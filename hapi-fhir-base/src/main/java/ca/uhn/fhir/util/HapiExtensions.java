@@ -128,7 +128,7 @@ public class HapiExtensions {
 	 * If provided, subscriptions will be retried this many times
 	 * (to a total of retry-count + 1 (for original attempt)
 	 */
-	public static final String EX_RETRY_COUNT = "http://hapifhir.io/fhir/StructureDefinition/retry-count";
+	public static final String EX_RETRY_COUNT = "http://hapifhir.io/fhir/StructureDefinition/subscription-delivery-retry-count";
 
 	/**
 	 * Non instantiable
