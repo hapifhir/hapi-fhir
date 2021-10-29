@@ -53,7 +53,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(SpringExtension.class)
 @RequiresDocker
 @ContextConfiguration(classes = {TestR4ConfigWithElasticsearchClient.class})
-public class BaseR4SearchLastN extends BaseJpaTest {
+abstract public class BaseR4SearchLastN extends BaseJpaTest {
 
 	private static final Map<String, String> observationPatientMap = new HashMap<>();
 	private static final Map<String, String> observationCategoryMap = new HashMap<>();
@@ -83,8 +83,6 @@ public class BaseR4SearchLastN extends BaseJpaTest {
 	@Qualifier("myObservationDaoR4")
 	protected IFhirResourceDaoObservation<Observation> myObservationDao;
 	@Autowired
-	protected DaoConfig myDaoConfig;
-	@Autowired
 	protected FhirContext myFhirCtx;
 	@Autowired
 	protected PlatformTransactionManager myPlatformTransactionManager;
@@ -113,7 +111,7 @@ public class BaseR4SearchLastN extends BaseJpaTest {
 		// Using a static flag to ensure that test data and elasticsearch index is only created once.
 		// Creating this data and the index is time consuming and as such want to avoid having to repeat for each test.
 		// Normally would use a static @BeforeClass method for this purpose, but Autowired objects cannot be accessed in static methods.
-		if (!dataLoaded) {
+		if (!dataLoaded || patient0Id == null) {
 			Patient pt = new Patient();
 			pt.addName().setFamily("Lastn").addGiven("Arthur");
 			patient0Id = myPatientDao.create(pt, mockSrd()).getId().toUnqualifiedVersionless();

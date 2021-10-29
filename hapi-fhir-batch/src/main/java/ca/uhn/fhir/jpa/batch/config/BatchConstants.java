@@ -57,6 +57,23 @@ public final class BatchConstants {
 	public static final String BULK_EXPORT_READ_CHUNK_PARAMETER = "readChunkSize";
 	public static final String BULK_EXPORT_GROUP_ID_PARAMETER = "groupId";
 	/**
+	 * Job Parameters
+	 */
+	public static final String READ_CHUNK_PARAMETER = "readChunkSize";
+	public static final String EXPAND_MDM_PARAMETER = "expandMdm";
+	public static final String GROUP_ID_PARAMETER = "groupId";
+	public static final String JOB_RESOURCE_TYPES_PARAMETER = "resourceTypes";
+	public static final String JOB_DESCRIPTION = "jobDescription";
+	public static final String JOB_SINCE_PARAMETER = "since";
+	public static final String JOB_TYPE_FILTERS = "filters";
+	public static final String JOB_COLLECTION_ENTITY_ID = "bulkExportCollectionEntityId";
+
+	/**
+	 * Job Execution Context
+	 */
+	public static final String JOB_EXECUTION_RESOURCE_TYPE = "resourceType";
+
+	/**
 	 * This Set contains the step names across all job types that are appropriate for
 	 * someone to look at the write count for that given step in order to determine the
 	 * number of processed records.

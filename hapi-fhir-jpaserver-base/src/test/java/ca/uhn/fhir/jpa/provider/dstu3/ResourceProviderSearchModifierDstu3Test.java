@@ -70,8 +70,6 @@ public class ResourceProviderSearchModifierDstu3Test extends BaseResourceProvide
 			SearchParameterMap searchParameterMap = resourceSearch.getSearchParameterMap();
 			IBundleProvider search = myObservationDao.search(searchParameterMap);
 			assertThat(search.size(), is(equalTo(0)));
-
 		}
-
 	}
 }

@@ -52,13 +52,7 @@ import java.util.List;
  */
 @Configuration
 public class BulkExportJobConfig {
-
-	public static final String READ_CHUNK_PARAMETER = "readChunkSize";
-	public static final String EXPAND_MDM_PARAMETER = "expandMdm";
-	public static final String GROUP_ID_PARAMETER = "groupId";
-	public static final String RESOURCE_TYPES_PARAMETER = "resourceTypes";
 	public static final int CHUNK_SIZE = 100;
-	public static final String JOB_DESCRIPTION = "jobDescription";
 
 	@Autowired
 	private FhirContext myFhirContext;
