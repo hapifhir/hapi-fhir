@@ -24,9 +24,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
-import ca.uhn.fhir.jpa.dao.search.AdvancedIndexSearchBuilder;
-import ca.uhn.fhir.jpa.dao.search.HibernateSearchClauseBuilder;
-import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneSearchBuilder;
+import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneIndexExtractor;
+import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneClauseBuilder;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -50,7 +50,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -71,7 +70,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	private DaoConfig myDaoConfig;
-	private AdvancedIndexSearchBuilder myAdvancedIndexQueryBuilder = new AdvancedIndexSearchBuilder();
+	private ExtendedLuceneSearchBuilder myAdvancedIndexQueryBuilder = new ExtendedLuceneSearchBuilder();
 
 	private Boolean ourDisabled;
 
@@ -82,47 +81,11 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		super();
 	}
 
-	public ExtendedLuceneIndexData extractLuceneIndexData(FhirContext theContext, IBaseResource theResource, ResourceIndexedSearchParams theNewParams) {
-		ExtendedLuceneIndexData retVal = new ExtendedLuceneIndexData(myFhirContext);
-
-		theNewParams.myStringParams.forEach(nextParam ->
-			retVal.addStringIndexData(nextParam.getParamName(), nextParam.getValueExact()));
-
-		theNewParams.myTokenParams.forEach(nextParam ->
-			retVal.addTokenIndexData(nextParam.getParamName(), nextParam.getSystem(), nextParam.getValue()));
-
-		if (!theNewParams.myLinks.isEmpty()) {
-			Map<String, ResourceLink> spNameToLinkMap = buildSpNameToLinkMap(theResource, theNewParams);
-
-			spNameToLinkMap.entrySet()
-					.forEach(nextEntry -> {
-						ResourceLink resourceLink = nextEntry.getValue();
-						String qualifiedTargetResourceId = resourceLink.getTargetResourceType() + "/" + resourceLink.getTargetResourceId();
-						retVal.addResourceLinkIndexData(nextEntry.getKey(), qualifiedTargetResourceId);
-					});
-
-		}
-		return retVal;
-	}
-
-	private Map<String, ResourceLink> buildSpNameToLinkMap(IBaseResource theResource, ResourceIndexedSearchParams theNewParams) {
+	public ExtendedLuceneIndexData extractLuceneIndexData(IBaseResource theResource, ResourceIndexedSearchParams theNewParams) {
 		String resourceType = myFhirContext.getResourceType(theResource);
-
-		Map<String, RuntimeSearchParam> paramNameToRuntimeParam =
-			theNewParams.getPopulatedResourceLinkParameters().stream()
-				.collect(Collectors.toMap(
-					(theParam) -> theParam,
-					(theParam) -> mySearchParamRegistry.getActiveSearchParam(resourceType, theParam)));
-
-		Map<String, ResourceLink> paramNameToIndexedLink = new HashMap<>();
-		for ( Map.Entry<String, RuntimeSearchParam> entry :paramNameToRuntimeParam.entrySet()) {
-			ResourceLink link = theNewParams.myLinks.stream().filter(resourceLink ->
-				entry.getValue().getPathsSplit().stream()
-					.anyMatch(path -> path.equalsIgnoreCase(resourceLink.getSourcePath())))
-				.findFirst().orElse(null);
-			paramNameToIndexedLink.put(entry.getKey(), link);
-		}
-		return paramNameToIndexedLink;
+		Map<String, RuntimeSearchParam> activeSearchParams = mySearchParamRegistry.getActiveSearchParams(resourceType);
+		ExtendedLuceneIndexExtractor extractor = new ExtendedLuceneIndexExtractor(myFhirContext, activeSearchParams);
+		return extractor.extract(theNewParams);
 	}
 
 	@Override
@@ -151,7 +114,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			)
 			.where(
 				f -> f.bool(b -> {
-					HibernateSearchClauseBuilder builder = new HibernateSearchClauseBuilder(myFhirContext, b, f);
+					ExtendedLuceneClauseBuilder builder = new ExtendedLuceneClauseBuilder(myFhirContext, b, f);
 
 					/*
 					 * Handle _content parameter (resource body content)

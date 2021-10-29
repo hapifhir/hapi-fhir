@@ -26,19 +26,18 @@ import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_TEXT;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class HibernateSearchClauseBuilder {
-	private static final Logger ourLog = LoggerFactory.getLogger(HibernateSearchClauseBuilder.class);
+public class ExtendedLuceneClauseBuilder {
+	private static final Logger ourLog = LoggerFactory.getLogger(ExtendedLuceneClauseBuilder.class);
 
 	final FhirContext myFhirContext;
 	final SearchPredicateFactory myPredicateFactory;
 	final BooleanPredicateClausesStep<?> myRootClause;
 
-	public HibernateSearchClauseBuilder(FhirContext myFhirContext, BooleanPredicateClausesStep<?> myRootClause, SearchPredicateFactory myPredicateFactory) {
+	public ExtendedLuceneClauseBuilder(FhirContext myFhirContext, BooleanPredicateClausesStep<?> myRootClause, SearchPredicateFactory myPredicateFactory) {
 		this.myFhirContext = myFhirContext;
 		this.myRootClause = myRootClause;
 		this.myPredicateFactory = myPredicateFactory;
 	}
-
 
 	@Nonnull
 	private Set<String> extractOrStringParams(List<? extends IQueryParameterType> nextAnd) {

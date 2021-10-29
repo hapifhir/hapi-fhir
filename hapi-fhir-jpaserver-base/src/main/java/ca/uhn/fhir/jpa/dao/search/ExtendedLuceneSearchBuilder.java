@@ -1,12 +1,7 @@
 package ca.uhn.fhir.jpa.dao.search;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
-import ca.uhn.fhir.jpa.model.entity.ResourceLink;
-import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.param.QuantityParam;
@@ -17,19 +12,16 @@ import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
  * Search builder for lucene/elastic for token, string, and reference parameters.
  */
-public class AdvancedIndexSearchBuilder {
+public class ExtendedLuceneSearchBuilder {
 	public static final String EMPTY_MODIFIER = "";
 
 	/**
@@ -91,7 +83,7 @@ public class AdvancedIndexSearchBuilder {
 		}
 	}
 
-	public void addAndConsumeAdvancedQueryClauses(HibernateSearchClauseBuilder builder, String theResourceType, SearchParameterMap theParams, ISearchParamRegistry theSearchParamRegistry) {
+	public void addAndConsumeAdvancedQueryClauses(ExtendedLuceneClauseBuilder builder, String theResourceType, SearchParameterMap theParams, ISearchParamRegistry theSearchParamRegistry) {
 		// copy the keys to avoid concurrent modification error
 		ArrayList<String> paramNames = Lists.newArrayList(theParams.keySet());
 		for(String nextParam: paramNames) {
@@ -139,4 +131,5 @@ public class AdvancedIndexSearchBuilder {
 			}
 		}
 	}
+
 }
