@@ -83,7 +83,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	}
 
 	protected void init560_20211027() {
-
+		// nothing
 	}
 
 	private void init550() {
