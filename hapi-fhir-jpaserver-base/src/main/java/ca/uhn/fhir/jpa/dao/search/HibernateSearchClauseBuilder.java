@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao;
+package ca.uhn.fhir.jpa.dao.search;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -26,14 +26,14 @@ import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_TEXT;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class HibernateSearchQueryBuilder {
-	private static final Logger ourLog = LoggerFactory.getLogger(HibernateSearchQueryBuilder.class);
+public class HibernateSearchClauseBuilder {
+	private static final Logger ourLog = LoggerFactory.getLogger(HibernateSearchClauseBuilder.class);
 
 	final FhirContext myFhirContext;
 	final SearchPredicateFactory myPredicateFactory;
 	final BooleanPredicateClausesStep<?> myRootClause;
 
-	public HibernateSearchQueryBuilder(FhirContext myFhirContext, BooleanPredicateClausesStep<?> myRootClause, SearchPredicateFactory myPredicateFactory) {
+	public HibernateSearchClauseBuilder(FhirContext myFhirContext, BooleanPredicateClausesStep<?> myRootClause, SearchPredicateFactory myPredicateFactory) {
 		this.myFhirContext = myFhirContext;
 		this.myRootClause = myRootClause;
 		this.myPredicateFactory = myPredicateFactory;
