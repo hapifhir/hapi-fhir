@@ -172,3 +172,5 @@ None of the limitations listed here are considered permanent. Over time the HAPI
 * **Bulk Operations are not partition aware**: Bulk export operations will export data across all partitions.
 
 * **Package Operations are not partition aware**: Package operations will only create, update and query resources in the default partition.
+
+* **Advanced Elasticsearch indexing is not partition optimized**: The results are correction partitioned, but the extended indexing is not optimized to account for partitions. 

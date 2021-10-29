@@ -35,7 +35,7 @@ public class TestR4ConfigWithElasticSearch extends TestR4Config {
 		int httpPort = elasticContainer().getMappedPort(9200);//9200 is the HTTP port
 		String host = elasticContainer().getHost();
 
-		ourLog.warn("Hibernate Search: using elasticsearch - host {} {}", host, httpPort);
+		ourLog.info("Hibernate Search: using elasticsearch - host {} {}", host, httpPort);
 
 		new ElasticsearchHibernatePropertiesBuilder()
 			.setDebugIndexSyncStrategy("read-sync")
