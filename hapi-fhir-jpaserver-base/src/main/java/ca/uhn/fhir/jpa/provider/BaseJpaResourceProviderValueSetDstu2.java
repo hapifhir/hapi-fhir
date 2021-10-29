@@ -159,11 +159,11 @@ public class BaseJpaResourceProviderValueSetDstu2 extends JpaResourceProviderDst
 	public static IBaseParameters toValidateCodeResult(FhirContext theContext, IValidationSupport.CodeValidationResult theResult) {
 		IBaseParameters retVal = ParametersUtil.newInstance(theContext);
 
-		ParametersUtil.addParameterToParametersBoolean(theContext, retVal, "result", theResult.isOk());
-		if (isNotBlank(theResult.getMessage())) {
+		ParametersUtil.addParameterToParametersBoolean(theContext, retVal, "result", ((theResult == null)?false:theResult.isOk()));
+		if (theResult != null && isNotBlank(theResult.getMessage())) {
 			ParametersUtil.addParameterToParametersString(theContext, retVal, "message", theResult.getMessage());
 		}
-		if (isNotBlank(theResult.getDisplay())) {
+		if (theResult != null && isNotBlank(theResult.getDisplay())) {
 			ParametersUtil.addParameterToParametersString(theContext, retVal, "display", theResult.getDisplay());
 		}
 
