@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3123
+title: "When performing paging queries over large result sets in the JPA server (> 1000 results), SQL could be
+   generated that violated the Oracle RDBMS limit of 1000 parameters. This has been resolved."

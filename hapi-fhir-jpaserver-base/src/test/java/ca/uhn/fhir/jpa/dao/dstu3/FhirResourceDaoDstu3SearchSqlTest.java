@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
+import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -16,20 +17,27 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FhirResourceDaoDstu3SearchSqlTest extends BaseJpaDstu3Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoDstu3SearchSqlTest.class);
 
+	@Autowired
+	private ISearchDao mySearchEntityDao;
+
 	@Test
 	public void testSearchCondition_ByPatientAndCategories() {
 		Patient patient = new Patient();
+		//patient.addIdentifier().setSystem("http://mydomain.com/patient-identifier").setValue("PID1");
 		IIdType patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
 		int numResources = 3000;
@@ -50,23 +58,21 @@ public class FhirResourceDaoDstu3SearchSqlTest extends BaseJpaDstu3Test {
 			}
 		}
 
-		myMemoryCacheService.invalidateAllCaches();
-
 		// Search
-		myCaptureQueriesListener.clear();
 		// http://127.0.0.1:8000/Condition
 		// ?_count=300
 		// &category=ACCEVN%2CACCMNTRG%2CMIDTX
 		// &patient=Patient%2F123
 		SearchParameterMap map = new SearchParameterMap();
-		map.setLoadSynchronous(false);
 		map.setCount(300);
-		map.add("category", new TokenOrListParam(null, "ACCEVN", "ACCMNTRG", "MIDTX"));
 		map.add("patient", new ReferenceParam(patientId.toString()));
+		map.add("category", new TokenOrListParam(null, "ACCEVN", "ACCMNTRG", "MIDTX")); // , = %2C
 
 		IBundleProvider outcome = null;
 		String uuid = null;
 		for (int i = 0; i < 3000; i += 300) {
+
+			ourLog.info("Starting batch {}-{}", i, i+300);
 			myCaptureQueriesListener.clear();
 			if (outcome == null) {
 				outcome = myConditionDao.search(map);
@@ -74,23 +80,24 @@ public class FhirResourceDaoDstu3SearchSqlTest extends BaseJpaDstu3Test {
 			} else {
 				outcome = myPagingProvider.retrieveResultList(mySrd, uuid);
 			}
+
 			List<IBaseResource> resources = outcome.getResources(i, i + 300);
 			ourLog.info("Batch {}-{} returned {} resources", i, i+300, resources.size());
-			List<SqlQuery> query = myCaptureQueriesListener
-				.getSelectQueries()
-				.stream()
-				.filter(t -> t.getSql(false, false).toLowerCase(Locale.ROOT).contains("res_id")) //  not in
-				.collect(Collectors.toList());
+			assertEquals(300, resources.size());
+
+			List<SqlQuery> query = myCaptureQueriesListener.getSelectQueries();
 			for (SqlQuery next : query) {
 				String sql = next.getSql(false, false);
-				int numSQLQueryparams = StringUtils.countMatches(sql, "?");
-				ourLog.info("SQL: {}", sql);
-				ourLog.info("SQL has {} params", numSQLQueryparams);
-				assertTrue((numSQLQueryparams <= 1000),
-					"The generated SQL should never have more than 1,000 parameters! " +
-					"The number of parameters is " + numSQLQueryparams + " and the SQL is " + sql);
+				int paramCount = StringUtils.countMatches(sql, "?");
+				ourLog.info("SQL has {} params", paramCount);
+				assertThat("SQL has >1000 params: " + sql, paramCount, lessThan(1000));
+				if (sql.contains("HASH_VALUE IN")) {
+					sql = next.getSql(true, false);
+					ourLog.info("SQL: {}", sql);
+				}
 			}
+
 		}
-		ourLog.info("DONE SQL Queries!\n");
+
 	}
 }

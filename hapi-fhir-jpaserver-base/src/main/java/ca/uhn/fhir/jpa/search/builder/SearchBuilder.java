@@ -172,6 +172,7 @@ public class SearchBuilder implements ISearchBuilder {
 	private int myFetchSize;
 	private Integer myMaxResultsToFetch;
 	private Set<ResourcePersistentId> myPidSet;
+	private boolean myHasNextIteratorQuery = false;
 	private RequestPartitionId myRequestPartitionId;
 	@Autowired
 	private PartitionSettings myPartitionSettings;
@@ -184,7 +185,6 @@ public class SearchBuilder implements ISearchBuilder {
 	@Autowired
 	private ModelConfig myModelConfig;
 
-	private boolean hasNextIteratorQuery = false;
 
 	/**
 	 * Constructor
@@ -444,9 +444,27 @@ public class SearchBuilder implements ISearchBuilder {
 			sqlBuilder.addPredicate(lastUpdatedPredicates);
 		}
 
-		//-- exclude the pids already in the previous iterator
-		if (hasNextIteratorQuery)
-			sqlBuilder.excludeResourceIdsPredicate(myPidSet);
+		/*
+		 * Exclude the pids already in the previous iterator. This is an optimization, as opposed
+		 * to something needed to guarantee correct results.
+		 *
+		 * Why do we need it? Suppose for example, a query like:
+		 *    Observation?category=foo,bar,baz
+		 * And suppose you have many resources that have all 3 of these category codes. In this case
+		 * the SQL query will probably return the same PIDs multiple times, and if this happens enough
+		 * we may exhaust the query results without getting enough distinct results back. When that
+		 * happens we re-run the query with a larger limit. Excluding results we already know about
+		 * tries to ensure that we get new unique results.
+		 *
+		 * The challenge with that though is that lots of DBs have an issue with too many
+		 * parameters in one query. So we only do this optimization if there aren't too
+		 * many results.
+		 */
+		if (myHasNextIteratorQuery) {
+			if (myPidSet.size() + sqlBuilder.countBindVariables() < 900) {
+				sqlBuilder.excludeResourceIdsPredicate(myPidSet);
+			}
+		}
 
 		/*
 		 * Sort
@@ -1248,10 +1266,9 @@ public class SearchBuilder implements ISearchBuilder {
 							if (!myResultsIterator.hasNext()) {
 								if (myMaxResultsToFetch != null && (mySkipCount + myNonSkipCount == myMaxResultsToFetch)) {
 									if (mySkipCount > 0 && myNonSkipCount == 0) {
-										myMaxResultsToFetch += 1000;
 
 										StorageProcessingMessage message = new StorageProcessingMessage();
-										String msg = "Pass completed with no matching results. This indicates an inefficient query! Retrying with new max count of " + myMaxResultsToFetch;
+										String msg = "Pass completed with no matching results seeking rows " + myPidSet.size() + "-" + mySkipCount + ". This indicates an inefficient query! Retrying with new max count of " + myMaxResultsToFetch;
 										ourLog.warn(msg);
 										message.setMessage(msg);
 										HookParams params = new HookParams()
@@ -1260,6 +1277,7 @@ public class SearchBuilder implements ISearchBuilder {
 											.add(StorageProcessingMessage.class, message);
 										JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_WARNING, params);
 
+										myMaxResultsToFetch += 1000;
 										initializeIteratorQuery(myOffset, myMaxResultsToFetch);
 									}
 								}
@@ -1342,10 +1360,10 @@ public class SearchBuilder implements ISearchBuilder {
 			close();
 			if (myQueryList != null && myQueryList.size() > 0) {
 				myResultsIterator = myQueryList.remove(0);
-				hasNextIteratorQuery = true;
+				myHasNextIteratorQuery = true;
 			} else {
 				myResultsIterator = SearchQueryExecutor.emptyExecutor();
-				hasNextIteratorQuery = false;
+				myHasNextIteratorQuery = false;
 			}
 
 		}
