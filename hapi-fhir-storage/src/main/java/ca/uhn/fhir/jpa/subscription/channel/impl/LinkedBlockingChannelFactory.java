@@ -48,7 +48,7 @@ public class LinkedBlockingChannelFactory implements IChannelFactory {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(LinkedBlockingChannelFactory.class);
 	private final IChannelNamer myChannelNamer;
-	private Map<String, LinkedBlockingChannel> myChannels = Collections.synchronizedMap(new HashMap<>());
+	private final Map<String, LinkedBlockingChannel> myChannels = Collections.synchronizedMap(new HashMap<>());
 
 	public LinkedBlockingChannelFactory(IChannelNamer theChannelNamer) {
 		myChannelNamer = theChannelNamer;
@@ -69,7 +69,10 @@ public class LinkedBlockingChannelFactory implements IChannelFactory {
 		return myChannelNamer;
 	}
 
-	private LinkedBlockingChannel getOrCreateChannel(String theChannelName, int theConcurrentConsumers, IChannelSettings theChannelSettings) {
+	private LinkedBlockingChannel getOrCreateChannel(String theChannelName,
+																	 int theConcurrentConsumers,
+																	 IChannelSettings theChannelSettings) {
+		// TODO - does this need retry settings?
 		final String channelName = myChannelNamer.getChannelName(theChannelName, theChannelSettings);
 
 		return myChannels.computeIfAbsent(channelName, t -> {
