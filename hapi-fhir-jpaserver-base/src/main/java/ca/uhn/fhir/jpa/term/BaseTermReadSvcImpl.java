@@ -2090,19 +2090,30 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		//TODO GGG TRY TO JUST AUTO_PASS HERE AND SEE WHAT HAPPENS.
 		invokeRunnableForUnitTest();
 
+		if (isEmpty(theCode) && isEmpty(theCodeSystem)) {
+			throw new IllegalArgumentException("Either theCode or theCodeSystem must be provided");
+		}
+
 		if (isNotBlank(theValueSetUrl)) {
 			return validateCodeInValueSet(theValidationSupportContext, theOptions, theValueSetUrl, theCodeSystem, theCode, theDisplay);
 		}
 
-		if (isEmpty(theCode) && isEmpty(theCodeSystem)) {
-			throw new IllegalArgumentException("Either theCode or theCodeSystem must be provided");
-		}
+//		boolean haveIdentifierParam = isNotBlank(theCodeSystem);
+//		String codeSystemUrl;
+//		if (theCodeSystemId != null) {
+//			IBaseResource codeSystem = myDaoRegistry.getResourceDao("CodeSystem").read(theCodeSystemId);
+//			codeSystemUrl = CommonCodeSystemsTerminologyService.getCodeSystemUrl(codeSystem);
+//		} else if (haveIdentifierParam) {
+//			codeSystemUrl = theCodeSystemUrl;
+//		} else {
+//			throw new InvalidRequestException("Either CodeSystem ID or CodeSystem identifier must be provided. Unable to validate.");
+//		}
 
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 		Optional<FhirVersionIndependentConcept> codeOpt = txTemplate.execute(
 			t -> findCode(theCodeSystem, theCode).filter(Objects::nonNull).map(
-				c -> new FhirVersionIndependentConcept(theCodeSystem, c.getCode())));
+				c -> new FhirVersionIndependentConcept(theCodeSystem, c.getCode(), c.getDisplay())));
 
 		if (codeOpt != null && codeOpt.isPresent()) {
 			FhirVersionIndependentConcept code = codeOpt.get();
