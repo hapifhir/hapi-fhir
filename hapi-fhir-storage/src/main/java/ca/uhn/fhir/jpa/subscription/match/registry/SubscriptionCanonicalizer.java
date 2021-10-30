@@ -174,10 +174,7 @@ public class SubscriptionCanonicalizer {
 						.getChannel()
 						.getExtension()
 						.stream()
-						.collect(Collectors.groupingBy(t -> t.getUrl(),
-							mapping(t -> {
-								return t.getValueAsPrimitive().getValueAsString();
-							}, toList())));
+						.collect(Collectors.groupingBy(t -> t.getUrl(), mapping(t -> t.getValueAsPrimitive().getValueAsString(), toList())));
 				}
 				case R5: {
 					org.hl7.fhir.r5.model.Subscription subscription = (org.hl7.fhir.r5.model.Subscription) theSubscription;

@@ -26,8 +26,6 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.ISubscriptionDeliveryChannelNamer;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
-import ca.uhn.fhir.jpa.subscription.model.ChannelRetryConfiguration;
-import ca.uhn.fhir.util.HapiExtensions;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -82,48 +80,17 @@ public class SubscriptionRegistry {
 		return activeSubscription.map(ActiveSubscription::getSubscription);
 	}
 
-	/**
-	 * Extracts the retry configuration settings from the CanonicalSubscription object.
-	 *
-	 * Returns the configuration, or null, if no retry (or a bad retry value)
-	 * is specified.
-	 *
-	 * @param theSubscription
-	 * @return
-	 */
-	private ChannelRetryConfiguration getRetryConfigurationFromSubscriptionExtensions(CanonicalSubscription theSubscription) {
-		ChannelRetryConfiguration configuration = new ChannelRetryConfiguration();
-
-		List<String> retryCount = theSubscription.getChannelExtensions(HapiExtensions.EX_RETRY_COUNT);
-		if (retryCount.size() == 1) {
-			String val = retryCount.get(0);
-			configuration.setRetryCount(Integer.parseInt(val));
-		}
-		// else - 0 or more than 1 means no retry policy at all
-
-		// retry count is required for any retry policy
-		if (configuration.getRetryCount() == null || configuration.getRetryCount() < 0) {
-			configuration = null;
-		}
-
-		return configuration;
-	}
-
-	private void registerSubscription(IIdType theId, CanonicalSubscription theCanonicalSubscription) {
+	private void registerSubscription(IIdType theId, IBaseResource theSubscription) {
 		Validate.notNull(theId);
 		String subscriptionId = theId.getIdPart();
 		Validate.notBlank(subscriptionId);
-		Validate.notNull(theCanonicalSubscription);
+		Validate.notNull(theSubscription);
 
-		String channelName = mySubscriptionDeliveryChannelNamer.nameFromSubscription(theCanonicalSubscription);
+		CanonicalSubscription canonicalized = mySubscriptionCanonicalizer.canonicalize(theSubscription);
 
-		// get the actual retry configuration
-		ChannelRetryConfiguration configuration = getRetryConfigurationFromSubscriptionExtensions(theCanonicalSubscription);
+		String channelName = mySubscriptionDeliveryChannelNamer.nameFromSubscription(canonicalized);
 
-		ActiveSubscription activeSubscription = new ActiveSubscription(theCanonicalSubscription, channelName);
-		activeSubscription.setRetryConfiguration(configuration);
-
-		// add to our registries
+		ActiveSubscription activeSubscription = new ActiveSubscription(canonicalized, channelName);
 		mySubscriptionChannelRegistry.add(activeSubscription);
 		myActiveSubscriptionCache.put(subscriptionId, activeSubscription);
 
@@ -131,8 +98,9 @@ public class SubscriptionRegistry {
 
 		// Interceptor call: SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED
 		HookParams params = new HookParams()
-			.add(CanonicalSubscription.class, theCanonicalSubscription);
+			.add(CanonicalSubscription.class, canonicalized);
 		myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED, params);
+
 	}
 
 	public void unregisterSubscriptionIfRegistered(String theSubscriptionId) {
@@ -146,6 +114,7 @@ public class SubscriptionRegistry {
 			// Interceptor call: SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_UNREGISTERED
 			HookParams params = new HookParams();
 			myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_UNREGISTERED, params);
+
 		}
 	}
 
@@ -166,7 +135,6 @@ public class SubscriptionRegistry {
 	}
 
 	public synchronized boolean registerSubscriptionUnlessAlreadyRegistered(IBaseResource theSubscription) {
-		Validate.notNull(theSubscription);
 		Optional<CanonicalSubscription> existingSubscription = hasSubscription(theSubscription.getIdElement());
 		CanonicalSubscription newSubscription = mySubscriptionCanonicalizer.canonicalize(theSubscription);
 
@@ -184,7 +152,7 @@ public class SubscriptionRegistry {
 			unregisterSubscriptionIfRegistered(theSubscription.getIdElement().getIdPart());
 		}
 		if (Subscription.SubscriptionStatus.ACTIVE.equals(newSubscription.getStatus())) {
-			registerSubscription(theSubscription.getIdElement(), newSubscription);
+			registerSubscription(theSubscription.getIdElement(), theSubscription);
 			return true;
 		} else {
 			return false;

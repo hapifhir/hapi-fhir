@@ -73,6 +73,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 		super();
 	}
 
+
 	@Override
 	public void handleMessage(@Nonnull Message<?> theMessage) throws MessagingException {
 		ourLog.trace("Handling resource modified message: {}", theMessage);

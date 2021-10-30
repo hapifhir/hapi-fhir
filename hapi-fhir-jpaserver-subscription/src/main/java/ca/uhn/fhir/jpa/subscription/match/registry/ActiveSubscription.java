@@ -23,18 +23,14 @@ package ca.uhn.fhir.jpa.subscription.match.registry;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionCriteriaParser;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
-import ca.uhn.fhir.jpa.subscription.model.ChannelRetryConfiguration;
 
 public class ActiveSubscription {
 
 	private SubscriptionCriteriaParser.SubscriptionCriteria myCriteria;
-
 	private final String myChannelName;
 	private final String myId;
 	private CanonicalSubscription mySubscription;
 	private boolean flagForDeletion;
-
-	private ChannelRetryConfiguration myRetryConfigurationParameters;
 
 	public ActiveSubscription(CanonicalSubscription theSubscription, String theChannelName) {
 		myChannelName = theChannelName;
@@ -73,13 +69,5 @@ public class ActiveSubscription {
 
 	public CanonicalSubscriptionChannelType getChannelType() {
 		return mySubscription.getChannelType();
-	}
-
-	public void setRetryConfiguration(ChannelRetryConfiguration theParams) {
-		myRetryConfigurationParameters = theParams;
-	}
-
-	public ChannelRetryConfiguration getRetryConfigurationParameters() {
-		return myRetryConfigurationParameters;
 	}
 }
