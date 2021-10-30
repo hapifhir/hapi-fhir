@@ -1,5 +1,0 @@
----
-type: add
-issue: 3120
-title: "Added http://hapifhir.io/fhir/StructureDefinition/subscription-delivery-retry-count extension that can be provided
-to a subscription to define a specific retry strategy (retry retry-count number of times before giving up)."

@@ -123,14 +123,6 @@ public class HapiExtensions {
 	public static final String EXT_OP_PARAMETER_EXAMPLE_VALUE = "http://hapifhir.io/fhir/StructureDefinition/op-parameter-example-value";
 
 	/**
-	 * This extension provides a way for subscribers to provide
-	 * a "retry-count".
-	 * If provided, subscriptions will be retried this many times
-	 * (to a total of retry-count + 1 (for original attempt)
-	 */
-	public static final String EX_RETRY_COUNT = "http://hapifhir.io/fhir/StructureDefinition/subscription-delivery-retry-count";
-
-	/**
 	 * Non instantiable
 	 */
 	private HapiExtensions() {

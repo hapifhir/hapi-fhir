@@ -43,7 +43,6 @@ public class SubscriptionChannelFactory {
 
 	public IChannelProducer newDeliverySendingChannel(String theChannelName, ChannelProducerSettings theChannelSettings) {
 		ChannelProducerSettings config = newProducerConfigForDeliveryChannel(theChannelSettings);
-		config.setRetryConfiguration(theChannelSettings.getRetryConfigurationParameters());
 		return myChannelFactory.getOrCreateProducer(theChannelName, ResourceDeliveryJsonMessage.class, config);
 	}
 
@@ -67,24 +66,17 @@ public class SubscriptionChannelFactory {
 	protected ChannelProducerSettings newProducerConfigForDeliveryChannel(ChannelProducerSettings theOptions) {
 		ChannelProducerSettings config = new ChannelProducerSettings();
 		config.setConcurrentConsumers(getDeliveryChannelConcurrentConsumers());
-		config.setRetryConfiguration(theOptions.getRetryConfigurationParameters());
 		return config;
 	}
 
 	protected ChannelConsumerSettings newConsumerConfigForDeliveryChannel(ChannelConsumerSettings theOptions) {
 		ChannelConsumerSettings config = new ChannelConsumerSettings();
 		config.setConcurrentConsumers(getDeliveryChannelConcurrentConsumers());
-		if (theOptions != null) {
-			config.setRetryConfiguration(theOptions.getRetryConfigurationParameters());
-		}
 		return config;
 	}
 
 	protected ChannelProducerSettings newProducerConfigForMatchingChannel(ChannelProducerSettings theOptions) {
 		ChannelProducerSettings config = new ChannelProducerSettings();
-		if (theOptions != null) {
-			config.setRetryConfiguration(theOptions.getRetryConfigurationParameters());
-		}
 		config.setConcurrentConsumers(getMatchingChannelConcurrentConsumers());
 		return config;
 	}
@@ -92,9 +84,6 @@ public class SubscriptionChannelFactory {
 	protected ChannelConsumerSettings newConsumerConfigForMatchingChannel(ChannelConsumerSettings theOptions) {
 		ChannelConsumerSettings config = new ChannelConsumerSettings();
 		config.setConcurrentConsumers(getMatchingChannelConcurrentConsumers());
-		if (theOptions != null) {
-			config.setRetryConfiguration(theOptions.getRetryConfigurationParameters());
-		}
 		return config;
 	}
 
