@@ -33,7 +33,7 @@ public class ExtendedLuceneSearchBuilder {
 	 * Are any of the queries supported by our indexing?
 	 */
 	public boolean isSupportsSomeOf(SearchParameterMap myParams) {
-		return this != null &&
+		return
 			myParams.entrySet().stream()
 				.filter(e -> !ourUnsafeSearchParmeters.contains(e.getKey()))
 				// each and clause may have a different modifier, so split down to the ORs
