@@ -3,12 +3,14 @@ package org.hl7.fhir.common.hapi.validation.support;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.parser.IJsonLikeParser;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
@@ -22,12 +24,14 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -44,11 +48,14 @@ import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class RemoteTerminologyServiceValidationSupportTest {
 
 	private static final String DISPLAY = "DISPLAY";
 	private static final String CODE_SYSTEM = "CODE_SYS";
+	private static final String CODE_SYSTEM_NAME = "CODE SYSTEM NAME";
+	private static final String CODE_SYSTEM_VERSION = "v1.1";
 	private static final String CODE = "CODE";
 	private static final String VALUE_SET_URL = "http://value.set/url";
 	private static final String ERROR_MESSAGE = "This is an error message";
@@ -85,6 +92,28 @@ public class RemoteTerminologyServiceValidationSupportTest {
 	public void testValidateCode_SystemCodeDisplayUrl_BlankCode() {
 		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(null, null, CODE_SYSTEM, "", DISPLAY, VALUE_SET_URL);
 		assertEquals(null, outcome);
+	}
+
+	@Test
+	public void testLookupOperation_CodeSystem_Success() {
+		createNextCodeSystemLookupReturnParameters(true, CODE_SYSTEM_VERSION, DISPLAY, null);
+
+		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(null, CODE_SYSTEM, CODE);
+		assertNotNull(outcome, "Call to lookupCode() should return a non-NULL result!");
+		assertEquals(DISPLAY, outcome.getCodeDisplay());
+		assertEquals(CODE_SYSTEM_VERSION, outcome.getCodeSystemVersion());
+
+		assertEquals(CODE, myCodeSystemProvider.myLastCode.getCode());
+		assertEquals(CODE_SYSTEM, myCodeSystemProvider.myLastUrl.getValueAsString());
+		assertTrue(Boolean.parseBoolean(myCodeSystemProvider.myNextReturnParams.getParameter("result").primitiveValue()));
+	}
+
+	@Test
+	public void testLookupCode_BlankCode_ThrowsException() {
+		Assertions.assertThrows(IllegalArgumentException.class, () -> {
+			IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(null, CODE_SYSTEM,
+				"", null);
+		});
 	}
 
 	@Test
@@ -375,6 +404,17 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		}
 	}
 
+	private void createNextCodeSystemLookupReturnParameters(boolean theResult, String theVersion, String theDisplay,
+																			  String theMessage) {
+		myCodeSystemProvider.myNextReturnParams = new Parameters();
+		myCodeSystemProvider.myNextReturnParams.addParameter("result", theResult);
+		myCodeSystemProvider.myNextReturnParams.addParameter("version", theVersion);
+		myCodeSystemProvider.myNextReturnParams.addParameter("display", theDisplay);
+		if (theMessage != null) {
+			myCodeSystemProvider.myNextReturnParams.addParameter("message", theMessage);
+		}
+	}
+
 	private void createNextValueSetReturnParameters(boolean theResult, String theDisplay, String theMessage) {
 		myValueSetProvider.myNextReturnParams = new Parameters();
 		myValueSetProvider.myNextReturnParams.addParameter("result", theResult);
@@ -391,8 +431,12 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		private int myInvocationCount;
 		private UriType myLastUrl;
 		private CodeType myLastCode;
+		private Coding myLastCoding;
+		private StringType myLastVersion;
+		private CodeType myLastDisplayLanguage;
 		private StringType myLastDisplay;
 		private Parameters myNextReturnParams;
+		private IValidationSupport.LookupCodeResult myNextLookupCodeResult;
 
 		@Operation(name = "validate-code", idempotent = true, returnParameters = {
 			@OperationParam(name = "result", type = BooleanType.class, min = 1),
@@ -412,6 +456,31 @@ public class RemoteTerminologyServiceValidationSupportTest {
 			myLastDisplay = theDisplay;
 			return myNextReturnParams;
 
+		}
+
+		@Operation(name = JpaConstants.OPERATION_LOOKUP, idempotent = true, returnParameters= {
+			@OperationParam(name="name", type=StringType.class, min=1),
+			@OperationParam(name="version", type=StringType.class, min=0),
+			@OperationParam(name="display", type=StringType.class, min=1),
+			@OperationParam(name="abstract", type=BooleanType.class, min=1),
+		})
+		public Parameters lookup(
+			HttpServletRequest theServletRequest,
+			@OperationParam(name="code", min=0, max=1) CodeType theCode,
+			@OperationParam(name="system", min=0, max=1) UriType theSystem,
+			@OperationParam(name="coding", min=0, max=1) Coding theCoding,
+			@OperationParam(name="version", min=0, max=1) StringType theVersion,
+			@OperationParam(name="displayLanguage", min=0, max=1) CodeType theDisplayLanguage,
+			@OperationParam(name="property", min = 0, max = OperationParam.MAX_UNLIMITED) List<CodeType> theProperties,
+			RequestDetails theRequestDetails
+		) {
+			myInvocationCount++;
+			myLastCode = theCode;
+			myLastUrl = theSystem;
+			myLastCoding = theCoding;
+			myLastVersion = theVersion;
+			myLastDisplayLanguage = theDisplayLanguage;
+			return myNextReturnParams;
 		}
 
 		@Search
