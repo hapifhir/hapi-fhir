@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.dao;
 
 import java.util.List;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -47,7 +46,7 @@ public interface IFulltextSearchSvc {
 
 	boolean isDisabled();
 
-	ExtendedLuceneIndexData extractLuceneIndexData(FhirContext theContext, IBaseResource theResource, ResourceIndexedSearchParams theNewParams);
+	ExtendedLuceneIndexData extractLuceneIndexData(IBaseResource theResource, ResourceIndexedSearchParams theNewParams);
 
     boolean supportsSomeOf(SearchParameterMap myParams);
 }
