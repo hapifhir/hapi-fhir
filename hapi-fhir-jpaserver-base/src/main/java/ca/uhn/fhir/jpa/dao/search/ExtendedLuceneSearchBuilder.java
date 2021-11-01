@@ -42,6 +42,11 @@ public class ExtendedLuceneSearchBuilder {
 				.anyMatch(this::isParamSupported);
 	}
 
+	/**
+	 * Do we support this query param type+modifier?
+	 *
+	 * NOTE - keep this in sync with addAndConsumeAdvancedQueryClauses() below.
+	 */
 	private boolean isParamSupported(IQueryParameterType param) {
 		String modifier = StringUtils.defaultString(param.getQueryParameterQualifier(), EMPTY_MODIFIER);
 		if (param instanceof TokenParam) {
@@ -72,7 +77,7 @@ public class ExtendedLuceneSearchBuilder {
 				return false;
 			}
 			switch (modifier) {
-				case	EMPTY_MODIFIER:
+				case EMPTY_MODIFIER:
 					return true;
 				case Constants.PARAMQUALIFIER_MDM:
 				default:
@@ -86,7 +91,7 @@ public class ExtendedLuceneSearchBuilder {
 	public void addAndConsumeAdvancedQueryClauses(ExtendedLuceneClauseBuilder builder, String theResourceType, SearchParameterMap theParams, ISearchParamRegistry theSearchParamRegistry) {
 		// copy the keys to avoid concurrent modification error
 		ArrayList<String> paramNames = Lists.newArrayList(theParams.keySet());
-		for(String nextParam: paramNames) {
+		for (String nextParam : paramNames) {
 			if (ourUnsafeSearchParmeters.contains(nextParam)) {
 				continue;
 			}
@@ -95,6 +100,8 @@ public class ExtendedLuceneSearchBuilder {
 				// ignore magic params handled in JPA
 				continue;
 			}
+
+			// NOTE - keep this in sync with isParamSupported() above.
 			switch (activeParam.getParamType()) {
 				case TOKEN:
 					List<List<IQueryParameterType>> tokenTextAndOrTerms = theParams.removeByNameAndModifier(nextParam, Constants.PARAMQUALIFIER_TOKEN_TEXT);
@@ -131,5 +138,4 @@ public class ExtendedLuceneSearchBuilder {
 			}
 		}
 	}
-
 }
