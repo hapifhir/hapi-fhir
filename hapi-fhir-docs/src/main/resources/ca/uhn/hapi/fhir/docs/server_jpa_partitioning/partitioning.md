@@ -173,4 +173,4 @@ None of the limitations listed here are considered permanent. Over time the HAPI
 
 * **Package Operations are not partition aware**: Package operations will only create, update and query resources in the default partition.
 
-* **Advanced Elasticsearch indexing is not partition optimized**: The results are correction partitioned, but the extended indexing is not optimized to account for partitions. 
+* **Advanced Elasticsearch indexing is not partition optimized**: The results are correctly partitioned, but the extended indexing is not optimized to account for partitions. 
