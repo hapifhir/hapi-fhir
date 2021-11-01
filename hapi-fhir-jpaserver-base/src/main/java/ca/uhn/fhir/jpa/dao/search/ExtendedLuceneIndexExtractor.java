@@ -59,7 +59,7 @@ public class ExtendedLuceneIndexExtractor {
 				List<String> paramNames = linkPathToParamName.getOrDefault(insensitivePath, Collections.emptyList());
 				for (String nextParamName : paramNames) {
 					String qualifiedTargetResourceId = nextLink.getTargetResourceType() + "/" + nextLink.getTargetResourceId();
-					//retVal.addResourceLinkIndexData(nextParamName, qualifiedTargetResourceId);
+					retVal.addResourceLinkIndexData(nextParamName, qualifiedTargetResourceId);
 				}
 			}
 		}
