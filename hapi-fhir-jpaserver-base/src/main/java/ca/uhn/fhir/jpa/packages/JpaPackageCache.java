@@ -490,6 +490,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 		ResourcePersistentId binaryPid = new ResourcePersistentId(contents.getResourceBinary().getId());
 		IBaseBinary binary = getBinaryDao().readByPid(binaryPid);
+
 		byte[] resourceContentsBytes = BinaryUtil.getOrCreateData(myCtx, binary).getValue();
 		String resourceContents = new String(resourceContentsBytes, StandardCharsets.UTF_8);
 

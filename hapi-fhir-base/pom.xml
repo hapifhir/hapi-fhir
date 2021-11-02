@@ -49,6 +49,7 @@
 			<optional>true</optional>
 		</dependency>
 
+
 		<!-- Only required for Schematron Validator Support -->
 		<dependency>
 			<groupId>com.helger</groupId>
