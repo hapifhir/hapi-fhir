@@ -1,6 +1,7 @@
 ---
 type: add
 issue: 3100
+backport: 5.5.3
 jira: SMILE-3151
 title: "Previously, only contained resources that are referenced directly by the containing resource were being indexed.
 This enhancement indexes the fields of contained resources that are referenced by other contained resources and

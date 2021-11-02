@@ -77,7 +77,9 @@ public enum VersionEnum {
 	V5_5_0,
 	V5_5_1,
 	V5_5_2,
-	V5_6_0
+	V5_5_3,
+	V5_6_0,
+	V5_7_0
 
 	;
 
