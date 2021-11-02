@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3118
+jira: SMILE-3254
+title: "MySQL 5.7 maps BLOB columns to LONGVARBINARY and the migrator did not take this into account. This has been fixed."

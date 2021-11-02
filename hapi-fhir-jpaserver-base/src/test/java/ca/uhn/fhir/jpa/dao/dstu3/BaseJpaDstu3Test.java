@@ -186,8 +186,6 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Qualifier("myConditionDaoDstu3")
 	protected IFhirResourceDao<Condition> myConditionDao;
 	@Autowired
-	protected DaoConfig myDaoConfig;
-	@Autowired
 	protected ModelConfig myModelConfig;
 	@Autowired
 	@Qualifier("myDeviceDaoDstu3")

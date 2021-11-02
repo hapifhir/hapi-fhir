@@ -277,6 +277,10 @@ public class Constants {
 	public static final String RESOURCE_PARTITION_ID = Constants.class.getName() + "_RESOURCE_PARTITION_ID";
 	public static final String CT_APPLICATION_GZIP = "application/gzip";
 	public static final String[] EMPTY_STRING_ARRAY = new String[0];
+	public static final String SUBSCRIPTION_MULTITYPE_PREFIX = "[";
+	public static final String SUBSCRIPTION_MULTITYPE_SUFFIX = "]";
+	public static final String SUBSCRIPTION_MULTITYPE_STAR = "*";
+	public static final String SUBSCRIPTION_STAR_CRITERIA = SUBSCRIPTION_MULTITYPE_PREFIX + SUBSCRIPTION_MULTITYPE_STAR + SUBSCRIPTION_MULTITYPE_SUFFIX;
 
 	static {
 		CHARSET_UTF8 = StandardCharsets.UTF_8;

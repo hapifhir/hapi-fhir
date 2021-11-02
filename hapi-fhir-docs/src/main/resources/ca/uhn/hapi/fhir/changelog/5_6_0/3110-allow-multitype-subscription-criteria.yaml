@@ -1,0 +1,6 @@
+---
+type: add
+issue: 3110
+title: "Subscription criteria in the HAPI FHIR JPA server now supports an optional alternate syntax of
+  `[*]` (all resources of all types) and `[resourcename,resourcename,...]` (all resources of the
+  given types. Note that no search parameters may be specitied with this syntax."

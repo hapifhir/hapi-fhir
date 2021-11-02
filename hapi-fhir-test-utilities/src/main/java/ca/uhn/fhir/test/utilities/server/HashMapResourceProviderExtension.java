@@ -20,15 +20,28 @@ package ca.uhn.fhir.test.utilities.server;
  * #L%
  */
 
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import static org.awaitility.Awaitility.await;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+
 public class HashMapResourceProviderExtension<T extends IBaseResource> extends HashMapResourceProvider<T> implements BeforeEachCallback, AfterEachCallback {
 
 	private final RestfulServerExtension myRestfulServerExtension;
+	private boolean myClearBetweenTests = true;
+	private final List<T> myUpdates = new ArrayList<>();
 
 	/**
 	 * Constructor
@@ -47,8 +60,46 @@ public class HashMapResourceProviderExtension<T extends IBaseResource> extends H
 	}
 
 	@Override
+	public synchronized MethodOutcome update(T theResource, String theConditional, RequestDetails theRequestDetails) {
+		T resourceClone = getFhirContext().newTerser().clone(theResource);
+		myUpdates.add(resourceClone);
+		return super.update(theResource, theConditional, theRequestDetails);
+	}
+
+	@Override
+	public synchronized void clear() {
+		super.clear();
+		if (myUpdates != null) {
+			myUpdates.clear();
+		}
+	}
+
+	@Override
 	public void beforeEach(ExtensionContext context) throws Exception {
-		clear();
+		if (myClearBetweenTests) {
+			clear();
+			clearCounts();
+		}
 		myRestfulServerExtension.getRestfulServer().registerProvider(HashMapResourceProviderExtension.this);
+	}
+
+	public HashMapResourceProviderExtension<T> dontClearBetweenTests() {
+		myClearBetweenTests = false;
+		return this;
+	}
+
+
+	public void waitForUpdateCount(long theCount) {
+		assertThat(theCount, greaterThanOrEqualTo(getCountUpdate()));
+		await().until(()->getCountUpdate(), equalTo(theCount));
+	}
+
+	public void waitForCreateCount(long theCount) {
+		assertThat(theCount, greaterThanOrEqualTo(getCountCreate()));
+		await().until(()->getCountCreate(), equalTo(theCount));
+	}
+
+	public List<T> getResourceUpdates() {
+		return Collections.unmodifiableList(myUpdates);
 	}
 }

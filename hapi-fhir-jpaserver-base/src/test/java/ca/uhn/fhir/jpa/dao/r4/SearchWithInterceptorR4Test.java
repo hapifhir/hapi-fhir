@@ -4,13 +4,11 @@ import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.SqlQueryList;
-import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -27,6 +25,7 @@ public class SearchWithInterceptorR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testRawSql_Search() {
+		myDaoConfig.setAdvancedLuceneIndexing(false);
 
 		IAnonymousInterceptor interceptor = (pointcut, params) -> {
 			RequestDetails requestDetails = params.get(RequestDetails.class);

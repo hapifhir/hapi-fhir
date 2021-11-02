@@ -19,7 +19,6 @@ package ca.uhn.fhir.jpa.binstore;
  * limitations under the License.
  * #L%
  */
-
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -38,6 +37,7 @@ import ca.uhn.fhir.util.AttachmentUtil;
 import ca.uhn.fhir.util.BinaryUtil;
 import ca.uhn.fhir.util.DateUtils;
 import ca.uhn.fhir.util.HapiExtensions;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -77,6 +77,8 @@ public class BinaryAccessProvider {
 	@Autowired(required = false)
 	private IBinaryStorageSvc myBinaryStorageSvc;
 
+	private Boolean addTargetAttachmentIdForTest = false;
+
 	/**
 	 * $binary-access-read
 	 */
@@ -93,8 +95,13 @@ public class BinaryAccessProvider {
 		IBaseResource resource = dao.read(theResourceId, theRequestDetails, false);
 
 		IBinaryTarget target = findAttachmentForRequest(resource, path, theRequestDetails);
-
 		Optional<String> attachmentId = target.getAttachmentId();
+
+		//for unit test only
+		if (addTargetAttachmentIdForTest){
+			attachmentId = Optional.of("1");
+		}
+
 		if (attachmentId.isPresent()) {
 
 			@SuppressWarnings("unchecked")
@@ -123,7 +130,6 @@ public class BinaryAccessProvider {
 			theServletResponse.getOutputStream().close();
 
 		} else {
-
 			String contentType = target.getContentType();
 			contentType = StringUtils.defaultIfBlank(contentType, Constants.CT_OCTET_STREAM);
 
@@ -189,7 +195,7 @@ public class BinaryAccessProvider {
 		}
 
 		if (blobId == null) {
-			byte[] bytes = IOUtils.toByteArray(theRequestDetails.getInputStream());
+			byte[] bytes = theRequestDetails.loadRequestContents();
 			size = bytes.length;
 			target.setData(bytes);
 		} else {
@@ -357,4 +363,23 @@ public class BinaryAccessProvider {
 	}
 
 
+	@VisibleForTesting
+	public void setDaoRegistryForUnitTest(DaoRegistry theDaoRegistry) {
+		myDaoRegistry = theDaoRegistry;
+	}
+
+	@VisibleForTesting
+	public void setBinaryStorageSvcForUnitTest(IBinaryStorageSvc theBinaryStorageSvc) {
+		myBinaryStorageSvc = theBinaryStorageSvc;
+	}
+
+	@VisibleForTesting
+	public void setFhirContextForUnitTest(FhirContext theCtx) {
+		myCtx = theCtx;
+	}
+
+	@VisibleForTesting
+	public void setTargetAttachmentIdForUnitTest(Boolean theTargetAttachmentIdForTest) {
+		addTargetAttachmentIdForTest = theTargetAttachmentIdForTest;
+	}
 }

@@ -15,7 +15,6 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -117,7 +116,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 	}
 
 	private void doMatchActiveSubscriptionsAndDeliver(ResourceModifiedMessage theMsg) {
-		IIdType resourceId = theMsg.getId(myFhirContext);
+		IIdType resourceId = theMsg.getPayloadId(myFhirContext);
 
 		Collection<ActiveSubscription> subscriptions = mySubscriptionRegistry.getAll();
 
@@ -136,18 +135,24 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 				}
 			}
 
-			if (!validCriteria(nextActiveSubscription, resourceId)) {
+			if (!resourceTypeIsAppropriateForSubscription(nextActiveSubscription, resourceId)) {
 				continue;
 			}
 
-			InMemoryMatchResult matchResult = mySubscriptionMatcher.match(nextActiveSubscription.getSubscription(), theMsg);
-			if (!matchResult.matched()) {
-				continue;
+			InMemoryMatchResult matchResult;
+			if (nextActiveSubscription.getCriteria().getType() == SubscriptionCriteriaParser.TypeEnum.SEARCH_EXPRESSION) {
+				matchResult = mySubscriptionMatcher.match(nextActiveSubscription.getSubscription(), theMsg);
+				if (!matchResult.matched()) {
+					continue;
+				}
+				ourLog.debug("Subscription {} was matched by resource {} {}",
+					nextActiveSubscription.getId(),
+					resourceId.toUnqualifiedVersionless().getValue(),
+					matchResult.isInMemory() ? "in-memory" : "by querying the repository");
+			} else {
+				matchResult = InMemoryMatchResult.successfulMatch();
+				matchResult.setInMemory(true);
 			}
-			ourLog.debug("Subscription {} was matched by resource {} {}",
-				nextActiveSubscription.getId(),
-				resourceId.toUnqualifiedVersionless().getValue(),
-				matchResult.isInMemory() ? "in-memory" : "by querying the repository");
 
 			IBaseResource payload = theMsg.getNewPayload(myFhirContext);
 			CanonicalSubscription subscription = nextActiveSubscription.getSubscription();
@@ -215,28 +220,26 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 		return theActiveSubscription.getId();
 	}
 
-	private boolean validCriteria(ActiveSubscription theActiveSubscription, IIdType theResourceId) {
-		String criteriaString = theActiveSubscription.getCriteriaString();
+	private boolean resourceTypeIsAppropriateForSubscription(ActiveSubscription theActiveSubscription, IIdType theResourceId) {
+		SubscriptionCriteriaParser.SubscriptionCriteria criteria = theActiveSubscription.getCriteria();
 		String subscriptionId = getId(theActiveSubscription);
 		String resourceType = theResourceId.getResourceType();
 
-		if (StringUtils.isBlank(criteriaString)) {
-			return false;
-		}
-
 		// see if the criteria matches the created object
-		ourLog.trace("Checking subscription {} for {} with criteria {}", subscriptionId, resourceType, criteriaString);
-		String criteriaResource = criteriaString;
-		int index = criteriaResource.indexOf("?");
-		if (index != -1) {
-			criteriaResource = criteriaResource.substring(0, criteriaResource.indexOf("?"));
-		}
+		ourLog.trace("Checking subscription {} for {} with criteria {}", subscriptionId, resourceType, criteria);
 
-		if (resourceType != null && !criteriaResource.equals(resourceType)) {
-			ourLog.trace("Skipping subscription search for {} because it does not match the criteria {}", resourceType, criteriaString);
+		if (criteria == null) {
 			return false;
 		}
 
-		return true;
+		switch (criteria.getType()) {
+			default:
+			case SEARCH_EXPRESSION:
+			case MULTITYPE_EXPRESSION:
+				return criteria.getApplicableResourceTypes().contains(resourceType);
+			case STARTYPE_EXPRESSION:
+				return !resourceType.equals("Subscription");
+		}
+
 	}
 }

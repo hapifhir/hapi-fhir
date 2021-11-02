@@ -25,6 +25,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.parser.IParser;
@@ -51,10 +52,10 @@ public abstract class BaseResourceToFileWriter implements ItemWriter<List<IBaseR
 
 	protected ByteArrayOutputStream myOutputStream;
 
-	@Value("#{stepExecutionContext['bulkExportCollectionEntityId']}")
+	@Value("#{stepExecutionContext['" + BatchConstants.JOB_COLLECTION_ENTITY_ID + "']}")
 	protected Long myBulkExportCollectionEntityId;
 
-	@Value("#{stepExecutionContext['resourceType']}")
+	@Value("#{stepExecutionContext['" + BatchConstants.JOB_EXECUTION_RESOURCE_TYPE + "']}")
 	protected String myResourceType;
 
 	protected IFhirResourceDao myBinaryDao;
