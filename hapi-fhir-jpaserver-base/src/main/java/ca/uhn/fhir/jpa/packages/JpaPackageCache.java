@@ -177,7 +177,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		IFhirResourceDao<? extends IBaseBinary> binaryDao = getBinaryDao();
 		IBaseBinary binary = binaryDao.readByPid(new ResourcePersistentId(thePackageVersion.getPackageBinary().getId()));
 		try {
-			byte[] content = fetchBlobFromBinary(binary)
+			byte[] content = fetchBlobFromBinary(binary);
 			PackageContents retVal = new PackageContents()
 				.setBytes(content)
 				.setPackageId(thePackageVersion.getPackageId())
