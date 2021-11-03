@@ -6,13 +6,13 @@ import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.checkerframework.framework.qual.InvisibleQualifier;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -117,7 +117,6 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		return null;
 	}
 
-
 	private String getVersionedCodeSystem(ValueSet.ConceptSetComponent theComponent) {
 			String codeSystem = theComponent.getSystem();
 			if ( ! codeSystem.contains("|") && theComponent.hasVersion()) {
@@ -125,7 +124,6 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 			}
 			return codeSystem;
 	}
-
 
 	@Override
 	public IBaseResource fetchCodeSystem(String theSystem) {
@@ -150,54 +148,40 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		Validate.notBlank(theCode, "theCode must be provided");
 
 		IGenericClient client = provideClient();
-		FhirVersionEnum fhirVersion = client.getFhirContext().getVersion().getVersion();
+		FhirContext fhirContext = client.getFhirContext();
+		FhirVersionEnum fhirVersion = fhirContext.getVersion().getVersion();
 
 		switch (fhirVersion) {
 			case DSTU3:
-				org.hl7.fhir.dstu3.model.Parameters paramsDSTU3 = new org.hl7.fhir.dstu3.model.Parameters();
-				paramsDSTU3.addParameter().setName("code").setValue(new org.hl7.fhir.dstu3.model.StringType(theCode));
-				if (!StringUtils.isEmpty(theSystem)) {
-					paramsDSTU3.addParameter().setName("system").setValue(new org.hl7.fhir.dstu3.model.UriType(theSystem));
-				}
-				if (!StringUtils.isEmpty(theDisplayLanguage)) {
-					paramsDSTU3.addParameter().setName("language").setValue(new org.hl7.fhir.dstu3.model.StringType(theDisplayLanguage));
-				}
-				org.hl7.fhir.dstu3.model.Parameters outcomeDSTU3 = client
-					.operation()
-					.onType(org.hl7.fhir.dstu3.model.CodeSystem.class)
-					.named("$lookup")
-					.withParameters(paramsDSTU3)
-					.useHttpGet()
-					.execute();
-				if (outcomeDSTU3 != null && !outcomeDSTU3.isEmpty()) {
-					return generateLookupCodeResultDSTU3(theCode, theSystem, outcomeDSTU3);
-				}
-				break;
 			case R4:
-				org.hl7.fhir.r4.model.Parameters paramsR4 = new org.hl7.fhir.r4.model.Parameters();
-				paramsR4.addParameter().setName("code").setValue(new org.hl7.fhir.r4.model.StringType(theCode));
+				IBaseParameters params = ParametersUtil.newInstance(fhirContext);
+				ParametersUtil.addParameterToParametersString(fhirContext, params, "code", theCode);
 				if (!StringUtils.isEmpty(theSystem)) {
-					paramsR4.addParameter().setName("system").setValue(new org.hl7.fhir.r4.model.UriType(theSystem));
+					ParametersUtil.addParameterToParametersString(fhirContext, params, "system", theSystem);
 				}
 				if (!StringUtils.isEmpty(theDisplayLanguage)) {
-					paramsR4.addParameter().setName("language").setValue(new org.hl7.fhir.r4.model.StringType(theDisplayLanguage));
+					ParametersUtil.addParameterToParametersString(fhirContext, params, "language", theDisplayLanguage);
 				}
-				org.hl7.fhir.r4.model.Parameters outcomeR4 = client
+				IBaseParameters outcome = client
 					.operation()
 					.onType(CodeSystem.class)
-					.named("$lookup")
-					.withParameters(paramsR4)
+					.named(JpaConstants.OPERATION_LOOKUP)
+					.withParameters(params)
 					.useHttpGet()
 					.execute();
-				if (outcomeR4 != null && !outcomeR4.isEmpty()) {
-					return generateLookupCodeResultR4(theCode, theSystem, outcomeR4);
+				if (outcome != null && !outcome.isEmpty()) {
+					switch (fhirVersion) {
+						case DSTU3:
+							return generateLookupCodeResultDSTU3(theCode, theSystem, (org.hl7.fhir.dstu3.model.Parameters)outcome);
+						case R4:
+							return generateLookupCodeResultR4(theCode, theSystem, (org.hl7.fhir.r4.model.Parameters)outcome);
+					}
 				}
 				break;
 			default:
 				throw new UnsupportedOperationException("Unsupported FHIR version '" + fhirVersion.getFhirVersionString() +
 					"'. Only DSTU3 and R4 are supported.");
 		}
-
 		return null;
 	}
 
