@@ -338,6 +338,8 @@ public class NpmR4Test extends BaseJpaR4Test {
 			IBaseResource resource = result.getResources(0, 1).get(0);
 			assertEquals("CodeSystem/shorthand-code-system/_history/1", resource.getIdElement().toString());
 		});
+
+		myInterceptorService.unregisterInterceptor(myBinaryStorageInterceptor);
 	}
 
 	@Test
