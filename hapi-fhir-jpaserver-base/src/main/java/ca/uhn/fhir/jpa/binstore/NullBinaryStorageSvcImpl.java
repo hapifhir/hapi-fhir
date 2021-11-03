@@ -85,7 +85,7 @@ public class NullBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	}
 
 	@Override
-	public byte[] fetchDataBlobFromBinary(IBaseBinary theResourceId) throws IOException {
+	public byte[] fetchDataBlobFromBinary(IBaseBinary theResource) throws IOException {
 		throw new UnsupportedOperationException();
 	}
 }
