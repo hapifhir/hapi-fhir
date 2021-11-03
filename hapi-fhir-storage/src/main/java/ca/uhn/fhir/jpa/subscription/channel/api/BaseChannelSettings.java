@@ -20,8 +20,13 @@ package ca.uhn.fhir.jpa.subscription.channel.api;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.subscription.model.ChannelRetryConfiguration;
+
 public abstract class BaseChannelSettings implements IChannelSettings {
 	private boolean myQualifyChannelName = true;
+
+	private ChannelRetryConfiguration myRetryConfigurationParameters;
+
 
 	/**
 	 * Default true.  Used by IChannelNamer to decide how to qualify the channel name.
@@ -36,5 +41,13 @@ public abstract class BaseChannelSettings implements IChannelSettings {
 	 */
 	public void setQualifyChannelName(boolean theQualifyChannelName) {
 		myQualifyChannelName = theQualifyChannelName;
+	}
+
+	public void setRetryConfiguration(ChannelRetryConfiguration theParams) {
+		myRetryConfigurationParameters = theParams;
+	}
+
+	public ChannelRetryConfiguration getRetryConfigurationParameters() {
+		return myRetryConfigurationParameters;
 	}
 }
