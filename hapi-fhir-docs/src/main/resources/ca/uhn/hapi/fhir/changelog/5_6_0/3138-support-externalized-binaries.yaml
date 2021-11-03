@@ -2,5 +2,5 @@
 type: fix
 jira: SMILE-3152
 issue: 3138
-title: "Previously, the package registry would not work correctly when externalied binary storage was enabled. This has been corrected."
+title: "Previously, the package registry would not work correctly when externalized binary storage was enabled. This has been corrected."
 
