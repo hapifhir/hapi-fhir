@@ -21,10 +21,13 @@ package ca.uhn.fhir.jpa.config;
  */
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.binstore.IBinaryStorageSvc;
+import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.orm.jpa.JpaTransactionManager;
 
@@ -41,6 +44,12 @@ public class TestJpaConfig {
 	@Bean
 	public ModelConfig modelConfig() {
 		return daoConfig().getModelConfig();
+	}
+
+	@Bean
+	@Lazy
+	public IBinaryStorageSvc binaryStorage() {
+		return new MemoryBinaryStorageSvcImpl();
 	}
 
 	@Bean

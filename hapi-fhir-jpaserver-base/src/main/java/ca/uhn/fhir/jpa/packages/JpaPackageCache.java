@@ -123,7 +123,8 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	private PlatformTransactionManager myTxManager;
 	@Autowired
 	private PartitionSettings myPartitionSettings;
-	@Autowired
+
+	@Autowired(required = false)//It is possible that some implementers will not create such a bean.
 	private IBinaryStorageSvc myBinaryStorageSvc;
 
 	@Override
@@ -176,7 +177,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		IFhirResourceDao<? extends IBaseBinary> binaryDao = getBinaryDao();
 		IBaseBinary binary = binaryDao.readByPid(new ResourcePersistentId(thePackageVersion.getPackageBinary().getId()));
 		try {
-			byte[] content = myBinaryStorageSvc.fetchDataBlobFromBinary(binary);
+			byte[] content = fetchBlobFromBinary(binary)
 			PackageContents retVal = new PackageContents()
 				.setBytes(content)
 				.setPackageId(thePackageVersion.getPackageId())
@@ -185,6 +186,26 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			return retVal;
 		} catch (IOException e) {
 			throw new InternalErrorException("Failed to load package. There was a problem reading binaries", e);
+		}
+	}
+
+	/**
+	 * Helper method which will attempt to use the IBinaryStorageSvc to resolve the binary blob if available. If
+	 * the bean is unavailable, fallback to assuming we are using an embedded base64 in the data element.
+	 * @param theBinary the Binary who's `data` blob you want to retrieve
+	 * @return a byte array containing the blob.
+	 *
+	 * @throws IOException
+	 */
+	private byte[] fetchBlobFromBinary(IBaseBinary theBinary) throws IOException {
+		if (myBinaryStorageSvc != null) {
+			return myBinaryStorageSvc.fetchDataBlobFromBinary(theBinary);
+		} else {
+			byte[] value = BinaryUtil.getOrCreateData(myCtx, theBinary).getValue();
+			if (value == null) {
+				throw new InternalErrorException("Failed to fetch blob from Binary/" + theBinary.getIdElement());
+			}
+			return value;
 		}
 	}
 
@@ -494,13 +515,12 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 	private IBaseResource loadPackageEntity(NpmPackageVersionResourceEntity contents) {
 		try {
-
-		ResourcePersistentId binaryPid = new ResourcePersistentId(contents.getResourceBinary().getId());
-		IBaseBinary binary = getBinaryDao().readByPid(binaryPid);
-		byte[] resourceContentsBytes= myBinaryStorageSvc.fetchDataBlobFromBinary(binary);
-		String resourceContents = new String(resourceContentsBytes, StandardCharsets.UTF_8);
-		FhirContext packageContext = getFhirContext(contents.getFhirVersion());
-		return EncodingEnum.detectEncoding(resourceContents).newParser(packageContext).parseResource(resourceContents);
+			ResourcePersistentId binaryPid = new ResourcePersistentId(contents.getResourceBinary().getId());
+			IBaseBinary binary = getBinaryDao().readByPid(binaryPid);
+			byte[] resourceContentsBytes= fetchBlobFromBinary(binary);
+			String resourceContents = new String(resourceContentsBytes, StandardCharsets.UTF_8);
+			FhirContext packageContext = getFhirContext(contents.getFhirVersion());
+			return EncodingEnum.detectEncoding(resourceContents).newParser(packageContext).parseResource(resourceContents);
 		} catch (Exception e) {
 			throw new RuntimeException("Failed to load package resource " + contents, e);
 		}
