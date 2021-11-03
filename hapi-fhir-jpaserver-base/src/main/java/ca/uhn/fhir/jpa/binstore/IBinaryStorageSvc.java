@@ -111,5 +111,5 @@ public interface IBinaryStorageSvc {
 	 * @param theResourceId The resource ID The ID of the Binary resource you want to extract data bytes from
 	 * @return The binary data blob as a byte array
 	 */
-	byte[] fetchDataBlobFromBinary(IBaseBinary theResourceId) throws IOException;
+	byte[] fetchDataBlobFromBinary(IBaseBinary theResource) throws IOException;
 }
