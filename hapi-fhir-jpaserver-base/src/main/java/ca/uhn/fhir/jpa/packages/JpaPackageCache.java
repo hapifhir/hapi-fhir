@@ -27,6 +27,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
+import ca.uhn.fhir.jpa.binstore.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionResourceDao;
@@ -122,6 +123,8 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	private PlatformTransactionManager myTxManager;
 	@Autowired
 	private PartitionSettings myPartitionSettings;
+	@Autowired
+	private IBinaryStorageSvc myBinaryStorageSvc;
 
 	@Override
 	@Transactional
@@ -172,13 +175,17 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	private IHapiPackageCacheManager.PackageContents loadPackageContents(NpmPackageVersionEntity thePackageVersion) {
 		IFhirResourceDao<? extends IBaseBinary> binaryDao = getBinaryDao();
 		IBaseBinary binary = binaryDao.readByPid(new ResourcePersistentId(thePackageVersion.getPackageBinary().getId()));
-
-		PackageContents retVal = new PackageContents()
-			.setBytes(binary.getContent())
-			.setPackageId(thePackageVersion.getPackageId())
-			.setVersion(thePackageVersion.getVersionId())
-			.setLastModified(thePackageVersion.getUpdatedTime());
-		return retVal;
+		try {
+			byte[] content = myBinaryStorageSvc.fetchDataBlobFromBinary(binary);
+			PackageContents retVal = new PackageContents()
+				.setBytes(content)
+				.setPackageId(thePackageVersion.getPackageId())
+				.setVersion(thePackageVersion.getVersionId())
+				.setLastModified(thePackageVersion.getUpdatedTime());
+			return retVal;
+		} catch (IOException e) {
+			throw new InternalErrorException("Failed to load package. There was a problem reading binaries", e);
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -490,9 +497,8 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 		ResourcePersistentId binaryPid = new ResourcePersistentId(contents.getResourceBinary().getId());
 		IBaseBinary binary = getBinaryDao().readByPid(binaryPid);
-		byte[] resourceContentsBytes = BinaryUtil.getOrCreateData(myCtx, binary).getValue();
+		byte[] resourceContentsBytes= myBinaryStorageSvc.fetchDataBlobFromBinary(binary);
 		String resourceContents = new String(resourceContentsBytes, StandardCharsets.UTF_8);
-
 		FhirContext packageContext = getFhirContext(contents.getFhirVersion());
 		return EncodingEnum.detectEncoding(resourceContents).newParser(packageContext).parseResource(resourceContents);
 		} catch (Exception e) {

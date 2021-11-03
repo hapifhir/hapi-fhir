@@ -20,8 +20,10 @@ package ca.uhn.fhir.jpa.binstore;
  * #L%
  */
 
+import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -79,6 +81,11 @@ public class NullBinaryStorageSvcImpl implements IBinaryStorageSvc {
 
 	@Override
 	public byte[] fetchBlob(IIdType theResourceId, String theBlobId) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public byte[] fetchDataBlobFromBinary(IBaseBinary theResourceId) throws IOException {
 		throw new UnsupportedOperationException();
 	}
 }
