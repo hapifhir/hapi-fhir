@@ -271,6 +271,78 @@ public class NpmR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testInstallR4PackageWithExternalizedBinaries() throws Exception {
+		myDaoConfig.setAllowExternalReferences(true);
+
+		myInterceptorService.registerInterceptor(myBinaryStorageInterceptor);
+		byte[] bytes = loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz");
+		myFakeNpmServlet.myResponses.put("/hl7.fhir.uv.shorthand/0.12.0", bytes);
+
+		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
+		assertEquals(1, outcome.getResourcesInstalled().get("CodeSystem"));
+
+		// Be sure no further communication with the server
+		JettyUtil.closeServer(myServer);
+
+		// Make sure we can fetch the package by ID and Version
+		NpmPackage pkg = myPackageCacheManager.loadPackage("hl7.fhir.uv.shorthand", "0.12.0");
+		assertEquals("Describes FHIR Shorthand (FSH), a domain-specific language (DSL) for defining the content of FHIR Implementation Guides (IG). (built Wed, Apr 1, 2020 17:24+0000+00:00)", pkg.description());
+
+		// Make sure we can fetch the package by ID
+		pkg = myPackageCacheManager.loadPackage("hl7.fhir.uv.shorthand", null);
+		assertEquals("0.12.0", pkg.version());
+		assertEquals("Describes FHIR Shorthand (FSH), a domain-specific language (DSL) for defining the content of FHIR Implementation Guides (IG). (built Wed, Apr 1, 2020 17:24+0000+00:00)", pkg.description());
+
+		// Make sure DB rows were saved
+		runInTransaction(() -> {
+			NpmPackageEntity pkgEntity = myPackageDao.findByPackageId("hl7.fhir.uv.shorthand").orElseThrow(() -> new IllegalArgumentException());
+			assertEquals("hl7.fhir.uv.shorthand", pkgEntity.getPackageId());
+
+			NpmPackageVersionEntity versionEntity = myPackageVersionDao.findByPackageIdAndVersion("hl7.fhir.uv.shorthand", "0.12.0").orElseThrow(() -> new IllegalArgumentException());
+			assertEquals("hl7.fhir.uv.shorthand", versionEntity.getPackageId());
+			assertEquals("0.12.0", versionEntity.getVersionId());
+			assertEquals(3001, versionEntity.getPackageSizeBytes());
+			assertEquals(true, versionEntity.isCurrentVersion());
+			assertEquals("hl7.fhir.uv.shorthand", versionEntity.getPackageId());
+			assertEquals("4.0.1", versionEntity.getFhirVersionId());
+			assertEquals(FhirVersionEnum.R4, versionEntity.getFhirVersion());
+
+			NpmPackageVersionResourceEntity resource = myPackageVersionResourceDao.findCurrentVersionByCanonicalUrl(Pageable.unpaged(), FhirVersionEnum.R4, "http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand").getContent().get(0);
+			assertEquals("http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand", resource.getCanonicalUrl());
+			assertEquals("0.12.0", resource.getCanonicalVersion());
+			assertEquals("ImplementationGuide-hl7.fhir.uv.shorthand.json", resource.getFilename());
+			assertEquals("4.0.1", resource.getFhirVersionId());
+			assertEquals(FhirVersionEnum.R4, resource.getFhirVersion());
+			assertEquals(6155, resource.getResSizeBytes());
+		});
+
+		// Fetch resource by URL
+		runInTransaction(() -> {
+			IBaseResource asset = myPackageCacheManager.loadPackageAssetByUrl(FhirVersionEnum.R4, "http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand");
+			assertThat(myFhirCtx.newJsonParser().encodeResourceToString(asset), containsString("\"url\":\"http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand\",\"version\":\"0.12.0\""));
+		});
+
+		// Fetch resource by URL with version
+		runInTransaction(() -> {
+			IBaseResource asset = myPackageCacheManager.loadPackageAssetByUrl(FhirVersionEnum.R4, "http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand|0.12.0");
+			assertThat(myFhirCtx.newJsonParser().encodeResourceToString(asset), containsString("\"url\":\"http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand\",\"version\":\"0.12.0\""));
+		});
+
+		// Search for the installed resource
+		runInTransaction(() -> {
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
+			map.add(StructureDefinition.SP_URL, new UriParam("http://hl7.org/fhir/uv/shorthand/CodeSystem/shorthand-code-system"));
+			IBundleProvider result = myCodeSystemDao.search(map);
+			assertEquals(1, result.sizeOrThrowNpe());
+			IBaseResource resource = result.getResources(0, 1).get(0);
+			assertEquals("CodeSystem/shorthand-code-system/_history/1", resource.getIdElement().toString());
+		});
+
+		myInterceptorService.unregisterInterceptor(myBinaryStorageInterceptor);
+	}
+
+	@Test
 	public void testNumericIdsInstalledWithNpmPrefix() throws Exception {
 			myDaoConfig.setAllowExternalReferences(true);
 

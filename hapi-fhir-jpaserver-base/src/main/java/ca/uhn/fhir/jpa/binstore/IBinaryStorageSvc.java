@@ -20,6 +20,8 @@ package ca.uhn.fhir.jpa.binstore;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
+import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.annotation.Nonnull;
@@ -101,4 +103,13 @@ public interface IBinaryStorageSvc {
 	 * @return The payload as a byte array
 	 */
 	byte[] fetchBlob(IIdType theResourceId, String theBlobId) throws IOException;
+
+	/**
+	 * Fetch the byte[] contents of a given Binary resource's `data` element. If the data is a standard base64encoded string that is embedded, return it.
+	 * Otherwise, attempt to load the externalized binary blob via the the externalized binary storage service.
+	 *
+	 * @param theResourceId The resource ID The ID of the Binary resource you want to extract data bytes from
+	 * @return The binary data blob as a byte array
+	 */
+	byte[] fetchDataBlobFromBinary(IBaseBinary theResource) throws IOException;
 }

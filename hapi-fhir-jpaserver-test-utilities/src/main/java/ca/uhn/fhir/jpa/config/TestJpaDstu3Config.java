@@ -135,10 +135,6 @@ public class TestJpaDstu3Config extends BaseJavaConfigDstu3 {
 		return requestValidator;
 	}
 
-	@Bean
-	public IBinaryStorageSvc binaryStorage() {
-		return new MemoryBinaryStorageSvcImpl();
-	}
 
 	@Bean
 	public DefaultProfileValidationSupport validationSupportChainDstu3() {
