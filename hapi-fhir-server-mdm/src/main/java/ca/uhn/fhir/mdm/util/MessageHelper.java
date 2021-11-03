@@ -109,6 +109,6 @@ public class MessageHelper {
 	}
 
 	public String getMessageForFailedGoldenResourceLoad(String theParamName, String theGoldenResourceId) {
-		return theGoldenResourceId + " used as parameter" + theParamName + " could not be loaded as a golden resource, as it appears to be lacking the golden resource meta tags.";
+		return theGoldenResourceId + " used as parameter [" + theParamName + "] could not be loaded as a golden resource, as it appears to be lacking the golden resource meta tags.";
 	}
 }
