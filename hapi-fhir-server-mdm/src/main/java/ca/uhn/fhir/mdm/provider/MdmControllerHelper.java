@@ -64,7 +64,12 @@ public class MdmControllerHelper {
 
 	public IAnyResource getLatestGoldenResourceFromIdOrThrowException(String theParamName, String theGoldenResourceId) {
 		IdDt resourceId = MdmControllerUtil.getGoldenIdDtOrThrowException(theParamName, theGoldenResourceId);
-		return loadResource(resourceId.toUnqualifiedVersionless());
+		IAnyResource iAnyResource = loadResource(resourceId.toUnqualifiedVersionless());
+		if (MdmResourceUtil.isGoldenRecord(iAnyResource)) {
+			return iAnyResource;
+		} else {
+			throw new InvalidRequestException("Resource with ID " + theGoldenResourceId + " is not a golden resource!");
+		}
 	}
 
 
