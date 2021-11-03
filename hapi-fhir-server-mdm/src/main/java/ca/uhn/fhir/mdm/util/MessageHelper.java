@@ -107,4 +107,8 @@ public class MessageHelper {
 	public String getMessageForMultipleGoldenRecords(String theSourceResource) {
 		return theSourceResource + " already has matched golden resource. Use $mdm-query-links to see more details.";
 	}
+
+	public String getMessageForFailedGoldenResourceLoad(String theParamName, String theGoldenResourceId) {
+		return theGoldenResourceId + " used as parameter" + theParamName + " could not be loaded as a golden resource, as it appears to be lacking the golden resource meta tags.";
+	}
 }

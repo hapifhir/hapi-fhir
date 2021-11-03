@@ -68,7 +68,7 @@ public class MdmControllerHelper {
 		if (MdmResourceUtil.isGoldenRecord(iAnyResource)) {
 			return iAnyResource;
 		} else {
-			throw new InvalidRequestException("Resource with ID " + theGoldenResourceId + " is not a golden resource!");
+			throw new InvalidRequestException(myMessageHelper.getMessageForFailedGoldenResourceLoad(theParamName, theGoldenResourceId));
 		}
 	}
 

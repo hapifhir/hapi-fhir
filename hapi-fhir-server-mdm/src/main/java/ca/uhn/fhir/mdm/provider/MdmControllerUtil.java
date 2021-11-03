@@ -57,7 +57,6 @@ public class MdmControllerUtil {
 
 	static IdDt getGoldenIdDtOrThrowException(String theParamName, String theId) {
 		IdDt goldenResourceId = new IdDt(theId);
-		//TODO GGG MDM: maybe add a gate here to only consider resources that can possibly be EMPI'ed?
 		if (goldenResourceId.getIdPart() == null) {
 			throw new InvalidRequestException(theParamName + " is '" + theId + "'.  must have form <resourceType>/<id> where <id> is the id of the resource");
 		}
