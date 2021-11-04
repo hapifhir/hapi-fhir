@@ -68,13 +68,13 @@ public class MdmSubscriptionLoader {
 			case DSTU3:
 				subscriptions = mdmResourceTypes
 					.stream()
-					.map(resourceType -> buildMdmSubscriptionDstu3(MDM_SUBSCIPRION_ID_PREFIX + resourceType, resourceType+"?"))
+					.map(resourceType -> buildMdmSubscriptionDstu3(MDM_SUBSCIPRION_ID_PREFIX + resourceType, resourceType+"?_tag:not=https://hapifhir.org/NamingSystem/managing-mdm-system|HAPI_MDM"))
 					.collect(Collectors.toList());
 				break;
 			case R4:
 				subscriptions = mdmResourceTypes
 					.stream()
-					.map(resourceType -> buildMdmSubscriptionR4(MDM_SUBSCIPRION_ID_PREFIX + resourceType, resourceType+"?"))
+					.map(resourceType -> buildMdmSubscriptionR4(MDM_SUBSCIPRION_ID_PREFIX + resourceType, resourceType+"?_tag:not=https://hapifhir.org/NamingSystem/managing-mdm-system|HAPI_MDM"))
 					.collect(Collectors.toList());
 				break;
 			default:
