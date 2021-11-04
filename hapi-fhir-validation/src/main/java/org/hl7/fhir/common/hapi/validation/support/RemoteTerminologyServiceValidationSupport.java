@@ -84,7 +84,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 	 */
 	private String extractCodeSystemForCode(ValueSet theValueSet, String theCode) {
 		if (theValueSet.getCompose() == null || theValueSet.getCompose().getInclude() == null
-					|| theValueSet.getCompose().getInclude().isEmpty()) {
+			|| theValueSet.getCompose().getInclude().isEmpty()) {
 			return null;
 		}
 
@@ -113,7 +113,6 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		} catch (IOException theE) {
 			ourLog.error("IOException trying to serialize ValueSet to json: " + theE);
 		}
-
 		return null;
 	}
 
@@ -162,9 +161,10 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 				if (!StringUtils.isEmpty(theDisplayLanguage)) {
 					ParametersUtil.addParameterToParametersString(fhirContext, params, "language", theDisplayLanguage);
 				}
+				Class<?> codeSystemClass = myCtx.getResourceDefinition("CodeSystem").getImplementingClass();
 				IBaseParameters outcome = client
 					.operation()
-					.onType(CodeSystem.class)
+					.onType((Class<? extends IBaseResource>) codeSystemClass)
 					.named(JpaConstants.OPERATION_LOOKUP)
 					.withParameters(params)
 					.useHttpGet()
