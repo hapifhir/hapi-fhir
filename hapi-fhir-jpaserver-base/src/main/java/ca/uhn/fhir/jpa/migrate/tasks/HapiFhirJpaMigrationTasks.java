@@ -41,10 +41,15 @@ import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
 import ca.uhn.fhir.util.VersionEnum;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toSet;
 
 @SuppressWarnings({"SqlNoDataSourceInspection", "SpellCheckingInspection"})
 public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
@@ -75,7 +80,27 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init530();
 		init540(); // 20210218 - 20210520
 		init550(); // 20210520 -
+		init570(); // 20211102 -
 	}
+
+	private void init570() {
+		Builder version = forVersion(VersionEnum.V5_7_0);
+
+		version.onTable("TRM_CONCEPT_PROPERTY")
+			.addIndex("20211101.1", "IDX_FK_CONCEPTPROP_CONCEPT")
+			.unique(false)
+			.withColumns("CONCEPT_PID")
+			// H2, Derby, MariaDB, and MySql automatically add indexes to foreign keys
+			.onlyAppliesToPlatforms(DriverTypeEnum.POSTGRES_9_4, DriverTypeEnum.ORACLE_12C, DriverTypeEnum.MSSQL_2012);
+
+		version.onTable("TRM_CONCEPT_DESIG")
+			.addIndex("20211101.2", "IDX_FK_CONCEPTDESIG_CONCEPT")
+			.unique(false)
+			.withColumns("CONCEPT_PID")
+			// H2, Derby, MariaDB, and MySql automatically add indexes to foreign keys
+			.onlyAppliesToPlatforms(DriverTypeEnum.POSTGRES_9_4, DriverTypeEnum.ORACLE_12C, DriverTypeEnum.MSSQL_2012);
+	}
+
 
 	private void init550() {
 

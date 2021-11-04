@@ -30,8 +30,9 @@ import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.length;
 
 @Entity
-@Table(name = "TRM_CONCEPT_DESIG", uniqueConstraints = {
-}, indexes = {
+@Table(name = "TRM_CONCEPT_DESIG", uniqueConstraints = { }, indexes = {
+	// same name that the indexed FK because some DBs add it automatically and fails SchemaMigrationTest otherwise
+	@Index(name = "FK_CONCEPTDESIG_CONCEPT",  columnList = "CONCEPT_PID", unique = false)
 })
 public class TermConceptDesignation implements Serializable {
 	private static final long serialVersionUID = 1L;
