@@ -60,13 +60,6 @@ public class HashMapResourceProviderExtension<T extends IBaseResource> extends H
 	}
 
 	@Override
-	public synchronized MethodOutcome update(T theResource, String theConditional, RequestDetails theRequestDetails) {
-		T resourceClone = getFhirContext().newTerser().clone(theResource);
-		myUpdates.add(resourceClone);
-		return super.update(theResource, theConditional, theRequestDetails);
-	}
-
-	@Override
 	public synchronized void clear() {
 		super.clear();
 		if (myUpdates != null) {
@@ -83,11 +76,16 @@ public class HashMapResourceProviderExtension<T extends IBaseResource> extends H
 		myRestfulServerExtension.getRestfulServer().registerProvider(HashMapResourceProviderExtension.this);
 	}
 
+	public synchronized MethodOutcome update(T theResource, String theConditional, RequestDetails theRequestDetails) {
+		T resourceClone = getFhirContext().newTerser().clone(theResource);
+		myUpdates.add(resourceClone);
+		return super.update(theResource, theConditional, theRequestDetails);
+	}
+
 	public HashMapResourceProviderExtension<T> dontClearBetweenTests() {
 		myClearBetweenTests = false;
 		return this;
 	}
-
 
 	public void waitForUpdateCount(long theCount) {
 		assertThat(theCount, greaterThanOrEqualTo(getCountUpdate()));

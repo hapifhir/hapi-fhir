@@ -20,10 +20,15 @@ package ca.uhn.fhir.jpa.subscription.channel.subscription;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
+import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
+import ca.uhn.fhir.jpa.subscription.channel.models.ProducingChannelParameters;
+import ca.uhn.fhir.jpa.subscription.channel.models.ReceivingChannelParameters;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
+import ca.uhn.fhir.jpa.subscription.model.ChannelRetryConfiguration;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import org.slf4j.Logger;
@@ -60,29 +65,63 @@ public class SubscriptionChannelRegistry {
 			return;
 		}
 
-		IChannelReceiver channelReceiver = newReceivingChannel(channelName);
+		// we get the retry configurations from the cannonicalized subscriber
+		// these will be provided to both the producer and receiver channel
+		ChannelRetryConfiguration retryConfigParameters = theActiveSubscription.getRetryConfigurationParameters();
+
+		/*
+		 * When we create a subscription, we create both
+		 * a producing/sending channel and
+		 * a receiving channel.
+		 *
+		 * Matched subscriptions are sent to the Sending channel
+		 * and the sending channel sends to subscription matching service.
+		 *
+		 * Receiving channel will send it out to
+		 * the subscriber hook (REST, email, etc).
+		 */
+
+		// the receiving channel
+		// this sends to the hook (resthook/message/email/whatever)
+		ReceivingChannelParameters receivingParameters = new ReceivingChannelParameters(channelName);
+		receivingParameters.setRetryConfiguration(retryConfigParameters);
+
+		IChannelReceiver channelReceiver = newReceivingChannel(receivingParameters);
 		Optional<MessageHandler> deliveryHandler = mySubscriptionDeliveryHandlerFactory.createDeliveryHandler(theActiveSubscription.getChannelType());
 
 		SubscriptionChannelWithHandlers subscriptionChannelWithHandlers = new SubscriptionChannelWithHandlers(channelName, channelReceiver);
 		deliveryHandler.ifPresent(subscriptionChannelWithHandlers::addHandler);
 		myDeliveryReceiverChannels.put(channelName, subscriptionChannelWithHandlers);
 
-		IChannelProducer sendingChannel = newSendingChannel(channelName);
+		// create the producing channel.
+		// channel used for sending to subscription matcher
+		ProducingChannelParameters producingChannelParameters = new ProducingChannelParameters(channelName);
+		producingChannelParameters.setRetryConfiguration(retryConfigParameters);
+
+		IChannelProducer sendingChannel = newSendingChannel(producingChannelParameters);
 		myChannelNameToSender.put(channelName, sendingChannel);
 	}
 
-	protected IChannelReceiver newReceivingChannel(String theChannelName) {
-		return mySubscriptionDeliveryChannelFactory.newDeliveryReceivingChannel(theChannelName, null);
+	protected IChannelReceiver newReceivingChannel(ReceivingChannelParameters theParameters) {
+		ChannelConsumerSettings settings = new ChannelConsumerSettings();
+		settings.setRetryConfiguration(theParameters.getRetryConfiguration());
+		return mySubscriptionDeliveryChannelFactory.newDeliveryReceivingChannel(theParameters.getChannelName(),
+			settings);
 	}
 
-	protected IChannelProducer newSendingChannel(String theChannelName) {
-		return mySubscriptionDeliveryChannelFactory.newDeliverySendingChannel(theChannelName, null);
+	protected IChannelProducer newSendingChannel(ProducingChannelParameters theParameters) {
+		ChannelProducerSettings settings = new ChannelProducerSettings();
+		settings.setRetryConfiguration(theParameters.getRetryConfiguration());
+		return mySubscriptionDeliveryChannelFactory.newDeliverySendingChannel(theParameters.getChannelName(),
+			settings);
 	}
 
 	public synchronized void remove(ActiveSubscription theActiveSubscription) {
 		String channelName = theActiveSubscription.getChannelName();
 		ourLog.info("Removing subscription {} from channel {}", theActiveSubscription.getId(), channelName);
 		boolean removed = myActiveSubscriptionByChannelName.remove(channelName, theActiveSubscription.getId());
+		ChannelRetryConfiguration retryConfig = theActiveSubscription.getRetryConfigurationParameters();
+
 		if (!removed) {
 			ourLog.warn("Failed to remove subscription {} from channel {}", theActiveSubscription.getId(), channelName);
 		}
