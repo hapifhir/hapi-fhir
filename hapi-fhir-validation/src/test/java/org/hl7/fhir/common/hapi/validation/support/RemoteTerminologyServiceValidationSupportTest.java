@@ -51,14 +51,15 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class RemoteTerminologyServiceValidationSupportTest {
-
 	private static final String DISPLAY = "DISPLAY";
+	private static final String LANGUAGE = "en";
 	private static final String CODE_SYSTEM = "CODE_SYS";
 	private static final String CODE_SYSTEM_NAME = "CODE SYSTEM NAME";
 	private static final String CODE_SYSTEM_VERSION = "v1.1";
 	private static final String CODE = "CODE";
 	private static final String VALUE_SET_URL = "http://value.set/url";
 	private static final String ERROR_MESSAGE = "This is an error message";
+
 	private static FhirContext ourCtx = FhirContext.forR4();
 
 	@RegisterExtension
@@ -117,7 +118,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 	}
 
 	@Test
-	public void testValidateCode_SystemCodeDisplayUrl_Success() {
+	public void testValidateCode_ValueSet_Success() {
 		createNextValueSetReturnParameters(true, DISPLAY, null);
 
 		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(null, null, CODE_SYSTEM, CODE, DISPLAY, VALUE_SET_URL);
@@ -131,6 +132,59 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		assertEquals(CODE_SYSTEM, myValueSetProvider.myLastSystem.getValue());
 		assertEquals(VALUE_SET_URL, myValueSetProvider.myLastUrl.getValue());
 		assertEquals(null, myValueSetProvider.myLastValueSet);
+	}
+
+	@Test
+	public void testValidateCodeWithAllParams_CodeSystem_Success() {
+		createNextCodeSystemReturnParameters(true, DISPLAY, null);
+		addAdditionalCodeSystemLookupReturnParameters();
+
+		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(null, null, CODE_SYSTEM, CODE, DISPLAY, null);
+		assertEquals(CODE, outcome.getCode());
+		assertEquals(DISPLAY, outcome.getDisplay());
+		assertEquals(null, outcome.getSeverity());
+		assertEquals(null, outcome.getMessage());
+
+		assertEquals(CODE, myCodeSystemProvider.myLastCode.getCode());
+		assertEquals(DISPLAY, myCodeSystemProvider.myLastDisplay.getValue());
+		assertEquals(CODE_SYSTEM, myCodeSystemProvider.myLastUrl.getValueAsString());
+		for (Parameters.ParametersParameterComponent param : myCodeSystemProvider.myNextReturnParams.getParameter()) {
+			String paramName = param.getName();
+			if (paramName.equals("result")) {
+				assertEquals(true, ((BooleanType)param.getValue()).booleanValue());
+			} else if (paramName.equals("display")) {
+				assertEquals(DISPLAY, param.getValue().toString());
+			} else if (paramName.equals("property")) {
+				for (Parameters.ParametersParameterComponent propertyComponent : param.getPart()) {
+					switch(propertyComponent.getName()) {
+						case "name":
+							assertEquals("birthDate", propertyComponent.getValue().toString());
+							break;
+						case "value":
+							assertEquals("1930-01-01", propertyComponent.getValue().toString());
+							break;
+					}
+				}
+			} else if (paramName.equals("designation")) {
+				for (Parameters.ParametersParameterComponent designationComponent : param.getPart()) {
+					switch(designationComponent.getName()) {
+						case "language":
+							assertEquals(LANGUAGE, designationComponent.getValue().toString());
+							break;
+						case "use":
+							Coding coding = (Coding)designationComponent.getValue();
+							assertNotNull(coding, "Coding value returned via designation use should NOT be NULL!");
+							assertEquals("code", coding.getCode());
+							assertEquals("system", coding.getSystem());
+							assertEquals("display", coding.getDisplay());
+							break;
+						case "value":
+							assertEquals("some value", designationComponent.getValue().toString());
+							break;
+					}
+				}
+			}
+		}
 	}
 
 	@Test
@@ -422,6 +476,23 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		if (theMessage != null) {
 			myValueSetProvider.myNextReturnParams.addParameter("message", theMessage);
 		}
+	}
+
+	private void addAdditionalCodeSystemLookupReturnParameters() {
+		// property
+		Parameters.ParametersParameterComponent param = myCodeSystemProvider.myNextReturnParams.addParameter().setName("property");
+		param.addPart().setName("name").setValue(new StringType("birthDate"));
+		param.addPart().setName("value").setValue(new StringType("1930-01-01"));
+		// designation
+		param = myCodeSystemProvider.myNextReturnParams.addParameter().setName("designation");
+		param.addPart().setName("language").setValue(new CodeType("en"));
+		Parameters.ParametersParameterComponent codingParam = param.addPart().setName("use");
+		Coding coding = new Coding();
+		coding.setCode("code");
+		coding.setSystem("system");
+		coding.setDisplay("display");
+		codingParam.setValue(coding);
+		param.addPart().setName("value").setValue(new StringType("some value"));
 	}
 
 	private static class MyCodeSystemProvider implements IResourceProvider {

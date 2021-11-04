@@ -9,11 +9,13 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.UriType;
@@ -30,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class RemoteTerminologyServiceValidationSupportDstu3Test {
 	private static final String DISPLAY = "DISPLAY";
+	private static final String LANGUAGE = "en";
 	private static final String CODE_SYSTEM = "CODE_SYS";
 	private static final String CODE_SYSTEM_VERSION = "v1.1";
 	private static final String CODE = "CODE";
@@ -65,7 +68,6 @@ public class RemoteTerminologyServiceValidationSupportDstu3Test {
 		assertEquals(CODE_SYSTEM, myCodeSystemProvider.myLastUrl.getValueAsString());
 		for (Parameters.ParametersParameterComponent param : myCodeSystemProvider.myNextReturnParams.getParameter()) {
 			String paramName = param.getName();
-			System.out.println("paramName: " + paramName);
 			if (paramName.equals("result")) {
 				assertEquals(true, ((BooleanType)param.getValue()).booleanValue());
 			} else if (paramName.equals("version")) {
@@ -74,14 +76,93 @@ public class RemoteTerminologyServiceValidationSupportDstu3Test {
 				assertEquals(DISPLAY, param.getValue().toString());
 			}
 		}
-		//assertTrue(Boolean.parseBoolean();
+	}
+
+	@Test
+	public void testLookupOperationWithAllParams_CodeSystem_Success() {
+		createNextCodeSystemLookupReturnParameters(true, CODE_SYSTEM_VERSION, DISPLAY, LANGUAGE);
+		addAdditionalCodeSystemLookupReturnParameters();
+
+		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(null, CODE_SYSTEM, CODE, LANGUAGE);
+		assertNotNull(outcome, "Call to lookupCode() should return a non-NULL result!");
+		assertEquals(DISPLAY, outcome.getCodeDisplay());
+		assertEquals(CODE_SYSTEM_VERSION, outcome.getCodeSystemVersion());
+
+		assertEquals(CODE, myCodeSystemProvider.myLastCode.asStringValue());
+		assertEquals(CODE_SYSTEM, myCodeSystemProvider.myLastUrl.getValueAsString());
+		for (Parameters.ParametersParameterComponent param : myCodeSystemProvider.myNextReturnParams.getParameter()) {
+			String paramName = param.getName();
+			if (paramName.equals("result")) {
+				assertEquals(true, ((BooleanType)param.getValue()).booleanValue());
+			} else if (paramName.equals("version")) {
+				assertEquals(CODE_SYSTEM_VERSION, param.getValue().toString());
+			} else if (paramName.equals("display")) {
+				assertEquals(DISPLAY, param.getValue().toString());
+			} else if (paramName.equals("language")) {
+				assertEquals(LANGUAGE, param.getValue().toString());
+			} else if (paramName.equals("property")) {
+				for (org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent propertyComponent : param.getPart()) {
+					switch(propertyComponent.getName()) {
+						case "name":
+							assertEquals("birthDate", propertyComponent.getValue().toString());
+							break;
+						case "value":
+							assertEquals("1930-01-01", ((DateType)propertyComponent.getValue()).asStringValue());
+							break;
+					}
+				}
+			} else if (paramName.equals("designation")) {
+				for (org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent designationComponent : param.getPart()) {
+					switch(designationComponent.getName()) {
+						case "language":
+							assertEquals(LANGUAGE, designationComponent.getValue().toString());
+							break;
+						case "use":
+							Coding coding = (Coding)designationComponent.getValue();
+							assertNotNull(coding, "Coding value returned via designation use should NOT be NULL!");
+							assertEquals("code", coding.getCode());
+							assertEquals("system", coding.getSystem());
+							assertEquals("display", coding.getDisplay());
+							break;
+						case "value":
+							assertEquals("some value", designationComponent.getValue().toString());
+							break;
+					}
+				}
+			}
+		}
 	}
 
 	private void createNextCodeSystemLookupReturnParameters(boolean theResult, String theVersion, String theDisplay) {
+		createNextCodeSystemLookupReturnParameters(theResult, theVersion, theDisplay, null);
+	}
+
+	private void createNextCodeSystemLookupReturnParameters(boolean theResult, String theVersion, String theDisplay,
+																			  String theLanguage) {
 		myCodeSystemProvider.myNextReturnParams = new Parameters();
 		myCodeSystemProvider.myNextReturnParams.addParameter().setName("result").setValue(new BooleanType(theResult));
 		myCodeSystemProvider.myNextReturnParams.addParameter().setName("version").setValue(new StringType(theVersion));
 		myCodeSystemProvider.myNextReturnParams.addParameter().setName("display").setValue(new StringType(theDisplay));
+		if (!StringUtils.isBlank(theLanguage)) {
+			myCodeSystemProvider.myNextReturnParams.addParameter().setName("language").setValue(new StringType(theLanguage));
+		}
+	}
+
+	private void addAdditionalCodeSystemLookupReturnParameters() {
+		// property
+		Parameters.ParametersParameterComponent param = myCodeSystemProvider.myNextReturnParams.addParameter().setName("property");
+		param.addPart().setName("name").setValue(new StringType("birthDate"));
+		param.addPart().setName("value").setValue(new DateType("1930-01-01"));
+		// designation
+		param = myCodeSystemProvider.myNextReturnParams.addParameter().setName("designation");
+		param.addPart().setName("language").setValue(new CodeType("en"));
+		Parameters.ParametersParameterComponent codingParam = param.addPart().setName("use");
+		Coding coding = new Coding();
+		coding.setCode("code");
+		coding.setSystem("system");
+		coding.setDisplay("display");
+		codingParam.setValue(coding);
+		param.addPart().setName("value").setValue(new StringType("some value"));
 	}
 
 	private static class MyCodeSystemProvider implements IResourceProvider {
