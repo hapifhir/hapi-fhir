@@ -22,17 +22,31 @@ package ca.uhn.fhir.jpa.dao;
 
 import java.util.List;
 
+import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
+import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface IFulltextSearchSvc {
 
 
+	/**
+	 * Search the Lucene/Elastic index for pids using params supported in theParams,
+	 * consuming entries from theParams when used to query.
+	 *
+	 * @param theResourceName the resource name to restrict the query.
+	 * @param theParams the full query - modified to return only params unused by the index.
+	 * @return the pid list for the matchign resources.
+	 */
 	List<ResourcePersistentId> search(String theResourceName, SearchParameterMap theParams);
 
 	List<ResourcePersistentId> everything(String theResourceName, SearchParameterMap theParams, RequestDetails theRequest);
 
 	boolean isDisabled();
 
+	ExtendedLuceneIndexData extractLuceneIndexData(IBaseResource theResource, ResourceIndexedSearchParams theNewParams);
+
+    boolean supportsSomeOf(SearchParameterMap myParams);
 }

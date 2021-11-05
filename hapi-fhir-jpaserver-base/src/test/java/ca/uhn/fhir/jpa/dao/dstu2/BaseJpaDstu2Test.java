@@ -114,8 +114,6 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Qualifier("myConceptMapDaoDstu2")
 	protected IFhirResourceDao<ConceptMap> myConceptMapDao;
 	@Autowired
-	protected DaoConfig myDaoConfig;
-	@Autowired
 	protected ModelConfig myModelConfig;
 	@Autowired
 	@Qualifier("myDeviceDaoDstu2")

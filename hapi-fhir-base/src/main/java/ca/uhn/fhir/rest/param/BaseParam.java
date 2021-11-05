@@ -51,7 +51,7 @@ public abstract class BaseParam implements IQueryParameterType {
 
 	@Override
 	public final String getQueryParameterQualifier() {
-		if (myMissing != null && myMissing.booleanValue()) {
+		if (myMissing != null) {
 			return Constants.PARAMQUALIFIER_MISSING;
 		}
 		return doGetQueryParameterQualifier();
@@ -74,7 +74,7 @@ public abstract class BaseParam implements IQueryParameterType {
 
 	/**
 	 * If set to non-null value, indicates that this parameter has been populated
-	 * with a "[name]:missing=true" or "[name]:missing=false" vale instead of a
+	 * with a "[name]:missing=true" or "[name]:missing=false" value instead of a
 	 * normal value
 	 * 
 	 * @return Returns a reference to <code>this</code> for easier method chaining

@@ -1118,7 +1118,7 @@ public class FhirContext {
 		try {
 			run.run();
 			retVal = true;
-		} catch (Exception | NoClassDefFoundError e) {
+		} catch (UnsupportedClassVersionError | Exception | NoClassDefFoundError e) {
 			retVal = false;
 		}
 		return retVal;

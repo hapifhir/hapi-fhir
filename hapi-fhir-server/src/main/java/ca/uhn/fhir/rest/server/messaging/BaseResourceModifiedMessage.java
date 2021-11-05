@@ -39,8 +39,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseResourceModifiedMessage extends BaseResourceMessage implements IResourceMessage, IModelJson {
 
-	@JsonProperty("resourceId")
-	protected String myId;
 	@JsonProperty("payload")
 	protected String myPayload;
 	@JsonProperty("payloadId")
@@ -57,10 +55,11 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 
 	public BaseResourceModifiedMessage(FhirContext theFhirContext, IBaseResource theResource, OperationTypeEnum theOperationType) {
 		this();
-		setId(theResource.getIdElement());
 		setOperationType(theOperationType);
 		if (theOperationType != OperationTypeEnum.DELETE) {
 			setNewPayload(theFhirContext, theResource);
+		} else {
+			setPayloadIdFromPayload(theFhirContext, theResource);
 		}
 	}
 
@@ -76,14 +75,45 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		return myPayloadId;
 	}
 
-	public String getId() {
-		return myId;
+	/**
+	 * @since 5.6.0
+	 */
+	public void setPayloadId(IIdType thePayloadId) {
+		myPayloadId = null;
+		if (thePayloadId != null) {
+			myPayloadId = thePayloadId.getValue();
+		}
 	}
 
+	/**
+	 * @deprecated Use {@link #getPayloadId()} instead. Deprecated in 5.6.0 / 2021-10-27
+	 */
+	public String getId() {
+		return myPayloadId;
+	}
+
+	/**
+	 * @deprecated Use {@link #setPayloadId(IIdType)}. Deprecated in 5.6.0 / 2021-10-27
+	 */
+	@Deprecated
+	public void setId(IIdType theId) {
+		setPayloadId(theId);
+	}
+
+	/**
+	 * @deprecated Use {@link #getPayloadId(FhirContext)}. Deprecated in 5.6.0 / 2021-10-27
+	 */
 	public IIdType getId(FhirContext theCtx) {
+		return getPayloadId(theCtx);
+	}
+
+	/**
+	 * @since 5.6.0
+	 */
+	public IIdType getPayloadId(FhirContext theCtx) {
 		IIdType retVal = null;
-		if (myId != null) {
-			retVal = theCtx.getVersion().newIdType().setValue(myId);
+		if (myPayloadId != null) {
+			retVal = theCtx.getVersion().newIdType().setValue(myPayloadId);
 		}
 		return retVal;
 	}
@@ -113,14 +143,7 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		return "";
 	}
 
-	public void setId(IIdType theId) {
-		myId = null;
-		if (theId != null) {
-			myId = theId.getValue();
-		}
-	}
-
-	protected void setNewPayload(FhirContext theCtx, IBaseResource theNewPayload) {
+	protected void setNewPayload(FhirContext theCtx, IBaseResource thePayload) {
 		/*
 		 * References with placeholders would be invalid by the time we get here, and
 		 * would be caught before we even get here. This check is basically a last-ditch
@@ -128,7 +151,7 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		 * should prevent this from happening (hence it only being an assert as
 		 * opposed to something executed all the time).
 		 */
-		assert payloadContainsNoPlaceholderReferences(theCtx, theNewPayload);
+		assert payloadContainsNoPlaceholderReferences(theCtx, thePayload);
 
 		/*
 		 * Note: Don't set myPayloadDecoded in here- This is a false optimization since
@@ -137,8 +160,27 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		 * as we would in a queue engine can mask bugs.
 		 * -JA
 		 */
-		myPayload = theCtx.newJsonParser().encodeResourceToString(theNewPayload);
-		myPayloadId = theNewPayload.getIdElement().toUnqualified().getValue();
+		myPayload = theCtx.newJsonParser().encodeResourceToString(thePayload);
+
+		setPayloadIdFromPayload(theCtx, thePayload);
+	}
+
+	private void setPayloadIdFromPayload(FhirContext theCtx, IBaseResource thePayload) {
+		IIdType payloadIdType = thePayload.getIdElement().toUnqualified();
+		if (!payloadIdType.hasResourceType()) {
+			String resourceType = theCtx.getResourceType(thePayload);
+			payloadIdType = payloadIdType.withResourceType(resourceType);
+		}
+
+		setPayloadId(payloadIdType);
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this)
+			.append("operationType", myOperationType)
+			.append("payloadId", myPayloadId)
+			.toString();
 	}
 
 	protected static boolean payloadContainsNoPlaceholderReferences(FhirContext theCtx, IBaseResource theNewPayload) {
@@ -161,17 +203,6 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 			}
 		}
 		return true;
-	}
-
-	@Override
-	public String toString() {
-		return new ToStringBuilder(this)
-			.append("myId", myId)
-			.append("myOperationType", myOperationType)
-//			.append("myPayload", myPayload)
-			.append("myPayloadId", myPayloadId)
-//			.append("myPayloadDecoded", myPayloadDecoded)
-			.toString();
 	}
 }
 

@@ -53,7 +53,7 @@ public class FhirResourceDaoR4InvalidSubscriptionTest extends BaseJpaR4Test {
 			mySubscriptionDao.update(s);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Subscription.criteria must be in the form \"{Resource Type}?[params]\"", e.getMessage());
+			assertEquals("Subscription.criteria contains invalid/unsupported resource type: FOO", e.getMessage());
 		}
 	}
 

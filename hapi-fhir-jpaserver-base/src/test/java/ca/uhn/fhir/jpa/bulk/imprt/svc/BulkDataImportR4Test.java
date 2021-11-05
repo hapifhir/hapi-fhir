@@ -6,7 +6,6 @@ import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.batch.config.BatchConstants;
-import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobFileJson;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobJson;
@@ -46,7 +45,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.batch.config.BatchConstants.BULK_IMPORT_JOB_NAME;
@@ -144,7 +142,7 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 		assertTrue(activateJobOutcome);
 
 		List<JobExecution> executions = awaitAllBulkImportJobCompletion();
-		assertEquals("testFlow_TransactionRows", executions.get(0).getJobParameters().getString(BulkExportJobConfig.JOB_DESCRIPTION));
+		assertEquals("testFlow_TransactionRows", executions.get(0).getJobParameters().getString(BatchConstants.JOB_DESCRIPTION));
 
 		runInTransaction(() -> {
 			List<BulkImportJobEntity> jobs = myBulkImportJobDao.findAll();

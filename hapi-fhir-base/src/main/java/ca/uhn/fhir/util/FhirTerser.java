@@ -1402,6 +1402,28 @@ public class FhirTerser {
 
 	}
 
+	/**
+	 * Clones a resource object, copying all data elements from theSource into a new copy of the same type.
+	 *
+	 * Note that:
+	 * <ul>
+	 *    <li>Only FHIR data elements are copied (i.e. user data maps are not copied)</li>
+	 *    <li>If a class extending a HAPI FHIR type (e.g. an instance of a class extending the Patient class) is supplied, an instance of the base type will be returned.</li>
+	 * </ul>
+	 *
+	 *
+	 * @param theSource The source resource
+	 * @return A copy of the source resource
+	 * @since 5.6.0
+	 */
+	@SuppressWarnings("unchecked")
+	public <T extends IBaseResource> T clone(T theSource) {
+		Validate.notNull(theSource, "theSource must not be null");
+		T target = (T) myContext.getResourceDefinition(theSource).newInstance();
+		cloneInto(theSource, target, false);
+		return target;
+	}
+
 
 	public enum OptionsEnum {
 

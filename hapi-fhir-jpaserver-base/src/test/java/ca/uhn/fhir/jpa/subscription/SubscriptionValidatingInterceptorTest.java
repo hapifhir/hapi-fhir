@@ -84,6 +84,25 @@ public class SubscriptionValidatingInterceptorTest {
 	}
 
 	@Test
+	public void testValidate_RestHook_MultitypeResourceTypeNotSupported() {
+		when(myDaoRegistry.isResourceTypeSupported(eq("Patient"))).thenReturn(false);
+
+		Subscription subscription = new Subscription();
+		subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
+		subscription.setCriteria("[Patient]");
+		subscription.getChannel().setType(Subscription.SubscriptionChannelType.RESTHOOK);
+		subscription.getChannel().setPayload("application/fhir+json");
+		subscription.getChannel().setEndpoint("http://foo");
+
+		try {
+			mySvc.validateSubmittedSubscription(subscription);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertThat(e.getMessage(), containsString("Subscription.criteria contains invalid/unsupported resource type: Patient"));
+		}
+	}
+
+	@Test
 	public void testValidate_RestHook_NoEndpoint() {
 		when(myDaoRegistry.isResourceTypeSupported(eq("Patient"))).thenReturn(true);
 

@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.bulk.export.job;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
@@ -68,9 +69,9 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	public static final int QUERY_CHUNK_SIZE = 100;
 
-	@Value("#{jobParameters['" + BulkExportJobConfig.GROUP_ID_PARAMETER + "']}")
+	@Value("#{jobParameters['" + BatchConstants.GROUP_ID_PARAMETER + "']}")
 	private String myGroupId;
-	@Value("#{jobParameters['" + BulkExportJobConfig.EXPAND_MDM_PARAMETER+ "'] ?: false}")
+	@Value("#{jobParameters['" + BatchConstants.EXPAND_MDM_PARAMETER+ "'] ?: false}")
 	private boolean myMdmEnabled;
 
 	@Autowired

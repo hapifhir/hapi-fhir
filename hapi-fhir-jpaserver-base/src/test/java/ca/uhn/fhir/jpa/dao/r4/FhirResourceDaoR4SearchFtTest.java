@@ -27,8 +27,14 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 	@BeforeEach
 	public void beforeDisableResultReuse() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myDaoConfig.setAllowContainsSearches(true);
+		myDaoConfig.setAdvancedLuceneIndexing(false);
 	}
 
+	/**
+	 * TODO mb Extract these tests and run on all: jpa, lucene, es, and mongo. {@link FhirResourceDaoR4SearchWithElasticSearchIT}
+	 * {@link FhirResourceDaoR4SearchWithElasticSearchIT#testStringSearch}
+	 */
 	@Test
 	public void testCodeTextSearch() {
 		Observation obs1 = new Observation();
@@ -97,7 +103,6 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	@Disabled
 	public void testStringTextSearch() {
 		Observation obs1 = new Observation();
 		obs1.getCode().setText("AAAAA");
@@ -114,8 +119,17 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 		SearchParameterMap map;
 
 		map = new SearchParameterMap();
-		map.add(Observation.SP_VALUE_STRING, new StringParam("sure").setContains(true));
-		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id1, id2)));
+		map.add(Observation.SP_VALUE_STRING, new StringParam("Systol"));
+		assertThat("Default search matches prefix", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id1)));
+
+		map = new SearchParameterMap();
+		map.add(Observation.SP_VALUE_STRING, new StringParam("Systolic Blood"));
+		assertThat("Default search matches prefix, even with space", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id1)));
+
+		// contains doesn't work
+//		map = new SearchParameterMap();
+//		map.add(Observation.SP_VALUE_STRING, new StringParam("sure").setContains(true));
+//		assertThat("contains matches internal fragment", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id1, id2)));
 
 	}
 

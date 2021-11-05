@@ -7,6 +7,8 @@ import ca.uhn.fhir.interceptor.api.IPointcut;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
+import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.delete.job.ReindexTestHelper;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
@@ -27,6 +29,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.TestPropertySource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +54,13 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 		myDaoConfig.setExpungeEnabled(true);
 		myDaoConfig.setDeleteExpungeEnabled(true);
 	}
+
+	@BeforeEach
+	public void disableAdvanceIndexing() {
+		// advanced indexing doesn't support partitions
+		myDaoConfig.setAdvancedLuceneIndexing(false);
+	}
+
 
 	@AfterEach
 	@Override

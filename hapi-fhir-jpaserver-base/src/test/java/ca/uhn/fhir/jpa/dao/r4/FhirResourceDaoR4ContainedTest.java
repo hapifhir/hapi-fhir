@@ -77,7 +77,6 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 
 		map = new SearchParameterMap();
 		map.add("subject", new ReferenceParam("name", "Smith"));
-		map.setSearchContainedMode(SearchContainedModeEnum.TRUE);
 		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id)));
 	}
 	
@@ -112,7 +111,6 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 
 		map = new SearchParameterMap();
 		map.add("subject", new ReferenceParam("name", "Smith"));
-		map.setSearchContainedMode(SearchContainedModeEnum.TRUE);
 		map.setLoadSynchronous(true);
 
 		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id)));
@@ -183,8 +181,7 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 
 		map = new SearchParameterMap();
 		map.add("general-practitioner", new ReferenceParam("family", "Smith"));
-		map.setSearchContainedMode(SearchContainedModeEnum.TRUE);
-		
+
 		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), containsInAnyOrder(toValues(id)));
 	}
 	
@@ -268,28 +265,8 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 
 		map = new SearchParameterMap();
 		map.add("based-on", new ReferenceParam("authored", "2021-02-23"));
-		map.setSearchContainedMode(SearchContainedModeEnum.TRUE);
-		
+
 		assertThat(toUnqualifiedVersionlessIdValues(myEncounterDao.search(map)), containsInAnyOrder(toValues(id)));
-	}
-	
-	@Test
-	public void testSearchWithNotSupportedSearchType() {
-
-		SearchParameterMap map;
-
-		map = new SearchParameterMap();
-		map.add("subject", new ReferenceParam("near", "toronto"));
-		map.setSearchContainedMode(SearchContainedModeEnum.TRUE);
-		
-		try {
-			IBundleProvider outcome = myObservationDao.search(map);
-			outcome.getResources(0, 1).get(0);
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals(e.getMessage(), "The search type: SPECIAL is not supported.");
-		}
-		
 	}
 	
 	@Test
@@ -299,14 +276,13 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 
 		map = new SearchParameterMap();
 		map.add("subject", new ReferenceParam("marital-status", "M"));
-		map.setSearchContainedMode(SearchContainedModeEnum.TRUE);
-		
+
 		try {
 			IBundleProvider outcome = myObservationDao.search(map);
 			outcome.getResources(0, 1).get(0);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(e.getMessage(), "Unknown search parameter name: subject.marital-status.");
+			assertEquals("Invalid parameter chain: subject.marital-status", e.getMessage());
 		}
 		
 	}

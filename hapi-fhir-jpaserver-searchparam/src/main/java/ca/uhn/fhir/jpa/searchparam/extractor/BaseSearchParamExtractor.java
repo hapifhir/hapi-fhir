@@ -54,7 +54,6 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.text.StringTokenizer;
-import org.apache.commons.text.matcher.StringMatcher;
 import org.fhir.ucum.Pair;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -1556,8 +1555,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	@Nonnull
 	public static String[] splitPathsR4(@Nonnull String thePaths) {
 		StringTokenizer tok = new StringTokenizer(thePaths, " |");
-		StringMatcher trimmerMatcher = (buffer, start, bufferStart, bufferEnd) -> (buffer[start] <= 32) ? 1 : 0;
-		tok.setTrimmerMatcher(trimmerMatcher);
+		tok.setTrimmerMatcher(new StringTrimmingTrimmerMatcher());
 		return tok.getTokenArray();
 	}
 

@@ -60,8 +60,6 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 	@Mock
 	private PlatformTransactionManager myTxManager;
 
-	private final DaoConfig myDaoConfig = new DaoConfig();
-
 	@Mock
 	private DaoRegistry myDaoRegistry;
 	@Mock

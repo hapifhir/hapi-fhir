@@ -72,7 +72,7 @@ public class SubscriptionRegisteringSubscriber extends BaseSubscriberForSubscrip
 
 		switch (payload.getOperationType()) {
 			case DELETE:
-				mySubscriptionRegistry.unregisterSubscriptionIfRegistered(payload.getId(myFhirContext).getIdPart());
+				mySubscriptionRegistry.unregisterSubscriptionIfRegistered(payload.getPayloadId(myFhirContext).getIdPart());
 				break;
 			case CREATE:
 			case UPDATE:
@@ -81,7 +81,7 @@ public class SubscriptionRegisteringSubscriber extends BaseSubscriberForSubscrip
 				if ("active".equals(statusString)) {
 					mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(payload.getNewPayload(myFhirContext));
 				} else {
-					mySubscriptionRegistry.unregisterSubscriptionIfRegistered(payload.getId(myFhirContext).getIdPart());
+					mySubscriptionRegistry.unregisterSubscriptionIfRegistered(payload.getPayloadId(myFhirContext).getIdPart());
 				}
 				break;
 			case MANUALLY_TRIGGERED:

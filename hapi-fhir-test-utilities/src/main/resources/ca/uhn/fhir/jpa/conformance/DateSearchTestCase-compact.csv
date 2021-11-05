@@ -1,0 +1,5 @@
+#Resource Date, Matching prefixes, Query Date,
+2020, eq ge le,2020,
+2021, gt ge ne,2020,
+2020, lt le ne,2021,
+2021-01-01, ne gt ge,2020

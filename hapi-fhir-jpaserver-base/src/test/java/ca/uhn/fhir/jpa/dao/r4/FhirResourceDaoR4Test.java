@@ -3643,6 +3643,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	@Test
 	public void testSortByString01() {
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		myDaoConfig.setAdvancedLuceneIndexing(false);
 
 		Patient p = new Patient();
 		String string = "testSortByString01";

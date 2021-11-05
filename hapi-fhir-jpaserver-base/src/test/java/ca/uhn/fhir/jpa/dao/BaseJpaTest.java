@@ -148,6 +148,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected ServletRequestDetails mySrd;
 	protected InterceptorService mySrdInterceptorService;
 	@Autowired
+	protected DaoConfig myDaoConfig = new DaoConfig();
+	@Autowired
 	protected DatabaseBackedPagingProvider myDatabaseBackedPagingProvider;
 	@Autowired
 	protected IInterceptorService myInterceptorRegistry;
@@ -209,6 +211,10 @@ public abstract class BaseJpaTest extends BaseTest {
 		if (myFhirInstanceValidator != null) {
 			myFhirInstanceValidator.invalidateCaches();
 		}
+		DaoConfig defaultConfig = new DaoConfig();
+		myDaoConfig.setAdvancedLuceneIndexing(defaultConfig.isAdvancedLuceneIndexing());
+		myDaoConfig.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
+
 
 	}
 
@@ -613,10 +619,10 @@ public abstract class BaseJpaTest extends BaseTest {
 	public static Map<String, String> buildHibernateSearchProperties(boolean enableLucene) {
 		Map<String, String> hibernateSearchProperties;
 		if (enableLucene) {
-			ourLog.warn("Hibernate Search is enabled");
+			ourLog.info("Hibernate Search is enabled");
 			hibernateSearchProperties = buildHeapLuceneHibernateSearchProperties();
 		} else {
-			ourLog.warn("Hibernate Search is disabled");
+			ourLog.info("Hibernate Search is disabled");
 			hibernateSearchProperties = new HashMap<>();
 			hibernateSearchProperties.put("hibernate.search.enabled", "false");
 		}
@@ -625,6 +631,7 @@ public abstract class BaseJpaTest extends BaseTest {
 
 	public static Map<String, String> buildHeapLuceneHibernateSearchProperties() {
 		Map<String, String> props = new HashMap<>();
+		ourLog.warn("Hibernate Search: using lucene - local-heap");
 		props.put(BackendSettings.backendKey(BackendSettings.TYPE), "lucene");
 		props.put(BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER), HapiLuceneAnalysisConfigurer.class.getName());
 		props.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_TYPE), "local-heap");

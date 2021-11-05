@@ -137,7 +137,7 @@ public class SearchParamExtractorService {
 		extractSearchIndexParametersForContainedResources(theRequestDetails, theParams, theResource, theEntity, containedResources, new HashSet<>());
 	}
 
-	private void extractSearchIndexParametersForContainedResources(RequestDetails theRequestDetails, ResourceIndexedSearchParams theParams, IBaseResource theResource, ResourceTable theEntity, Collection<IBaseResource> containedResources, Collection<IBaseResource> theAlreadySeenResources) {
+	private void extractSearchIndexParametersForContainedResources(RequestDetails theRequestDetails, ResourceIndexedSearchParams theParams, IBaseResource theResource, ResourceTable theEntity, Collection<IBaseResource> theContainedResources, Collection<IBaseResource> theAlreadySeenResources) {
 		// 2. Find referenced search parameters
 		ISearchParamExtractor.SearchParamSet<PathAndRef> referencedSearchParamSet = mySearchParamExtractor.extractResourceLinks(theResource, true);
 
@@ -153,7 +153,7 @@ public class SearchParamExtractorService {
 				continue;
 
 			// 3.2 find the contained resource
-			IBaseResource containedResource = findContainedResource(containedResources, nextPathAndRef.getRef());
+			IBaseResource containedResource = findContainedResource(theContainedResources, nextPathAndRef.getRef());
 			if (containedResource == null)
 				continue;
 
@@ -171,7 +171,7 @@ public class SearchParamExtractorService {
 			if (myModelConfig.isIndexOnContainedResourcesRecursively()) {
 				HashSet<IBaseResource> nextAlreadySeenResources = new HashSet<>(theAlreadySeenResources);
 				nextAlreadySeenResources.add(containedResource);
-				extractSearchIndexParametersForContainedResources(theRequestDetails, currParams, containedResource, theEntity, containedResources, nextAlreadySeenResources);
+				extractSearchIndexParametersForContainedResources(theRequestDetails, currParams, containedResource, theEntity, theContainedResources, nextAlreadySeenResources);
 			}
 
 			// 3.5 added reference name as a prefix for the contained resource if any
@@ -430,6 +430,11 @@ public class SearchParamExtractorService {
 		// 1. get all contained resources
 		Collection<IBaseResource> containedResources = terser.getAllEmbeddedResources(theResource, false);
 
+		extractResourceLinksForContainedResources(theRequestPartitionId, theParams, theEntity, theResource, theTransactionDetails, theFailOnInvalidReference, theRequest, containedResources, new HashSet<>());
+	}
+
+	private void extractResourceLinksForContainedResources(RequestPartitionId theRequestPartitionId, ResourceIndexedSearchParams theParams, ResourceTable theEntity, IBaseResource theResource, TransactionDetails theTransactionDetails, boolean theFailOnInvalidReference, RequestDetails theRequest, Collection<IBaseResource> theContainedResources, Collection<IBaseResource> theAlreadySeenResources) {
+
 		// 2. Find referenced search parameters
 		ISearchParamExtractor.SearchParamSet<PathAndRef> referencedSearchParamSet = mySearchParamExtractor.extractResourceLinks(theResource, true);
 
@@ -445,14 +450,26 @@ public class SearchParamExtractorService {
 				continue;
 
 			// 3.2 find the contained resource
-			IBaseResource containedResource = findContainedResource(containedResources, nextPathAndRef.getRef());
+			IBaseResource containedResource = findContainedResource(theContainedResources, nextPathAndRef.getRef());
 			if (containedResource == null)
 				continue;
+
+			// 3.2.1 if we've already processed this resource upstream, do not process it again, to prevent infinite loops
+			if (theAlreadySeenResources.contains(containedResource)) {
+				continue;
+			}
 
 			currParams = new ResourceIndexedSearchParams();
 
 			// 3.3 create indexes for the current contained resource
 			extractResourceLinks(theRequestPartitionId, currParams, theEntity, containedResource, theTransactionDetails, theFailOnInvalidReference, theRequest);
+
+			// 3.4 recurse to process any other contained resources referenced by this one
+			if (myModelConfig.isIndexOnContainedResourcesRecursively()) {
+				HashSet<IBaseResource> nextAlreadySeenResources = new HashSet<>(theAlreadySeenResources);
+				nextAlreadySeenResources.add(containedResource);
+				extractResourceLinksForContainedResources(theRequestPartitionId, currParams, theEntity, containedResource, theTransactionDetails, theFailOnInvalidReference, theRequest, theContainedResources, nextAlreadySeenResources);
+			}
 
 			// 3.4 added reference name as a prefix for the contained resource if any
 			// e.g. for Observation.subject contained reference

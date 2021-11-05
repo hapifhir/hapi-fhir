@@ -80,8 +80,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init530();
 		init540(); // 20210218 - 20210520
 		init550(); // 20210520 -
+		init560(); // 20211027 -
 		init570(); // 20211102 -
 	}
+
 
 	private void init570() {
 		Builder version = forVersion(VersionEnum.V5_7_0);
@@ -101,6 +103,17 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.onlyAppliesToPlatforms(DriverTypeEnum.POSTGRES_9_4, DriverTypeEnum.ORACLE_12C, DriverTypeEnum.MSSQL_2012);
 	}
 
+
+	private void init560() {
+		init560_20211027();
+	}
+
+	/**
+	 * Mirgation for the batch job parameter size change. Overriding purposes only.
+	 */
+	protected void init560_20211027() {
+		// nothing
+	}
 
 	private void init550() {
 

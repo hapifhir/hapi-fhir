@@ -37,7 +37,7 @@ public abstract class BaseSubscriberForSubscriptionResources implements MessageH
 
 	protected boolean isSubscription(ResourceModifiedMessage theNewResource) {
 		String payloadIdType = null;
-		IIdType payloadId = theNewResource.getId(myFhirContext);
+		IIdType payloadId = theNewResource.getPayloadId(myFhirContext);
 		if (payloadId != null) {
 			payloadIdType = payloadId.getResourceType();
 		}

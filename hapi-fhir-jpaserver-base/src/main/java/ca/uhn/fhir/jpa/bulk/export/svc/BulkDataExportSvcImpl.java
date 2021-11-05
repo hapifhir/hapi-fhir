@@ -33,7 +33,6 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
-import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionFileDao;
@@ -244,7 +243,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		String theJobUuid = theBulkExportJobEntity.getJobId();
 		JobParametersBuilder parameters = new JobParametersBuilder()
 			.addString(BatchConstants.JOB_UUID_PARAMETER, theJobUuid)
-			.addLong(BulkExportJobConfig.READ_CHUNK_PARAMETER, READ_CHUNK_SIZE);
+			.addLong(BatchConstants.READ_CHUNK_PARAMETER, READ_CHUNK_SIZE);
 
 		ourLog.info("Submitting bulk export job {} to job scheduler", theJobUuid);
 
@@ -273,8 +272,8 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	private void enhanceBulkParametersWithGroupParameters(BulkExportJobEntity theBulkExportJobEntity, JobParametersBuilder theParameters) {
 		String theGroupId = getQueryParameterIfPresent(theBulkExportJobEntity.getRequest(), JpaConstants.PARAM_EXPORT_GROUP_ID);
 		String expandMdm  = getQueryParameterIfPresent(theBulkExportJobEntity.getRequest(), JpaConstants.PARAM_EXPORT_MDM);
-		theParameters.addString(BulkExportJobConfig.GROUP_ID_PARAMETER, theGroupId);
-		theParameters.addString(BulkExportJobConfig.EXPAND_MDM_PARAMETER, expandMdm);
+		theParameters.addString(BatchConstants.GROUP_ID_PARAMETER, theGroupId);
+		theParameters.addString(BatchConstants.EXPAND_MDM_PARAMETER, expandMdm);
 	}
 
 
