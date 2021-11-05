@@ -110,6 +110,23 @@ public class RemoteTerminologyServiceValidationSupportTest {
 	}
 
 	@Test
+	public void testLookupOperationWithAllParams_CodeSystem_Success() {
+		createNextCodeSystemLookupReturnParameters(true, CODE_SYSTEM_VERSION, DISPLAY, null);
+		addAdditionalReturnParameters();
+
+		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(null, CODE_SYSTEM, CODE);
+		assertNotNull(outcome, "Call to lookupCode() should return a non-NULL result!");
+		assertEquals(DISPLAY, outcome.getCodeDisplay());
+		assertEquals(CODE_SYSTEM_VERSION, outcome.getCodeSystemVersion());
+
+		assertEquals(CODE, myCodeSystemProvider.myLastCode.getCode());
+		assertEquals(CODE_SYSTEM, myCodeSystemProvider.myLastUrl.getValueAsString());
+		assertTrue(Boolean.parseBoolean(myCodeSystemProvider.myNextReturnParams.getParameter("result").primitiveValue()));
+
+		validateExtraCodeSystemParams();
+	}
+
+	@Test
 	public void testLookupCode_BlankCode_ThrowsException() {
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
 			IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(null, CODE_SYSTEM,
@@ -137,7 +154,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 	@Test
 	public void testValidateCodeWithAllParams_CodeSystem_Success() {
 		createNextCodeSystemReturnParameters(true, DISPLAY, null);
-		addAdditionalCodeSystemLookupReturnParameters();
+		addAdditionalReturnParameters();
 
 		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(null, null, CODE_SYSTEM, CODE, DISPLAY, null);
 		assertEquals(CODE, outcome.getCode());
@@ -145,8 +162,11 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		assertEquals(null, outcome.getSeverity());
 		assertEquals(null, outcome.getMessage());
 
+		validateExtraCodeSystemParams();
+	}
+
+	private void validateExtraCodeSystemParams() {
 		assertEquals(CODE, myCodeSystemProvider.myLastCode.getCode());
-		assertEquals(DISPLAY, myCodeSystemProvider.myLastDisplay.getValue());
 		assertEquals(CODE_SYSTEM, myCodeSystemProvider.myLastUrl.getValueAsString());
 		for (Parameters.ParametersParameterComponent param : myCodeSystemProvider.myNextReturnParams.getParameter()) {
 			String paramName = param.getName();
@@ -215,7 +235,6 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		assertEquals(null, outcome.getMessage());
 
 		assertEquals(CODE, myCodeSystemProvider.myLastCode.getCode());
-		assertEquals(DISPLAY, myCodeSystemProvider.myLastDisplay.getValue());
 		assertEquals(CODE_SYSTEM, myCodeSystemProvider.myLastUrl.getValueAsString());
 	}
 
@@ -478,7 +497,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		}
 	}
 
-	private void addAdditionalCodeSystemLookupReturnParameters() {
+	private void addAdditionalReturnParameters() {
 		// property
 		Parameters.ParametersParameterComponent param = myCodeSystemProvider.myNextReturnParams.addParameter().setName("property");
 		param.addPart().setName("name").setValue(new StringType("birthDate"));
@@ -504,8 +523,6 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		private CodeType myLastCode;
 		private Coding myLastCoding;
 		private StringType myLastVersion;
-		private CodeType myLastDisplayLanguage;
-		private StringType myLastDisplay;
 		private Parameters myNextReturnParams;
 		private IValidationSupport.LookupCodeResult myNextLookupCodeResult;
 
@@ -524,7 +541,6 @@ public class RemoteTerminologyServiceValidationSupportTest {
 			myInvocationCount++;
 			myLastUrl = theCodeSystemUrl;
 			myLastCode = theCode;
-			myLastDisplay = theDisplay;
 			return myNextReturnParams;
 
 		}
@@ -550,7 +566,6 @@ public class RemoteTerminologyServiceValidationSupportTest {
 			myLastUrl = theSystem;
 			myLastCoding = theCoding;
 			myLastVersion = theVersion;
-			myLastDisplayLanguage = theDisplayLanguage;
 			return myNextReturnParams;
 		}
 
@@ -569,8 +584,6 @@ public class RemoteTerminologyServiceValidationSupportTest {
 
 
 	private static class MyValueSetProvider implements IResourceProvider {
-
-
 		private Parameters myNextReturnParams;
 		private List<ValueSet> myNextReturnValueSets;
 		private UriType myLastUrl;
