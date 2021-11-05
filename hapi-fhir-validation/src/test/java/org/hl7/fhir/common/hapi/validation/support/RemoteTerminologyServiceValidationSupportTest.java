@@ -54,8 +54,8 @@ public class RemoteTerminologyServiceValidationSupportTest {
 	private static final String DISPLAY = "DISPLAY";
 	private static final String LANGUAGE = "en";
 	private static final String CODE_SYSTEM = "CODE_SYS";
-	private static final String CODE_SYSTEM_NAME = "CODE SYSTEM NAME";
-	private static final String CODE_SYSTEM_VERSION = "v1.1";
+	private static final String CODE_SYSTEM_VERSION = "2.1";
+	private static final String CODE_SYSTEM_VERSION_AS_TEXT = "v2.1.12";
 	private static final String CODE = "CODE";
 	private static final String VALUE_SET_URL = "http://value.set/url";
 	private static final String ERROR_MESSAGE = "This is an error message";
@@ -97,7 +97,8 @@ public class RemoteTerminologyServiceValidationSupportTest {
 
 	@Test
 	public void testLookupOperation_CodeSystem_Success() {
-		createNextCodeSystemLookupReturnParameters(true, CODE_SYSTEM_VERSION, DISPLAY, null);
+		createNextCodeSystemLookupReturnParameters(true, CODE_SYSTEM_VERSION, CODE_SYSTEM_VERSION_AS_TEXT,
+			DISPLAY, null);
 
 		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(null, CODE_SYSTEM, CODE);
 		assertNotNull(outcome, "Call to lookupCode() should return a non-NULL result!");
@@ -106,18 +107,21 @@ public class RemoteTerminologyServiceValidationSupportTest {
 
 		assertEquals(CODE, myCodeSystemProvider.myLastCode.getCode());
 		assertEquals(CODE_SYSTEM, myCodeSystemProvider.myLastUrl.getValueAsString());
+		assertEquals(CODE_SYSTEM_VERSION_AS_TEXT, myCodeSystemProvider.myNextReturnParams.getParameter("name").toString());
 		assertTrue(Boolean.parseBoolean(myCodeSystemProvider.myNextReturnParams.getParameter("result").primitiveValue()));
 	}
 
 	@Test
 	public void testLookupOperationWithAllParams_CodeSystem_Success() {
-		createNextCodeSystemLookupReturnParameters(true, CODE_SYSTEM_VERSION, DISPLAY, null);
+		createNextCodeSystemLookupReturnParameters(true, CODE_SYSTEM_VERSION, CODE_SYSTEM_VERSION_AS_TEXT,
+			DISPLAY, null);
 		addAdditionalReturnParameters();
 
 		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(null, CODE_SYSTEM, CODE);
 		assertNotNull(outcome, "Call to lookupCode() should return a non-NULL result!");
 		assertEquals(DISPLAY, outcome.getCodeDisplay());
 		assertEquals(CODE_SYSTEM_VERSION, outcome.getCodeSystemVersion());
+		assertEquals(CODE_SYSTEM_VERSION_AS_TEXT, myCodeSystemProvider.myNextReturnParams.getParameter("name").toString());
 
 		assertEquals(CODE, myCodeSystemProvider.myLastCode.getCode());
 		assertEquals(CODE_SYSTEM, myCodeSystemProvider.myLastUrl.getValueAsString());
@@ -477,11 +481,12 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		}
 	}
 
-	private void createNextCodeSystemLookupReturnParameters(boolean theResult, String theVersion, String theDisplay,
-																			  String theMessage) {
+	private void createNextCodeSystemLookupReturnParameters(boolean theResult, String theVersion, String theVersionAsText,
+																			  String theDisplay, String theMessage) {
 		myCodeSystemProvider.myNextReturnParams = new Parameters();
 		myCodeSystemProvider.myNextReturnParams.addParameter("result", theResult);
 		myCodeSystemProvider.myNextReturnParams.addParameter("version", theVersion);
+		myCodeSystemProvider.myNextReturnParams.addParameter("name", theVersionAsText);
 		myCodeSystemProvider.myNextReturnParams.addParameter("display", theDisplay);
 		if (theMessage != null) {
 			myCodeSystemProvider.myNextReturnParams.addParameter("message", theMessage);

@@ -34,7 +34,8 @@ public class RemoteTerminologyServiceValidationSupportDstu3Test {
 	private static final String DISPLAY = "DISPLAY";
 	private static final String LANGUAGE = "en";
 	private static final String CODE_SYSTEM = "CODE_SYS";
-	private static final String CODE_SYSTEM_VERSION = "v1.1";
+	private static final String CODE_SYSTEM_VERSION = "2.1";
+	private static final String CODE_SYSTEM_VERSION_AS_TEXT = "v2.1.12";
 	private static final String CODE = "CODE";
 
 	private static FhirContext ourCtx = FhirContext.forDstu3();
@@ -57,7 +58,7 @@ public class RemoteTerminologyServiceValidationSupportDstu3Test {
 
 	@Test
 	public void testLookupOperation_CodeSystem_Success() {
-		createNextCodeSystemLookupReturnParameters(true, CODE_SYSTEM_VERSION, DISPLAY);
+		createNextCodeSystemLookupReturnParameters(true, CODE_SYSTEM_VERSION, CODE_SYSTEM_VERSION_AS_TEXT, DISPLAY);
 
 		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(null, CODE_SYSTEM, CODE);
 		assertNotNull(outcome, "Call to lookupCode() should return a non-NULL result!");
@@ -74,13 +75,15 @@ public class RemoteTerminologyServiceValidationSupportDstu3Test {
 				assertEquals(CODE_SYSTEM_VERSION, param.getValue().toString());
 			} else if (paramName.equals("display")) {
 				assertEquals(DISPLAY, param.getValue().toString());
+			} else if (paramName.equals("name")) {
+				assertEquals(CODE_SYSTEM_VERSION_AS_TEXT, param.getValue().toString());
 			}
 		}
 	}
 
 	@Test
 	public void testLookupOperationWithAllParams_CodeSystem_Success() {
-		createNextCodeSystemLookupReturnParameters(true, CODE_SYSTEM_VERSION, DISPLAY, LANGUAGE);
+		createNextCodeSystemLookupReturnParameters(true, CODE_SYSTEM_VERSION, CODE_SYSTEM_VERSION_AS_TEXT, DISPLAY, LANGUAGE);
 		addAdditionalCodeSystemLookupReturnParameters();
 
 		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(null, CODE_SYSTEM, CODE, LANGUAGE);
@@ -98,6 +101,8 @@ public class RemoteTerminologyServiceValidationSupportDstu3Test {
 				assertEquals(CODE_SYSTEM_VERSION, param.getValue().toString());
 			} else if (paramName.equals("display")) {
 				assertEquals(DISPLAY, param.getValue().toString());
+			} else if (paramName.equals("name")) {
+				assertEquals(CODE_SYSTEM_VERSION_AS_TEXT, param.getValue().toString());
 			} else if (paramName.equals("language")) {
 				assertEquals(LANGUAGE, param.getValue().toString());
 			} else if (paramName.equals("property")) {
@@ -133,15 +138,17 @@ public class RemoteTerminologyServiceValidationSupportDstu3Test {
 		}
 	}
 
-	private void createNextCodeSystemLookupReturnParameters(boolean theResult, String theVersion, String theDisplay) {
-		createNextCodeSystemLookupReturnParameters(theResult, theVersion, theDisplay, null);
+	private void createNextCodeSystemLookupReturnParameters(boolean theResult, String theVersion, String theVersionAsText,
+																			  String theDisplay) {
+		createNextCodeSystemLookupReturnParameters(theResult, theVersion, theVersionAsText, theDisplay, null);
 	}
 
-	private void createNextCodeSystemLookupReturnParameters(boolean theResult, String theVersion, String theDisplay,
-																			  String theLanguage) {
+	private void createNextCodeSystemLookupReturnParameters(boolean theResult, String theVersion, String theVersionAsText,
+																			  String theDisplay, String theLanguage) {
 		myCodeSystemProvider.myNextReturnParams = new Parameters();
 		myCodeSystemProvider.myNextReturnParams.addParameter().setName("result").setValue(new BooleanType(theResult));
 		myCodeSystemProvider.myNextReturnParams.addParameter().setName("version").setValue(new StringType(theVersion));
+		myCodeSystemProvider.myNextReturnParams.addParameter().setName("name").setValue(new StringType(theVersionAsText));
 		myCodeSystemProvider.myNextReturnParams.addParameter().setName("display").setValue(new StringType(theDisplay));
 		if (!StringUtils.isBlank(theLanguage)) {
 			myCodeSystemProvider.myNextReturnParams.addParameter().setName("language").setValue(new StringType(theLanguage));
