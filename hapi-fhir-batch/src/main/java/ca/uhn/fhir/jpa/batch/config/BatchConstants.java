@@ -54,6 +54,22 @@ public final class BatchConstants {
 	 * MDM Clear
 	 */
 	public static final String MDM_CLEAR_JOB_NAME = "mdmClearJob";
+
+	/**
+	 * TermCodeSystem delete
+	 */
+	public static final String TERM_CODE_SYSTEM_DELETE_JOB_NAME 			= "termCodeSystemDeleteJob";
+	public static final String TERM_CODE_SYSTEM_DELETE_STEP_NAME 			= "termCodeSystemDeleteStep";
+	public static final String JOB_PARAM_CODE_SYSTEM_ID 						= "termCodeSystemPid";
+
+	/**
+	 * TermCodeSystemVersion delete
+	 */
+	public static final String TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME 	= "termCodeSystemVersionDeleteJob";
+	public static final String TERM_CODE_SYSTEM_VERSION_DELETE_STEP_NAME	= "termCodeSystemVersionDeleteStep";
+	public static final String JOB_PARAM_CODE_SYSTEM_VERSION_ID 			= "termCodeSystemVersionPid";
+
+
 	public static final String BULK_EXPORT_READ_CHUNK_PARAMETER = "readChunkSize";
 	public static final String BULK_EXPORT_GROUP_ID_PARAMETER = "groupId";
 	/**
