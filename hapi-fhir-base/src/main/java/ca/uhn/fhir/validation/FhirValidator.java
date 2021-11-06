@@ -24,13 +24,22 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.validation.schematron.SchematronProvider;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 
 /**
@@ -46,6 +55,7 @@ import java.util.List;
  * </p>
  */
 public class FhirValidator {
+	private static final Logger ourLog = LoggerFactory.getLogger(FhirValidator.class);
 
 	private static final String I18N_KEY_NO_PH_ERROR = FhirValidator.class.getName() + ".noPhError";
 
@@ -53,6 +63,7 @@ public class FhirValidator {
 	private final FhirContext myContext;
 	private List<IValidatorModule> myValidators = new ArrayList<>();
 	private IInterceptorBroadcaster myInterceptorBraodcaster;
+	private ExecutorService myExecutor;
 
 	/**
 	 * Constructor (this should not be called directly, but rather {@link FhirContext#newValidator()} should be called to obtain an instance of {@link FhirValidator})
@@ -215,6 +226,45 @@ public class FhirValidator {
 
 		applyDefaultValidators();
 
+		if (theResource instanceof IBaseBundle && myContext.getValidationSupport().isConcurrentBundleValidation()) {
+			return validateBundleEntriesConcurrently((IBaseBundle) theResource, theOptions);
+		}
+
+		return validateResource(theResource, theOptions);
+	}
+
+	private ValidationResult validateBundleEntriesConcurrently(IBaseBundle theBundle, ValidationOptions theOptions) {
+		List<IBaseResource> entries = BundleUtil.toListOfResources(myContext, theBundle);
+
+		ExecutorService executorService = getExecutorService();
+		List<Future<ValidationResult>> futures = new ArrayList<>();
+		for (IBaseResource entry : entries) {
+			futures.add(executorService.submit(() -> validateResource(entry, theOptions)));
+		}
+
+		List<SingleValidationMessage> validationMessages = new ArrayList<>();
+		try {
+			for (Future<ValidationResult> future : futures) {
+				ValidationResult result = future.get();
+				// FIXME KHS prepend bundle entry details so we know which entry has the errors
+				validationMessages.addAll(result.getMessages());
+			}
+		} catch (Exception e) {
+			throw new InternalErrorException(e);
+		}
+		return new ValidationResult(myContext, validationMessages.stream().collect(Collectors.toList()));
+	}
+
+	private ExecutorService getExecutorService() {
+		if (myExecutor == null) {
+			int size = myContext.getValidationSupport().getBundleValidationThreadCount();
+			ourLog.info("Creating FhirValidation thread pool with size {}", size);
+			myExecutor = Executors.newFixedThreadPool(size);
+		}
+		return myExecutor;
+	}
+
+	private ValidationResult validateResource(IBaseResource theResource, ValidationOptions theOptions) {
 		IValidationContext<IBaseResource> ctx = ValidationContext.forResource(myContext, theResource, theOptions);
 
 		for (IValidatorModule next : myValidators) {
@@ -273,5 +323,11 @@ public class FhirValidator {
 	 */
 	public void setInterceptorBroadcaster(IInterceptorBroadcaster theInterceptorBraodcaster) {
 		myInterceptorBraodcaster = theInterceptorBraodcaster;
+	}
+
+	// FIXME KHS use this to set an executor that uses ThreadPoolUtil#newThreadPool
+	public FhirValidator setExecutor(ExecutorService theExecutor) {
+		myExecutor = theExecutor;
+		return this;
 	}
 }

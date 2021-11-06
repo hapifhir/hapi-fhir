@@ -111,4 +111,14 @@ public class BaseValidationSupportWrapper extends BaseValidationSupport {
 	public TranslateConceptResults translateConcept(TranslateCodeRequest theRequest) {
 		return myWrap.translateConcept(theRequest);
 	}
+
+	@Override
+	public boolean isConcurrentBundleValidation() {
+		return myWrap.isConcurrentBundleValidation();
+	}
+
+	@Override
+	public int getBundleValidationThreadCount() {
+		return myWrap.getBundleValidationThreadCount();
+	}
 }

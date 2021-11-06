@@ -67,6 +67,8 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 	private Map<String, IBaseResource> myValueSets;
 	private List<String> myTerminologyResources;
 	private List<String> myStructureDefinitionResources;
+	private int myBundleValidationThreadCount = IValidationSupport.DEFAULT_BUNDLE_VALIDATION_THREADCOUNT;
+	private boolean myConcurrentBundleValidation;
 
 	/**
 	 * Constructor
@@ -381,4 +383,23 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 		return (List<T>) Collections.unmodifiableList(retVal);
 	}
 
+	@Override
+	public boolean isConcurrentBundleValidation() {
+		return myConcurrentBundleValidation;
+	}
+
+	public DefaultProfileValidationSupport setConcurrentBundleValidation(boolean theConcurrentBundleValidation) {
+		myConcurrentBundleValidation = theConcurrentBundleValidation;
+		return this;
+	}
+
+	@Override
+	public int getBundleValidationThreadCount() {
+		return myBundleValidationThreadCount;
+	}
+
+	public DefaultProfileValidationSupport setBundleValidationThreadCount(int theBundleValidationThreadCount) {
+		myBundleValidationThreadCount = theBundleValidationThreadCount;
+		return this;
+	}
 }

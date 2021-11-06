@@ -80,6 +80,7 @@ import ca.uhn.fhir.util.ElementUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.util.ThreadPoolUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
@@ -102,7 +103,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionCallback;
@@ -201,12 +201,7 @@ public abstract class BaseTransactionProcessor {
 	private TaskExecutor getTaskExecutor() {
 		if (myExecutor == null) {
 			if (myDaoConfig.getBundleBatchPoolSize() > 1) {
-				ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-				executor.setThreadNamePrefix("bundle_batch_");
-				executor.setCorePoolSize(myDaoConfig.getBundleBatchPoolSize());
-				executor.setMaxPoolSize(myDaoConfig.getBundleBatchMaxPoolSize());
-				executor.initialize();
-				myExecutor = executor;
+				myExecutor = ThreadPoolUtil.newThreadPool(myDaoConfig.getBundleBatchPoolSize(), myDaoConfig.getBundleBatchMaxPoolSize(), "bundle-batch-");
 
 			} else {
 				SyncTaskExecutor executor = new SyncTaskExecutor();

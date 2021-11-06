@@ -9,6 +9,8 @@ import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.test.utilities.LoggingExtension;
+import ca.uhn.fhir.util.BundleBuilder;
+import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
@@ -79,6 +81,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -147,6 +151,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 		ValidationSupportChain chain = new ValidationSupportChain(myDefaultValidationSupport, mockSupport, new InMemoryTerminologyServerValidationSupport(ourCtx), new CommonCodeSystemsTerminologyService(ourCtx), new SnapshotGeneratingValidationSupport(ourCtx));
 		myValidationSupport = new CachingValidationSupport(chain);
+		ourCtx.setValidationSupport(myValidationSupport);
 		myInstanceVal = new FhirInstanceValidator(myValidationSupport);
 
 		myVal.registerValidatorModule(myInstanceVal);
@@ -1492,6 +1497,45 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		assertEquals(0, errors.size(), errors.toString());
 		assertThat(errors.get(0).getMessage(), containsString("The value provided ('BLAH') is not in the value set http://hl7.org/fhir/ValueSet/currencies"));
 
+	}
+
+	@Test
+	public void testValidateBundleMultithreaded() throws IOException {
+		StructureDefinition sd = loadStructureDefinition(myDefaultValidationSupport, "/r4/multithread/StructureDefinitionPatientV1.json");
+
+		myStructureDefinitionMap.put("https://example.com/StructureDefinition/Patient-v1", sd);
+
+		int entriesCount = 300;
+		Bundle bundle = buildBundle(entriesCount);
+		assertThat(bundle.getEntry(), hasSize(entriesCount));
+		try {
+			myDefaultValidationSupport.setConcurrentBundleValidation(true);
+			myVal.setExecutor(Executors.newFixedThreadPool(4));
+			// Run once to exclude initialization from time
+			myVal.validateWithResult(bundle);
+			StopWatch stopwatch = new StopWatch();
+			ValidationResult output = myVal.validateWithResult(bundle);
+			ourLog.info("Validation time: {}", stopwatch);
+			List<SingleValidationMessage> all = logResultsAndReturnErrorOnes(output);
+			assertThat(output.getMessages(), hasSize(entriesCount * 2));
+			assertEquals(0, all.size(), all.toString());
+		} finally {
+			myDefaultValidationSupport.setBundleValidationThreadCount(IValidationSupport.DEFAULT_BUNDLE_VALIDATION_THREADCOUNT);
+			myDefaultValidationSupport.setConcurrentBundleValidation(false);
+		}
+	}
+
+	private Bundle buildBundle(int theSize) throws IOException {
+		BundleBuilder bundleBuilder = new BundleBuilder(ourCtx);
+		Patient p = ourCtx.newJsonParser().parseResource(Patient.class, loadResource("/r4/multithread/patient.json"));
+		for (int i = 0; i < theSize; ++i) {
+			bundleBuilder.addTransactionCreateEntry(p);
+		}
+
+		Bundle retval = (Bundle) bundleBuilder.getBundle();
+		AtomicInteger count = new AtomicInteger(1);
+		retval.getEntry().stream().forEach(entry -> entry.setFullUrl("urn:uuid:" + count.getAndIncrement()));
+		return retval;
 	}
 
 	@AfterAll

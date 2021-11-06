@@ -36,7 +36,6 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -77,6 +76,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 public interface IValidationSupport {
 	String URL_PREFIX_VALUE_SET = "http://hl7.org/fhir/ValueSet/";
+	public static final int DEFAULT_BUNDLE_VALIDATION_THREADCOUNT = 1;
 
 
 	/**
@@ -331,6 +331,19 @@ public interface IValidationSupport {
 		return null;
 	}
 
+	/**
+	 * Validate bundle entries in parallel threads
+	 *
+	 * @return
+	 */
+
+	default boolean isConcurrentBundleValidation() {
+		return false;
+	}
+
+	default int getBundleValidationThreadCount() {
+		return DEFAULT_BUNDLE_VALIDATION_THREADCOUNT;
+	}
 
 	enum IssueSeverity {
 		/**
