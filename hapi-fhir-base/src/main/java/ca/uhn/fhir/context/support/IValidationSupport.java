@@ -331,8 +331,11 @@ public interface IValidationSupport {
 		return null;
 	}
 
+	// FIXME KHS make it clear in the docs that bundle structure is not validated when this is true
+
 	/**
-	 * Validate bundle entries in parallel threads
+	 * If this is true, bundles will be validated in parallel threads.  The bundle structure itself will not be validated,
+	 * only the resources in its entries.
 	 *
 	 * @return
 	 */
@@ -340,6 +343,11 @@ public interface IValidationSupport {
 	default boolean isConcurrentBundleValidation() {
 		return false;
 	}
+
+	/**
+	 * @return the number of threads bundle entries will be validated within.  This is only used when
+	 * {@link #isConcurrentBundleValidation} is true.
+	 */
 
 	default int getBundleValidationThreadCount() {
 		return DEFAULT_BUNDLE_VALIDATION_THREADCOUNT;
