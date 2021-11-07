@@ -1503,7 +1503,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	@Test
 	public void testValidateBundleMultithreaded() throws IOException {
 		// setup
-		StructureDefinition sd = loadStructureDefinition(myDefaultValidationSupport, "/r4/multithread/StructureDefinitionPatientV1.json");
+		StructureDefinition sd = loadStructureDefinition(myDefaultValidationSupport, "/r4/concurrent-bundle/StructureDefinitionPatientV1.json");
 
 		myStructureDefinitionMap.put("https://example.com/StructureDefinition/Patient-v1", sd);
 
@@ -1539,7 +1539,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 	private Bundle buildBundle(int theSize, boolean theValidBundle) throws IOException {
 		BundleBuilder bundleBuilder = new BundleBuilder(ourCtx);
-		Patient p = ourCtx.newJsonParser().parseResource(Patient.class, loadResource("/r4/multithread/patient.json"));
+		Patient p = ourCtx.newJsonParser().parseResource(Patient.class, loadResource("/r4/concurrent-bundle/patient.json"));
 		for (int i = 0; i < theSize; ++i) {
 			bundleBuilder.addTransactionCreateEntry(p);
 		}

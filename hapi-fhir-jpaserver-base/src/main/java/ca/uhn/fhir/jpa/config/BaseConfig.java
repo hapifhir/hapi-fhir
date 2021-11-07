@@ -404,7 +404,7 @@ public abstract class BaseConfig {
 
 	@Bean(name= BatchConstants.JOB_LAUNCHING_TASK_EXECUTOR)
 	public TaskExecutor jobLaunchingTaskExecutor() {
-		return ThreadPoolUtil.newThreadPool(0, 10, "JobLauncher-");
+		return ThreadPoolUtil.newThreadPool(0, 10, "job-launcher-");
 	}
 
 	@Bean
