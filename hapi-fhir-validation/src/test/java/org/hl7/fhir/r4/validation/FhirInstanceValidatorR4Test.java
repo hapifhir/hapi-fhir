@@ -146,7 +146,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		myFhirValidator.setValidateAgainstStandardSchema(false);
 		myFhirValidator.setValidateAgainstStandardSchematron(false);
 		// This is only used if the validation is performed with validationOptions.isConcurrentBundleValidation = true
-		myFhirValidator.setExecutor(Executors.newFixedThreadPool(4));
+		myFhirValidator.setExecutorService(Executors.newFixedThreadPool(4));
 
 		IValidationSupport mockSupport = mock(IValidationSupport.class);
 		when(mockSupport.getFhirContext()).thenReturn(ourCtx);
@@ -1514,8 +1514,9 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		assertThat(bundle.getEntry(), hasSize(entriesCount));
 
 		try {
+			// RED-GREEN set ConcurrentBundleValidation to false to see the test fail
 			myFhirValidator.setConcurrentBundleValidation(true);
-			myFhirValidator.setBundleValidationThreadCount(4);
+			myFhirValidator.setExecutorService(Executors.newFixedThreadPool(4));
 			// Run once to exclude initialization from time
 			myFhirValidator.validateWithResult(bundle);
 
@@ -1532,7 +1533,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 			assertEquals(0, all.size(), all.toString());
 		} finally {
 			myFhirValidator.setConcurrentBundleValidation(false);
-			myFhirValidator.setBundleValidationThreadCount(FhirValidator.DEFAULT_BUNDLE_VALIDATION_THREADCOUNT);
+			myFhirValidator.setExecutorService(null);
 		}
 	}
 

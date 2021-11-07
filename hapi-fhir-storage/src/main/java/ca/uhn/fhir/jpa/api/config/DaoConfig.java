@@ -280,12 +280,6 @@ public class DaoConfig {
 	private boolean myAdvancedLuceneIndexing = false;
 
 	/**
-	 * @see FhirValidator#getBundleValidationThreadCount()
-	 * @since 5.6.0
-	 */
-	private int myBundleValidationThreadCount = FhirValidator.DEFAULT_BUNDLE_VALIDATION_THREADCOUNT;
-
-	/**
 	 * @see FhirValidator#isConcurrentBundleValidation()
 	 * @since 5.6.0
 	 */
@@ -2683,23 +2677,6 @@ public class DaoConfig {
 	 */
 	public void setElasticSearchIndexPrefix(String thePrefix) {
 		myElasicSearchIndexPrefix = thePrefix;
-	}
-
-	/**
-	 * @see FhirValidator#getBundleValidationThreadCount()
-	 * @since 5.6.0
-	 */
-	public int getBundleValidationThreadCount() {
-		return myBundleValidationThreadCount;
-	}
-
-	/**
-	 * @see FhirValidator#getBundleValidationThreadCount()
-	 * @since 5.6.0
-	 */
-	public DaoConfig setBundleValidationThreadCount(int theBundleValidationThreadCount) {
-		myBundleValidationThreadCount = theBundleValidationThreadCount;
-		return this;
 	}
 
 	/**

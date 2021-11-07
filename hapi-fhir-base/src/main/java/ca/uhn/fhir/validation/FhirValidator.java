@@ -37,7 +37,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
@@ -58,7 +57,6 @@ public class FhirValidator {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirValidator.class);
 
 	private static final String I18N_KEY_NO_PH_ERROR = FhirValidator.class.getName() + ".noPhError";
-	public static final int DEFAULT_BUNDLE_VALIDATION_THREADCOUNT = 1;
 
 	private static volatile Boolean ourPhPresentOnClasspath;
 	private final FhirContext myContext;
@@ -66,9 +64,8 @@ public class FhirValidator {
 	private IInterceptorBroadcaster myInterceptorBraodcaster;
 	// FIXME KHS make it clear in the docs that bundle structure is not validated when this is true
 	private boolean myConcurrentBundleValidation;
-	private int myBundleValidationThreadCount = DEFAULT_BUNDLE_VALIDATION_THREADCOUNT;
 
-	private ExecutorService myExecutor;
+	private ExecutorService myExecutorService;
 
 	/**
 	 * Constructor (this should not be called directly, but rather {@link FhirContext#newValidator()} should be called to obtain an instance of {@link FhirValidator})
@@ -232,7 +229,11 @@ public class FhirValidator {
 		applyDefaultValidators();
 
 		if (theResource instanceof IBaseBundle && myConcurrentBundleValidation) {
-			return validateBundleEntriesConcurrently((IBaseBundle) theResource, theOptions);
+			if (myExecutorService != null) {
+				return validateBundleEntriesConcurrently((IBaseBundle) theResource, theOptions);
+			} else {
+				ourLog.error("Concurrent Bundle Validation is enabled but ExecutorService is null.  Reverting to serial validation.");
+			}
 		}
 
 		return validateResource(theResource, theOptions);
@@ -241,10 +242,9 @@ public class FhirValidator {
 	private ValidationResult validateBundleEntriesConcurrently(IBaseBundle theBundle, ValidationOptions theOptions) {
 		List<IBaseResource> entries = BundleUtil.toListOfResources(myContext, theBundle);
 
-		ExecutorService executorService = getExecutorService();
 		List<Future<ValidationResult>> futures = new ArrayList<>();
 		for (IBaseResource entry : entries) {
-			futures.add(executorService.submit(() -> validateResource(entry, theOptions)));
+			futures.add(myExecutorService.submit(() -> validateResource(entry, theOptions)));
 		}
 
 		List<SingleValidationMessage> validationMessages = new ArrayList<>();
@@ -258,15 +258,6 @@ public class FhirValidator {
 			throw new InternalErrorException(e);
 		}
 		return new ValidationResult(myContext, validationMessages.stream().collect(Collectors.toList()));
-	}
-
-	private ExecutorService getExecutorService() {
-		if (myExecutor == null) {
-			int size = myBundleValidationThreadCount;
-			ourLog.info("Creating FhirValidation thread pool with size {}", size);
-			myExecutor = Executors.newFixedThreadPool(size);
-		}
-		return myExecutor;
 	}
 
 	private ValidationResult validateResource(IBaseResource theResource, ValidationOptions theOptions) {
@@ -314,7 +305,11 @@ public class FhirValidator {
 		IValidationContext<IBaseResource> ctx = ValidationContext.forText(myContext, theResource, theOptions);
 
 		if (ctx.getResource() instanceof IBaseBundle && myConcurrentBundleValidation) {
-			return validateBundleEntriesConcurrently((IBaseBundle) ctx.getResource(), theOptions);
+			if (myExecutorService != null) {
+				return validateBundleEntriesConcurrently((IBaseBundle) ctx.getResource(), theOptions);
+			} else {
+				ourLog.error("Concurrent Bundle Validation is enabled but ExecutorService is null.  Reverting to serial validation.");
+			}
 		}
 
 		for (IValidatorModule next : myValidators) {
@@ -336,8 +331,8 @@ public class FhirValidator {
 	}
 
 	// FIXME KHS use this to set an executor that uses ThreadPoolUtil#newThreadPool
-	public FhirValidator setExecutor(ExecutorService theExecutor) {
-		myExecutor = theExecutor;
+	public FhirValidator setExecutorService(ExecutorService theExecutorService) {
+		myExecutorService = theExecutorService;
 		return this;
 	}
 
@@ -356,23 +351,6 @@ public class FhirValidator {
 	 */
 	public FhirValidator setConcurrentBundleValidation(boolean theConcurrentBundleValidation) {
 		myConcurrentBundleValidation = theConcurrentBundleValidation;
-		return this;
-	}
-
-	/**
-	 * The number of threads bundle entries will be validated within.  This is only used when
-	 * {@link #isConcurrentBundleValidation} is true.
-	 */
-	public int getBundleValidationThreadCount() {
-		return myBundleValidationThreadCount;
-	}
-
-	/**
-	 * The number of threads bundle entries will be validated within.  This is only used when
-	 * {@link #isConcurrentBundleValidation} is true.
-	 */
-	public FhirValidator setBundleValidationThreadCount(int theBundleValidationThreadCount) {
-		myBundleValidationThreadCount = theBundleValidationThreadCount;
 		return this;
 	}
 }
