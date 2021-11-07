@@ -250,7 +250,7 @@ public class FhirValidator {
 		try {
 			for (Future<ValidationResult> future : futures) {
 				ValidationResult result = future.get();
-				// FIXME KHS prepend bundle entry details so we know which entry has the errors
+				// FIXME JB prepend bundle entry details so we know which entry has the errors
 				validationMessages.addAll(result.getMessages());
 			}
 		} catch (Exception e) {
@@ -295,7 +295,7 @@ public class FhirValidator {
 	 * @return the results of validation
 	 * @since 4.0.0
 	 */
-	// FIXME KHS consolidate this method with the other one that calls applyDefaultValidators()
+	// FIXME JB consolidate this method with the other one that also calls applyDefaultValidators()
 	public ValidationResult validateWithResult(String theResource, ValidationOptions theOptions) {
 		Validate.notNull(theResource, "theResource must not be null");
 
