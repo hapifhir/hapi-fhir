@@ -32,6 +32,7 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
+import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.text.StrLookup;
@@ -75,6 +76,7 @@ public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnric
 
 	private List<IValidatorModule> myValidatorModules;
 	private FhirValidator myValidator;
+	private final ValidationOptions myValidationOptions = new ValidationOptions();
 
 	private void addResponseIssueHeader(RequestDetails theRequestDetails, SingleValidationMessage theNext) {
 		// Perform any string substitutions from the message format
@@ -115,7 +117,7 @@ public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnric
 	}
 
 
-	abstract ValidationResult doValidate(FhirValidator theValidator, T theRequest);
+	abstract ValidationResult doValidate(FhirValidator theValidator, T theRequest, ValidationOptions theValidationOptions);
 
 	/**
 	 * Fail the request by throwing an {@link UnprocessableEntityException} as a result of a validation failure.
@@ -324,7 +326,7 @@ public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnric
 
 		ValidationResult validationResult;
 		try {
-			validationResult = doValidate(validator, theRequest);
+			validationResult = doValidate(validator, theRequest, myValidationOptions);
 		} catch (Exception e) {
 			if (myIgnoreValidatorExceptions) {
 				ourLog.warn("Validator threw an exception during validation", e);
@@ -388,6 +390,14 @@ public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnric
 		postProcessResult(theRequestDetails, validationResult);
 
 		return validationResult;
+	}
+
+	protected void setConcurrentBundleValidation(boolean theConcurrentBundleValidation) {
+		myValidationOptions.setConcurrentBundleValidation(theConcurrentBundleValidation);
+	}
+
+	protected void setBundleValidationThreadCount(int theBundleValidationThreadCount) {
+		myValidationOptions.setBundleValidationThreadCount(theBundleValidationThreadCount);
 	}
 
 	private static class MyLookup extends StrLookup<String> {

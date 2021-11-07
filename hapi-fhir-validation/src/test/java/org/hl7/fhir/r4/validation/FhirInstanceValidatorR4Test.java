@@ -15,6 +15,7 @@ import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
+import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -65,6 +66,7 @@ import org.hl7.fhir.r4.utils.FHIRPathEngine;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -145,6 +147,8 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		myVal = ourCtx.newValidator();
 		myVal.setValidateAgainstStandardSchema(false);
 		myVal.setValidateAgainstStandardSchematron(false);
+		// This is only used if the validation is performed with validationOptions.isConcurrentBundleValidation = true
+		myVal.setExecutor(Executors.newFixedThreadPool(4));
 
 		IValidationSupport mockSupport = mock(IValidationSupport.class);
 		when(mockSupport.getFhirContext()).thenReturn(ourCtx);
@@ -1501,6 +1505,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 	@Test
 	public void testValidateBundleMultithreaded() throws IOException {
+		// setup
 		StructureDefinition sd = loadStructureDefinition(myDefaultValidationSupport, "/r4/multithread/StructureDefinitionPatientV1.json");
 
 		myStructureDefinitionMap.put("https://example.com/StructureDefinition/Patient-v1", sd);
@@ -1510,24 +1515,31 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		// We deliberately create an invalid bundle to confirm we are indeed running multithreaded
 		Bundle bundle = buildBundle(entriesCount, false);
 		assertThat(bundle.getEntry(), hasSize(entriesCount));
-		try {
-			myDefaultValidationSupport.setConcurrentBundleValidation(true);
-			myVal.setExecutor(Executors.newFixedThreadPool(4));
-			// Run once to exclude initialization from time
-			myVal.validateWithResult(bundle);
-			StopWatch stopwatch = new StopWatch();
-			ValidationResult output = myVal.validateWithResult(bundle);
-			ourLog.info("Validation time: {}", stopwatch);
-			List<SingleValidationMessage> all = logResultsAndReturnErrorOnes(output);
-			assertThat(output.getMessages(), hasSize(entriesCount * 2));
-			// This assert proves that we did a multi-threaded validation since the outer bundle fails validation
-			// due to lack of unique fullUrl values on the entries.  If you setConcurrentBundleValidation(false)
-			// above this test will fail.
-			assertEquals(0, all.size(), all.toString());
-		} finally {
-			myVal.setExecutor(null);
-			myDefaultValidationSupport.setConcurrentBundleValidation(false);
-		}
+
+		ValidationOptions validationOptions = buildValidationOptions();
+		// Run once to exclude initialization from time
+		myVal.validateWithResult(bundle, validationOptions);
+
+		// execute
+		StopWatch stopwatch = new StopWatch();
+		ValidationResult output = myVal.validateWithResult(bundle, validationOptions);
+		ourLog.info("Validation time: {}", stopwatch);
+
+		// validate
+		List<SingleValidationMessage> all = logResultsAndReturnErrorOnes(output);
+		assertThat(output.getMessages(), hasSize(entriesCount * 2));
+		// This assert proves that we did a multi-threaded validation since the outer bundle fails validation
+		// due to lack of unique fullUrl values on the entries.  If you setConcurrentBundleValidation(false)
+		// above this test will fail.
+		assertEquals(0, all.size(), all.toString());
+	}
+
+	@NotNull
+	private ValidationOptions buildValidationOptions() {
+		ValidationOptions validationOptions = new ValidationOptions();
+		validationOptions.setConcurrentBundleValidation(true);
+		validationOptions.setBundleValidationThreadCount(4);
+		return validationOptions;
 	}
 
 	private Bundle buildBundle(int theSize, boolean theValidBundle) throws IOException {

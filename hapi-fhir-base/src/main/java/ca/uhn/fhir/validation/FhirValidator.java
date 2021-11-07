@@ -226,7 +226,7 @@ public class FhirValidator {
 
 		applyDefaultValidators();
 
-		if (theResource instanceof IBaseBundle && myContext.getValidationSupport().isConcurrentBundleValidation()) {
+		if (theResource instanceof IBaseBundle && theOptions.isConcurrentBundleValidation()) {
 			return validateBundleEntriesConcurrently((IBaseBundle) theResource, theOptions);
 		}
 
@@ -236,7 +236,7 @@ public class FhirValidator {
 	private ValidationResult validateBundleEntriesConcurrently(IBaseBundle theBundle, ValidationOptions theOptions) {
 		List<IBaseResource> entries = BundleUtil.toListOfResources(myContext, theBundle);
 
-		ExecutorService executorService = getExecutorService();
+		ExecutorService executorService = getExecutorService(theOptions);
 		List<Future<ValidationResult>> futures = new ArrayList<>();
 		for (IBaseResource entry : entries) {
 			futures.add(executorService.submit(() -> validateResource(entry, theOptions)));
@@ -255,9 +255,9 @@ public class FhirValidator {
 		return new ValidationResult(myContext, validationMessages.stream().collect(Collectors.toList()));
 	}
 
-	private ExecutorService getExecutorService() {
+	private ExecutorService getExecutorService(ValidationOptions theOptions) {
 		if (myExecutor == null) {
-			int size = myContext.getValidationSupport().getBundleValidationThreadCount();
+			int size = theOptions.getBundleValidationThreadCount();
 			ourLog.info("Creating FhirValidation thread pool with size {}", size);
 			myExecutor = Executors.newFixedThreadPool(size);
 		}
@@ -308,7 +308,7 @@ public class FhirValidator {
 
 		IValidationContext<IBaseResource> ctx = ValidationContext.forText(myContext, theResource, theOptions);
 
-		if (ctx.getResource() instanceof IBaseBundle && myContext.getValidationSupport().isConcurrentBundleValidation()) {
+		if (ctx.getResource() instanceof IBaseBundle && theOptions.isConcurrentBundleValidation()) {
 			return validateBundleEntriesConcurrently((IBaseBundle) ctx.getResource(), theOptions);
 		}
 

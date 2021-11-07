@@ -302,14 +302,4 @@ public class ValidationSupportChain implements IValidationSupport {
 		}
 		return null;
 	}
-
-	@Override
-	public boolean isConcurrentBundleValidation() {
-		for (IValidationSupport next : myChain) {
-			if (next.isConcurrentBundleValidation()) {
-				return true;
-			}
-		}
-		return false;
-	}
 }

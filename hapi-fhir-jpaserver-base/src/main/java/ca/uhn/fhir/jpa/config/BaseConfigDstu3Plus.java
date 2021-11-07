@@ -67,10 +67,7 @@ public abstract class BaseConfigDstu3Plus extends BaseConfig {
 
 	@Bean(name = "myDefaultProfileValidationSupport")
 	public DefaultProfileValidationSupport defaultProfileValidationSupport(DaoConfig theDaoConfig) {
-		DefaultProfileValidationSupport retval = new DefaultProfileValidationSupport(fhirContext());
-		retval.setConcurrentBundleValidation(theDaoConfig.isConcurrentBundleValidation());
-		retval.setBundleValidationThreadCount(theDaoConfig.getBundleValidationThreadCount());
-		return retval;
+		return new DefaultProfileValidationSupport(fhirContext());
 	}
 
 	@Bean(name = JPA_VALIDATION_SUPPORT_CHAIN)

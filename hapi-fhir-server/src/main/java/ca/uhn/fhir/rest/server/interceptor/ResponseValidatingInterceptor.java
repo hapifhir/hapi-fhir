@@ -20,20 +20,20 @@ package ca.uhn.fhir.rest.server.interceptor;
  * #L%
  */
 
-import java.util.HashSet;
-import java.util.Set;
-
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
+import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * This interceptor intercepts each outgoing response and if it contains a FHIR resource, validates that resource. The interceptor may be configured to run any validator modules, and will then add
@@ -62,8 +62,8 @@ public class ResponseValidatingInterceptor extends BaseValidatingInterceptor<IBa
 	}
 
 	@Override
-	ValidationResult doValidate(FhirValidator theValidator, IBaseResource theRequest) {
-		return theValidator.validateWithResult(theRequest);
+	ValidationResult doValidate(FhirValidator theValidator, IBaseResource theRequest, ValidationOptions theValidationOptions) {
+		return theValidator.validateWithResult(theRequest, theValidationOptions);
 	}
 
 	@Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
