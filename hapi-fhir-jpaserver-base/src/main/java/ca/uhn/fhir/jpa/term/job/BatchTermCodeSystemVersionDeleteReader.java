@@ -53,7 +53,9 @@ public class BatchTermCodeSystemVersionDeleteReader implements ItemReader<Long> 
 	@Override
 	public Long read() throws Exception {
 		if (myTermCodeSystemVersionPidList == null) {
-			init();
+			// fixme JM: add method to obtain IDs
+			List<TermCodeSystemVersion> tcsVersionList = myTermCodeSystemVersionDao.findByCodeSystemPid(myTermCodeSystemPid);
+			myTermCodeSystemVersionPidList = tcsVersionList.stream().map(TermCodeSystemVersion::getPid).sorted().collect(toList());
 		}
 
 		if (myTermCodeSystemVersionPidList.isEmpty())  {
@@ -64,29 +66,15 @@ public class BatchTermCodeSystemVersionDeleteReader implements ItemReader<Long> 
 
 		if (myCurrentIdx >= myTermCodeSystemVersionPidList.size())  {
 			// nothing else to process
-			ourLog.info("Nothing else to process");
+			ourLog.info("No more versions to process");
 			return null;
 		}
 
 		// still processing elements
 		long TermCodeSystemVersionPid = myTermCodeSystemVersionPidList.get(myCurrentIdx++);
-		ourLog.info("Output id: {}", TermCodeSystemVersionPid);
+		ourLog.info("Passing termCodeSystemVersionPid: {} to writer", TermCodeSystemVersionPid);
 		return TermCodeSystemVersionPid;
 	}
-
-
-	private void init() {
-		if (myTermCodeSystemPid <= 0) {
-			throw new InvalidParameterException("Invalid parameter '" + JOB_PARAM_CODE_SYSTEM_ID + "' :" + myTermCodeSystemPid);
-		}
-
-		if (myTermCodeSystemVersionPidList == null) {
-			// fixme JM: add method to obtain IDs
-			List<TermCodeSystemVersion> tcsVersionList = myTermCodeSystemVersionDao.findByCodeSystemPid(myTermCodeSystemPid);
-			myTermCodeSystemVersionPidList = tcsVersionList.stream().map(TermCodeSystemVersion::getPid).sorted().collect(toList());
-		}
-	}
-
 
 
 }

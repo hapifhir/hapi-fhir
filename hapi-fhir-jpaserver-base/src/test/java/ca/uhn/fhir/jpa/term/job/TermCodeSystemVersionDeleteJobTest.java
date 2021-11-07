@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.term.job;
 
+import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
@@ -31,12 +32,12 @@ import static ca.uhn.fhir.jpa.batch.config.BatchConstants.TERM_CODE_SYSTEM_VERSI
 import static org.junit.jupiter.api.Assertions.*;
 
 
-@ContextConfiguration(classes = TermCodeSystemVersionDeleteJobConfig.class)
+//@ContextConfiguration(classes = TermCodeSystemVersionDeleteJobConfig.class)
 public class TermCodeSystemVersionDeleteJobTest extends BaseJpaR4Test {
 
 	public static final int CONCEPT_QTY = 222;
 
-	@Autowired private JobLauncher myJobLauncher;
+	@Autowired private IBatchJobSubmitter myJobSubmitter;
 	@Autowired private BatchJobHelper myBatchJobHelper;
 	@Autowired private ITermCodeSystemVersionDao myCodeSystemVersionDao;
 
@@ -67,7 +68,7 @@ public class TermCodeSystemVersionDeleteJobTest extends BaseJpaR4Test {
 			JOB_PARAM_CODE_SYSTEM_VERSION_ID, new JobParameter(termCodeSystemVersionPidVect[0], true) ));
 
 
-		JobExecution jobExecution = myJobLauncher.run(myTermCodeSystemVersionDeleteJob, jobParameters);
+		JobExecution jobExecution = myJobSubmitter.runJob(myTermCodeSystemVersionDeleteJob, jobParameters);
 
 
 		myBatchJobHelper.awaitJobCompletion(jobExecution);
@@ -86,7 +87,7 @@ public class TermCodeSystemVersionDeleteJobTest extends BaseJpaR4Test {
 	public void runWithNoParameterFailsValidation() {
 		JobParametersInvalidException thrown = Assertions.assertThrows(
 			JobParametersInvalidException.class,
-			() -> myJobLauncher.run(myTermCodeSystemVersionDeleteJob, new JobParameters())
+			() -> myJobSubmitter.runJob(myTermCodeSystemVersionDeleteJob, new JobParameters())
 		);
 		assertEquals("This job needs Parameter: '" + JOB_PARAM_CODE_SYSTEM_VERSION_ID + "'", thrown.getMessage());
 	}
@@ -100,7 +101,7 @@ public class TermCodeSystemVersionDeleteJobTest extends BaseJpaR4Test {
 
 		JobParametersInvalidException thrown = Assertions.assertThrows(
 			JobParametersInvalidException.class,
-			() -> myJobLauncher.run(myTermCodeSystemVersionDeleteJob, jobParameters)
+			() -> myJobSubmitter.runJob(myTermCodeSystemVersionDeleteJob, jobParameters)
 		);
 		assertEquals("'" + JOB_PARAM_CODE_SYSTEM_VERSION_ID + "' parameter is null", thrown.getMessage());
 	}
@@ -114,7 +115,7 @@ public class TermCodeSystemVersionDeleteJobTest extends BaseJpaR4Test {
 
 		JobParametersInvalidException thrown = Assertions.assertThrows(
 			JobParametersInvalidException.class,
-			() -> myJobLauncher.run(myTermCodeSystemVersionDeleteJob, jobParameters)
+			() -> myJobSubmitter.runJob(myTermCodeSystemVersionDeleteJob, jobParameters)
 		);
 		assertEquals("Invalid parameter '" + JOB_PARAM_CODE_SYSTEM_VERSION_ID + "' value: 0", thrown.getMessage());
 	}

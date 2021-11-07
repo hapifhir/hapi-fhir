@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.term.job;
 
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
-import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,9 +34,13 @@ import org.springframework.stereotype.Component;
 
 import static ca.uhn.fhir.jpa.batch.config.BatchConstants.JOB_PARAM_CODE_SYSTEM_ID;
 
+/**
+ * Deletes the TermConcept(s) related to the TermCodeSystemVersion being deleted
+ * Executes in its own step to be in own transaction because it is a DB-heavy operation
+ */
 @Component
-public class TermCodeSystemDeleteTasklet implements Tasklet {
-	private static final Logger ourLog = LoggerFactory.getLogger(TermCodeSystemDeleteTasklet.class);
+public class TermConceptDeleteTasklet implements Tasklet {
+	private static final Logger ourLog = LoggerFactory.getLogger(TermConceptDeleteTasklet.class);
 
 	@Autowired
 	private ITermCodeSystemDao myTermCodeSystemDao;
@@ -52,7 +55,6 @@ public class TermCodeSystemDeleteTasklet implements Tasklet {
 
 		myTermCodeSystemDao.findById(codeSystemPid).orElseThrow(IllegalStateException::new);
 		myTermCodeSystemDao.deleteById(codeSystemPid);
-		ourLog.info(" * Code system {} deleted", codeSystemPid);
 
 		return RepeatStatus.FINISHED;
 	}

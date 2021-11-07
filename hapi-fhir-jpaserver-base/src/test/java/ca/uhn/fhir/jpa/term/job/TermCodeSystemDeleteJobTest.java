@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.term.job;
 
+import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -13,7 +14,6 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
-import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
@@ -34,7 +34,7 @@ public class TermCodeSystemDeleteJobTest extends BaseJpaR4Test {
 	public static final int CONCEPT_QTY = 222;
 
 	@Autowired
-	private JobLauncher myJobLauncher;
+	private IBatchJobSubmitter myJobSubmitter;
 
 	@Autowired
 	private BatchJobHelper myBatchJobHelper;
@@ -61,7 +61,7 @@ public class TermCodeSystemDeleteJobTest extends BaseJpaR4Test {
 				JOB_PARAM_CODE_SYSTEM_ID, new JobParameter(id.getIdPartAsLong(), true) ));
 
 
-		JobExecution jobExecution = myJobLauncher.run(myTermCodeSystemDeleteJob, jobParameters);
+		JobExecution jobExecution = myJobSubmitter.runJob(myTermCodeSystemDeleteJob, jobParameters);
 
 
 		myBatchJobHelper.awaitJobCompletion(jobExecution);
@@ -79,7 +79,7 @@ public class TermCodeSystemDeleteJobTest extends BaseJpaR4Test {
 	public void runWithNoParameterFailsValidation() {
 		JobParametersInvalidException thrown = Assertions.assertThrows(
 			JobParametersInvalidException.class,
-			() -> myJobLauncher.run(myTermCodeSystemDeleteJob, new JobParameters())
+			() -> myJobSubmitter.runJob(myTermCodeSystemDeleteJob, new JobParameters())
 		);
 		assertEquals("This job needs Parameter: '" + JOB_PARAM_CODE_SYSTEM_ID + "'", thrown.getMessage());
 	}
@@ -93,7 +93,7 @@ public class TermCodeSystemDeleteJobTest extends BaseJpaR4Test {
 
 		JobParametersInvalidException thrown = Assertions.assertThrows(
 			JobParametersInvalidException.class,
-			() -> myJobLauncher.run(myTermCodeSystemDeleteJob, jobParameters)
+			() -> myJobSubmitter.runJob(myTermCodeSystemDeleteJob, jobParameters)
 		);
 		assertEquals("'" + JOB_PARAM_CODE_SYSTEM_ID + "' parameter is null", thrown.getMessage());
 	}
@@ -107,7 +107,7 @@ public class TermCodeSystemDeleteJobTest extends BaseJpaR4Test {
 
 		JobParametersInvalidException thrown = Assertions.assertThrows(
 			JobParametersInvalidException.class,
-			() -> myJobLauncher.run(myTermCodeSystemDeleteJob, jobParameters)
+			() -> myJobSubmitter.runJob(myTermCodeSystemDeleteJob, jobParameters)
 		);
 		assertEquals("Invalid parameter '" + JOB_PARAM_CODE_SYSTEM_ID + "' value: 0", thrown.getMessage());
 	}
