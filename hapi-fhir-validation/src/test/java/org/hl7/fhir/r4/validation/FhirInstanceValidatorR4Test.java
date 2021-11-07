@@ -82,6 +82,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -1505,7 +1506,9 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		myStructureDefinitionMap.put("https://example.com/StructureDefinition/Patient-v1", sd);
 
 		int entriesCount = 300;
-		Bundle bundle = buildBundle(entriesCount);
+
+		// We deliberately create an invalid bundle to confirm we are indeed running multithreaded
+		Bundle bundle = buildBundle(entriesCount, false);
 		assertThat(bundle.getEntry(), hasSize(entriesCount));
 		try {
 			myDefaultValidationSupport.setConcurrentBundleValidation(true);
@@ -1527,18 +1530,20 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		}
 	}
 
-	private Bundle buildBundle(int theSize) throws IOException {
+	private Bundle buildBundle(int theSize, boolean theValidBundle) throws IOException {
 		BundleBuilder bundleBuilder = new BundleBuilder(ourCtx);
 		Patient p = ourCtx.newJsonParser().parseResource(Patient.class, loadResource("/r4/multithread/patient.json"));
 		for (int i = 0; i < theSize; ++i) {
 			bundleBuilder.addTransactionCreateEntry(p);
 		}
-		return (Bundle) bundleBuilder.getBundle();
-// We deliberately omit setting unique fullUrls on the bundle to validate that the bundle was validated concurrently
-//		Bundle retval = (Bundle) bundleBuilder.getBundle();
-//		AtomicInteger count = new AtomicInteger(1);
-//		retval.getEntry().stream().forEach(entry -> entry.setFullUrl("urn:uuid:" + count.getAndIncrement()));
-//		return retval;
+		if (theValidBundle) {
+			Bundle retval = (Bundle) bundleBuilder.getBundle();
+			AtomicInteger count = new AtomicInteger(1);
+			retval.getEntry().stream().forEach(entry -> entry.setFullUrl("urn:uuid:" + count.getAndIncrement()));
+			return retval;
+		} else {
+			return (Bundle) bundleBuilder.getBundle();
+		}
 	}
 
 	@AfterAll

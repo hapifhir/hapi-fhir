@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.api.config;
 
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.api.model.WarmCacheEntry;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -277,6 +278,18 @@ public class DaoConfig {
 	 * TODO mb test more with this true
 	 */
 	private boolean myAdvancedLuceneIndexing = false;
+
+	/**
+	 * @see IValidationSupport#getBundleValidationThreadCount()
+	 * @since 5.6.0
+	 */
+	private int myBundleValidationThreadCount = IValidationSupport.DEFAULT_BUNDLE_VALIDATION_THREADCOUNT;
+
+	/**
+	 * @see IValidationSupport#isConcurrentBundleValidation()
+	 * @since 5.6.0
+	 */
+	private boolean myConcurrentBundleValidation;
 
 	/**
 	 * Constructor
@@ -2670,6 +2683,40 @@ public class DaoConfig {
 	 */
 	public void setElasticSearchIndexPrefix(String thePrefix) {
 		myElasicSearchIndexPrefix = thePrefix;
+	}
+
+	/**
+	 * @see IValidationSupport#getBundleValidationThreadCount()
+	 * @since 5.6.0
+	 */
+	public int getBundleValidationThreadCount() {
+		return myBundleValidationThreadCount;
+	}
+
+	/**
+	 * @see IValidationSupport#getBundleValidationThreadCount()
+	 * @since 5.6.0
+	 */
+	public DaoConfig setBundleValidationThreadCount(int theBundleValidationThreadCount) {
+		myBundleValidationThreadCount = theBundleValidationThreadCount;
+		return this;
+	}
+
+	/**
+	 * @see IValidationSupport#isConcurrentBundleValidation()
+	 * @since 5.6.0
+	 */
+	public boolean isConcurrentBundleValidation() {
+		return myConcurrentBundleValidation;
+	}
+
+	/**
+	 * @see IValidationSupport#isConcurrentBundleValidation()
+	 * @since 5.6.0
+	 */
+	public DaoConfig setConcurrentBundleValidation(boolean theConcurrentBundleValidation) {
+		myConcurrentBundleValidation = theConcurrentBundleValidation;
+		return this;
 	}
 
 	public enum StoreMetaSourceInformationEnum {

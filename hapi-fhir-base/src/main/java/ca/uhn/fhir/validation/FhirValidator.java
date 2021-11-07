@@ -300,12 +300,17 @@ public class FhirValidator {
 	 * @return the results of validation
 	 * @since 4.0.0
 	 */
+	// FIXME KHS consolidate this method with the other one that calls applyDefaultValidators()
 	public ValidationResult validateWithResult(String theResource, ValidationOptions theOptions) {
 		Validate.notNull(theResource, "theResource must not be null");
 
 		applyDefaultValidators();
 
 		IValidationContext<IBaseResource> ctx = ValidationContext.forText(myContext, theResource, theOptions);
+
+		if (ctx.getResource() instanceof IBaseBundle && myContext.getValidationSupport().isConcurrentBundleValidation()) {
+			return validateBundleEntriesConcurrently((IBaseBundle) ctx.getResource(), theOptions);
+		}
 
 		for (IValidatorModule next : myValidators) {
 			next.validateResource(ctx);

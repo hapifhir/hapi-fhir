@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.JpaPersistedResourceValidationSupport;
 import ca.uhn.fhir.jpa.dao.ObservationLastNIndexPersistSvc;
 import ca.uhn.fhir.jpa.term.TermCodeSystemStorageSvcImpl;
@@ -65,8 +66,11 @@ public abstract class BaseConfigDstu3Plus extends BaseConfig {
 	public abstract ITermVersionAdapterSvc terminologyVersionAdapterSvc();
 
 	@Bean(name = "myDefaultProfileValidationSupport")
-	public DefaultProfileValidationSupport defaultProfileValidationSupport() {
-		return new DefaultProfileValidationSupport(fhirContext());
+	public DefaultProfileValidationSupport defaultProfileValidationSupport(DaoConfig theDaoConfig) {
+		DefaultProfileValidationSupport retval = new DefaultProfileValidationSupport(fhirContext());
+		retval.setConcurrentBundleValidation(theDaoConfig.isConcurrentBundleValidation());
+		retval.setBundleValidationThreadCount(theDaoConfig.getBundleValidationThreadCount());
+		return retval;
 	}
 
 	@Bean(name = JPA_VALIDATION_SUPPORT_CHAIN)
