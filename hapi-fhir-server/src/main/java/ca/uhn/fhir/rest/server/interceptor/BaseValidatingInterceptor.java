@@ -314,7 +314,6 @@ public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnric
 		if (myValidator != null) {
 			fhirValidator = myValidator;
 		} else {
-			// FIXME KHS this is our validator
 			fhirValidator = theRequestDetails.getServer().getFhirContext().newValidator();
 			if (myValidatorModules != null) {
 				for (IValidatorModule next : myValidatorModules) {

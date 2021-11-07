@@ -62,7 +62,6 @@ public class FhirValidator {
 	private final FhirContext myContext;
 	private List<IValidatorModule> myValidators = new ArrayList<>();
 	private IInterceptorBroadcaster myInterceptorBraodcaster;
-	// FIXME KHS make it clear in the docs that bundle structure is not validated when this is true
 	private boolean myConcurrentBundleValidation;
 
 	private ExecutorService myExecutorService;
@@ -330,7 +329,6 @@ public class FhirValidator {
 		myInterceptorBraodcaster = theInterceptorBraodcaster;
 	}
 
-	// FIXME KHS use this to set an executor that uses ThreadPoolUtil#newThreadPool
 	public FhirValidator setExecutorService(ExecutorService theExecutorService) {
 		myExecutorService = theExecutorService;
 		return this;
