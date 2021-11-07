@@ -25,7 +25,10 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
+import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
+import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -36,6 +39,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_30_40;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
@@ -45,15 +49,23 @@ import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobParameter;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.annotation.Nonnull;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import static ca.uhn.fhir.jpa.batch.config.BatchConstants.JOB_PARAM_CODE_SYSTEM_ID;
+import static ca.uhn.fhir.jpa.batch.config.BatchConstants.TERM_CODE_SYSTEM_DELETE_JOB_NAME;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Transactional
@@ -68,6 +80,16 @@ public class FhirResourceDaoCodeSystemDstu3 extends BaseHapiFhirResourceDao<Code
 	private IValidationSupport myValidationSupport;
 	@Autowired
 	private FhirContext myFhirContext;
+
+	@Autowired
+	private ITermCodeSystemDao myTermCodeSystemDao;
+
+	@Autowired
+	private IBatchJobSubmitter myJobSubmitter;
+
+	@Autowired @Qualifier(TERM_CODE_SYSTEM_DELETE_JOB_NAME)
+	private Job myTermCodeSystemDeleteJob;
+
 
 	public FhirResourceDaoCodeSystemDstu3() {
 		super();
@@ -147,9 +169,25 @@ public class FhirResourceDaoCodeSystemDstu3 extends BaseHapiFhirResourceDao<Code
 	protected void preDelete(CodeSystem theResourceToDelete, ResourceTable theEntityToDelete) {
 		super.preDelete(theResourceToDelete, theEntityToDelete);
 
-		myTermDeferredStorageSvc.deleteCodeSystemForResource(theEntityToDelete);
-
+		TermCodeSystem termCodeSystemToDelete = myTermCodeSystemDao.findByResourcePid(theEntityToDelete.getId());
+		deleteTermCodeSystemOffline(termCodeSystemToDelete.getPid());
 	}
+
+
+	private void deleteTermCodeSystemOffline(Long theCodeSystemPid) {
+		JobParameters jobParameters = new JobParameters(
+			Collections.singletonMap(
+				JOB_PARAM_CODE_SYSTEM_ID, new JobParameter(theCodeSystemPid, true) ));
+
+		try {
+			myJobSubmitter.runJob(myTermCodeSystemDeleteJob, jobParameters);
+
+		} catch (JobParametersInvalidException theE) {
+			throw new InternalErrorException("Offline job submission for TermCodeSystem: " +
+				theCodeSystemPid + " failed: " + theE);
+		}
+	}
+
 
 	@Override
 	public ResourceTable updateEntity(RequestDetails theRequest, IBaseResource theResource, IBasePersistedResource theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
