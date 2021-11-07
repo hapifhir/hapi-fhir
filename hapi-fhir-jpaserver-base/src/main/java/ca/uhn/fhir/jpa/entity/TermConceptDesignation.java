@@ -31,7 +31,7 @@ import static org.apache.commons.lang3.StringUtils.length;
 
 @Entity
 @Table(name = "TRM_CONCEPT_DESIG", uniqueConstraints = { }, indexes = {
-	// same name that the indexed FK because some DBs add it automatically and fails SchemaMigrationTest otherwise
+	// must have same name that indexed FK or SchemaMigrationTest complains because H2 sets this index automatically
 	@Index(name = "FK_CONCEPTDESIG_CONCEPT",  columnList = "CONCEPT_PID", unique = false)
 })
 public class TermConceptDesignation implements Serializable {

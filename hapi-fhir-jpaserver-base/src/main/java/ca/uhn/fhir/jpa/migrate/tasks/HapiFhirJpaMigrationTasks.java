@@ -88,15 +88,17 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	private void init570() {
 		Builder version = forVersion(VersionEnum.V5_7_0);
 
+		// both indexes must have same name that indexed FK or SchemaMigrationTest complains because H2 sets this index automatically
+
 		version.onTable("TRM_CONCEPT_PROPERTY")
-			.addIndex("20211101.1", "IDX_FK_CONCEPTPROP_CONCEPT")
+			.addIndex("20211102.1", "FK_CONCEPTPROP_CONCEPT")
 			.unique(false)
 			.withColumns("CONCEPT_PID")
 			// H2, Derby, MariaDB, and MySql automatically add indexes to foreign keys
 			.onlyAppliesToPlatforms(DriverTypeEnum.POSTGRES_9_4, DriverTypeEnum.ORACLE_12C, DriverTypeEnum.MSSQL_2012);
 
 		version.onTable("TRM_CONCEPT_DESIG")
-			.addIndex("20211101.2", "IDX_FK_CONCEPTDESIG_CONCEPT")
+			.addIndex("20211102.2", "FK_CONCEPTDESIG_CONCEPT")
 			.unique(false)
 			.withColumns("CONCEPT_PID")
 			// H2, Derby, MariaDB, and MySql automatically add indexes to foreign keys
