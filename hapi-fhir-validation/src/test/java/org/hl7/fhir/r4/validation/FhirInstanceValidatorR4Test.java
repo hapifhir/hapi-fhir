@@ -82,7 +82,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -1518,9 +1517,12 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 			ourLog.info("Validation time: {}", stopwatch);
 			List<SingleValidationMessage> all = logResultsAndReturnErrorOnes(output);
 			assertThat(output.getMessages(), hasSize(entriesCount * 2));
+			// This assert proves that we did a multi-threaded validation since the outer bundle fails validation
+			// due to lack of unique fullUrl values on the entries.  If you setConcurrentBundleValidation(false)
+			// above this test will fail.
 			assertEquals(0, all.size(), all.toString());
 		} finally {
-			myDefaultValidationSupport.setBundleValidationThreadCount(IValidationSupport.DEFAULT_BUNDLE_VALIDATION_THREADCOUNT);
+			myVal.setExecutor(null);
 			myDefaultValidationSupport.setConcurrentBundleValidation(false);
 		}
 	}
@@ -1531,11 +1533,12 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		for (int i = 0; i < theSize; ++i) {
 			bundleBuilder.addTransactionCreateEntry(p);
 		}
-
-		Bundle retval = (Bundle) bundleBuilder.getBundle();
-		AtomicInteger count = new AtomicInteger(1);
-		retval.getEntry().stream().forEach(entry -> entry.setFullUrl("urn:uuid:" + count.getAndIncrement()));
-		return retval;
+		return (Bundle) bundleBuilder.getBundle();
+// We deliberately omit setting unique fullUrls on the bundle to validate that the bundle was validated concurrently
+//		Bundle retval = (Bundle) bundleBuilder.getBundle();
+//		AtomicInteger count = new AtomicInteger(1);
+//		retval.getEntry().stream().forEach(entry -> entry.setFullUrl("urn:uuid:" + count.getAndIncrement()));
+//		return retval;
 	}
 
 	@AfterAll
