@@ -30,7 +30,6 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.method.ResourceParameter;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
-import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 
 import javax.servlet.http.HttpServletRequest;
@@ -54,8 +53,8 @@ public class RequestValidatingInterceptor extends BaseValidatingInterceptor<Stri
 	private boolean myAddValidationResultsToResponseOperationOutcome = true;
 
 	@Override
-	ValidationResult doValidate(FhirValidator theValidator, String theRequest, ValidationOptions theValidationOptions) {
-		return theValidator.validateWithResult(theRequest, theValidationOptions);
+	ValidationResult doValidate(FhirValidator theValidator, String theRequest) {
+		return theValidator.validateWithResult(theRequest);
 	}
 
 	@Hook(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED)

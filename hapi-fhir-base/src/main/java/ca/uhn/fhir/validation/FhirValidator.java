@@ -58,11 +58,16 @@ public class FhirValidator {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirValidator.class);
 
 	private static final String I18N_KEY_NO_PH_ERROR = FhirValidator.class.getName() + ".noPhError";
+	public static final int DEFAULT_BUNDLE_VALIDATION_THREADCOUNT = 1;
 
 	private static volatile Boolean ourPhPresentOnClasspath;
 	private final FhirContext myContext;
 	private List<IValidatorModule> myValidators = new ArrayList<>();
 	private IInterceptorBroadcaster myInterceptorBraodcaster;
+	// FIXME KHS make it clear in the docs that bundle structure is not validated when this is true
+	private boolean myConcurrentBundleValidation;
+	private int myBundleValidationThreadCount = DEFAULT_BUNDLE_VALIDATION_THREADCOUNT;
+
 	private ExecutorService myExecutor;
 
 	/**
@@ -226,7 +231,7 @@ public class FhirValidator {
 
 		applyDefaultValidators();
 
-		if (theResource instanceof IBaseBundle && theOptions.isConcurrentBundleValidation()) {
+		if (theResource instanceof IBaseBundle && myConcurrentBundleValidation) {
 			return validateBundleEntriesConcurrently((IBaseBundle) theResource, theOptions);
 		}
 
@@ -236,7 +241,7 @@ public class FhirValidator {
 	private ValidationResult validateBundleEntriesConcurrently(IBaseBundle theBundle, ValidationOptions theOptions) {
 		List<IBaseResource> entries = BundleUtil.toListOfResources(myContext, theBundle);
 
-		ExecutorService executorService = getExecutorService(theOptions);
+		ExecutorService executorService = getExecutorService();
 		List<Future<ValidationResult>> futures = new ArrayList<>();
 		for (IBaseResource entry : entries) {
 			futures.add(executorService.submit(() -> validateResource(entry, theOptions)));
@@ -255,9 +260,9 @@ public class FhirValidator {
 		return new ValidationResult(myContext, validationMessages.stream().collect(Collectors.toList()));
 	}
 
-	private ExecutorService getExecutorService(ValidationOptions theOptions) {
+	private ExecutorService getExecutorService() {
 		if (myExecutor == null) {
-			int size = theOptions.getBundleValidationThreadCount();
+			int size = myBundleValidationThreadCount;
 			ourLog.info("Creating FhirValidation thread pool with size {}", size);
 			myExecutor = Executors.newFixedThreadPool(size);
 		}
@@ -308,7 +313,7 @@ public class FhirValidator {
 
 		IValidationContext<IBaseResource> ctx = ValidationContext.forText(myContext, theResource, theOptions);
 
-		if (ctx.getResource() instanceof IBaseBundle && theOptions.isConcurrentBundleValidation()) {
+		if (ctx.getResource() instanceof IBaseBundle && myConcurrentBundleValidation) {
 			return validateBundleEntriesConcurrently((IBaseBundle) ctx.getResource(), theOptions);
 		}
 
@@ -333,6 +338,41 @@ public class FhirValidator {
 	// FIXME KHS use this to set an executor that uses ThreadPoolUtil#newThreadPool
 	public FhirValidator setExecutor(ExecutorService theExecutor) {
 		myExecutor = theExecutor;
+		return this;
+	}
+
+	/**
+	 * If this is true, bundles will be validated in parallel threads.  The bundle structure itself will not be validated,
+	 * only the resources in its entries.
+	 */
+
+	public boolean isConcurrentBundleValidation() {
+		return myConcurrentBundleValidation;
+	}
+
+	/**
+	 * If this is true, bundles will be validated in parallel threads.  The bundle structure itself will not be validated,
+	 * only the resources in its entries.
+	 */
+	public FhirValidator setConcurrentBundleValidation(boolean theConcurrentBundleValidation) {
+		myConcurrentBundleValidation = theConcurrentBundleValidation;
+		return this;
+	}
+
+	/**
+	 * The number of threads bundle entries will be validated within.  This is only used when
+	 * {@link #isConcurrentBundleValidation} is true.
+	 */
+	public int getBundleValidationThreadCount() {
+		return myBundleValidationThreadCount;
+	}
+
+	/**
+	 * The number of threads bundle entries will be validated within.  This is only used when
+	 * {@link #isConcurrentBundleValidation} is true.
+	 */
+	public FhirValidator setBundleValidationThreadCount(int theBundleValidationThreadCount) {
+		myBundleValidationThreadCount = theBundleValidationThreadCount;
 		return this;
 	}
 }

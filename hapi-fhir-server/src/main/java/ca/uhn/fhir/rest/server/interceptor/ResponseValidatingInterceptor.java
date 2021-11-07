@@ -27,7 +27,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
-import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -62,8 +61,8 @@ public class ResponseValidatingInterceptor extends BaseValidatingInterceptor<IBa
 	}
 
 	@Override
-	ValidationResult doValidate(FhirValidator theValidator, IBaseResource theRequest, ValidationOptions theValidationOptions) {
-		return theValidator.validateWithResult(theRequest, theValidationOptions);
+	ValidationResult doValidate(FhirValidator theValidator, IBaseResource theRequest) {
+		return theValidator.validateWithResult(theRequest);
 	}
 
 	@Hook(Pointcut.SERVER_OUTGOING_RESPONSE)

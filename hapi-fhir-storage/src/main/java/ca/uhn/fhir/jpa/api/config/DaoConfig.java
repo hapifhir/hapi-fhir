@@ -6,7 +6,7 @@ import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.util.HapiExtensions;
-import ca.uhn.fhir.validation.ValidationOptions;
+import ca.uhn.fhir.validation.FhirValidator;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
@@ -280,13 +280,13 @@ public class DaoConfig {
 	private boolean myAdvancedLuceneIndexing = false;
 
 	/**
-	 * @see ValidationOptions#getBundleValidationThreadCount()
+	 * @see FhirValidator#getBundleValidationThreadCount()
 	 * @since 5.6.0
 	 */
-	private int myBundleValidationThreadCount = ValidationOptions.DEFAULT_BUNDLE_VALIDATION_THREADCOUNT;
+	private int myBundleValidationThreadCount = FhirValidator.DEFAULT_BUNDLE_VALIDATION_THREADCOUNT;
 
 	/**
-	 * @see ValidationOptions#isConcurrentBundleValidation()
+	 * @see FhirValidator#isConcurrentBundleValidation()
 	 * @since 5.6.0
 	 */
 	private boolean myConcurrentBundleValidation;
@@ -2686,7 +2686,7 @@ public class DaoConfig {
 	}
 
 	/**
-	 * @see ValidationOptions#getBundleValidationThreadCount()
+	 * @see FhirValidator#getBundleValidationThreadCount()
 	 * @since 5.6.0
 	 */
 	public int getBundleValidationThreadCount() {
@@ -2694,7 +2694,7 @@ public class DaoConfig {
 	}
 
 	/**
-	 * @see ValidationOptions#getBundleValidationThreadCount()
+	 * @see FhirValidator#getBundleValidationThreadCount()
 	 * @since 5.6.0
 	 */
 	public DaoConfig setBundleValidationThreadCount(int theBundleValidationThreadCount) {
@@ -2703,7 +2703,7 @@ public class DaoConfig {
 	}
 
 	/**
-	 * @see ValidationOptions#isConcurrentBundleValidation()
+	 * @see FhirValidator#isConcurrentBundleValidation()
 	 * @since 5.6.0
 	 */
 	public boolean isConcurrentBundleValidation() {
@@ -2711,7 +2711,7 @@ public class DaoConfig {
 	}
 
 	/**
-	 * @see ValidationOptions#isConcurrentBundleValidation()
+	 * @see FhirValidator#isConcurrentBundleValidation()
 	 * @since 5.6.0
 	 */
 	public DaoConfig setConcurrentBundleValidation(boolean theConcurrentBundleValidation) {

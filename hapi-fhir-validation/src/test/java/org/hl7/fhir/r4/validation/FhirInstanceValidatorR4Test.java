@@ -15,7 +15,6 @@ import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
-import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -66,7 +65,6 @@ import org.hl7.fhir.r4.utils.FHIRPathEngine;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -114,7 +112,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	public LoggingExtension myLoggingExtension = new LoggingExtension();
 	private FhirInstanceValidator myInstanceVal;
 	private Map<String, ValueSetExpansionComponent> mySupportedCodeSystemsForExpansion;
-	private FhirValidator myVal;
+	private FhirValidator myFhirValidator;
 	private ArrayList<String> myValidConcepts;
 	private Set<String> myValidSystems = new HashSet<>();
 	private Map<String, StructureDefinition> myStructureDefinitionMap = new HashMap<>();
@@ -136,7 +134,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 		resource.setSubject(new Reference("#invalid-ref"));
 
-		ValidationResult output = myVal.validateWithResult(resource);
+		ValidationResult output = myFhirValidator.validateWithResult(resource);
 		List<SingleValidationMessage> nonInfo = logResultsAndReturnNonInformationalOnes(output);
 		assertThat(nonInfo, hasSize(2));
 	}
@@ -144,21 +142,20 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	@SuppressWarnings("unchecked")
 	@BeforeEach
 	public void before() {
-		myVal = ourCtx.newValidator();
-		myVal.setValidateAgainstStandardSchema(false);
-		myVal.setValidateAgainstStandardSchematron(false);
+		myFhirValidator = ourCtx.newValidator();
+		myFhirValidator.setValidateAgainstStandardSchema(false);
+		myFhirValidator.setValidateAgainstStandardSchematron(false);
 		// This is only used if the validation is performed with validationOptions.isConcurrentBundleValidation = true
-		myVal.setExecutor(Executors.newFixedThreadPool(4));
+		myFhirValidator.setExecutor(Executors.newFixedThreadPool(4));
 
 		IValidationSupport mockSupport = mock(IValidationSupport.class);
 		when(mockSupport.getFhirContext()).thenReturn(ourCtx);
 
 		ValidationSupportChain chain = new ValidationSupportChain(myDefaultValidationSupport, mockSupport, new InMemoryTerminologyServerValidationSupport(ourCtx), new CommonCodeSystemsTerminologyService(ourCtx), new SnapshotGeneratingValidationSupport(ourCtx));
 		myValidationSupport = new CachingValidationSupport(chain);
-		ourCtx.setValidationSupport(myValidationSupport);
 		myInstanceVal = new FhirInstanceValidator(myValidationSupport);
 
-		myVal.registerValidatorModule(myInstanceVal);
+		myFhirValidator.registerValidatorModule(myInstanceVal);
 
 		mySupportedCodeSystemsForExpansion = new HashMap<>();
 
@@ -530,7 +527,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 		ourLog.info("Encoded: {}", encoded);
 
-		ValidationResult output = myVal.validateWithResult(encoded);
+		ValidationResult output = myFhirValidator.validateWithResult(encoded);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(1, errors.size());
 		assertEquals("The value '%%%2@()()' is not a valid Base64 value", errors.get(0).getMessage());
@@ -541,7 +538,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	public void testValidateBundleWithNoFullUrl() throws IOException {
 		String encoded = loadResource("/r4/r4-caredove-bundle.json");
 
-		ValidationResult output = myVal.validateWithResult(encoded);
+		ValidationResult output = myFhirValidator.validateWithResult(encoded);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 		errors = errors
 			.stream()
@@ -563,7 +560,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 		ourLog.info("Encoded: {}", encoded);
 
-		ValidationResult output = myVal.validateWithResult(encoded);
+		ValidationResult output = myFhirValidator.validateWithResult(encoded);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(0, errors.size());
 
@@ -607,7 +604,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		t.setSystem(org.hl7.fhir.r4.model.ContactPoint.ContactPointSystem.URL);
 		t.setValue("http://infoway-inforoute.ca");
 
-		ValidationResult results = myVal.validateWithResult(p);
+		ValidationResult results = myFhirValidator.validateWithResult(p);
 		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
 		assertThat(outcome, empty());
 
@@ -619,7 +616,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	@Test
 	public void testExtensionUrlWithHl7Url() throws IOException {
 		String input = IOUtils.toString(FhirInstanceValidator.class.getResourceAsStream("/bug872-ext-with-hl7-url.json"), Charsets.UTF_8);
-		ValidationResult output = myVal.validateWithResult(input);
+		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> nonInfo = logResultsAndReturnNonInformationalOnes(output);
 		assertThat(nonInfo, empty());
 	}
@@ -634,7 +631,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	@Test
 	public void testLargeBase64() throws IOException {
 		String input = IOUtils.toString(FhirInstanceValidatorR4Test.class.getResourceAsStream("/r4/diagnosticreport-example-gingival-mass.json"), Constants.CHARSET_UTF8);
-		ValidationResult output = myVal.validateWithResult(input);
+		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
 		assertEquals(1, errors.size());
 		assertEquals("None of the codings provided are in the value set http://hl7.org/fhir/ValueSet/report-codes (http://hl7.org/fhir/ValueSet/report-codes), and a coding is recommended to come from this value set) (codes = http://loinc.org#1-8)", errors.get(0).getMessage());
@@ -650,7 +647,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		int passes = 1;
 		for (int i = 0; i < passes; i++) {
 			ourLog.info("Pass {}", i + 1);
-			output = myVal.validateWithResult(input);
+			output = myFhirValidator.validateWithResult(input);
 		}
 
 		long delay = System.currentTimeMillis() - start;
@@ -687,7 +684,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 			ourLog.info("Validating {}", next.getId());
 			ourLog.trace(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(next));
 
-			ValidationResult output = myVal.validateWithResult(next);
+			ValidationResult output = myFhirValidator.validateWithResult(next);
 			List<SingleValidationMessage> results = logResultsAndReturnAll(output);
 
 			// This isn't a validator problem but a definition problem.. it should get fixed at some point and
@@ -715,7 +712,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	public void testValidateBundleWithNoType() throws Exception {
 		String vsContents = loadResource("/r4/bundle-with-no-type.json");
 
-		ValidationResult output = myVal.validateWithResult(vsContents);
+		ValidationResult output = myFhirValidator.validateWithResult(vsContents);
 		logResultsAndReturnNonInformationalOnes(output);
 		assertThat(output.getMessages().toString(), containsString("Bundle.type: minimum required = 1, but only found 0"));
 	}
@@ -732,7 +729,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 			"\"name\":[ {\"family\":\"bar\"} ]" +
 			"}";
 
-		ValidationResult output = myVal.validateWithResult(patient);
+		ValidationResult output = myFhirValidator.validateWithResult(patient);
 		logResultsAndReturnNonInformationalOnes(output);
 		assertThat(output.getMessages().toString(), containsString("Error parsing JSON source: Duplicated property name"));
 	}
@@ -760,7 +757,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		// bool = (BooleanType) fpOutput.get(0);
 		// assertTrue(bool.getValue());
 
-		ValidationResult output = myVal.validateWithResult(inputString);
+		ValidationResult output = myFhirValidator.validateWithResult(inputString);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 		assertThat(errors, empty());
 
@@ -771,7 +768,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	public void testValidateDocument() throws Exception {
 		String vsContents = loadResource("/sample-document.xml");
 
-		ValidationResult output = myVal.validateWithResult(vsContents);
+		ValidationResult output = myFhirValidator.validateWithResult(vsContents);
 		logResultsAndReturnNonInformationalOnes(output);
 		assertTrue(output.isSuccessful());
 	}
@@ -823,7 +820,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	public void testValidateQuestionnaireResponse() throws IOException {
 		String input = loadResource("/qr_jon.xml");
 
-		ValidationResult output = myVal.validateWithResult(input);
+		ValidationResult output = myFhirValidator.validateWithResult(input);
 		logResultsAndReturnAll(output);
 
 		assertThat(output.getMessages().toString(), containsString("Items not of type group should not have items - Item with linkId 5.1 of type BOOLEAN has 1 item(s)"));
@@ -840,7 +837,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 			"  \"id\":\"123\"" +
 			"}";
 
-		ValidationResult output = myVal.validateWithResult(input);
+		ValidationResult output = myFhirValidator.validateWithResult(input);
 		assertEquals(0, output.getMessages().size(), output.toString());
 	}
 
@@ -857,7 +854,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 				"\"foo\":\"123\"" +
 				"}";
 
-		ValidationResult output = myVal.validateWithResult(input);
+		ValidationResult output = myFhirValidator.validateWithResult(input);
 		assertEquals(1, output.getMessages().size(), output.toString());
 		ourLog.info(output.getMessages().get(0).getLocationString());
 		ourLog.info(output.getMessages().get(0).getMessage());
@@ -876,7 +873,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	public void testValidateRawJsonResourceFromExamples() throws Exception {
 		String input = loadResource("/testscript-search.json");
 
-		ValidationResult output = myVal.validateWithResult(input);
+		ValidationResult output = myFhirValidator.validateWithResult(input);
 		logResultsAndReturnNonInformationalOnes(output);
 		// assertEquals(output.toString(), 1, output.getMessages().size());
 		// ourLog.info(output.getMessages().get(0).getLocationString());
@@ -912,7 +909,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		 * }
 		 */
 
-		ValidationResult output = myVal.validateWithResult(encoded);
+		ValidationResult output = myFhirValidator.validateWithResult(encoded);
 		assertEquals(1, output.getMessages().size(), output.toString());
 
 		assertEquals("Unknown extension http://hl7.org/fhir/v3/ethnicity", output.getMessages().get(0).getMessage());
@@ -947,7 +944,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		 */
 
 		myInstanceVal.setAnyExtensionsAllowed(false);
-		ValidationResult output = myVal.validateWithResult(encoded);
+		ValidationResult output = myFhirValidator.validateWithResult(encoded);
 		assertEquals(1, output.getMessages().size(), output.toString());
 
 		assertEquals("The extension http://hl7.org/fhir/v3/ethnicity is unknown, and not allowed here", output.getMessages().get(0).getMessage());
@@ -964,7 +961,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 			"  </text>" +
 			"</Patient>";
 
-		ValidationResult output = myVal.validateWithResult(input);
+		ValidationResult output = myFhirValidator.validateWithResult(input);
 		assertEquals(0, output.getMessages().size(), output.toString());
 	}
 
@@ -980,7 +977,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 				"<foo value=\"222\"/>" +
 				"</Patient>";
 
-		ValidationResult output = myVal.validateWithResult(input);
+		ValidationResult output = myFhirValidator.validateWithResult(input);
 		assertEquals(1, output.getMessages().size(), output.toString());
 		ourLog.info(output.getMessages().get(0).getLocationString());
 		ourLog.info(output.getMessages().get(0).getMessage());
@@ -1000,7 +997,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 			"<name><given/></name>" +
 			"</Patient>";
 
-		ValidationResult output = myVal.validateWithResult(input);
+		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> messages = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(3, messages.size(), output.toString());
 		assertThat(messages.get(0).getMessage(), containsString("Element must have some content"));
@@ -1035,7 +1032,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 			"                        </timingTiming>\n" +
 			"                </ActivityDefinition>";
 
-		ValidationResult output = myVal.validateWithResult(input);
+		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> res = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(1, res.size(), output.toString());
 		assertEquals("A code with no system has no defined meaning. A system should be provided", output.getMessages().get(0).getMessage());
@@ -1050,7 +1047,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		p.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 		p.getManagingOrganization().setDisplay("HELLO");
 
-		ValidationResult output = myVal.validateWithResult(p);
+		ValidationResult output = myFhirValidator.validateWithResult(p);
 		List<SingleValidationMessage> nonInfo = logResultsAndReturnNonInformationalOnes(output);
 		assertThat(nonInfo, empty());
 	}
@@ -1065,7 +1062,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		p.getManagingOrganization().getIdentifier().setSystem("http://acme.org");
 		p.getManagingOrganization().getIdentifier().setValue("foo");
 
-		ValidationResult output = myVal.validateWithResult(p);
+		ValidationResult output = myFhirValidator.validateWithResult(p);
 		List<SingleValidationMessage> nonInfo = logResultsAndReturnNonInformationalOnes(output);
 		assertThat(nonInfo, empty());
 	}
@@ -1085,7 +1082,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		rp.getPatient().setReference("Patient/1");
 		rp.addRelationship().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/v2-0131").setCode("C");
 
-		ValidationResult results = myVal.validateWithResult(rp);
+		ValidationResult results = myFhirValidator.validateWithResult(rp);
 		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
 		assertThat(outcome, empty());
 
@@ -1096,7 +1093,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		rp.getPatient().setReference("Patient/1");
 		rp.addRelationship().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/v2-0131").setCode("GAGAGAGA");
 
-		results = myVal.validateWithResult(rp);
+		results = myFhirValidator.validateWithResult(rp);
 		outcome = logResultsAndReturnNonInformationalOnes(results);
 		assertThat(outcome, not(empty()));
 
@@ -1115,7 +1112,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
 
 		myInstanceVal.setValidationSupport(myValidationSupport);
-		ValidationResult output = myVal.validateWithResult(input);
+		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
 
 		assertEquals(ResultSeverityEnum.ERROR, errors.get(0).getSeverity());
@@ -1136,7 +1133,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
 
 		myInstanceVal.setValidationSupport(myValidationSupport);
-		ValidationResult output = myVal.validateWithResult(input);
+		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 
 		assertThat(errors.toString(), containsString("Observation.subject: minimum required = 1, but only found 0"));
@@ -1156,7 +1153,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		input.setStatus(ObservationStatus.FINAL);
 
 		myInstanceVal.setValidationSupport(myValidationSupport);
-		ValidationResult output = myVal.validateWithResult(input);
+		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 
 		assertEquals(1, errors.size());
@@ -1173,7 +1170,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
 		input.setValue(new StringType("AAA"));
 
-		ValidationResult output = myVal.validateWithResult(input);
+		ValidationResult output = myFhirValidator.validateWithResult(input);
 		assertThat(output.getMessages().size(), greaterThan(0));
 		assertEquals("Observation.status: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/Observation)", output.getMessages().get(0).getMessage());
 
@@ -1189,7 +1186,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(input));
 
-		ValidationResult output = myVal.validateWithResult(input);
+		ValidationResult output = myFhirValidator.validateWithResult(input);
 		assertEquals(output.getMessages().size(), 0);
 	}
 
@@ -1206,7 +1203,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 				"      <text value=\"No code here!\"/>\n" +
 				"   </code>\n" +
 				"</Observation>";
-		ValidationResult output = myVal.validateWithResult(input);
+		ValidationResult output = myFhirValidator.validateWithResult(input);
 		logResultsAndReturnAll(output);
 		assertEquals(
 			"The value provided ('notvalidcode') is not in the value set http://hl7.org/fhir/ValueSet/observation-status|4.0.1 (http://hl7.org/fhir/ValueSet/observation-status), and a code is required from this value set) (error message = Unknown code 'notvalidcode' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/observation-status')",
@@ -1236,7 +1233,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 			"        ]" +
 			"}";
 		ourLog.info(input);
-		ValidationResult output = myVal.validateWithResult(input);
+		ValidationResult output = myFhirValidator.validateWithResult(input);
 		logResultsAndReturnAll(output);
 		assertEquals(
 			"",
@@ -1253,7 +1250,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		input.setStatus(ObservationStatus.FINAL);
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
 
-		ValidationResult output = myVal.validateWithResult(input);
+		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(0, errors.size(), errors.toString());
 
@@ -1270,7 +1267,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		input.setStatus(ObservationStatus.FINAL);
 		input.getCode().addCoding().setSystem("http://acme.org").setCode("9988877");
 
-		ValidationResult output = myVal.validateWithResult(input);
+		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
 		assertThat(errors.toString(), errors.size(), greaterThan(0));
 		assertEquals("Unknown code for 'http://acme.org#9988877'", errors.get(0).getMessage());
@@ -1288,7 +1285,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		input.setStatus(ObservationStatus.FINAL);
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
 
-		ValidationResult output = myVal.validateWithResult(input);
+		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(0, errors.size(), errors.toString());
 	}
@@ -1308,7 +1305,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		input.setStatus(ObservationStatus.FINAL);
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("1234");
 
-		ValidationResult output = myVal.validateWithResult(input);
+		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(1, errors.size());
 		assertEquals("Unknown code for 'http://loinc.org#1234'", errors.get(0).getMessage());
@@ -1325,7 +1322,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		input.setStatus(ObservationStatus.FINAL);
 		input.getCode().addCoding().setSystem("http://acme.org").setCode("12345");
 
-		ValidationResult output = myVal.validateWithResult(input);
+		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
 		assertEquals(0, errors.size(), errors.toString());
 	}
@@ -1337,7 +1334,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		p.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 		p.addIdentifier().setSystem("http://example.com/").setValue("12345").getType().addCoding().setSystem("http://example.com/foo/bar").setCode("bar");
 
-		ValidationResult output = myVal.validateWithResult(p);
+		ValidationResult output = myFhirValidator.validateWithResult(p);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
 		assertEquals(1, all.size());
 		assertEquals("Patient.identifier[0].type", all.get(0).getLocationString());
@@ -1352,13 +1349,13 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		addValidConcept("http://loinc.org", "8310-5");
 
 		Observation input = loadResource(ourCtx, Observation.class, "/r4/observation-with-body-temp-ucum.json");
-		ValidationResult output = myVal.validateWithResult(input);
+		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> all = logResultsAndReturnNonInformationalOnes(output);
 		assertThat(all, empty());
 
 		// Change the unit to something not supported
 		input.getValueQuantity().setCode("Heck");
-		output = myVal.validateWithResult(input);
+		output = myFhirValidator.validateWithResult(input);
 		all = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(2, all.size());
 		assertThat(all.get(0).getMessage(), containsString("Validation failed for 'http://unitsofmeasure.org#Heck'"));
@@ -1375,7 +1372,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		o.addPerformer(new Reference(p1));
 		o.addPerformer(new Reference(p2));
 
-		ValidationResult output = myVal.validateWithResult(o);
+		ValidationResult output = myFhirValidator.validateWithResult(o);
 		List<SingleValidationMessage> valMessages = logResultsAndReturnAll(output);
 		for (SingleValidationMessage msg : valMessages) {
 			assertThat(msg.getMessage(), not(containsString("have a performer")));
@@ -1395,7 +1392,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 			.setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
 			.setCode("MR");
 
-		ValidationResult output = myVal.validateWithResult(patient);
+		ValidationResult output = myFhirValidator.validateWithResult(patient);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
 		assertEquals(0, all.size());
 	}
@@ -1408,7 +1405,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		IResourceValidator.IValidatorResourceFetcher resourceFetcher = mock(IResourceValidator.IValidatorResourceFetcher.class);
 		when(resourceFetcher.validationPolicy(any(), any(), any(), any())).thenReturn(IResourceValidator.ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
 		myInstanceVal.setValidatorResourceFetcher(resourceFetcher);
-		myVal.validateWithResult(encoded);
+		myFhirValidator.validateWithResult(encoded);
 
 		verify(resourceFetcher, times(15)).resolveURL(any(), any(), anyString(), anyString(), anyString());
 		verify(resourceFetcher, times(12)).validationPolicy(any(), any(), anyString(), anyString());
@@ -1420,7 +1417,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	public void testValidateStructureDefinition() throws IOException {
 		String input = loadResource("/sdc-questionnaire.profile.xml");
 
-		ValidationResult output = myVal.validateWithResult(input);
+		ValidationResult output = myFhirValidator.validateWithResult(input);
 		logResultsAndReturnAll(output);
 
 		assertEquals(3, output.getMessages().size(), output.toString());
@@ -1439,7 +1436,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 			"  \"currency\": \"USD\"\n" +
 			" }\n" +
 			"}";
-		ValidationResult output = myVal.validateWithResult(input);
+		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(0, errors.size(), errors.toString());
 
@@ -1457,7 +1454,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 			"  \"currency\": \"BLAH\"\n" +
 			" }\n" +
 			"}";
-		ValidationResult output = myVal.validateWithResult(input);
+		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(1, errors.size(), errors.toString());
 		assertThat(errors.get(0).getMessage(), containsString("The value provided ('BLAH') is not in the value set http://hl7.org/fhir/ValueSet/currencies"));
@@ -1477,7 +1474,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 			.setText("This is text")
 			.setAuthor(new Reference("Patient/123"));
 
-		ValidationResult output = myVal.validateWithResult(allergy);
+		ValidationResult output = myFhirValidator.validateWithResult(allergy);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(0, errors.size(), errors.toString());
 
@@ -1496,7 +1493,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 			.setText("This is text")
 			.setAuthor(new Reference("CodeSystems/123"));
 
-		ValidationResult output = myVal.validateWithResult(allergy);
+		ValidationResult output = myFhirValidator.validateWithResult(allergy);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(0, errors.size(), errors.toString());
 		assertThat(errors.get(0).getMessage(), containsString("The value provided ('BLAH') is not in the value set http://hl7.org/fhir/ValueSet/currencies"));
@@ -1516,30 +1513,27 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		Bundle bundle = buildBundle(entriesCount, false);
 		assertThat(bundle.getEntry(), hasSize(entriesCount));
 
-		ValidationOptions validationOptions = buildValidationOptions();
-		// Run once to exclude initialization from time
-		myVal.validateWithResult(bundle, validationOptions);
+		try {
+			myFhirValidator.setConcurrentBundleValidation(true);
+			myFhirValidator.setBundleValidationThreadCount(4);
+			// Run once to exclude initialization from time
+			myFhirValidator.validateWithResult(bundle);
 
-		// execute
-		StopWatch stopwatch = new StopWatch();
-		ValidationResult output = myVal.validateWithResult(bundle, validationOptions);
-		ourLog.info("Validation time: {}", stopwatch);
-
-		// validate
-		List<SingleValidationMessage> all = logResultsAndReturnErrorOnes(output);
-		assertThat(output.getMessages(), hasSize(entriesCount * 2));
-		// This assert proves that we did a multi-threaded validation since the outer bundle fails validation
-		// due to lack of unique fullUrl values on the entries.  If you setConcurrentBundleValidation(false)
-		// above this test will fail.
-		assertEquals(0, all.size(), all.toString());
-	}
-
-	@NotNull
-	private ValidationOptions buildValidationOptions() {
-		ValidationOptions validationOptions = new ValidationOptions();
-		validationOptions.setConcurrentBundleValidation(true);
-		validationOptions.setBundleValidationThreadCount(4);
-		return validationOptions;
+			// execute
+			StopWatch stopwatch = new StopWatch();
+			ValidationResult output = myFhirValidator.validateWithResult(bundle);
+			ourLog.info("Validation time: {}", stopwatch);
+			// validate
+			List<SingleValidationMessage> all = logResultsAndReturnErrorOnes(output);
+			assertThat(output.getMessages(), hasSize(entriesCount * 2));
+			// This assert proves that we did a multi-threaded validation since the outer bundle fails validation
+			// due to lack of unique fullUrl values on the entries.  If you setConcurrentBundleValidation(false)
+			// above this test will fail.
+			assertEquals(0, all.size(), all.toString());
+		} finally {
+			myFhirValidator.setConcurrentBundleValidation(false);
+			myFhirValidator.setBundleValidationThreadCount(FhirValidator.DEFAULT_BUNDLE_VALIDATION_THREADCOUNT);
+		}
 	}
 
 	private Bundle buildBundle(int theSize, boolean theValidBundle) throws IOException {
