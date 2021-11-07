@@ -59,14 +59,23 @@ public final class BatchConstants {
 	 * TermCodeSystem delete
 	 */
 	public static final String TERM_CODE_SYSTEM_DELETE_JOB_NAME 			= "termCodeSystemDeleteJob";
+	public static final String TERM_CONCEPT_RELATIONS_DELETE_STEP_NAME	= "termConceptRelationsDeleteStep";
+	public static final String TERM_CONCEPTS_DELETE_STEP_NAME 				= "termConceptsDeleteStep";
+	public static final String TERM_CODE_SYSTEM_VERSION_DELETE_STEP_NAME = "termCodeSystemVersionDeleteStep";
 	public static final String TERM_CODE_SYSTEM_DELETE_STEP_NAME 			= "termCodeSystemDeleteStep";
 	public static final String JOB_PARAM_CODE_SYSTEM_ID 						= "termCodeSystemPid";
 
 	/**
 	 * TermCodeSystemVersion delete
 	 */
-	public static final String TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME 	= "termCodeSystemVersionDeleteJob";
-	public static final String TERM_CODE_SYSTEM_VERSION_DELETE_STEP_NAME	= "termCodeSystemVersionDeleteStep";
+	public static final String TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME 						= "termCodeSystemVersionDeleteJob";
+	public static final String TERM_CONCEPT_RELATIONS_UNIQUE_VERSION_DELETE_STEP_NAME 	= "termConceptRelationsUniqueVersionDeleteStep";
+	public static final String TERM_CONCEPTS_UNIQUE_VERSION_DELETE_STEP_NAME 				= "termConceptsUniqueVersionDeleteStep";
+	public static final String TERM_CODE_SYSTEM_UNIQUE_VERSION_DELETE_STEP_NAME 			= "termCodeSystemUniqueVersionDeleteStep";
+
+	/**
+	 * Both: TermCodeSystem delete and TermCodeSystemVersion delete
+	 */
 	public static final String JOB_PARAM_CODE_SYSTEM_VERSION_ID 			= "termCodeSystemVersionPid";
 
 
