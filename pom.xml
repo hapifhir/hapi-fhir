@@ -1531,7 +1531,7 @@
 			</dependency>
 			<dependency>
 				<groupId>org.jboss.resteasy</groupId>
-				<artifactId>resteasy-jaxrs</artifactId>
+				<artifactId>resteasy-core-spi</artifactId>
 				<version>${resteasy_version}</version>
 			</dependency>
 			<dependency>
