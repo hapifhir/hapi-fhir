@@ -34,11 +34,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 
 /**
@@ -84,8 +85,7 @@ public class FhirValidator {
 				registerValidatorModule(theInstance);
 			}
 		} else {
-			for (Iterator<IValidatorModule> iter = myValidators.iterator(); iter.hasNext(); ) {
-				IValidatorModule next = iter.next();
+			for (IValidatorModule next : myValidators) {
 				if (next.getClass().equals(type)) {
 					unregisterValidatorModule(next);
 				}
@@ -98,6 +98,7 @@ public class FhirValidator {
 		for (IValidatorModule next : myValidators) {
 			if (next.getClass().equals(type)) {
 				found = true;
+				break;
 			}
 		}
 		return found;
@@ -211,7 +212,21 @@ public class FhirValidator {
 	 * @since 1.1
 	 */
 	public ValidationResult validateWithResult(String theResource) {
-		return validateWithResult(theResource, null);
+		IValidationContext<IBaseResource> ctx = ValidationContext.forText(myContext, theResource, null);
+		return validateWithResult(ctx.getResource(), null);
+	}
+
+	/**
+	 * Validates a resource instance returning a {@link ValidationResult} which contains the results.
+	 *
+	 * @param theResource the resource to validate
+	 * @param theOptions  Optionally provides options to the validator
+	 * @return the results of validation
+	 * @since 4.0.0
+	 */
+	public ValidationResult validateWithResult(String theResource, ValidationOptions theOptions) {
+		IValidationContext<IBaseResource> ctx = ValidationContext.forText(myContext, theResource, theOptions);
+		return validateResource(ctx.getResource(), theOptions);
 	}
 
 	/**
@@ -240,23 +255,32 @@ public class FhirValidator {
 
 	private ValidationResult validateBundleEntriesConcurrently(IBaseBundle theBundle, ValidationOptions theOptions) {
 		List<IBaseResource> entries = BundleUtil.toListOfResources(myContext, theBundle);
+		List<String> entryBundlePaths = IntStream.range(0, entries.size())
+			.mapToObj(index -> String.format("Bundle.entry[%d].resource.ofType(%s)", index, entries.get(index).fhirType()))
+			.collect(Collectors.toList());
 
-		List<Future<ValidationResult>> futures = new ArrayList<>();
-		for (IBaseResource entry : entries) {
-			futures.add(myExecutorService.submit(() -> validateResource(entry, theOptions)));
-		}
+		List<Future<ValidationResult>> futures = entries.stream()
+			.map(entry -> myExecutorService.submit(() -> validateResource(entry, theOptions)))
+			.collect(Collectors.toList());
 
 		List<SingleValidationMessage> validationMessages = new ArrayList<>();
 		try {
-			for (Future<ValidationResult> future : futures) {
-				ValidationResult result = future.get();
-				// FIXME JB prepend bundle entry details so we know which entry has the errors
-				validationMessages.addAll(result.getMessages());
+			for (int i = 0; i < futures.size(); i++) {
+				ValidationResult result = futures.get(i).get();
+				final String bundleEntryPath = entryBundlePaths.get(i);
+				List<SingleValidationMessage> messages = result.getMessages().stream()
+					.map(message -> {
+						String currentPath = message.getLocationString().substring(message.getLocationString().indexOf('.'));
+						message.setLocationString(bundleEntryPath + currentPath);
+						return message;
+					})
+					.collect(Collectors.toList());
+				validationMessages.addAll(messages);
 			}
-		} catch (Exception e) {
-			throw new InternalErrorException(e);
+		} catch (InterruptedException | ExecutionException exp) {
+			throw new InternalErrorException(exp);
 		}
-		return new ValidationResult(myContext, validationMessages.stream().collect(Collectors.toList()));
+		return new ValidationResult(myContext, new ArrayList<>(validationMessages));
 	}
 
 	private ValidationResult validateResource(IBaseResource theResource, ValidationOptions theOptions) {
@@ -267,7 +291,7 @@ public class FhirValidator {
 		}
 
 		ValidationResult result = ctx.toResult();
-		result = invokeValidationCompletedHooks(theResource, null, result);
+		result = invokeValidationCompletedHooks(ctx.getResource(), ctx.getResourceAsString(), result);
 		return result;
 	}
 
@@ -285,39 +309,6 @@ public class FhirValidator {
 			}
 		}
 		return theValidationResult;
-	}
-
-	/**
-	 * Validates a resource instance returning a {@link ValidationResult} which contains the results.
-	 *
-	 * @param theResource the resource to validate
-	 * @param theOptions  Optionally provides options to the validator
-	 * @return the results of validation
-	 * @since 4.0.0
-	 */
-	// FIXME JB consolidate this method with the other one that also calls applyDefaultValidators()
-	public ValidationResult validateWithResult(String theResource, ValidationOptions theOptions) {
-		Validate.notNull(theResource, "theResource must not be null");
-
-		applyDefaultValidators();
-
-		IValidationContext<IBaseResource> ctx = ValidationContext.forText(myContext, theResource, theOptions);
-
-		if (myConcurrentBundleValidation && ctx.getResource() instanceof IBaseBundle) {
-			if (myExecutorService != null) {
-				return validateBundleEntriesConcurrently((IBaseBundle) ctx.getResource(), theOptions);
-			} else {
-				ourLog.error("Concurrent Bundle Validation is enabled but ExecutorService is null.  Reverting to serial validation.");
-			}
-		}
-
-		for (IValidatorModule next : myValidators) {
-			next.validateResource(ctx);
-		}
-
-		ValidationResult result = ctx.toResult();
-		result = invokeValidationCompletedHooks(null, theResource, result);
-		return result;
 	}
 
 	/**
