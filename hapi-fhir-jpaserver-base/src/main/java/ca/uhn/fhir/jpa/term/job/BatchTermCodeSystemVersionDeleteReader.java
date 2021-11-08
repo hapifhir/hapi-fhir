@@ -21,18 +21,15 @@ package ca.uhn.fhir.jpa.term.job;
  */
 
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
-import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import java.security.InvalidParameterException;
 import java.util.List;
 
 import static ca.uhn.fhir.jpa.batch.config.BatchConstants.JOB_PARAM_CODE_SYSTEM_ID;
-import static java.util.stream.Collectors.toList;
 
 /**
  *
@@ -53,9 +50,7 @@ public class BatchTermCodeSystemVersionDeleteReader implements ItemReader<Long> 
 	@Override
 	public Long read() throws Exception {
 		if (myTermCodeSystemVersionPidList == null) {
-			// fixme JM: add method to obtain IDs
-			List<TermCodeSystemVersion> tcsVersionList = myTermCodeSystemVersionDao.findByCodeSystemPid(myTermCodeSystemPid);
-			myTermCodeSystemVersionPidList = tcsVersionList.stream().map(TermCodeSystemVersion::getPid).sorted().collect(toList());
+			myTermCodeSystemVersionPidList = myTermCodeSystemVersionDao.findSortedPidsByCodeSystemPid(myTermCodeSystemPid);
 		}
 
 		if (myTermCodeSystemVersionPidList.isEmpty())  {
