@@ -1,7 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
@@ -19,6 +18,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.server.ResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
@@ -44,13 +44,13 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -62,20 +62,22 @@ public class RequestValidatingInterceptorR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RequestValidatingInterceptorR4Test.class);
 	@RegisterExtension
 	static HttpClientExtension ourClient = new HttpClientExtension();
-	private static FhirContext ourCtx = FhirContext.forR4Cached();
+	private static final FhirContext ourCtx = FhirContext.forR4Cached();
+
 	@RegisterExtension
-	static RestfulServerExtension ourServlet = new RestfulServerExtension(ourCtx)
-		.registerProvider(new PatientProvider());
+	@Order(0)
+	static RestfulServerExtension ourServlet = new RestfulServerExtension(ourCtx);
+	@RegisterExtension
+	@Order(1)
+	static ResourceProviderExtension<PatientProvider> ourProvider = new ResourceProviderExtension<>(ourServlet, new PatientProvider());
 	private static boolean ourLastRequestWasSearch;
 	private static int ourPort;
-	private static String ourLastGraphQlQueryGet;
-	private static String ourLastGraphQlQueryPost;
 	private RequestValidatingInterceptor myInterceptor;
 
 	@BeforeEach
 	public void before() {
-		ourLastGraphQlQueryGet = null;
-		ourLastGraphQlQueryPost = null;
+		ourProvider.getProvider().ourLastGraphQlQueryGet = null;
+		ourProvider.getProvider().ourLastGraphQlQueryPost = null;
 		ourLastRequestWasSearch = false;
 		ourServlet.unregisterAllInterceptors();
 
@@ -128,7 +130,7 @@ public class RequestValidatingInterceptorR4Test {
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertEquals("{\"name\":{\"family\": \"foo\"}}", responseContent);
-			assertEquals("{name}", ourLastGraphQlQueryGet);
+			assertEquals("{name}", ourProvider.getProvider().ourLastGraphQlQueryGet);
 		}
 
 	}
@@ -146,7 +148,7 @@ public class RequestValidatingInterceptorR4Test {
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertEquals("{\"name\":{\"family\": \"foo\"}}", responseContent);
-			assertEquals("{name}", ourLastGraphQlQueryPost);
+			assertEquals("{name}", ourProvider.getProvider().ourLastGraphQlQueryPost);
 		}
 
 	}
@@ -174,7 +176,7 @@ public class RequestValidatingInterceptorR4Test {
 
 		assertEquals(422, status.getStatusLine().getStatusCode());
 		assertThat(status.toString(), containsString("X-FHIR-Request-Validation"));
-		assertThat(responseContent, containsString("\"severity\":\"error\""));
+		assertThat(responseContent, containsString("\"severity\": \"error\""));
 	}
 
 	@Test
@@ -544,6 +546,10 @@ public class RequestValidatingInterceptorR4Test {
 
 	public static class PatientProvider implements IResourceProvider {
 
+		public String ourLastGraphQlQueryGet;
+		public String ourLastGraphQlQueryPost;
+
+		private IBaseResource myReturnResource;
 
 		@Create()
 		public MethodOutcome createPatient(@ResourceParam Patient thePatient, @IdParam IdType theIdParam) {
@@ -572,11 +578,22 @@ public class RequestValidatingInterceptorR4Test {
 			return Patient.class;
 		}
 
-		@Search
-		public List<IResource> search(@OptionalParam(name = "foo") StringParam theString) {
-			ourLastRequestWasSearch = true;
-			return new ArrayList<IResource>();
+		public void setReturnResource(IBaseResource theReturnResource) {
+			myReturnResource = theReturnResource;
 		}
+
+		@Search
+		public ArrayList<IBaseResource> search(@OptionalParam(name = "foo") StringParam theString) {
+			ourLastRequestWasSearch = true;
+			ArrayList<IBaseResource> retVal = new ArrayList<>();
+			if (myReturnResource != null) {
+				myReturnResource.setId("1");
+				retVal.add(myReturnResource);
+				myReturnResource = null;
+			}
+			return retVal;
+		}
+
 
 	}
 
