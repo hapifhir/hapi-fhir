@@ -227,7 +227,7 @@ public class FhirValidator {
 
 		applyDefaultValidators();
 
-		if (theResource instanceof IBaseBundle && myConcurrentBundleValidation) {
+		if (myConcurrentBundleValidation && theResource instanceof IBaseBundle) {
 			if (myExecutorService != null) {
 				return validateBundleEntriesConcurrently((IBaseBundle) theResource, theOptions);
 			} else {
@@ -303,7 +303,7 @@ public class FhirValidator {
 
 		IValidationContext<IBaseResource> ctx = ValidationContext.forText(myContext, theResource, theOptions);
 
-		if (ctx.getResource() instanceof IBaseBundle && myConcurrentBundleValidation) {
+		if (myConcurrentBundleValidation && ctx.getResource() instanceof IBaseBundle) {
 			if (myExecutorService != null) {
 				return validateBundleEntriesConcurrently((IBaseBundle) ctx.getResource(), theOptions);
 			} else {
