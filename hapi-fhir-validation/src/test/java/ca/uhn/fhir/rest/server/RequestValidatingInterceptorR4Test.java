@@ -5,17 +5,23 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
+import ca.uhn.fhir.rest.annotation.GraphQL;
+import ca.uhn.fhir.rest.annotation.GraphQLQueryBody;
+import ca.uhn.fhir.rest.annotation.GraphQLQueryUrl;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.validation.IValidationContext;
 import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
@@ -28,29 +34,23 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -59,23 +59,25 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
 public class RequestValidatingInterceptorR4Test {
-	private static CloseableHttpClient ourClient;
-
-	private static FhirContext ourCtx = FhirContext.forR4();
-	private static boolean ourLastRequestWasSearch;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RequestValidatingInterceptorR4Test.class);
+	@RegisterExtension
+	static HttpClientExtension ourClient = new HttpClientExtension();
+	private static FhirContext ourCtx = FhirContext.forR4Cached();
+	@RegisterExtension
+	static RestfulServerExtension ourServlet = new RestfulServerExtension(ourCtx)
+		.registerProvider(new PatientProvider());
+	private static boolean ourLastRequestWasSearch;
 	private static int ourPort;
-
-	private static Server ourServer;
-
-	private static RestfulServer ourServlet;
-
+	private static String ourLastGraphQlQueryGet;
+	private static String ourLastGraphQlQueryPost;
 	private RequestValidatingInterceptor myInterceptor;
 
 	@BeforeEach
 	public void before() {
+		ourLastGraphQlQueryGet = null;
+		ourLastGraphQlQueryPost = null;
 		ourLastRequestWasSearch = false;
-		ourServlet.getInterceptorService().unregisterAllInterceptors();
+		ourServlet.unregisterAllInterceptors();
 
 		myInterceptor = new RequestValidatingInterceptor();
 		//		myInterceptor.setFailOnSeverity(ResultSeverityEnum.ERROR);
@@ -84,6 +86,7 @@ public class RequestValidatingInterceptorR4Test {
 		//		myInterceptor.setResponseHeaderValue(RequestValidatingInterceptor.DEFAULT_RESPONSE_HEADER_VALUE);
 
 		ourServlet.registerInterceptor(myInterceptor);
+		ourPort = ourServlet.getPort();
 	}
 
 	@Test
@@ -100,7 +103,7 @@ public class RequestValidatingInterceptorR4Test {
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
 		httpPost.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
 
-		HttpResponse status = ourClient.execute(httpPost);
+		HttpResponse status = ourClient.getClient().execute(httpPost);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -111,6 +114,41 @@ public class RequestValidatingInterceptorR4Test {
 		assertEquals(201, status.getStatusLine().getStatusCode());
 		assertThat(status.toString(), containsString("X-FHIR-Request-Validation"));
 		assertThat(responseContent, not(containsString("<severity value=\"error\"/>")));
+	}
+
+	@Test
+	public void testGraphQlRequestResponse_GET() throws IOException {
+		HttpGet request = new HttpGet("http://localhost:" + ourPort + "/Patient/123/$graphql?query=" + UrlUtil.escapeUrlParam("{name}"));
+
+		try (CloseableHttpResponse status = ourClient.getClient().execute(request)) {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+
+			ourLog.info("Response was:\n{}", status);
+			ourLog.info("Response was:\n{}", responseContent);
+
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertEquals("{\"name\":{\"family\": \"foo\"}}", responseContent);
+			assertEquals("{name}", ourLastGraphQlQueryGet);
+		}
+
+	}
+
+	@Test
+	public void testGraphQlRequestResponse_POST() throws IOException {
+		HttpPost request = new HttpPost("http://localhost:" + ourPort + "/Patient/123/$graphql");
+		request.setEntity(new StringEntity("{\"query\": \"{name}\"}", ContentType.APPLICATION_JSON));
+
+		try (CloseableHttpResponse status = ourClient.getClient().execute(request)) {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+
+			ourLog.info("Response was:\n{}", status);
+			ourLog.info("Response was:\n{}", responseContent);
+
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertEquals("{\"name\":{\"family\": \"foo\"}}", responseContent);
+			assertEquals("{name}", ourLastGraphQlQueryPost);
+		}
+
 	}
 
 	@Test
@@ -126,7 +164,7 @@ public class RequestValidatingInterceptorR4Test {
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
 		httpPost.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
 
-		HttpResponse status = ourClient.execute(httpPost);
+		HttpResponse status = ourClient.getClient().execute(httpPost);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -150,7 +188,7 @@ public class RequestValidatingInterceptorR4Test {
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
 		httpPost.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
 
-		HttpResponse status = ourClient.execute(httpPost);
+		HttpResponse status = ourClient.getClient().execute(httpPost);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -176,7 +214,7 @@ public class RequestValidatingInterceptorR4Test {
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
 		httpPost.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
 
-		HttpResponse status = ourClient.execute(httpPost);
+		HttpResponse status = ourClient.getClient().execute(httpPost);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -187,8 +225,6 @@ public class RequestValidatingInterceptorR4Test {
 		assertEquals(201, status.getStatusLine().getStatusCode());
 		assertThat(status.toString(), (containsString("X-FHIR-Request-Validation: NO ISSUES")));
 	}
-
-
 
 	@Test
 	public void testValidateXmlPayloadWithXxeDirective_InstanceValidator() throws IOException {
@@ -213,7 +249,7 @@ public class RequestValidatingInterceptorR4Test {
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
 		httpPost.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
-		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
+		try (CloseableHttpResponse status = ourClient.getClient().execute(httpPost)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 
 			ourLog.info("Response was:\n{}", status);
@@ -224,7 +260,6 @@ public class RequestValidatingInterceptorR4Test {
 		}
 
 	}
-
 
 	@Test
 	public void testCreateXmlInvalidInstanceValidator() throws Exception {
@@ -242,7 +277,7 @@ public class RequestValidatingInterceptorR4Test {
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
 		httpPost.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
-		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
+		try (CloseableHttpResponse status = ourClient.getClient().execute(httpPost)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 
 			ourLog.info("Response was:\n{}", status);
@@ -266,7 +301,7 @@ public class RequestValidatingInterceptorR4Test {
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
 		httpPost.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
-		HttpResponse status = ourClient.execute(httpPost);
+		HttpResponse status = ourClient.getClient().execute(httpPost);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -293,7 +328,7 @@ public class RequestValidatingInterceptorR4Test {
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
 		httpPost.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
-		HttpResponse status = ourClient.execute(httpPost);
+		HttpResponse status = ourClient.getClient().execute(httpPost);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -304,7 +339,6 @@ public class RequestValidatingInterceptorR4Test {
 		assertEquals(201, status.getStatusLine().getStatusCode());
 		assertThat(status.toString(), containsString("X-FHIR-Request-Validation: {\"resourceType\":\"OperationOutcome"));
 	}
-
 
 	@SuppressWarnings("unchecked")
 	@Test
@@ -317,14 +351,14 @@ public class RequestValidatingInterceptorR4Test {
 		myInterceptor.setIgnoreValidatorExceptions(false);
 
 		Mockito.doThrow(new NullPointerException("SOME MESSAGE")).when(module).validateResource(Mockito.any(IValidationContext.class));
-		
+
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(patient);
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
 		httpPost.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		HttpResponse status = ourClient.execute(httpPost);
+		HttpResponse status = ourClient.getClient().execute(httpPost);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -347,14 +381,14 @@ public class RequestValidatingInterceptorR4Test {
 		myInterceptor.setIgnoreValidatorExceptions(true);
 
 		Mockito.doThrow(NullPointerException.class).when(module).validateResource(Mockito.any(IValidationContext.class));
-		
+
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(patient);
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
 		httpPost.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		HttpResponse status = ourClient.execute(httpPost);
+		HttpResponse status = ourClient.getClient().execute(httpPost);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -377,14 +411,14 @@ public class RequestValidatingInterceptorR4Test {
 		myInterceptor.setIgnoreValidatorExceptions(false);
 
 		Mockito.doThrow(new InternalErrorException("FOO")).when(module).validateResource(Mockito.any(IValidationContext.class));
-		
+
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(patient);
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
 		httpPost.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		HttpResponse status = ourClient.execute(httpPost);
+		HttpResponse status = ourClient.getClient().execute(httpPost);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -407,14 +441,14 @@ public class RequestValidatingInterceptorR4Test {
 		myInterceptor.setIgnoreValidatorExceptions(true);
 
 		Mockito.doThrow(InternalErrorException.class).when(module).validateResource(Mockito.any(IValidationContext.class));
-		
+
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(patient);
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
 		httpPost.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		HttpResponse status = ourClient.execute(httpPost);
+		HttpResponse status = ourClient.getClient().execute(httpPost);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -437,7 +471,7 @@ public class RequestValidatingInterceptorR4Test {
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
 		httpPost.setEntity(new StringEntity(encoded, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
-		HttpResponse status = ourClient.execute(httpPost);
+		HttpResponse status = ourClient.getClient().execute(httpPost);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -459,7 +493,7 @@ public class RequestValidatingInterceptorR4Test {
 
 		HttpDelete httpDelete = new HttpDelete("http://localhost:" + ourPort + "/Patient/123");
 
-		CloseableHttpResponse status = ourClient.execute(httpDelete);
+		CloseableHttpResponse status = ourClient.getClient().execute(httpDelete);
 		try {
 			ourLog.info("Response was:\n{}", status);
 
@@ -479,7 +513,7 @@ public class RequestValidatingInterceptorR4Test {
 		// This header caused a crash
 		httpGet.addHeader("Content-Type", "application/xml+fhir");
 
-		HttpResponse status = ourClient.execute(httpGet);
+		HttpResponse status = ourClient.getClient().execute(httpGet);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -495,7 +529,7 @@ public class RequestValidatingInterceptorR4Test {
 	public void testSearch() throws Exception {
 		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
 
-		HttpResponse status = ourClient.execute(httpPost);
+		HttpResponse status = ourClient.getClient().execute(httpPost);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -508,35 +542,8 @@ public class RequestValidatingInterceptorR4Test {
 		assertEquals(true, ourLastRequestWasSearch);
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
-		TestUtil.randomizeLocaleAndTimezone();
-	}
-
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
-
-		PatientProvider patientProvider = new PatientProvider();
-
-		ServletHandler proxyHandler = new ServletHandler();
-		ourServlet = new RestfulServer(ourCtx);
-		ourServlet.setResourceProviders(patientProvider);
-		ServletHolder servletHolder = new ServletHolder(ourServlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
-	}
-
 	public static class PatientProvider implements IResourceProvider {
+
 
 		@Create()
 		public MethodOutcome createPatient(@ResourceParam Patient thePatient, @IdParam IdType theIdParam) {
@@ -546,6 +553,18 @@ public class RequestValidatingInterceptorR4Test {
 		@Delete
 		public MethodOutcome delete(@IdParam IdType theId) {
 			return new MethodOutcome(theId.withVersion("2"));
+		}
+
+		@GraphQL(type = RequestTypeEnum.GET)
+		public String graphQLGet(@IdParam IIdType theId, @GraphQLQueryUrl String theQueryUrl) {
+			ourLastGraphQlQueryGet = theQueryUrl;
+			return "{\"name\":{\"family\": \"foo\"}}";
+		}
+
+		@GraphQL(type = RequestTypeEnum.POST)
+		public String graphQLPost(@IdParam IIdType theId, @GraphQLQueryBody String theQueryUrl) {
+			ourLastGraphQlQueryPost = theQueryUrl;
+			return "{\"name\":{\"family\": \"foo\"}}";
 		}
 
 		@Override
@@ -559,6 +578,11 @@ public class RequestValidatingInterceptorR4Test {
 			return new ArrayList<IResource>();
 		}
 
+	}
+
+	@AfterAll
+	public static void afterClassClearContext() throws Exception {
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 }

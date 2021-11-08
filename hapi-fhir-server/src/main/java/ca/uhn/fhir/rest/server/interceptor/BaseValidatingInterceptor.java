@@ -306,8 +306,15 @@ public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnric
 	 * Note: May return null
 	 */
 	protected ValidationResult validate(T theRequest, RequestDetails theRequestDetails) {
-		if (theRequest == null) {
+		if (theRequest == null || theRequestDetails == null) {
 			return null;
+		}
+
+		switch (theRequestDetails.getRestOperationType()) {
+			case GRAPHQL_REQUEST:
+				return null;
+			default:
+				break;
 		}
 
 		FhirValidator validator;
