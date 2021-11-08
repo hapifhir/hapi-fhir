@@ -11,7 +11,9 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.ResponseValidatingInterceptor;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.IValidationContext;
 import ca.uhn.fhir.validation.IValidatorModule;
@@ -40,6 +42,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
@@ -56,18 +59,21 @@ import static org.mockito.Mockito.mock;
 public class ResponseValidatingInterceptorR4Test {
 	public static IBaseResource myReturnResource;
 
-	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forR4();
+	@RegisterExtension
+	static HttpClientExtension ourClient = new HttpClientExtension();
+	private static FhirContext ourCtx = FhirContext.forR4Cached();
+	@RegisterExtension
+	static RestfulServerExtension ourServlet = new RestfulServerExtension(ourCtx)
+		.registerProvider(new RequestValidatingInterceptorR4Test.PatientProvider());
+
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResponseValidatingInterceptorR4Test.class);
 	private static int ourPort;
-	private static Server ourServer;
-	private static RestfulServer ourServlet;
 	private ResponseValidatingInterceptor myInterceptor;
 
 	@BeforeEach
 	public void before() {
 		myReturnResource = null;
-		ourServlet.getInterceptorService().unregisterAllInterceptors();
+		ourServlet.unregisterAllInterceptors();
 
 		myInterceptor = new ResponseValidatingInterceptor();
 		// myInterceptor.setFailOnSeverity(ResultSeverityEnum.ERROR);
@@ -76,6 +82,7 @@ public class ResponseValidatingInterceptorR4Test {
 		// myInterceptor.setResponseHeaderValue(RequestValidatingInterceptor.DEFAULT_RESPONSE_HEADER_VALUE);
 
 		ourServlet.registerInterceptor(myInterceptor);
+		ourPort = ourServlet.getPort();
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -96,7 +103,7 @@ public class ResponseValidatingInterceptorR4Test {
 		Mockito.doThrow(new NullPointerException("SOME MESSAGE")).when(module).validateResource(Mockito.any(IValidationContext.class));
 		
 		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
-		HttpResponse status = ourClient.execute(httpPost);
+		HttpResponse status = ourClient.getClient().execute(httpPost);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -126,7 +133,7 @@ public class ResponseValidatingInterceptorR4Test {
 		Mockito.doThrow(NullPointerException.class).when(module).validateResource(Mockito.any(IValidationContext.class));
 		
 		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
-		HttpResponse status = ourClient.execute(httpPost);
+		HttpResponse status = ourClient.getClient().execute(httpPost);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -156,7 +163,7 @@ public class ResponseValidatingInterceptorR4Test {
 		Mockito.doThrow(new InternalErrorException("FOO")).when(module).validateResource(Mockito.any(IValidationContext.class));
 		
 		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
-		HttpResponse status = ourClient.execute(httpPost);
+		HttpResponse status = ourClient.getClient().execute(httpPost);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -186,7 +193,7 @@ public class ResponseValidatingInterceptorR4Test {
 		Mockito.doThrow(InternalErrorException.class).when(module).validateResource(Mockito.any(IValidationContext.class));
 		
 		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
-		HttpResponse status = ourClient.execute(httpPost);
+		HttpResponse status = ourClient.getClient().execute(httpPost);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -209,7 +216,7 @@ public class ResponseValidatingInterceptorR4Test {
 
 		HttpDelete httpDelete = new HttpDelete("http://localhost:" + ourPort + "/Patient/123");
 
-		CloseableHttpResponse status = ourClient.execute(httpDelete);
+		CloseableHttpResponse status = ourClient.getClient().execute(httpDelete);
 		try {
 			ourLog.info("Response was:\n{}", status);
 
@@ -238,7 +245,7 @@ public class ResponseValidatingInterceptorR4Test {
 		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
 
 		{
-			HttpResponse status = ourClient.execute(httpPost);
+			HttpResponse status = ourClient.getClient().execute(httpPost);
 
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			IOUtils.closeQuietly(status.getEntity().getContent());
@@ -252,7 +259,7 @@ public class ResponseValidatingInterceptorR4Test {
 		}
 		{
 			myInterceptor.setMaximumHeaderLength(100);
-			HttpResponse status = ourClient.execute(httpPost);
+			HttpResponse status = ourClient.getClient().execute(httpPost);
 
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			IOUtils.closeQuietly(status.getEntity().getContent());
@@ -277,7 +284,7 @@ public class ResponseValidatingInterceptorR4Test {
 
 		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
 
-		HttpResponse status = ourClient.execute(httpPost);
+		HttpResponse status = ourClient.getClient().execute(httpPost);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -290,9 +297,6 @@ public class ResponseValidatingInterceptorR4Test {
 				"X-FHIR-Response-Validation: {\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"information\",\"code\":\"informational\",\"diagnostics\":\"No issues detected\"}]}")));
 	}
 
-	/**
-	 * Ignored until #264 is fixed
-	 */
 	@Test
 	public void testSearchJsonInvalidNoValidatorsSpecified() throws Exception {
 		Patient patient = new Patient();
@@ -303,7 +307,7 @@ public class ResponseValidatingInterceptorR4Test {
 
 		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
 
-		HttpResponse status = ourClient.execute(httpPost);
+		HttpResponse status = ourClient.getClient().execute(httpPost);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -325,7 +329,7 @@ public class ResponseValidatingInterceptorR4Test {
 
 		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
 
-		HttpResponse status = ourClient.execute(httpPost);
+		HttpResponse status = ourClient.getClient().execute(httpPost);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -350,7 +354,7 @@ public class ResponseValidatingInterceptorR4Test {
 
 		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
 
-		HttpResponse status = ourClient.execute(httpPost);
+		HttpResponse status = ourClient.getClient().execute(httpPost);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -376,7 +380,7 @@ public class ResponseValidatingInterceptorR4Test {
 
 		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
 
-		HttpResponse status = ourClient.execute(httpPost);
+		HttpResponse status = ourClient.getClient().execute(httpPost);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -401,7 +405,7 @@ public class ResponseValidatingInterceptorR4Test {
 
 		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
 
-		HttpResponse status = ourClient.execute(httpPost);
+		HttpResponse status = ourClient.getClient().execute(httpPost);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -423,7 +427,7 @@ public class ResponseValidatingInterceptorR4Test {
 
 		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
 
-		HttpResponse status = ourClient.execute(httpPost);
+		HttpResponse status = ourClient.getClient().execute(httpPost);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -443,7 +447,7 @@ public class ResponseValidatingInterceptorR4Test {
 		myInterceptor.setResponseHeaderValueNoIssues("No issues");
 
 		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/metadata");
-		HttpResponse status = ourClient.execute(httpPost);
+		HttpResponse status = ourClient.getClient().execute(httpPost);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -463,7 +467,7 @@ public class ResponseValidatingInterceptorR4Test {
 		myInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
 
 		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/metadata?_pretty=true");
-		HttpResponse status = ourClient.execute(httpPost);
+		HttpResponse status = ourClient.getClient().execute(httpPost);
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 		ourLog.info(responseContent);
@@ -474,36 +478,6 @@ public class ResponseValidatingInterceptorR4Test {
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(status.toString(), (containsString("X-FHIR-Response-Validation")));
-	}
-
-	@AfterAll
-	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
-		TestUtil.randomizeLocaleAndTimezone();
-	}
-
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
-
-		PatientProvider patientProvider = new PatientProvider();
-
-		ServletHandler proxyHandler = new ServletHandler();
-		ourServlet = new RestfulServer(ourCtx);
-		ourServlet.setResourceProviders(patientProvider);
-		ourServlet.setDefaultResponseEncoding(EncodingEnum.XML);
-
-		ServletHolder servletHolder = new ServletHolder(ourServlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
 	}
 
 	public static class PatientProvider implements IResourceProvider {
