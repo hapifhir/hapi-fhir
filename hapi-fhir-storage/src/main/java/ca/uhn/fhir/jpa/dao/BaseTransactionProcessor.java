@@ -202,7 +202,6 @@ public abstract class BaseTransactionProcessor {
 		if (myExecutor == null) {
 			if (myDaoConfig.getBundleBatchPoolSize() > 1) {
 				myExecutor = ThreadPoolUtil.newThreadPool(myDaoConfig.getBundleBatchPoolSize(), myDaoConfig.getBundleBatchMaxPoolSize(), "bundle-batch-");
-
 			} else {
 				SyncTaskExecutor executor = new SyncTaskExecutor();
 				myExecutor = executor;
