@@ -44,6 +44,8 @@ import java.util.Collection;
 import static ca.uhn.fhir.rest.api.Constants.CT_GRAPHQL;
 import static ca.uhn.fhir.rest.api.Constants.CT_JSON;
 import static ca.uhn.fhir.rest.server.method.ResourceParameter.createRequestReader;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 public class GraphQLQueryBodyParameter implements IParameter {
 
@@ -51,8 +53,15 @@ public class GraphQLQueryBodyParameter implements IParameter {
 
 	@Override
 	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
-		String ctValue = theRequest.getHeader(Constants.HEADER_CONTENT_TYPE);
+		String ctValue = defaultString(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE));
 		Reader requestReader = createRequestReader(theRequest);
+
+		// Trim off "; charset=FOO" from the content-type header
+		int semicolonIdx = ctValue.indexOf(';');
+		if (semicolonIdx != -1) {
+			ctValue = ctValue.substring(0, semicolonIdx);
+		}
+		ctValue = trim(ctValue);
 
 		if (CT_JSON.equals(ctValue)) {
 			try {
