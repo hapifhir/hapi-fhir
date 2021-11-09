@@ -27,22 +27,20 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.validation.schematron.SchematronProvider;
-import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -230,20 +228,9 @@ public class FhirValidator {
 	 */
 	public ValidationResult validateWithResult(String theResource, ValidationOptions theOptions) {
 		Validate.notNull(theResource, "theResource must not be null");
-
-		applyDefaultValidators();
-
 		IValidationContext<IBaseResource> validationContext = ValidationContext.forText(myContext, theResource, theOptions);
-
-		ValidationResult result;
-		if (myConcurrentBundleValidation && validationContext.getResource() instanceof IBaseBundle
-			&& myExecutorService != null) {
-			result = validateBundleEntriesConcurrently(validationContext, theOptions);
-		} else {
-			result = validateResource(validationContext);
-		}
-
-		return invokeValidationCompletedHooks(null, theResource, result);
+		Function<ValidationResult, ValidationResult> callback = result -> invokeValidationCompletedHooks(null, theResource, result);
+		return doValidate(validationContext, theOptions, callback);
 	}
 
 	/**
@@ -256,20 +243,24 @@ public class FhirValidator {
 	 */
 	public ValidationResult validateWithResult(IBaseResource theResource, ValidationOptions theOptions) {
 		Validate.notNull(theResource, "theResource must not be null");
+		IValidationContext<IBaseResource> validationContext = ValidationContext.forResource(myContext, theResource, theOptions);
+		Function<ValidationResult, ValidationResult> callback = result -> invokeValidationCompletedHooks(theResource, null, result);
+		return doValidate(validationContext, theOptions, callback);
+	}
 
+	private ValidationResult doValidate(IValidationContext<IBaseResource> theValidationContext, ValidationOptions theOptions,
+													Function<ValidationResult, ValidationResult> theValidationCompletionCallback) {
 		applyDefaultValidators();
 
-		IValidationContext<IBaseResource> validationContext = ValidationContext.forResource(myContext, theResource, theOptions);
-
 		ValidationResult result;
-		if (myConcurrentBundleValidation && validationContext.getResource() instanceof IBaseBundle
+		if (myConcurrentBundleValidation && theValidationContext.getResource() instanceof IBaseBundle
 			&& myExecutorService != null) {
-			result = validateBundleEntriesConcurrently(validationContext, theOptions);
+			result = validateBundleEntriesConcurrently(theValidationContext, theOptions);
 		} else {
-			result = validateResource(validationContext);
+			result = validateResource(theValidationContext);
 		}
 
-		return invokeValidationCompletedHooks(theResource, null, result);
+		return theValidationCompletionCallback.apply(result);
 	}
 
 	private ValidationResult validateBundleEntriesConcurrently(IValidationContext<IBaseResource> theValidationContext, ValidationOptions theOptions) {
@@ -361,6 +352,7 @@ public class FhirValidator {
 		return this;
 	}
 
+	// Simple Tuple to keep track of bundle path and associate aync future task
 	private static class ConcurrentValidationTask {
 		private final String myResourcePathPrefix;
 		private final Future<ValidationResult> myFuture;
@@ -378,4 +370,5 @@ public class FhirValidator {
 			return myFuture;
 		}
 	}
+
 }
