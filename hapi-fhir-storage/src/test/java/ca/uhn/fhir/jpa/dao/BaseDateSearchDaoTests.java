@@ -25,7 +25,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public abstract class BaseDateSearchDaoTests {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseDateSearchDaoTests.class);
 
-	// wipmb can we disable tests so it shows in the UI?
 	/**
 	 * Id of test Observation
 	 */
@@ -92,7 +91,6 @@ public abstract class BaseDateSearchDaoTests {
 	/**
 	 * Helper to provide local setup and query services.
 	 *
-	 // wipmb can we inject into a constructor instead of this
 	 * Use an abstract method instead of a constructor because JUnit has a such a funky lifecycle.
 	 */
 	protected abstract Embedding getEmbedding();
