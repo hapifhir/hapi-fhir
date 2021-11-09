@@ -1,15 +1,16 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.config.TestR4WithLuceneDisabledConfig;
-import ca.uhn.fhir.jpa.conformance.BaseDateSearchDaoTests;
+import ca.uhn.fhir.jpa.dao.BaseDateSearchDaoTests;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
+import ca.uhn.fhir.jpa.dao.DaoTestDataBuilder;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import org.hl7.fhir.r4.model.Observation;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +19,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -35,6 +34,8 @@ public class FhirResourceDaoR4LuceneDisabledStandardQueries extends BaseJpaTest 
 	@Autowired
 	@Qualifier("myObservationDaoR4")
 	IFhirResourceDao<Observation> myObservationDao;
+	@Autowired
+	protected DaoRegistry myDaoRegistry;
 
 	@Override
 	protected PlatformTransactionManager getTxManager() {
@@ -50,7 +51,8 @@ public class FhirResourceDaoR4LuceneDisabledStandardQueries extends BaseJpaTest 
 	public class DateSearchTests extends BaseDateSearchDaoTests {
 		@Override
 		protected Embedding getEmbedding() {
-			return new JPAEmbedding<>(myFhirCtx, myObservationDao, myTxManager);
+			DaoTestDataBuilder testDataBuilder = new DaoTestDataBuilder(myFhirCtx, myDaoRegistry, new SystemRequestDetails());
+			return new TestDataBuilderEmbedding<>(testDataBuilder, myObservationDao);
 		}
 	}
 

@@ -1,12 +1,11 @@
-package ca.uhn.fhir.jpa.conformance;
+package ca.uhn.fhir.jpa.dao;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.conformance.DateSearchTestCase;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateParam;
-import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -14,8 +13,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -113,32 +110,18 @@ public abstract class BaseDateSearchDaoTests {
 
 	}
 
-	/** Provide a test Embedding using standard JPA dao services */
-	public static class JPAEmbedding<O extends IBaseResource> implements BaseDateSearchDaoTests.Embedding {
-		final private FhirContext myFhirContext;
-		final private IFhirResourceDao<O> myObservationDao;
-		final private PlatformTransactionManager myTransactionManager;
+	public static class TestDataBuilderEmbedding<O extends IBaseResource> implements BaseDateSearchDaoTests.Embedding {
+		final ITestDataBuilder myTestDataBuilder;
+		final IFhirResourceDao<O> myObservationDao;
 
-		public JPAEmbedding(FhirContext theFhirContext, IFhirResourceDao<O> theObservationDao, PlatformTransactionManager theTransactionManager) {
-			myFhirContext = theFhirContext;
+		public TestDataBuilderEmbedding(ITestDataBuilder theTestDataBuilder, IFhirResourceDao<O> theObservationDao) {
+			myTestDataBuilder = theTestDataBuilder;
 			myObservationDao = theObservationDao;
-			myTransactionManager = theTransactionManager;
 		}
 
-		/**
-		 * Version-agnostic helper to build a test Observation using JPA collaborators
-		 */
 		@Override
 		public IIdType createObservationWithEffectiveDate(String theResourceDate) {
-			// noinspection unchecked -- getResourceDefinition() could make IBase, but our dao needs IBaseResource
-			O obs = (O) myFhirContext.getResourceDefinition("Observation").newInstance();
-			FhirTerser fhirTerser = myFhirContext.newTerser();
-			fhirTerser.addElement(obs, "effectiveDateTime", theResourceDate);
-			ourLog.info("obs {}", myFhirContext.newJsonParser().encodeResourceToString(obs));
-
-			DaoMethodOutcome createOutcome = new TransactionTemplate(myTransactionManager).execute(s -> myObservationDao.create(obs));
-			assert createOutcome != null;
-			return createOutcome.getId();
+			return myTestDataBuilder.createObservation(myTestDataBuilder.withEffectiveDate(theResourceDate));
 		}
 
 		@Override
