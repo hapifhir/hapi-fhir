@@ -1524,6 +1524,9 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 			StopWatch stopwatch = new StopWatch();
 			ValidationResult output = myFhirValidator.validateWithResult(bundle);
 			ourLog.info("Validation time: {}", stopwatch);
+			// assert that validation messages include the bundle entry path
+			assertTrue(output.getMessages().stream().anyMatch(message -> message.getLocationString().contains("Bundle.entry[0].resource.ofType(Patient)")));
+			assertTrue(output.getMessages().stream().anyMatch(message -> message.getLocationString().contains("Bundle.entry[1].resource.ofType(Patient)")));
 			// validate
 			List<SingleValidationMessage> all = logResultsAndReturnErrorOnes(output);
 			assertThat(output.getMessages(), hasSize(entriesCount * 2));
