@@ -8,6 +8,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.print.attribute.standard.Severity;
 
 /**
  * This validation support module may be placed at the end of a {@link ValidationSupportChain}
@@ -20,7 +21,7 @@ import javax.annotation.Nullable;
 public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSupport {
 	public static final boolean ALLOW_NON_EXISTENT_CODE_SYSTEM_DEFAULT = false;
 
-	private boolean myAllowNonExistentCodeSystem = ALLOW_NON_EXISTENT_CODE_SYSTEM_DEFAULT;
+	private IssueSeverity myNonExistentCodeSystemSeverity = IssueSeverity.ERROR;
 
 	/**
 	 * Constructor
@@ -34,17 +35,32 @@ public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSup
 		return true;
 	}
 
+	@Override
+	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
+		return canValidateCodeSystem(theValidationSupportContext, theSystem);
+	}
+
+	@Override
+	public CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+		if (!canValidateCodeSystem(theValidationSupportContext, theCodeSystem)) {
+			return null;
+		}
+
+		// we don't set the code
+		// cause if we do, the severity is stripped out
+		// (see VersionSpecificWorkerContextWrapper.convertValidationResult)
+		return new CodeValidationResult()
+			.setSeverity(myNonExistentCodeSystemSeverity)
+			.setMessage("Code "
+				+ theCodeSystem
+				+ "#" + theCode
+				+ " is not a valid code.");
+	}
+
 	@Nullable
 	@Override
 	public CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
-		if (!myAllowNonExistentCodeSystem) {
-			return null;
-		}
-		if (theCodeSystem == null) {
-			return null;
-		}
-		IBaseResource codeSystem = theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(theCodeSystem);
-		if (codeSystem != null) {
+		if (!canValidateCodeSystem(theValidationSupportContext, theCodeSystem)) {
 			return null;
 		}
 
@@ -54,7 +70,59 @@ public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSup
 			.setMessage("Code " + theCodeSystem + "#" + theCode + " was not checked because the CodeSystem is not available");
 	}
 
+	/**
+	 * Returns true if non existent code systems will still validate.
+	 * False if they will throw errors.
+	 * @return
+	 */
+	private boolean allowNonExistentCodeSystems() {
+		switch (myNonExistentCodeSystemSeverity) {
+			case ERROR:
+			case FATAL:
+				return false;
+			default:
+				// TODO - log
+			case WARNING:
+			case INFORMATION:
+				return true;
+		}
+	}
+
+	private boolean canValidateCodeSystem(ValidationSupportContext theValidationSupportContext,
+													  String theCodeSystem) {
+		if (!allowNonExistentCodeSystems()) {
+			return false;
+		}
+		if (theCodeSystem == null) {
+			return false;
+		}
+		IBaseResource codeSystem = theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(theCodeSystem);
+		if (codeSystem != null) {
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * If set to allow, code system violations will be flagged with Warning by default.
+	 * Use setNonExistentCodeSystemSeverity instead.
+	 *
+	 * @param theAllowNonExistentCodeSystem
+	 */
+	@Deprecated
 	public void setAllowNonExistentCodeSystem(boolean theAllowNonExistentCodeSystem) {
-		myAllowNonExistentCodeSystem = theAllowNonExistentCodeSystem;
+		if (theAllowNonExistentCodeSystem) {
+			setNonExistentCodeSystemSeverity(IssueSeverity.WARNING);
+		} else {
+			setNonExistentCodeSystemSeverity(IssueSeverity.ERROR);
+		}
+	}
+
+	/**
+	 * Sets the non-existent code system severity.
+	 * @param theSeverity
+	 */
+	public void setNonExistentCodeSystemSeverity(IssueSeverity theSeverity) {
+		myNonExistentCodeSystemSeverity = theSeverity;
 	}
 }
