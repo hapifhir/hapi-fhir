@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -216,8 +217,7 @@ public class FhirValidator {
 	 * @since 1.1
 	 */
 	public ValidationResult validateWithResult(String theResource) {
-		IValidationContext<IBaseResource> ctx = ValidationContext.forText(myContext, theResource, null);
-		return validateWithResult(ctx.getResource(), null);
+		return validateWithResult(theResource, null);
 	}
 
 	/**
@@ -229,8 +229,21 @@ public class FhirValidator {
 	 * @since 4.0.0
 	 */
 	public ValidationResult validateWithResult(String theResource, ValidationOptions theOptions) {
-		IValidationContext<IBaseResource> ctx = ValidationContext.forText(myContext, theResource, theOptions);
-		return validateResource(ctx.getResource(), theOptions);
+		Validate.notNull(theResource, "theResource must not be null");
+
+		applyDefaultValidators();
+
+		IValidationContext<IBaseResource> validationContext = ValidationContext.forText(myContext, theResource, theOptions);
+
+		ValidationResult result;
+		if (myConcurrentBundleValidation && validationContext.getResource() instanceof IBaseBundle
+			&& myExecutorService != null) {
+			result = validateBundleEntriesConcurrently(validationContext, theOptions);
+		} else {
+			result = validateResource(validationContext);
+		}
+
+		return invokeValidationCompletedHooks(null, theResource, result);
 	}
 
 	/**
@@ -246,44 +259,42 @@ public class FhirValidator {
 
 		applyDefaultValidators();
 
-		if (myConcurrentBundleValidation && theResource instanceof IBaseBundle) {
-			if (myExecutorService != null) {
-				return validateBundleEntriesConcurrently((IBaseBundle) theResource, theOptions);
-			} else {
-				ourLog.error("Concurrent Bundle Validation is enabled but ExecutorService is null.  Reverting to serial validation.");
-			}
+		IValidationContext<IBaseResource> validationContext = ValidationContext.forResource(myContext, theResource, theOptions);
+
+		ValidationResult result;
+		if (myConcurrentBundleValidation && validationContext.getResource() instanceof IBaseBundle
+			&& myExecutorService != null) {
+			result = validateBundleEntriesConcurrently(validationContext, theOptions);
+		} else {
+			result = validateResource(validationContext);
 		}
 
-		/*if (myConcurrentBundleValidation) {
-			if (myExecutorService != null) {
-				return validateResourceConcurrently(theResource, theOptions);
-			} else {
-				ourLog.error("Concurrent Bundle Validation is enabled but ExecutorService is null.  Reverting to serial validation.");
-			}
-		}*/
-
-		return validateResource(theResource, theOptions);
+		return invokeValidationCompletedHooks(theResource, null, result);
 	}
 
-	private ValidationResult validateBundleEntriesConcurrently(IBaseBundle theBundle, ValidationOptions theOptions) {
-		List<IBaseResource> entries = BundleUtil.toListOfResources(myContext, theBundle);
-		List<String> entryBundlePaths = IntStream.range(0, entries.size())
-			.mapToObj(index -> String.format("Bundle.entry[%d].resource.ofType(%s)", index, entries.get(index).fhirType()))
-			.collect(Collectors.toList());
-
-		List<Future<ValidationResult>> futures = entries.stream()
-			.map(entry -> myExecutorService.submit(() -> validateResource(entry, theOptions)))
-			.collect(Collectors.toList());
+	private ValidationResult validateBundleEntriesConcurrently(IValidationContext<IBaseResource> theValidationContext, ValidationOptions theOptions) {
+		List<IBaseResource> entries = BundleUtil.toListOfResources(myContext, (IBaseBundle) theValidationContext.getResource());
+		// Async validation tasks
+		List<ConcurrentValidationTask> validationTasks = IntStream.range(0, entries.size())
+			.mapToObj(index -> {
+				IBaseResource entry = entries.get(index);
+				String entryPathPrefix = String.format("Bundle.entry[%d].resource.ofType(%s)", index, entry.fhirType());
+				Future<ValidationResult> future = myExecutorService.submit(() -> {
+					IValidationContext<IBaseResource> entryValidationContext = ValidationContext.forResource(theValidationContext.getFhirContext(), entry, theOptions);
+					return validateResource(entryValidationContext);
+				});
+				return new ConcurrentValidationTask(entryPathPrefix, future);
+			}).collect(Collectors.toList());
 
 		List<SingleValidationMessage> validationMessages = new ArrayList<>();
 		try {
-			for (int i = 0; i < futures.size(); i++) {
-				ValidationResult result = futures.get(i).get();
-				final String bundleEntryPath = entryBundlePaths.get(i);
+			for (ConcurrentValidationTask validationTask : validationTasks) {
+				ValidationResult result = validationTask.getFuture().get();
+				final String bundleEntryPathPrefix = validationTask.getResourcePathPrefix();
 				List<SingleValidationMessage> messages = result.getMessages().stream()
 					.map(message -> {
 						String currentPath = message.getLocationString().substring(message.getLocationString().indexOf('.'));
-						message.setLocationString(bundleEntryPath + currentPath);
+						message.setLocationString(bundleEntryPathPrefix + currentPath);
 						return message;
 					})
 					.collect(Collectors.toList());
@@ -295,16 +306,11 @@ public class FhirValidator {
 		return new ValidationResult(myContext, new ArrayList<>(validationMessages));
 	}
 
-	private ValidationResult validateResource(IBaseResource theResource, ValidationOptions theOptions) {
-		IValidationContext<IBaseResource> ctx = ValidationContext.forResource(myContext, theResource, theOptions);
-
+	private ValidationResult validateResource(IValidationContext<IBaseResource> theValidationContext) {
 		for (IValidatorModule next : myValidators) {
-			next.validateResource(ctx);
+			next.validateResource(theValidationContext);
 		}
-
-		ValidationResult result = ctx.toResult();
-		result = invokeValidationCompletedHooks(ctx.getResource(), ctx.getResourceAsString(), result);
-		return result;
+		return theValidationContext.toResult();
 	}
 
 	private ValidationResult invokeValidationCompletedHooks(IBaseResource theResourceParsed, String theResourceRaw, ValidationResult theValidationResult) {
@@ -321,58 +327,6 @@ public class FhirValidator {
 			}
 		}
 		return theValidationResult;
-	}
-
-	private ValidationResult validateResourceConcurrently(IBaseResource theResource, ValidationOptions theOptions) {
-		List<ConcurrentValidationTask> validationTasks = new ArrayList<>();
-		populateConcurrentValidationTasks(theResource, theOptions, "", validationTasks);
-		List<SingleValidationMessage> messages = new ArrayList<>();
-		for (ConcurrentValidationTask validationTask : validationTasks) {
-			try {
-				ValidationResult result = validationTask.getFuture().get();
-				messages.addAll(result.getMessages().stream()
-					.map(message -> {
-						String currentPath = message.getLocationString().substring(message.getLocationString().indexOf('.'));
-						message.setLocationString(validationTask.getResourcePathPrefix() + currentPath);
-						return message;
-					}).collect(Collectors.toList()));
-			} catch (InterruptedException | ExecutionException exp) {
-				throw new InternalErrorException(exp);
-			}
-		}
-		return new ValidationResult(myContext, messages);
-	}
-
-	private void populateConcurrentValidationTasks(IBaseResource theResource, ValidationOptions theOptions, String resourcePathPrefix, List<ConcurrentValidationTask> theValidationTasks) {
-		if (theResource instanceof IBaseBundle) {
-			List<IBaseResource> bundleEntries = BundleUtil.toListOfResources(myContext, (IBaseBundle) theResource);
-			for (int i = 0; i < bundleEntries.size(); i++) {
-				IBaseResource entry = bundleEntries.get(i);
-				String bundleEntryPath = String.format("Bundle.entry[%d].resource.ofType(%s)", i, entry.fhirType());
-				populateConcurrentValidationTasks(entry, theOptions, bundleEntryPath, theValidationTasks);
-			}
-		} else if (theResource instanceof IDomainResource) {
-			IDomainResource domainResource = (IDomainResource) theResource;
-			if (domainResource.getContained().size() > 0) {
-				// validate contained resources
-				List<? extends IAnyResource> containedResources = domainResource.getContained();
-				for (int i = 0; i < containedResources.size(); i++) {
-					IBaseResource containedResource = containedResources.get(i);
-					String containedResourcePath = String.format("%s.contained[%d].ofType(%s)", resourcePathPrefix, i, containedResource.fhirType());
-					populateConcurrentValidationTasks(containedResource, theOptions, containedResourcePath, theValidationTasks);
-				}
-			} else {
-				theValidationTasks.add(new ConcurrentValidationTask(
-					resourcePathPrefix,
-					myExecutorService.submit(() -> validateResource(domainResource, theOptions))
-				));
-			}
-		} else {
-			theValidationTasks.add(new ConcurrentValidationTask(
-				resourcePathPrefix,
-				myExecutorService.submit(() -> validateResource(theResource, theOptions))
-			));
-		}
 	}
 
 	/**

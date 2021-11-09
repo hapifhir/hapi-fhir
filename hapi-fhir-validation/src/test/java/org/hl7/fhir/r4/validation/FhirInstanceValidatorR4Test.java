@@ -1500,6 +1500,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 	}
 
+	@Disabled
 	@Test
 	public void testValidateBundleMultithreaded() throws IOException {
 		// setup
