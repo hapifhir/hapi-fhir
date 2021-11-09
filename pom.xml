@@ -2913,7 +2913,7 @@
 		<profile>
 			<id>FASTINSTALL</id>
 			<properties>
-				<maven.test.skip>true</maven.test.skip>
+				<skipTests>true</skipTests>
 			</properties>
 			<!-- Profile for a quick local mvn install after a git pull.
 			     We assume upstream ran these checks as part of the build. -->
