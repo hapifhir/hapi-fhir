@@ -139,15 +139,23 @@ public class BaseJpaResourceProviderCodeSystemR4 extends JpaResourceProviderR4<C
 		RequestDetails theRequestDetails
 	) {
 
+		IValidationSupport.CodeValidationResult result = null;
 		startRequest(theServletRequest);
 		try {
-			String codeSystemUrl = (theCodeSystemUrl != null && theCodeSystemUrl.hasValue()) ?
-				theCodeSystemUrl.asStringValue() : null;
-			String code = (theCode != null && theCode.hasValue()) ? theCode.asStringValue() : null;
-			String display = (theDisplay != null && theDisplay.hasValue()) ? theDisplay.asStringValue() : null;
-			IValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(
-				new ValidationSupportContext(myValidationSupport), new ConceptValidationOptions(),
-				codeSystemUrl, code, display, null);
+			// If a Remote Terminology Server has been configured, use it
+			if (myValidationSupport.isRemoteTerminologyServiceConfigured()) {
+				String codeSystemUrl = (theCodeSystemUrl != null && theCodeSystemUrl.hasValue()) ?
+					theCodeSystemUrl.asStringValue() : null;
+				String code = (theCode != null && theCode.hasValue()) ? theCode.asStringValue() : null;
+				String display = (theDisplay != null && theDisplay.hasValue()) ? theDisplay.asStringValue() : null;
+				result = myValidationSupport.validateCode(
+					new ValidationSupportContext(myValidationSupport), new ConceptValidationOptions(),
+					codeSystemUrl, code, display, null);
+			} else {
+				// Otherwise, use the local DAO layer to validate the code
+				IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> dao = (IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept>) getDao();
+				result = dao.validateCode(theId, theCodeSystemUrl, theVersion, theCode, theDisplay, theCoding, theCodeableConcept, theRequestDetails);
+			}
 			return (Parameters) BaseJpaResourceProviderValueSetDstu2.toValidateCodeResult(getContext(), result);
 		} finally {
 			endRequest(theServletRequest);

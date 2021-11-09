@@ -20,7 +20,9 @@ package ca.uhn.fhir.jpa.provider;
  * #L%
  */
 
+import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -34,6 +36,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.ParametersUtil;
+import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
@@ -56,6 +59,8 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private ITermReadSvc myTermReadSvc;
+	@Autowired
+	IValidationSupport myValidationSupport;
 
 	public void setDaoConfig(DaoConfig theDaoConfig) {
 		myDaoConfig = theDaoConfig;
@@ -142,24 +147,37 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		RequestDetails theRequestDetails
 	) {
 
+		IValidationSupport.CodeValidationResult result = null;
 		startRequest(theServletRequest);
 		try {
-			IFhirResourceDaoValueSet<IBaseResource, ICompositeType, ICompositeType> dao = getDao();
-			IPrimitiveType<String> valueSetIdentifier;
-			if (theValueSetVersion != null) {
-				valueSetIdentifier = (IPrimitiveType<String>) getContext().getElementDefinition("uri").newInstance();
-				valueSetIdentifier.setValue(theValueSetUrl.getValue() + "|" + theValueSetVersion);
+			// If a Remote Terminology Server has been configured, use it
+			if (myValidationSupport.isRemoteTerminologyServiceConfigured()) {
+				String theSystemString = (theSystem != null && theSystem.hasValue()) ? theSystem.getValueAsString() : null;
+				String theCodeString = (theCode != null && theCode.hasValue()) ? theCode.getValueAsString() : null;
+				String theDisplayString = (theDisplay != null && theDisplay.hasValue()) ? theDisplay.getValueAsString() : null;
+				String theValueSetUrlString = (theValueSetUrl != null && theValueSetUrl.hasValue()) ?
+					theValueSetUrl.getValueAsString() : null;
+				result = myValidationSupport.validateCode(new ValidationSupportContext(myValidationSupport),
+					new ConceptValidationOptions(), theSystemString, theCodeString, theDisplayString, theValueSetUrlString);
 			} else {
-				valueSetIdentifier = theValueSetUrl;
+				// Otherwise, use the local DAO layer to validate the code
+				IFhirResourceDaoValueSet<IBaseResource, ICompositeType, ICompositeType> dao = getDao();
+				IPrimitiveType<String> valueSetIdentifier;
+				if (theValueSetVersion != null) {
+					valueSetIdentifier = (IPrimitiveType<String>) getContext().getElementDefinition("uri").newInstance();
+					valueSetIdentifier.setValue(theValueSetUrl.getValue() + "|" + theValueSetVersion);
+				} else {
+					valueSetIdentifier = theValueSetUrl;
+				}
+				IPrimitiveType<String> codeSystemIdentifier;
+				if (theSystemVersion != null) {
+					codeSystemIdentifier = (IPrimitiveType<String>) getContext().getElementDefinition("uri").newInstance();
+					codeSystemIdentifier.setValue(theSystem.getValue() + "|" + theSystemVersion);
+				} else {
+					codeSystemIdentifier = theSystem;
+				}
+				result = dao.validateCode(valueSetIdentifier, theId, theCode, codeSystemIdentifier, theDisplay, theCoding, theCodeableConcept, theRequestDetails);
 			}
-			IPrimitiveType<String> codeSystemIdentifier;
-			if (theSystemVersion != null) {
-				codeSystemIdentifier = (IPrimitiveType<String>) getContext().getElementDefinition("uri").newInstance();
-				codeSystemIdentifier.setValue(theSystem.getValue() + "|" + theSystemVersion);
-			} else {
-				codeSystemIdentifier = theSystem;
-			}
-			IValidationSupport.CodeValidationResult result = dao.validateCode(valueSetIdentifier, theId, theCode, codeSystemIdentifier, theDisplay, theCoding, theCodeableConcept, theRequestDetails);
 			return BaseJpaResourceProviderValueSetDstu2.toValidateCodeResult(getContext(), result);
 		} finally {
 			endRequest(theServletRequest);
