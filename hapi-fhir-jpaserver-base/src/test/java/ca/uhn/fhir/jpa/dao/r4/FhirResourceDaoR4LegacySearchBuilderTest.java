@@ -1,13 +1,11 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.BaseDAODateSearchTest;
+import ca.uhn.fhir.jpa.conformance.BaseDateSearchDaoTests;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -128,6 +126,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -5316,28 +5316,20 @@ public class FhirResourceDaoR4LegacySearchBuilderTest extends BaseJpaR4Test {
 	}
 
 	@Nested
-	public class DateSearchTests extends BaseDAODateSearchTest {
+	public class DateSearchTests extends BaseDateSearchDaoTests {
 
 		/**
 		 * legacy builder didn't get the year/month date search fixes, so skip anything wider than a day.
 		 */
 		@Override
-		protected boolean isShouldSkip(String theResourceDate, String theQuery) {
+		public boolean isShouldSkip(String theResourceDate, String theQuery) {
 			// skip anything with just year or month resolution.
 			return (theResourceDate.length()<10 || theQuery.length()<10);
 		}
 
 		@Override
-		protected FhirContext getMyFhirCtx() {
-			return myFhirCtx;
-		}
-		@Override
-		protected <T> T doInTransaction(TransactionCallback<T> theCallback) {
-			return new TransactionTemplate(myTxManager).execute(theCallback);
-		}
-		@Override
-		protected IFhirResourceDao<Observation> getObservationDao() {
-			return myObservationDao;
+		protected Embedding getEmbedding() {
+			return new JPAEmbedding<>(myFhirCtx, myObservationDao, myTxManager);
 		}
 	}
 

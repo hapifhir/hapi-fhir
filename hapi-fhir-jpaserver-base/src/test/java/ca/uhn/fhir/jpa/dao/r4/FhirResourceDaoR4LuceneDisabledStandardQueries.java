@@ -3,11 +3,13 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.config.TestR4WithLuceneDisabledConfig;
-import ca.uhn.fhir.jpa.dao.BaseDAODateSearchTest;
+import ca.uhn.fhir.jpa.conformance.BaseDateSearchDaoTests;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import org.hl7.fhir.r4.model.Observation;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,22 +47,10 @@ public class FhirResourceDaoR4LuceneDisabledStandardQueries extends BaseJpaTest 
 	}
 
 	@Nested
-	public class DateSearchTests extends BaseDAODateSearchTest {
+	public class DateSearchTests extends BaseDateSearchDaoTests {
 		@Override
-		protected FhirContext getMyFhirCtx() {
-			return myFhirCtx;
-		}
-
-		@Override
-		protected <T> T doInTransaction(TransactionCallback<T> theCallback) {
-			return new TransactionTemplate(myTxManager).execute(
-				theCallback
-			);
-		}
-
-		@Override
-		protected IFhirResourceDao<Observation> getObservationDao() {
-			return myObservationDao;
+		protected Embedding getEmbedding() {
+			return new JPAEmbedding<>(myFhirCtx, myObservationDao, myTxManager);
 		}
 	}
 

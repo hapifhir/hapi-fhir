@@ -46,7 +46,7 @@ public class ExtendedLuceneIndexExtractor {
 
 	@NotNull
 	public ExtendedLuceneIndexData extract(ResourceIndexedSearchParams theNewParams) {
-		// wip mb this is testable now.
+		// wipmb this is testable now.
 		ExtendedLuceneIndexData retVal = new ExtendedLuceneIndexData(myContext);
 
 		theNewParams.myStringParams.forEach(nextParam ->
@@ -59,7 +59,7 @@ public class ExtendedLuceneIndexExtractor {
 
 			// awkwardly, links are shared between different search params if they use the same path,
 			// so we re-build the linkage.
-			// WIP MB is this the right design?  Or should we follow JPA and share these?
+			// WIPMB is this the right design?  Or should we follow JPA and share these?
 			Map<String, List<String>> linkPathToParamName = new HashMap<>();
 			for (String nextParamName : theNewParams.getPopulatedResourceLinkParameters()) {
 				RuntimeSearchParam sp = myParams.get(nextParamName);
