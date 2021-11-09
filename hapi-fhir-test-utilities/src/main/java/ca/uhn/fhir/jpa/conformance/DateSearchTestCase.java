@@ -79,13 +79,13 @@ public class DateSearchTestCase {
 		InputStream resource = DateSearchTestCase.class.getResourceAsStream(csv);
 		assert resource != null;
 		InputStreamReader inputStreamReader = new InputStreamReader(resource, StandardCharsets.UTF_8);
-		List<DateSearchTestCase> ca = parseCsvCases(inputStreamReader, csv);
+		List<DateSearchTestCase> cases = parseCsvCases(inputStreamReader, csv);
 		try {
 			resource.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return ca;
+		return cases;
 	}
 
 	static List<DateSearchTestCase> parseCsvCases(Reader theSource, String theFileName) {
@@ -129,7 +129,7 @@ public class DateSearchTestCase {
 				String resourceValue = fields[0].trim();
 				String truePrefixes = fields[1].trim();
 				String queryValue = fields[2].trim();
-				Set<String> expectedTruePrefixes = Arrays.stream(truePrefixes.split(" +")).map(String::trim).collect(Collectors.toSet());
+				Set<String> expectedTruePrefixes = Arrays.stream(truePrefixes.split("\\s+")).map(String::trim).collect(Collectors.toSet());
 
 				// expand to one test case per supportedPrefixes
 				return supportedPrefixes.stream()

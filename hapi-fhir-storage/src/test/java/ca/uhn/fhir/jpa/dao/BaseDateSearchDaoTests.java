@@ -70,7 +70,7 @@ public abstract class BaseDateSearchDaoTests {
 		return false;
 	}
 
-	public static void assertExpectedMatch(String theResourceDate, String theQuery, boolean theExpectedMatch, boolean matched, String theFileName, int theLineNumber) {
+	protected static void assertExpectedMatch(String theResourceDate, String theQuery, boolean theExpectedMatch, boolean matched, String theFileName, int theLineNumber) {
 		String message =
 			"Expected " + theQuery + " to " +
 				(theExpectedMatch ? "" : "not ") + "match " + theResourceDate +

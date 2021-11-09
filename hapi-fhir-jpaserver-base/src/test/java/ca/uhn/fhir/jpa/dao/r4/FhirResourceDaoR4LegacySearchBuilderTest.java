@@ -5315,12 +5315,11 @@ public class FhirResourceDaoR4LegacySearchBuilderTest extends BaseJpaR4Test {
 
 	@Nested
 	public class DateSearchTests extends BaseDateSearchDaoTests {
-
 		/**
 		 * legacy builder didn't get the year/month date search fixes, so skip anything wider than a day.
 		 */
 		@Override
-		public boolean isShouldSkip(String theResourceDate, String theQuery) {
+		protected boolean isShouldSkip(String theResourceDate, String theQuery) {
 			// skip anything with just year or month resolution.
 			return (theResourceDate.length()<10 || theQuery.length()<10);
 		}
