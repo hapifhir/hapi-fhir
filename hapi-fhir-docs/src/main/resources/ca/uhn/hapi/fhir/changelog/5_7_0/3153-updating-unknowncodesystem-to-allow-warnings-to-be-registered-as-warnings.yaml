@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3153
+title: "Updated UnknownCodeSystemWarningValidationSupport to allow the throwing of warnings if
+configured to do so."
