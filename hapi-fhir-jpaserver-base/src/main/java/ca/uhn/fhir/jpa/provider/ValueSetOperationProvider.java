@@ -166,14 +166,14 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 				// Otherwise, use the local DAO layer to validate the code
 				IFhirResourceDaoValueSet<IBaseResource, ICompositeType, ICompositeType> dao = getDao();
 				IPrimitiveType<String> valueSetIdentifier;
-				if (theValueSetVersion != null) {
+				if (theValueSetUrl != null && theValueSetVersion != null) {
 					valueSetIdentifier = (IPrimitiveType<String>) getContext().getElementDefinition("uri").newInstance();
 					valueSetIdentifier.setValue(theValueSetUrl.getValue() + "|" + theValueSetVersion);
 				} else {
 					valueSetIdentifier = theValueSetUrl;
 				}
 				IPrimitiveType<String> codeSystemIdentifier;
-				if (theSystemVersion != null) {
+				if (theSystem != null && theSystemVersion != null) {
 					codeSystemIdentifier = (IPrimitiveType<String>) getContext().getElementDefinition("uri").newInstance();
 					codeSystemIdentifier.setValue(theSystem.getValue() + "|" + theSystemVersion);
 				} else {
