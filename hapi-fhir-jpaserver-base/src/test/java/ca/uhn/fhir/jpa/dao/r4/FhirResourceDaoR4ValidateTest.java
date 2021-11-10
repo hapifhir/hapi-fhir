@@ -120,7 +120,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		myValidationSettings.setLocalReferenceValidationDefaultPolicy(IResourceValidator.ReferenceValidationPolicy.IGNORE);
 		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
 
-		myUnknownCodeSystemWarningValidationSupport.setAllowNonExistentCodeSystem(UnknownCodeSystemWarningValidationSupport.ALLOW_NON_EXISTENT_CODE_SYSTEM_DEFAULT);
+		myUnknownCodeSystemWarningValidationSupport.setNonExistentCodeSystemSeverity(UnknownCodeSystemWarningValidationSupport.DEFAULT_SEVERITY);
 	}
 
 	/**
@@ -162,11 +162,12 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	/**
-	 * By default an unknown code system should fail vaildation
+	 * By default, an unknown code system should fail validation
 	 */
 	@Test
 	public void testValidateCodeInValueSetWithUnknownCodeSystem_Warning() {
-		myUnknownCodeSystemWarningValidationSupport.setAllowNonExistentCodeSystem(true);
+		// set to warning
+		myUnknownCodeSystemWarningValidationSupport.setNonExistentCodeSystemSeverity(IValidationSupport.IssueSeverity.WARNING);
 
 		createStructureDefWithBindingToUnknownCs();
 
@@ -189,14 +190,14 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		oo = validateAndReturnOutcome(obs);
 		encoded = encode(oo);
 		ourLog.info(encoded);
-		assertEquals("No issues detected during validation", oo.getIssueFirstRep().getDiagnostics(), encoded);
+		assertTrue(oo.getIssueFirstRep().getDiagnostics().contains("No issues detected during validation"));
 
 		// Invalid code
 		obs.setValue(new Quantity().setSystem("http://cs").setCode("code99").setValue(123));
 		oo = validateAndReturnOutcome(obs);
 		encoded = encode(oo);
 		ourLog.info(encoded);
-		assertEquals("No issues detected during validation", oo.getIssueFirstRep().getDiagnostics(), encoded);
+		assertTrue(oo.getIssueFirstRep().getDiagnostics().contains("No issues detected during validation"));
 
 	}
 
