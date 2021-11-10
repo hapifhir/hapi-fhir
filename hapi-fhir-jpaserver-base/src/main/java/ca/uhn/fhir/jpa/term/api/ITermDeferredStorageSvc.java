@@ -54,13 +54,8 @@ public interface ITermDeferredStorageSvc {
 
 	void addValueSetsToStorageQueue(List<ValueSet> theValueSets);
 
-	void deleteCodeSystem(TermCodeSystem theCodeSystem);
+	void deleteCodeSystemForResource(ResourceTable theCodeSystemResourceToDelete);	/**
 
-	void deleteCodeSystemForResource(ResourceTable theCodeSystemResourceToDelete);
-
-	void deleteCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion);
-
-	/**
 	 * This is mostly here for unit tests - Saves any and all deferred concepts and links
 	 */
 	void saveAllDeferred();

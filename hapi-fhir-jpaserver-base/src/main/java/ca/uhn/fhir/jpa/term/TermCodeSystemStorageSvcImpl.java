@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
@@ -48,6 +49,7 @@ import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ObjectUtil;
@@ -59,8 +61,12 @@ import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobParameter;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -86,6 +92,8 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.batch.config.BatchConstants.JOB_PARAM_CODE_SYSTEM_VERSION_ID;
+import static ca.uhn.fhir.jpa.batch.config.BatchConstants.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
@@ -108,8 +116,6 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	@Autowired
 	protected IdHelperService myIdHelperService;
 	@Autowired
-	private PlatformTransactionManager myTransactionManager;
-	@Autowired
 	private ITermConceptParentChildLinkDao myConceptParentChildLinkDao;
 	@Autowired
 	private ITermVersionAdapterSvc myTerminologyVersionAdapterSvc;
@@ -123,6 +129,13 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	private DaoConfig myDaoConfig;
 	@Autowired
 	private IResourceTableDao myResourceTableDao;
+
+	@Autowired
+	private IBatchJobSubmitter myJobSubmitter;
+
+	@Autowired @Qualifier(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME)
+	private Job myTermCodeSystemVersionDeleteJob;
+
 
 	@Override
 	public ResourcePersistentId getValueSetResourcePid(IIdType theIdType) {
@@ -260,44 +273,6 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		//Add itself before its list of children
 		childTermConcepts.add(0, theTermConcept);
 		return childTermConcepts;
-	}
-
-	@Override
-	@Transactional
-	public void deleteCodeSystem(TermCodeSystem theCodeSystem) {
-		assert TransactionSynchronizationManager.isActualTransactionActive();
-
-		ourLog.info(" * Deleting code system {}", theCodeSystem.getPid());
-
-		myEntityManager.flush();
-		TermCodeSystem cs = myCodeSystemDao.findById(theCodeSystem.getPid()).orElseThrow(IllegalStateException::new);
-		cs.setCurrentVersion(null);
-		myCodeSystemDao.save(cs);
-		myCodeSystemDao.flush();
-
-		List<TermCodeSystemVersion> codeSystemVersions = myCodeSystemVersionDao.findByCodeSystemPid(theCodeSystem.getPid());
-		List<Long> codeSystemVersionPids = codeSystemVersions
-			.stream()
-			.map(TermCodeSystemVersion::getPid)
-			.collect(Collectors.toList());
-		for (Long next : codeSystemVersionPids) {
-			deleteCodeSystemVersion(next);
-		}
-
-		myCodeSystemVersionDao.deleteForCodeSystem(theCodeSystem);
-		myCodeSystemDao.delete(theCodeSystem);
-		myEntityManager.flush();
-	}
-
-	@Override
-	@Transactional(propagation = Propagation.NEVER)
-	public void deleteCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion) {
-		assert !TransactionSynchronizationManager.isActualTransactionActive();
-
-		// Delete TermCodeSystemVersion
-		ourLog.info(" * Deleting TermCodeSystemVersion {}", theCodeSystemVersion.getCodeSystemVersionId());
-		deleteCodeSystemVersion(theCodeSystemVersion.getPid());
-
 	}
 
 	/**
@@ -444,10 +419,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 				 * multiple CodeSystem resources with CodeSystem.version set differently (as opposed to
 				 * multiple versions of the same CodeSystem, where CodeSystem.meta.versionId is different)
 				 */
-				next.setCodeSystemVersionId("DELETED_" + UUID.randomUUID().toString());
-				myCodeSystemVersionDao.saveAndFlush(next);
-				myDeferredStorageSvc.deleteCodeSystemVersion(next);
-
+				deleteTermCodeSystemVersionOffline(next);
 			}
 		}
 
@@ -527,11 +499,27 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		}
 
 		TermCodeSystemVersion codeSystemVersion = myCodeSystemVersionDao.findById(theCodeSystemVersionPid).orElseThrow(() -> new IllegalStateException());
-		codeSystemVersion.setCodeSystemVersionId("DELETED_" + UUID.randomUUID().toString());
-		myCodeSystemVersionDao.save(codeSystemVersion);
-
-		myDeferredStorageSvc.deleteCodeSystemVersion(codeSystemVersion);
+		deleteTermCodeSystemVersionOffline(codeSystemVersion);
 	}
+
+
+	private void deleteTermCodeSystemVersionOffline(TermCodeSystemVersion theCodeSystemVersion) {
+		theCodeSystemVersion.setCodeSystemVersionId("DELETED_" + UUID.randomUUID());
+		myCodeSystemVersionDao.saveAndFlush(theCodeSystemVersion);
+
+		JobParameters jobParameters = new JobParameters(
+			Collections.singletonMap(
+				JOB_PARAM_CODE_SYSTEM_VERSION_ID, new JobParameter(theCodeSystemVersion.getPid(), true) ));
+
+		try {
+			myJobSubmitter.runJob(myTermCodeSystemVersionDeleteJob, jobParameters);
+
+		} catch (JobParametersInvalidException theE) {
+			throw new InternalErrorException("Offline job submission for TermCodeSystemVersion: " +
+				theCodeSystemVersion.getPid() + " failed: " + theE);
+		}
+	}
+
 
 	private void validateDstu3OrNewer() {
 		Validate.isTrue(myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3), "Terminology operations only supported in DSTU3+ mode");
