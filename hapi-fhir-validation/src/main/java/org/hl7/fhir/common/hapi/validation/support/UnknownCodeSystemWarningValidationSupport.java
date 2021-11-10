@@ -19,9 +19,9 @@ import javax.print.attribute.standard.Severity;
  * in order to specify that unknown code systems should be allowed.
  */
 public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSupport {
-	public static final boolean ALLOW_NON_EXISTENT_CODE_SYSTEM_DEFAULT = false;
+	public static final IssueSeverity DEFAULT_SEVERITY = IssueSeverity.ERROR;
 
-	private IssueSeverity myNonExistentCodeSystemSeverity = IssueSeverity.ERROR;
+	private IssueSeverity myNonExistentCodeSystemSeverity = DEFAULT_SEVERITY;
 
 	/**
 	 * Constructor
@@ -42,19 +42,26 @@ public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSup
 
 	@Override
 	public CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+		// filters out error/fatal
 		if (!canValidateCodeSystem(theValidationSupportContext, theCodeSystem)) {
 			return null;
 		}
 
-		// we don't set the code
-		// cause if we do, the severity is stripped out
-		// (see VersionSpecificWorkerContextWrapper.convertValidationResult)
-		return new CodeValidationResult()
-			.setSeverity(myNonExistentCodeSystemSeverity)
-			.setMessage("Code "
-				+ theCodeSystem
-				+ "#" + theCode
-				+ " is not a valid code.");
+		CodeValidationResult result = new CodeValidationResult()
+			.setSeverity(myNonExistentCodeSystemSeverity); // will be warning or info
+
+		result.setMessage("No issues detected during validation");
+
+		switch (myNonExistentCodeSystemSeverity) {
+			case INFORMATION:
+				// for warnings, we don't set the code
+				// cause if we do, the severity is stripped out
+				// (see VersionSpecificWorkerContextWrapper.convertValidationResult)
+				result.setCode(theCode);
+				break;
+		}
+
+		return result;
 	}
 
 	@Nullable
