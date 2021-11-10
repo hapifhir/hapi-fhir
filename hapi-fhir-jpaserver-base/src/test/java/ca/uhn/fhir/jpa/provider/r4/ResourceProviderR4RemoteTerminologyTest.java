@@ -23,6 +23,7 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.junit.Ignore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,6 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 // Modeled after: ca.uhn.fhir.jpa.provider.r4.ResourceProviderR4CodeSystemTest
 //           AND: ca.uhn.fhir.jpa.provider.r4.RemoteTerminologyServiceResourceProviderR4Test
+@Ignore
 public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProviderR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4RemoteTerminologyTest.class);
 	private static final String DISPLAY = "DISPLAY";
