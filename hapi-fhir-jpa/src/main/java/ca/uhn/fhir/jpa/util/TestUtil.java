@@ -24,6 +24,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
 import org.apache.commons.io.IOUtils;
@@ -73,6 +74,22 @@ public class TestUtil {
 	private static final int MAX_LENGTH = 30;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestUtil.class);
 	private static Set<String> ourReservedWords;
+
+
+	// Exception reasons:
+	// (*1) H2 sets indexes for FKs automatically so this index had to be called as the target FK field it is indexing
+	// to avoid SchemaMigrationTest to complain about the extra index (which doesn't exist in H2)
+
+	private static final Set<String> constraintNameValidationExceptionList = Sets.newHashSet(
+	"FK_CONCEPTPROP_CONCEPT", // excepted for reason (*1)
+		"FK_CONCEPTDESIG_CONCEPT" 			// excepted for reason (*1)
+	);
+
+	private static final Set<String> duplicateNameValidationExceptionList = Sets.newHashSet(
+	"FK_CONCEPTPROP_CONCEPT", // excepted for reason (*1)
+		"FK_CONCEPTDESIG_CONCEPT" 			// excepted for reason (*1)
+	);
+
 
 	/**
 	 * non instantiable
@@ -252,7 +269,9 @@ public class TestUtil {
 			}
 			for (Index nextConstraint : table.indexes()) {
 				assertNotADuplicateName(nextConstraint.name(), theNames);
-				Validate.isTrue(nextConstraint.name().startsWith("IDX_"), nextConstraint.name() + " must start with IDX_");
+				if ( ! constraintNameValidationExceptionList.contains(nextConstraint.name())) {
+					Validate.isTrue(nextConstraint.name().startsWith("IDX_"), nextConstraint.name() + " must start with IDX_");
+				}
 			}
 		}
 
@@ -269,7 +288,9 @@ public class TestUtil {
 				Validate.notNull(fk);
 				Validate.isTrue(isNotBlank(fk.name()), "Foreign key on " + theAnnotatedElement + " has no name()");
 				Validate.isTrue(fk.name().startsWith("FK_"));
-				assertNotADuplicateName(fk.name(), theNames);
+				if ( ! duplicateNameValidationExceptionList.contains(fk.name())) {
+					assertNotADuplicateName(fk.name(), theNames);
+				}
 			}
 		}
 
