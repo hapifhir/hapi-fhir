@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -29,8 +30,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -65,8 +64,9 @@ public class RemoteTerminologyServiceResourceProviderR4Test {
 	}
 
 	@AfterEach
-	public void after() {
-		assertThat(myValueSetProvider.myInvocationCount, lessThan(2));
+	public void after() throws Exception {
+		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
+		myRestfulServerExtension.getRestfulServer().getInterceptorService().unregisterAllInterceptors();
 	}
 
 	@Test

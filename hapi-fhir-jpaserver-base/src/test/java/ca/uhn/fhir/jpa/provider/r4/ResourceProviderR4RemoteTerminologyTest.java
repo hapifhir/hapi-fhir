@@ -23,6 +23,7 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -39,6 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 //           AND: ca.uhn.fhir.jpa.provider.r4.RemoteTerminologyServiceResourceProviderR4Test
 public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProviderR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4RemoteTerminologyTest.class);
+	private static final String DISPLAY = "DISPLAY";
 	private static FhirContext ourCtx = FhirContext.forR4();
 	private RemoteTerminologyServiceValidationSupport mySvc;
 	private MyCodeSystemProvider myCodeSystemProvider;
@@ -65,13 +67,18 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 		myRestfulServerExtension.getRestfulServer().registerProvider(myValueSetProvider);
 	}
 
+	@AfterEach
+	public void afterEach() throws Exception {
+		this.after();
+	}
+
 	@Test
 	public void testLookupOperationByCodeAndSystemBuiltInCode() {
 		myCodeSystemProvider.myNextReturnCodeSystems = new ArrayList<>();
 		myCodeSystemProvider.myNextReturnCodeSystems.add((CodeSystem) new CodeSystem().setId("CodeSystem/list-example-use-codes"));
 		myValueSetProvider.myNextReturnValueSets = new ArrayList<>();
 		myValueSetProvider.myNextReturnValueSets.add((ValueSet) new ValueSet().setId("ValueSet/list-example-codes"));
-		createNextValueSetReturnParameters(true, "Display", null);
+		createNextValueSetReturnParameters(true, DISPLAY, null);
 
 		Parameters respParam = myClient
 			.operation()
@@ -87,7 +94,7 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 		ourLog.info(resp);
 
 		assertEquals(true, ((BooleanType)respParam.getParameter("result")).booleanValue());
-		assertEquals("Display", respParam.getParameter("display").toString());
+		assertEquals(DISPLAY, respParam.getParameter("display").toString());
 	}
 
 	private void createNextValueSetReturnParameters(boolean theResult, String theDisplay, String theMessage) {
