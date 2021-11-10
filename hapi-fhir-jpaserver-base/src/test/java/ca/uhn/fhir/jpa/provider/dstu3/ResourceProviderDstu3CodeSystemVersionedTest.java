@@ -6,7 +6,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPut;
@@ -22,7 +21,6 @@ import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
@@ -36,9 +34,6 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderDstu3CodeSystemVersionedTest.class);
 	private long parentChildCs1Id;
 	private long parentChildCs2Id;
-
-	@Autowired private BatchJobHelper myBatchJobHelper;
-
 
 	@BeforeEach
 	@Transactional
@@ -88,6 +83,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 
 		parentChildCsOutcome = myCodeSystemDao.create(parentChildCs);
 		parentChildCs2Id = ((ResourceTable)parentChildCsOutcome.getEntity()).getId();
+
 	}
 
 	@Test
