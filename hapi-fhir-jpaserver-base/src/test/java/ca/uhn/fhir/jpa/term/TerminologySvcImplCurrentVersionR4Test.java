@@ -14,6 +14,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
@@ -50,6 +51,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.batch.config.BatchConstants.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_DUPLICATE_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_LINK_DUPLICATE_FILE_DEFAULT;
@@ -130,9 +132,11 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 	@Autowired
 	private ITermReadSvc myITermReadSvc;
 
-	@Autowired
-	@Qualifier(BaseConfig.JPA_VALIDATION_SUPPORT)
-		private IValidationSupport myJpaPersistedResourceValidationSupport;
+	@Autowired @Qualifier(BaseConfig.JPA_VALIDATION_SUPPORT)
+	private IValidationSupport myJpaPersistedResourceValidationSupport;
+
+	@Autowired private BatchJobHelper myBatchJobHelper;
+
 
 	private ZipCollectionBuilder myFiles;
 	private ServletRequestDetails myRequestDetails = new ServletRequestDetails();
@@ -690,6 +694,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 
 		String currentVer = "2.68";
 		uploadLoincCodeSystem(currentVer, true);
+		myBatchJobHelper.awaitAllBulkJobCompletions(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
 
 		runCommonValidations(Lists.newArrayList(nonCurrentVer, currentVer));
 
@@ -711,6 +716,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 
 		String lastCurrentVer = "2.69";
 		uploadLoincCodeSystem(lastCurrentVer, true);
+		myBatchJobHelper.awaitAllBulkJobCompletions(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
 
 		runCommonValidations(Lists.newArrayList(firstCurrentVer, noCurrentVer, lastCurrentVer));
 

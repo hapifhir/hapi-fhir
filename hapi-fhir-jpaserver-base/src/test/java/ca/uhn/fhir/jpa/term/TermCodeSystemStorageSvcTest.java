@@ -5,18 +5,25 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 
+import static ca.uhn.fhir.jpa.batch.config.BatchConstants.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 
 	public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";
+
+	@Autowired
+	private BatchJobHelper myBatchJobHelper;
+
 
 	@Test
 	public void testStoreNewCodeSystemVersionForExistingCodeSystemNoVersionId() {
@@ -47,6 +54,7 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 
 		testCreatingAndUpdatingCodeSystemEntity(firstUpload, duplicateUpload, 125, "Can not create multiple CodeSystem resources with CodeSystem.url \"http://example.com/my_code_system\" and CodeSystem.version \"1\", already have one with resource ID: CodeSystem/");
 
+		myBatchJobHelper.awaitAllBulkJobCompletions(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());
 			assertEquals(1, myTermCodeSystemVersionDao.count());
@@ -66,6 +74,7 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 
 		testCreatingAndUpdatingCodeSystemEntity(firstUpload, duplicateUpload, 251, "Can not create multiple CodeSystem resources with CodeSystem.url \"http://example.com/my_code_system\" and CodeSystem.version \"2\", already have one with resource ID: CodeSystem/");
 
+		myBatchJobHelper.awaitAllBulkJobCompletions(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());
 			assertEquals(2, myTermCodeSystemVersionDao.count());
@@ -103,6 +112,7 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 		theUpload.addConcept(new CodeSystem.ConceptDefinitionComponent(new CodeType("codeB")));
 		// Update the CodeSystem and CodeSystemVersion entities
 		runInTransaction(() -> myTermCodeSystemStorageSvc.storeNewCodeSystemVersionIfNeeded(theUpload, codeSystemResourceEntity));
+		myBatchJobHelper.awaitAllBulkJobCompletions(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
 		validateCodeSystemUpdates(expectedCnt + 1);
 
 		// Try duplicating the CodeSystem
