@@ -1,14 +1,5 @@
 package ca.uhn.fhir.jpa.term.job;
 
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobParametersValidator;
-import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.StepScope;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -28,6 +19,15 @@ import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
  * limitations under the License.
  * #L%
  */
+
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobParametersValidator;
+import org.springframework.batch.core.Step;
+import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
 
 import static ca.uhn.fhir.jpa.batch.config.BatchConstants.TERM_CODE_SYSTEM_UNIQUE_VERSION_DELETE_STEP_NAME;
 import static ca.uhn.fhir.jpa.batch.config.BatchConstants.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
