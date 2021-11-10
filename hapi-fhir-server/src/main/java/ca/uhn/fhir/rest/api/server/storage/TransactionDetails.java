@@ -148,6 +148,18 @@ public class TransactionDetails {
 		myResolvedResourceIds.put(theResourceId.toVersionless().getValue(), thePersistentId);
 	}
 
+	/**
+	 * A <b>Resolved Resource ID</b> is a mapping between a resource ID (e.g. "<code>Patient/ABC</code>" or
+	 * "<code>Observation/123</code>") and a storage ID for that resource. Resources should only be placed within
+	 * the TransactionDetails if they are known to exist and be valid targets for other resources to link to.
+	 */
+	public void addResolvedResourceIdIfNotNull(IIdType theResourceId, @Nullable ResourcePersistentId thePersistentId) {
+		assert theResourceId != null;
+		if (thePersistentId != null && thePersistentId.getId() != null) {
+			addResolvedResourceId(theResourceId, thePersistentId);
+		}
+	}
+
 	public Map<String, ResourcePersistentId> getResolvedMatchUrls() {
 		return myResolvedMatchUrls;
 	}
