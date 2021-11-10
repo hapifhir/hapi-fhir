@@ -46,7 +46,6 @@ public class ExtendedLuceneIndexExtractor {
 
 	@NotNull
 	public ExtendedLuceneIndexData extract(ResourceIndexedSearchParams theNewParams) {
-		// wipmb this is testable now.
 		ExtendedLuceneIndexData retVal = new ExtendedLuceneIndexData(myContext);
 
 		theNewParams.myStringParams.forEach(nextParam ->
