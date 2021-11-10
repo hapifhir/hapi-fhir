@@ -51,16 +51,16 @@ public abstract class BaseDateSearchDaoTests {
 	//@CsvSource("2019-12-31T08:00:00,eq2020,false,inline,1")
 	@MethodSource("dateSearchCases")
 	public void testDateSearchMatching(String theResourceDate, String theQuery, boolean theExpectedMatch, String theFileName, int theLineNumber) {
-		Embedding searchEmbedding = getEmbedding();
+		Fixture fixture = getFixture();
 		if (isShouldSkip(theResourceDate, theQuery)) {
 			return;
 		}
 
 		// setup
-		myObservationId = searchEmbedding.createObservationWithEffectiveDate(theResourceDate);
+		myObservationId = fixture.createObservationWithEffectiveDate(theResourceDate);
 
 		// run the query
-		boolean matched = searchEmbedding.isObservationSearchMatch(theQuery, myObservationId);
+		boolean matched = fixture.isObservationSearchMatch(theQuery, myObservationId);
 
 		assertExpectedMatch(theResourceDate, theQuery, theExpectedMatch, matched, theFileName, theLineNumber);
 	}
@@ -93,9 +93,9 @@ public abstract class BaseDateSearchDaoTests {
 	 *
 	 * Use an abstract method instead of a constructor because JUnit has a such a funky lifecycle.
 	 */
-	protected abstract Embedding getEmbedding();
+	protected abstract Fixture getFixture();
 
-	public interface Embedding {
+	public interface Fixture {
 		/**
 		 * Create an observation and save it
 		 */
@@ -108,11 +108,11 @@ public abstract class BaseDateSearchDaoTests {
 
 	}
 
-	public static class TestDataBuilderEmbedding<O extends IBaseResource> implements BaseDateSearchDaoTests.Embedding {
+	public static class TestDataBuilderFixture<O extends IBaseResource> implements Fixture {
 		final ITestDataBuilder myTestDataBuilder;
 		final IFhirResourceDao<O> myObservationDao;
 
-		public TestDataBuilderEmbedding(ITestDataBuilder theTestDataBuilder, IFhirResourceDao<O> theObservationDao) {
+		public TestDataBuilderFixture(ITestDataBuilder theTestDataBuilder, IFhirResourceDao<O> theObservationDao) {
 			myTestDataBuilder = theTestDataBuilder;
 			myObservationDao = theObservationDao;
 		}

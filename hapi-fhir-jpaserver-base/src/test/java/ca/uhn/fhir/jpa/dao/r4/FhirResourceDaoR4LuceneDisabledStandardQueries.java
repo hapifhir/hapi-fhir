@@ -50,9 +50,9 @@ public class FhirResourceDaoR4LuceneDisabledStandardQueries extends BaseJpaTest 
 	@Nested
 	public class DateSearchTests extends BaseDateSearchDaoTests {
 		@Override
-		protected Embedding getEmbedding() {
+		protected Fixture getFixture() {
 			DaoTestDataBuilder testDataBuilder = new DaoTestDataBuilder(myFhirCtx, myDaoRegistry, new SystemRequestDetails());
-			return new TestDataBuilderEmbedding<>(testDataBuilder, myObservationDao);
+			return new TestDataBuilderFixture<>(testDataBuilder, myObservationDao);
 		}
 	}
 

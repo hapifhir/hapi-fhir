@@ -5325,8 +5325,8 @@ public class FhirResourceDaoR4LegacySearchBuilderTest extends BaseJpaR4Test {
 		}
 
 		@Override
-		protected Embedding getEmbedding() {
-			return new TestDataBuilderEmbedding(FhirResourceDaoR4LegacySearchBuilderTest.this, myObservationDao);
+		protected Fixture getFixture() {
+			return new TestDataBuilderFixture(FhirResourceDaoR4LegacySearchBuilderTest.this, myObservationDao);
 		}
 	}
 
