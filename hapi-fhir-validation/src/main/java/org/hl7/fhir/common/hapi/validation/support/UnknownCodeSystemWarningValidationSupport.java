@@ -3,12 +3,13 @@ package org.hl7.fhir.common.hapi.validation.support;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
-import org.hl7.fhir.exceptions.TerminologyServiceException;
+import org.hl7.fhir.common.hapi.validation.validator.ValidatorWrapper;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.print.attribute.standard.Severity;
 
 /**
  * This validation support module may be placed at the end of a {@link ValidationSupportChain}
@@ -19,6 +20,8 @@ import javax.print.attribute.standard.Severity;
  * in order to specify that unknown code systems should be allowed.
  */
 public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSupport {
+	private static final Logger ourLog = LoggerFactory.getLogger(UnknownCodeSystemWarningValidationSupport.class);
+
 	public static final IssueSeverity DEFAULT_SEVERITY = IssueSeverity.ERROR;
 
 	private IssueSeverity myNonExistentCodeSystemSeverity = DEFAULT_SEVERITY;
@@ -88,7 +91,8 @@ public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSup
 			case FATAL:
 				return false;
 			default:
-				// TODO - log
+				ourLog.info("Unknown issue severity " + myNonExistentCodeSystemSeverity.name()
+					+ ". Treating as INFO/WARNING");
 			case WARNING:
 			case INFORMATION:
 				return true;
