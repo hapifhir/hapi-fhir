@@ -419,7 +419,10 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 				 * multiple CodeSystem resources with CodeSystem.version set differently (as opposed to
 				 * multiple versions of the same CodeSystem, where CodeSystem.meta.versionId is different)
 				 */
-				deleteTermCodeSystemVersionOffline(next);
+				next.setCodeSystemVersionId("DELETED_" + UUID.randomUUID().toString());
+				myCodeSystemVersionDao.saveAndFlush(next);
+				myDeferredStorageSvc.deleteCodeSystemVersion(next);
+
 			}
 		}
 
@@ -482,42 +485,6 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		}
 
 		return existing;
-	}
-
-	private void deleteCodeSystemVersion(final Long theCodeSystemVersionPid) {
-		assert TransactionSynchronizationManager.isActualTransactionActive();
-		ourLog.info(" * Marking code system version {} for deletion", theCodeSystemVersionPid);
-
-		Optional<TermCodeSystem> codeSystemOpt = myCodeSystemDao.findWithCodeSystemVersionAsCurrentVersion(theCodeSystemVersionPid);
-		if (codeSystemOpt.isPresent()) {
-			TermCodeSystem codeSystem = codeSystemOpt.get();
-			if (codeSystem.getCurrentVersion() != null && codeSystem.getCurrentVersion().getPid().equals(theCodeSystemVersionPid)) {
-				ourLog.info(" * Removing code system version {} as current version of code system {}", theCodeSystemVersionPid, codeSystem.getPid());
-				codeSystem.setCurrentVersion(null);
-				myCodeSystemDao.save(codeSystem);
-			}
-		}
-
-		TermCodeSystemVersion codeSystemVersion = myCodeSystemVersionDao.findById(theCodeSystemVersionPid).orElseThrow(() -> new IllegalStateException());
-		deleteTermCodeSystemVersionOffline(codeSystemVersion);
-	}
-
-
-	private void deleteTermCodeSystemVersionOffline(TermCodeSystemVersion theCodeSystemVersion) {
-		theCodeSystemVersion.setCodeSystemVersionId("DELETED_" + UUID.randomUUID());
-		myCodeSystemVersionDao.saveAndFlush(theCodeSystemVersion);
-
-		JobParameters jobParameters = new JobParameters(
-			Collections.singletonMap(
-				JOB_PARAM_CODE_SYSTEM_VERSION_ID, new JobParameter(theCodeSystemVersion.getPid(), true) ));
-
-		try {
-			myJobSubmitter.runJob(myTermCodeSystemVersionDeleteJob, jobParameters);
-
-		} catch (JobParametersInvalidException theE) {
-			throw new InternalErrorException("Offline job submission for TermCodeSystemVersion: " +
-				theCodeSystemVersion.getPid() + " failed: " + theE);
-		}
 	}
 
 

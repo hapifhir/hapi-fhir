@@ -43,12 +43,12 @@ public class BatchTermCodeSystemUniqueVersionDeleteReader implements ItemReader<
 
 	@Override
 	public Long read() throws Exception {
-		if (myParameterPassed) {
-			return null;
+		if ( ! myParameterPassed) {
+			myParameterPassed = true;
+			return myTermCodeSystemVersionPid;
 		}
 
-		myParameterPassed = true;
-		return myTermCodeSystemVersionPid;
+		return null;
 	}
 
 }

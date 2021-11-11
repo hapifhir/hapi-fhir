@@ -283,8 +283,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 				!isConceptLinksToSaveLater() &&
 				!isDeferredValueSets() &&
 				!isDeferredConceptMaps() &&
-				!isDeferredCodeSystemDeletions() &&
-				!isJobsExecuting()) {
+				!isDeferredCodeSystemDeletions()) {
 				return;
 			}
 
@@ -473,6 +472,10 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		ourLog.info("isDeferredCodeSystemDeletions: {}", isDeferredCodeSystemDeletions());
 	}
 
+	@Override
+	public void deleteCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion) {
+		myDeferredCodeSystemVersionsDeletions.add(theCodeSystemVersion);
+	}
 
 	public static class Job implements HapiJob {
 		@Autowired

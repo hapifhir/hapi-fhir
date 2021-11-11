@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
+import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
@@ -26,6 +27,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
@@ -34,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.util.ResourceUtils;
 
 import javax.persistence.EntityManager;
@@ -77,6 +80,7 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_TOP2000
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_XML_FILE;
+import static java.util.stream.Collectors.joining;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_ALL_VALUESET_ID;
@@ -781,10 +785,26 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 	}
 
 	private TermCodeSystemVersion fetchCurrentCodeSystemVersion() {
+		runInTransaction(() -> {
+			List<TermCodeSystem> tcsList = myEntityManager.createQuery("from TermCodeSystem").getResultList();
+			List<TermCodeSystemVersion> tcsvList = myEntityManager.createQuery("from TermCodeSystemVersion").getResultList();
+			ourLog.error("tcslist: {}", tcsList.stream().map(tcs -> tcs.toString()).collect(joining("\n", "\n", "")));
+			ourLog.error("tcsvlist: {}", tcsvList.stream().map(v -> v.toString()).collect(joining("\n", "\n", "")));
+
+			if (tcsList.size() != 1) {
+				throw new IllegalStateException("More than one TCS: " +
+					tcsList.stream().map(tcs -> String.valueOf(tcs.getPid())).collect(joining()));
+			}
+			if (tcsList.get(0).getCurrentVersion() == null) {
+				throw new IllegalStateException("Current version is null in TCS: " + tcsList.get(0).getPid());
+			}
+		});
+
 		return runInTransaction(() -> (TermCodeSystemVersion) myEntityManager.createQuery(
-			"select tcsv from TermCodeSystemVersion tcsv join fetch tcsv.myCodeSystem tcs " +
-				"where tcs.myCurrentVersion = tcsv").getSingleResult());
+				"select tcsv from TermCodeSystemVersion tcsv join fetch tcsv.myCodeSystem tcs " +
+					"where tcs.myCurrentVersion = tcsv").getSingleResult());
 	}
+
 
 	private static void addBaseLoincMandatoryFilesToZip(
 		ZipCollectionBuilder theFiles, Boolean theIncludeTop2000, String theClassPathPrefix) throws IOException {
