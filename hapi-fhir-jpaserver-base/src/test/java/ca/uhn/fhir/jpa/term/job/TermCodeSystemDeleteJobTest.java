@@ -108,14 +108,9 @@ public class TermCodeSystemDeleteJobTest extends BaseJpaR4Test {
 	public void runDeleteJobMultipleVersions() throws Exception {
 		initMultipleVersionLoad();
 
+		// loading a loinc CS with version loads two versions (second one with null version)
 		String firstCurrentVer = "2.67";
 		uploadLoincCodeSystem(firstCurrentVer, true);
-
-		String noCurrentVer = "2.68";
-		uploadLoincCodeSystem(noCurrentVer, false);
-
-		String lastCurrentVer = "2.69";
-		uploadLoincCodeSystem(lastCurrentVer, true);
 
 		long[] termCodeSystemPidVect = new long[1];  //bypass final restriction
 		runInTransaction(() -> {
@@ -125,8 +120,8 @@ public class TermCodeSystemDeleteJobTest extends BaseJpaR4Test {
 			assertNotNull(termCodeSystem);
 			termCodeSystemPidVect[0] = termCodeSystem.getPid();
 
-			assertEquals(4, myTermCodeSystemVersionDao.count());
-			assertEquals(324, myTermConceptDao.count());
+			assertEquals(2, myTermCodeSystemVersionDao.count());
+			assertEquals(162, myTermConceptDao.count());
 		});
 
 		JobParameters jobParameters = new JobParameters(

@@ -54,7 +54,6 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 
 		testCreatingAndUpdatingCodeSystemEntity(firstUpload, duplicateUpload, 125, "Can not create multiple CodeSystem resources with CodeSystem.url \"http://example.com/my_code_system\" and CodeSystem.version \"1\", already have one with resource ID: CodeSystem/");
 
-		myBatchJobHelper.awaitAllBulkJobCompletions(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());
 			assertEquals(1, myTermCodeSystemVersionDao.count());
@@ -74,7 +73,6 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 
 		testCreatingAndUpdatingCodeSystemEntity(firstUpload, duplicateUpload, 251, "Can not create multiple CodeSystem resources with CodeSystem.url \"http://example.com/my_code_system\" and CodeSystem.version \"2\", already have one with resource ID: CodeSystem/");
 
-		myBatchJobHelper.awaitAllBulkJobCompletions(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());
 			assertEquals(2, myTermCodeSystemVersionDao.count());
@@ -112,7 +110,6 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 		theUpload.addConcept(new CodeSystem.ConceptDefinitionComponent(new CodeType("codeB")));
 		// Update the CodeSystem and CodeSystemVersion entities
 		runInTransaction(() -> myTermCodeSystemStorageSvc.storeNewCodeSystemVersionIfNeeded(theUpload, codeSystemResourceEntity));
-		myBatchJobHelper.awaitAllBulkJobCompletions(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
 		validateCodeSystemUpdates(expectedCnt + 1);
 
 		// Try duplicating the CodeSystem
@@ -136,6 +133,7 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 		myTerminologyDeferredStorageSvc.setProcessDeferred(true);
 		myTerminologyDeferredStorageSvc.saveDeferred();
 		myTerminologyDeferredStorageSvc.setProcessDeferred(false);
+		myBatchJobHelper.awaitAllBulkJobCompletions(false, TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
 		assertEquals(theExpectedConceptCount, runInTransaction(() -> myTermConceptDao.count()));
 
 	}

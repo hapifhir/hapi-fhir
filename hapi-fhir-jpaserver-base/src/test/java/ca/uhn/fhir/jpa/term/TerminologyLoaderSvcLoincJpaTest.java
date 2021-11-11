@@ -63,10 +63,8 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 		TerminologyLoaderSvcLoincTest.addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v267_loincupload.properties");
 
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
-		myBatchJobHelper.awaitAllBulkJobCompletions(
-			TERM_CODE_SYSTEM_DELETE_JOB_NAME,
-			TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME );
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myBatchJobHelper.awaitAllBulkJobCompletions(false, TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME );
 
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());
@@ -92,6 +90,7 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 		TerminologyLoaderSvcLoincTest.addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v268_loincupload.properties");
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myBatchJobHelper.awaitAllBulkJobCompletions(false, TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME );
 
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());

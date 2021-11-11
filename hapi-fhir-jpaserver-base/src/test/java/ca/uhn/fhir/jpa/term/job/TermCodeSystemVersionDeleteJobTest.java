@@ -111,12 +111,6 @@ public class TermCodeSystemVersionDeleteJobTest extends BaseJpaR4Test {
 		String firstCurrentVer = "2.67";
 		uploadLoincCodeSystem(firstCurrentVer, true);
 
-		String noCurrentVer = "2.68";
-		uploadLoincCodeSystem(noCurrentVer, false);
-
-		String lastCurrentVer = "2.69";
-		uploadLoincCodeSystem(lastCurrentVer, true);
-
 		long[] termCodeSystemVersionPidVect = new long[1];  //bypass final restriction
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());
@@ -128,8 +122,8 @@ public class TermCodeSystemVersionDeleteJobTest extends BaseJpaR4Test {
 			assertNotNull(termCodeSystemVersion);
 			termCodeSystemVersionPidVect[0] = termCodeSystemVersion.getPid();
 
-			assertEquals(4, myTermCodeSystemVersionDao.count());
-			assertEquals(81 * 4, myTermConceptDao.count());
+			assertEquals(2, myTermCodeSystemVersionDao.count());
+			assertEquals(81 * 2, myTermConceptDao.count());
 		});
 
 
@@ -146,8 +140,8 @@ public class TermCodeSystemVersionDeleteJobTest extends BaseJpaR4Test {
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());
 			assertNotNull(myTermCodeSystemDao.findByCodeSystemUri("http://loinc.org"));
-			assertEquals(3, myTermCodeSystemVersionDao.count());
-			assertEquals(81 * 3, myTermConceptDao.count());
+			assertEquals(1, myTermCodeSystemVersionDao.count());
+			assertEquals(81, myTermConceptDao.count());
 		});
 	}
 
