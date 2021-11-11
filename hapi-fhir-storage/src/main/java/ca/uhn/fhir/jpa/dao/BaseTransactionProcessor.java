@@ -1402,9 +1402,8 @@ public abstract class BaseTransactionProcessor {
 						id.setValue(newRef);
 					} else {
 						// we will add the looked up info to the transaction
-						// for later if storage ID is not null (in cases where resource
-						// is newly created placeholder, it may not yet have a storage ID).
-						theTransactionDetails.addResolvedResourceIdIfNotNull(id,
+						// for later
+						theTransactionDetails.addResolvedResourceId(id,
 							resourceVersionMap.getResourcePersistentId(id));
 					}
 				}

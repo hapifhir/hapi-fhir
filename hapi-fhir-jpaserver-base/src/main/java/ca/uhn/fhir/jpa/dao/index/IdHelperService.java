@@ -316,12 +316,14 @@ public class IdHelperService {
 			TypedQuery<ForcedId> query = myEntityManager.createQuery(criteriaQuery);
 			List<ForcedId> results = query.getResultList();
 			for (ForcedId nextId : results) {
-				ResourcePersistentId persistentId = new ResourcePersistentId(nextId.getResourceId());
-				populateAssociatedResourceId(nextId.getResourceType(), nextId.getForcedId(), persistentId);
-				retVal.add(persistentId);
+				if (nextId.getResourceId() != null) {
+					ResourcePersistentId persistentId = new ResourcePersistentId(nextId.getResourceId());
+					populateAssociatedResourceId(nextId.getResourceType(), nextId.getForcedId(), persistentId);
+					retVal.add(persistentId);
 
-				String key = toForcedIdToPidKey(theRequestPartitionId, nextId.getResourceType(), nextId.getForcedId());
-				myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, persistentId);
+					String key = toForcedIdToPidKey(theRequestPartitionId, nextId.getResourceType(), nextId.getForcedId());
+					myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, persistentId);
+				}
 			}
 
 		}
