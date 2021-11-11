@@ -316,6 +316,7 @@ public class IdHelperService {
 			TypedQuery<ForcedId> query = myEntityManager.createQuery(criteriaQuery);
 			List<ForcedId> results = query.getResultList();
 			for (ForcedId nextId : results) {
+				// Check if the nextId has a resource ID. It may have a null resource ID if a commit is still pending.
 				if (nextId.getResourceId() != null) {
 					ResourcePersistentId persistentId = new ResourcePersistentId(nextId.getResourceId());
 					populateAssociatedResourceId(nextId.getResourceType(), nextId.getForcedId(), persistentId);
