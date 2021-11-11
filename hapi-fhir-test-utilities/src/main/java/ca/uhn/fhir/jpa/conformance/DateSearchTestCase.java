@@ -30,6 +30,7 @@ import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -68,17 +69,23 @@ public class DateSearchTestCase {
  	 */
 	public final static List<DateSearchTestCase> ourCases;
 	static {
+		ourCases = new ArrayList<>();
+		ourCases.addAll(expandedCases());
+		ourCases.addAll(compactCases());
+	}
+
+	private static List<DateSearchTestCase> expandedCases() {
 		String csv = "DateSearchTestCase.csv";
 		InputStream resource = DateSearchTestCase.class.getResourceAsStream(csv);
 		assert resource != null;
 		InputStreamReader inputStreamReader = new InputStreamReader(resource, StandardCharsets.UTF_8);
-		ourCases = parseCsvCases(inputStreamReader, csv);
+		List<DateSearchTestCase> cases = parseCsvCases(inputStreamReader, csv);
 		try {
 			resource.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		ourCases.addAll(compactCases());
+		return cases;
 	}
 
 	static List<DateSearchTestCase> parseCsvCases(Reader theSource, String theFileName) {
@@ -122,7 +129,7 @@ public class DateSearchTestCase {
 				String resourceValue = fields[0].trim();
 				String truePrefixes = fields[1].trim();
 				String queryValue = fields[2].trim();
-				Set<String> expectedTruePrefixes = Arrays.stream(truePrefixes.split(" +")).map(String::trim).collect(Collectors.toSet());
+				Set<String> expectedTruePrefixes = Arrays.stream(truePrefixes.split("\\s+")).map(String::trim).collect(Collectors.toSet());
 
 				// expand to one test case per supportedPrefixes
 				return supportedPrefixes.stream()
