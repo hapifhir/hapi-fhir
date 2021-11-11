@@ -8,7 +8,6 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
@@ -23,7 +22,6 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.junit.Ignore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,8 +35,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-// Modeled after: ca.uhn.fhir.jpa.provider.r4.ResourceProviderR4CodeSystemTest
-//           AND: ca.uhn.fhir.jpa.provider.r4.RemoteTerminologyServiceResourceProviderR4Test
 public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProviderR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4RemoteTerminologyTest.class);
 	private static final String DISPLAY = "DISPLAY";
@@ -66,9 +62,12 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 
 		mySvc = new RemoteTerminologyServiceValidationSupport(ourCtx);
 		mySvc.setBaseUrl(baseUrl);
-//		mySvc.addClientInterceptor(new LoggingInterceptor(true));
 		myValidationSupportChain.addValidationSupport(0, mySvc);
-//		myInterceptorRegistry.registerInterceptor(myInterceptor);
+	}
+
+	@AfterEach
+	public void after_removeRemoteTerminologySupport() {
+		myValidationSupportChain.removeValidationSupport(mySvc);
 	}
 
 	@Test
