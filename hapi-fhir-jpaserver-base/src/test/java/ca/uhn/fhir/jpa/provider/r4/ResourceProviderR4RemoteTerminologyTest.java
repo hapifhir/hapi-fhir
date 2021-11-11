@@ -64,10 +64,10 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 
 		String baseUrl = "http://localhost:" + myRestfulServerExtension.getPort();
 
-//		mySvc = new RemoteTerminologyServiceValidationSupport(ourCtx);
-//		mySvc.setBaseUrl(baseUrl);
+		mySvc = new RemoteTerminologyServiceValidationSupport(ourCtx);
+		mySvc.setBaseUrl(baseUrl);
 //		mySvc.addClientInterceptor(new LoggingInterceptor(true));
-//		myValidationSupportChain.addValidationSupport(0, mySvc);
+		myValidationSupportChain.addValidationSupport(0, mySvc);
 //		myInterceptorRegistry.registerInterceptor(myInterceptor);
 	}
 
@@ -93,7 +93,7 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 		ourLog.info(resp);
 
 		assertEquals(true, ((BooleanType)respParam.getParameter("result")).booleanValue());
-		assertEquals("Alerts", respParam.getParameter("display").toString());
+		assertEquals(DISPLAY, respParam.getParameter("display").toString());
 	}
 
 	private void createNextValueSetReturnParameters(boolean theResult, String theDisplay, String theMessage) {
