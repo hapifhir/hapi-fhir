@@ -39,8 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 // Modeled after: ca.uhn.fhir.jpa.provider.r4.ResourceProviderR4CodeSystemTest
 //           AND: ca.uhn.fhir.jpa.provider.r4.RemoteTerminologyServiceResourceProviderR4Test
-//@Ignore
-public class ResourceProviderR4RemoteTerminologyTest { // extends BaseResourceProviderR4Test
+public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProviderR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4RemoteTerminologyTest.class);
 	private static final String DISPLAY = "DISPLAY";
 	private static FhirContext ourCtx = FhirContext.forR4();
@@ -48,56 +47,54 @@ public class ResourceProviderR4RemoteTerminologyTest { // extends BaseResourcePr
 	private MyCodeSystemProvider myCodeSystemProvider;
 	private MyValueSetProvider myValueSetProvider;
 
-//	@RegisterExtension
-//	public RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(ourCtx);
+	@RegisterExtension
+	public RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(ourCtx);
 
-//	@Autowired
-//	@Qualifier(BaseConfig.JPA_VALIDATION_SUPPORT_CHAIN)
-//	private ValidationSupportChain myValidationSupportChain;
+	@Autowired
+	@Qualifier(BaseConfig.JPA_VALIDATION_SUPPORT_CHAIN)
+	private ValidationSupportChain myValidationSupportChain;
 
-//	@BeforeEach
-//	public void before_addRemoteTerminologySupport() throws Exception {
+	@BeforeEach
+	public void before_addRemoteTerminologySupport() throws Exception {
+		myCodeSystemProvider = new MyCodeSystemProvider();
+		myRestfulServerExtension.getRestfulServer().registerProvider(myCodeSystemProvider);
+
+		myValueSetProvider = new MyValueSetProvider();
+		myRestfulServerExtension.getRestfulServer().registerProvider(myValueSetProvider);
+
+		String baseUrl = "http://localhost:" + myRestfulServerExtension.getPort();
+
 //		mySvc = new RemoteTerminologyServiceValidationSupport(ourCtx);
-//		String baseUrl = "http://localhost:" + myRestfulServerExtension.getPort();
 //		mySvc.setBaseUrl(baseUrl);
 //		mySvc.addClientInterceptor(new LoggingInterceptor(true));
 //		myValidationSupportChain.addValidationSupport(0, mySvc);
 //		myInterceptorRegistry.registerInterceptor(myInterceptor);
-//		myCodeSystemProvider = new MyCodeSystemProvider();
-//		myRestfulServerExtension.getRestfulServer().registerProvider(myCodeSystemProvider);
-//		myValueSetProvider = new MyValueSetProvider();
-//		myRestfulServerExtension.getRestfulServer().registerProvider(myValueSetProvider);
-//	}
+	}
 
-//	@AfterEach
-//	public void afterEach() throws Exception {
-//		this.after();
-//	}
+	@Test
+	public void testLookupOperationByCodeAndSystemBuiltInCode() {
+		myCodeSystemProvider.myNextReturnCodeSystems = new ArrayList<>();
+		myCodeSystemProvider.myNextReturnCodeSystems.add((CodeSystem) new CodeSystem().setId("CodeSystem/list-example-use-codes"));
+		myValueSetProvider.myNextReturnValueSets = new ArrayList<>();
+		myValueSetProvider.myNextReturnValueSets.add((ValueSet) new ValueSet().setId("ValueSet/list-example-codes"));
+		createNextValueSetReturnParameters(true, DISPLAY, null);
 
-//	@Test
-//	public void testLookupOperationByCodeAndSystemBuiltInCode() {
-//		myCodeSystemProvider.myNextReturnCodeSystems = new ArrayList<>();
-//		myCodeSystemProvider.myNextReturnCodeSystems.add((CodeSystem) new CodeSystem().setId("CodeSystem/list-example-use-codes"));
-//		myValueSetProvider.myNextReturnValueSets = new ArrayList<>();
-//		myValueSetProvider.myNextReturnValueSets.add((ValueSet) new ValueSet().setId("ValueSet/list-example-codes"));
-//		createNextValueSetReturnParameters(true, DISPLAY, null);
-//
-//		Parameters respParam = myClient
-//			.operation()
-//			.onType(ValueSet.class)
-//			.named(JpaConstants.OPERATION_VALIDATE_CODE)
-//			.withParameter(Parameters.class, "code", new CodeType("alerts"))
-//			.andParameter("system", new UriType("http://terminology.hl7.org/CodeSystem/list-example-use-codes"))
-//			.andParameter("url", new UriType("http://hl7.org/fhir/ValueSet/list-example-codes"))
-//			.useHttpGet()
-//			.execute();
-//
-//		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
-//		ourLog.info(resp);
-//
-//		assertEquals(true, ((BooleanType)respParam.getParameter("result")).booleanValue());
-//		assertEquals(DISPLAY, respParam.getParameter("display").toString());
-//	}
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named(JpaConstants.OPERATION_VALIDATE_CODE)
+			.withParameter(Parameters.class, "code", new CodeType("alerts"))
+			.andParameter("system", new UriType("http://terminology.hl7.org/CodeSystem/list-example-use-codes"))
+			.andParameter("url", new UriType("http://hl7.org/fhir/ValueSet/list-example-codes"))
+			.useHttpGet()
+			.execute();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertEquals(true, ((BooleanType)respParam.getParameter("result")).booleanValue());
+		assertEquals("Alerts", respParam.getParameter("display").toString());
+	}
 
 	private void createNextValueSetReturnParameters(boolean theResult, String theDisplay, String theMessage) {
 		myValueSetProvider.myNextReturnParams = new Parameters();
