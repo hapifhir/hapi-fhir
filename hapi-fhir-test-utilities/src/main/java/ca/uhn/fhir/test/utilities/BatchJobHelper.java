@@ -31,6 +31,7 @@ import org.springframework.batch.core.explore.JobExplorer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -48,17 +49,30 @@ public class BatchJobHelper {
 		myJobExplorer = theJobExplorer;
 	}
 
+
 	public List<JobExecution> awaitAllBulkJobCompletions(String... theJobNames) {
+		return awaitAllBulkJobCompletions(true, theJobNames);
+	}
+
+	/**
+	 * Await and report for job completions
+	 * @param theFailIfNotJobsFound indicate if must fail in case no matching jobs are found
+	 * @param theJobNames The job names to match
+	 * @return the matched JobExecution(s)
+	 */
+	public List<JobExecution> awaitAllBulkJobCompletions(boolean theFailIfNotJobsFound, String... theJobNames) {
 		assert theJobNames.length > 0;
 
 		List<JobInstance> matchingJobInstances = new ArrayList<>();
 		for (String nextName : theJobNames) {
 			matchingJobInstances.addAll(myJobExplorer.findJobInstancesByJobName(nextName, 0, 100));
 		}
-		if (matchingJobInstances.isEmpty()) {
-			List<String> wantNames = Arrays.asList(theJobNames);
-			List<String> haveNames = myJobExplorer.getJobNames();
-			fail("There are no jobs running - Want names " + wantNames + " and have names " + haveNames);
+		if (theFailIfNotJobsFound) {
+			if (matchingJobInstances.isEmpty()) {
+				List<String> wantNames = Arrays.asList(theJobNames);
+				List<String> haveNames = myJobExplorer.getJobNames();
+				fail("There are no jobs running - Want names " + wantNames + " and have names " + haveNames);
+			}
 		}
 		List<JobExecution> matchingExecutions = matchingJobInstances.stream().flatMap(jobInstance -> myJobExplorer.getJobExecutions(jobInstance).stream()).collect(Collectors.toList());
 		awaitJobCompletions(matchingExecutions);
