@@ -161,6 +161,20 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 	}
 
+	private Observation createObservationForUnknownCodeSystemTest() {
+		Observation obs = new Observation();
+		obs.getMeta().addProfile("http://sd");
+		obs.getText().setDivAsString("<div>Hello</div>");
+		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs");
+		obs.getCode().setText("hello");
+		obs.setSubject(new Reference("Patient/123"));
+		obs.addPerformer(new Reference("Practitioner/123"));
+		obs.setEffective(DateTimeType.now());
+		obs.setStatus(ObservationStatus.FINAL);
+		return obs;
+	}
+
 	/**
 	 * By default, an unknown code system should fail validation
 	 */
@@ -168,6 +182,32 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	public void testValidateCodeInValueSetWithUnknownCodeSystem_Warning() {
 		// set to warning
 		myUnknownCodeSystemWarningValidationSupport.setNonExistentCodeSystemSeverity(IValidationSupport.IssueSeverity.WARNING);
+
+		createStructureDefWithBindingToUnknownCs();
+
+		Observation obs = createObservationForUnknownCodeSystemTest();
+
+		OperationOutcome oo;
+		String encoded;
+
+		// Valid code
+		obs.setValue(new Quantity().setSystem("http://cs").setCode("code1").setValue(123));
+		oo = validateAndReturnOutcome(obs);
+		encoded = encode(oo);
+		ourLog.info(encoded);
+		assertTrue(oo.getIssueFirstRep().getDiagnostics().contains("No issues detected during validation"));
+
+		// Invalid code
+		obs.setValue(new Quantity().setSystem("http://cs").setCode("code99").setValue(123));
+		oo = validateAndReturnOutcome(obs);
+		encoded = encode(oo);
+		ourLog.info(encoded);
+		assertTrue(oo.getIssueFirstRep().getDiagnostics().contains("No issues detected during validation"));
+	}
+
+	@Test
+	public void testValidateCodeInValueSetWithUnknownCodeSystem_Error() {
+		myUnknownCodeSystemWarningValidationSupport.setNonExistentCodeSystemSeverity(IValidationSupport.IssueSeverity.ERROR);
 
 		createStructureDefWithBindingToUnknownCs();
 
@@ -192,13 +232,15 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		ourLog.info(encoded);
 		assertTrue(oo.getIssueFirstRep().getDiagnostics().contains("No issues detected during validation"));
 
+
 		// Invalid code
 		obs.setValue(new Quantity().setSystem("http://cs").setCode("code99").setValue(123));
 		oo = validateAndReturnOutcome(obs);
 		encoded = encode(oo);
 		ourLog.info(encoded);
-		assertTrue(oo.getIssueFirstRep().getDiagnostics().contains("No issues detected during validation"));
-
+		assertTrue(oo.getIssueFirstRep()
+			.getDiagnostics().contains("The code provided (http://cs#code99) is not in the value set http://vs, and a code from this value set is required: Unknown code 'http://cs#code99' for in-memory expansion of ValueSet 'http://vs'")
+		);
 	}
 
 	public void createStructureDefWithBindingToUnknownCs() {
