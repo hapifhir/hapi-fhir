@@ -1,13 +1,11 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.BaseDAODateSearchTest;
+import ca.uhn.fhir.jpa.dao.BaseDateSearchDaoTests;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -5316,8 +5314,7 @@ public class FhirResourceDaoR4LegacySearchBuilderTest extends BaseJpaR4Test {
 	}
 
 	@Nested
-	public class DateSearchTests extends BaseDAODateSearchTest {
-
+	public class DateSearchTests extends BaseDateSearchDaoTests {
 		/**
 		 * legacy builder didn't get the year/month date search fixes, so skip anything wider than a day.
 		 */
@@ -5328,16 +5325,8 @@ public class FhirResourceDaoR4LegacySearchBuilderTest extends BaseJpaR4Test {
 		}
 
 		@Override
-		protected FhirContext getMyFhirCtx() {
-			return myFhirCtx;
-		}
-		@Override
-		protected <T> T doInTransaction(TransactionCallback<T> theCallback) {
-			return new TransactionTemplate(myTxManager).execute(theCallback);
-		}
-		@Override
-		protected IFhirResourceDao<Observation> getObservationDao() {
-			return myObservationDao;
+		protected Fixture getFixture() {
+			return new TestDataBuilderFixture(FhirResourceDaoR4LegacySearchBuilderTest.this, myObservationDao);
 		}
 	}
 
