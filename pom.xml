@@ -798,7 +798,7 @@
         <mockito_version>3.9.0</mockito_version>
         <nullaway_version>0.7.9</nullaway_version>
         <guava_version>30.1.1-jre</guava_version>
-        <gson_version>2.8.6</gson_version>
+        <gson_version>2.8.9</gson_version>
         <jaxb_bundle_version>2.2.11_1</jaxb_bundle_version>
         <jaxb_api_version>2.3.1</jaxb_api_version>
         <jaxb_core_version>2.3.0.1</jaxb_core_version>
