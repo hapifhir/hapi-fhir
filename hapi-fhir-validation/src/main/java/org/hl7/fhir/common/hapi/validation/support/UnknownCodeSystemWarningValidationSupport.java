@@ -45,12 +45,15 @@ public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSup
 	@Override
 	public CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		// filters out error/fatal
+		// NB: this is a secondary check. isCodeSystemSupported
+		// should prevent this from ever calling validate code here
+		// ... but should it ever get called, we'll return null
 		if (!canValidateCodeSystem(theValidationSupportContext, theCodeSystem)) {
 			return null;
 		}
 
 		CodeValidationResult result = new CodeValidationResult()
-			.setSeverity(myNonExistentCodeSystemSeverity); // will be warning or info
+			.setSeverity(myNonExistentCodeSystemSeverity); // will be warning or info (error/fatal filtered out above)
 
 		result.setMessage("No issues detected during validation");
 
@@ -89,15 +92,22 @@ public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSup
 			case ERROR:
 			case FATAL:
 				return false;
+			case WARNING:
+			case INFORMATION:
+				return true;
 			default:
 				ourLog.info("Unknown issue severity " + myNonExistentCodeSystemSeverity.name()
 					+ ". Treating as INFO/WARNING");
-			case WARNING:
-			case INFORMATION:
 				return true;
 		}
 	}
 
+	/**
+	 * Determines if the code system can (and should) be validated.
+	 * @param theValidationSupportContext
+	 * @param theCodeSystem
+	 * @return
+	 */
 	private boolean canValidateCodeSystem(ValidationSupportContext theValidationSupportContext,
 													  String theCodeSystem) {
 		if (!allowNonExistentCodeSystems()) {
