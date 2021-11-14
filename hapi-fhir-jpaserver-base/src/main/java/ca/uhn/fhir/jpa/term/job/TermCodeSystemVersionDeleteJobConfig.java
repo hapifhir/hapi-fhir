@@ -73,7 +73,7 @@ public class TermCodeSystemVersionDeleteJobConfig extends BaseTermCodeSystemDele
 	@Bean(name = TERM_CONCEPTS_UNIQUE_VERSION_DELETE_STEP_NAME)
 	public Step termConceptsUniqueVersionDeleteStep() {
 		DefaultTransactionAttribute attribute = new DefaultTransactionAttribute();
-		attribute.setTimeout(TWENTY_MINUTES);
+		attribute.setTimeout(TERM_CONCEPT_DELETE_TIMEOUT);
 
 		return myStepBuilderFactory.get(TERM_CONCEPTS_UNIQUE_VERSION_DELETE_STEP_NAME)
 			.<Long, Long>chunk(1)

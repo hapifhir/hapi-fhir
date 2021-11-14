@@ -79,7 +79,7 @@ public class TermCodeSystemDeleteJobConfig extends BaseTermCodeSystemDeleteJobCo
 	@Bean(name = TERM_CONCEPTS_DELETE_STEP_NAME)
 	public Step termConceptsDeleteStep() {
 		DefaultTransactionAttribute attribute = new DefaultTransactionAttribute();
-		attribute.setTimeout(TWENTY_MINUTES);
+		attribute.setTimeout(TERM_CONCEPT_DELETE_TIMEOUT);
 
 		return myStepBuilderFactory.get(TERM_CONCEPTS_DELETE_STEP_NAME)
 			.<Long, Long>chunk(1)

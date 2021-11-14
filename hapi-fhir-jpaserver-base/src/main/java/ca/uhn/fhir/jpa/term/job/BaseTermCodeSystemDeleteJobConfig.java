@@ -32,7 +32,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class BaseTermCodeSystemDeleteJobConfig {
 
-	protected static final int TWENTY_MINUTES = 60 * 20;
+	protected static final int TERM_CONCEPT_DELETE_TIMEOUT = 60 * 2; // two minutes
 
 	@Autowired
 	protected JobBuilderFactory myJobBuilderFactory;

@@ -103,6 +103,20 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.withColumns("CONCEPT_PID")
 			// H2, Derby, MariaDB, and MySql automatically add indexes to foreign keys
 			.onlyAppliesToPlatforms(DriverTypeEnum.POSTGRES_9_4, DriverTypeEnum.ORACLE_12C, DriverTypeEnum.MSSQL_2012);
+
+		version.onTable("TRM_CONCEPT_PC_LINK")
+			.addIndex("20211102.3", "FK_TERM_CONCEPTPC_CHILD")
+			.unique(false)
+			.withColumns("CHILD_PID")
+			// H2, Derby, MariaDB, and MySql automatically add indexes to foreign keys
+			.onlyAppliesToPlatforms(DriverTypeEnum.POSTGRES_9_4, DriverTypeEnum.ORACLE_12C, DriverTypeEnum.MSSQL_2012);
+
+		version.onTable("TRM_CONCEPT_PC_LINK")
+			.addIndex("20211102.4", "FK_TERM_CONCEPTPC_PARENT")
+			.unique(false)
+			.withColumns("PARENT_PID")
+			// H2, Derby, MariaDB, and MySql automatically add indexes to foreign keys
+			.onlyAppliesToPlatforms(DriverTypeEnum.POSTGRES_9_4, DriverTypeEnum.ORACLE_12C, DriverTypeEnum.MSSQL_2012);
 	}
 
 

@@ -76,18 +76,20 @@ public class TestUtil {
 	private static Set<String> ourReservedWords;
 
 
-	// Exception reasons:
-	// (*1) H2 sets indexes for FKs automatically so this index had to be called as the target FK field it is indexing
-	// to avoid SchemaMigrationTest to complain about the extra index (which doesn't exist in H2)
-
+	// Exceptions set because H2 sets indexes for FKs automatically so this index had to be called as the target FK field
+	// it is indexing to avoid SchemaMigrationTest to complain about the extra index (which doesn't exist in H2)
 	private static final Set<String> constraintNameValidationExceptionList = Sets.newHashSet(
-	"FK_CONCEPTPROP_CONCEPT", // excepted for reason (*1)
-		"FK_CONCEPTDESIG_CONCEPT" 			// excepted for reason (*1)
-	);
+	"FK_CONCEPTPROP_CONCEPT",
+		"FK_CONCEPTDESIG_CONCEPT",
+		"FK_TERM_CONCEPTPC_CHILD",
+		"FK_TERM_CONCEPTPC_PARENT"
 
+	);
 	private static final Set<String> duplicateNameValidationExceptionList = Sets.newHashSet(
-	"FK_CONCEPTPROP_CONCEPT", // excepted for reason (*1)
-		"FK_CONCEPTDESIG_CONCEPT" 			// excepted for reason (*1)
+	"FK_CONCEPTPROP_CONCEPT",
+		"FK_CONCEPTDESIG_CONCEPT",
+		"FK_TERM_CONCEPTPC_CHILD",
+		"FK_TERM_CONCEPTPC_PARENT"
 	);
 
 
