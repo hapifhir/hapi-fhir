@@ -192,6 +192,12 @@ public class AuthorizationInterceptorR4Test {
 			retVal.setId(new IdType("Patient", (long) theId));
 		}
 		retVal.addName().setFamily("FAM");
+		Identifier identifier = new Identifier();
+		identifier.setSystem("smilecdr");
+		identifier.setValue("12345");
+		List<Identifier> identifierList = new ArrayList<>();
+		identifierList.add(identifier);
+		retVal.setIdentifier(identifierList);
 		return retVal;
 	}
 
@@ -2456,6 +2462,40 @@ public class AuthorizationInterceptorR4Test {
 	}
 
 	@Test
+	public void testReadByCompartmentReadByIdentifier() throws Exception {
+		AuthorizationInterceptor interceptor = new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("Rule 1").read().allResources().inCompartment("Patient", new IdType("Patient/123")).andThen()
+					.build();
+			}
+		};
+		ourServlet.registerInterceptor(interceptor);
+
+		HttpGet httpGet;
+		HttpResponse status;
+		String response;
+
+		ourReturn = Collections.singletonList(createPatient(123));
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_identifier=smilecdr%7C12345");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		ourReturn = Collections.singletonList(createPatient(456));
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_identifier=smilecdr%7C12345");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertThat(response, containsString("Access denied by default policy (no applicable rules)"));
+		assertTrue(ourHitMethod);
+	}
+
+	@Test
 	public void testReadByCompartmentReadByPatientParam() throws Exception {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
@@ -2490,8 +2530,8 @@ public class AuthorizationInterceptorR4Test {
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/DiagnosticReport?patient=Patient/2");
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
 
 		ourReturn = Collections.singletonList(createDiagnosticReport(1, "Patient/1"));
 		ourHitMethod = false;
@@ -2514,8 +2554,8 @@ public class AuthorizationInterceptorR4Test {
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/DiagnosticReport?subject=Patient/2");
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
 
 	}
 
@@ -2555,8 +2595,8 @@ public class AuthorizationInterceptorR4Test {
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient");
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
 
 	}
 
@@ -2605,8 +2645,8 @@ public class AuthorizationInterceptorR4Test {
 		status = ourClient.execute(httpGet);
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/_history");
@@ -2800,8 +2840,8 @@ public class AuthorizationInterceptorR4Test {
 		status = ourClient.execute(httpGet);
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/_history");
