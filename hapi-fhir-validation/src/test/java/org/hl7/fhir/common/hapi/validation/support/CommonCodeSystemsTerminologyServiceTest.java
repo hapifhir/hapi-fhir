@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -52,6 +53,26 @@ public class CommonCodeSystemsTerminologyServiceTest {
 	public void testUcum_LookupCode_UnknownSystem() {
 		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(newSupport(), "http://foo", "AAAAA", null);
 		assertNull(outcome);
+	}
+
+	@Test
+	public void lookupCode_languageOnlyLookup_isCaseInsensitive() {
+		IValidationSupport.LookupCodeResult outcomeUpper = mySvc.lookupCode(newSupport(), "urn:ietf:bcp:47", "SGN", "Sign Languages");
+		IValidationSupport.LookupCodeResult outcomeLower = mySvc.lookupCode(newSupport(), "urn:ietf:bcp:47", "sgn", "Sign Languages");
+		assertNotNull(outcomeUpper);
+		assertNotNull(outcomeLower);
+		assertTrue(outcomeLower.isFound());
+		assertTrue(outcomeUpper.isFound());
+	}
+
+	@Test
+	public void lookupCode_languageAndRegionLookup_languageIsCaseInsensitive() {
+		IValidationSupport.LookupCodeResult outcomeUpper = mySvc.lookupCode(newSupport(), "urn:ietf:bcp:47", "EN-US", "English");
+		IValidationSupport.LookupCodeResult outcomeLower = mySvc.lookupCode(newSupport(), "urn:ietf:bcp:47", "en-US", "English");
+		assertNotNull(outcomeUpper);
+		assertNotNull(outcomeLower);
+		assertTrue(outcomeLower.isFound());
+		assertTrue(outcomeUpper.isFound());
 	}
 
 	@Test
