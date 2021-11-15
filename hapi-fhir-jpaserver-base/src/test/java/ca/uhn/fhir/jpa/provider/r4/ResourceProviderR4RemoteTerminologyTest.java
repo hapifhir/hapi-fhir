@@ -39,12 +39,14 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4RemoteTerminologyTest.class);
 	private static final String DISPLAY = "DISPLAY";
 	private static FhirContext ourCtx = FhirContext.forR4();
-	private RemoteTerminologyServiceValidationSupport mySvc;
-	private MyCodeSystemProvider myCodeSystemProvider;
-	private MyValueSetProvider myValueSetProvider;
+	private MyCodeSystemProvider myCodeSystemProvider = new MyCodeSystemProvider();
+	private MyValueSetProvider myValueSetProvider = new MyValueSetProvider();
 
 	@RegisterExtension
-	public RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(ourCtx);
+	public RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(ourCtx, myCodeSystemProvider,
+		myValueSetProvider);
+
+	private RemoteTerminologyServiceValidationSupport mySvc;
 
 	@Autowired
 	@Qualifier(BaseConfig.JPA_VALIDATION_SUPPORT_CHAIN)
@@ -52,16 +54,8 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 
 	@BeforeEach
 	public void before_addRemoteTerminologySupport() throws Exception {
-		myCodeSystemProvider = new MyCodeSystemProvider();
-		myRestfulServerExtension.getRestfulServer().registerProvider(myCodeSystemProvider);
-
-		myValueSetProvider = new MyValueSetProvider();
-		myRestfulServerExtension.getRestfulServer().registerProvider(myValueSetProvider);
-
 		String baseUrl = "http://localhost:" + myRestfulServerExtension.getPort();
-
-		mySvc = new RemoteTerminologyServiceValidationSupport(ourCtx);
-		mySvc.setBaseUrl(baseUrl);
+		mySvc = new RemoteTerminologyServiceValidationSupport(ourCtx, baseUrl);
 		myValidationSupportChain.addValidationSupport(0, mySvc);
 	}
 

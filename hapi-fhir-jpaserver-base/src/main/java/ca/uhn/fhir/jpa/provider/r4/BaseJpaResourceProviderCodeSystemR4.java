@@ -4,12 +4,21 @@ import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
+import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseJpaResourceProviderValueSetDstu2;
+import ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
+import ca.uhn.fhir.jpa.util.LogicUtil;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
@@ -20,9 +29,12 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
  * #%L
@@ -47,7 +59,11 @@ import java.util.List;
 public class BaseJpaResourceProviderCodeSystemR4 extends JpaResourceProviderR4<CodeSystem> {
 
 	@Autowired
-	IValidationSupport myValidationSupport;
+	@Qualifier(BaseConfig.JPA_VALIDATION_SUPPORT_CHAIN)
+	private ValidationSupportChain myValidationSupportChain;
+
+	@Autowired
+	protected ITermReadSvcR4 myTermSvc;
 
 	/**
 	 * $lookup operation
@@ -143,13 +159,34 @@ public class BaseJpaResourceProviderCodeSystemR4 extends JpaResourceProviderR4<C
 		startRequest(theServletRequest);
 		try {
 			// If a Remote Terminology Server has been configured, use it
-			if (myValidationSupport.isRemoteTerminologyServiceConfigured()) {
+			if (myValidationSupportChain.isRemoteTerminologyServiceConfigured()) {
 				String codeSystemUrl = (theCodeSystemUrl != null && theCodeSystemUrl.hasValue()) ?
 					theCodeSystemUrl.asStringValue() : null;
 				String code = (theCode != null && theCode.hasValue()) ? theCode.asStringValue() : null;
 				String display = (theDisplay != null && theDisplay.hasValue()) ? theDisplay.asStringValue() : null;
-				result = myValidationSupport.validateCode(
-					new ValidationSupportContext(myValidationSupport), new ConceptValidationOptions(),
+
+				if (theId != null && !StringUtils.isBlank(theId.asStringValue())) {
+					IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> dao = (IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept>) getDao();
+					IBaseResource codeSystem = dao.read(theId);
+					codeSystemUrl = CommonCodeSystemsTerminologyService.getCodeSystemUrl(codeSystem);
+				}
+				if (StringUtils.isBlank(codeSystemUrl)) {
+					throw new InvalidRequestException("Either CodeSystem ID or CodeSystem identifier must be provided. Unable to validate.");
+				}
+
+				if (theCoding != null) {
+					if (theCoding.hasSystem()) {
+						if (!codeSystemUrl.equalsIgnoreCase(theCoding.getSystem())) {
+							throw new InvalidRequestException("Coding.system '" + theCoding.getSystem() + "' does not equal param url '" + theCodeSystemUrl + "'. Unable to validate-code.");
+						}
+						codeSystemUrl = theCoding.getSystem();
+					}
+					code = theCoding.getCode();
+					display = theCoding.getDisplay();
+				}
+
+				result = myValidationSupportChain.validateCode(
+					new ValidationSupportContext(myValidationSupportChain), new ConceptValidationOptions(),
 					codeSystemUrl, code, display, null);
 			} else {
 				// Otherwise, use the local DAO layer to validate the code

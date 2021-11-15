@@ -150,7 +150,7 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		RequestDetails theRequestDetails
 	) {
 
-		IValidationSupport.CodeValidationResult result = null;
+		IValidationSupport.CodeValidationResult result;
 		startRequest(theServletRequest);
 		try {
 			// If a Remote Terminology Server has been configured, use it

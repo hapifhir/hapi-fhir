@@ -8,7 +8,6 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
-import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
@@ -40,38 +39,31 @@ public class RemoteTerminologyServiceResourceProviderR4Test {
 	private static final String VALUE_SET_URL = "http://value.set/url";
 	private static final String SAMPLE_MESSAGE = "This is a sample message";
 	private static FhirContext ourCtx = FhirContext.forR4();
+	private MyCodeSystemProvider myCodeSystemProvider = new MyCodeSystemProvider();
+	private MyValueSetProvider myValueSetProvider = new MyValueSetProvider();
 
 	@RegisterExtension
-	public RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(ourCtx);
+	public RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(ourCtx, myCodeSystemProvider,
+		myValueSetProvider);
 
-	private MyValueSetProvider myValueSetProvider;
 	private RemoteTerminologyServiceValidationSupport mySvc;
-	private MyCodeSystemProvider myCodeSystemProvider;
 
 	@BeforeEach
-	public void before() {
-		myValueSetProvider = new MyValueSetProvider();
-		myRestfulServerExtension.getRestfulServer().registerProvider(myValueSetProvider);
-
-		myCodeSystemProvider = new MyCodeSystemProvider();
-		myRestfulServerExtension.getRestfulServer().registerProvider(myCodeSystemProvider);
-
-		String baseUrl = "http://localhost:" + myRestfulServerExtension.getPort();
-
-		mySvc = new RemoteTerminologyServiceValidationSupport(ourCtx);
-		mySvc.setBaseUrl(baseUrl);
-		mySvc.addClientInterceptor(new LoggingInterceptor(true));
+	public void before_ConfigureService() {
+		String myBaseUrl = "http://localhost:" + myRestfulServerExtension.getPort();
+		mySvc = new RemoteTerminologyServiceValidationSupport(ourCtx, myBaseUrl);
 	}
 
 	@AfterEach
-	public void after() throws Exception {
+	public void after_UnregisterProviders() {
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
 		myRestfulServerExtension.getRestfulServer().getInterceptorService().unregisterAllInterceptors();
 	}
 
 	@Test
 	public void testValidateCodeInCodeSystem_BlankCode_ReturnsNull() {
-		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(null, null, CODE_SYSTEM, null, DISPLAY, null);
+		IValidationSupport.CodeValidationResult outcome = mySvc
+			.validateCode(null, null, CODE_SYSTEM, null, DISPLAY, null);
 		assertNull(outcome);
 	}
 
@@ -79,7 +71,8 @@ public class RemoteTerminologyServiceResourceProviderR4Test {
 	public void testValidateCodeInCodeSystem_ProvidingMinimalInputs_ReturnsSuccess() {
 		createNextCodeSystemReturnParameters(true, null, null);
 
-		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(null, null, CODE_SYSTEM, CODE, null, null);
+		IValidationSupport.CodeValidationResult outcome = mySvc
+			.validateCode(null, null, CODE_SYSTEM, CODE, null, null);
 		assertEquals(CODE, outcome.getCode());
 		assertEquals(null, outcome.getSeverity());
 		assertEquals(null, outcome.getMessage());
@@ -92,7 +85,8 @@ public class RemoteTerminologyServiceResourceProviderR4Test {
 	public void testValidateCodeInCodeSystem_WithMessageValue_ReturnsMessage() {
 		createNextCodeSystemReturnParameters(true, DISPLAY, SAMPLE_MESSAGE);
 
-		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(null, null, CODE_SYSTEM, CODE, DISPLAY, null);
+		IValidationSupport.CodeValidationResult outcome = mySvc
+			.validateCode(null, null, CODE_SYSTEM, CODE, DISPLAY, null);
 		assertEquals(CODE, outcome.getCode());
 		assertEquals(DISPLAY, outcome.getDisplay());
 		assertEquals(null, outcome.getSeverity());
@@ -108,7 +102,8 @@ public class RemoteTerminologyServiceResourceProviderR4Test {
 	public void testValidateCodeInCodeSystem_AssumeFailure_ReturnsFailureCodeAndFailureMessage() {
 		createNextCodeSystemReturnParameters(false, null, SAMPLE_MESSAGE);
 
-		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(null, null, CODE_SYSTEM, CODE, null, null);
+		IValidationSupport.CodeValidationResult outcome = mySvc
+			.validateCode(null, null, CODE_SYSTEM, CODE, null, null);
 		assertEquals(IValidationSupport.IssueSeverity.ERROR, outcome.getSeverity());
 		assertEquals(SAMPLE_MESSAGE, outcome.getMessage());
 
@@ -119,7 +114,8 @@ public class RemoteTerminologyServiceResourceProviderR4Test {
 	public void testValidateCodeInValueSet_ProvidingMinimalInputs_ReturnsSuccess() {
 		createNextValueSetReturnParameters(true, null, null);
 
-		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(null, null, CODE_SYSTEM, CODE, null, VALUE_SET_URL);
+		IValidationSupport.CodeValidationResult outcome = mySvc
+			.validateCode(null, null, CODE_SYSTEM, CODE, null, VALUE_SET_URL);
 		assertEquals(CODE, outcome.getCode());
 		assertEquals(null, outcome.getSeverity());
 		assertEquals(null, outcome.getMessage());
@@ -132,7 +128,8 @@ public class RemoteTerminologyServiceResourceProviderR4Test {
 	public void testValidateCodeInValueSet_WithMessageValue_ReturnsMessage() {
 		createNextValueSetReturnParameters(true, DISPLAY, SAMPLE_MESSAGE);
 
-		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(null, null, CODE_SYSTEM, CODE, DISPLAY, VALUE_SET_URL);
+		IValidationSupport.CodeValidationResult outcome = mySvc
+			.validateCode(null, null, CODE_SYSTEM, CODE, DISPLAY, VALUE_SET_URL);
 		assertEquals(CODE, outcome.getCode());
 		assertEquals(DISPLAY, outcome.getDisplay());
 		assertEquals(null, outcome.getSeverity());
