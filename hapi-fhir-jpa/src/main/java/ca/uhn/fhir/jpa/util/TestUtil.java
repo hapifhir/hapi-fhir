@@ -78,15 +78,8 @@ public class TestUtil {
 
 	// Exceptions set because H2 sets indexes for FKs automatically so this index had to be called as the target FK field
 	// it is indexing to avoid SchemaMigrationTest to complain about the extra index (which doesn't exist in H2)
-	private static final Set<String> constraintNameValidationExceptionList = Sets.newHashSet(
-	"FK_CONCEPTPROP_CONCEPT",
-		"FK_CONCEPTDESIG_CONCEPT",
-		"FK_TERM_CONCEPTPC_CHILD",
-		"FK_TERM_CONCEPTPC_PARENT"
-
-	);
 	private static final Set<String> duplicateNameValidationExceptionList = Sets.newHashSet(
-	"FK_CONCEPTPROP_CONCEPT",
+		"FK_CONCEPTPROP_CONCEPT",
 		"FK_CONCEPTDESIG_CONCEPT",
 		"FK_TERM_CONCEPTPC_CHILD",
 		"FK_TERM_CONCEPTPC_PARENT"
@@ -271,9 +264,8 @@ public class TestUtil {
 			}
 			for (Index nextConstraint : table.indexes()) {
 				assertNotADuplicateName(nextConstraint.name(), theNames);
-				if ( ! constraintNameValidationExceptionList.contains(nextConstraint.name())) {
-					Validate.isTrue(nextConstraint.name().startsWith("IDX_"), nextConstraint.name() + " must start with IDX_");
-				}
+				Validate.isTrue(nextConstraint.name().startsWith("IDX_") || nextConstraint.name().startsWith("FK_"),
+					nextConstraint.name() + " must start with IDX_ or FK_ (last one when indexing a FK column)");
 			}
 		}
 
