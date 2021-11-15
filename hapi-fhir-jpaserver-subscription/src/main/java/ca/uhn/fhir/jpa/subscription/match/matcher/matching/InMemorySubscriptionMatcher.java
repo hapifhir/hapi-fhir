@@ -40,6 +40,7 @@ public class InMemorySubscriptionMatcher implements ISubscriptionMatcher {
 
 	@Override
 	public InMemoryMatchResult match(CanonicalSubscription theSubscription, ResourceModifiedMessage theMsg) {
+		// fixme parititon aware?
 		try {
 			return mySearchParamMatcher.match(theSubscription.getCriteriaString(), theMsg.getNewPayload(myContext), null);
 		} catch (Exception e) {

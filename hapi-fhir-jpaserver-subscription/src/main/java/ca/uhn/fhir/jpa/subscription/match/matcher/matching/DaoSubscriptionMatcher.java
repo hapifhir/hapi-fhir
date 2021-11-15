@@ -50,12 +50,14 @@ public class DaoSubscriptionMatcher implements ISubscriptionMatcher {
 
 	@Override
 	public InMemoryMatchResult match(CanonicalSubscription theSubscription, ResourceModifiedMessage theMsg) {
+		// fixme parititon aware?
 		IIdType id = theMsg.getPayloadId(myCtx);
 		String criteria = theSubscription.getCriteriaString();
 
 		// Run the subscriptions query and look for matches, add the id as part of the criteria to avoid getting matches of previous resources rather than the recent resource
 		criteria += "&_id=" + id.toUnqualifiedVersionless().getValue();
 
+		// fixme parititon aware?
 		IBundleProvider results = performSearch(criteria);
 
 		ourLog.debug("Subscription check found {} results for query: {}", results.size(), criteria);
@@ -74,6 +76,8 @@ public class DaoSubscriptionMatcher implements ISubscriptionMatcher {
 		IFhirResourceDao<? extends IBaseResource> responseDao = myDaoRegistry.getResourceDao(responseResourceDef.getImplementingClass());
 		responseCriteriaUrl.setLoadSynchronousUpTo(1);
 
+		// fixme need to add SystemRequestDetails with partition info and call search(SearchParameterMap theParams, RequestDetails theRequestDetails)
+		// instead
 		return responseDao.search(responseCriteriaUrl);
 	}
 
