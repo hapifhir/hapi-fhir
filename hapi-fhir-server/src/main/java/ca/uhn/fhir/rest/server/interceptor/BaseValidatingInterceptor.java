@@ -23,6 +23,7 @@ package ca.uhn.fhir.rest.server.interceptor;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -310,11 +311,14 @@ public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnric
 			return null;
 		}
 
-		switch (theRequestDetails.getRestOperationType()) {
-			case GRAPHQL_REQUEST:
-				return null;
-			default:
-				break;
+		RestOperationTypeEnum opType = theRequestDetails.getRestOperationType();
+		if (opType != null) {
+			switch (opType) {
+				case GRAPHQL_REQUEST:
+					return null;
+				default:
+					break;
+			}
 		}
 
 		FhirValidator validator;
