@@ -44,8 +44,8 @@ public class BatchTermConceptsDeleteWriter implements ItemWriter<Long> {
 		// receives input in chunks of size one
 		long codeSystemVersionId = theTermCodeSystemVersionPidList.get(0);
 
-		ourLog.info(" * Deleting concepts");
+		ourLog.info("Deleting concepts");
 		int deletedConcepts = myConceptDao.deleteByCodeSystemVersion(codeSystemVersionId);
-		ourLog.info(" * Deleted {} concepts", ourDecimalFormat.format(deletedConcepts));
+		ourLog.info("Deleted {} concepts", ourDecimalFormat.format(deletedConcepts));
 	}
 }

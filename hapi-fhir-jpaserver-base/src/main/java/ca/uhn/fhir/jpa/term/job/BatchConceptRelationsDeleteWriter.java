@@ -51,16 +51,16 @@ public class BatchConceptRelationsDeleteWriter implements ItemWriter<Long> {
 		// receives input in chunks of size one
 		long codeSystemVersionId = theTermCodeSystemVersionPidList.get(0);
 
-		ourLog.info(" * Deleting term code links");
+		ourLog.info("Deleting term code links");
 		int deletedLinks = myConceptParentChildLinkDao.deleteByCodeSystemVersion(codeSystemVersionId);
-		ourLog.info(" * Deleted {} term code links", ourDecimalFormat.format(deletedLinks));
+		ourLog.info("Deleted {} term code links", ourDecimalFormat.format(deletedLinks));
 
-		ourLog.info(" * Deleting term code properties");
+		ourLog.info("Deleting term code properties");
 		int deletedProperties = myConceptPropertyDao.deleteByCodeSystemVersion(codeSystemVersionId);
-		ourLog.info(" * Deleted {} term code properties", ourDecimalFormat.format(deletedProperties));
+		ourLog.info("Deleted {} term code properties", ourDecimalFormat.format(deletedProperties));
 
-		ourLog.info(" * Deleting concept designations");
+		ourLog.info("Deleting concept designations");
 		int deletedDesignations = myConceptDesignationDao.deleteByCodeSystemVersion(codeSystemVersionId);
-		ourLog.info(" * Deleted {} concept designations", ourDecimalFormat.format(deletedDesignations));
+		ourLog.info("Deleted {} concept designations", ourDecimalFormat.format(deletedDesignations));
 	}
 }

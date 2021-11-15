@@ -61,16 +61,16 @@ public class BatchTermCodeSystemVersionDeleteWriter implements ItemWriter<Long> 
 		Optional<TermCodeSystem> codeSystemOpt = myCodeSystemDao.findWithCodeSystemVersionAsCurrentVersion(codeSystemVersionId);
 		if (codeSystemOpt.isPresent()) {
 			TermCodeSystem codeSystem = codeSystemOpt.get();
-			ourLog.info(" * Removing code system version: {} as current version of code system: {}", codeSystemVersionId, codeSystem.getPid());
+			ourLog.info("Removing code system version: {} as current version of code system: {}", codeSystemVersionId, codeSystem.getPid());
 			codeSystem.setCurrentVersion(null);
 			myCodeSystemDao.save(codeSystem);
 		}
 
-		ourLog.info(" * Deleting code system version: {}", codeSystemVersionId);
+		ourLog.info("Deleting code system version: {}", codeSystemVersionId);
 		Optional<TermCodeSystemVersion> csv = myTermCodeSystemVersionDao.findById(codeSystemVersionId);
 		csv.ifPresent(theTermCodeSystemVersion -> {
 			myTermCodeSystemVersionDao.delete(theTermCodeSystemVersion);
-			ourLog.info(" * Code system version: {} deleted", codeSystemVersionId);
+			ourLog.info("Code system version: {} deleted", codeSystemVersionId);
 		});
 
 	}

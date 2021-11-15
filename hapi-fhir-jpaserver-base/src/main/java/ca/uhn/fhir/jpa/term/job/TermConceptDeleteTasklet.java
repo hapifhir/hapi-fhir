@@ -51,7 +51,7 @@ public class TermConceptDeleteTasklet implements Tasklet {
 	@Override
 	public RepeatStatus execute(@NotNull StepContribution contribution, ChunkContext context) throws Exception {
 		long codeSystemPid = (Long) context.getStepContext().getJobParameters().get(JOB_PARAM_CODE_SYSTEM_ID);
-		ourLog.info(" * Deleting code system {}", codeSystemPid);
+		ourLog.info("Deleting code system {}", codeSystemPid);
 
 		myTermCodeSystemDao.findById(codeSystemPid).orElseThrow(IllegalStateException::new);
 		myTermCodeSystemDao.deleteById(codeSystemPid);
