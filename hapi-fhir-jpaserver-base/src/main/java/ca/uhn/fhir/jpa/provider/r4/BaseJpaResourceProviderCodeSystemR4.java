@@ -7,18 +7,13 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseJpaResourceProviderValueSetDstu2;
-import ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
-import ca.uhn.fhir.jpa.util.LogicUtil;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
@@ -33,8 +28,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
  * #%L
@@ -164,15 +157,6 @@ public class BaseJpaResourceProviderCodeSystemR4 extends JpaResourceProviderR4<C
 					theCodeSystemUrl.asStringValue() : null;
 				String code = (theCode != null && theCode.hasValue()) ? theCode.asStringValue() : null;
 				String display = (theDisplay != null && theDisplay.hasValue()) ? theDisplay.asStringValue() : null;
-
-				if (theId != null && !StringUtils.isBlank(theId.asStringValue())) {
-					IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> dao = (IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept>) getDao();
-					IBaseResource codeSystem = dao.read(theId);
-					codeSystemUrl = CommonCodeSystemsTerminologyService.getCodeSystemUrl(codeSystem);
-				}
-				if (StringUtils.isBlank(codeSystemUrl)) {
-					throw new InvalidRequestException("Either CodeSystem ID or CodeSystem identifier must be provided. Unable to validate.");
-				}
 
 				if (theCoding != null) {
 					if (theCoding.hasSystem()) {

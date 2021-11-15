@@ -32,6 +32,11 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+/*
+ * This set of Unit Tests simulates the call to a remote server and therefore, only tests the code in the
+ * {@link org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport#invokeRemoteValidateCode}
+ * method, before and after it makes that remote client call.
+ */
 public class RemoteTerminologyServiceResourceProviderR4Test {
 	private static final String DISPLAY = "DISPLAY";
 	private static final String CODE_SYSTEM = "CODE_SYS";

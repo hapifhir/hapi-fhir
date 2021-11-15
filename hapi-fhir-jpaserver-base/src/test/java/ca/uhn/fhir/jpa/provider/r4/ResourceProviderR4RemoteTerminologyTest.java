@@ -10,6 +10,7 @@ import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
@@ -17,6 +18,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
@@ -34,10 +36,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
+/*
+ * This set of Unit Tests instantiates and injects an instance of
+ * {@link org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport}
+ * into the ValidationSupportChain, which tests the logic of dynamically selecting the correct Remote Terminology
+ * implementation. It also exercises the code found in
+ * {@link org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport#invokeRemoteValidateCode}
+ */
 public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProviderR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4RemoteTerminologyTest.class);
 	private static final String DISPLAY = "DISPLAY";
+	private static final String DISPLAY_BODY_MASS_INDEX = "Body mass index (BMI) [Ratio]";
+	private static final String CODE_BODY_MASS_INDEX = "39156-5";
 	private static FhirContext ourCtx = FhirContext.forR4();
 	private MyCodeSystemProvider myCodeSystemProvider = new MyCodeSystemProvider();
 	private MyValueSetProvider myValueSetProvider = new MyValueSetProvider();
@@ -62,10 +74,45 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 	@AfterEach
 	public void after_removeRemoteTerminologySupport() {
 		myValidationSupportChain.removeValidationSupport(mySvc);
+		myRestfulServerExtension.getRestfulServer().getInterceptorService().unregisterAllInterceptors();
 	}
 
 	@Test
-	public void testLookupOperationByCodeAndSystemBuiltInCode() {
+	public void testValidateCodeOperationOnCodeSystem_ByCodingAndUrlWhereSystemIsDifferent_ThrowsException() {
+		assertThrows(InvalidRequestException.class, () -> {
+			Parameters respParam = myClient
+				.operation()
+				.onType(CodeSystem.class)
+				.named(JpaConstants.OPERATION_VALIDATE_CODE)
+				.withParameter(Parameters.class, "coding", new Coding().setSystem("http://terminology.hl7.org/CodeSystem/v2-0247").setCode("P"))
+				.andParameter("url", new UriType("http://terminology.hl7.org/CodeSystem/INVALID-CODESYSTEM"))
+				.execute();
+		});
+	}
+
+	@Test
+	public void testValidateCodeOperationOnCodeSystem_ByCodingAndUrl_UsingBuiltInCodeSystems() {
+		myCodeSystemProvider.myNextReturnCodeSystems = new ArrayList<>();
+		myCodeSystemProvider.myNextReturnCodeSystems.add((CodeSystem) new CodeSystem().setId("CodeSystem/v2-0247"));
+		createNextCodeSystemReturnParameters(true, DISPLAY, null);
+
+		Parameters respParam = myClient
+			.operation()
+			.onType(CodeSystem.class)
+			.named(JpaConstants.OPERATION_VALIDATE_CODE)
+			.withParameter(Parameters.class, "coding", new Coding().setSystem("http://terminology.hl7.org/CodeSystem/v2-0247").setCode("P"))
+			.andParameter("url", new UriType("http://terminology.hl7.org/CodeSystem/v2-0247"))
+			.execute();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertEquals(true, ((BooleanType)respParam.getParameter("result")).booleanValue());
+		assertEquals(DISPLAY, respParam.getParameter("display").toString());
+	}
+
+	@Test
+	public void testValidateCodeOperationOnValueSet_ByUrlAndSystem_UsingBuiltInCodeSystems() {
 		myCodeSystemProvider.myNextReturnCodeSystems = new ArrayList<>();
 		myCodeSystemProvider.myNextReturnCodeSystems.add((CodeSystem) new CodeSystem().setId("CodeSystem/list-example-use-codes"));
 		myValueSetProvider.myNextReturnValueSets = new ArrayList<>();
@@ -87,6 +134,39 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 
 		assertEquals(true, ((BooleanType)respParam.getParameter("result")).booleanValue());
 		assertEquals(DISPLAY, respParam.getParameter("display").toString());
+	}
+
+	@Test
+	public void testValidateCodeOperationOnValueSet_ByUrlSystemAndCode() {
+		myCodeSystemProvider.myNextReturnCodeSystems = new ArrayList<>();
+		myCodeSystemProvider.myNextReturnCodeSystems.add((CodeSystem) new CodeSystem().setId("CodeSystem/list-example-use-codes"));
+		myValueSetProvider.myNextReturnValueSets = new ArrayList<>();
+		myValueSetProvider.myNextReturnValueSets.add((ValueSet) new ValueSet().setId("ValueSet/list-example-codes"));
+		createNextValueSetReturnParameters(true, DISPLAY_BODY_MASS_INDEX, null);
+
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named(JpaConstants.OPERATION_VALIDATE_CODE)
+			.withParameter(Parameters.class, "code", new CodeType(CODE_BODY_MASS_INDEX))
+			.andParameter("url", new UriType("https://loinc.org"))
+			.andParameter("system", new UriType("http://loinc.org"))
+			.execute();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertEquals(true, ((BooleanType)respParam.getParameter("result")).booleanValue());
+		assertEquals(DISPLAY_BODY_MASS_INDEX, respParam.getParameter("display").toString());
+	}
+
+	private void createNextCodeSystemReturnParameters(boolean theResult, String theDisplay, String theMessage) {
+		myCodeSystemProvider.myNextReturnParams = new Parameters();
+		myCodeSystemProvider.myNextReturnParams.addParameter("result", theResult);
+		myCodeSystemProvider.myNextReturnParams.addParameter("display", theDisplay);
+		if (theMessage != null) {
+			myCodeSystemProvider.myNextReturnParams.addParameter("message", theMessage);
+		}
 	}
 
 	private void createNextValueSetReturnParameters(boolean theResult, String theDisplay, String theMessage) {
@@ -125,7 +205,6 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 			myLastCode = theCode;
 			myLastDisplay = theDisplay;
 			return myNextReturnParams;
-
 		}
 
 		@Search
