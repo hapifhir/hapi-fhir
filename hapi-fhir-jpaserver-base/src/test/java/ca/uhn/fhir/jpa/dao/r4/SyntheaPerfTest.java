@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.search.reindex.BlockPolicy;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.StopWatch;
+import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.r4.model.Bundle;
 import org.junit.jupiter.api.Test;
@@ -30,6 +31,7 @@ import java.util.stream.Collectors;
 public class SyntheaPerfTest extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(SyntheaPerfTest.class);
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
+	public static final String PATH_TO_SYNTHEA_OUTPUT = "../../synthea/output/fhir/";
 
 	@Test
 	public void testLoadSynthea() throws Exception {
@@ -39,7 +41,7 @@ public class SyntheaPerfTest extends BaseJpaR4Test {
 		myDaoConfig.setDeleteEnabled(false);
 
 		List<Path> files = Files
-			.list(FileSystems.getDefault().getPath("../../synthea/output/fhir/"))
+			.list(FileSystems.getDefault().getPath(PATH_TO_SYNTHEA_OUTPUT))
 			.filter(t->t.toString().endsWith(".json"))
 			.collect(Collectors.toList());
 
@@ -48,8 +50,12 @@ public class SyntheaPerfTest extends BaseJpaR4Test {
 
 		List<Path> nonMeta = files.stream().filter(t -> !t.toString().contains("hospital") && !t.toString().contains("practitioner")).collect(Collectors.toList());
 
-		new Uploader(Collections.singletonList(nonMeta.remove(0)));
-		new Uploader(Collections.singletonList(nonMeta.remove(0)));
+		List<Path> initialGroup = Lists.newArrayList();
+		initialGroup.add(nonMeta.remove(0));
+		initialGroup.add(nonMeta.remove(0));
+		initialGroup.add(nonMeta.remove(0));
+		initialGroup.add(nonMeta.remove(0));
+		new Uploader(initialGroup);
 
 		new Uploader(nonMeta);
 	}
