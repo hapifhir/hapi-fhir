@@ -22,14 +22,17 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.matching;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -76,8 +79,10 @@ public class DaoSubscriptionMatcher implements ISubscriptionMatcher {
 		IFhirResourceDao<? extends IBaseResource> responseDao = myDaoRegistry.getResourceDao(responseResourceDef.getImplementingClass());
 		responseCriteriaUrl.setLoadSynchronousUpTo(1);
 
-		// fixme need to add SystemRequestDetails with partition info and call search(SearchParameterMap theParams, RequestDetails theRequestDetails)
+		// FIXME need to add SystemRequestDetails with partition info and call search(SearchParameterMap theParams, RequestDetails theRequestDetails)
 		// instead
+//		RequestDetails systemRequestDetails = new SystemRequestDetails().setRequestPartitionId(requestPartitionId);
+//		return responseDao.search(responseCriteriaUrl, systemRequestDetails);
 		return responseDao.search(responseCriteriaUrl);
 	}
 

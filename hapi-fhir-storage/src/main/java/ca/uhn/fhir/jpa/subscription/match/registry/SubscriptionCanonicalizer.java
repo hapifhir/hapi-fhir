@@ -30,6 +30,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -65,11 +66,13 @@ public class SubscriptionCanonicalizer {
 			case DSTU2:
 				return canonicalizeDstu2(theSubscription);
 			case DSTU3:
-				return canonicalizeDstu3(theSubscription);
+				// FIXME for these three change parameter to IAnyResource and then get the partitionId from
+				// resource.getUserData(Constants.RESOURCE_PARTITION_ID)
+				return canonicalizeDstu3((IAnyResource)theSubscription);
 			case R4:
-				return canonicalizeR4(theSubscription);
+				return canonicalizeR4((IAnyResource)theSubscription);
 			case R5:
-				return canonicalizeR5(theSubscription);
+				return canonicalizeR5((IAnyResource)theSubscription);
 			case DSTU2_HL7ORG:
 			case DSTU2_1:
 			default:

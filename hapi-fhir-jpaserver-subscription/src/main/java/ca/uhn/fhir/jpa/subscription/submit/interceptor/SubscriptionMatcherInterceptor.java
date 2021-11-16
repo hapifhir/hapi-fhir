@@ -6,7 +6,9 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedConsumer;
@@ -60,6 +62,8 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 	private SubscriptionChannelFactory mySubscriptionChannelFactory;
 	@Autowired
 	private DaoConfig myDaoConfig;
+	@Autowired
+	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	private volatile MessageChannel myMatchingChannel;
 
@@ -114,7 +118,9 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 	 */
 	@Override
 	public void submitResourceModified(IBaseResource theNewResource, ResourceModifiedMessage.OperationTypeEnum theOperationType, RequestDetails theRequest) {
-		ResourceModifiedMessage msg = new ResourceModifiedMessage(myFhirContext, theNewResource, theOperationType, theRequest);
+		// FIXME do the same for triggering
+		RequestPartitionId requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(theRequest, theNewResource.getIdElement().getResourceType(), theNewResource.getIdElement());
+		ResourceModifiedMessage msg = new ResourceModifiedMessage(myFhirContext, theNewResource, theOperationType, theRequest, requestPartitionId);
 
 		// Interceptor call: SUBSCRIPTION_RESOURCE_MODIFIED
 		HookParams params = new HookParams()

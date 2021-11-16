@@ -124,6 +124,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 
 		for (ActiveSubscription nextActiveSubscription : subscriptions) {
 
+			// FIXME skip if the partitions don't match
 			String nextSubscriptionId = getId(nextActiveSubscription);
 
 			if (isNotBlank(theMsg.getSubscriptionId())) {

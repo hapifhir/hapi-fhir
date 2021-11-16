@@ -43,7 +43,7 @@ public class CompositeInMemoryDaoSubscriptionMatcher implements ISubscriptionMat
 
 	@Override
 	public InMemoryMatchResult match(CanonicalSubscription theSubscription, ResourceModifiedMessage theMsg) {
-		// fixme parititon aware?
+		// FIXME partition aware?
 		InMemoryMatchResult result;
 		if (myDaoConfig.isEnableInMemorySubscriptionMatching()) {
 			result = myInMemorySubscriptionMatcher.match(theSubscription, theMsg);
