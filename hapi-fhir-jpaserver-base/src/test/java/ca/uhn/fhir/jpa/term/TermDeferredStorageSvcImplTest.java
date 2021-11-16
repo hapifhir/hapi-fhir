@@ -54,7 +54,7 @@ public class TermDeferredStorageSvcImplTest {
 	@Test
 	public void testStorageNotEmptyWhileJobsExecuting() {
 		TermDeferredStorageSvcImpl svc = new TermDeferredStorageSvcImpl();
-		ReflectionTestUtils.setField(svc, "currentJobExecutions", Collections.singletonList(myJobExecution));
+		ReflectionTestUtils.setField(svc, "myCurrentJobExecutions", Collections.singletonList(myJobExecution));
 
 		when(myJobExecution.isRunning()).thenReturn(true, false);
 		assertFalse(svc.isStorageQueueEmpty());
