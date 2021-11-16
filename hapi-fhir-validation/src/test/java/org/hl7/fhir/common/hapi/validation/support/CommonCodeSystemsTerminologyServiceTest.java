@@ -66,9 +66,9 @@ public class CommonCodeSystemsTerminologyServiceTest {
 	}
 
 	@Test
-	public void lookupCode_languageAndRegionLookup_languageIsCaseInsensitive() {
+	public void lookupCode_languageAndRegionLookup_isCaseInsensitive() {
 		IValidationSupport.LookupCodeResult outcomeUpper = mySvc.lookupCode(newSupport(), "urn:ietf:bcp:47", "EN-US", "English");
-		IValidationSupport.LookupCodeResult outcomeLower = mySvc.lookupCode(newSupport(), "urn:ietf:bcp:47", "en-US", "English");
+		IValidationSupport.LookupCodeResult outcomeLower = mySvc.lookupCode(newSupport(), "urn:ietf:bcp:47", "en-us", "English");
 		assertNotNull(outcomeUpper);
 		assertNotNull(outcomeLower);
 		assertTrue(outcomeLower.isFound());

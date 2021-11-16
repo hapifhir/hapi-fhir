@@ -266,7 +266,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 			// we look for languages in lowercase only
 			// this will allow case insensitivity for language portion of code
 			language = myLanguagesLanugageMap.get(theCode.substring(0, langRegionSeparatorIndex).toLowerCase());
-			region = myLanguagesRegionMap.get(theCode.substring(langRegionSeparatorIndex + 1));
+			region = myLanguagesRegionMap.get(theCode.substring(langRegionSeparatorIndex + 1).toUpperCase());
 
 			if (language == null || region == null) {
 				//In case the user provides both a language and a region, they must both be valid for the lookup to succeed.
