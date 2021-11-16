@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 3170
+title: "Fixed language code validation so that language portion of language-region code (eg, en-US) is case insensitive"
