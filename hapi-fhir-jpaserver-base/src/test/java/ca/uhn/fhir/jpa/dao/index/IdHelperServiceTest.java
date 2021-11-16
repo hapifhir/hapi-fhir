@@ -4,9 +4,15 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.ForcedId;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import org.apache.commons.math3.analysis.function.Exp;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Procedure;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,6 +22,13 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -37,6 +50,9 @@ public class IdHelperServiceTest {
 
 	@Mock
 	private PartitionSettings myPartitionSettings;
+
+	@Mock
+	private EntityManager myEntityManager;
 
 	@InjectMocks
 	private IdHelperService myHelperService;
@@ -138,5 +154,50 @@ public class IdHelperServiceTest {
 		}
 		Assertions.assertEquals(red, map.get("RED"));
 		Assertions.assertEquals(blue, map.get("BLUE"));
+	}
+
+	@Test
+	public void resolveResourcePersistentIdsWithCache_GOODPROC_shouldPass() {
+		IIdType id = new IdDt("Procedure/GOODPROCREQ/_history/1");
+
+		ResourceTable proc = new ResourceTable();
+		proc.setResourceType("Procedure");
+
+		ForcedId fid = new ForcedId();
+		fid.setForcedId("GOODPROCREQ");
+		fid.setResourceType("Procedure");
+		fid.setResource(proc);
+
+		CriteriaBuilder builder = Mockito.mock(CriteriaBuilder.class);
+		CriteriaQuery<ForcedId> cq = Mockito.mock(CriteriaQuery.class);
+		TypedQuery<ForcedId> tq = Mockito.mock(TypedQuery.class);
+		Root<ForcedId> from = Mockito.mock(Root.class);
+		Path p = Mockito.mock(Path.class);
+		Expression<String> stringExp = Mockito.mock(Expression.class);
+		Expression<Integer> intExp = Mockito.mock(Expression.class);
+
+		// when
+		Mockito.when(tq.getResultList())
+				.thenReturn(Collections.singletonList(fid));
+		Mockito.when(builder.createQuery(Mockito.any(Class.class)))
+				.thenReturn(cq);
+		Mockito.when(p.as(Mockito.any(Class.class)))
+				.thenReturn(stringExp).thenReturn(stringExp).thenReturn(intExp);
+		Mockito.when(from.get(Mockito.anyString()))
+				.thenReturn(p);
+		Mockito.when(cq.from(Mockito.any(Class.class)))
+				.thenReturn(from);
+		Mockito.when(myEntityManager.createQuery(Mockito.any(CriteriaQuery.class)))
+				.thenReturn(tq);
+		Mockito.when(myEntityManager.getCriteriaBuilder())
+			.thenReturn(builder);
+
+		// test
+		List<ResourcePersistentId> ids = myHelperService.resolveResourcePersistentIdsWithCache(
+			RequestPartitionId.allPartitions(),
+			Collections.singletonList(id)
+		);
+
+		Assertions.assertEquals(1, ids.size());
 	}
 }
