@@ -160,7 +160,7 @@ public class BaseJpaResourceProviderCodeSystemR4 extends JpaResourceProviderR4<C
 
 				if (theCoding != null) {
 					if (theCoding.hasSystem()) {
-						if (!codeSystemUrl.equalsIgnoreCase(theCoding.getSystem())) {
+						if (codeSystemUrl != null && theCoding != null && !codeSystemUrl.equalsIgnoreCase(theCoding.getSystem())) {
 							throw new InvalidRequestException("Coding.system '" + theCoding.getSystem() + "' does not equal param url '" + theCodeSystemUrl + "'. Unable to validate-code.");
 						}
 						codeSystemUrl = theCoding.getSystem();
