@@ -31,7 +31,6 @@ import org.springframework.batch.core.explore.JobExplorer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -96,7 +95,11 @@ public class BatchJobHelper {
 		await().atMost(120, TimeUnit.SECONDS).until(() -> {
 			JobExecution jobExecution = myJobExplorer.getJobExecution(theJobExecution.getId());
 			ourLog.info("JobExecution {} currently has status: {}- Failures if any: {}", theJobExecution.getId(), jobExecution.getStatus(), jobExecution.getFailureExceptions());
-			return jobExecution.getStatus() == BatchStatus.COMPLETED || jobExecution.getStatus() == BatchStatus.FAILED;
+
+			// JM: Adding ABANDONED status because given the description, it s similar to FAILURE, and we need to avoid tests failing because
+			// of wait timeouts caused by unmatched statuses (as the one originating this change). Maybe we should even also add UNKNOWN here
+			return jobExecution.getStatus() == BatchStatus.COMPLETED || jobExecution.getStatus() == BatchStatus.FAILED
+				|| jobExecution.getStatus() == BatchStatus.ABANDONED;
 		});
 	}
 
