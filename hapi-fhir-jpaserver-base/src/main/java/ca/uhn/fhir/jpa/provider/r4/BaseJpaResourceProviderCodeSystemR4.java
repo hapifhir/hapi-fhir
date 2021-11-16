@@ -151,32 +151,25 @@ public class BaseJpaResourceProviderCodeSystemR4 extends JpaResourceProviderR4<C
 		IValidationSupport.CodeValidationResult result = null;
 		startRequest(theServletRequest);
 		try {
-			// If a Remote Terminology Server has been configured, use it
-			if (myValidationSupportChain.isRemoteTerminologyServiceConfigured()) {
-				String codeSystemUrl = (theCodeSystemUrl != null && theCodeSystemUrl.hasValue()) ?
-					theCodeSystemUrl.asStringValue() : null;
-				String code = (theCode != null && theCode.hasValue()) ? theCode.asStringValue() : null;
-				String display = (theDisplay != null && theDisplay.hasValue()) ? theDisplay.asStringValue() : null;
+			String codeSystemUrl = (theCodeSystemUrl != null && theCodeSystemUrl.hasValue()) ?
+				theCodeSystemUrl.asStringValue() : null;
+			String code = (theCode != null && theCode.hasValue()) ? theCode.asStringValue() : null;
+			String display = (theDisplay != null && theDisplay.hasValue()) ? theDisplay.asStringValue() : null;
 
-				if (theCoding != null) {
-					if (theCoding.hasSystem()) {
-						if (codeSystemUrl != null && theCoding != null && !codeSystemUrl.equalsIgnoreCase(theCoding.getSystem())) {
-							throw new InvalidRequestException("Coding.system '" + theCoding.getSystem() + "' does not equal param url '" + theCodeSystemUrl + "'. Unable to validate-code.");
-						}
-						codeSystemUrl = theCoding.getSystem();
+			if (theCoding != null) {
+				if (theCoding.hasSystem()) {
+					if (codeSystemUrl != null && theCoding != null && !codeSystemUrl.equalsIgnoreCase(theCoding.getSystem())) {
+						throw new InvalidRequestException("Coding.system '" + theCoding.getSystem() + "' does not equal param url '" + theCodeSystemUrl + "'. Unable to validate-code.");
 					}
-					code = theCoding.getCode();
-					display = theCoding.getDisplay();
+					codeSystemUrl = theCoding.getSystem();
 				}
-
-				result = myValidationSupportChain.validateCode(
-					new ValidationSupportContext(myValidationSupportChain), new ConceptValidationOptions(),
-					codeSystemUrl, code, display, null);
-			} else {
-				// Otherwise, use the local DAO layer to validate the code
-				IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> dao = (IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept>) getDao();
-				result = dao.validateCode(theId, theCodeSystemUrl, theVersion, theCode, theDisplay, theCoding, theCodeableConcept, theRequestDetails);
+				code = theCoding.getCode();
+				display = theCoding.getDisplay();
 			}
+
+			result = myValidationSupportChain.validateCode(
+				new ValidationSupportContext(myValidationSupportChain), new ConceptValidationOptions(),
+				codeSystemUrl, code, display, null);
 			return (Parameters) BaseJpaResourceProviderValueSetDstu2.toValidateCodeResult(getContext(), result);
 		} finally {
 			endRequest(theServletRequest);

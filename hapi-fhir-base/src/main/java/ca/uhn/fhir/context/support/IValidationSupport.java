@@ -216,15 +216,6 @@ public interface IValidationSupport {
 	}
 
 	/**
-	 * Returns <code>true</code> if a Remote Terminology Service is currently configured
-	 *
-	 * @return Returns <code>true</code> if a Remote Terminology Service is currently configured
-	 */
-	default boolean isRemoteTerminologyServiceConfigured() {
-		return false;
-	}
-
-	/**
 	 * Fetch the given ValueSet by URL
 	 */
 	@Nullable

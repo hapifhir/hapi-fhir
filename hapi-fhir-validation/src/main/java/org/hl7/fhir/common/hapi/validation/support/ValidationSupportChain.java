@@ -161,17 +161,6 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	@Override
-	public boolean isRemoteTerminologyServiceConfigured() {
-		if (myChain != null) {
-			Optional<IValidationSupport> remoteTerminologyService = myChain.stream().filter(RemoteTerminologyServiceValidationSupport.class::isInstance).findFirst();
-			if (remoteTerminologyService.isPresent()) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	@Override
 	public ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext, ValueSetExpansionOptions theExpansionOptions, @Nonnull IBaseResource theValueSetToExpand) {
 		for (IValidationSupport next : myChain) {
 			// TODO: test if code system is supported?

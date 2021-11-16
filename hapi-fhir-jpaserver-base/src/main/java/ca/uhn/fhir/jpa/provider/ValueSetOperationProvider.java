@@ -153,34 +153,14 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		IValidationSupport.CodeValidationResult result;
 		startRequest(theServletRequest);
 		try {
-			// If a Remote Terminology Server has been configured, use it
-			if (myValidationSupportChain.isRemoteTerminologyServiceConfigured()) {
-				String theSystemString = (theSystem != null && theSystem.hasValue()) ? theSystem.getValueAsString() : null;
-				String theCodeString = (theCode != null && theCode.hasValue()) ? theCode.getValueAsString() : null;
-				String theDisplayString = (theDisplay != null && theDisplay.hasValue()) ? theDisplay.getValueAsString() : null;
-				String theValueSetUrlString = (theValueSetUrl != null && theValueSetUrl.hasValue()) ?
-					theValueSetUrl.getValueAsString() : null;
-				result = myValidationSupportChain.validateCode(new ValidationSupportContext(myValidationSupportChain),
-					new ConceptValidationOptions(), theSystemString, theCodeString, theDisplayString, theValueSetUrlString);
-			} else {
-				// Otherwise, use the local DAO layer to validate the code
-				IFhirResourceDaoValueSet<IBaseResource, ICompositeType, ICompositeType> dao = getDao();
-				IPrimitiveType<String> valueSetIdentifier;
-				if (theValueSetUrl != null && theValueSetVersion != null) {
-					valueSetIdentifier = (IPrimitiveType<String>) getContext().getElementDefinition("uri").newInstance();
-					valueSetIdentifier.setValue(theValueSetUrl.getValue() + "|" + theValueSetVersion);
-				} else {
-					valueSetIdentifier = theValueSetUrl;
-				}
-				IPrimitiveType<String> codeSystemIdentifier;
-				if (theSystem != null && theSystemVersion != null) {
-					codeSystemIdentifier = (IPrimitiveType<String>) getContext().getElementDefinition("uri").newInstance();
-					codeSystemIdentifier.setValue(theSystem.getValue() + "|" + theSystemVersion);
-				} else {
-					codeSystemIdentifier = theSystem;
-				}
-				result = dao.validateCode(valueSetIdentifier, theId, theCode, codeSystemIdentifier, theDisplay, theCoding, theCodeableConcept, theRequestDetails);
-			}
+			String theSystemString = (theSystem != null && theSystem.hasValue()) ? theSystem.getValueAsString() : null;
+			String theCodeString = (theCode != null && theCode.hasValue()) ? theCode.getValueAsString() : null;
+			String theDisplayString = (theDisplay != null && theDisplay.hasValue()) ? theDisplay.getValueAsString() : null;
+			String theValueSetUrlString = (theValueSetUrl != null && theValueSetUrl.hasValue()) ?
+				theValueSetUrl.getValueAsString() : null;
+
+			result = myValidationSupportChain.validateCode(new ValidationSupportContext(myValidationSupportChain),
+				new ConceptValidationOptions(), theSystemString, theCodeString, theDisplayString, theValueSetUrlString);
 			return BaseJpaResourceProviderValueSetDstu2.toValidateCodeResult(getContext(), result);
 		} finally {
 			endRequest(theServletRequest);
