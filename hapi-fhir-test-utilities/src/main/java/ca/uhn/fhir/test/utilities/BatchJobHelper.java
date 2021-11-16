@@ -97,9 +97,10 @@ public class BatchJobHelper {
 			ourLog.info("JobExecution {} currently has status: {}- Failures if any: {}", theJobExecution.getId(), jobExecution.getStatus(), jobExecution.getFailureExceptions());
 
 			// JM: Adding ABANDONED status because given the description, it s similar to FAILURE, and we need to avoid tests failing because
-			// of wait timeouts caused by unmatched statuses (as the one originating this change). Maybe we should even also add UNKNOWN here
+			// of wait timeouts caused by unmatched statuses (as the one originating this change).
+			// still failed after adding ABANDONED meaning also has to include UNKNOWN
 			return jobExecution.getStatus() == BatchStatus.COMPLETED || jobExecution.getStatus() == BatchStatus.FAILED
-				|| jobExecution.getStatus() == BatchStatus.ABANDONED;
+				|| jobExecution.getStatus() == BatchStatus.ABANDONED || jobExecution.getStatus() == BatchStatus.UNKNOWN;
 		});
 	}
 
