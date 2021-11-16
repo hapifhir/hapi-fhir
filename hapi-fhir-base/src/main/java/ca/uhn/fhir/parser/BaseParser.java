@@ -615,7 +615,7 @@ public abstract class BaseParser implements IParser {
 							if (isBlank(resourceId.getValue())) {
 								resourceId.setValue(fullUrl);
 							} else {
-								if (fullUrl.startsWith("urn:") && fullUrl.endsWith(":" + resourceId.getIdPart())) {
+								if (fullUrl.startsWith("urn:") && fullUrl.length() > resourceId.getIdPart().length() && fullUrl.charAt(fullUrl.length() - resourceId.getIdPart().length()) == ':' && fullUrl.endsWith(resourceId.getIdPart())) {
 									resourceId.setValue(fullUrl);
 								} else {
 									IIdType fullUrlId = myContext.getVersion().newIdType();

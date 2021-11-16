@@ -584,6 +584,7 @@ class ParserState<T> {
 				return;
 			}
 
+			// FIXME: make it work
 			if ((child.getMax() == 0 || child.getMax() == 1) && !myParsedNonRepeatableNames.add(theChildName)) {
 				myErrorHandler.unexpectedRepeatingElement(null, theChildName);
 				push(new SwallowChildrenWholeState(getPreResourceState()));
