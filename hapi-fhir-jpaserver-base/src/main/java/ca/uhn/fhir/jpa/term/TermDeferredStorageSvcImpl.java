@@ -49,6 +49,9 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
+import org.springframework.batch.core.launch.JobExecutionNotRunningException;
+import org.springframework.batch.core.launch.JobOperator;
+import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -81,7 +84,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	final private List<ValueSet> myDeferredValueSets = Collections.synchronizedList(new ArrayList<>());
 	final private List<ConceptMap> myDeferredConceptMaps = Collections.synchronizedList(new ArrayList<>());
 	final private List<TermConceptParentChildLink> myConceptLinksToSaveLater = Collections.synchronizedList(new ArrayList<>());
-	final private List<JobExecution> currentJobExecutions = Collections.synchronizedList(new ArrayList<>());
+	final private List<JobExecution> myCurrentJobExecutions = Collections.synchronizedList(new ArrayList<>());
 
 
 	@Autowired
@@ -104,6 +107,9 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 
 	@Autowired
 	private IBatchJobSubmitter myJobSubmitter;
+
+	@Autowired
+	private JobOperator myJobOperator;
 
 	@Autowired @Qualifier(TERM_CODE_SYSTEM_DELETE_JOB_NAME)
 	private org.springframework.batch.core.Job myTermCodeSystemDeleteJob;
@@ -249,13 +255,23 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		myDeferredCodeSystemsDeletions.clear();
 		myConceptLinksToSaveLater.clear();
 		myDeferredCodeSystemVersionsDeletions.clear();
+		clearJobExecutions();
 	}
 
-	private void runInTransaction(Runnable theRunnable) {
-		assert !TransactionSynchronizationManager.isActualTransactionActive();
 
-		new TransactionTemplate(myTransactionMgr).executeWithoutResult(tx -> theRunnable.run());
+	private void clearJobExecutions() {
+		for (JobExecution jobExecution : myCurrentJobExecutions) {
+			try {
+				myJobOperator.stop(jobExecution.getId());
+
+			} catch (NoSuchJobExecutionException | JobExecutionNotRunningException theE) {
+				ourLog.error("Couldn't stop job execution {}: {}", jobExecution.getId(), theE);
+			}
+		}
+
+		myCurrentJobExecutions.clear();
 	}
+
 
 	private <T> T runInTransaction(Supplier<T> theRunnable) {
 		assert !TransactionSynchronizationManager.isActualTransactionActive();
@@ -353,7 +369,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		try {
 
 			JobExecution jobExecution = myJobSubmitter.runJob(myTermCodeSystemVersionDeleteJob, jobParameters);
-			currentJobExecutions.add(jobExecution);
+			myCurrentJobExecutions.add(jobExecution);
 
 		} catch (JobParametersInvalidException theE) {
 			throw new InternalErrorException("Offline job submission for TermCodeSystemVersion: " +
@@ -370,7 +386,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		try {
 
 			JobExecution jobExecution = myJobSubmitter.runJob(myTermCodeSystemDeleteJob, jobParameters);
-			currentJobExecutions.add(jobExecution);
+			myCurrentJobExecutions.add(jobExecution);
 
 		} catch (JobParametersInvalidException theE) {
 			throw new InternalErrorException("Offline job submission for TermCodeSystem: " +
@@ -392,7 +408,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	}
 
 	private boolean isJobsExecuting() {
-		return  currentJobExecutions.stream().anyMatch(JobExecution::isRunning);
+		return  myCurrentJobExecutions.stream().anyMatch(JobExecution::isRunning);
 	}
 
 
