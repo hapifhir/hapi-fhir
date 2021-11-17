@@ -173,6 +173,17 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	@Override
+	public boolean isRemoteTerminologyServiceConfigured() {
+		if (myChain != null) {
+			Optional<IValidationSupport> remoteTerminologyService = myChain.stream().filter(RemoteTerminologyServiceValidationSupport.class::isInstance).findFirst();
+			if (remoteTerminologyService.isPresent()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
 	public List<IBaseResource> fetchAllConformanceResources() {
 		List<IBaseResource> retVal = new ArrayList<>();
 		for (IValidationSupport next : myChain) {
