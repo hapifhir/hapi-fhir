@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.subscription.model;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;
@@ -38,6 +39,8 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 
 	@JsonProperty("canonicalSubscription")
 	private CanonicalSubscription mySubscription;
+	@JsonProperty("partitionId")
+	private RequestPartitionId myPartitionId;
 	@JsonProperty("payload")
 	private String myPayloadString;
 	@JsonProperty("payloadId")
@@ -110,6 +113,14 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 		}
 	}
 
+	public RequestPartitionId getPartitionId() {
+		return myPartitionId;
+	}
+
+	public void setPartitionId(RequestPartitionId thePartitionId) {
+		myPartitionId = thePartitionId;
+	}
+
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
@@ -117,6 +128,7 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 			.append("myPayloadString", myPayloadString)
 			.append("myPayload", myPayloadDecoded)
 			.append("myPayloadId", myPayloadId)
+			.append("myPartitionId", myPartitionId)
 			.append("myOperationType", getOperationType())
 			.toString();
 	}

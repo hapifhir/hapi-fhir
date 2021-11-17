@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.subscription.model;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceModifiedMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -39,6 +40,9 @@ public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 	 */
 	@JsonProperty(value = "subscriptionId", required = false)
 	private String mySubscriptionId;
+
+	@JsonProperty(value = "partitionId", required = false)
+	private RequestPartitionId myPartitionId;
 
 	/**
 	 * Constructor
@@ -64,12 +68,22 @@ public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 		mySubscriptionId = theSubscriptionId;
 	}
 
+	public RequestPartitionId getPartitionId() {
+		return myPartitionId;
+	}
+
+	public void setPartitionId(RequestPartitionId thePartitionId) {
+		myPartitionId = thePartitionId;
+	}
+
+
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
 			.append("operationType", myOperationType)
 			.append("subscriptionId", mySubscriptionId)
 			.append("payloadId", myPayloadId)
+			.append("partitionId", myPartitionId)
 			.toString();
 	}
 }
