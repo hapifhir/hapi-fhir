@@ -261,6 +261,8 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 
 	private void clearJobExecutions() {
 		for (JobExecution jobExecution : myCurrentJobExecutions) {
+			if (! jobExecution.isRunning()) { continue; }
+
 			try {
 				myJobOperator.stop(jobExecution.getId());
 
