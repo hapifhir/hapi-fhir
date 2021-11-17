@@ -53,6 +53,7 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 	 */
 	public ResourceDeliveryMessage() {
 		super();
+		myPartitionId = RequestPartitionId.defaultPartition();
 	}
 
 	public IBaseResource getPayload(FhirContext theCtx) {
