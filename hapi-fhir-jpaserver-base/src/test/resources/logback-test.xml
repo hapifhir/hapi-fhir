@@ -76,4 +76,7 @@
 		<appender-ref ref="STDOUT" />
 	</root>
 
+<!--	todo JM: remove after fixing test-->
+	<logger name="ca.uhn.fhir.test.utilities.BatchJobHelper" level="trace" />
+
 </configuration>
