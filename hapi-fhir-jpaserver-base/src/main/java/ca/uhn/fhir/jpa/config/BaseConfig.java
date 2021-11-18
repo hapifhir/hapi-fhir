@@ -155,8 +155,13 @@ import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValid
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.hl7.fhir.utilities.npm.FilesystemPackageCacheManager;
+import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
+import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.launch.support.SimpleJobOperator;
+import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
@@ -229,6 +234,9 @@ public abstract class BaseConfig {
 	private Integer searchCoordMaxPoolSize = 100;
 	private Integer searchCoordQueueCapacity = 200;
 
+	@Autowired
+	private JobLauncher myJobLauncher;
+
 	/**
 	 * Subclasses may override this method to provide settings such as search coordinator pool sizes.
 	 */
@@ -277,6 +285,18 @@ public abstract class BaseConfig {
 	@Bean
 	public CascadingDeleteInterceptor cascadingDeleteInterceptor(FhirContext theFhirContext, DaoRegistry theDaoRegistry, IInterceptorBroadcaster theInterceptorBroadcaster) {
 		return new CascadingDeleteInterceptor(theFhirContext, theDaoRegistry, theInterceptorBroadcaster);
+	}
+
+	@Bean
+	public SimpleJobOperator jobOperator(JobExplorer jobExplorer, JobRepository jobRepository, JobRegistry jobRegistry) {
+		SimpleJobOperator jobOperator = new SimpleJobOperator();
+
+		jobOperator.setJobExplorer(jobExplorer);
+		jobOperator.setJobRepository(jobRepository);
+		jobOperator.setJobRegistry(jobRegistry);
+		jobOperator.setJobLauncher(myJobLauncher);
+
+		return jobOperator;
 	}
 
 

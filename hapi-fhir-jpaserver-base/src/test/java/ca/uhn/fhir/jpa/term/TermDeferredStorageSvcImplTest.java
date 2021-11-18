@@ -10,10 +10,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.times;
@@ -33,11 +40,25 @@ public class TermDeferredStorageSvcImplTest {
 	@Mock
 	private ITermCodeSystemVersionDao myTermCodeSystemVersionDao;
 
+	@Mock
+	private JobExecution myJobExecution;
+
 	@Test
 	public void testSaveDeferredWithExecutionSuspended() {
 		TermDeferredStorageSvcImpl svc = new TermDeferredStorageSvcImpl();
 		svc.setProcessDeferred(false);
 		svc.saveDeferred();
+	}
+
+
+	@Test
+	public void testStorageNotEmptyWhileJobsExecuting() {
+		TermDeferredStorageSvcImpl svc = new TermDeferredStorageSvcImpl();
+		ReflectionTestUtils.setField(svc, "myCurrentJobExecutions", Collections.singletonList(myJobExecution));
+
+		when(myJobExecution.isRunning()).thenReturn(true, false);
+		assertFalse(svc.isStorageQueueEmpty());
+		assertTrue(svc.isStorageQueueEmpty());
 	}
 
 
