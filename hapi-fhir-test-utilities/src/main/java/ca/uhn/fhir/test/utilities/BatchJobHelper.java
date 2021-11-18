@@ -95,16 +95,11 @@ public class BatchJobHelper {
 		await().atMost(120, TimeUnit.SECONDS).until(() -> {
 			JobExecution jobExecution = myJobExplorer.getJobExecution(theJobExecution.getId());
 			ourLog.info("JobExecution {} currently has status: {}- Failures if any: {}", theJobExecution.getId(), jobExecution.getStatus(), jobExecution.getFailureExceptions());
-			// todo JM: remove after fixing test
-			if (ourLog.isTraceEnabled()) {
-				ourLog.trace("Job: {} has status: {}", jobExecution.getJobInstance().getJobName(), jobExecution.getStatus());
-			}
-
 			// JM: Adding ABANDONED status because given the description, it s similar to FAILURE, and we need to avoid tests failing because
-			// of wait timeouts caused by unmatched statuses (as the one originating this change).
-			// still failed after adding ABANDONED meaning also has to include UNKNOWN
+			// of wait timeouts caused by unmatched statuses. Also adding STOPPED because tests were found where this wait timed out
+			// with jobs keeping that status during the whole wait
 			return jobExecution.getStatus() == BatchStatus.COMPLETED || jobExecution.getStatus() == BatchStatus.FAILED
-				|| jobExecution.getStatus() == BatchStatus.ABANDONED || jobExecution.getStatus() == BatchStatus.UNKNOWN;
+				|| jobExecution.getStatus() == BatchStatus.ABANDONED || jobExecution.getStatus() == BatchStatus.STOPPED;
 		});
 	}
 
