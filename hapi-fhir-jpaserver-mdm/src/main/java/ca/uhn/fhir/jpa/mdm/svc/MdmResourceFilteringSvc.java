@@ -57,7 +57,7 @@ public class MdmResourceFilteringSvc {
 	 */
 	public boolean shouldBeProcessed(IAnyResource theResource) {
 		if (MdmResourceUtil.isMdmManaged(theResource)) {
-			ourLog.debug("MDM Message handler is dropping [{}] as it is MDM-managed.", theResource);
+			ourLog.debug("MDM Message handler is dropping [{}] as it is MDM-managed.", theResource.getId());
 			return false;
 		}
 

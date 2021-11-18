@@ -51,11 +51,6 @@ public interface ITermCodeSystemStorageSvc {
 			(boolean) theRequestDetails.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE);
 	}
 
-	void deleteCodeSystem(TermCodeSystem theCodeSystem);
-
-	void deleteCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion);
-
-
 	void storeNewCodeSystemVersion(ResourcePersistentId theCodeSystemResourcePid, String theSystemUri, String theSystemName,
 		String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion, ResourceTable theCodeSystemResourceTable,
 		RequestDetails theRequestDetails);

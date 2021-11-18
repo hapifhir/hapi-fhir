@@ -341,6 +341,11 @@ public class GiantTransactionPerfTest {
 		private int mySaveCount;
 
 		@Override
+		public List<ResourceHistoryTable> findAllVersionsForResourceIdInOrder(Long theId) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
 		public ResourceHistoryTable findForIdAndVersionAndFetchProvenance(long theId, long theVersion) {
 			throw new UnsupportedOperationException();
 		}

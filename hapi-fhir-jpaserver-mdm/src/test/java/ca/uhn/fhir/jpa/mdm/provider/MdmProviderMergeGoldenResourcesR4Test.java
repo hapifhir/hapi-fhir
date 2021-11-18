@@ -129,7 +129,8 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 			myMdmProvider.mergeGoldenResources(fromGoldenResourceId, toGoldenResourceId, null, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Only MDM managed resources can be merged. MDM managed resources must have the HAPI-MDM tag.", e.getMessage());
+			String message = myMessageHelper.getMessageForFailedGoldenResourceLoad("fromGoldenResourceId", fromGoldenResourceId.getValue());
+			assertEquals(e.getMessage(), message);
 		}
 	}
 

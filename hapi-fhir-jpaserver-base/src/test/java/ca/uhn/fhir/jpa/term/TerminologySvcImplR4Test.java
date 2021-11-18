@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -18,6 +19,7 @@ import org.hl7.fhir.r4.model.codesystems.HttpVerb;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -29,6 +31,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static ca.uhn.fhir.jpa.batch.config.BatchConstants.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -39,6 +42,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class TerminologySvcImplR4Test extends BaseTermR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(TerminologySvcImplR4Test.class);
+
+	@Autowired private BatchJobHelper myBatchJobHelper;
+
 	ConceptValidationOptions optsNoGuess = new ConceptValidationOptions();
 	ConceptValidationOptions optsGuess = new ConceptValidationOptions().setInferSystem(true);
 
@@ -424,6 +430,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 		IIdType id_v2 = myCodeSystemDao.update(codeSystem, mySrd).getId().toUnqualified();
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myBatchJobHelper.awaitAllBulkJobCompletions(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
 
 		runInTransaction(() -> {
 			List<TermCodeSystemVersion> termCodeSystemVersions_updated = myTermCodeSystemVersionDao.findAll();

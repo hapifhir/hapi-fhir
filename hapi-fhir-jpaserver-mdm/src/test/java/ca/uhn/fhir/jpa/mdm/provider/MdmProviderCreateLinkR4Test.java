@@ -141,7 +141,7 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 	@Test
 	public void testCreateIllegalSecondArg() {
 		try {
-			myMdmProvider.createLink(myPatientId, new StringType(""), MATCH_RESULT, myRequestDetails);
+			myMdmProvider.createLink(myVersionlessGodlenResourceId, new StringType(""), MATCH_RESULT, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), endsWith(" must have form <resourceType>/<id>  where <id> is the id of the resource and <resourceType> is the type of the resource"));
@@ -155,7 +155,7 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 			myMdmProvider.createLink(new StringType(patient.getIdElement().getValue()), myPatientId, MATCH_RESULT, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			String expectedMessage = myMessageHelper.getMessageForUnmanagedResource();
+			String expectedMessage = myMessageHelper.getMessageForFailedGoldenResourceLoad("goldenResourceId", patient.getId());
 			assertEquals(expectedMessage, e.getMessage());
 		}
 	}
