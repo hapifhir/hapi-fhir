@@ -27,6 +27,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
+import ca.uhn.fhir.jpa.binstore.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionResourceDao;
@@ -123,6 +124,9 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	@Autowired
 	private PartitionSettings myPartitionSettings;
 
+	@Autowired(required = false)//It is possible that some implementers will not create such a bean.
+	private IBinaryStorageSvc myBinaryStorageSvc;
+
 	@Override
 	@Transactional
 	public NpmPackage loadPackageFromCacheOnly(String theId, @Nullable String theVersion) {
@@ -172,13 +176,37 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	private IHapiPackageCacheManager.PackageContents loadPackageContents(NpmPackageVersionEntity thePackageVersion) {
 		IFhirResourceDao<? extends IBaseBinary> binaryDao = getBinaryDao();
 		IBaseBinary binary = binaryDao.readByPid(new ResourcePersistentId(thePackageVersion.getPackageBinary().getId()));
+		try {
+			byte[] content = fetchBlobFromBinary(binary);
+			PackageContents retVal = new PackageContents()
+				.setBytes(content)
+				.setPackageId(thePackageVersion.getPackageId())
+				.setVersion(thePackageVersion.getVersionId())
+				.setLastModified(thePackageVersion.getUpdatedTime());
+			return retVal;
+		} catch (IOException e) {
+			throw new InternalErrorException("Failed to load package. There was a problem reading binaries", e);
+		}
+	}
 
-		PackageContents retVal = new PackageContents()
-			.setBytes(binary.getContent())
-			.setPackageId(thePackageVersion.getPackageId())
-			.setVersion(thePackageVersion.getVersionId())
-			.setLastModified(thePackageVersion.getUpdatedTime());
-		return retVal;
+	/**
+	 * Helper method which will attempt to use the IBinaryStorageSvc to resolve the binary blob if available. If
+	 * the bean is unavailable, fallback to assuming we are using an embedded base64 in the data element.
+	 * @param theBinary the Binary who's `data` blob you want to retrieve
+	 * @return a byte array containing the blob.
+	 *
+	 * @throws IOException
+	 */
+	private byte[] fetchBlobFromBinary(IBaseBinary theBinary) throws IOException {
+		if (myBinaryStorageSvc != null) {
+			return myBinaryStorageSvc.fetchDataBlobFromBinary(theBinary);
+		} else {
+			byte[] value = BinaryUtil.getOrCreateData(myCtx, theBinary).getValue();
+			if (value == null) {
+				throw new InternalErrorException("Failed to fetch blob from Binary/" + theBinary.getIdElement());
+			}
+			return value;
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -487,14 +515,12 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 	private IBaseResource loadPackageEntity(NpmPackageVersionResourceEntity contents) {
 		try {
-
-		ResourcePersistentId binaryPid = new ResourcePersistentId(contents.getResourceBinary().getId());
-		IBaseBinary binary = getBinaryDao().readByPid(binaryPid);
-		byte[] resourceContentsBytes = BinaryUtil.getOrCreateData(myCtx, binary).getValue();
-		String resourceContents = new String(resourceContentsBytes, StandardCharsets.UTF_8);
-
-		FhirContext packageContext = getFhirContext(contents.getFhirVersion());
-		return EncodingEnum.detectEncoding(resourceContents).newParser(packageContext).parseResource(resourceContents);
+			ResourcePersistentId binaryPid = new ResourcePersistentId(contents.getResourceBinary().getId());
+			IBaseBinary binary = getBinaryDao().readByPid(binaryPid);
+			byte[] resourceContentsBytes= fetchBlobFromBinary(binary);
+			String resourceContents = new String(resourceContentsBytes, StandardCharsets.UTF_8);
+			FhirContext packageContext = getFhirContext(contents.getFhirVersion());
+			return EncodingEnum.detectEncoding(resourceContents).newParser(packageContext).parseResource(resourceContents);
 		} catch (Exception e) {
 			throw new RuntimeException("Failed to load package resource " + contents, e);
 		}
