@@ -148,7 +148,7 @@ public class MdmRulesJson implements IModelJson {
 
 	public Map<String, String> getEnterpriseEIDSystems() {
 		//First try the new property.
-		if (!myEnterpriseEidSystems.isEmpty()) {
+		if (myEnterpriseEidSystems != null && !myEnterpriseEidSystems.isEmpty()) {
 			return myEnterpriseEidSystems;
 		//If that fails, fall back to our deprecated property.
 		} else if (!StringUtils.isBlank(myEnterpriseEIDSystem)) {
