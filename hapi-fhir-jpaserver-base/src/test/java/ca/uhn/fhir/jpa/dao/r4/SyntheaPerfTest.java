@@ -16,6 +16,8 @@ import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Meta;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,14 +45,23 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestR4WithLuceneDisabledConfig.class})
 @DirtiesContext
 public class SyntheaPerfTest extends BaseJpaTest {
 
-	static {
+	@BeforeAll
+	public static void beforeAll() {
 		System.setProperty("unlimited_db_connection", "true");
+		System.setProperty("mass_ingestion_mode", "true");
+	}
+
+	@AfterAll
+	public static void afterAll() {
+		System.clearProperty("unlimited_db_connection");
+		System.clearProperty("mass_ingestion_mode");
 	}
 
 	private static final Logger ourLog = LoggerFactory.getLogger(SyntheaPerfTest.class);
@@ -72,8 +83,9 @@ public class SyntheaPerfTest extends BaseJpaTest {
 		myDaoConfig.setResourceEncoding(ResourceEncodingEnum.JSON);
 		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.INLINE);
 		myDaoConfig.setMatchUrlCacheEnabled(true);
-		myDaoConfig.setMassIngestionMode(true);
 		myDaoConfig.setDeleteEnabled(false);
+
+		assertTrue(myDaoConfig.isMassIngestionMode());
 
 		List<Path> files = Files
 			.list(FileSystems.getDefault().getPath(PATH_TO_SYNTHEA_OUTPUT))
@@ -85,10 +97,10 @@ public class SyntheaPerfTest extends BaseJpaTest {
 
 		List<Path> nonMeta = files.stream().filter(t -> !t.toString().contains("hospital") && !t.toString().contains("practitioner")).collect(Collectors.toList());
 
+//		new Uploader(Collections.singletonList(nonMeta.remove(0)));
+//		new Uploader(Collections.singletonList(nonMeta.remove(0)));
+//		new Uploader(Collections.singletonList(nonMeta.remove(0)));
 		new Uploader(Collections.singletonList(nonMeta.remove(0)));
-//		new Uploader(Collections.singletonList(nonMeta.remove(0)));
-//		new Uploader(Collections.singletonList(nonMeta.remove(0)));
-//		new Uploader(Collections.singletonList(nonMeta.remove(0)));
 
 		new Uploader(nonMeta);
 	}
