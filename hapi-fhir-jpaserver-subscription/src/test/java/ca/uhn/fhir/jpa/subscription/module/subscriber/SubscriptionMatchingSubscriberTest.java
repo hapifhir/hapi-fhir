@@ -1,11 +1,16 @@
 package ca.uhn.fhir.jpa.subscription.module.subscriber;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.subscription.module.standalone.BaseBlockingQueueSubscribableChannelDstu3Test;
 import ca.uhn.fhir.rest.api.Constants;
+import com.google.common.collect.Lists;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -121,5 +126,91 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
 	}
 
+	@Test
+	public void testSubscriptionAndResourceOnTheSamePartition() throws InterruptedException {
+		String payload = "application/fhir+json";
 
+		String code = "1000000050";
+		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+
+		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(0);
+		sendSubscription(criteria1, payload, ourListenerServerBase, requestPartitionId);
+
+		mySubscriptionResourceMatched.setExpectedCount(1);
+		sendObservation(code, "SNOMED-CT", requestPartitionId);
+		mySubscriptionResourceMatched.awaitExpected();
+	}
+
+	@Test
+	public void testSubscriptionAndResourceOnTheSamePartitionPart2() throws InterruptedException {
+		String payload = "application/fhir+json";
+
+		String code = "1000000050";
+		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+
+		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(1);
+		sendSubscription(criteria1, payload, ourListenerServerBase, requestPartitionId);
+
+		mySubscriptionResourceMatched.setExpectedCount(1);
+		sendObservation(code, "SNOMED-CT", requestPartitionId);
+		mySubscriptionResourceMatched.awaitExpected();
+	}
+
+	@Test
+	public void testSubscriptionAndResourceOnDiffPartition() throws InterruptedException {
+		String payload = "application/fhir+json";
+
+		String code = "1000000050";
+		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+
+		sendSubscription(criteria1, payload, ourListenerServerBase, RequestPartitionId.fromPartitionId(1));
+
+		mySubscriptionResourceNotMatched.setExpectedCount(1);
+		sendObservation(code, "SNOMED-CT", RequestPartitionId.fromPartitionId(0));
+		mySubscriptionResourceNotMatched.awaitExpected();
+	}
+
+	@Test
+	public void testSubscriptionAndResourceOnDiffPartitionPart2() throws InterruptedException {
+		String payload = "application/fhir+json";
+
+		String code = "1000000050";
+		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+
+		sendSubscription(criteria1, payload, ourListenerServerBase, RequestPartitionId.fromPartitionId(0));
+
+		mySubscriptionResourceNotMatched.setExpectedCount(1);
+		sendObservation(code, "SNOMED-CT", RequestPartitionId.fromPartitionId(1));
+		mySubscriptionResourceNotMatched.awaitExpected();
+	}
+
+	@Test
+	public void testSubscriptionOnOnePartitionMatchResourceOnMultiplePartitions() throws InterruptedException {
+		String payload = "application/fhir+json";
+
+		String code = "1000000050";
+		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+
+		sendSubscription(criteria1, payload, ourListenerServerBase, RequestPartitionId.fromPartitionId(1));
+
+		mySubscriptionResourceMatched.setExpectedCount(1);
+		List<Integer> partitionId = Collections.synchronizedList(Lists.newArrayList(0, 1, 2));
+		sendObservation(code, "SNOMED-CT", RequestPartitionId.fromPartitionIds(partitionId));
+		mySubscriptionResourceMatched.awaitExpected();
+	}
+
+	@Test
+	public void testSubscriptionOnOnePartitionDoNotMatchResourceOnMultiplePartitions() throws InterruptedException {
+		String payload = "application/fhir+json";
+
+		String code = "1000000050";
+		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+
+		sendSubscription(criteria1, payload, ourListenerServerBase, RequestPartitionId.fromPartitionId(1));
+
+		mySubscriptionResourceNotMatched.setExpectedCount(1);
+		List<Integer> partitionId = Collections.synchronizedList(Lists.newArrayList(0, 2));
+		sendObservation(code, "SNOMED-CT", RequestPartitionId.fromPartitionIds(partitionId));
+		mySubscriptionResourceNotMatched.awaitExpected();
+	}
 }

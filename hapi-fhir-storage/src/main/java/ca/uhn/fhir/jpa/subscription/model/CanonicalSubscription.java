@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.subscription.model;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -70,6 +71,8 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 	private Map<String, List<String>> myChannelExtensions;
 	@JsonProperty("payloadSearchCriteria")
 	private String myPayloadSearchCriteria;
+	@JsonProperty("partitionId")
+	private RequestPartitionId myPartitionId;
 
 	/**
 	 * Constructor
@@ -149,7 +152,7 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 	public String getChannelExtension(String theUrl) {
 		String retVal = null;
 		List<String> strings = myChannelExtensions.get(theUrl);
-		if (strings != null && strings.isEmpty() == false) {
+		if (strings != null && !strings.isEmpty()) {
 			retVal = strings.get(0);
 		}
 		return retVal;
@@ -214,6 +217,14 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 
 	public void setStatus(Subscription.SubscriptionStatus theStatus) {
 		myStatus = theStatus;
+	}
+
+	public RequestPartitionId getPartitionId() {
+		return myPartitionId;
+	}
+
+	public void setPartitionId(RequestPartitionId thePartitionId) {
+		myPartitionId = thePartitionId;
 	}
 
 	/**

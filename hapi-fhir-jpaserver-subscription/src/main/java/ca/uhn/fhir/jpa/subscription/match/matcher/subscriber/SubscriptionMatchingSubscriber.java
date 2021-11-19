@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.ISubscriptionMatcher;
@@ -52,7 +53,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 
 public class SubscriptionMatchingSubscriber implements MessageHandler {
-	private Logger ourLog = LoggerFactory.getLogger(SubscriptionMatchingSubscriber.class);
+	private final Logger ourLog = LoggerFactory.getLogger(SubscriptionMatchingSubscriber.class);
 	public static final String SUBSCRIPTION_MATCHING_CHANNEL_NAME = "subscription-matching";
 
 	@Autowired
@@ -123,8 +124,12 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 		boolean resourceMatched = false;
 
 		for (ActiveSubscription nextActiveSubscription : subscriptions) {
-
-			// FIXME skip if the partitions don't match
+			// skip if the partitions don't match
+			RequestPartitionId subscriptionPartitionId = nextActiveSubscription.getSubscription().getPartitionId();
+			if (subscriptionPartitionId != null && theMsg.getPartitionId() != null
+				&& !theMsg.getPartitionId().getPartitionIds().retainAll(subscriptionPartitionId.getPartitionIds())) {
+				continue;
+			}
 			String nextSubscriptionId = getId(nextActiveSubscription);
 
 			if (isNotBlank(theMsg.getSubscriptionId())) {

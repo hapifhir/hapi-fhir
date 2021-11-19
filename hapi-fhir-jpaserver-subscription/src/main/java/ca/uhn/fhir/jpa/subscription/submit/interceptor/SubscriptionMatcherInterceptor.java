@@ -120,7 +120,7 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 	public void submitResourceModified(IBaseResource theNewResource, ResourceModifiedMessage.OperationTypeEnum theOperationType, RequestDetails theRequest) {
 		// FIXME do the same for triggering
 		RequestPartitionId requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(theRequest, theNewResource.getIdElement().getResourceType(), theNewResource.getIdElement());
-		ResourceModifiedMessage msg = new ResourceModifiedMessage(myFhirContext, theNewResource, theOperationType, theRequest, requestPartitionId);
+		ResourceModifiedMessage msg = new ResourceModifiedMessage(myFhirContext, theNewResource, theOperationType, theRequest);
 
 		// Interceptor call: SUBSCRIPTION_RESOURCE_MODIFIED
 		HookParams params = new HookParams()
