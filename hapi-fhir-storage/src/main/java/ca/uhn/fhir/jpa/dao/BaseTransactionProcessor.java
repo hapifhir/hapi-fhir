@@ -642,12 +642,12 @@ public abstract class BaseTransactionProcessor {
 			callWriteOperationsHook(Pointcut.STORAGE_TRANSACTION_WRITE_OPERATIONS_PRE, theRequestDetails, theTransactionDetails, writeOperationsDetails);
 		}
 
-		TransactionCallback<Map<IBase, IIdType>> txCallback = status -> {
+		TransactionCallback<EntriesToProcessMap> txCallback = status -> {
 			final Set<IIdType> allIds = new LinkedHashSet<>();
 			final IdSubstitutionMap idSubstitutions = new IdSubstitutionMap();
 			final Map<IIdType, DaoMethodOutcome> idToPersistedOutcome = new HashMap<>();
 
-			Map<IBase, IIdType> retVal = doTransactionWriteOperations(theRequestDetails, theActionName,
+			EntriesToProcessMap retVal = doTransactionWriteOperations(theRequestDetails, theActionName,
 				theTransactionDetails, allIds,
 				idSubstitutions, idToPersistedOutcome,
 				theResponse, theOriginalRequestOrder,
@@ -656,7 +656,7 @@ public abstract class BaseTransactionProcessor {
 			theTransactionStopWatch.startTask("Commit writes to database");
 			return retVal;
 		};
-		Map<IBase, IIdType> entriesToProcess;
+		EntriesToProcessMap entriesToProcess;
 
 		try {
 			entriesToProcess = myHapiTransactionService.execute(theRequestDetails, theTransactionDetails, txCallback);
@@ -880,7 +880,7 @@ public abstract class BaseTransactionProcessor {
 	/**
 	 * After pre-hooks have been called
 	 */
-	protected Map<IBase, IIdType> doTransactionWriteOperations(final RequestDetails theRequest, String theActionName,
+	protected EntriesToProcessMap doTransactionWriteOperations(final RequestDetails theRequest, String theActionName,
 																				  TransactionDetails theTransactionDetails, Set<IIdType> theAllIds,
 																				  IdSubstitutionMap theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome,
 																				  IBaseBundle theResponse, IdentityHashMap<IBase, Integer> theOriginalRequestOrder,
@@ -895,7 +895,7 @@ public abstract class BaseTransactionProcessor {
 		try {
 			Set<String> deletedResources = new HashSet<>();
 			DeleteConflictList deleteConflicts = new DeleteConflictList();
-			Map<IBase, IIdType> entriesToProcess = new IdentityHashMap<>();
+			EntriesToProcessMap entriesToProcess = new EntriesToProcessMap();
 			Set<IIdType> nonUpdatedEntities = new HashSet<>();
 			Set<IBasePersistedResource> updatedEntities = new HashSet<>();
 			Map<String, IIdType> conditionalUrlToIdMap = new HashMap<>();
@@ -1283,7 +1283,7 @@ public abstract class BaseTransactionProcessor {
 	 */
 	private void resolveReferencesThenSaveAndIndexResources(RequestDetails theRequest, TransactionDetails theTransactionDetails,
 																			  IdSubstitutionMap theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome,
-																			  StopWatch theTransactionStopWatch, Map<IBase, IIdType> entriesToProcess,
+																			  StopWatch theTransactionStopWatch, EntriesToProcessMap entriesToProcess,
 																			  Set<IIdType> nonUpdatedEntities, Set<IBasePersistedResource> updatedEntities) {
 		FhirTerser terser = myContext.newTerser();
 		theTransactionStopWatch.startTask("Index " + theIdToPersistedOutcome.size() + " resources");
@@ -1342,7 +1342,7 @@ public abstract class BaseTransactionProcessor {
 
 	private void resolveReferencesThenSaveAndIndexResource(RequestDetails theRequest, TransactionDetails theTransactionDetails,
 																			 IdSubstitutionMap theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome,
-																			 Map<IBase, IIdType> entriesToProcess, Set<IIdType> nonUpdatedEntities,
+																			 EntriesToProcessMap entriesToProcess, Set<IIdType> nonUpdatedEntities,
 																			 Set<IBasePersistedResource> updatedEntities, FhirTerser terser,
 																			 DaoMethodOutcome nextOutcome, IBaseResource nextResource,
 																			 Set<IBaseReference> theReferencesToAutoVersion) {
@@ -1470,6 +1470,11 @@ public abstract class BaseTransactionProcessor {
 //			newId.toUnqualified();
 //
 			// FIXME: optimize
+			IIdType entryId = entriesToProcess.getIdWithVersionlessComparison(newId);
+			if (entryId != null && !StringUtils.equals(entryId.getValue(), newId.getValue())) {
+				entryId.setValue(newId.getValue());
+			}
+
 //			for (IIdType nextEntry : entriesToProcess.values()) {
 //				if (nextEntry.getResourceType().equals(newId.getResourceType())) {
 //					if (nextEntry.getIdPart().equals(newId.getIdPart())) {

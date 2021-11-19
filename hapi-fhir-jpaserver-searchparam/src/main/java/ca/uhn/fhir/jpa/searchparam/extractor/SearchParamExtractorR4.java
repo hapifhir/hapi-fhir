@@ -76,8 +76,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 	public IValueExtractor getPathValueExtractor(IBaseResource theResource, String theSinglePath) {
 		return () -> {
 			ExpressionNode parsed = myParsedFhirPathCache.get(theSinglePath, path -> myFhirPathEngine.parse(path));
-			List<Base> allValues = myFhirPathEngine.evaluate((Base) theResource, parsed);
-			return (List<IBase>) new ArrayList<IBase>(allValues);
+			return myFhirPathEngine.evaluate((Base) theResource, parsed);
 		};
 	}
 

@@ -90,14 +90,8 @@ public class IdSubstitutionMap {
 		}
 
 		private Entry(IIdType theId) {
-			boolean isPlaceholder = theId.getValue().startsWith("urn:");
-			assert theId.hasResourceType() || isPlaceholder;
-			assert theId.hasIdPart();
-			if (isPlaceholder || (!theId.hasBaseUrl() && !theId.hasVersionIdPart())) {
-				myUnversionedId = theId.getValue();
-			} else {
-				myUnversionedId = theId.toUnqualifiedVersionless().getValue();
-			}
+			String unversionedId = toVersionlessValue(theId);
+			myUnversionedId = unversionedId;
 			myId = theId;
 		}
 
@@ -117,5 +111,18 @@ public class IdSubstitutionMap {
 			return myUnversionedId.hashCode();
 		}
 
+	}
+
+	static String toVersionlessValue(IIdType theId) {
+		boolean isPlaceholder = theId.getValue().startsWith("urn:");
+		assert theId.hasResourceType() || isPlaceholder;
+		assert theId.hasIdPart();
+		String unversionedId;
+		if (isPlaceholder || (!theId.hasBaseUrl() && !theId.hasVersionIdPart())) {
+			unversionedId = theId.getValue();
+		} else {
+			unversionedId = theId.toUnqualifiedVersionless().getValue();
+		}
+		return unversionedId;
 	}
 }
