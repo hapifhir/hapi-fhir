@@ -29,7 +29,7 @@ There are two Spring beans available that add CQL processing to HAPI. You can en
 
 HAPI provides implementations for some operations in DSTU3 and R4:
 
-[Measure Operations](cql_measure)
+[CQL Measure](cql_measure.html)
 
 ## Roadmap
 
