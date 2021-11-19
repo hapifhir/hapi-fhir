@@ -41,15 +41,25 @@ import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
 import ca.uhn.fhir.util.VersionEnum;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toSet;
 
 @SuppressWarnings({"SqlNoDataSourceInspection", "SpellCheckingInspection"})
 public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 	private final Set<FlagEnum> myFlags;
+
+	// H2, Derby, MariaDB, and MySql automatically add indexes to foreign keys
+	public static final DriverTypeEnum[] NON_AUTOMATIC_FK_INDEX_PLATFORMS = new DriverTypeEnum[] {
+		DriverTypeEnum.POSTGRES_9_4, DriverTypeEnum.ORACLE_12C, DriverTypeEnum.MSSQL_2012 };
+
 
 	/**
 	 * Constructor
@@ -76,7 +86,43 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init540(); // 20210218 - 20210520
 		init550(); // 20210520 -
 		init560(); // 20211027 -
+		init570(); // 20211102 -
 	}
+
+
+	private void init570() {
+		Builder version = forVersion(VersionEnum.V5_7_0);
+
+		// both indexes must have same name that indexed FK or SchemaMigrationTest complains because H2 sets this index automatically
+
+		version.onTable("TRM_CONCEPT_PROPERTY")
+			.addIndex("20211102.1", "FK_CONCEPTPROP_CONCEPT")
+			.unique(false)
+			.withColumns("CONCEPT_PID")
+			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
+
+		version.onTable("TRM_CONCEPT_DESIG")
+			.addIndex("20211102.2", "FK_CONCEPTDESIG_CONCEPT")
+			.unique(false)
+			.withColumns("CONCEPT_PID")
+			// H2, Derby, MariaDB, and MySql automatically add indexes to foreign keys
+			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
+
+		version.onTable("TRM_CONCEPT_PC_LINK")
+			.addIndex("20211102.3", "FK_TERM_CONCEPTPC_CHILD")
+			.unique(false)
+			.withColumns("CHILD_PID")
+			// H2, Derby, MariaDB, and MySql automatically add indexes to foreign keys
+			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
+
+		version.onTable("TRM_CONCEPT_PC_LINK")
+			.addIndex("20211102.4", "FK_TERM_CONCEPTPC_PARENT")
+			.unique(false)
+			.withColumns("PARENT_PID")
+			// H2, Derby, MariaDB, and MySql automatically add indexes to foreign keys
+			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
+	}
+
 
 	private void init560() {
 		init560_20211027();

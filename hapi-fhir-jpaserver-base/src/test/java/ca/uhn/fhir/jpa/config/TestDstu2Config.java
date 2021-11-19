@@ -172,6 +172,4 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 
 		return requestValidator;
 	}
-
-
 }

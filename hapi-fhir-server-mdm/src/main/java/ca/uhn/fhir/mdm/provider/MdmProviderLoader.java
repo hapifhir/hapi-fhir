@@ -39,7 +39,7 @@ public class MdmProviderLoader {
 	@Autowired
 	private ResourceProviderFactory myResourceProviderFactory;
 	@Autowired
-	private IMdmMatchFinderSvc myMdmMatchFinderSvc;
+	private MdmControllerHelper myMdmControllerHelper;
 	@Autowired
 	private IMdmControllerSvc myMdmControllerSvc;
 	@Autowired
@@ -54,7 +54,11 @@ public class MdmProviderLoader {
 			case DSTU3:
 			case R4:
 				myResourceProviderFactory.addSupplier(() -> {
-					myMdmProvider = new MdmProviderDstu3Plus(myFhirContext, myMdmControllerSvc, myMdmMatchFinderSvc, myMdmSubmitSvc, myMdmSettings);
+					myMdmProvider = new MdmProviderDstu3Plus(myFhirContext,
+						myMdmControllerSvc,
+						myMdmControllerHelper,
+						myMdmSubmitSvc,
+						myMdmSettings);
 					return myMdmProvider;
 				});
 				break;

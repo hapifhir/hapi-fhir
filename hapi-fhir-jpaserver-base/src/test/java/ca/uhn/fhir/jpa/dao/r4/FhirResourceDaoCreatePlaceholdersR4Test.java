@@ -13,6 +13,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.Sets;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.AuditEvent;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -29,6 +30,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashSet;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -648,6 +650,54 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 		Observation retObservation = myObservationDao.read(obs.getIdElement());
 		assertNotNull(retObservation);
+	}
+
+	@Test
+	public void testMultipleVersionedReferencesToAutocreatedPlaceholder() {
+		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+		HashSet<String> refPaths = new HashSet<>();
+		refPaths.add("Observation.subject");
+		myModelConfig.setAutoVersionReferenceAtPaths(refPaths);
+
+
+		Observation obs1 = new Observation();
+		obs1.setId("Observation/DEF1");
+		Reference patientRef = new Reference("Patient/RED");
+		obs1.setSubject(patientRef);
+		BundleBuilder builder = new BundleBuilder(myFhirCtx);
+		Observation obs2 = new Observation();
+		obs2.setId("Observation/DEF2");
+		obs2.setSubject(patientRef);
+		builder.addTransactionUpdateEntry(obs1);
+		builder.addTransactionUpdateEntry(obs2);
+
+		mySystemDao.transaction(new SystemRequestDetails(), (Bundle) builder.getBundle());
+
+		// verify links created to Patient placeholder from both Observations
+		IBundleProvider outcome = myPatientDao.search(SearchParameterMap.newSynchronous().addRevInclude(IBaseResource.INCLUDE_ALL));
+		assertEquals(3, outcome.getAllResources().size());
+	}
+
+	@Test
+	public void testMultipleReferencesToAutocreatedPlaceholder() {
+		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+
+		Observation obs1 = new Observation();
+		obs1.setId("Observation/DEF1");
+		Reference patientRef = new Reference("Patient/RED");
+		obs1.setSubject(patientRef);
+		BundleBuilder builder = new BundleBuilder(myFhirCtx);
+		Observation obs2 = new Observation();
+		obs2.setId("Observation/DEF2");
+		obs2.setSubject(patientRef);
+		builder.addTransactionUpdateEntry(obs1);
+		builder.addTransactionUpdateEntry(obs2);
+
+		mySystemDao.transaction(new SystemRequestDetails(), (Bundle) builder.getBundle());
+
+		// verify links created to Patient placeholder from both Observations
+		IBundleProvider outcome = myPatientDao.search(SearchParameterMap.newSynchronous().addRevInclude(IBaseResource.INCLUDE_ALL));
+		assertEquals(3, outcome.getAllResources().size());
 	}
 
 }
