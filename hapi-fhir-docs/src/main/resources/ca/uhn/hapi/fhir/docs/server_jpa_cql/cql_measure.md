@@ -1,4 +1,4 @@
-# Measures
+# CQL Measure
 
 ## Introduction
 
@@ -234,7 +234,7 @@ The HAPI implementation uses the populations defined by the CQF Measures IG for 
 
 #### Population Criteria
 
-The logical criteria used for determining each Measure population is defined by the [Measure.group.population.criteria element](). The Measure specification allows population criteria to be defined using FHIR Path, CQL, or other languages as appropriate. The HAPI implementation currently only supports using CQL. The relationship between a Measure Population and CQL is illustrated in the [Population Criteria](https://build.fhir.org/ig/HL7/cqf-measures/measure-conformance.html#population-criteria) section of the CQF Measures IG.
+The logical criteria used for determining each Measure population is defined by the [Measure.group.population.criteria](https://hl7.org/fhir/R4/measure-definitions.html#Measure.group.population.criteria) element. The Measure specification allows population criteria to be defined using FHIR Path, CQL, or other languages as appropriate. The HAPI implementation currently only supports using CQL. The relationship between a Measure Population and CQL is illustrated in the [Population Criteria](https://build.fhir.org/ig/HL7/cqf-measures/measure-conformance.html#population-criteria) section of the CQF Measures IG.
 
 An example Measure resource with a population criteria referencing a CQL identifier looks like:
 
@@ -376,13 +376,13 @@ Below are a few diagrams that show the overall architecture of Measure evaluatio
 
 This is a simplified component diagram of the Measure evaluation architecture
 
-![Measure Evaluation Architecture](images/../../images/ref.measure.architecture.drawio.svg)
+![Measure Evaluation Architecture](/hapi-fhir/docs/images/ref_measure_architecture_drawio.svg)
 
 ### Sequence Chart
 
 This sequence chart approximates the Measure evaluation logic implemented by HAPI.
 
-![Measure Evaluation Sequence Chart](images/../../images/measure_evaluation_sequence.png)
+![Measure Evaluation Sequence Chart](/hapi-fhir/docs/images/measure_evaluation_sequence.png)
 
 ## FAQs
 
@@ -402,5 +402,5 @@ A: Yes, though the Measure and associated Resources must be in the same partitio
 * Support for stratifiers
 * Support for Group subjects
 * Support for FHIRPath expressions in Stratifiers, Supplemental Data Elements, and Population Criteria
-* $data-requirements, $collect-data, $submit-data, and $care-gaps operations
+* `$data-requirements`, `$collect-data`, `$submit-data`, and `$care-gaps` operations
 * Support for more extensions defined in the CQF Measures, CPG, and ATR IGs
