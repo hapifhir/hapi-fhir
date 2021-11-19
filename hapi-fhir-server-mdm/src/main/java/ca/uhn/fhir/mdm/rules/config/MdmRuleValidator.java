@@ -35,17 +35,21 @@ import ca.uhn.fhir.mdm.rules.json.MdmSimilarityJson;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.FhirTerser;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.xml.crypto.Data;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class MdmRuleValidator implements IMdmRuleValidator {
@@ -73,7 +77,39 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 		validateMdmTypes(theMdmRules);
 		validateSearchParams(theMdmRules);
 		validateMatchFields(theMdmRules);
-		validateSystemIsUri(theMdmRules);
+		validateSystemsAreUris(theMdmRules);
+		validateEidSystemsMatchMdmTypes(theMdmRules);
+	}
+
+	private void validateEidSystemsMatchMdmTypes(MdmRulesJson theMdmRules) {
+		theMdmRules.getEnterpriseEIDSystems().keySet().stream()
+			.forEach(key -> {
+				if (!theMdmRules.getMdmTypes().contains(key)) {
+					throw new ConfigurationException(String.format("There is an eidSystem set for [%s] but that is not one of the mdmTypes. Valid options are [%s].", key, buildValidEidKeysMessage(theMdmRules)));
+				}
+			});
+	}
+
+	private String buildValidEidKeysMessage(MdmRulesJson theMdmRulesJson) {
+		List<String> validTypes = new ArrayList<>(theMdmRulesJson.getMdmTypes());
+		validTypes.add("*");
+		return String.join(", ", validTypes);
+	}
+
+	private void validateSystemsAreUris(MdmRulesJson theMdmRules) {
+		theMdmRules.getEnterpriseEIDSystems().entrySet()
+			.forEach(entry -> {
+				String resourceType = entry.getKey();
+				String uri = entry.getValue();
+				if (!resourceType.equals("*")) {
+					try {
+						myFhirContext.getResourceType(resourceType);
+					}catch (DataFormatException e) {
+						throw new ConfigurationException(String.format("%s is not a valid resource type, but is set in the eidSystems field.", resourceType));
+					}
+				}
+				validateIsUri(uri);
+			});
 	}
 
 	public void validateMdmTypes(MdmRulesJson theMdmRulesJson) {
@@ -212,15 +248,10 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 		validateFieldPathForType(theFieldMatch.getResourceType(), theFieldMatch);
 	}
 
-	private void validateSystemIsUri(MdmRulesJson theMdmRulesJson) {
-		if (theMdmRulesJson.getEnterpriseEIDSystem() == null) {
-			return;
-		}
-
-		ourLog.info("Validating system URI {}", theMdmRulesJson.getEnterpriseEIDSystem());
-
+	private void validateIsUri(String theUri) {
+		ourLog.info("Validating system URI {}", theUri);
 		try {
-			new URI(theMdmRulesJson.getEnterpriseEIDSystem());
+			new URI(theUri);
 		} catch (URISyntaxException e) {
 			throw new ConfigurationException("Enterprise Identifier System (eidSystem) must be a valid URI");
 		}
