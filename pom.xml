@@ -2519,6 +2519,7 @@
 								<echo>Adding Google analytics in target/site for &lt;body&gt;</echo>
 								<replace dir="target/site" summary="true">
 									<include name="**/*.html"></include>
+									<!--suppress UnresolvedMavenProperty -->
 									<replacefilter token="#build#" value="${label}"/>
 									<replacefilter token="#version#" value="${project.version}"/>
 									<replacetoken><![CDATA[</body>]]></replacetoken>
@@ -2843,6 +2844,7 @@
 								<id>validate</id>
 								<phase>generate-sources</phase>
 								<configuration>
+									<!--suppress UnresolvedMavenProperty -->
 									<configLocation>${maven.multiModuleProjectDirectory}/src/checkstyle/checkstyle_config_nofixmes.xml</configLocation>
 									<encoding>UTF-8</encoding>
 									<consoleOutput>true</consoleOutput>
