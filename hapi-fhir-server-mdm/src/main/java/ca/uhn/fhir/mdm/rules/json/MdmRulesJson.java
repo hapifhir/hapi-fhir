@@ -35,6 +35,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static ca.uhn.fhir.mdm.api.MdmConstants.ALL_RESOURCE_SEARCH_PARAM_TYPE;
+
 @JsonDeserialize(converter = MdmRulesJson.MdmRulesJsonConverter.class)
 public class MdmRulesJson implements IModelJson {
 
@@ -153,7 +155,7 @@ public class MdmRulesJson implements IModelJson {
 		//If that fails, fall back to our deprecated property.
 		} else if (!StringUtils.isBlank(myEnterpriseEIDSystem)) {
 			HashMap<String , String> retVal = new HashMap<>();
-			retVal.put("*", myEnterpriseEIDSystem);
+			retVal.put(ALL_RESOURCE_SEARCH_PARAM_TYPE, myEnterpriseEIDSystem);
 			return retVal;
 		//Otherwise, return an empty map.
 		} else {
@@ -163,8 +165,8 @@ public class MdmRulesJson implements IModelJson {
 
 	public String getEnterpriseEIDSystemForResourceType(String theResourceType) {
 		Map<String, String> enterpriseEIDSystems = getEnterpriseEIDSystems();
-		if (enterpriseEIDSystems.containsKey("*")) {
-			return enterpriseEIDSystems.get("*");
+		if (enterpriseEIDSystems.containsKey(ALL_RESOURCE_SEARCH_PARAM_TYPE)) {
+			return enterpriseEIDSystems.get(ALL_RESOURCE_SEARCH_PARAM_TYPE);
 		} else {
 			return enterpriseEIDSystems.get(theResourceType);
 		}
@@ -185,7 +187,7 @@ public class MdmRulesJson implements IModelJson {
 		Map<String, String> enterpriseEIDSystems = getEnterpriseEIDSystems();
 
 		//If we have a * eid system, there should only be one.
-		if (enterpriseEIDSystems.containsKey("*")) {
+		if (enterpriseEIDSystems.containsKey(ALL_RESOURCE_SEARCH_PARAM_TYPE)) {
 			Validate.isTrue(enterpriseEIDSystems.size() == 1);
 		}
 
