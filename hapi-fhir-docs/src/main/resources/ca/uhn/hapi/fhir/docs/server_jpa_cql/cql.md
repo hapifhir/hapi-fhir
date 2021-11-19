@@ -25,14 +25,19 @@ There are two Spring beans available that add CQL processing to HAPI. You can en
 * `ca.uhn.fhir.cql.config.CqlDstu3Config`
 * `ca.uhn.fhir.cql.config.CqlR4Config`
 
-## Operations
+## Clinical Reasoning Operations
 
-HAPI provides implementations for some Measure operations for DSTU3 and R4
+HAPI provides implementations for some operations in DSTU3 and R4:
 
-### $evaluate-measure
+[Measure Operations](cql_measure)
 
-The [$evaluate-measure](http://hl7.org/fhir/measure-operation-evaluate-measure.html) operation allows the evaluation of a clinical quality measure. This operation is invoked on an instance of a Measure resource:
+## Roadmap
 
-`http://base/Measure/measureId/$evaluate-measure?subject=124&periodStart=2014-01&periodend=2014-03`
+Further development of the CQL capabilities in HAPI is planned:
 
-The Measure will be evaluated, including any CQL that is referenced. The CQL evaluation requires that all the supporting knowledge artifacts for a given Measure be loaded on the HAPI server, including `Libaries` and `ValueSets`.
+* Additional features and performance enhancements for Measure evaluation
+* Additional FHIR Clinical Reasoning Module operations:
+  * Library $evaluate
+  * PlanDefinition $apply
+* Support for the CPG IG Operations
+  * $cql
