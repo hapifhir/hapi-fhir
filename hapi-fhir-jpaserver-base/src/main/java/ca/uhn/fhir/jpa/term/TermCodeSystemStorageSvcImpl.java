@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
@@ -59,8 +60,9 @@ import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.Job;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -86,6 +88,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.batch.config.BatchConstants.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
@@ -108,8 +111,6 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	@Autowired
 	protected IdHelperService myIdHelperService;
 	@Autowired
-	private PlatformTransactionManager myTransactionManager;
-	@Autowired
 	private ITermConceptParentChildLinkDao myConceptParentChildLinkDao;
 	@Autowired
 	private ITermVersionAdapterSvc myTerminologyVersionAdapterSvc;
@@ -123,6 +124,13 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	private DaoConfig myDaoConfig;
 	@Autowired
 	private IResourceTableDao myResourceTableDao;
+
+	@Autowired
+	private IBatchJobSubmitter myJobSubmitter;
+
+	@Autowired @Qualifier(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME)
+	private Job myTermCodeSystemVersionDeleteJob;
+
 
 	@Override
 	public ResourcePersistentId getValueSetResourcePid(IIdType theIdType) {
@@ -260,44 +268,6 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		//Add itself before its list of children
 		childTermConcepts.add(0, theTermConcept);
 		return childTermConcepts;
-	}
-
-	@Override
-	@Transactional
-	public void deleteCodeSystem(TermCodeSystem theCodeSystem) {
-		assert TransactionSynchronizationManager.isActualTransactionActive();
-
-		ourLog.info(" * Deleting code system {}", theCodeSystem.getPid());
-
-		myEntityManager.flush();
-		TermCodeSystem cs = myCodeSystemDao.findById(theCodeSystem.getPid()).orElseThrow(IllegalStateException::new);
-		cs.setCurrentVersion(null);
-		myCodeSystemDao.save(cs);
-		myCodeSystemDao.flush();
-
-		List<TermCodeSystemVersion> codeSystemVersions = myCodeSystemVersionDao.findByCodeSystemPid(theCodeSystem.getPid());
-		List<Long> codeSystemVersionPids = codeSystemVersions
-			.stream()
-			.map(TermCodeSystemVersion::getPid)
-			.collect(Collectors.toList());
-		for (Long next : codeSystemVersionPids) {
-			deleteCodeSystemVersion(next);
-		}
-
-		myCodeSystemVersionDao.deleteForCodeSystem(theCodeSystem);
-		myCodeSystemDao.delete(theCodeSystem);
-		myEntityManager.flush();
-	}
-
-	@Override
-	@Transactional(propagation = Propagation.NEVER)
-	public void deleteCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion) {
-		assert !TransactionSynchronizationManager.isActualTransactionActive();
-
-		// Delete TermCodeSystemVersion
-		ourLog.info(" * Deleting TermCodeSystemVersion {}", theCodeSystemVersion.getCodeSystemVersionId());
-		deleteCodeSystemVersion(theCodeSystemVersion.getPid());
-
 	}
 
 	/**
@@ -512,26 +482,6 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		return existing;
 	}
 
-	private void deleteCodeSystemVersion(final Long theCodeSystemVersionPid) {
-		assert TransactionSynchronizationManager.isActualTransactionActive();
-		ourLog.info(" * Marking code system version {} for deletion", theCodeSystemVersionPid);
-
-		Optional<TermCodeSystem> codeSystemOpt = myCodeSystemDao.findWithCodeSystemVersionAsCurrentVersion(theCodeSystemVersionPid);
-		if (codeSystemOpt.isPresent()) {
-			TermCodeSystem codeSystem = codeSystemOpt.get();
-			if (codeSystem.getCurrentVersion() != null && codeSystem.getCurrentVersion().getPid().equals(theCodeSystemVersionPid)) {
-				ourLog.info(" * Removing code system version {} as current version of code system {}", theCodeSystemVersionPid, codeSystem.getPid());
-				codeSystem.setCurrentVersion(null);
-				myCodeSystemDao.save(codeSystem);
-			}
-		}
-
-		TermCodeSystemVersion codeSystemVersion = myCodeSystemVersionDao.findById(theCodeSystemVersionPid).orElseThrow(() -> new IllegalStateException());
-		codeSystemVersion.setCodeSystemVersionId("DELETED_" + UUID.randomUUID().toString());
-		myCodeSystemVersionDao.save(codeSystemVersion);
-
-		myDeferredStorageSvc.deleteCodeSystemVersion(codeSystemVersion);
-	}
 
 	private void validateDstu3OrNewer() {
 		Validate.isTrue(myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3), "Terminology operations only supported in DSTU3+ mode");

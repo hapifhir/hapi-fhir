@@ -21,21 +21,15 @@ package ca.uhn.fhir.rest.server.method;
  */
 
 import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.parser.json.JsonLikeObject;
-import ca.uhn.fhir.parser.json.JsonLikeStructure;
-import ca.uhn.fhir.parser.json.JsonLikeValue;
-import ca.uhn.fhir.parser.json.jackson.JacksonStructure;
 import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.Reader;
 import java.lang.reflect.Method;
@@ -44,6 +38,8 @@ import java.util.Collection;
 import static ca.uhn.fhir.rest.api.Constants.CT_GRAPHQL;
 import static ca.uhn.fhir.rest.api.Constants.CT_JSON;
 import static ca.uhn.fhir.rest.server.method.ResourceParameter.createRequestReader;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 public class GraphQLQueryBodyParameter implements IParameter {
 
@@ -51,8 +47,15 @@ public class GraphQLQueryBodyParameter implements IParameter {
 
 	@Override
 	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
-		String ctValue = theRequest.getHeader(Constants.HEADER_CONTENT_TYPE);
+		String ctValue = defaultString(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE));
 		Reader requestReader = createRequestReader(theRequest);
+
+		// Trim off "; charset=FOO" from the content-type header
+		int semicolonIdx = ctValue.indexOf(';');
+		if (semicolonIdx != -1) {
+			ctValue = ctValue.substring(0, semicolonIdx);
+		}
+		ctValue = trim(ctValue);
 
 		if (CT_JSON.equals(ctValue)) {
 			try {

@@ -22,8 +22,6 @@ package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
-import ca.uhn.fhir.jpa.binstore.IBinaryStorageSvc;
-import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
@@ -135,10 +133,6 @@ public class TestJpaDstu3Config extends BaseJavaConfigDstu3 {
 		return requestValidator;
 	}
 
-	@Bean
-	public IBinaryStorageSvc binaryStorage() {
-		return new MemoryBinaryStorageSvcImpl();
-	}
 
 	@Bean
 	public DefaultProfileValidationSupport validationSupportChainDstu3() {

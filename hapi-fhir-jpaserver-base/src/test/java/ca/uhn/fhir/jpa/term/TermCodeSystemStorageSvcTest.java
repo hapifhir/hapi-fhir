@@ -5,18 +5,25 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 
+import static ca.uhn.fhir.jpa.batch.config.BatchConstants.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 
 	public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";
+
+	@Autowired
+	private BatchJobHelper myBatchJobHelper;
+
 
 	@Test
 	public void testStoreNewCodeSystemVersionForExistingCodeSystemNoVersionId() {
@@ -126,6 +133,7 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 		myTerminologyDeferredStorageSvc.setProcessDeferred(true);
 		myTerminologyDeferredStorageSvc.saveDeferred();
 		myTerminologyDeferredStorageSvc.setProcessDeferred(false);
+		myBatchJobHelper.awaitAllBulkJobCompletions(false, TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
 		assertEquals(theExpectedConceptCount, runInTransaction(() -> myTermConceptDao.count()));
 
 	}

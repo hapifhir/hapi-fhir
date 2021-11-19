@@ -23,7 +23,6 @@ package ca.uhn.fhir.mdm.provider;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
-import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
@@ -39,7 +38,7 @@ public class MdmProviderLoader {
 	@Autowired
 	private ResourceProviderFactory myResourceProviderFactory;
 	@Autowired
-	private IMdmMatchFinderSvc myMdmMatchFinderSvc;
+	private MdmControllerHelper myMdmControllerHelper;
 	@Autowired
 	private IMdmControllerSvc myMdmControllerSvc;
 	@Autowired
@@ -54,7 +53,11 @@ public class MdmProviderLoader {
 			case DSTU3:
 			case R4:
 				myResourceProviderFactory.addSupplier(() -> {
-					myMdmProvider = new MdmProviderDstu3Plus(myFhirContext, myMdmControllerSvc, myMdmMatchFinderSvc, myMdmSubmitSvc, myMdmSettings);
+					myMdmProvider = new MdmProviderDstu3Plus(myFhirContext,
+						myMdmControllerSvc,
+						myMdmControllerHelper,
+						myMdmSubmitSvc,
+						myMdmSettings);
 					return myMdmProvider;
 				});
 				break;

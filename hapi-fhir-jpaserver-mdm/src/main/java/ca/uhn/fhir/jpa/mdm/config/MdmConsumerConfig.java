@@ -257,8 +257,16 @@ public class MdmConsumerConfig {
 	}
 
 	@Bean
-	MdmControllerHelper mdmProviderHelper(FhirContext theFhirContext, IResourceLoader theResourceLoader, IMdmSettings theMdmSettings, MessageHelper messageHelper) {
-		return new MdmControllerHelper(theFhirContext, theResourceLoader, theMdmSettings, messageHelper);
+	MdmControllerHelper mdmProviderHelper(FhirContext theFhirContext,
+													  IResourceLoader theResourceLoader,
+													  IMdmSettings theMdmSettings,
+													  IMdmMatchFinderSvc theMdmMatchFinderSvc,
+													  MessageHelper messageHelper) {
+		return new MdmControllerHelper(theFhirContext,
+			theResourceLoader,
+			theMdmMatchFinderSvc,
+			theMdmSettings,
+			messageHelper);
 	}
 
 	@Bean

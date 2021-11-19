@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 3153
+jira: SMILE-3289
+title: "Updated UnknownCodeSystemWarningValidationSupport to allow the throwing of warnings if
+configured to do so."

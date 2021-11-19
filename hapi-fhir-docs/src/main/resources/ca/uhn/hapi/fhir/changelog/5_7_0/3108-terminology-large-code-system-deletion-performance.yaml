@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3108
+title: "Code System deletion background tasks were taking over a day to complete on very large CodeSystems for PostgreSQL, SQL Server and Oracle
+   databases. That was improved now taking less than an hour in all three platforms"

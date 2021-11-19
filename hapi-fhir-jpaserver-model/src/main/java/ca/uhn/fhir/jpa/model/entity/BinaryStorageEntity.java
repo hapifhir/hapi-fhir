@@ -20,7 +20,13 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Lob;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import java.sql.Blob;
 import java.util.Date;
 
@@ -30,6 +36,7 @@ public class BinaryStorageEntity {
 
 	@Id
 	@Column(name = "BLOB_ID", length = 200, nullable = false)
+	//N.B GGG: Note that the `blob id` is the same as the `externalized binary id`.
 	private String myBlobId;
 	@Column(name = "RESOURCE_ID", length = 100, nullable = false)
 	private String myResourceId;
