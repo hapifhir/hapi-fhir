@@ -1,0 +1,121 @@
+package ca.uhn.fhir.jpa.dao;
+
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
+import org.apache.commons.lang3.tuple.Pair;
+import org.hl7.fhir.instance.model.api.IIdType;
+
+import javax.annotation.Nonnull;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+public class IdSubstitutionMap {
+
+	private final Map<Entry, Entry> myMap = new HashMap<>();
+	private final Multimap<Entry, Entry> myReverseMap = MultimapBuilder.hashKeys().arrayListValues().build();
+
+
+	public boolean containsSource(IIdType theId) {
+		if (theId.isLocal()) {
+			return false;
+		}
+		return myMap.containsKey(new Entry(theId));
+	}
+
+	public boolean containsSource(String theId) {
+		return myMap.containsKey(new Entry(theId));
+	}
+
+	public boolean containsTarget(IIdType theId) {
+		return myReverseMap.containsKey(new Entry(theId));
+	}
+
+	public boolean containsTarget(String theId) {
+		return myReverseMap.containsKey(new Entry(theId));
+	}
+
+	public IIdType getForSource(IIdType theId) {
+		Entry target = myMap.get(new Entry(theId));
+		if (target != null) {
+			assert target.myId != null;
+			return target.myId;
+		}
+		return null;
+	}
+
+
+	public IIdType getForSource(String theId) {
+		Entry target = myMap.get(new Entry(theId));
+		if (target != null) {
+			assert target.myId != null;
+			return target.myId;
+		}
+		return null;
+	}
+
+	@Nonnull
+	public Collection<IIdType> getForValue(IIdType theId) {
+		return myReverseMap
+			.get(new Entry(theId))
+			.stream()
+			.map(t -> t.myId)
+			.collect(Collectors.toList());
+	}
+
+	public List<Pair<IIdType, IIdType>> entrySet() {
+		return myMap
+			.entrySet()
+			.stream()
+			.map(t->Pair.of(t.getKey().myId, t.getValue().myId))
+			.collect(Collectors.toList());
+	}
+
+	public void put(IIdType theSource, IIdType theTarget) {
+		myMap.put(new Entry(theSource), new Entry(theTarget));
+		myReverseMap.put(new Entry(theTarget), new Entry(theSource));
+	}
+
+
+	private static class Entry {
+
+		private final String myUnversionedId;
+		private final IIdType myId;
+
+		private Entry(String theId) {
+			myId = null;
+			myUnversionedId = theId;
+		}
+
+		private Entry(IIdType theId) {
+			boolean isPlaceholder = theId.getValue().startsWith("urn:");
+			assert theId.hasResourceType() || isPlaceholder;
+			assert theId.hasIdPart();
+			if (isPlaceholder || (!theId.hasBaseUrl() && !theId.hasVersionIdPart())) {
+				myUnversionedId = theId.getValue();
+			} else {
+				myUnversionedId = theId.toUnqualifiedVersionless().getValue();
+			}
+			myId = theId;
+		}
+
+		@Override
+		public boolean equals(Object theOther) {
+			if (theOther instanceof Entry) {
+				String otherUnversionedId = ((Entry) theOther).myUnversionedId;
+				if (myUnversionedId.equals(otherUnversionedId)) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		@Override
+		public int hashCode() {
+			return myUnversionedId.hashCode();
+		}
+
+	}
+}

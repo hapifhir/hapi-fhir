@@ -36,7 +36,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.DecimalNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 
 import java.io.IOException;
 import java.io.PushbackReader;
@@ -48,9 +47,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 public class JacksonStructure implements JsonLikeStructure {
 
@@ -377,7 +373,6 @@ public class JacksonStructure implements JsonLikeStructure {
 		ObjectMapper retVal =
 			JsonMapper
 				.builder()
-				.addModule(new AfterburnerModule())
 				.build();
 		retVal = retVal.setNodeFactory(new JsonNodeFactory(true));
 		retVal = retVal.enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);

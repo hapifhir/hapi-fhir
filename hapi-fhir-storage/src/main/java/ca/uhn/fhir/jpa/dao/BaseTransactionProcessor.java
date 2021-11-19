@@ -86,6 +86,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -273,14 +274,16 @@ public abstract class BaseTransactionProcessor {
 		myVersionAdapter.populateEntryWithOperationOutcome(caughtEx, nextEntry);
 	}
 
-	private void handleTransactionCreateOrUpdateOutcome(Map<IIdType, IIdType> idSubstitutions, Map<IIdType, DaoMethodOutcome> idToPersistedOutcome,
+	private void handleTransactionCreateOrUpdateOutcome(IdSubstitutionMap idSubstitutions, Map<IIdType, DaoMethodOutcome> idToPersistedOutcome,
 																		 IIdType nextResourceId, DaoMethodOutcome outcome,
 																		 IBase newEntry, String theResourceType,
 																		 IBaseResource theRes, RequestDetails theRequestDetails) {
 		IIdType newId = outcome.getId().toUnqualified();
 		IIdType resourceId = isPlaceholder(nextResourceId) ? nextResourceId : nextResourceId.toUnqualifiedVersionless();
 		if (newId.equals(resourceId) == false) {
-			idSubstitutions.put(resourceId, newId);
+			if (!nextResourceId.isEmpty()) {
+				idSubstitutions.put(resourceId, newId);
+			}
 			if (isPlaceholder(resourceId)) {
 				/*
 				 * The correct way for substitution IDs to be is to be with no resource type, but we'll accept the qualified kind too just to be lenient.
@@ -336,10 +339,12 @@ public abstract class BaseTransactionProcessor {
 		return theRes.getMeta().getLastUpdated();
 	}
 
-	private String performIdSubstitutionsInMatchUrl(Map<IIdType, IIdType> theIdSubstitutions, String theMatchUrl) {
+	private String performIdSubstitutionsInMatchUrl(IdSubstitutionMap theIdSubstitutions, String theMatchUrl) {
 		String matchUrl = theMatchUrl;
 		if (isNotBlank(matchUrl)) {
-			for (Map.Entry<IIdType, IIdType> nextSubstitutionEntry : theIdSubstitutions.entrySet()) {
+
+			// FIXME: tune this and maybe delete the entrySet method?
+			for (Pair<IIdType, IIdType> nextSubstitutionEntry : theIdSubstitutions.entrySet()) {
 				IIdType nextTemporaryId = nextSubstitutionEntry.getKey();
 				IIdType nextReplacementId = nextSubstitutionEntry.getValue();
 				String nextTemporaryIdPart = nextTemporaryId.getIdPart();
@@ -639,7 +644,7 @@ public abstract class BaseTransactionProcessor {
 
 		TransactionCallback<Map<IBase, IIdType>> txCallback = status -> {
 			final Set<IIdType> allIds = new LinkedHashSet<>();
-			final Map<IIdType, IIdType> idSubstitutions = new HashMap<>();
+			final IdSubstitutionMap idSubstitutions = new IdSubstitutionMap();
 			final Map<IIdType, DaoMethodOutcome> idToPersistedOutcome = new HashMap<>();
 
 			Map<IBase, IIdType> retVal = doTransactionWriteOperations(theRequestDetails, theActionName,
@@ -877,7 +882,7 @@ public abstract class BaseTransactionProcessor {
 	 */
 	protected Map<IBase, IIdType> doTransactionWriteOperations(final RequestDetails theRequest, String theActionName,
 																				  TransactionDetails theTransactionDetails, Set<IIdType> theAllIds,
-																				  Map<IIdType, IIdType> theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome,
+																				  IdSubstitutionMap theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome,
 																				  IBaseBundle theResponse, IdentityHashMap<IBase, Integer> theOriginalRequestOrder,
 																				  List<IBase> theEntries, StopWatch theTransactionStopWatch) {
 
@@ -1139,7 +1144,7 @@ public abstract class BaseTransactionProcessor {
 			theTransactionStopWatch.endCurrentTask();
 
 			for (IIdType next : theAllIds) {
-				IIdType replacement = theIdSubstitutions.get(next);
+				IIdType replacement = theIdSubstitutions.getForSource(next);
 				if (replacement != null && !replacement.equals(next)) {
 					ourLog.debug("Placeholder resource ID \"{}\" was replaced with permanent ID \"{}\"", next, replacement);
 				}
@@ -1183,9 +1188,6 @@ public abstract class BaseTransactionProcessor {
 	/**
 	 * After transaction processing and resolution of indexes and references, we want to validate that the resources that were stored _actually_
 	 * match the conditional URLs that they were brought in on.
-	 *
-	 * @param theIdToPersistedOutcome
-	 * @param conditionalUrlToIdMap
 	 */
 	private void validateAllInsertsMatchTheirConditionalUrls(Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome, Map<String, IIdType> conditionalUrlToIdMap, RequestDetails theRequest) {
 		conditionalUrlToIdMap.entrySet().stream()
@@ -1280,7 +1282,7 @@ public abstract class BaseTransactionProcessor {
 	 * account for NOPs, so we block NOPs in that pass.
 	 */
 	private void resolveReferencesThenSaveAndIndexResources(RequestDetails theRequest, TransactionDetails theTransactionDetails,
-																			  Map<IIdType, IIdType> theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome,
+																			  IdSubstitutionMap theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome,
 																			  StopWatch theTransactionStopWatch, Map<IBase, IIdType> entriesToProcess,
 																			  Set<IIdType> nonUpdatedEntities, Set<IBasePersistedResource> updatedEntities) {
 		FhirTerser terser = myContext.newTerser();
@@ -1339,7 +1341,7 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	private void resolveReferencesThenSaveAndIndexResource(RequestDetails theRequest, TransactionDetails theTransactionDetails,
-																			 Map<IIdType, IIdType> theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome,
+																			 IdSubstitutionMap theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome,
 																			 Map<IBase, IIdType> entriesToProcess, Set<IIdType> nonUpdatedEntities,
 																			 Set<IBasePersistedResource> updatedEntities, FhirTerser terser,
 																			 DaoMethodOutcome nextOutcome, IBaseResource nextResource,
@@ -1356,7 +1358,7 @@ public abstract class BaseTransactionProcessor {
 					if (targetId.getValue() == null || targetId.getValue().startsWith("#")) {
 						// This means it's a contained resource
 						continue;
-					} else if (theIdSubstitutions.containsValue(targetId)) {
+					} else if (theIdSubstitutions.containsTarget(targetId)) {
 						newId = targetId;
 					} else {
 						throw new InternalErrorException("References by resource with no reference ID are not supported in DAO layer");
@@ -1365,9 +1367,9 @@ public abstract class BaseTransactionProcessor {
 					continue;
 				}
 			}
-			if (newId != null || theIdSubstitutions.containsKey(nextId)) {
+			if (newId != null || theIdSubstitutions.containsSource(nextId)) {
 				if (newId == null) {
-					newId = theIdSubstitutions.get(nextId);
+					newId = theIdSubstitutions.getForSource(nextId);
 				}
 				if (newId != null) {
 					ourLog.debug(" * Replacing resource ref {} with {}", nextId, newId);
@@ -1427,9 +1429,9 @@ public abstract class BaseTransactionProcessor {
 			if (nextRef instanceof IIdType) {
 				continue; // No substitution on the resource ID itself!
 			}
-			IIdType nextUriString = newIdType(nextRef.getValueAsString());
-			if (theIdSubstitutions.containsKey(nextUriString)) {
-				IIdType newId = theIdSubstitutions.get(nextUriString);
+			String nextUriString = nextRef.getValueAsString();
+			if (theIdSubstitutions.containsSource(nextUriString)) {
+				IIdType newId = theIdSubstitutions.getForSource(nextUriString);
 				ourLog.debug(" * Replacing resource ref {} with {}", nextUriString, newId);
 
 				String existingValue = nextRef.getValueAsString();
@@ -1464,27 +1466,37 @@ public abstract class BaseTransactionProcessor {
 		// Make sure we reflect the actual final version for the resource.
 		if (updateOutcome != null) {
 			IIdType newId = updateOutcome.getIdDt();
-			for (IIdType nextEntry : entriesToProcess.values()) {
-				if (nextEntry.getResourceType().equals(newId.getResourceType())) {
-					if (nextEntry.getIdPart().equals(newId.getIdPart())) {
-						if (!nextEntry.hasVersionIdPart() || !nextEntry.getVersionIdPart().equals(newId.getVersionIdPart())) {
-							nextEntry.setParts(nextEntry.getBaseUrl(), nextEntry.getResourceType(), nextEntry.getIdPart(), newId.getVersionIdPart());
-						}
-					}
-				}
-			}
+
+//			newId.toUnqualified();
+//
+			// FIXME: optimize
+//			for (IIdType nextEntry : entriesToProcess.values()) {
+//				if (nextEntry.getResourceType().equals(newId.getResourceType())) {
+//					if (nextEntry.getIdPart().equals(newId.getIdPart())) {
+//						if (!nextEntry.hasVersionIdPart() || !nextEntry.getVersionIdPart().equals(newId.getVersionIdPart())) {
+//							nextEntry.setParts(nextEntry.getBaseUrl(), nextEntry.getResourceType(), nextEntry.getIdPart(), newId.getVersionIdPart());
+//						}
+//					}
+//				}
+//			}
 
 			nextOutcome.setId(newId);
 
-			for (IIdType next : theIdSubstitutions.values()) {
-				if (next.getResourceType().equals(newId.getResourceType())) {
-					if (next.getIdPart().equals(newId.getIdPart())) {
-						if (!next.getValue().equals(newId.getValue())) {
-							next.setValue(newId.getValue());
-						}
-					}
-				}
+			Collection<IIdType> target = theIdSubstitutions.getForValue(newId);
+			for (IIdType next : target) {
+				next.setValue(newId.getValue());
 			}
+
+			// FIXME: remove
+//			for (IIdType next : theIdSubstitutions.values()) {
+//				if (next.getResourceType().equals(newId.getResourceType())) {
+//					if (next.getIdPart().equals(newId.getIdPart())) {
+//						if (!next.getValue().equals(newId.getValue())) {
+//							next.setValue(newId.getValue());
+//						}
+//					}
+//				}
+//			}
 
 		}
 	}
