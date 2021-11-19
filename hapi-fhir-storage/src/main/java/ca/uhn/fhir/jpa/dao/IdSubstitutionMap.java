@@ -56,15 +56,6 @@ public class IdSubstitutionMap {
 		return null;
 	}
 
-	@Nonnull
-	public Collection<IIdType> getForValue(IIdType theId) {
-		return myReverseMap
-			.get(new Entry(theId))
-			.stream()
-			.map(t -> t.myId)
-			.collect(Collectors.toList());
-	}
-
 	public List<Pair<IIdType, IIdType>> entrySet() {
 		return myMap
 			.entrySet()

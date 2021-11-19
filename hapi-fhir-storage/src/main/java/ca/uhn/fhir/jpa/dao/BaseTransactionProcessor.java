@@ -1487,9 +1487,14 @@ public abstract class BaseTransactionProcessor {
 
 			nextOutcome.setId(newId);
 
-			Collection<IIdType> target = theIdSubstitutions.getForValue(newId);
-			for (IIdType next : target) {
-				next.setValue(newId.getValue());
+//			Collection<IIdType> targets = theIdSubstitutions.getForValue(newId);
+//			for (IIdType next : targets) {
+//				next.setValue(newId.getValue());
+//			}
+
+			IIdType target = theIdSubstitutions.getForSource(newId);
+			if (target != null) {
+				target.setValue(newId.getValue());
 			}
 
 			// FIXME: remove
