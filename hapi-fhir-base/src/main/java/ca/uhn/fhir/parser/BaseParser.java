@@ -45,6 +45,7 @@ import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
+import org.apache.commons.io.output.StringBuilderWriter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -268,7 +269,7 @@ public abstract class BaseParser implements IParser {
 
 	@Override
 	public String encodeResourceToString(IBaseResource theResource) throws DataFormatException {
-		Writer stringWriter = new StringWriter();
+		Writer stringWriter = new StringBuilderWriter();
 		try {
 			encodeResourceToWriter(theResource, stringWriter);
 		} catch (IOException e) {

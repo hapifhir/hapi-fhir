@@ -106,10 +106,8 @@ public class IdSubstitutionMap {
 
 	static String toVersionlessValue(IIdType theId) {
 		boolean isPlaceholder = theId.getValue().startsWith("urn:");
-		assert theId.hasResourceType() || isPlaceholder;
-		assert theId.hasIdPart();
 		String unversionedId;
-		if (isPlaceholder || (!theId.hasBaseUrl() && !theId.hasVersionIdPart())) {
+		if (isPlaceholder || (!theId.hasBaseUrl() && !theId.hasVersionIdPart()) || !theId.hasResourceType()) {
 			unversionedId = theId.getValue();
 		} else {
 			unversionedId = theId.toUnqualifiedVersionless().getValue();
