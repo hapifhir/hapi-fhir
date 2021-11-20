@@ -870,6 +870,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		Practitioner pract = new Practitioner();
 		pract.addIdentifier().setSystem("foo").setValue("bar");
 		myPractitionerDao.create(pract);
+		runInTransaction(()->assertEquals(1, myResourceTableDao.count()));
 
 		// First pass
 
