@@ -61,6 +61,14 @@ public class ResourceOperationJsonMessage extends BaseJsonMessage<ResourceOperat
 	}
 
 	@Override
+	public Integer getMessageHashOrNull() {
+		if (myPayload == null) {
+			return null;
+		}
+		return myPayload.getMessageHashOrNull();
+	}
+
+	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
 			.append("myPayload", myPayload)

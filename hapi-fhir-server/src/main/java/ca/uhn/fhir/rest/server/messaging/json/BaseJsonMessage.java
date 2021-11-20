@@ -58,4 +58,8 @@ public abstract class BaseJsonMessage<T> implements Message<T>, IModelJson {
 	public void setHeaders(HapiMessageHeaders theHeaders) {
 		myHeaders = theHeaders;
 	}
+
+    public Integer getMessageHashOrNull() {
+		return null;
+    }
 }

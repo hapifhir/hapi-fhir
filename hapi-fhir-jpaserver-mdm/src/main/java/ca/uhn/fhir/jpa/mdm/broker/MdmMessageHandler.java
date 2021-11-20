@@ -67,6 +67,8 @@ public class MdmMessageHandler implements MessageHandler {
 	private IMdmSettings myMdmSettings;
 	@Autowired
 	private IMdmModelConverterSvc myModelConverter;
+	@Autowired
+	private MdmMessageHasher myMessageHasher;
 
 	@Override
 	public void handleMessage(Message<?> theMessage) throws MessagingException {
@@ -116,6 +118,7 @@ public class MdmMessageHandler implements MessageHandler {
 			IBaseResource targetResource = theMsg.getPayload(myFhirContext);
 			ResourceOperationMessage outgoingMsg = new ResourceOperationMessage(myFhirContext, targetResource, theMsg.getOperationType());
 			outgoingMsg.setTransactionId(theMsg.getTransactionId());
+			outgoingMsg.setMessageHash(myMessageHasher.getMessageHashOrNull(targetResource));
 
 			MdmLinkEvent linkChangeEvent = new MdmLinkEvent();
 			mdmContext.getMdmLinks()
