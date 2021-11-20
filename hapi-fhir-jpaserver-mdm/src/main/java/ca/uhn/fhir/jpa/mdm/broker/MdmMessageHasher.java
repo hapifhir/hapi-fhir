@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.broker;
 
+import ca.uhn.fhir.jpa.subscription.api.ISubscriptionMessageHasher;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.util.EIDHelper;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -10,10 +11,11 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class MdmMessageHasher {
+public class MdmMessageHasher implements ISubscriptionMessageHasher {
 	@Autowired
 	private EIDHelper myEIDHelper;
 
+	@Override
 	public Integer getMessageHashOrNull(IBaseResource theTargetResource) {
 		List<CanonicalEID> eidList = myEIDHelper.getExternalEid(theTargetResource);
 		if (eidList.isEmpty()) {

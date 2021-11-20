@@ -22,13 +22,9 @@ package ca.uhn.fhir.rest.server.messaging;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public class ResourceOperationMessage extends BaseResourceModifiedMessage {
-
-	@JsonProperty("messageHash")
-	private Integer myMessageHash;
 
 	public ResourceOperationMessage() {
 	}
@@ -47,13 +43,5 @@ public class ResourceOperationMessage extends BaseResourceModifiedMessage {
 	 */
 	public void setPayload(String thePayload) {
 		this.myPayload = thePayload;
-	}
-
-    public Integer getMessageHashOrNull() {
-		return myMessageHash;
-    }
-
-	public void setMessageHash(Integer theMessageHash) {
-		myMessageHash = theMessageHash;
 	}
 }
