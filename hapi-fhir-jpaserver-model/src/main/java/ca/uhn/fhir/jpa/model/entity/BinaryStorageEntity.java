@@ -30,6 +30,7 @@ public class BinaryStorageEntity {
 
 	@Id
 	@Column(name = "BLOB_ID", length = 200, nullable = false)
+	//N.B GGG: Note that the `blob id` is the same as the `externalized binary id`.
 	private String myBlobId;
 	@Column(name = "RESOURCE_ID", length = 100, nullable = false)
 	private String myResourceId;
