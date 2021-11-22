@@ -30,10 +30,8 @@ import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptMapDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptMapGroupElementTargetDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
-import ca.uhn.fhir.jpa.dao.dstu2.FhirResourceDaoDstu2SearchNoFtTest;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
@@ -46,17 +44,12 @@ import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
-import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.UrlUtil;
-import org.apache.commons.io.IOUtils;
-import org.hibernate.search.mapper.orm.Search;
-import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_30_40;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.dstu3.model.AllergyIntolerance;
@@ -107,7 +100,6 @@ import org.hl7.fhir.dstu3.model.Substance;
 import org.hl7.fhir.dstu3.model.Task;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -124,12 +116,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.persistence.EntityManager;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestDstu3Config.class})
@@ -202,8 +189,6 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	// @PersistenceContext()
 	@Autowired
 	protected EntityManager myEntityManager;
-	@Autowired
-	protected FhirContext myFhirCtx;
 	@Autowired
 	@Qualifier("myGroupDaoDstu3")
 	protected IFhirResourceDao<Group> myGroupDao;
@@ -353,6 +338,8 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Autowired
 	protected ITermValueSetDao myTermValueSetDao;
 
+	protected FhirContext myFhirCtx = FhirContext.forDstu3();
+
 	@AfterEach()
 	public void afterCleanupDao() {
 		myDaoConfig.setExpireSearchResults(new DaoConfig().isExpireSearchResults());
@@ -409,16 +396,6 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Override
 	protected PlatformTransactionManager getTxManager() {
 		return myTxManager;
-	}
-
-	protected <T extends IBaseResource> T loadResourceFromClasspath(Class<T> type, String resourceName) throws IOException {
-		InputStream stream = FhirResourceDaoDstu2SearchNoFtTest.class.getResourceAsStream(resourceName);
-		if (stream == null) {
-			fail("Unable to load resource: " + resourceName);
-		}
-		String string = IOUtils.toString(stream, StandardCharsets.UTF_8);
-		IParser newJsonParser = EncodingEnum.detectEncodingNoDefault(string).newParser(myFhirCtx);
-		return newJsonParser.parseResource(type, string);
 	}
 
 	@Override

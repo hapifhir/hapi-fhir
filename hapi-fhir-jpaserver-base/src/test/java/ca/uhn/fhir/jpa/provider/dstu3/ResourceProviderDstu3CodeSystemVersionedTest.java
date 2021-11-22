@@ -38,14 +38,14 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 	@BeforeEach
 	@Transactional
 	public void before02() throws IOException {
-		CodeSystem cs = loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs.xml");
+		CodeSystem cs = loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs.xml", myFhirCtx);
 		cs.setVersion("1");
 		for(CodeSystem.ConceptDefinitionComponent conceptDefinitionComponent : cs.getConcept()) {
 			conceptDefinitionComponent.setDisplay(conceptDefinitionComponent.getDisplay() + " v1");
 		}
 		myCodeSystemDao.create(cs, mySrd);
 
-		cs = loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs.xml");
+		cs = loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs.xml", myFhirCtx);
 		cs.setVersion("2");
 		for(CodeSystem.ConceptDefinitionComponent conceptDefinitionComponent : cs.getConcept()) {
 			conceptDefinitionComponent.setDisplay(conceptDefinitionComponent.getDisplay() + " v2");

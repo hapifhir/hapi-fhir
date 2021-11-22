@@ -2315,7 +2315,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@Test
 	public void testTransactionWithCircularReferences2() throws IOException {
-		Bundle request = loadResourceFromClasspath(Bundle.class, "/dstu3_transaction.xml");
+		Bundle request = loadResourceFromClasspath(Bundle.class, "/dstu3_transaction.xml", myFhirCtx);
 
 		Bundle resp = mySystemDao.transaction(mySrd, request);
 		assertEquals(3, resp.getEntry().size());
@@ -2330,7 +2330,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@Test
 	public void testTransactionWithCircularReferences3() throws IOException {
-		Bundle request = loadResourceFromClasspath(Bundle.class, "/dstu3_transaction2.xml");
+		Bundle request = loadResourceFromClasspath(Bundle.class, "/dstu3_transaction2.xml", myFhirCtx);
 
 		Bundle resp = mySystemDao.transaction(mySrd, request);
 		assertEquals(3, resp.getEntry().size());

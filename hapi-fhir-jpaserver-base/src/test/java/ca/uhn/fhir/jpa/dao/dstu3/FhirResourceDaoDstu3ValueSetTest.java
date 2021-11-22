@@ -45,17 +45,17 @@ public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 	@BeforeEach
 	@Transactional
 	public void before02() throws IOException {
-		ValueSet upload = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
+		ValueSet upload = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml", myFhirCtx);
 		myExtensionalVsId = myValueSetDao.create(upload, mySrd).getId().toUnqualifiedVersionless();
 
-		CodeSystem upload2 = loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs.xml");
+		CodeSystem upload2 = loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs.xml", myFhirCtx);
 		myCodeSystemDao.create(upload2, mySrd).getId().toUnqualifiedVersionless();
 
 	}
 
 	@Test
 	public void testExpandValueSetWithIso3166() throws IOException {
-		ValueSet vs = loadResourceFromClasspath(ValueSet.class, "/dstu3/nl/LandISOCodelijst-2.16.840.1.113883.2.4.3.11.60.40.2.20.5.2--20171231000000.json");
+		ValueSet vs = loadResourceFromClasspath(ValueSet.class, "/dstu3/nl/LandISOCodelijst-2.16.840.1.113883.2.4.3.11.60.40.2.20.5.2--20171231000000.json", myFhirCtx);
 		myValueSetDao.create(vs);
 
 		runInTransaction(() -> {
@@ -188,7 +188,7 @@ public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 	@Test
 	@Disabled
 	public void testExpandByValueSet() throws IOException {
-		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
+		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml", myFhirCtx);
 		ValueSet expanded = myValueSetDao.expand(toExpand, new ValueSetExpansionOptions().setFilter("11378"));
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);

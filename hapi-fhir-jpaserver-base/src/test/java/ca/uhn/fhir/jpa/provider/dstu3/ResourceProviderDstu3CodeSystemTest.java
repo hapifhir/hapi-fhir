@@ -40,10 +40,10 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 	@BeforeEach
 	@Transactional
 	public void before02() throws IOException {
-		CodeSystem cs = loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs.xml");
+		CodeSystem cs = loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs.xml", myFhirCtx);
 		myCodeSystemDao.create(cs, mySrd);
 
-		ValueSet upload = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
+		ValueSet upload = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml", myFhirCtx);
 		myValueSetDao.create(upload, mySrd).getId().toUnqualifiedVersionless();
 	}
 

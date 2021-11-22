@@ -7,11 +7,10 @@ import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TerminologyTest;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
-import ca.uhn.fhir.jpa.util.BaseCaptureQueriesListener;
-import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -55,7 +54,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3Test {
 
@@ -70,7 +72,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	}
 
 	private void loadAndPersistCodeSystem() throws IOException {
-		CodeSystem codeSystem = loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs.xml");
+		CodeSystem codeSystem = loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs.xml", myFhirCtx);
 		codeSystem.setId("CodeSystem/cs");
 		persistCodeSystem(codeSystem);
 	}
@@ -85,7 +87,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	}
 
 	private void loadAndPersistValueSet() throws IOException {
-		ValueSet valueSet = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
+		ValueSet valueSet = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml", myFhirCtx);
 		valueSet.setId("ValueSet/vs");
 		persistValueSet(valueSet);
 	}
@@ -491,7 +493,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	public void testExpandByValueSet() throws IOException {
 		loadAndPersistCodeSystemAndValueSet();
 
-		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
+		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml", myFhirCtx);
 
 		Parameters respParam = ourClient
 			.operation()
@@ -568,7 +570,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		}
 
 		try {
-			ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-dstu3.xml");
+			ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-dstu3.xml", myFhirCtx);
 			ourClient
 				.operation()
 				.onType(ValueSet.class)
@@ -582,7 +584,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		}
 
 		try {
-			ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-dstu3.xml");
+			ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-dstu3.xml", myFhirCtx);
 			ourClient
 				.operation()
 				.onInstance(myExtensionalVsId)
@@ -848,7 +850,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	public void testExpandByValueSetWithFilter() throws IOException {
 		loadAndPersistCodeSystem();
 
-		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
+		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml", myFhirCtx);
 
 		Parameters respParam = ourClient
 			.operation()
@@ -871,7 +873,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	public void testExpandByValueSetWithFilterContainsPrefixValue() throws IOException {
 		loadAndPersistCodeSystem();
 
-		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
+		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml", myFhirCtx);
 
 		Parameters respParam = ourClient
 			.operation()
@@ -891,7 +893,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	public void testExpandByValueSetWithFilterContainsNoPrefixValue() throws IOException {
 		loadAndPersistCodeSystem();
 
-		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
+		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml", myFhirCtx);
 
 		Parameters respParam = ourClient
 			.operation()
@@ -912,7 +914,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	public void testExpandByValueSetWithFilterNotContainsAnyValue() throws IOException {
 		loadAndPersistCodeSystem();
 
-		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
+		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml", myFhirCtx);
 
 		Parameters respParam = ourClient
 			.operation()
