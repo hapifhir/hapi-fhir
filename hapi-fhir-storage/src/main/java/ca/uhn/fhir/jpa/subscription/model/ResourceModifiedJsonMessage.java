@@ -53,11 +53,12 @@ public class ResourceModifiedJsonMessage extends BaseJsonMessage<ResourceModifie
 	}
 
 	@Override
-	public Integer getMessageHashOrNull() {
+	// FIXME make all these nullable
+	public String getMessageKeyOrNull() {
 		if (myPayload == null) {
 			return null;
 		}
-		return myPayload.getMessageHashOrNull();
+		return myPayload.getMessageKeyOrNull();
 	}
 
 	@Override

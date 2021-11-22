@@ -44,8 +44,8 @@ public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 	 * This is used by mdm to manage concurrent discovery of golden resources
 	 */
 
-	@JsonProperty("messageHash")
-	private Integer myMessageHash;
+	@JsonProperty("messageKey")
+	private String myMessageKey;
 
 	/**
 	 * Constructor
@@ -71,12 +71,12 @@ public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 		mySubscriptionId = theSubscriptionId;
 	}
 
-	public Integer getMessageHashOrNull() {
-		return myMessageHash;
+	public String getMessageKeyOrNull() {
+		return myMessageKey;
 	}
 
-	public void setMessageHash(Integer theMessageHash) {
-		myMessageHash = theMessageHash;
+	public void setMessageKey(String theMessageKey) {
+		myMessageKey = theMessageKey;
 	}
 
 	@Override
