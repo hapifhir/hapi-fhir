@@ -86,7 +86,6 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -109,6 +108,7 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -140,6 +140,7 @@ public abstract class BaseTransactionProcessor {
 	public static final String URN_PREFIX = "urn:";
 	public static final Pattern UNQUALIFIED_MATCH_URL_START = Pattern.compile("^[a-zA-Z0-9_]+=");
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseTransactionProcessor.class);
+	public static final Pattern INVALID_PLACEHOLDER_PATTERN = Pattern.compile("[a-zA-Z]+:.*");
 	private BaseStorageDao myDao;
 	@Autowired
 	private PlatformTransactionManager myTxManager;
@@ -168,17 +169,6 @@ public abstract class BaseTransactionProcessor {
 
 	@Autowired
 	private IResourceVersionSvc myResourceVersionSvc;
-
-	public static boolean isPlaceholder(IIdType theId) {
-		if (theId != null && theId.getValue() != null) {
-			return theId.getValue().startsWith("urn:oid:") || theId.getValue().startsWith("urn:uuid:");
-		}
-		return false;
-	}
-
-	private static String toStatusString(int theStatusCode) {
-		return theStatusCode + " " + defaultString(Constants.HTTP_STATUS_NAMES.get(theStatusCode));
-	}
 
 	@VisibleForTesting
 	public void setDaoConfig(DaoConfig theDaoConfig) {
@@ -339,32 +329,6 @@ public abstract class BaseTransactionProcessor {
 		return theRes.getMeta().getLastUpdated();
 	}
 
-	private String performIdSubstitutionsInMatchUrl(IdSubstitutionMap theIdSubstitutions, String theMatchUrl) {
-		String matchUrl = theMatchUrl;
-		if (isNotBlank(matchUrl)) {
-
-			// FIXME: tune this and maybe delete the entrySet method?
-			for (Pair<IIdType, IIdType> nextSubstitutionEntry : theIdSubstitutions.entrySet()) {
-				IIdType nextTemporaryId = nextSubstitutionEntry.getKey();
-				IIdType nextReplacementId = nextSubstitutionEntry.getValue();
-				String nextTemporaryIdPart = nextTemporaryId.getIdPart();
-				String nextReplacementIdPart = nextReplacementId.getValueAsString();
-				if (isUrn(nextTemporaryId) && nextTemporaryIdPart.length() > URN_PREFIX.length()) {
-					matchUrl = matchUrl.replace(nextTemporaryIdPart, nextReplacementIdPart);
-					String escapedUrlParam = UrlUtil.escapeUrlParam(nextTemporaryIdPart);
-					if (isNotBlank(escapedUrlParam)) {
-						matchUrl = matchUrl.replace(escapedUrlParam, nextReplacementIdPart);
-					}
-				}
-			}
-		}
-		return matchUrl;
-	}
-
-	private boolean isUrn(IIdType theId) {
-		return defaultString(theId.getValue()).startsWith(URN_PREFIX);
-	}
-
 	public void setDao(BaseStorageDao theDao) {
 		myDao = theDao;
 	}
@@ -403,10 +367,10 @@ public abstract class BaseTransactionProcessor {
 		List<RetriableBundleTask> nonGetCalls = new ArrayList<>();
 
 		CountDownLatch completionLatch = new CountDownLatch(requestEntriesSize);
-		for (int i=0; i< requestEntriesSize ; i++ ) {
+		for (int i = 0; i < requestEntriesSize; i++) {
 			IBase nextRequestEntry = requestEntries.get(i);
 			RetriableBundleTask retriableBundleTask = new RetriableBundleTask(completionLatch, theRequestDetails, responseMap, i, nextRequestEntry, theNestedMode);
-			if  (myVersionAdapter.getEntryRequestVerb(myContext, nextRequestEntry).equalsIgnoreCase("GET")) {
+			if (myVersionAdapter.getEntryRequestVerb(myContext, nextRequestEntry).equalsIgnoreCase("GET")) {
 				getCalls.add(retriableBundleTask);
 			} else {
 				nonGetCalls.add(retriableBundleTask);
@@ -419,24 +383,24 @@ public abstract class BaseTransactionProcessor {
 
 		// waiting for all async tasks to be completed
 		AsyncUtil.awaitLatchAndIgnoreInterrupt(completionLatch, 300L, TimeUnit.SECONDS);
-		
+
 		// Now, create the bundle response in original order
 		Object nextResponseEntry;
-		for (int i=0; i<requestEntriesSize; i++ )  {
-			
+		for (int i = 0; i < requestEntriesSize; i++) {
+
 			nextResponseEntry = responseMap.get(i);
 			if (nextResponseEntry instanceof BaseServerResponseExceptionHolder) {
-				BaseServerResponseExceptionHolder caughtEx = (BaseServerResponseExceptionHolder)nextResponseEntry;
+				BaseServerResponseExceptionHolder caughtEx = (BaseServerResponseExceptionHolder) nextResponseEntry;
 				if (caughtEx.getException() != null) {
 					IBase nextEntry = myVersionAdapter.addEntry(response);
 					populateEntryWithOperationOutcome(caughtEx.getException(), nextEntry);
 					myVersionAdapter.setResponseStatus(nextEntry, toStatusString(caughtEx.getException().getStatusCode()));
-				} 
+				}
 			} else {
-				myVersionAdapter.addEntry(response, (IBase)nextResponseEntry);
+				myVersionAdapter.addEntry(response, (IBase) nextResponseEntry);
 			}
 		}
-		
+
 		long delay = System.currentTimeMillis() - start;
 		ourLog.info("Batch completed in {}ms", delay);
 
@@ -849,8 +813,13 @@ public abstract class BaseTransactionProcessor {
 				}
 			}
 
-			if (nextResourceId.hasIdPart() && nextResourceId.getIdPart().matches("[a-zA-Z]+:.*") && !isPlaceholder(nextResourceId)) {
-				throw new InvalidRequestException("Invalid placeholder ID found: " + nextResourceId.getIdPart() + " - Must be of the form 'urn:uuid:[uuid]' or 'urn:oid:[oid]'");
+			if (nextResourceId.hasIdPart() && !isPlaceholder(nextResourceId)) {
+				int colonIndex = nextResourceId.getIdPart().indexOf(':');
+				if (colonIndex != -1) {
+					if (INVALID_PLACEHOLDER_PATTERN.matcher(nextResourceId.getIdPart()).matches()) {
+						throw new InvalidRequestException("Invalid placeholder ID found: " + nextResourceId.getIdPart() + " - Must be of the form 'urn:uuid:[uuid]' or 'urn:oid:[oid]'");
+					}
+				}
 			}
 
 			if (nextResourceId.hasIdPart() && !nextResourceId.hasResourceType() && !isPlaceholder(nextResourceId)) {
@@ -1654,18 +1623,6 @@ public abstract class BaseTransactionProcessor {
 		return null;
 	}
 
-	private static class BaseServerResponseExceptionHolder {
-		private BaseServerResponseException myException;
-
-		public BaseServerResponseException getException() {
-			return myException;
-		}
-
-		public void setException(BaseServerResponseException myException) {
-			this.myException = myException;
-		}
-	}
-
 	/**
 	 * Transaction Order, per the spec:
 	 * <p>
@@ -1835,5 +1792,99 @@ public abstract class BaseTransactionProcessor {
 			myResponseMap.put(myResponseOrder, caughtEx);
 		}
 
+	}
+
+	private static class BaseServerResponseExceptionHolder {
+		private BaseServerResponseException myException;
+
+		public BaseServerResponseException getException() {
+			return myException;
+		}
+
+		public void setException(BaseServerResponseException myException) {
+			this.myException = myException;
+		}
+	}
+
+	public static boolean isPlaceholder(IIdType theId) {
+		if (theId != null && theId.getValue() != null) {
+			return theId.getValue().startsWith("urn:oid:") || theId.getValue().startsWith("urn:uuid:");
+		}
+		return false;
+	}
+
+	private static String toStatusString(int theStatusCode) {
+		return theStatusCode + " " + defaultString(Constants.HTTP_STATUS_NAMES.get(theStatusCode));
+	}
+
+	/**
+	 * Given a match URL containing
+	 *
+	 * @param theIdSubstitutions
+	 * @param theMatchUrl
+	 * @return
+	 */
+	static String performIdSubstitutionsInMatchUrl(IdSubstitutionMap theIdSubstitutions, String theMatchUrl) {
+		String matchUrl = theMatchUrl;
+		if (isNotBlank(matchUrl) && !theIdSubstitutions.isEmpty()) {
+
+			int startIdx = matchUrl.indexOf('?');
+			while (startIdx != -1) {
+
+				int endIdx = matchUrl.indexOf('&', startIdx + 1);
+				if (endIdx == -1) {
+					endIdx = matchUrl.length();
+				}
+
+				int equalsIdx = matchUrl.indexOf('=', startIdx + 1);
+
+				int searchFrom;
+				if (equalsIdx == -1) {
+					searchFrom = matchUrl.length();
+				} else if (equalsIdx >= endIdx) {
+					// First equals we found is from a subsequent parameter
+					searchFrom = matchUrl.length();
+				} else {
+					String paramValue = matchUrl.substring(equalsIdx + 1, endIdx);
+					if (isUrn(paramValue)) {
+						IIdType replacement = theIdSubstitutions.getForSource(paramValue);
+						if (replacement != null) {
+							matchUrl = matchUrl.substring(0, equalsIdx + 1) + replacement.getValue() + matchUrl.substring(endIdx);
+							searchFrom = equalsIdx + 1 + replacement.getValue().length();
+						} else {
+							searchFrom = endIdx + 1;
+						}
+					} else {
+						searchFrom = endIdx + 1;
+					}
+				}
+
+				if (searchFrom >= matchUrl.length()) {
+					break;
+				}
+
+				startIdx = matchUrl.indexOf('&', searchFrom);
+			}
+
+//			// FIXME: tune this and maybe delete the entrySet method?
+//			for (Pair<IIdType, IIdType> nextSubstitutionEntry : theIdSubstitutions.entrySet()) {
+//				IIdType nextTemporaryId = nextSubstitutionEntry.getKey();
+//				IIdType nextReplacementId = nextSubstitutionEntry.getValue();
+//				String nextTemporaryIdPart = nextTemporaryId.getIdPart();
+//				String nextReplacementIdPart = nextReplacementId.getValueAsString();
+//				if (isUrn(nextTemporaryId) && nextTemporaryIdPart.length() > URN_PREFIX.length()) {
+//					matchUrl = matchUrl.replace(nextTemporaryIdPart, nextReplacementIdPart);
+//					String escapedUrlParam = UrlUtil.escapeUrlParam(nextTemporaryIdPart);
+//					if (isNotBlank(escapedUrlParam)) {
+//						matchUrl = matchUrl.replace(escapedUrlParam, nextReplacementIdPart);
+//					}
+//				}
+//			}
+		}
+		return matchUrl;
+	}
+
+	private static boolean isUrn(@Nonnull String theId) {
+		return theId.startsWith(URN_PREFIX);
 	}
 }

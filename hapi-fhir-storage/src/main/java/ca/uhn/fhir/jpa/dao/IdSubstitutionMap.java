@@ -69,6 +69,10 @@ public class IdSubstitutionMap {
 		myReverseMap.put(new Entry(theTarget), new Entry(theSource));
 	}
 
+	public boolean isEmpty() {
+		return myMap.isEmpty();
+	}
+
 
 	private static class Entry {
 
