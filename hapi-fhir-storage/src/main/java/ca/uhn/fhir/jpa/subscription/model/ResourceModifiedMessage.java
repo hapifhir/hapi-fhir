@@ -42,12 +42,7 @@ public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 	@JsonProperty(value = "subscriptionId", required = false)
 	private String mySubscriptionId;
 
-	/**
-	 * This is used by mdm to manage concurrent discovery of golden resources
-	 */
 
-	@JsonProperty("messageKey")
-	private String myMessageKey;
 
 	/**
 	 * Constructor
@@ -73,14 +68,6 @@ public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 		mySubscriptionId = theSubscriptionId;
 	}
 
-	@Nullable
-	public String getMessageKeyOrNull() {
-		return myMessageKey;
-	}
-
-	public void setMessageKey(String theMessageKey) {
-		myMessageKey = theMessageKey;
-	}
 
 	@Override
 	public String toString() {
