@@ -110,6 +110,11 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
 		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -136,17 +141,17 @@
 					<argLine>@{argLine} ${surefire_jvm_args}</argLine>
 				</configuration>
 			</plugin>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
-                <configuration>
-                    <instructions>
-                        <_nouses>true</_nouses>
-                        <_removeheaders>Built-By, Include-Resource, Private-Package, Require-Capability</_removeheaders>
-                    </instructions>
-                </configuration>
-            </plugin>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<_nouses>true</_nouses>
+						<_removeheaders>Built-By, Include-Resource, Private-Package, Require-Capability</_removeheaders>
+					</instructions>
+				</configuration>
+			</plugin>
 		</plugins>
 		<resources>
 			<resource>

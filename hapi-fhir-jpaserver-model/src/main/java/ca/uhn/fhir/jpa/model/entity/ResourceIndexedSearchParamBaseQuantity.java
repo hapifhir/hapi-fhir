@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.model.entity;
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 
+import ca.uhn.fhir.interceptor.model.PartitionablePartitionId;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 

@@ -20,7 +20,8 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+
+import ca.uhn.fhir.interceptor.model.PartitionablePartitionId;
 
 import javax.annotation.Nullable;
 import javax.persistence.Column;

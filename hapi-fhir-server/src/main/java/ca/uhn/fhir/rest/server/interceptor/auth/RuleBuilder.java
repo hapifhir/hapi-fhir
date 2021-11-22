@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.model.PartitionablePartitionId;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -30,6 +31,7 @@ import com.google.common.collect.Lists;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -214,10 +216,10 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 			private boolean matchesResource(IBaseResource theResource) {
 				if (theResource != null) {
-					RequestPartitionId partitionId = (RequestPartitionId) theResource.getUserData(Constants.RESOURCE_PARTITION_ID);
+					PartitionablePartitionId partitionId = (PartitionablePartitionId) theResource.getUserData(Constants.RESOURCE_PARTITION_ID);
 					if (partitionId != null) {
-						String partitionNameOrNull = partitionId.getFirstPartitionNameOrNull();
-						if (partitionNameOrNull == null || !myTenantIds.contains(partitionNameOrNull)) {
+						Integer partitionNameOrNull = partitionId.getPartitionId();
+						if (partitionNameOrNull == null || !myTenantIds.contains(String.valueOf(partitionNameOrNull))) {
 							return !myOutcome;
 						}
 					}

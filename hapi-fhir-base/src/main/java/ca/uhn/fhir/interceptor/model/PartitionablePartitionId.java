@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.model.entity;
+package ca.uhn.fhir.interceptor.model;
 
 /*-
  * #%L
@@ -20,8 +20,6 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.persistence.Column;
@@ -31,7 +29,7 @@ import java.time.LocalDate;
 @Embeddable
 public class PartitionablePartitionId implements Cloneable {
 
-	static final String PARTITION_ID = "PARTITION_ID";
+	public static final String PARTITION_ID = "PARTITION_ID";
 
 	@Column(name = PARTITION_ID, nullable = true, insertable = true, updatable = false)
 	private Integer myPartitionId;

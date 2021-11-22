@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.ISubscriptionMatcher;
@@ -124,9 +125,9 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 
 		for (ActiveSubscription nextActiveSubscription : subscriptions) {
 			// skip if the partitions don't match
-			Integer subscriptionPartitionId = nextActiveSubscription.getSubscription().getPartitionId();
-			if (subscriptionPartitionId != null && theMsg.getPartitionId() != null
-				&& !theMsg.getPartitionId().hasPartitionId(subscriptionPartitionId)) {
+			PartitionablePartitionId subscriptionPartitionId = nextActiveSubscription.getSubscription().getMyPartitionId();
+			if (subscriptionPartitionId != null && subscriptionPartitionId.getPartitionId() != null && theMsg.getPartitionId() != null
+				&& !theMsg.getPartitionId().hasPartitionId(subscriptionPartitionId.getPartitionId())) {
 				continue;
 			}
 			String nextSubscriptionId = getId(nextActiveSubscription);
