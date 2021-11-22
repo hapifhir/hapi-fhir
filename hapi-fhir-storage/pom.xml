@@ -64,7 +64,7 @@
 			<artifactId>hapi-fhir-structures-hl7org-dstu2</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<!-- FIXME KHS remove jpa stuff from here -->
+		<!-- TODO KHS remove jpa stuff from here -->
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-jpaserver-model</artifactId>
