@@ -27,6 +27,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import javax.annotation.Nullable;
+
 /**
  * Most of this class has been moved to ResourceModifiedMessage in the hapi-fhir-server project, for a reusable channel ResourceModifiedMessage
  * that doesn't require knowledge of subscriptions.
@@ -71,6 +73,7 @@ public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 		mySubscriptionId = theSubscriptionId;
 	}
 
+	@Nullable
 	public String getMessageKeyOrNull() {
 		return myMessageKey;
 	}
