@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
+import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.Test;
 
@@ -12,6 +13,22 @@ public class BaseTransactionProcessorTest {
 		IdSubstitutionMap idSubstitutions = new IdSubstitutionMap();
 		idSubstitutions.put(new IdType("urn:uuid:1234"), new IdType("Patient/123"));
 		String outcome = BaseTransactionProcessor.performIdSubstitutionsInMatchUrl(idSubstitutions, "Patient?foo=urn:uuid:1234&bar=baz");
+		assertEquals("Patient?foo=Patient/123&bar=baz", outcome);
+	}
+
+	@Test
+	void testPerformIdSubstitutionsInMatchUrl_MatchAtEnd() {
+		IdSubstitutionMap idSubstitutions = new IdSubstitutionMap();
+		idSubstitutions.put(new IdType("urn:uuid:7ea4f3a6-d2a3-4105-9f31-374d525085d4"), new IdType("Patient/123"));
+		String outcome = BaseTransactionProcessor.performIdSubstitutionsInMatchUrl(idSubstitutions, "Patient?name=FAMILY1&organization=urn%3Auuid%3A7ea4f3a6-d2a3-4105-9f31-374d525085d4");
+		assertEquals("Patient?name=FAMILY1&organization=Patient/123", outcome);
+	}
+
+	@Test
+	void testPerformIdSubstitutionsInMatchUrl_MatchEscapedParam() {
+		IdSubstitutionMap idSubstitutions = new IdSubstitutionMap();
+		idSubstitutions.put(new IdType("urn:uuid:1234"), new IdType("Patient/123"));
+		String outcome = BaseTransactionProcessor.performIdSubstitutionsInMatchUrl(idSubstitutions, "Patient?foo=" + UrlUtil.escapeUrlParam("urn:uuid:1234") + "&bar=baz");
 		assertEquals("Patient?foo=Patient/123&bar=baz", outcome);
 	}
 

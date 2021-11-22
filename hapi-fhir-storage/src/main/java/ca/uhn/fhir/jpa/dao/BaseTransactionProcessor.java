@@ -138,6 +138,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public abstract class BaseTransactionProcessor {
 
 	public static final String URN_PREFIX = "urn:";
+	public static final String URN_PREFIX_ESCAPED = UrlUtil.escapeUrlParam(URN_PREFIX);
 	public static final Pattern UNQUALIFIED_MATCH_URL_START = Pattern.compile("^[a-zA-Z0-9_]+=");
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseTransactionProcessor.class);
 	public static final Pattern INVALID_PLACEHOLDER_PATTERN = Pattern.compile("[a-zA-Z]+:.*");
@@ -1846,16 +1847,21 @@ public abstract class BaseTransactionProcessor {
 					searchFrom = matchUrl.length();
 				} else {
 					String paramValue = matchUrl.substring(equalsIdx + 1, endIdx);
-					if (isUrn(paramValue)) {
+					boolean isUrn = isUrn(paramValue);
+					boolean isUrnEscaped = !isUrn && isUrnEscaped(paramValue);
+					if (isUrn || isUrnEscaped) {
+						if (isUrnEscaped) {
+							paramValue = UrlUtil.unescape(paramValue);
+						}
 						IIdType replacement = theIdSubstitutions.getForSource(paramValue);
 						if (replacement != null) {
 							matchUrl = matchUrl.substring(0, equalsIdx + 1) + replacement.getValue() + matchUrl.substring(endIdx);
 							searchFrom = equalsIdx + 1 + replacement.getValue().length();
 						} else {
-							searchFrom = endIdx + 1;
+							searchFrom = endIdx;
 						}
 					} else {
-						searchFrom = endIdx + 1;
+						searchFrom = endIdx;
 					}
 				}
 
@@ -1866,25 +1872,15 @@ public abstract class BaseTransactionProcessor {
 				startIdx = matchUrl.indexOf('&', searchFrom);
 			}
 
-//			// FIXME: tune this and maybe delete the entrySet method?
-//			for (Pair<IIdType, IIdType> nextSubstitutionEntry : theIdSubstitutions.entrySet()) {
-//				IIdType nextTemporaryId = nextSubstitutionEntry.getKey();
-//				IIdType nextReplacementId = nextSubstitutionEntry.getValue();
-//				String nextTemporaryIdPart = nextTemporaryId.getIdPart();
-//				String nextReplacementIdPart = nextReplacementId.getValueAsString();
-//				if (isUrn(nextTemporaryId) && nextTemporaryIdPart.length() > URN_PREFIX.length()) {
-//					matchUrl = matchUrl.replace(nextTemporaryIdPart, nextReplacementIdPart);
-//					String escapedUrlParam = UrlUtil.escapeUrlParam(nextTemporaryIdPart);
-//					if (isNotBlank(escapedUrlParam)) {
-//						matchUrl = matchUrl.replace(escapedUrlParam, nextReplacementIdPart);
-//					}
-//				}
-//			}
 		}
 		return matchUrl;
 	}
 
 	private static boolean isUrn(@Nonnull String theId) {
 		return theId.startsWith(URN_PREFIX);
+	}
+
+	private static boolean isUrnEscaped(@Nonnull String theId) {
+		return theId.startsWith(URN_PREFIX_ESCAPED);
 	}
 }
