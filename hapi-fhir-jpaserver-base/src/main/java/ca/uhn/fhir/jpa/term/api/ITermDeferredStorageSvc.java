@@ -54,8 +54,6 @@ public interface ITermDeferredStorageSvc {
 
 	void addValueSetsToStorageQueue(List<ValueSet> theValueSets);
 
-	void deleteCodeSystem(TermCodeSystem theCodeSystem);
-
 	void deleteCodeSystemForResource(ResourceTable theCodeSystemResourceToDelete);
 
 	void deleteCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion);
