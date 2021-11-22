@@ -82,9 +82,10 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 	}
 
 	private void validateEidSystemsMatchMdmTypes(MdmRulesJson theMdmRules) {
-		theMdmRules.getEnterpriseEIDSystems().keySet().stream()
+		theMdmRules.getEnterpriseEIDSystems().keySet()
 			.forEach(key -> {
-				if (!theMdmRules.getMdmTypes().contains(key)) {
+				//Ensure each key is either * or a valid resource type.
+				if (!key.equalsIgnoreCase("*") && !theMdmRules.getMdmTypes().contains(key)) {
 					throw new ConfigurationException(String.format("There is an eidSystem set for [%s] but that is not one of the mdmTypes. Valid options are [%s].", key, buildValidEidKeysMessage(theMdmRules)));
 				}
 			});
