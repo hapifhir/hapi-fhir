@@ -124,9 +124,9 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 
 		for (ActiveSubscription nextActiveSubscription : subscriptions) {
 			// skip if the partitions don't match
-			Integer subscriptionPartitionId = nextActiveSubscription.getSubscription().getPartitionId();
-			if (subscriptionPartitionId != null && theMsg.getPartitionId() != null
-				&& !theMsg.getPartitionId().hasPartitionId(subscriptionPartitionId)) {
+			CanonicalSubscription subscription = nextActiveSubscription.getSubscription();
+			if (subscription != null && subscription.getPartitionId() != null && theMsg.getPartitionId() != null
+				&& !theMsg.getPartitionId().hasPartitionId(subscription.getPartitionId())) {
 				continue;
 			}
 			String nextSubscriptionId = getId(nextActiveSubscription);
@@ -159,10 +159,9 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 			}
 
 			IBaseResource payload = theMsg.getNewPayload(myFhirContext);
-			CanonicalSubscription subscription = nextActiveSubscription.getSubscription();
 
 			EncodingEnum encoding = null;
-			if (subscription.getPayloadString() != null && !subscription.getPayloadString().isEmpty()) {
+			if (subscription != null && subscription.getPayloadString() != null && !subscription.getPayloadString().isEmpty()) {
 				encoding = EncodingEnum.forContentType(subscription.getPayloadString());
 			}
 			encoding = defaultIfNull(encoding, EncodingEnum.JSON);

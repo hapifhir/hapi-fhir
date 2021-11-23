@@ -21,10 +21,13 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.rest.api.Constants;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +52,8 @@ public class SubscriptionRegisteringSubscriber extends BaseSubscriberForSubscrip
 	private SubscriptionRegistry mySubscriptionRegistry;
 	@Autowired
 	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
+	@Autowired
+	private PartitionSettings myPartitionSettings;
 
 	/**
 	 * Constructor
@@ -68,6 +73,15 @@ public class SubscriptionRegisteringSubscriber extends BaseSubscriberForSubscrip
 
 		if (!isSubscription(payload)) {
 			return;
+		}
+
+		if (myPartitionSettings.isPartitioningEnabled()) {
+			RequestPartitionId partitionId = payload.getPartitionId();
+			if (partitionId != null && partitionId.hasPartitionIds()) {
+				payload.getNewPayload(myFhirContext).setUserData(Constants.RESOURCE_PARTITION_ID, partitionId);
+			} else {
+				payload.getNewPayload(myFhirContext).setUserData(Constants.RESOURCE_PARTITION_ID, null);
+			}
 		}
 
 		switch (payload.getOperationType()) {
