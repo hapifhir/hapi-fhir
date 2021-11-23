@@ -22,7 +22,6 @@ public class MdmMessageKeySvc implements ISubscriptionMessageKeySvc {
 		if (eidList.isEmpty()) {
 			return null;
 		}
-		// FIXME document we use the first one for the key
 		return eidList.get(0).getValue();
 	}
 }
