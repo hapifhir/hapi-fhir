@@ -102,11 +102,12 @@ public class ExecuteRawSqlTaskTest extends BaseTest {
 		getMigrator().addTasks(tasks.getTasks(VersionEnum.V0_1, VersionEnum.V4_0_0));
 		getMigrator().migrate();
 
-		List<Map<String, Object>> output = executeQuery("SELECT PID FROM SOMETABLE");
+		List<Map<String, Object>> output = executeQuery("SELECT PID,TEXTCOL FROM SOMETABLE");
 		//Then
 		if (theTestDatabaseDetails.get().getDriverType() == DriverTypeEnum.H2_EMBEDDED) {
 			assertEquals(1, output.size());
 			assertEquals(123L, output.get(0).get("PID"));
+			assertEquals("abc", output.get(0).get("TEXTCOL"));
 		} else if (theTestDatabaseDetails.get().getDriverType() == DriverTypeEnum.DERBY_EMBEDDED) {
 			assertEquals(1, output.size());
 			assertEquals(456L, output.get(0).get("PID"));
