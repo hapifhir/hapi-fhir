@@ -47,6 +47,7 @@ import org.intellij.lang.annotations.Language;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -93,6 +94,16 @@ public class Builder {
 
 	public Builder executeRawSql(String theVersion, DriverTypeEnum theDriver, @Language("SQL") String theSql) {
 		mySink.addTask(new ExecuteRawSqlTask(myRelease, theVersion).addSql(theDriver, theSql));
+		return this;
+	}
+
+	public Builder executeRawSql(String theVersion, Map<DriverTypeEnum, String> theDriverToSql) {
+		ExecuteRawSqlTask executeRawSqlTask = new ExecuteRawSqlTask(myRelease, theVersion);
+		theDriverToSql.entrySet().stream()
+				.forEach(entry -> {
+					executeRawSqlTask.addSql(entry.getKey(), entry.getValue());
+				});
+		mySink.addTask(executeRawSqlTask);
 		return this;
 	}
 
