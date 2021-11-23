@@ -97,6 +97,14 @@ public class Builder {
 		return this;
 	}
 
+	/**
+	 * Builder method to define a raw SQL execution migration that needs to take place against multiple database types,
+	 * and the SQL they need to use is not equal. Provide a map of driver types to SQL statements.
+	 *
+	 * @param theVersion The version of the migration.
+	 * @param theDriverToSql Map of driver types to SQL statements.
+	 * @return
+	 */
 	public Builder executeRawSql(String theVersion, Map<DriverTypeEnum, String> theDriverToSql) {
 		ExecuteRawSqlTask executeRawSqlTask = new ExecuteRawSqlTask(myRelease, theVersion);
 		theDriverToSql.entrySet().stream()
