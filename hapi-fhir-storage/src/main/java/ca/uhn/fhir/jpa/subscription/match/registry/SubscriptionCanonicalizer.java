@@ -22,12 +22,10 @@ package ca.uhn.fhir.jpa.subscription.match.registry;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.interceptor.model.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.model.dstu2.resource.Subscription;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.HapiExtensions;
@@ -68,11 +66,13 @@ public class SubscriptionCanonicalizer {
 			case DSTU2:
 				return canonicalizeDstu2(theSubscription);
 			case DSTU3:
-				return canonicalizeDstu3((IAnyResource) theSubscription);
+				// FIXME for these three change parameter to IAnyResource and then get the partitionId from
+				// resource.getUserData(Constants.RESOURCE_PARTITION_ID)
+				return canonicalizeDstu3((IAnyResource)theSubscription);
 			case R4:
-				return canonicalizeR4((IAnyResource) theSubscription);
+				return canonicalizeR4((IAnyResource)theSubscription);
 			case R5:
-				return canonicalizeR5((IAnyResource) theSubscription);
+				return canonicalizeR5((IAnyResource)theSubscription);
 			case DSTU2_HL7ORG:
 			case DSTU2_1:
 			default:
@@ -116,7 +116,6 @@ public class SubscriptionCanonicalizer {
 			retVal.setIdElement(subscription.getIdElement());
 			retVal.setPayloadString(subscription.getChannel().getPayload());
 			retVal.setPayloadSearchCriteria(getExtensionString(subscription, HapiExtensions.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA));
-			retVal.setMyPartitionId((PartitionablePartitionId) theSubscription.getUserData(Constants.RESOURCE_PARTITION_ID));
 
 			if (retVal.getChannelType() == CanonicalSubscriptionChannelType.EMAIL) {
 				String from;
@@ -216,7 +215,6 @@ public class SubscriptionCanonicalizer {
 		retVal.setIdElement(subscription.getIdElement());
 		retVal.setPayloadString(subscription.getChannel().getPayload());
 		retVal.setPayloadSearchCriteria(getExtensionString(subscription, HapiExtensions.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA));
-		retVal.setMyPartitionId((PartitionablePartitionId) theSubscription.getUserData(Constants.RESOURCE_PARTITION_ID));
 
 		if (retVal.getChannelType() == CanonicalSubscriptionChannelType.EMAIL) {
 			String from;
@@ -271,7 +269,6 @@ public class SubscriptionCanonicalizer {
 		retVal.setIdElement(subscription.getIdElement());
 		retVal.setPayloadString(subscription.getContentType());
 		retVal.setPayloadSearchCriteria(getExtensionString(subscription, HapiExtensions.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA));
-		retVal.setMyPartitionId((PartitionablePartitionId) theSubscription.getUserData(Constants.RESOURCE_PARTITION_ID));
 
 		if (retVal.getChannelType() == CanonicalSubscriptionChannelType.EMAIL) {
 			String from;
