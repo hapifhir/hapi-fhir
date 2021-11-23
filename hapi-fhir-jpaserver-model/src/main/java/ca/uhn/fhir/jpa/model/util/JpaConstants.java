@@ -90,6 +90,13 @@ public class JpaConstants {
 	 */
 	public static final String OPERATION_EXPAND = "$expand";
 	/**
+	 * Operation name for the $find-matches operation
+	 */
+	public static final String OPERATION_FIND_MATCHES = "$find-matches";
+	/**
+	 * Operation name for the $get-resource-counts operation
+	 */
+	/**
 	 * Operation name for the $validate-code operation
 	 */
 	public static final String OPERATION_VALIDATE_CODE = "$validate-code";
