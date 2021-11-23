@@ -1,13 +1,19 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
+import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseJpaResourceProviderValueSetDstu2;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
@@ -17,6 +23,8 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -42,6 +50,13 @@ import java.util.List;
  */
 
 public class BaseJpaResourceProviderCodeSystemR4 extends JpaResourceProviderR4<CodeSystem> {
+
+	@Autowired
+	@Qualifier(BaseConfig.JPA_VALIDATION_SUPPORT_CHAIN)
+	private ValidationSupportChain myValidationSupportChain;
+
+	@Autowired
+	protected ITermReadSvcR4 myTermSvc;
 
 	/**
 	 * $lookup operation
@@ -133,11 +148,35 @@ public class BaseJpaResourceProviderCodeSystemR4 extends JpaResourceProviderR4<C
 		RequestDetails theRequestDetails
 	) {
 
+		IValidationSupport.CodeValidationResult result = null;
 		startRequest(theServletRequest);
 		try {
-			IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> dao = (IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept>) getDao();
-				
-			IValidationSupport.CodeValidationResult result = dao.validateCode(theId, theCodeSystemUrl, theVersion, theCode, theDisplay, theCoding, theCodeableConcept, theRequestDetails);
+			// If a Remote Terminology Server has been configured, use it
+			if (myValidationSupportChain.isRemoteTerminologyServiceConfigured()) {
+				String codeSystemUrl = (theCodeSystemUrl != null && theCodeSystemUrl.hasValue()) ?
+					theCodeSystemUrl.asStringValue() : null;
+				String code = (theCode != null && theCode.hasValue()) ? theCode.asStringValue() : null;
+				String display = (theDisplay != null && theDisplay.hasValue()) ? theDisplay.asStringValue() : null;
+
+				if (theCoding != null) {
+					if (theCoding.hasSystem()) {
+						if (codeSystemUrl != null && !codeSystemUrl.equalsIgnoreCase(theCoding.getSystem())) {
+							throw new InvalidRequestException("Coding.system '" + theCoding.getSystem() + "' does not equal param url '" + theCodeSystemUrl + "'. Unable to validate-code.");
+						}
+						codeSystemUrl = theCoding.getSystem();
+						code = theCoding.getCode();
+						display = theCoding.getDisplay();
+
+						result = myValidationSupportChain.validateCode(
+							new ValidationSupportContext(myValidationSupportChain), new ConceptValidationOptions(),
+							codeSystemUrl, code, display, null);
+					}
+				}
+			} else {
+				// Otherwise, use the local DAO layer to validate the code
+				IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> dao = (IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept>) getDao();
+				result = dao.validateCode(theId, theCodeSystemUrl, theVersion, theCode, theDisplay, theCoding, theCodeableConcept, theRequestDetails);
+			}
 			return (Parameters) BaseJpaResourceProviderValueSetDstu2.toValidateCodeResult(getContext(), result);
 		} finally {
 			endRequest(theServletRequest);
