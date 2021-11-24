@@ -277,14 +277,7 @@ public class LegacySearchBuilder implements ISearchBuilder {
 		 */
 		if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT) || myParams.isLastN()) {
 			if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT)) {
-				if (myFulltextSearchSvc == null || myFulltextSearchSvc.isDisabled()) {
-					if (myParams.containsKey(Constants.PARAM_TEXT)) {
-						throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
-					} else if (myParams.containsKey(Constants.PARAM_CONTENT)) {
-						throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
-					}
-				}
-
+				validateFullTextIsEnabledOrThrowException();
 				if (myParams.getEverythingMode() != null) {
 					pids = myFulltextSearchSvc.everything(myResourceName, myParams, theRequest);
 				} else {
@@ -329,6 +322,18 @@ public class LegacySearchBuilder implements ISearchBuilder {
 		}
 
 		return myQueries;
+	}
+
+	private void validateFullTextIsEnabledOrThrowException() {
+		if (myFulltextSearchSvc == null || myFulltextSearchSvc.isDisabled()) {
+			if (myParams.containsKey(Constants.PARAM_TEXT)) {
+				throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
+			} else if (myParams.containsKey(Constants.PARAM_CONTENT)) {
+				throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
+			} else if (myParams.getEverythingMode() != null) {
+				throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process $everything");
+			}
+		}
 	}
 
 	private void doCreateChunkedQueries(List<Long> thePids, SortSpec sort, Integer theOffset, boolean theCount, RequestDetails theRequest, ArrayList<TypedQuery<Long>> theQueries) {

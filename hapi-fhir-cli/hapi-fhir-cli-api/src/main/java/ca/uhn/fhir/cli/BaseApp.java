@@ -221,7 +221,7 @@ public abstract class BaseApp {
 			return;
 		}
 
-		BaseCommand command = parseCommand(theArgs)
+		BaseCommand command = parseCommand(theArgs);
 
 		myShutdownHook = new MyShutdownHook(command);
 		Runtime.getRuntime().addShutdownHook(myShutdownHook);
