@@ -759,10 +759,10 @@ public class SearchBuilder implements ISearchBuilder {
 			IBaseResource resource = null;
 			if (next != null) {
 				resource = myCallingDao.toResource(resourceType, next, tagMap.get(next.getId()), theForHistoryOperation);
-			}
-			if (resource == null) {
-				ourLog.warn("Unable to find resource {}/{}/_history/{} in database", next.getResourceType(), next.getIdDt().getIdPart(), next.getVersion());
-				continue;
+				if (resource == null) {
+					ourLog.warn("Unable to find resource {}/{}/_history/{} in database", next.getResourceType(), next.getIdDt().getIdPart(), next.getVersion());
+					continue;
+				}
 			}
 
 			Integer index = thePosition.get(resourceId);
