@@ -88,8 +88,9 @@ public class MemberMatcherR4Helper {
 
 	private List<IBaseResource> findCoverageByCoverageIdentifier(Coverage theCoverageToMatch) {
 		TokenOrListParam identifierParam = new TokenOrListParam();
-		theCoverageToMatch.getIdentifier().stream().forEach(identifier ->
-			identifierParam.add(identifier.getSystem(), identifier.getValue()) );
+		for (Identifier identifier : theCoverageToMatch.getIdentifier()) {
+			identifierParam.add(identifier.getSystem(), identifier.getValue());
+		}
 
 		SearchParameterMap paramMap = new SearchParameterMap()
 			.add("identifier", identifierParam);
@@ -153,8 +154,12 @@ public class MemberMatcherR4Helper {
 		}
 
 		Reference beneficiaryRef = theCoverage.getBeneficiary();
-		if (beneficiaryRef.getResource() != null && beneficiaryRef.getType().equals("Patient")) {
+		if (beneficiaryRef.getResource() != null) {
 			return Optional.of((Patient) beneficiaryRef.getResource());
+		}
+
+		if (beneficiaryRef.getReference() == null) {
+			return Optional.empty();
 		}
 
 		Patient beneficiary = myPatientDao.read(new IdDt(beneficiaryRef.getReference()));
