@@ -1,0 +1,5 @@
+---
+type: add
+issue: 3158
+title: "Add the concept of `messageKey` to the BaseResourceMessage class. This is to support brokers which permit key-based
+partitioning."

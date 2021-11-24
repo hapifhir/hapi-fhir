@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -169,6 +170,17 @@ public class ValidationSupportChain implements IValidationSupport {
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public boolean isRemoteTerminologyServiceConfigured() {
+		if (myChain != null) {
+			Optional<IValidationSupport> remoteTerminologyService = myChain.stream().filter(RemoteTerminologyServiceValidationSupport.class::isInstance).findFirst();
+			if (remoteTerminologyService.isPresent()) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override
