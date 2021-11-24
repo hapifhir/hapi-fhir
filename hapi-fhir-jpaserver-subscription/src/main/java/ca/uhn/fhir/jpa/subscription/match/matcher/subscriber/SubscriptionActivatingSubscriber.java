@@ -20,9 +20,11 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionConstants;
@@ -115,19 +117,22 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscript
 	@SuppressWarnings("unchecked")
 	private boolean activateSubscription(final IBaseResource theSubscription) {
 		IFhirResourceDao subscriptionDao = myDaoRegistry.getSubscriptionDao();
-		IBaseResource subscription = subscriptionDao.read(theSubscription.getIdElement());
+		SystemRequestDetails srd = new SystemRequestDetails();
+		srd.setRequestPartitionId(RequestPartitionId.allPartitions());
+
+		IBaseResource subscription = subscriptionDao.read(theSubscription.getIdElement(), srd);
 		subscription.setId(subscription.getIdElement().toVersionless());
 
 		ourLog.info("Activating subscription {} from status {} to {}", subscription.getIdElement().toUnqualified().getValue(), SubscriptionConstants.REQUESTED_STATUS, SubscriptionConstants.ACTIVE_STATUS);
 		try {
 			SubscriptionUtil.setStatus(myFhirContext, subscription, SubscriptionConstants.ACTIVE_STATUS);
-			subscriptionDao.update(subscription);
+			subscriptionDao.update(subscription, srd);
 			return true;
 		} catch (final UnprocessableEntityException e) {
 			ourLog.info("Changing status of {} to ERROR", subscription.getIdElement());
 			SubscriptionUtil.setStatus(myFhirContext, subscription, "error");
 			SubscriptionUtil.setReason(myFhirContext, subscription, e.getMessage());
-			subscriptionDao.update(subscription);
+			subscriptionDao.update(subscription, srd);
 			return false;
 		}
 	}

@@ -75,7 +75,6 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 		myNonPartitionableResourceNames = new HashSet<>();
 
 		// Infrastructure
-		myNonPartitionableResourceNames.add("Subscription");
 		myNonPartitionableResourceNames.add("SearchParameter");
 
 		// Validation and Conformance

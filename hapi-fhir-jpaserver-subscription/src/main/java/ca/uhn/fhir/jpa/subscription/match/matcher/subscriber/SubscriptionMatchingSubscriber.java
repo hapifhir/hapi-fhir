@@ -169,6 +169,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 			encoding = defaultIfNull(encoding, EncodingEnum.JSON);
 
 			ResourceDeliveryMessage deliveryMsg = new ResourceDeliveryMessage();
+			deliveryMsg.setPartitionId(theMsg.getPartitionId());
 
 			deliveryMsg.setPayload(myFhirContext, payload, encoding);
 			deliveryMsg.setSubscription(subscription);
