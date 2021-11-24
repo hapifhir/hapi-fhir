@@ -16,10 +16,13 @@ import java.util.HashMap;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CanonicalSubscriptionTest {
 
+	private static final String TAG_SYSTEM = "https://hapifhir.org/NamingSystem/managing-mdm-system";
+	private static final String TAG_VALUE = "HAPI-MDM";
 	@Test
 	public void testGetChannelExtension() throws IOException {
 
@@ -55,6 +58,14 @@ public class CanonicalSubscriptionTest {
 	}
 
 	@Test
+	public void testCanonicalSubscriptionRetainsMetaTags() throws IOException {
+		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4());
+		CanonicalSubscription sub1 = canonicalizer.canonicalize(makeMdmSubscription());
+		assertTrue(sub1.getTags().keySet().contains(TAG_SYSTEM));
+		assertEquals(sub1.getTags().get(TAG_SYSTEM), TAG_VALUE);
+   }
+
+	@Test
 	public void emailDetailsEquals() {
 		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4());
 		CanonicalSubscription sub1 = canonicalizer.canonicalize(makeEmailSubscription());
@@ -67,6 +78,14 @@ public class CanonicalSubscriptionTest {
 		Subscription.SubscriptionChannelComponent channel = new Subscription.SubscriptionChannelComponent();
 		channel.setType(Subscription.SubscriptionChannelType.EMAIL);
 		retVal.setChannel(channel);
+		return retVal;
+	}
+	private Subscription makeMdmSubscription() {
+		Subscription retVal = new Subscription();
+		Subscription.SubscriptionChannelComponent channel = new Subscription.SubscriptionChannelComponent();
+		channel.setType(Subscription.SubscriptionChannelType.MESSAGE);
+		retVal.setChannel(channel);
+		retVal.getMeta().addTag("https://hapifhir.org/NamingSystem/managing-mdm-system", "HAPI-MDM", "managed by hapi mdm");
 		return retVal;
 	}
 

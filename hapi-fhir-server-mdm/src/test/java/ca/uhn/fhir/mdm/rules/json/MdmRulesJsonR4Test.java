@@ -11,9 +11,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -72,4 +76,32 @@ public class MdmRulesJsonR4Test extends BaseMdmRulesR4Test {
 			assertEquals("There is no matchField with name bad", e.getMessage());
 		}
 	}
+
+	@Test
+	public void testInvalidResourceTypeDoesntDeserialize() throws IOException {
+		myRules = buildOldStyleEidRules();
+
+		String eidSystem = myRules.getEnterpriseEIDSystemForResourceType("Patient");
+		assertThat(eidSystem, is(equalTo(PATIENT_EID_FOR_TEST)));
+
+		eidSystem = myRules.getEnterpriseEIDSystemForResourceType("Practitioner");
+		assertThat(eidSystem, is(equalTo(PATIENT_EID_FOR_TEST)));
+
+		eidSystem = myRules.getEnterpriseEIDSystemForResourceType("Medication");
+		assertThat(eidSystem, is(equalTo(PATIENT_EID_FOR_TEST)));
+	}
+
+	@Override
+	protected MdmRulesJson buildActiveBirthdateIdRules() {
+		return super.buildActiveBirthdateIdRules();
+	}
+
+	private MdmRulesJson buildOldStyleEidRules() {
+		MdmRulesJson mdmRulesJson = super.buildActiveBirthdateIdRules();
+		mdmRulesJson.setEnterpriseEIDSystems(Collections.emptyMap());
+		//This sets the new-style eid resource type to `*`
+		mdmRulesJson.setEnterpriseEIDSystem(PATIENT_EID_FOR_TEST);
+		return mdmRulesJson;
+	}
+
 }
