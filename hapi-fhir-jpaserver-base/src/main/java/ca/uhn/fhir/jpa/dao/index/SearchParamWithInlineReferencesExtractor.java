@@ -227,7 +227,7 @@ public class SearchParamWithInlineReferencesExtractor {
 					}
 				}
 			}
-			
+
 			if (linksForCompositePart != null) {
 				for (ResourceLink nextLink : linksForCompositePart) {
 					if (linksForCompositePartWantPaths.contains(nextLink.getSourcePath())) {
