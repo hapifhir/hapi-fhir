@@ -163,7 +163,7 @@ public abstract class BaseReverseCronologicalBatchPidReader implements ItemReade
 	@Override
 	public void open(ExecutionContext executionContext) throws ItemStreamException {
 		if (executionContext.containsKey(BatchConstants.CURRENT_URL_INDEX)) {
-			myUrlIndex = new Long(executionContext.getLong(BatchConstants.CURRENT_URL_INDEX)).intValue();
+			myUrlIndex = (int) executionContext.getLong(BatchConstants.CURRENT_URL_INDEX);
 		}
 		for (int index = 0; index < myPartitionedUrls.size(); ++index) {
 			String key = highKey(index);
