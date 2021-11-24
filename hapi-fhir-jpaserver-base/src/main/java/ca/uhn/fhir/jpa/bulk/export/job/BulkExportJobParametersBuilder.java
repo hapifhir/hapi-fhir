@@ -20,10 +20,14 @@ package ca.uhn.fhir.jpa.bulk.export.job;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.batch.reader.ReverseCronologicalBatchResourcePidReader;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.rest.api.Constants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobParametersBuilder;
 
+import javax.xml.transform.SourceLocator;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -34,6 +38,7 @@ import java.util.stream.Collectors;
  *
  */
 public class BulkExportJobParametersBuilder extends JobParametersBuilder {
+	private static final Logger ourLog = LoggerFactory.getLogger(BulkExportJobParametersBuilder.class);
 
 	public BulkExportJobParametersBuilder setResourceTypes(List<String> resourceTypes) {
 		String resourceTypesString = resourceTypes.stream().collect(Collectors.joining(","));
@@ -48,8 +53,10 @@ public class BulkExportJobParametersBuilder extends JobParametersBuilder {
 
 	public BulkExportJobParametersBuilder setOutputFormat(String theOutputFormat) {
 		//TODO eventually we will support more types.
-		theOutputFormat = Constants.CT_FHIR_NDJSON;
-		this.addString("outputFormat", theOutputFormat);
+		if (!Constants.CT_FHIR_NDJSON.equalsIgnoreCase(theOutputFormat)) {
+			ourLog.warn(String.format("Attempted to set the output format of bulk export job to %s, but since currently only %s is supported, we are setting it to that instead.", theOutputFormat, Constants.CT_FHIR_NDJSON));
+		}
+		this.addString("outputFormat", Constants.CT_FHIR_NDJSON);
 		return this;
 	}
 
