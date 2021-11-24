@@ -196,37 +196,14 @@ public class SearchParamWithInlineReferencesExtractor {
 		for (RuntimeSearchParam nextCompositeOf : compositeComponents) {
 			Collection<? extends BaseResourceIndexedSearchParam> paramsListForCompositePart = findParameterIndexes(theParams, nextCompositeOf);
 
+			Collection<String> linksForCompositePartWantPaths = null;
 			Collection<ResourceLink> linksForCompositePart = null;
 			switch (nextCompositeOf.getParamType()) {
 				case REFERENCE:
 					linksForCompositePart = theParams.myLinks;
-					break;
-				case NUMBER:
-				case DATE:
-				case STRING:
-				case TOKEN:
-				case QUANTITY:
-				case URI:
-				case SPECIAL:
-				case COMPOSITE:
-				case HAS:
-					break;
-			}
-
-			Collection<String> linksForCompositePartWantPaths = null;
-			switch (nextCompositeOf.getParamType()) {
-				case REFERENCE:
 					linksForCompositePartWantPaths = new HashSet<>(nextCompositeOf.getPathsSplit());
 					break;
-				case NUMBER:
-				case DATE:
-				case STRING:
-				case TOKEN:
-				case QUANTITY:
-				case URI:
-				case SPECIAL:
-				case COMPOSITE:
-				case HAS:
+				default:
 					break;
 			}
 
@@ -250,6 +227,7 @@ public class SearchParamWithInlineReferencesExtractor {
 					}
 				}
 			}
+			
 			if (linksForCompositePart != null) {
 				for (ResourceLink nextLink : linksForCompositePart) {
 					if (linksForCompositePartWantPaths.contains(nextLink.getSourcePath())) {
