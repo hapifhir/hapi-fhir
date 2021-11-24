@@ -663,7 +663,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 				ourLog.info(msg);
 				retVal.getMessage().add(msg);
 				Optional<NpmPackageEntity> pkgEntity = myPackageDao.findByPackageId(thePackageId);
-				myPackageDao.delete(pkgEntity.get());
+				pkgEntity.ifPresent(npmPackageEntity -> myPackageDao.delete(npmPackageEntity));
 			} else {
 
 				List<NpmPackageVersionEntity> versions = remainingVersions
