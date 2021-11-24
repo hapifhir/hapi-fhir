@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.subscription.match.registry;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.interceptor.model.PartitionablePartitionId;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
@@ -68,11 +68,11 @@ public class SubscriptionCanonicalizer {
 			case DSTU2:
 				return canonicalizeDstu2(theSubscription);
 			case DSTU3:
-				return canonicalizeDstu3((IAnyResource) theSubscription);
+				return canonicalizeDstu3(theSubscription);
 			case R4:
-				return canonicalizeR4((IAnyResource) theSubscription);
+				return canonicalizeR4(theSubscription);
 			case R5:
-				return canonicalizeR5((IAnyResource) theSubscription);
+				return canonicalizeR5(theSubscription);
 			case DSTU2_HL7ORG:
 			case DSTU2_1:
 			default:
@@ -108,6 +108,10 @@ public class SubscriptionCanonicalizer {
 			if (status != null) {
 				retVal.setStatus(org.hl7.fhir.r4.model.Subscription.SubscriptionStatus.fromCode(status.toCode()));
 			}
+			RequestPartitionId requestPartitionId = (RequestPartitionId) theSubscription.getUserData(Constants.RESOURCE_PARTITION_ID);
+			if (requestPartitionId != null) {
+				retVal.setPartitionId(requestPartitionId.getFirstPartitionIdOrNull());
+			}
 			retVal.setChannelType(getChannelType(theSubscription));
 			retVal.setCriteriaString(subscription.getCriteria());
 			retVal.setEndpointUrl(subscription.getChannel().getEndpoint());
@@ -116,7 +120,6 @@ public class SubscriptionCanonicalizer {
 			retVal.setIdElement(subscription.getIdElement());
 			retVal.setPayloadString(subscription.getChannel().getPayload());
 			retVal.setPayloadSearchCriteria(getExtensionString(subscription, HapiExtensions.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA));
-			retVal.setMyPartitionId((PartitionablePartitionId) theSubscription.getUserData(Constants.RESOURCE_PARTITION_ID));
 
 			if (retVal.getChannelType() == CanonicalSubscriptionChannelType.EMAIL) {
 				String from;
@@ -216,7 +219,10 @@ public class SubscriptionCanonicalizer {
 		retVal.setIdElement(subscription.getIdElement());
 		retVal.setPayloadString(subscription.getChannel().getPayload());
 		retVal.setPayloadSearchCriteria(getExtensionString(subscription, HapiExtensions.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA));
-		retVal.setMyPartitionId((PartitionablePartitionId) theSubscription.getUserData(Constants.RESOURCE_PARTITION_ID));
+		RequestPartitionId requestPartitionId = (RequestPartitionId) theSubscription.getUserData(Constants.RESOURCE_PARTITION_ID);
+		if (requestPartitionId != null) {
+			retVal.setPartitionId(requestPartitionId.getFirstPartitionIdOrNull());
+		}
 
 		if (retVal.getChannelType() == CanonicalSubscriptionChannelType.EMAIL) {
 			String from;
@@ -263,6 +269,10 @@ public class SubscriptionCanonicalizer {
 		if (status != null) {
 			retVal.setStatus(org.hl7.fhir.r4.model.Subscription.SubscriptionStatus.fromCode(status.toCode()));
 		}
+		RequestPartitionId requestPartitionId = (RequestPartitionId) theSubscription.getUserData(Constants.RESOURCE_PARTITION_ID);
+		if (requestPartitionId != null) {
+			retVal.setPartitionId(requestPartitionId.getFirstPartitionIdOrNull());
+		}
 		retVal.setChannelType(getChannelType(subscription));
 		retVal.setCriteriaString(getCriteria(theSubscription));
 		retVal.setEndpointUrl(subscription.getEndpoint());
@@ -271,7 +281,6 @@ public class SubscriptionCanonicalizer {
 		retVal.setIdElement(subscription.getIdElement());
 		retVal.setPayloadString(subscription.getContentType());
 		retVal.setPayloadSearchCriteria(getExtensionString(subscription, HapiExtensions.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA));
-		retVal.setMyPartitionId((PartitionablePartitionId) theSubscription.getUserData(Constants.RESOURCE_PARTITION_ID));
 
 		if (retVal.getChannelType() == CanonicalSubscriptionChannelType.EMAIL) {
 			String from;

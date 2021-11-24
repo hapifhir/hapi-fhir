@@ -64,16 +64,15 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 
 	@Test
 	public void testRestHookSubscription_NoResourceTypeInPayloadId() throws Exception {
+		Observation observation = new Observation();
+		observation.setId("OBS");
+		observation.setStatus(Observation.ObservationStatus.CORRECTED);
+
 		sendSubscription("Observation?", "application/fhir+xml", ourListenerServerBase);
 
 		assertEquals(1, mySubscriptionRegistry.size());
 		ourObservationListener.setExpectedCount(1);
-
-		Observation observation = new Observation();
-		observation.setId("OBS");
-		observation.setStatus(Observation.ObservationStatus.CORRECTED);
 		sendResource(observation);
-
 		ourObservationListener.awaitExpected();
 
 		assertEquals(1, ourContentTypes.size());
@@ -128,6 +127,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 
 	@Test
 	public void testSubscriptionAndResourceOnTheSamePartition() throws InterruptedException {
+		myPartitionSettings.setPartitioningEnabled(true);
 		String payload = "application/fhir+json";
 
 		String code = "1000000050";
@@ -143,6 +143,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 
 	@Test
 	public void testSubscriptionAndResourceOnTheSamePartitionPart2() throws InterruptedException {
+		myPartitionSettings.setPartitioningEnabled(true);
 		String payload = "application/fhir+json";
 
 		String code = "1000000050";
@@ -158,6 +159,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 
 	@Test
 	public void testSubscriptionAndResourceOnDiffPartition() throws InterruptedException {
+		myPartitionSettings.setPartitioningEnabled(true);
 		String payload = "application/fhir+json";
 
 		String code = "1000000050";
@@ -172,6 +174,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 
 	@Test
 	public void testSubscriptionAndResourceOnDiffPartitionPart2() throws InterruptedException {
+		myPartitionSettings.setPartitioningEnabled(true);
 		String payload = "application/fhir+json";
 
 		String code = "1000000050";
@@ -186,6 +189,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 
 	@Test
 	public void testSubscriptionOnOnePartitionMatchResourceOnMultiplePartitions() throws InterruptedException {
+		myPartitionSettings.setPartitioningEnabled(true);
 		String payload = "application/fhir+json";
 
 		String code = "1000000050";
@@ -201,6 +205,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 
 	@Test
 	public void testSubscriptionOnOnePartitionDoNotMatchResourceOnMultiplePartitions() throws InterruptedException {
+		myPartitionSettings.setPartitioningEnabled(true);
 		String payload = "application/fhir+json";
 
 		String code = "1000000050";

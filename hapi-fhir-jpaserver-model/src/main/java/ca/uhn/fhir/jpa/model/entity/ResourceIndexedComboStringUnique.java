@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
-import ca.uhn.fhir.interceptor.model.PartitionablePartitionId;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;

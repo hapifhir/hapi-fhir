@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.model.entity;
  */
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.interceptor.model.PartitionablePartitionId;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 

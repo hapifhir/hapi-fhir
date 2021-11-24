@@ -5,6 +5,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.ISubscriptionDeliveryChannelNamer;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
@@ -83,6 +84,8 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 	private SubscriptionLoader mySubscriptionLoader;
 	@Autowired
 	private ISubscriptionDeliveryChannelNamer mySubscriptionDeliveryChannelNamer;
+	@Autowired
+	protected PartitionSettings myPartitionSettings;
 
 	protected String myCode = "1000000050";
 
@@ -122,6 +125,7 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 
 	@AfterEach
 	public void cleanup() {
+		myPartitionSettings.setPartitioningEnabled(false);
 		myInterceptorRegistry.unregisterAllInterceptors();
 		mySubscriptionMatchingPost.clear();
 		mySubscriptionActivatedPost.clear();

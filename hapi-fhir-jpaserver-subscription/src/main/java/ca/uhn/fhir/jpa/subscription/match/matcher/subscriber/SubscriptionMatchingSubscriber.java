@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.interceptor.model.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.ISubscriptionMatcher;
@@ -125,9 +124,9 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 
 		for (ActiveSubscription nextActiveSubscription : subscriptions) {
 			// skip if the partitions don't match
-			PartitionablePartitionId subscriptionPartitionId = nextActiveSubscription.getSubscription().getMyPartitionId();
-			if (subscriptionPartitionId != null && subscriptionPartitionId.getPartitionId() != null && theMsg.getPartitionId() != null
-				&& !theMsg.getPartitionId().hasPartitionId(subscriptionPartitionId.getPartitionId())) {
+			CanonicalSubscription subscription = nextActiveSubscription.getSubscription();
+			if (subscription != null && subscription.getPartitionId() != null && theMsg.getPartitionId() != null
+				&& !theMsg.getPartitionId().hasPartitionId(subscription.getPartitionId())) {
 				continue;
 			}
 			String nextSubscriptionId = getId(nextActiveSubscription);
@@ -160,10 +159,9 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 			}
 
 			IBaseResource payload = theMsg.getNewPayload(myFhirContext);
-			CanonicalSubscription subscription = nextActiveSubscription.getSubscription();
 
 			EncodingEnum encoding = null;
-			if (subscription.getPayloadString() != null && !subscription.getPayloadString().isEmpty()) {
+			if (subscription != null && subscription.getPayloadString() != null && !subscription.getPayloadString().isEmpty()) {
 				encoding = EncodingEnum.forContentType(subscription.getPayloadString());
 			}
 			encoding = defaultIfNull(encoding, EncodingEnum.JSON);
