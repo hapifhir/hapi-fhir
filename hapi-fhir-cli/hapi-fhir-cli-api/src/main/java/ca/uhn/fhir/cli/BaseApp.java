@@ -221,9 +221,7 @@ public abstract class BaseApp {
 			return;
 		}
 
-		Optional<BaseCommand> commandOpt = parseCommand(theArgs);
-
-		BaseCommand command = commandOpt.get();
+		BaseCommand command = parseCommand(theArgs)
 
 		myShutdownHook = new MyShutdownHook(command);
 		Runtime.getRuntime().addShutdownHook(myShutdownHook);
@@ -280,7 +278,7 @@ public abstract class BaseApp {
 
 	}
 
-	private Optional<BaseCommand> parseCommand(String[] theArgs) {
+	private BaseCommand parseCommand(String[] theArgs) {
 		Optional<BaseCommand> commandOpt = getNextCommand(theArgs, 0);
 
 		if (!commandOpt.isPresent()) {
@@ -290,7 +288,7 @@ public abstract class BaseApp {
 			logUsage();
 			exitDueToProblem(message);
 		}
-		return commandOpt;
+		return commandOpt.get();
 	}
 
 	private Optional<BaseCommand> getNextCommand(String[] theArgs, int thePosition) {
