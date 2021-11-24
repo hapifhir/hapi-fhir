@@ -23,7 +23,6 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
@@ -206,28 +205,23 @@ public class BaseJpaResourceProviderPatientR4 extends JpaResourceProviderR4<Pati
 		}
 		Coverage coverage = coverageOpt.get();
 
-		Identifier patientIdentifier  = getCoveragePatientIdentifier(coverage);
-		myMemberMatcherR4Helper.addMemberIdentifierToMemberPatient(theMemberPatient, patientIdentifier);
-
-		return myMemberMatcherR4Helper.buildSuccessReturnParameters(theMemberPatient, theCoverageToLink);
-	}
-
-
-	private Identifier getCoveragePatientIdentifier(Coverage theCoverage) {
-		if (theCoverage.getBeneficiary() == null || theCoverage.getBeneficiary().getReference() == null) {
+		Optional<Patient> patientOpt = myMemberMatcherR4Helper.getBeneficiaryPatient(coverage);
+		if (! patientOpt.isPresent()) {
 			String i18nMessage = getContext().getLocalizer().getMessage(
 				"operation.member.match.error.beneficiary.not.found");
 			throw new UnprocessableEntityException(i18nMessage);
 		}
+		Patient patient = patientOpt.get();
 
-		Patient patient = (Patient) theCoverage.getBeneficiary().getResource();
 		if (patient.getIdentifier().isEmpty()) {
 			String i18nMessage = getContext().getLocalizer().getMessage(
 				"operation.member.match.error.beneficiary.without.identifier");
 			throw new UnprocessableEntityException(i18nMessage);
 		}
 
-		return patient.getIdentifierFirstRep();
+		myMemberMatcherR4Helper.addMemberIdentifierToMemberPatient(theMemberPatient, patient.getIdentifierFirstRep());
+
+		return myMemberMatcherR4Helper.buildSuccessReturnParameters(theMemberPatient, theCoverageToLink);
 	}
 
 

@@ -189,7 +189,7 @@ public class ProviderConstants {
 	/**
 	 * Operation name for the $member-match operation
 	 */
-	public static final String OPERATION_MEMBER_MATCH = "member-match";
+	public static final String OPERATION_MEMBER_MATCH = "$member-match";
 
 	@Deprecated
 	public static final String MARK_ALL_RESOURCES_FOR_REINDEXING = "$mark-all-resources-for-reindexing";

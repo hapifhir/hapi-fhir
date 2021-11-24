@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.util.ParametersUtil;
@@ -15,6 +16,7 @@ import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -54,6 +56,9 @@ public class MemberMatcherR4Helper {
 
 	@Autowired
 	private IFhirResourceDao<Coverage> myCoverageDao;
+
+	@Autowired
+	private IFhirResourceDao<Patient> myPatientDao;
 
 
 	public MemberMatcherR4Helper(FhirContext theContext) {
@@ -137,6 +142,22 @@ public class MemberMatcherR4Helper {
 	}
 
 
+	public Optional<Patient> getBeneficiaryPatient(Coverage theCoverage) {
+		if (theCoverage.getBeneficiaryTarget() == null && theCoverage.getBeneficiary() == null) {
+			return Optional.empty();
+		}
 
+		if (theCoverage.getBeneficiaryTarget() != null
+				&& ! theCoverage.getBeneficiaryTarget().getIdentifier().isEmpty()) {
+			return Optional.of(theCoverage.getBeneficiaryTarget());
+		}
 
+		Reference beneficiaryRef = theCoverage.getBeneficiary();
+		if (beneficiaryRef.getResource() != null && beneficiaryRef.getType().equals("Patient")) {
+			return Optional.of((Patient) beneficiaryRef.getResource());
+		}
+
+		Patient beneficiary = myPatientDao.read(new IdDt(beneficiaryRef.getReference()));
+		return Optional.ofNullable(beneficiary);
+	}
 }
