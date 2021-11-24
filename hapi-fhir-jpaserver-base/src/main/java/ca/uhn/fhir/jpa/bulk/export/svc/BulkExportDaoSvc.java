@@ -33,6 +33,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -64,6 +65,10 @@ public class BulkExportDaoSvc {
 	@Transactional
 	public Map<Long, String> getBulkJobCollectionIdToResourceTypeMap(String theJobUUID) {
 		BulkExportJobEntity bulkExportJobEntity = loadJob(theJobUUID);
+		if (bulkExportJobEntity == null) {
+			return Collections.emptyMap();
+		}
+
 		Collection<BulkExportCollectionEntity> collections = bulkExportJobEntity.getCollections();
 		return collections.stream()
 			.collect(Collectors.toMap(
@@ -75,7 +80,7 @@ public class BulkExportDaoSvc {
 	private BulkExportJobEntity loadJob(String theJobUUID) {
 		Optional<BulkExportJobEntity> jobOpt = myBulkExportJobDao.findByJobId(theJobUUID);
 		if (!jobOpt.isPresent()) {
-			ourLog.warn("Job with UUID {} appears to be deleted", theJobUUID);
+			ourLog.warn("Job with UUID {} appears to be deleted.", theJobUUID);
 			return null;
 		}
 		return jobOpt.get();

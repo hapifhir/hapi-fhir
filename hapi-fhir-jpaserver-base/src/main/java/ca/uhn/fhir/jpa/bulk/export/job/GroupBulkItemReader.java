@@ -46,6 +46,7 @@ import org.springframework.batch.item.ItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -254,9 +255,12 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 			ISearchBuilder searchBuilder = getSearchBuilderForLocalResourceType();
 
 			//Execute query and all found pids to our local iterator.
-			IResultIterator resultIterator = searchBuilder.createQuery(expandedSpMap, new SearchRuntimeDetails(null, myJobUUID), null, RequestPartitionId.allPartitions());
-			while (resultIterator.hasNext()) {
-				myReadPids.add(resultIterator.next());
+			try(IResultIterator resultIterator = searchBuilder.createQuery(expandedSpMap, new SearchRuntimeDetails(null, myJobUUID), null, RequestPartitionId.allPartitions())) {
+				while (resultIterator.hasNext()) {
+					myReadPids.add(resultIterator.next());
+				}
+			} catch (IOException e) {
+				ourLog.error("Failed to close result iterator during bulk item read.", e);
 			}
 		}
 	}
