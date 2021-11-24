@@ -222,7 +222,6 @@ public abstract class BaseApp {
 		}
 
 		Optional<BaseCommand> commandOpt = parseCommand(theArgs);
-		if (! commandOpt.isPresent())  return;
 
 		BaseCommand command = commandOpt.get();
 
@@ -284,7 +283,7 @@ public abstract class BaseApp {
 	private Optional<BaseCommand> parseCommand(String[] theArgs) {
 		Optional<BaseCommand> commandOpt = getNextCommand(theArgs, 0);
 
-		if (! commandOpt.isPresent()) {
+		if (!commandOpt.isPresent()) {
 			String message = "Unrecognized command: " + ansi().bold().fg(Ansi.Color.RED) + theArgs[0] + ansi().boldOff().fg(Ansi.Color.WHITE);
 			printMessageToStdout(message);
 			printMessageToStdout("");
