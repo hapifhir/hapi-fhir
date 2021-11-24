@@ -23,7 +23,6 @@ package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 
@@ -139,11 +138,11 @@ public class ExtensionUtil {
 		if (!hasExtension(theBase, theExtensionUrl)) {
 			return false;
 		}
-		IBaseDatatype value = getExtensionByUrl(theBase, theExtensionUrl).getValue();
-		if (value == null) {
+		IBaseExtension<?, ?> ext = getExtensionByUrl(theBase, theExtensionUrl);
+		if (ext == null || ext.getValue() == null) {
 			return theExtensionValue == null;
 		}
-		return value.toString().equals(theExtensionValue);
+		return ext.getValue().toString().equals(theExtensionValue);
 	}
 
 	/**
