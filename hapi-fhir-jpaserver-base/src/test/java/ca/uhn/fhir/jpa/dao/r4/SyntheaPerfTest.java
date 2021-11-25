@@ -17,6 +17,7 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Meta;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -64,6 +65,11 @@ public class SyntheaPerfTest extends BaseJpaTest {
 		System.clearProperty("mass_ingestion_mode");
 	}
 
+	@AfterEach
+	public void afterEach() {
+		myCtx.getParserOptions().setAutoContainReferenceTargetsWithNoId(true);
+	}
+
 	private static final Logger ourLog = LoggerFactory.getLogger(SyntheaPerfTest.class);
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	public static final String PATH_TO_SYNTHEA_OUTPUT = "../../synthea/output/fhir/";
@@ -84,6 +90,7 @@ public class SyntheaPerfTest extends BaseJpaTest {
 		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.INLINE);
 		myDaoConfig.setMatchUrlCacheEnabled(true);
 		myDaoConfig.setDeleteEnabled(false);
+		myCtx.getParserOptions().setAutoContainReferenceTargetsWithNoId(false);
 
 		assertTrue(myDaoConfig.isMassIngestionMode());
 

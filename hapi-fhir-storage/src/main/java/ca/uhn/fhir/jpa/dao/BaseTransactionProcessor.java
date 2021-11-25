@@ -1437,46 +1437,17 @@ public abstract class BaseTransactionProcessor {
 		if (updateOutcome != null) {
 			IIdType newId = updateOutcome.getIdDt();
 
-//			newId.toUnqualified();
-//
-			// FIXME: optimize
 			IIdType entryId = entriesToProcess.getIdWithVersionlessComparison(newId);
 			if (entryId != null && !StringUtils.equals(entryId.getValue(), newId.getValue())) {
 				entryId.setValue(newId.getValue());
 			}
 
-//			for (IIdType nextEntry : entriesToProcess.values()) {
-//				if (nextEntry.getResourceType().equals(newId.getResourceType())) {
-//					if (nextEntry.getIdPart().equals(newId.getIdPart())) {
-//						if (!nextEntry.hasVersionIdPart() || !nextEntry.getVersionIdPart().equals(newId.getVersionIdPart())) {
-//							nextEntry.setParts(nextEntry.getBaseUrl(), nextEntry.getResourceType(), nextEntry.getIdPart(), newId.getVersionIdPart());
-//						}
-//					}
-//				}
-//			}
-
 			nextOutcome.setId(newId);
-
-//			Collection<IIdType> targets = theIdSubstitutions.getForValue(newId);
-//			for (IIdType next : targets) {
-//				next.setValue(newId.getValue());
-//			}
 
 			IIdType target = theIdSubstitutions.getForSource(newId);
 			if (target != null) {
 				target.setValue(newId.getValue());
 			}
-
-			// FIXME: remove
-//			for (IIdType next : theIdSubstitutions.values()) {
-//				if (next.getResourceType().equals(newId.getResourceType())) {
-//					if (next.getIdPart().equals(newId.getIdPart())) {
-//						if (!next.getValue().equals(newId.getValue())) {
-//							next.setValue(newId.getValue());
-//						}
-//					}
-//				}
-//			}
 
 		}
 	}
