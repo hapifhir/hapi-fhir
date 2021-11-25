@@ -46,6 +46,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -105,12 +106,26 @@ public class SubscriptionCanonicalizer {
 	 * @return A map of tags System:Code
 	 */
 	private Map<String, String> extractTags(IBaseResource theSubscription) {
-		return theSubscription.getMeta().getTag()
-			.stream()
-			.collect(Collectors.toMap(
-				IBaseCoding::getSystem,
-				IBaseCoding::getCode
-			));
+		List<? extends  IBaseCoding> tags = theSubscription.getMeta().getTag();
+		HashMap<String, String> map = new HashMap<>();
+		for (IBaseCoding tag : tags) {
+			if (tag.getCode() != null
+					&& tag.getSystem() != null) {
+				map.put(tag.getSystem(), tag.getCode());
+			}
+			else {
+				if (tag.getCode() != null) {
+					ourLog.warn("Tag without system. Code: " + tag.getCode());
+				}
+				else if (tag.getSystem() != null) {
+					ourLog.warn("Tag without code. System: " + tag.getSystem());
+				}
+				else {
+					ourLog.warn("Tag with null values.");
+				}
+			}
+		}
+		return map;
 	}
 
 	private CanonicalSubscription canonicalizeDstu3(IBaseResource theSubscription) {
