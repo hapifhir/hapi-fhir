@@ -209,6 +209,9 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
 		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
+
+		myModelConfig.setAutoSupportDefaultSearchParams(true);
+		mySearchParamRegistry.resetForUnitTest();
 	}
 
 	@BeforeEach
@@ -216,6 +219,32 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		myModelConfig.setSuppressStringIndexingInTokens(new ModelConfig().isSuppressStringIndexingInTokens());
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 	}
+
+
+	@Test
+	public void testDisableAutoSupportDefaultSearchParams() {
+		myModelConfig.setAutoSupportDefaultSearchParams(false);
+		mySearchParamRegistry.resetForUnitTest();
+
+		Patient patient = new Patient();
+		patient.setActive(true);
+		patient.addName().setFamily("FAMILY");
+		myPatientDao.create(patient);
+
+		runInTransaction(()->{
+			assertEquals(0, myResourceIndexedSearchParamStringDao.count());
+			assertEquals(0, myResourceIndexedSearchParamTokenDao.count());
+		});
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous("name", new StringParam("FAMILY"));
+		try {
+			myPatientDao.search(map, mySrd);
+			fail();
+		} catch (InvalidRequestException e) {
+			// good
+		}
+	}
+
 
 	@Test
 	public void testSearchInExistingTransaction() {

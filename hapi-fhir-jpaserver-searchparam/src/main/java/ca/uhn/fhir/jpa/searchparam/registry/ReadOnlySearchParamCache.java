@@ -40,6 +40,8 @@ import java.util.stream.Stream;
 
 public class ReadOnlySearchParamCache {
 
+	private static final ReadOnlySearchParamCache EMPTY = new ReadOnlySearchParamCache();
+
 	// resourceName -> searchParamName -> searchparam
 	protected final Map<String, Map<String, RuntimeSearchParam>> myResourceNameToSpNameToSp;
 	protected final Map<String, RuntimeSearchParam> myUrlToParam;
@@ -120,5 +122,9 @@ public class ReadOnlySearchParamCache {
 
 	public static ReadOnlySearchParamCache fromRuntimeSearchParamCache(RuntimeSearchParamCache theRuntimeSearchParamCache) {
 		return new ReadOnlySearchParamCache(theRuntimeSearchParamCache);
+	}
+
+	public static ReadOnlySearchParamCache empty() {
+		return EMPTY;
 	}
 }

@@ -166,6 +166,10 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 	}
 
 	private ReadOnlySearchParamCache getBuiltInSearchParams() {
+		if (!myModelConfig.isAutoSupportDefaultSearchParams()) {
+			return ReadOnlySearchParamCache.empty();
+		}
+
 		if (myBuiltInSearchParams == null) {
 			myBuiltInSearchParams = ReadOnlySearchParamCache.fromFhirContext(myFhirContext, mySearchParameterCanonicalizer);
 		}
