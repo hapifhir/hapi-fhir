@@ -106,26 +106,16 @@ public class SubscriptionCanonicalizer {
 	 * @return A map of tags System:Code
 	 */
 	private Map<String, String> extractTags(IBaseResource theSubscription) {
-		List<? extends  IBaseCoding> tags = theSubscription.getMeta().getTag();
-		HashMap<String, String> map = new HashMap<>();
-		for (IBaseCoding tag : tags) {
-			if (tag.getCode() != null
-					&& tag.getSystem() != null) {
-				map.put(tag.getSystem(), tag.getCode());
-			}
-			else {
-				if (tag.getCode() != null) {
-					ourLog.warn("Tag without system. Code: " + tag.getCode());
-				}
-				else if (tag.getSystem() != null) {
-					ourLog.warn("Tag without code. System: " + tag.getSystem());
-				}
-				else {
-					ourLog.warn("Tag with null values.");
-				}
-			}
-		}
-		return map;
+		return theSubscription.getMeta().getTag()
+			.stream()
+			.filter(t -> {
+				// ignore the tags with null system or code
+				return t.getSystem() != null && t.getCode() != null;
+			})
+			.collect(Collectors.toMap(
+				IBaseCoding::getSystem,
+				IBaseCoding::getCode
+			));
 	}
 
 	private CanonicalSubscription canonicalizeDstu3(IBaseResource theSubscription) {
