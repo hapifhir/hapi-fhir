@@ -110,7 +110,7 @@ public class SubscriptionCanonicalizer {
 			.stream()
 			.filter(t -> {
 				// ignore the tags with null system or code
-				return t.getSystem() != null && t.getCode() != null;
+				return t.getSystem() != null || t.getCode() != null;
 			})
 			.collect(Collectors.toMap(
 				IBaseCoding::getSystem,
