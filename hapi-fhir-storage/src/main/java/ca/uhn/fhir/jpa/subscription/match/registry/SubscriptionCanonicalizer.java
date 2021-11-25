@@ -108,10 +108,7 @@ public class SubscriptionCanonicalizer {
 	private Map<String, String> extractTags(IBaseResource theSubscription) {
 		return theSubscription.getMeta().getTag()
 			.stream()
-			.filter(t -> {
-				// ignore the tags with null system or code
-				return !(t.getSystem() == null || t.getCode() == null);
-			})
+			.filter(t -> t.getSystem() != null && t.getCode() != null)
 			.collect(Collectors.toMap(
 				IBaseCoding::getSystem,
 				IBaseCoding::getCode
