@@ -26,13 +26,15 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
+import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.resource.Subscription;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.HapiExtensions;
+import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -82,7 +84,6 @@ public class SubscriptionCanonicalizer {
 
 	private CanonicalSubscription canonicalizeDstu2(IBaseResource theSubscription) {
 		ca.uhn.fhir.model.dstu2.resource.Subscription subscription = (ca.uhn.fhir.model.dstu2.resource.Subscription) theSubscription;
-
 		CanonicalSubscription retVal = new CanonicalSubscription();
 		try {
 			retVal.setStatus(org.hl7.fhir.r4.model.Subscription.SubscriptionStatus.fromCode(subscription.getStatus()));
@@ -93,10 +94,25 @@ public class SubscriptionCanonicalizer {
 			retVal.setChannelExtensions(extractExtension(subscription));
 			retVal.setIdElement(subscription.getIdElement());
 			retVal.setPayloadString(subscription.getChannel().getPayload());
+			retVal.setTags(extractTags(subscription));
 		} catch (FHIRException theE) {
 			throw new InternalErrorException(theE);
 		}
 		return retVal;
+	}
+
+	/**
+	 * Extract the meta tags from the subscription and convert them to a simple string map.
+	 * @param theSubscription The subscription to extract the tags from
+	 * @return A map of tags System:Code
+	 */
+	private Map<String, String> extractTags(IBaseResource theSubscription) {
+		return theSubscription.getMeta().getTag()
+			.stream()
+			.collect(Collectors.toMap(
+				IBaseCoding::getSystem,
+				IBaseCoding::getCode
+			));
 	}
 
 	private CanonicalSubscription canonicalizeDstu3(IBaseResource theSubscription) {
@@ -120,6 +136,7 @@ public class SubscriptionCanonicalizer {
 			retVal.setIdElement(subscription.getIdElement());
 			retVal.setPayloadString(subscription.getChannel().getPayload());
 			retVal.setPayloadSearchCriteria(getExtensionString(subscription, HapiExtensions.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA));
+			retVal.setTags(extractTags(subscription));
 
 			if (retVal.getChannelType() == CanonicalSubscriptionChannelType.EMAIL) {
 				String from;
@@ -208,7 +225,6 @@ public class SubscriptionCanonicalizer {
 
 	private CanonicalSubscription canonicalizeR4(IBaseResource theSubscription) {
 		org.hl7.fhir.r4.model.Subscription subscription = (org.hl7.fhir.r4.model.Subscription) theSubscription;
-
 		CanonicalSubscription retVal = new CanonicalSubscription();
 		retVal.setStatus(subscription.getStatus());
 		retVal.setChannelType(getChannelType(theSubscription));
@@ -223,6 +239,7 @@ public class SubscriptionCanonicalizer {
 		if (requestPartitionId != null) {
 			retVal.setPartitionId(requestPartitionId.getFirstPartitionIdOrNull());
 		}
+		retVal.setTags(extractTags(subscription));
 
 		if (retVal.getChannelType() == CanonicalSubscriptionChannelType.EMAIL) {
 			String from;
@@ -281,6 +298,7 @@ public class SubscriptionCanonicalizer {
 		retVal.setIdElement(subscription.getIdElement());
 		retVal.setPayloadString(subscription.getContentType());
 		retVal.setPayloadSearchCriteria(getExtensionString(subscription, HapiExtensions.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA));
+		retVal.setTags(extractTags(subscription));
 
 		if (retVal.getChannelType() == CanonicalSubscriptionChannelType.EMAIL) {
 			String from;

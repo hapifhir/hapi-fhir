@@ -68,6 +68,8 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 	private RestHookDetails myRestHookDetails;
 	@JsonProperty("extensions")
 	private Map<String, List<String>> myChannelExtensions;
+	@JsonProperty("tags")
+	private Map<String, String> myTags;
 	@JsonProperty("payloadSearchCriteria")
 	private String myPayloadSearchCriteria;
 	@JsonProperty("partitionId")
@@ -140,6 +142,15 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 			}
 		}
 	}
+
+	public Map<String, String> getTags() {
+		return myTags;
+	}
+
+	public void setTags(Map<String, String> theTags) {
+		this.myTags = theTags;
+	}
+
 
 	public void setHeaders(String theHeaders) {
 		myHeaders = new ArrayList<>();
