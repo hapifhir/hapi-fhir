@@ -77,6 +77,10 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		myTermReadSvc = theTermReadSvc;
 	}
 
+	public void setValidationSupportChain(ValidationSupportChain theValidationSupportChain) {
+		myValidationSupportChain = theValidationSupportChain;
+	}
+
 	@Operation(name = JpaConstants.OPERATION_EXPAND, idempotent = true, typeName = "ValueSet")
 	public IBaseResource expand(
 		HttpServletRequest theServletRequest,
@@ -154,7 +158,7 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		startRequest(theServletRequest);
 		try {
 			// If a Remote Terminology Server has been configured, use it
-			if (myValidationSupportChain.isRemoteTerminologyServiceConfigured()) {
+			if (myValidationSupportChain != null && myValidationSupportChain.isRemoteTerminologyServiceConfigured()) {
 				String theSystemString = (theSystem != null && theSystem.hasValue()) ? theSystem.getValueAsString() : null;
 				String theCodeString = (theCode != null && theCode.hasValue()) ? theCode.getValueAsString() : null;
 				String theDisplayString = (theDisplay != null && theDisplay.hasValue()) ? theDisplay.getValueAsString() : null;
