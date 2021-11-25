@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3145
+title: "RequestValidatingInteceptor incorrectly prevented GraphQL requests from being submitted using
+  the HTTP POST form of the GraphQL operation."

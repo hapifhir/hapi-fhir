@@ -33,7 +33,7 @@ public class EIDHelperR4Test extends BaseR4Test {
 
 	private static final MdmRulesJson ourRules = new MdmRulesJson() {
 		{
-			setEnterpriseEIDSystem(EXTERNAL_ID_SYSTEM_FOR_TEST);
+			addEnterpriseEIDSystem("Patient", EXTERNAL_ID_SYSTEM_FOR_TEST);
 			setMdmTypes(Arrays.asList(new String[] {"Patient"}));
 		}
 	};

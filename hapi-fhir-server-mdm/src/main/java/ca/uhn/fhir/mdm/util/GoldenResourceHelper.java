@@ -120,7 +120,7 @@ public class GoldenResourceHelper {
 	}
 
 	private void cloneAllExternalEidsIntoNewGoldenResource(BaseRuntimeChildDefinition theGoldenResourceIdentifier,
-																			 IBase theGoldenResource, IBase theNewGoldenResource) {
+																			 IAnyResource theGoldenResource, IBase theNewGoldenResource) {
 		// FHIR choice types - fields within fhir where we have a choice of ids
 		IFhirPath fhirPath = myFhirContext.newFhirPath();
 		List<IBase> goldenResourceIdentifiers = theGoldenResourceIdentifier.getAccessor().getValues(theGoldenResource);
@@ -128,7 +128,8 @@ public class GoldenResourceHelper {
 		for (IBase base : goldenResourceIdentifiers) {
 			Optional<IPrimitiveType> system = fhirPath.evaluateFirst(base, "system", IPrimitiveType.class);
 			if (system.isPresent()) {
-				String mdmSystem = myMdmSettings.getMdmRules().getEnterpriseEIDSystem();
+				String resourceType = myFhirContext.getResourceType(theGoldenResource);
+				String mdmSystem = myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType(resourceType);
 				String baseSystem = system.get().getValueAsString();
 				if (Objects.equals(baseSystem, mdmSystem)) {
 					ca.uhn.fhir.util.TerserUtil.cloneEidIntoResource(myFhirContext, theGoldenResourceIdentifier, base, theNewGoldenResource);
@@ -188,7 +189,7 @@ public class GoldenResourceHelper {
 		return theGoldenResource;
 	}
 
-	private void clearExternalEidsFromTheGoldenResource(BaseRuntimeChildDefinition theGoldenResourceIdentifier, IBase theGoldenResource) {
+	private void clearExternalEidsFromTheGoldenResource(BaseRuntimeChildDefinition theGoldenResourceIdentifier, IBaseResource theGoldenResource) {
 		IFhirPath fhirPath = myFhirContext.newFhirPath();
 		List<IBase> goldenResourceIdentifiers = theGoldenResourceIdentifier.getAccessor().getValues(theGoldenResource);
 		List<IBase> clonedIdentifiers = new ArrayList<>();
@@ -197,7 +198,8 @@ public class GoldenResourceHelper {
 		for (IBase base : goldenResourceIdentifiers) {
 			Optional<IPrimitiveType> system = fhirPath.evaluateFirst(base, "system", IPrimitiveType.class);
 			if (system.isPresent()) {
-				String mdmSystem = myMdmSettings.getMdmRules().getEnterpriseEIDSystem();
+				String resourceType = myFhirContext.getResourceType(theGoldenResource);
+				String mdmSystem = myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType(resourceType);
 				String baseSystem = system.get().getValueAsString();
 				if (Objects.equals(baseSystem, mdmSystem)) {
 					ourLog.debug("Found EID confirming to MDM rules {}. It should not be copied, skipping", baseSystem);

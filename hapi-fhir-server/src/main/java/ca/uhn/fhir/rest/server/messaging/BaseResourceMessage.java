@@ -47,6 +47,12 @@ public abstract class BaseResourceMessage implements IResourceMessage, IModelJso
 	private String myMediaType;
 
 	/**
+	 * This is used by any message going to kafka for topic partition selection purposes.
+	 */
+	@JsonProperty("messageKey")
+	private String myMessageKey;
+
+	/**
 	 * Returns an attribute stored in this message.
 	 * <p>
 	 * Attributes are just a spot for user data of any kind to be
@@ -154,6 +160,15 @@ public abstract class BaseResourceMessage implements IResourceMessage, IModelJso
 
 	public void setMediaType(String theMediaType) {
 		myMediaType = theMediaType;
+	}
+
+	@Nullable
+	public String getMessageKeyOrNull() {
+		return myMessageKey;
+	}
+
+	public void setMessageKey(String theMessageKey) {
+		myMessageKey = theMessageKey;
 	}
 
 	public enum OperationTypeEnum {

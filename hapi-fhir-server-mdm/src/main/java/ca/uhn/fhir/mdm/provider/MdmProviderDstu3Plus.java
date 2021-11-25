@@ -72,9 +72,9 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	private static final Logger ourLog = getLogger(MdmProviderDstu3Plus.class);
 
 	private final IMdmControllerSvc myMdmControllerSvc;
-	private final IMdmMatchFinderSvc myMdmMatchFinderSvc;
 	private final IMdmSubmitSvc myMdmSubmitSvc;
 	private final IMdmSettings myMdmSettings;
+	private final MdmControllerHelper myMdmControllerHelper;
 
 	public static final int DEFAULT_PAGE_SIZE = 20;
 	public static final int MAX_PAGE_SIZE = 100;
@@ -85,10 +85,14 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	 * Note that this is not a spring bean. Any necessary injections should
 	 * happen in the constructor
 	 */
-	public MdmProviderDstu3Plus(FhirContext theFhirContext, IMdmControllerSvc theMdmControllerSvc, IMdmMatchFinderSvc theMdmMatchFinderSvc, IMdmSubmitSvc theMdmSubmitSvc, IMdmSettings theIMdmSettings) {
+	public MdmProviderDstu3Plus(FhirContext theFhirContext,
+										 IMdmControllerSvc theMdmControllerSvc,
+										 MdmControllerHelper theMdmHelper,
+										 IMdmSubmitSvc theMdmSubmitSvc,
+										 IMdmSettings theIMdmSettings) {
 		super(theFhirContext);
 		myMdmControllerSvc = theMdmControllerSvc;
-		myMdmMatchFinderSvc = theMdmMatchFinderSvc;
+		myMdmControllerHelper = theMdmHelper;
 		myMdmSubmitSvc = theMdmSubmitSvc;
 		myMdmSettings = theIMdmSettings;
 	}
@@ -98,7 +102,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		if (thePatient == null) {
 			throw new InvalidRequestException("resource may not be null");
 		}
-		return getMatchesAndPossibleMatchesForResource(thePatient, "Patient");
+		return myMdmControllerHelper.getMatchesAndPossibleMatchesForResource(thePatient, "Patient");
 	}
 
 	@Operation(name = ProviderConstants.MDM_MATCH)
@@ -108,51 +112,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		if (theResource == null) {
 			throw new InvalidRequestException("resource may not be null");
 		}
-		return getMatchesAndPossibleMatchesForResource(theResource, theResourceType.getValueAsString());
-	}
-
-	/**
-	 * Helper method which will return a bundle of all Matches and Possible Matches.
-	 */
-	private IBaseBundle getMatchesAndPossibleMatchesForResource(IAnyResource theResource, String theResourceType) {
-		List<MatchedTarget> matches = myMdmMatchFinderSvc.getMatchedTargets(theResourceType, theResource);
-		matches.sort(Comparator.comparing((MatchedTarget m) -> m.getMatchResult().getNormalizedScore()).reversed());
-
-		BundleBuilder builder = new BundleBuilder(myFhirContext);
-		builder.setBundleField("type", "searchset");
-		builder.setBundleField("id", UUID.randomUUID().toString());
-		builder.setMetaField("lastUpdated", builder.newPrimitive("instant", new Date()));
-
-		IBaseBundle retVal = builder.getBundle();
-		for (MatchedTarget next : matches) {
-			boolean shouldKeepThisEntry = next.isMatch() || next.isPossibleMatch();
-			if (!shouldKeepThisEntry) {
-				continue;
-			}
-
-			IBase entry = builder.addEntry();
-			builder.addToEntry(entry, "resource", next.getTarget());
-
-			IBaseBackboneElement search = builder.addSearch(entry);
-			toBundleEntrySearchComponent(builder, search, next);
-		}
-		return retVal;
-	}
-
-
-	public IBaseBackboneElement toBundleEntrySearchComponent(BundleBuilder theBuilder, IBaseBackboneElement theSearch, MatchedTarget theMatchedTarget) {
-		theBuilder.setSearchField(theSearch, "mode", "match");
-		double score = theMatchedTarget.getMatchResult().getNormalizedScore();
-		theBuilder.setSearchField(theSearch, "score",
-			theBuilder.newPrimitive("decimal", BigDecimal.valueOf(score)));
-
-		String matchGrade = getMatchGrade(theMatchedTarget);
-		IBaseDatatype codeType = (IBaseDatatype) myFhirContext.getElementDefinition("code").newInstance(matchGrade);
-		IBaseExtension searchExtension = theSearch.addExtension();
-		searchExtension.setUrl(MdmConstants.FIHR_STRUCTURE_DEF_MATCH_GRADE_URL_NAMESPACE);
-		searchExtension.setValue(codeType);
-
-		return theSearch;
+		return myMdmControllerHelper.getMatchesAndPossibleMatchesForResource(theResource, theResourceType.getValueAsString());
 	}
 
 	@Operation(name = ProviderConstants.MDM_MERGE_GOLDEN_RESOURCES)
@@ -351,17 +311,6 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
 		ParametersUtil.addParameterToParametersLong(myFhirContext, retval, ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, theCount);
 		return retval;
-	}
-
-	@Nonnull
-	protected String getMatchGrade(MatchedTarget theTheMatchedTarget) {
-		String retVal = "probable";
-		if (theTheMatchedTarget.isMatch()) {
-			retVal = "certain";
-		} else if (theTheMatchedTarget.isPossibleMatch()) {
-			retVal = "possible";
-		}
-		return retVal;
 	}
 
 	private String getResourceType(String theParamName, IPrimitiveType<String> theResourceId) {

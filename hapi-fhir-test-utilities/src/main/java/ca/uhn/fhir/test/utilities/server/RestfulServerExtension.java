@@ -234,6 +234,10 @@ public class RestfulServerExtension implements BeforeEachCallback, AfterEachCall
 		return "http://localhost:" + myPort;
 	}
 
+	public void unregisterAllInterceptors() {
+		myServlet.getInterceptorService().unregisterAllInterceptors();
+	}
+
 	@Interceptor
 	private class ListenerExtension {
 

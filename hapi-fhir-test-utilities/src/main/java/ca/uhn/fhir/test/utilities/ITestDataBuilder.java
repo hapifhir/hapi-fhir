@@ -87,6 +87,13 @@ public interface ITestDataBuilder {
 	}
 
 	/**
+	 * Set Observation.effectiveDate
+	 */
+	default Consumer<IBaseResource> withEffectiveDate(String theDate) {
+		return t -> __setPrimitiveChild(getFhirContext(), t, "effectiveDateTime", "dateTime", theDate);
+	}
+
+	/**
 	 * Set [Resource].identifier.system and [Resource].identifier.value
 	 */
 	default Consumer<IBaseResource> withIdentifier(String theSystem, String theValue) {

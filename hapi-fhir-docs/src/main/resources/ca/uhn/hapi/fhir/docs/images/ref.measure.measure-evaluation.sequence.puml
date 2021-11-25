@@ -1,0 +1,43 @@
+@startuml measure_evaluation_sequence
+!include styling.puml
+title Measure $evaluate-measure
+
+actor User as User
+participant OperationProvider as "HAPI Measure Operation Provider"
+participant CQLEngine as "CQL Engine"
+participant HAPI as "HAPI CQL Adapters"
+participant JPA as "HAPI JPA / Terminology Providers"
+
+User -> OperationProvider: invoke $evaluate-measure
+OperationProvider -> JPA: read Measure
+JPA --> OperationProvider: return Measure
+OperationProvider -> JPA: read Libraries
+JPA --> OperationProvider: return Libraries
+OperationProvider -> OperationProvider: convert FHIR Libraries to ELM libraries
+OperationProvider-> CQLEngine **: create with ELM Libraries
+
+OperationProvider -> JPA: get Subjects
+JPA --> OperationProvider: return Subjects
+loop each Subject
+OperationProvider -> CQLEngine: set current Subject context
+loop each SDE/Population 
+OperationProvider -> CQLEngine: evaluate SDE/Population criteria
+CQLEngine -> CQLEngine: evaluate Definition
+alt terminology required
+CQLEngine -> HAPI: retrieve terminology
+HAPI -> JPA: request terminology
+JPA --> HAPI: return terminology
+HAPI --> CQLEngine: return terminology
+end 
+CQLEngine -> HAPI: retrieve data
+HAPI -> JPA: request data
+JPA --> HAPI: return data
+HAPI --> CQLEngine: return data
+CQLEngine --> OperationProvider: return SDE/Population criteria result
+end
+end
+OperationProvider -> CQLEngine !!: destroy
+OperationProvider -> OperationProvider: build MeasureReport
+OperationProvider -> OperationProvider: score MeasureReport
+OperationProvider -> User: return MeasureReport
+@enduml
