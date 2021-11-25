@@ -134,6 +134,8 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 		params.setLoadSynchronousUpTo(MAX_MANAGED_PARAM_COUNT);
 
 		IBundleProvider allSearchParamsBp = mySearchParamProvider.search(params);
+
+		List<IBaseResource> allSearchParams = allSearchParamsBp.getResources(0, MAX_MANAGED_PARAM_COUNT);
 		int size = allSearchParamsBp.sizeOrThrowNpe();
 
 		ourLog.trace("Loaded {} search params from the DB", size);
@@ -141,9 +143,8 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 		// Just in case..
 		if (size >= MAX_MANAGED_PARAM_COUNT) {
 			ourLog.warn("Unable to support >" + MAX_MANAGED_PARAM_COUNT + " search params!");
-			size = MAX_MANAGED_PARAM_COUNT;
 		}
-		List<IBaseResource> allSearchParams = allSearchParamsBp.getResources(0, size);
+
 		initializeActiveSearchParams(allSearchParams);
 	}
 
