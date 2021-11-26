@@ -5,6 +5,9 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.ISubscriptionDeliveryChannelNamer;
@@ -42,6 +45,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +65,8 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 
 	@Autowired
 	FhirContext myFhirContext;
+	@Autowired
+	protected DaoRegistry myDaoRegistry;
 
 	// Caused by: java.lang.IllegalStateException: Unable to register mock bean org.springframework.messaging.MessageHandler expected a single matching bean to replace but found [subscriptionActivatingSubscriber, subscriptionDeliveringEmailSubscriber, subscriptionDeliveringRestHookSubscriber, subscriptionMatchingSubscriber, subscriptionRegisteringSubscriber]
 
@@ -146,14 +152,9 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 		return theResource;
 	}
 
-	protected Subscription sendSubscription(String theCriteria, String thePayload, String theEndpoint) throws InterruptedException {
-		return sendSubscription(theCriteria, thePayload, theEndpoint, null);
-	}
-
-	protected Subscription sendSubscription(String theCriteria, String thePayload, String theEndpoint, RequestPartitionId theRequestPartitionId) throws InterruptedException {
-		Subscription subscription = makeActiveSubscription(theCriteria, thePayload, theEndpoint);
+	protected Subscription sendSubscription(Subscription theSubscription, RequestPartitionId theRequestPartitionId, Boolean mockDao) throws InterruptedException {
 		mySubscriptionActivatedPost.setExpectedCount(1);
-		Subscription retVal = sendResource(subscription, theRequestPartitionId);
+		Subscription retVal = sendResource(theSubscription, theRequestPartitionId);
 		mySubscriptionActivatedPost.awaitExpected();
 		return retVal;
 	}
