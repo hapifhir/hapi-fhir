@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.slf4j.Logger;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,7 +93,7 @@ public class PatientBulkItemReader extends BaseJpaBulkItemReader implements Item
 					myReadPids.add(myResultIterator.next());
 				}
 			} catch (IOException e) {
-				ourLog.error("Failed to close result iterator during bulk item read.", e);
+				throw new InternalErrorException("Failed to close result iterator during bulk item read.", e);
 			}
 		}
 		return myReadPids.iterator();

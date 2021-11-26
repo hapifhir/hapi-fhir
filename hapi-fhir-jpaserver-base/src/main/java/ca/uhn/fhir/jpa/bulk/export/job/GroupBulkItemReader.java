@@ -38,6 +38,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -260,7 +261,7 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 					myReadPids.add(resultIterator.next());
 				}
 			} catch (IOException e) {
-				ourLog.error("Failed to close result iterator during bulk item read.", e);
+				throw new InternalErrorException("Failed to close result iterator during bulk item read.", e);
 			}
 		}
 	}
