@@ -2,27 +2,32 @@ package ca.uhn.fhir.jpa.subscription.submit.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.subscription.log.Msg;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.r4.model.Subscription;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(SpringExtension.class)
 public class SubscriptionValidatingInterceptorTest {
+	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionValidatingInterceptorTest.class);
+
 	@Autowired
 	private SubscriptionValidatingInterceptor mySubscriptionValidatingInterceptor;
 	@MockBean
@@ -42,8 +47,9 @@ public class SubscriptionValidatingInterceptorTest {
 			mySubscriptionValidatingInterceptor.validateSubmittedSubscription(badSub);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), is("Can not process submitted Subscription - Subscription.status must be populated on this server"));
-		}
+			assertThat(e.getMessage(), is(Msg.code(8) + "Can not process submitted Subscription - Subscription.status must be populated on this server"));
+			ourLog.info("Expected exception", e);
+			}
 	}
 
 	@Test
@@ -54,7 +60,7 @@ public class SubscriptionValidatingInterceptorTest {
 			mySubscriptionValidatingInterceptor.validateSubmittedSubscription(badSub);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), is("Subscription.criteria must be populated"));
+			assertThat(e.getMessage(), is(Msg.code(11) + "Subscription.criteria must be populated"));
 		}
 	}
 
@@ -67,7 +73,7 @@ public class SubscriptionValidatingInterceptorTest {
 			mySubscriptionValidatingInterceptor.validateSubmittedSubscription(badSub);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), is("Subscription.criteria must be in the form \"{Resource Type}?[params]\""));
+			assertThat(e.getMessage(), is(Msg.code(14) + "Subscription.criteria must be in the form \"{Resource Type}?[params]\""));
 		}
 	}
 
@@ -80,7 +86,7 @@ public class SubscriptionValidatingInterceptorTest {
 			mySubscriptionValidatingInterceptor.validateSubmittedSubscription(badSub);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), is("Subscription.channel.type must be populated"));
+			assertThat(e.getMessage(), is(Msg.code(20) + "Subscription.channel.type must be populated"));
 		}
 	}
 
@@ -95,7 +101,7 @@ public class SubscriptionValidatingInterceptorTest {
 			mySubscriptionValidatingInterceptor.validateSubmittedSubscription(badSub);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), is("No endpoint defined for message subscription"));
+			assertThat(e.getMessage(), is(Msg.code(16) + "No endpoint defined for message subscription"));
 		}
 	}
 
@@ -112,7 +118,7 @@ public class SubscriptionValidatingInterceptorTest {
 			mySubscriptionValidatingInterceptor.validateSubmittedSubscription(badSub);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), is("Only 'channel' protocol is supported for Subscriptions with channel type 'message'"));
+			assertThat(e.getMessage(), is(Msg.code(17) + "Only 'channel' protocol is supported for Subscriptions with channel type 'message'"));
 		}
 
 		channel.setEndpoint("channel");
@@ -120,7 +126,7 @@ public class SubscriptionValidatingInterceptorTest {
 			mySubscriptionValidatingInterceptor.validateSubmittedSubscription(badSub);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), is("Only 'channel' protocol is supported for Subscriptions with channel type 'message'"));
+			assertThat(e.getMessage(), is(Msg.code(17) + "Only 'channel' protocol is supported for Subscriptions with channel type 'message'"));
 		}
 
 		channel.setEndpoint("channel:");
@@ -128,7 +134,7 @@ public class SubscriptionValidatingInterceptorTest {
 			mySubscriptionValidatingInterceptor.validateSubmittedSubscription(badSub);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), is("Invalid subscription endpoint uri channel:"));
+			assertThat(e.getMessage(), is(Msg.code(19) + "Invalid subscription endpoint uri channel:"));
 		}
 
 		// Happy path
