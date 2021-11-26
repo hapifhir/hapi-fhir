@@ -154,6 +154,10 @@ public class MemberMatcherR4Helper {
 		}
 
 		Reference beneficiaryRef = theCoverage.getBeneficiary();
+		if (beneficiaryRef == null) {
+			return Optional.empty();
+		}
+
 		if (beneficiaryRef.getResource() != null) {
 			return Optional.of((Patient) beneficiaryRef.getResource());
 		}
