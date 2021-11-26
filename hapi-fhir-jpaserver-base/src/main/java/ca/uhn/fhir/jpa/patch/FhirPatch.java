@@ -235,7 +235,7 @@ public class FhirPatch {
 					}
 
 				} else {
-					childDef.getMutator().setValue(next, newValue);
+					childDef.getMutator().addValue(next, newValue);
 				}
 
 			}

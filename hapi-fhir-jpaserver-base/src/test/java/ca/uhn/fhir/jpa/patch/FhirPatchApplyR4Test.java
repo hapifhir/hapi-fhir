@@ -7,16 +7,20 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.Specimen;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -167,6 +171,141 @@ public class FhirPatchApplyR4Test {
 		svc.apply(patient, patch);
 
 		assertEquals("{\"resourceType\":\"Patient\",\"identifier\":[{\"system\":\"sys\",\"value\":\"val\"}],\"active\":true}", ourCtx.newJsonParser().encodeResourceToString(patient));
+
+	}
+
+
+	@Test
+	public void testAddAnonymousTypeItem() {
+		FhirPatch svc = new FhirPatch(ourCtx);
+
+		Specimen specimen = new Specimen();
+		specimen.addIdentifier().setValue("something");
+		Specimen.SpecimenProcessingComponent processingComponent = new Specimen.SpecimenProcessingComponent();
+		processingComponent.setDescription("sample");
+		processingComponent.setTime(new DateTimeType("2021-08-13T07:44:38.342+00:00"));
+		specimen.addProcessing(processingComponent);
+
+		Parameters.ParametersParameterComponent operation;
+		Parameters patch = new Parameters();
+		operation = patch.addParameter();
+		operation.setName("operation");
+		operation
+			.addPart()
+			.setName("type")
+			.setValue(new CodeType("add"));
+		operation
+			.addPart()
+			.setName("path")
+			.setValue(new StringType("Specimen"));
+		operation
+			.addPart()
+			.setName("name")
+			.setValue(new StringType("processing"));
+
+		Parameters processing = new Parameters();
+		Parameters.ParametersParameterComponent op = processing.addParameter();
+
+		List<Parameters.ParametersParameterComponent> listPart = new ArrayList<>();
+		listPart.add(
+			op
+				.addPart()
+				.setName("description")
+				.setValue(new StringType("sample2"))
+		);
+		listPart.add(
+			op
+				.addPart()
+				.setName("timeDateTime")
+				.setValue(new DateTimeType("2021-08-13T07:44:38.342+00:00"))
+		);
+
+		operation.addPart().setName("value").setPart(listPart);
+
+		svc.apply(specimen, patch);
+
+		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(specimen));
+		assertEquals("{\"resourceType\":\"Specimen\",\"identifier\":[{\"value\":\"something\"}],\"processing\":[{\"description\":\"sample\",\"timeDateTime\":\"2021-08-13T07:44:38.342+00:00\"},{\"description\":\"sample2\",\"timeDateTime\":\"2021-08-13T07:44:38.342+00:00\"}]}", ourCtx.newJsonParser().encodeResourceToString(specimen));
+
+	}
+
+	@Test
+	public void testAddItem() {
+		FhirPatch svc = new FhirPatch(ourCtx);
+
+		Specimen specimen = new Specimen();
+		specimen.addIdentifier().setValue("something");
+
+		Parameters.ParametersParameterComponent operation;
+		Parameters patch = new Parameters();
+		operation = patch.addParameter();
+		operation.setName("operation");
+		operation
+			.addPart()
+			.setName("type")
+			.setValue(new CodeType("add"));
+		operation
+			.addPart()
+			.setName("path")
+			.setValue(new StringType("Specimen"));
+		operation
+			.addPart()
+			.setName("name")
+			.setValue(new StringType("processing"));
+
+		Parameters processing = new Parameters();
+		Parameters.ParametersParameterComponent op = processing.addParameter();
+
+		List<Parameters.ParametersParameterComponent> listPart = new ArrayList<>();
+		listPart.add(
+			op
+				.addPart()
+				.setName("description")
+				.setValue(new StringType("sample2"))
+		);
+		listPart.add(
+			op
+				.addPart()
+				.setName("timeDateTime")
+				.setValue(new DateTimeType("2021-08-13T07:44:38.342+00:00"))
+		);
+		operation.addPart().setName("value").setPart(listPart);
+
+		svc.apply(specimen, patch);
+
+		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(specimen));
+		assertEquals("{\"resourceType\":\"Specimen\",\"identifier\":[{\"value\":\"something\"}],\"processing\":[{\"description\":\"sample2\",\"timeDateTime\":\"2021-08-13T07:44:38.342+00:00\"}]}", ourCtx.newJsonParser().encodeResourceToString(specimen));
+
+	}
+
+	@Test
+	public void testDeleteItem() {
+		FhirPatch svc = new FhirPatch(ourCtx);
+
+		Specimen specimen = new Specimen();
+		specimen.addIdentifier().setValue("something");
+		Specimen.SpecimenProcessingComponent processingComponent = new Specimen.SpecimenProcessingComponent();
+		processingComponent.setDescription("sample");
+		processingComponent.setTime(new DateTimeType("2021-08-13T07:44:38.342+00:00"));
+		specimen.addProcessing(processingComponent);
+
+		Parameters.ParametersParameterComponent operation;
+		Parameters patch = new Parameters();
+		operation = patch.addParameter();
+		operation.setName("operation");
+		operation
+			.addPart()
+			.setName("type")
+			.setValue(new CodeType("delete"));
+		operation
+			.addPart()
+			.setName("path")
+			.setValue(new StringType("Specimen.processing.where(description='sample')"));
+
+		svc.apply(specimen, patch);
+
+		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(specimen));
+		assertEquals("{\"resourceType\":\"Specimen\",\"identifier\":[{\"value\":\"something\"}]}", ourCtx.newJsonParser().encodeResourceToString(specimen));
 
 	}
 
