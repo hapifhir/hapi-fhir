@@ -47,10 +47,6 @@ public class FindCandidateByExampleSvc extends BaseCandidateFinder {
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
-	IdHelperService myIdHelperService;
-	@Autowired
-	private MdmLinkDaoSvc myMdmLinkDaoSvc;
-	@Autowired
 	private IMdmMatchFinderSvc myMdmMatchFinderSvc;
 
 	/**
