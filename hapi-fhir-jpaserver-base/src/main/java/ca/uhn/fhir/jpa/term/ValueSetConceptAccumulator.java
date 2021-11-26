@@ -113,8 +113,10 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 			if (++myConceptsExcluded % 250 == 0) {
 				ourLog.info("Have excluded {} concepts from ValueSet[{}]", myConceptsExcluded, myTermValueSet.getUrl());
 			}
+			return true;
+		} else {
+			return false;
 		}
-		return false;
 	}
 
 	private TermValueSetConcept saveConcept(String theSystem, String theCode, String theDisplay, Long theSourceConceptPid, String theSourceConceptDirectParentPids, String theSystemVersion) {
