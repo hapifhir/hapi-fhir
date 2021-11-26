@@ -210,8 +210,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	@Autowired
 	protected IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
-	protected DaoRegistry myDaoRegistry;
-	@Autowired
 	protected InMemoryResourceMatcher myInMemoryResourceMatcher;
 	@Autowired
 	ExpungeService myExpungeService;

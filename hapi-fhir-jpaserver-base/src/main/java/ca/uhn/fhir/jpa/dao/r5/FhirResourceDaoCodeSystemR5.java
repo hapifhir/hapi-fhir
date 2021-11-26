@@ -67,8 +67,6 @@ public class FhirResourceDaoCodeSystemR5 extends BaseHapiFhirResourceDao<CodeSys
 	@Autowired
 	private IValidationSupport myValidationSupport;
 	@Autowired
-	private FhirContext myFhirContext;
-	@Autowired
 	protected ITermDeferredStorageSvc myTermDeferredStorageSvc;
 
 	@Override

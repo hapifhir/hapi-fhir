@@ -56,8 +56,6 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ValueSetOperationProvider.class);
 	@Autowired
-	private DaoConfig myDaoConfig;
-	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private ITermReadSvc myTermReadSvc;

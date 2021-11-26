@@ -67,8 +67,6 @@ public class FhirResourceDaoCodeSystemR4 extends BaseHapiFhirResourceDao<CodeSys
 	@Autowired
 	protected ITermCodeSystemStorageSvc myTerminologyCodeSystemStorageSvc;
 	@Autowired
-	private FhirContext myFhirContext;
-	@Autowired
 	protected ITermDeferredStorageSvc myTermDeferredStorageSvc;
 
 	@Override

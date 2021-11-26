@@ -66,8 +66,6 @@ public class FhirResourceDaoCodeSystemDstu3 extends BaseHapiFhirResourceDao<Code
 	protected ITermDeferredStorageSvc myTermDeferredStorageSvc;
 	@Autowired
 	private IValidationSupport myValidationSupport;
-	@Autowired
-	private FhirContext myFhirContext;
 
 	public FhirResourceDaoCodeSystemDstu3() {
 		super();

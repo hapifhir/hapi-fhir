@@ -76,8 +76,6 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 	@Autowired
 	@Qualifier("myFhirContextDstu2Hl7Org")
 	private FhirContext myRiCtx;
-	@Autowired
-	private FhirContext myFhirContext;
 
 	private CachingValidationSupport myValidationSupport;
 
