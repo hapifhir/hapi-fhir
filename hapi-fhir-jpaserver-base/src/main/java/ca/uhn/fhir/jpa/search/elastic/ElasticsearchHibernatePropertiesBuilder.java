@@ -149,14 +149,12 @@ public class ElasticsearchHibernatePropertiesBuilder {
 			.patterns(Arrays.asList("*resourcetable-*", "*termconcept-*"))
 			.settings(Settings.builder().put("index.max_ngram_diff", 50));
 
-		try {
-			RestHighLevelClient elasticsearchHighLevelRestClient = ElasticsearchRestClientFactory.createElasticsearchHighLevelRestClient(theProtocol, theHosts, theUsername, thePassword);
+		try(RestHighLevelClient elasticsearchHighLevelRestClient = ElasticsearchRestClientFactory.createElasticsearchHighLevelRestClient(theProtocol, theHosts, theUsername, thePassword)) {
 			ourLog.info("Adding starter template for large ngram diffs");
 			AcknowledgedResponse acknowledgedResponse = elasticsearchHighLevelRestClient.indices().putTemplate(ngramTemplate, RequestOptions.DEFAULT);
 			assert acknowledgedResponse.isAcknowledged();
-		} catch (IOException theE) {
-			theE.printStackTrace();
-			throw new ConfigurationException("Couldn't connect to the elasticsearch server to create necessary templates. Ensure the Elasticsearch user has permissions to create templates.");
+		} catch (IOException e) {
+			throw new ConfigurationException("Couldn't connect to the elasticsearch server to create necessary templates. Ensure the Elasticsearch user has permissions to create templates.", theE);
 		}
 	}
 }
