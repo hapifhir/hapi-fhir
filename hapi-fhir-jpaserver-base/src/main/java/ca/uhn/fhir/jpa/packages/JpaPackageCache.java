@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.binstore.IBinaryStorageSvc;
+import ca.uhn.fhir.jpa.binstore.NullBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionResourceDao;
@@ -198,7 +199,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	 * @throws IOException
 	 */
 	private byte[] fetchBlobFromBinary(IBaseBinary theBinary) throws IOException {
-		if (myBinaryStorageSvc != null) {
+		if (myBinaryStorageSvc != null && !(myBinaryStorageSvc instanceof NullBinaryStorageSvcImpl)) {
 			return myBinaryStorageSvc.fetchDataBlobFromBinary(theBinary);
 		} else {
 			byte[] value = BinaryUtil.getOrCreateData(myCtx, theBinary).getValue();
