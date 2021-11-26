@@ -83,7 +83,6 @@ import static org.apache.commons.lang3.StringUtils.substring;
 public class FhirTerser {
 
 	private static final Pattern COMPARTMENT_MATCHER_PATH = Pattern.compile("([a-zA-Z.]+)\\.where\\(resolve\\(\\) is ([a-zA-Z]+)\\)");
-	private static final EnumSet<OptionsEnum> EMPTY_OPTION_SET = EnumSet.noneOf(OptionsEnum.class);
 	private static final String USER_DATA_KEY_CONTAIN_RESOURCES_COMPLETED = FhirTerser.class.getName() + "_CONTAIN_RESOURCES_COMPLETED";
 	private final FhirContext myContext;
 
@@ -1172,9 +1171,11 @@ public class FhirTerser {
 			}
 		}
 
-		Object cachedValue = theResource.getUserData(USER_DATA_KEY_CONTAIN_RESOURCES_COMPLETED);
-		if (cachedValue != null) {
-			return (ContainedResources) cachedValue;
+		if (storeAndReuse) {
+			Object cachedValue = theResource.getUserData(USER_DATA_KEY_CONTAIN_RESOURCES_COMPLETED);
+			if (cachedValue != null) {
+				return (ContainedResources) cachedValue;
+			}
 		}
 
 		ContainedResources contained = new ContainedResources();

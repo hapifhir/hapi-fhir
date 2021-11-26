@@ -55,9 +55,7 @@ import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.param.UriParamQualifierEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
-import ca.uhn.fhir.util.CollectionUtil;
 import ca.uhn.fhir.util.HapiExtensions;
-import ca.uhn.fhir.util.ResourceUtil;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -133,11 +131,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.CsvFileSource;
-import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -149,12 +142,9 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -162,7 +152,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_TYPE;
 import static org.apache.commons.lang3.StringUtils.countMatches;
@@ -190,16 +179,11 @@ import static org.mockito.Mockito.verify;
 @SuppressWarnings({"unchecked", "Duplicates"})
 @TestPropertySource(properties = {
 	BaseJpaTest.CONFIG_ENABLE_LUCENE_FALSE
-	})
+})
 public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4SearchNoFtTest.class);
 	@Autowired
 	MatchUrlService myMatchUrlService;
-
-	@BeforeAll
-	public static void beforeAllTest(){
-		System.setProperty("user.timezone", "EST");
-	}
 
 	@AfterEach
 	public void afterResetSearchSize() {
@@ -220,7 +204,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 	}
 
-
 	@Test
 	public void testDisableAutoSupportDefaultSearchParams() {
 		myModelConfig.setAutoSupportDefaultSearchParams(false);
@@ -231,7 +214,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		patient.addName().setFamily("FAMILY");
 		myPatientDao.create(patient);
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			assertEquals(0, myResourceIndexedSearchParamStringDao.count());
 			assertEquals(0, myResourceIndexedSearchParamTokenDao.count());
 		});
@@ -243,8 +226,12 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		} catch (InvalidRequestException e) {
 			// good
 		}
-	}
 
+		// Make sure we can support mandatory SPs
+		map = SearchParameterMap.newSynchronous("url", new UriParam("http://foo"));
+		myCodeSystemDao.search(map, mySrd); // should not fail
+
+	}
 
 	@Test
 	public void testSearchInExistingTransaction() {
@@ -265,8 +252,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		});
 
 	}
-
-
 
 	@Test
 	public void testCanonicalReference() {
@@ -694,7 +679,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	}
 
-
 	/**
 	 * See #1053
 	 */
@@ -1090,7 +1074,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	}
 
-
 	@Test
 	public void testHasParameterChained() {
 		IIdType pid0;
@@ -1444,15 +1427,15 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		Bundle bundleResponse = mySystemDao.transaction(new SystemRequestDetails(), firstBundle);
 		bundleResponse.getEntry()
-			.forEach( entry -> assertThat(entry.getResponse().getStatus(), is(equalTo("201 Created"))));
+			.forEach(entry -> assertThat(entry.getResponse().getStatus(), is(equalTo("201 Created"))));
 
 		IBundleProvider search = myOrganizationDao.search(new SearchParameterMap().setLoadSynchronous(true));
 		assertEquals(1, search.getAllResources().size());
 
 		//Running the bundle again should just result in 0 new resources created, as the org should already exist, and there is no update to the SR.
-		bundleResponse= mySystemDao.transaction(new SystemRequestDetails(), duplicateBundle);
+		bundleResponse = mySystemDao.transaction(new SystemRequestDetails(), duplicateBundle);
 		bundleResponse.getEntry()
-			.forEach( entry -> {
+			.forEach(entry -> {
 				assertThat(entry.getResponse().getStatus(), is(equalTo("200 OK")));
 			});
 
@@ -1603,7 +1586,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	}
 
-
 	@Test
 	public void testPeriodWithNoStart() {
 		ServiceRequest serviceRequest = new ServiceRequest();
@@ -1640,7 +1622,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		});
 	}
 
-
 	@Test
 	public void testSearchByIdParamInverse() {
 		String id1;
@@ -1669,7 +1650,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), contains(id1));
 
 	}
-
 
 	@Test
 	public void testSearchByIdParam_QueryIsMinimal() {
@@ -1948,7 +1928,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	}
 
-
 	@Test
 	public void testSearchWithIncludeStarQualified() {
 
@@ -2012,7 +1991,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		ids = toUnqualifiedVersionlessIds(myEncounterDao.search(map));
 		assertThat(ids, containsInAnyOrder(obsId, encId));
 	}
-
 
 	@Test
 	public void testComponentQuantity() {
@@ -2090,7 +2068,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		}
 	}
 
-
 	@Test
 	public void testSearchDate_TimingValueUsingPeriod() {
 		ServiceRequest p1 = new ServiceRequest();
@@ -2109,7 +2086,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			assertEquals(1, found.size().intValue());
 		}
 	}
-
 
 	@Test
 	public void testSearchDateWrongParam() {
@@ -2133,7 +2109,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		}
 
 	}
-
 
 	@Test
 	public void testDateRangeOnPeriod_SearchByDateTime_NoUpperBound() {
@@ -2182,7 +2157,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		assertThat(ids, empty());
 	}
 
-
 	@Test
 	public void testDateRangeOnPeriod_SearchByDate_NoUpperBound() {
 		Encounter enc = new Encounter();
@@ -2229,7 +2203,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(ids, empty());
 	}
-
 
 	@Test
 	public void testDateRangeOnPeriod_SearchByDateTime_NoLowerBound() {
@@ -2278,7 +2251,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		assertThat(ids, contains(id1));
 	}
 
-
 	@Test
 	public void testDateRangeOnPeriod_SearchByDate_NoLowerBound() {
 		Encounter enc = new Encounter();
@@ -2325,7 +2297,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(ids, contains(id1));
 	}
-
 
 	@Test
 	public void testDatePeriodParamEndOnly() {
@@ -2465,7 +2436,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	}
 
-
 	/**
 	 * See #1174
 	 */
@@ -2574,7 +2544,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			assertEquals(0, retrieved.size().intValue());
 		}
 	}
-
 
 	@Test
 	public void testSearchLastUpdatedParam() {
@@ -2890,7 +2859,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		}
 	}
 
-
 	@Test
 	public void testSearchNumberParam() {
 		RiskAssessment e1 = new RiskAssessment();
@@ -3013,7 +2981,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			assertEquals("Invalid token specified for parameter code - No system specified: 111-1|(missing)", e.getMessage());
 		}
 	}
-
 
 	@Test
 	public void testSearchParamChangesType() {
@@ -3161,7 +3128,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 
 	}
-
 
 	@Test
 	public void testSearchResourceLinkWithChain() {
@@ -3446,7 +3412,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	}
 
-
 	@Test
 	public void testSearchTokenListWithMixedCombinations() {
 
@@ -3694,7 +3659,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		assertEquals(5, countMatches(searchQuery.toUpperCase(), "LEFT OUTER JOIN"), searchQuery);
 	}
 
-
 	@Test
 	public void testSearchWithDateRange() {
 
@@ -3821,7 +3785,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		}
 	}
 
-
 	@Test
 	public void testSearchDoubleToken() {
 		Patient patient = new Patient();
@@ -3857,7 +3820,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			assertThat(toUnqualifiedVersionlessIdValues(retrieved), containsInAnyOrder(idA, idBoth));
 		}
 	}
-
 
 	@Test
 	public void testSearchDoubleString() {
@@ -4326,7 +4288,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		}
 	}
 
-
 	@Test
 	public void testSearchReferenceUntyped() {
 		Patient p = new Patient();
@@ -4362,7 +4323,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		StorageProcessingMessage message = captor.getValue().get(StorageProcessingMessage.class);
 		assertEquals("This search uses an unqualified resource(a parameter in a chain without a resource type). This is less efficient than using a qualified type. If you know what you're looking for, try qualifying it using the form: 'entity:[resourceType]'", message.getMessage());
 	}
-
 
 	@Test
 	public void testSearchWithDateAndReusesExistingJoin() {
@@ -4462,7 +4422,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		}
 
 	}
-
 
 	@Test
 	public void testSearchWithFetchSizeDefaultMaximum() {
@@ -5148,7 +5107,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		p.addName().setFamily("A1");
 		myPatientDao.create(p);
 
-		runInTransaction(()->assertEquals(0, mySearchEntityDao.count()));
+		runInTransaction(() -> assertEquals(0, mySearchEntityDao.count()));
 
 		SearchParameterMap map = new SearchParameterMap();
 		StringOrListParam or = new StringOrListParam();
@@ -5159,7 +5118,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		map.add(Patient.SP_NAME, or);
 		IBundleProvider results = myPatientDao.search(map);
 		assertEquals(1, results.getResources(0, 10).size());
-		runInTransaction(()->assertEquals(1, mySearchEntityDao.count()));
+		runInTransaction(() -> assertEquals(1, mySearchEntityDao.count()));
 
 		map = new SearchParameterMap();
 		or = new StringOrListParam();
@@ -5172,7 +5131,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		results = myPatientDao.search(map);
 		assertEquals(1, results.getResources(0, 10).size());
 		// We expect a new one because we don't cache the search URL for very long search URLs
-		runInTransaction(()->assertEquals(2, mySearchEntityDao.count()));
+		runInTransaction(() -> assertEquals(2, mySearchEntityDao.count()));
 	}
 
 	@Test
@@ -5217,7 +5176,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			assertEquals("The :text modifier is disabled for this search parameter", e.getMessage());
 		}
 	}
-
 
 	@Test
 	public void testDateSearchParametersShouldBeTimezoneIndependent() {
@@ -5345,7 +5303,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		));
 	}
 
-
 	private void createObservationWithEffective(String theId, String theEffective) {
 		Observation obs = new Observation();
 		obs.setId(theId);
@@ -5366,7 +5323,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		p.addName().setFamily("A1");
 		myPatientDao.create(p);
 
-		runInTransaction(()->assertEquals(0, mySearchEntityDao.count()));
+		runInTransaction(() -> assertEquals(0, mySearchEntityDao.count()));
 
 		SearchParameterMap map = new SearchParameterMap();
 		StringOrListParam or = new StringOrListParam();
@@ -5377,7 +5334,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		map.add(Patient.SP_NAME, or);
 		IBundleProvider results = myPatientDao.search(map);
 		assertEquals(1, results.getResources(0, 10).size());
-		assertEquals(1, runInTransaction(()->mySearchEntityDao.count()));
+		assertEquals(1, runInTransaction(() -> mySearchEntityDao.count()));
 
 		map = new SearchParameterMap();
 		or = new StringOrListParam();
@@ -5388,7 +5345,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		map.add(Patient.SP_NAME, or);
 		results = myPatientDao.search(map);
 		assertEquals(1, results.getResources(0, 10).size());
-		assertEquals(1, runInTransaction(()->mySearchEntityDao.count()));
+		assertEquals(1, runInTransaction(() -> mySearchEntityDao.count()));
 
 	}
 
@@ -5432,7 +5389,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(toUnqualifiedVersionlessIdValues(outcome), contains(crId));
 	}
-
 
 	@Test
 	public void testSearchWithTwoChainedDates() {
@@ -5486,7 +5442,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	}
 
-
 	@Test
 	public void testCircularReferencesDontBreakRevIncludes() {
 
@@ -5524,7 +5479,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	}
 
-
 	private String toStringMultiline(List<?> theResults) {
 		StringBuilder b = new StringBuilder();
 		for (Object next : theResults) {
@@ -5532,6 +5486,11 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			b.append(" * ").append(next.toString());
 		}
 		return b.toString();
+	}
+
+	@BeforeAll
+	public static void beforeAllTest() {
+		System.setProperty("user.timezone", "EST");
 	}
 
 

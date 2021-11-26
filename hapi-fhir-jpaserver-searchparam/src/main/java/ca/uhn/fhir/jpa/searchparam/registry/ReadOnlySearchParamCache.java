@@ -26,11 +26,12 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ClasspathUtil;
-import com.google.common.annotations.VisibleForTesting;
-import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -39,8 +40,6 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 public class ReadOnlySearchParamCache {
-
-	private static final ReadOnlySearchParamCache EMPTY = new ReadOnlySearchParamCache();
 
 	// resourceName -> searchParamName -> searchparam
 	protected final Map<String, Map<String, RuntimeSearchParam>> myResourceNameToSpNameToSp;
@@ -82,7 +81,11 @@ public class ReadOnlySearchParamCache {
 		return myUrlToParam.get(theUrl);
 	}
 
-	public static ReadOnlySearchParamCache fromFhirContext(FhirContext theFhirContext, SearchParameterCanonicalizer theCanonicalizer) {
+	public static ReadOnlySearchParamCache fromFhirContext(@Nonnull FhirContext theFhirContext, @Nonnull SearchParameterCanonicalizer theCanonicalizer) {
+		return fromFhirContext(theFhirContext, theCanonicalizer, null);
+	}
+
+	public static ReadOnlySearchParamCache fromFhirContext(@Nonnull FhirContext theFhirContext, @Nonnull SearchParameterCanonicalizer theCanonicalizer, @Nullable Set<String> theSearchParamPatternsToInclude) {
 		assert theCanonicalizer != null;
 
 		ReadOnlySearchParamCache retVal = new ReadOnlySearchParamCache();
@@ -99,10 +102,12 @@ public class ReadOnlySearchParamCache {
 						base = resourceNames;
 					}
 
-					for (String nextBase : base) {
-						Map<String, RuntimeSearchParam> nameToParam = retVal.myResourceNameToSpNameToSp.computeIfAbsent(nextBase, t -> new HashMap<>());
-						String nextName = nextCanonical.getName();
-						nameToParam.putIfAbsent(nextName, nextCanonical);
+					for (String nextResourceName : base) {
+						Map<String, RuntimeSearchParam> nameToParam = retVal.myResourceNameToSpNameToSp.computeIfAbsent(nextResourceName, t -> new HashMap<>());
+						String nextParamName = nextCanonical.getName();
+						if (theSearchParamPatternsToInclude == null || searchParamMatchesAtLeastOnePattern(theSearchParamPatternsToInclude, nextResourceName, nextParamName)) {
+							nameToParam.putIfAbsent(nextParamName, nextCanonical);
+						}
 					}
 				}
 			}
@@ -112,19 +117,42 @@ public class ReadOnlySearchParamCache {
 			RuntimeResourceDefinition nextResDef = theFhirContext.getResourceDefinition(resourceName);
 			String nextResourceName = nextResDef.getName();
 
-			Map<String, RuntimeSearchParam> nameToParam = retVal.myResourceNameToSpNameToSp.computeIfAbsent(nextResourceName, t-> new HashMap<>());
+			Map<String, RuntimeSearchParam> nameToParam = retVal.myResourceNameToSpNameToSp.computeIfAbsent(nextResourceName, t -> new HashMap<>());
 			for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
-				nameToParam.putIfAbsent(nextSp.getName(), nextSp);
+				String nextParamName = nextSp.getName();
+				if (theSearchParamPatternsToInclude == null || searchParamMatchesAtLeastOnePattern(theSearchParamPatternsToInclude, nextResourceName, nextParamName)) {
+					nameToParam.putIfAbsent(nextParamName, nextSp);
+				}
 			}
 		}
 		return retVal;
+	}
+
+	public static boolean searchParamMatchesAtLeastOnePattern(Set<String> theSearchParamPatterns, String theResourceType, String theSearchParamName) {
+		for (String nextPattern : theSearchParamPatterns) {
+			if ("*".equals(nextPattern)) {
+				return true;
+			}
+			int colonIdx = nextPattern.indexOf(':');
+			Validate.isTrue(colonIdx > 0, "Invalid search param pattern: %s", nextPattern);
+			String resourceType = nextPattern.substring(0, colonIdx);
+			String searchParamName = nextPattern.substring(colonIdx + 1);
+			Validate.notBlank(resourceType, "No resource type specified in pattern: %s", nextPattern);
+			Validate.notBlank(searchParamName, "No param name specified in pattern: %s", nextPattern);
+			if (!resourceType.equals("*") && !resourceType.equals(theResourceType)) {
+				continue;
+			}
+			if (!searchParamName.equals("*") && !searchParamName.equals(theSearchParamName)) {
+				continue;
+			}
+			return true;
+		}
+
+		return false;
 	}
 
 	public static ReadOnlySearchParamCache fromRuntimeSearchParamCache(RuntimeSearchParamCache theRuntimeSearchParamCache) {
 		return new ReadOnlySearchParamCache(theRuntimeSearchParamCache);
 	}
 
-	public static ReadOnlySearchParamCache empty() {
-		return EMPTY;
-	}
 }
