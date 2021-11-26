@@ -1,26 +1,25 @@
 package ca.uhn.fhir.i18n;
 
 public enum ModuleErrorCodeEnum {
-	BASE(1),
-	JPA(2),
-	PLAIN(3),
-	STORE(4),
-	VALID(5),
-	SUBS(6),
-	BATCH(7),
-	MDM(8),
-	SQL(10),
+	BASE("BAS"),
+	JPA("JPA"),
+	PLAIN("PLN"),
+	STORAGE("STO"),
+	VALIDATION("VAL"),
+	SUBSCRIPTION("SUB"),
+	BATCH("BAT"),
+	MDM("MDM"),
+	SQL_MIGRATION("SQL"),
 	;
 
-	private final int myCode;
+	private final String myShortCode;
 
-	ModuleErrorCodeEnum(int theCode) {
-		myCode = theCode;
+	ModuleErrorCodeEnum(String theShortCode) {
+		myShortCode = theShortCode;
 	}
-
-
+	
 	@Override
 	public String toString() {
-		return String.format("%02d", myCode);
+		return myShortCode;
 	}
 }
