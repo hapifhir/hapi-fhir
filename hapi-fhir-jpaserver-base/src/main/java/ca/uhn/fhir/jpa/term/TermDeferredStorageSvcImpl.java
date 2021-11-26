@@ -265,9 +265,8 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 
 			try {
 				myJobOperator.stop(jobExecution.getId());
-
 			} catch (NoSuchJobExecutionException | JobExecutionNotRunningException theE) {
-				ourLog.error("Couldn't stop job execution {}: {}", jobExecution.getId(), theE);
+				ourLog.error("Couldn't stop job execution {}.", jobExecution.getId(), theE);
 			}
 		}
 

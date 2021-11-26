@@ -54,33 +54,35 @@ public class GraphQLQueryBodyParameter implements IParameter {
 	@Override
 	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
 		String ctValue = defaultString(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE));
-		Reader requestReader = createRequestReader(theRequest);
+		try (Reader requestReader = createRequestReader(theRequest)) {
+			// Trim off "; charset=FOO" from the content-type header
+			int semicolonIdx = ctValue.indexOf(';');
+			if (semicolonIdx != -1) {
+				ctValue = ctValue.substring(0, semicolonIdx);
+			}
+			ctValue = trim(ctValue);
 
-		// Trim off "; charset=FOO" from the content-type header
-		int semicolonIdx = ctValue.indexOf(';');
-		if (semicolonIdx != -1) {
-			ctValue = ctValue.substring(0, semicolonIdx);
-		}
-		ctValue = trim(ctValue);
-
-		if (CT_JSON.equals(ctValue)) {
-			try {
-				ObjectMapper mapper = new ObjectMapper();
-				JsonNode jsonNode = mapper.readTree(requestReader);
-				if (jsonNode != null && jsonNode.get("query") != null) {
-					return jsonNode.get("query").asText();
+			if (CT_JSON.equals(ctValue)) {
+				try {
+					ObjectMapper mapper = new ObjectMapper();
+					JsonNode jsonNode = mapper.readTree(requestReader);
+					if (jsonNode != null && jsonNode.get("query") != null) {
+						return jsonNode.get("query").asText();
+					}
+				} catch (IOException e) {
+					throw new InternalErrorException(e);
 				}
-			} catch (IOException e) {
-				throw new InternalErrorException(e);
 			}
-		}
 
-		if (CT_GRAPHQL.equals(ctValue)) {
-			try {
-				return IOUtils.toString(requestReader);
-			} catch (IOException e) {
-				throw new InternalErrorException(e);
+			if (CT_GRAPHQL.equals(ctValue)) {
+				try {
+					return IOUtils.toString(requestReader);
+				} catch (IOException e) {
+					throw new InternalErrorException(e);
+				}
 			}
+		} catch (IOException e) {
+			throw new InternalErrorException("Failed to read request during GraphQL operation", e);
 		}
 
 		return null;
