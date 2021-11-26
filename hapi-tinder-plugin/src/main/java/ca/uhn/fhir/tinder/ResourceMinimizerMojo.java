@@ -112,12 +112,9 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 				ourLog.info("Trimming contents of resource: {} - From {} to {}", nextFile, FileUtils.byteCountToDisplaySize(inputString.length()), FileUtils.byteCountToDisplaySize(outputString.length()));
 				myByteCount += (inputString.length() - outputString.length());
 				myFileCount++;
-				try {
-					String f = nextFile.getAbsolutePath();
-					Writer w = new OutputStreamWriter(new FileOutputStream(f, false), StandardCharsets.UTF_8);
-					w = new BufferedWriter(w);
+				String f = nextFile.getAbsolutePath();
+				try (BufferedWriter w = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f, false), StandardCharsets.UTF_8))) {
 					w.append(outputString);
-					w.close();
 				} catch (IOException e) {
 					throw new MojoFailureException("Failed to write " + nextFile, e);
 				}
