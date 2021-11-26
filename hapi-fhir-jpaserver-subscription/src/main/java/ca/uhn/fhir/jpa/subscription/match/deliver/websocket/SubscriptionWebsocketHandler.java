@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.subscription.match.deliver.websocket;
 
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelWithHandlers;
+import ca.uhn.fhir.jpa.subscription.log.Msg;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -150,7 +151,7 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 				}
 			} catch (Exception e) {
 				ourLog.error("Failure handling subscription payload", e);
-				throw new MessagingException(theMessage, "Failure handling subscription payload", e);
+				throw new MessagingException(theMessage, Msg.code(6) + "Failure handling subscription payload", e);
 			}
 		}
 

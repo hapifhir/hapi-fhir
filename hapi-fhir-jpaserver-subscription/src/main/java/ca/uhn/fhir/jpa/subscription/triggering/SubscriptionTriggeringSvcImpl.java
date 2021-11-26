@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.subscription.log.Msg;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedConsumer;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
@@ -104,7 +105,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 	public IBaseParameters triggerSubscription(List<IPrimitiveType<String>> theResourceIds, List<IPrimitiveType<String>> theSearchUrls, @IdParam IIdType theSubscriptionId) {
 
 		if (myDaoConfig.getSupportedSubscriptionTypes().isEmpty()) {
-			throw new PreconditionFailedException("Subscription processing not active on this server");
+			throw new PreconditionFailedException(Msg.code(22) + "Subscription processing not active on this server");
 		}
 
 		// Throw a 404 if the subscription doesn't exist
@@ -122,7 +123,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 
 		// Make sure we have at least one resource ID or search URL
 		if (resourceIds.size() == 0 && searchUrls.size() == 0) {
-			throw new InvalidRequestException("No resource IDs or search URLs specified for triggering");
+			throw new InvalidRequestException(Msg.code(23) + "No resource IDs or search URLs specified for triggering");
 		}
 
 		// Resource URLs must be compete
@@ -135,7 +136,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		// Search URLs must be valid
 		for (IPrimitiveType<String> next : searchUrls) {
 			if (!next.getValue().contains("?")) {
-				throw new InvalidRequestException("Search URL is not valid (must be in the form \"[resource type]?[optional params]\")");
+				throw new InvalidRequestException(Msg.code(24) + "Search URL is not valid (must be in the form \"[resource type]?[optional params]\")");
 			}
 		}
 
@@ -317,7 +318,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 					break;
 				} catch (Exception e) {
 					if (i >= 3) {
-						throw new InternalErrorException(e);
+						throw new InternalErrorException(Msg.code(25) + e);
 					}
 
 					ourLog.warn("Exception while retriggering subscriptions (going to sleep and retry): {}", e.toString());
@@ -371,7 +372,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 				} catch (InterruptedException theE) {
 					// Restore interrupted state...
 					Thread.currentThread().interrupt();
-					throw new RejectedExecutionException("Task " + theRunnable.toString() +
+					throw new RejectedExecutionException(Msg.code(26) + "Task " + theRunnable.toString() +
 						" rejected from " + theE.toString());
 				}
 				ourLog.info("Slot become available after {}ms", sw.getMillis());

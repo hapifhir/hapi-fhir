@@ -25,6 +25,7 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.subscription.log.Msg;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionCriteriaParser;
@@ -80,7 +81,7 @@ public class SubscriptionValidatingInterceptor {
 		CanonicalSubscription subscription = mySubscriptionCanonicalizer.canonicalize(theSubscription);
 		boolean finished = false;
 		if (subscription.getStatus() == null) {
-			throw new UnprocessableEntityException("Can not process submitted Subscription - Subscription.status must be populated on this server");
+			throw new UnprocessableEntityException(Msg.code(8) + "Can not process submitted Subscription - Subscription.status must be populated on this server");
 		}
 
 		switch (subscription.getStatus()) {
@@ -110,11 +111,11 @@ public class SubscriptionValidatingInterceptor {
 				SubscriptionMatchingStrategy strategy = mySubscriptionStrategyEvaluator.determineStrategy(subscription.getCriteriaString());
 				mySubscriptionCanonicalizer.setMatchingStrategyTag(theSubscription, strategy);
 			} catch (InvalidRequestException | DataFormatException e) {
-				throw new UnprocessableEntityException("Invalid subscription criteria submitted: " + subscription.getCriteriaString() + " " + e.getMessage());
+				throw new UnprocessableEntityException(Msg.code(9) + "Invalid subscription criteria submitted: " + subscription.getCriteriaString() + " " + e.getMessage());
 			}
 
 			if (subscription.getChannelType() == null) {
-				throw new UnprocessableEntityException("Subscription.channel.type must be populated on this server");
+				throw new UnprocessableEntityException(Msg.code(10) + "Subscription.channel.type must be populated on this server");
 			} else if (subscription.getChannelType() == CanonicalSubscriptionChannelType.MESSAGE) {
 				validateMessageSubscriptionEndpoint(subscription.getEndpointUrl());
 			}
@@ -125,12 +126,12 @@ public class SubscriptionValidatingInterceptor {
 
 	public void validateQuery(String theQuery, String theFieldName) {
 		if (isBlank(theQuery)) {
-			throw new UnprocessableEntityException(theFieldName + " must be populated");
+			throw new UnprocessableEntityException(Msg.code(11) + theFieldName + " must be populated");
 		}
 
 		SubscriptionCriteriaParser.SubscriptionCriteria parsedCriteria = SubscriptionCriteriaParser.parse(theQuery);
 		if (parsedCriteria == null) {
-			throw new UnprocessableEntityException(theFieldName + " can not be parsed");
+			throw new UnprocessableEntityException(Msg.code(12) + theFieldName + " can not be parsed");
 		}
 
 		if (parsedCriteria.getType() == SubscriptionCriteriaParser.TypeEnum.STARTYPE_EXPRESSION) {
@@ -139,7 +140,7 @@ public class SubscriptionValidatingInterceptor {
 
 		for (String next : parsedCriteria.getApplicableResourceTypes()) {
 			if (!myDaoRegistry.isResourceTypeSupported(next)) {
-				throw new UnprocessableEntityException(theFieldName + " contains invalid/unsupported resource type: " + next);
+				throw new UnprocessableEntityException(Msg.code(13) + theFieldName + " contains invalid/unsupported resource type: " + next);
 			}
 		}
 
@@ -149,40 +150,40 @@ public class SubscriptionValidatingInterceptor {
 
 		int sep = theQuery.indexOf('?');
 		if (sep <= 1) {
-			throw new UnprocessableEntityException(theFieldName + " must be in the form \"{Resource Type}?[params]\"");
+			throw new UnprocessableEntityException(Msg.code(14) + theFieldName + " must be in the form \"{Resource Type}?[params]\"");
 		}
 
 		String resType = theQuery.substring(0, sep);
 		if (resType.contains("/")) {
-			throw new UnprocessableEntityException(theFieldName + " must be in the form \"{Resource Type}?[params]\"");
+			throw new UnprocessableEntityException(Msg.code(15) + theFieldName + " must be in the form \"{Resource Type}?[params]\"");
 		}
 
 	}
 
 	public void validateMessageSubscriptionEndpoint(String theEndpointUrl) {
 		if (theEndpointUrl == null) {
-			throw new UnprocessableEntityException("No endpoint defined for message subscription");
+			throw new UnprocessableEntityException(Msg.code(16) + "No endpoint defined for message subscription");
 		}
 
 		try {
 			URI uri = new URI(theEndpointUrl);
 
 			if (!"channel".equals(uri.getScheme())) {
-				throw new UnprocessableEntityException("Only 'channel' protocol is supported for Subscriptions with channel type 'message'");
+				throw new UnprocessableEntityException(Msg.code(17) + "Only 'channel' protocol is supported for Subscriptions with channel type 'message'");
 			}
 			String channelName = uri.getSchemeSpecificPart();
 			if (isBlank(channelName)) {
-				throw new UnprocessableEntityException("A channel name must appear after channel: in a message Subscription endpoint");
+				throw new UnprocessableEntityException(Msg.code(18) + "A channel name must appear after channel: in a message Subscription endpoint");
 			}
 		} catch (URISyntaxException e) {
-			throw new UnprocessableEntityException("Invalid subscription endpoint uri " + theEndpointUrl, e);
+			throw new UnprocessableEntityException(Msg.code(19) + "Invalid subscription endpoint uri " + theEndpointUrl, e);
 		}
 	}
 
 	@SuppressWarnings("WeakerAccess")
 	protected void validateChannelType(CanonicalSubscription theSubscription) {
 		if (theSubscription.getChannelType() == null) {
-			throw new UnprocessableEntityException("Subscription.channel.type must be populated");
+			throw new UnprocessableEntityException(Msg.code(20) + "Subscription.channel.type must be populated");
 		} else if (theSubscription.getChannelType() == CanonicalSubscriptionChannelType.RESTHOOK) {
 			validateChannelPayload(theSubscription);
 			validateChannelEndpoint(theSubscription);
@@ -192,14 +193,14 @@ public class SubscriptionValidatingInterceptor {
 	@SuppressWarnings("WeakerAccess")
 	protected void validateChannelEndpoint(CanonicalSubscription theResource) {
 		if (isBlank(theResource.getEndpointUrl())) {
-			throw new UnprocessableEntityException("Rest-hook subscriptions must have Subscription.channel.endpoint defined");
+			throw new UnprocessableEntityException(Msg.code(21) + "Rest-hook subscriptions must have Subscription.channel.endpoint defined");
 		}
 	}
 
 	@SuppressWarnings("WeakerAccess")
 	protected void validateChannelPayload(CanonicalSubscription theResource) {
 		if (!isBlank(theResource.getPayloadString()) && EncodingEnum.forContentType(theResource.getPayloadString()) == null) {
-			throw new UnprocessableEntityException("Invalid value for Subscription.channel.payload: " + theResource.getPayloadString());
+			throw new UnprocessableEntityException(Msg.code(21) + "Invalid value for Subscription.channel.payload: " + theResource.getPayloadString());
 		}
 	}
 
