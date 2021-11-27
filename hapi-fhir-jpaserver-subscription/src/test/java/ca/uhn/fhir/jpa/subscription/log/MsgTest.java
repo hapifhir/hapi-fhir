@@ -8,5 +8,6 @@ class MsgTest {
 	@Test
 	public void testCode() {
 		assertEquals("HAPI-SUB-073: ", Msg.code(73));
+		assertEquals("HAPI-SUB-973: ", Msg.code(973));
 	}
 }
