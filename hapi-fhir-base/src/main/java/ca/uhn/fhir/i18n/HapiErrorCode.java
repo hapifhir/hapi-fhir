@@ -6,7 +6,7 @@ public final class HapiErrorCode {
 	private HapiErrorCode() {}
 
 	public static String code(ModuleErrorCodeEnum moduleErrorCode, int theCode) {
-		return String.join("-", ERROR_CODE_PREFIX, moduleErrorCode.toString(), String.format("%04d", theCode)) + ": ";
+		return String.join("-", ERROR_CODE_PREFIX, moduleErrorCode.toString(), String.format("%03d", theCode)) + ": ";
 	}
 
 }
