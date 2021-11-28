@@ -53,6 +53,9 @@ public class TestR4Config extends BaseJavaConfigR4 {
 			if ("true".equals(System.getProperty("single_db_connection"))) {
 				ourMaxThreads = 1;
 			}
+			if ("true".equals(System.getProperty("unlimited_db_connection"))) {
+				ourMaxThreads = 100;
+			}
 		}
 	}
 

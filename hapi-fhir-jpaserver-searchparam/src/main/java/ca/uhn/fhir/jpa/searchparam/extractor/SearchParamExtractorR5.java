@@ -24,12 +24,16 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.PathEngineException;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r5.model.Base;
+import org.hl7.fhir.r5.model.ExpressionNode;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.ResourceType;
@@ -38,16 +42,19 @@ import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.utils.FHIRPathEngine;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class SearchParamExtractorR5 extends BaseSearchParamExtractor implements ISearchParamExtractor {
 
 	private FHIRPathEngine myFhirPathEngine;
+	private Cache<String, ExpressionNode> myParsedFhirPathCache;
 
 	public SearchParamExtractorR5() {
 		super();
@@ -75,11 +82,19 @@ public class SearchParamExtractorR5 extends BaseSearchParamExtractor implements 
 		IWorkerContext worker = new HapiWorkerContext(getContext(), getContext().getValidationSupport());
 		myFhirPathEngine = new FHIRPathEngine(worker);
 		myFhirPathEngine.setHostServices(new SearchParamExtractorR5HostServices());
+
+		myParsedFhirPathCache = Caffeine
+			.newBuilder()
+			.expireAfterWrite(10, TimeUnit.MINUTES)
+			.build();
 	}
 
 	@Override
-	public IValueExtractor getPathValueExtractor(IBaseResource theResource, String nextPath) {
-		return () -> myFhirPathEngine.evaluate((Base) theResource, nextPath);
+	public IValueExtractor getPathValueExtractor(IBaseResource theResource, String theSinglePath) {
+		return () -> {
+			ExpressionNode parsed = myParsedFhirPathCache.get(theSinglePath, path -> myFhirPathEngine.parse(path));
+			return myFhirPathEngine.evaluate((Base) theResource, parsed);
+		};
 	}
 
 
