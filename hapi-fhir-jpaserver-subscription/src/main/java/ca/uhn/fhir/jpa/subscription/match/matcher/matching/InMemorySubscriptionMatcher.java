@@ -21,9 +21,9 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.matching;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
-import ca.uhn.fhir.jpa.subscription.log.Msg;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;

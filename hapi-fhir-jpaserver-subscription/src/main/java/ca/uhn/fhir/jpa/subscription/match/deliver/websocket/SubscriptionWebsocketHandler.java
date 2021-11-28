@@ -20,9 +20,9 @@ package ca.uhn.fhir.jpa.subscription.match.deliver.websocket;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelWithHandlers;
-import ca.uhn.fhir.jpa.subscription.log.Msg;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import org.hl7.fhir.instance.model.api.IIdType;

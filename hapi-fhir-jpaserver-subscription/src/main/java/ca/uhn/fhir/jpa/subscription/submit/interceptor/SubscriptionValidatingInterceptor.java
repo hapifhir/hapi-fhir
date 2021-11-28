@@ -21,11 +21,11 @@ package ca.uhn.fhir.jpa.subscription.submit.interceptor;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.subscription.log.Msg;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionCriteriaParser;
@@ -45,7 +45,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
-
+// FIXME test
 @Interceptor
 public class SubscriptionValidatingInterceptor {
 
