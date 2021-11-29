@@ -20,14 +20,6 @@ package ca.uhn.fhir.rest.client.method;
  * #L%
  */
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.*;
-
-import org.hl7.fhir.instance.model.api.*;
-
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
@@ -38,6 +30,22 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ReflectionUtil;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Object> {
 	protected static final Set<String> ALLOWED_PARAMS;
@@ -163,7 +171,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				} else if (list.size() == 1) {
 					return list.get(0);
 				} else {
-					throw new InvalidResponseException(theResponseStatusCode, "FHIR server call returned a bundle with multiple resources, but this method is only able to returns one.");
+					throw new InvalidResponseException("FHIR server call returned a bundle with multiple resources, but this method is only able to returns one.", theResponseStatusCode);
 				}
 			default:
 				break;
