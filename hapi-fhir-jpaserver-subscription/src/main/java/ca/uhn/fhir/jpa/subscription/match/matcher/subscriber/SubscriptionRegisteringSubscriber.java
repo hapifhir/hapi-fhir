@@ -21,9 +21,11 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
@@ -90,7 +92,9 @@ public class SubscriptionRegisteringSubscriber extends BaseSubscriberForSubscrip
 				// reading resource back from db in order to store partition id in the userdata of the resource for partitioned subscriptions
 				if (myPartitionSettings.isPartitioningEnabled()) {
 					IFhirResourceDao subscriptionDao = myDaoRegistry.getSubscriptionDao();
-					subscriptionToRegister = subscriptionDao.read(subscription.getIdElement());
+					SystemRequestDetails requestDetails = new SystemRequestDetails();
+					requestDetails.setRequestPartitionId(RequestPartitionId.allPartitions());
+					subscriptionToRegister = subscriptionDao.read(subscription.getIdElement(), requestDetails);
 				}
 
 				if ("active".equals(statusString)) {
