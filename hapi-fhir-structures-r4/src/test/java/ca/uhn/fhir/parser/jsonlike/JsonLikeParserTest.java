@@ -28,10 +28,10 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Stack;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -537,8 +537,8 @@ public class JsonLikeParserTest {
 			}
 
 			@Override
-			public Set<String> keySet() {
-				return nativeObject.keySet();
+			public Iterator<String> keyIterator() {
+				return nativeObject.keySet().iterator();
 			}
 
 			@Override

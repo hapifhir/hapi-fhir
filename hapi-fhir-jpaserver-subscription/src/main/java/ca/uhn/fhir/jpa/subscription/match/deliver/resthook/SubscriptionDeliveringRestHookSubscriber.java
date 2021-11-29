@@ -45,7 +45,6 @@ import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleBuilder;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -58,10 +57,10 @@ import org.springframework.messaging.MessagingException;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -252,21 +251,10 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 	 */
 	protected void sendNotification(ResourceDeliveryMessage theMsg) {
 		Map<String, List<String>> params = new HashMap<>();
-		List<Header> headers = new ArrayList<>();
-		if (theMsg.getSubscription().getHeaders() != null) {
-			theMsg.getSubscription().getHeaders().stream().filter(Objects::nonNull).forEach(h -> {
-				final int sep = h.indexOf(':');
-				if (sep > 0) {
-					final String name = h.substring(0, sep);
-					final String value = h.substring(sep + 1);
-					if (StringUtils.isNotBlank(name)) {
-						headers.add(new Header(name.trim(), value.trim()));
-					}
-				}
-			});
-		}
+		CanonicalSubscription subscription = theMsg.getSubscription();
+		List<Header> headers = parseHeadersFromSubscription(subscription);
 
-		StringBuilder url = new StringBuilder(theMsg.getSubscription().getEndpointUrl());
+		StringBuilder url = new StringBuilder(subscription.getEndpointUrl());
 		IHttpClient client = myFhirContext.getRestfulClientFactory().getHttpClient(url, params, "", RequestTypeEnum.POST, headers);
 		IHttpRequest request = client.createParamRequest(myFhirContext, params, null);
 		try {
@@ -278,4 +266,32 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 			throw new ResourceNotFoundException(Msg.code(5) + e.getMessage());
 		}
 	}
+
+	public static List<Header> parseHeadersFromSubscription(CanonicalSubscription subscription) {
+		List<Header> headers = null;
+		if (subscription != null) {
+			for (String h : subscription.getHeaders()) {
+				if (h != null) {
+					final int sep = h.indexOf(':');
+					if (sep > 0) {
+						final String name = h.substring(0, sep);
+						final String value = h.substring(sep + 1);
+						if (isNotBlank(name)) {
+							if (headers == null) {
+								headers = new ArrayList<>();
+							}
+							headers.add(new Header(name.trim(), value.trim()));
+						}
+					}
+				}
+			}
+		}
+		if (headers == null) {
+			headers = Collections.emptyList();
+		} else {
+			headers = Collections.unmodifiableList(headers);
+		}
+		return headers;
+	}
+
 }

@@ -45,7 +45,6 @@ import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -53,7 +52,6 @@ import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -185,7 +183,7 @@ public class MatchResourceUrlService {
 	@Nullable
 	public ResourcePersistentId processMatchUrlUsingCacheOnly(String theResourceType, String theMatchUrl) {
 		ResourcePersistentId existing = null;
-		if (myDaoConfig.getMatchUrlCache()) {
+		if (myDaoConfig.isMatchUrlCacheEnabled()) {
 			String matchUrl = massageForStorage(theResourceType, theMatchUrl);
 			existing = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.MATCH_URL, matchUrl);
 		}

@@ -30,7 +30,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-import static ca.uhn.fhir.jpa.dao.BaseJpaTest.buildHeapLuceneHibernateSearchProperties;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @Configuration
@@ -52,6 +51,9 @@ public class TestR4Config extends BaseJavaConfigR4 {
 
 			if ("true".equals(System.getProperty("single_db_connection"))) {
 				ourMaxThreads = 1;
+			}
+			if ("true".equals(System.getProperty("unlimited_db_connection"))) {
+				ourMaxThreads = 100;
 			}
 		}
 	}

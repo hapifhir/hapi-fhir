@@ -88,7 +88,6 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.strip;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public abstract class BaseSearchParamExtractor implements ISearchParamExtractor {
@@ -991,7 +990,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			myModelConfig.isIndexOnContainedResources()
 				|| anySearchParameterUsesResolve(searchParams, theSearchParamType);
 
-		if (havePathWithResolveExpression) {
+		if (havePathWithResolveExpression && myContext.getParserOptions().isAutoContainReferenceTargetsWithNoId()) {
 			//TODO GGG/JA: At this point, if the Task.basedOn.reference.resource does _not_ have an ID, we will attempt to contain it internally. Wild
 			myContext.newTerser().containResources(theResource, FhirTerser.OptionsEnum.MODIFY_RESOURCE, FhirTerser.OptionsEnum.STORE_AND_REUSE_RESULTS);
 		}

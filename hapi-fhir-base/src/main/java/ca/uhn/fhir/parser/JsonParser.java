@@ -20,8 +20,17 @@ package ca.uhn.fhir.parser;
  * #L%
  */
 
-import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum;
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeChildContainedResources;
+import ca.uhn.fhir.context.RuntimeChildDeclaredExtensionDefinition;
+import ca.uhn.fhir.context.RuntimeChildNarrativeDefinition;
+import ca.uhn.fhir.context.RuntimeChildUndeclaredExtensionDefinition;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
@@ -45,11 +54,21 @@ import ca.uhn.fhir.parser.json.JsonLikeWriter;
 import ca.uhn.fhir.parser.json.jackson.JacksonStructure;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.util.ElementUtil;
-import ca.uhn.fhir.util.FhirTerser;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.text.WordUtils;
-import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
+import org.hl7.fhir.instance.model.api.IBaseDecimalDatatype;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
+import org.hl7.fhir.instance.model.api.IBaseIntegerDatatype;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IDomainResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.INarrative;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -57,9 +76,9 @@ import java.io.Writer;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum.ID_DATATYPE;
 import static ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum.PRIMITIVE_DATATYPE;
@@ -939,7 +958,9 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		}
 
 		JsonLikeObject alternate = alternateVal.getAsObject();
-		for (String nextKey : alternate.keySet()) {
+
+		for (Iterator<String> keyIter = alternate.keyIterator(); keyIter.hasNext(); ) {
+			String nextKey = keyIter.next();
 			JsonLikeValue nextVal = alternate.get(nextKey);
 			if ("extension".equals(nextKey)) {
 				boolean isModifier = false;
@@ -962,12 +983,11 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 	}
 
 	private void parseChildren(JsonLikeObject theObject, ParserState<?> theState) {
-		Set<String> keySet = theObject.keySet();
-
 		int allUnderscoreNames = 0;
 		int handledUnderscoreNames = 0;
 
-		for (String nextName : keySet) {
+		for (Iterator<String> keyIter = theObject.keyIterator(); keyIter.hasNext(); ) {
+			String nextName = keyIter.next();
 			if ("resourceType".equals(nextName)) {
 				continue;
 			} else if ("extension".equals(nextName)) {
@@ -1013,7 +1033,8 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		 * for example.
 		 */
 		if (allUnderscoreNames > handledUnderscoreNames) {
-			for (String alternateName : keySet) {
+			for (Iterator<String> keyIter = theObject.keyIterator(); keyIter.hasNext(); ) {
+				String alternateName = keyIter.next();
 				if (alternateName.startsWith("_") && alternateName.length() > 1) {
 					JsonLikeValue nextValue = theObject.get(alternateName);
 					if (nextValue != null) {
@@ -1116,7 +1137,8 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 				url = getExtensionUrl(jsonElement.getAsString());
 			}
 			theState.enteringNewElementExtension(null, url, theIsModifier, getServerBaseUrl());
-			for (String next : nextExtObj.keySet()) {
+			for (Iterator<String> keyIter = nextExtObj.keyIterator(); keyIter.hasNext(); ) {
+				String next = keyIter.next();
 				if ("url".equals(next)) {
 					continue;
 				} else if ("extension".equals(next)) {
@@ -1146,7 +1168,8 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			 * for example.
 			 */
 			if (allUnderscoreNames > handledUnderscoreNames) {
-				for (String alternateName : nextExtObj.keySet()) {
+				for (Iterator<String> keyIter = nextExtObj.keyIterator(); keyIter.hasNext(); ) {
+					String alternateName = keyIter.next();
 					if (alternateName.startsWith("_") && alternateName.length() > 1) {
 						JsonLikeValue nextValue = nextExtObj.get(alternateName);
 						if (nextValue != null) {

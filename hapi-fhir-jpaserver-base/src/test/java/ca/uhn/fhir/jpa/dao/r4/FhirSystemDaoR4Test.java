@@ -49,7 +49,6 @@ import org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.CarePlan;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Communication;
 import org.hl7.fhir.r4.model.Condition;
@@ -136,6 +135,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		myDaoConfig.setBundleBatchMaxPoolSize(new DaoConfig().getBundleBatchMaxPoolSize());
 		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(new DaoConfig().isAutoCreatePlaceholderReferenceTargets());
 		myModelConfig.setAutoVersionReferenceAtPaths(new ModelConfig().getAutoVersionReferenceAtPaths());
+		myFhirCtx.getParserOptions().setAutoContainReferenceTargetsWithNoId(true);
 	}
 
 	@BeforeEach
@@ -1028,6 +1028,25 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testTransactionNoContainedRedux() throws IOException {
+		//Pre-create the patient, which will cause the ifNoneExist to prevent a new creation during bundle transaction
+		Patient patient = loadResourceFromClasspath(Patient.class, "/r4/preexisting-patient.json");
+		myPatientDao.create(patient);
+
+		//Post the Bundle containing a conditional POST with an identical patient from the above resource.
+		Bundle request = loadResourceFromClasspath(Bundle.class, "/r4/transaction-no-contained-2.json");
+
+		Bundle outcome = mySystemDao.transaction(mySrd, request);
+
+		IdType taskId = new IdType(outcome.getEntry().get(0).getResponse().getLocation());
+		Task task = myTaskDao.read(taskId, mySrd);
+
+		assertThat(task.getBasedOn().get(0).getReference(), matchesPattern("Patient/[0-9]+"));
+	}
+
+	@Test
+	public void testTransactionNoContainedRedux_ContainedProcessingDisabled() throws IOException {
+		myFhirCtx.getParserOptions().setAutoContainReferenceTargetsWithNoId(false);
+
 		//Pre-create the patient, which will cause the ifNoneExist to prevent a new creation during bundle transaction
 		Patient patient = loadResourceFromClasspath(Patient.class, "/r4/preexisting-patient.json");
 		myPatientDao.create(patient);
