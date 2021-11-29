@@ -36,7 +36,15 @@ public final class HapiErrorCodeCheck extends AbstractCheck {
 
 	private void validateMessageCode(DetailAST theAst) {
 		DetailAST exceptionNode = theAst.getFirstChild().getFirstChild().getFirstChild();
+		if (exceptionNode == null) {
+			log(theAst.getLineNo(), "Exception thrown that does not call Msg.code()");
+			return;
+		}
 		DetailAST thirdSiblingOfException = exceptionNode.getNextSibling().getNextSibling();
+		if (thirdSiblingOfException == null) {
+			log(theAst.getLineNo(), "Exception thrown that does not call Msg.code()");
+			return;
+		}
 		DetailAST msgNode = getMsgNodeOrNull(thirdSiblingOfException);
 		if (msgNode == null) {
 			log(theAst.getLineNo(), "Exception thrown that does not call Msg.code()");
