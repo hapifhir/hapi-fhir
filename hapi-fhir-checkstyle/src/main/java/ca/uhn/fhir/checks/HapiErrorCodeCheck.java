@@ -35,7 +35,12 @@ public final class HapiErrorCodeCheck extends AbstractCheck {
 	}
 
 	private void validateMessageCode(DetailAST theAst) {
-		DetailAST exceptionNode = theAst.getFirstChild().getFirstChild().getFirstChild();
+		DetailAST instantiation = theAst.getFirstChild().getFirstChild();
+		// We only expect message codes on new exception instantiations
+		if (TokenTypes.LITERAL_NEW != instantiation.getType()) {
+			return;
+		}
+		DetailAST exceptionNode = instantiation.getFirstChild();
 		if (exceptionNode == null) {
 			log(theAst.getLineNo(), "Exception thrown that does not call Msg.code()");
 			return;

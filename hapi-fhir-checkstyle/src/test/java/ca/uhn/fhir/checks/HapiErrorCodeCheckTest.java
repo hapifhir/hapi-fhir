@@ -14,6 +14,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -22,6 +23,7 @@ import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class HapiErrorCodeCheckTest {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(HapiErrorCodeCheckTest.class);
 	@Test
 	public void testExpectedErrors() throws CheckstyleException {
 		// setup
@@ -40,11 +42,12 @@ class HapiErrorCodeCheckTest {
 
 		// validate
 		String[] errorLines = errors.toString().split("\n");
+		Arrays.stream(errorLines).forEach(ourLog::info);
 		assertEquals(2, errorLines.length);
 		assertThat(errorLines[0], startsWith("[ERROR] "));
-		assertThat(errorLines[0], endsWith("BadClass.java:4: Exception thrown that does not call Msg.code() [HapiErrorCode]"));
+		assertThat(errorLines[0], endsWith("BadClass.java:7: Exception thrown that does not call Msg.code() [HapiErrorCode]"));
 		assertThat(errorLines[1], startsWith("[ERROR] "));
-		assertThat(errorLines[1], endsWith("BadClass.java:6: Two different exception messages call Msg.code(2).  Each thrown exception throw call Msg.code() with a different code. [HapiErrorCode]"));
+		assertThat(errorLines[1], endsWith("BadClass.java:11: Two different exception messages call Msg.code(2).  Each thrown exception throw call Msg.code() with a different code. [HapiErrorCode]"));
 	}
 
 	private Checker buildChecker() throws CheckstyleException {
