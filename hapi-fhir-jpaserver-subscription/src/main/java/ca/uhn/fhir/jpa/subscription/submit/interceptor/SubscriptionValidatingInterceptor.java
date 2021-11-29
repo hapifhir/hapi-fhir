@@ -45,7 +45,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
-// FIXME test
 @Interceptor
 public class SubscriptionValidatingInterceptor {
 
@@ -200,7 +199,7 @@ public class SubscriptionValidatingInterceptor {
 	@SuppressWarnings("WeakerAccess")
 	protected void validateChannelPayload(CanonicalSubscription theResource) {
 		if (!isBlank(theResource.getPayloadString()) && EncodingEnum.forContentType(theResource.getPayloadString()) == null) {
-			throw new UnprocessableEntityException(Msg.code(21) + "Invalid value for Subscription.channel.payload: " + theResource.getPayloadString());
+			throw new UnprocessableEntityException(Msg.code(22) + "Invalid value for Subscription.channel.payload: " + theResource.getPayloadString());
 		}
 	}
 
