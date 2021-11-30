@@ -39,6 +39,10 @@ public final class HapiErrorCodeCheck extends AbstractCheck {
 	}
 
 	private void validateMessageCode(DetailAST theAst) {
+		// TODO KHS this should be done in the checkstyle plugin pom config, not here
+		if (getFileContents().getFileName().contains("/generated-sources/")) {
+			return;
+		}
 		DetailAST instantiation = theAst.getFirstChild().getFirstChild();
 		// We only expect message codes on new exception instantiations
 		if (TokenTypes.LITERAL_NEW != instantiation.getType()) {
