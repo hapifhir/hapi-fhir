@@ -514,14 +514,14 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
-	public ValidationResult validateCode(ValidationOptions theOptions, String system, String code, String display) {
+	public ValidationResult validateCode(ValidationOptions theOptions, String system, String theVersion, String code, String display) {
 		ConceptValidationOptions validationOptions = convertConceptValidationOptions(theOptions);
 
 		return doValidation(null, validationOptions, system, code, display);
 	}
 
 	@Override
-	public ValidationResult validateCode(ValidationOptions theOptions, String theSystem, String theCode, String display, org.hl7.fhir.r5.model.ValueSet theValueSet) {
+	public ValidationResult validateCode(ValidationOptions theOptions, String theSystem, String theVersion, String theCode, String display, org.hl7.fhir.r5.model.ValueSet theValueSet) {
 		IBaseResource convertedVs = null;
 
 		try {

@@ -170,7 +170,8 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 		String system = theCode.getSystem();
 		String code = theCode.getCode();
 		String display = theCode.getDisplay();
-		return validateCode(theOptions, system, code, display, theVs);
+		// null version
+		return validateCode(theOptions, system, null, code, display, theVs);
 	}
 
 	@Override
@@ -179,7 +180,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
-	public ValidationResult validateCode(ValidationOptions theOptions, String theSystem, String theCode, String theDisplay) {
+	public ValidationResult validateCode(ValidationOptions theOptions, String theSystem, String theVersion, String theCode, String theDisplay) {
 		IValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(new ValidationSupportContext(myValidationSupport), convertConceptValidationOptions(theOptions), theSystem, theCode, theDisplay, null);
 		if (result == null) {
 			return null;
@@ -193,8 +194,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
-	public ValidationResult validateCode(ValidationOptions theOptions, String theSystem, String theCode, String theDisplay, ValueSet theVs) {
-
+	public ValidationResult validateCode(ValidationOptions theOptions, String theSystem, String theVersion, String theCode, String theDisplay, ValueSet theVs) {
 		IValidationSupport.CodeValidationResult outcome;
 		if (isNotBlank(theVs.getUrl())) {
 			outcome = myValidationSupport.validateCode(new ValidationSupportContext(myValidationSupport), convertConceptValidationOptions(theOptions), theSystem, theCode, theDisplay, theVs.getUrl());
@@ -214,7 +214,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public ValidationResult validateCode(ValidationOptions theOptions, String code, ValueSet vs) {
-		return validateCode(theOptions, null, code, null, vs);
+		return validateCode(theOptions, null, null, code, null, vs);
 	}
 
 	@Override
