@@ -1826,8 +1826,14 @@ public abstract class BaseTransactionProcessor {
 						}
 						IIdType replacement = theIdSubstitutions.getForSource(paramValue);
 						if (replacement != null) {
-							matchUrl = matchUrl.substring(0, equalsIdx + 1) + replacement.getValue() + matchUrl.substring(endIdx);
-							searchFrom = equalsIdx + 1 + replacement.getValue().length();
+							String replacementValue;
+							if (replacement.hasVersionIdPart()) {
+								replacementValue = replacement.toVersionless().getValue();
+							} else {
+								replacementValue = replacement.getValue();
+							}
+							matchUrl = matchUrl.substring(0, equalsIdx + 1) + replacementValue + matchUrl.substring(endIdx);
+							searchFrom = equalsIdx + 1 + replacementValue.length();
 						} else {
 							searchFrom = endIdx;
 						}
