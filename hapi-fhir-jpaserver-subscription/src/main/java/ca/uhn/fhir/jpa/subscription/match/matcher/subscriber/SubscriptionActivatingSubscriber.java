@@ -20,10 +20,10 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
  * #L%
  */
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.partition.AllPartitionSystemRequestDetails;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
@@ -117,10 +117,9 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscript
 	@SuppressWarnings("unchecked")
 	private boolean activateSubscription(final IBaseResource theSubscription) {
 		IFhirResourceDao subscriptionDao = myDaoRegistry.getSubscriptionDao();
-		SystemRequestDetails srd = new SystemRequestDetails();
-		srd.setRequestPartitionId(RequestPartitionId.allPartitions());
+		SystemRequestDetails srd = new AllPartitionSystemRequestDetails();
 
-		IBaseResource subscription = subscriptionDao.read(theSubscription.getIdElement(), srd);
+		IBaseResource subscription = subscriptionDao.read(theSubscription.getIdElement(), new AllPartitionSystemRequestDetails());
 		subscription.setId(subscription.getIdElement().toVersionless());
 
 		ourLog.info("Activating subscription {} from status {} to {}", subscription.getIdElement().toUnqualified().getValue(), SubscriptionConstants.REQUESTED_STATUS, SubscriptionConstants.ACTIVE_STATUS);
