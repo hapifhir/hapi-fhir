@@ -4,12 +4,16 @@ import com.puppycrawl.tools.checkstyle.StatelessCheck;
 import com.puppycrawl.tools.checkstyle.api.AbstractCheck;
 import com.puppycrawl.tools.checkstyle.api.DetailAST;
 import com.puppycrawl.tools.checkstyle.api.TokenTypes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.Set;
 
 @StatelessCheck
 public final class HapiErrorCodeCheck extends AbstractCheck {
+	private static final Logger ourLog = LoggerFactory.getLogger(HapiErrorCodeCheck.class);
+
 	private final Set<Integer> ourCodesUsed = new HashSet<>();
 
 	@Override
@@ -68,16 +72,32 @@ public final class HapiErrorCodeCheck extends AbstractCheck {
 		}
 	}
 
-	private DetailAST getMsgNodeOrNull(DetailAST theAst) {
-		DetailAST child = theAst;
-		for (; ; ) {
-			if ("Msg".equals(child.getText())) {
-				return child;
-			}
-			if (!child.hasChildren()) {
-				return null;
-			}
-			child = child.getFirstChild();
+	private DetailAST getMsgNodeOrNull(DetailAST theNode) {
+
+
+		if (TokenTypes.IDENT == theNode.getType() && "Msg".equals(theNode.getText())) {
+			return theNode;
 		}
+
+		DetailAST retval = null;
+		// depth first
+		if (theNode.hasChildren()) {
+			retval = getMsgNodeOrNull(theNode.getFirstChild());
+			if (retval != null) {
+				return retval;
+			}
+		}
+
+		// then breadth
+		DetailAST next = theNode.getNextSibling();
+		while (next != null) {
+			retval = getMsgNodeOrNull(next);
+			if (retval != null) {
+				return retval;
+			}
+			next = next.getNextSibling();
+		}
+		return null;
 	}
 }
+
