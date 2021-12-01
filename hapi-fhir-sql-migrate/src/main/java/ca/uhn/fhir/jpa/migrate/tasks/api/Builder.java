@@ -76,9 +76,19 @@ public class Builder {
 	}
 
 	public BuilderCompleteTask executeRawSql(String theVersion, @Language("SQL") String theSql) {
-		ExecuteRawSqlTask task = new ExecuteRawSqlTask(myRelease, theVersion).addSql(theSql);
-		mySink.addTask(task);
+		ExecuteRawSqlTask task = executeRawSqlOptional(false, theVersion, theSql);
 		return new BuilderCompleteTask(task);
+	}
+
+	public void executeRawSqlStub(String theVersion, @Language("SQL") String theSql) {
+		executeRawSqlOptional(true, theVersion, theSql);
+	}
+
+	private ExecuteRawSqlTask executeRawSqlOptional(boolean theDoNothing, String theVersion, @Language("SQL") String theSql) {
+		ExecuteRawSqlTask task = new ExecuteRawSqlTask(myRelease, theVersion).addSql(theSql);
+		task.setDoNothing(theDoNothing);
+		mySink.addTask(task);
+		return task;
 	}
 
 	public Builder initializeSchema(String theVersion, ISchemaInitializationProvider theSchemaInitializationProvider) {
