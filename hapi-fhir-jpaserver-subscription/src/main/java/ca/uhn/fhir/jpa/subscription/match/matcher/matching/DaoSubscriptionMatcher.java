@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -53,15 +54,13 @@ public class DaoSubscriptionMatcher implements ISubscriptionMatcher {
 
 	@Override
 	public InMemoryMatchResult match(CanonicalSubscription theSubscription, ResourceModifiedMessage theMsg) {
-		// fixme parititon aware?
 		IIdType id = theMsg.getPayloadId(myCtx);
 		String criteria = theSubscription.getCriteriaString();
 
 		// Run the subscriptions query and look for matches, add the id as part of the criteria to avoid getting matches of previous resources rather than the recent resource
 		criteria += "&_id=" + id.toUnqualifiedVersionless().getValue();
 
-		// fixme parititon aware?
-		IBundleProvider results = performSearch(criteria);
+		IBundleProvider results = performSearch(criteria, theSubscription);
 
 		ourLog.debug("Subscription check found {} results for query: {}", results.size(), criteria);
 
@@ -71,7 +70,7 @@ public class DaoSubscriptionMatcher implements ISubscriptionMatcher {
 	/**
 	 * Search based on a query criteria
 	 */
-	private IBundleProvider performSearch(String theCriteria) {
+	private IBundleProvider performSearch(String theCriteria, CanonicalSubscription theSubscription) {
 		IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getSubscriptionDao();
 		RuntimeResourceDefinition responseResourceDef = subscriptionDao.validateCriteriaAndReturnResourceDefinition(theCriteria);
 		SearchParameterMap responseCriteriaUrl = myMatchUrlService.translateMatchUrl(theCriteria, responseResourceDef);
@@ -79,11 +78,9 @@ public class DaoSubscriptionMatcher implements ISubscriptionMatcher {
 		IFhirResourceDao<? extends IBaseResource> responseDao = myDaoRegistry.getResourceDao(responseResourceDef.getImplementingClass());
 		responseCriteriaUrl.setLoadSynchronousUpTo(1);
 
-		// FIXME need to add SystemRequestDetails with partition info and call search(SearchParameterMap theParams, RequestDetails theRequestDetails)
-		// instead
-//		RequestDetails systemRequestDetails = new SystemRequestDetails().setRequestPartitionId(requestPartitionId);
-//		return responseDao.search(responseCriteriaUrl, systemRequestDetails);
-		return responseDao.search(responseCriteriaUrl);
+		PartitionablePartitionId partitionId = new PartitionablePartitionId(theSubscription.getPartitionId(), null);
+		RequestDetails systemRequestDetails = new SystemRequestDetails().setRequestPartitionId(partitionId.toPartitionId());
+		return responseDao.search(responseCriteriaUrl, systemRequestDetails);
 	}
 
 }

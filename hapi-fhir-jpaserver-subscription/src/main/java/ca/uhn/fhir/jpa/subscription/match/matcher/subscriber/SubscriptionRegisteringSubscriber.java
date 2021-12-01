@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,8 +94,8 @@ public class SubscriptionRegisteringSubscriber extends BaseSubscriberForSubscrip
 				// reading resource back from db in order to store partition id in the userdata of the resource for partitioned subscriptions
 				if (myPartitionSettings.isPartitioningEnabled()) {
 					IFhirResourceDao subscriptionDao = myDaoRegistry.getSubscriptionDao();
-					SystemRequestDetails requestDetails = new AllPartitionSystemRequestDetails();
-					subscriptionToRegister = subscriptionDao.read(subscription.getIdElement(), requestDetails);
+					RequestDetails systemRequestDetails = new SystemRequestDetails().setRequestPartitionId(payload.getPartitionId());
+					subscriptionToRegister = subscriptionDao.read(subscription.getIdElement(), systemRequestDetails);
 				}
 
 				if ("active".equals(statusString)) {
