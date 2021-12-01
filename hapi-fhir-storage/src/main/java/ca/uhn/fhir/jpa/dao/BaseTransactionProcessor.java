@@ -20,9 +20,9 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -1826,8 +1826,14 @@ public abstract class BaseTransactionProcessor {
 						}
 						IIdType replacement = theIdSubstitutions.getForSource(paramValue);
 						if (replacement != null) {
-							matchUrl = matchUrl.substring(0, equalsIdx + 1) + replacement.getValue() + matchUrl.substring(endIdx);
-							searchFrom = equalsIdx + 1 + replacement.getValue().length();
+							String replacementValue;
+							if (replacement.hasVersionIdPart()) {
+								replacementValue = replacement.toVersionless().getValue();
+							} else {
+								replacementValue = replacement.getValue();
+							}
+							matchUrl = matchUrl.substring(0, equalsIdx + 1) + replacementValue + matchUrl.substring(endIdx);
+							searchFrom = equalsIdx + 1 + replacementValue.length();
 						} else {
 							searchFrom = endIdx;
 						}
