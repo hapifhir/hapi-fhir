@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.method;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import java.lang.reflect.Method;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -47,14 +48,13 @@ public abstract class BaseOutcomeReturningMethodBindingWithResourceIdButNoResour
 				RuntimeResourceDefinition def = theContext.getResourceDefinition(((IResourceProvider) theProvider).getResourceType());
 				myResourceName = def.getName();
 			} else {
-				throw new ConfigurationException(
-						"Can not determine resource type for method '" + theMethod.getName() + "' on type " + theMethod.getDeclaringClass().getCanonicalName() + " - Did you forget to include the resourceType() value on the @" + Delete.class.getSimpleName() + " method annotation?");
+				throw new ConfigurationException(Msg.code(457) + "Can not determine resource type for method '" + theMethod.getName() + "' on type " + theMethod.getDeclaringClass().getCanonicalName() + " - Did you forget to include the resourceType() value on the @" + Delete.class.getSimpleName() + " method annotation?");
 			}
 		}
 
 		myIdParameterIndex = ParameterUtil.findIdParameterIndex(theMethod, getContext());
 		if (myIdParameterIndex == null) {
-			throw new ConfigurationException("Method '" + theMethod.getName() + "' on type '" + theMethod.getDeclaringClass().getCanonicalName() + "' has no parameter annotated with the @" + IdParam.class.getSimpleName() + " annotation");
+			throw new ConfigurationException(Msg.code(458) + "Method '" + theMethod.getName() + "' on type '" + theMethod.getDeclaringClass().getCanonicalName() + "' has no parameter annotated with the @" + IdParam.class.getSimpleName() + " annotation");
 		}
 
 	}

@@ -20,6 +20,7 @@ package ca.uhn.fhir.cql.r4.evaluation;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.cql.common.evaluation.MeasurePopulationType;
 import ca.uhn.fhir.cql.common.evaluation.MeasureScoring;
 import ca.uhn.fhir.cql.r4.builder.MeasureReportBuilder;
@@ -160,8 +161,7 @@ public class MeasureEvaluation {
 		String observationName = pop.getCriteria().getExpression();
 		ExpressionDef ed = context.resolveExpressionRef(observationName);
 		if (!(ed instanceof FunctionDef)) {
-			throw new IllegalArgumentException(
-					String.format("Measure observation %s does not reference a function definition", observationName));
+			throw new IllegalArgumentException(Msg.code(1672) + String.format("Measure observation %s does not reference a function definition", observationName));
 		}
 
 		Object result = null;
@@ -301,7 +301,7 @@ public class MeasureEvaluation {
 
 		MeasureScoring measureScoring = MeasureScoring.fromCode(measure.getScoring().getCodingFirstRep().getCode());
 		if (measureScoring == null) {
-			throw new RuntimeException("Measure scoring is required in order to calculate.");
+			throw new RuntimeException(Msg.code(1673) + "Measure scoring is required in order to calculate.");
 		}
 
 		List<Measure.MeasureSupplementalDataComponent> sde = new ArrayList<>();

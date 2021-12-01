@@ -20,6 +20,11 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+
 import java.lang.ref.SoftReference;
 import java.text.ParseException;
 import java.text.ParsePosition;
@@ -30,10 +35,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A utility class for parsing and formatting HTTP dates as used in cookies and
@@ -222,7 +223,7 @@ public final class DateUtils {
 
 	public static <T> T notNull(final T argument, final String name) {
 		if (argument == null) {
-			throw new IllegalArgumentException(name + " may not be null");
+			throw new IllegalArgumentException(Msg.code(1783) + name + " may not be null");
 		}
 		return argument;
 	}

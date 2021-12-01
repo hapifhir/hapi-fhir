@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.migrate.tasks.api;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
@@ -100,7 +101,7 @@ public class BaseMigrationTasks<T extends Enum> {
 			MigrationVersion migrationVersion = MigrationVersion.fromVersion(version);
 			if (lastVersion != null) {
 				if (migrationVersion.compareTo(lastVersion) <= 0) {
-					throw new IllegalStateException("Migration version " + migrationVersion + " found after migration version " + lastVersion + ".  Migrations need to be in order by version number.");
+					throw new IllegalStateException(Msg.code(51) + "Migration version " + migrationVersion + " found after migration version " + lastVersion + ".  Migrations need to be in order by version number.");
 				}
 			}
 			lastVersion = migrationVersion;

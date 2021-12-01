@@ -20,6 +20,7 @@ package ca.uhn.fhir.mdm.provider;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
@@ -63,7 +64,7 @@ public class MdmProviderLoader {
 				});
 				break;
 			default:
-				throw new ConfigurationException("MDM not supported for FHIR version " + myFhirContext.getVersion().getVersion());
+				throw new ConfigurationException(Msg.code(1497) + "MDM not supported for FHIR version " + myFhirContext.getVersion().getVersion());
 		}
 	}
 

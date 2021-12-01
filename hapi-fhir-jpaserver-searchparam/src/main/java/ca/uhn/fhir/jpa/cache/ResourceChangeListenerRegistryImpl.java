@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.cache;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -90,7 +91,7 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theResourceName);
 		InMemoryMatchResult inMemoryMatchResult = myInMemoryResourceMatcher.canBeEvaluatedInMemory(theSearchParameterMap, resourceDef);
 		if (!inMemoryMatchResult.supported()) {
-			throw new IllegalArgumentException("SearchParameterMap " + theSearchParameterMap + " cannot be evaluated in-memory: " + inMemoryMatchResult.getUnsupportedReason() + ".  Only search parameter maps that can be evaluated in-memory may be registered.");
+			throw new IllegalArgumentException(Msg.code(482) + "SearchParameterMap " + theSearchParameterMap + " cannot be evaluated in-memory: " + inMemoryMatchResult.getUnsupportedReason() + ".  Only search parameter maps that can be evaluated in-memory may be registered.");
 		}
 		return add(theResourceName, theResourceChangeListener, theSearchParameterMap, theRemoteRefreshIntervalMs);
 	}

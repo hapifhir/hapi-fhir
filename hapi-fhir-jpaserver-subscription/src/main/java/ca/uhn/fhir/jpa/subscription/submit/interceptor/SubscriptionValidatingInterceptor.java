@@ -199,7 +199,7 @@ public class SubscriptionValidatingInterceptor {
 	@SuppressWarnings("WeakerAccess")
 	protected void validateChannelPayload(CanonicalSubscription theResource) {
 		if (!isBlank(theResource.getPayloadString()) && EncodingEnum.forContentType(theResource.getPayloadString()) == null) {
-			throw new UnprocessableEntityException(Msg.code(22) + "Invalid value for Subscription.channel.payload: " + theResource.getPayloadString());
+			throw new UnprocessableEntityException(Msg.code(1985) + "Invalid value for Subscription.channel.payload: " + theResource.getPayloadString());
 		}
 	}
 

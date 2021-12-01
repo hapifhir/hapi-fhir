@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.mdm.config;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -78,7 +79,7 @@ public class MdmSubscriptionLoader {
 					.collect(Collectors.toList());
 				break;
 			default:
-				throw new ConfigurationException("MDM not supported for FHIR version " + myFhirContext.getVersion().getVersion());
+				throw new ConfigurationException(Msg.code(736) + "MDM not supported for FHIR version " + myFhirContext.getVersion().getVersion());
 		}
 
 		mySubscriptionDao = myDaoRegistry.getResourceDao("Subscription");

@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.interceptor;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.parser.IParser;
@@ -123,7 +124,7 @@ public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnric
 	 * Subclasses may change this behaviour by providing alternate behaviour.
 	 */
 	protected void fail(RequestDetails theRequestDetails, ValidationResult theValidationResult) {
-		throw new UnprocessableEntityException(theRequestDetails.getServer().getFhirContext(), theValidationResult.toOperationOutcome());
+		throw new UnprocessableEntityException(Msg.code(330) + theRequestDetails.getServer().getFhirContext(), theValidationResult.toOperationOutcome());
 	}
 
 	/**
@@ -344,7 +345,7 @@ public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnric
 			if (e instanceof BaseServerResponseException) {
 				throw (BaseServerResponseException) e;
 			}
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(331) + e);
 		}
 
 		if (myAddResponseIssueHeaderOnSeverity != null) {

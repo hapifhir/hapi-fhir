@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client.method;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
@@ -54,7 +55,7 @@ public abstract class BaseQueryParameter implements IParameter {
 	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, IBaseResource theTargetResource) throws InternalErrorException {
 		if (theSourceClientArgument == null) {
 			if (isRequired()) {
-				throw new NullPointerException("SearchParameter '" + getName() + "' is required and may not be null");
+				throw new NullPointerException(Msg.code(1451) + "SearchParameter '" + getName() + "' is required and may not be null");
 			}
 		} else {
 			List<QualifiedParamList> value = encode(theContext, theSourceClientArgument);

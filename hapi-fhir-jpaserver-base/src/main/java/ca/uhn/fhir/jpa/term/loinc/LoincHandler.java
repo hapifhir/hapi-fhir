@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.term.loinc;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
@@ -94,7 +95,7 @@ public class LoincHandler implements IZipContentsHandlerCsv {
 						case BOOLEAN:
 						case DATETIME:
 						case NULL:
-							throw new InternalErrorException("Don't know how to handle LOINC property of type: " + nextPropertyType);
+							throw new InternalErrorException(Msg.code(915) + "Don't know how to handle LOINC property of type: " + nextPropertyType);
 					}
 
 				}

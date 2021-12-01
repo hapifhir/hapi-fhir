@@ -20,6 +20,7 @@ package org.hl7.fhir.dstu2.hapi.rest.server;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -410,11 +411,11 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
   @Read(type = OperationDefinition.class)
   public OperationDefinition readOperationDefinition(@IdParam IdType theId, RequestDetails theRequestDetails) {
     if (theId == null || theId.hasIdPart() == false) {
-      throw new ResourceNotFoundException(theId);
+      throw new ResourceNotFoundException(Msg.code(589) + theId);
     }
     List<OperationMethodBinding> sharedDescriptions = getServerConfiguration(theRequestDetails).provideBindings().getOperationIdToBindings().get(theId.getIdPart());
     if (sharedDescriptions == null || sharedDescriptions.isEmpty()) {
-      throw new ResourceNotFoundException(theId);
+      throw new ResourceNotFoundException(Msg.code(590) + theId);
     }
 
     OperationDefinition op = new OperationDefinition();

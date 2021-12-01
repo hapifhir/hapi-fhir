@@ -20,13 +20,13 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.hl7.fhir.instance.model.api.IBase;
-
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.ICompositeElement;
 import ca.uhn.fhir.model.api.IElement;
+import org.hl7.fhir.instance.model.api.IBase;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ElementUtil {
 
@@ -87,7 +87,7 @@ public class ElementUtil {
 			} catch (ClassCastException e) {
 				List<?> elements = theElements;
 				String s = "Found instance of " + elements.get(i).getClass() + " - Did you set a field value to the incorrect type? Expected " + IBase.class.getName();
-				throw new ClassCastException(s);
+				throw new ClassCastException(Msg.code(1748) + s);
 			}
 			if (next != null && !next.isEmpty()) {
 				return false;
@@ -109,12 +109,12 @@ public class ElementUtil {
 			} else if (next instanceof List) {
 				for (Object nextElement : ((List<?>)next)) {
 					if (!(nextElement instanceof IBase)) {
-						throw new IllegalArgumentException("Found element of "+nextElement.getClass());
+						throw new IllegalArgumentException(Msg.code(1749) + "Found element of "+nextElement.getClass());
 					}
 					addElement(retVal, (IElement) nextElement, theType);
 				}
 			} else {
-				throw new IllegalArgumentException("Found element of "+next.getClass());
+				throw new IllegalArgumentException(Msg.code(1750) + "Found element of "+next.getClass());
 			}
 			
 		}

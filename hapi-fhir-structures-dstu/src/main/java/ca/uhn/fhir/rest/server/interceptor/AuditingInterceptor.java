@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.interceptor;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -159,7 +160,7 @@ public class AuditingInterceptor extends InterceptorAdapter {
 			return true; // success
 		} catch (Exception e) {
 			log.error("Unable to audit resource: " + theResponseObject + " from request: " + theRequestDetails, e);
-			throw new InternalErrorException("Auditing failed, unable to complete request", e);
+			throw new InternalErrorException(Msg.code(778) + "Auditing failed, unable to complete request", e);
 		}
 	}
 
@@ -208,7 +209,7 @@ public class AuditingInterceptor extends InterceptorAdapter {
 			return true;
 		} catch (Exception e) {
 			log.error("Unable to audit resource: " + theResponseObject + " from request: " + theRequestDetails, e);
-			throw new InternalErrorException("Auditing failed, unable to complete request", e);
+			throw new InternalErrorException(Msg.code(779) + "Auditing failed, unable to complete request", e);
 		}
 	}
 
@@ -222,7 +223,7 @@ public class AuditingInterceptor extends InterceptorAdapter {
 	 */
 	protected void store(SecurityEvent auditEvent) throws Exception {
 		if (myDataStore == null)
-			throw new InternalErrorException("No data store provided to persist audit events");
+			throw new InternalErrorException(Msg.code(780) + "No data store provided to persist audit events");
 		myDataStore.store(auditEvent);
 	}
 
@@ -357,14 +358,14 @@ public class AuditingInterceptor extends InterceptorAdapter {
 				return null;
 			}
 			// TODO: get user info from token
-			throw new NotImplementedException("OAuth user auditing not yet implemented.");
+			throw new NotImplementedException(Msg.code(781) + "OAuth user auditing not yet implemented.");
 		} else { // no auth or basic auth or anything else, use HTTP headers for user info
 			String userId = theServletRequest.getHeader(UserInfoInterceptor.HEADER_USER_ID);
 			if (userId == null) {
 				if (myClientParamsOptional)
 					return null; // no auditing
 				else
-					throw new InvalidRequestException(UserInfoInterceptor.HEADER_USER_ID + " must be specified as an HTTP header to access PHI.");
+					throw new InvalidRequestException(Msg.code(782) + UserInfoInterceptor.HEADER_USER_ID + " must be specified as an HTTP header to access PHI.");
 			}
 			String userName = theServletRequest.getHeader(UserInfoInterceptor.HEADER_USER_NAME);
 			if (userName == null)
@@ -394,7 +395,7 @@ public class AuditingInterceptor extends InterceptorAdapter {
 			if (myClientParamsOptional)
 				return null; // no auditing required
 			// TODO: get application info from token
-			throw new NotImplementedException("OAuth auditing not yet implemented.");
+			throw new NotImplementedException(Msg.code(783) + "OAuth auditing not yet implemented.");
 		} else { // no auth or basic auth or anything else, use HTTP headers for audit info
 			String appId = theServletRequest.getHeader(UserInfoInterceptor.HEADER_APPLICATION_NAME);
 			Source source = new Source();

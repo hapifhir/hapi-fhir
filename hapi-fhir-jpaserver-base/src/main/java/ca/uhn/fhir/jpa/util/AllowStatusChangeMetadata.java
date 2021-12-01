@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.util;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.util.CoverageIgnore;
@@ -34,12 +35,12 @@ final class AllowStatusChangeMetadata extends ResourceMetadataKeyEnum<Object> {
 	@CoverageIgnore
 	@Override
 	public Object get(IResource theResource) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(805));
 	}
 
 	@CoverageIgnore
 	@Override
 	public void put(IResource theResource, Object theObject) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(806));
 	}
 }

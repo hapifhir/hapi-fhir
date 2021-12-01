@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
@@ -86,7 +87,7 @@ public class MdmResourceDaoSvc {
 		if (resources.isEmpty()) {
 			return Optional.empty();
 		} else if (resources.size() > 1) {
-			throw new InternalErrorException("Found more than one active " +
+			throw new InternalErrorException(Msg.code(737) + "Found more than one active " +
 				MdmConstants.CODE_HAPI_MDM_MANAGED +
 				" Golden Resource with EID " +
 				theEid +

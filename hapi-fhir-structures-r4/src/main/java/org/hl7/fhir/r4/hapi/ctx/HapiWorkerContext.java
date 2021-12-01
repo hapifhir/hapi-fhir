@@ -1,5 +1,6 @@
 package org.hl7.fhir.r4.hapi.ctx;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -92,27 +93,27 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
   @Override
   public List<ConceptMap> findMapsForSource(String theUrl) {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(Msg.code(258));
   }
 
   @Override
   public String getAbbreviation(String theName) {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(Msg.code(259));
   }
 
   @Override
   public org.hl7.fhir.r4.utils.INarrativeGenerator getNarrativeGenerator(String thePrefix, String theBasePath) {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(Msg.code(260));
   }
 
   @Override
   public IParser getParser(ParserType theType) {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(Msg.code(261));
   }
 
   @Override
   public IParser getParser(String theType) {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(Msg.code(262));
   }
 
   @Override
@@ -127,22 +128,22 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
   @Override
   public IParser newJsonParser() {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(Msg.code(263));
   }
 
   @Override
   public IResourceValidator newValidator() {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(Msg.code(264));
   }
 
   @Override
   public IParser newXmlParser() {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(Msg.code(265));
   }
 
   @Override
   public String oid2Uri(String theCode) {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(Msg.code(266));
   }
 
   @Override
@@ -199,7 +200,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
   @Override
   public ValidationResult validateCode(ValidationOptions theOptions, String theSystem, String theCode, String theDisplay, ConceptSetComponent theVsi) {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(Msg.code(267));
   }
 
 
@@ -232,12 +233,12 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
   @Override
   @CoverageIgnore
   public List<MetadataResource> allConformanceResources() {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(Msg.code(268));
   }
 
   @Override
   public void generateSnapshot(StructureDefinition p) throws FHIRException {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(Msg.code(269));
   }
 
   @Override
@@ -253,12 +254,12 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
   @Override
   @CoverageIgnore
   public boolean hasCache() {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(Msg.code(270));
   }
 
   @Override
   public ValueSetExpander.ValueSetExpansionOutcome expandVS(ValueSet theSource, boolean theCacheOk, boolean theHierarchical) {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(Msg.code(271));
   }
 
   @Override
@@ -271,12 +272,12 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
   @Override
   public ILoggingService getLogger() {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(Msg.code(272));
   }
 
   @Override
   public void setLogger(ILoggingService theLogger) {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(Msg.code(273));
   }
 
   @Override
@@ -286,12 +287,12 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
   @Override
   public UcumService getUcumService() {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(Msg.code(274));
   }
 
   @Override
   public void setUcumService(UcumService ucumService) {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(Msg.code(275));
   }
 
   @Override
@@ -301,17 +302,17 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
   @Override
   public TranslationServices translator() {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(Msg.code(276));
   }
 
   @Override
   public List<StructureMap> listTransforms() {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(Msg.code(277));
   }
 
   @Override
   public StructureMap getTransform(String url) {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(Msg.code(278));
   }
 
   @Override
@@ -331,12 +332,12 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
   @Override
   public String getLinkForUrl(String corePath, String url) {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(Msg.code(279));
   }
 
   @Override
   public List<String> getTypeNames() {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(Msg.code(280));
   }
 
   @Override
@@ -354,24 +355,24 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
   public <T extends org.hl7.fhir.r4.model.Resource> T fetchResourceWithException(Class<T> theClass, String theUri) throws FHIRException {
     T retVal = fetchResource(theClass, theUri);
     if (retVal == null) {
-      throw new FHIRException("Could not find resource: " + theUri);
+      throw new FHIRException(Msg.code(281) + "Could not find resource: " + theUri);
     }
     return retVal;
   }
 
   @Override
   public org.hl7.fhir.r4.model.Resource fetchResourceById(String theType, String theUri) {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(Msg.code(282));
   }
 
   @Override
   public <T extends org.hl7.fhir.r4.model.Resource> boolean hasResource(Class<T> theClass_, String theUri) {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(Msg.code(283));
   }
 
   @Override
   public void cacheResource(org.hl7.fhir.r4.model.Resource theRes) throws FHIRException {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(Msg.code(284));
   }
 
   @Override
@@ -381,7 +382,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
   @Override
   public ValueSetExpander.ValueSetExpansionOutcome expandVS(ElementDefinitionBindingComponent theBinding, boolean theCacheOk, boolean theHierarchical) throws FHIRException {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(Msg.code(285));
   }
 
   public static ConceptValidationOptions convertConceptValidationOptions(ValidationOptions theOptions) {

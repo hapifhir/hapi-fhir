@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -84,7 +85,7 @@ public class DropIdGeneratorTask extends BaseTask {
 				sql = "drop sequence " + myGeneratorName;
 				break;
 			default:
-				throw new IllegalStateException();
+				throw new IllegalStateException(Msg.code(64));
 		}
 
 		if (isNotBlank(sql)) {

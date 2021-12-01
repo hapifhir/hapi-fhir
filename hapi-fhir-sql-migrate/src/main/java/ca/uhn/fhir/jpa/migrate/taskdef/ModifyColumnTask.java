@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.intellij.lang.annotations.Language;
@@ -62,7 +63,7 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask {
 			existingType = JdbcUtils.getColumnType(getConnectionProperties(), getTableName(), getColumnName());
 			nullable = isColumnNullable(getTableName(), getColumnName());
 		} catch (SQLException e) {
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(66) + e);
 		}
 
 		Long taskColumnLength = getColumnLength();
@@ -138,7 +139,7 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask {
 				}
 				break;
 			default:
-				throw new IllegalStateException("Dont know how to handle " + getDriverType());
+				throw new IllegalStateException(Msg.code(67) + "Dont know how to handle " + getDriverType());
 		}
 
 		if (!isFailureAllowed() && isShrinkOnly) {

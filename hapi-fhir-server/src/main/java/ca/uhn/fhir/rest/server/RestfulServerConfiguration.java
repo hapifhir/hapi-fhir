@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -448,7 +449,7 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 	@Nullable
 	@Override
 	public RuntimeSearchParam getActiveSearchParamByUrl(String theUrl) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(286));
 	}
 
 	private void createRuntimeBinding(Map<String, RuntimeSearchParam> theMapToPopulate, SearchMethodBinding theSearchMethodBinding) {

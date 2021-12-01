@@ -1,6 +1,7 @@
 package ca.uhn.fhir.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -139,7 +140,7 @@ public class ValidationContext<T> extends BaseValidationContext<T> implements IV
 				if (myEncoding == null) {
 					myEncoding = EncodingEnum.detectEncodingNoDefault(theResourceBody);
 					if (myEncoding == null) {
-						throw new InvalidRequestException(theContext.getLocalizer().getMessage(ValidationContext.class, "unableToDetermineEncoding"));
+						throw new InvalidRequestException(Msg.code(1971) + theContext.getLocalizer().getMessage(ValidationContext.class, "unableToDetermineEncoding"));
 					}
 				}
 				return myEncoding;

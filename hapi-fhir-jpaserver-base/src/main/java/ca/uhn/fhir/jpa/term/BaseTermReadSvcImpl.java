@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.term;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -324,7 +325,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		if (retVal) {
 			if (theSetToPopulate.size() >= myDaoConfig.getMaximumExpansionSize()) {
 				String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "expansionTooLarge", myDaoConfig.getMaximumExpansionSize());
-				throw new ExpansionTooCostlyException(msg);
+				throw new ExpansionTooCostlyException(Msg.code(885) + msg);
 			}
 		}
 		return retVal;
@@ -384,7 +385,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	public ValueSet expandValueSet(@Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull String theValueSetCanonicalUrl) {
 		ValueSet valueSet = fetchCanonicalValueSetFromCompleteContext(theValueSetCanonicalUrl);
 		if (valueSet == null) {
-			throw new ResourceNotFoundException("Unknown ValueSet: " + UrlUtil.escapeUrlParam(theValueSetCanonicalUrl));
+			throw new ResourceNotFoundException(Msg.code(886) + "Unknown ValueSet: " + UrlUtil.escapeUrlParam(theValueSetCanonicalUrl));
 		}
 
 		return expandValueSet(theExpansionOptions, valueSet);
@@ -694,7 +695,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		if (skipCountRemaining != null && skipCountRemaining > 0) {
 			if (theValueSetToExpand.getCompose().getExclude().size() > 0) {
 				String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "valueSetNotYetExpanded_OffsetNotAllowed", valueSetInfo);
-				throw new InvalidRequestException(msg);
+				throw new InvalidRequestException(Msg.code(887) + msg);
 			}
 		}
 
@@ -816,7 +817,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 					if (!theExpansionOptions.isFailOnMissingCodeSystem() && e.getFailureType() == InMemoryTerminologyServerValidationSupport.FailureType.UNKNOWN_CODE_SYSTEM) {
 						return false;
 					}
-					throw new InternalErrorException(e);
+					throw new InternalErrorException(Msg.code(888) + e);
 				} finally {
 					ConversionContext40_50.INSTANCE.close("ValueSet");
 				}
@@ -836,7 +837,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 				ValueSet valueSet = fetchCanonicalValueSetFromCompleteContext(valueSetUrl);
 				if (valueSet == null) {
-					throw new ResourceNotFoundException("Unknown ValueSet: " + UrlUtil.escapeUrlParam(valueSetUrl));
+					throw new ResourceNotFoundException(Msg.code(889) + "Unknown ValueSet: " + UrlUtil.escapeUrlParam(valueSetUrl));
 				}
 
 				expandValueSetIntoAccumulator(valueSet, theExpansionOptions, theValueSetCodeAccumulator, subExpansionFilter, theAdd);
@@ -846,7 +847,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			return false;
 
 		} else {
-			throw new InvalidRequestException("ValueSet contains " + (theAdd ? "include" : "exclude") + " criteria with no system defined");
+			throw new InvalidRequestException(Msg.code(890) + "ValueSet contains " + (theAdd ? "include" : "exclude") + " criteria with no system defined");
 		}
 
 
@@ -1064,7 +1065,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		}
 
 		if (isBlank(theFilter.getValue()) || theFilter.getOp() == null || isBlank(theFilter.getProperty())) {
-			throw new InvalidRequestException("Invalid filter, must have fields populated: property op value");
+			throw new InvalidRequestException(Msg.code(891) + "Invalid filter, must have fields populated: property op value");
 		}
 
 		switch (theFilter.getProperty()) {
@@ -1181,7 +1182,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				addLoincFilterAncestorIn(theSystem, f, b, theFilter);
 				break;
 			default:
-				throw new InvalidRequestException("Don't know how to handle op=" + theFilter.getOp() + " on property " + theFilter.getProperty());
+				throw new InvalidRequestException(Msg.code(892) + "Don't know how to handle op=" + theFilter.getOp() + " on property " + theFilter.getProperty());
 		}
 
 	}
@@ -1215,7 +1216,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				addLoincFilterParentChildIn(f, b, theFilter);
 				break;
 			default:
-				throw new InvalidRequestException("Don't know how to handle op=" + theFilter.getOp() + " on property " + theFilter.getProperty());
+				throw new InvalidRequestException(Msg.code(893) + "Don't know how to handle op=" + theFilter.getOp() + " on property " + theFilter.getProperty());
 		}
 	}
 
@@ -1254,7 +1255,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 			b.must(f.match().field("myParentPids").matching("" + code.getId()));
 		} else {
-			throw new InvalidRequestException("Don't know how to handle op=" + theFilter.getOp() + " on property " + theFilter.getProperty());
+			throw new InvalidRequestException(Msg.code(894) + "Don't know how to handle op=" + theFilter.getOp() + " on property " + theFilter.getProperty());
 		}
 	}
 
@@ -1262,7 +1263,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	private void isCodeSystemLoincOrThrowInvalidRequestException(String theSystemIdentifier, String theProperty) {
 		String systemUrl = getUrlFromIdentifier(theSystemIdentifier);
 		if (!isCodeSystemLoinc(systemUrl)) {
-			throw new InvalidRequestException("Invalid filter, property " + theProperty + " is LOINC-specific and cannot be used with system: " + systemUrl);
+			throw new InvalidRequestException(Msg.code(895) + "Invalid filter, property " + theProperty + " is LOINC-specific and cannot be used with system: " + systemUrl);
 		}
 	}
 
@@ -1323,7 +1324,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				addLoincFilterDescendantIn(theSystem, f, b, theFilter);
 				break;
 			default:
-				throw new InvalidRequestException("Don't know how to handle op=" + theFilter.getOp() + " on property " + theFilter.getProperty());
+				throw new InvalidRequestException(Msg.code(896) + "Don't know how to handle op=" + theFilter.getOp() + " on property " + theFilter.getProperty());
 		}
 	}
 
@@ -1381,11 +1382,11 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	private void throwInvalidRequestForOpOnProperty(ValueSet.FilterOperator theOp, String theProperty) {
-		throw new InvalidRequestException("Don't know how to handle op=" + theOp + " on property " + theProperty);
+		throw new InvalidRequestException(Msg.code(897) + "Don't know how to handle op=" + theOp + " on property " + theProperty);
 	}
 
 	private void throwInvalidRequestForValueOnProperty(String theValue, String theProperty) {
-		throw new InvalidRequestException("Don't know how to handle value=" + theValue + " on property " + theProperty);
+		throw new InvalidRequestException(Msg.code(898) + "Don't know how to handle value=" + theValue + " on property " + theProperty);
 	}
 
 	private void expandWithoutHibernateSearch(IValueSetConceptAccumulator theValueSetCodeAccumulator, TermCodeSystemVersion theVersion, Set<String> theAddedCodes, ValueSet.ConceptSetComponent theInclude, String theSystem, boolean theAdd) {
@@ -1816,10 +1817,10 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		boolean haveCode = theCodeToValidate != null && theCodeToValidate.isEmpty() == false;
 
 		if (!haveCodeableConcept && !haveCoding && !haveCode) {
-			throw new InvalidRequestException("No code, coding, or codeableConcept provided to validate");
+			throw new InvalidRequestException(Msg.code(899) + "No code, coding, or codeableConcept provided to validate");
 		}
 		if (!LogicUtil.multiXor(haveCodeableConcept, haveCoding, haveCode)) {
-			throw new InvalidRequestException("$validate-code can only validate (system AND code) OR (coding) OR (codeableConcept)");
+			throw new InvalidRequestException(Msg.code(900) + "$validate-code can only validate (system AND code) OR (coding) OR (codeableConcept)");
 		}
 
 		boolean haveIdentifierParam = isNotBlank(theValueSetIdentifier);
@@ -1836,7 +1837,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		} else if (haveIdentifierParam) {
 			valueSetIdentifier = theValueSetIdentifier;
 		} else {
-			throw new InvalidRequestException("Either ValueSet ID or ValueSet identifier or system and code must be provided. Unable to validate.");
+			throw new InvalidRequestException(Msg.code(901) + "Either ValueSet ID or ValueSet identifier or system and code must be provided. Unable to validate.");
 		}
 
 		ValidationSupportContext validationContext = new ValidationSupportContext(provideValidationSupport());
@@ -1943,7 +1944,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 					"cannotCreateDuplicateValueSetUrl",
 					url, existingTermValueSet.getResource().getIdDt().toUnqualifiedVersionless().getValue());
 			}
-			throw new UnprocessableEntityException(msg);
+			throw new UnprocessableEntityException(Msg.code(902) + msg);
 		}
 	}
 
@@ -1955,11 +1956,11 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		FhirVersionIndependentConcept conceptB = toConcept(theCodeB, theSystem, theCodingB);
 
 		if (!StringUtils.equals(conceptA.getSystem(), conceptB.getSystem())) {
-			throw new InvalidRequestException("Unable to test subsumption across different code systems");
+			throw new InvalidRequestException(Msg.code(903) + "Unable to test subsumption across different code systems");
 		}
 
 		if (!StringUtils.equals(conceptA.getSystemVersion(), conceptB.getSystemVersion())) {
-			throw new InvalidRequestException("Unable to test subsumption across different code system versions");
+			throw new InvalidRequestException(Msg.code(904) + "Unable to test subsumption across different code system versions");
 		}
 
 		String codeASystemIdentifier;
@@ -2032,7 +2033,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 						IValidationSupport.StringConceptProperty property = new IValidationSupport.StringConceptProperty(next.getKey(), next.getValue());
 						result.getProperties().add(property);
 					} else {
-						throw new InternalErrorException("Unknown type: " + next.getType());
+						throw new InternalErrorException(Msg.code(905) + "Unknown type: " + next.getType());
 					}
 				}
 
@@ -2294,10 +2295,10 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		boolean haveCode = theCode != null && theCode.isEmpty() == false;
 
 		if (!haveCodeableConcept && !haveCoding && !haveCode) {
-			throw new InvalidRequestException("No code, coding, or codeableConcept provided to validate.");
+			throw new InvalidRequestException(Msg.code(906) + "No code, coding, or codeableConcept provided to validate.");
 		}
 		if (!LogicUtil.multiXor(haveCodeableConcept, haveCoding, haveCode)) {
-			throw new InvalidRequestException("$validate-code can only validate (code) OR (coding) OR (codeableConcept)");
+			throw new InvalidRequestException(Msg.code(907) + "$validate-code can only validate (code) OR (coding) OR (codeableConcept)");
 		}
 
 		boolean haveIdentifierParam = isNotBlank(theCodeSystemUrl);
@@ -2308,7 +2309,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		} else if (haveIdentifierParam) {
 			codeSystemUrl = theCodeSystemUrl;
 		} else {
-			throw new InvalidRequestException("Either CodeSystem ID or CodeSystem identifier must be provided. Unable to validate.");
+			throw new InvalidRequestException(Msg.code(908) + "Either CodeSystem ID or CodeSystem identifier must be provided. Unable to validate.");
 		}
 
 
@@ -2320,7 +2321,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				Coding nextCoding = codeableConcept.getCoding().get(i);
 				if (nextCoding.hasSystem()) {
 					if (!codeSystemUrl.equalsIgnoreCase(nextCoding.getSystem())) {
-						throw new InvalidRequestException("Coding.system '" + nextCoding.getSystem() + "' does not equal with CodeSystem.url '" + theCodeSystemUrl + "'. Unable to validate.");
+						throw new InvalidRequestException(Msg.code(909) + "Coding.system '" + nextCoding.getSystem() + "' does not equal with CodeSystem.url '" + theCodeSystemUrl + "'. Unable to validate.");
 					}
 					codeSystemUrl = nextCoding.getSystem();
 				}
@@ -2334,7 +2335,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		} else if (haveCoding) {
 			if (coding.hasSystem()) {
 				if (!codeSystemUrl.equalsIgnoreCase(coding.getSystem())) {
-					throw new InvalidRequestException("Coding.system '" + coding.getSystem() + "' does not equal with CodeSystem.url '" + theCodeSystemUrl + "'. Unable to validate.");
+					throw new InvalidRequestException(Msg.code(910) + "Coding.system '" + coding.getSystem() + "' does not equal with CodeSystem.url '" + theCodeSystemUrl + "'. Unable to validate.");
 				}
 				codeSystemUrl = coding.getSystem();
 			}
@@ -2435,8 +2436,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				"where f.myResourceType = 'CodeSystem' and f.myForcedId = '" + theForcedId + "'").getResultList();
 		if (resultList.isEmpty()) return Optional.empty();
 
-		if (resultList.size() > 1) throw new NonUniqueResultException(
-			"More than one CodeSystem is pointed by forcedId: " + theForcedId + ". Was constraint "
+		if (resultList.size() > 1) throw new NonUniqueResultException(Msg.code(911) + "More than one CodeSystem is pointed by forcedId: " + theForcedId + ". Was constraint "
 				+ ForcedId.IDX_FORCEDID_TYPE_FID + " removed?");
 
 		IFhirResourceDao<CodeSystem> csDao = myDaoRegistry.getResourceDao("CodeSystem");

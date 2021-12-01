@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.client.impl;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
@@ -415,17 +416,17 @@ public abstract class BaseClient implements IRestfulClient {
 			} else {
 				msg = getFhirContext().getLocalizer().getMessage(BaseClient.class, "failedToParseResponse", "UNKNOWN", "UNKNOWN", e.toString());
 			}
-			throw new FhirClientConnectionException(msg, e);
+			throw new FhirClientConnectionException(Msg.code(1359) + msg, e);
 		} catch (IllegalStateException e) {
-			throw new FhirClientConnectionException(e);
+			throw new FhirClientConnectionException(Msg.code(1360) + e);
 		} catch (IOException e) {
 			String msg;
 			msg = getFhirContext().getLocalizer().getMessage(BaseClient.class, "failedToParseResponse", httpRequest.getHttpVerbName(), httpRequest.getUri(), e.toString());
-			throw new FhirClientConnectionException(msg, e);
+			throw new FhirClientConnectionException(Msg.code(1361) + msg, e);
 		} catch (RuntimeException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new FhirClientConnectionException(e);
+			throw new FhirClientConnectionException(Msg.code(1362) + e);
 		} finally {
 			if (response != null) {
 				response.close();
@@ -547,7 +548,7 @@ public abstract class BaseClient implements IRestfulClient {
 			try {
 				responseBinary.setContent(IOUtils.toByteArray(theResponseInputStream));
 			} catch (IOException e) {
-				throw new InternalErrorException("IO failure parsing response", e);
+				throw new InternalErrorException(Msg.code(1363) + "IO failure parsing response", e);
 			}
 
 			return responseBinary;
@@ -629,7 +630,7 @@ public abstract class BaseClient implements IRestfulClient {
 			try {
 				divInstance.setValueAsString(IOUtils.toString(theResponseInputStream, Charsets.UTF_8));
 			} catch (Exception e) {
-				throw new InvalidResponseException("Failed to process HTML response from server: " + e.getMessage(), 400, e);
+				throw new InvalidResponseException(Msg.code(1364) + "Failed to process HTML response from server: " + e.getMessage(), 400, e);
 			}
 			divChild.getMutator().addValue(textInstance, divInstance);
 			return (T) instance;

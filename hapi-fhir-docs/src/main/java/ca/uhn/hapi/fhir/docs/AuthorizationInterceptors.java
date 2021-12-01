@@ -20,6 +20,7 @@ package ca.uhn.hapi.fhir.docs;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -87,7 +88,7 @@ public class AuthorizationInterceptors {
             userIsAdmin = true;
          } else {
             // Throw an HTTP 401
-            throw new AuthenticationException("Missing or invalid Authorization header value");
+            throw new AuthenticationException(Msg.code(644) + "Missing or invalid Authorization header value");
          }
 
          // If the user is a specific patient, we create the following rule chain:
@@ -254,7 +255,7 @@ public class AuthorizationInterceptors {
 
 			} else {
 
-				throw new AuthenticationException("Unknown bearer token");
+				throw new AuthenticationException(Msg.code(645) + "Unknown bearer token");
 
 			}
 

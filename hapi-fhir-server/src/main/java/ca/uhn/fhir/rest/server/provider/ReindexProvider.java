@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.provider;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -66,7 +67,7 @@ public class ReindexProvider {
 			List<String> urls = theUrlsToReindex.stream().map(IPrimitiveType::getValue).collect(Collectors.toList());
 			return myMultiUrlProcessor.processUrls(urls, batchSize, theRequestDetails);
 		} else {
-			throw new InvalidRequestException(ProviderConstants.OPERATION_REINDEX + " must specify either everything=true or provide at least one value for " + ProviderConstants.OPERATION_REINDEX_PARAM_URL);
+			throw new InvalidRequestException(Msg.code(318) + ProviderConstants.OPERATION_REINDEX + " must specify either everything=true or provide at least one value for " + ProviderConstants.OPERATION_REINDEX_PARAM_URL);
 		}
 	}
 
@@ -77,7 +78,7 @@ public class ReindexProvider {
 			ParametersUtil.addParameterToParametersLong(myFhirContext, retVal, ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, jobExecution.getJobId());
 			return retVal;
 		} catch (JobParametersInvalidException e) {
-			throw new InvalidRequestException("Invalid job parameters: " + e.getMessage(), e);
+			throw new InvalidRequestException(Msg.code(319) + "Invalid job parameters: " + e.getMessage(), e);
 		}
 	}
 

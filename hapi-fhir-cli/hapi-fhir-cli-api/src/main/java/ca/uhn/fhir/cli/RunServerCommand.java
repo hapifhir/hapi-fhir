@@ -20,6 +20,7 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.demo.ContextHolder;
 import ca.uhn.fhir.jpa.demo.FhirServerConfig;
@@ -83,7 +84,7 @@ public class RunServerCommand extends BaseCommand {
 		try {
 			return Integer.parseInt(theCommandLine.getOptionValue(opt, Integer.toString(defaultPort)));
 		} catch (NumberFormatException e) {
-			throw new ParseException("Invalid value '" + theCommandLine.getOptionValue(opt) + "' (must be numeric)");
+			throw new ParseException(Msg.code(1558) + "Invalid value '" + theCommandLine.getOptionValue(opt) + "' (must be numeric)");
 		}
 	}
 
@@ -119,12 +120,12 @@ public class RunServerCommand extends BaseCommand {
 				try {
 					long reuseSearchResultsMillis = Long.parseLong(reuseSearchResults);
 					if (reuseSearchResultsMillis < 0) {
-						throw new NumberFormatException("expected a positive integer");
+						throw new NumberFormatException(Msg.code(1559) + "expected a positive integer");
 					}
 					ourLog.info("Server is configured to reuse search results for " + String.valueOf(reuseSearchResultsMillis) + " milliseconds");
 					ContextHolder.setReuseCachedSearchResultsForMillis(reuseSearchResultsMillis);
 				} catch (NumberFormatException e) {
-					throw new ParseException("Invalid value '" + reuseSearchResults + "' (must be a positive integer)");
+					throw new ParseException(Msg.code(1560) + "Invalid value '" + reuseSearchResults + "' (must be a positive integer)");
 				}
 			}
 		}
@@ -188,10 +189,10 @@ public class RunServerCommand extends BaseCommand {
 		try {
 			myServer.start();
 		} catch (SocketException e) {
-			throw new CommandFailureException("Server failed to start on port " + myPort + " because of the following error \"" + e.toString() + "\". Note that you can use the '-p' option to specify an alternate port."); 
+			throw new CommandFailureException(Msg.code(1561) + "Server failed to start on port " + myPort + " because of the following error \"" + e.toString() + "\". Note that you can use the '-p' option to specify an alternate port."); 
 		} catch (Exception e) {
 			ourLog.error("Server failed to start", e);
-			throw new CommandFailureException("Server failed to start", e);
+			throw new CommandFailureException(Msg.code(1562) + "Server failed to start", e);
 		}
 
 		ourLog.info("Server started on port {}", myPort);

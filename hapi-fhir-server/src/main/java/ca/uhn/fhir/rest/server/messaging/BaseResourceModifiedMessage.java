@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.messaging;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.parser.IParser;
@@ -198,7 +199,7 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 					continue;
 				}
 				if (ref.startsWith("urn:uuid:")) {
-					throw new AssertionError("Reference at " + next.getName() + " is invalid: " + ref);
+					throw new AssertionError(Msg.code(320) + "Reference at " + next.getName() + " is invalid: " + ref);
 				}
 			}
 		}

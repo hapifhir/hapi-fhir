@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ParserOptions;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import com.google.common.annotations.VisibleForTesting;
@@ -844,7 +845,7 @@ public class ModelConfig {
 		int starIdx = theUrl.indexOf('*');
 		if (starIdx != -1) {
 			if (starIdx != theUrl.length() - 1) {
-				throw new IllegalArgumentException("Base URL wildcard character (*) can only appear at the end of the string: " + theUrl);
+				throw new IllegalArgumentException(Msg.code(1525) + "Base URL wildcard character (*) can only appear at the end of the string: " + theUrl);
 			}
 		}
 

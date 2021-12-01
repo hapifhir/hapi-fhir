@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -153,7 +154,7 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 	@Override
 	public ValueSet expandByIdentifier(String theUri, ValueSetExpansionOptions theOptions) {
 		if (isBlank(theUri)) {
-			throw new InvalidRequestException("URI must not be blank or missing");
+			throw new InvalidRequestException(Msg.code(946) + "URI must not be blank or missing");
 		}
 		ValueSet source;
 
@@ -166,7 +167,7 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 			params.add(ValueSet.SP_URL, new UriParam(theUri));
 			IBundleProvider ids = search(params);
 			if (ids.size() == 0) {
-				throw new InvalidRequestException("Unknown ValueSet URI: " + theUri);
+				throw new InvalidRequestException(Msg.code(947) + "Unknown ValueSet URI: " + theUri);
 			}
 			source = (ValueSet) ids.getResources(0, 1).get(0);
 		}
@@ -199,7 +200,7 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 		}
 		BaseHasResource sourceEntity = readEntity(theId, theRequest);
 		if (sourceEntity == null) {
-			throw new ResourceNotFoundException(theId);
+			throw new ResourceNotFoundException(Msg.code(948) + theId);
 		}
 		ValueSet source = (ValueSet) toResource(sourceEntity, false);
 		return source;
@@ -245,10 +246,10 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 		boolean haveSystem = theSystem != null && theSystem.isEmpty() == false;
 
 		if (!haveCoding && !(haveSystem && haveCode)) {
-			throw new InvalidRequestException("No code, coding, or codeableConcept provided to validate");
+			throw new InvalidRequestException(Msg.code(949) + "No code, coding, or codeableConcept provided to validate");
 		}
 		if (!multiXor(haveCoding, (haveSystem && haveCode)) || (haveSystem != haveCode)) {
-			throw new InvalidRequestException("$lookup can only validate (system AND code) OR (coding.system AND coding.code)");
+			throw new InvalidRequestException(Msg.code(950) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)");
 		}
 
 		String code;
@@ -305,7 +306,7 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 	@Override
 	public CodeValidationResult validateCode(IIdType theCodeSystemId, IPrimitiveType<String> theCodeSystemUrl, IPrimitiveType<String> theVersion, IPrimitiveType<String> theCode,
 														  IPrimitiveType<String> theDisplay, CodingDt theCoding, CodeableConceptDt theCodeableConcept, RequestDetails theRequestDetails) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(951));
 	}
 
 	public static String toStringOrNull(IPrimitiveType<String> thePrimitive) {

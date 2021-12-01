@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
@@ -227,7 +228,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				break;
 			case COMPOSITE:
 			default:
-				throw new UnsupportedOperationException("Type " + theSearchParam.getParamType() + " not supported for extraction");
+				throw new UnsupportedOperationException(Msg.code(503) + "Type " + theSearchParam.getParamType() + " not supported for extraction");
 		}
 
 		return extractParamsAsQueryTokens(theSearchParam, theResource, extractor);
@@ -515,7 +516,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					allValues = allValuesFunc.get();
 				} catch (Exception e) {
 					String msg = getContext().getLocalizer().getMessage(BaseSearchParamExtractor.class, "failedToExtractPaths", nextPath, e.toString());
-					throw new InternalErrorException(msg, e);
+					throw new InternalErrorException(Msg.code(504) + msg, e);
 				}
 
 				values.addAll(allValues);

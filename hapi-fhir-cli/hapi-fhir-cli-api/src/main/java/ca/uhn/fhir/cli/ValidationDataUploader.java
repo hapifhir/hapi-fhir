@@ -20,6 +20,7 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
@@ -138,9 +139,9 @@ public class ValidationDataUploader extends BaseCommand {
 
 		String targetServer = theCommandLine.getOptionValue("t");
 		if (isBlank(targetServer)) {
-			throw new ParseException("No target server (-t) specified");
+			throw new ParseException(Msg.code(1589) + "No target server (-t) specified");
 		} else if (targetServer.startsWith("http") == false) {
-			throw new ParseException("Invalid target server specified, must begin with 'http'");
+			throw new ParseException(Msg.code(1590) + "Invalid target server specified, must begin with 'http'");
 		}
 
 		FhirContext ctx = getFhirContext();
@@ -178,7 +179,7 @@ public class ValidationDataUploader extends BaseCommand {
 			ctx.getVersion().getPathToSchemaDefinitions();
 			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/instance/model/valueset/" + "valuesets.xml"), "UTF-8");
 		} catch (IOException e) {
-			throw new CommandFailureException(e.toString());
+			throw new CommandFailureException(Msg.code(1591) + e.toString());
 		}
 		Bundle bundle = ctx.newXmlParser().parseResource(Bundle.class, vsContents);
 
@@ -197,7 +198,7 @@ public class ValidationDataUploader extends BaseCommand {
 		try {
 			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/instance/model/valueset/" + "v3-codesystems.xml"), "UTF-8");
 		} catch (IOException e) {
-			throw new CommandFailureException(e.toString());
+			throw new CommandFailureException(Msg.code(1592) + e.toString());
 		}
 
 		bundle = ctx.newXmlParser().parseResource(Bundle.class, vsContents);
@@ -216,7 +217,7 @@ public class ValidationDataUploader extends BaseCommand {
 		try {
 			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/instance/model/valueset/" + "v2-tables.xml"), "UTF-8");
 		} catch (IOException e) {
-			throw new CommandFailureException(e.toString());
+			throw new CommandFailureException(Msg.code(1593) + e.toString());
 		}
 		bundle = ctx.newXmlParser().parseResource(Bundle.class, vsContents);
 		total = bundle.getEntry().size();
@@ -237,7 +238,7 @@ public class ValidationDataUploader extends BaseCommand {
 		try {
 			mappingLocations = patternResolver.getResources("classpath*:org/hl7/fhir/instance/model/profile/" + "*.profile.xml");
 		} catch (IOException e) {
-			throw new CommandFailureException(e.toString());
+			throw new CommandFailureException(Msg.code(1594) + e.toString());
 		}
 		total = mappingLocations.length;
 		count = 1;
@@ -246,7 +247,7 @@ public class ValidationDataUploader extends BaseCommand {
 			try {
 				next = ctx.newXmlParser().parseResource(StructureDefinition.class, IOUtils.toString(i.getInputStream(), "UTF-8"));
 			} catch (Exception e) {
-				throw new CommandFailureException(e.toString());
+				throw new CommandFailureException(Msg.code(1595) + e.toString());
 			}
 			next.setId(next.getIdElement().toUnqualifiedVersionless());
 
@@ -280,7 +281,7 @@ public class ValidationDataUploader extends BaseCommand {
 			theCtx.getVersion().getPathToSchemaDefinitions();
 			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/dstu3/model/valueset/" + "valuesets.xml"), "UTF-8");
 		} catch (IOException e) {
-			throw new CommandFailureException(e.toString());
+			throw new CommandFailureException(Msg.code(1596) + e.toString());
 		}
 		bundle = theCtx.newXmlParser().parseResource(org.hl7.fhir.dstu3.model.Bundle.class, vsContents);
 		filterBundle(bundle);
@@ -308,7 +309,7 @@ public class ValidationDataUploader extends BaseCommand {
 		try {
 			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/dstu3/model/valueset/" + "v3-codesystems.xml"), "UTF-8");
 		} catch (IOException e) {
-			throw new CommandFailureException(e.toString());
+			throw new CommandFailureException(Msg.code(1597) + e.toString());
 		}
 
 		bundle = theCtx.newXmlParser().parseResource(org.hl7.fhir.dstu3.model.Bundle.class, vsContents);
@@ -332,7 +333,7 @@ public class ValidationDataUploader extends BaseCommand {
 		try {
 			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/dstu3/model/valueset/" + "v2-tables.xml"), "UTF-8");
 		} catch (IOException e) {
-			throw new CommandFailureException(e.toString());
+			throw new CommandFailureException(Msg.code(1598) + e.toString());
 		}
 		bundle = theCtx.newXmlParser().parseResource(org.hl7.fhir.dstu3.model.Bundle.class, vsContents);
 		filterBundle(bundle);
@@ -379,7 +380,7 @@ public class ValidationDataUploader extends BaseCommand {
 			theCtx.getVersion().getPathToSchemaDefinitions();
 			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/r4/model/valueset/" + "valuesets.xml"), "UTF-8");
 		} catch (IOException e) {
-			throw new CommandFailureException(e.toString());
+			throw new CommandFailureException(Msg.code(1599) + e.toString());
 		}
 		bundle = theCtx.newXmlParser().parseResource(org.hl7.fhir.r4.model.Bundle.class, vsContents);
 		filterBundle(bundle);
@@ -405,7 +406,7 @@ public class ValidationDataUploader extends BaseCommand {
 		try {
 			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/r4/model/valueset/" + "v3-codesystems.xml"), "UTF-8");
 		} catch (IOException e) {
-			throw new CommandFailureException(e.toString());
+			throw new CommandFailureException(Msg.code(1600) + e.toString());
 		}
 
 		bundle = theCtx.newXmlParser().parseResource(org.hl7.fhir.r4.model.Bundle.class, vsContents);
@@ -425,7 +426,7 @@ public class ValidationDataUploader extends BaseCommand {
 		try {
 			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/r4/model/valueset/" + "v2-tables.xml"), "UTF-8");
 		} catch (IOException e) {
-			throw new CommandFailureException(e.toString());
+			throw new CommandFailureException(Msg.code(1601) + e.toString());
 		}
 		bundle = theCtx.newXmlParser().parseResource(org.hl7.fhir.r4.model.Bundle.class, vsContents);
 		filterBundle(bundle);
@@ -467,7 +468,7 @@ public class ValidationDataUploader extends BaseCommand {
 		try {
 			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/dstu3/model/" + theName + ".xml"), "UTF-8");
 		} catch (IOException e) {
-			throw new CommandFailureException(e.toString());
+			throw new CommandFailureException(Msg.code(1602) + e.toString());
 		}
 
 		bundle = ctx.newXmlParser().parseResource(org.hl7.fhir.dstu3.model.Bundle.class, vsContents);
@@ -515,7 +516,7 @@ public class ValidationDataUploader extends BaseCommand {
 		try {
 			vsContents = IOUtils.toString(ValidationDataUploader.class.getResourceAsStream("/org/hl7/fhir/r4/model/" + theName + ".xml"), "UTF-8");
 		} catch (IOException e) {
-			throw new CommandFailureException(e.toString());
+			throw new CommandFailureException(Msg.code(1603) + e.toString());
 		}
 
 		bundle = theContext.newXmlParser().parseResource(org.hl7.fhir.r4.model.Bundle.class, vsContents);

@@ -20,6 +20,7 @@ package ca.uhn.fhir.cql.common.provider;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
@@ -49,7 +50,7 @@ public class CqlProviderLoader {
 				myResourceProviderFactory.addSupplier(() -> myCqlProviderFactory.getMeasureOperationsProvider());
 				break;
 			default:
-				throw new ConfigurationException("CQL not supported for FHIR version " + myFhirContext.getVersion().getVersion());
+				throw new ConfigurationException(Msg.code(1653) + "CQL not supported for FHIR version " + myFhirContext.getVersion().getVersion());
 		}
 	}
 }

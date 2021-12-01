@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -110,7 +111,7 @@ public class MatchResourceUrlService {
 			RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(theResourceType);
 			SearchParameterMap paramMap = myMatchUrlService.translateMatchUrl(matchUrl, resourceDef);
 			if (paramMap.isEmpty() && paramMap.getLastUpdated() == null) {
-				throw new InvalidRequestException("Invalid match URL[" + matchUrl + "] - URL has no search parameters");
+				throw new InvalidRequestException(Msg.code(518) + "Invalid match URL[" + matchUrl + "] - URL has no search parameters");
 			}
 			paramMap.setLoadSynchronousUpTo(2);
 
@@ -163,7 +164,7 @@ public class MatchResourceUrlService {
 	private <R extends IBaseResource> IFhirResourceDao<R> getResourceDao(Class<R> theResourceType) {
 		IFhirResourceDao<R> dao = myDaoRegistry.getResourceDao(theResourceType);
 		if (dao == null) {
-			throw new InternalErrorException("No DAO for resource type: " + theResourceType.getName());
+			throw new InternalErrorException(Msg.code(519) + "No DAO for resource type: " + theResourceType.getName());
 		}
 		return dao;
 	}

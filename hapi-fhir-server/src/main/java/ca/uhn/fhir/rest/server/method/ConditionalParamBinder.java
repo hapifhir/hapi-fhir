@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.method;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import java.lang.reflect.Method;
 import java.util.Collection;
 
@@ -46,8 +47,7 @@ class ConditionalParamBinder implements IParameter {
 	@Override
 	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
 		if (theOuterCollectionType != null || theInnerCollectionType != null || theParameterType.equals(String.class) == false) {
-			throw new ConfigurationException(
-					"Parameters annotated with @" + ConditionalUrlParam.class.getSimpleName() + " must be of type String, found incorrect parameter in method \"" + theMethod + "\"");
+			throw new ConfigurationException(Msg.code(409) + "Parameters annotated with @" + ConditionalUrlParam.class.getSimpleName() + " must be of type String, found incorrect parameter in method \"" + theMethod + "\"");
 		}
 	}
 

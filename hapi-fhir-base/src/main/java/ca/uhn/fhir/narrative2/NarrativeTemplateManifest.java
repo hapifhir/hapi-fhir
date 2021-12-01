@@ -22,6 +22,7 @@ package ca.uhn.fhir.narrative2;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.base.Charsets;
@@ -163,7 +164,7 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 					try {
 						nextTemplate.addAppliesToClass((Class<? extends IBase>) Class.forName(className));
 					} catch (ClassNotFoundException theE) {
-						throw new InternalErrorException("Could not find class " + className + " declared in narative manifest");
+						throw new InternalErrorException(Msg.code(1867) + "Could not find class " + className + " declared in narative manifest");
 					}
 				}
 			} else if (nextKey.endsWith(".profile")) {
@@ -201,7 +202,7 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 			} else if (nextKey.endsWith(".title")) {
 				ourLog.debug("Ignoring title property as narrative generator no longer generates titles: {}", nextKey);
 			} else {
-				throw new ConfigurationException("Invalid property name: " + nextKey
+				throw new ConfigurationException(Msg.code(1868) + "Invalid property name: " + nextKey
 						  + " - the key must end in one of the expected extensions "
 						  + "'.profile', '.resourceType', '.dataType', '.style', '.contextPath', '.narrative', '.title'");
 			}
@@ -218,7 +219,7 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 				if (resource == null) {
 					try (InputStream resource2 = DefaultThymeleafNarrativeGenerator.class.getResourceAsStream("/" + cpName)) {
 						if (resource2 == null) {
-							throw new IOException("Can not find '" + cpName + "' on classpath");
+							throw new IOException(Msg.code(1869) + "Can not find '" + cpName + "' on classpath");
 						}
 						return IOUtils.toString(resource2, Charsets.UTF_8);
 					}
@@ -228,13 +229,13 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 		} else if (name.startsWith("file:")) {
 			File file = new File(name.substring("file:".length()));
 			if (file.exists() == false) {
-				throw new IOException("File not found: " + file.getAbsolutePath());
+				throw new IOException(Msg.code(1870) + "File not found: " + file.getAbsolutePath());
 			}
 			try (FileInputStream inputStream = new FileInputStream(file)) {
 				return IOUtils.toString(inputStream, Charsets.UTF_8);
 			}
 		} else {
-			throw new IOException("Invalid resource name: '" + name + "' (must start with classpath: or file: )");
+			throw new IOException(Msg.code(1871) + "Invalid resource name: '" + name + "' (must start with classpath: or file: )");
 		}
 	}
 

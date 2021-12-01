@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.method;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -56,7 +57,7 @@ public class TransactionParameter implements IParameter {
 	@Override
 	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
 		if (theOuterCollectionType != null) {
-			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName() + "' is annotated with @"
+			throw new ConfigurationException(Msg.code(429) + "Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName() + "' is annotated with @"
 				+ TransactionParam.class.getName() + " but can not be a collection of collections");
 		}
 		if (Modifier.isInterface(theParameterType.getModifiers()) == false && IBaseResource.class.isAssignableFrom(theParameterType)) {
@@ -74,16 +75,16 @@ public class TransactionParameter implements IParameter {
 			return;
 		} else if (theInnerCollectionType != null) {
 			if (theInnerCollectionType.equals(List.class) == false) {
-				throw new ConfigurationException(createParameterTypeError(theMethod));
+				throw new ConfigurationException(Msg.code(430) + createParameterTypeError(theMethod));
 			}
 			if (theParameterType.equals(IResource.class) == false) {
-				throw new ConfigurationException(createParameterTypeError(theMethod));
+				throw new ConfigurationException(Msg.code(431) + createParameterTypeError(theMethod));
 			}
 			myParamStyle = ParamStyle.RESOURCE_LIST;
 			return;
 		}
 
-		throw new ConfigurationException(createParameterTypeError(theMethod));
+		throw new ConfigurationException(Msg.code(432) + createParameterTypeError(theMethod));
 	}
 
 	@Override

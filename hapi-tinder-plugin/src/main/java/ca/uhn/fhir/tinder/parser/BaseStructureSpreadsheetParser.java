@@ -1,5 +1,6 @@
 package ca.uhn.fhir.tinder.parser;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
@@ -72,7 +73,7 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 			try {
 				file = XMLUtils.parse(nextInputStream, false);
 			} catch (Exception e) {
-				throw new Exception("Failed during reading: " + spreadsheetName, e);
+				throw new Exception(Msg.code(164) + "Failed during reading: " + spreadsheetName, e);
 			}
 
 			Element bindingsSheet = findSheetByName(spreadsheetName, "Bindings", file, false);
@@ -149,7 +150,7 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 				elements.put(elem.getName(), elem);
 				BaseElement parent = elements.get(elem.getElementParentName());
 				if (parent == null) {
-					throw new Exception("Can't find element " + elem.getElementParentName() + "  -  Valid values are: " + elements.keySet());
+					throw new Exception(Msg.code(165) + "Can't find element " + elem.getElementParentName() + "  -  Valid values are: " + elements.keySet());
 				}
 				parent.addChild(elem);
 
@@ -218,7 +219,7 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 		}
 
 		if (retVal == null && theFailIfNotFound) {
-			throw new Exception("Failed to find worksheet with name '" + wantedName + "' in spreadsheet: " + spreadsheetName);
+			throw new Exception(Msg.code(166) + "Failed to find worksheet with name '" + wantedName + "' in spreadsheet: " + spreadsheetName);
 		}
 		return retVal;
 	}
@@ -345,11 +346,11 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 					// if(true)continue;
 
 					if (isBlank(nextCompositeParam.getPath())) {
-						throw new MojoExecutionException("Composite param " + nextCompositeParam.getName() + " has no path");
+						throw new MojoExecutionException(Msg.code(167) + "Composite param " + nextCompositeParam.getName() + " has no path");
 					}
 
 					if (nextCompositeParam.getPath().indexOf('&') == -1) {
-						throw new MojoExecutionException("Composite param " + nextCompositeParam.getName() + " has path with no '&': " + nextCompositeParam.getPath());
+						throw new MojoExecutionException(Msg.code(168) + "Composite param " + nextCompositeParam.getName() + " has path with no '&': " + nextCompositeParam.getPath());
 					}
 
 					String[] parts = nextCompositeParam.getPath().split("\\&");
@@ -391,7 +392,7 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 						}
 
 						if (part.isEmpty()) {
-							throw new MojoExecutionException("Composite param " + nextCompositeParam.getName() + " has path that doesn't seem to correspond to any other params: " + nextPart);
+							throw new MojoExecutionException(Msg.code(169) + "Composite param " + nextCompositeParam.getName() + " has path that doesn't seem to correspond to any other params: " + nextPart);
 						}
 
 					}
@@ -455,28 +456,28 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 		}
 
 		if (myColName == -1) {
-			throw new IllegalArgumentException("Unable to determine column: name");
+			throw new IllegalArgumentException(Msg.code(170) + "Unable to determine column: name");
 		}
 		if (myColModifier == -1) {
-			throw new IllegalArgumentException("Unable to determine column: modifier");
+			throw new IllegalArgumentException(Msg.code(171) + "Unable to determine column: modifier");
 		}
 		if (myColCard == -1) {
-			throw new IllegalArgumentException("Unable to determine column: card");
+			throw new IllegalArgumentException(Msg.code(172) + "Unable to determine column: card");
 		}
 		if (myColType == -1) {
-			throw new IllegalArgumentException("Unable to determine column: type");
+			throw new IllegalArgumentException(Msg.code(173) + "Unable to determine column: type");
 		}
 		if (myColBinding == -1) {
-			throw new IllegalArgumentException("Unable to determine column: binding");
+			throw new IllegalArgumentException(Msg.code(174) + "Unable to determine column: binding");
 		}
 		if (myColDefinition == -1) {
-			throw new IllegalArgumentException("Unable to determine column: definition");
+			throw new IllegalArgumentException(Msg.code(175) + "Unable to determine column: definition");
 		}
 		if (myColRequirements == -1) {
-			throw new IllegalArgumentException("Unable to determine column: requirements");
+			throw new IllegalArgumentException(Msg.code(176) + "Unable to determine column: requirements");
 		}
 		if (myColV2Mapping == -1) {
-			throw new IllegalArgumentException("Unable to determine column: v2 mapping");
+			throw new IllegalArgumentException(Msg.code(177) + "Unable to determine column: v2 mapping");
 		}
 	}
 

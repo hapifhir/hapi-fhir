@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 
 import java.util.HashMap;
@@ -117,7 +118,7 @@ public class ColumnTypeToDriverTypeToSqlType {
 	private void setColumnType(ColumnTypeEnum theColumnType, DriverTypeEnum theDriverType, String theColumnTypeSql) {
 		Map<DriverTypeEnum, String> columnSqlType = myColumnTypeToDriverTypeToSqlType.computeIfAbsent(theColumnType, k -> new HashMap<>());
 		if (columnSqlType.containsKey(theDriverType)) {
-			throw new IllegalStateException("Duplicate key: " + theDriverType);
+			throw new IllegalStateException(Msg.code(65) + "Duplicate key: " + theDriverType);
 		}
 		columnSqlType.put(theDriverType, theColumnTypeSql);
 	}

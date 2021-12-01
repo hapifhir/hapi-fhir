@@ -20,8 +20,18 @@ package ca.uhn.fhir.model.view;
  * #L%
  */
 
-import ca.uhn.fhir.context.*;
-import org.hl7.fhir.instance.model.api.*;
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeChildDeclaredExtensionDefinition;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.List;
 
@@ -48,7 +58,7 @@ public class ViewGenerator {
 		try {
 			retVal = theTargetType.newInstance();
 		} catch (Exception e) {
-			throw new ConfigurationException("Failed to instantiate " + theTargetType, e);
+			throw new ConfigurationException(Msg.code(1886) + "Failed to instantiate " + theTargetType, e);
 		}
 
 		copyChildren(sourceDef, (IBase) theResource, targetDef, (IBase) retVal);

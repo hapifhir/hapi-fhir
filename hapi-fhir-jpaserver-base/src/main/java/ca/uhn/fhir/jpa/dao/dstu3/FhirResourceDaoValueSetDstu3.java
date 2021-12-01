@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
@@ -89,7 +90,7 @@ public class FhirResourceDaoValueSetDstu3 extends BaseHapiFhirResourceDao<ValueS
 					org.hl7.fhir.r4.model.ValueSet converted = (org.hl7.fhir.r4.model.ValueSet) VersionConvertorFactory_30_40.convertResource(valueSet, new BaseAdvisor_30_40(false));
 					myTerminologySvc.storeTermValueSet(retVal, converted);
 				} catch (FHIRException fe) {
-					throw new InternalErrorException(fe);
+					throw new InternalErrorException(Msg.code(1080) + fe);
 				}
 			} else {
 				myTerminologySvc.deleteValueSetAndChildren(retVal);

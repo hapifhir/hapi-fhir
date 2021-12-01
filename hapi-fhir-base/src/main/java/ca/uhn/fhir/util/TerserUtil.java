@@ -26,6 +26,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Triple;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -230,7 +231,7 @@ public final class TerserUtil {
 			try {
 				return (Boolean) theMethod.invoke(theItem1, theItem2);
 			} catch (Exception e) {
-				throw new RuntimeException(String.format("Unable to compare equality via %s", EQUALS_DEEP), e);
+				throw new RuntimeException(Msg.code(1746) + String.format("Unable to compare equality via %s", EQUALS_DEEP), e);
 			}
 		}
 		return theItem1.equals(theItem2);

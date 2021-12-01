@@ -20,6 +20,7 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
@@ -47,7 +48,7 @@ public class LoadingValidationSupportDstu2 implements IValidationSupport {
 		try {
 			result = client.read(theClass, theUri);
 		} catch (BaseServerResponseException e) {
-			throw new CommandFailureException("FAILURE: Received HTTP " + e.getStatusCode() + ": " + e.getMessage());
+			throw new CommandFailureException(Msg.code(1554) + "FAILURE: Received HTTP " + e.getStatusCode() + ": " + e.getMessage());
 		}
 		ourLog.info("Successfully loaded resource");
 		return result;

@@ -20,6 +20,7 @@ package ca.uhn.hapi.converters.server;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IResource;
@@ -115,7 +116,7 @@ public class VersionedApiConverterInterceptor extends InterceptorAdapter {
 				converted = VersionConvertorFactory_10_30.convertResource(toDstu2(responseResource), advisor30);
 			}
 		} catch (FHIRException e) {
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(73) + e);
 		}
 
 		if (converted != null) {

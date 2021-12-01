@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.migrate;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.flywaydb.core.api.MigrationInfoService;
@@ -59,7 +60,7 @@ public class TaskOnlyMigrator extends BaseMigrator {
 				next.execute();
 				addExecutedStatements(next.getExecutedStatements());
 			} catch (SQLException e) {
-				throw new InternalErrorException(e);
+				throw new InternalErrorException(Msg.code(48) + e);
 			}
 		}
 		if (isDryRun()) {

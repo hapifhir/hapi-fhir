@@ -21,6 +21,7 @@ package ca.uhn.fhir.util;
  */
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import org.apache.commons.lang3.Validate;
 
 import java.lang.reflect.Constructor;
@@ -35,8 +36,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -202,7 +201,7 @@ public class ReflectionUtil {
 		try {
 			return theType.getConstructor().newInstance();
 		} catch (Exception e) {
-			throw new ConfigurationException("Failed to instantiate " + theType.getName(), e);
+			throw new ConfigurationException(Msg.code(1784) + "Failed to instantiate " + theType.getName(), e);
 		}
 	}
 
@@ -212,7 +211,7 @@ public class ReflectionUtil {
 			Constructor<T> constructor = theType.getConstructor(theArgumentType);
 			return constructor.newInstance(theArgument);
 		} catch (Exception e) {
-			throw new ConfigurationException("Failed to instantiate " + theType.getName(), e);
+			throw new ConfigurationException(Msg.code(1785) + "Failed to instantiate " + theType.getName(), e);
 		}
 	}
 
@@ -231,7 +230,7 @@ public class ReflectionUtil {
 				Validate.isTrue(serverType.isAssignableFrom(type));
 				fhirServerVersion = type.getConstructor(theParameterArgTypes).newInstance(theConstructorArgs);
 			} catch (Exception e) {
-				throw new ConfigurationException(errorMessage, e);
+				throw new ConfigurationException(Msg.code(1786) + errorMessage, e);
 			}
 
 			ourFhirServerVersions.put(theKey, fhirServerVersion);
@@ -248,7 +247,7 @@ public class ReflectionUtil {
 		try {
 			Class<?> clazz = Class.forName(theClassName);
 			if (!theType.isAssignableFrom(clazz)) {
-				throw new ConfigurationException(theClassName + " is not assignable to " + theType);
+				throw new ConfigurationException(Msg.code(1787) + theClassName + " is not assignable to " + theType);
 			}
 			return (T) clazz.getConstructor(theArgTypes).newInstance(theArgs);
 		} catch (ConfigurationException e) {

@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.term.loinc;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
@@ -106,7 +107,7 @@ public class LoincPartRelatedCodeMappingHandler extends BaseLoincHandler impleme
 				equivalence = Enumerations.ConceptMapEquivalence.RELATEDTO;
 				break;
 			default:
-				throw new InternalErrorException("Unknown equivalence '" + mapType + "' for PartNumber: " + partNumber);
+				throw new InternalErrorException(Msg.code(916) + "Unknown equivalence '" + mapType + "' for PartNumber: " + partNumber);
 		}
 
 		String loincPartMapId;

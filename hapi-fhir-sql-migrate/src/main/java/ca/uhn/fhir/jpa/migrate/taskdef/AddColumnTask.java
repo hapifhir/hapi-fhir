@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +69,7 @@ public class AddColumnTask extends BaseTableColumnTypeTask {
 				sql = "alter table " + getTableName() + " add " + getColumnName() + " " + typeStatement;
 				break;
 			default:
-				throw new IllegalStateException();
+				throw new IllegalStateException(Msg.code(60));
 		}
 
 		logInfo(ourLog, "Adding column {} of type {} to table {}", getColumnName(), getSqlType(), getTableName());

@@ -20,6 +20,7 @@ package ca.uhn.fhir.mdm.util;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -60,7 +61,7 @@ public class CanonicalIdentifier extends BaseIdentifierDt {
 
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(1488));
 	}
 
 	@Override

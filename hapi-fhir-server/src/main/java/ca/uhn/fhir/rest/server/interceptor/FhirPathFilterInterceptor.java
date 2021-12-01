@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.interceptor;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.FhirPathExecutionException;
 import ca.uhn.fhir.fhirpath.IFhirPath;
@@ -69,7 +70,7 @@ public class FhirPathFilterInterceptor {
 						try {
 							outputs = fhirPath.evaluate(responseResource, expression, IBase.class);
 						} catch (FhirPathExecutionException e) {
-							throw new InvalidRequestException("Error parsing FHIRPath expression: " + e.getMessage());
+							throw new InvalidRequestException(Msg.code(327) + "Error parsing FHIRPath expression: " + e.getMessage());
 						}
 
 						for (IBase nextOutput : outputs) {

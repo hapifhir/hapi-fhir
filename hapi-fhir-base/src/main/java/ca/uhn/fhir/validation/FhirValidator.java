@@ -21,6 +21,7 @@ package ca.uhn.fhir.validation;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -128,7 +129,7 @@ public class FhirValidator {
 	 */
 	public synchronized FhirValidator setValidateAgainstStandardSchematron(boolean theValidateAgainstStandardSchematron) {
 		if (theValidateAgainstStandardSchematron && !ourPhPresentOnClasspath) {
-			throw new IllegalArgumentException(myContext.getLocalizer().getMessage(I18N_KEY_NO_PH_ERROR));
+			throw new IllegalArgumentException(Msg.code(1970) + myContext.getLocalizer().getMessage(I18N_KEY_NO_PH_ERROR));
 		}
 		if (!theValidateAgainstStandardSchematron && !ourPhPresentOnClasspath) {
 			return this;

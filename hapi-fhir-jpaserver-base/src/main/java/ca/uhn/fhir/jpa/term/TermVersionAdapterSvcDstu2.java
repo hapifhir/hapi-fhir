@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.term;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -31,17 +32,17 @@ public class TermVersionAdapterSvcDstu2 implements ITermVersionAdapterSvc {
 
 	@Override
 	public IIdType createOrUpdateCodeSystem(CodeSystem theCodeSystemResource, RequestDetails theRequestDetails) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(882));
 	}
 
 	@Override
 	public void createOrUpdateConceptMap(ConceptMap theNextConceptMap) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(883));
 	}
 
 	@Override
 	public void createOrUpdateValueSet(ValueSet theValueSet) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(884));
 	}
 
 }

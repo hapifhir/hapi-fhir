@@ -31,6 +31,7 @@ import ca.uhn.fhir.context.RuntimeChildDeclaredExtensionDefinition;
 import ca.uhn.fhir.context.RuntimeChildNarrativeDefinition;
 import ca.uhn.fhir.context.RuntimeChildUndeclaredExtensionDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
@@ -168,11 +169,11 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 
 	// private void assertObjectOfType(JsonLikeValue theResourceTypeObj, Object theValueType, String thePosition) {
 	// if (theResourceTypeObj == null) {
-	// throw new DataFormatException("Invalid JSON content detected, missing required element: '" + thePosition + "'");
+	// throw new DataFormatException(Msg.code(1836) + "Invalid JSON content detected, missing required element: '" + thePosition + "'");
 	// }
 	//
 	// if (theResourceTypeObj.getValueType() != theValueType) {
-	// throw new DataFormatException("Invalid content of element " + thePosition + ", expected " + theValueType);
+	// throw new DataFormatException(Msg.code(1837) + "Invalid content of element " + thePosition + ", expected " + theValueType);
 	// }
 	// }
 
@@ -222,7 +223,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 
 		JsonLikeValue resourceTypeObj = object.get("resourceType");
 		if (resourceTypeObj == null || !resourceTypeObj.isString() || isBlank(resourceTypeObj.getAsString())) {
-			throw new DataFormatException("Invalid JSON content detected, missing required element: 'resourceType'");
+			throw new DataFormatException(Msg.code(1838) + "Invalid JSON content detected, missing required element: 'resourceType'");
 		}
 
 		String resourceType = resourceTypeObj.getAsString();
@@ -382,7 +383,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 				break;
 			case UNDECL_EXT:
 			default:
-				throw new IllegalStateException("Should not have this state here: " + theChildDef.getChildType().name());
+				throw new IllegalStateException(Msg.code(1839) + "Should not have this state here: " + theChildDef.getChildType().name());
 		}
 
 	}
@@ -639,8 +640,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		Validate.notNull(theJsonLikeWriter, "theJsonLikeWriter can not be null");
 
 		if (theResource.getStructureFhirVersionEnum() != getContext().getVersion().getVersion()) {
-			throw new IllegalArgumentException(
-				"This parser is for FHIR version " + getContext().getVersion().getVersion() + " - Can not encode a structure for version " + theResource.getStructureFhirVersionEnum());
+			throw new IllegalArgumentException(Msg.code(1840) + "This parser is for FHIR version " + getContext().getVersion().getVersion() + " - Can not encode a structure for version " + theResource.getStructureFhirVersionEnum());
 		}
 
 		EncodeContext encodeContext = new EncodeContext();
@@ -929,7 +929,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			return null;
 		}
 		if (!object.isArray()) {
-			throw new DataFormatException("Syntax error parsing JSON FHIR structure: Expected ARRAY at element '" + thePosition + "', found '" + object.getJsonType() + "'");
+			throw new DataFormatException(Msg.code(1841) + "Syntax error parsing JSON FHIR structure: Expected ARRAY at element '" + thePosition + "', found '" + object.getJsonType() + "'");
 		}
 		return object.getAsArray();
 	}
@@ -942,7 +942,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		if (theAlternateVal.isArray()) {
 			JsonLikeArray array = theAlternateVal.getAsArray();
 			if (array.size() > 1) {
-				throw new DataFormatException("Unexpected array of length " + array.size() + " (expected 0 or 1) for element: " + theElementName);
+				throw new DataFormatException(Msg.code(1842) + "Unexpected array of length " + array.size() + " (expected 0 or 1) for element: " + theElementName);
 			}
 			if (array.size() == 0) {
 				return;
@@ -1092,7 +1092,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			if (theState.isPreResource()) {
 				JsonLikeValue resType = nextObject.get("resourceType");
 				if (resType == null || !resType.isString()) {
-					throw new DataFormatException("Missing required element 'resourceType' from JSON resource object, unable to parse");
+					throw new DataFormatException(Msg.code(1843) + "Missing required element 'resourceType' from JSON resource object, unable to parse");
 				}
 				theState.enteringNewElement(null, resType.getAsString());
 				preResource = true;
@@ -1550,7 +1550,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 					}
 					BaseRuntimeElementDefinition<?> childDef = extDef.getChildElementDefinitionByDatatype(value.getClass());
 					if (childDef == null) {
-						throw new ConfigurationException("Unable to encode extension, unrecognized child element type: " + value.getClass().getCanonicalName());
+						throw new ConfigurationException(Msg.code(1844) + "Unable to encode extension, unrecognized child element type: " + value.getClass().getCanonicalName());
 					}
 					encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, value, childDef, childName, false, myParent, false, theEncodeContext);
 					managePrimitiveExtension(value, theResDef, theResource, theEventWriter, childDef, childName, theEncodeContext, theContainedResource);

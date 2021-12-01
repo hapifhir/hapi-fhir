@@ -20,6 +20,7 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -89,7 +90,7 @@ public class JsonUtil {
 		try {
 			return ourMapperNonPrettyPrint.writeValueAsString(theJson);
 		} catch (JsonProcessingException e) {
-			throw new InvalidRequestException("Failed to encode " + theJson.getClass(), e);
+			throw new InvalidRequestException(Msg.code(1741) + "Failed to encode " + theJson.getClass(), e);
 		}
 	}
 }

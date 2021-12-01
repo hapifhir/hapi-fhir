@@ -32,6 +32,7 @@ import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import ca.uhn.fhir.context.RuntimeChildContainedResources;
 import ca.uhn.fhir.context.RuntimeChildNarrativeDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IIdentifiableElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
@@ -272,7 +273,7 @@ public abstract class BaseParser implements IParser {
 		try {
 			encodeResourceToWriter(theResource, stringWriter);
 		} catch (IOException e) {
-			throw new Error("Encountered IOException during write to string - This should not happen!");
+			throw new Error(Msg.code(1828) + "Encountered IOException during write to string - This should not happen!");
 		}
 		return stringWriter.toString();
 	}
@@ -290,8 +291,7 @@ public abstract class BaseParser implements IParser {
 		Validate.notNull(theEncodeContext, "theEncodeContext can not be null");
 
 		if (theResource.getStructureFhirVersionEnum() != myContext.getVersion().getVersion()) {
-			throw new IllegalArgumentException(
-				"This parser is for FHIR version " + myContext.getVersion().getVersion() + " - Can not encode a structure for version " + theResource.getStructureFhirVersionEnum());
+			throw new IllegalArgumentException(Msg.code(1829) + "This parser is for FHIR version " + myContext.getVersion().getVersion() + " - Can not encode a structure for version " + theResource.getStructureFhirVersionEnum());
 		}
 
 		String resourceName = myContext.getResourceType(theResource);
@@ -684,7 +684,7 @@ public abstract class BaseParser implements IParser {
 				try {
 					metaValue = (IBaseMetaType) metaValue.getClass().getMethod("copy").invoke(metaValue);
 				} catch (Exception e) {
-					throw new InternalErrorException("Failed to duplicate meta", e);
+					throw new InternalErrorException(Msg.code(1830) + "Failed to duplicate meta", e);
 				}
 
 				if (isBlank(metaValue.getVersionId())) {
@@ -896,9 +896,9 @@ public abstract class BaseParser implements IParser {
 				RuntimeChildChoiceDefinition choice = (RuntimeChildChoiceDefinition) nextChild;
 				b.append(" - Expected one of: " + choice.getValidChildTypes());
 			}
-			throw new DataFormatException(b.toString());
+			throw new DataFormatException(Msg.code(1831) + b.toString());
 		}
-		throw new DataFormatException(nextChild + " has no child of type " + theType);
+		throw new DataFormatException(Msg.code(1832) + nextChild + " has no child of type " + theType);
 	}
 
 	protected boolean shouldEncodeResource(String theName) {

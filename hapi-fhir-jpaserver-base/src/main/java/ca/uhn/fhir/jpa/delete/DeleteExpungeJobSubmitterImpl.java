@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.delete;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -75,7 +76,7 @@ public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter
 		}
 		RequestListJson requestListJson = myPartitionedUrlValidator.buildRequestListJson(theRequest, theUrlsToDeleteExpunge);
 		if (!myDaoConfig.canDeleteExpunge()) {
-			throw new ForbiddenOperationException("Delete Expunge not allowed:  " + myDaoConfig.cannotDeleteExpungeReason());
+			throw new ForbiddenOperationException(Msg.code(820) + "Delete Expunge not allowed:  " + myDaoConfig.cannotDeleteExpungeReason());
 		}
 
 		for (String url : theUrlsToDeleteExpunge) {

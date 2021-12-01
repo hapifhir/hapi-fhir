@@ -20,6 +20,7 @@ package ca.uhn.fhir.parser.json.jackson;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.json.JsonLikeArray;
 import ca.uhn.fhir.parser.json.JsonLikeObject;
@@ -84,7 +85,7 @@ public class JacksonStructure implements JsonLikeStructure {
 			while (true) {
 				nextInt = pbr.read();
 				if (nextInt == -1) {
-					throw new DataFormatException("Did not find any content to parse");
+					throw new DataFormatException(Msg.code(1857) + "Did not find any content to parse");
 				}
 				if (nextInt == '{') {
 					pbr.unread(nextInt);
@@ -98,9 +99,9 @@ public class JacksonStructure implements JsonLikeStructure {
 						pbr.unread(nextInt);
 						break;
 					}
-					throw new DataFormatException("Content does not appear to be FHIR JSON, first non-whitespace character was: '" + (char) nextInt + "' (must be '{' or '[')");
+					throw new DataFormatException(Msg.code(1858) + "Content does not appear to be FHIR JSON, first non-whitespace character was: '" + (char) nextInt + "' (must be '{' or '[')");
 				}
-				throw new DataFormatException("Content does not appear to be FHIR JSON, first non-whitespace character was: '" + (char) nextInt + "' (must be '{')");
+				throw new DataFormatException(Msg.code(1859) + "Content does not appear to be FHIR JSON, first non-whitespace character was: '" + (char) nextInt + "' (must be '{')");
 			}
 
 			if (nextInt == '{') {
@@ -110,10 +111,10 @@ public class JacksonStructure implements JsonLikeStructure {
 			}
 		} catch (Exception e) {
 			if (e.getMessage().startsWith("Unexpected char 39")) {
-				throw new DataFormatException("Failed to parse JSON encoded FHIR content: " + e.getMessage() + " - " +
+				throw new DataFormatException(Msg.code(1860) + "Failed to parse JSON encoded FHIR content: " + e.getMessage() + " - " +
 					"This may indicate that single quotes are being used as JSON escapes where double quotes are required", e);
 			}
-			throw new DataFormatException("Failed to parse JSON encoded FHIR content: " + e.getMessage(), e);
+			throw new DataFormatException(Msg.code(1861) + "Failed to parse JSON encoded FHIR content: " + e.getMessage(), e);
 		}
 	}
 
@@ -144,7 +145,7 @@ public class JacksonStructure implements JsonLikeStructure {
 			return new JacksonJsonObject((ObjectNode) jsonLikeRoot);
 		}
 
-		throw new DataFormatException("Content must be a valid JSON Object. It must start with '{'.");
+		throw new DataFormatException(Msg.code(1862) + "Content must be a valid JSON Object. It must start with '{'.");
 	}
 
 	private enum ROOT_TYPE {OBJECT, ARRAY}

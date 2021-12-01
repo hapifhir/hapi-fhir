@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.log.Logs;
@@ -126,7 +127,7 @@ public class MdmCandidateSearchSvc {
 		//2.
 		Optional<IBundleProvider> bundleProvider = myCandidateSearcher.search(theResourceType, resourceCriteria);
 		if (!bundleProvider.isPresent()) {
-			throw new TooManyCandidatesException("More than " + myMdmSettings.getCandidateSearchLimit() + " candidate matches found for " + resourceCriteria + ".  Aborting mdm matching.");
+			throw new TooManyCandidatesException(Msg.code(762) + "More than " + myMdmSettings.getCandidateSearchLimit() + " candidate matches found for " + resourceCriteria + ".  Aborting mdm matching.");
 		}
 		List<IBaseResource> resources = bundleProvider.get().getAllResources();
 

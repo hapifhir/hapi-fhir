@@ -20,6 +20,7 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
@@ -66,13 +67,13 @@ public enum FhirVersionEnum {
 
 	public IFhirVersion getVersionImplementation() {
 		if (!isPresentOnClasspath()) {
-			throw new IllegalStateException("Version " + name() + " is not present on classpath");
+			throw new IllegalStateException(Msg.code(1709) + "Version " + name() + " is not present on classpath");
 		}
 		if (myVersionImplementation == null) {
 			try {
 				myVersionImplementation = (IFhirVersion) Class.forName(myVersionClass).newInstance();
 			} catch (Exception e) {
-				throw new InternalErrorException("Failed to instantiate FHIR version " + name(), e);
+				throw new InternalErrorException(Msg.code(1710) + "Failed to instantiate FHIR version " + name(), e);
 			}
 		}
 		return myVersionImplementation;
@@ -139,7 +140,7 @@ public enum FhirVersionEnum {
 			case R5:
 				return FhirContext.forR5();
 		}
-		throw new IllegalStateException("Unknown version: " + this); // should not happen
+		throw new IllegalStateException(Msg.code(1711) + "Unknown version: " + this); // should not happen
 	}
 
 	private interface IVersionProvider {

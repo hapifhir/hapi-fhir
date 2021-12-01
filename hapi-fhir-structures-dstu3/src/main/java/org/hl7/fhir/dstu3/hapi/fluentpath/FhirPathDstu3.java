@@ -1,5 +1,6 @@
 package org.hl7.fhir.dstu3.hapi.fluentpath;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.fhirpath.FhirPathExecutionException;
@@ -29,12 +30,12 @@ public class FhirPathDstu3 implements IFhirPath {
 		try {
 			result = myEngine.evaluate((Base)theInput, thePath);
 		} catch (FHIRException e) {
-			throw new FhirPathExecutionException(e);
+			throw new FhirPathExecutionException(Msg.code(607) + e);
 		}
 
 		for (Base next : result) {
 			if (!theReturnType.isAssignableFrom(next.getClass())) {
-				throw new FhirPathExecutionException("FluentPath expression \"" + thePath + "\" returned unexpected type " + next.getClass().getSimpleName() + " - Expected " + theReturnType.getName());
+				throw new FhirPathExecutionException(Msg.code(608) + "FluentPath expression \"" + thePath + "\" returned unexpected type " + next.getClass().getSimpleName() + " - Expected " + theReturnType.getName());
 			}
 		}
 		

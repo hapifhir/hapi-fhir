@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.subscription.channel.impl;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
@@ -93,7 +94,7 @@ public class LinkedBlockingChannelFactory implements IChannelFactory {
 					queue.put(theRunnable);
 				} catch (InterruptedException e) {
 					Thread.currentThread().interrupt();
-					throw new RejectedExecutionException("Task " + theRunnable.toString() +
+					throw new RejectedExecutionException(Msg.code(568) + "Task " + theRunnable.toString() +
 						" rejected from " + e.toString());
 				}
 				ourLog.info("Slot become available after {}ms", sw.getMillis());

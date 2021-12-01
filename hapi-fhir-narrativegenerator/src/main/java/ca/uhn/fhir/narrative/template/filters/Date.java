@@ -1,5 +1,6 @@
 package ca.uhn.fhir.narrative.template.filters;
 
+import ca.uhn.fhir.i18n.Msg;
 import java.text.SimpleDateFormat;
 import java.util.HashSet;
 import java.util.Locale;
@@ -214,7 +215,7 @@ class Date extends Filter {
     public static void addDatePattern(String pattern) {
 
         if(pattern == null) {
-            throw new NullPointerException("date-pattern cannot be null");
+            throw new NullPointerException(Msg.code(725) + "date-pattern cannot be null");
         }
 
         datePatterns.add(pattern);

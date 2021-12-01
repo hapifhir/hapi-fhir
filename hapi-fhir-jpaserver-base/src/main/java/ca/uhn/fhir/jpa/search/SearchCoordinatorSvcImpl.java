@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.search;
  * #L%family
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -259,7 +260,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 			if (sw.getMillis() > myMaxMillisToWaitForRemoteResults) {
 				ourLog.error("Search {} of type {} for {}{} timed out after {}ms", search.getId(), search.getSearchType(), search.getResourceType(), search.getSearchQueryString(), sw.getMillis());
-				throw new InternalErrorException("Request timed out after " + sw.getMillis() + "ms");
+				throw new InternalErrorException(Msg.code(1163) + "Request timed out after " + sw.getMillis() + "ms");
 			}
 
 			// If the search was saved in "pass complete mode" it's probably time to
@@ -511,7 +512,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				}
 			} catch (IOException e) {
 				ourLog.error("IO failure during database access", e);
-				throw new InternalErrorException(e);
+				throw new InternalErrorException(Msg.code(1164) + e);
 			}
 
 			JpaPreResourceAccessDetails accessDetails = new JpaPreResourceAccessDetails(pids, () -> theSb);
@@ -612,7 +613,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			if (theCacheControlDirective.getMaxResults() != null) {
 				loadSynchronousUpTo = theCacheControlDirective.getMaxResults();
 				if (loadSynchronousUpTo > myDaoConfig.getCacheControlNoStoreMaxResultsUpperLimit()) {
-					throw new InvalidRequestException(Constants.HEADER_CACHE_CONTROL + " header " + Constants.CACHE_CONTROL_MAX_RESULTS + " value must not exceed " + myDaoConfig.getCacheControlNoStoreMaxResultsUpperLimit());
+					throw new InvalidRequestException(Msg.code(1165) + Constants.HEADER_CACHE_CONTROL + " header " + Constants.CACHE_CONTROL_MAX_RESULTS + " value must not exceed " + myDaoConfig.getCacheControlNoStoreMaxResultsUpperLimit());
 				}
 			} else {
 				loadSynchronousUpTo = 100;
@@ -1205,7 +1206,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 			} catch (IOException e) {
 				ourLog.error("IO failure during database access", e);
-				throw new InternalErrorException(e);
+				throw new InternalErrorException(Msg.code(1166) + e);
 			}
 		}
 	}

@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.interceptor.s13n;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.FhirPathExecutionException;
 import ca.uhn.fhir.fhirpath.IFhirPath;
@@ -166,7 +167,7 @@ public class StandardizingInterceptor {
 		try {
 			standardizer = (IStandardizer) Class.forName(standardizerName).getDeclaredConstructor().newInstance();
 		} catch (Exception e) {
-			throw new RuntimeException(String.format("Unable to create standardizer %s", standardizerName), e);
+			throw new RuntimeException(Msg.code(349) + String.format("Unable to create standardizer %s", standardizerName), e);
 		}
 
 		myStandardizers.put(standardizerName, standardizer);

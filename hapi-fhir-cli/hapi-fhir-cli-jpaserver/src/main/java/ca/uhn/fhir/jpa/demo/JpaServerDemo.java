@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.demo;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -89,7 +90,7 @@ public class JpaServerDemo extends RestfulServer {
 			resourceProviderBeanName = "myResourceProvidersR4";
 			break;
 		default:
-			throw new IllegalStateException();
+			throw new IllegalStateException(Msg.code(1532));
 		}
 
 		ResourceProviderFactory beans = myAppCtx.getBean(resourceProviderBeanName, ResourceProviderFactory.class);
@@ -110,7 +111,7 @@ public class JpaServerDemo extends RestfulServer {
 			systemProvider.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
 			systemProvider.add(myAppCtx.getBean(BaseConfig.GRAPHQL_PROVIDER_NAME));
 		} else {
-			throw new IllegalStateException();
+			throw new IllegalStateException(Msg.code(1533));
 		}
 		registerProviders(systemProvider);
 
@@ -141,7 +142,7 @@ public class JpaServerDemo extends RestfulServer {
 			confProvider.setImplementationDescription("Example Server");
 			setServerConformanceProvider(confProvider);
 		} else {
-			throw new IllegalStateException();
+			throw new IllegalStateException(Msg.code(1534));
 		}
 
 		/*

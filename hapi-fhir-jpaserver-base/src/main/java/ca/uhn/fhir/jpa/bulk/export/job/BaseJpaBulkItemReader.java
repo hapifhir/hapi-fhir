@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.bulk.export.job;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -92,7 +93,7 @@ public abstract class BaseJpaBulkItemReader extends BaseBulkItemReader {
 				myJobEntity = jobOpt.get();
 			} else {
 				String errorMessage = String.format("Job with UUID %s does not exist!", myJobUUID);
-				throw new IllegalStateException(errorMessage);
+				throw new IllegalStateException(Msg.code(795) + errorMessage);
 			}
 		}
 		return myJobEntity;

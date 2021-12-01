@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.bulk.export.provider;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
@@ -138,7 +139,7 @@ public class BulkDataExportProvider {
 				.collect(Collectors.toList());
 
 			if (!badResourceTypes.isEmpty()) {
-				throw new InvalidRequestException(String.format("Resource types [%s] are invalid for this type of export, as they do not contain search parameters that refer to patients.", String.join(",", badResourceTypes)));
+				throw new InvalidRequestException(Msg.code(512) + String.format("Resource types [%s] are invalid for this type of export, as they do not contain search parameters that refer to patients.", String.join(",", badResourceTypes)));
 			}
 		}
 	}
@@ -281,7 +282,7 @@ public class BulkDataExportProvider {
 		String preferHeader = theRequestDetails.getHeader(Constants.HEADER_PREFER);
 		PreferHeader prefer = RestfulServerUtils.parsePreferHeader(null, preferHeader);
 		if (prefer.getRespondAsync() == false) {
-			throw new InvalidRequestException("Must request async processing for $export");
+			throw new InvalidRequestException(Msg.code(513) + "Must request async processing for $export");
 		}
 	}
 

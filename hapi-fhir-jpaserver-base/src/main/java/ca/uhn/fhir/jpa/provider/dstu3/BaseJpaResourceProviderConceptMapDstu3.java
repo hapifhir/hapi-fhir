@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.provider.dstu3;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
 import ca.uhn.fhir.jpa.api.model.TranslationRequest;
@@ -94,7 +95,7 @@ public class BaseJpaResourceProviderConceptMapDstu3 extends JpaResourceProviderD
 		// <editor-fold desc="Filters">
 		if ((!haveSourceCode && !haveSourceCoding && !haveSourceCodeableConcept)
 			|| moreThanOneTrue(haveSourceCode, haveSourceCoding, haveSourceCodeableConcept)) {
-			throw new InvalidRequestException("One (and only one) of the in parameters (code, coding, codeableConcept) must be provided, to identify the code that is to be translated.");
+			throw new InvalidRequestException(Msg.code(1149) + "One (and only one) of the in parameters (code, coding, codeableConcept) must be provided, to identify the code that is to be translated.");
 		}
 
 		TranslationRequest translationRequest = new TranslationRequest();
@@ -145,7 +146,7 @@ public class BaseJpaResourceProviderConceptMapDstu3 extends JpaResourceProviderD
 				translationRequest.setResourceId(theId.getIdPartAsLong());
 			}
 		} catch (FHIRException fe) {
-			throw new InternalErrorException(fe);
+			throw new InternalErrorException(Msg.code(1150) + fe);
 		}
 
 		startRequest(theServletRequest);
@@ -156,7 +157,7 @@ public class BaseJpaResourceProviderConceptMapDstu3 extends JpaResourceProviderD
 			// Convert from R4 to DSTU3
 			return (Parameters) VersionConvertorFactory_30_40.convertResource(TermConceptMappingSvcImpl.toParameters(result), new BaseAdvisor_30_40(false));
 		} catch (FHIRException fe) {
-			throw new InternalErrorException(fe);
+			throw new InternalErrorException(Msg.code(1151) + fe);
 		} finally {
 			endRequest(theServletRequest);
 		}

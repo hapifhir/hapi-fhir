@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.search.lastn;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.util.CodeSystemHash;
@@ -137,7 +138,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 			createObservationIndexIfMissing();
 			createObservationCodeIndexIfMissing();
 		} catch (IOException theE) {
-			throw new RuntimeException("Failed to create document index", theE);
+			throw new RuntimeException(Msg.code(1175) + "Failed to create document index", theE);
 		}
 	}
 
@@ -159,7 +160,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		}
 		String observationMapping = getIndexSchema(OBSERVATION_INDEX_SCHEMA_FILE);
 		if (!createIndex(OBSERVATION_INDEX, observationMapping)) {
-			throw new RuntimeException("Failed to create observation index");
+			throw new RuntimeException(Msg.code(1176) + "Failed to create observation index");
 		}
 	}
 
@@ -169,7 +170,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		}
 		String observationCodeMapping = getIndexSchema(OBSERVATION_CODE_INDEX_SCHEMA_FILE);
 		if (!createIndex(OBSERVATION_CODE_INDEX, observationCodeMapping)) {
-			throw new RuntimeException("Failed to create observation code index");
+			throw new RuntimeException(Msg.code(1177) + "Failed to create observation code index");
 		}
 
 	}
@@ -214,7 +215,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 					searchResults.addAll(buildObservationList(lastnResponse, setValue, theSearchParameterMap, theFhirContext,
 						theMaxResultsToFetch));
 				} catch (IOException theE) {
-					throw new InvalidRequestException("Unable to execute LastN request", theE);
+					throw new InvalidRequestException(Msg.code(1178) + "Unable to execute LastN request", theE);
 				}
 			}
 		} else {
@@ -225,7 +226,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 				searchResults.addAll(buildObservationList(lastnResponse, setValue, theSearchParameterMap, theFhirContext,
 					theMaxResultsToFetch));
 			} catch (IOException theE) {
-				throw new InvalidRequestException("Unable to execute LastN request", theE);
+				throw new InvalidRequestException(Msg.code(1179) + "Unable to execute LastN request", theE);
 			}
 		}
 		return searchResults;
@@ -266,7 +267,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 					referenceList.add(ref.getValue());
 				}
 			} else {
-				throw new IllegalArgumentException("Invalid token type (expecting ReferenceParam): " + nextOr.getClass());
+				throw new IllegalArgumentException(Msg.code(1180) + "Invalid token type (expecting ReferenceParam): " + nextOr.getClass());
 			}
 		}
 		return referenceList;
@@ -471,7 +472,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 					codeSystemHashList.add(String.valueOf(CodeSystemHash.hashCodeSystem(ref.getSystem(), ref.getValue())));
 				}
 			} else {
-				throw new IllegalArgumentException("Invalid token type (expecting TokenParam): " + nextOr.getClass());
+				throw new IllegalArgumentException(Msg.code(1181) + "Invalid token type (expecting TokenParam): " + nextOr.getClass());
 			}
 		}
 		return codeSystemHashList;
@@ -487,7 +488,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 					codeOnlyList.add(ref.getValue());
 				}
 			} else {
-				throw new IllegalArgumentException("Invalid token type (expecting TokenParam): " + nextOr.getClass());
+				throw new IllegalArgumentException(Msg.code(1182) + "Invalid token type (expecting TokenParam): " + nextOr.getClass());
 			}
 		}
 		return codeOnlyList;
@@ -503,7 +504,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 					systemOnlyList.add(ref.getSystem());
 				}
 			} else {
-				throw new IllegalArgumentException("Invalid token type (expecting TokenParam): " + nextOr.getClass());
+				throw new IllegalArgumentException(Msg.code(1183) + "Invalid token type (expecting TokenParam): " + nextOr.getClass());
 			}
 		}
 		return systemOnlyList;
@@ -519,7 +520,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 					textOnlyList.add(ref.getValue());
 				}
 			} else {
-				throw new IllegalArgumentException("Invalid token type (expecting TokenParam): " + nextOr.getClass());
+				throw new IllegalArgumentException(Msg.code(1184) + "Invalid token type (expecting TokenParam): " + nextOr.getClass());
 			}
 		}
 		return textOnlyList;
@@ -625,7 +626,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	@Override
 	public ObservationJson getObservationDocument(String theDocumentID) {
 		if (theDocumentID == null) {
-			throw new InvalidRequestException("Require non-null document ID for observation document query");
+			throw new InvalidRequestException(Msg.code(1185) + "Require non-null document ID for observation document query");
 		}
 		SearchRequest theSearchRequest = buildSingleObservationSearchRequest(theDocumentID);
 		ObservationJson observationDocumentJson = null;
@@ -639,7 +640,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 			}
 
 		} catch (IOException theE) {
-			throw new InvalidRequestException("Unable to execute observation document query for ID " + theDocumentID, theE);
+			throw new InvalidRequestException(Msg.code(1186) + "Unable to execute observation document query for ID " + theDocumentID, theE);
 		}
 
 		return observationDocumentJson;
@@ -661,7 +662,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	@Override
 	public CodeJson getObservationCodeDocument(String theCodeSystemHash, String theText) {
 		if (theCodeSystemHash == null && theText == null) {
-			throw new InvalidRequestException("Require a non-null code system hash value or display value for observation code document query");
+			throw new InvalidRequestException(Msg.code(1187) + "Require a non-null code system hash value or display value for observation code document query");
 		}
 		SearchRequest theSearchRequest = buildSingleObservationCodeSearchRequest(theCodeSystemHash, theText);
 		CodeJson observationCodeDocumentJson = null;
@@ -675,7 +676,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 			}
 
 		} catch (IOException theE) {
-			throw new InvalidRequestException("Unable to execute observation code document query hash code or display", theE);
+			throw new InvalidRequestException(Msg.code(1188) + "Unable to execute observation code document query hash code or display", theE);
 		}
 
 		return observationCodeDocumentJson;
@@ -705,7 +706,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 			String documentToIndex = objectMapper.writeValueAsString(theObservationDocument);
 			return performIndex(OBSERVATION_INDEX, theDocumentId, documentToIndex, ElasticsearchSvcImpl.OBSERVATION_DOCUMENT_TYPE);
 		} catch (IOException theE) {
-			throw new InvalidRequestException("Unable to persist Observation document " + theDocumentId);
+			throw new InvalidRequestException(Msg.code(1189) + "Unable to persist Observation document " + theDocumentId);
 		}
 	}
 
@@ -715,7 +716,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 			String documentToIndex = objectMapper.writeValueAsString(theObservationCodeDocument);
 			return performIndex(OBSERVATION_CODE_INDEX, theCodeableConceptID, documentToIndex, ElasticsearchSvcImpl.CODE_DOCUMENT_TYPE);
 		} catch (IOException theE) {
-			throw new InvalidRequestException("Unable to persist Observation Code document " + theCodeableConceptID);
+			throw new InvalidRequestException(Msg.code(1190) + "Unable to persist Observation Code document " + theCodeableConceptID);
 		}
 	}
 
@@ -745,7 +746,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		try {
 			myRestHighLevelClient.deleteByQuery(deleteByQueryRequest, RequestOptions.DEFAULT);
 		} catch (IOException theE) {
-			throw new InvalidRequestException("Unable to delete Observation " + theDocumentId);
+			throw new InvalidRequestException(Msg.code(1191) + "Unable to delete Observation " + theDocumentId);
 		}
 	}
 

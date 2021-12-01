@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r5;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoStructureDefinition;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -65,7 +66,7 @@ public class BaseJpaResourceProviderStructureDefinitionR5 extends JpaResourcePro
 			Integer numResults = outcome.size();
 			assert numResults != null;
 			if (numResults == 0) {
-				throw new ResourceNotFoundException("No StructureDefiniton found with url = '" + theUrl.getValue() + "'");
+				throw new ResourceNotFoundException(Msg.code(1162) + "No StructureDefiniton found with url = '" + theUrl.getValue() + "'");
 			}
 			sd = (StructureDefinition) outcome.getResources(0, 1).get(0);
 		}

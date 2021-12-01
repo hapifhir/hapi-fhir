@@ -20,6 +20,7 @@ package ca.uhn.hapi.fhir.docs;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -55,7 +56,7 @@ public class SecurityInterceptors {
 			// The format of the header must be:
 			// Authorization: Basic [base64 of username:password]
 			if (authHeader == null || authHeader.startsWith("Basic ") == false) {
-				throw new AuthenticationException("Missing or invalid Authorization header");
+				throw new AuthenticationException(Msg.code(642) + "Missing or invalid Authorization header");
 			}
 
 			String base64 = authHeader.substring("Basic ".length());
@@ -71,7 +72,7 @@ public class SecurityInterceptors {
 			 * system of course..
 			 */
 			if (!username.equals("someuser") || !password.equals("thepassword")) {
-				throw new AuthenticationException("Invalid username or password");
+				throw new AuthenticationException(Msg.code(643) + "Invalid username or password");
 			}
 
 			// Return true to allow the request to proceed

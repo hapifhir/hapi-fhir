@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.term.loinc;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
@@ -67,7 +68,7 @@ public class LoincPartLinkHandler implements IZipContentsHandlerCsv {
 
 		TermConcept loincConcept = myCode2Concept.get(loincNumber);
 		if (loincConcept == null) {
-			throw new InternalErrorException("Unknown loinc code: " + loincNumber);
+			throw new InternalErrorException(Msg.code(913) + "Unknown loinc code: " + loincNumber);
 		}
 
 		CodeSystem.PropertyType propertyType = myPropertyNames.get(propertyPart);
@@ -81,7 +82,7 @@ public class LoincPartLinkHandler implements IZipContentsHandlerCsv {
 		} else if (propertyType == CodeSystem.PropertyType.CODING) {
 			expectedValue = partNumber;
 		} else {
-			throw new InternalErrorException("Don't know how to handle property of type: " + propertyType);
+			throw new InternalErrorException(Msg.code(914) + "Don't know how to handle property of type: " + propertyType);
 		}
 
 		Optional<TermConceptProperty> existingProprty = loincConcept

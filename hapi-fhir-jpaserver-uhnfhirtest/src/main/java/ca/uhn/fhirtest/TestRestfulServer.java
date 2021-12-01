@@ -1,5 +1,6 @@
 package ca.uhn.fhirtest;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -173,7 +174,7 @@ public class TestRestfulServer extends RestfulServer {
 				break;
 			}
 			default:
-				throw new ServletException("Unknown FHIR version specified in init-param[FhirVersion]: " + fhirVersionParam);
+				throw new ServletException(Msg.code(1975) + "Unknown FHIR version specified in init-param[FhirVersion]: " + fhirVersionParam);
 		}
 
 		/*
@@ -243,7 +244,7 @@ public class TestRestfulServer extends RestfulServer {
 			// Try to fall back in case the property isn't set
 			baseUrl = System.getProperty("fhir.baseurl");
 			if (StringUtils.isBlank(baseUrl)) {
-				throw new ServletException("Missing system property: " + baseUrlProperty);
+				throw new ServletException(Msg.code(1976) + "Missing system property: " + baseUrlProperty);
 			}
 		}
 		setServerAddressStrategy(new MyHardcodedServerAddressStrategy(baseUrl));

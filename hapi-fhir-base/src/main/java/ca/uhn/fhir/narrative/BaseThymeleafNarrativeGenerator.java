@@ -21,6 +21,7 @@ package ca.uhn.fhir.narrative;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.narrative2.NarrativeTemplateManifest;
 import ca.uhn.fhir.narrative2.ThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -61,7 +62,7 @@ public abstract class BaseThymeleafNarrativeGenerator extends ThymeleafNarrative
 			NarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileLocation(propFileName);
 			setManifest(manifest);
 		} catch (IOException e) {
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(1808) + e);
 		}
 
 		myInitialized = true;

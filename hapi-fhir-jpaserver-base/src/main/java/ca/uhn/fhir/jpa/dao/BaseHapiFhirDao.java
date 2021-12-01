@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
@@ -843,7 +844,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	@CoverageIgnore
 	public BaseHasResource readEntity(IIdType theValueId, RequestDetails theRequest) {
-		throw new NotImplementedException("");
+		throw new NotImplementedException(Msg.code(927) + "");
 	}
 
 	/**
@@ -1042,7 +1043,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				b.append(e.getMessage());
 				String msg = b.toString();
 				ourLog.error(msg, e);
-				throw new DataFormatException(msg, e);
+				throw new DataFormatException(Msg.code(928) + msg, e);
 			}
 
 		} else {
@@ -1121,7 +1122,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		// Make sure that the match URL was actually appropriate for the supplied resource
 		InMemoryMatchResult outcome = myInMemoryResourceMatcher.match(theIfNoneExist, theResource, theParams);
 		if (outcome.supported() && !outcome.matched()) {
-			throw new InvalidRequestException("Failed to process conditional create. The supplied resource did not satisfy the conditional URL.");
+			throw new InvalidRequestException(Msg.code(929) + "Failed to process conditional create. The supplied resource did not satisfy the conditional URL.");
 		}
 	}
 
@@ -1396,8 +1397,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	private void validateIncomingResourceTypeMatchesExisting(IBaseResource theResource, ResourceTable entity) {
 		String resourceType = myContext.getResourceType(theResource);
 		if (!resourceType.equals(entity.getResourceType())) {
-			throw new UnprocessableEntityException(
-				"Existing resource ID[" + entity.getIdDt().toUnqualifiedVersionless() + "] is of type[" + entity.getResourceType() + "] - Cannot update with [" + resourceType + "]");
+			throw new UnprocessableEntityException(Msg.code(930) + "Existing resource ID[" + entity.getIdDt().toUnqualifiedVersionless() + "] is of type[" + entity.getResourceType() + "] - Cannot update with [" + resourceType + "]");
 		}
 	}
 
@@ -1539,8 +1539,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 							if (!isLogicalReference(referencedId)) {
 								if (!referencedId.getValue().contains("?")) {
 									if (!validTypes.contains(referencedId.getResourceType())) {
-										throw new UnprocessableEntityException(
-											"Invalid reference found at path '" + newPath + "'. Resource type '" + referencedId.getResourceType() + "' is not valid for this path");
+										throw new UnprocessableEntityException(Msg.code(931) + "Invalid reference found at path '" + newPath + "'. Resource type '" + referencedId.getResourceType() + "' is not valid for this path");
 									}
 								}
 							}
@@ -1555,7 +1554,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	protected void validateMetaCount(int theMetaCount) {
 		if (myConfig.getResourceMetaCountHardLimit() != null) {
 			if (theMetaCount > myConfig.getResourceMetaCountHardLimit()) {
-				throw new UnprocessableEntityException("Resource contains " + theMetaCount + " meta entries (tag/profile/security label), maximum is " + myConfig.getResourceMetaCountHardLimit());
+				throw new UnprocessableEntityException(Msg.code(932) + "Resource contains " + theMetaCount + " meta entries (tag/profile/security label), maximum is " + myConfig.getResourceMetaCountHardLimit());
 			}
 		}
 	}
@@ -1592,7 +1591,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 
 		if (tag != null) {
-			throw new UnprocessableEntityException("Resource contains the 'subsetted' tag, and must not be stored as it may contain a subset of available data");
+			throw new UnprocessableEntityException(Msg.code(933) + "Resource contains the 'subsetted' tag, and must not be stored as it may contain a subset of available data");
 		}
 
 		if (getConfig().isEnforceReferenceTargetTypes()) {
@@ -1745,7 +1744,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					}
 				}
 			} catch (Exception e) {
-				throw new DataFormatException("Unable to convert DIV to string", e);
+				throw new DataFormatException(Msg.code(934) + "Unable to convert DIV to string", e);
 			}
 
 		}
@@ -1775,8 +1774,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	public static void validateResourceType(BaseHasResource theEntity, String theResourceName) {
 		if (!theResourceName.equals(theEntity.getResourceType())) {
-			throw new ResourceNotFoundException(
-				"Resource with ID " + theEntity.getIdDt().getIdPart() + " exists but it is not of type " + theResourceName + ", found resource of type " + theEntity.getResourceType());
+			throw new ResourceNotFoundException(Msg.code(935) + "Resource with ID " + theEntity.getIdDt().getIdPart() + " exists but it is not of type " + theResourceName + ", found resource of type " + theEntity.getResourceType());
 		}
 	}
 

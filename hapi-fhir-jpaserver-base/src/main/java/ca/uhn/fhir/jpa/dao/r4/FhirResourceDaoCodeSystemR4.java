@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.r4;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
@@ -98,10 +99,10 @@ public class FhirResourceDaoCodeSystemR4 extends BaseHapiFhirResourceDao<CodeSys
 		boolean haveDisplayLanguage = theDisplayLanguage != null && theDisplayLanguage.isEmpty() == false;
 
 		if (!haveCoding && !(haveSystem && haveCode)) {
-			throw new InvalidRequestException("No code, coding, or codeableConcept provided to validate");
+			throw new InvalidRequestException(Msg.code(1108) + "No code, coding, or codeableConcept provided to validate");
 		}
 		if (!LogicUtil.multiXor(haveCoding, (haveSystem && haveCode)) || (haveSystem != haveCode)) {
-			throw new InvalidRequestException("$lookup can only validate (system AND code) OR (coding.system AND coding.code)");
+			throw new InvalidRequestException(Msg.code(1109) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)");
 		}
 
 		String code;
@@ -184,7 +185,7 @@ public class FhirResourceDaoCodeSystemR4 extends BaseHapiFhirResourceDao<CodeSys
 		// loinc CodeSystem must have an ID
 		if (isNotBlank(theResource.getUrl()) && theResource.getUrl().contains(LOINC_LOW)
 			&& isBlank(theResource.getIdElement().getIdPart())) {
-			throw new InvalidParameterException("'loinc' CodeSystem must have an ID");
+			throw new InvalidParameterException(Msg.code(1110) + "'loinc' CodeSystem must have an ID");
 		}
 		return myTransactionService.execute(theRequestDetails, theTransactionDetails,
 			tx -> doCreateForPost(theResource, theIfNoneExist, thePerformIndexing, theTransactionDetails, theRequestDetails));

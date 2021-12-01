@@ -20,13 +20,14 @@ package ca.uhn.fhir.jpa.util;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import java.util.Iterator;
 
 public abstract class BaseIterator<T> implements Iterator<T> {
 
 	@Override
 	public void remove() {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(798));
 	}
 
 }

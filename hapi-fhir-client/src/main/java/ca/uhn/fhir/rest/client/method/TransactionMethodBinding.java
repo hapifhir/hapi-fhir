@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.client.method;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import java.lang.reflect.Method;
 import java.util.List;
 
@@ -47,7 +48,7 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 		for (IParameter next : getParameters()) {
 			if (next instanceof TransactionParameter) {
 				if (myTransactionParamIndex != -1) {
-					throw new ConfigurationException("Method '" + theMethod.getName() + "' in type " + theMethod.getDeclaringClass().getCanonicalName() + " has multiple parameters annotated with the @" + TransactionParam.class + " annotation, exactly one is required for @" + Transaction.class
+					throw new ConfigurationException(Msg.code(1418) + "Method '" + theMethod.getName() + "' in type " + theMethod.getDeclaringClass().getCanonicalName() + " has multiple parameters annotated with the @" + TransactionParam.class + " annotation, exactly one is required for @" + Transaction.class
 							+ " methods");
 				}
 				myTransactionParamIndex = index;
@@ -56,7 +57,7 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 		}
 
 		if (myTransactionParamIndex == -1) {
-			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type " + theMethod.getDeclaringClass().getCanonicalName() + " does not have a parameter annotated with the @" + TransactionParam.class + " annotation");
+			throw new ConfigurationException(Msg.code(1419) + "Method '" + theMethod.getName() + "' in type " + theMethod.getDeclaringClass().getCanonicalName() + " does not have a parameter annotated with the @" + TransactionParam.class + " annotation");
 		}
 	}
 

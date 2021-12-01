@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoEncounter;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
@@ -44,7 +45,7 @@ public class FhirResourceDaoEncounterDstu2 extends BaseHapiFhirResourceDao<Encou
 			paramMap.setCount(theCount.getValue());
 		}
 		if (theOffset != null) {
-			throw new IllegalArgumentException("Everything operation does not support offset searching");
+			throw new IllegalArgumentException(Msg.code(944) + "Everything operation does not support offset searching");
 		}
 
 //		paramMap.setRevIncludes(Collections.singleton(IResource.INCLUDE_ALL.asRecursive()));

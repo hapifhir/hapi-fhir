@@ -20,6 +20,7 @@ package ca.uhn.fhir.cql.common.helper;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.DateTimeType;
 
@@ -37,7 +38,7 @@ public class DateHelper {
 	 */
 	public static Date resolveRequestDate(String paramName, String date) {
 		if (StringUtils.isBlank(date)) {
-			throw new IllegalArgumentException(paramName + " parameter cannot be blank!");
+			throw new IllegalArgumentException(Msg.code(1662) + paramName + " parameter cannot be blank!");
 		}
 		return new DateTimeType(date).getValue();
 	}

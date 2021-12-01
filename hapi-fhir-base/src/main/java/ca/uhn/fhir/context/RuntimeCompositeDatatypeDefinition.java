@@ -19,16 +19,17 @@ package ca.uhn.fhir.context;
  * limitations under the License.
  * #L%
  */
-import static org.apache.commons.lang3.StringUtils.isBlank;
 
-import java.util.Map;
-
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import java.util.Map;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class RuntimeCompositeDatatypeDefinition extends BaseRuntimeElementCompositeDefinition<ICompositeType> implements IRuntimeDatatypeDefinition {
 
@@ -41,7 +42,7 @@ public class RuntimeCompositeDatatypeDefinition extends BaseRuntimeElementCompos
 		
 		String resourceName = theDef.name();
 		if (isBlank(resourceName)) {
-			throw new ConfigurationException("Resource type @" + ResourceDef.class.getSimpleName() + " annotation contains no resource name: " + theImplementingClass.getCanonicalName());
+			throw new ConfigurationException(Msg.code(1712) + "Resource type @" + ResourceDef.class.getSimpleName() + " annotation contains no resource name: " + theImplementingClass.getCanonicalName());
 		}
 		
 		mySpecialization = theDef.isSpecialization();
@@ -59,7 +60,7 @@ public class RuntimeCompositeDatatypeDefinition extends BaseRuntimeElementCompos
 		if (myProfileOfType != null) {
 			myProfileOf = theClassToElementDefinitions.get(myProfileOfType);
 			if (myProfileOf == null) {
-				throw new ConfigurationException("Unknown profileOf value: " + myProfileOfType);
+				throw new ConfigurationException(Msg.code(1713) + "Unknown profileOf value: " + myProfileOfType);
 			}
 		}
 	}

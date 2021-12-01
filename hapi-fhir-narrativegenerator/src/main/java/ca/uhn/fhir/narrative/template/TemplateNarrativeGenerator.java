@@ -1,6 +1,7 @@
 
 package ca.uhn.fhir.narrative.template;
 
+import ca.uhn.fhir.i18n.Msg;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -92,7 +93,7 @@ public class TemplateNarrativeGenerator implements INarrativeGenerator {
 				}
 				return new MyContextMap(evaluated, myResource);
 			} catch (FHIRException e) {
-				throw new InternalErrorException("Failed to process expression: " + theKey, e);
+				throw new InternalErrorException(Msg.code(711) + "Failed to process expression: " + theKey, e);
 			}
 			
 		}

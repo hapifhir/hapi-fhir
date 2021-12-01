@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.search.lastn;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
@@ -46,7 +47,7 @@ public class ElasticsearchRestClientFactory {
 		String protocol, String hosts, @Nullable String theUsername, @Nullable String thePassword) {
 
 		if (hosts.contains("://")) {
-			throw new ConfigurationException("Elasticsearch URLs cannot include a protocol, that is a separate property. Remove http:// or https:// from this URL.");
+			throw new ConfigurationException(Msg.code(1173) + "Elasticsearch URLs cannot include a protocol, that is a separate property. Remove http:// or https:// from this URL.");
 		}
 		String[] hostArray = hosts.split(",");
 		List<Node> clientNodes = Arrays.stream(hostArray)
@@ -60,7 +61,7 @@ public class ElasticsearchRestClientFactory {
 			})
 			.collect(Collectors.toList());
 		if (hostArray.length != clientNodes.size()) {
-			throw new ConfigurationException("Elasticsearch URLs have to contain ':' as a host:port separator. Example: localhost:9200,localhost:9201,localhost:9202");
+			throw new ConfigurationException(Msg.code(1174) + "Elasticsearch URLs have to contain ':' as a host:port separator. Example: localhost:9200,localhost:9201,localhost:9202");
 		}
 
 		RestClientBuilder clientBuilder = RestClient.builder(clientNodes.toArray(new Node[0]));

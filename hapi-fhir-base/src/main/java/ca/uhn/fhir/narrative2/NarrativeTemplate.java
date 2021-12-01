@@ -20,6 +20,7 @@ package ca.uhn.fhir.narrative2;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBase;
 
@@ -111,7 +112,7 @@ public class NarrativeTemplate implements INarrativeTemplate {
 		try {
 			return NarrativeTemplateManifest.loadResource(getTemplateFileName());
 		} catch (IOException e) {
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(1866) + e);
 		}
 	}
 

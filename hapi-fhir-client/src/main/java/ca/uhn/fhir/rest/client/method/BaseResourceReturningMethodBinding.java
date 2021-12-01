@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.client.method;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
@@ -83,8 +84,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			Class<?> collectionType = ReflectionUtil.getGenericCollectionTypeOfMethodReturnType(theMethod);
 			if (collectionType != null) {
 				if (!Object.class.equals(collectionType) && !IBaseResource.class.isAssignableFrom(collectionType)) {
-					throw new ConfigurationException(
-							"Method " + theMethod.getDeclaringClass().getSimpleName() + "#" + theMethod.getName() + " returns an invalid collection generic type: " + collectionType);
+					throw new ConfigurationException(Msg.code(1458) + "Method " + theMethod.getDeclaringClass().getSimpleName() + "#" + theMethod.getName() + " returns an invalid collection generic type: " + collectionType);
 				}
 			}
 			myResourceListCollectionType = collectionType;
@@ -98,8 +98,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		} else if (MethodOutcome.class.isAssignableFrom(methodReturnType)) {
 			myMethodReturnType = MethodReturnTypeEnum.METHOD_OUTCOME;
 		} else {
-			throw new ConfigurationException(
-					"Invalid return type '" + methodReturnType.getCanonicalName() + "' on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
+			throw new ConfigurationException(Msg.code(1459) + "Invalid return type '" + methodReturnType.getCanonicalName() + "' on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
 		}
 
 		if (theReturnResourceType != null) {
@@ -171,7 +170,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				} else if (list.size() == 1) {
 					return list.get(0);
 				} else {
-					throw new InvalidResponseException("FHIR server call returned a bundle with multiple resources, but this method is only able to returns one.", theResponseStatusCode);
+					throw new InvalidResponseException(Msg.code(1460) + "FHIR server call returned a bundle with multiple resources, but this method is only able to returns one.", theResponseStatusCode);
 				}
 			default:
 				break;
@@ -192,7 +191,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		}
 		}
 
-		throw new IllegalStateException("Should not get here!");
+		throw new IllegalStateException(Msg.code(1461) + "Should not get here!");
 	}
 
 	private Object toReturnType(IBaseResource resource) {

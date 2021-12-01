@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.client.method;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import java.lang.reflect.Method;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -55,7 +56,7 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 	@CoverageIgnore
 	@Override
 	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(1446));
 	}
 
 	public IBaseResource provider() {

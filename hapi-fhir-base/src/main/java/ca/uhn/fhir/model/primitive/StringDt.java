@@ -20,14 +20,14 @@ package ca.uhn.fhir.model.primitive;
  * #L%
  */
 
-import org.apache.commons.lang3.StringUtils;
-
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.rest.param.StringParam;
+import org.apache.commons.lang3.StringUtils;
 
 @DatatypeDef(name = "string")
 public class StringDt extends BasePrimitive<String> implements IQueryParameterType {
@@ -145,7 +145,7 @@ public class StringDt extends BasePrimitive<String> implements IQueryParameterTy
 	@Deprecated
 	@Override
 	public IQueryParameterType setMissing(Boolean theMissing) {
-		throw new UnsupportedOperationException("get/setMissing is not supported in StringDt. Use {@link StringParam} instead if you need this functionality");
+		throw new UnsupportedOperationException(Msg.code(1874) + "get/setMissing is not supported in StringDt. Use {@link StringParam} instead if you need this functionality");
 	}
 
 }

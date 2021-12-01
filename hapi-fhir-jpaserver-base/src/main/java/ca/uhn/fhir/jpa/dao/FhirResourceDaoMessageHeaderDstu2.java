@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoMessageHeader;
 import ca.uhn.fhir.model.dstu2.resource.MessageHeader;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
@@ -28,6 +29,6 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 public class FhirResourceDaoMessageHeaderDstu2 extends BaseHapiFhirResourceDao<MessageHeader> implements IFhirResourceDaoMessageHeader<MessageHeader> {
 
 	public static IBaseBundle throwProcessMessageNotImplemented() {
-		throw new NotImplementedOperationException("This operation is not yet implemented on this server");
+		throw new NotImplementedOperationException(Msg.code(945) + "This operation is not yet implemented on this server");
 	}
 }

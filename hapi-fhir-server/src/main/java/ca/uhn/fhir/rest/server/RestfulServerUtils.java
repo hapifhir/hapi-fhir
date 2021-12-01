@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -166,7 +167,7 @@ public class RestfulServerUtils {
 		// _elements
 		Set<String> elements = ElementsParameter.getElementsValueOrNull(theRequestDetails, false);
 		if (elements != null && !summaryMode.equals(Collections.singleton(SummaryEnum.FALSE))) {
-			throw new InvalidRequestException("Cannot combine the " + Constants.PARAM_SUMMARY + " and " + Constants.PARAM_ELEMENTS + " parameters");
+			throw new InvalidRequestException(Msg.code(304) + "Cannot combine the " + Constants.PARAM_SUMMARY + " and " + Constants.PARAM_ELEMENTS + " parameters");
 		}
 
 		// _elements:exclude
@@ -1025,7 +1026,7 @@ public class RestfulServerUtils {
 			try {
 				writer.append(((IDomainResource) theResource).getText().getDivAsString());
 			} catch (Exception e) {
-				throw new InternalErrorException(e);
+				throw new InternalErrorException(Msg.code(305) + e);
 			}
 		} else {
 			FhirVersionEnum forVersion = theResource.getStructureFhirVersionEnum();
@@ -1055,7 +1056,7 @@ public class RestfulServerUtils {
 
 	public static void validateResourceListNotNull(List<? extends IBaseResource> theResourceList) {
 		if (theResourceList == null) {
-			throw new InternalErrorException("IBundleProvider returned a null list of resources - This is not allowed");
+			throw new InternalErrorException(Msg.code(306) + "IBundleProvider returned a null list of resources - This is not allowed");
 		}
 	}
 

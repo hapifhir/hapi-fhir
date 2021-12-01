@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.binstore;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.IBinaryStorageEntityDao;
 import ca.uhn.fhir.jpa.model.entity.BinaryStorageEntity;
@@ -153,7 +154,7 @@ public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 		try (InputStream inputStream = theEntity.getBlob().getBinaryStream()) {
 			IOUtils.copy(inputStream, theOutputStream);
 		} catch (SQLException e) {
-			throw new IOException(e);
+			throw new IOException(Msg.code(1341) + e);
 		}
 	}
 
@@ -162,7 +163,7 @@ public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 		try {
 			return IOUtils.toByteArray(theEntity.getBlob().getBinaryStream(), size);
 		} catch (SQLException e) {
-			throw new IOException(e);
+			throw new IOException(Msg.code(1342) + e);
 		}
 	}
 }

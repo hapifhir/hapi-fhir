@@ -1,5 +1,6 @@
 package ca.uhn.fhir.narrative.template.filters;
 
+import ca.uhn.fhir.i18n.Msg;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,7 +20,7 @@ class Replace_First extends Filter {
         String replacement = "";
 
         if (needle == null) {
-            throw new RuntimeException("invalid pattern: " + needle);
+            throw new RuntimeException(Msg.code(719) + "invalid pattern: " + needle);
         }
 
         if (params.length >= 2) {
@@ -27,7 +28,7 @@ class Replace_First extends Filter {
             Object obj = super.get(1, params);
 
             if (obj == null) {
-                throw new RuntimeException("invalid replacement: " + needle);
+                throw new RuntimeException(Msg.code(720) + "invalid replacement: " + needle);
             }
 
             replacement = super.asString(super.get(1, params));

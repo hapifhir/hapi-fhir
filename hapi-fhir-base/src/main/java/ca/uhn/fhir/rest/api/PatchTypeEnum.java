@@ -21,9 +21,9 @@ package ca.uhn.fhir.rest.api;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.Patch;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.util.UrlUtil;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
@@ -76,11 +76,11 @@ public enum PatchTypeEnum {
 		if (retVal == null) {
 			if (isBlank(contentType)) {
 				String msg = theContext.getLocalizer().getMessage(PatchTypeEnum.class, "missingPatchContentType");
-				throw new InvalidRequestException(msg);
+				throw new InvalidRequestException(Msg.code(1964) + msg);
 			}
 
 			String msg = theContext.getLocalizer().getMessageSanitized(PatchTypeEnum.class, "invalidPatchContentType", contentType);
-			throw new InvalidRequestException(msg);
+			throw new InvalidRequestException(Msg.code(1965) + msg);
 		}
 
 		return retVal;

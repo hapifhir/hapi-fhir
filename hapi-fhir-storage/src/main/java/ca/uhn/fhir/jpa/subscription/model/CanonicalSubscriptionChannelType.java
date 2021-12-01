@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.subscription.model;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.exceptions.FHIRException;
 
@@ -79,7 +80,7 @@ public enum CanonicalSubscriptionChannelType {
 			}
 		}
 
-		throw new FHIRException("Unknown SubscriptionChannelType code '" + codeString + "'");
+		throw new FHIRException(Msg.code(569) + "Unknown SubscriptionChannelType code '" + codeString + "'");
 	}
 
 	public String toCode() {

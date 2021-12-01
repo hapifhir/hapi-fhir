@@ -2863,6 +2863,7 @@
 									<consoleOutput>true</consoleOutput>
 									<failOnViolation>true</failOnViolation>
 									<failsOnError>false</failsOnError>
+									<excludes>generated-sources/tinder/**/*</excludes>
 								</configuration>
 								<goals>
 									<goal>check</goal>

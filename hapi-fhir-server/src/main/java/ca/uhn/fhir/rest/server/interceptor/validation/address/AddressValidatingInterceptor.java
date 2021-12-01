@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.interceptor.validation.address;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
@@ -97,7 +98,7 @@ public class AddressValidatingInterceptor {
 			}
 			setAddressValidator(addressValidator);
 		} catch (Exception e) {
-			throw new RuntimeException("Unable to create validator", e);
+			throw new RuntimeException(Msg.code(344) + "Unable to create validator", e);
 		}
 	}
 

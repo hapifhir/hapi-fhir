@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -201,7 +202,7 @@ public class BaseJpaResourceProviderPatientR4 extends JpaResourceProviderR4<Pati
 		if ( ! coverageOpt.isPresent()) {
 			String i18nMessage = getContext().getLocalizer().getMessage(
 				"operation.member.match.error.coverage.not.found");
-			throw new UnprocessableEntityException(i18nMessage);
+			throw new UnprocessableEntityException(Msg.code(1155) + i18nMessage);
 		}
 		Coverage coverage = coverageOpt.get();
 
@@ -209,14 +210,14 @@ public class BaseJpaResourceProviderPatientR4 extends JpaResourceProviderR4<Pati
 		if (! patientOpt.isPresent()) {
 			String i18nMessage = getContext().getLocalizer().getMessage(
 				"operation.member.match.error.beneficiary.not.found");
-			throw new UnprocessableEntityException(i18nMessage);
+			throw new UnprocessableEntityException(Msg.code(1156) + i18nMessage);
 		}
 		Patient patient = patientOpt.get();
 
 		if (patient.getIdentifier().isEmpty()) {
 			String i18nMessage = getContext().getLocalizer().getMessage(
 				"operation.member.match.error.beneficiary.without.identifier");
-			throw new UnprocessableEntityException(i18nMessage);
+			throw new UnprocessableEntityException(Msg.code(1157) + i18nMessage);
 		}
 
 		myMemberMatcherR4Helper.addMemberIdentifierToMemberPatient(theMemberPatient, patient.getIdentifierFirstRep());
@@ -236,7 +237,7 @@ public class BaseJpaResourceProviderPatientR4 extends JpaResourceProviderR4<Pati
 		if (theParam == null) {
 			String i18nMessage = getContext().getLocalizer().getMessage(
 				"operation.member.match.error.missing.parameter", theParamName);
-			throw new UnprocessableEntityException(i18nMessage);
+			throw new UnprocessableEntityException(Msg.code(1158) + i18nMessage);
 		}
 	}
 

@@ -20,6 +20,7 @@ package ca.uhn.fhir.cql.common.helper;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.CqlTranslatorException;
 import org.cqframework.cql.cql2elm.LibraryManager;
@@ -40,7 +41,7 @@ public class TranslatorHelper {
 		try {
 			return CqlLibraryReader.read(xmlStream);
 		} catch (IOException | JAXBException e) {
-			throw new IllegalArgumentException("Error encountered while reading ELM xml: " + e.getMessage());
+			throw new IllegalArgumentException(Msg.code(1660) + "Error encountered while reading ELM xml: " + e.getMessage());
 		}
 	}
 
@@ -78,8 +79,7 @@ public class TranslatorHelper {
 			translator = CqlTranslator.fromStream(cqlStream, modelManager, libraryManager,
 				options.toArray(new CqlTranslator.Options[options.size()]));
 		} catch (IOException e) {
-			throw new IllegalArgumentException(
-				String.format("Errors occurred translating library: %s", e.getMessage()));
+			throw new IllegalArgumentException(Msg.code(1661) + String.format("Errors occurred translating library: %s", e.getMessage()));
 		}
 
 		return translator;

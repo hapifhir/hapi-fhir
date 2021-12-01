@@ -19,6 +19,7 @@ package ca.uhn.fhir.tinder;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import java.util.List;
 
 import javax.security.auth.login.FailedLoginException;
@@ -100,7 +101,7 @@ public class GeneratorContext {
 		if (ResourceSource.MODEL.name().equalsIgnoreCase(resourceSource)) {
 			this.resourceSource = ResourceSource.MODEL;
 		} else {
-			throw new FailureException("Unknown resource-source option: " + resourceSource);
+			throw new FailureException(Msg.code(112) + "Unknown resource-source option: " + resourceSource);
 		}
 	}
 

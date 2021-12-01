@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.i18n.HapiLocalizer;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.api.IResource;
@@ -178,7 +179,7 @@ public class FhirContext {
 
 		if (theVersion != null) {
 			if (!theVersion.isPresentOnClasspath()) {
-				throw new IllegalStateException(getLocalizer().getMessage(FhirContext.class, "noStructuresForSpecifiedVersion", theVersion.name()));
+				throw new IllegalStateException(Msg.code(1680) + getLocalizer().getMessage(FhirContext.class, "noStructuresForSpecifiedVersion", theVersion.name()));
 			}
 			myVersion = theVersion.getVersionImplementation();
 		} else if (FhirVersionEnum.DSTU2.isPresentOnClasspath()) {
@@ -192,7 +193,7 @@ public class FhirContext {
 		} else if (FhirVersionEnum.R4.isPresentOnClasspath()) {
 			myVersion = FhirVersionEnum.R4.getVersionImplementation();
 		} else {
-			throw new IllegalStateException(getLocalizer().getMessage(FhirContext.class, "noStructures"));
+			throw new IllegalStateException(Msg.code(1681) + getLocalizer().getMessage(FhirContext.class, "noStructures"));
 		}
 
 		if (theVersion == null) {
@@ -455,7 +456,7 @@ public class FhirContext {
 		Validate.notNull(theResourceType, "theResourceType can not be null");
 
 		if (Modifier.isAbstract(theResourceType.getModifiers())) {
-			throw new IllegalArgumentException("Can not scan abstract or interface class (resource definitions must be concrete classes): " + theResourceType.getName());
+			throw new IllegalArgumentException(Msg.code(1682) + "Can not scan abstract or interface class (resource definitions must be concrete classes): " + theResourceType.getName());
 		}
 
 		RuntimeResourceDefinition retVal = (RuntimeResourceDefinition) myClassToElementDefinition.get(theResourceType);
@@ -488,7 +489,7 @@ public class FhirContext {
 
 		Class<? extends IBaseResource> resourceType = nameToType.get(theResourceName.toLowerCase());
 		if (resourceType == null) {
-			throw new DataFormatException(createUnknownResourceNameError(theResourceName, theVersion));
+			throw new DataFormatException(Msg.code(1683) + createUnknownResourceNameError(theResourceName, theVersion));
 		}
 
 		return getResourceDefinition(resourceType);
@@ -555,7 +556,7 @@ public class FhirContext {
 				// Multiple spots in HAPI FHIR and Smile CDR depend on DataFormatException
 				// being thrown by this method, don't change that.
 				// ***********************************************************************
-				throw new DataFormatException(createUnknownResourceNameError(theResourceName, myVersion.getVersion()));
+				throw new DataFormatException(Msg.code(1684) + createUnknownResourceNameError(theResourceName, myVersion.getVersion()));
 			}
 			if (IBaseResource.class.isAssignableFrom(clazz)) {
 				retVal = scanResourceType(clazz);
@@ -604,7 +605,7 @@ public class FhirContext {
 		try (InputStream propFile = myVersion.getFhirVersionPropertiesFile()) {
 			props.load(propFile);
 		} catch (IOException e) {
-			throw new ConfigurationException("Failed to load version properties file", e);
+			throw new ConfigurationException(Msg.code(1685) + "Failed to load version properties file", e);
 		}
 		Enumeration<?> propNames = props.propertyNames();
 		while (propNames.hasMoreElements()) {
@@ -627,7 +628,7 @@ public class FhirContext {
 			try {
 				myRestfulClientFactory = (IRestfulClientFactory) ReflectionUtil.newInstance(Class.forName("ca.uhn.fhir.rest.client.apache.ApacheRestfulClientFactory"), FhirContext.class, this);
 			} catch (ClassNotFoundException e) {
-				throw new ConfigurationException("hapi-fhir-client does not appear to be on the classpath");
+				throw new ConfigurationException(Msg.code(1686) + "hapi-fhir-client does not appear to be on the classpath");
 			}
 		}
 		return myRestfulClientFactory;
@@ -1023,7 +1024,7 @@ public class FhirContext {
 			if (next instanceof RuntimeResourceDefinition) {
 				if ("Bundle".equals(next.getName())) {
 					if (!IBaseBundle.class.isAssignableFrom(next.getImplementingClass())) {
-						throw new ConfigurationException("Resource type declares resource name Bundle but does not implement IBaseBundle");
+						throw new ConfigurationException(Msg.code(1687) + "Resource type declares resource name Bundle but does not implement IBaseBundle");
 					}
 				}
 			}
@@ -1195,7 +1196,7 @@ public class FhirContext {
 		ArrayList<Class<? extends IBaseResource>> retVal = new ArrayList<Class<? extends IBaseResource>>(1);
 		for (Class<?> clazz : theResourceTypes) {
 			if (!IResource.class.isAssignableFrom(clazz)) {
-				throw new IllegalArgumentException(clazz.getCanonicalName() + " is not an instance of " + IResource.class.getSimpleName());
+				throw new IllegalArgumentException(Msg.code(1688) + clazz.getCanonicalName() + " is not an instance of " + IResource.class.getSimpleName());
 			}
 			retVal.add((Class<? extends IResource>) clazz);
 		}

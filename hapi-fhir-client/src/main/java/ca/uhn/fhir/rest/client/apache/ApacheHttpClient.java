@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.client.apache;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.Map.Entry;
@@ -82,7 +83,7 @@ public class ApacheHttpClient extends BaseHttpClient implements IHttpClient {
 		try {
 			return new UrlEncodedFormEntity(parameters, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
-			throw new InternalErrorException("Server does not support UTF-8 (should not happen)", e);
+			throw new InternalErrorException(Msg.code(1479) + "Server does not support UTF-8 (should not happen)", e);
 		}
 	}
 

@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.batch.processor;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.fhirpath.IFhirPath;
@@ -71,7 +72,7 @@ public class GoldenResourceAnnotatingProcessor implements ItemProcessor<List<IBa
 		Optional<RuntimeSearchParam> oPatientSearchParam= SearchParameterUtil.getOnlyPatientSearchParamForResourceType(myContext, myResourceType);
 		if (!oPatientSearchParam.isPresent()) {
 			String errorMessage = String.format("[%s] has  no search parameters that are for patients, so it is invalid for Group Bulk Export!", myResourceType);
-			throw new IllegalArgumentException(errorMessage);
+			throw new IllegalArgumentException(Msg.code(1279) + errorMessage);
 		} else {
 			myRuntimeSearchParam = oPatientSearchParam.get();
 		}

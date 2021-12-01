@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.search;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
@@ -77,7 +78,7 @@ public class ExtendedLuceneClauseBuilder {
 					nextValueTrimmed = nextValueTrimmed.substring(0, nextValueTrimmed.indexOf("/_history"));
 				}
 			} else {
-				throw new IllegalArgumentException("Unsupported full-text param type: " + nextOr.getClass());
+				throw new IllegalArgumentException(Msg.code(1088) + "Unsupported full-text param type: " + nextOr.getClass());
 			}
 			if (isNotBlank(nextValueTrimmed)) {
 				terms.add(nextValueTrimmed);
@@ -133,7 +134,7 @@ public class ExtendedLuceneClauseBuilder {
 					// treat a string as a code with no system (like _id)
 					return myPredicateFactory.match().field(indexFieldPrefix + ".code").matching(string.getValue());
 				} else {
-					throw new IllegalArgumentException("Unexpected param type for token search-param: " + orTerm.getClass().getName());
+					throw new IllegalArgumentException(Msg.code(1089) + "Unexpected param type for token search-param: " + orTerm.getClass().getName());
 				}
 			}).collect(Collectors.toList());
 

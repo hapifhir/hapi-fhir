@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.client.method;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
@@ -100,7 +101,7 @@ public class OperationParameter implements IParameter {
 	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
 		if (getContext().getVersion().getVersion().isRi()) {
 			if (IDatatype.class.isAssignableFrom(theParameterType)) {
-				throw new ConfigurationException("Incorrect use of type " + theParameterType.getSimpleName() + " as parameter type for method when context is for version " + getContext().getVersion().getVersion().name() + " in method: " + theMethod.toString());
+				throw new ConfigurationException(Msg.code(1408) + "Incorrect use of type " + theParameterType.getSimpleName() + " as parameter type for method when context is for version " + getContext().getVersion().getVersion().name() + " in method: " + theMethod.toString());
 			}
 		}
 
@@ -156,7 +157,7 @@ public class OperationParameter implements IParameter {
 				mySearchParameterBinding.setType(myContext, theParameterType, theInnerCollectionType, theOuterCollectionType);
 				myConverter = new OperationParamConverter();
 			} else {
-				throw new ConfigurationException("Invalid type for @OperationParam: " + myParameterType.getName());
+				throw new ConfigurationException(Msg.code(1409) + "Invalid type for @OperationParam: " + myParameterType.getName());
 			}
 
 		}
@@ -186,7 +187,7 @@ public class OperationParameter implements IParameter {
 
 
 	public static void throwInvalidMode(String paramValues) {
-		throw new InvalidRequestException("Invalid mode value: \"" + paramValues + "\"");
+		throw new InvalidRequestException(Msg.code(1410) + "Invalid mode value: \"" + paramValues + "\"");
 	}
 
 	interface IOperationParamConverter {

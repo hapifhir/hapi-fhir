@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.i18n.Msg;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
@@ -49,7 +50,7 @@ public class MetaUtil {
 		} else if (theContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU3)) {
 			return getSourceDstu3((IBaseHasExtensions) theMeta);
 		} else {
-			throw new UnsupportedOperationException(MetaUtil.class.getSimpleName() + ".getSource() not supported on FHIR Version " + theContext.getVersion().getVersion());
+			throw new UnsupportedOperationException(Msg.code(1782) + MetaUtil.class.getSimpleName() + ".getSource() not supported on FHIR Version " + theContext.getVersion().getVersion());
 		}
 	}
 

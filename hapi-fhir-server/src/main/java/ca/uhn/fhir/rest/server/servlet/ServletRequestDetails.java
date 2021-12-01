@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.servlet;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.rest.api.Constants;
@@ -94,7 +95,7 @@ public class ServletRequestDetails extends RequestDetails {
 			return requestContents;
 		} catch (IOException e) {
 			ourLog.error("Could not load request resource", e);
-			throw new InvalidRequestException(String.format("Could not load request resource: %s", e.getMessage()));
+			throw new InvalidRequestException(Msg.code(308) + String.format("Could not load request resource: %s", e.getMessage()));
 		}
 	}
 

@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
@@ -67,7 +68,7 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 
 		if (theMergedResource != null ) {
 			if (myGoldenResourceHelper.hasIdentifier(theMergedResource)) {
-				throw new IllegalArgumentException("Manually merged resource can not contain identifiers");
+				throw new IllegalArgumentException(Msg.code(751) + "Manually merged resource can not contain identifiers");
 			}
 			myGoldenResourceHelper.mergeIndentifierFields(theFromGoldenResource, theMergedResource, theMdmTransactionContext);
 			myGoldenResourceHelper.mergeIndentifierFields(theToGoldenResource, theMergedResource, theMdmTransactionContext);
@@ -147,7 +148,7 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 							break;
 						case MANUAL:
 							if (fromLink.getMatchResult() != toLink.getMatchResult()) {
-								throw new InvalidRequestException("A MANUAL " + fromLink.getMatchResult() + " link may not be merged into a MANUAL " + toLink.getMatchResult() + " link for the same target");
+								throw new InvalidRequestException(Msg.code(752) + "A MANUAL " + fromLink.getMatchResult() + " link may not be merged into a MANUAL " + toLink.getMatchResult() + " link for the same target");
 							}
 					}
 				} else {

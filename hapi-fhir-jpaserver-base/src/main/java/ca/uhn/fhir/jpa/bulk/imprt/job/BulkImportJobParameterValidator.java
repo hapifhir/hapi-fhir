@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.bulk.imprt.job;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.dao.data.IBulkImportJobDao;
 import ca.uhn.fhir.jpa.entity.BulkImportJobEntity;
@@ -46,7 +47,7 @@ public class BulkImportJobParameterValidator implements JobParametersValidator {
 	@Override
 	public void validate(JobParameters theJobParameters) throws JobParametersInvalidException {
 		if (theJobParameters == null) {
-			throw new JobParametersInvalidException("This job needs Parameters: [jobUUID]");
+			throw new JobParametersInvalidException(Msg.code(784) + "This job needs Parameters: [jobUUID]");
 		}
 
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
@@ -64,7 +65,7 @@ public class BulkImportJobParameterValidator implements JobParametersValidator {
 		});
 
 		if (!StringUtils.isEmpty(errorMessage)) {
-			throw new JobParametersInvalidException(errorMessage);
+			throw new JobParametersInvalidException(Msg.code(785) + errorMessage);
 		}
 	}
 }

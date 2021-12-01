@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.client.method;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Collections;
@@ -53,11 +54,11 @@ public class CountParameter implements IParameter {
 	@Override
 	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
 		if (theOuterCollectionType != null) {
-			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName() + "' is annotated with @" + Count.class.getName()
+			throw new ConfigurationException(Msg.code(1420) + "Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName() + "' is annotated with @" + Count.class.getName()
 					+ " but can not be of collection type");
 		}
 		if (!ParameterUtil.isBindableIntegerType(theParameterType)) {
-			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName() + "' is annotated with @" + Count.class.getName()
+			throw new ConfigurationException(Msg.code(1421) + "Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName() + "' is annotated with @" + Count.class.getName()
 					+ " but type '" + theParameterType + "' is an invalid type, must be Integer or IntegerType");
 		}
 	}

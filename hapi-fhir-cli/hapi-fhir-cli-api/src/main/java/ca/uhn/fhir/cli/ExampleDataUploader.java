@@ -20,6 +20,7 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
@@ -86,7 +87,7 @@ public class ExampleDataUploader extends BaseRequestGeneratingCommand {
 			case R4:
 				return getBundleFromFileR4(theLimit, theSuppliedFile, theCtx);
 			default:
-				throw new ParseException("Invalid spec version for this command: " + theCtx.getVersion().getVersion());
+				throw new ParseException(Msg.code(1607) + "Invalid spec version for this command: " + theCtx.getVersion().getVersion());
 		}
 	}
 
@@ -374,7 +375,7 @@ public class ExampleDataUploader extends BaseRequestGeneratingCommand {
 				processBundleR4(ctx, (org.hl7.fhir.r4.model.Bundle) bundle);
 				break;
 			default:
-				throw new IllegalStateException();
+				throw new IllegalStateException(Msg.code(1608));
 		}
 	}
 
@@ -609,9 +610,9 @@ public class ExampleDataUploader extends BaseRequestGeneratingCommand {
 
 		String targetServer = theCommandLine.getOptionValue("t");
 		if (isBlank(targetServer)) {
-			throw new ParseException("No target server (-t) specified");
+			throw new ParseException(Msg.code(1609) + "No target server (-t) specified");
 		} else if (! targetServer.startsWith("http") && ! targetServer.startsWith("file")) {
-			throw new ParseException("Invalid target server specified, must begin with 'http' or 'file'");
+			throw new ParseException(Msg.code(1610) + "Invalid target server specified, must begin with 'http' or 'file'");
 		}
 
 		Integer limit = null;
@@ -620,7 +621,7 @@ public class ExampleDataUploader extends BaseRequestGeneratingCommand {
 			try {
 				limit = Integer.parseInt(limitString);
 			} catch (NumberFormatException e) {
-				throw new ParseException("Invalid number for limit (-l) option, must be a number: " + limitString);
+				throw new ParseException(Msg.code(1611) + "Invalid number for limit (-l) option, must be a number: " + limitString);
 			}
 		}
 
@@ -636,7 +637,7 @@ public class ExampleDataUploader extends BaseRequestGeneratingCommand {
 				specUrl = "http://build.fhir.org/examples-json.zip";
 				break;
 			default:
-				throw new ParseException("Invalid spec version for this command: " + ctx.getVersion().getVersion());
+				throw new ParseException(Msg.code(1612) + "Invalid spec version for this command: " + ctx.getVersion().getVersion());
 		}
 
 		String filepath = theCommandLine.getOptionValue('d');
@@ -652,7 +653,7 @@ public class ExampleDataUploader extends BaseRequestGeneratingCommand {
 				sendBundleToTarget(targetServer, ctx, bundle, theCommandLine);
 			}
 		} catch (Exception e) {
-			throw new CommandFailureException(e);
+			throw new CommandFailureException(Msg.code(1613) + e);
 		}
 
 
@@ -733,7 +734,7 @@ public class ExampleDataUploader extends BaseRequestGeneratingCommand {
 				ourLog.info("Writing bundle to: {}", path);
 				File file = new File(path);
 				if (file.exists()) {
-					throw new Exception("File already exists: " + file.getAbsolutePath());
+					throw new Exception(Msg.code(1614) + "File already exists: " + file.getAbsolutePath());
 				}
 				FileWriter w = new FileWriter(file, false);
 				w.append(encoded);

@@ -1,5 +1,6 @@
 package ca.uhn.fhirtest.interceptor;
 
+import ca.uhn.fhir.i18n.Msg;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.util.*;
@@ -34,13 +35,13 @@ public class TdlSecurityInterceptor extends AuthorizationInterceptor {
 		}
 		
 		if (!authHeader.startsWith("Bearer ")) {
-			throw new ForbiddenOperationException("Invalid bearer token, must be in the form \"Authorization: Bearer [token]\"");
+			throw new ForbiddenOperationException(Msg.code(1980) + "Invalid bearer token, must be in the form \"Authorization: Bearer [token]\"");
 		}
 		
 		String token = authHeader.substring("Bearer ".length()).trim();
 		if (!myTokens.contains(token)) {
 			ourLog.error("Invalid token '{}' - Valid are: {}", token, myTokens);
-			throw new ForbiddenOperationException("Unknown/expired bearer token");
+			throw new ForbiddenOperationException(Msg.code(1981) + "Unknown/expired bearer token");
 		}
 		
 		ourLog.info("User logged in with bearer token: " + token.substring(0, 4) + "...");

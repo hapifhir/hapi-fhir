@@ -21,6 +21,7 @@ package ca.uhn.fhir.validation.schematron;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.BundleUtil;
@@ -142,7 +143,7 @@ public class SchematronBaseValidator implements IValidatorModule {
 				+ ".sch";
 			try (InputStream baseIs = FhirValidator.class.getResourceAsStream(pathToBase)) {
 				if (baseIs == null) {
-					throw new InternalErrorException("Failed to load schematron for resource '" + theCtx.getFhirContext().getResourceDefinition(theCtx.getResource()).getBaseDefinition().getName() + "'. "
+					throw new InternalErrorException(Msg.code(1972) + "Failed to load schematron for resource '" + theCtx.getFhirContext().getResourceDefinition(theCtx.getResource()).getBaseDefinition().getName() + "'. "
 						+ SchemaBaseValidator.RESOURCES_JAR_NOTE);
 				}
 			} catch (IOException e) {

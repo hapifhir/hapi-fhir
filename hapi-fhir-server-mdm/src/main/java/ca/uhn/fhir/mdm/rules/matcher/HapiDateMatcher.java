@@ -20,6 +20,7 @@ package ca.uhn.fhir.mdm.rules.matcher;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBase;
 
@@ -35,7 +36,7 @@ public class HapiDateMatcher implements IMdmFieldMatcher {
 			case R4:
 				return myHapiDateMatcherR4.match(theLeftBase, theRightBase);
 			default:
-				throw new UnsupportedOperationException("Version not supported: " + theFhirContext.getVersion().getVersion());
+				throw new UnsupportedOperationException(Msg.code(1520) + "Version not supported: " + theFhirContext.getVersion().getVersion());
 		}
 	}
 }

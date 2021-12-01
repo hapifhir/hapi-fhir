@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.binstore;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PayloadTooLargeException;
@@ -110,7 +111,7 @@ abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 			public int getCount() {
 				int retVal = super.getCount();
 				if (retVal > getMaximumBinarySize()) {
-					throw new PayloadTooLargeException("Binary size exceeds maximum: " + getMaximumBinarySize());
+					throw new PayloadTooLargeException(Msg.code(1343) + "Binary size exceeds maximum: " + getMaximumBinarySize());
 				}
 				return retVal;
 			}
@@ -134,7 +135,7 @@ abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 			if (attachmentId.isPresent()) {
 				value = fetchBlob(theBaseBinary.getIdElement(), attachmentId.get());
 			} else {
-				throw new InternalErrorException("Unable to load binary blob data for " + theBaseBinary.getIdElement());
+				throw new InternalErrorException(Msg.code(1344) + "Unable to load binary blob data for " + theBaseBinary.getIdElement());
 			}
 		}
 		return value;

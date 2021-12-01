@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.r5;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
@@ -98,10 +99,10 @@ public class FhirResourceDaoCodeSystemR5 extends BaseHapiFhirResourceDao<CodeSys
 		boolean haveDisplayLanguage = theDisplayLanguage != null && theDisplayLanguage.isEmpty() == false;
 		
 		if (!haveCoding && !(haveSystem && haveCode)) {
-			throw new InvalidRequestException("No code, coding, or codeableConcept provided to validate");
+			throw new InvalidRequestException(Msg.code(1126) + "No code, coding, or codeableConcept provided to validate");
 		}
 		if (!LogicUtil.multiXor(haveCoding, (haveSystem && haveCode)) || (haveSystem != haveCode)) {
-			throw new InvalidRequestException("$lookup can only validate (system AND code) OR (coding.system AND coding.code)");
+			throw new InvalidRequestException(Msg.code(1127) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)");
 		}
 
 		String code;

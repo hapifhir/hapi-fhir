@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.batch.mdm;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -65,7 +66,7 @@ public class MdmClearJobSubmitterImpl implements IMdmClearJobSubmitter {
 			theBatchSize = myDaoConfig.getExpungeBatchSize();
 		}
 		if (!myDaoConfig.canDeleteExpunge()) {
-			throw new ForbiddenOperationException("Delete Expunge not allowed:  " + myDaoConfig.cannotDeleteExpungeReason());
+			throw new ForbiddenOperationException(Msg.code(1278) + "Delete Expunge not allowed:  " + myDaoConfig.cannotDeleteExpungeReason());
 		}
 
 		RequestListJson requestListJson = myPartitionedUrlValidator.buildRequestListJson(theRequest, theUrls);

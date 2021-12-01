@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.util;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.collect.ImmutableSet;
@@ -112,7 +113,7 @@ public class TestUtil {
 		Set<String> names = new HashSet<String>();
 
 		if (classes.size() <= 1) {
-			throw new InternalErrorException("Found no classes");
+			throw new InternalErrorException(Msg.code(1623) + "Found no classes");
 		}
 
 		for (ClassInfo classInfo : classes) {
@@ -143,7 +144,7 @@ public class TestUtil {
 			for (UniqueConstraint nextIndex : table.uniqueConstraints()) {
 				int indexLength = calculateIndexLength(nextIndex.columnNames(), columnNameToLength, theClazz, nextIndex.name());
 				if (indexLength > maxIndexLength) {
-					throw new IllegalStateException("Index '" + nextIndex.name() + "' is too long. Length is " + indexLength + " and must not exceed " + maxIndexLength + " which is the maximum MySQL length");
+					throw new IllegalStateException(Msg.code(1624) + "Index '" + nextIndex.name() + "' is too long. Length is " + indexLength + " and must not exceed " + maxIndexLength + " which is the maximum MySQL length");
 				}
 			}
 
@@ -156,7 +157,7 @@ public class TestUtil {
 		for (String nextName : theColumnNames) {
 			Integer nextLength = theColumnNameToLength.get(nextName);
 			if (nextLength == null) {
-				throw new IllegalStateException("Index '" + theIndexName + "' references unknown column: " + nextName);
+				throw new IllegalStateException(Msg.code(1625) + "Index '" + theIndexName + "' references unknown column: " + nextName);
 			}
 			retVal += nextLength;
 		}
@@ -309,24 +310,24 @@ public class TestUtil {
 			if (field.getType().equals(String.class)) {
 				if (!hasLob) {
 					if (!theIsView && column.length() == 255) {
-						throw new IllegalStateException("Field does not have an explicit maximum length specified: " + field);
+						throw new IllegalStateException(Msg.code(1626) + "Field does not have an explicit maximum length specified: " + field);
 					}
 					if (column.length() > MAX_COL_LENGTH) {
-						throw new IllegalStateException("Field is too long: " + field);
+						throw new IllegalStateException(Msg.code(1627) + "Field is too long: " + field);
 					}
 				}
 
 				Size size = theAnnotatedElement.getAnnotation(Size.class);
 				if (size != null) {
 					if (size.max() > MAX_COL_LENGTH) {
-						throw new IllegalStateException("Field is too long: " + field);
+						throw new IllegalStateException(Msg.code(1628) + "Field is too long: " + field);
 					}
 				}
 
 				Length length = theAnnotatedElement.getAnnotation(Length.class);
 				if (length != null) {
 					if (length.max() > MAX_COL_LENGTH) {
-						throw new IllegalStateException("Field is too long: " + field);
+						throw new IllegalStateException(Msg.code(1629) + "Field is too long: " + field);
 					}
 				}
 			}
@@ -348,10 +349,10 @@ public class TestUtil {
 
 	private static void validateColumnName(String theColumnName, AnnotatedElement theElement) {
 		if (!theColumnName.equals(theColumnName.toUpperCase())) {
-			throw new IllegalArgumentException("Column name must be all upper case: " + theColumnName + " found on " + theElement);
+			throw new IllegalArgumentException(Msg.code(1630) + "Column name must be all upper case: " + theColumnName + " found on " + theElement);
 		}
 		if (ourReservedWords.contains(theColumnName)) {
-			throw new IllegalArgumentException("Column name is a reserved word: " + theColumnName + " found on " + theElement);
+			throw new IllegalArgumentException(Msg.code(1631) + "Column name is a reserved word: " + theColumnName + " found on " + theElement);
 		}
 	}
 

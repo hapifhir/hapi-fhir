@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -144,17 +145,15 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 				system = null;
 				code = number.getValueAsQueryToken(getFhirContext());
 			} else {
-				throw new IllegalArgumentException("Invalid token type: " + nextParameter.getClass());
+				throw new IllegalArgumentException(Msg.code(1236) + "Invalid token type: " + nextParameter.getClass());
 			}
 
 			if (system != null && system.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
-				throw new InvalidRequestException(
-					"Parameter[" + paramName + "] has system (" + system.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + system);
+				throw new InvalidRequestException(Msg.code(1237) + "Parameter[" + paramName + "] has system (" + system.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + system);
 			}
 
 			if (code != null && code.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
-				throw new InvalidRequestException(
-					"Parameter[" + paramName + "] has code (" + code.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + code);
+				throw new InvalidRequestException(Msg.code(1238) + "Parameter[" + paramName + "] has code (" + code.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + code);
 			}
 
 			/*
@@ -262,11 +261,11 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 		String codeDesc = defaultIfBlank(theCode, "(missing)");
 		if (isBlank(theCode)) {
 			String msg = getFhirContext().getLocalizer().getMessage(LegacySearchBuilder.class, "invalidCodeMissingSystem", theParamName, systemDesc, codeDesc);
-			throw new InvalidRequestException(msg);
+			throw new InvalidRequestException(Msg.code(1239) + msg);
 		}
 		if (isBlank(theSystem)) {
 			String msg = getFhirContext().getLocalizer().getMessage(LegacySearchBuilder.class, "invalidCodeMissingCode", theParamName, systemDesc, codeDesc);
-			throw new InvalidRequestException(msg);
+			throw new InvalidRequestException(Msg.code(1240) + msg);
 		}
 	}
 

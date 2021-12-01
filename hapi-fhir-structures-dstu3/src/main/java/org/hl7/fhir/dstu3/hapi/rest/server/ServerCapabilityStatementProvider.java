@@ -1,5 +1,6 @@
 package org.hl7.fhir.dstu3.hapi.rest.server;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -460,7 +461,7 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
   @Read(type = OperationDefinition.class)
   public OperationDefinition readOperationDefinition(@IdParam IdType theId, RequestDetails theRequestDetails) {
     if (theId == null || theId.hasIdPart() == false) {
-      throw new ResourceNotFoundException(theId);
+      throw new ResourceNotFoundException(Msg.code(628) + theId);
     }
 
     RestfulServerConfiguration serverConfiguration = getServerConfiguration(theRequestDetails);
@@ -474,7 +475,7 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
     if (searchBindings != null && !searchBindings.isEmpty()) {
         return readOperationDefinitionForNamedSearch(searchBindings);
     }
-    throw new ResourceNotFoundException(theId);
+    throw new ResourceNotFoundException(Msg.code(629) + theId);
   }
   
   private OperationDefinition readOperationDefinitionForNamedSearch(List<SearchMethodBinding> bindings) {

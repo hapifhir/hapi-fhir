@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -250,7 +251,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				return null;
 			default:
 				// Should not happen
-				throw new IllegalStateException("Unable to apply security to event of type " + theOperation);
+				throw new IllegalStateException(Msg.code(335) + "Unable to apply security to event of type " + theOperation);
 		}
 
 		switch (myAppliesTo) {
@@ -294,7 +295,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				}
 				break;
 			default:
-				throw new IllegalStateException("Unable to apply security to event of applies to type " + myAppliesTo);
+				throw new IllegalStateException(Msg.code(336) + "Unable to apply security to event of applies to type " + myAppliesTo);
 		}
 
 		switch (myClassifierType) {
@@ -303,7 +304,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 			case IN_COMPARTMENT:
 				return applyRuleToCompartment(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theFlags, ctx, target);
 			default:
-				throw new IllegalStateException("Unable to apply security to event of applies to type " + myAppliesTo);
+				throw new IllegalStateException(Msg.code(337) + "Unable to apply security to event of applies to type " + myAppliesTo);
 		}
 
 		return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
@@ -493,7 +494,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 					operation = RestOperationTypeEnum.PATCH;
 				} else {
 
-					throw new InvalidRequestException("Can not handle transaction with operation of type " + nextPart.getRequestType());
+					throw new InvalidRequestException(Msg.code(338) + "Can not handle transaction with operation of type " + nextPart.getRequestType());
 				}
 
 				/*
@@ -504,7 +505,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				if (nextPart.getResource() != null) {
 					RuntimeResourceDefinition resourceDef = ctx.getResourceDefinition(nextPart.getResource());
 					if ("Parameters".equals(resourceDef.getName()) || "Bundle".equals(resourceDef.getName())) {
-						throw new InvalidRequestException("Can not handle transaction with nested resource of type " + resourceDef.getName());
+						throw new InvalidRequestException(Msg.code(339) + "Can not handle transaction with nested resource of type " + resourceDef.getName());
 					}
 				}
 
@@ -621,7 +622,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				return true;
 			} else {
 				String msg = theContext.getLocalizer().getMessage(RuleImplOp.class, "invalidRequestBundleTypeForTransaction", '"' + bundleType + '"');
-				throw new UnprocessableEntityException(msg);
+				throw new UnprocessableEntityException(Msg.code(340) + msg);
 			}
 		}
 		return false;

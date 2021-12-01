@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
@@ -70,7 +71,7 @@ public class SearchFilterParser {
 			} else if (original.charAt(cursor) == ']') {
 				result = FilterLexType.fsltCloseSq;
 			} else {
-				throw new FilterSyntaxException(String.format("Unknown Character \"%s\" at %d",
+				throw new FilterSyntaxException(Msg.code(1052) + String.format("Unknown Character \"%s\" at %d",
 					peekCh(),
 					cursor));
 			}
@@ -171,7 +172,7 @@ public class SearchFilterParser {
 					str.append('\n');
 //						str.setCharAt(l, '\n');
 				} else {
-					throw new FilterSyntaxException(String.format("Unknown escape sequence at %d",
+					throw new FilterSyntaxException(Msg.code(1053) + String.format("Unknown escape sequence at %d",
 						cursor));
 				}
 			}
@@ -179,12 +180,12 @@ public class SearchFilterParser {
 		}
 //			SetLength(result, l);
 		if ((cursor > original.length()) || (original.charAt(cursor) != '"')) {
-			throw new FilterSyntaxException(String.format("Problem with string termination at %d",
+			throw new FilterSyntaxException(Msg.code(1054) + String.format("Problem with string termination at %d",
 				cursor));
 		}
 
 		if (str.length() == 0) {
-			throw new FilterSyntaxException(String.format("Problem with string at %d cannot be empty",
+			throw new FilterSyntaxException(Msg.code(1055) + String.format("Problem with string at %d cannot be empty",
 				cursor));
 		}
 
@@ -196,7 +197,7 @@ public class SearchFilterParser {
 
 		Filter result = parseOpen();
 		if (cursor < original.length()) {
-			throw new FilterSyntaxException(String.format("Expression did not terminate at %d",
+			throw new FilterSyntaxException(Msg.code(1056) + String.format("Expression did not terminate at %d",
 				cursor));
 		}
 		return result;
@@ -212,7 +213,7 @@ public class SearchFilterParser {
 			grp = new FilterParameterGroup();
 			grp.setContained(parseOpen());
 			if (peek() != FilterLexType.fsltClose) {
-				throw new FilterSyntaxException(String.format("Expected ')' at %d but found %s",
+				throw new FilterSyntaxException(Msg.code(1057) + String.format("Expected ')' at %d but found %s",
 					cursor,
 					peekCh()));
 			}
@@ -223,7 +224,7 @@ public class SearchFilterParser {
 			} else if ((lexType == FilterLexType.fsltEnded) || (lexType == FilterLexType.fsltClose) || (lexType == FilterLexType.fsltCloseSq)) {
 				result = grp;
 			} else {
-				throw new FilterSyntaxException(String.format("Unexpected Character %s at %d",
+				throw new FilterSyntaxException(Msg.code(1058) + String.format("Unexpected Character %s at %d",
 					peekCh(),
 					cursor));
 			}
@@ -248,7 +249,7 @@ public class SearchFilterParser {
 		} else {
 			s = consumeName();
 			if ((!s.equals("or")) && (!s.equals("and")) && (!s.equals("not"))) {
-				throw new FilterSyntaxException(String.format("Unexpected Name %s at %d",
+				throw new FilterSyntaxException(Msg.code(1059) + String.format("Unexpected Name %s at %d",
 					s,
 					cursor));
 			}
@@ -277,7 +278,7 @@ public class SearchFilterParser {
 			cursor++;
 			result.setFilter(parseOpen());
 			if (peek() != FilterLexType.fsltCloseSq) {
-				throw new FilterSyntaxException(String.format("Expected ']' at %d but found %s",
+				throw new FilterSyntaxException(Msg.code(1060) + String.format("Expected ']' at %d but found %s",
 					cursor,
 					peekCh()));
 			}
@@ -287,13 +288,13 @@ public class SearchFilterParser {
 		if (peek() == FilterLexType.fsltDot) {
 			cursor++;
 			if (peek() != FilterLexType.fsltName) {
-				throw new FilterSyntaxException(String.format("Unexpected Character %s at %d",
+				throw new FilterSyntaxException(Msg.code(1061) + String.format("Unexpected Character %s at %d",
 					peekCh(),
 					cursor));
 			}
 			result.setNext(parsePath(consumeName()));
 		} else if (result.getFilter() != null) {
-			throw new FilterSyntaxException(String.format("Expected '.' at %d but found %s",
+			throw new FilterSyntaxException(Msg.code(1062) + String.format("Expected '.' at %d but found %s",
 				cursor,
 				peekCh()));
 		}
@@ -311,14 +312,14 @@ public class SearchFilterParser {
 		filter.setParamPath(parsePath(name));
 
 		if (peek() != FilterLexType.fsltName) {
-			throw new FilterSyntaxException(String.format("Unexpected Character %s at %d",
+			throw new FilterSyntaxException(Msg.code(1063) + String.format("Unexpected Character %s at %d",
 				peekCh(),
 				cursor));
 		}
 		s = consumeName();
 		int index = CODES_CompareOperation.indexOf(s);
 		if (index == -1) {
-			throw new FilterSyntaxException(String.format("Unknown operation %s at %d",
+			throw new FilterSyntaxException(Msg.code(1064) + String.format("Unknown operation %s at %d",
 				s,
 				cursor));
 		}
@@ -335,7 +336,7 @@ public class SearchFilterParser {
 			filter.setValue(consumeString());
 			filter.setValueType(FilterValueType.string);
 		} else {
-			throw new FilterSyntaxException(String.format("Unexpected Character %s at %d",
+			throw new FilterSyntaxException(Msg.code(1065) + String.format("Unexpected Character %s at %d",
 				peekCh(),
 				cursor));
 		}
@@ -344,14 +345,14 @@ public class SearchFilterParser {
 		if (filter.getOperation() == CompareOperation.pr) {
 			if ((filter.getValue().compareToIgnoreCase("true") != 0) &&
 				(filter.getValue().compareToIgnoreCase("false") != 0)) {
-				throw new FilterSyntaxException(String.format("Value %s not valid for operation %s at %d",
+				throw new FilterSyntaxException(Msg.code(1066) + String.format("Value %s not valid for operation %s at %d",
 					filter.getValue(),
 					CODES_CompareOperation.get(filter.getOperation().ordinal()),
 					cursor));
 			}
 		} else if (filter.getOperation() == CompareOperation.po) {
 			if (!isDate(filter.getValue())) {
-				throw new FilterSyntaxException(String.format("Value %s not valid for operation %s at %d",
+				throw new FilterSyntaxException(Msg.code(1067) + String.format("Value %s not valid for operation %s at %d",
 					filter.getValue(),
 					CODES_CompareOperation.get(filter.getOperation().ordinal()),
 					cursor));
@@ -364,7 +365,7 @@ public class SearchFilterParser {
 		} else if ((lexType == FilterLexType.fsltEnded) || (lexType == FilterLexType.fsltClose) || (lexType == FilterLexType.fsltCloseSq)) {
 			result = filter;
 		} else {
-			throw new FilterSyntaxException(String.format("Unexpected Character %s at %d",
+			throw new FilterSyntaxException(Msg.code(1068) + String.format("Unexpected Character %s at %d",
 				peekCh(),
 				cursor));
 		}

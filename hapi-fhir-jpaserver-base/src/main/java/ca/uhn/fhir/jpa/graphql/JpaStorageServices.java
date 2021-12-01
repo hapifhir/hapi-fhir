@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.graphql;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -119,7 +120,7 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 					.map(this::searchParamToGraphqlArgument)
 					.collect(Collectors.toSet());
 				String msg = getContext().getLocalizer().getMessageSanitized(JpaStorageServices.class, "invalidGraphqlArgument", nextArgument.getName(), new TreeSet<>(graphqlArguments));
-				throw new InvalidRequestException(msg);
+				throw new InvalidRequestException(Msg.code(1275) + msg);
 			}
 
 			IQueryParameterOr<?> queryParam;
@@ -177,7 +178,7 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 					queryParam = specialOrListParam;
 					break;
 				default:
-					throw new InvalidRequestException(String.format("%s parameters are not yet supported in GraphQL", searchParam.getParamType()));
+					throw new InvalidRequestException(Msg.code(1276) + String.format("%s parameters are not yet supported in GraphQL", searchParam.getParamType()));
 			}
 
 			params.add(searchParamName, queryParam);
@@ -221,7 +222,7 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 	@Transactional(propagation = Propagation.NEVER)
 	@Override
 	public IBaseBundle search(Object theAppInfo, String theType, List<Argument> theSearchParams) throws FHIRException {
-		throw new NotImplementedOperationException("Not yet able to handle this GraphQL request");
+		throw new NotImplementedOperationException(Msg.code(1277) + "Not yet able to handle this GraphQL request");
 	}
 
 	@Nullable

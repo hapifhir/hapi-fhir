@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.interceptor.validation.fields;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.interceptor.api.Hook;
@@ -137,7 +138,7 @@ public class FieldValidatingInterceptor {
 		try {
 			return (IValidator) Class.forName(theValue).getDeclaredConstructor().newInstance();
 		} catch (Exception e) {
-			throw new IllegalStateException(String.format("Unable to create validator for %s", theValue), e);
+			throw new IllegalStateException(Msg.code(348) + String.format("Unable to create validator for %s", theValue), e);
 		}
 	}
 

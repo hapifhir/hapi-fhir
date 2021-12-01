@@ -1,5 +1,6 @@
 package ca.uhn.fhir.narrative.template.tags;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.narrative.template.LValue;
 
 import java.util.HashMap;
@@ -78,7 +79,7 @@ public abstract class Tag extends LValue {
         Tag tag = TAGS.get(name);
 
         if (tag == null) {
-            throw new RuntimeException("unknown tag: " + name);
+            throw new RuntimeException(Msg.code(733) + "unknown tag: " + name);
         }
 
         return tag;

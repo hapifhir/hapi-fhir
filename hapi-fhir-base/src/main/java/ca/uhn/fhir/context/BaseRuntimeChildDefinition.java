@@ -20,14 +20,15 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.Map.Entry;
-
+import ca.uhn.fhir.i18n.Msg;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Set;
 
 public abstract class BaseRuntimeChildDefinition {
 
@@ -98,7 +99,7 @@ public abstract class BaseRuntimeChildDefinition {
 		}
 		
 		// Shouldn't happen
-		throw new IllegalStateException("Unable to find reference type");
+		throw new IllegalStateException(Msg.code(1692) + "Unable to find reference type");
 	}
 
 	// public String getExtensionUrl() {

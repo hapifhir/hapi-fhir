@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.searchparam.provider;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
@@ -64,7 +65,7 @@ public class SearchableHashMapResourceProvider<T extends IBaseResource> extends 
 		for (T resource : allEResources) {
 			InMemoryMatchResult result = theMatcher.apply(resource);
 			if (!result.supported()) {
-				throw new InvalidRequestException("Search not supported by in-memory matcher: "+result.getUnsupportedReason());
+				throw new InvalidRequestException(Msg.code(502) + "Search not supported by in-memory matcher: "+result.getUnsupportedReason());
 			}
 			if (result.matched()) {
 				matches.add(resource);

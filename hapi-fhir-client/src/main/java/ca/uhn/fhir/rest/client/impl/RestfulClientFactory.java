@@ -19,6 +19,7 @@ package ca.uhn.fhir.rest.client.impl;
  * limitations under the License.
  * #L%
  */
+import ca.uhn.fhir.i18n.Msg;
 import java.lang.reflect.*;
 import java.util.*;
 
@@ -141,7 +142,7 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 		validateConfigured();
 
 		if (!theClientType.isInterface()) {
-			throw new ConfigurationException(theClientType.getCanonicalName() + " is not an interface");
+			throw new ConfigurationException(Msg.code(1354) + theClientType.getCanonicalName() + " is not an interface");
 		}
 
 		ClientInvocationHandlerFactory invocationHandler = myInvocationHandlers.get(theClientType);
@@ -165,7 +166,7 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 	 */
 	protected void validateConfigured() {
 		if (getFhirContext() == null) {
-			throw new IllegalStateException(getClass().getSimpleName() + " does not have FhirContext defined. This must be set via " + getClass().getSimpleName() + "#setFhirContext(FhirContext)");
+			throw new IllegalStateException(Msg.code(1355) + getClass().getSimpleName() + " does not have FhirContext defined. This must be set via " + getClass().getSimpleName() + "#setFhirContext(FhirContext)");
 		}
 	}
 
@@ -202,7 +203,7 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 	 */
 	public void setFhirContext(FhirContext theContext) {
 		if (myContext != null && myContext != theContext) {
-			throw new IllegalStateException("RestfulClientFactory instance is already associated with one FhirContext. RestfulClientFactory instances can not be shared.");
+			throw new IllegalStateException(Msg.code(1356) + "RestfulClientFactory instance is already associated with one FhirContext. RestfulClientFactory instances can not be shared.");
 		}
 		myContext = theContext;
 	}
@@ -309,7 +310,7 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 			}
 		} catch (FhirClientConnectionException e) {
 			String msg = myContext.getLocalizer().getMessage(RestfulClientFactory.class, "failedToRetrieveConformance", theServerBase + Constants.URL_TOKEN_METADATA);
-			throw new FhirClientConnectionException(msg, e);
+			throw new FhirClientConnectionException(Msg.code(1357) + msg, e);
 		}
 
 		FhirTerser t = myContext.newTerser();
@@ -340,7 +341,7 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 		if (serverFhirVersionEnum != null) {
 			FhirVersionEnum contextFhirVersion = myContext.getVersion().getVersion();
 			if (!contextFhirVersion.isEquivalentTo(serverFhirVersionEnum)) {
-				throw new FhirClientInappropriateForServerException(myContext.getLocalizer().getMessage(RestfulClientFactory.class, "wrongVersionInConformance",
+				throw new FhirClientInappropriateForServerException(Msg.code(1358) + myContext.getLocalizer().getMessage(RestfulClientFactory.class, "wrongVersionInConformance",
 						theServerBase + Constants.URL_TOKEN_METADATA, serverFhirVersionString, serverFhirVersionEnum, contextFhirVersion));
 			}
 		}

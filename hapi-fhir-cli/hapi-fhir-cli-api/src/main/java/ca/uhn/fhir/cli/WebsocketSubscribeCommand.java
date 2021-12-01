@@ -20,6 +20,7 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.primitive.IdDt;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
@@ -64,7 +65,7 @@ public class WebsocketSubscribeCommand extends BaseCommand {
 	public void run(CommandLine theCommandLine) throws ParseException {
 		String target = theCommandLine.getOptionValue("t");
 		if (isBlank(target) || (!target.startsWith("ws://") && !target.startsWith("wss://"))) {
-			throw new ParseException("Target (-t) needs to be in the form \"ws://foo\" or \"wss://foo\"");
+			throw new ParseException(Msg.code(1536) + "Target (-t) needs to be in the form \"ws://foo\" or \"wss://foo\"");
 		}
 
 		IdDt subsId = new IdDt(theCommandLine.getOptionValue("i"));
@@ -84,7 +85,7 @@ public class WebsocketSubscribeCommand extends BaseCommand {
 
 			ourLog.info("Shutting down websocket client");
 		} catch (Exception e) {
-			throw new CommandFailureException(e);
+			throw new CommandFailureException(Msg.code(1537) + e);
 		} finally {
 			try {
 				client.stop();

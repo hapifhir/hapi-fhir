@@ -20,10 +20,12 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.length;
 
 public class ValidateUtil {
 
@@ -32,7 +34,7 @@ public class ValidateUtil {
 	 */
 	public static void isGreaterThan(long theValue, long theMinimum, String theMessage) {
 		if (theValue <= theMinimum) {
-			throw new IllegalArgumentException(theMessage);
+			throw new IllegalArgumentException(Msg.code(1762) + theMessage);
 		}
 	}
 
@@ -41,43 +43,43 @@ public class ValidateUtil {
 	 */
 	public static void isGreaterThanOrEqualTo(long theValue, long theMinimum, String theMessage) {
 		if (theValue < theMinimum) {
-			throw new IllegalArgumentException(theMessage);
+			throw new IllegalArgumentException(Msg.code(1763) + theMessage);
 		}
 	}
 
 	public static void isNotBlankOrThrowIllegalArgument(String theString, String theMessage) {
 		if (isBlank(theString)) {
-			throw new IllegalArgumentException(theMessage);
+			throw new IllegalArgumentException(Msg.code(1764) + theMessage);
 		}
 	}
 
 	public static void isNotBlankOrThrowInvalidRequest(String theString, String theMessage) {
 		if (isBlank(theString)) {
-			throw new InvalidRequestException(theMessage);
+			throw new InvalidRequestException(Msg.code(1765) + theMessage);
 		}
 	}
 
 	public static void isNotBlankOrThrowUnprocessableEntity(String theString, String theMessage) {
 		if (isBlank(theString)) {
-			throw new UnprocessableEntityException(theMessage);
+			throw new UnprocessableEntityException(Msg.code(1766) + theMessage);
 		}
 	}
 
 	public static void isNotNullOrThrowUnprocessableEntity(Object theObject, String theMessage, Object... theValues) {
 		if (theObject == null) {
-			throw new UnprocessableEntityException(String.format(theMessage, theValues));
+			throw new UnprocessableEntityException(Msg.code(1767) + String.format(theMessage, theValues));
 		}
 	}
 
 	public static void isNotTooLongOrThrowIllegalArgument(String theString, int theMaxLength, String theMessage) {
 		if (length(theString) > theMaxLength) {
-			throw new IllegalArgumentException(theMessage);
+			throw new IllegalArgumentException(Msg.code(1768) + theMessage);
 		}
 	}
 
 	public static void isTrueOrThrowInvalidRequest(boolean theSuccess, String theMessage, Object... theValues) {
 		if (!theSuccess) {
-			throw new InvalidRequestException(String.format(theMessage, theValues));
+			throw new InvalidRequestException(Msg.code(1769) + String.format(theMessage, theValues));
 		}
 	}
 
@@ -89,7 +91,7 @@ public class ValidateUtil {
 			}
 		}
 		if (count != 1) {
-			throw new InvalidRequestException(theMessage);
+			throw new InvalidRequestException(Msg.code(1770) + theMessage);
 		}
 	}
 

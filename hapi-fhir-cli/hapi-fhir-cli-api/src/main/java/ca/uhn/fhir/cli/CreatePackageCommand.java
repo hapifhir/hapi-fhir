@@ -20,6 +20,7 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -99,7 +100,7 @@ public class CreatePackageCommand extends BaseCommand {
 				FileUtils.deleteDirectory(myWorkDirectory);
 			}
 		} catch (IOException e) {
-			throw new InternalErrorException("Failed to delete temporary directory \"" + myWorkDirectory.getAbsolutePath() + "\"", e);
+			throw new InternalErrorException(Msg.code(1545) + "Failed to delete temporary directory \"" + myWorkDirectory.getAbsolutePath() + "\"", e);
 		}
 	}
 
@@ -110,18 +111,18 @@ public class CreatePackageCommand extends BaseCommand {
 
 		myPackageName = theCommandLine.getOptionValue(NAME_OPT);
 		if (isBlank(myPackageName)) {
-			throw new ParseException("No package name supplied (--" + NAME_OPT + ")");
+			throw new ParseException(Msg.code(1546) + "No package name supplied (--" + NAME_OPT + ")");
 		}
 		if (!NpmPackage.isValidName(myPackageName)) {
-			throw new ParseException("Invalid package name: " + myPackageName);
+			throw new ParseException(Msg.code(1547) + "Invalid package name: " + myPackageName);
 		}
 
 		myPackageVersion = theCommandLine.getOptionValue(VERSION_OPT);
 		if (isBlank(myPackageVersion)) {
-			throw new ParseException("No package version supplied (--"+VERSION_OPT+")");
+			throw new ParseException(Msg.code(1548) + "No package version supplied (--"+VERSION_OPT+")");
 		}
 		if (!NpmPackage.isValidVersion(myPackageVersion)) {
-			throw new ParseException("Invalid package version: " + myPackageVersion);
+			throw new ParseException(Msg.code(1549) + "Invalid package version: " + myPackageVersion);
 		}
 
 		ourLog.info("Creating FHIR package {}#{}", myPackageName, myPackageVersion);
@@ -140,7 +141,7 @@ public class CreatePackageCommand extends BaseCommand {
 			for (String nextDependencyString : dependencies) {
 				int colonIdx = nextDependencyString.indexOf(":");
 				if (colonIdx == -1) {
-					throw new ParseException("Invalid dependency spec: " + nextDependencyString);
+					throw new ParseException(Msg.code(1550) + "Invalid dependency spec: " + nextDependencyString);
 				}
 				String depName = nextDependencyString.substring(0, colonIdx);
 				String depVersion = nextDependencyString.substring(colonIdx + 1);
@@ -175,7 +176,7 @@ public class CreatePackageCommand extends BaseCommand {
 		try (FileOutputStream os = new FileOutputStream(targetFile, false)) {
 			myPackage.save(os);
 		} catch (IOException e) {
-			throw new ExecutionException("Failed to write file " + targetFile, e);
+			throw new ExecutionException(Msg.code(1551) + "Failed to write file " + targetFile, e);
 		}
 	}
 
@@ -190,7 +191,7 @@ public class CreatePackageCommand extends BaseCommand {
 		if (thePackageValues != null) {
 			for (String nextPackageValue : thePackageValues) {
 				if (!nextPackageValue.contains("/")) {
-					throw new ParseException("Invalid file expression: " + nextPackageValue);
+					throw new ParseException(Msg.code(1552) + "Invalid file expression: " + nextPackageValue);
 				}
 
 				int endIndex = nextPackageValue.lastIndexOf("/");
@@ -208,7 +209,7 @@ public class CreatePackageCommand extends BaseCommand {
 						contentBytes = contents.getBytes(StandardCharsets.UTF_8);
 						type = EncodingEnum.detectEncoding(contents).newParser(myFhirCtx).parseResource(contents).fhirType();
 					} catch (IOException | DataFormatException e) {
-						throw new ExecutionException("Failed to load/parse file: " + next.getName(), e);
+						throw new ExecutionException(Msg.code(1553) + "Failed to load/parse file: " + next.getName(), e);
 					}
 
 					ourLog.info("Adding {} file of type {}: {}", theFolder, type, next.getName());

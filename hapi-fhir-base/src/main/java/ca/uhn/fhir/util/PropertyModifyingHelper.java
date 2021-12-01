@@ -21,6 +21,7 @@ package ca.uhn.fhir.util;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 
@@ -53,7 +54,7 @@ public class PropertyModifyingHelper {
 	 */
 	public PropertyModifyingHelper(FhirContext theFhirContext, IBase theBase) {
 		if (findGetPropertyMethod(theBase) == null) {
-			throw new IllegalArgumentException("Specified base instance does not support property retrieval.");
+			throw new IllegalArgumentException(Msg.code(1771) + "Specified base instance does not support property retrieval.");
 		}
 		myBase = theBase;
 		myFhirContext = theFhirContext;
@@ -129,7 +130,7 @@ public class PropertyModifyingHelper {
 			int hashCode = thePropertyName.hashCode();
 			setPropertyMethod.invoke(myBase, hashCode, thePropertyName, value);
 		} catch (Exception e) {
-			throw new IllegalStateException(String.format("Unable to set property %s on %s", thePropertyName, myBase), e);
+			throw new IllegalStateException(Msg.code(1772) + String.format("Unable to set property %s on %s", thePropertyName, myBase), e);
 		}
 	}
 
@@ -145,7 +146,7 @@ public class PropertyModifyingHelper {
 		try {
 			values = (Object[]) getPropertyMethod.invoke(myBase, thePropertyName.hashCode(), thePropertyName, true);
 		} catch (Exception e) {
-			throw new IllegalStateException(String.format("Instance %s does not supply property %s", myBase, thePropertyName), e);
+			throw new IllegalStateException(Msg.code(1773) + String.format("Instance %s does not supply property %s", myBase, thePropertyName), e);
 		}
 
 		return Arrays.stream(values)

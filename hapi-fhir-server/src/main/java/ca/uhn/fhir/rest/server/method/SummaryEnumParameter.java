@@ -19,6 +19,7 @@ package ca.uhn.fhir.rest.server.method;
  * limitations under the License.
  * #L%
  */
+import ca.uhn.fhir.i18n.Msg;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.lang.reflect.Method;
@@ -55,9 +56,9 @@ public class SummaryEnumParameter implements IParameter {
 			retVal.addAll(value);
 			return retVal;
 		} catch (InstantiationException e) {
-			throw new InternalErrorException("Failed to instantiate " + myInnerCollectionType, e);
+			throw new InternalErrorException(Msg.code(378) + "Failed to instantiate " + myInnerCollectionType, e);
 		} catch (IllegalAccessException e) {
-			throw new InternalErrorException("Failed to instantiate " + myInnerCollectionType, e);
+			throw new InternalErrorException(Msg.code(379) + "Failed to instantiate " + myInnerCollectionType, e);
 		}
 	}
 
@@ -93,7 +94,7 @@ public class SummaryEnumParameter implements IParameter {
 			if (retVal.contains(SummaryEnum.TEXT)) {
 				if (retVal.size() > 1) {
 					String msg = theRequest.getServer().getFhirContext().getLocalizer().getMessage(SummaryEnumParameter.class, "cantCombineText");
-					throw new InvalidRequestException(msg);
+					throw new InvalidRequestException(Msg.code(380) + msg);
 				}
 			}
 		}
@@ -111,7 +112,7 @@ public class SummaryEnumParameter implements IParameter {
 	@Override
 	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
 		if (theOuterCollectionType != null) {
-			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName() + "' is of type " + SummaryEnum.class + " but can not be a collection of collections");
+			throw new ConfigurationException(Msg.code(381) + "Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName() + "' is of type " + SummaryEnum.class + " but can not be a collection of collections");
 		}
 		if (theInnerCollectionType != null) {
 			myInnerCollectionType = CollectionBinder.getInstantiableCollectionType(theInnerCollectionType, SummaryEnum.class.getSimpleName());

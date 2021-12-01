@@ -19,6 +19,7 @@ package ca.uhn.fhir.model.dstu;
  * limitations under the License.
  * #L%
  */
+import ca.uhn.fhir.i18n.Msg;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.join;
 
@@ -174,7 +175,7 @@ public class FhirDstu1 implements IFhirVersion {
 		String name = nextDef.getName();
 		DataTypeEnum fromCodeString = DataTypeEnum.VALUESET_BINDER.fromCodeString(name);
 		if (fromCodeString == null) {
-			throw new ConfigurationException("Unknown type: " + name);
+			throw new ConfigurationException(Msg.code(767) + "Unknown type: " + name);
 		}
 		type.setCode(fromCodeString);
 	}
@@ -234,7 +235,7 @@ public class FhirDstu1 implements IFhirVersion {
 				} else if (child instanceof RuntimeChildContainedResources) {
 					// ignore
 				} else if (child instanceof RuntimeChildDeclaredExtensionDefinition) {
-					throw new IllegalStateException("Unexpected child type: " + child.getClass().getCanonicalName());
+					throw new IllegalStateException(Msg.code(768) + "Unexpected child type: " + child.getClass().getCanonicalName());
 				} else if (child instanceof RuntimeChildCompositeDatatypeDefinition || child instanceof RuntimeChildPrimitiveDatatypeDefinition || child instanceof RuntimeChildChoiceDefinition || child instanceof RuntimeChildResourceDefinition) {
 					Iterator<String> childNamesIter = child.getValidChildNames().iterator();
 					String nextName = childNamesIter.next();
@@ -247,12 +248,12 @@ public class FhirDstu1 implements IFhirVersion {
 					}
 					path.pollLast();
 				} else {
-					throw new IllegalStateException("Unexpected child type: " + child.getClass().getCanonicalName());
+					throw new IllegalStateException(Msg.code(769) + "Unexpected child type: " + child.getClass().getCanonicalName());
 				}
 
 			}
 		} else {
-			throw new IllegalStateException("Unexpected child type: " + def.getClass().getCanonicalName());
+			throw new IllegalStateException(Msg.code(770) + "Unexpected child type: " + def.getClass().getCanonicalName());
 		}
 
 		path.pollLast();
@@ -307,7 +308,7 @@ public class FhirDstu1 implements IFhirVersion {
 			str = FhirDstu1.class.getResourceAsStream("ca/uhn/fhir/model/dstu/fhirversion.properties");
 		}
 		if (str == null) {
-			throw new ConfigurationException("Can not find model property file on classpath: " + "/ca/uhn/fhir/model/dstu/model.properties");
+			throw new ConfigurationException(Msg.code(771) + "Can not find model property file on classpath: " + "/ca/uhn/fhir/model/dstu/model.properties");
 		}
 		return str;
 	}
@@ -359,12 +360,12 @@ public class FhirDstu1 implements IFhirVersion {
 			if (nextChild.getExtensionUrl().contains("#") && !nextChild.getExtensionUrl().endsWith("#")) {
 				code = nextChild.getExtensionUrl().substring(nextChild.getExtensionUrl().indexOf('#') + 1);
 			} else {
-				throw new ConfigurationException("Locally defined extension has no '#[code]' part in extension URL: " + nextChild.getExtensionUrl());
+				throw new ConfigurationException(Msg.code(772) + "Locally defined extension has no '#[code]' part in extension URL: " + nextChild.getExtensionUrl());
 			}
 
 			defn.setCode(code);
 			if (theExtensionDefToCode.values().contains(code)) {
-				throw new IllegalStateException("Duplicate extension code: " + code);
+				throw new IllegalStateException(Msg.code(773) + "Duplicate extension code: " + code);
 			}
 			theExtensionDefToCode.put(nextChild, code);
 
@@ -399,12 +400,12 @@ public class FhirDstu1 implements IFhirVersion {
 
 	@Override
 	public IContextValidationSupport<?, ?, ?, ?, ?, ?> createValidationSupport() {
-		throw new UnsupportedOperationException("Validation support is not supported in DSTU1 contexts");
+		throw new UnsupportedOperationException(Msg.code(774) + "Validation support is not supported in DSTU1 contexts");
 	}
 
 	@Override
 	public IFluentPath createFluentPathExecutor(FhirContext theFhirContext) {
-		throw new UnsupportedOperationException("FluentPath is not supported in DSTU1 contexts");
+		throw new UnsupportedOperationException(Msg.code(775) + "FluentPath is not supported in DSTU1 contexts");
 	}
 
 }

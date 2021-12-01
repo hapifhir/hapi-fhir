@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
@@ -99,10 +100,10 @@ public class FhirResourceDaoCodeSystemDstu3 extends BaseHapiFhirResourceDao<Code
 		boolean haveDisplayLanguage = theDisplayLanguage != null && theDisplayLanguage.isEmpty() == false;
 		
 		if (!haveCoding && !(haveSystem && haveCode)) {
-			throw new InvalidRequestException("No code, coding, or codeableConcept provided to validate");
+			throw new InvalidRequestException(Msg.code(1075) + "No code, coding, or codeableConcept provided to validate");
 		}
 		if (!LogicUtil.multiXor(haveCoding, (haveSystem && haveCode)) || (haveSystem != haveCode)) {
-			throw new InvalidRequestException("$lookup can only validate (system AND code) OR (coding.system AND coding.code)");
+			throw new InvalidRequestException(Msg.code(1076) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)");
 		}
 
 		String code;
@@ -172,7 +173,7 @@ public class FhirResourceDaoCodeSystemDstu3 extends BaseHapiFhirResourceDao<Code
 	@Override
 	public CodeValidationResult validateCode(IIdType theCodeSystemId, IPrimitiveType<String> theCodeSystemUrl, IPrimitiveType<String> theVersion, IPrimitiveType<String> theCode,
 														  IPrimitiveType<String> theDisplay, Coding theCoding, CodeableConcept theCodeableConcept, RequestDetails theRequestDetails) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(1077));
 	}
 
 }

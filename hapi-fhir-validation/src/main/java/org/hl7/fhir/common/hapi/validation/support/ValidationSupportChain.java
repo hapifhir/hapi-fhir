@@ -1,5 +1,6 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -136,7 +137,7 @@ public class ValidationSupportChain implements IValidationSupport {
 
 		if (theValidationSupport.getFhirContext() == null) {
 			String message = "Can not add validation support: getFhirContext() returns null";
-			throw new ConfigurationException(message);
+			throw new ConfigurationException(Msg.code(708) + message);
 		}
 
 		FhirContext existingFhirContext = getFhirContext();
@@ -145,7 +146,7 @@ public class ValidationSupportChain implements IValidationSupport {
 			FhirVersionEnum existingVersion = existingFhirContext.getVersion().getVersion();
 			if (!existingVersion.equals(newVersion)) {
 				String message = "Trying to add validation support of version " + newVersion + " to chain with " + myChain.size() + " entries of version " + existingVersion;
-				throw new ConfigurationException(message);
+				throw new ConfigurationException(Msg.code(709) + message);
 			}
 		}
 

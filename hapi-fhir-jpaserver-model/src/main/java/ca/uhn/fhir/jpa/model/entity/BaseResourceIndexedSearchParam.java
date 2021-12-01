@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -153,7 +154,7 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	public abstract IQueryParameterType toQueryParameterType();
 
 	public boolean matches(IQueryParameterType theParam) {
-		throw new UnsupportedOperationException("No parameter matcher for " + theParam);
+		throw new UnsupportedOperationException(Msg.code(1526) + "No parameter matcher for " + theParam);
 	}
 
 	public PartitionSettings getPartitionSettings() {
@@ -202,7 +203,7 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 
 		if (thePartitionSettings.isPartitioningEnabled() && thePartitionSettings.isIncludePartitionInSearchHashes() && theRequestPartitionId != null) {
 			if (theRequestPartitionId.getPartitionIds().size() > 1) {
-				throw new InternalErrorException("Can not search multiple partitions when partitions are included in search hashes");
+				throw new InternalErrorException(Msg.code(1527) + "Can not search multiple partitions when partitions are included in search hashes");
 			}
 			Integer partitionId = theRequestPartitionId.getFirstPartitionIdOrNull();
 			if (partitionId != null) {

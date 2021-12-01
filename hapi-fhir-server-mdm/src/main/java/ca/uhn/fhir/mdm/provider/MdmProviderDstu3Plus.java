@@ -20,6 +20,7 @@ package ca.uhn.fhir.mdm.provider;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
 import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
@@ -100,7 +101,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	@Operation(name = ProviderConstants.EMPI_MATCH, typeName = "Patient")
 	public IBaseBundle match(@OperationParam(name = ProviderConstants.MDM_MATCH_RESOURCE, min = 1, max = 1, typeName = "Patient") IAnyResource thePatient) {
 		if (thePatient == null) {
-			throw new InvalidRequestException("resource may not be null");
+			throw new InvalidRequestException(Msg.code(1498) + "resource may not be null");
 		}
 		return myMdmControllerHelper.getMatchesAndPossibleMatchesForResource(thePatient, "Patient");
 	}
@@ -110,7 +111,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 											 @OperationParam(name = ProviderConstants.MDM_RESOURCE_TYPE, min = 1, max = 1, typeName = "string") IPrimitiveType<String> theResourceType
 	) {
 		if (theResource == null) {
-			throw new InvalidRequestException("resource may not be null");
+			throw new InvalidRequestException(Msg.code(1499) + "resource may not be null");
 		}
 		return myMdmControllerHelper.getMatchesAndPossibleMatchesForResource(theResource, theResourceType.getValueAsString());
 	}
@@ -177,7 +178,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	private void validateResourceNames(List<String> theResourceNames) {
 		for (String resourceName : theResourceNames) {
 			if (!myMdmSettings.isSupportedMdmType(resourceName)) {
-				throw new InvalidRequestException(ProviderConstants.OPERATION_MDM_CLEAR + " does not support resource type: " + resourceName);
+				throw new InvalidRequestException(Msg.code(1500) + ProviderConstants.OPERATION_MDM_CLEAR + " does not support resource type: " + resourceName);
 			}
 		}
 	}

@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.delete;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.model.DeleteConflict;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
@@ -60,6 +61,6 @@ public final class DeleteConflictUtil {
 			return;
 		}
 
-		throw new ResourceVersionConflictException(firstMsg, oo);
+		throw new ResourceVersionConflictException(Msg.code(515) + firstMsg, oo);
 	}
 }

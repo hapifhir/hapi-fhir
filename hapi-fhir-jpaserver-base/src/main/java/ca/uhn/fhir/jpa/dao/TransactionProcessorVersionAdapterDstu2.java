@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -83,7 +84,7 @@ public class TransactionProcessorVersionAdapterDstu2 implements ITransactionProc
 		try {
 			resp.setType(BundleTypeEnum.forCode(theBundleType));
 		} catch (FHIRException theE) {
-			throw new InternalErrorException("Unknown bundle type: " + theBundleType);
+			throw new InternalErrorException(Msg.code(936) + "Unknown bundle type: " + theBundleType);
 		}
 		return resp;
 	}

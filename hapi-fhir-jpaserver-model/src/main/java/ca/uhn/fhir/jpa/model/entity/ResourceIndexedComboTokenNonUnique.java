@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import org.apache.commons.lang3.builder.CompareToBuilder;
@@ -112,7 +113,7 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex implem
 
 	@Override
 	public <T extends BaseResourceIndex> void copyMutableValuesFrom(T theSource) {
-		throw new IllegalStateException();
+		throw new IllegalStateException(Msg.code(1528));
 	}
 
 	@Override
