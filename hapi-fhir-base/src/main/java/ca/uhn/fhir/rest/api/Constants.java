@@ -201,6 +201,14 @@ public class Constants {
 	public static final String PARAM_TAGS = "_tags";
 	public static final String PARAM_TEXT = "_text";
 	public static final String PARAM_VALIDATE = "_validate";
+
+	/**
+	 * $member-match operation
+	 */
+	public static final String PARAM_MEMBER_PATIENT = "MemberPatient";
+	public static final String PARAM_OLD_COVERAGE = "OldCoverage";
+	public static final String PARAM_NEW_COVERAGE = "NewCoverage";
+
 	public static final String PARAMQUALIFIER_MISSING = ":missing";
 	public static final String PARAMQUALIFIER_MISSING_FALSE = "false";
 	public static final String PARAMQUALIFIER_MISSING_TRUE = "true";

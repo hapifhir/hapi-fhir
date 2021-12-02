@@ -1,0 +1,7 @@
+---
+type: perf
+issue: 3197
+title: "A new configuration option has been added to ParserOptions called `setAutoContainReferenceTargetsWithNoId`. This
+   setting disables the automatic creation of contained resources in cases where the target/contained resource is set
+   to a Reference instance but not actually added to the `Resource.contained` list. Disabling this automatic containing
+   yields a minor performance improvement in systems that do not need this functionality."

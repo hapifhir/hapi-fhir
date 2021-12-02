@@ -818,7 +818,7 @@
         <hibernate_validator_version>6.1.5.Final</hibernate_validator_version>
         <httpcore_version>4.4.13</httpcore_version>
         <httpclient_version>4.5.13</httpclient_version>
-        <jackson_version>2.12.3</jackson_version>
+        <jackson_version>2.13.0</jackson_version>
         <jackson_databind_version>${jackson_version}</jackson_databind_version>
         <maven_assembly_plugin_version>3.3.0</maven_assembly_plugin_version>
         <maven_license_plugin_version>1.8</maven_license_plugin_version>
@@ -841,7 +841,7 @@
 
         <stax2_api_version>3.1.4</stax2_api_version>
         <testcontainers_version>1.16.0</testcontainers_version>
-        <thymeleaf-version>3.0.12.RELEASE</thymeleaf-version>
+        <thymeleaf-version>3.0.13.RELEASE</thymeleaf-version>
         <woodstox_core_asl_version>4.4.1</woodstox_core_asl_version>
 
         <!-- We are aiming to still work on a very old version of SLF4j even though we depend on the newest, just to be nice to users of the API. This version is tested in the hapi-fhir-cobertura. -->
@@ -2519,6 +2519,7 @@
 								<echo>Adding Google analytics in target/site for &lt;body&gt;</echo>
 								<replace dir="target/site" summary="true">
 									<include name="**/*.html"></include>
+									<!--suppress UnresolvedMavenProperty -->
 									<replacefilter token="#build#" value="${label}"/>
 									<replacefilter token="#version#" value="${project.version}"/>
 									<replacetoken><![CDATA[</body>]]></replacetoken>
@@ -2843,6 +2844,7 @@
 								<id>validate</id>
 								<phase>generate-sources</phase>
 								<configuration>
+									<!--suppress UnresolvedMavenProperty -->
 									<configLocation>${maven.multiModuleProjectDirectory}/src/checkstyle/checkstyle_config_nofixmes.xml</configLocation>
 									<encoding>UTF-8</encoding>
 									<consoleOutput>true</consoleOutput>

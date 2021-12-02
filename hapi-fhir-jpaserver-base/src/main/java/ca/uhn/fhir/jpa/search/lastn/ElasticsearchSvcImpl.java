@@ -125,13 +125,13 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	private PartitionSettings myPartitionSettings;
 
 	//This constructor used to inject a dummy partitionsettings in test.
-	public ElasticsearchSvcImpl(PartitionSettings thePartitionSetings, String theHostname, @Nullable String theUsername, @Nullable String thePassword) {
-		this(theHostname, theUsername, thePassword);
+	public ElasticsearchSvcImpl(PartitionSettings thePartitionSetings, String theProtocol, String theHostname, @Nullable String theUsername, @Nullable String thePassword) {
+		this(theProtocol, theHostname, theUsername, thePassword);
 		this.myPartitionSettings = thePartitionSetings;
 	}
 
-	public ElasticsearchSvcImpl(String theHostname, @Nullable String theUsername, @Nullable String thePassword) {
-		myRestHighLevelClient = ElasticsearchRestClientFactory.createElasticsearchHighLevelRestClient("http", theHostname, theUsername, thePassword);
+	public ElasticsearchSvcImpl(String theProtocol, String theHostname, @Nullable String theUsername, @Nullable String thePassword) {
+		myRestHighLevelClient = ElasticsearchRestClientFactory.createElasticsearchHighLevelRestClient(theProtocol, theHostname, theUsername, thePassword);
 
 		try {
 			createObservationIndexIfMissing();

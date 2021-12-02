@@ -39,29 +39,27 @@ import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.StringTokenizer;
-import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.in;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+@TestMethodOrder(MethodOrderer.MethodName.class)
 public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4QueryCountTest.class);
 
@@ -70,7 +68,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myDaoConfig.setResourceMetaCountHardLimit(new DaoConfig().getResourceMetaCountHardLimit());
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
 		myDaoConfig.setDeleteEnabled(new DaoConfig().isDeleteEnabled());
-		myDaoConfig.setMatchUrlCache(new DaoConfig().getMatchUrlCache());
+		myDaoConfig.setMatchUrlCacheEnabled(new DaoConfig().isMatchUrlCacheEnabled());
 		myDaoConfig.setHistoryCountMode(DaoConfig.DEFAULT_HISTORY_COUNT_MODE);
 		myDaoConfig.setMassIngestionMode(new DaoConfig().isMassIngestionMode());
 		myModelConfig.setAutoVersionReferenceAtPaths(new ModelConfig().getAutoVersionReferenceAtPaths());
@@ -811,7 +809,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(5, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(1, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		runInTransaction(()->assertEquals(4, myResourceTableDao.count()));
+		runInTransaction(() -> assertEquals(4, myResourceTableDao.count()));
 
 		// Run it again - This time even the match URL should be cached
 
@@ -822,7 +820,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(4, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(1, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		runInTransaction(()->assertEquals(7, myResourceTableDao.count()));
+		runInTransaction(() -> assertEquals(7, myResourceTableDao.count()));
 
 		// Once more for good measure
 
@@ -833,28 +831,28 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(4, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(1, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		runInTransaction(()->assertEquals(10, myResourceTableDao.count()));
+		runInTransaction(() -> assertEquals(10, myResourceTableDao.count()));
 
 	}
 
 	@Nonnull
 	private Bundle createTransactionWithCreatesAndOneMatchUrl() {
-			BundleBuilder bb = new BundleBuilder(myFhirCtx);
+		BundleBuilder bb = new BundleBuilder(myFhirCtx);
 
-			Patient p = new Patient();
-			p.setId(IdType.newRandomUuid());
-			p.setActive(true);
-			bb.addTransactionCreateEntry(p);
+		Patient p = new Patient();
+		p.setId(IdType.newRandomUuid());
+		p.setActive(true);
+		bb.addTransactionCreateEntry(p);
 
-			Encounter enc = new Encounter();
-			enc.setSubject(new Reference(p.getId()));
-			enc.addParticipant().setIndividual(new Reference("Practitioner?identifier=foo|bar"));
-			bb.addTransactionCreateEntry(enc);
+		Encounter enc = new Encounter();
+		enc.setSubject(new Reference(p.getId()));
+		enc.addParticipant().setIndividual(new Reference("Practitioner?identifier=foo|bar"));
+		bb.addTransactionCreateEntry(enc);
 
-			enc = new Encounter();
-			enc.setSubject(new Reference(p.getId()));
-			enc.addParticipant().setIndividual(new Reference("Practitioner?identifier=foo|bar"));
-			bb.addTransactionCreateEntry(enc);
+		enc = new Encounter();
+		enc.setSubject(new Reference(p.getId()));
+		enc.addParticipant().setIndividual(new Reference("Practitioner?identifier=foo|bar"));
+		bb.addTransactionCreateEntry(enc);
 
 		return (Bundle) bb.getBundle();
 	}
@@ -870,6 +868,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		Practitioner pract = new Practitioner();
 		pract.addIdentifier().setSystem("foo").setValue("bar");
 		myPractitionerDao.create(pract);
+		runInTransaction(() -> assertEquals(1, myResourceTableDao.count(), () -> myResourceTableDao.findAll().stream().map(t -> t.getIdDt().toUnqualifiedVersionless().getValue()).collect(Collectors.joining(","))));
 
 		// First pass
 
@@ -881,7 +880,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(5, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(1, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		runInTransaction(()->assertEquals(4, myResourceTableDao.count()));
+		runInTransaction(() -> assertEquals(4, myResourceTableDao.count(), () -> myResourceTableDao.findAll().stream().map(t -> t.getIdDt().toUnqualifiedVersionless().getValue()).collect(Collectors.joining(","))));
 
 		// Run it again - This time even the match URL should be cached
 
@@ -892,7 +891,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(4, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(1, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		runInTransaction(()->assertEquals(7, myResourceTableDao.count()));
+		runInTransaction(() -> assertEquals(7, myResourceTableDao.count()));
 
 		// Once more for good measure
 
@@ -903,7 +902,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(4, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(1, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		runInTransaction(()->assertEquals(10, myResourceTableDao.count()));
+		runInTransaction(() -> assertEquals(10, myResourceTableDao.count()));
 
 	}
 
@@ -923,9 +922,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		pt2.addIdentifier().setSystem("http://foo").setValue("456");
 		bb.addTransactionCreateEntry(pt2);
 
-		runInTransaction(() -> {
-			assertEquals(0, myResourceTableDao.count());
-		});
+		runInTransaction(() -> assertEquals(0, myResourceTableDao.count()));
 
 		ourLog.info("About to start transaction");
 
@@ -940,9 +937,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 
-		runInTransaction(() -> {
-			assertEquals(2, myResourceTableDao.count());
-		});
+		runInTransaction(() -> assertEquals(2, myResourceTableDao.count()));
 	}
 
 	@Test
@@ -1299,7 +1294,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		 * Third time with mass ingestion mode enabled
 		 */
 		myDaoConfig.setMassIngestionMode(true);
-		myDaoConfig.setMatchUrlCache(true);
+		myDaoConfig.setMatchUrlCacheEnabled(true);
 
 		myCaptureQueriesListener.clear();
 		outcome = mySystemDao.transaction(mySrd, input.get());
@@ -1331,7 +1326,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@Test
 	public void testTransactionWithConditionalCreate_MatchUrlCacheEnabled() {
-		myDaoConfig.setMatchUrlCache(true);
+		myDaoConfig.setMatchUrlCacheEnabled(true);
 
 		Supplier<Bundle> bundleCreator = () -> {
 			BundleBuilder bb = new BundleBuilder(myFhirCtx);
@@ -2155,7 +2150,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	@Test
 	public void testMassIngestionMode_TransactionWithChanges() {
 		myDaoConfig.setDeleteEnabled(false);
-		myDaoConfig.setMatchUrlCache(true);
+		myDaoConfig.setMatchUrlCacheEnabled(true);
 		myDaoConfig.setMassIngestionMode(true);
 		myFhirCtx.getParserOptions().setStripVersionsFromReferences(false);
 		myModelConfig.setRespectVersionsForSearchIncludes(true);
@@ -2219,7 +2214,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	@Test
 	public void testMassIngestionMode_TransactionWithChanges_2() throws IOException {
 		myDaoConfig.setDeleteEnabled(false);
-		myDaoConfig.setMatchUrlCache(true);
+		myDaoConfig.setMatchUrlCacheEnabled(true);
 		myDaoConfig.setMassIngestionMode(true);
 		myFhirCtx.getParserOptions().setStripVersionsFromReferences(false);
 		myModelConfig.setRespectVersionsForSearchIncludes(true);

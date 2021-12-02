@@ -1,0 +1,7 @@
+---
+type: perf
+issue: 3197
+title: "A number of minor optimizations have been added to the JsonParser serializer module as well as to the
+   transaction processor. These optimizations lead to a significant performance improvement when processing
+   large transaction bundles (i.e. transaction bundles containing a larger number of entries)."
+
