@@ -117,5 +117,22 @@ public class ExecuteRawSqlTaskTest extends BaseTest {
 		}
 	}
 
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testExecuteRawSqlStub(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
+		//Given
+		before(theTestDatabaseDetails);
+		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
 
+		BaseMigrationTasks<VersionEnum> tasks = new BaseMigrationTasks<>();
+		tasks.forVersion(VersionEnum.V4_0_0)
+			.executeRawSqlStub("2001.01", "INSERT INTO SOMETABLE (PID, TEXTCOL) VALUES (123, 'abc')");
+
+		getMigrator().addTasks(tasks.getTasks(VersionEnum.V0_1, VersionEnum.V4_0_0));
+		getMigrator().migrate();
+
+		List<Map<String, Object>> output = executeQuery("SELECT PID,TEXTCOL FROM SOMETABLE");
+
+		assertEquals(0, output.size());
+	}
 }
