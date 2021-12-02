@@ -1,4 +1,4 @@
 ---
 type: fix
 jira: SMILE-3472
-title: "Fixed a serious performance issue with the $reindex operation."
+title: "Fixed a serious performance issue with the `$reindex` operation."
