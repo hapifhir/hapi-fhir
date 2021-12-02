@@ -2338,7 +2338,7 @@ public class JsonParserDstu3Test {
 			ourCtx.newJsonParser().parseResource(Bundle.class, bundle);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Failed to parse JSON encoded FHIR content: Unexpected close marker '}': expected ']' (for root starting at [Source: UNKNOWN; line: 1, column: 0])\n" +
+			assertEquals("Failed to parse JSON encoded FHIR content: Unexpected close marker '}': expected ']' (for root starting at [Source: UNKNOWN; line: 1])\n" +
 				" at [Source: UNKNOWN; line: 4, column: 3]", e.getMessage());
 		}
 	}

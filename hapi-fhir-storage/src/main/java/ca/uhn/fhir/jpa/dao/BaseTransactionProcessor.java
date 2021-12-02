@@ -108,6 +108,7 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -137,8 +138,10 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public abstract class BaseTransactionProcessor {
 
 	public static final String URN_PREFIX = "urn:";
+	public static final String URN_PREFIX_ESCAPED = UrlUtil.escapeUrlParam(URN_PREFIX);
 	public static final Pattern UNQUALIFIED_MATCH_URL_START = Pattern.compile("^[a-zA-Z0-9_]+=");
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseTransactionProcessor.class);
+	public static final Pattern INVALID_PLACEHOLDER_PATTERN = Pattern.compile("[a-zA-Z]+:.*");
 	private BaseStorageDao myDao;
 	@Autowired
 	private PlatformTransactionManager myTxManager;
@@ -167,17 +170,6 @@ public abstract class BaseTransactionProcessor {
 
 	@Autowired
 	private IResourceVersionSvc myResourceVersionSvc;
-
-	public static boolean isPlaceholder(IIdType theId) {
-		if (theId != null && theId.getValue() != null) {
-			return theId.getValue().startsWith("urn:oid:") || theId.getValue().startsWith("urn:uuid:");
-		}
-		return false;
-	}
-
-	private static String toStatusString(int theStatusCode) {
-		return theStatusCode + " " + defaultString(Constants.HTTP_STATUS_NAMES.get(theStatusCode));
-	}
 
 	@VisibleForTesting
 	public void setDaoConfig(DaoConfig theDaoConfig) {
@@ -267,14 +259,16 @@ public abstract class BaseTransactionProcessor {
 		myVersionAdapter.populateEntryWithOperationOutcome(caughtEx, nextEntry);
 	}
 
-	private void handleTransactionCreateOrUpdateOutcome(Map<IIdType, IIdType> idSubstitutions, Map<IIdType, DaoMethodOutcome> idToPersistedOutcome,
+	private void handleTransactionCreateOrUpdateOutcome(IdSubstitutionMap idSubstitutions, Map<IIdType, DaoMethodOutcome> idToPersistedOutcome,
 																		 IIdType nextResourceId, DaoMethodOutcome outcome,
 																		 IBase newEntry, String theResourceType,
 																		 IBaseResource theRes, RequestDetails theRequestDetails) {
 		IIdType newId = outcome.getId().toUnqualified();
 		IIdType resourceId = isPlaceholder(nextResourceId) ? nextResourceId : nextResourceId.toUnqualifiedVersionless();
 		if (newId.equals(resourceId) == false) {
-			idSubstitutions.put(resourceId, newId);
+			if (!nextResourceId.isEmpty()) {
+				idSubstitutions.put(resourceId, newId);
+			}
 			if (isPlaceholder(resourceId)) {
 				/*
 				 * The correct way for substitution IDs to be is to be with no resource type, but we'll accept the qualified kind too just to be lenient.
@@ -330,30 +324,6 @@ public abstract class BaseTransactionProcessor {
 		return theRes.getMeta().getLastUpdated();
 	}
 
-	private String performIdSubstitutionsInMatchUrl(Map<IIdType, IIdType> theIdSubstitutions, String theMatchUrl) {
-		String matchUrl = theMatchUrl;
-		if (isNotBlank(matchUrl)) {
-			for (Map.Entry<IIdType, IIdType> nextSubstitutionEntry : theIdSubstitutions.entrySet()) {
-				IIdType nextTemporaryId = nextSubstitutionEntry.getKey();
-				IIdType nextReplacementId = nextSubstitutionEntry.getValue();
-				String nextTemporaryIdPart = nextTemporaryId.getIdPart();
-				String nextReplacementIdPart = nextReplacementId.getValueAsString();
-				if (isUrn(nextTemporaryId) && nextTemporaryIdPart.length() > URN_PREFIX.length()) {
-					matchUrl = matchUrl.replace(nextTemporaryIdPart, nextReplacementIdPart);
-					String escapedUrlParam = UrlUtil.escapeUrlParam(nextTemporaryIdPart);
-					if (isNotBlank(escapedUrlParam)) {
-						matchUrl = matchUrl.replace(escapedUrlParam, nextReplacementIdPart);
-					}
-				}
-			}
-		}
-		return matchUrl;
-	}
-
-	private boolean isUrn(IIdType theId) {
-		return defaultString(theId.getValue()).startsWith(URN_PREFIX);
-	}
-
 	public void setDao(BaseStorageDao theDao) {
 		myDao = theDao;
 	}
@@ -392,10 +362,10 @@ public abstract class BaseTransactionProcessor {
 		List<RetriableBundleTask> nonGetCalls = new ArrayList<>();
 
 		CountDownLatch completionLatch = new CountDownLatch(requestEntriesSize);
-		for (int i=0; i< requestEntriesSize ; i++ ) {
+		for (int i = 0; i < requestEntriesSize; i++) {
 			IBase nextRequestEntry = requestEntries.get(i);
 			RetriableBundleTask retriableBundleTask = new RetriableBundleTask(completionLatch, theRequestDetails, responseMap, i, nextRequestEntry, theNestedMode);
-			if  (myVersionAdapter.getEntryRequestVerb(myContext, nextRequestEntry).equalsIgnoreCase("GET")) {
+			if (myVersionAdapter.getEntryRequestVerb(myContext, nextRequestEntry).equalsIgnoreCase("GET")) {
 				getCalls.add(retriableBundleTask);
 			} else {
 				nonGetCalls.add(retriableBundleTask);
@@ -408,24 +378,24 @@ public abstract class BaseTransactionProcessor {
 
 		// waiting for all async tasks to be completed
 		AsyncUtil.awaitLatchAndIgnoreInterrupt(completionLatch, 300L, TimeUnit.SECONDS);
-		
+
 		// Now, create the bundle response in original order
 		Object nextResponseEntry;
-		for (int i=0; i<requestEntriesSize; i++ )  {
-			
+		for (int i = 0; i < requestEntriesSize; i++) {
+
 			nextResponseEntry = responseMap.get(i);
 			if (nextResponseEntry instanceof BaseServerResponseExceptionHolder) {
-				BaseServerResponseExceptionHolder caughtEx = (BaseServerResponseExceptionHolder)nextResponseEntry;
+				BaseServerResponseExceptionHolder caughtEx = (BaseServerResponseExceptionHolder) nextResponseEntry;
 				if (caughtEx.getException() != null) {
 					IBase nextEntry = myVersionAdapter.addEntry(response);
 					populateEntryWithOperationOutcome(caughtEx.getException(), nextEntry);
 					myVersionAdapter.setResponseStatus(nextEntry, toStatusString(caughtEx.getException().getStatusCode()));
-				} 
+				}
 			} else {
-				myVersionAdapter.addEntry(response, (IBase)nextResponseEntry);
+				myVersionAdapter.addEntry(response, (IBase) nextResponseEntry);
 			}
 		}
-		
+
 		long delay = System.currentTimeMillis() - start;
 		ourLog.info("Batch completed in {}ms", delay);
 
@@ -631,12 +601,12 @@ public abstract class BaseTransactionProcessor {
 			callWriteOperationsHook(Pointcut.STORAGE_TRANSACTION_WRITE_OPERATIONS_PRE, theRequestDetails, theTransactionDetails, writeOperationsDetails);
 		}
 
-		TransactionCallback<Map<IBase, IIdType>> txCallback = status -> {
+		TransactionCallback<EntriesToProcessMap> txCallback = status -> {
 			final Set<IIdType> allIds = new LinkedHashSet<>();
-			final Map<IIdType, IIdType> idSubstitutions = new HashMap<>();
+			final IdSubstitutionMap idSubstitutions = new IdSubstitutionMap();
 			final Map<IIdType, DaoMethodOutcome> idToPersistedOutcome = new HashMap<>();
 
-			Map<IBase, IIdType> retVal = doTransactionWriteOperations(theRequestDetails, theActionName,
+			EntriesToProcessMap retVal = doTransactionWriteOperations(theRequestDetails, theActionName,
 				theTransactionDetails, allIds,
 				idSubstitutions, idToPersistedOutcome,
 				theResponse, theOriginalRequestOrder,
@@ -645,7 +615,7 @@ public abstract class BaseTransactionProcessor {
 			theTransactionStopWatch.startTask("Commit writes to database");
 			return retVal;
 		};
-		Map<IBase, IIdType> entriesToProcess;
+		EntriesToProcessMap entriesToProcess;
 
 		try {
 			entriesToProcess = myHapiTransactionService.execute(theRequestDetails, theTransactionDetails, txCallback);
@@ -838,8 +808,13 @@ public abstract class BaseTransactionProcessor {
 				}
 			}
 
-			if (nextResourceId.hasIdPart() && nextResourceId.getIdPart().matches("[a-zA-Z]+:.*") && !isPlaceholder(nextResourceId)) {
-				throw new InvalidRequestException("Invalid placeholder ID found: " + nextResourceId.getIdPart() + " - Must be of the form 'urn:uuid:[uuid]' or 'urn:oid:[oid]'");
+			if (nextResourceId.hasIdPart() && !isPlaceholder(nextResourceId)) {
+				int colonIndex = nextResourceId.getIdPart().indexOf(':');
+				if (colonIndex != -1) {
+					if (INVALID_PLACEHOLDER_PATTERN.matcher(nextResourceId.getIdPart()).matches()) {
+						throw new InvalidRequestException("Invalid placeholder ID found: " + nextResourceId.getIdPart() + " - Must be of the form 'urn:uuid:[uuid]' or 'urn:oid:[oid]'");
+					}
+				}
 			}
 
 			if (nextResourceId.hasIdPart() && !nextResourceId.hasResourceType() && !isPlaceholder(nextResourceId)) {
@@ -869,9 +844,9 @@ public abstract class BaseTransactionProcessor {
 	/**
 	 * After pre-hooks have been called
 	 */
-	protected Map<IBase, IIdType> doTransactionWriteOperations(final RequestDetails theRequest, String theActionName,
+	protected EntriesToProcessMap doTransactionWriteOperations(final RequestDetails theRequest, String theActionName,
 																				  TransactionDetails theTransactionDetails, Set<IIdType> theAllIds,
-																				  Map<IIdType, IIdType> theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome,
+																				  IdSubstitutionMap theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome,
 																				  IBaseBundle theResponse, IdentityHashMap<IBase, Integer> theOriginalRequestOrder,
 																				  List<IBase> theEntries, StopWatch theTransactionStopWatch) {
 
@@ -884,7 +859,7 @@ public abstract class BaseTransactionProcessor {
 		try {
 			Set<String> deletedResources = new HashSet<>();
 			DeleteConflictList deleteConflicts = new DeleteConflictList();
-			Map<IBase, IIdType> entriesToProcess = new IdentityHashMap<>();
+			EntriesToProcessMap entriesToProcess = new EntriesToProcessMap();
 			Set<IIdType> nonUpdatedEntities = new HashSet<>();
 			Set<IBasePersistedResource> updatedEntities = new HashSet<>();
 			Map<String, IIdType> conditionalUrlToIdMap = new HashMap<>();
@@ -1133,7 +1108,7 @@ public abstract class BaseTransactionProcessor {
 			theTransactionStopWatch.endCurrentTask();
 
 			for (IIdType next : theAllIds) {
-				IIdType replacement = theIdSubstitutions.get(next);
+				IIdType replacement = theIdSubstitutions.getForSource(next);
 				if (replacement != null && !replacement.equals(next)) {
 					ourLog.debug("Placeholder resource ID \"{}\" was replaced with permanent ID \"{}\"", next, replacement);
 				}
@@ -1177,9 +1152,6 @@ public abstract class BaseTransactionProcessor {
 	/**
 	 * After transaction processing and resolution of indexes and references, we want to validate that the resources that were stored _actually_
 	 * match the conditional URLs that they were brought in on.
-	 *
-	 * @param theIdToPersistedOutcome
-	 * @param conditionalUrlToIdMap
 	 */
 	private void validateAllInsertsMatchTheirConditionalUrls(Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome, Map<String, IIdType> conditionalUrlToIdMap, RequestDetails theRequest) {
 		conditionalUrlToIdMap.entrySet().stream()
@@ -1274,8 +1246,8 @@ public abstract class BaseTransactionProcessor {
 	 * account for NOPs, so we block NOPs in that pass.
 	 */
 	private void resolveReferencesThenSaveAndIndexResources(RequestDetails theRequest, TransactionDetails theTransactionDetails,
-																			  Map<IIdType, IIdType> theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome,
-																			  StopWatch theTransactionStopWatch, Map<IBase, IIdType> entriesToProcess,
+																			  IdSubstitutionMap theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome,
+																			  StopWatch theTransactionStopWatch, EntriesToProcessMap entriesToProcess,
 																			  Set<IIdType> nonUpdatedEntities, Set<IBasePersistedResource> updatedEntities) {
 		FhirTerser terser = myContext.newTerser();
 		theTransactionStopWatch.startTask("Index " + theIdToPersistedOutcome.size() + " resources");
@@ -1333,8 +1305,8 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	private void resolveReferencesThenSaveAndIndexResource(RequestDetails theRequest, TransactionDetails theTransactionDetails,
-																			 Map<IIdType, IIdType> theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome,
-																			 Map<IBase, IIdType> entriesToProcess, Set<IIdType> nonUpdatedEntities,
+																			 IdSubstitutionMap theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome,
+																			 EntriesToProcessMap entriesToProcess, Set<IIdType> nonUpdatedEntities,
 																			 Set<IBasePersistedResource> updatedEntities, FhirTerser terser,
 																			 DaoMethodOutcome nextOutcome, IBaseResource nextResource,
 																			 Set<IBaseReference> theReferencesToAutoVersion) {
@@ -1350,7 +1322,7 @@ public abstract class BaseTransactionProcessor {
 					if (targetId.getValue() == null || targetId.getValue().startsWith("#")) {
 						// This means it's a contained resource
 						continue;
-					} else if (theIdSubstitutions.containsValue(targetId)) {
+					} else if (theIdSubstitutions.containsTarget(targetId)) {
 						newId = targetId;
 					} else {
 						throw new InternalErrorException("References by resource with no reference ID are not supported in DAO layer");
@@ -1359,9 +1331,9 @@ public abstract class BaseTransactionProcessor {
 					continue;
 				}
 			}
-			if (newId != null || theIdSubstitutions.containsKey(nextId)) {
+			if (newId != null || theIdSubstitutions.containsSource(nextId)) {
 				if (newId == null) {
-					newId = theIdSubstitutions.get(nextId);
+					newId = theIdSubstitutions.getForSource(nextId);
 				}
 				if (newId != null) {
 					ourLog.debug(" * Replacing resource ref {} with {}", nextId, newId);
@@ -1421,9 +1393,9 @@ public abstract class BaseTransactionProcessor {
 			if (nextRef instanceof IIdType) {
 				continue; // No substitution on the resource ID itself!
 			}
-			IIdType nextUriString = newIdType(nextRef.getValueAsString());
-			if (theIdSubstitutions.containsKey(nextUriString)) {
-				IIdType newId = theIdSubstitutions.get(nextUriString);
+			String nextUriString = nextRef.getValueAsString();
+			if (theIdSubstitutions.containsSource(nextUriString)) {
+				IIdType newId = theIdSubstitutions.getForSource(nextUriString);
 				ourLog.debug(" * Replacing resource ref {} with {}", nextUriString, newId);
 
 				String existingValue = nextRef.getValueAsString();
@@ -1458,26 +1430,17 @@ public abstract class BaseTransactionProcessor {
 		// Make sure we reflect the actual final version for the resource.
 		if (updateOutcome != null) {
 			IIdType newId = updateOutcome.getIdDt();
-			for (IIdType nextEntry : entriesToProcess.values()) {
-				if (nextEntry.getResourceType().equals(newId.getResourceType())) {
-					if (nextEntry.getIdPart().equals(newId.getIdPart())) {
-						if (!nextEntry.hasVersionIdPart() || !nextEntry.getVersionIdPart().equals(newId.getVersionIdPart())) {
-							nextEntry.setParts(nextEntry.getBaseUrl(), nextEntry.getResourceType(), nextEntry.getIdPart(), newId.getVersionIdPart());
-						}
-					}
-				}
+
+			IIdType entryId = entriesToProcess.getIdWithVersionlessComparison(newId);
+			if (entryId != null && !StringUtils.equals(entryId.getValue(), newId.getValue())) {
+				entryId.setValue(newId.getValue());
 			}
 
 			nextOutcome.setId(newId);
 
-			for (IIdType next : theIdSubstitutions.values()) {
-				if (next.getResourceType().equals(newId.getResourceType())) {
-					if (next.getIdPart().equals(newId.getIdPart())) {
-						if (!next.getValue().equals(newId.getValue())) {
-							next.setValue(newId.getValue());
-						}
-					}
-				}
+			IIdType target = theIdSubstitutions.getForSource(newId);
+			if (target != null) {
+				target.setValue(newId.getValue());
 			}
 
 		}
@@ -1624,18 +1587,6 @@ public abstract class BaseTransactionProcessor {
 			}
 		}
 		return null;
-	}
-
-	private static class BaseServerResponseExceptionHolder {
-		private BaseServerResponseException myException;
-
-		public BaseServerResponseException getException() {
-			return myException;
-		}
-
-		public void setException(BaseServerResponseException myException) {
-			this.myException = myException;
-		}
 	}
 
 	/**
@@ -1807,5 +1758,100 @@ public abstract class BaseTransactionProcessor {
 			myResponseMap.put(myResponseOrder, caughtEx);
 		}
 
+	}
+
+	private static class BaseServerResponseExceptionHolder {
+		private BaseServerResponseException myException;
+
+		public BaseServerResponseException getException() {
+			return myException;
+		}
+
+		public void setException(BaseServerResponseException myException) {
+			this.myException = myException;
+		}
+	}
+
+	public static boolean isPlaceholder(IIdType theId) {
+		if (theId != null && theId.getValue() != null) {
+			return theId.getValue().startsWith("urn:oid:") || theId.getValue().startsWith("urn:uuid:");
+		}
+		return false;
+	}
+
+	private static String toStatusString(int theStatusCode) {
+		return theStatusCode + " " + defaultString(Constants.HTTP_STATUS_NAMES.get(theStatusCode));
+	}
+
+	/**
+	 * Given a match URL containing
+	 *
+	 * @param theIdSubstitutions
+	 * @param theMatchUrl
+	 * @return
+	 */
+	static String performIdSubstitutionsInMatchUrl(IdSubstitutionMap theIdSubstitutions, String theMatchUrl) {
+		String matchUrl = theMatchUrl;
+		if (isNotBlank(matchUrl) && !theIdSubstitutions.isEmpty()) {
+
+			int startIdx = matchUrl.indexOf('?');
+			while (startIdx != -1) {
+
+				int endIdx = matchUrl.indexOf('&', startIdx + 1);
+				if (endIdx == -1) {
+					endIdx = matchUrl.length();
+				}
+
+				int equalsIdx = matchUrl.indexOf('=', startIdx + 1);
+
+				int searchFrom;
+				if (equalsIdx == -1) {
+					searchFrom = matchUrl.length();
+				} else if (equalsIdx >= endIdx) {
+					// First equals we found is from a subsequent parameter
+					searchFrom = matchUrl.length();
+				} else {
+					String paramValue = matchUrl.substring(equalsIdx + 1, endIdx);
+					boolean isUrn = isUrn(paramValue);
+					boolean isUrnEscaped = !isUrn && isUrnEscaped(paramValue);
+					if (isUrn || isUrnEscaped) {
+						if (isUrnEscaped) {
+							paramValue = UrlUtil.unescape(paramValue);
+						}
+						IIdType replacement = theIdSubstitutions.getForSource(paramValue);
+						if (replacement != null) {
+							String replacementValue;
+							if (replacement.hasVersionIdPart()) {
+								replacementValue = replacement.toVersionless().getValue();
+							} else {
+								replacementValue = replacement.getValue();
+							}
+							matchUrl = matchUrl.substring(0, equalsIdx + 1) + replacementValue + matchUrl.substring(endIdx);
+							searchFrom = equalsIdx + 1 + replacementValue.length();
+						} else {
+							searchFrom = endIdx;
+						}
+					} else {
+						searchFrom = endIdx;
+					}
+				}
+
+				if (searchFrom >= matchUrl.length()) {
+					break;
+				}
+
+				startIdx = matchUrl.indexOf('&', searchFrom);
+			}
+
+		}
+		return matchUrl;
+	}
+
+	private static boolean isUrn(@Nonnull String theId) {
+		return theId.startsWith(URN_PREFIX);
+	}
+
+	private static boolean isUrnEscaped(@Nonnull String theId) {
+		return theId.startsWith(URN_PREFIX_ESCAPED);
 	}
 }

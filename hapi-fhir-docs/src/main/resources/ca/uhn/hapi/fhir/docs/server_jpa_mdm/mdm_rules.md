@@ -99,7 +99,11 @@ Here is an example of a full HAPI MDM rules json document:
 		"lastname-jaro,phone,birthday": "POSSIBLE_MATCH",
 		"firstname-jaro,phone,birthday": "POSSIBLE_MATCH",
         "org-name": "MATCH"
-	}
+	},
+   "eidSystems": {
+      "Organization": "https://hapifhir.org/identifier/naming/business-number",
+      "Practitioner": "https://hapifhir.org/identifier/naming/license-number"
+   }
 }
 ```
 
@@ -483,6 +487,13 @@ These entries convert combinations of successful matchFields into an MDM Match R
 }
 ```
 
-### eidSystem
+### eidSystems
 
-The external EID system that the HAPI MDM system should expect to see on incoming Patient resources. Must be a valid URI.  See [MDM EID](/hapi-fhir/docs/server_jpa_mdm/mdm_eid.html) for details on how EIDs are managed by HAPI MDM.
+The external EID systems that the HAPI MDM system can expect to see on incoming resources. These are defined on a per-resource basis. Alternatively, you may use `*` to indicate 
+that an EID is valid for all managed resource types. The values must be valid URIs, and the keys must be valid resource types, or `*`.
+See [MDM EID](/hapi-fhir/docs/server_jpa_mdm/mdm_eid.html) for details on how EIDs are managed by HAPI MDM.
+
+<p class="helpInfoCalloutBox">
+    Note that this field used to be called `eidSystem`. While that field is deprecated, it will continue to work. In the background, it effectively sets the eid for resource type `*`.
+</p>
+

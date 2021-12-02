@@ -185,7 +185,7 @@ public class MatchResourceUrlService {
 	@Nullable
 	public ResourcePersistentId processMatchUrlUsingCacheOnly(String theResourceType, String theMatchUrl) {
 		ResourcePersistentId existing = null;
-		if (myDaoConfig.getMatchUrlCache()) {
+		if (myDaoConfig.isMatchUrlCacheEnabled()) {
 			String matchUrl = massageForStorage(theResourceType, theMatchUrl);
 			existing = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.MATCH_URL, matchUrl);
 		}

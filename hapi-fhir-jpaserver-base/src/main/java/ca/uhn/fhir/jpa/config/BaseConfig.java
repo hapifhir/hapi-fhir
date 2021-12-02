@@ -86,6 +86,7 @@ import ca.uhn.fhir.jpa.provider.DiffProvider;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
+import ca.uhn.fhir.jpa.provider.r4.MemberMatcherR4Helper;
 import ca.uhn.fhir.jpa.reindex.ReindexJobSubmitterImpl;
 import ca.uhn.fhir.jpa.sched.AutowiringSpringBeanJobFactory;
 import ca.uhn.fhir.jpa.sched.HapiSchedulerServiceImpl;
@@ -941,6 +942,14 @@ public abstract class BaseConfig {
 	public UnknownCodeSystemWarningValidationSupport unknownCodeSystemWarningValidationSupport() {
 		return new UnknownCodeSystemWarningValidationSupport(fhirContext());
 	}
+
+	@Lazy
+	@Bean
+	public MemberMatcherR4Helper memberMatcherR4Helper(FhirContext theFhirContext) {
+		return new MemberMatcherR4Helper(theFhirContext);
+	}
+
+
 
 	public static void configureEntityManagerFactory(LocalContainerEntityManagerFactoryBean theFactory, FhirContext theCtx) {
 		theFactory.setJpaDialect(hibernateJpaDialect(theCtx.getLocalizer()));
