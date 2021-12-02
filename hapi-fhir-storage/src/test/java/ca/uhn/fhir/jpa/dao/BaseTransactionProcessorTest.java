@@ -16,10 +16,13 @@ public class BaseTransactionProcessorTest {
 		assertEquals("Patient?foo=Patient/123&bar=baz", outcome);
 	}
 
+	/**
+	 * Make sure versioned targets get the version stripped
+	 */
 	@Test
 	void testPerformIdSubstitutionsInMatchUrl_MatchAtEnd() {
 		IdSubstitutionMap idSubstitutions = new IdSubstitutionMap();
-		idSubstitutions.put(new IdType("urn:uuid:7ea4f3a6-d2a3-4105-9f31-374d525085d4"), new IdType("Patient/123"));
+		idSubstitutions.put(new IdType("urn:uuid:7ea4f3a6-d2a3-4105-9f31-374d525085d4"), new IdType("Patient/123/_history/1"));
 		String outcome = BaseTransactionProcessor.performIdSubstitutionsInMatchUrl(idSubstitutions, "Patient?name=FAMILY1&organization=urn%3Auuid%3A7ea4f3a6-d2a3-4105-9f31-374d525085d4");
 		assertEquals("Patient?name=FAMILY1&organization=Patient/123", outcome);
 	}

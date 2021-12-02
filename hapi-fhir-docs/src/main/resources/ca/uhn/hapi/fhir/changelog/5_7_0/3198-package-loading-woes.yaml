@@ -1,0 +1,5 @@
+---
+type: change
+issue: 3198
+jira: SMILE-3452
+title: "Fixed a regression where packages would fail to load if HAPI-FHIR was operating in DATABASE binary storage mode."
