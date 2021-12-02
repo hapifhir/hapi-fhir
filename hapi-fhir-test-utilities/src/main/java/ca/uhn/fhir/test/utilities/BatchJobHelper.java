@@ -62,10 +62,11 @@ public class BatchJobHelper {
 	public List<JobExecution> awaitAllBulkJobCompletions(boolean theFailIfNotJobsFound, String... theJobNames) {
 		assert theJobNames.length > 0;
 
-		List<JobInstance> matchingJobInstances = new ArrayList<>();
-		for (String nextName : theJobNames) {
-			matchingJobInstances.addAll(myJobExplorer.findJobInstancesByJobName(nextName, 0, 100));
+		if (theFailIfNotJobsFound) {
+			await().until(() -> !getJobInstances(theJobNames).isEmpty());
 		}
+		List<JobInstance> matchingJobInstances = getJobInstances(theJobNames);
+
 		if (theFailIfNotJobsFound) {
 			if (matchingJobInstances.isEmpty()) {
 				List<String> wantNames = Arrays.asList(theJobNames);
@@ -79,6 +80,14 @@ public class BatchJobHelper {
 		// Return the final state
 		matchingExecutions = matchingJobInstances.stream().flatMap(jobInstance -> myJobExplorer.getJobExecutions(jobInstance).stream()).collect(Collectors.toList());
 		return matchingExecutions;
+	}
+
+	private List<JobInstance> getJobInstances(String[] theJobNames) {
+		List<JobInstance> matchingJobInstances = new ArrayList<>();
+		for (String nextName : theJobNames) {
+			matchingJobInstances.addAll(myJobExplorer.findJobInstancesByJobName(nextName, 0, 100));
+		}
+		return matchingJobInstances;
 	}
 
 	public JobExecution awaitJobExecution(Long theJobExecutionId) {
