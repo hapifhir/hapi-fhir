@@ -56,7 +56,7 @@ public class ReindexWriter implements ItemWriter<List<Long>> {
 
 		// Note that since our chunk size is 1, there will always be exactly one list
 		for (List<Long> pidList : thePidLists) {
-			partitionRunner.runInPartitionedThreads(new SliceImpl<>(pidList), pids -> reindexPids(pidList));
+			partitionRunner.runInPartitionedThreads(new SliceImpl<>(pidList), pids -> reindexPids(pids));
 		}
 	}
 

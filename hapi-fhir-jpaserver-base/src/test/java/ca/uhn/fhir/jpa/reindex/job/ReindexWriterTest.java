@@ -12,8 +12,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.atMost;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -45,7 +45,7 @@ public class ReindexWriterTest {
 		pidListList.add(pidList);
 		myReindexWriter.write(pidListList);
 
-		verify(myResourceReindexer, atMost(count)).reindexResourceEntity(any());
+		verify(myResourceReindexer, times(count)).readAndReindexResourceByPid(anyLong());
 		verifyNoMoreInteractions(myResourceReindexer);
 	}
 }
