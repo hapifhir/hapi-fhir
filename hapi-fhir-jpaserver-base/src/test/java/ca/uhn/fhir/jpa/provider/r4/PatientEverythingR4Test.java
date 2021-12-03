@@ -237,6 +237,7 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 		bundle = fetchBundle(bundle.getLink("next").getUrl(), EncodingEnum.XML);
 	}
 	@Test
+	//See https://github.com/hapifhir/hapi-fhir/issues/3215
 	public void testEverythingWithLargeResultSetDoesNotNpe() throws IOException {
 		for (int i = 0; i < 500; i++) {
 			Observation obs1 = new Observation();
@@ -246,11 +247,13 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 			myObservationDao.create(obs1, new SystemRequestDetails()).getId().toUnqualifiedVersionless();
 		}
 
-		Bundle bundle = fetchBundle(ourServerBase + "/" + patId + "/$everything?_format=json", EncodingEnum.JSON);
-		String next = bundle.getLink("next").getUrl();
-		//This used to NPE.
-		Bundle bundle1 = fetchBundle(next, EncodingEnum.JSON);
+		Bundle bundle = fetchBundle(ourServerBase + "/" + patId + "/$everything?_format=json&_count=250", EncodingEnum.JSON);
+		do {
+			String next = bundle.getLink("next").getUrl();
 
+			//This used to NPE!
+			bundle = fetchBundle(next, EncodingEnum.JSON);
+		} while (bundle.getLink("next") != null);
 	}
 
 	private Bundle fetchBundle(String theUrl, EncodingEnum theEncoding) throws IOException, ClientProtocolException {
