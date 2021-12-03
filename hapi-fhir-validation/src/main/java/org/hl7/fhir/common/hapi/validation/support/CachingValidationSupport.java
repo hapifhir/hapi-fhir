@@ -215,6 +215,7 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 		myLookupCodeCache.invalidateAll();
 		myCache.invalidateAll();
 		myValidateCodeCache.invalidateAll();
+		myNonExpiringCache.clear();
 	}
 
 	/**
