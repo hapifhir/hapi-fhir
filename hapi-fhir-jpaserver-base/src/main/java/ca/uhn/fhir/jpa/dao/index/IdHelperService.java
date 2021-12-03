@@ -626,7 +626,7 @@ public class IdHelperService {
 	}
 
 	@Nonnull
-	public Long getPidOrThrowException(IAnyResource theResource) {
+	public Long getPidOrThrowException(@Nonnull IAnyResource theResource) {
 		Long retVal = (Long) theResource.getUserData(RESOURCE_PID);
 		if (retVal == null) {
 			throw new IllegalStateException(

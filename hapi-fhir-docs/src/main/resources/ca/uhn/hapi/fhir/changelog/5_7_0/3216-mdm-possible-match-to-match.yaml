@@ -1,0 +1,3 @@
+---
+type: fix
+title: "MDM was throwing a NullPointerException when upgrading a match from POSSIBLE_MATCH to MATCH.  This has been corrected."
