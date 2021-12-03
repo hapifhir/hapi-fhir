@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.matching;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
@@ -41,7 +40,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class DaoSubscriptionMatcher implements ISubscriptionMatcher {
-	private Logger ourLog = LoggerFactory.getLogger(DaoSubscriptionMatcher.class);
+	private final Logger ourLog = LoggerFactory.getLogger(DaoSubscriptionMatcher.class);
 
 	@Autowired
 	DaoRegistry myDaoRegistry;

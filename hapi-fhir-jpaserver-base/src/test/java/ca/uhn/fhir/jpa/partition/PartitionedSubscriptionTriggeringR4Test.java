@@ -5,6 +5,7 @@ import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.config.StoppableSubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.jpa.dao.r4.BasePartitioningR4Test;
@@ -12,8 +13,11 @@ import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
 import ca.uhn.fhir.jpa.subscription.resthook.RestHookTestR4Test;
+import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
 import ca.uhn.fhir.rest.api.Constants;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Subscription;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,7 +29,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.servlet.ServletException;
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.ArrayList;
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4Test  {
@@ -33,6 +40,9 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 
 	@Autowired
 	StoppableSubscriptionDeliveringRestHookSubscriber myStoppableSubscriptionDeliveringRestHookSubscriber;
+
+	@Autowired
+	private ISubscriptionTriggeringSvc mySubscriptionTriggeringSvc;
 
 	static final String PARTITION_1 = "PART-1";
 
@@ -105,6 +115,40 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		ourObservationProvider.waitForUpdateCount(1);
 
 		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
+	}
+
+	@Test
+	public void testManualTriggeredSubscriptionInPartition() throws Exception {
+		String payload = "application/fhir+json";
+		String code = "1000000050";
+		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+
+		// Create the resource first
+		DaoMethodOutcome observationOutcome = myDaoRegistry.getResourceDao("Observation").create(createBaseObservation(code, "SNOMED-CT"), mySrd);
+
+		Observation observation = (Observation) observationOutcome.getResource();
+
+		// Create the subscription now
+		DaoMethodOutcome subscriptionOutcome = myDaoRegistry.getResourceDao("Subscription").create(newSubscription(criteria1, payload), mySrd);
+
+		assertEquals(mySrdInterceptorService.getAllRegisteredInterceptors().size(), 1);
+
+		Subscription subscription = (Subscription) subscriptionOutcome.getResource();
+
+		waitForActivatedSubscriptionCount(1);
+
+		ArrayList<IPrimitiveType<String>> resourceIdList = new ArrayList<>();
+		resourceIdList.add(observation.getIdElement());
+
+
+		Parameters resultParameters = (Parameters) mySubscriptionTriggeringSvc.triggerSubscription(resourceIdList, null, subscription.getIdElement());
+
+		waitForQueueToDrain();
+		assertEquals(0, ourObservationProvider.getCountCreate());
+		//ourObservationProvider.waitForUpdateCount(1);
+
+		String responseValue = resultParameters.getParameter().get(0).getValue().primitiveValue();
+		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
 	}
 
 	@Interceptor

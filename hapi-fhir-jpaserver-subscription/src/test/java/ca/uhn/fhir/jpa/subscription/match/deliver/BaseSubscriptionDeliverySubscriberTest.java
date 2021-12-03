@@ -48,7 +48,7 @@ public class BaseSubscriptionDeliverySubscriberTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseSubscriptionDeliverySubscriberTest.class);
 
 	private SubscriptionDeliveringRestHookSubscriber mySubscriber;
-	private FhirContext myCtx = FhirContext.forR4();
+	private final FhirContext myCtx = FhirContext.forR4();
 
 	@Mock
 	private IInterceptorBroadcaster myInterceptorBroadcaster;

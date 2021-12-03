@@ -21,11 +21,9 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.partition.AllPartitionSystemRequestDetails;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
@@ -49,7 +47,7 @@ import javax.annotation.Nonnull;
  * Also validates criteria.  If invalid, rejects the subscription without persisting the subscription.
  */
 public class SubscriptionRegisteringSubscriber extends BaseSubscriberForSubscriptionResources implements MessageHandler {
-	private Logger ourLog = LoggerFactory.getLogger(SubscriptionRegisteringSubscriber.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionRegisteringSubscriber.class);
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired

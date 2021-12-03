@@ -51,7 +51,7 @@ import javax.annotation.Nonnull;
  * Also validates criteria.  If invalid, rejects the subscription without persisting the subscription.
  */
 public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscriptionResources implements MessageHandler {
-	private Logger ourLog = LoggerFactory.getLogger(SubscriptionActivatingSubscriber.class);
+	private final Logger ourLog = LoggerFactory.getLogger(SubscriptionActivatingSubscriber.class);
 	@Autowired
 	private SubscriptionRegistry mySubscriptionRegistry;
 	@Autowired
