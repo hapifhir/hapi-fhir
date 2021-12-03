@@ -52,7 +52,7 @@ public class FhirValidator {
 	private static volatile Boolean ourPhPresentOnClasspath;
 	private final FhirContext myContext;
 	private List<IValidatorModule> myValidators = new ArrayList<>();
-	private IInterceptorBroadcaster iInterceptorBroadcaster;
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	/**
 	 * Constructor (this should not be called directly, but rather {@link FhirContext#newValidator()} should be called to obtain an instance of {@link FhirValidator})
@@ -227,13 +227,13 @@ public class FhirValidator {
 	}
 
 	private ValidationResult invokeValidationCompletedHooks(IBaseResource theResourceParsed, String theResourceRaw, ValidationResult theValidationResult) {
-		if (iInterceptorBroadcaster != null) {
-			if (iInterceptorBroadcaster.hasHooks(Pointcut.VALIDATION_COMPLETED)) {
+		if (myInterceptorBroadcaster != null) {
+			if (myInterceptorBroadcaster.hasHooks(Pointcut.VALIDATION_COMPLETED)) {
 				HookParams params = new HookParams()
 					.add(IBaseResource.class, theResourceParsed)
 					.add(String.class, theResourceRaw)
 					.add(ValidationResult.class, theValidationResult);
-				Object newResult = iInterceptorBroadcaster.callHooksAndReturnObject(Pointcut.VALIDATION_COMPLETED, params);
+				Object newResult = myInterceptorBroadcaster.callHooksAndReturnObject(Pointcut.VALIDATION_COMPLETED, params);
 				if (newResult != null) {
 					theValidationResult = (ValidationResult) newResult;
 				}
@@ -272,6 +272,6 @@ public class FhirValidator {
 	 * @since 5.5.0
 	 */
 	public void setInterceptorBroadcaster(IInterceptorBroadcaster theInterceptorBraodcaster) {
-		iInterceptorBroadcaster = theInterceptorBraodcaster;
+		myInterceptorBroadcaster = theInterceptorBraodcaster;
 	}
 }

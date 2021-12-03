@@ -128,8 +128,8 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 	@Test
 	public void testValidateWithCanonicalReference() {
 		FhirInstanceValidator val = AopTestUtils.getTargetObject(myValidatorModule);
-		BestPracticeWarningLevel a = BestPracticeWarningLevel.Ignore;
-		val.setBestPracticeWarningLevel(a);
+		BestPracticeWarningLevel bestPracticeWarningLevel = BestPracticeWarningLevel.Ignore;
+		val.setBestPracticeWarningLevel(bestPracticeWarningLevel);
 
 		ValueSet vs = new ValueSet();
 		vs.setId("MYVS");
