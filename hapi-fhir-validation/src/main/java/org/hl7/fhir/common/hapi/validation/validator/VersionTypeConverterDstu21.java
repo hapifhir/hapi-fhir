@@ -7,7 +7,7 @@ import org.hl7.fhir.r5.model.Resource;
 public class VersionTypeConverterDstu21 implements VersionSpecificWorkerContextWrapper.IVersionTypeConverter {
     @Override
     public Resource toCanonical(IBaseResource theNonCanonical) {
-        return VersionConvertorFactory_14_50.convertResource((org.hl7.fhir.dstu2016may.model.Resource) theNonCanonical, new VersionTypeAdvisorDstu21());
+        return VersionConvertorFactory_14_50.convertResource((org.hl7.fhir.dstu2016may.model.Resource) theNonCanonical);
     }
 
     @Override

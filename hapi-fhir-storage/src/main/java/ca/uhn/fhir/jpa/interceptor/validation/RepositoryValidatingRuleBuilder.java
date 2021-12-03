@@ -23,13 +23,12 @@ package ca.uhn.fhir.jpa.interceptor.validation;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.jpa.validation.ValidatorPolicyAdvisor;
 import ca.uhn.fhir.jpa.validation.ValidatorResourceFetcher;
 import ca.uhn.fhir.rest.server.interceptor.ValidationResultEnrichingInterceptor;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.text.WordUtils;
-import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
+import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
@@ -57,8 +56,6 @@ public final class RepositoryValidatingRuleBuilder implements IRuleRoot {
 	private IValidationSupport myValidationSupport;
 	@Autowired
 	private ValidatorResourceFetcher myValidatorResourceFetcher;
-	@Autowired
-	private ValidatorPolicyAdvisor myValidationPolicyAdvisor;
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
@@ -178,8 +175,7 @@ public final class RepositoryValidatingRuleBuilder implements IRuleRoot {
 		 * @see ValidationResultEnrichingInterceptor
 		 */
 		public FinalizedRequireValidationRule requireValidationToDeclaredProfiles() {
-			RequireValidationRule rule = new RequireValidationRule(myFhirContext, myType, myValidationSupport,
-				myValidatorResourceFetcher, myValidationPolicyAdvisor, myInterceptorBroadcaster);
+			RequireValidationRule rule = new RequireValidationRule(myFhirContext, myType, myValidationSupport, myValidatorResourceFetcher, myInterceptorBroadcaster);
 			myRules.add(rule);
 			return new FinalizedRequireValidationRule(rule);
 		}
@@ -209,9 +205,9 @@ public final class RepositoryValidatingRuleBuilder implements IRuleRoot {
 			 */
 			@Nonnull
 			public FinalizedRequireValidationRule withBestPracticeWarningLevel(String theBestPracticeWarningLevel) {
-				BestPracticeWarningLevel level = null;
+				IResourceValidator.BestPracticeWarningLevel level = null;
 				if (isNotBlank(theBestPracticeWarningLevel)) {
-					level = BestPracticeWarningLevel.valueOf(WordUtils.capitalize(theBestPracticeWarningLevel.toLowerCase()));
+					level = IResourceValidator.BestPracticeWarningLevel.valueOf(WordUtils.capitalize(theBestPracticeWarningLevel.toLowerCase()));
 				}
 				return withBestPracticeWarningLevel(level);
 			}
@@ -219,13 +215,13 @@ public final class RepositoryValidatingRuleBuilder implements IRuleRoot {
 			/**
 			 * Sets the "Best Practice Warning Level", which is the severity at which any "best practices" that
 			 * are specified in the FHIR specification will be added to the validation outcome. Set to
-			 * {@link org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel#Error} to
+			 * {@link org.hl7.fhir.r5.utils.IResourceValidator.BestPracticeWarningLevel#Error} to
 			 * cause any best practice notices to result in a validation failure.
-			 * Set to {@link org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel#Ignore}
+			 * Set to {@link org.hl7.fhir.r5.utils.IResourceValidator.BestPracticeWarningLevel#Ignore}
 			 * to not include any best practice notifications.
 			 */
 			@Nonnull
-			public FinalizedRequireValidationRule withBestPracticeWarningLevel(BestPracticeWarningLevel bestPracticeWarningLevel) {
+			public FinalizedRequireValidationRule withBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel bestPracticeWarningLevel) {
 				myRule.setBestPracticeWarningLevel(bestPracticeWarningLevel);
 				return this;
 			}

@@ -15,7 +15,7 @@ import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
+import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,7 +118,7 @@ public class ValidationMessageSuppressingInterceptorTest extends BaseResourcePro
 
 		List<IRepositoryValidatingRule> rules = myApplicationContext.getBean(RepositoryValidatingRuleBuilder.REPOSITORY_VALIDATING_RULE_BUILDER, RepositoryValidatingRuleBuilder.class)
 			.forResourcesOfType("Encounter")
-			.requireValidationToDeclaredProfiles().withBestPracticeWarningLevel(BestPracticeWarningLevel.Ignore)
+			.requireValidationToDeclaredProfiles().withBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Ignore)
 			.build();
 
 		RepositoryValidatingInterceptor repositoryValidatingInterceptor = new RepositoryValidatingInterceptor();

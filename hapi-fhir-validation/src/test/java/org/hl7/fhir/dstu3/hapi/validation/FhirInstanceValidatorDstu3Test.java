@@ -53,9 +53,7 @@ import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.dstu3.utils.FHIRPathEngine;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
-import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;
-import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
+import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -597,8 +595,7 @@ public class FhirInstanceValidatorDstu3Test {
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> issues = logResultsAndReturnNonInformationalOnes(output);
 
-		assertThat(issues.stream().map(SingleValidationMessage::getMessage).collect(Collectors.toList()).toString(),
-			containsString("None of the codings provided are in the value set 'Value Set Finnish PHR Medication Context' (http://phr.kanta.fi/ValueSet/fiphr-vs-medicationcontext), and a coding from this value set is required) (codes = http://phr.kanta.fi/fiphr-cs-medicationcontext#13)"));
+		assertThat(issues.toString(), containsString("None of the codings provided are in the value set http://phr.kanta.fi/ValueSet/fiphr-vs-medicationcontext"));
 	}
 
 	@Test
@@ -667,9 +664,6 @@ public class FhirInstanceValidatorDstu3Test {
 						// Some DSTU3 structures have missing binding information
 						return false;
 					} else if (t.getMessage().contains("The valueSet reference http://www.rfc-editor.org/bcp/bcp13.txt on element")) {
-						return false;
-					} else if (t.getMessage().contains("The Unicode sequence has unterminated bi-di control characters")) {
-						// Some DSTU3 structures conain bi-di control characters, and a check for this was added recently.
 						return false;
 					} else {
 						return true;
@@ -1186,7 +1180,7 @@ public class FhirInstanceValidatorDstu3Test {
 		ValidationResult output = myVal.validateWithResult(input);
 		logResultsAndReturnAll(output);
 		assertEquals(
-			"The value provided ('notvalidcode') is not in the value set 'ObservationStatus' (http://hl7.org/fhir/ValueSet/observation-status), and a code is required from this value set) (error message = Unknown code 'notvalidcode' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/observation-status')",
+			"The value provided ('notvalidcode') is not in the value set http://hl7.org/fhir/ValueSet/observation-status (http://hl7.org/fhir/ValueSet/observation-status), and a code is required from this value set) (error message = Unknown code 'notvalidcode' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/observation-status')",
 			output.getMessages().get(0).getMessage());
 	}
 
@@ -1283,7 +1277,7 @@ public class FhirInstanceValidatorDstu3Test {
 		assertEquals(1, all.size());
 		assertEquals("Patient.identifier[0].type", all.get(0).getLocationString());
 		assertEquals(
-			"None of the codings provided are in the value set 'Identifier Type Codes' (http://hl7.org/fhir/ValueSet/identifier-type), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://example.com/foo/bar#bar)",
+			"None of the codings provided are in the value set http://hl7.org/fhir/ValueSet/identifier-type (http://hl7.org/fhir/ValueSet/identifier-type), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://example.com/foo/bar#bar)",
 			all.get(0).getMessage());
 		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
 
@@ -1316,18 +1310,14 @@ public class FhirInstanceValidatorDstu3Test {
 	public void testInvocationOfValidatorFetcher() throws IOException {
 		String input = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/dstu3-rick-test.json"), Charsets.UTF_8);
 
-		IValidationPolicyAdvisor policyAdvisor = mock(IValidationPolicyAdvisor.class);
-		IValidatorResourceFetcher fetcher = mock(IValidatorResourceFetcher.class);
-
-		when(policyAdvisor.policyForReference(any(), any(), any(), any())).thenReturn(ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
-		when(policyAdvisor.policyForReference(any(), any(), any(), any())).thenReturn(ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
-		myInstanceVal.setValidatorResourceFetcher(fetcher);
-		myInstanceVal.setValidatorPolicyAdvisor(policyAdvisor);
+		IResourceValidator.IValidatorResourceFetcher resourceFetcher = mock(IResourceValidator.IValidatorResourceFetcher.class);
+		when(resourceFetcher.validationPolicy(any(), any(), any(), any())).thenReturn(IResourceValidator.ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
+		myInstanceVal.setValidatorResourceFetcher(resourceFetcher);
 		myVal.validateWithResult(input);
 
-		verify(fetcher, times(3)).resolveURL(any(), any(), anyString(), anyString(), anyString());
-		verify(policyAdvisor, times(4)).policyForReference(any(), any(), anyString(), anyString());
-		verify(fetcher, times(4)).fetch(any(), any(), anyString());
+		verify(resourceFetcher, times(3)).resolveURL(any(), any(), anyString(), anyString(), anyString());
+		verify(resourceFetcher, times(4)).validationPolicy(any(), any(), anyString(), anyString());
+		verify(resourceFetcher, times(4)).fetch(any(), any(), anyString());
 	}
 
 	@Test

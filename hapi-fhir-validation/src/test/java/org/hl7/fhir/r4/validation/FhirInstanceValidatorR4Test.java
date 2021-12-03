@@ -62,11 +62,7 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.r4.terminologies.ValueSetExpander;
 import org.hl7.fhir.r4.utils.FHIRPathEngine;
-import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
-import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;
-import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
-import org.hl7.fhir.r5.utils.validation.constants.ContainedReferenceValidationPolicy;
-import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
+import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.jupiter.api.AfterAll;
@@ -74,8 +70,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.mockito.MockingDetails;
-import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -476,7 +470,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		// With BPs enabled
 		val = ourCtx.newValidator();
 		instanceModule = new FhirInstanceValidator(myValidationSupport);
-		BestPracticeWarningLevel level = BestPracticeWarningLevel.Error;
+		IResourceValidator.BestPracticeWarningLevel level = IResourceValidator.BestPracticeWarningLevel.Error;
 		instanceModule.setBestPracticeWarningLevel(level);
 		val.registerValidatorModule(instanceModule);
 		result = val.validateWithResult(input);
@@ -640,7 +634,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
 		assertEquals(1, errors.size());
-		assertEquals("None of the codings provided are in the value set 'LOINC Diagnostic Report Codes' (http://hl7.org/fhir/ValueSet/report-codes), and a coding is recommended to come from this value set) (codes = http://loinc.org#1-8)", errors.get(0).getMessage());
+		assertEquals("None of the codings provided are in the value set http://hl7.org/fhir/ValueSet/report-codes (http://hl7.org/fhir/ValueSet/report-codes), and a coding is recommended to come from this value set) (codes = http://loinc.org#1-8)", errors.get(0).getMessage());
 	}
 
 	@Test
@@ -1212,7 +1206,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		logResultsAndReturnAll(output);
 		assertEquals(
-			"The value provided ('notvalidcode') is not in the value set 'ObservationStatus' (http://hl7.org/fhir/ValueSet/observation-status|4.0.1), and a code is required from this value set) (error message = Unknown code 'notvalidcode' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/observation-status')",
+			"The value provided ('notvalidcode') is not in the value set http://hl7.org/fhir/ValueSet/observation-status|4.0.1 (http://hl7.org/fhir/ValueSet/observation-status), and a code is required from this value set) (error message = Unknown code 'notvalidcode' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/observation-status')",
 			output.getMessages().get(0).getMessage());
 	}
 
@@ -1344,7 +1338,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
 		assertEquals(1, all.size());
 		assertEquals("Patient.identifier[0].type", all.get(0).getLocationString());
-		assertThat(all.get(0).getMessage(), containsString("None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://example.com/foo/bar#bar)"));
+		assertThat(all.get(0).getMessage(), containsString("None of the codings provided are in the value set http://hl7.org/fhir/ValueSet/identifier-type"));
 		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
 
 	}
@@ -1365,7 +1359,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		all = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(2, all.size());
 		assertThat(all.get(0).getMessage(), containsString("Validation failed for 'http://unitsofmeasure.org#Heck'"));
-		assertThat(all.get(1).getMessage(), containsString("The value provided ('Heck') is not in the value set 'Body Temperature Units' (http://hl7.org/fhir/ValueSet/ucum-bodytemp|4.0.1), and a code is required from this value set) (error message = Failed to expand ValueSet 'http://hl7.org/fhir/ValueSet/ucum-bodytemp' (in-memory). Could not validate code null#Heck. Error was: Unable to expand ValueSet because CodeSystem could not be found: http://unitsofmeasure.org)"));
+		assertThat(all.get(1).getMessage(), containsString("The value provided ('Heck') is not in the value set http://hl7.org/fhir/ValueSet/ucum-bodytemp"));
 
 	}
 
@@ -1408,17 +1402,14 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 		String encoded = loadResource("/r4/r4-caredove-bundle.json");
 
-		IValidatorResourceFetcher resourceFetcher = mock(IValidatorResourceFetcher.class);
-		IValidationPolicyAdvisor policyAdvisor = mock(IValidationPolicyAdvisor.class);
-
-		when(policyAdvisor.policyForReference(any(), any(), any(), any())).thenReturn(ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
-		when(policyAdvisor.policyForContained(any(), any(), any(), any(), any(), any(), any())).thenReturn(ContainedReferenceValidationPolicy.CHECK_TYPE);
+		IResourceValidator.IValidatorResourceFetcher resourceFetcher = mock(IResourceValidator.IValidatorResourceFetcher.class);
+		when(resourceFetcher.validationPolicy(any(), any(), any(), any())).thenReturn(IResourceValidator.ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
 		myInstanceVal.setValidatorResourceFetcher(resourceFetcher);
-		myInstanceVal.setValidatorPolicyAdvisor(policyAdvisor);
-		myVal.validateWithResult(encoded);
+		myFhirValidator.validateWithResult(encoded);
 
-		verify(resourceFetcher, times(12)).resolveURL(any(), any(), anyString(), anyString(), anyString());
-		verify(policyAdvisor, times(12)).policyForContained(any(), any(), any(), any(), any(), any(), any());
+		verify(resourceFetcher, times(15)).resolveURL(any(), any(), anyString(), anyString(), anyString());
+		verify(resourceFetcher, times(12)).validationPolicy(any(), any(), anyString(), anyString());
+		verify(resourceFetcher, times(12)).fetch(any(), any(), anyString());
 	}
 
 	@Test
@@ -1466,7 +1457,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(1, errors.size(), errors.toString());
-		assertThat(errors.get(0).getMessage(), containsString("The value provided ('BLAH') is not in the value set 'CurrencyCode' (http://hl7.org/fhir/ValueSet/currencies|4.0.1), and a code is required from this value set) (error message = Unknown code 'BLAH' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/currencies')"));
+		assertThat(errors.get(0).getMessage(), containsString("The value provided ('BLAH') is not in the value set http://hl7.org/fhir/ValueSet/currencies"));
 
 
 	}

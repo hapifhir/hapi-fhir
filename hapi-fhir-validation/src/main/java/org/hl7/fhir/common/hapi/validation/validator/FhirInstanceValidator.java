@@ -13,9 +13,8 @@ import org.hl7.fhir.r5.model.Base;
 import org.hl7.fhir.r5.model.TypeDetails;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.utils.FHIRPathEngine;
-import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
-import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;
-import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
+import org.hl7.fhir.r5.utils.IResourceValidator;
+import org.hl7.fhir.r5.utils.IResourceValidator.BestPracticeWarningLevel;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 
 import javax.annotation.Nonnull;
@@ -36,8 +35,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	private boolean errorForUnknownProfiles = true;
 	private boolean assumeValidRestReferences;
 	private List<String> myExtensionDomains = Collections.emptyList();
-	private IValidatorResourceFetcher validatorResourceFetcher;
-	private IValidationPolicyAdvisor validatorPolicyAdvisor;
+	private IResourceValidator.IValidatorResourceFetcher validatorResourceFetcher;
 
 	/**
 	 * Constructor
@@ -229,8 +227,6 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 			.setBestPracticeWarningLevel(getBestPracticeWarningLevel())
 			.setErrorForUnknownProfiles(isErrorForUnknownProfiles())
 			.setExtensionDomains(getExtensionDomains())
-			.setValidatorResourceFetcher(validatorResourceFetcher)
-			.setValidationPolicyAdvisor(validatorPolicyAdvisor)
 			.setNoTerminologyChecks(isNoTerminologyChecks())
 			.setNoExtensibleWarnings(isNoExtensibleWarnings())
 			.setNoBindingMsgSuppressed(isNoBindingMsgSuppressed())
@@ -249,19 +245,11 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		return wrappedWorkerContext;
 	}
 
-	public IValidationPolicyAdvisor getValidatorPolicyAdvisor() {
-		return validatorPolicyAdvisor;
-	}
-
-	public void setValidatorPolicyAdvisor(IValidationPolicyAdvisor validatorPolicyAdvisor) {
-		this.validatorPolicyAdvisor = validatorPolicyAdvisor;
-	}
-
-	public IValidatorResourceFetcher getValidatorResourceFetcher() {
+	public IResourceValidator.IValidatorResourceFetcher getValidatorResourceFetcher() {
 		return validatorResourceFetcher;
 	}
 
-	public void setValidatorResourceFetcher(IValidatorResourceFetcher validatorResourceFetcher) {
+	public void setValidatorResourceFetcher(IResourceValidator.IValidatorResourceFetcher validatorResourceFetcher) {
 		this.validatorResourceFetcher = validatorResourceFetcher;
 	}
 

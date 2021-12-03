@@ -156,15 +156,7 @@ import org.hl7.fhir.r4.model.Substance;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.hl7.fhir.r5.elementmodel.Element;
-import org.hl7.fhir.r5.model.ElementDefinition;
-import org.hl7.fhir.r5.utils.validation.IResourceValidator;
-import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
-import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
-import org.hl7.fhir.r5.utils.validation.constants.BindingKind;
-import org.hl7.fhir.r5.utils.validation.constants.CodedContentValidationPolicy;
-import org.hl7.fhir.r5.utils.validation.constants.ContainedReferenceValidationPolicy;
-import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
+import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -610,29 +602,11 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	protected void validate(IBaseResource theResource) {
 		FhirValidator validatorModule = myFhirCtx.newValidator();
 		FhirInstanceValidator instanceValidator = new FhirInstanceValidator(myValidationSupport);
-		instanceValidator.setBestPracticeWarningLevel(BestPracticeWarningLevel.Ignore);
-		instanceValidator.setValidatorPolicyAdvisor(new ValidationPolicyAdvisor());
+		instanceValidator.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Ignore);
 		validatorModule.registerValidatorModule(instanceValidator);
 		ValidationResult result = validatorModule.validateWithResult(theResource);
 		if (!result.isSuccessful()) {
 			fail(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
-		}
-	}
-
-	public class ValidationPolicyAdvisor implements IValidationPolicyAdvisor {
-		@Override
-		public ReferenceValidationPolicy policyForReference(IResourceValidator validator, Object appContext, String path, String url) {
-			return ReferenceValidationPolicy.CHECK_VALID;
-		}
-
-		@Override
-		public CodedContentValidationPolicy policyForCodedContent(IResourceValidator iResourceValidator, Object o, String s, ElementDefinition elementDefinition, org.hl7.fhir.r5.model.StructureDefinition structureDefinition, BindingKind bindingKind, org.hl7.fhir.r5.model.ValueSet valueSet, List<String> list) {
-			return CodedContentValidationPolicy.CODE;
-		}
-
-		@Override
-		public ContainedReferenceValidationPolicy policyForContained(IResourceValidator validator, Object appContext, String containerType, String containerId, Element.SpecialElement containingResourceType, String path, String url) {
-			return ContainedReferenceValidationPolicy.CHECK_VALID;
 		}
 	}
 

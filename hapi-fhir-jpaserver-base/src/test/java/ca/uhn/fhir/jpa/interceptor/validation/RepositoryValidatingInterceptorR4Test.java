@@ -14,7 +14,7 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
+import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -370,7 +370,7 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 			.requireAtLeastProfile("http://hl7.org/fhir/StructureDefinition/Observation")
 			.and()
 			.requireValidationToDeclaredProfiles()
-			.withBestPracticeWarningLevel(BestPracticeWarningLevel.Ignore)
+			.withBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Ignore)
 			.build();
 		myValInterceptor.setRules(rules);
 
