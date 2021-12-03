@@ -7,6 +7,7 @@ import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -15,8 +16,14 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
@@ -28,10 +35,13 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class CachingValidationSupport extends BaseValidationSupportWrapper implements IValidationSupport {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(CachingValidationSupport.class);
+
 	private final Cache<String, Object> myCache;
 	private final Cache<String, Object> myValidateCodeCache;
 	private final Cache<TranslateCodeRequest, Object> myTranslateCodeCache;
 	private final Cache<String, Object> myLookupCodeCache;
+	private final ThreadPoolExecutor myBackgroundExecutor;
+	private final Map<Object, Object> myNonExpiringCache;
 
 	/**
 	 * Constuctor with default timeouts
@@ -70,24 +80,41 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 			.expireAfterWrite(theCacheTimeouts.getMiscMillis(), TimeUnit.MILLISECONDS)
 			.maximumSize(5000)
 			.build();
+		myNonExpiringCache = Collections.synchronizedMap(new HashMap<>());
+
+		LinkedBlockingQueue<Runnable> executorQueue = new LinkedBlockingQueue<>(1000);
+		BasicThreadFactory threadFactory = new BasicThreadFactory.Builder()
+			.namingPattern("CachingValidationSupport-%d")
+			.daemon(false)
+			.priority(Thread.NORM_PRIORITY)
+			.build();
+		myBackgroundExecutor = new ThreadPoolExecutor(
+			1,
+			1,
+			0L,
+			TimeUnit.MILLISECONDS,
+			executorQueue,
+			threadFactory,
+			new ThreadPoolExecutor.DiscardPolicy());
+
 	}
 
 	@Override
 	public List<IBaseResource> fetchAllConformanceResources() {
 		String key = "fetchAllConformanceResources";
-		return loadFromCache(myCache, key, t -> super.fetchAllConformanceResources());
+		return loadFromCacheWithAsyncRefresh(myCache, key, t -> super.fetchAllConformanceResources());
 	}
 
 	@Override
 	public <T extends IBaseResource> List<T> fetchAllStructureDefinitions() {
 		String key = "fetchAllStructureDefinitions";
-		return loadFromCache(myCache, key, t -> super.fetchAllStructureDefinitions());
+		return loadFromCacheWithAsyncRefresh(myCache, key, t -> super.fetchAllStructureDefinitions());
 	}
 
 	@Override
 	public <T extends IBaseResource> List<T> fetchAllNonBaseStructureDefinitions() {
 		String key = "fetchAllNonBaseStructureDefinitions";
-		return loadFromCache(myCache, key, t -> super.fetchAllNonBaseStructureDefinitions());
+		return loadFromCacheWithAsyncRefresh(myCache, key, t -> super.fetchAllNonBaseStructureDefinitions());
 	}
 
 	@Override
@@ -159,14 +186,36 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 		assert result != null;
 
 		return result.orElse(null);
-
 	}
+
+	private <S, T> T loadFromCacheWithAsyncRefresh(Cache<S, Object> theCache, S theKey, Function<S, T> theLoader) {
+		T retVal = (T) theCache.getIfPresent(theKey);
+		if (retVal == null) {
+			retVal = (T) myNonExpiringCache.get(theKey);
+			if (retVal != null) {
+
+				Runnable loaderTask = ()->{
+					T loadedItem = loadFromCache(theCache, theKey, theLoader);
+					myNonExpiringCache.put(theKey, loadedItem);
+				};
+				myBackgroundExecutor.execute(loaderTask);
+
+				return retVal;
+			}
+		}
+
+		retVal = loadFromCache(theCache, theKey, theLoader);
+		myNonExpiringCache.put(theKey, retVal);
+		return retVal;
+	}
+
 
 	@Override
 	public void invalidateCaches() {
 		myLookupCodeCache.invalidateAll();
 		myCache.invalidateAll();
 		myValidateCodeCache.invalidateAll();
+		myNonExpiringCache.clear();
 	}
 
 	/**
