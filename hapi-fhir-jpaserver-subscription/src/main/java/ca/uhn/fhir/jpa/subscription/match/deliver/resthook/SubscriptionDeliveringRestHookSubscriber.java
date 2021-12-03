@@ -23,8 +23,10 @@ package ca.uhn.fhir.jpa.subscription.match.deliver.resthook;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.match.deliver.BaseSubscriptionDeliverySubscriber;
@@ -163,10 +165,11 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 		return operation;
 	}
 
-	public IBaseResource getResource(IIdType payloadId) throws ResourceGoneException {
+	public IBaseResource getResource(IIdType payloadId, RequestPartitionId thePartitionId) throws ResourceGoneException {
 		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(payloadId.getResourceType());
+		SystemRequestDetails systemRequestDetails = new SystemRequestDetails().setRequestPartitionId(thePartitionId);
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceDef.getImplementingClass());
-		return dao.read(payloadId.toVersionless());
+		return dao.read(payloadId.toVersionless(),  systemRequestDetails);
 	}
 
 
@@ -178,7 +181,7 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 
 			try {
 				if (payloadId != null) {
-					payloadResource = getResource(payloadId.toVersionless());
+					payloadResource = getResource(payloadId.toVersionless(), theMsg.getPartitionId());
 				} else {
 					return null;
 				}
