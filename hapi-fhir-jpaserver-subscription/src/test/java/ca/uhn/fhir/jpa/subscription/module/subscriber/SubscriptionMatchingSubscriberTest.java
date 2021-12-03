@@ -17,6 +17,8 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 
 /**
  * Tests copied from jpa.subscription.resthook.RestHookTestDstu3Test
@@ -267,6 +269,6 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		Subscription modifiedSubscription = subscription.copy();
 		// the original partition info was the request info, but we need the actual storage partition.
 		modifiedSubscription.setUserData(Constants.RESOURCE_PARTITION_ID, theRequestPartitionId);
-		Mockito.when(myMockSubscriptionDao.read(subscription.getIdElement())).thenReturn(modifiedSubscription);
+		Mockito.when(myMockSubscriptionDao.read(eq(subscription.getIdElement()), any())).thenReturn(modifiedSubscription);
 	}
 }
