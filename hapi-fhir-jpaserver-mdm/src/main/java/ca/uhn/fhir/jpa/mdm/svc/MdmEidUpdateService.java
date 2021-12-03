@@ -161,11 +161,11 @@ public class MdmEidUpdateService {
 			myHasEidsInCommon = myEIDHelper.hasEidOverlap(myMatchedGoldenResource, theResource);
 			myIncomingResourceHasAnEid = !myEIDHelper.getExternalEid(theResource).isEmpty();
 
-			Optional<MdmLink> theExistingMatchLink = myMdmLinkDaoSvc.getMatchedOrPossibleMatchedLinkForSource(theResource);
+			Optional<MdmLink> theExistingMatchOrPossibleMatchLink = myMdmLinkDaoSvc.getMatchedOrPossibleMatchedLinkForSource(theResource);
 			myExistingGoldenResource = null;
 
-			if (theExistingMatchLink.isPresent()) {
-				MdmLink mdmLink = theExistingMatchLink.get();
+			if (theExistingMatchOrPossibleMatchLink.isPresent()) {
+				MdmLink mdmLink = theExistingMatchOrPossibleMatchLink.get();
 				Long existingGoldenResourcePid = mdmLink.getGoldenResourcePid();
 				myExistingGoldenResource = myMdmResourceDaoSvc.readGoldenResourceByPid(new ResourcePersistentId(existingGoldenResourcePid), resourceType);
 				myRemainsMatchedToSameGoldenResource = candidateIsSameAsMdmLinkGoldenResource(mdmLink, theMatchedGoldenResourceCandidate);
