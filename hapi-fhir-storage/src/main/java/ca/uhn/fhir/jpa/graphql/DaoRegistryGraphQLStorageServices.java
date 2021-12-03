@@ -46,7 +46,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -67,7 +66,7 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_FILTER;
 
-public class JpaStorageServices implements IGraphQLStorageServices {
+public class DaoRegistryGraphQLStorageServices implements IGraphQLStorageServices {
 
 	private static final int MAX_SEARCH_SIZE = 500;
 	@Autowired
@@ -120,7 +119,7 @@ public class JpaStorageServices implements IGraphQLStorageServices {
 				Set<String> graphqlArguments = searchParams.keySet().stream()
 					.map(this::searchParamToGraphqlArgument)
 					.collect(Collectors.toSet());
-				String msg = myContext.getLocalizer().getMessageSanitized(JpaStorageServices.class, "invalidGraphqlArgument", nextArgument.getName(), new TreeSet<>(graphqlArguments));
+				String msg = myContext.getLocalizer().getMessageSanitized(DaoRegistryGraphQLStorageServices.class, "invalidGraphqlArgument", nextArgument.getName(), new TreeSet<>(graphqlArguments));
 				throw new InvalidRequestException(msg);
 			}
 
