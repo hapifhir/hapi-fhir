@@ -435,6 +435,28 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		assertThat(patient3, is(sameGoldenResourceAs(patient)));
 	}
 
+
+	@Test
+	public void testPossibleMatchUpdatedToMatch() {
+		Patient patient = buildJanePatient();
+		patient.getNameFirstRep().setFamily("familyone");
+		patient = createPatientAndUpdateLinks(patient);
+		assertThat(patient, is(sameGoldenResourceAs(patient)));
+
+		Patient patient2 = buildJanePatient();
+		patient2.getNameFirstRep().setFamily("pleasedonotmatchatall");
+		patient2 = createPatientAndUpdateLinks(patient2);
+
+		assertThat(patient2, is(not(sameGoldenResourceAs(patient))));
+		assertThat(patient2, is(not(linkedTo(patient))));
+		assertThat(patient2, is(possibleMatchWith(patient)));
+
+		patient2.getNameFirstRep().setFamily(patient.getNameFirstRep().getFamily());
+		updatePatientAndUpdateLinks(patient2);
+		assertThat(patient2, is(linkedTo(patient)));
+		assertThat(patient2, is(sameGoldenResourceAs(patient)));
+	}
+
 	@Test
 	public void testCreateGoldenResourceFromMdmTarget() {
 		// Create Use Case #2 - adding patient with no EID
