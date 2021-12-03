@@ -438,6 +438,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 
 	@Test
 	public void testPossibleMatchUpdatedToMatch() {
+		// setup
 		Patient patient = buildJanePatient();
 		patient.getNameFirstRep().setFamily("familyone");
 		patient = createPatientAndUpdateLinks(patient);
@@ -452,7 +453,11 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		assertThat(patient2, is(possibleMatchWith(patient)));
 
 		patient2.getNameFirstRep().setFamily(patient.getNameFirstRep().getFamily());
+
+		// execute
 		updatePatientAndUpdateLinks(patient2);
+
+		// validate
 		assertThat(patient2, is(linkedTo(patient)));
 		assertThat(patient2, is(sameGoldenResourceAs(patient)));
 	}

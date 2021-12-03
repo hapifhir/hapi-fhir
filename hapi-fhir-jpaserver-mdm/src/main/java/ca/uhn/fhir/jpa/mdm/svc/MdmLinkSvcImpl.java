@@ -36,6 +36,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nonnull;
 import javax.transaction.Transactional;
 import java.util.Optional;
 
@@ -85,6 +86,9 @@ public class MdmLinkSvcImpl implements IMdmLinkSvc {
 
 	@Override
 	public void deleteLink(IAnyResource theGoldenResource, IAnyResource theSourceResource, MdmTransactionContext theMdmTransactionContext) {
+		if (theGoldenResource == null) {
+			return;
+		}
 		Optional<MdmLink> optionalMdmLink = getMdmLinkForGoldenResourceSourceResourcePair(theGoldenResource, theSourceResource);
 		if (optionalMdmLink.isPresent()) {
 			MdmLink mdmLink = optionalMdmLink.get();
@@ -122,7 +126,7 @@ public class MdmLinkSvcImpl implements IMdmLinkSvc {
 		return theIncomingSource == MdmLinkSourceEnum.AUTO && theExistingSource.isManual();
 	}
 
-	private Optional<MdmLink> getMdmLinkForGoldenResourceSourceResourcePair(IAnyResource theGoldenResource, IAnyResource theCandidate) {
+	private Optional<MdmLink> getMdmLinkForGoldenResourceSourceResourcePair(@Nonnull IAnyResource theGoldenResource, @Nonnull IAnyResource theCandidate) {
 		if (theGoldenResource.getIdElement().getIdPart() == null || theCandidate.getIdElement().getIdPart() == null) {
 			return Optional.empty();
 		} else {
