@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.*;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -16,6 +17,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Encounter;
@@ -25,6 +27,7 @@ import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.*;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -232,6 +235,25 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 		ourLog.info("Next link: {}", bundle.getLink("next").getUrl());
 		assertThat(bundle.getLink("next").getUrl(), containsString("_format=xml"));
 		bundle = fetchBundle(bundle.getLink("next").getUrl(), EncodingEnum.XML);
+	}
+	@Test
+	//See https://github.com/hapifhir/hapi-fhir/issues/3215
+	public void testEverythingWithLargeResultSetDoesNotNpe() throws IOException {
+		for (int i = 0; i < 500; i++) {
+			Observation obs1 = new Observation();
+			obs1.setSubject(new Reference( patId));
+			obs1.getCode().addCoding().setCode("CODE1");
+			obs1.setValue(new StringType("obsvalue1"));
+			myObservationDao.create(obs1, new SystemRequestDetails()).getId().toUnqualifiedVersionless();
+		}
+
+		Bundle bundle = fetchBundle(ourServerBase + "/" + patId + "/$everything?_format=json&_count=250", EncodingEnum.JSON);
+		do {
+			String next = bundle.getLink("next").getUrl();
+
+			//This used to NPE!
+			bundle = fetchBundle(next, EncodingEnum.JSON);
+		} while (bundle.getLink("next") != null);
 	}
 
 	private Bundle fetchBundle(String theUrl, EncodingEnum theEncoding) throws IOException, ClientProtocolException {
