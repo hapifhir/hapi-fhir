@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.graphql;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR Storage api
  * %%
  * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
@@ -23,11 +23,10 @@ package ca.uhn.fhir.jpa.graphql;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
-import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateOrListParam;
@@ -40,13 +39,14 @@ import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.SpecialOrListParam;
 import ca.uhn.fhir.rest.param.SpecialParam;
-import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -55,28 +55,30 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.utilities.graphql.Argument;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.hl7.fhir.utilities.graphql.Value;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_FILTER;
 
-public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implements IGraphQLStorageServices {
+public class JpaStorageServices implements IGraphQLStorageServices {
 
 	private static final int MAX_SEARCH_SIZE = 500;
-	private static final Logger ourLog = LoggerFactory.getLogger(JpaStorageServices.class);
+	@Autowired
+	private FhirContext myContext;
+	@Autowired
+	private DaoRegistry myDaoRegistry;
+	@Autowired
+	private ISearchParamRegistry mySearchParamRegistry;
 
 	private IFhirResourceDao<? extends IBaseResource> getDao(String theResourceType) {
-		RuntimeResourceDefinition typeDef = getContext().getResourceDefinition(theResourceType);
+		RuntimeResourceDefinition typeDef = myContext.getResourceDefinition(theResourceType);
 		return myDaoRegistry.getResourceDaoOrNull(typeDef.getImplementingClass());
 	}
 
@@ -95,9 +97,9 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 	@Transactional(propagation = Propagation.NEVER)
 	@Override
 	public void listResources(Object theAppInfo, String theType, List<Argument> theSearchParams, List<IBaseResource> theMatches) throws FHIRException {
-		FhirContext fhirContext = getContext();
+		FhirContext fhirContext = myContext;
 		RuntimeResourceDefinition typeDef = fhirContext.getResourceDefinition(theType);
-		IFhirResourceDao<? extends IBaseResource> dao = myDaoRegistry.getResourceDaoOrNull(typeDef.getImplementingClass());
+		IFhirResourceDao<? extends IBaseResource> dao = myDaoRegistry.getResourceDao(typeDef.getImplementingClass());
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronousUpTo(MAX_SEARCH_SIZE);
@@ -118,7 +120,7 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 				Set<String> graphqlArguments = searchParams.keySet().stream()
 					.map(this::searchParamToGraphqlArgument)
 					.collect(Collectors.toSet());
-				String msg = getContext().getLocalizer().getMessageSanitized(JpaStorageServices.class, "invalidGraphqlArgument", nextArgument.getName(), new TreeSet<>(graphqlArguments));
+				String msg = myContext.getLocalizer().getMessageSanitized(JpaStorageServices.class, "invalidGraphqlArgument", nextArgument.getName(), new TreeSet<>(graphqlArguments));
 				throw new InvalidRequestException(msg);
 			}
 
@@ -127,28 +129,28 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 			switch (searchParam.getParamType()) {
 				case NUMBER:
 					NumberOrListParam numberOrListParam = new NumberOrListParam();
-					for (Value value: nextArgument.getValues()) {
+					for (Value value : nextArgument.getValues()) {
 						numberOrListParam.addOr(new NumberParam(value.getValue()));
 					}
 					queryParam = numberOrListParam;
 					break;
 				case DATE:
 					DateOrListParam dateOrListParam = new DateOrListParam();
-					for (Value value: nextArgument.getValues()) {
+					for (Value value : nextArgument.getValues()) {
 						dateOrListParam.addOr(new DateParam(value.getValue()));
 					}
 					queryParam = dateOrListParam;
 					break;
 				case STRING:
 					StringOrListParam stringOrListParam = new StringOrListParam();
-					for (Value value: nextArgument.getValues()) {
+					for (Value value : nextArgument.getValues()) {
 						stringOrListParam.addOr(new StringParam(value.getValue()));
 					}
 					queryParam = stringOrListParam;
 					break;
 				case TOKEN:
 					TokenOrListParam tokenOrListParam = new TokenOrListParam();
-					for (Value value: nextArgument.getValues()) {
+					for (Value value : nextArgument.getValues()) {
 						TokenParam tokenParam = new TokenParam();
 						tokenParam.setValueAsQueryToken(fhirContext, searchParamName, null, value.getValue());
 						tokenOrListParam.addOr(tokenParam);
@@ -157,25 +159,28 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 					break;
 				case REFERENCE:
 					ReferenceOrListParam referenceOrListParam = new ReferenceOrListParam();
-					for (Value value: nextArgument.getValues()) {
+					for (Value value : nextArgument.getValues()) {
 						referenceOrListParam.addOr(new ReferenceParam(value.getValue()));
 					}
 					queryParam = referenceOrListParam;
 					break;
 				case QUANTITY:
 					QuantityOrListParam quantityOrListParam = new QuantityOrListParam();
-					for (Value value: nextArgument.getValues()) {
+					for (Value value : nextArgument.getValues()) {
 						quantityOrListParam.addOr(new QuantityParam(value.getValue()));
 					}
 					queryParam = quantityOrListParam;
 					break;
 				case SPECIAL:
 					SpecialOrListParam specialOrListParam = new SpecialOrListParam();
-					for (Value value: nextArgument.getValues()) {
+					for (Value value : nextArgument.getValues()) {
 						specialOrListParam.addOr(new SpecialParam().setValue(value.getValue()));
 					}
 					queryParam = specialOrListParam;
 					break;
+				case COMPOSITE:
+				case URI:
+				case HAS:
 				default:
 					throw new InvalidRequestException(String.format("%s parameters are not yet supported in GraphQL", searchParam.getParamType()));
 			}
@@ -185,7 +190,7 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 
 		RequestDetails requestDetails = (RequestDetails) theAppInfo;
 		IBundleProvider response = dao.search(params, requestDetails);
-		int size = response.size();
+		int size = response.sizeOrThrowNpe();
 		if (response.preferredPageSize() != null && response.preferredPageSize() < size) {
 			size = response.preferredPageSize();
 		}
@@ -197,7 +202,7 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 	@Transactional(propagation = Propagation.REQUIRED)
 	@Override
 	public IBaseResource lookup(Object theAppInfo, String theType, String theId) throws FHIRException {
-		IIdType refId = getContext().getVersion().newIdType();
+		IIdType refId = myContext.getVersion().newIdType();
 		refId.setValue(theType + "/" + theId);
 		return lookup(theAppInfo, refId);
 	}
@@ -224,9 +229,4 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 		throw new NotImplementedOperationException("Not yet able to handle this GraphQL request");
 	}
 
-	@Nullable
-	@Override
-	protected String getResourceName() {
-		return null;
-	}
 }
