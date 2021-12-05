@@ -46,10 +46,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-<<<<<<<< HEAD:hapi-fhir-storage/src/main/java/ca/uhn/fhir/jpa/graphql/DaoRegistryGraphQLStorageServices.java
-========
-import org.apache.commons.lang3.Validate;
->>>>>>>> master:hapi-fhir-storage/src/main/java/ca/uhn/fhir/jpa/graphql/JpaStorageServices.java
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -70,11 +66,7 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_FILTER;
 
-<<<<<<<< HEAD:hapi-fhir-storage/src/main/java/ca/uhn/fhir/jpa/graphql/DaoRegistryGraphQLStorageServices.java
 public class DaoRegistryGraphQLStorageServices implements IGraphQLStorageServices {
-========
-public class JpaStorageServices implements IGraphQLStorageServices {
->>>>>>>> master:hapi-fhir-storage/src/main/java/ca/uhn/fhir/jpa/graphql/JpaStorageServices.java
 
 	private static final int MAX_SEARCH_SIZE = 500;
 	@Autowired
@@ -127,11 +119,7 @@ public class JpaStorageServices implements IGraphQLStorageServices {
 				Set<String> graphqlArguments = searchParams.keySet().stream()
 					.map(this::searchParamToGraphqlArgument)
 					.collect(Collectors.toSet());
-<<<<<<<< HEAD:hapi-fhir-storage/src/main/java/ca/uhn/fhir/jpa/graphql/DaoRegistryGraphQLStorageServices.java
 				String msg = myContext.getLocalizer().getMessageSanitized(DaoRegistryGraphQLStorageServices.class, "invalidGraphqlArgument", nextArgument.getName(), new TreeSet<>(graphqlArguments));
-========
-				String msg = myContext.getLocalizer().getMessageSanitized(JpaStorageServices.class, "invalidGraphqlArgument", nextArgument.getName(), new TreeSet<>(graphqlArguments));
->>>>>>>> master:hapi-fhir-storage/src/main/java/ca/uhn/fhir/jpa/graphql/JpaStorageServices.java
 				throw new InvalidRequestException(msg);
 			}
 
