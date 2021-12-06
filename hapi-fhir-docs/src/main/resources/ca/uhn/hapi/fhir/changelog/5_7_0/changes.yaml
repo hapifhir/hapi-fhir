@@ -1,0 +1,11 @@
+---
+- item:
+    type: "add"
+    title: "The version of a few dependencies have been bumped to the latest versions
+(dependent HAPI modules listed in brackets):
+<ul>
+<li>Spring (JPA): 5.3.7 -> 5.3.13</li>
+<li>Thymeleaf (Testpage Overlay): 3.0.12.RELEASE -> 3.0.13.RELEASE (Addresses CVE-2021-43466)</li>
+</ul>
+"
+

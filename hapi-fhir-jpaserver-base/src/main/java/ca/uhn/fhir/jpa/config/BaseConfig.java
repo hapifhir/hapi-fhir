@@ -65,7 +65,7 @@ import ca.uhn.fhir.jpa.delete.DeleteConflictFinderService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.delete.DeleteExpungeJobSubmitterImpl;
 import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.graphql.JpaStorageServices;
+import ca.uhn.fhir.jpa.graphql.DaoRegistryGraphQLStorageServices;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
 import ca.uhn.fhir.jpa.interceptor.MdmSearchExpandingInterceptor;
@@ -86,6 +86,7 @@ import ca.uhn.fhir.jpa.provider.DiffProvider;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
+import ca.uhn.fhir.jpa.provider.r4.MemberMatcherR4Helper;
 import ca.uhn.fhir.jpa.reindex.ReindexJobSubmitterImpl;
 import ca.uhn.fhir.jpa.sched.AutowiringSpringBeanJobFactory;
 import ca.uhn.fhir.jpa.sched.HapiSchedulerServiceImpl;
@@ -322,7 +323,7 @@ public abstract class BaseConfig {
 	@Bean
 	@Lazy
 	public IGraphQLStorageServices graphqlStorageServices() {
-		return new JpaStorageServices();
+		return new DaoRegistryGraphQLStorageServices();
 	}
 
 	@Bean
@@ -951,6 +952,14 @@ public abstract class BaseConfig {
 	public UnknownCodeSystemWarningValidationSupport unknownCodeSystemWarningValidationSupport() {
 		return new UnknownCodeSystemWarningValidationSupport(fhirContext());
 	}
+
+	@Lazy
+	@Bean
+	public MemberMatcherR4Helper memberMatcherR4Helper(FhirContext theFhirContext) {
+		return new MemberMatcherR4Helper(theFhirContext);
+	}
+
+
 
 	public static void configureEntityManagerFactory(LocalContainerEntityManagerFactoryBean theFactory, FhirContext theCtx) {
 		theFactory.setJpaDialect(hibernateJpaDialect(theCtx.getLocalizer()));

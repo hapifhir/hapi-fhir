@@ -46,6 +46,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -107,6 +108,7 @@ public class SubscriptionCanonicalizer {
 	private Map<String, String> extractTags(IBaseResource theSubscription) {
 		return theSubscription.getMeta().getTag()
 			.stream()
+			.filter(t -> t.getSystem() != null && t.getCode() != null)
 			.collect(Collectors.toMap(
 				IBaseCoding::getSystem,
 				IBaseCoding::getCode
