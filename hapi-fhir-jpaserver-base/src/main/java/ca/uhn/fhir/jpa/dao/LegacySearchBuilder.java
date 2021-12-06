@@ -1082,7 +1082,6 @@ public class LegacySearchBuilder implements ISearchBuilder {
 		private boolean myFirst = true;
 		private IncludesIterator myIncludesIterator;
 		private ResourcePersistentId myNext;
-		private Iterator<ResourcePersistentId> myPreResultsIterator;
 		private ScrollableResultsIterator<Long> myResultsIterator;
 		private Integer myOffset;
 		private final SortSpec mySort;
@@ -1136,16 +1135,14 @@ public class LegacySearchBuilder implements ISearchBuilder {
 
 					initializeIteratorQuery(myOffset, myMaxResultsToFetch);
 
-					// If the query resulted in extra results being requested
-					if (myAlsoIncludePids != null) {
-						myPreResultsIterator = myAlsoIncludePids.iterator();
+					if (myAlsoIncludePids == null) {
+						myAlsoIncludePids = new ArrayList<>();
 					}
 				}
 
 				if (myNext == null) {
 
-					if (myPreResultsIterator != null && myPreResultsIterator.hasNext()) {
-						while (myPreResultsIterator.hasNext()) {
+					for (Iterator<ResourcePersistentId> myPreResultsIterator = myAlsoIncludePids.iterator(); myPreResultsIterator.hasNext();) {
 							ResourcePersistentId next = myPreResultsIterator.next();
 							if (next != null)
 								if (myPidSet.add(next)) {
@@ -1153,7 +1150,6 @@ public class LegacySearchBuilder implements ISearchBuilder {
 									break;
 								}
 						}
-					}
 
 					if (myNext == null) {
 						while (myResultsIterator.hasNext() || !myQueryList.isEmpty()) {

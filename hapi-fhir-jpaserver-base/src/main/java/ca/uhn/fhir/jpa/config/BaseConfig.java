@@ -65,7 +65,7 @@ import ca.uhn.fhir.jpa.delete.DeleteConflictFinderService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.delete.DeleteExpungeJobSubmitterImpl;
 import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.graphql.JpaStorageServices;
+import ca.uhn.fhir.jpa.graphql.DaoRegistryGraphQLStorageServices;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
 import ca.uhn.fhir.jpa.interceptor.MdmSearchExpandingInterceptor;
@@ -322,7 +322,7 @@ public abstract class BaseConfig {
 	@Bean
 	@Lazy
 	public IGraphQLStorageServices graphqlStorageServices() {
-		return new JpaStorageServices();
+		return new DaoRegistryGraphQLStorageServices();
 	}
 
 	@Bean

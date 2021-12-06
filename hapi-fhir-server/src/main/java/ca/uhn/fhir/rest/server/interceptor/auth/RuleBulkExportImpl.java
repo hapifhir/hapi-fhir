@@ -107,4 +107,12 @@ public class RuleBulkExportImpl extends BaseRule {
 	public void setAppliesToAny() {
 		myWantAnyStyle = true;
 	}
+
+	String getGroupId() {
+		return myGroupId;
+	}
+
+	BulkDataExportOptions.ExportStyle getWantExportStyle() {
+		return myWantExportStyle;
+	}
 }
