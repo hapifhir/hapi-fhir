@@ -106,7 +106,7 @@ In this type of request, the client adds a header containing `Prefer: return=rep
 
  In order for the server to be able to honour this request, the	server method should add the updated resource to the MethodOutcome object being returned, as shown in the example below.
  
- ```java
+```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/RestfulPatientResourceProviderMore.java|updatePrefer}}
 ``` 
 
