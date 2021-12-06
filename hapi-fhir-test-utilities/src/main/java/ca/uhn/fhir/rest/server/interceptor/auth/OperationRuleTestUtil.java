@@ -1,7 +1,8 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
-public final class OperationRuleUtil {
-	private OperationRuleUtil() {}
+public final class OperationRuleTestUtil {
+	private OperationRuleTestUtil() {}
+
 	public static String getOperationName(IAuthRule theRule) {
 		return ((OperationRule)theRule).getOperationName();
 	}
