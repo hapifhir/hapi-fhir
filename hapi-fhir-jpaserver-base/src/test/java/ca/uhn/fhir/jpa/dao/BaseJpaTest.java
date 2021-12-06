@@ -615,7 +615,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		}
 	}
 
-	@NotNull
+	@Nonnull
 	public static Map<String, String> buildHibernateSearchProperties(boolean enableLucene) {
 		Map<String, String> hibernateSearchProperties;
 		if (enableLucene) {

@@ -66,7 +66,6 @@ public class FhirValidator {
 	private final FhirContext myContext;
 	private List<IValidatorModule> myValidators = new ArrayList<>();
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
-	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	private boolean myConcurrentBundleValidation;
 
 	private ExecutorService myExecutorService;
