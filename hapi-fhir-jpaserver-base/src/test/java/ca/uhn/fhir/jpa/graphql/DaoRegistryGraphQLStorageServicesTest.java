@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 @ContextConfiguration(classes = {TestR4Config.class})
 @ExtendWith(SpringExtension.class)
 @DirtiesContext
-public class JpaStorageServicesTest extends BaseJpaR4Test {
+public class DaoRegistryGraphQLStorageServicesTest extends BaseJpaR4Test {
 
 	@Autowired
 	private IGraphQLStorageServices mySvc;
