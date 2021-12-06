@@ -33,32 +33,30 @@ import javax.annotation.Nonnull;
 public class EmailSenderImpl implements IEmailSender {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(EmailSenderImpl.class);
-	private MailSvc myMailSvc = new MailSvc();
-	private MailConfig myMailConfig;
+
+	private final MailSvc myMailSvc;
 
 	public EmailSenderImpl(@Nonnull MailConfig theMailConfig) {
-		Validate.notNull(theMailConfig);
-		myMailConfig = theMailConfig;
+		Validate.notNull(theMailConfig, "Mail configuration is null!");
+		myMailSvc = new MailSvc(theMailConfig);
 	}
 
 	@Override
 	public void send(EmailDetails theDetails) {
-		Validate.notNull(myMailConfig, "Mail configuration is not set!");
-
 		StopWatch stopWatch = new StopWatch();
 
 		ourLog.info("Sending email for subscription {} from [{}] to recipients: [{}]", theDetails.getSubscriptionId(), theDetails.getFrom(), theDetails.getTo());
 
 		Email email = theDetails.toEmail();
 
-		myMailSvc.sendMail(myMailConfig,	email,
+		myMailSvc.sendMail(email,
 			() -> ourLog.info("Done sending email for subscription {} from [{}] to recipients: [{}] (took {}ms)",
 				theDetails.getSubscriptionId(), theDetails.getFrom(), theDetails.getTo(), stopWatch.getMillis()),
 			(e) -> {
 				ourLog.error("Error sending email for subscription {} from [{}] to recipients: [{}] (took {}ms)",
 					theDetails.getSubscriptionId(), theDetails.getFrom(), theDetails.getTo(), stopWatch.getMillis());
 				ourLog.error("Error sending email", e);
-		});
+			});
 	}
 
 }
