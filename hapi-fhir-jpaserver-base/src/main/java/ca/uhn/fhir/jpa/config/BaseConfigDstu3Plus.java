@@ -33,11 +33,12 @@ import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReindexingSvc;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
+import ca.uhn.fhir.jpa.validation.ValidatorPolicyAdvisor;
 import ca.uhn.fhir.jpa.validation.ValidatorResourceFetcher;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
-import org.hl7.fhir.r5.utils.IResourceValidator;
+import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -95,7 +96,8 @@ public abstract class BaseConfigDstu3Plus extends BaseConfig {
 	public IInstanceValidatorModule instanceValidator() {
 		FhirInstanceValidator val = new FhirInstanceValidator(validationSupportChain());
 		val.setValidatorResourceFetcher(jpaValidatorResourceFetcher());
-		val.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Warning);
+		val.setValidatorPolicyAdvisor(jpaValidatorPolicyAdvisor());
+		val.setBestPracticeWarningLevel(BestPracticeWarningLevel.Warning);
 		val.setValidationSupport(validationSupportChain());
 		return val;
 	}
@@ -104,6 +106,12 @@ public abstract class BaseConfigDstu3Plus extends BaseConfig {
 	@Lazy
 	public ValidatorResourceFetcher jpaValidatorResourceFetcher() {
 		return new ValidatorResourceFetcher();
+	}
+
+	@Bean
+	@Lazy
+	public ValidatorPolicyAdvisor jpaValidatorPolicyAdvisor() {
+		return new ValidatorPolicyAdvisor();
 	}
 
 	@Bean

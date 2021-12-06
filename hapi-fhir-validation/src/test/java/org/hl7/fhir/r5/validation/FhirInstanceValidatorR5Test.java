@@ -43,7 +43,11 @@ import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.r5.terminologies.ValueSetExpander;
-import org.hl7.fhir.r5.utils.IResourceValidator;
+import org.hl7.fhir.r5.utils.validation.IResourceValidator;
+import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
+import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;
+import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
+import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -304,7 +308,7 @@ public class FhirInstanceValidatorR5Test {
 		// With BPs enabled
 		val = ourCtx.newValidator();
 		instanceModule = new FhirInstanceValidator(myValidationSupport);
-		IResourceValidator.BestPracticeWarningLevel level = IResourceValidator.BestPracticeWarningLevel.Error;
+		BestPracticeWarningLevel level = BestPracticeWarningLevel.Error;
 		instanceModule.setBestPracticeWarningLevel(level);
 		val.registerValidatorModule(instanceModule);
 		result = val.validateWithResult(input);
@@ -446,14 +450,17 @@ public class FhirInstanceValidatorR5Test {
 
 		String input = IOUtils.toString(FhirInstanceValidator.class.getResourceAsStream("/vitals.json"), Charsets.UTF_8);
 
-		IResourceValidator.IValidatorResourceFetcher resourceFetcher = mock(IResourceValidator.IValidatorResourceFetcher.class);
-		when(resourceFetcher.validationPolicy(any(), any(), any(), any())).thenReturn(IResourceValidator.ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
+		IValidatorResourceFetcher resourceFetcher = mock(IValidatorResourceFetcher.class);
+		IValidationPolicyAdvisor policyAdvisor = mock(IValidationPolicyAdvisor.class);
+
+		when(policyAdvisor.policyForReference(any(), any(), any(), any())).thenReturn(ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
 		myInstanceVal.setValidatorResourceFetcher(resourceFetcher);
+		myInstanceVal.setValidatorPolicyAdvisor(policyAdvisor);
 		myVal.validateWithResult(input);
 
-		verify(resourceFetcher, times(13)).resolveURL(any(), any(), anyString(), anyString(), anyString());
-		verify(resourceFetcher, times(4)).validationPolicy(any(), any(), anyString(), anyString());
-		verify(resourceFetcher, times(3)).fetch(any(), any(), anyString());
+		//verify(resourceFetcher, times(13)).resolveURL(any(), any(), anyString(), anyString(), anyString());
+		verify(policyAdvisor, times(4)).policyForReference(any(), any(), anyString(), anyString());
+		//verify(resourceFetcher, times(3)).fetch(any(), any(), anyString());
 	}
 
 	@Test
@@ -862,7 +869,7 @@ public class FhirInstanceValidatorR5Test {
 		logResultsAndReturnAll(output);
 		assertThat(
 			output.getMessages().get(0).getMessage(),
-			containsString("The value provided ('notvalidcode') is not in the value set http://hl7.org/fhir/ValueSet/observation-status")
+			containsString("The value provided ('notvalidcode') is not in the value set 'ObservationStatus' (http://hl7.org/fhir/ValueSet/observation-status|4.6.0), and a code is required from this value set) (error message = Unknown code 'notvalidcode' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/observation-status')")
 			);
 	}
 
@@ -965,7 +972,7 @@ public class FhirInstanceValidatorR5Test {
 		assertEquals(1, all.size());
 		assertEquals("Patient.identifier[0].type", all.get(0).getLocationString());
 		assertEquals(
-			"None of the codings provided are in the value set http://hl7.org/fhir/ValueSet/identifier-type (http://hl7.org/fhir/ValueSet/identifier-type), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://example.com/foo/bar#bar)",
+			"None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://example.com/foo/bar#bar)",
 			all.get(0).getMessage());
 		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
 
