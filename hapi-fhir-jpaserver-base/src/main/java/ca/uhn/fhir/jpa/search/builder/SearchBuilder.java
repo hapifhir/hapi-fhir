@@ -305,6 +305,7 @@ public class SearchBuilder implements ISearchBuilder {
 		myRequestPartitionId = theRequestPartitionId;
 	}
 
+	// fixme may need a NOP SearchQueryExecutor for queries that resolve the pids without recourse to JPA
 	private ArrayList<SearchQueryExecutor> createQuery(SearchParameterMap theParams, SortSpec sort, Integer theOffset, Integer theMaximumResults, boolean theCount, RequestDetails theRequest,
 																		SearchRuntimeDetails theSearchRuntimeDetails) {
 
@@ -312,6 +313,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 		if (checkUseHibernateSearch()) {
 			if (myParams.isLastN()) {
+				// fixme if we have no _includes to process, and no remaining search params, should we fetch the resource json here instead?
 				pids = executeLastNAgainstIndex(theMaximumResults);
 			} else {
 				pids = queryLuceneForPIDs(theRequest);
@@ -725,6 +727,8 @@ public class SearchBuilder implements ISearchBuilder {
 			versionlessPids = normalizeIdListForLastNInClause(versionlessPids);
 		}
 
+		// fixme we have a list of pids, and about to query for the json
+		// fixme if resourcePidToVersion has no version overrides, we can just go to elastic here.
 		// -- get the resource from the searchView
 		Collection<ResourceSearchView> resourceSearchViewList = myResourceSearchViewDao.findByResourceIds(versionlessPids);
 
