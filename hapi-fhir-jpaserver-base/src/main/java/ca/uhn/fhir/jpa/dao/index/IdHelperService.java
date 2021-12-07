@@ -628,7 +628,7 @@ public class IdHelperService {
 	}
 
 	@Nonnull
-	public Long getPidOrThrowException(IAnyResource theResource) {
+	public Long getPidOrThrowException(@Nonnull IAnyResource theResource) {
 		Long retVal = (Long) theResource.getUserData(RESOURCE_PID);
 		if (retVal == null) {
 			throw new IllegalStateException(Msg.code(1102) + String.format("Unable to find %s in the user data for %s with ID %s", RESOURCE_PID, theResource, theResource.getId())

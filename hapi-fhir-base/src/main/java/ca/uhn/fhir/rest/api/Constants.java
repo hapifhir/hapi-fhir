@@ -73,6 +73,7 @@ public class Constants {
 	public static final String CT_OCTET_STREAM = "application/octet-stream";
 	public static final String CT_TEXT = "text/plain";
 	public static final String CT_TEXT_WITH_UTF8 = CT_TEXT + CHARSET_UTF8_CTSUFFIX;
+	public static final String CT_TEXT_CDA = "text/xml+cda";
 	public static final String CT_X_FORM_URLENCODED = "application/x-www-form-urlencoded";
 	public static final String CT_XML = "application/xml";
 	public static final String CT_XML_PATCH = "application/xml-patch+xml";

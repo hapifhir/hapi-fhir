@@ -1318,7 +1318,6 @@ public class SearchBuilder implements ISearchBuilder {
 		private boolean myFirst = true;
 		private IncludesIterator myIncludesIterator;
 		private ResourcePersistentId myNext;
-		private Iterator<ResourcePersistentId> myPreResultsIterator;
 		private SearchQueryExecutor myResultsIterator;
 		private boolean myStillNeedToFetchIncludes;
 		private int mySkipCount = 0;
@@ -1362,23 +1361,21 @@ public class SearchBuilder implements ISearchBuilder {
 
 					initializeIteratorQuery(myOffset, myMaxResultsToFetch);
 
-					// If the query resulted in extra results being requested
-					if (myAlsoIncludePids != null) {
-						myPreResultsIterator = myAlsoIncludePids.iterator();
+					if (myAlsoIncludePids == null) {
+						myAlsoIncludePids = new ArrayList<>();
 					}
 				}
 
 				if (myNext == null) {
 
-					if (myPreResultsIterator != null && myPreResultsIterator.hasNext()) {
-						while (myPreResultsIterator.hasNext()) {
-							ResourcePersistentId next = myPreResultsIterator.next();
-							if (next != null)
-								if (myPidSet.add(next)) {
-									myNext = next;
-									break;
-								}
-						}
+
+					for (Iterator<ResourcePersistentId> myPreResultsIterator = myAlsoIncludePids.iterator(); myPreResultsIterator.hasNext();) {
+						ResourcePersistentId next = myPreResultsIterator.next();
+						if (next != null)
+							if (myPidSet.add(next)) {
+								myNext = next;
+								break;
+							}
 					}
 
 					if (myNext == null) {
