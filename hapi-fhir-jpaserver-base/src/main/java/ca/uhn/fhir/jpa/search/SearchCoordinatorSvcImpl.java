@@ -459,6 +459,15 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		return candidate.orElse(null);
 	}
 
+	// fixme our main entry point.
+	// MB Proposal - split this in two stories.
+	// fast path -
+	// - add (optional) resource json string to lastn index ObservationJson
+	// - create fast path below to use it (only for lastn)
+	// - new DaoConfig flag - resourceInLuceneIndex - to make this optional
+	// replace lastn with new lucene
+	// - add resource json to hibernate search index as projectable field
+	// - replace the lastn index with new lucene index.
 	private IBundleProvider executeQuery(String theResourceType, SearchParameterMap theParams, RequestDetails theRequestDetails, String theSearchUuid, ISearchBuilder theSb, Integer theLoadSynchronousUpTo, RequestPartitionId theRequestPartitionId) {
 		SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(theRequestDetails, theSearchUuid);
 		searchRuntimeDetails.setLoadSynchronous(true);
