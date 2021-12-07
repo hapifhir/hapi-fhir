@@ -289,7 +289,7 @@ public class DaoConfig {
 
 	/**
 	 * @see FhirValidator#isConcurrentBundleValidation()
-	 * @since 5.6.0
+	 * @since 5.7.0
 	 */
 	private boolean myConcurrentBundleValidation;
 
@@ -2733,7 +2733,7 @@ public class DaoConfig {
 
 	/**
 	 * @see FhirValidator#isConcurrentBundleValidation()
-	 * @since 5.6.0
+	 * @since 5.7.0
 	 */
 	public boolean isConcurrentBundleValidation() {
 		return myConcurrentBundleValidation;
@@ -2741,7 +2741,7 @@ public class DaoConfig {
 
 	/**
 	 * @see FhirValidator#isConcurrentBundleValidation()
-	 * @since 5.6.0
+	 * @since 5.7.0
 	 */
 	public DaoConfig setConcurrentBundleValidation(boolean theConcurrentBundleValidation) {
 		myConcurrentBundleValidation = theConcurrentBundleValidation;
