@@ -70,7 +70,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TestUtil {
-	public static final int MAX_COL_LENGTH = 2000;
+	public static final int MAX_COL_LENGTH = 4000;
 	private static final int MAX_LENGTH = 30;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestUtil.class);
 	private static Set<String> ourReservedWords;
