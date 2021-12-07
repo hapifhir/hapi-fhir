@@ -1687,7 +1687,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		} catch (PreconditionFailedException e) {
 			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
 			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
-			assertThat(oo.getIssueFirstRep().getDiagnostics(),
+			assertThat(oo.getIssue().get(1).getDiagnostics(),
 				containsString("None of the codings provided are in the value set 'Condition Clinical Status Codes' (http://hl7.org/fhir/ValueSet/condition-clinical|4.0.1), and a coding from this value set is required) (codes = http://terminology.hl7.org/CodeSystem/condition-clinical/wrong-system#notrealcode)"));
 		}
 	}
