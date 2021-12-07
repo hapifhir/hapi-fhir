@@ -20,9 +20,9 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hibernate.annotations.OptimisticLock;
 
 import javax.persistence.CascadeType;
@@ -67,7 +67,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@SuppressWarnings("WeakerAccess")
 	public static final int ENCODING_COL_LENGTH = 5;
 	public static final String HFJ_RES_VER = "HFJ_RES_VER";
-
+	public static final int RES_TEXT_VC_MAX_LENGTH = 5000;
 	private static final long serialVersionUID = 1L;
 	@Id
 	@SequenceGenerator(name = "SEQ_RESOURCE_HISTORY_ID", sequenceName = "SEQ_RESOURCE_HISTORY_ID")
@@ -95,17 +95,26 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@Lob()
 	@OptimisticLock(excluded = true)
 	private byte[] myResource;
-
+	@Column(name = "RES_TEXT_VC", length = RES_TEXT_VC_MAX_LENGTH, nullable = true)
+	@OptimisticLock(excluded = true)
+	private String myResourceTextVc;
 	@Column(name = "RES_ENCODING", nullable = false, length = ENCODING_COL_LENGTH)
 	@Enumerated(EnumType.STRING)
 	@OptimisticLock(excluded = true)
 	private ResourceEncodingEnum myEncoding;
-
 	@OneToOne(mappedBy = "myResourceHistoryTable", cascade = {CascadeType.REMOVE})
 	private ResourceHistoryProvenanceEntity myProvenance;
 
 	public ResourceHistoryTable() {
 		super();
+	}
+
+	public String getResourceTextVc() {
+		return myResourceTextVc;
+	}
+
+	public void setResourceTextVc(String theResourceTextVc) {
+		myResourceTextVc = theResourceTextVc;
 	}
 
 	public ResourceHistoryProvenanceEntity getProvenance() {
