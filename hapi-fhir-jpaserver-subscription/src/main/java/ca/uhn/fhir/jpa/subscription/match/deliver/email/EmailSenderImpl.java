@@ -20,8 +20,7 @@ package ca.uhn.fhir.jpa.subscription.match.deliver.email;
  * #L%
  */
 
-import ca.uhn.fhir.rest.server.mail.MailConfig;
-import ca.uhn.fhir.rest.server.mail.MailSvc;
+import ca.uhn.fhir.rest.server.mail.IMailSvc;
 import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.Validate;
 import org.simplejavamail.api.email.Email;
@@ -34,11 +33,11 @@ public class EmailSenderImpl implements IEmailSender {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(EmailSenderImpl.class);
 
-	private final MailSvc myMailSvc;
+	private final IMailSvc myMailSvc;
 
-	public EmailSenderImpl(@Nonnull MailConfig theMailConfig) {
-		Validate.notNull(theMailConfig, "Mail configuration is null!");
-		myMailSvc = new MailSvc(theMailConfig);
+	public EmailSenderImpl(@Nonnull IMailSvc theMailSvc) {
+		Validate.notNull(theMailSvc);
+		myMailSvc = theMailSvc;
 	}
 
 	@Override
