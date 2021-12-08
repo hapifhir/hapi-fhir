@@ -638,8 +638,8 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		retVal.setVersion(myVersion);
 		retVal.setTransientForcedId(getTransientForcedId());
 
-		retVal.setPublished(getPublished());
-		retVal.setUpdated(getUpdated());
+		retVal.setPublished(getPublishedDate());
+		retVal.setUpdated(getUpdatedDate());
 		retVal.setFhirVersion(getFhirVersion());
 		retVal.setDeleted(getDeleted());
 		retVal.setResourceTable(this);

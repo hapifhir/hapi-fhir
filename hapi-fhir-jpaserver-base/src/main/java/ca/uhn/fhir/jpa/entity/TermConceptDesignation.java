@@ -30,8 +30,9 @@ import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.length;
 
 @Entity
-@Table(name = "TRM_CONCEPT_DESIG", uniqueConstraints = {
-}, indexes = {
+@Table(name = "TRM_CONCEPT_DESIG", uniqueConstraints = { }, indexes = {
+	// must have same name that indexed FK or SchemaMigrationTest complains because H2 sets this index automatically
+	@Index(name = "FK_CONCEPTDESIG_CONCEPT",  columnList = "CONCEPT_PID", unique = false)
 })
 public class TermConceptDesignation implements Serializable {
 	private static final long serialVersionUID = 1L;

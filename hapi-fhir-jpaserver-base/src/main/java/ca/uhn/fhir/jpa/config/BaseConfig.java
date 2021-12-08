@@ -65,7 +65,7 @@ import ca.uhn.fhir.jpa.delete.DeleteConflictFinderService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.delete.DeleteExpungeJobSubmitterImpl;
 import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.graphql.JpaStorageServices;
+import ca.uhn.fhir.jpa.graphql.DaoRegistryGraphQLStorageServices;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
 import ca.uhn.fhir.jpa.interceptor.MdmSearchExpandingInterceptor;
@@ -86,6 +86,7 @@ import ca.uhn.fhir.jpa.provider.DiffProvider;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
+import ca.uhn.fhir.jpa.provider.r4.MemberMatcherR4Helper;
 import ca.uhn.fhir.jpa.reindex.ReindexJobSubmitterImpl;
 import ca.uhn.fhir.jpa.sched.AutowiringSpringBeanJobFactory;
 import ca.uhn.fhir.jpa.sched.HapiSchedulerServiceImpl;
@@ -155,8 +156,13 @@ import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValid
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.hl7.fhir.utilities.npm.FilesystemPackageCacheManager;
+import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
+import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.launch.support.SimpleJobOperator;
+import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
@@ -229,6 +235,9 @@ public abstract class BaseConfig {
 	private Integer searchCoordMaxPoolSize = 100;
 	private Integer searchCoordQueueCapacity = 200;
 
+	@Autowired
+	private JobLauncher myJobLauncher;
+
 	/**
 	 * Subclasses may override this method to provide settings such as search coordinator pool sizes.
 	 */
@@ -279,6 +288,18 @@ public abstract class BaseConfig {
 		return new CascadingDeleteInterceptor(theFhirContext, theDaoRegistry, theInterceptorBroadcaster);
 	}
 
+	@Bean
+	public SimpleJobOperator jobOperator(JobExplorer jobExplorer, JobRepository jobRepository, JobRegistry jobRegistry) {
+		SimpleJobOperator jobOperator = new SimpleJobOperator();
+
+		jobOperator.setJobExplorer(jobExplorer);
+		jobOperator.setJobRepository(jobRepository);
+		jobOperator.setJobRegistry(jobRegistry);
+		jobOperator.setJobLauncher(myJobLauncher);
+
+		return jobOperator;
+	}
+
 
 	@Lazy
 	@Bean
@@ -302,7 +323,7 @@ public abstract class BaseConfig {
 	@Bean
 	@Lazy
 	public IGraphQLStorageServices graphqlStorageServices() {
-		return new JpaStorageServices();
+		return new DaoRegistryGraphQLStorageServices();
 	}
 
 	@Bean
@@ -931,6 +952,14 @@ public abstract class BaseConfig {
 	public UnknownCodeSystemWarningValidationSupport unknownCodeSystemWarningValidationSupport() {
 		return new UnknownCodeSystemWarningValidationSupport(fhirContext());
 	}
+
+	@Lazy
+	@Bean
+	public MemberMatcherR4Helper memberMatcherR4Helper(FhirContext theFhirContext) {
+		return new MemberMatcherR4Helper(theFhirContext);
+	}
+
+
 
 	public static void configureEntityManagerFactory(LocalContainerEntityManagerFactoryBean theFactory, FhirContext theCtx) {
 		theFactory.setJpaDialect(hibernateJpaDialect(theCtx.getLocalizer()));

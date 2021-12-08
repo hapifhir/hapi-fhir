@@ -277,6 +277,14 @@ public class DaoConfig {
 	 * TODO mb test more with this true
 	 */
 	private boolean myAdvancedLuceneIndexing = false;
+	/**
+	 * If set to a positive number, any resources with a character length at or below the given number
+	 * of characters will be stored inline in the <code>HFJ_RES_VER</code> table instead of using a
+	 * separate LOB column.
+	 *
+	 * @since 7.0.0
+	 */
+	private int myInlineResourceTextBelowSize = 0;
 
 	/**
 	 * Constructor
@@ -298,6 +306,28 @@ public class DaoConfig {
 			ourLog.info("Status based reindexing is DISABLED");
 			setStatusBasedReindexingDisabled(true);
 		}
+	}
+
+	/**
+	 * If set to a positive number, any resources with a character length at or below the given number
+	 * of characters will be stored inline in the <code>HFJ_RES_VER</code> table instead of using a
+	 * separate LOB column.
+	 *
+	 * @since 7.0.0
+	 */
+	public int getInlineResourceTextBelowSize() {
+		return myInlineResourceTextBelowSize;
+	}
+
+	/**
+	 * If set to a positive number, any resources with a character length at or below the given number
+	 * of characters will be stored inline in the <code>HFJ_RES_VER</code> table instead of using a
+	 * separate LOB column.
+	 *
+	 * @since 7.0.0
+	 */
+	public void setInlineResourceTextBelowSize(int theInlineResourceTextBelowSize) {
+		myInlineResourceTextBelowSize = theInlineResourceTextBelowSize;
 	}
 
 	/**
@@ -2672,6 +2702,28 @@ public class DaoConfig {
 		myElasicSearchIndexPrefix = thePrefix;
 	}
 
+	/**
+	 * Is lucene/hibernate indexing enabled beyond _contains or _text?
+	 *
+	 * @since 5.6.0
+	 */
+	public boolean isAdvancedLuceneIndexing() {
+		return myAdvancedLuceneIndexing;
+	}
+
+	/**
+	 * Enable/disable lucene/hibernate indexing enabled beyond _contains or _text.
+	 * <p>
+	 * String, token, and reference parameters can be indexed in Lucene.
+	 * This extends token search to support :text searches, as well as supporting
+	 * :contains and :text on string parameters.
+	 *
+	 * @since 5.6.0
+	 */
+	public void setAdvancedLuceneIndexing(boolean theAdvancedLuceneIndexing) {
+		this.myAdvancedLuceneIndexing = theAdvancedLuceneIndexing;
+	}
+
 	public enum StoreMetaSourceInformationEnum {
 		NONE(false, false),
 		SOURCE_URI(true, false),
@@ -2693,28 +2745,6 @@ public class DaoConfig {
 		public boolean isStoreRequestId() {
 			return myStoreRequestId;
 		}
-	}
-
-	/**
-	 * Is lucene/hibernate indexing enabled beyond _contains or _text?
-	 *
-	 * @since 5.6.0
-	 */
-	public boolean isAdvancedLuceneIndexing() {
-		return myAdvancedLuceneIndexing;
-	}
-
-	/**
-	 * Enable/disable lucene/hibernate indexing enabled beyond _contains or _text.
-	 *
-	 * String, token, and reference parameters can be indexed in Lucene.
-	 * This extends token search to support :text searches, as well as supporting
-	 * :contains and :text on string parameters.
-	 *
-	 * @since 5.6.0
-	 */
-	public void setAdvancedLuceneIndexing(boolean theAdvancedLuceneIndexing) {
-		this.myAdvancedLuceneIndexing = theAdvancedLuceneIndexing;
 	}
 
 

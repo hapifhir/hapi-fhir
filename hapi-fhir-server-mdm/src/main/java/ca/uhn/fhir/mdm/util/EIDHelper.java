@@ -63,7 +63,8 @@ public final class EIDHelper {
 	 * @return An optional {@link CanonicalEID} representing the external EID. Absent if the EID is not present.
 	 */
 	public List<CanonicalEID> getExternalEid(IBaseResource theResource) {
-		return CanonicalEID.extractFromResource(myFhirContext, myMdmSettings.getMdmRules().getEnterpriseEIDSystem(), theResource);
+		String resourceType = myFhirContext.getResourceType(theResource);
+		return CanonicalEID.extractFromResource(myFhirContext, myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType(resourceType), theResource);
 	}
 
 	/**

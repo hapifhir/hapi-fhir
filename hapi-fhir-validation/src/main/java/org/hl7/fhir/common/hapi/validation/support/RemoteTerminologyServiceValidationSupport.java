@@ -50,6 +50,11 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		super(theFhirContext);
 	}
 
+	public RemoteTerminologyServiceValidationSupport(FhirContext theFhirContext, String theBaseUrl) {
+		super(theFhirContext);
+		myBaseUrl = theBaseUrl;
+	}
+
 	@Override
 	public CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		return invokeRemoteValidateCode(theCodeSystem, theCode, theDisplay, theValueSetUrl, null);
@@ -165,7 +170,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 				IBaseParameters outcome = client
 					.operation()
 					.onType((Class<? extends IBaseResource>) codeSystemClass)
-					.named(JpaConstants.OPERATION_LOOKUP)
+					.named("$lookup")
 					.withParameters(params)
 					.useHttpGet()
 					.execute();

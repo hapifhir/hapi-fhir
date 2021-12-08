@@ -28,7 +28,7 @@ public class ZipCollectionBuilder {
 	/**
 	 * Constructor
 	 */
-	ZipCollectionBuilder() {
+	public ZipCollectionBuilder() {
 		myFiles = new ArrayList<>();
 	}
 

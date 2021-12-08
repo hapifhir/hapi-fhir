@@ -12,6 +12,7 @@ import org.springframework.core.io.Resource;
 
 import java.io.IOException;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.startsWith;
@@ -158,6 +159,25 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 		}
 		catch (ConfigurationException e){
 			fail("Unable to validate extension matcher");
+		}
+	}
+
+	@Test
+	public void testBadEidResourceType() throws IOException {
+		try {
+			setMdmRuleJson("bad-rules-illegal-resource-type-eid.json");
+		}
+		catch (ConfigurationException e){
+			assertThat(e.getMessage(), is(equalTo("not-a-resource is not a valid resource type, but is set in the eidSystems field.")));
+		}
+	}
+	@Test
+	public void testBadEidDoesntMatchKnownMdmTypes() throws IOException {
+		try {
+			setMdmRuleJson("bad-rules-illegal-missing-resource-type.json");
+		}
+		catch (ConfigurationException e){
+			assertThat(e.getMessage(), is(equalTo("There is an eidSystem set for [Patient] but that is not one of the mdmTypes. Valid options are [Organization, *].")));
 		}
 	}
 
