@@ -464,7 +464,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	// fast path -
 	// - add (optional) resource json string to lastn index ObservationJson
 	// - create fast path below to use it (only for lastn)
-	// - new DaoConfig flag - resourceInLuceneIndex - to make this optional
 	// replace lastn with new lucene
 	// - add resource json to hibernate search index as projectable field
 	// - replace the lastn index with new lucene index.
