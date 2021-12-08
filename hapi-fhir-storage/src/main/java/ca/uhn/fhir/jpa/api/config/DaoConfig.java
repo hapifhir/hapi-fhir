@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.util.HapiExtensions;
+import ca.uhn.fhir.validation.FhirValidator;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
@@ -285,6 +286,12 @@ public class DaoConfig {
 	 * @since 7.0.0
 	 */
 	private int myInlineResourceTextBelowSize = 0;
+
+	/**
+	 * @see FhirValidator#isConcurrentBundleValidation()
+	 * @since 5.7.0
+	 */
+	private boolean myConcurrentBundleValidation;
 
 	/**
 	 * Constructor
@@ -2722,6 +2729,23 @@ public class DaoConfig {
 	 */
 	public void setAdvancedLuceneIndexing(boolean theAdvancedLuceneIndexing) {
 		this.myAdvancedLuceneIndexing = theAdvancedLuceneIndexing;
+	}
+
+	/**
+	 * @see FhirValidator#isConcurrentBundleValidation()
+	 * @since 5.7.0
+	 */
+	public boolean isConcurrentBundleValidation() {
+		return myConcurrentBundleValidation;
+	}
+
+	/**
+	 * @see FhirValidator#isConcurrentBundleValidation()
+	 * @since 5.7.0
+	 */
+	public DaoConfig setConcurrentBundleValidation(boolean theConcurrentBundleValidation) {
+		myConcurrentBundleValidation = theConcurrentBundleValidation;
+		return this;
 	}
 
 	public enum StoreMetaSourceInformationEnum {

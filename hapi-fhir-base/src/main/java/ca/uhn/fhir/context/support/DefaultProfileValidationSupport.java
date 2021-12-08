@@ -380,5 +380,4 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 		ArrayList<IBaseResource> retVal = new ArrayList<>(theMap.values());
 		return (List<T>) Collections.unmodifiableList(retVal);
 	}
-
 }
