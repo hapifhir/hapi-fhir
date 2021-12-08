@@ -33,7 +33,6 @@ public final class ThreadPoolUtil {
 
 	@Nonnull
 	public static ThreadPoolTaskExecutor newThreadPool(int theCorePoolSize, int theMaxPoolSize, String theThreadNamePrefix) {
-		Validate.matchesPattern(theThreadNamePrefix, "[a-z1-9\\-]+", "Thread pool prefix name must consist only of lower-case letters and hyphens");
 		Validate.isTrue(theThreadNamePrefix.endsWith("-"), "Thread pool prefix name must end with a hyphen");
 		ThreadPoolTaskExecutor asyncTaskExecutor = new ThreadPoolTaskExecutor();
 		asyncTaskExecutor.setCorePoolSize(theCorePoolSize);
