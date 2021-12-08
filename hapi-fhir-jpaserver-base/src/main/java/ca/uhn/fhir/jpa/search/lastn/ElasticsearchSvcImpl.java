@@ -191,6 +191,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	public List<String> executeLastN(SearchParameterMap theSearchParameterMap, FhirContext theFhirContext, Integer theMaxResultsToFetch) {
 		Validate.isTrue(!myPartitionSettings.isPartitioningEnabled(), "$lastn is not currently supported on partitioned servers");
 
+		// fixme - if we add the resource to the list of fields to include here, it will come back in the results.
 		String[] topHitsInclude = {OBSERVATION_IDENTIFIER_FIELD_NAME};
 		return buildAndExecuteSearch(theSearchParameterMap, theFhirContext, topHitsInclude,
 			ObservationJson::getIdentifier, theMaxResultsToFetch);
