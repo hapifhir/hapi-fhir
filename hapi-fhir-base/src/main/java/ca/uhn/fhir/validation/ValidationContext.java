@@ -96,12 +96,12 @@ public class ValidationContext<T> extends BaseValidationContext<T> implements IV
 		IEncoder encoder = new IEncoder() {
 			@Override
 			public String encode() {
-				return theContext.newJsonParser().encodeResourceToString(theResource);
+				return theContext.newXmlParser().encodeResourceToString(theResource);
 			}
 
 			@Override
 			public EncodingEnum getEncoding() {
-				return EncodingEnum.JSON;
+				return EncodingEnum.XML;
 			}
 		};
 		return new ValidationContext<>(theContext, theResource, encoder, options);
