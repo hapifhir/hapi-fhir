@@ -97,10 +97,8 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@OptimisticLock(excluded = true)
 	private byte[] myResource;
 
-	// TODO: JA For future use or removal
-	//	@Column(name = "RES_TEXT_VC", length = RES_TEXT_VC_MAX_LENGTH, nullable = true)
-	//	@OptimisticLock(excluded = true)
-	@Transient
+	@Column(name = "RES_TEXT_VC", length = RES_TEXT_VC_MAX_LENGTH, nullable = true)
+	@OptimisticLock(excluded = true)
 	private String myResourceTextVc;
 
 	@Column(name = "RES_ENCODING", nullable = false, length = ENCODING_COL_LENGTH)

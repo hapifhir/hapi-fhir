@@ -116,6 +116,13 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.withColumns("PARENT_PID")
 			// H2, Derby, MariaDB, and MySql automatically add indexes to foreign keys
 			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
+
+		// Add inline resource text column
+		version.onTable("HFJ_RES_VER")
+			.addColumn("20211209.1", "RES_TEXT_VC")
+			.nullable()
+			.type(ColumnTypeEnum.STRING, 2000);
+
 	}
 
 
@@ -201,6 +208,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// HFJ_SEARCH.SEARCH_QUERY_STRING
 		version.onTable("HFJ_SEARCH")
 			.migratePostgresTextClobToBinaryClob("20211003.3", "SEARCH_QUERY_STRING");
+		
+
+		
 	}
 
 	private void init540() {
