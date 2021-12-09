@@ -142,8 +142,8 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 	}
 
 
-	protected Observation sendObservation(String code, String system) {
-		Observation observation = createBaseObservation(code, system);
+	protected Observation sendObservation(String theCode, String theSystem) {
+		Observation observation = createBaseObservation(theCode, theSystem);
 
 		IIdType id = myObservationDao.create(observation).getId();
 		observation.setId(id);

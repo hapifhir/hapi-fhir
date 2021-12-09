@@ -46,7 +46,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -124,10 +123,7 @@ public class SubscriptionCanonicalizer {
 			if (status != null) {
 				retVal.setStatus(org.hl7.fhir.r4.model.Subscription.SubscriptionStatus.fromCode(status.toCode()));
 			}
-			RequestPartitionId requestPartitionId = (RequestPartitionId) theSubscription.getUserData(Constants.RESOURCE_PARTITION_ID);
-			if (requestPartitionId != null) {
-				retVal.setPartitionId(requestPartitionId.getFirstPartitionIdOrNull());
-			}
+			setPartitionIdOnReturnValue(theSubscription, retVal);
 			retVal.setChannelType(getChannelType(theSubscription));
 			retVal.setCriteriaString(subscription.getCriteria());
 			retVal.setEndpointUrl(subscription.getChannel().getEndpoint());
@@ -235,11 +231,8 @@ public class SubscriptionCanonicalizer {
 		retVal.setIdElement(subscription.getIdElement());
 		retVal.setPayloadString(subscription.getChannel().getPayload());
 		retVal.setPayloadSearchCriteria(getExtensionString(subscription, HapiExtensions.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA));
-		RequestPartitionId requestPartitionId = (RequestPartitionId) theSubscription.getUserData(Constants.RESOURCE_PARTITION_ID);
-		if (requestPartitionId != null) {
-			retVal.setPartitionId(requestPartitionId.getFirstPartitionIdOrNull());
-		}
 		retVal.setTags(extractTags(subscription));
+		setPartitionIdOnReturnValue(theSubscription, retVal);
 
 		if (retVal.getChannelType() == CanonicalSubscriptionChannelType.EMAIL) {
 			String from;
@@ -286,10 +279,7 @@ public class SubscriptionCanonicalizer {
 		if (status != null) {
 			retVal.setStatus(org.hl7.fhir.r4.model.Subscription.SubscriptionStatus.fromCode(status.toCode()));
 		}
-		RequestPartitionId requestPartitionId = (RequestPartitionId) theSubscription.getUserData(Constants.RESOURCE_PARTITION_ID);
-		if (requestPartitionId != null) {
-			retVal.setPartitionId(requestPartitionId.getFirstPartitionIdOrNull());
-		}
+		setPartitionIdOnReturnValue(theSubscription, retVal);
 		retVal.setChannelType(getChannelType(subscription));
 		retVal.setCriteriaString(getCriteria(theSubscription));
 		retVal.setEndpointUrl(subscription.getEndpoint());
@@ -335,6 +325,13 @@ public class SubscriptionCanonicalizer {
 		}
 
 		return retVal;
+	}
+
+	private void setPartitionIdOnReturnValue(IBaseResource theSubscription, CanonicalSubscription retVal) {
+		RequestPartitionId requestPartitionId = (RequestPartitionId) theSubscription.getUserData(Constants.RESOURCE_PARTITION_ID);
+		if (requestPartitionId != null) {
+			retVal.setPartitionId(requestPartitionId.getFirstPartitionIdOrNull());
+		}
 	}
 
 	private String getExtensionString(IBaseHasExtensions theBase, String theUrl) {

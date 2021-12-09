@@ -125,8 +125,8 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 		for (ActiveSubscription nextActiveSubscription : subscriptions) {
 			// skip if the partitions don't match
 			CanonicalSubscription subscription = nextActiveSubscription.getSubscription();
-			if (subscription != null && subscription.getPartitionId() != null && theMsg.getPartitionId() != null
-				&& !theMsg.getPartitionId().hasPartitionId(subscription.getPartitionId())) {
+			if (subscription != null && subscription.getRequestPartitionId() != null && theMsg.getPartitionId() != null
+				&& !theMsg.getPartitionId().hasPartitionId(subscription.getRequestPartitionId())) {
 				continue;
 			}
 			String nextSubscriptionId = getId(nextActiveSubscription);

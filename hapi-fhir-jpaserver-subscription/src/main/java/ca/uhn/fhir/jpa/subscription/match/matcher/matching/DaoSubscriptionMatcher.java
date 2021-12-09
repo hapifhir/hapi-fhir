@@ -77,7 +77,7 @@ public class DaoSubscriptionMatcher implements ISubscriptionMatcher {
 		IFhirResourceDao<? extends IBaseResource> responseDao = myDaoRegistry.getResourceDao(responseResourceDef.getImplementingClass());
 		responseCriteriaUrl.setLoadSynchronousUpTo(1);
 
-		PartitionablePartitionId partitionId = new PartitionablePartitionId(theSubscription.getPartitionId(), null);
+		PartitionablePartitionId partitionId = new PartitionablePartitionId(theSubscription.getRequestPartitionId(), null);
 		RequestDetails systemRequestDetails = new SystemRequestDetails().setRequestPartitionId(partitionId.toPartitionId());
 		return responseDao.search(responseCriteriaUrl, systemRequestDetails);
 	}
