@@ -431,7 +431,7 @@ public abstract class BaseStorageDao {
 		return oo;
 	}
 
-	@NotNull
+	@Nonnull
 	protected ResourceGoneException createResourceGoneException(IBasePersistedResource theResourceEntity) {
 		StringBuilder b = new StringBuilder();
 		b.append("Resource was deleted at ");

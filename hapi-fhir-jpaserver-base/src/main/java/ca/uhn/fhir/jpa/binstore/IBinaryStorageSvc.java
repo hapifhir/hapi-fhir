@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.binstore;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IIdType;
 
