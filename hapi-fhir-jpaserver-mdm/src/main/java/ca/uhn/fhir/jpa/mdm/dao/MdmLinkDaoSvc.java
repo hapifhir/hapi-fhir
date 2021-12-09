@@ -155,7 +155,7 @@ public class MdmLinkDaoSvc {
 		return getMdmLinkWithMatchResult(theSourceResource, MdmMatchResultEnum.POSSIBLE_MATCH);
 	}
 
-	@NotNull
+	@Nonnull
 	private Optional<MdmLink> getMdmLinkWithMatchResult(IBaseResource theSourceResource, MdmMatchResultEnum theMatchResult) {
 		Long pid = myIdHelperService.getPidOrNull(theSourceResource);
 		if (pid == null) {
