@@ -13,6 +13,7 @@ import org.springframework.jdbc.core.support.AbstractLobCreatingPreparedStatemen
 import org.springframework.jdbc.support.lob.DefaultLobHandler;
 import org.springframework.jdbc.support.lob.LobCreator;
 
+import javax.annotation.Nonnull;
 import javax.validation.constraints.NotNull;
 import java.io.File;
 import java.io.IOException;
@@ -278,7 +279,7 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 		assertTrue(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_BLK_EXPORT_JOB")); // Late table
 	}
 
-	@NotNull
+	@Nonnull
 	private File getLocation(String theDatabaseName) throws IOException {
 		File directory = new File(DB_DIRECTORY);
 		if (directory.exists()) {
