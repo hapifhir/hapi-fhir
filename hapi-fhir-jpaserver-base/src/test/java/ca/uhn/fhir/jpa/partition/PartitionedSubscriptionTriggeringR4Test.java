@@ -15,9 +15,12 @@ import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
 import ca.uhn.fhir.jpa.subscription.resthook.RestHookTestR4Test;
 import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
 import ca.uhn.fhir.rest.api.Constants;
+import org.awaitility.core.ConditionTimeoutException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Subscription;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,6 +37,7 @@ import java.util.ArrayList;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4Test  {
 	private static final Logger ourLog = LoggerFactory.getLogger(RestHookTestR4Test.class);
@@ -45,6 +49,7 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 	private ISubscriptionTriggeringSvc mySubscriptionTriggeringSvc;
 
 	static final String PARTITION_1 = "PART-1";
+	static final String PARTITION_2 = "PART-2";
 
 	protected MyReadWriteInterceptor myPartitionInterceptor;
 	protected LocalDate myPartitionDate;
@@ -73,6 +78,7 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		mySrdInterceptorService.registerInterceptor(myPartitionInterceptor);
 
 		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
+		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2));
 
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 	}
@@ -118,6 +124,37 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 	}
 
 	@Test
+	public void testCreateSubscriptionInPartitionAndResourceInDifferentPartition() throws Exception {
+		String payload = "application/fhir+json";
+
+		String code = "1000000050";
+		String criteria1 = "Patient?active=true";
+		Subscription subscription = newSubscription(criteria1, payload);
+
+		assertEquals(mySrdInterceptorService.getAllRegisteredInterceptors().size(), 1);
+
+		myDaoRegistry.getResourceDao("Subscription").create(subscription, mySrd);
+
+		waitForActivatedSubscriptionCount(1);
+
+		Patient patient = new Patient();
+		patient.setActive(true);
+		myDaoRegistry.getResourceDao("Patient").create(patient, new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.fromPartitionId(2)));
+
+		// Should see 0 subscription notification
+		waitForQueueToDrain();
+		assertEquals(0, ourPatientProvider.getCountCreate());
+
+		try {
+			// Should have 0 matching subscription, if we get 1 update count then the test fails
+			ourPatientProvider.waitForUpdateCount(1);
+			fail();
+		} catch (ConditionTimeoutException e) {
+			assertEquals(0, ourRestfulServer.getRequestContentTypes().size());
+		}
+	}
+
+	@Test
 	public void testManualTriggeredSubscriptionInPartition() throws Exception {
 		String payload = "application/fhir+json";
 		String code = "1000000050";
@@ -145,7 +182,6 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 
 		waitForQueueToDrain();
 		assertEquals(0, ourObservationProvider.getCountCreate());
-		//ourObservationProvider.waitForUpdateCount(1);
 
 		String responseValue = resultParameters.getParameter().get(0).getValue().primitiveValue();
 		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));

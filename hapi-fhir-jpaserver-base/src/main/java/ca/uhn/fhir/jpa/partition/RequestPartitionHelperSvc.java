@@ -84,6 +84,8 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 		myNonPartitionableResourceNames.add("CompartmentDefinition");
 		myNonPartitionableResourceNames.add("OperationDefinition");
 
+		myNonPartitionableResourceNames.add("Library");
+
 		// Terminology
 		myNonPartitionableResourceNames.add("ConceptMap");
 		myNonPartitionableResourceNames.add("CodeSystem");

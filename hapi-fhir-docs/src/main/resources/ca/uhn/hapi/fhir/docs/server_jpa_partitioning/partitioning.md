@@ -95,6 +95,7 @@ The following resource types may not be placed in any partition except the defau
 * CodeSystem
 * CompartmentDefinition
 * ConceptMap
+* Library
 * NamingSystem
 * OperationDefinition
 * Questionnaire
@@ -149,13 +150,13 @@ None of the limitations listed here are considered permanent. Over time the HAPI
    * CodeSystem
    * CompartmentDefinition
    * ConceptMap
+   * Library
    * NamingSystem
    * OperationDefinition
    * Questionnaire
    * SearchParameter
    * StructureDefinition
    * StructureMap
-   * Subscription
    * ValueSet
 
 * **Server Capability Statement is not partition aware**: The server creates and exposes a single server capability statement, covering all partitions. This can be misleading when partitioning us used as a multitenancy strategy.
@@ -172,4 +173,4 @@ None of the limitations listed here are considered permanent. Over time the HAPI
 
 * **Advanced Elasticsearch indexing is not partition optimized**: The results are correctly partitioned, but the extended indexing is not optimized to account for partitions. 
 
-* **Subscriptions are partition aware**: Subscriptions can be placed on any partition and subscribers will receive deliveries for matching resources from the same partition.
+* **Subscriptions are partition aware**: Subscriptions can be placed on any partition and will deliver matching resources from the same partition.
