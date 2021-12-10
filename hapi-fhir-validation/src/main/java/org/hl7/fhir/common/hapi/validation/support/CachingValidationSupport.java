@@ -141,7 +141,7 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
 		String key = "isCodeSystemSupported " + theSystem;
-		Boolean retVal = loadFromCache(myCache, key, t -> super.isCodeSystemSupported(theValidationSupportContext, theSystem));
+		Boolean retVal = loadFromCacheReentrantSafe(myCache, key, t -> super.isCodeSystemSupported(theValidationSupportContext, theSystem));
 		assert retVal != null;
 		return retVal;
 	}
@@ -186,6 +186,27 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 		assert result != null;
 
 		return result.orElse(null);
+	}
+
+	/**
+	 * The Caffeine cache uses ConcurrentHashMap which is not reentrant, so if we get unlucky and the hashtable
+	 * needs to grow at the same time as we are in a reentrant cache lookup, the thread will deadlock.  Use this
+	 * method in place of loadFromCache in situations where a cache lookup calls another cache lookup within its lambda
+	 */
+	@Nullable
+	private <S, T> T loadFromCacheReentrantSafe(Cache<S, Object> theCache, S theKey, Function<S, T> theLoader) {
+		ourLog.trace("Reentrant fetch from cache: {}", theKey);
+
+		Optional<T> result = (Optional<T>) theCache.getIfPresent(theKey);
+		if (result != null && result.isPresent()) {
+			return result.get();
+		}
+		T value = theLoader.apply(theKey);
+		assert value != null;
+
+		theCache.put(theKey, Optional.of(value));
+
+		return value;
 	}
 
 	private <S, T> T loadFromCacheWithAsyncRefresh(Cache<S, Object> theCache, S theKey, Function<S, T> theLoader) {

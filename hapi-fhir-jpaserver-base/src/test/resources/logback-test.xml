@@ -35,6 +35,10 @@
 		<appender-ref ref="STDOUT" />
 	</logger>
 
+	<logger name="org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport" additivity="true" level="trace">
+		<appender-ref ref="STDOUT" />
+	</logger>
+
 	<logger name="org.eclipse" additivity="false" level="error">
 	</logger>
 
