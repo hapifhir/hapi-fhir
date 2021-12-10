@@ -3,6 +3,7 @@ package ca.uhn.fhir.util;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.junit.jupiter.api.Test;
 
@@ -18,7 +19,7 @@ public class ValidateUtilTest {
 			ValidateUtil.isTrueOrThrowInvalidRequest(false, "The message");
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("The message", e.getMessage());
+			assertEquals(Msg.code(1769) + "The message", e.getMessage());
 		}
 	}
 	
@@ -29,7 +30,7 @@ public class ValidateUtilTest {
 			ValidateUtil.isGreaterThan(1L, 1L, "The message");
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("The message", e.getMessage());
+			assertEquals(Msg.code(1762) + "The message", e.getMessage());
 		}
 	}
 
@@ -40,7 +41,7 @@ public class ValidateUtilTest {
 			ValidateUtil.isGreaterThanOrEqualTo(0L, 1L, "The message");
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("The message", e.getMessage());
+			assertEquals(Msg.code(1763) + "The message", e.getMessage());
 		}
 	}
 
@@ -52,21 +53,21 @@ public class ValidateUtilTest {
 			ValidateUtil.isNotBlankOrThrowInvalidRequest("", "The message");
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("The message", e.getMessage());
+			assertEquals(Msg.code(1765) + "The message", e.getMessage());
 		}
 
 		try {
 			ValidateUtil.isNotBlankOrThrowInvalidRequest(null, "The message");
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("The message", e.getMessage());
+			assertEquals(Msg.code(1765) + "The message", e.getMessage());
 		}
 
 		try {
 			ValidateUtil.isNotBlankOrThrowInvalidRequest(" ", "The message");
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("The message", e.getMessage());
+			assertEquals(Msg.code(1765) + "The message", e.getMessage());
 		}
 	}
 
@@ -77,9 +78,10 @@ public class ValidateUtilTest {
 
 		try {
 			ValidateUtil.isNotNullOrThrowUnprocessableEntity(null, "The message %s", "123");
+
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("The message 123", e.getMessage());
+			assertEquals(Msg.code(1767) + "The message 123", e.getMessage());
 		}
 
 	}

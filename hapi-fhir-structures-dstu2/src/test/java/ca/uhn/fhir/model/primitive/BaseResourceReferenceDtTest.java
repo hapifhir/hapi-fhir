@@ -1,6 +1,7 @@
 package ca.uhn.fhir.model.primitive;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -119,28 +120,28 @@ public class BaseResourceReferenceDtTest {
 			new ResourceReferenceDt().loadResource(client);
 			fail();
 		} catch (IllegalStateException e) {
-			assertEquals("Reference has no resource ID defined", e.getMessage());
+			assertEquals(Msg.code(1905) + "Reference has no resource ID defined", e.getMessage());
 		}
 
 		try {
 			new ResourceReferenceDt("123").loadResource(client);
 			fail();
 		} catch (IllegalStateException e) {
-			assertEquals("Reference is not complete (must be in the form [baseUrl]/[resource type]/[resource ID]) - Reference is: 123", e.getMessage());
+			assertEquals(Msg.code(1906) + "Reference is not complete (must be in the form [baseUrl]/[resource type]/[resource ID]) - Reference is: 123", e.getMessage());
 		}
 
 		try {
 			new ResourceReferenceDt("Patient/123").loadResource(client);
 			fail();
 		} catch (IllegalStateException e) {
-			assertEquals("Reference is not complete (must be in the form [baseUrl]/[resource type]/[resource ID]) - Reference is: Patient/123", e.getMessage());
+			assertEquals(Msg.code(1906) + "Reference is not complete (must be in the form [baseUrl]/[resource type]/[resource ID]) - Reference is: Patient/123", e.getMessage());
 		}
 
 		try {
 			new ResourceReferenceDt("http://foo/123123").loadResource(client);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Unknown resource name \"123123\" (this name is not known in FHIR version \"DSTU2\")", e.getMessage());
+			assertEquals(Msg.code(1684) + "Unknown resource name \"123123\" (this name is not known in FHIR version \"DSTU2\")", e.getMessage());
 		}
 
 		try {
@@ -148,7 +149,7 @@ public class BaseResourceReferenceDtTest {
 			fail();
 		} catch (DataFormatException e) {
 			e.printStackTrace();
-			assertEquals("Unknown resource name \"Sometype\" (this name is not known in FHIR version \"DSTU2\")", e.getMessage());
+			assertEquals(Msg.code(1684) + "Unknown resource name \"Sometype\" (this name is not known in FHIR version \"DSTU2\")", e.getMessage());
 		}
 	
 	}
