@@ -28,12 +28,12 @@ import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCache;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionActivatingSubscriber;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -56,8 +56,8 @@ import java.util.stream.Collectors;
 
 public class SubscriptionLoader implements IResourceChangeListener {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionLoader.class);
-	private static final int MAX_RETRIES = 60; // 60 * 5 seconds = 5 minutes
-	private static long REFRESH_INTERVAL = DateUtils.MILLIS_PER_MINUTE;
+	private static final int MAX_RETRIES = 1; // 60 * 5 seconds = 5 minutes
+	private static final long REFRESH_INTERVAL = DateUtils.MILLIS_PER_MINUTE;
 
 	private final Object mySyncSubscriptionsLock = new Object();
 	@Autowired
@@ -111,7 +111,8 @@ public class SubscriptionLoader implements IResourceChangeListener {
 		}
 		try {
 			doSyncSubscriptionsWithRetry();
-		} finally {
+		}
+		finally {
 			mySyncSubscriptionsSemaphore.release();
 		}
 	}
@@ -130,6 +131,8 @@ public class SubscriptionLoader implements IResourceChangeListener {
 	}
 
 	synchronized int doSyncSubscriptionsWithRetry() {
+		// retry runs MAX_RETRIES times
+		// and if errors result every time, it will fail
 		Retrier<Integer> syncSubscriptionRetrier = new Retrier<>(this::doSyncSubscriptions, MAX_RETRIES);
 		return syncSubscriptionRetrier.runWithRetry();
 	}
@@ -182,9 +185,17 @@ public class SubscriptionLoader implements IResourceChangeListener {
 			String nextId = resource.getIdElement().getIdPart();
 			allIds.add(nextId);
 
+			// internally, subscriptions that cannot activate
+			// will be set to error
 			boolean activated = mySubscriptionActivatingInterceptor.activateSubscriptionIfRequired(resource);
 			if (activated) {
 				activatedCount++;
+			}
+			else {
+				ourLog.error("Subscription "
+					+ resource.getIdElement().getIdPart()
+					+ " could not be activated."
+					+ " This will not prevent startup, but it could lead to undesirable outcomes!");
 			}
 
 			boolean registered = mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(resource);
