@@ -228,10 +228,10 @@ public class BaseSubscriptionDeliverySubscriberTest {
 
 		ResourceDeliveryJsonMessage jsonMessage = ResourceDeliveryJsonMessage.fromJson(legacyDeliveryMessageJson);
 
-		ourLog.info(jsonMessage.getPayload().getPartitionId().asJson());
+		ourLog.info(jsonMessage.getPayload().getRequestPartitionId().asJson());
 
-		assertNotNull(jsonMessage.getPayload().getPartitionId());
-		assertEquals(jsonMessage.getPayload().getPartitionId().toJson(), RequestPartitionId.defaultPartition().toJson());
+		assertNotNull(jsonMessage.getPayload().getRequestPartitionId());
+		assertEquals(jsonMessage.getPayload().getRequestPartitionId().toJson(), RequestPartitionId.defaultPartition().toJson());
 	}
 
 	@NotNull

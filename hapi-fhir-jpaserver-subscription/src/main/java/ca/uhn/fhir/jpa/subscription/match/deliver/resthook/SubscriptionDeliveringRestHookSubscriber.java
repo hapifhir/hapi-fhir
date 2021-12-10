@@ -180,7 +180,7 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 
 			try {
 				if (payloadId != null) {
-					payloadResource = getResource(payloadId.toVersionless(), theMsg.getPartitionId());
+					payloadResource = getResource(payloadId.toVersionless(), theMsg.getRequestPartitionId());
 				} else {
 					return null;
 				}

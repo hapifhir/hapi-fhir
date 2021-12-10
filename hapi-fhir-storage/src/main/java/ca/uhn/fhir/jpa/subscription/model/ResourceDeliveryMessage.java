@@ -114,7 +114,7 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 		}
 	}
 
-	public RequestPartitionId getPartitionId() {
+	public RequestPartitionId getRequestPartitionId() {
 		return myPartitionId;
 	}
 
