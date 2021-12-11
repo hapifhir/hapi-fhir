@@ -27,6 +27,7 @@ import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
@@ -37,7 +38,9 @@ import java.io.Serializable;
 @Embeddable
 @Entity
 @Table(name = "HFJ_HISTORY_TAG", uniqueConstraints = {
-	@UniqueConstraint(name = "IDX_RESHISTTAG_TAGID", columnNames = {"RES_VER_PID", "TAG_ID"})
+	@UniqueConstraint(name = "IDX_RESHISTTAG_TAGID", columnNames = {"RES_VER_PID", "TAG_ID"}),
+}, indexes =  {
+	//@Index(name = "IDX_RESHISTTAG_TYPERESID", columnList="RES_ID,RES_TYPE")
 })
 public class ResourceHistoryTag extends BaseTag implements Serializable {
 

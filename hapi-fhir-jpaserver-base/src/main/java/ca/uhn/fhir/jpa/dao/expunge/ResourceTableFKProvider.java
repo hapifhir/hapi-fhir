@@ -33,7 +33,6 @@ public class ResourceTableFKProvider {
 		List<ResourceForeignKey> retval = new ArrayList<>();
 		// Add some secondary related records that don't have foreign keys
 		retval.add(new ResourceForeignKey("HFJ_HISTORY_TAG", "RES_ID"));
-		retval.add(new ResourceForeignKey("TRM_CODESYSTEM_VER", "RES_ID"));
 		retval.add(new ResourceForeignKey("HFJ_RES_VER_PROV", "RES_PID"));
 
 		// To find all the FKs that need to be included here, run the following SQL in the INFORMATION_SCHEMA:
@@ -55,16 +54,22 @@ public class ResourceTableFKProvider {
 		retval.add(new ResourceForeignKey("HFJ_SPIDX_STRING", "RES_ID"));
 		retval.add(new ResourceForeignKey("HFJ_SPIDX_TOKEN", "RES_ID"));
 		retval.add(new ResourceForeignKey("HFJ_SPIDX_URI", "RES_ID"));
-		retval.add(new ResourceForeignKey("HFJ_SUBSCRIPTION_STATS", "RES_ID"));
 		retval.add(new ResourceForeignKey("MPI_LINK", "GOLDEN_RESOURCE_PID"));
 		retval.add(new ResourceForeignKey("MPI_LINK", "TARGET_PID"));
 		retval.add(new ResourceForeignKey("MPI_LINK", "PERSON_PID"));
-		retval.add(new ResourceForeignKey("NPM_PACKAGE_VER", "BINARY_RES_ID"));
-		retval.add(new ResourceForeignKey("NPM_PACKAGE_VER_RES", "BINARY_RES_ID"));
+
+		retval.add(new ResourceForeignKey("TRM_CODESYSTEM_VER", "RES_ID"));
+		retval.add(new ResourceForeignKey("TRM_VALUESET", "RES_ID"));
+		retval.add(new ResourceForeignKey("TRM_CONCEPT_MAP", "RES_ID"));
 		retval.add(new ResourceForeignKey("TRM_CODESYSTEM", "RES_ID"));
 		retval.add(new ResourceForeignKey("TRM_CODESYSTEM_VER", "RES_ID"));
-		retval.add(new ResourceForeignKey("TRM_CONCEPT_MAP", "RES_ID"));
-		retval.add(new ResourceForeignKey("TRM_VALUESET", "RES_ID"));
+		retval.add(new ResourceForeignKey("NPM_PACKAGE_VER", "BINARY_RES_ID"));
+		retval.add(new ResourceForeignKey("NPM_PACKAGE_VER_RES", "BINARY_RES_ID"));
+
+		retval.add(new ResourceForeignKey("HFJ_SUBSCRIPTION_STATS", "RES_ID"));
+
+		//Sort retval by table name
+
 
 		return retval;
 	}
