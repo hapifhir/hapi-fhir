@@ -40,7 +40,7 @@ import java.io.Serializable;
 @Table(name = "HFJ_HISTORY_TAG", uniqueConstraints = {
 	@UniqueConstraint(name = "IDX_RESHISTTAG_TAGID", columnNames = {"RES_VER_PID", "TAG_ID"}),
 }, indexes =  {
-	//@Index(name = "IDX_RESHISTTAG_TYPERESID", columnList="RES_ID,RES_TYPE")
+	@Index(name = "IDX_RESHISTTAG_RESID", columnList="RES_ID")
 })
 public class ResourceHistoryTag extends BaseTag implements Serializable {
 

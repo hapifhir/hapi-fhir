@@ -606,9 +606,8 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		myBatchJobHelper.awaitAllBulkJobCompletions(BatchConstants.DELETE_EXPUNGE_JOB_NAME);
 		int deleteCount = myCaptureQueriesListener.countDeleteQueries();
 		List<SqlQuery> deleteQueries = myCaptureQueriesListener.getDeleteQueries();
+		myCaptureQueriesListener.logDeleteQueries();
 		assertThat(deleteCount, is(greaterThan(1)));
-		Long jobId = BatchHelperR4.jobIdFromParameters(response);
-
 	}
 
 	private void validateNoErrors(List<BaseTask> tasks) {
