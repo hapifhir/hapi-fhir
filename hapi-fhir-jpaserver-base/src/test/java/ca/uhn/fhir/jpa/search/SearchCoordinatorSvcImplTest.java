@@ -593,21 +593,6 @@ public class SearchCoordinatorSvcImplTest {
 		assertEquals("109", resources.get(99).getIdElement().getValueAsString());
 	}
 
-	@Test
-	public void test() {
-		SearchParameterMap params = new SearchParameterMap();
-		params.add("_content", new StringParam("yui"));
-
-		IBundleProvider result = mySvc.registerSearch(myCallingDao,
-			params,
-			"Patient",
-			new CacheControlDirective(),
-			null,
-			RequestPartitionId.allPartitions());
-
-		System.out.println("hi");
-	}
-
 	/**
 	 * Simulate results being removed from the search result cache but not the search cache
 	 */

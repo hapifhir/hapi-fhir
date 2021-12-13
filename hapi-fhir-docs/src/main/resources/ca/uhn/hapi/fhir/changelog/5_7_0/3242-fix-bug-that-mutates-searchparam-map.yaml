@@ -1,0 +1,4 @@
+---
+issue: 3242
+type: fix
+title: "Fixed bug that mutated SearchParameterMap in FulltextSearchSvcImpl"

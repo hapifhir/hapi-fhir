@@ -100,8 +100,6 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		return requiresHibernateSearchAccess;
 	}
 
-
-
 	private List<ResourcePersistentId> doSearch(String theResourceType, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
 		// keep this in sync with supportsSomeOf();
 		SearchSession session = Search.session(myEntityManager);
