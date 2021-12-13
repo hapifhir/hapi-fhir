@@ -91,11 +91,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	 * This adds indexes to various tables to enhance delete-expunge performance, which does deletes by PID.
 	 */
 	private void addIndexesForDeleteExpunge(Builder theVersion) {
-		theVersion.onTable( "HFJ_FORCED_ID")
-			.addIndex("20211210.1", "IDX_FORCEDID_RESID" )
-			.unique(false)
-			.withColumns("RESOURCE_PID")
-			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
 
 		theVersion.onTable( "HFJ_HISTORY_TAG")
 			.addIndex("20211210.2", "IDX_RESHISTTAG_RESID" )
