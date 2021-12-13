@@ -1075,7 +1075,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				ISearchBuilder sb = newSearchBuilder();
 				Iterator<Long> countIterator = sb.createCountQuery(myParams, mySearch.getUuid(), myRequest, myRequestPartitionId);
 				Long count = countIterator.hasNext() ? countIterator.next() : 0L;
-				ourLog.trace("Got count {}", count);
+				ourLog.info("Got count {}", count);
 
 				TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
 				txTemplate.execute(new TransactionCallbackWithoutResult() {
@@ -1149,6 +1149,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			/*
 			 * Construct the SQL query we'll be sending to the database
 			 */
+			// TODO - this has the _content removed
 			try (IResultIterator resultIterator = sb.createQuery(myParams, mySearchRuntimeDetails, myRequest, myRequestPartitionId)) {
 				assert (resultIterator != null);
 

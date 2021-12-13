@@ -38,6 +38,11 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void test() {
+		System.out.println("here");
+	}
+
+	@Test
 	public void testContentSearch() {
 		Long id1;
 		{

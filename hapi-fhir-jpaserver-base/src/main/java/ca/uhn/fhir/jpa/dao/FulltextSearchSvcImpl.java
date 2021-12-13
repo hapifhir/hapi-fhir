@@ -102,7 +102,6 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 
 
-
 	private List<ResourcePersistentId> doSearch(String theResourceType, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
 		// keep this in sync with supportsSomeOf();
 		SearchSession session = Search.session(myEntityManager);
@@ -119,12 +118,13 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 					/*
 					 * Handle _content parameter (resource body content)
 					 */
-					List<List<IQueryParameterType>> contentAndTerms = theParams.remove(Constants.PARAM_CONTENT);
+					List<List<IQueryParameterType>> contentAndTerms = theParams.get(Constants.PARAM_CONTENT);
 					builder.addStringTextSearch(Constants.PARAM_CONTENT, contentAndTerms);
+
 					/*
 					 * Handle _text parameter (resource narrative content)
 					 */
-					List<List<IQueryParameterType>> textAndTerms = theParams.remove(Constants.PARAM_TEXT);
+					List<List<IQueryParameterType>> textAndTerms = theParams.get(Constants.PARAM_TEXT);
 					builder.addStringTextSearch(Constants.PARAM_TEXT, textAndTerms);
 
 					if (theReferencingPid != null) {
