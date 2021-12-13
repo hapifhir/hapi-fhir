@@ -125,7 +125,6 @@ import ca.uhn.fhir.jpa.search.cache.DatabaseSearchResultCacheSvcImpl;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.search.elastic.IndexNamePrefixLayoutStrategy;
-import ca.uhn.fhir.jpa.search.reindex.BlockPolicy;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexer;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
@@ -151,6 +150,7 @@ import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
 import ca.uhn.fhir.rest.server.provider.DeleteExpungeProvider;
 import ca.uhn.fhir.rest.server.provider.ReindexProvider;
+import ca.uhn.fhir.util.ThreadPoolUtil;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -181,7 +181,6 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
@@ -426,17 +425,8 @@ public abstract class BaseConfig {
 
 	@Bean(name= BatchConstants.JOB_LAUNCHING_TASK_EXECUTOR)
 	public TaskExecutor jobLaunchingTaskExecutor() {
-		ThreadPoolTaskExecutor asyncTaskExecutor = new ThreadPoolTaskExecutor();
-		asyncTaskExecutor.setCorePoolSize(0);
-		asyncTaskExecutor.setMaxPoolSize(10);
-		asyncTaskExecutor.setQueueCapacity(0);
-		asyncTaskExecutor.setAllowCoreThreadTimeOut(true);
-		asyncTaskExecutor.setThreadNamePrefix("JobLauncher-");
-		asyncTaskExecutor.setRejectedExecutionHandler(new BlockPolicy());
-		asyncTaskExecutor.initialize();
-		return asyncTaskExecutor;
+		return ThreadPoolUtil.newThreadPool(0, 10, "job-launcher-");
 	}
-
 
 	@Bean
 	public IResourceReindexingSvc resourceReindexingSvc() {

@@ -47,7 +47,10 @@ import org.apache.commons.lang3.Validate;
 import org.intellij.lang.annotations.Language;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -74,9 +77,19 @@ public class Builder {
 	}
 
 	public BuilderCompleteTask executeRawSql(String theVersion, @Language("SQL") String theSql) {
-		ExecuteRawSqlTask task = new ExecuteRawSqlTask(myRelease, theVersion).addSql(theSql);
-		mySink.addTask(task);
+		ExecuteRawSqlTask task = executeRawSqlOptional(false, theVersion, theSql);
 		return new BuilderCompleteTask(task);
+	}
+
+	public void executeRawSqlStub(String theVersion, @Language("SQL") String theSql) {
+		executeRawSqlOptional(true, theVersion, theSql);
+	}
+
+	private ExecuteRawSqlTask executeRawSqlOptional(boolean theDoNothing, String theVersion, @Language("SQL") String theSql) {
+		ExecuteRawSqlTask task = new ExecuteRawSqlTask(myRelease, theVersion).addSql(theSql);
+		task.setDoNothing(theDoNothing);
+		mySink.addTask(task);
+		return task;
 	}
 
 	public Builder initializeSchema(String theVersion, ISchemaInitializationProvider theSchemaInitializationProvider) {
@@ -97,6 +110,41 @@ public class Builder {
 		return this;
 	}
 
+	/**
+	 * Builder method to define a raw SQL execution migration that needs to take place against multiple database types,
+	 * and the SQL they need to use is not equal. Provide a map of driver types to SQL statements.
+	 *
+	 * @param theVersion The version of the migration.
+	 * @param theDriverToSql Map of driver types to SQL statements.
+	 * @return
+	 */
+	public Builder executeRawSql(String theVersion, Map<DriverTypeEnum, String> theDriverToSql) {
+		Map<DriverTypeEnum, List<String>> singleSqlStatementMap = new HashMap<>();
+		theDriverToSql.entrySet().stream()
+			.forEach(entry -> {
+					singleSqlStatementMap.put(entry.getKey(), Collections.singletonList(entry.getValue()));
+				});
+		return executeRawSqls(theVersion, singleSqlStatementMap);
+	}
+
+	/**
+	 * Builder method to define a raw SQL execution migration that needs to take place against multiple database types,
+	 * and the SQL they need to use is not equal, and there are multiple sql commands for a given database.
+	 * Provide a map of driver types to list of SQL statements.
+	 *
+	 * @param theVersion The version of the migration.
+	 * @param theDriverToSqls Map of driver types to list of SQL statements.
+	 * @return
+	 */
+	public Builder executeRawSqls(String theVersion, Map<DriverTypeEnum, List<String>> theDriverToSqls) {
+		ExecuteRawSqlTask executeRawSqlTask = new ExecuteRawSqlTask(myRelease, theVersion);
+		theDriverToSqls.entrySet().stream()
+			.forEach(entry -> {
+				entry.getValue().forEach(sql -> executeRawSqlTask.addSql(entry.getKey(), sql));
+			});
+		mySink.addTask(executeRawSqlTask);
+		return this;
+	}
 
 	// Flyway doesn't support these kinds of migrations
 	@Deprecated

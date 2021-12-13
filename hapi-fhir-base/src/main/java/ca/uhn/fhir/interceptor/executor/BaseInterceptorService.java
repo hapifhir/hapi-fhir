@@ -292,7 +292,8 @@ public abstract class BaseInterceptorService<POINTCUT extends IPointcut> impleme
 	}
 
 	private Object doCallHooks(POINTCUT thePointcut, HookParams theParams, Object theRetVal) {
-		List<BaseInvoker> invokers = getInvokersForPointcut(thePointcut);
+		// use new list for loop to avoid ConcurrentModificationException in case invoker gets added while looping
+		List<BaseInvoker> invokers = new ArrayList<>(getInvokersForPointcut(thePointcut));
 
 		/*
 		 * Call each hook in order

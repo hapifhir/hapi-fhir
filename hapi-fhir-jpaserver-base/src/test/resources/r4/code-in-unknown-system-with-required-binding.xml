@@ -22,7 +22,6 @@
 			<code value="encounter-diagnosis"/>
 			<display value="Encounter Diagnosis"/>
 		</coding>
-		<!--   and also a SNOMED CT coding   -->
 		<coding>
 			<system value="http://snomed.info/sct"/>
 			<code value="439401001"/>

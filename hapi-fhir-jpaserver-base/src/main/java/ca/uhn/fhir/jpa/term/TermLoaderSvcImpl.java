@@ -414,7 +414,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 	}
 
 	@VisibleForTesting
-	@NotNull
+	@Nonnull
 	Properties getProperties(LoadedFileDescriptors theDescriptors, String thePropertiesFile) {
 		Properties retVal = new Properties();
 

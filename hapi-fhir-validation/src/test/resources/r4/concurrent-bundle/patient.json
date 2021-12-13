@@ -1,0 +1,73 @@
+{
+	"resourceType": "Patient",
+	"meta": {
+		"profile": [
+			"https://example.com/StructureDefinition/Patient-v1"
+		],
+		"tag": [
+			{
+				"system": "https://example.org/region",
+				"code": "ax2",
+				"display": "REGION"
+			},
+			{
+				"system": "https://example.org/tenant",
+				"code": "a3",
+				"display": "TENANT"
+			},
+			{
+				"system": "https://example.org/deployment",
+				"code": "a2",
+				"display": "DEPLOYMENT"
+			},
+			{
+				"system": "https://example.org/provider",
+				"code": "aabc1234",
+				"display": "PROVIDER"
+			}
+		]
+	},
+	"identifier": [
+		{
+			"type": {
+				"text": "TESTPatientMRN"
+			},
+			"system": "https://id.example.com/sapmrn",
+			"value": "1234567"
+		},
+		{
+			"type": {
+				"text": "HIE Patient MRN"
+			},
+			"system": "http://mrn.example.com/hiePatientId",
+			"value": "abc123"
+		}
+	],
+	"active": true,
+	"name": [
+		{
+			"use": "official",
+			"family": "Jones",
+			"given": [
+				"David"
+			]
+		},
+		{
+			"use": "usual",
+			"family": "Jones",
+			"given": [
+				"David"
+			]
+		}
+	],
+	"gender": "male",
+	"birthDate": "1975-01-03",
+	"generalPractitioner": [
+		{
+			"reference": "Organization/abc"
+		}
+	],
+	"managingOrganization": {
+		"reference": "Organization/abc"
+	}
+}

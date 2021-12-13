@@ -24,7 +24,7 @@ public class ProducingChannelParameters extends BaseChannelParameters {
 
 	/**
 	 * Constructor
-	 *
+	 * <p>
 	 * Producing channels are sending channels. They send data to topics/queues.
 	 *
 	 * @param theChannelName

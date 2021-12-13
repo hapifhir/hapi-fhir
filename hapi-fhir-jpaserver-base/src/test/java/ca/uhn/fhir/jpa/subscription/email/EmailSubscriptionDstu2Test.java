@@ -11,7 +11,9 @@ import ca.uhn.fhir.model.dstu2.valueset.ObservationStatusEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SubscriptionChannelTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.server.mail.IMailSvc;
 import ca.uhn.fhir.rest.server.mail.MailConfig;
+import ca.uhn.fhir.rest.server.mail.MailSvc;
 import com.icegreen.greenmail.junit5.GreenMailExtension;
 import com.icegreen.greenmail.util.GreenMailUtil;
 import com.icegreen.greenmail.util.ServerSetupTest;
@@ -43,7 +45,7 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 	@RegisterExtension
 	static GreenMailExtension ourGreenMail = new GreenMailExtension(ServerSetupTest.SMTP.withPort(0));
 
-	private List<IIdType> mySubscriptionIds = new ArrayList<>();
+	private final List<IIdType> mySubscriptionIds = new ArrayList<>();
 
 	@Autowired
 	private SubscriptionTestUtil mySubscriptionTestUtil;
@@ -122,8 +124,8 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 
 		Subscription subscription1 = createSubscription(criteria1, payload, "to1@example.com,to2@example.com");
 		mySubscriptionTestUtil.waitForQueueToDrain();
-		await().until(()->mySubscriptionRegistry.get(subscription1.getIdElement().getIdPart()), Matchers.not(Matchers.nullValue()));
-		mySubscriptionTestUtil.setEmailSender(subscription1.getIdElement(), new EmailSenderImpl(withMailConfig()));
+		await().until(() -> mySubscriptionRegistry.get(subscription1.getIdElement().getIdPart()), Matchers.not(Matchers.nullValue()));
+		mySubscriptionTestUtil.setEmailSender(subscription1.getIdElement(), new EmailSenderImpl(withMailService()));
 		assertEquals(0, Arrays.asList(ourGreenMail.getReceivedMessages()).size());
 
 		Observation observation1 = sendObservation(code, "SNOMED-CT");
@@ -145,10 +147,11 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 		assertEquals("", foundBody);
 	}
 
-	private MailConfig withMailConfig() {
-		return new MailConfig()
+	private IMailSvc withMailService() {
+		final MailConfig mailConfig = new MailConfig()
 			.setSmtpHostname(ServerSetupTest.SMTP.getBindAddress())
 			.setSmtpPort(ourGreenMail.getSmtp().getPort());
+		return new MailSvc(mailConfig);
 	}
 
 }
