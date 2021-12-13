@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.subscription.match.deliver;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.subscription.match.deliver.resthook.SubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
@@ -13,19 +14,28 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.GenericMessage;
 
+import java.time.LocalDate;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.eq;
@@ -35,9 +45,10 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class BaseSubscriptionDeliverySubscriberTest {
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseSubscriptionDeliverySubscriberTest.class);
 
 	private SubscriptionDeliveringRestHookSubscriber mySubscriber;
-	private FhirContext myCtx = FhirContext.forR4();
+	private final FhirContext myCtx = FhirContext.forR4();
 
 	@Mock
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -79,13 +90,9 @@ public class BaseSubscriptionDeliverySubscriberTest {
 	public void testRestHookDeliverySuccessful() {
 		when(myInterceptorBroadcaster.callHooks(any(), any())).thenReturn(true);
 
-		Patient patient = new Patient();
-		patient.setActive(true);
+		Patient patient = generatePatient();
 
-		CanonicalSubscription subscription = new CanonicalSubscription();
-		subscription.setIdElement(new IdType("Subscription/123"));
-		subscription.setEndpointUrl("http://example.com/fhir");
-		subscription.setPayloadString("application/fhir+json");
+		CanonicalSubscription subscription = generateSubscription();
 
 		ResourceDeliveryMessage payload = new ResourceDeliveryMessage();
 		payload.setSubscription(subscription);
@@ -101,13 +108,9 @@ public class BaseSubscriptionDeliverySubscriberTest {
 	public void testRestHookDeliveryFails_ShouldRollBack() {
 		when(myInterceptorBroadcaster.callHooks(any(), any())).thenReturn(true);
 
-		Patient patient = new Patient();
-		patient.setActive(true);
+		Patient patient = generatePatient();
 
-		CanonicalSubscription subscription = new CanonicalSubscription();
-		subscription.setIdElement(new IdType("Subscription/123"));
-		subscription.setEndpointUrl("http://example.com/fhir");
-		subscription.setPayloadString("application/fhir+json");
+		CanonicalSubscription subscription = generateSubscription();
 
 		ResourceDeliveryMessage payload = new ResourceDeliveryMessage();
 		payload.setSubscription(subscription);
@@ -132,13 +135,9 @@ public class BaseSubscriptionDeliverySubscriberTest {
 		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY), any())).thenReturn(true);
 		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_AFTER_DELIVERY_FAILED), any())).thenReturn(false);
 
-		Patient patient = new Patient();
-		patient.setActive(true);
+		Patient patient = generatePatient();
 
-		CanonicalSubscription subscription = new CanonicalSubscription();
-		subscription.setIdElement(new IdType("Subscription/123"));
-		subscription.setEndpointUrl("http://example.com/fhir");
-		subscription.setPayloadString("application/fhir+json");
+		CanonicalSubscription subscription = generateSubscription();
 
 		ResourceDeliveryMessage payload = new ResourceDeliveryMessage();
 		payload.setSubscription(subscription);
@@ -158,13 +157,9 @@ public class BaseSubscriptionDeliverySubscriberTest {
 		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_BEFORE_DELIVERY), any())).thenReturn(true);
 		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY), any())).thenReturn(false);
 
-		Patient patient = new Patient();
-		patient.setActive(true);
+		Patient patient = generatePatient();
 
-		CanonicalSubscription subscription = new CanonicalSubscription();
-		subscription.setIdElement(new IdType("Subscription/123"));
-		subscription.setEndpointUrl("http://example.com/fhir");
-		subscription.setPayloadString("application/fhir+json");
+		CanonicalSubscription subscription = generateSubscription();
 
 		ResourceDeliveryMessage payload = new ResourceDeliveryMessage();
 		payload.setSubscription(subscription);
@@ -181,4 +176,77 @@ public class BaseSubscriptionDeliverySubscriberTest {
 
 	}
 
+	@Test
+	public void testSerializeDeliveryMessageWithRequestPartition() throws JsonProcessingException {
+		CanonicalSubscription subscription = generateSubscription();
+		Patient patient = generatePatient();
+
+		ResourceDeliveryMessage message = new ResourceDeliveryMessage();
+		message.setPartitionId(RequestPartitionId.fromPartitionId(123, LocalDate.of(2020, 1, 1)));
+		message.setSubscription(subscription);
+		message.setPayload(myCtx, patient, EncodingEnum.JSON);
+		message.setOperationType(ResourceModifiedMessage.OperationTypeEnum.CREATE);
+
+		ResourceDeliveryJsonMessage jsonMessage = new ResourceDeliveryJsonMessage(message);
+		String jsonString = jsonMessage.asJson();
+
+		ourLog.info(jsonString);
+
+
+
+		// Assert that the partitionID is being serialized in JSON
+		assertThat(jsonString, containsString("\"partitionDate\":[2020,1,1]"));
+		assertThat(jsonString, containsString("\"partitionIds\":[123]"));
+	}
+
+	@Test
+	public void testSerializeDeliveryMessageWithNoPartition() throws JsonProcessingException {
+		CanonicalSubscription subscription = generateSubscription();
+		Patient patient = generatePatient();
+
+		ResourceDeliveryMessage message = new ResourceDeliveryMessage();
+		message.setSubscription(subscription);
+		message.setPayload(myCtx, patient, EncodingEnum.JSON);
+		message.setOperationType(ResourceModifiedMessage.OperationTypeEnum.CREATE);
+
+		ResourceDeliveryJsonMessage jsonMessage = new ResourceDeliveryJsonMessage(message);
+		String jsonString = jsonMessage.asJson();
+
+		ourLog.info(jsonString);
+
+		assertThat(jsonString, containsString("\"operationType\":\"CREATE"));
+		assertThat(jsonString, containsString("\"canonicalSubscription\":"));
+
+		// Assert that the default partitionID is being generated and is being serialized in JSON
+		assertThat(jsonString, containsString("\"allPartitions\":false"));
+		assertThat(jsonString, containsString("\"partitionIds\":[null]"));
+	}
+
+	@Test
+	public void testSerializeLegacyDeliveryMessage() throws JsonProcessingException {
+		String legacyDeliveryMessageJson = "{\"headers\":{\"retryCount\":0,\"customHeaders\":{}},\"payload\":{\"operationType\":\"CREATE\",\"canonicalSubscription\":{\"id\":\"Subscription/123\",\"endpointUrl\":\"http://example.com/fhir\",\"payload\":\"application/fhir+json\"},\"payload\":\"{\\\"resourceType\\\":\\\"Patient\\\",\\\"active\\\":true}\"}}";
+
+		ResourceDeliveryJsonMessage jsonMessage = ResourceDeliveryJsonMessage.fromJson(legacyDeliveryMessageJson);
+
+		ourLog.info(jsonMessage.getPayload().getRequestPartitionId().asJson());
+
+		assertNotNull(jsonMessage.getPayload().getRequestPartitionId());
+		assertEquals(jsonMessage.getPayload().getRequestPartitionId().toJson(), RequestPartitionId.defaultPartition().toJson());
+	}
+
+	@NotNull
+	private Patient generatePatient() {
+		Patient patient = new Patient();
+		patient.setActive(true);
+		return patient;
+	}
+
+	@NotNull
+	private CanonicalSubscription generateSubscription() {
+		CanonicalSubscription subscription = new CanonicalSubscription();
+		subscription.setIdElement(new IdType("Subscription/123"));
+		subscription.setEndpointUrl("http://example.com/fhir");
+		subscription.setPayloadString("application/fhir+json");
+		return subscription;
+	}
 }

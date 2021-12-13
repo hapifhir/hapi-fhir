@@ -52,7 +52,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 
 public class SubscriptionMatchingSubscriber implements MessageHandler {
-	private Logger ourLog = LoggerFactory.getLogger(SubscriptionMatchingSubscriber.class);
+	private final Logger ourLog = LoggerFactory.getLogger(SubscriptionMatchingSubscriber.class);
 	public static final String SUBSCRIPTION_MATCHING_CHANNEL_NAME = "subscription-matching";
 
 	@Autowired
@@ -123,7 +123,12 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 		boolean resourceMatched = false;
 
 		for (ActiveSubscription nextActiveSubscription : subscriptions) {
-
+			// skip if the partitions don't match
+			CanonicalSubscription subscription = nextActiveSubscription.getSubscription();
+			if (subscription != null && subscription.getRequestPartitionId() != null && theMsg.getPartitionId() != null
+				&& !theMsg.getPartitionId().hasPartitionId(subscription.getRequestPartitionId())) {
+				continue;
+			}
 			String nextSubscriptionId = getId(nextActiveSubscription);
 
 			if (isNotBlank(theMsg.getSubscriptionId())) {
@@ -154,15 +159,15 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 			}
 
 			IBaseResource payload = theMsg.getNewPayload(myFhirContext);
-			CanonicalSubscription subscription = nextActiveSubscription.getSubscription();
 
 			EncodingEnum encoding = null;
-			if (subscription.getPayloadString() != null && !subscription.getPayloadString().isEmpty()) {
+			if (subscription != null && subscription.getPayloadString() != null && !subscription.getPayloadString().isEmpty()) {
 				encoding = EncodingEnum.forContentType(subscription.getPayloadString());
 			}
 			encoding = defaultIfNull(encoding, EncodingEnum.JSON);
 
 			ResourceDeliveryMessage deliveryMsg = new ResourceDeliveryMessage();
+			deliveryMsg.setPartitionId(theMsg.getPartitionId());
 
 			deliveryMsg.setPayload(myFhirContext, payload, encoding);
 			deliveryMsg.setSubscription(subscription);

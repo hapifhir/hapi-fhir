@@ -27,13 +27,14 @@ import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCache;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionActivatingSubscriber;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -75,6 +76,7 @@ public class SubscriptionLoader implements IResourceChangeListener {
 	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
 
 	private SearchParameterMap mySearchParameterMap;
+	private SystemRequestDetails mySystemRequestDetails;
 
 	/**
 	 * Constructor
@@ -86,6 +88,8 @@ public class SubscriptionLoader implements IResourceChangeListener {
 	@PostConstruct
 	public void registerListener() {
 		mySearchParameterMap = getSearchParameterMap();
+		mySystemRequestDetails = SystemRequestDetails.forAllPartition();
+
 		IResourceChangeListenerCache subscriptionCache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener("Subscription", mySearchParameterMap, this, REFRESH_INTERVAL);
 		subscriptionCache.forceRefresh();
 	}
@@ -142,7 +146,7 @@ public class SubscriptionLoader implements IResourceChangeListener {
 		synchronized (mySyncSubscriptionsLock) {
 			ourLog.debug("Starting sync subscriptions");
 
-			IBundleProvider subscriptionBundleList =  getSubscriptionDao().search(mySearchParameterMap);
+			IBundleProvider subscriptionBundleList =  getSubscriptionDao().search(mySearchParameterMap, mySystemRequestDetails);
 
 			Integer subscriptionCount = subscriptionBundleList.size();
 			assert subscriptionCount != null;

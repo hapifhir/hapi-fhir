@@ -142,20 +142,25 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 	}
 
 
-	protected Observation sendObservation(String code, String system) {
+	protected Observation sendObservation(String theCode, String theSystem) {
+		Observation observation = createBaseObservation(theCode, theSystem);
+
+		IIdType id = myObservationDao.create(observation).getId();
+		observation.setId(id);
+
+		return observation;
+	}
+
+	protected Observation createBaseObservation(String theCode, String theSystem) {
 		Observation observation = new Observation();
 		CodeableConcept codeableConcept = new CodeableConcept();
 		observation.setCode(codeableConcept);
 		observation.getIdentifierFirstRep().setSystem("foo").setValue("1");
 		Coding coding = codeableConcept.addCoding();
-		coding.setCode(code);
-		coding.setSystem(system);
+		coding.setCode(theCode);
+		coding.setSystem(theSystem);
 
 		observation.setStatus(Observation.ObservationStatus.FINAL);
-
-		IIdType id = myObservationDao.create(observation).getId();
-		observation.setId(id);
-
 		return observation;
 	}
 
