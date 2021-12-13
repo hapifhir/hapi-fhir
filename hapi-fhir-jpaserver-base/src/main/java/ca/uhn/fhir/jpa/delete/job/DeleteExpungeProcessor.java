@@ -66,7 +66,7 @@ public class DeleteExpungeProcessor implements ItemProcessor<List<Long>, List<St
 
 		List<String> retval = new ArrayList<>();
 
-		String pidListString = thePids.toString().replace("[", "(").replace("]", ")");
+		String pidListString = "(" + ",".join(thePids) +  ")";
 
 		//Given the first pid in the last, grab the resource type so we can filter out which FKs we care about.
 		//TODO GGG should we pass this down the pipe?
