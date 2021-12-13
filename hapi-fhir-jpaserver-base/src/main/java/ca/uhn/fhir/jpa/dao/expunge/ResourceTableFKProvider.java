@@ -83,34 +83,29 @@ public class ResourceTableFKProvider {
 	public List<ResourceForeignKey> getResourceForeignKeysByResourceType(String theResourceType) {
 		List<ResourceForeignKey> retval = new ArrayList<>();
 		//These have the possibility of touching all resource types.
-		retval.add(new ResourceForeignKey("HFJ_HISTORY_TAG", "RES_ID"));//NOT covered by index. *
-		retval.add(new ResourceForeignKey("HFJ_RES_VER_PROV", "RES_PID"));//NOT covered by index *
-		retval.add(new ResourceForeignKey("HFJ_FORCED_ID", "RESOURCE_PID"));//NOT covered by index *
-
-		retval.add(new ResourceForeignKey("HFJ_IDX_CMP_STRING_UNIQ", "RES_ID"));//Covered by index
-		retval.add(new ResourceForeignKey("HFJ_IDX_CMB_TOK_NU", "RES_ID"));//Covered by index
-		retval.add(new ResourceForeignKey("HFJ_RES_LINK", "SRC_RESOURCE_ID"));//Covered by index
-		retval.add(new ResourceForeignKey("HFJ_RES_LINK", "TARGET_RESOURCE_ID"));//Covered by index
-		retval.add(new ResourceForeignKey("HFJ_RES_PARAM_PRESENT", "RES_ID"));//Covered by index
-
-
-		retval.add(new ResourceForeignKey("HFJ_RES_TAG", "RES_ID"));//??? Res_ID + TAG_ID
-		retval.add(new ResourceForeignKey("HFJ_RES_VER", "RES_ID"));//??? RES_ID + updated
-
-
-		retval.add(new ResourceForeignKey("HFJ_SPIDX_COORDS", "RES_ID"));//Covered by index
-		retval.add(new ResourceForeignKey("HFJ_SPIDX_DATE", "RES_ID"));//Covered by index
-		retval.add(new ResourceForeignKey("HFJ_SPIDX_NUMBER", "RES_ID"));//Covered by index
-		retval.add(new ResourceForeignKey("HFJ_SPIDX_QUANTITY", "RES_ID"));//Covered by index
-		retval.add(new ResourceForeignKey("HFJ_SPIDX_QUANTITY_NRML", "RES_ID"));//Covered by index
-		retval.add(new ResourceForeignKey("HFJ_SPIDX_STRING", "RES_ID"));//Covered by index
-		retval.add(new ResourceForeignKey("HFJ_SPIDX_TOKEN", "RES_ID"));//Covered by index
-		retval.add(new ResourceForeignKey("HFJ_SPIDX_URI", "RES_ID"));//Covered by index
+		retval.add(new ResourceForeignKey("HFJ_HISTORY_TAG", "RES_ID"));
+		retval.add(new ResourceForeignKey("HFJ_RES_VER_PROV", "RES_PID"));
+		retval.add(new ResourceForeignKey("HFJ_FORCED_ID", "RESOURCE_PID"));
+		retval.add(new ResourceForeignKey("HFJ_IDX_CMP_STRING_UNIQ", "RES_ID"));
+		retval.add(new ResourceForeignKey("HFJ_IDX_CMB_TOK_NU", "RES_ID"));
+		retval.add(new ResourceForeignKey("HFJ_RES_LINK", "SRC_RESOURCE_ID"));
+		retval.add(new ResourceForeignKey("HFJ_RES_LINK", "TARGET_RESOURCE_ID"));
+		retval.add(new ResourceForeignKey("HFJ_RES_PARAM_PRESENT", "RES_ID"));
+		retval.add(new ResourceForeignKey("HFJ_RES_TAG", "RES_ID"));//TODO GGG: Res_ID + TAG_ID? is that enough?
+		retval.add(new ResourceForeignKey("HFJ_RES_VER", "RES_ID"));//TODO GGG: RES_ID + updated? is that enough?
+		retval.add(new ResourceForeignKey("HFJ_SPIDX_COORDS", "RES_ID"));
+		retval.add(new ResourceForeignKey("HFJ_SPIDX_DATE", "RES_ID"));
+		retval.add(new ResourceForeignKey("HFJ_SPIDX_NUMBER", "RES_ID"));
+		retval.add(new ResourceForeignKey("HFJ_SPIDX_QUANTITY", "RES_ID"));
+		retval.add(new ResourceForeignKey("HFJ_SPIDX_QUANTITY_NRML", "RES_ID"));
+		retval.add(new ResourceForeignKey("HFJ_SPIDX_STRING", "RES_ID"));
+		retval.add(new ResourceForeignKey("HFJ_SPIDX_TOKEN", "RES_ID"));
+		retval.add(new ResourceForeignKey("HFJ_SPIDX_URI", "RES_ID"));
 
 		if (myMdmSettings != null &&  myMdmSettings.isEnabled()) {
-			retval.add(new ResourceForeignKey("MPI_LINK", "GOLDEN_RESOURCE_PID"));//NOT covered
+			retval.add(new ResourceForeignKey("MPI_LINK", "GOLDEN_RESOURCE_PID"));//NOT covered by index.
 			retval.add(new ResourceForeignKey("MPI_LINK", "TARGET_PID"));//Possibly covered, partial index
-			retval.add(new ResourceForeignKey("MPI_LINK", "PERSON_PID"));//??? I don't even think we need this... this field is deprecated, and the deletion is covered by GOLDEN_RESOURCE_PID
+			retval.add(new ResourceForeignKey("MPI_LINK", "PERSON_PID"));//TODO GGG: I don't even think we need this... this field is deprecated, and the deletion is covered by GOLDEN_RESOURCE_PID
 		}
 
 		switch (theResourceType.toLowerCase()) {

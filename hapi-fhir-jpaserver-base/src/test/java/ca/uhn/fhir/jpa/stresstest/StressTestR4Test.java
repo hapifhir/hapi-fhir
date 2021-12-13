@@ -69,6 +69,7 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.greaterThan;
@@ -605,9 +606,9 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		myBatchJobHelper.awaitAllBulkJobCompletions(BatchConstants.DELETE_EXPUNGE_JOB_NAME);
 		int deleteCount = myCaptureQueriesListener.countDeleteQueries();
-		List<SqlQuery> deleteQueries = myCaptureQueriesListener.getDeleteQueries();
+
 		myCaptureQueriesListener.logDeleteQueries();
-		assertThat(deleteCount, is(greaterThan(1)));
+		assertThat(deleteCount, is(equalTo(19)));
 	}
 
 	private void validateNoErrors(List<BaseTask> tasks) {

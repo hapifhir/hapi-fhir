@@ -67,8 +67,11 @@ public class DeleteExpungeProcessor implements ItemProcessor<List<Long>, List<St
 		List<String> retval = new ArrayList<>();
 
 		String pidListString = thePids.toString().replace("[", "(").replace("]", ")");
-		//FIXME do not leave this in, pass the resource type as a parameter
+
+		//Given the first pid in the last, grab the resource type so we can filter out which FKs we care about.
+		//TODO GGG should we pass this down the pipe?
 		IIdType iIdType = myIdHelper.resourceIdFromPidOrThrowException(thePids.get(0));
+
 		List<ResourceForeignKey> resourceForeignKeys = myResourceTableFKProvider.getResourceForeignKeysByResourceType(iIdType.getResourceType());
 
 		for (ResourceForeignKey resourceForeignKey : resourceForeignKeys) {
