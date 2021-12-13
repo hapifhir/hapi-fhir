@@ -43,6 +43,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -67,7 +68,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@SuppressWarnings("WeakerAccess")
 	public static final int ENCODING_COL_LENGTH = 5;
 	public static final String HFJ_RES_VER = "HFJ_RES_VER";
-	public static final int RES_TEXT_VC_MAX_LENGTH = 5000;
+	public static final int RES_TEXT_VC_MAX_LENGTH = 4000;
 	private static final long serialVersionUID = 1L;
 	@Id
 	@SequenceGenerator(name = "SEQ_RESOURCE_HISTORY_ID", sequenceName = "SEQ_RESOURCE_HISTORY_ID")
@@ -95,9 +96,13 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@Lob()
 	@OptimisticLock(excluded = true)
 	private byte[] myResource;
-	@Column(name = "RES_TEXT_VC", length = RES_TEXT_VC_MAX_LENGTH, nullable = true)
-	@OptimisticLock(excluded = true)
+
+	// TODO: JA For future use or removal
+	//	@Column(name = "RES_TEXT_VC", length = RES_TEXT_VC_MAX_LENGTH, nullable = true)
+	//	@OptimisticLock(excluded = true)
+	@Transient
 	private String myResourceTextVc;
+
 	@Column(name = "RES_ENCODING", nullable = false, length = ENCODING_COL_LENGTH)
 	@Enumerated(EnumType.STRING)
 	@OptimisticLock(excluded = true)
