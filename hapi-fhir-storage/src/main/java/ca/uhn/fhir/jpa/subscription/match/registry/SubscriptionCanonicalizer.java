@@ -38,6 +38,7 @@ import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Extension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +51,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.util.HapiExtensions.EX_SEND_DELETE_MESSAGES;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
 
@@ -268,6 +270,10 @@ public class SubscriptionCanonicalizer {
 			}
 		}
 
+		Extension extension = subscription.getExtensionByUrl(EX_SEND_DELETE_MESSAGES);
+		if (extension != null && extension.hasValue() && extension.getValue() instanceof BooleanType) {
+			retVal.setMustSendDeleteMessages(((BooleanType) extension.getValue()).booleanValue());
+		}
 		return retVal;
 	}
 

@@ -28,6 +28,7 @@ import org.springframework.messaging.MessagingException;
 import javax.annotation.Nonnull;
 import java.util.Collection;
 
+import static ca.uhn.fhir.rest.server.messaging.BaseResourceMessage.OperationTypeEnum.DELETE;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -91,8 +92,8 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 			case CREATE:
 			case UPDATE:
 			case MANUALLY_TRIGGERED:
-				break;
 			case DELETE:
+				break;
 			default:
 				ourLog.trace("Not processing modified message for {}", theMsg.getOperationType());
 				// ignore anything else
@@ -143,6 +144,13 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 				continue;
 			}
 
+			if (theMsg.getOperationType().equals(DELETE)) {
+				if (! nextActiveSubscription.getSubscription().getMustSendDeleteMessages()) {
+					ourLog.trace("Not processing modified message for {}", theMsg.getOperationType());
+					return;
+				}
+			}
+
 			InMemoryMatchResult matchResult;
 			if (nextActiveSubscription.getCriteria().getType() == SubscriptionCriteriaParser.TypeEnum.SEARCH_EXPRESSION) {
 				matchResult = mySubscriptionMatcher.match(nextActiveSubscription.getSubscription(), theMsg);
@@ -169,7 +177,11 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 			ResourceDeliveryMessage deliveryMsg = new ResourceDeliveryMessage();
 			deliveryMsg.setPartitionId(theMsg.getPartitionId());
 
-			deliveryMsg.setPayload(myFhirContext, payload, encoding);
+			if (payload != null) {
+				deliveryMsg.setPayload(myFhirContext, payload, encoding);
+			} else {
+				deliveryMsg.setPayloadId(theMsg.getPayloadId(myFhirContext));
+			}
 			deliveryMsg.setSubscription(subscription);
 			deliveryMsg.setOperationType(theMsg.getOperationType());
 			deliveryMsg.setTransactionId(theMsg.getTransactionId());
