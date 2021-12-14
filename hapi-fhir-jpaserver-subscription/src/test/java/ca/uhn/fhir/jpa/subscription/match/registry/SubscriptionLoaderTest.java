@@ -1,13 +1,15 @@
 package ca.uhn.fhir.jpa.subscription.match.registry;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCache;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionActivatingSubscriber;
-import ca.uhn.fhir.model.dstu2.resource.Subscription;
+
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -16,6 +18,7 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Subscription;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,6 +28,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +39,9 @@ import java.util.List;
 public class SubscriptionLoaderTest {
 
 	private Logger ourLogger;
+
+	@Spy
+	private FhirContext myFhirContext = FhirContext.forR4Cached();
 
 	@Mock
 	private Appender<ILoggingEvent> myAppender;
@@ -101,6 +108,7 @@ public class SubscriptionLoaderTest {
 		// setup
 		Subscription subscription = new Subscription();
 		subscription.setId("Subscription/123");
+		subscription.setError("THIS IS AN ERROR");
 		IFhirResourceDao<Subscription> subscriptionDao = Mockito.mock(IFhirResourceDao.class);
 
 		ourLogger.setLevel(Level.ERROR);
@@ -110,7 +118,7 @@ public class SubscriptionLoaderTest {
 				.thenReturn(subscriptionDao);
 		Mockito.when(myDaoRegistery.isResourceTypeSupported(Mockito.anyString()))
 				.thenReturn(true);
-		Mockito.when(subscriptionDao.search(Mockito.any(SearchParameterMap.class)))
+		Mockito.when(subscriptionDao.search(Mockito.any(SearchParameterMap.class), Mockito.any(SystemRequestDetails.class)))
 			.thenReturn(getSubscriptionList(
 				Collections.singletonList(subscription)
 			));
@@ -125,13 +133,17 @@ public class SubscriptionLoaderTest {
 
 		// verify
 		Mockito.verify(subscriptionDao)
-			.search(Mockito.any(SearchParameterMap.class));
+			.search(Mockito.any(SearchParameterMap.class), Mockito.any(SystemRequestDetails.class));
 
 		ArgumentCaptor<ILoggingEvent> eventCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
 		Mockito.verify(myAppender).doAppend(eventCaptor.capture());
-		Assertions.assertTrue(eventCaptor.getValue().getMessage()
-			.contains("Subscription "
-				+ subscription.getIdElement().getIdPart()
-				+ " could not be activated."));
+		String actual = "Subscription "
+			+ subscription.getIdElement().getIdPart()
+			+ " could not be activated.";
+		String msg = eventCaptor.getValue().getMessage();
+		Assertions.assertTrue(msg
+			.contains(actual),
+			String.format("Expected %s, actual %s", msg, actual));
+		Assertions.assertTrue(msg.contains(subscription.getError()));
 	}
 }

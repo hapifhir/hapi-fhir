@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.subscription.match.registry;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.cache.IResourceChangeEvent;
@@ -35,6 +36,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.util.SubscriptionUtil;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -57,7 +59,7 @@ import java.util.stream.Collectors;
 
 public class SubscriptionLoader implements IResourceChangeListener {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionLoader.class);
-	private static final int MAX_RETRIES = 1; // 60 * 5 seconds = 5 minutes
+	private static final int MAX_RETRIES = 60; // 60 * 5 seconds = 5 minutes
 	private static final long REFRESH_INTERVAL = DateUtils.MILLIS_PER_MINUTE;
 
 	private final Object mySyncSubscriptionsLock = new Object();
@@ -74,6 +76,8 @@ public class SubscriptionLoader implements IResourceChangeListener {
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
+	@Autowired
+	private FhirContext myFhirContext;
 
 	private SearchParameterMap mySearchParameterMap;
 	private SystemRequestDetails mySystemRequestDetails;
@@ -195,10 +199,7 @@ public class SubscriptionLoader implements IResourceChangeListener {
 				activatedCount++;
 			}
 			else {
-				ourLog.error("Subscription "
-					+ resource.getIdElement().getIdPart()
-					+ " could not be activated."
-					+ " This will not prevent startup, but it could lead to undesirable outcomes!");
+				logSubscriptionNotActivatedPlusErrorIfPossible(resource);
 			}
 
 			boolean registered = mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(resource);
@@ -210,6 +211,32 @@ public class SubscriptionLoader implements IResourceChangeListener {
 		mySubscriptionRegistry.unregisterAllSubscriptionsNotInCollection(allIds);
 		ourLog.debug("Finished sync subscriptions - activated {} and registered {}", theResourceList.size(), registeredCount);
 		return activatedCount;
+	}
+
+	/**
+	 * Logs
+	 * @param theSubscription
+	 */
+	private void logSubscriptionNotActivatedPlusErrorIfPossible(IBaseResource theSubscription) {
+		String error;
+		if (theSubscription instanceof Subscription) {
+			error = ((Subscription) theSubscription).getError();
+		}
+		else if (theSubscription instanceof org.hl7.fhir.dstu3.model.Subscription) {
+			error = ((org.hl7.fhir.dstu3.model.Subscription) theSubscription).getError();
+		}
+		else if (theSubscription instanceof org.hl7.fhir.dstu2.model.Subscription) {
+			error = ((org.hl7.fhir.dstu2.model.Subscription) theSubscription).getError();
+		}
+		else {
+			error = "";
+		}
+		ourLog.error("Subscription "
+			+ theSubscription.getIdElement().getIdPart()
+			+ " could not be activated."
+			+ " This will not prevent startup, but it could lead to undesirable outcomes! "
+			+ error
+		);
 	}
 
 	@Override
