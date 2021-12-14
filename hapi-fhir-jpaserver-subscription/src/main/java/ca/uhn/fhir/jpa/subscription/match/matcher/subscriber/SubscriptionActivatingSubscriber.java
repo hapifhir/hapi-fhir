@@ -124,8 +124,7 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscript
 		try {
 			// read can throw ResourceGoneException
 			// if this happens, we will treat this as a failure to activate
-			subscription =  subscriptionDao.read(theSubscription.getIdElement());
-
+			subscription =  subscriptionDao.read(theSubscription.getIdElement(), SystemRequestDetails.forAllPartition());
 			subscription.setId(subscription.getIdElement().toVersionless());
 
 			ourLog.info("Activating subscription {} from status {} to {}", subscription.getIdElement().toUnqualified().getValue(), SubscriptionConstants.REQUESTED_STATUS, SubscriptionConstants.ACTIVE_STATUS);
