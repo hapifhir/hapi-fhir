@@ -126,6 +126,7 @@ public class SubscriptionCanonicalizer {
 			if (status != null) {
 				retVal.setStatus(org.hl7.fhir.r4.model.Subscription.SubscriptionStatus.fromCode(status.toCode()));
 			}
+			setPartitionIdOnReturnValue(theSubscription, retVal);
 			retVal.setChannelType(getChannelType(theSubscription));
 			retVal.setCriteriaString(subscription.getCriteria());
 			retVal.setEndpointUrl(subscription.getChannel().getEndpoint());
@@ -135,6 +136,7 @@ public class SubscriptionCanonicalizer {
 			retVal.setPayloadString(subscription.getChannel().getPayload());
 			retVal.setPayloadSearchCriteria(getExtensionString(subscription, HapiExtensions.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA));
 			retVal.setTags(extractTags(subscription));
+			setPartitionIdOnReturnValue(theSubscription, retVal);
 
 			if (retVal.getChannelType() == CanonicalSubscriptionChannelType.EMAIL) {
 				String from;
@@ -280,6 +282,7 @@ public class SubscriptionCanonicalizer {
 		if (status != null) {
 			retVal.setStatus(org.hl7.fhir.r4.model.Subscription.SubscriptionStatus.fromCode(status.toCode()));
 		}
+		setPartitionIdOnReturnValue(theSubscription, retVal);
 		retVal.setChannelType(getChannelType(subscription));
 		retVal.setCriteriaString(getCriteria(theSubscription));
 		retVal.setEndpointUrl(subscription.getEndpoint());
@@ -325,6 +328,13 @@ public class SubscriptionCanonicalizer {
 		}
 
 		return retVal;
+	}
+
+	private void setPartitionIdOnReturnValue(IBaseResource theSubscription, CanonicalSubscription retVal) {
+		RequestPartitionId requestPartitionId = (RequestPartitionId) theSubscription.getUserData(Constants.RESOURCE_PARTITION_ID);
+		if (requestPartitionId != null) {
+			retVal.setPartitionId(requestPartitionId.getFirstPartitionIdOrNull());
+		}
 	}
 
 	private String getExtensionString(IBaseHasExtensions theBase, String theUrl) {

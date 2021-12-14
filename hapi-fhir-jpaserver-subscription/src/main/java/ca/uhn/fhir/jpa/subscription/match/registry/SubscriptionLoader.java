@@ -115,8 +115,7 @@ public class SubscriptionLoader implements IResourceChangeListener {
 		}
 		try {
 			doSyncSubscriptionsWithRetry();
-		}
-		finally {
+		} finally {
 			mySyncSubscriptionsSemaphore.release();
 		}
 	}
