@@ -2643,7 +2643,7 @@ public class AuthorizationInterceptorR4Test {
 					.allow("Rule 2").read().resourcesOfType(Observation.class).inCompartment("Patient", new IdType("Patient/1"))
 					.build();
 			}
-		}.setFlags(AuthorizationFlagsEnum.NO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS));
+		}.setFlags(AuthorizationFlagsEnum.DO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS));
 
 		HttpGet httpGet;
 		HttpResponse status;
@@ -2711,7 +2711,7 @@ public class AuthorizationInterceptorR4Test {
 					.allow("Rule 2").read().resourcesOfType(Observation.class).inCompartment("Patient", new IdType("Patient/1"))
 					.build();
 			}
-		}.setFlags(AuthorizationFlagsEnum.NO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS));
+		}.setFlags(AuthorizationFlagsEnum.DO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS));
 
 		HttpGet httpGet;
 		HttpResponse status;
