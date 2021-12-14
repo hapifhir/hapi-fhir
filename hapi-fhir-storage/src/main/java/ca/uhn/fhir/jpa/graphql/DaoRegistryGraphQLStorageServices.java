@@ -20,10 +20,10 @@ package ca.uhn.fhir.jpa.graphql;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -120,7 +120,7 @@ public class DaoRegistryGraphQLStorageServices implements IGraphQLStorageService
 				Set<String> graphqlArguments = searchParams.keySet().stream()
 					.map(this::searchParamToGraphqlArgument)
 					.collect(Collectors.toSet());
-				String msg = myContext.getLocalizer().getMessageSanitized(JpaStorageServices.class, "invalidGraphqlArgument", nextArgument.getName(), new TreeSet<>(graphqlArguments));
+				String msg = myContext.getLocalizer().getMessageSanitized(DaoRegistryGraphQLStorageServices.class, "invalidGraphqlArgument", nextArgument.getName(), new TreeSet<>(graphqlArguments));
 				throw new InvalidRequestException(Msg.code(1275) + msg);
 			}
 
