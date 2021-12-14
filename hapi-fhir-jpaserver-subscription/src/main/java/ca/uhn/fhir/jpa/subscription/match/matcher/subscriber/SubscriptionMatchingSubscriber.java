@@ -145,7 +145,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 			}
 
 			if (theMsg.getOperationType().equals(DELETE)) {
-				if (! nextActiveSubscription.getSubscription().getMustSendDeleteMessages()) {
+				if (! nextActiveSubscription.getSubscription().getSendDeleteMessages()) {
 					ourLog.trace("Not processing modified message for {}", theMsg.getOperationType());
 					return;
 				}

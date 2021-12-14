@@ -74,8 +74,8 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 	private String myPayloadSearchCriteria;
 	@JsonProperty("partitionId")
 	private Integer myPartitionId;
-	@JsonProperty("mustSendDeleteMessages")
-	private boolean myMustSendDeleteMessages;
+	@JsonProperty("sendDeleteMessages")
+	private boolean mySendDeleteMessages;
 
 	/**
 	 * Constructor
@@ -163,9 +163,9 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 
 	public String getChannelExtension(String theUrl) {
 		String retVal = null;
-		List<String> strings = myChannelExtensions.get(theUrl);
-		if (strings != null && strings.isEmpty() == false) {
-			retVal = strings.get(0);
+		List<String> channelExtensions = myChannelExtensions.get(theUrl);
+		if (channelExtensions != null && !channelExtensions.isEmpty()) {
+			retVal = channelExtensions.get(0);
 		}
 		return retVal;
 	}
@@ -247,10 +247,10 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 		return myTrigger;
 	}
 
-	public boolean getMustSendDeleteMessages() { return myMustSendDeleteMessages; }
+	public boolean getSendDeleteMessages() { return mySendDeleteMessages; }
 
-	public void setMustSendDeleteMessages(boolean theMustSendDeleteMessages) {
-		myMustSendDeleteMessages = theMustSendDeleteMessages;
+	public void setSendDeleteMessages(boolean theSendDeleteMessages) {
+		mySendDeleteMessages = theSendDeleteMessages;
 	}
 
 	@Override
