@@ -105,7 +105,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		SearchSession session = Search.session(myEntityManager);
 
 		List<Long> longPids = session.search(ResourceTable.class)
-			//Selects are replacements for projection and convert more cleanly than the old implementation.
+			// Selects are replacements for projection and convert more cleanly than the old implementation.
 			.select(
 				f -> f.field("myId", Long.class)
 			)
@@ -115,14 +115,22 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 					/*
 					 * Handle _content parameter (resource body content)
+					 *
+					 * Posterity:
+					 * We do not want the HAPI-FHIR dao's to process the
+					 * _content parameter, so we remove it from the map here
 					 */
-					List<List<IQueryParameterType>> contentAndTerms = theParams.get(Constants.PARAM_CONTENT);
+					List<List<IQueryParameterType>> contentAndTerms = theParams.remove(Constants.PARAM_CONTENT);
 					builder.addStringTextSearch(Constants.PARAM_CONTENT, contentAndTerms);
 
 					/*
 					 * Handle _text parameter (resource narrative content)
+					 *
+					 * Positerity:
+					 * We do not want the HAPI-FHIR dao's to process the
+					 * _text parameter, so we remove it from the map here
 					 */
-					List<List<IQueryParameterType>> textAndTerms = theParams.get(Constants.PARAM_TEXT);
+					List<List<IQueryParameterType>> textAndTerms = theParams.remove(Constants.PARAM_TEXT);
 					builder.addStringTextSearch(Constants.PARAM_TEXT, textAndTerms);
 
 					if (theReferencingPid != null) {

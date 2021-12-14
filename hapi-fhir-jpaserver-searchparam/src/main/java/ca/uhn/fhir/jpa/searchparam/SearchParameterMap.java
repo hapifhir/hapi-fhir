@@ -18,6 +18,7 @@ import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.util.ObjectUtil;
 import ca.uhn.fhir.util.UrlUtil;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -87,6 +88,42 @@ public class SearchParameterMap implements Serializable {
 	 */
 	public SearchParameterMap() {
 		super();
+	}
+
+	/**
+	 * Creates and returns a copy of this map
+	 * @return
+	 */
+	@JsonIgnore
+	public SearchParameterMap cpy() {
+		SearchParameterMap map = new SearchParameterMap();
+		map.setSummaryMode(getSummaryMode());
+		map.setSort(getSort());
+		map.setSearchTotalMode(getSearchTotalMode());
+		map.setRevIncludes(getRevIncludes());
+		map.setIncludes(getIncludes());
+		map.setEverythingMode(getEverythingMode());
+		map.setCount(getCount());
+		map.setDeleteExpunge(isDeleteExpunge());
+		map.setLastN(isLastN());
+		map.setLastNMax(getLastNMax());
+		map.setLastUpdated(getLastUpdated());
+		map.setLoadSynchronous(isLoadSynchronous());
+		map.setNearDistanceParam(getNearDistanceParam());
+		map.setLoadSynchronousUpTo(getLoadSynchronousUpTo());
+		map.setOffset(getOffset());
+		map.setSearchContainedMode(getSearchContainedMode());
+
+		for (Map.Entry<String, List<List<IQueryParameterType>>> entry : mySearchParameterMap.entrySet()) {
+			List<List<IQueryParameterType>> params = entry.getValue();
+			for (List<IQueryParameterType> p : params) {
+				for (IQueryParameterType t : p) {
+					map.add(entry.getKey(), t);
+				}
+			}
+		}
+
+		return map;
 	}
 
 	/**

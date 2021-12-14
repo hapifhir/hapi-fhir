@@ -3,6 +3,8 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
@@ -10,6 +12,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -38,6 +41,7 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 		assert !TransactionSynchronizationManager.isActualTransactionActive();
 	}
 
+	//TODO - remove
 	@Test
 	public void testSearchReturnsExpectedPatientsWhenContentTypeUsed() {
 		// setup
@@ -66,11 +70,32 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 		// verify results
 		Assertions.assertEquals(1, ids.size());
 		Assertions.assertEquals(id1, ids.get(0).getIdAsLong());
+	}
 
-		// verify the passed in parameter is not mutated
-		Assertions.assertEquals(1, params.size());
-		String value = params.get("_content").get(0).get(0).getValueAsQueryToken(myFhirCtx);
-		Assertions.assertEquals(content, value);
+	@Test
+	public void testSearchesWithAccurateCountReturnOnlyExpectedResults() {
+		// create 2 patients
+		Patient patient = new Patient();
+		patient.addName().setFamily("hirasawa");
+		myPatientDao.create(patient);
+
+		Patient patient2 = new Patient();
+		patient2.addName().setFamily("akiyama");
+		myPatientDao.create(patient2);
+
+		// construct searchmap with Accurate search mode
+		SearchParameterMap map = new SearchParameterMap();
+		map.add(Constants.PARAM_CONTENT, new StringParam("hirasawa"));
+		map.setSearchTotalMode(SearchTotalModeEnum.ACCURATE);
+
+		// test
+		IBundleProvider ret = myPatientDao.search(map);
+
+		// only one should be returned
+		Assertions.assertEquals(1, ret.size());
+		Patient retPatient = (Patient) ret.getAllResources().get(0);
+		Assertions.assertEquals(patient.getName().get(0).getFamily(),
+			retPatient.getName().get(0).getFamily());
 	}
 
 	@Test

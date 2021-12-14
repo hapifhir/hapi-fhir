@@ -1,4 +1,5 @@
 ---
 issue: 3242
 type: fix
-title: "Fixed bug that mutated SearchParameterMap in FulltextSearchSvcImpl"
+title: "Fixed bug that caused accurate elastisearch searches to return all values when using
+      _content or _text parameters"
