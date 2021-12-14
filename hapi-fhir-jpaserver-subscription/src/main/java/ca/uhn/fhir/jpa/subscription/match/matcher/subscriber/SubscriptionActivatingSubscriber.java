@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.SubscriptionUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -131,7 +132,7 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscript
 			SubscriptionUtil.setStatus(myFhirContext, subscription, SubscriptionConstants.ACTIVE_STATUS);
 			subscriptionDao.update(subscription, srd);
 			return true;
-		} catch (final Exception e) {
+		} catch (final UnprocessableEntityException | ResourceGoneException e) {
 			subscription = subscription != null ? subscription : theSubscription;
 			ourLog.info("Failed to activate subscription "
 				+ subscription.getIdElement()

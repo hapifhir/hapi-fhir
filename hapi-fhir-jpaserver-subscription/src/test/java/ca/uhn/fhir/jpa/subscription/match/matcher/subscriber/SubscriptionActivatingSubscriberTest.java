@@ -99,7 +99,7 @@ public class SubscriptionActivatingSubscriberTest {
 			.thenReturn(SubscriptionConstants.REQUESTED_STATUS);
 		Mockito.when(myDaoRegistry.getSubscriptionDao())
 			.thenReturn(dao);
-		Mockito.when(dao.read(Mockito.any(IIdType.class)))
+		Mockito.when(dao.read(Mockito.any(IIdType.class), Mockito.any(SystemRequestDetails.class)))
 			.thenThrow(new ResourceGoneException(exceptionMsg));
 
 		// test
