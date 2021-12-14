@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +67,7 @@ public class DeleteExpungeProcessor implements ItemProcessor<List<Long>, List<St
 
 		List<String> retval = new ArrayList<>();
 
-		String pidListString = "(" + ",".join(thePids) +  ")";
+		String pidListString = "(" + StringUtils.join(",", thePids) +  ")";
 
 		//Given the first pid in the last, grab the resource type so we can filter out which FKs we care about.
 		//TODO GGG should we pass this down the pipe?
