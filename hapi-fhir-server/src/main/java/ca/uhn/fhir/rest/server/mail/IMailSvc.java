@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.subscription.channel.models;
+package ca.uhn.fhir.rest.server.mail;
 
 /*-
  * #%L
- * HAPI FHIR Subscription Server
+ * HAPI FHIR - Server Framework
  * %%
  * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
@@ -20,16 +20,19 @@ package ca.uhn.fhir.jpa.subscription.channel.models;
  * #L%
  */
 
-public class ReceivingChannelParameters extends BaseChannelParameters {
+import org.simplejavamail.api.email.Email;
+import org.simplejavamail.api.mailer.AsyncResponse;
 
-	/**
-	 * Constructor
-	 * <p>
-	 * Receiving channels are channels that receive data from topics/queues
-	 *
-	 * @param theChannelName
-	 */
-	public ReceivingChannelParameters(String theChannelName) {
-		super(theChannelName);
-	}
+import javax.annotation.Nonnull;
+import java.util.List;
+
+public interface IMailSvc {
+	void sendMail(@Nonnull List<Email> theEmails);
+
+	void sendMail(@Nonnull Email theEmail);
+
+	void sendMail(@Nonnull Email theEmail,
+					  @Nonnull Runnable theOnSuccess,
+					  @Nonnull AsyncResponse.ExceptionConsumer theErrorHandler);
+
 }

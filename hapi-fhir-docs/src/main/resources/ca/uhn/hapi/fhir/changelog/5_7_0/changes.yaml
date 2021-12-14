@@ -6,6 +6,7 @@
 <ul>
 <li>Spring (JPA): 5.3.7 -> 5.3.13</li>
 <li>Thymeleaf (Testpage Overlay): 3.0.12.RELEASE -> 3.0.13.RELEASE (Addresses CVE-2021-43466)</li>
+<li>log4j-api (JPA): 2.11.1 -> 2.15.0 (Addresses CVE-2021-44228 - HAPI FHIR was not vulnerable to this issue but this upgrade avoids unnecessary OWASP scan notices)</li>
 </ul>
 "
 

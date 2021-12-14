@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionConstants;
@@ -107,7 +108,7 @@ public class SubscriptionActivatingSubscriberTest {
 		// verify
 		Assertions.assertFalse(isActivated);
 		ArgumentCaptor<IBaseResource> captor = ArgumentCaptor.forClass(IBaseResource.class);
-		Mockito.verify(dao).update(captor.capture());
+		Mockito.verify(dao).update(captor.capture(), Mockito.any(SystemRequestDetails.class));
 		IBaseResource savedResource = captor.getValue();
 		Assertions.assertTrue(savedResource instanceof Subscription);
 		Assertions.assertEquals(Subscription.SubscriptionStatus.ERROR, ((Subscription)savedResource).getStatus());

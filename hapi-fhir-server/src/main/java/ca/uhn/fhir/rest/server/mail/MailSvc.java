@@ -36,41 +36,44 @@ import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class MailSvc {
+public class MailSvc implements IMailSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(MailSvc.class);
 
-	public void sendMail(@Nonnull MailConfig theMailConfig, @Nonnull List<Email> theEmails) {
+	private final MailConfig myMailConfig;
+	private final Mailer myMailer;
+
+	public MailSvc(@Nonnull MailConfig theMailConfig) {
 		Validate.notNull(theMailConfig);
+		myMailConfig = theMailConfig;
+		myMailer = makeMailer(myMailConfig);
+	}
+
+	@Override
+	public void sendMail(@Nonnull List<Email> theEmails) {
 		Validate.notNull(theEmails);
-		final Mailer mailer = makeMailer(theMailConfig);
-		theEmails.forEach(theEmail -> sendMail(mailer, theEmail, new OnSuccess(theEmail), new ErrorHandler(theEmail)));
+		theEmails.forEach(theEmail -> send(theEmail, new OnSuccess(theEmail), new ErrorHandler(theEmail)));
 	}
 
-	public void sendMail(@Nonnull MailConfig theMailConfig, @Nonnull Email theEmail) {
-		Validate.notNull(theMailConfig);
-		final Mailer mailer = makeMailer(theMailConfig);
-		sendMail(mailer, theEmail, new OnSuccess(theEmail), new ErrorHandler(theEmail));
+	@Override
+	public void sendMail(@Nonnull Email theEmail) {
+		send(theEmail, new OnSuccess(theEmail), new ErrorHandler(theEmail));
 	}
 
-	public void sendMail(@Nonnull MailConfig theMailConfig,
-								@Nonnull Email theEmail,
+	@Override
+	public void sendMail(@Nonnull Email theEmail,
 								@Nonnull Runnable theOnSuccess,
 								@Nonnull ExceptionConsumer theErrorHandler) {
-		Validate.notNull(theMailConfig);
-		final Mailer mailer = makeMailer(theMailConfig);
-		sendMail(mailer, theEmail, theOnSuccess, theErrorHandler);
+		send(theEmail, theOnSuccess, theErrorHandler);
 	}
 
-	private void sendMail(@Nonnull Mailer theMailer,
-								 @Nonnull Email theEmail,
-								 @Nonnull Runnable theOnSuccess,
-								 @Nonnull ExceptionConsumer theErrorHandler) {
-		Validate.notNull(theMailer);
+	private void send(@Nonnull Email theEmail,
+							@Nonnull Runnable theOnSuccess,
+							@Nonnull ExceptionConsumer theErrorHandler) {
 		Validate.notNull(theEmail);
 		Validate.notNull(theOnSuccess);
 		Validate.notNull(theErrorHandler);
 		try {
-			final AsyncResponse asyncResponse = theMailer.sendMail(theEmail, true);
+			final AsyncResponse asyncResponse = myMailer.sendMail(theEmail, true);
 			if (asyncResponse != null) {
 				asyncResponse.onSuccess(theOnSuccess);
 				asyncResponse.onException(theErrorHandler);

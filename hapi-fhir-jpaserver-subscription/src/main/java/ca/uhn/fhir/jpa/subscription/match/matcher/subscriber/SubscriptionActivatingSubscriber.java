@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionConstants;
@@ -100,7 +101,8 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscript
 		CanonicalSubscriptionChannelType subscriptionChannelType = mySubscriptionCanonicalizer.getChannelType(theSubscription);
 
 		// Only activate supported subscriptions
-		if (subscriptionChannelType == null || !myDaoConfig.getSupportedSubscriptionTypes().contains(subscriptionChannelType.toCanonical())) {
+		if (subscriptionChannelType == null
+				|| !myDaoConfig.getSupportedSubscriptionTypes().contains(subscriptionChannelType.toCanonical())) {
 			return false;
 		}
 
@@ -116,6 +118,8 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscript
 	@SuppressWarnings("unchecked")
 	private boolean activateSubscription(final IBaseResource theSubscription) {
 		IFhirResourceDao subscriptionDao = myDaoRegistry.getSubscriptionDao();
+		SystemRequestDetails srd = SystemRequestDetails.forAllPartition();
+
 		IBaseResource subscription = null;
 		try {
 			// read can throw ResourceGoneException
@@ -126,7 +130,7 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscript
 
 			ourLog.info("Activating subscription {} from status {} to {}", subscription.getIdElement().toUnqualified().getValue(), SubscriptionConstants.REQUESTED_STATUS, SubscriptionConstants.ACTIVE_STATUS);
 			SubscriptionUtil.setStatus(myFhirContext, subscription, SubscriptionConstants.ACTIVE_STATUS);
-			subscriptionDao.update(subscription);
+			subscriptionDao.update(subscription, srd);
 			return true;
 		} catch (final Exception e) {
 			subscription = subscription != null ? subscription : theSubscription;
@@ -134,9 +138,9 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscript
 				+ subscription.getIdElement()
 				+ " : " + e.getMessage());
 			ourLog.info("Changing status of {} to ERROR", subscription.getIdElement());
-			SubscriptionUtil.setStatus(myFhirContext, subscription, "error");
+			SubscriptionUtil.setStatus(myFhirContext, subscription, SubscriptionConstants.ERROR_STATUS);
 			SubscriptionUtil.setReason(myFhirContext, subscription, e.getMessage());
-			subscriptionDao.update(subscription);
+			subscriptionDao.update(subscription, srd);
 			return false;
 		}
 	}

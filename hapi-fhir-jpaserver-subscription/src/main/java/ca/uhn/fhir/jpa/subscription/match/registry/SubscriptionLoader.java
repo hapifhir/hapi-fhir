@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCache;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionActivatingSubscriber;
@@ -75,6 +76,7 @@ public class SubscriptionLoader implements IResourceChangeListener {
 	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
 
 	private SearchParameterMap mySearchParameterMap;
+	private SystemRequestDetails mySystemRequestDetails;
 
 	/**
 	 * Constructor
@@ -86,6 +88,8 @@ public class SubscriptionLoader implements IResourceChangeListener {
 	@PostConstruct
 	public void registerListener() {
 		mySearchParameterMap = getSearchParameterMap();
+		mySystemRequestDetails = SystemRequestDetails.forAllPartition();
+
 		IResourceChangeListenerCache subscriptionCache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener("Subscription", mySearchParameterMap, this, REFRESH_INTERVAL);
 		subscriptionCache.forceRefresh();
 	}
@@ -145,7 +149,7 @@ public class SubscriptionLoader implements IResourceChangeListener {
 		synchronized (mySyncSubscriptionsLock) {
 			ourLog.debug("Starting sync subscriptions");
 
-			IBundleProvider subscriptionBundleList =  getSubscriptionDao().search(mySearchParameterMap);
+			IBundleProvider subscriptionBundleList =  getSubscriptionDao().search(mySearchParameterMap, mySystemRequestDetails);
 
 			Integer subscriptionCount = subscriptionBundleList.size();
 			assert subscriptionCount != null;
