@@ -20,8 +20,8 @@ package ca.uhn.fhir.jpa.search;
  * #L%family
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -90,14 +90,12 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
-import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -391,21 +389,9 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		return Optional.empty();
 	}
 
-	@NotNull
+	@Nonnull
 	private PersistedJpaSearchFirstPageBundleProvider submitSearch(IDao theCallingDao, SearchParameterMap theParams, String theResourceType, RequestDetails theRequestDetails, String theSearchUuid, ISearchBuilder theSb, String theQueryString, RequestPartitionId theRequestPartitionId, Search theSearch) {
 		StopWatch w = new StopWatch();
-//		Search search = new Search();
-		//TODO GGG MOVE THIS POPULATE AND ALSO THE HOOK CALL HIGHER UP IN THE STACK.
-//		populateSearchEntity(theParams, theResourceType, theSearchUuid, theQueryString, search, theRequestPartitionId);
-
-//		 Interceptor call: STORAGE_PRESEARCH_REGISTERED
-//		HookParams params = new HookParams()
-//			.add(ICachedSearchDetails.class, search)
-//			.add(RequestDetails.class, theRequestDetails)
-//			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
-//			.add(SearchParameterMap.class, theParams);
-//		CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRESEARCH_REGISTERED, params);
-
 		SearchTask task = new SearchTask(theSearch, theCallingDao, theParams, theResourceType, theRequestDetails, theRequestPartitionId);
 		myIdToSearchTask.put(theSearch.getUuid(), task);
 		task.call();
@@ -842,7 +828,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 			txTemplate.execute(new TransactionCallbackWithoutResult() {
 				@Override
-				protected void doInTransactionWithoutResult(@Nonnull @NotNull TransactionStatus theArg0) {
+				protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theArg0) {
 					doSaveSearch();
 				}
 
@@ -854,7 +840,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 			txTemplate.execute(new TransactionCallbackWithoutResult() {
 				@Override
-				protected void doInTransactionWithoutResult(@Nonnull @NotNull TransactionStatus theArg0) {
+				protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theArg0) {
 					if (mySearch.getId() == null) {
 						doSaveSearch();
 					}

@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.term.job;
 
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.StepContribution;
@@ -31,6 +30,8 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Nonnull;
 
 import static ca.uhn.fhir.jpa.batch.config.BatchConstants.JOB_PARAM_CODE_SYSTEM_ID;
 
@@ -49,7 +50,7 @@ public class TermConceptDeleteTasklet implements Tasklet {
 	private ITermCodeSystemVersionDao myCodeSystemVersionDao;
 
 	@Override
-	public RepeatStatus execute(@NotNull StepContribution contribution, ChunkContext context) throws Exception {
+	public RepeatStatus execute(@Nonnull StepContribution contribution, ChunkContext context) throws Exception {
 		long codeSystemPid = (Long) context.getStepContext().getJobParameters().get(JOB_PARAM_CODE_SYSTEM_ID);
 		ourLog.info("Deleting code system {}", codeSystemPid);
 

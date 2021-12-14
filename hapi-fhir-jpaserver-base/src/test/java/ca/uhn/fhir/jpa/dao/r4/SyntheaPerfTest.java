@@ -7,9 +7,9 @@ import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.config.TestR4WithLuceneDisabledConfig;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.search.reindex.BlockPolicy;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.util.FileUtil;
 import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.r4.model.Bundle;
@@ -177,26 +177,26 @@ public class SyntheaPerfTest extends BaseJpaTest {
 					throw new InternalErrorException(e);
 				}
 
-				int resCount = 0;
-				int totalBytes = 0;
-				int maxBytes = 0;
-				int countOver5kb = 0;
-				for (Bundle.BundleEntryComponent nextEntry : bundle.getEntry()) {
-					int size = myCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(nextEntry.getResource()).length();
-					resCount++;
-					totalBytes += size;
-					if (size > maxBytes) {
-						maxBytes = size;
-					}
-					if (size > 5000) {
-						countOver5kb++;
-					}
-				}
-				int avg = (int) ((double)totalBytes / (double) resCount);
-				ourLog.info("Resources {} Average {} Max {} CountOver5 {}", resCount, FileUtil.formatFileSize(avg), FileUtil.formatFileSize(maxBytes), countOver5kb);
+//				int resCount = 0;
+//				int totalBytes = 0;
+//				int maxBytes = 0;
+//				int countOver5kb = 0;
+//				for (Bundle.BundleEntryComponent nextEntry : bundle.getEntry()) {
+//					int size = myCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(nextEntry.getResource()).length();
+//					resCount++;
+//					totalBytes += size;
+//					if (size > maxBytes) {
+//						maxBytes = size;
+//					}
+//					if (size > 10000) {
+//						countOver5kb++;
+//					}
+//				}
+//				int avg = (int) ((double)totalBytes / (double) resCount);
+//				ourLog.info("Resources {} Average {} Max {} CountOver {}", resCount, FileUtil.formatFileSize(avg), FileUtil.formatFileSize(maxBytes), countOver5kb);
 
 
-//				mySystemDao.transaction(new SystemRequestDetails(myInterceptorRegistry), bundle);
+				mySystemDao.transaction(new SystemRequestDetails(myInterceptorRegistry), bundle);
 
 				int fileCount = myFilesCounter.incrementAndGet();
 				myResourcesCounter.addAndGet(bundle.getEntry().size());

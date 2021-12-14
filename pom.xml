@@ -6,7 +6,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>5.7.0-PRE4-SNAPSHOT</version>
+	<version>5.7.0-PRE7-SNAPSHOT</version>
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
 	<url>https://hapifhir.io</url>
@@ -832,7 +832,7 @@
 		<servicemix_saxon_version>9.8.0-15</servicemix_saxon_version>
 		<servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
 		<slf4j_version>1.7.30</slf4j_version>
-		<log4j_to_slf4j_version>2.11.1</log4j_to_slf4j_version>
+        <log4j_to_slf4j_version>2.15.0</log4j_to_slf4j_version>
         <spring_version>5.3.13</spring_version>
 		<spring_data_version>2.5.0</spring_data_version>
 		<spring_batch_version>4.3.3</spring_batch_version>

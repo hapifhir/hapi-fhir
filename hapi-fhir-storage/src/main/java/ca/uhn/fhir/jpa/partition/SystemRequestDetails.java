@@ -57,6 +57,10 @@ public class SystemRequestDetails extends RequestDetails {
 		super(new MyInterceptorBroadcaster());
 	}
 
+	public static SystemRequestDetails forAllPartition(){
+		return new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.allPartitions());
+	}
+
 	private ListMultimap<String, String> myHeaders;
 
 	/**

@@ -20,9 +20,9 @@ package ca.uhn.fhir.jpa.partition;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -76,7 +76,6 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 		myNonPartitionableResourceNames = new HashSet<>();
 
 		// Infrastructure
-		myNonPartitionableResourceNames.add("Subscription");
 		myNonPartitionableResourceNames.add("SearchParameter");
 
 		// Validation and Conformance
@@ -85,6 +84,8 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 		myNonPartitionableResourceNames.add("CapabilityStatement");
 		myNonPartitionableResourceNames.add("CompartmentDefinition");
 		myNonPartitionableResourceNames.add("OperationDefinition");
+
+		myNonPartitionableResourceNames.add("Library");
 
 		// Terminology
 		myNonPartitionableResourceNames.add("ConceptMap");

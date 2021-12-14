@@ -43,7 +43,6 @@ import java.util.Map;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class CanonicalSubscription implements Serializable, Cloneable, IModelJson {
-
 	private static final long serialVersionUID = 1L;
 
 	@JsonProperty("id")
@@ -72,6 +71,8 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 	private Map<String, String> myTags;
 	@JsonProperty("payloadSearchCriteria")
 	private String myPayloadSearchCriteria;
+	@JsonProperty("partitionId")
+	private Integer myPartitionId;
 
 	/**
 	 * Constructor
@@ -89,7 +90,7 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 	}
 
 	/**
-	 * For now we're using the R4 TriggerDefinition, but this
+	 * For now, we're using the R4 TriggerDefinition, but this
 	 * may change in the future when things stabilize
 	 */
 	public void addTrigger(CanonicalEventDefinition theTrigger) {
@@ -159,9 +160,9 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 
 	public String getChannelExtension(String theUrl) {
 		String retVal = null;
-		List<String> strings = myChannelExtensions.get(theUrl);
-		if (strings != null && strings.isEmpty() == false) {
-			retVal = strings.get(0);
+		List<String> channelExtensions = myChannelExtensions.get(theUrl);
+		if (channelExtensions != null && !channelExtensions.isEmpty()) {
+			retVal = channelExtensions.get(0);
 		}
 		return retVal;
 	}
@@ -227,8 +228,16 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 		myStatus = theStatus;
 	}
 
+	public Integer getRequestPartitionId() {
+		return myPartitionId;
+	}
+
+	public void setPartitionId(Integer thePartitionId) {
+		myPartitionId = thePartitionId;
+	}
+
 	/**
-	 * For now we're using the R4 triggerdefinition, but this
+	 * For now, we're using the R4 triggerdefinition, but this
 	 * may change in the future when things stabilize
 	 */
 	public CanonicalEventDefinition getTrigger() {
@@ -325,7 +334,7 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 		private String mySubjectTemplate;
 
 		/**
-		 * Construcor
+		 * Constructor
 		 */
 		public EmailDetails() {
 			super();

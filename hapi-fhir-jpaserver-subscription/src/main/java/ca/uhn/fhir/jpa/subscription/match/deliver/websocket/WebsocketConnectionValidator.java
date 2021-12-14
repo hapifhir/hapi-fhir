@@ -20,14 +20,15 @@ package ca.uhn.fhir.jpa.subscription.match.deliver.websocket;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
-import com.sun.istack.NotNull;
+import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import javax.annotation.Nonnull;
 
 public class WebsocketConnectionValidator {
 	private static Logger ourLog = LoggerFactory.getLogger(WebsocketConnectionValidator.class);
@@ -43,7 +44,7 @@ public class WebsocketConnectionValidator {
 		super();
 	}
 
-	public WebsocketValidationResponse validate(@NotNull IdType id) {
+	public WebsocketValidationResponse validate(@Nonnull IdType id) {
 		if (!id.hasIdPart() || !id.isIdPartValid()) {
 			return WebsocketValidationResponse.INVALID_RESPONSE("Invalid bind request - No ID included: " + id.getValue());
 		}

@@ -128,6 +128,7 @@ public class FhirContext {
 	private volatile Boolean myFormatJsonSupported;
 	private volatile Boolean myFormatNDJsonSupported;
 	private volatile Boolean myFormatRdfSupported;
+	private IFhirValidatorFactory myFhirValidatorFactory = fhirContext -> new FhirValidator(fhirContext);
 
 	/**
 	 * @deprecated It is recommended that you use one of the static initializer methods instead
@@ -909,7 +910,7 @@ public class FhirContext {
 	 * </p>
 	 */
 	public FhirValidator newValidator() {
-		return new FhirValidator(this);
+		return myFhirValidatorFactory.newFhirValidator(this);
 	}
 
 	public ViewGenerator newViewGenerator() {
@@ -1073,9 +1074,22 @@ public class FhirContext {
 	 *
 	 * @param theParserErrorHandler The error handler
 	 */
-	public void setParserErrorHandler(final IParserErrorHandler theParserErrorHandler) {
+	public FhirContext setParserErrorHandler(final IParserErrorHandler theParserErrorHandler) {
 		Validate.notNull(theParserErrorHandler, "theParserErrorHandler must not be null");
 		myParserErrorHandler = theParserErrorHandler;
+		return this;
+	}
+
+	/**
+	 * Set the factory method used to create FhirValidator instances
+	 *
+	 * @param theFhirValidatorFactory
+	 * @return this
+	 * @since 5.6.0
+	 */
+	public FhirContext setFhirValidatorFactory(IFhirValidatorFactory theFhirValidatorFactory) {
+		myFhirValidatorFactory = theFhirValidatorFactory;
+		return this;
 	}
 
 	@SuppressWarnings({"cast"})

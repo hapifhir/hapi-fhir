@@ -340,7 +340,6 @@ public interface IValidationSupport {
 		return null;
 	}
 
-
 	enum IssueSeverity {
 		/**
 		 * The issue caused the action to fail, and no further checking could be performed.
