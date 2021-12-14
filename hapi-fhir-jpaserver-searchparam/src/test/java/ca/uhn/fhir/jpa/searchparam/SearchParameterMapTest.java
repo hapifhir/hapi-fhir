@@ -8,20 +8,14 @@ import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
-import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.math3.random.RandomDataGenerator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
 
 import static ca.uhn.fhir.rest.param.TokenParamModifier.TEXT;
 import static org.hamcrest.CoreMatchers.is;
@@ -114,7 +108,7 @@ class SearchParameterMapTest {
 	}
 
 	@Test
-	public void cpy_searchParams_copiesAllfields() throws JsonProcessingException {
+	public void cpy_searchParams_copiesAllFields() {
 		HashSet<Include> includes = new HashSet<>();
 		Include i = new Include("test", true);
 		includes.add(i);
