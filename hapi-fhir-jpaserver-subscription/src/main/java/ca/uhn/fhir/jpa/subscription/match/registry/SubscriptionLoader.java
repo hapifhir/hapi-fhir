@@ -58,7 +58,7 @@ import java.util.stream.Collectors;
 public class SubscriptionLoader implements IResourceChangeListener {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionLoader.class);
 	private static final int MAX_RETRIES = 60; // 60 * 5 seconds = 5 minutes
-	private static long REFRESH_INTERVAL = DateUtils.MILLIS_PER_MINUTE;
+	private static final long REFRESH_INTERVAL = DateUtils.MILLIS_PER_MINUTE;
 
 	private final Object mySyncSubscriptionsLock = new Object();
 	@Autowired
@@ -134,6 +134,8 @@ public class SubscriptionLoader implements IResourceChangeListener {
 	}
 
 	synchronized int doSyncSubscriptionsWithRetry() {
+		// retry runs MAX_RETRIES times
+		// and if errors result every time, it will fail
 		Retrier<Integer> syncSubscriptionRetrier = new Retrier<>(this::doSyncSubscriptions, MAX_RETRIES);
 		return syncSubscriptionRetrier.runWithRetry();
 	}
@@ -186,9 +188,14 @@ public class SubscriptionLoader implements IResourceChangeListener {
 			String nextId = resource.getIdElement().getIdPart();
 			allIds.add(nextId);
 
+			// internally, subscriptions that cannot activate
+			// will be set to error
 			boolean activated = mySubscriptionActivatingInterceptor.activateSubscriptionIfRequired(resource);
 			if (activated) {
 				activatedCount++;
+			}
+			else {
+				logSubscriptionNotActivatedPlusErrorIfPossible(resource);
 			}
 
 			boolean registered = mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(resource);
@@ -200,6 +207,32 @@ public class SubscriptionLoader implements IResourceChangeListener {
 		mySubscriptionRegistry.unregisterAllSubscriptionsNotInCollection(allIds);
 		ourLog.debug("Finished sync subscriptions - activated {} and registered {}", theResourceList.size(), registeredCount);
 		return activatedCount;
+	}
+
+	/**
+	 * Logs
+	 * @param theSubscription
+	 */
+	private void logSubscriptionNotActivatedPlusErrorIfPossible(IBaseResource theSubscription) {
+		String error;
+		if (theSubscription instanceof Subscription) {
+			error = ((Subscription) theSubscription).getError();
+		}
+		else if (theSubscription instanceof org.hl7.fhir.dstu3.model.Subscription) {
+			error = ((org.hl7.fhir.dstu3.model.Subscription) theSubscription).getError();
+		}
+		else if (theSubscription instanceof org.hl7.fhir.dstu2.model.Subscription) {
+			error = ((org.hl7.fhir.dstu2.model.Subscription) theSubscription).getError();
+		}
+		else {
+			error = "";
+		}
+		ourLog.error("Subscription "
+			+ theSubscription.getIdElement().getIdPart()
+			+ " could not be activated."
+			+ " This will not prevent startup, but it could lead to undesirable outcomes! "
+			+ error
+		);
 	}
 
 	@Override

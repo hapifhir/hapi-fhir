@@ -31,9 +31,11 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.SubscriptionUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,7 +102,8 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscript
 		CanonicalSubscriptionChannelType subscriptionChannelType = mySubscriptionCanonicalizer.getChannelType(theSubscription);
 
 		// Only activate supported subscriptions
-		if (subscriptionChannelType == null || !myDaoConfig.getSupportedSubscriptionTypes().contains(subscriptionChannelType.toCanonical())) {
+		if (subscriptionChannelType == null
+				|| !myDaoConfig.getSupportedSubscriptionTypes().contains(subscriptionChannelType.toCanonical())) {
 			return false;
 		}
 
@@ -118,17 +121,24 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscript
 		IFhirResourceDao subscriptionDao = myDaoRegistry.getSubscriptionDao();
 		SystemRequestDetails srd = SystemRequestDetails.forAllPartition();
 
-		IBaseResource subscription = subscriptionDao.read(theSubscription.getIdElement(), SystemRequestDetails.forAllPartition());
-		subscription.setId(subscription.getIdElement().toVersionless());
-
-		ourLog.info("Activating subscription {} from status {} to {}", subscription.getIdElement().toUnqualified().getValue(), SubscriptionConstants.REQUESTED_STATUS, SubscriptionConstants.ACTIVE_STATUS);
+		IBaseResource subscription = null;
 		try {
+			// read can throw ResourceGoneException
+			// if this happens, we will treat this as a failure to activate
+			subscription =  subscriptionDao.read(theSubscription.getIdElement(), SystemRequestDetails.forAllPartition());
+			subscription.setId(subscription.getIdElement().toVersionless());
+
+			ourLog.info("Activating subscription {} from status {} to {}", subscription.getIdElement().toUnqualified().getValue(), SubscriptionConstants.REQUESTED_STATUS, SubscriptionConstants.ACTIVE_STATUS);
 			SubscriptionUtil.setStatus(myFhirContext, subscription, SubscriptionConstants.ACTIVE_STATUS);
 			subscriptionDao.update(subscription, srd);
 			return true;
-		} catch (final UnprocessableEntityException e) {
+		} catch (final UnprocessableEntityException | ResourceGoneException e) {
+			subscription = subscription != null ? subscription : theSubscription;
+			ourLog.error("Failed to activate subscription "
+				+ subscription.getIdElement()
+				+ " : " + e.getMessage());
 			ourLog.info("Changing status of {} to ERROR", subscription.getIdElement());
-			SubscriptionUtil.setStatus(myFhirContext, subscription, "error");
+			SubscriptionUtil.setStatus(myFhirContext, subscription, SubscriptionConstants.ERROR_STATUS);
 			SubscriptionUtil.setReason(myFhirContext, subscription, e.getMessage());
 			subscriptionDao.update(subscription, srd);
 			return false;
