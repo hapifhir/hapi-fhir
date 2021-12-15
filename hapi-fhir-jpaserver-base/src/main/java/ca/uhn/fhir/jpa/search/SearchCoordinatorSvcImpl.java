@@ -459,14 +459,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		return candidate.orElse(null);
 	}
 
-	// fixme our main entry point.
-	// MB Proposal - split this in two stories.
-	// fast path -
-	// - add (optional) resource json string to lastn index ObservationJson
-	// - create fast path below to use it (only for lastn)
-	// replace lastn with new lucene
-	// - add resource json to hibernate search index as projectable field
-	// - replace the lastn index with new lucene index.
 	private IBundleProvider executeQuery(String theResourceType, SearchParameterMap theParams, RequestDetails theRequestDetails, String theSearchUuid, ISearchBuilder theSb, Integer theLoadSynchronousUpTo, RequestPartitionId theRequestPartitionId) {
 		SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(theRequestDetails, theSearchUuid);
 		searchRuntimeDetails.setLoadSynchronous(true);
@@ -474,7 +466,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		boolean wantOnlyCount = isWantOnlyCount(theParams);
 		boolean wantCount = isWantCount(theParams, wantOnlyCount);
 
-		// fixme we won't need the tx wrapper if we're only using es.
 		// Execute the query and make sure we return distinct results
 		TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
@@ -485,7 +476,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			final List<ResourcePersistentId> pids = new ArrayList<>();
 
 			Long count = 0L;
-			// fixme I don't understand what we need to do about counts.
 			if (wantCount) {
 				ourLog.trace("Performing count");
 				// TODO FulltextSearchSvcImpl will remove necessary parameters from the "theParams", this will cause actual query after count to
@@ -509,83 +499,63 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				return bundleProvider;
 			}
 
-			// fixme need to figure out if we can just use ES.  If so. skip this block
-			// fixme so theParams.getRevIncludes() and theParams.getIncludes() should be empty
-			// no version-specific queries
-			// etc.
-			// FIXME start with just lastn.  Get smarter as we go.  Paging will be TBD.
-			boolean esFastPath = theParams.isLastN();
-			List<IBaseResource> resources;
-			if (esFastPath) {
-				// fixme do something smart here.
-				resources = new ArrayList<>();
-				// fixme bypass the query builder and use modified executeLastNAgainstIndex() or queryLuceneForPIDs() that return actual resources instead of pids.
-			} else {
-				try (IResultIterator resultIter = theSb.createQuery(theParams, searchRuntimeDetails, theRequestDetails, theRequestPartitionId)) {
-					while (resultIter.hasNext()) {
-						pids.add(resultIter.next());
-						if (theLoadSynchronousUpTo != null && pids.size() >= theLoadSynchronousUpTo) {
-							break;
-						}
-						if (theParams.getLoadSynchronousUpTo() != null && pids.size() >= theParams.getLoadSynchronousUpTo()) {
-							break;
-						}
+			try (IResultIterator resultIter = theSb.createQuery(theParams, searchRuntimeDetails, theRequestDetails, theRequestPartitionId)) {
+				while (resultIter.hasNext()) {
+					pids.add(resultIter.next());
+					if (theLoadSynchronousUpTo != null && pids.size() >= theLoadSynchronousUpTo) {
+						break;
 					}
-				} catch (IOException e) {
-					ourLog.error("IO failure during database access", e);
-					throw new InternalErrorException(e);
-				}
-
-				// fixme a fast path would skip this hook.  Is that ok?
-				JpaPreResourceAccessDetails accessDetails = new JpaPreResourceAccessDetails(pids, () -> theSb);
-				HookParams params = new HookParams()
-					.add(IPreResourceAccessDetails.class, accessDetails)
-					.add(RequestDetails.class, theRequestDetails)
-					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-				CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
-
-				for (int i = pids.size() - 1; i >= 0; i--) {
-					if (accessDetails.isDontReturnResourceAtIndex(i)) {
-						pids.remove(i);
+					if (theParams.getLoadSynchronousUpTo() != null && pids.size() >= theParams.getLoadSynchronousUpTo()) {
+						break;
 					}
 				}
-
-				/*
-				 * For synchronous queries, we load all the includes right away
-				 * since we're returning a static bundle with all the results
-				 * pre-loaded. This is ok because synchronous requests are not
-				 * expected to be paged
-				 *
-				 * On the other hand for async queries we load includes/revincludes
-				 * individually for pages as we return them to clients
-				 */
-
-				// fixme fast path would assume no includes or revincludes.
-				// fixme so theParams.getRevIncludes() and theParams.getIncludes() should be empty
-				// _includes
-				Integer maxIncludes = myDaoConfig.getMaximumIncludesToLoadPerPage();
-				final Set<ResourcePersistentId> includedPids = theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getRevIncludes(), true, theParams.getLastUpdated(), "(synchronous)", theRequestDetails, maxIncludes);
-				if (maxIncludes != null) {
-					maxIncludes -= includedPids.size();
-				}
-				pids.addAll(includedPids);
-				List<ResourcePersistentId> includedPidsList = new ArrayList<>(includedPids);
-
-				// _revincludes
-				if (theParams.getEverythingMode() == null && (maxIncludes == null || maxIncludes > 0)) {
-					// fixme can we use es here to satisfy the include/revinclude references?
-					Set<ResourcePersistentId> revIncludedPids = theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getIncludes(), false, theParams.getLastUpdated(), "(synchronous)", theRequestDetails, maxIncludes);
-					includedPids.addAll(revIncludedPids);
-					pids.addAll(revIncludedPids);
-					includedPidsList.addAll(revIncludedPids);
-				}
-
-				resources = new ArrayList<>();
-				theSb.loadResourcesByPid(pids, includedPidsList, resources, false, theRequestDetails);
+			} catch (IOException e) {
+				ourLog.error("IO failure during database access", e);
+				throw new InternalErrorException(e);
 			}
-			// fixme and we rejoin the flow here. We have a list of parsed resources.
 
-			// fixme I bet we could end the tx boundary here.
+			JpaPreResourceAccessDetails accessDetails = new JpaPreResourceAccessDetails(pids, () -> theSb);
+			HookParams params = new HookParams()
+				.add(IPreResourceAccessDetails.class, accessDetails)
+				.add(RequestDetails.class, theRequestDetails)
+				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+
+			for (int i = pids.size() - 1; i >= 0; i--) {
+				if (accessDetails.isDontReturnResourceAtIndex(i)) {
+					pids.remove(i);
+				}
+			}
+
+			/*
+			 * For synchronous queries, we load all the includes right away
+			 * since we're returning a static bundle with all the results
+			 * pre-loaded. This is ok because synchronous requests are not
+			 * expected to be paged
+			 *
+			 * On the other hand for async queries we load includes/revincludes
+			 * individually for pages as we return them to clients
+			 */
+
+			// _includes
+			Integer maxIncludes = myDaoConfig.getMaximumIncludesToLoadPerPage();
+			final Set<ResourcePersistentId> includedPids = theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getRevIncludes(), true, theParams.getLastUpdated(), "(synchronous)", theRequestDetails, maxIncludes);
+			if (maxIncludes != null) {
+				maxIncludes -= includedPids.size();
+			}
+			pids.addAll(includedPids);
+			List<ResourcePersistentId> includedPidsList = new ArrayList<>(includedPids);
+
+			// _revincludes
+			if (theParams.getEverythingMode() == null && (maxIncludes == null || maxIncludes > 0)) {
+				Set<ResourcePersistentId> revIncludedPids = theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getIncludes(), false, theParams.getLastUpdated(), "(synchronous)", theRequestDetails, maxIncludes);
+				includedPids.addAll(revIncludedPids);
+				pids.addAll(revIncludedPids);
+				includedPidsList.addAll(revIncludedPids);
+			}
+
+			List<IBaseResource> resources = new ArrayList<>();
+			theSb.loadResourcesByPid(pids, includedPidsList, resources, false, theRequestDetails);
 			// Hook: STORAGE_PRESHOW_RESOURCES
 			resources = InterceptorUtil.fireStoragePreshowResource(resources, theRequestDetails, myInterceptorBroadcaster);
 

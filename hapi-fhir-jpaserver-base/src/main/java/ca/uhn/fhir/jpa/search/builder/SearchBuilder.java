@@ -849,6 +849,8 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		List<ResourcePersistentId> pids = new ArrayList<>(thePids);
+		// fixme maybe try the fast path here.  We only chunk because some jdbc drivers can't handle long param lists.
+		// if lastn and theIncludedPids.isEmpty(), then go back to elastic to fetch thePids into a list of Resources.
 		new QueryChunker<ResourcePersistentId>().chunk(pids, t -> doLoadPids(t, theIncludedPids, theResourceListToPopulate, theForHistoryOperation, position));
 
 	}
