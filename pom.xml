@@ -832,7 +832,7 @@
         <servicemix_saxon_version>9.8.0-15</servicemix_saxon_version>
         <servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
         <slf4j_version>1.7.30</slf4j_version>
-        <log4j_to_slf4j_version>2.15.0</log4j_to_slf4j_version>
+        <log4j_to_slf4j_version>2.16.0</log4j_to_slf4j_version>
         <spring_version>5.3.13</spring_version>
         <spring_data_version>2.5.0</spring_data_version>
         <spring_batch_version>4.3.3</spring_batch_version>
@@ -872,7 +872,7 @@
 			<dependency>
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-classic</artifactId>
-				<version>1.2.3</version>
+				<version>1.2.8</version>
 			</dependency>
 			<dependency>
 				<groupId>com.atlassian.commonmark</groupId>
