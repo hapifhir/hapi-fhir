@@ -85,9 +85,9 @@ public class SubscriptionActivatingSubscriberTest {
 		Subscription subscription = new Subscription();
 		subscription.setId("Subscription/123");
 		String exceptionMsg = "Gone Exception";
-		int totalInfoLogs = 2;
+		int totalInfoLogs = 1;
 
-		ourLogger.setLevel(Level.INFO);
+		ourLogger.setLevel(Level.ERROR);
 		IFhirResourceDao dao = Mockito.mock(IFhirResourceDao.class);
 
 		// when
@@ -119,6 +119,5 @@ public class SubscriptionActivatingSubscriberTest {
 		List<ILoggingEvent> events = appenderCaptor.getAllValues();
 		Assertions.assertEquals(totalInfoLogs, events.size());
 		Assertions.assertTrue(events.get(0).getMessage().contains(exceptionMsg));
-		Assertions.assertTrue(events.get(1).getMessage().contains("Changing status of {} to ERROR"));
 	}
 }

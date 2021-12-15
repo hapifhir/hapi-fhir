@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.subscription.match.registry;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.cache.IResourceChangeEvent;
@@ -36,7 +35,6 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import ca.uhn.fhir.util.SubscriptionUtil;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -76,8 +74,6 @@ public class SubscriptionLoader implements IResourceChangeListener {
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
-	@Autowired
-	private FhirContext myFhirContext;
 
 	private SearchParameterMap mySearchParameterMap;
 	private SystemRequestDetails mySystemRequestDetails;

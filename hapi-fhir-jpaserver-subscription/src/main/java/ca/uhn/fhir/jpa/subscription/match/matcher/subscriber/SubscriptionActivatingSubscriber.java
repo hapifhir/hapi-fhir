@@ -134,7 +134,7 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscript
 			return true;
 		} catch (final UnprocessableEntityException | ResourceGoneException e) {
 			subscription = subscription != null ? subscription : theSubscription;
-			ourLog.info("Failed to activate subscription "
+			ourLog.error("Failed to activate subscription "
 				+ subscription.getIdElement()
 				+ " : " + e.getMessage());
 			ourLog.info("Changing status of {} to ERROR", subscription.getIdElement());
