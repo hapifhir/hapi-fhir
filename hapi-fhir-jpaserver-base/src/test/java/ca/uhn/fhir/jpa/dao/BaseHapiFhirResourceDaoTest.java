@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -34,7 +35,7 @@ class BaseHapiFhirResourceDaoTest {
 			mySvc.validateResourceIdCreation(patient, sysRequest);
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertEquals("failedToCreateWithClientAssignedIdNotAllowed", e.getMessage());
+			assertEquals(Msg.code(959) + "failedToCreateWithClientAssignedIdNotAllowed", e.getMessage());
 		}
 	}
 
@@ -48,7 +49,7 @@ class BaseHapiFhirResourceDaoTest {
 			mySvc.validateResourceIdCreation(patient, sysRequest);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("failedToCreateWithClientAssignedNumericId", e.getMessage());
+			assertEquals(Msg.code(960) + "failedToCreateWithClientAssignedNumericId", e.getMessage());
 		}
 	}
 
