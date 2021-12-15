@@ -133,7 +133,6 @@ public class SubscriptionCanonicalizer {
 			retVal.setPayloadString(subscription.getChannel().getPayload());
 			retVal.setPayloadSearchCriteria(getExtensionString(subscription, HapiExtensions.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA));
 			retVal.setTags(extractTags(subscription));
-			setPartitionIdOnReturnValue(theSubscription, retVal);
 
 			if (retVal.getChannelType() == CanonicalSubscriptionChannelType.EMAIL) {
 				String from;
@@ -233,6 +232,7 @@ public class SubscriptionCanonicalizer {
 		retVal.setPayloadString(subscription.getChannel().getPayload());
 		retVal.setPayloadSearchCriteria(getExtensionString(subscription, HapiExtensions.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA));
 		retVal.setTags(extractTags(subscription));
+		setPartitionIdOnReturnValue(theSubscription, retVal);
 
 		if (retVal.getChannelType() == CanonicalSubscriptionChannelType.EMAIL) {
 			String from;
