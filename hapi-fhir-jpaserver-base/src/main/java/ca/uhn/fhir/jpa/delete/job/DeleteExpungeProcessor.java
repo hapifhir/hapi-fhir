@@ -71,8 +71,6 @@ public class DeleteExpungeProcessor implements ItemProcessor<List<Long>, List<St
 	IResourceLinkDao myResourceLinkDao;
 	@Autowired
 	IInterceptorService myInterceptorService;
-	@Autowired
-	FhirContext myFhirContext;
 
 	@Override
 	public List<String> process(List<Long> thePids) throws Exception {
