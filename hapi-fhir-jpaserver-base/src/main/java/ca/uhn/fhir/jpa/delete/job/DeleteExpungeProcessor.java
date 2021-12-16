@@ -20,6 +20,10 @@ package ca.uhn.fhir.jpa.delete.job;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.expunge.PartitionRunner;
@@ -27,8 +31,11 @@ import ca.uhn.fhir.jpa.dao.expunge.ResourceForeignKey;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import org.apache.commons.lang3.StringUtils;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +47,8 @@ import org.springframework.data.domain.SliceImpl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 /**
@@ -60,6 +69,10 @@ public class DeleteExpungeProcessor implements ItemProcessor<List<Long>, List<St
 	IdHelperService myIdHelper;
 	@Autowired
 	IResourceLinkDao myResourceLinkDao;
+	@Autowired
+	IInterceptorService myInterceptorService;
+	@Autowired
+	FhirContext myFhirContext;
 
 	@Override
 	public List<String> process(List<Long> thePids) throws Exception {
@@ -67,13 +80,16 @@ public class DeleteExpungeProcessor implements ItemProcessor<List<Long>, List<St
 
 		List<String> retval = new ArrayList<>();
 
-		String pidListString = "(" + thePids.stream().map(Object::toString).collect(Collectors.joining(",")) +  ")";
+		String pidListString = "(" + thePids.stream().map(Object::toString).collect(Collectors.joining(",")) + ")";
 
 		//Given the first pid in the last, grab the resource type so we can filter out which FKs we care about.
 		//TODO GGG should we pass this down the pipe?
 		IIdType iIdType = myIdHelper.resourceIdFromPidOrThrowException(thePids.get(0));
 
-		List<ResourceForeignKey> resourceForeignKeys = myResourceTableFKProvider.getResourceForeignKeysByResourceType(iIdType.getResourceType());
+
+		String resourceType = iIdType.getResourceType();
+		callHooks(thePids, resourceType);
+		List<ResourceForeignKey> resourceForeignKeys = myResourceTableFKProvider.getResourceForeignKeysByResourceType(resourceType);
 
 		for (ResourceForeignKey resourceForeignKey : resourceForeignKeys) {
 			retval.add(deleteRecordsByColumnSql(pidListString, resourceForeignKey));
@@ -83,6 +99,16 @@ public class DeleteExpungeProcessor implements ItemProcessor<List<Long>, List<St
 		ResourceForeignKey resourceTablePk = new ResourceForeignKey("HFJ_RESOURCE", "RES_ID");
 		retval.add(deleteRecordsByColumnSql(pidListString, resourceTablePk));
 		return retval;
+	}
+
+	private void callHooks(List<Long> thePids, String theResourceType) {
+		HookParams params = new HookParams()
+			.add(String.class, theResourceType)
+			.add(List.class, thePids)
+			.add(AtomicLong.class, new AtomicLong())
+			.add(RequestDetails.class, new SystemRequestDetails())
+			.add(ServletRequestDetails.class, new ServletRequestDetails());
+		myInterceptorService.callHooks(Pointcut.STORAGE_PRE_DELETE_EXPUNGE_PID_LIST, params);
 	}
 
 	public void validateOkToDeleteAndExpunge(Slice<Long> thePids) {
