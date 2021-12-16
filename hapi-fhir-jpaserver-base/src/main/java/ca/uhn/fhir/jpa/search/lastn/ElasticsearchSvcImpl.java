@@ -38,6 +38,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
@@ -82,6 +83,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
@@ -745,40 +747,47 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	}
 
 	@Override
-	public List<IBaseResource> getObservationResources(List<ResourcePersistentId> thePids) {
+	public List<IBaseResource> getObservationResources(Collection<ResourcePersistentId> thePids) {
 		SearchRequest searchRequest = buildObservationResourceSearchRequest(thePids);
 		try {
 			SearchResponse observationDocumentResponse = executeSearchRequest(searchRequest);
 			SearchHit[] observationDocumentHits = observationDocumentResponse.getHits().getHits();
-			List<IBaseResource> observationResources = new ArrayList<>();
 			IParser parser = TolerantJsonParser.createWithLenientErrorHandling(myContext, null);
 			Class<? extends IBaseResource> resourceType = myContext.getResourceDefinition(OBSERVATION_RESOURCE_NAME).getImplementingClass();
-			for (SearchHit hit : observationDocumentHits) {
-				ObservationJson observationJson = objectMapper.readValue(hit.getSourceAsString(), ObservationJson.class);
-				/**
-				 * @see ca.uhn.fhir.jpa.dao.BaseHapiFhirDao#toResource(Class, IBaseResourceEntity, Collection, boolean) for
-				 * details about parsing raw json to BaseResource
-				 */
-				// Parse using tolerant parser
-				IBaseResource resource = parser.parseResource(resourceType, observationJson.getResource());
-				// Fixme what do we do with partition?
-				// Fixme what do we do with deleted observation resources
-				// Fixme how do you handle provenance?
-				observationResources.add(resource);
-			}
-			return observationResources;
+
+			return Arrays.stream(observationDocumentHits)
+				.map(hit -> parseObservationResource(hit, parser, resourceType))
+				.collect(Collectors.toList());
 		} catch (IOException theE) {
+			// Fixme do we fallback to JPA search then?
 			throw new InvalidRequestException("Unable to execute observation document query for provided IDs " + thePids, theE);
 		}
 	}
 
-	private SearchRequest buildObservationResourceSearchRequest(List<ResourcePersistentId> thePids) {
+	private IBaseResource parseObservationResource(SearchHit theSearchHit, IParser theParser, Class<? extends IBaseResource> resourceType) {
+		try {
+			ObservationJson observationJson = objectMapper.readValue(theSearchHit.getSourceAsString(), ObservationJson.class);
+			/**
+			 * @see ca.uhn.fhir.jpa.dao.BaseHapiFhirDao#toResource(Class, IBaseResourceEntity, Collection, boolean) for
+			 * details about parsing raw json to BaseResource
+			 */
+			// Fixme what do we do with partition?
+			// Fixme what do we do with deleted observation resources
+			// Fixme how do you handle provenance?
+			// Parse using tolerant parser
+			return theParser.parseResource(resourceType, observationJson.getResource());
+		} catch (JsonProcessingException exp) {
+			throw new InvalidRequestException("Unable to parse the observation resource json", exp);
+		}
+	}
+
+	private SearchRequest buildObservationResourceSearchRequest(Collection<ResourcePersistentId> thePids) {
 		SearchRequest searchRequest = new SearchRequest(OBSERVATION_INDEX);
 		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 		// Query
 		BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-		boolQueryBuilder.must(QueryBuilders.termsQuery(OBSERVATION_IDENTIFIER_FIELD_NAME,
-			thePids.stream().map(Object::toString).collect(Collectors.toList())));
+		List<String> pidParams = thePids.stream().map(Object::toString).collect(Collectors.toList());
+		boolQueryBuilder.must(QueryBuilders.termsQuery(OBSERVATION_IDENTIFIER_FIELD_NAME, pidParams));
 		searchSourceBuilder.query(boolQueryBuilder);
 		searchSourceBuilder.size(thePids.size());
 		searchRequest.source(searchSourceBuilder);

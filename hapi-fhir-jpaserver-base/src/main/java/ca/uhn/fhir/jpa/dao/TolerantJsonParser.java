@@ -92,10 +92,11 @@ public class TolerantJsonParser extends JsonParser {
 					BaseRuntimeElementDefinition<?> def = theElementDefinitionPath.get(theElementDefinitionPath.size() - 1);
 					if (def.getName().equals("decimal")) {
 						IPrimitiveType<BigDecimal> decimal = (IPrimitiveType<BigDecimal>) theElement;
-						String newPlainString = decimal.getValue().toPlainString();
+						String oldValue = decimal.getValueAsString();
+						String newValue = decimal.getValue().toPlainString();
 						ourLog.warn("Correcting invalid previously saved decimal number for Resource[pid={}] - Was {} and now is {}",
-							Objects.isNull(myResourcePid) ? "" : myResourcePid, decimal.getValueAsString(), newPlainString);
-						decimal.setValueAsString(newPlainString);
+							Objects.isNull(myResourcePid) ? "" : myResourcePid, oldValue, newValue);
+						decimal.setValueAsString(newValue);
 					}
 
 					return true;

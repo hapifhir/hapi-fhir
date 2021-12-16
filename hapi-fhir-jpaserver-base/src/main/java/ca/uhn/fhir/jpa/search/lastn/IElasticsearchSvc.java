@@ -28,6 +28,7 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 
 public interface IElasticsearchSvc {
@@ -95,6 +96,6 @@ public interface IElasticsearchSvc {
 	 * @param thePids
 	 * @return Resources list or empty if nothing found
 	 */
-	List<IBaseResource> getObservationResources(List<ResourcePersistentId> thePids);
+	List<IBaseResource> getObservationResources(Collection<ResourcePersistentId> thePids);
 
 }

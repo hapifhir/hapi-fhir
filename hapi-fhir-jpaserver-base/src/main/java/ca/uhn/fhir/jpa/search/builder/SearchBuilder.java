@@ -861,7 +861,7 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	private List<IBaseResource> loadObservationResourcesFromElasticSearch(Collection<ResourcePersistentId> thePids) {
-		return myIElasticsearchSvc.getObservationResources(new ArrayList<>(thePids));
+		return myIElasticsearchSvc.getObservationResources(thePids);
 	}
 
 	/**
