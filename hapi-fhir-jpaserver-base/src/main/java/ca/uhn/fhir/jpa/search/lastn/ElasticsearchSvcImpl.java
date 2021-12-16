@@ -21,13 +21,16 @@ package ca.uhn.fhir.jpa.search.lastn;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.dao.TolerantJsonParser;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
 import ca.uhn.fhir.jpa.model.util.CodeSystemHash;
 import ca.uhn.fhir.jpa.search.lastn.json.CodeJson;
 import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.util.LastNParameterHelper;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
@@ -79,6 +82,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -96,29 +100,31 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	public static final String OBSERVATION_CODE_INDEX_SCHEMA_FILE = "ObservationCodeIndexSchema.json";
 
 	// Aggregation Constants
-	private final String GROUP_BY_SUBJECT = "group_by_subject";
-	private final String GROUP_BY_SYSTEM = "group_by_system";
-	private final String GROUP_BY_CODE = "group_by_code";
-	private final String MOST_RECENT_EFFECTIVE = "most_recent_effective";
+	private static final String GROUP_BY_SUBJECT = "group_by_subject";
+	private static final String GROUP_BY_SYSTEM = "group_by_system";
+	private static final String GROUP_BY_CODE = "group_by_code";
+	private static final String MOST_RECENT_EFFECTIVE = "most_recent_effective";
 
 	// Observation index document element names
-	private final String OBSERVATION_IDENTIFIER_FIELD_NAME = "identifier";
-	private final String OBSERVATION_SUBJECT_FIELD_NAME = "subject";
-	private final String OBSERVATION_CODEVALUE_FIELD_NAME = "codeconceptcodingcode";
-	private final String OBSERVATION_CODESYSTEM_FIELD_NAME = "codeconceptcodingsystem";
-	private final String OBSERVATION_CODEHASH_FIELD_NAME = "codeconceptcodingcode_system_hash";
-	private final String OBSERVATION_CODEDISPLAY_FIELD_NAME = "codeconceptcodingdisplay";
-	private final String OBSERVATION_CODE_TEXT_FIELD_NAME = "codeconcepttext";
-	private final String OBSERVATION_EFFECTIVEDTM_FIELD_NAME = "effectivedtm";
-	private final String OBSERVATION_CATEGORYHASH_FIELD_NAME = "categoryconceptcodingcode_system_hash";
-	private final String OBSERVATION_CATEGORYVALUE_FIELD_NAME = "categoryconceptcodingcode";
-	private final String OBSERVATION_CATEGORYSYSTEM_FIELD_NAME = "categoryconceptcodingsystem";
-	private final String OBSERVATION_CATEGORYDISPLAY_FIELD_NAME = "categoryconceptcodingdisplay";
-	private final String OBSERVATION_CATEGORYTEXT_FIELD_NAME = "categoryconcepttext";
+	private static final String OBSERVATION_IDENTIFIER_FIELD_NAME = "identifier";
+	private static final String OBSERVATION_SUBJECT_FIELD_NAME = "subject";
+	private static final String OBSERVATION_CODEVALUE_FIELD_NAME = "codeconceptcodingcode";
+	private static final String OBSERVATION_CODESYSTEM_FIELD_NAME = "codeconceptcodingsystem";
+	private static final String OBSERVATION_CODEHASH_FIELD_NAME = "codeconceptcodingcode_system_hash";
+	private static final String OBSERVATION_CODEDISPLAY_FIELD_NAME = "codeconceptcodingdisplay";
+	private static final String OBSERVATION_CODE_TEXT_FIELD_NAME = "codeconcepttext";
+	private static final String OBSERVATION_EFFECTIVEDTM_FIELD_NAME = "effectivedtm";
+	private static final String OBSERVATION_CATEGORYHASH_FIELD_NAME = "categoryconceptcodingcode_system_hash";
+	private static final String OBSERVATION_CATEGORYVALUE_FIELD_NAME = "categoryconceptcodingcode";
+	private static final String OBSERVATION_CATEGORYSYSTEM_FIELD_NAME = "categoryconceptcodingsystem";
+	private static final String OBSERVATION_CATEGORYDISPLAY_FIELD_NAME = "categoryconceptcodingdisplay";
+	private static final String OBSERVATION_CATEGORYTEXT_FIELD_NAME = "categoryconcepttext";
 
 	// Code index document element names
-	private final String CODE_HASH = "codingcode_system_hash";
-	private final String CODE_TEXT = "text";
+	private static final String CODE_HASH = "codingcode_system_hash";
+	private static final String CODE_TEXT = "text";
+
+	private static final String OBSERVATION_RESOURCE_NAME = "Observation";
 
 	private final RestHighLevelClient myRestHighLevelClient;
 
@@ -126,6 +132,9 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 
 	@Autowired
 	private PartitionSettings myPartitionSettings;
+
+	@Autowired
+	private FhirContext myContext;
 
 	//This constructor used to inject a dummy partitionsettings in test.
 	public ElasticsearchSvcImpl(PartitionSettings thePartitionSetings, String theProtocol, String theHostname, @Nullable String theUsername, @Nullable String thePassword) {
@@ -742,13 +751,20 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 			SearchResponse observationDocumentResponse = executeSearchRequest(searchRequest);
 			SearchHit[] observationDocumentHits = observationDocumentResponse.getHits().getHits();
 			List<IBaseResource> observationResources = new ArrayList<>();
+			IParser parser = TolerantJsonParser.createWithLenientErrorHandling(myContext, null);
+			Class<? extends IBaseResource> resourceType = myContext.getResourceDefinition(OBSERVATION_RESOURCE_NAME).getImplementingClass();
 			for (SearchHit hit : observationDocumentHits) {
 				ObservationJson observationJson = objectMapper.readValue(hit.getSourceAsString(), ObservationJson.class);
-				// fixme do we use IDao.toResource method? if did, we have to lookup
-				// ResourceSearchView from DB that defeats the purpose of storing observation resource
-				// in elastic search because the toResource method will use the raw resource json stored in the DB
-				// and not need the resource json stored in elastic search
-				// observationResources.add(parseObservationResource(observationJson.getResource()));
+				/**
+				 * @see ca.uhn.fhir.jpa.dao.BaseHapiFhirDao#toResource(Class, IBaseResourceEntity, Collection, boolean) for
+				 * details about hydrate you raw json to BaseResource
+				 */
+				// Parse using tolerant parser
+				IBaseResource resource = parser.parseResource(resourceType, observationJson.getResource());
+				// Fixme what do we do with partition?
+				// Fixme what do we do with deleted observation resources
+				// Fixme how do you handle provenance?
+				observationResources.add(resource);
 			}
 			return observationResources;
 		} catch (IOException theE) {

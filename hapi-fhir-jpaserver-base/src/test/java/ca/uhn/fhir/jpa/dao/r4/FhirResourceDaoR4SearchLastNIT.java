@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.search.lastn.ElasticsearchSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -7,14 +8,12 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.IOException;
@@ -29,8 +28,6 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -39,8 +36,9 @@ import static org.mockito.Mockito.when;
 public class FhirResourceDaoR4SearchLastNIT extends BaseR4SearchLastN {
 
 	@AfterEach
-	public void resetMaximumPageSize() {
+	public void reset() {
 		SearchBuilder.setMaxPageSize50ForTest(false);
+		myDaoConfig.setStoreResourceInLuceneIndex(new DaoConfig().isStoreResourceInLuceneIndex());
 	}
 
 	@Test
@@ -129,17 +127,16 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseR4SearchLastN {
 		when(mySrd.getParameters()).thenReturn(requestParameters);
 
 		List<String> results = toUnqualifiedVersionlessIdValues(myObservationDao.observationsLastN(params, mockSrd(), null));
-		List<ResourcePersistentId> expectedPids = ResourcePersistentId.fromLongList(
+		List<ResourcePersistentId> expectedArgumentPids = ResourcePersistentId.fromLongList(
 			observationIds.stream().map(IIdType::getIdPartAsLong).collect(Collectors.toList())
 		);
 		ArgumentCaptor<List<ResourcePersistentId>> actualPids = ArgumentCaptor.forClass(List.class);
 		verify(myElasticsearchSvc, times(1)).getObservationResources(actualPids.capture());
-		assertThat(actualPids.getValue(), is(expectedPids));
-		assertEquals(5, results.size());
+		assertThat(actualPids.getValue(), is(expectedArgumentPids));
 
-
-		// Disable flag
-		myDaoConfig.setStoreResourceInLuceneIndex(false);
+		List<String> expectedObservationList = observationIds.stream()
+			.map(id -> id.toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
+		assertThat(results, is(expectedObservationList));
 	}
 
 }
