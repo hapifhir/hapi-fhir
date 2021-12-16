@@ -33,6 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -86,8 +87,10 @@ abstract public class BaseR4SearchLastN extends BaseJpaTest {
 	protected FhirContext myFhirCtx;
 	@Autowired
 	protected PlatformTransactionManager myPlatformTransactionManager;
+
+	@SpyBean
 	@Autowired
-	private ElasticsearchSvcImpl myElasticsearchSvc;
+	protected ElasticsearchSvcImpl myElasticsearchSvc;
 
 	@Override
 	protected FhirContext getContext() {
@@ -143,8 +146,12 @@ abstract public class BaseR4SearchLastN extends BaseJpaTest {
 		createFiveObservationsForPatientCodeCategory(thePatientId, observationCd3, categoryCd3, 5);
 	}
 
-	private void createFiveObservationsForPatientCodeCategory(IIdType thePatientId, String theObservationCode, String theCategoryCode,
-																				 Integer theTimeOffset) {
+	/**
+	 * Create and return observation ids
+	 */
+	protected List<IIdType> createFiveObservationsForPatientCodeCategory(IIdType thePatientId, String theObservationCode, String theCategoryCode,
+																								Integer theTimeOffset) {
+		List<IIdType> observerationIds = new ArrayList<>();
 
 		for (int idx = 0; idx < 5; idx++) {
 			Observation obs = new Observation();
@@ -154,12 +161,15 @@ abstract public class BaseR4SearchLastN extends BaseJpaTest {
 			Date effectiveDtm = calculateObservationDateFromOffset(theTimeOffset, idx);
 			obs.setEffective(new DateTimeType(effectiveDtm));
 			obs.getCategoryFirstRep().addCoding().setCode(theCategoryCode).setSystem(categorySystem);
-			String observationId = myObservationDao.create(obs, mockSrd()).getId().toUnqualifiedVersionless().getValue();
-			observationPatientMap.put(observationId, thePatientId.getValue());
-			observationCategoryMap.put(observationId, theCategoryCode);
-			observationCodeMap.put(observationId, theObservationCode);
-			observationEffectiveMap.put(observationId, effectiveDtm);
+			IIdType observationId = myObservationDao.create(obs, mockSrd()).getId().toUnqualifiedVersionless();
+			String observationIdValue = observationId.getValue();
+			observationPatientMap.put(observationIdValue, thePatientId.getValue());
+			observationCategoryMap.put(observationIdValue, theCategoryCode);
+			observationCodeMap.put(observationIdValue, theObservationCode);
+			observationEffectiveMap.put(observationIdValue, effectiveDtm);
+			observerationIds.add(observationId);
 		}
+		return observerationIds;
 	}
 
 	private Date calculateObservationDateFromOffset(Integer theTimeOffset, Integer theObservationIndex) {

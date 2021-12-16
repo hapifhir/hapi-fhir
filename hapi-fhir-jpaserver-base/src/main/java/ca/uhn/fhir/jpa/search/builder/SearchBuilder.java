@@ -121,6 +121,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -305,7 +306,6 @@ public class SearchBuilder implements ISearchBuilder {
 		myRequestPartitionId = theRequestPartitionId;
 	}
 
-	// fixme may need a NOP SearchQueryExecutor for queries that resolve the pids without recourse to JPA
 	private ArrayList<SearchQueryExecutor> createQuery(SearchParameterMap theParams, SortSpec sort, Integer theOffset, Integer theMaximumResults, boolean theCount, RequestDetails theRequest,
 																		SearchRuntimeDetails theSearchRuntimeDetails) {
 
@@ -313,7 +313,6 @@ public class SearchBuilder implements ISearchBuilder {
 
 		if (checkUseHibernateSearch()) {
 			if (myParams.isLastN()) {
-				// fixme if we have no _includes to process, and no remaining search params, should we fetch the resource json here instead?
 				pids = executeLastNAgainstIndex(theMaximumResults);
 			} else {
 				pids = queryLuceneForPIDs(theRequest);
@@ -374,11 +373,10 @@ public class SearchBuilder implements ISearchBuilder {
 	private List<ResourcePersistentId> executeLastNAgainstIndex(Integer theMaximumResults) {
 		validateLastNIsEnabled();
 
-		// TODO MB we can satisfy resources directly if we put the resources in elastic.
 		List<String> lastnResourceIds = myIElasticsearchSvc.executeLastN(myParams, myContext, theMaximumResults);
 
 		return lastnResourceIds.stream()
-			.map(lastnResourceId -> myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId,myResourceName,lastnResourceId))
+			.map(lastnResourceId -> myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, lastnResourceId))
 			.collect(Collectors.toList());
 	}
 
@@ -405,6 +403,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 	/**
 	 * Combs through the params for any _id parameters and extracts the PIDs for them
+	 *
 	 * @param theTargetPids
 	 */
 	private void extractTargetPidsFromIdParams(HashSet<Long> theTargetPids) {
@@ -418,7 +417,7 @@ public class SearchBuilder implements ISearchBuilder {
 					// we expect all _id values to be StringParams
 					ids.add(((StringParam) param).getValue());
 				} else if (param instanceof TokenParam) {
-					ids.add(((TokenParam)param).getValue());
+					ids.add(((TokenParam) param).getValue());
 				} else {
 					// we do not expect the _id parameter to be a non-string value
 					throw new IllegalArgumentException("_id parameter must be a StringParam or TokenParam");
@@ -727,8 +726,6 @@ public class SearchBuilder implements ISearchBuilder {
 			versionlessPids = normalizeIdListForLastNInClause(versionlessPids);
 		}
 
-		// fixme we have a list of pids, and about to query for the json
-		// fixme if resourcePidToVersion has no version overrides, we can just go to elastic here.
 		// -- get the resource from the searchView
 		Collection<ResourceSearchView> resourceSearchViewList = myResourceSearchViewDao.findByResourceIds(versionlessPids);
 
@@ -849,10 +846,22 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		List<ResourcePersistentId> pids = new ArrayList<>(thePids);
-		// fixme maybe try the fast path here.  We only chunk because some jdbc drivers can't handle long param lists.
-		// if lastn and theIncludedPids.isEmpty(), then go back to elastic to fetch thePids into a list of Resources.
-		new QueryChunker<ResourcePersistentId>().chunk(pids, t -> doLoadPids(t, theIncludedPids, theResourceListToPopulate, theForHistoryOperation, position));
+		// Can we fast track this loading by checking elastic search?
+		if (isLoadingFromElasticSearchSupported(theIncludedPids.isEmpty())) {
+			theResourceListToPopulate.addAll(loadObservationResourcesFromElasticSearch(thePids));
+		} else {
+			// We only chunk because some jdbc drivers can't handle long param lists.
+			new QueryChunker<ResourcePersistentId>().chunk(pids, t -> doLoadPids(t, theIncludedPids, theResourceListToPopulate, theForHistoryOperation, position));
+		}
+	}
 
+	private boolean isLoadingFromElasticSearchSupported(boolean noIncludePids) {
+		return noIncludePids && !Objects.isNull(myParams) && myParams.isLastN() && myDaoConfig.isStoreResourceInLuceneIndex()
+			&& myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3);
+	}
+
+	private List<IBaseResource> loadObservationResourcesFromElasticSearch(Collection<ResourcePersistentId> thePids) {
+		return myIElasticsearchSvc.getObservationResources(new ArrayList<>(thePids));
 	}
 
 	/**
@@ -1374,7 +1383,7 @@ public class SearchBuilder implements ISearchBuilder {
 				if (myNext == null) {
 
 
-					for (Iterator<ResourcePersistentId> myPreResultsIterator = myAlsoIncludePids.iterator(); myPreResultsIterator.hasNext();) {
+					for (Iterator<ResourcePersistentId> myPreResultsIterator = myAlsoIncludePids.iterator(); myPreResultsIterator.hasNext(); ) {
 						ResourcePersistentId next = myPreResultsIterator.next();
 						if (next != null)
 							if (myPidSet.add(next)) {

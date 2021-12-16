@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.util.LastNParameterHelper;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -70,6 +71,7 @@ import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilde
 import org.elasticsearch.search.aggregations.metrics.ParsedTopHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nullable;
@@ -79,6 +81,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -731,6 +734,41 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	public void close() throws IOException {
 		myRestHighLevelClient.close();
 	}
+
+	@Override
+	public List<IBaseResource> getObservationResources(List<ResourcePersistentId> thePids) {
+		SearchRequest searchRequest = buildObservationResourceSearchRequest(thePids);
+		try {
+			SearchResponse observationDocumentResponse = executeSearchRequest(searchRequest);
+			SearchHit[] observationDocumentHits = observationDocumentResponse.getHits().getHits();
+			List<IBaseResource> observationResources = new ArrayList<>();
+			for (SearchHit hit : observationDocumentHits) {
+				ObservationJson observationJson = objectMapper.readValue(hit.getSourceAsString(), ObservationJson.class);
+				// fixme do we use IDao.toResource method? if did, we have to lookup
+				// ResourceSearchView from DB that defeats the purpose of storing observation resource
+				// in elastic search because the toResource method will use the raw resource json stored in the DB
+				// and not need the resource json stored in elastic search
+				// observationResources.add(parseObservationResource(observationJson.getResource()));
+			}
+			return observationResources;
+		} catch (IOException theE) {
+			throw new InvalidRequestException("Unable to execute observation document query for provided IDs " + thePids, theE);
+		}
+	}
+
+	private SearchRequest buildObservationResourceSearchRequest(List<ResourcePersistentId> thePids) {
+		SearchRequest searchRequest = new SearchRequest(OBSERVATION_INDEX);
+		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+		// Query
+		BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+		boolQueryBuilder.must(QueryBuilders.termsQuery(OBSERVATION_IDENTIFIER_FIELD_NAME,
+			thePids.stream().map(Object::toString).collect(Collectors.toList())));
+		searchSourceBuilder.query(boolQueryBuilder);
+		searchSourceBuilder.size(thePids.size());
+		searchRequest.source(searchSourceBuilder);
+		return searchRequest;
+	}
+
 
 	private IndexRequest createIndexRequest(String theIndexName, String theDocumentId, String theObservationDocument, String theDocumentType) {
 		IndexRequest request = new IndexRequest(theIndexName);
