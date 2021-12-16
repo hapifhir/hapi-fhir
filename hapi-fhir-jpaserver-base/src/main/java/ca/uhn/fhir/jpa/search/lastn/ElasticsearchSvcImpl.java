@@ -757,7 +757,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 				ObservationJson observationJson = objectMapper.readValue(hit.getSourceAsString(), ObservationJson.class);
 				/**
 				 * @see ca.uhn.fhir.jpa.dao.BaseHapiFhirDao#toResource(Class, IBaseResourceEntity, Collection, boolean) for
-				 * details about hydrate you raw json to BaseResource
+				 * details about parsing raw json to BaseResource
 				 */
 				// Parse using tolerant parser
 				IBaseResource resource = parser.parseResource(resourceType, observationJson.getResource());
