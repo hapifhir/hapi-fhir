@@ -45,6 +45,7 @@ import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.messaging.BaseResourceModifiedMessage;
 import ca.uhn.fhir.util.BundleBuilder;
 import org.apache.commons.text.StringSubstitutor;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -164,11 +165,11 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 		return operation;
 	}
 
-	public IBaseResource getResource(IIdType payloadId, RequestPartitionId thePartitionId) throws ResourceGoneException {
+	public IBaseResource getResource(IIdType payloadId, RequestPartitionId thePartitionId, boolean theDeletedOK) throws ResourceGoneException {
 		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(payloadId.getResourceType());
 		SystemRequestDetails systemRequestDetails = new SystemRequestDetails().setRequestPartitionId(thePartitionId);
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceDef.getImplementingClass());
-		return dao.read(payloadId.toVersionless(),  systemRequestDetails);
+		return dao.read(payloadId.toVersionless(),  systemRequestDetails, theDeletedOK);
 	}
 
 
@@ -180,7 +181,8 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 
 			try {
 				if (payloadId != null) {
-					payloadResource = getResource(payloadId.toVersionless(), theMsg.getRequestPartitionId());
+					boolean deletedOK = theMsg.getOperationType() == BaseResourceModifiedMessage.OperationTypeEnum.DELETE;
+					payloadResource = getResource(payloadId.toVersionless(), theMsg.getRequestPartitionId(), deletedOK);
 				} else {
 					return null;
 				}

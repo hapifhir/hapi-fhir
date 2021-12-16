@@ -1376,6 +1376,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					.orElse(null);
 			}
 		}
+
 		boolean haveSource = isNotBlank(source) && myConfig.getStoreMetaSourceInformation().isStoreSourceUri();
 		boolean haveRequestId = isNotBlank(requestId) && myConfig.getStoreMetaSourceInformation().isStoreRequestId();
 		if (haveSource || haveRequestId) {

@@ -40,6 +40,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
 import ca.uhn.fhir.util.VersionEnum;
 
+import javax.persistence.Index;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -85,6 +86,31 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	}
 
 
+	/**
+	 * See https://github.com/hapifhir/hapi-fhir/issues/3237 for reasoning for these indexes.
+	 * This adds indexes to various tables to enhance delete-expunge performance, which does deletes by PID.
+	 */
+	private void addIndexesForDeleteExpunge(Builder theVersion) {
+
+		theVersion.onTable( "HFJ_HISTORY_TAG")
+			.addIndex("20211210.2", "IDX_RESHISTTAG_RESID" )
+			.unique(false)
+			.withColumns("RES_ID");
+
+
+		theVersion.onTable( "HFJ_RES_VER_PROV")
+			.addIndex("20211210.3", "FK_RESVERPROV_RES_PID" )
+			.unique(false)
+			.withColumns("RES_PID")
+			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
+
+		theVersion.onTable("HFJ_FORCED_ID")
+			.addIndex("20211210.4", "FK_FORCEDID_RESOURCE")
+			.unique(true)
+			.withColumns("RESOURCE_PID")
+			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
+	}
+
 	private void init570() {
 		Builder version = forVersion(VersionEnum.V5_7_0);
 
@@ -116,6 +142,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.withColumns("PARENT_PID")
 			// H2, Derby, MariaDB, and MySql automatically add indexes to foreign keys
 			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
+
+		addIndexesForDeleteExpunge(version);
 	}
 
 
