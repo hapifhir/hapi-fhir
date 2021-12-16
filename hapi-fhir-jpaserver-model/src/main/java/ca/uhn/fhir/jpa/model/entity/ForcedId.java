@@ -57,7 +57,7 @@ import javax.persistence.UniqueConstraint;
 	 * so don't reuse these names
 	 */
 	@Index(name = "IDX_FORCEID_FID", columnList = "FORCED_ID"),
-	@Index(name = "IDX_FORCEID_RESID", columnList = "RESOURCE_PID"),
+	//@Index(name = "IDX_FORCEID_RESID", columnList = "RESOURCE_PID"),
 	//TODO GGG potentiall add a type + res_id index here, specifically for deletion?
 })
 public class ForcedId extends BasePartitionable {

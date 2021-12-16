@@ -95,13 +95,19 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		theVersion.onTable( "HFJ_HISTORY_TAG")
 			.addIndex("20211210.2", "IDX_RESHISTTAG_RESID" )
 			.unique(false)
-			.withColumns("RES_ID")
-			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
+			.withColumns("RES_ID");
+
 
 		theVersion.onTable( "HFJ_RES_VER_PROV")
-			.addIndex("20211210.3", "IDX_RESVERPROV_RESID" )
+			.addIndex("20211210.3", "FK_RESVERPROV_RES_PID" )
 			.unique(false)
 			.withColumns("RES_PID")
+			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
+
+		theVersion.onTable("HFJ_FORCED_ID")
+			.addIndex("20211210.4", "FK_FORCEDID_RESOURCE")
+			.unique(true)
+			.withColumns("RESOURCE_PID")
 			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
 	}
 

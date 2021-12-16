@@ -48,9 +48,8 @@ import java.util.Date;
 @Table(name = "MPI_LINK", uniqueConstraints = {
 	// TODO GGG DROP this index, and instead use the below one
 	@UniqueConstraint(name = "IDX_EMPI_PERSON_TGT", columnNames = {"PERSON_PID", "TARGET_PID"}),
-
 	// v---- this one
-	@UniqueConstraint(name = "IDX_EMPI_GR_TGT", columnNames = {"GOLDEN_RESOURCE_PID", "TARGET_PID"}),
+	//TODO GGG revisit adding this: @UniqueConstraint(name = "IDX_EMPI_GR_TGT", columnNames = {"GOLDEN_RESOURCE_PID", "TARGET_PID"}),
 	//TODO GGG Should i make individual indices for PERSON/TARGET?
 })
 public class MdmLink implements IMdmLink {

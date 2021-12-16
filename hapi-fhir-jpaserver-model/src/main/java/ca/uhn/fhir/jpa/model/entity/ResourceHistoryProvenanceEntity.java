@@ -39,7 +39,7 @@ import javax.persistence.Table;
 @Table(name = "HFJ_RES_VER_PROV", indexes = {
 	@Index(name = "IDX_RESVERPROV_SOURCEURI", columnList = "SOURCE_URI"),
 	@Index(name = "IDX_RESVERPROV_REQUESTID", columnList = "REQUEST_ID"),
-	@Index(name = "IDX_RESVERPROV_RESID", columnList = "RES_PID")
+	//@Index(name = "IDX_RESVERPROV_RESID", columnList = "RES_PID")
 })
 @Entity
 public class ResourceHistoryProvenanceEntity extends BasePartitionable {
