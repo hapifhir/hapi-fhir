@@ -161,11 +161,11 @@ public class TermReindexingSvcImpl implements ITermReindexingSvc {
 
 	public static class Job implements HapiJob {
 		@Autowired
-		private ITermDeferredStorageSvc myTerminologySvc;
+		private ITermReindexingSvc myTermReindexingSvc;
 
 		@Override
 		public void execute(JobExecutionContext theContext) {
-			myTerminologySvc.saveDeferred();
+			myTermReindexingSvc.processReindexing();
 		}
 	}
 
