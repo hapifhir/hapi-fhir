@@ -14,9 +14,7 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;

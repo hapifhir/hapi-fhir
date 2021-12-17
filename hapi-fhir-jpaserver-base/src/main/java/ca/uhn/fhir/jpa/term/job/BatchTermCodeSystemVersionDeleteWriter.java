@@ -22,10 +22,6 @@ package ca.uhn.fhir.jpa.term.job;
 
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
-import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
-import ca.uhn.fhir.jpa.dao.data.ITermConceptDesignationDao;
-import ca.uhn.fhir.jpa.dao.data.ITermConceptParentChildLinkDao;
-import ca.uhn.fhir.jpa.dao.data.ITermConceptPropertyDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import org.slf4j.Logger;
@@ -34,7 +30,6 @@ import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Optional;
 

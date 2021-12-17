@@ -27,7 +27,12 @@ import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * Extract search params for advanced lucene indexing.

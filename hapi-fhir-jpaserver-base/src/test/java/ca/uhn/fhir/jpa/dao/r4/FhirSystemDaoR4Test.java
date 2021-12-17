@@ -824,7 +824,6 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		profiles = meta.getProfile();
 		assertEquals(1, profiles.size());
 		assertEquals("http://profile/2", profiles.get(0).getValue());
-
 	}
 
 	@Test

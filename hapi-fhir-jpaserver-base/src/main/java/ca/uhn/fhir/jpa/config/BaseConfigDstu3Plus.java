@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.JpaPersistedResourceValidationSupport;
 import ca.uhn.fhir.jpa.dao.ObservationLastNIndexPersistSvc;
 import ca.uhn.fhir.jpa.term.TermCodeSystemStorageSvcImpl;
@@ -66,7 +67,7 @@ public abstract class BaseConfigDstu3Plus extends BaseConfig {
 	public abstract ITermVersionAdapterSvc terminologyVersionAdapterSvc();
 
 	@Bean(name = "myDefaultProfileValidationSupport")
-	public DefaultProfileValidationSupport defaultProfileValidationSupport() {
+	public DefaultProfileValidationSupport defaultProfileValidationSupport(DaoConfig theDaoConfig) {
 		return new DefaultProfileValidationSupport(fhirContext());
 	}
 

@@ -1,0 +1,4 @@
+---
+type: add
+issue: 2480
+title: "Added partition support for subscriptions. Subscriptions will now only match resource from the same partition"

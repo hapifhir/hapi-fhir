@@ -20,7 +20,13 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Lob;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import java.sql.Blob;
 import java.util.Date;
 

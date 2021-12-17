@@ -24,13 +24,25 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.validation.schematron.SchematronProvider;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 
 /**
@@ -46,6 +58,7 @@ import java.util.List;
  * </p>
  */
 public class FhirValidator {
+	private static final Logger ourLog = LoggerFactory.getLogger(FhirValidator.class);
 
 	private static final String I18N_KEY_NO_PH_ERROR = FhirValidator.class.getName() + ".noPhError";
 
@@ -53,6 +66,9 @@ public class FhirValidator {
 	private final FhirContext myContext;
 	private List<IValidatorModule> myValidators = new ArrayList<>();
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
+	private boolean myConcurrentBundleValidation;
+
+	private ExecutorService myExecutorService;
 
 	/**
 	 * Constructor (this should not be called directly, but rather {@link FhirContext#newValidator()} should be called to obtain an instance of {@link FhirValidator})
@@ -72,8 +88,7 @@ public class FhirValidator {
 				registerValidatorModule(theInstance);
 			}
 		} else {
-			for (Iterator<IValidatorModule> iter = myValidators.iterator(); iter.hasNext(); ) {
-				IValidatorModule next = iter.next();
+			for (IValidatorModule next : myValidators) {
 				if (next.getClass().equals(type)) {
 					unregisterValidatorModule(next);
 				}
@@ -86,6 +101,7 @@ public class FhirValidator {
 		for (IValidatorModule next : myValidators) {
 			if (next.getClass().equals(type)) {
 				found = true;
+				break;
 			}
 		}
 		return found;
@@ -210,20 +226,82 @@ public class FhirValidator {
 	 * @return the results of validation
 	 * @since 4.0.0
 	 */
+	public ValidationResult validateWithResult(String theResource, ValidationOptions theOptions) {
+		Validate.notNull(theResource, "theResource must not be null");
+		IValidationContext<IBaseResource> validationContext = ValidationContext.forText(myContext, theResource, theOptions);
+		Function<ValidationResult, ValidationResult> callback = result -> invokeValidationCompletedHooks(null, theResource, result);
+		return doValidate(validationContext, theOptions, callback);
+	}
+
+	/**
+	 * Validates a resource instance returning a {@link ValidationResult} which contains the results.
+	 *
+	 * @param theResource the resource to validate
+	 * @param theOptions  Optionally provides options to the validator
+	 * @return the results of validation
+	 * @since 4.0.0
+	 */
 	public ValidationResult validateWithResult(IBaseResource theResource, ValidationOptions theOptions) {
 		Validate.notNull(theResource, "theResource must not be null");
+		IValidationContext<IBaseResource> validationContext = ValidationContext.forResource(myContext, theResource, theOptions);
+		Function<ValidationResult, ValidationResult> callback = result -> invokeValidationCompletedHooks(theResource, null, result);
+		return doValidate(validationContext, theOptions, callback);
+	}
 
+	private ValidationResult doValidate(IValidationContext<IBaseResource> theValidationContext, ValidationOptions theOptions,
+													Function<ValidationResult, ValidationResult> theValidationCompletionCallback) {
 		applyDefaultValidators();
 
-		IValidationContext<IBaseResource> ctx = ValidationContext.forResource(myContext, theResource, theOptions);
-
-		for (IValidatorModule next : myValidators) {
-			next.validateResource(ctx);
+		ValidationResult result;
+		if (myConcurrentBundleValidation && theValidationContext.getResource() instanceof IBaseBundle
+			&& myExecutorService != null) {
+			result = validateBundleEntriesConcurrently(theValidationContext, theOptions);
+		} else {
+			result = validateResource(theValidationContext);
 		}
 
-		ValidationResult result = ctx.toResult();
-		result = invokeValidationCompletedHooks(theResource, null, result);
-		return result;
+		return theValidationCompletionCallback.apply(result);
+	}
+
+	private ValidationResult validateBundleEntriesConcurrently(IValidationContext<IBaseResource> theValidationContext, ValidationOptions theOptions) {
+		List<IBaseResource> entries = BundleUtil.toListOfResources(myContext, (IBaseBundle) theValidationContext.getResource());
+		// Async validation tasks
+		List<ConcurrentValidationTask> validationTasks = IntStream.range(0, entries.size())
+			.mapToObj(index -> {
+				IBaseResource entry = entries.get(index);
+				String entryPathPrefix = String.format("Bundle.entry[%d].resource.ofType(%s)", index, entry.fhirType());
+				Future<ValidationResult> future = myExecutorService.submit(() -> {
+					IValidationContext<IBaseResource> entryValidationContext = ValidationContext.forResource(theValidationContext.getFhirContext(), entry, theOptions);
+					return validateResource(entryValidationContext);
+				});
+				return new ConcurrentValidationTask(entryPathPrefix, future);
+			}).collect(Collectors.toList());
+
+		List<SingleValidationMessage> validationMessages = new ArrayList<>();
+		try {
+			for (ConcurrentValidationTask validationTask : validationTasks) {
+				ValidationResult result = validationTask.getFuture().get();
+				final String bundleEntryPathPrefix = validationTask.getResourcePathPrefix();
+				List<SingleValidationMessage> messages = result.getMessages().stream()
+					.map(message -> {
+						String currentPath = message.getLocationString().substring(message.getLocationString().indexOf('.'));
+						message.setLocationString(bundleEntryPathPrefix + currentPath);
+						return message;
+					})
+					.collect(Collectors.toList());
+				validationMessages.addAll(messages);
+			}
+		} catch (InterruptedException | ExecutionException exp) {
+			throw new InternalErrorException(exp);
+		}
+		return new ValidationResult(myContext, new ArrayList<>(validationMessages));
+	}
+
+	private ValidationResult validateResource(IValidationContext<IBaseResource> theValidationContext) {
+		for (IValidatorModule next : myValidators) {
+			next.validateResource(theValidationContext);
+		}
+		return theValidationContext.toResult();
 	}
 
 	private ValidationResult invokeValidationCompletedHooks(IBaseResource theResourceParsed, String theResourceRaw, ValidationResult theValidationResult) {
@@ -243,30 +321,6 @@ public class FhirValidator {
 	}
 
 	/**
-	 * Validates a resource instance returning a {@link ValidationResult} which contains the results.
-	 *
-	 * @param theResource the resource to validate
-	 * @param theOptions  Optionally provides options to the validator
-	 * @return the results of validation
-	 * @since 4.0.0
-	 */
-	public ValidationResult validateWithResult(String theResource, ValidationOptions theOptions) {
-		Validate.notNull(theResource, "theResource must not be null");
-
-		applyDefaultValidators();
-
-		IValidationContext<IBaseResource> ctx = ValidationContext.forText(myContext, theResource, theOptions);
-
-		for (IValidatorModule next : myValidators) {
-			next.validateResource(ctx);
-		}
-
-		ValidationResult result = ctx.toResult();
-		result = invokeValidationCompletedHooks(null, theResource, result);
-		return result;
-	}
-
-	/**
 	 * Optionally supplies an interceptor broadcaster that will be used to invoke validation related Pointcut events
 	 *
 	 * @since 5.5.0
@@ -274,4 +328,47 @@ public class FhirValidator {
 	public void setInterceptorBroadcaster(IInterceptorBroadcaster theInterceptorBraodcaster) {
 		myInterceptorBroadcaster = theInterceptorBraodcaster;
 	}
+
+	public FhirValidator setExecutorService(ExecutorService theExecutorService) {
+		myExecutorService = theExecutorService;
+		return this;
+	}
+
+	/**
+	 * If this is true, bundles will be validated in parallel threads.  The bundle structure itself will not be validated,
+	 * only the resources in its entries.
+	 */
+
+	public boolean isConcurrentBundleValidation() {
+		return myConcurrentBundleValidation;
+	}
+
+	/**
+	 * If this is true, bundles will be validated in parallel threads.  The bundle structure itself will not be validated,
+	 * only the resources in its entries.
+	 */
+	public FhirValidator setConcurrentBundleValidation(boolean theConcurrentBundleValidation) {
+		myConcurrentBundleValidation = theConcurrentBundleValidation;
+		return this;
+	}
+
+	// Simple Tuple to keep track of bundle path and associate aync future task
+	private static class ConcurrentValidationTask {
+		private final String myResourcePathPrefix;
+		private final Future<ValidationResult> myFuture;
+
+		private ConcurrentValidationTask(String theResourcePathPrefix, Future<ValidationResult> theFuture) {
+			myResourcePathPrefix = theResourcePathPrefix;
+			myFuture = theFuture;
+		}
+
+		public String getResourcePathPrefix() {
+			return myResourcePathPrefix;
+		}
+
+		public Future<ValidationResult> getFuture() {
+			return myFuture;
+		}
+	}
+
 }
