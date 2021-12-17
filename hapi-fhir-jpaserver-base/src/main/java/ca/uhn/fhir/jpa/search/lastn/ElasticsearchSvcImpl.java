@@ -205,7 +205,6 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	public List<String> executeLastN(SearchParameterMap theSearchParameterMap, FhirContext theFhirContext, Integer theMaxResultsToFetch) {
 		Validate.isTrue(!myPartitionSettings.isPartitioningEnabled(), "$lastn is not currently supported on partitioned servers");
 
-		// fixme - if we add the resource to the list of fields to include here, it will come back in the results.
 		String[] topHitsInclude = {OBSERVATION_IDENTIFIER_FIELD_NAME};
 		return buildAndExecuteSearch(theSearchParameterMap, theFhirContext, topHitsInclude,
 			ObservationJson::getIdentifier, theMaxResultsToFetch);
@@ -759,16 +758,16 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 			 * @see ca.uhn.fhir.jpa.dao.BaseHapiFhirDao#toResource(Class, IBaseResourceEntity, Collection, boolean) for
 			 * details about parsing raw json to BaseResource
 			 */
-			// Fixme what do we do with partition?
-			// Fixme what do we do with deleted observation resources
-			// Fixme how do you handle provenance?
+			// WIP what do we do with partition?
+			// WIP what do we do with deleted observation resources
+			// WIP how do you handle provenance?
 			// Parse using tolerant parser
 			return Arrays.stream(observationDocumentHits)
 				.map(this::parseObservationJson)
 				.map(observationJson -> parser.parseResource(resourceType, observationJson.getResource()))
 				.collect(Collectors.toList());
 		} catch (IOException theE) {
-			// Fixme do we fallback to JPA search then?
+			// WIP do we fallback to JPA search then?
 			throw new InvalidRequestException("Unable to execute observation document query for provided IDs " + thePids, theE);
 		}
 	}
