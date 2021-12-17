@@ -43,6 +43,7 @@ import java.util.Map;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class CanonicalSubscription implements Serializable, Cloneable, IModelJson {
+
 	private static final long serialVersionUID = 1L;
 
 	@JsonProperty("id")
@@ -73,6 +74,8 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 	private String myPayloadSearchCriteria;
 	@JsonProperty("partitionId")
 	private Integer myPartitionId;
+	@JsonProperty("sendDeleteMessages")
+	private boolean mySendDeleteMessages;
 
 	/**
 	 * Constructor
@@ -90,7 +93,7 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 	}
 
 	/**
-	 * For now, we're using the R4 TriggerDefinition, but this
+	 * For now we're using the R4 TriggerDefinition, but this
 	 * may change in the future when things stabilize
 	 */
 	public void addTrigger(CanonicalEventDefinition theTrigger) {
@@ -237,11 +240,17 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 	}
 
 	/**
-	 * For now, we're using the R4 triggerdefinition, but this
+	 * For now we're using the R4 triggerdefinition, but this
 	 * may change in the future when things stabilize
 	 */
 	public CanonicalEventDefinition getTrigger() {
 		return myTrigger;
+	}
+
+	public boolean getSendDeleteMessages() { return mySendDeleteMessages; }
+
+	public void setSendDeleteMessages(boolean theSendDeleteMessages) {
+		mySendDeleteMessages = theSendDeleteMessages;
 	}
 
 	@Override

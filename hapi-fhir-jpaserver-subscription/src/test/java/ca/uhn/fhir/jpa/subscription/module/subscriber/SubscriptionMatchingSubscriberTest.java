@@ -1,24 +1,43 @@
 package ca.uhn.fhir.jpa.subscription.module.subscriber;
 
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionCriteriaParser;
+import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingSubscriber;
+import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
+import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
+import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.standalone.BaseBlockingQueueSubscribableChannelDstu3Test;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.messaging.BaseResourceModifiedMessage;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Subscription;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.Answers;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Collections;
 import java.util.List;
 
+import static ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionCriteriaParser.TypeEnum.STARTYPE_EXPRESSION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Tests copied from jpa.subscription.resthook.RestHookTestDstu3Test
@@ -29,7 +48,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 
 	@BeforeEach
 	public void beforeEach() {
-		Mockito.when(myMockSubscriptionDao.getResourceType()).thenReturn(Subscription.class);
+		when(myMockSubscriptionDao.getResourceType()).thenReturn(Subscription.class);
 		myDaoRegistry.register(myMockSubscriptionDao);
 	}
 
@@ -264,11 +283,82 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		mySubscriptionResourceNotMatched.awaitExpected();
 	}
 
+	@Nested
+	public class TestDeleteMessages {
+		private final SubscriptionMatchingSubscriber subscriber = new SubscriptionMatchingSubscriber();
+		@Mock ResourceModifiedMessage message;
+		@Mock IInterceptorBroadcaster myInterceptorBroadcaster;
+		@Mock SubscriptionRegistry mySubscriptionRegistry;
+		@Mock(answer = Answers.RETURNS_DEEP_STUBS) ActiveSubscription myActiveSubscription;
+		@Mock CanonicalSubscription myCanonicalSubscription;
+		@Mock SubscriptionCriteriaParser.SubscriptionCriteria mySubscriptionCriteria;
+
+		@Test
+		public void testAreNotIgnored()  {
+			ReflectionTestUtils.setField(subscriber, "myInterceptorBroadcaster", myInterceptorBroadcaster);
+			ReflectionTestUtils.setField(subscriber, "mySubscriptionRegistry", mySubscriptionRegistry);
+
+			when(message.getOperationType()).thenReturn(BaseResourceModifiedMessage.OperationTypeEnum.DELETE);
+			when(myInterceptorBroadcaster.callHooks(
+				eq(Pointcut.SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED), any(HookParams.class))).thenReturn(true);
+			when(mySubscriptionRegistry.getAll()).thenReturn(Collections.emptyList());
+
+			subscriber.matchActiveSubscriptionsAndDeliver(message);
+
+			verify(myInterceptorBroadcaster).callHooks(
+				eq(Pointcut.SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED), any(HookParams.class));
+			verify(myInterceptorBroadcaster).callHooks(
+				eq(Pointcut.SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED), any(HookParams.class));
+		}
+
+		@Test
+		public void matchActiveSubscriptionsChecksSendDeleteMessagesExtensionFlag() {
+			ReflectionTestUtils.setField(subscriber, "myInterceptorBroadcaster", myInterceptorBroadcaster);
+			ReflectionTestUtils.setField(subscriber, "mySubscriptionRegistry", mySubscriptionRegistry);
+
+			when(message.getOperationType()).thenReturn(BaseResourceModifiedMessage.OperationTypeEnum.DELETE);
+			when(myInterceptorBroadcaster.callHooks(
+				eq(Pointcut.SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED), any(HookParams.class))).thenReturn(true);
+			when(message.getPayloadId(null)).thenReturn(new IdDt("Patient", 123L));
+			when(mySubscriptionRegistry.getAll()).thenReturn(Collections.singletonList(myActiveSubscription));
+			when(myActiveSubscription.getSubscription()).thenReturn(myCanonicalSubscription);
+			when(myActiveSubscription.getCriteria()).thenReturn(mySubscriptionCriteria);
+			when(myActiveSubscription.getId()).thenReturn("Patient/123");
+			when(mySubscriptionCriteria.getType()).thenReturn(STARTYPE_EXPRESSION);
+
+			subscriber.matchActiveSubscriptionsAndDeliver(message);
+
+			verify(myCanonicalSubscription, atLeastOnce()).getSendDeleteMessages();
+		}
+
+		@Test
+		public void matchActiveSubscriptionsAndDeliverSetsPartitionId() {
+			ReflectionTestUtils.setField(subscriber, "myInterceptorBroadcaster", myInterceptorBroadcaster);
+			ReflectionTestUtils.setField(subscriber, "mySubscriptionRegistry", mySubscriptionRegistry);
+
+			when(message.getOperationType()).thenReturn(BaseResourceModifiedMessage.OperationTypeEnum.DELETE);
+			when(myInterceptorBroadcaster.callHooks(
+				eq(Pointcut.SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED), any(HookParams.class))).thenReturn(true);
+			when(message.getPayloadId(null)).thenReturn(new IdDt("Patient", 123L));
+			when(mySubscriptionRegistry.getAll()).thenReturn(Collections.singletonList(myActiveSubscription));
+			when(myActiveSubscription.getSubscription()).thenReturn(myCanonicalSubscription);
+			when(myActiveSubscription.getCriteria()).thenReturn(mySubscriptionCriteria);
+			when(myActiveSubscription.getId()).thenReturn("Patient/123");
+			when(mySubscriptionCriteria.getType()).thenReturn(STARTYPE_EXPRESSION);
+			when(myCanonicalSubscription.getSendDeleteMessages()).thenReturn(true);
+
+			subscriber.matchActiveSubscriptionsAndDeliver(message);
+
+			verify(message, atLeastOnce()).getPayloadId(null);
+		}
+	}
+
+
 
 	private void mockSubscriptionRead(RequestPartitionId theRequestPartitionId, Subscription subscription) {
 		Subscription modifiedSubscription = subscription.copy();
 		// the original partition info was the request info, but we need the actual storage partition.
 		modifiedSubscription.setUserData(Constants.RESOURCE_PARTITION_ID, theRequestPartitionId);
-		Mockito.when(myMockSubscriptionDao.read(eq(subscription.getIdElement()), any())).thenReturn(modifiedSubscription);
+		when(myMockSubscriptionDao.read(eq(subscription.getIdElement()), any())).thenReturn(modifiedSubscription);
 	}
 }

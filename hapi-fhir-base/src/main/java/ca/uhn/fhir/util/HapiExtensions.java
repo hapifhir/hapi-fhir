@@ -131,6 +131,11 @@ public class HapiExtensions {
 	public static final String EX_RETRY_COUNT = "http://hapifhir.io/fhir/StructureDefinition/subscription-delivery-retry-count";
 
 	/**
+	 * This extension provides a way for subscribers to indicate if DELETE messages must be sent (default is ignoring them)
+	 */
+	public static final String EX_SEND_DELETE_MESSAGES = "http://hapifhir.io/fhir/StructureDefinition/subscription-send-delete-messages";
+
+	/**
 	 * Non instantiable
 	 */
 	private HapiExtensions() {
