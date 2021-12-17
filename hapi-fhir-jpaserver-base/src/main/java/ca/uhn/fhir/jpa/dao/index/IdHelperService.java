@@ -139,7 +139,7 @@ public class IdHelperService {
 
 		// We only pass 1 input in so only 0..1 will come back
 		if (matches.isEmpty() || !matches.containsKey(theResourceId)) {
-			throw new ResourceNotFoundException(Msg.code(1098) + id);
+			throw new ResourceNotFoundException(id);
 		}
 
 		if (matches.size() > 1 || matches.get(theResourceId).size() > 1) {

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.config.TestR4Config;
@@ -502,7 +503,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 			assertThat(responseString, not(containsString("\"name\":\"ORG_NAME\"")));
 
 			OperationOutcome oo = myFhirCtx.newJsonParser().parseResource(OperationOutcome.class, responseString);
-			assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesPattern("Unable to execute GraphQL Expression: HTTP 404 Resource Patient/[0-9]+ is not known"));
+			assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesPattern(Msg.code(1147) + "Unable to execute GraphQL Expression: HTTP 404 " + Msg.code(971) + "Resource Patient/[0-9]+ is not known"));
 		}
 
 	}
@@ -541,7 +542,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 			assertThat(responseString, not(containsString("\"name\":\"ORG_NAME\"")));
 
 			OperationOutcome oo = myFhirCtx.newJsonParser().parseResource(OperationOutcome.class, responseString);
-			assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesPattern("Unable to execute GraphQL Expression: HTTP 404 Resource Organization/[0-9]+ is not known"));
+			assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesPattern(Msg.code(1147) + "Unable to execute GraphQL Expression: HTTP 404 " + Msg.code(971) + "Resource Organization/[0-9]+ is not known"));
 		}
 
 	}

@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
@@ -176,7 +177,7 @@ public class FhirResourceDaoR4SearchWithLuceneDisabledTest extends BaseJpaTest {
 			myOrganizationDao.search(map).size();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Fulltext search is not enabled on this service, can not process parameter: _content", e.getMessage());
+			assertEquals(Msg.code(1192) + "Fulltext search is not enabled on this service, can not process parameter: _content", e.getMessage());
 		}
 	}
 
@@ -208,7 +209,7 @@ public class FhirResourceDaoR4SearchWithLuceneDisabledTest extends BaseJpaTest {
 			myOrganizationDao.search(map).size();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Fulltext search is not enabled on this service, can not process parameter: _text", e.getMessage());
+			assertEquals(Msg.code(1192) + "Fulltext search is not enabled on this service, can not process parameter: _text", e.getMessage());
 		}
 	}
 

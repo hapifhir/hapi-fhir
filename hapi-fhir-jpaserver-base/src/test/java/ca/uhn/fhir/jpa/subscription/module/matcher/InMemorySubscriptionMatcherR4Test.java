@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.subscription.module.matcher;
 
 import ca.uhn.fhir.context.FhirContext;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -560,7 +561,7 @@ public class InMemorySubscriptionMatcherR4Test {
 			InMemoryMatchResult result = myInMemorySubscriptionMatcher.match(subscription, msg);
 			fail();
 		} catch (AssertionError e) {
-			assertEquals("Reference at managingOrganization is invalid: urn:uuid:13720262-b392-465f-913e-54fb198ff954", e.getMessage());
+			assertEquals(Msg.code(320) + "Reference at managingOrganization is invalid: urn:uuid:13720262-b392-465f-913e-54fb198ff954", e.getMessage());
 		}
 	}
 

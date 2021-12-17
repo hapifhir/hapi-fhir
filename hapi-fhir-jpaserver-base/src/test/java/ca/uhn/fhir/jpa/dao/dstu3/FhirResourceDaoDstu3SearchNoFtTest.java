@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
@@ -473,7 +474,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			myPatientDao.search(params);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Invalid resource type: Observation__", e.getMessage());
+			assertEquals(Msg.code(1208) + "Invalid resource type: Observation__", e.getMessage());
 		}
 	}
 
@@ -486,7 +487,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			myPatientDao.search(params);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Unknown parameter name: Observation:IIIIDENFIEYR", e.getMessage());
+			assertEquals(Msg.code(1209) + "Unknown parameter name: Observation:IIIIDENFIEYR", e.getMessage());
 		}
 	}
 
@@ -499,7 +500,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			myPatientDao.search(params);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Unknown parameter name: Observation:soooooobject", e.getMessage());
+			assertEquals(Msg.code(1210) + "Unknown parameter name: Observation:soooooobject", e.getMessage());
 		}
 	}
 
@@ -2246,7 +2247,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			myPatientDao.search(params).getAllResources();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Fulltext search is not enabled on this service, can not process parameter: _content", e.getMessage());
+			assertEquals(Msg.code(1192) + "Fulltext search is not enabled on this service, can not process parameter: _content", e.getMessage());
 		}
 	}
 
@@ -2258,7 +2259,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			myPatientDao.search(params).getAllResources();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Fulltext search is not enabled on this service, can not process parameter: _text", e.getMessage());
+			assertEquals(Msg.code(1192) + "Fulltext search is not enabled on this service, can not process parameter: _text", e.getMessage());
 		}
 	}
 

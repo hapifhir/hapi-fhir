@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.exceptions;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -91,11 +92,11 @@ public class ResourceNotFoundException extends BaseServerResponseException {
 	}
 
   private static String createErrorMessage(Class<? extends IResource> theClass, IIdType theId) {
-		return "Resource of type " + theClass.getSimpleName() + " with ID " + theId + " is not known";
+		return Msg.code(970) + "Resource of type " + theClass.getSimpleName() + " with ID " + theId + " is not known";
 	}
 
 	private static String createErrorMessage(IIdType theId) {
-		return "Resource " + (theId != null ? theId.getValue() : "") + " is not known";
+		return Msg.code(971) + "Resource " + (theId != null ? theId.getValue() : "") + " is not known";
 	}
 
 }

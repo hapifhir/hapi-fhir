@@ -200,7 +200,7 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 		}
 		BaseHasResource sourceEntity = readEntity(theId, theRequest);
 		if (sourceEntity == null) {
-			throw new ResourceNotFoundException(Msg.code(948) + theId);
+			throw new ResourceNotFoundException(theId);
 		}
 		ValueSet source = (ValueSet) toResource(sourceEntity, false);
 		return source;

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -282,7 +283,7 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 			outcome.getResources(0, 1).get(0);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Invalid parameter chain: subject.marital-status", e.getMessage());
+			assertEquals(Msg.code(1243) + "Invalid parameter chain: subject.marital-status", e.getMessage());
 		}
 		
 	}

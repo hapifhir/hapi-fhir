@@ -61,7 +61,7 @@ public class PatientResourceProvider extends AbstractJaxRsResourceProvider<Patie
         if (patients.containsKey(theId.getIdPart())) {
             return patients.get(theId.getIdPart());
         } else {
-            throw new ResourceNotFoundException(Msg.code(254) + theId);
+            throw new ResourceNotFoundException(theId);
         }
     }
 

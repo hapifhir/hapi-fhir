@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -92,7 +93,7 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
 			assertEquals(MethodNotAllowedException.STATUS_CODE, response.getStatusLine().getStatusCode());
-			assertThat(resp, containsString(">Searching with _contained mode enabled is not enabled on this server"));
+			assertThat(resp, containsString(">" + Msg.code(984) + "Searching with _contained mode enabled is not enabled on this server"));
 		}
 	}
 

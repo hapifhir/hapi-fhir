@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -317,7 +318,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			myObservationDao.create(obs, "identifier=A%20B", new SystemRequestDetails());
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Failed to process conditional create. The supplied resource did not satisfy the conditional URL.", e.getMessage());
+			assertEquals(Msg.code(929) + "Failed to process conditional create. The supplied resource did not satisfy the conditional URL.", e.getMessage());
 		}
 	}
 
@@ -342,7 +343,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			mySystemDao.transaction(new SystemRequestDetails(), (Bundle) bb.getBundle());
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Failed to process conditional create. The supplied resource did not satisfy the conditional URL.", e.getMessage());
+			assertEquals(Msg.code(929) + "Failed to process conditional create. The supplied resource did not satisfy the conditional URL.", e.getMessage());
 		}
 	}
 
@@ -428,7 +429,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			myPatientDao.update(p);
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertEquals("No resource exists on this server resource with ID[AAA], and client-assigned IDs are not enabled.", e.getMessage());
+			assertEquals(Msg.code(959) + "No resource exists on this server resource with ID[AAA], and client-assigned IDs are not enabled.", e.getMessage());
 		}
 	}
 
@@ -627,7 +628,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			mySearchParameterDao.update(sp);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Can not override built-in search parameter Patient:birthdate because overriding is disabled on this server", e.getMessage());
+			assertEquals(Msg.code(1111) + "Can not override built-in search parameter Patient:birthdate because overriding is disabled on this server", e.getMessage());
 		}
 
 	}

@@ -172,7 +172,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 
 		TreeMap<Long, T> versions = myIdToVersionToResourceMap.get(theId.getIdPart());
 		if (versions == null || versions.isEmpty()) {
-			throw new ResourceNotFoundException(Msg.code(312) + theId);
+			throw new ResourceNotFoundException(theId);
 		}
 
 
@@ -239,7 +239,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	public  synchronized List<IBaseResource> historyInstance(@IdParam IIdType theId, RequestDetails theRequestDetails) {
 		LinkedList<T> retVal = myIdToHistory.get(theId.getIdPart());
 		if (retVal == null) {
-			throw new ResourceNotFoundException(Msg.code(313) + theId);
+			throw new ResourceNotFoundException(theId);
 		}
 
 		return fireInterceptorsAndFilterAsNeeded(retVal, theRequestDetails);
@@ -254,18 +254,18 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	public  synchronized T read(@IdParam IIdType theId, RequestDetails theRequestDetails) {
 		TreeMap<Long, T> versions = myIdToVersionToResourceMap.get(theId.getIdPart());
 		if (versions == null || versions.isEmpty()) {
-			throw new ResourceNotFoundException(Msg.code(314) + theId);
+			throw new ResourceNotFoundException(theId);
 		}
 
 		T retVal;
 		if (theId.hasVersionIdPart()) {
 			Long versionId = theId.getVersionIdPartAsLong();
 			if (!versions.containsKey(versionId)) {
-				throw new ResourceNotFoundException(Msg.code(315) + theId);
+				throw new ResourceNotFoundException(theId);
 			} else {
 				T resource = versions.get(versionId);
 				if (resource == null) {
-					throw new ResourceGoneException(Msg.code(316) + theId);
+					throw new ResourceGoneException(theId);
 				}
 				retVal = resource;
 			}
@@ -278,7 +278,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 
 		retVal = fireInterceptorsAndFilterAsNeeded(retVal, theRequestDetails);
 		if (retVal == null) {
-			throw new ResourceNotFoundException(Msg.code(317) + theId);
+			throw new ResourceNotFoundException(theId);
 		}
 		return retVal;
 	}

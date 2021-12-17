@@ -946,7 +946,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		StopWatch w = new StopWatch();
 		BaseHasResource entity = readEntity(theResourceId, theRequest);
 		if (entity == null) {
-			throw new ResourceNotFoundException(Msg.code(970) + theResourceId);
+			throw new ResourceNotFoundException(theResourceId);
 		}
 
 		ResourceTable latestVersion = readEntityLatestVersion(theResourceId, theRequest, transactionDetails);
@@ -981,7 +981,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		StopWatch w = new StopWatch();
 		BaseHasResource entity = readEntity(theResourceId, theRequest);
 		if (entity == null) {
-			throw new ResourceNotFoundException(Msg.code(971) + theResourceId);
+			throw new ResourceNotFoundException(theResourceId);
 		}
 
 		ResourceTable latestVersion = readEntityLatestVersion(theResourceId, theRequest, transactionDetails);
@@ -1196,7 +1196,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				.addIfMatchesType(ServletRequestDetails.class, theRequest);
 			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
 			if (accessDetails.isDontReturnResourceAtIndex(0)) {
-				throw new ResourceNotFoundException(Msg.code(976) + theId);
+				throw new ResourceNotFoundException(theId);
 			}
 		}
 
@@ -1267,7 +1267,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		if (entity == null) {
-			throw new ResourceNotFoundException(Msg.code(977) + theId);
+			throw new ResourceNotFoundException(theId);
 		}
 
 		if (theId.hasVersionIdPart()) {
@@ -1313,13 +1313,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		validateResourceTypeAndThrowInvalidRequestException(theId);
 
 		if (theTransactionDetails.isResolvedResourceIdEmpty(theId.toUnqualifiedVersionless())) {
-			throw new ResourceNotFoundException(Msg.code(980) + theId);
+			throw new ResourceNotFoundException(theId);
 		}
 
 		ResourcePersistentId persistentId = myIdHelperService.resolveResourcePersistentIds(theRequestPartitionId, getResourceName(), theId.getIdPart());
 		ResourceTable entity = myEntityManager.find(ResourceTable.class, persistentId.getId());
 		if (entity == null) {
-			throw new ResourceNotFoundException(Msg.code(981) + theId);
+			throw new ResourceNotFoundException(theId);
 		}
 		validateGivenIdIsAppropriateToRetrieveResource(theId, entity);
 		entity.setTransientForcedId(theId.getIdPart());
@@ -1360,7 +1360,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		StopWatch w = new StopWatch();
 		BaseHasResource entity = readEntity(theId, theRequest);
 		if (entity == null) {
-			throw new ResourceNotFoundException(Msg.code(982) + theId);
+			throw new ResourceNotFoundException(theId);
 		}
 
 		for (BaseTag next : new ArrayList<>(entity.getTags())) {
@@ -1838,7 +1838,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					// as far as the outside world is concerned, the given ID doesn't exist (it's just an internal pointer
 					// to the
 					// forced ID)
-					throw new ResourceNotFoundException(Msg.code(995) + theId);
+					throw new ResourceNotFoundException(theId);
 				}
 			}
 		}

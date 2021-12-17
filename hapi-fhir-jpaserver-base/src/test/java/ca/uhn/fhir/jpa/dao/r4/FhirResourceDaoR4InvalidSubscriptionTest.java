@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
@@ -53,7 +54,7 @@ public class FhirResourceDaoR4InvalidSubscriptionTest extends BaseJpaR4Test {
 			mySubscriptionDao.update(s);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Subscription.criteria contains invalid/unsupported resource type: FOO", e.getMessage());
+			assertEquals(Msg.code(13) + "Subscription.criteria contains invalid/unsupported resource type: FOO", e.getMessage());
 		}
 	}
 

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.interceptor;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -128,7 +129,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 			myStructureDefinitionDao.create(sd, new ServletRequestDetails());
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Resource type StructureDefinition can not be partitioned", e.getMessage());
+			assertEquals(Msg.code(1318) + "Resource type StructureDefinition can not be partitioned", e.getMessage());
 		}
 	}
 
@@ -143,7 +144,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 			myPatientDao.search(map);
 			fail();
 		} catch (InternalErrorException e) {
-			assertEquals("No interceptor provided a value for pointcut: STORAGE_PARTITION_IDENTIFY_READ", e.getMessage());
+			assertEquals(Msg.code(1319) + "No interceptor provided a value for pointcut: STORAGE_PARTITION_IDENTIFY_READ", e.getMessage());
 		}
 	}
 

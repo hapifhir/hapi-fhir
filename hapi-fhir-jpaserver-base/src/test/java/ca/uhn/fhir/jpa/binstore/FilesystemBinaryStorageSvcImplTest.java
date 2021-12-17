@@ -90,7 +90,7 @@ public class FilesystemBinaryStorageSvcImplTest {
 			mySvc.fetchBlob(new IdType("Patient/123"), "1111111");
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertEquals(Msg.code(1340) + "Unknown blob ID: 1111111 for resource ID Patient/123", e.getMessage());
+			assertEquals(Msg.code(1327) + "Unknown blob ID: 1111111 for resource ID Patient/123", e.getMessage());
 		}
 	}
 

@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -175,7 +176,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), startsWith("Resource Patient/" + patientId.getIdPart() + " not found, specified in path: Observation.subject"));
+			assertThat(e.getMessage(), startsWith(Msg.code(1094) + "Resource Patient/" + patientId.getIdPart() + " not found, specified in path: Observation.subject"));
 		}
 
 	}
@@ -225,7 +226,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), startsWith("Resource Patient/ONE not found, specified in path: Observation.subject"));
+			assertThat(e.getMessage(), startsWith(Msg.code(1094) + "Resource Patient/ONE not found, specified in path: Observation.subject"));
 		}
 
 	}
@@ -316,7 +317,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			mySearchParameterDao.create(sp, mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Resource type SearchParameter can not be partitioned", e.getMessage());
+			assertEquals(Msg.code(1318) + "Resource type SearchParameter can not be partitioned", e.getMessage());
 		}
 	}
 
@@ -836,7 +837,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 				myPatientDao.read(patientIdNull, mySrd).getIdElement().toUnqualifiedVersionless();
 				fail();
 			} catch (ResourceNotFoundException e) {
-				assertThat(e.getMessage(), matchesPattern("Resource Patient/[0-9]+ is not known"));
+				assertThat(e.getMessage(), matchesPattern(Msg.code(971) + "Resource Patient/[0-9]+ is not known"));
 			}
 		}
 
@@ -847,7 +848,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 				myPatientDao.read(patientId2, mySrd).getIdElement().toUnqualifiedVersionless();
 				fail();
 			} catch (ResourceNotFoundException e) {
-				assertThat(e.getMessage(), matchesPattern("Resource Patient/[0-9]+ is not known"));
+				assertThat(e.getMessage(), matchesPattern(Msg.code(971) + "Resource Patient/[0-9]+ is not known"));
 			}
 		}
 	}
@@ -990,7 +991,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 				myPatientDao.read(patientId1, mySrd).getIdElement().toUnqualifiedVersionless();
 				fail();
 			} catch (ResourceNotFoundException e) {
-				assertThat(e.getMessage(), matchesPattern("Resource Patient/[0-9]+ is not known"));
+				assertThat(e.getMessage(), matchesPattern(Msg.code(971) + "Resource Patient/[0-9]+ is not known"));
 			}
 		}
 	}
@@ -1064,7 +1065,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			myPatientDao.read(patientIdNull, mySrd).getIdElement().toUnqualifiedVersionless();
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getMessage(), matchesPattern("Resource Patient/NULL is not known"));
+			assertThat(e.getMessage(), matchesPattern(Msg.code(971) + "Resource Patient/NULL is not known"));
 		}
 
 		// Read in wrong Partition
@@ -1073,7 +1074,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			myPatientDao.read(patientId2, mySrd).getIdElement().toUnqualifiedVersionless();
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getMessage(), matchesPattern("Resource Patient/TWO is not known"));
+			assertThat(e.getMessage(), matchesPattern(Msg.code(971) + "Resource Patient/TWO is not known"));
 		}
 
 		// Read in wrong Partition
@@ -1082,7 +1083,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			myPatientDao.read(patientId1, mySrd).getIdElement().toUnqualifiedVersionless();
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getMessage(), matchesPattern("Resource Patient/ONE is not known"));
+			assertThat(e.getMessage(), matchesPattern(Msg.code(971) + "Resource Patient/ONE is not known"));
 		}
 
 		// Read in correct Partition
@@ -1109,7 +1110,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			myPatientDao.read(patientId1, mySrd).getIdElement().toUnqualifiedVersionless();
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getMessage(), matchesPattern("Resource Patient/ONE is not known"));
+			assertThat(e.getMessage(), matchesPattern(Msg.code(971) + "Resource Patient/ONE is not known"));
 		}
 
 		// Read in wrong Partition
@@ -1118,7 +1119,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			myPatientDao.read(patientId2, mySrd).getIdElement().toUnqualifiedVersionless();
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getMessage(), matchesPattern("Resource Patient/TWO is not known"));
+			assertThat(e.getMessage(), matchesPattern(Msg.code(971) + "Resource Patient/TWO is not known"));
 		}
 	}
 
@@ -1154,7 +1155,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 				myPatientDao.read(patientIdNull, mySrd);
 				fail();
 			} catch (PreconditionFailedException e) {
-				assertEquals("Non-unique ID specified, can not process request", e.getMessage());
+				assertEquals(Msg.code(1099) + "Non-unique ID specified, can not process request", e.getMessage());
 			}
 		}
 	}
@@ -2141,7 +2142,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			myPatientDao.search(map, mySrd);
 			fail();
 		} catch (InternalErrorException e) {
-			assertEquals("Can not search multiple partitions when partitions are included in search hashes", e.getMessage());
+			assertEquals(Msg.code(1527) + "Can not search multiple partitions when partitions are included in search hashes", e.getMessage());
 		}
 	}
 
@@ -2160,7 +2161,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			value.size();
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertEquals("This server is not configured to support search against all partitions", e.getMessage());
+			assertEquals(Msg.code(1220) + "This server is not configured to support search against all partitions", e.getMessage());
 		}
 	}
 
@@ -2929,7 +2930,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			mySystemDao.history(null, null, null, mySrd).size();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Type- and Server- level history operation not supported across partitions on partitioned server", e.getMessage());
+			assertEquals(Msg.code(953) + "Type- and Server- level history operation not supported across partitions on partitioned server", e.getMessage());
 		}
 	}
 
@@ -3039,7 +3040,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			myPatientDao.history(null, null, null, mySrd).size();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Type- and Server- level history operation not supported across partitions on partitioned server", e.getMessage());
+			assertEquals(Msg.code(953) + "Type- and Server- level history operation not supported across partitions on partitioned server", e.getMessage());
 		}
 	}
 
