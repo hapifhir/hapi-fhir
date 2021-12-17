@@ -130,7 +130,7 @@ class SearchParameterMapTest {
 		orig.setSearchContainedMode(SearchContainedModeEnum.BOTH);
 		orig.setEverythingMode(SearchParameterMap.EverythingModeEnum.ENCOUNTER_INSTANCE);
 		orig.setSort(new SortSpec());
-		orig.add("Something", new StringParam("value"));
+		orig.add("something", new StringParam("value"));
 
 		// test
 		SearchParameterMap copy = orig.clone();
@@ -141,6 +141,21 @@ class SearchParameterMapTest {
 		// ... but that they are equal
 		Assertions.assertEquals(orig.toNormalizedQueryString(null),
 			copy.toNormalizedQueryString(null));
+		Assertions.assertEquals(orig.getOffset(), copy.getOffset());
+		Assertions.assertEquals(orig.getLoadSynchronousUpTo(), copy.getLoadSynchronousUpTo());
+		Assertions.assertEquals(orig.isLoadSynchronous(), copy.isLoadSynchronous());
+		Assertions.assertEquals(orig.getNearDistanceParam(), copy.getNearDistanceParam());
+		Assertions.assertEquals(orig.getCount(), copy.getCount());
+		Assertions.assertEquals(orig.getLastNMax(), copy.getLastNMax());
+		Assertions.assertEquals(orig.isLastN(), copy.isLastN());
+		Assertions.assertEquals(orig.isDeleteExpunge(), copy.isDeleteExpunge());
+		Assertions.assertEquals(orig.getIncludes(), copy.getIncludes());
+		Assertions.assertEquals(orig.getSearchTotalMode(), copy.getSearchTotalMode());
+		Assertions.assertEquals(orig.getLastUpdated(), copy.getLastUpdated());
+		Assertions.assertEquals(orig.getSearchContainedMode(), copy.getSearchContainedMode());
+		Assertions.assertEquals(orig.getEverythingMode(), copy.getEverythingMode());
+		Assertions.assertEquals(orig.getSort(), copy.getSort());
+		Assertions.assertEquals(orig.get("something"), copy.get("something"));
 
 		// verify changing one does not change the other
 		orig.setOffset(100);
