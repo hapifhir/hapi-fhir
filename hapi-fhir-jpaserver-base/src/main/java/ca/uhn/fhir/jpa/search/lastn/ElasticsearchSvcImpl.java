@@ -755,19 +755,6 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 			SearchHit[] observationDocumentHits = observationDocumentResponse.getHits().getHits();
 			IParser parser = TolerantJsonParser.createWithLenientErrorHandling(myContext, null);
 			Class<? extends IBaseResource> resourceType = myContext.getResourceDefinition(OBSERVATION_RESOURCE_NAME).getImplementingClass();
-
-			return Arrays.stream(observationDocumentHits)
-				.map(hit -> parseObservationResource(hit, parser, resourceType))
-				.collect(Collectors.toList());
-		} catch (IOException theE) {
-			// Fixme do we fallback to JPA search then?
-			throw new InvalidRequestException("Unable to execute observation document query for provided IDs " + thePids, theE);
-		}
-	}
-
-	private IBaseResource parseObservationResource(SearchHit theSearchHit, IParser theParser, Class<? extends IBaseResource> resourceType) {
-		try {
-			ObservationJson observationJson = objectMapper.readValue(theSearchHit.getSourceAsString(), ObservationJson.class);
 			/**
 			 * @see ca.uhn.fhir.jpa.dao.BaseHapiFhirDao#toResource(Class, IBaseResourceEntity, Collection, boolean) for
 			 * details about parsing raw json to BaseResource
@@ -776,8 +763,19 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 			// Fixme what do we do with deleted observation resources
 			// Fixme how do you handle provenance?
 			// Parse using tolerant parser
-			return theParser.parseResource(resourceType, observationJson.getResource());
+			return Arrays.stream(observationDocumentHits)
+				.map(this::parseObservationJson)
+				.map(observationJson -> parser.parseResource(resourceType, observationJson.getResource()))
+				.collect(Collectors.toList());
+		} catch (IOException theE) {
+			// Fixme do we fallback to JPA search then?
+			throw new InvalidRequestException("Unable to execute observation document query for provided IDs " + thePids, theE);
+		}
+	}
 
+	private ObservationJson parseObservationJson(SearchHit theSearchHit) {
+		try {
+			return objectMapper.readValue(theSearchHit.getSourceAsString(), ObservationJson.class);
 		} catch (JsonProcessingException exp) {
 			throw new InvalidRequestException("Unable to parse the observation resource json", exp);
 		}
