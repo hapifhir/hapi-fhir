@@ -14,6 +14,8 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.sql.Date;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
 
@@ -108,7 +110,7 @@ class SearchParameterMapTest {
 	}
 
 	@Test
-	public void cpy_searchParams_copiesAllFields() {
+	public void clone_searchParams_copiesAllFields() {
 		HashSet<Include> includes = new HashSet<>();
 		Include i = new Include("test", true);
 		includes.add(i);
@@ -131,7 +133,7 @@ class SearchParameterMapTest {
 		orig.add("Something", new StringParam("value"));
 
 		// test
-		SearchParameterMap copy = orig.cpy();
+		SearchParameterMap copy = orig.clone();
 
 		// verify that they are not the same
 		Assertions.assertNotEquals(orig, copy);
@@ -144,5 +146,23 @@ class SearchParameterMapTest {
 		orig.setOffset(100);
 		Assertions.assertNotEquals(orig.toNormalizedQueryString(null),
 			copy.toNormalizedQueryString(null));
+	}
+
+	@Test
+	public void clone_searchParams_haveSameSearchParamsMap() {
+		SearchParameterMap orig = new SearchParameterMap();
+		orig.add("string", new StringParam("stringvalue"));
+		orig.add("datetime", new DateRangeParam(Date.from(Instant.now()),
+			new Date(2000, 11, 11)));
+		orig.add("int", new QuantityParam(1));
+
+		// test
+		SearchParameterMap clone = orig.clone();
+
+		// verify
+		Assertions.assertEquals(orig.size(), clone.size());
+		Assertions.assertEquals(orig.get("string"), clone.get("string"));
+		Assertions.assertEquals(orig.get("datetime"), clone.get("datetime"));
+		Assertions.assertEquals(orig.get("int"), clone.get("int"));
 	}
 }

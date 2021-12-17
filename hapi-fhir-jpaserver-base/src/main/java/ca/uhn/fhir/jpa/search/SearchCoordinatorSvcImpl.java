@@ -1080,7 +1080,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				 * we will have to clone those parameters here so that
 				 * the "correct" params are used in createQuery below
 				 */
-				Iterator<Long> countIterator = sb.createCountQuery(myParams.cpy(), mySearch.getUuid(), myRequest, myRequestPartitionId);
+				Iterator<Long> countIterator = sb.createCountQuery(myParams.clone(), mySearch.getUuid(), myRequest, myRequestPartitionId);
 				Long count = countIterator.hasNext() ? countIterator.next() : 0L;
 				ourLog.trace("Got count {}", count);
 

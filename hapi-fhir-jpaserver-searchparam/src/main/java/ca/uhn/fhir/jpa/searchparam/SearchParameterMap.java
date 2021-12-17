@@ -95,7 +95,8 @@ public class SearchParameterMap implements Serializable {
 	 * @return
 	 */
 	@JsonIgnore
-	public SearchParameterMap cpy() {
+	@Override
+	public SearchParameterMap clone() {
 		SearchParameterMap map = new SearchParameterMap();
 		map.setSummaryMode(getSummaryMode());
 		map.setSort(getSort());
