@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.IParserErrorHandler;
 import ca.uhn.fhir.parser.JsonParser;
 import ca.uhn.fhir.parser.LenientErrorHandler;
@@ -37,6 +36,8 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.Objects;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
 public class TolerantJsonParser extends JsonParser {
 
@@ -78,7 +79,7 @@ public class TolerantJsonParser extends JsonParser {
 			 * ParserState.Primitive state too.
 			 */
 
-			String msg = Objects.isNull(e.getMessage()) ? "" : e.getMessage();
+			String msg = defaultString(e.getMessage(), "");
 			if (msg.contains("Unexpected character ('.' (code 46))") || msg.contains("Invalid numeric value: Leading zeroes not allowed")) {
 				Gson gson = new Gson();
 

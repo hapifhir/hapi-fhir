@@ -117,8 +117,7 @@ public class ObservationLastNIndexPersistSvc {
 	}
 
 	private String encodeResource(IBaseResource theResource) {
-		ResourceEncodingEnum encoding = myConfig.getResourceEncoding();
-		IParser parser = encoding.newParser(myContext);
+		IParser parser = myContext.newJsonParser();
 		return parser.encodeResourceToString(theResource);
 	}
 

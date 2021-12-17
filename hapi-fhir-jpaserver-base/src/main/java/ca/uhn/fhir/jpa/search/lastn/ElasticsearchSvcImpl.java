@@ -750,6 +750,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	public List<IBaseResource> getObservationResources(Collection<ResourcePersistentId> thePids) {
 		SearchRequest searchRequest = buildObservationResourceSearchRequest(thePids);
 		try {
+			// wip mb what is the limit to an ES hit count?  10k?  We may need to chunk this :-(
 			SearchResponse observationDocumentResponse = executeSearchRequest(searchRequest);
 			SearchHit[] observationDocumentHits = observationDocumentResponse.getHits().getHits();
 			IParser parser = TolerantJsonParser.createWithLenientErrorHandling(myContext, null);
@@ -776,6 +777,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 			// Fixme how do you handle provenance?
 			// Parse using tolerant parser
 			return theParser.parseResource(resourceType, observationJson.getResource());
+
 		} catch (JsonProcessingException exp) {
 			throw new InvalidRequestException("Unable to parse the observation resource json", exp);
 		}
