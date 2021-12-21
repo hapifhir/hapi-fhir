@@ -850,7 +850,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
 
-        <elastic_apm_version>1.24.0</elastic_apm_version>
+        <elastic_apm_version>1.28.2</elastic_apm_version>
         <!-- CQL Support -->
         <cql-engine.version>1.5.1</cql-engine.version>
         <cql-evaluator.version>1.2.0</cql-evaluator.version>
@@ -961,7 +961,7 @@
 			<dependency>
 				<groupId>com.h2database</groupId>
 				<artifactId>h2</artifactId>
-				<version>1.4.200</version>
+				<version>2.0.202</version>
 			</dependency>
 			<dependency>
 				<groupId>com.helger</groupId>
