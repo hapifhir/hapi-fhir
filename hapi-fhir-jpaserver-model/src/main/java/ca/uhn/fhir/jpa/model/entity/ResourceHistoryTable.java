@@ -155,6 +155,20 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 		return myId;
 	}
 
+	/**
+	 * Do not delete, required for java bean introspection
+	 */
+	public Long getMyId() {
+		return myId;
+	}
+
+	/**
+	 * Do not delete, required for java bean introspection
+	 */
+	public void setMyId(Long theId) {
+		myId = theId;
+	}
+
 	public byte[] getResource() {
 		return myResource;
 	}
