@@ -4,9 +4,18 @@
     title: "The version of a few dependencies have been bumped to the latest versions
 (dependent HAPI modules listed in brackets):
 <ul>
-<li>Spring (JPA): 5.3.7 -> 5.3.13</li>
-<li>Thymeleaf (Testpage Overlay): 3.0.12.RELEASE -> 3.0.13.RELEASE (Addresses CVE-2021-43466)</li>
-<li>log4j-api (JPA): 2.11.1 -> 2.15.0 (Addresses CVE-2021-44228 - HAPI FHIR was not vulnerable to this issue but this upgrade avoids unnecessary OWASP scan notices)</li>
+<li>log4j-api (JPA): 2.11.1 -> 2.17.0 (Addresses CVE-2021-44228 - HAPI FHIR was not vulnerable to this issue but this upgrade avoids unnecessary OWASP scan notices)</li>
+<li>SLF4j (All): 1.7.30 -> 1.7.32</li>
+<li>Logback (All): 1.2.8 -> 1.2.10</li>
+<li>Commons-IO (All): 2.8.0 -> 2.11.0</li>
+<li>JDOM (XML Patch Support):  2.0.6 -> 2.0.6.1 (Addresses CVE-2021-33813)</li>
+<li>Spring (JPA): 5.3.7 -> 5.3.14</li>
+<li>Spring-Data (JPA): 2.5.0 -> 2.6.0</li>
+<li>Hibernate ORM (JPA): 5.4.30.Final -> 5.4.33</li>
+<li>Flyway (JPA): 6.5.4 -> 8.3.0</li>
+<li>Swagger-Models (OpenAPI Support): 2.1.7 -> 2.1.12</li>
+<li>Thymeleaf (Testpage Overlay): 3.0.12.RELEASE -> 3.0.14.RELEASE (Addresses CVE-2021-43466)</li>
+<li>Commons-CLI (CLI): 1.4 -> 1.5.0</li>
 </ul>
 "
 
