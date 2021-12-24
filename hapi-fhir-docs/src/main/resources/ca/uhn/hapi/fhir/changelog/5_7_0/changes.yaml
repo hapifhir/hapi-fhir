@@ -8,6 +8,7 @@
 <li>SLF4j (All): 1.7.30 -> 1.7.32</li>
 <li>Logback (All): 1.2.8 -> 1.2.10</li>
 <li>Commons-IO (All): 2.8.0 -> 2.11.0</li>
+<li>Jackson (All): 2.13.0 -> 2.13.1</li>
 <li>JDOM (XML Patch Support):  2.0.6 -> 2.0.6.1 (Addresses CVE-2021-33813)</li>
 <li>Spring (JPA): 5.3.7 -> 5.3.14</li>
 <li>Spring-Data (JPA): 2.5.0 -> 2.6.0</li>
