@@ -396,9 +396,9 @@ public class ServerCapabilityStatementProviderR5Test {
 
 		assertEquals("subject.identifier", res.getSearchParam().get(0).getName());
 
-		assertEquals(DiagnosticReport.SP_CODE, res.getSearchParam().get(1).getName());
+		assertEquals("code", res.getSearchParam().get(1).getName());
 
-		assertEquals(DiagnosticReport.SP_DATE, res.getSearchParam().get(2).getName());
+		assertEquals("date", res.getSearchParam().get(2).getName());
 
 		assertEquals(1, res.getSearchInclude().size());
 		assertEquals("DiagnosticReport.result", res.getSearchInclude().get(0).getValue());
@@ -865,8 +865,8 @@ public class ServerCapabilityStatementProviderR5Test {
 	public static class MultiOptionalProvider {
 
 		@Search(type = Patient.class)
-		public Patient findPatient(@Description(shortDefinition = "The patient's identifier") @OptionalParam(name = Patient.SP_IDENTIFIER) TokenParam theIdentifier,
-				@Description(shortDefinition = "The patient's name") @OptionalParam(name = Patient.SP_NAME) StringParam theName) {
+		public Patient findPatient(@Description(shortDefinition = "The patient's identifier") @OptionalParam(name = "identifier") TokenParam theIdentifier,
+				@Description(shortDefinition = "The patient's name") @OptionalParam(name = "name") StringParam theName) {
 			return null;
 		}
 
@@ -971,8 +971,8 @@ public class ServerCapabilityStatementProviderR5Test {
 
 		@Description(shortDefinition = "This is a search for stuff!")
 		@Search
-		public List<DiagnosticReport> findDiagnosticReportsByPatient(@RequiredParam(name = DiagnosticReport.SP_SUBJECT + '.' + Patient.SP_IDENTIFIER) TokenParam thePatientId,
-				@OptionalParam(name = DiagnosticReport.SP_CODE) TokenOrListParam theNames, @OptionalParam(name = DiagnosticReport.SP_DATE) DateRangeParam theDateRange,
+		public List<DiagnosticReport> findDiagnosticReportsByPatient(@RequiredParam(name = "subject" + '.' + "identifier") TokenParam thePatientId,
+				@OptionalParam(name = "code") TokenOrListParam theNames, @OptionalParam(name = "date") DateRangeParam theDateRange,
 				@IncludeParam(allow = { "DiagnosticReport.result" }) Set<Include> theIncludes) throws Exception {
 			return null;
 		}
@@ -983,7 +983,7 @@ public class ServerCapabilityStatementProviderR5Test {
 	public static class ReadProvider {
 
 		@Search(type = Patient.class)
-		public Patient findPatient(@Description(shortDefinition = "The patient's identifier (MRN or other card number)") @RequiredParam(name = Patient.SP_IDENTIFIER) TokenParam theIdentifier) {
+		public Patient findPatient(@Description(shortDefinition = "The patient's identifier (MRN or other card number)") @RequiredParam(name = "identifier") TokenParam theIdentifier) {
 			return null;
 		}
 
@@ -998,7 +998,7 @@ public class ServerCapabilityStatementProviderR5Test {
 	public static class SearchProvider {
 
 		@Search(type = Patient.class)
-		public Patient findPatient1(@Description(shortDefinition = "The patient's identifier (MRN or other card number)") @RequiredParam(name = Patient.SP_IDENTIFIER) TokenParam theIdentifier) {
+		public Patient findPatient1(@Description(shortDefinition = "The patient's identifier (MRN or other card number)") @RequiredParam(name = "identifier") TokenParam theIdentifier) {
 			return null;
 		}
 
@@ -1014,7 +1014,7 @@ public class ServerCapabilityStatementProviderR5Test {
 	public static class SearchProviderWithWhitelist {
 
 		@Search(type = Patient.class)
-		public Patient findPatient1(@Description(shortDefinition = "The organization at which this person is a patient") @RequiredParam(name = Patient.SP_ORGANIZATION, chainWhitelist = { "foo",
+		public Patient findPatient1(@Description(shortDefinition = "The organization at which this person is a patient") @RequiredParam(name = "organization", chainWhitelist = { "foo",
 				"bar" }) ReferenceAndListParam theIdentifier) {
 			return null;
 		}
@@ -1032,7 +1032,7 @@ public class ServerCapabilityStatementProviderR5Test {
 
 
 		@Search()
-		public List<Patient> findPatient1(@Description(shortDefinition = "The organization at which this person is a patient") @RequiredParam(name = Patient.SP_ORGANIZATION) ReferenceAndListParam theIdentifier) {
+		public List<Patient> findPatient1(@Description(shortDefinition = "The organization at which this person is a patient") @RequiredParam(name = "organization") ReferenceAndListParam theIdentifier) {
 			return null;
 		}
 
@@ -1049,7 +1049,7 @@ public class ServerCapabilityStatementProviderR5Test {
 
 
 		@Search(type=Patient.class)
-		public List<Patient> findPatient1(@Description(shortDefinition = "The organization at which this person is a patient") @RequiredParam(name = Patient.SP_ORGANIZATION) ReferenceAndListParam theIdentifier) {
+		public List<Patient> findPatient1(@Description(shortDefinition = "The organization at which this person is a patient") @RequiredParam(name = "organization") ReferenceAndListParam theIdentifier) {
 			return null;
 		}
 
@@ -1083,7 +1083,7 @@ public class ServerCapabilityStatementProviderR5Test {
 	public static class VreadProvider {
 
 		@Search(type = Patient.class)
-		public Patient findPatient(@Description(shortDefinition = "The patient's identifier (MRN or other card number)") @RequiredParam(name = Patient.SP_IDENTIFIER) TokenParam theIdentifier) {
+		public Patient findPatient(@Description(shortDefinition = "The patient's identifier (MRN or other card number)") @RequiredParam(name = "identifier") TokenParam theIdentifier) {
 			return null;
 		}
 

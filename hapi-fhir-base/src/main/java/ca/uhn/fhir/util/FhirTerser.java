@@ -41,7 +41,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -339,6 +338,10 @@ public class FhirTerser {
 
 	@SuppressWarnings("unchecked")
 	private <T extends IBase> List<T> getValues(BaseRuntimeElementCompositeDefinition<?> theCurrentDef, IBase theCurrentObj, List<String> theSubList, Class<T> theWantedClass, boolean theCreate, boolean theAddExtension) {
+		if (theSubList.isEmpty()) {
+			return Collections.emptyList();
+		}
+
 		String name = theSubList.get(0);
 		List<T> retVal = new ArrayList<>();
 
@@ -683,7 +686,15 @@ public class FhirTerser {
 
 		parts.add(thePath.substring(currentStart));
 
-		if (parts.size() > 0 && parts.get(0).equals(theElementDef.getName())) {
+		String firstPart = parts.get(0);
+		if (Character.isLetter(firstPart.charAt(0)) && theElementDef instanceof RuntimeResourceDefinition) {
+			if (firstPart.equals(theElementDef.getName())) {
+				parts = parts.subList(1, parts.size());
+			} else {
+				parts = Collections.emptyList();
+				return parts;
+			}
+		} else if (firstPart.equals(theElementDef.getName())) {
 			parts = parts.subList(1, parts.size());
 		}
 

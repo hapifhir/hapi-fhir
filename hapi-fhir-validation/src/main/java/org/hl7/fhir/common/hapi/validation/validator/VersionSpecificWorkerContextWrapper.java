@@ -31,6 +31,7 @@ import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.terminologies.ValueSetExpander;
 import org.hl7.fhir.r5.utils.validation.IResourceValidator;
+import org.hl7.fhir.r5.utils.validation.ValidationContextCarrier;
 import org.hl7.fhir.utilities.TimeTracker;
 import org.hl7.fhir.utilities.TranslationServices;
 import org.hl7.fhir.utilities.i18n.I18nBase;
@@ -372,6 +373,11 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
+	public <T extends Resource> T fetchResource(Class<T> class_, String uri, String version) {
+		return fetchResource(class_, uri + "|" + version);
+	}
+
+	@Override
 	public <T extends Resource> T fetchResource(Class<T> class_, String uri, CanonicalResource canonicalForSource) {
 		throw new UnsupportedOperationException();
 	}
@@ -589,6 +595,11 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		String display = theCoding.getDisplay();
 
 		return doValidation(convertedVs, validationOptions, system, code, display);
+	}
+
+	@Override
+	public ValidationResult validateCode(ValidationOptions options, Coding code, ValueSet vs, ValidationContextCarrier ctxt) {
+		return validateCode(options, code, vs);
 	}
 
 	@Override

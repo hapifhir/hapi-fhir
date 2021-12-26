@@ -26,18 +26,25 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ClasspathUtil;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r5.model.CompartmentDefinition;
+import org.hl7.fhir.r5.model.StringType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
+
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 public class ReadOnlySearchParamCache {
 
@@ -66,8 +73,8 @@ public class ReadOnlySearchParamCache {
 	}
 
 	protected Map<String, RuntimeSearchParam> getSearchParamMap(String theResourceName) {
-		Map<String, RuntimeSearchParam> retval = myResourceNameToSpNameToSp.get(theResourceName);
-		if (retval == null) {
+		Map<String, RuntimeSearchParam> retVal = myResourceNameToSpNameToSp.get(theResourceName);
+		if (retVal == null) {
 			return Collections.emptyMap();
 		}
 		return Collections.unmodifiableMap(myResourceNameToSpNameToSp.get(theResourceName));
@@ -92,11 +99,36 @@ public class ReadOnlySearchParamCache {
 
 		Set<String> resourceNames = theFhirContext.getResourceTypes();
 
+		IBaseBundle allSearchParameterBundle = null;
 		if (theFhirContext.getVersion().getVersion() == FhirVersionEnum.R4) {
-			IBaseBundle allSearchParameterBundle = (IBaseBundle) theFhirContext.newJsonParser().parseResource(ClasspathUtil.loadResourceAsStream("org/hl7/fhir/r4/model/sp/search-parameters.json"));
+			allSearchParameterBundle = (IBaseBundle) theFhirContext.newJsonParser().parseResource(ClasspathUtil.loadResourceAsStream("org/hl7/fhir/r4/model/sp/search-parameters.json"));
+		} else if (theFhirContext.getVersion().getVersion() == FhirVersionEnum.R5) {
+			allSearchParameterBundle = (IBaseBundle) theFhirContext.newXmlParser().parseResource(ClasspathUtil.loadResourceAsStream("org/hl7/fhir/r5/model/sp/search-parameters.xml"));
+		}
+
+		if (allSearchParameterBundle != null) {
 			for (IBaseResource next : BundleUtil.toListOfResources(theFhirContext, allSearchParameterBundle)) {
 				RuntimeSearchParam nextCanonical = theCanonicalizer.canonicalizeSearchParameter(next);
+
 				if (nextCanonical != null) {
+
+					// Force status to ACTIVE - For whatever reason the R5 draft SPs ship with
+					// a status of DRAFT which means the server doesn't actually apply them.
+					// At least this was the case as of 2021-12-24 - JA
+					nextCanonical = new RuntimeSearchParam(
+						nextCanonical.getId(),
+						nextCanonical.getUri(),
+						nextCanonical.getName(),
+						nextCanonical.getDescription(),
+						nextCanonical.getPath(),
+						nextCanonical.getParamType(),
+						nextCanonical.getProvidesMembershipInCompartments(),
+						nextCanonical.getTargets(),
+						RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE,
+						nextCanonical.getComboSearchParamType(),
+						nextCanonical.getComponents(),
+						nextCanonical.getBase());
+
 					Collection<String> base = nextCanonical.getBase();
 					if (base.contains("Resource") || base.contains("DomainResource")) {
 						base = resourceNames;
@@ -125,6 +157,29 @@ public class ReadOnlySearchParamCache {
 				}
 			}
 		}
+		return retVal;
+	}
+
+	private static Map<String, Multimap<String, String>> loadCompartments(FhirContext theFhirContext, String... theCompartmentDefinitionResources) {
+		Map<String, Multimap<String, String>> retVal = new HashMap<>();
+
+		for (String nextDefinitionResourcePath : theCompartmentDefinitionResources) {
+			String nextDefinitionResourceString = ClasspathUtil.loadResource(nextDefinitionResourcePath);
+			IBaseResource nextDefinitionResource = theFhirContext.newXmlParser().parseResource(nextDefinitionResourceString);
+			CompartmentDefinition nextDefinition = (CompartmentDefinition) nextDefinitionResource;
+			String compartmentName = nextDefinition.getCode().toCode();
+
+			for (CompartmentDefinition.CompartmentDefinitionResourceComponent nextResource : nextDefinition.getResource()) {
+				String nextResourceType = nextResource.getCode();
+				for (StringType nextParamType : nextResource.getParam()) {
+					String nextParam = nextParamType.getValue();
+
+					Multimap<String, String> map = retVal.computeIfAbsent(nextResourceType, t -> ArrayListMultimap.create());
+					map.put(nextParam, compartmentName);
+				}
+			}
+		}
+
 		return retVal;
 	}
 

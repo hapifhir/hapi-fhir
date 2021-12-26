@@ -96,7 +96,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		Bundle output = myClient
 			.search()
 			.forResource("Patient")
-			.where(Patient.NAME.contains().value("ZAB"))
+			.where(org.hl7.fhir.r4.model.Patient.NAME.contains().value("ZAB"))
 			.returnBundle(Bundle.class)
 			.execute();
 		List<String> ids = output.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
@@ -105,7 +105,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		output = myClient
 			.search()
 			.forResource("Patient")
-			.where(Patient.NAME.contains().value("zab"))
+			.where(org.hl7.fhir.r4.model.Patient.NAME.contains().value("zab"))
 			.returnBundle(Bundle.class)
 			.execute();
 		ids = output.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
@@ -122,7 +122,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		// Perform the search
 		Bundle response0 = myClient.search()
 			.forResource("Patient")
-			.where(Patient.NAME.matches().value("Hello"))
+			.where(org.hl7.fhir.r4.model.Patient.NAME.matches().value("Hello"))
 			.returnBundle(Bundle.class)
 			.execute();
 		assertEquals(1, response0.getEntry().size());
@@ -130,7 +130,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		// Perform the search again (should return the same)
 		Bundle response1 = myClient.search()
 			.forResource("Patient")
-			.where(Patient.NAME.matches().value("Hello"))
+			.where(org.hl7.fhir.r4.model.Patient.NAME.matches().value("Hello"))
 			.returnBundle(Bundle.class)
 			.execute();
 		assertEquals(1, response1.getEntry().size());
@@ -142,7 +142,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		// Perform the search again (shouldn't return the errored out search)
 		Bundle response3 = myClient.search()
 			.forResource("Patient")
-			.where(Patient.NAME.matches().value("Hello"))
+			.where(org.hl7.fhir.r4.model.Patient.NAME.matches().value("Hello"))
 			.returnBundle(Bundle.class)
 			.execute();
 		assertEquals(1, response3.getEntry().size());
@@ -182,7 +182,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		// Perform a search for the first page
 		Bundle response0 = myClient.search()
 			.forResource("Patient")
-			.where(Patient.NAME.matches().value("Hello"))
+			.where(org.hl7.fhir.r4.model.Patient.NAME.matches().value("Hello"))
 			.returnBundle(Bundle.class)
 			.count(1)
 			.execute();

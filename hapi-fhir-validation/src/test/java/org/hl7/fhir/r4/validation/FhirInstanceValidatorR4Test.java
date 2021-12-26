@@ -639,8 +639,9 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		String input = IOUtils.toString(FhirInstanceValidatorR4Test.class.getResourceAsStream("/r4/diagnosticreport-example-gingival-mass.json"), Constants.CHARSET_UTF8);
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
-		assertEquals(1, errors.size());
+		assertEquals(2, errors.size());
 		assertEquals("None of the codings provided are in the value set 'LOINC Diagnostic Report Codes' (http://hl7.org/fhir/ValueSet/report-codes), and a coding is recommended to come from this value set) (codes = http://loinc.org#1-8)", errors.get(0).getMessage());
+		assertEquals("Base64 encoded values SHOULD not contain any whitespace (per RFC 4648). Note that non-validating readers are encouraged to accept whitespace anyway", errors.get(1).getMessage());
 	}
 
 	@Test

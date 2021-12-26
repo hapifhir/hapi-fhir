@@ -41,12 +41,10 @@ public class RuntimeSearchParamCache extends ReadOnlySearchParamCache {
 		String uri = theSearchParam.getUri();
 		if (isNotBlank(uri)) {
 			RuntimeSearchParam existingForUrl = myUrlToParam.get(uri);
-			if (existingForUrl == theSearchParam) {
+			if (existingForUrl != theSearchParam) {
 				// This is expected, since the same SP can span multiple resource types
 				// so it may get added more than once by this method
 				ourLog.trace("Search param was previously registered for url: {}", uri);
-			} else if (existingForUrl != null) {
-				ourLog.warn("Multiple search parameters have URL: {}", uri);
 			} else {
 				myUrlToParam.put(uri, theSearchParam);
 			}
@@ -69,7 +67,8 @@ public class RuntimeSearchParamCache extends ReadOnlySearchParamCache {
 		for (Map.Entry<String, Map<String, RuntimeSearchParam>> nextBuiltInEntry : builtInSps) {
 			for (RuntimeSearchParam nextParam : nextBuiltInEntry.getValue().values()) {
 				String nextResourceName = nextBuiltInEntry.getKey();
-				add(nextResourceName, nextParam.getName(), nextParam);
+				String nextParamName = nextParam.getName();
+				add(nextResourceName, nextParamName, nextParam);
 			}
 
 			ourLog.trace("Have {} built-in SPs for: {}", nextBuiltInEntry.getValue().size(), nextBuiltInEntry.getKey());
@@ -95,8 +94,8 @@ public class RuntimeSearchParamCache extends ReadOnlySearchParamCache {
 	}
 
 	public static RuntimeSearchParamCache fromReadOnlySearchParmCache(ReadOnlySearchParamCache theBuiltInSearchParams) {
-		RuntimeSearchParamCache retval = new RuntimeSearchParamCache();
-		retval.putAll(theBuiltInSearchParams);
-		return retval;
+		RuntimeSearchParamCache retVal = new RuntimeSearchParamCache();
+		retVal.putAll(theBuiltInSearchParams);
+		return retVal;
 	}
 }

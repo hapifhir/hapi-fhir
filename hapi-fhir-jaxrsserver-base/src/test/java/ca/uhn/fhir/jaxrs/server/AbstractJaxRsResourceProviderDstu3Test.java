@@ -46,7 +46,6 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
 import org.mockito.ArgumentMatchers;
-import org.mockito.Matchers;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -178,7 +177,7 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 		toCreate.getIdentifier().add(new Identifier().setValue("myIdentifier"));
 		outcome.setResource(toCreate);
 
-		when(mock.create(patientCaptor.capture(), isNull(String.class))).thenReturn(outcome);
+		when(mock.create(patientCaptor.capture(), isNull())).thenReturn(outcome);
 		client.setEncoding(EncodingEnum.JSON);
 		final MethodOutcome response = client.create().resource(toCreate).prefer(PreferReturnEnum.REPRESENTATION)
 				.execute();
@@ -295,11 +294,11 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 	@Test
 	public void testSearchUsingGenericClientBySearch() {
 		// Perform a search
-		when(mock.search(any(StringParam.class), Matchers.isNull(StringAndListParam.class)))
+		when(mock.search(any(StringParam.class), isNull()))
 				.thenReturn(Arrays.asList(createPatient(1)));
 		final Bundle results = client.search().forResource(Patient.class)
 				.where(Patient.NAME.matchesExactly().value(PATIENT_NAME)).returnBundle(Bundle.class).execute();
-		verify(mock).search(any(StringParam.class), Matchers.isNull(StringAndListParam.class));
+		verify(mock).search(any(StringParam.class), isNull());
 		IBaseResource resource = results.getEntry().get(0).getResource();
 
 		compareResultId(1, resource);

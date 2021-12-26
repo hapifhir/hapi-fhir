@@ -156,6 +156,7 @@ import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValid
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.hl7.fhir.utilities.npm.FilesystemPackageCacheManager;
+import org.hl7.fhir.utilities.npm.PackageClient;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
@@ -377,8 +378,8 @@ public abstract class BaseConfig {
 	public IHapiPackageCacheManager packageCacheManager() {
 		JpaPackageCache retVal = new JpaPackageCache();
 		retVal.getPackageServers().clear();
-		retVal.getPackageServers().add(FilesystemPackageCacheManager.PRIMARY_SERVER);
-		retVal.getPackageServers().add(FilesystemPackageCacheManager.SECONDARY_SERVER);
+		retVal.getPackageServers().add(PackageClient.PRIMARY_SERVER);
+		retVal.getPackageServers().add(PackageClient.SECONDARY_SERVER);
 		return retVal;
 	}
 
