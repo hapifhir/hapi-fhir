@@ -7,6 +7,7 @@ import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -40,8 +41,10 @@ public class ModelR5Test {
 			.getResourceDefinition("Observation")
 			.getSearchParam("performer")
 			.getProvidesMembershipInCompartments();
-		assertThat(compartments.toString(), compartments, contains(
-			"AAAAA"
+		assertThat(compartments.toString(), compartments, containsInAnyOrder(
+			"Practitioner",
+			"Patient",
+			"RelatedPerson"
 		));
 	}
 

@@ -399,7 +399,13 @@ class ModelScanner {
 						ourLog.warn(b.toString());
 						continue;
 					}
-					providesMembershipInCompartments.add(next.name());
+					String name = next.name();
+
+					// As of 2021-12-28 the R5 structures incorrectly have this prefix
+					if (name.startsWith("Base FHIR compartment definition for ")) {
+						name = name.substring("Base FHIR compartment definition for ".length());
+					}
+					providesMembershipInCompartments.add(name);
 				}
 
 				List<RuntimeSearchParam.Component> components = null;

@@ -25,7 +25,7 @@ public class AsyncUtilTest {
 			outcomeHolder.set(outcome);
 		});
 		thread.start();
-		sleepAtLeast(100);
+		sleepAtLeast(1000);
 		thread.interrupt();
 		await().until(()-> outcomeHolder.get() == false);
 	}

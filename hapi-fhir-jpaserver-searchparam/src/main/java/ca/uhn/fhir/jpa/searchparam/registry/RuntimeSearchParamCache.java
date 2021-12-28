@@ -41,10 +41,12 @@ public class RuntimeSearchParamCache extends ReadOnlySearchParamCache {
 		String uri = theSearchParam.getUri();
 		if (isNotBlank(uri)) {
 			RuntimeSearchParam existingForUrl = myUrlToParam.get(uri);
-			if (existingForUrl != theSearchParam) {
+			if (existingForUrl == theSearchParam) {
 				// This is expected, since the same SP can span multiple resource types
 				// so it may get added more than once by this method
 				ourLog.trace("Search param was previously registered for url: {}", uri);
+			} else if (existingForUrl != null) {
+				ourLog.debug("Multiple search parameters have URL: {}", uri);
 			} else {
 				myUrlToParam.put(uri, theSearchParam);
 			}

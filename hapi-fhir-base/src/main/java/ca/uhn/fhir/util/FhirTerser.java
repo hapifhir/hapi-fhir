@@ -687,7 +687,7 @@ public class FhirTerser {
 		parts.add(thePath.substring(currentStart));
 
 		String firstPart = parts.get(0);
-		if (Character.isLetter(firstPart.charAt(0)) && theElementDef instanceof RuntimeResourceDefinition) {
+		if (Character.isUpperCase(firstPart.charAt(0)) && theElementDef instanceof RuntimeResourceDefinition) {
 			if (firstPart.equals(theElementDef.getName())) {
 				parts = parts.subList(1, parts.size());
 			} else {
