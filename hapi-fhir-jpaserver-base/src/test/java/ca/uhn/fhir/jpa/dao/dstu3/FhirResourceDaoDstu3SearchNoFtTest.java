@@ -94,7 +94,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.TransactionDefinition;
@@ -110,7 +109,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -3196,7 +3194,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 	public void testSearchWithUriParam() throws Exception {
 		Class<ValueSet> type = ValueSet.class;
 		String resourceName = "/valueset-dstu2.json";
-		ValueSet vs = loadResourceFromClasspath(type, resourceName);
+		ValueSet vs = loadResourceFromClasspath(type, resourceName, myFhirCtx);
 		IIdType id1 = myValueSetDao.update(vs, mySrd).getId().toUnqualifiedVersionless();
 
 		ValueSet vs2 = new ValueSet();
@@ -3257,7 +3255,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 
 		Class<ValueSet> type = ValueSet.class;
 		String resourceName = "/valueset-dstu2.json";
-		ValueSet vs = loadResourceFromClasspath(type, resourceName);
+		ValueSet vs = loadResourceFromClasspath(type, resourceName, myFhirCtx);
 		IIdType id1 = myValueSetDao.update(vs, mySrd).getId().toUnqualifiedVersionless();
 
 		ValueSet vs2 = new ValueSet();

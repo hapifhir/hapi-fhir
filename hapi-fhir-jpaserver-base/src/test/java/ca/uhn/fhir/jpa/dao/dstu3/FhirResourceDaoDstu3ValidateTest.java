@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.dao.JpaPersistedResourceValidationSupport;
-import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
@@ -16,14 +15,27 @@ import ca.uhn.fhir.validation.IValidatorModule;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu3.model.CodeSystem;
+import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Narrative;
+import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
+import org.hl7.fhir.dstu3.model.Organization;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Questionnaire;
+import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.StructureDefinition;
+import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,9 +46,9 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
@@ -103,10 +115,10 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 
 	@Test
 	public void testExpandLocalCodeSystemWithExplicitCodes() throws IOException {
-		CodeSystem cs = loadResourceFromClasspath(CodeSystem.class, "/dstu3/iar/CodeSystem-iar-citizenship-status.xml");
+		CodeSystem cs = loadResourceFromClasspath(CodeSystem.class, "/dstu3/iar/CodeSystem-iar-citizenship-status.xml", myFhirCtx);
 		myCodeSystemDao.create(cs);
 
-		ValueSet vs = loadResourceFromClasspath(ValueSet.class, "/dstu3/iar/ValueSet-iar-citizenship-status.xml");
+		ValueSet vs = loadResourceFromClasspath(ValueSet.class, "/dstu3/iar/ValueSet-iar-citizenship-status.xml", myFhirCtx);
 		myValueSetDao.create(vs);
 
 		ValueSet expansion = myValueSetDao.expandByIdentifier("http://ccim.on.ca/fhir/iar/ValueSet/iar-citizenship-status", null);
@@ -258,7 +270,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 	}
 
 	private OperationOutcome doTestValidateResourceContainingProfileDeclaration(String methodName, EncodingEnum enc) throws IOException {
-		Bundle vss = loadResourceFromClasspath(Bundle.class, "/org/hl7/fhir/dstu3/model/valueset/valuesets.xml");
+		Bundle vss = loadResourceFromClasspath(Bundle.class, "/org/hl7/fhir/dstu3/model/valueset/valuesets.xml", myFhirCtx);
 		myValueSetDao.update((ValueSet) findResourceByIdInBundle(vss, "observation-status"), mySrd);
 		myValueSetDao.update((ValueSet) findResourceByIdInBundle(vss, "observation-category"), mySrd);
 		myValueSetDao.update((ValueSet) findResourceByIdInBundle(vss, "observation-codes"), mySrd);
@@ -269,7 +281,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 		myValueSetDao.update((ValueSet) findResourceByIdInBundle(vss, "referencerange-meaning"), mySrd);
 		myValueSetDao.update((ValueSet) findResourceByIdInBundle(vss, "observation-relationshiptypes"), mySrd);
 
-		StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/org/hl7/fhir/dstu3/model/profile/devicemetricobservation.profile.xml");
+		StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/org/hl7/fhir/dstu3/model/profile/devicemetricobservation.profile.xml", myFhirCtx);
 		sd.setId(new IdType());
 		sd.setUrl("http://example.com/foo/bar/" + methodName);
 		myStructureDefinitionDao.create(sd, mySrd);
@@ -470,7 +482,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 
 	@Test
 	public void testValidateUsingDifferentialProfile() throws IOException {
-		StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/dstu3/profile-differential-patient-dstu3.json");
+		StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/dstu3/profile-differential-patient-dstu3.json", myFhirCtx);
 		myStructureDefinitionDao.create(sd);
 
 		Patient p = new Patient();

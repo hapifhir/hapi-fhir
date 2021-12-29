@@ -23,6 +23,8 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -50,6 +52,36 @@ import java.util.List;
  */
 
 public class BaseJpaResourceProviderCodeSystemR4 extends JpaResourceProviderR4<CodeSystem> {
+	private static Logger ourLog = LoggerFactory.getLogger(BaseJpaResourceProviderCodeSystemR4.class);
+
+	/**
+	 * $find-matches operation
+	 * See <a href="http://hl7.org/fhir/codesystem-operation-find-matches.html">http://hl7.org/fhir/codesystem-operation-find-matches.html</a>
+	 */
+	@SuppressWarnings("unchecked")
+	@Operation(name = JpaConstants.OPERATION_FIND_MATCHES, idempotent = true, returnParameters = {
+		@OperationParam(name = "result", type = BooleanType.class, min = 1),
+		@OperationParam(name = "message", type = StringType.class),
+		@OperationParam(name = "display", type = StringType.class)
+	})
+	public Parameters findMatches(
+		HttpServletRequest theServletRequest,
+		@IdParam(optional = true) IdType theId,
+		@OperationParam(name = "system", min = 0, max = 1) UriType theSystem,
+		@OperationParam(name = "version", min = 0, max = 1) StringType theVersion,
+		// FIXME KBD - Figure out how to represent this parameter!
+		//@OperationParam(name = "property", min = 0, max = OperationParam.MAX_UNLIMITED) Property theProperty,
+		RequestDetails theRequestDetails
+	) {
+
+		startRequest(theServletRequest);
+		try {
+			ourLog.info("Entering findMatches(...)...");
+			return new Parameters();
+		} finally {
+			endRequest(theServletRequest);
+		}
+	}
 
 	@Autowired
 	@Qualifier(BaseConfig.JPA_VALIDATION_SUPPORT_CHAIN)

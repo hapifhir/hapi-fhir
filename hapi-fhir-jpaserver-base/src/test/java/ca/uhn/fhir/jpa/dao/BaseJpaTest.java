@@ -11,7 +11,6 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.config.BaseConfig;
-import ca.uhn.fhir.jpa.config.TestDstu2Config;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboTokensNonUniqueDao;
@@ -20,6 +19,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
+import ca.uhn.fhir.jpa.dao.dstu2.FhirResourceDaoDstu2SearchNoFtTest;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
@@ -42,7 +42,9 @@ import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
@@ -95,6 +97,7 @@ import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -259,6 +262,16 @@ public abstract class BaseJpaTest extends BaseTest {
 		// TODO enforce strict mocking everywhere
 		lenient().when(mySrd.getServer().getDefaultPageSize()).thenReturn(null);
 		lenient().when(mySrd.getServer().getMaximumPageSize()).thenReturn(null);
+	}
+
+	protected <T extends IBaseResource> T loadResourceFromClasspath(Class<T> type, String resourceName, FhirContext theFhirContext) throws IOException {
+		InputStream stream = FhirResourceDaoDstu2SearchNoFtTest.class.getResourceAsStream(resourceName);
+		if (stream == null) {
+			fail("Unable to load resource: " + resourceName);
+		}
+		String string = IOUtils.toString(stream, StandardCharsets.UTF_8);
+		IParser newJsonParser = EncodingEnum.detectEncodingNoDefault(string).newParser(theFhirContext);
+		return newJsonParser.parseResource(type, string);
 	}
 
 	protected CountDownLatch registerLatchHookInterceptor(int theCount, Pointcut theLatchPointcut) {

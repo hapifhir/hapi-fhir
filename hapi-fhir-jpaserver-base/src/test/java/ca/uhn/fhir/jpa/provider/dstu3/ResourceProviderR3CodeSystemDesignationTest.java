@@ -1,12 +1,5 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeType;
@@ -18,6 +11,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 public class ResourceProviderR3CodeSystemDesignationTest extends BaseResourceProviderDstu3Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR3CodeSystemDesignationTest.class);
@@ -27,7 +27,7 @@ public class ResourceProviderR3CodeSystemDesignationTest extends BaseResourcePro
 	@BeforeEach
 	@Transactional
 	public void before02() throws IOException {
-		CodeSystem cs = loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs-with-designations-lang.xml");
+		CodeSystem cs = loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs-with-designations-lang.xml", myFhirCtx);
 		myCodeSystemDao.create(cs, mySrd).getId().toUnqualifiedVersionless();
 	}
 	

@@ -8,7 +8,6 @@ import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
-import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
@@ -16,11 +15,14 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
+import org.hl7.fhir.dstu3.model.CodeType;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.StringType;
@@ -29,10 +31,7 @@ import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.FilterOperator;
 import org.hl7.fhir.dstu3.model.codesystems.HttpVerb;
-import org.hl7.fhir.dstu3.model.BooleanType;
-import org.hl7.fhir.dstu3.model.CodeType;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageRequest;
@@ -86,12 +85,12 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 	}
 
 	private void loadAndPersistCodeSystem() throws IOException {
-		CodeSystem codeSystem = loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs.xml");
+		CodeSystem codeSystem = loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs.xml", myFhirCtx);
 		persistCodeSystem(codeSystem);
 	}
 
 	private void loadAndPersistCodeSystemWithDesignations() throws IOException {
-		CodeSystem codeSystem = loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs-with-designations.xml");
+		CodeSystem codeSystem = loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs-with-designations.xml", myFhirCtx);
 		persistCodeSystem(codeSystem);
 	}
 
@@ -122,7 +121,7 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 	}
 
 	private void loadAndPersistValueSet() throws IOException {
-		ValueSet valueSet = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
+		ValueSet valueSet = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml", myFhirCtx);
 		valueSet.setVersion("1");
 		valueSet.setId("ValueSet/vs1");
 		valueSet.getCompose().getInclude().get(0).setVersion("1");
@@ -665,7 +664,7 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 		loadAndPersistCodeSystem();
 
 		// Test with no version specified
-		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
+		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml", myFhirCtx);
 
 		Parameters respParam = ourClient
 			.operation()
@@ -734,7 +733,7 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		// Test with no version specified
-		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
+		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml", myFhirCtx);
 
 		Parameters respParam = ourClient
 			.operation()

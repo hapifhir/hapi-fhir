@@ -3,13 +3,11 @@ package ca.uhn.fhir.jpa.provider.dstu3;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -21,7 +19,7 @@ public class ResourceProviderDstu3StructureDefinitionTest extends BaseResourcePr
 
 	@Test
 	public void testSnapshotWithResourceParameter() throws IOException {
-		StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/dstu3/profile-differential-patient-dstu3.json");
+		StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/dstu3/profile-differential-patient-dstu3.json", myFhirCtx);
 
 		StructureDefinition response = ourClient
 			.operation()
@@ -36,7 +34,7 @@ public class ResourceProviderDstu3StructureDefinitionTest extends BaseResourcePr
 
 	@Test
 	public void testSnapshotWithId() throws IOException {
-		StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/dstu3/profile-differential-patient-dstu3.json");
+		StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/dstu3/profile-differential-patient-dstu3.json", myFhirCtx);
 		IIdType id = ourClient.create().resource(sd).execute().getId().toUnqualifiedVersionless();
 
 		StructureDefinition response = ourClient
@@ -52,7 +50,7 @@ public class ResourceProviderDstu3StructureDefinitionTest extends BaseResourcePr
 
 	@Test
 	public void testSnapshotWithUrl() throws IOException {
-		StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/dstu3/profile-differential-patient-dstu3.json");
+		StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/dstu3/profile-differential-patient-dstu3.json", myFhirCtx);
 		IIdType id = ourClient.create().resource(sd).execute().getId().toUnqualifiedVersionless();
 
 		StructureDefinition response = ourClient

@@ -1,8 +1,6 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
-import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -20,7 +18,7 @@ public class FhirResourceDaoDstu3StructureDefinitionTest extends BaseJpaDstu3Tes
 
 	@Test
 	public void testGenerateSnapshot() throws IOException {
-		StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/dstu3/profile-differential-patient-dstu3.json");
+		StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/dstu3/profile-differential-patient-dstu3.json", myFhirCtx);
 		assertEquals(0, sd.getSnapshot().getElement().size());
 
 		StructureDefinition output = myStructureDefinitionDao.generateSnapshot(sd, "http://foo", null, "THE BEST PROFILE");
