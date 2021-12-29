@@ -75,6 +75,9 @@ public class ObservationJson {
 	@JsonProperty(value = "effectivedtm", required = true)
 	private Date myEffectiveDtm;
 
+	@JsonProperty(value = "resource")
+	private String myResource;
+
 	public ObservationJson() {
 	}
 
@@ -186,4 +189,11 @@ public class ObservationJson {
 		return myIdentifier;
 	}
 
+	public String getResource() {
+		return myResource;
+	}
+
+	public void setResource(String theResource) {
+		myResource = theResource;
+	}
 }
