@@ -133,7 +133,7 @@ public class DropIndexTask extends BaseTableTask {
 		 */
 
 		if (getDriverType() == DriverTypeEnum.H2_EMBEDDED) {
-			@Language("SQL") String findConstraintSql = "SELECT DISTINCT constraint_name FROM INFORMATION_SCHEMA.INDEXES WHERE constraint_name = ? AND table_name = ?";
+			@Language("SQL") String findConstraintSql = "SELECT DISTINCT constraint_name FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE constraint_name = ? AND table_name = ?";
 			@Language("SQL") String dropConstraintSql = "ALTER TABLE " + getTableName() + " DROP CONSTRAINT ?";
 			findAndDropConstraint(findConstraintSql, dropConstraintSql);
 		} else if (getDriverType() == DriverTypeEnum.DERBY_EMBEDDED) {
