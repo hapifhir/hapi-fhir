@@ -18,6 +18,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class ModifyColumnTest extends BaseTest {
 
+	public static final int LONG_LENGTH_H2 = 64;
+
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
 	public void testColumnWithJdbcTypeClob(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
@@ -109,7 +111,7 @@ public class ModifyColumnTest extends BaseTest {
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255) not null)");
 		assertFalse(JdbcUtils.isColumnNullable(getConnectionProperties(), "SOMETABLE", "PID"));
 		assertFalse(JdbcUtils.isColumnNullable(getConnectionProperties(), "SOMETABLE", "TEXTCOL"));
-		assertEquals(new JdbcUtils.ColumnType(ColumnTypeEnum.LONG, 19), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "PID"));
+		assertEquals(new JdbcUtils.ColumnType(ColumnTypeEnum.LONG, LONG_LENGTH_H2), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "PID"));
 		assertEquals(new JdbcUtils.ColumnType(ColumnTypeEnum.STRING, 255), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "TEXTCOL"));
 
 		// PID
@@ -134,7 +136,7 @@ public class ModifyColumnTest extends BaseTest {
 
 		assertTrue(JdbcUtils.isColumnNullable(getConnectionProperties(), "SOMETABLE", "PID"));
 		assertTrue(JdbcUtils.isColumnNullable(getConnectionProperties(), "SOMETABLE", "TEXTCOL"));
-		assertEquals(new JdbcUtils.ColumnType(ColumnTypeEnum.LONG, 19), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "PID"));
+		assertEquals(new JdbcUtils.ColumnType(ColumnTypeEnum.LONG, LONG_LENGTH_H2), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "PID"));
 		assertEquals(new JdbcUtils.ColumnType(ColumnTypeEnum.STRING, 255), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "TEXTCOL"));
 
 		// Make sure additional migrations don't crash
@@ -152,7 +154,7 @@ public class ModifyColumnTest extends BaseTest {
 		executeSql("create table SOMETABLE (PID bigint not null, DATECOL timestamp not null)");
 		assertFalse(JdbcUtils.isColumnNullable(getConnectionProperties(), "SOMETABLE", "PID"));
 		assertFalse(JdbcUtils.isColumnNullable(getConnectionProperties(), "SOMETABLE", "DATECOL"));
-		assertEquals(new JdbcUtils.ColumnType(ColumnTypeEnum.LONG, 19), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "PID"));
+		assertEquals(new JdbcUtils.ColumnType(ColumnTypeEnum.LONG, LONG_LENGTH_H2), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "PID"));
 		assertEquals(ColumnTypeEnum.DATE_TIMESTAMP, JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "DATECOL").getColumnTypeEnum());
 
 		getMigrator().setNoColumnShrink(true);
@@ -178,7 +180,7 @@ public class ModifyColumnTest extends BaseTest {
 
 		assertTrue(JdbcUtils.isColumnNullable(getConnectionProperties(), "SOMETABLE", "PID"));
 		assertTrue(JdbcUtils.isColumnNullable(getConnectionProperties(), "SOMETABLE", "DATECOL"));
-		assertEquals(new JdbcUtils.ColumnType(ColumnTypeEnum.LONG, 19), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "PID"));
+		assertEquals(new JdbcUtils.ColumnType(ColumnTypeEnum.LONG, LONG_LENGTH_H2), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "PID"));
 		assertEquals(ColumnTypeEnum.DATE_TIMESTAMP, JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "DATECOL").getColumnTypeEnum());
 
 		// Make sure additional migrations don't crash
@@ -194,7 +196,7 @@ public class ModifyColumnTest extends BaseTest {
 		executeSql("create table SOMETABLE (PID bigint, TEXTCOL varchar(255))");
 		assertTrue(JdbcUtils.isColumnNullable(getConnectionProperties(), "SOMETABLE", "PID"));
 		assertTrue(JdbcUtils.isColumnNullable(getConnectionProperties(), "SOMETABLE", "TEXTCOL"));
-		assertEquals(new JdbcUtils.ColumnType(ColumnTypeEnum.LONG, 19), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "PID"));
+		assertEquals(new JdbcUtils.ColumnType(ColumnTypeEnum.LONG, LONG_LENGTH_H2), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "PID"));
 		assertEquals(new JdbcUtils.ColumnType(ColumnTypeEnum.STRING, 255), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "TEXTCOL"));
 
 		// PID
@@ -219,7 +221,7 @@ public class ModifyColumnTest extends BaseTest {
 
 		assertFalse(JdbcUtils.isColumnNullable(getConnectionProperties(), "SOMETABLE", "PID"));
 		assertFalse(JdbcUtils.isColumnNullable(getConnectionProperties(), "SOMETABLE", "TEXTCOL"));
-		assertEquals(new JdbcUtils.ColumnType(ColumnTypeEnum.LONG, 19), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "PID"));
+		assertEquals(new JdbcUtils.ColumnType(ColumnTypeEnum.LONG, LONG_LENGTH_H2), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "PID"));
 		assertEquals(new JdbcUtils.ColumnType(ColumnTypeEnum.STRING, 255), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "TEXTCOL"));
 
 		// Make sure additional migrations don't crash
@@ -307,7 +309,7 @@ public class ModifyColumnTest extends BaseTest {
 
 		JdbcUtils.ColumnType existingColumnType = JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "PID");
 		assertEquals(ColumnTypeEnum.LONG, existingColumnType.getColumnTypeEnum());
-		assertEquals(19L, existingColumnType.getLength().longValue());
+		assertEquals(LONG_LENGTH_H2, existingColumnType.getLength().longValue());
 		assertTrue(existingColumnType.equals(task.getColumnType(), task.getColumnLength()));
 	}
 
