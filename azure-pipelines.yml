@@ -4,7 +4,7 @@ variables:
   MAVEN_CACHE_FOLDER: $(Pipeline.Workspace)/.m2/repository
   #MAVEN_CACHE_FOLDER: $(Agent.TempDirectory)/.m2/repository
   #MAVEN_OPTS: '-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
-  MAVEN_OPTS: ''
+  MAVEN_OPTS: '-Djansi.force=true'
 
 trigger:
 - master
