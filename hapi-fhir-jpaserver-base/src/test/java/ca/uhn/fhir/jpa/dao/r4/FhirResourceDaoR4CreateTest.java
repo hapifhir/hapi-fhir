@@ -97,41 +97,6 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		});
 	}
 
-
-	@Test
-	public void testCreateWithInlineResourceTextStorage() {
-		myDaoConfig.setInlineResourceTextBelowSize(5000);
-
-		Patient patient = new Patient();
-		patient.setActive(true);
-		Long resourceId = myPatientDao.create(patient).getId().getIdPartAsLong();
-
-		patient = new Patient();
-		patient.setId("Patient/" + resourceId);
-		patient.setActive(false);
-		myPatientDao.update(patient);
-
-		runInTransaction(() -> {
-			// Version 1
-			ResourceHistoryTable entity = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(resourceId, 1);
-			assertNull(entity.getResource());
-			assertEquals("{\"resourceType\":\"Patient\",\"active\":true}", entity.getResourceTextVc());
-			// Version 2
-			entity = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(resourceId, 2);
-			assertNull(entity.getResource());
-			assertEquals("{\"resourceType\":\"Patient\",\"active\":false}", entity.getResourceTextVc());
-		});
-
-		patient = myPatientDao.read(new IdType("Patient/" + resourceId));
-		assertFalse(patient.getActive());
-
-		patient = (Patient) myPatientDao.search(SearchParameterMap.newSynchronous()).getAllResources().get(0);
-		assertFalse(patient.getActive());
-
-	}
-
-
-
 	@Test
 	public void testCreateLinkCreatesAppropriatePaths_ContainedResource() {
 		myModelConfig.setIndexOnContainedResources(true);

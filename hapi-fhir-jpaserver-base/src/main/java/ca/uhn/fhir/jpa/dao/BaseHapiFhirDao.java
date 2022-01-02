@@ -92,6 +92,7 @@ import ca.uhn.fhir.util.XmlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Sets;
+import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import org.apache.commons.lang3.NotImplementedException;
@@ -133,6 +134,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -576,11 +578,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				theEntity.setFhirVersion(myContext.getVersion().getVersion());
 
 				HashFunction sha256 = Hashing.sha256();
+				HashCode hashCode;
 				String encodedResource = encodeResource(theResource, encoding, excludeElements, myContext);
 				if (getConfig().getInlineResourceTextBelowSize() > 0 && encodedResource.length() < getConfig().getInlineResourceTextBelowSize()) {
 					resourceText = encodedResource;
 					resourceBinary = null;
 					encoding = ResourceEncodingEnum.JSON;
+					hashCode = sha256.hashUnencodedChars(encodedResource);
 				} else {
 					resourceText = null;
 					switch (encoding) {
@@ -595,10 +599,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 							resourceBinary = new byte[0];
 							break;
 					}
-					sha256.hashBytes(resourceBinary);
+					hashCode = sha256.hashBytes(resourceBinary);
 				}
 
-				String hashSha256 = sha256.toString();
+				String hashSha256 = hashCode.toString();
 				if (hashSha256.equals(theEntity.getHashSha256()) == false) {
 					changed = true;
 				}
@@ -651,7 +655,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				if (currentHistoryVersion == null) {
 					currentHistoryVersion = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(theEntity.getId(), theEntity.getVersion());
 				}
-				if (currentHistoryVersion == null || currentHistoryVersion.getResource() == null) {
+				if (currentHistoryVersion == null || !currentHistoryVersion.hasResource()) {
 					changed = true;
 				} else {
 					changed = !Arrays.equals(currentHistoryVersion.getResource(), resourceBinary);

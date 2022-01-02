@@ -43,7 +43,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -252,4 +251,12 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 		getResourceTable().setForcedId(theForcedId);
 	}
 
+	/**
+	 * Returns <code>true</code> if there is a populated resource text (i.e.
+	 * either {@link #getResource()} or {@link #getResourceTextVc()} return a non null
+	 * value.
+	 */
+	public boolean hasResource() {
+		return myResource != null || myResourceTextVc != null;
+	}
 }
