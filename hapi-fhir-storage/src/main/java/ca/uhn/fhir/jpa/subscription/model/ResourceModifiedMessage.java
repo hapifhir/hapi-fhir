@@ -21,13 +21,12 @@ package ca.uhn.fhir.jpa.subscription.model;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceModifiedMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import javax.annotation.Nullable;
 
 /**
  * Most of this class has been moved to ResourceModifiedMessage in the hapi-fhir-server project, for a reusable channel ResourceModifiedMessage
@@ -42,6 +41,8 @@ public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 	@JsonProperty(value = "subscriptionId", required = false)
 	private String mySubscriptionId;
 
+	@JsonProperty(value = "partitionId", required = false)
+	private RequestPartitionId myPartitionId;
 
 
 	/**
@@ -53,10 +54,17 @@ public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 
 	public ResourceModifiedMessage(FhirContext theFhirContext, IBaseResource theResource, OperationTypeEnum theOperationType) {
 		super(theFhirContext, theResource, theOperationType);
+		myPartitionId = RequestPartitionId.defaultPartition();
 	}
 
 	public ResourceModifiedMessage(FhirContext theFhirContext, IBaseResource theNewResource, OperationTypeEnum theOperationType, RequestDetails theRequest) {
 		super(theFhirContext, theNewResource, theOperationType, theRequest);
+		myPartitionId = RequestPartitionId.defaultPartition();
+	}
+
+	public ResourceModifiedMessage(FhirContext theFhirContext, IBaseResource theNewResource, OperationTypeEnum theOperationType, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
+		super(theFhirContext, theNewResource, theOperationType, theRequest);
+		myPartitionId = theRequestPartitionId;
 	}
 
 
@@ -68,6 +76,14 @@ public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 		mySubscriptionId = theSubscriptionId;
 	}
 
+	public RequestPartitionId getPartitionId() {
+		return myPartitionId;
+	}
+
+	public void setPartitionId(RequestPartitionId thePartitionId) {
+		myPartitionId = thePartitionId;
+	}
+
 
 	@Override
 	public String toString() {
@@ -75,6 +91,7 @@ public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 			.append("operationType", myOperationType)
 			.append("subscriptionId", mySubscriptionId)
 			.append("payloadId", myPayloadId)
+			.append("partitionId", myPartitionId)
 			.toString();
 	}
 }

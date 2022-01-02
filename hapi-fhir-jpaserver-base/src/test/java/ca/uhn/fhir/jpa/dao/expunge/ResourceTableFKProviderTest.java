@@ -33,8 +33,8 @@ class ResourceTableFKProviderTest extends BaseJpaR4Test {
 
 			// Add the extra FKs that are not available in the CROSS_REFERENCES table
 			expected.add(new ResourceForeignKey("HFJ_HISTORY_TAG", "RES_ID"));
-			expected.add(new ResourceForeignKey("TRM_CODESYSTEM_VER", "RES_ID"));
-			expected.add(new ResourceForeignKey("HFJ_RES_VER_PROV", "RES_PID"));
+			//expected.add(new ResourceForeignKey("TRM_CODESYSTEM_VER", "RES_ID"));
+			//expected.add(new ResourceForeignKey("HFJ_RES_VER_PROV", "RES_PID"));
 			// If this assertion fails, it means hapi-fhir has added a new foreign-key dependency to HFJ_RESOURCE.  To fix
 			// the test, add the missing key to myResourceTableFKProvider.getResourceForeignKeys()
 			assertThat(myResourceTableFKProvider.getResourceForeignKeys(), containsInAnyOrder(expected.toArray()));

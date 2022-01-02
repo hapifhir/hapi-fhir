@@ -59,7 +59,6 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 	private static final Logger ourLog = getLogger(RequestPartitionHelperSvc.class);
 
-
 	private final HashSet<Object> myNonPartitionableResourceNames;
 
 	@Autowired
@@ -75,7 +74,6 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 		myNonPartitionableResourceNames = new HashSet<>();
 
 		// Infrastructure
-		myNonPartitionableResourceNames.add("Subscription");
 		myNonPartitionableResourceNames.add("SearchParameter");
 
 		// Validation and Conformance
@@ -84,6 +82,8 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 		myNonPartitionableResourceNames.add("CapabilityStatement");
 		myNonPartitionableResourceNames.add("CompartmentDefinition");
 		myNonPartitionableResourceNames.add("OperationDefinition");
+
+		myNonPartitionableResourceNames.add("Library");
 
 		// Terminology
 		myNonPartitionableResourceNames.add("ConceptMap");

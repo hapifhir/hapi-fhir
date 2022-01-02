@@ -24,7 +24,7 @@ public class ReceivingChannelParameters extends BaseChannelParameters {
 
 	/**
 	 * Constructor
-	 *
+	 * <p>
 	 * Receiving channels are channels that receive data from topics/queues
 	 *
 	 * @param theChannelName
