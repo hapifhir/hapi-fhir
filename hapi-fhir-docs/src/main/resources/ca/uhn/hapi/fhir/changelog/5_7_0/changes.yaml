@@ -21,6 +21,7 @@
 <li>Thymeleaf (Testpage Overlay): 3.0.12.RELEASE -> 3.0.14.RELEASE (Addresses CVE-2021-43466)</li>
 <li>Commons-CLI (CLI): 1.4 -> 1.5.0</li>
 <li>JANSI (CLI): 2.3.2 -> 2.4.0</li>
+<li>Jetty Server (CLI): 9.4.43.v20210629 -> 9.4.44.v20210927</li>
 <li>Spring Boot (Boot): 2.5.0 -> 2.6.2</li>
 </ul>
 "
