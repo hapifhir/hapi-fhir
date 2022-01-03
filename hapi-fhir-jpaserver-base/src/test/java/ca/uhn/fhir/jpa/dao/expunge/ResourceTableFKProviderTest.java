@@ -14,7 +14,6 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -36,21 +35,27 @@ class ResourceTableFKProviderTest extends BaseJpaR4Test {
 
 	@Test
 	public void testWeHaveAllForeignKeys() throws SQLException {
-		List<ResourceForeignKey> expected = myResourceTableFKProvider.getResourceForeignKeys();
-		Set<ResourceForeignKey> actual = new HashSet<>();
+		Set<ResourceForeignKey> expected = new HashSet<>();
 
 		try (Connection connection = myDataSource.getConnection()) {
 			DatabaseMetaData metadata = connection.getMetaData();
 
-			for (ResourceForeignKey nextExpected : expected) {
-				String sourceTable = nextExpected.table;
-				String targetTable = "HFJ_RESOURCE";
-				ResultSet crossRefs = metadata.getCrossReference(null, null, sourceTable, null, null, targetTable);
+			Set<String> tableNames = new HashSet<>();
+			ResultSet tables = metadata.getTables(null, null, null, null);
+			while (tables.next()) {
+				tableNames.add(tables.getString("TABLE_NAME"));
+			}
+			tableNames.remove("HFJ_RESOURCE");
+
+			for (String nextTargetTable : tableNames) {
+				String sourceTable = "HFJ_RESOURCE";
+				ResultSet crossRefs = metadata.getCrossReference(null, null, sourceTable, null, null, nextTargetTable);
 				while (crossRefs.next()) {
 					String fkTableName = crossRefs.getString("FKTABLE_NAME");
 					String fkColumnName = crossRefs.getString("FKCOLUMN_NAME");
-					String fkName = crossRefs.getString("FK_NAME");
-					actual.add(new ResourceForeignKey(fkTableName, fkName));
+					ResourceForeignKey foreignKey = new ResourceForeignKey(fkTableName, fkColumnName);
+					ourLog.info("Found FK to HFJ_RESOURCE: {}", foreignKey);
+					expected.add(foreignKey);
 				}
 
 			}
@@ -58,12 +63,11 @@ class ResourceTableFKProviderTest extends BaseJpaR4Test {
 		}
 
 		// Add the extra FKs that are not available in the CROSS_REFERENCES table
-//		actual.add(new ResourceForeignKey("HFJ_HISTORY_TAG", "RES_ID"));
+		expected.add(new ResourceForeignKey("HFJ_HISTORY_TAG", "RES_ID"));
 
-		//actual.add(new ResourceForeignKey("TRM_CODESYSTEM_VER", "RES_ID"));
-		//actual.add(new ResourceForeignKey("HFJ_RES_VER_PROV", "RES_PID"));
 		// If this assertion fails, it means hapi-fhir has added a new foreign-key dependency to HFJ_RESOURCE.  To fix
 		// the test, add the missing key to myResourceTableFKProvider.getResourceForeignKeys()
-		assertThat(expected, containsInAnyOrder(actual.toArray()));
+		List<ResourceForeignKey> actual = myResourceTableFKProvider.getResourceForeignKeys();
+		assertThat(actual, containsInAnyOrder(expected.toArray()));
 	}
 }
