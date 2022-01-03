@@ -2,4 +2,4 @@
 issue: 3242
 type: fix
 title: "Fixed bug that caused queries that checked Elastisearch when setting `_total=accurate` searches to return all
-      values when using _content or _text parameters""
+      values when using _content or _text parameters"
