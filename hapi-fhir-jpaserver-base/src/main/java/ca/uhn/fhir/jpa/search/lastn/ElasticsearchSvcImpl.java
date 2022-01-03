@@ -21,19 +21,24 @@ package ca.uhn.fhir.jpa.search.lastn;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.dao.TolerantJsonParser;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
 import ca.uhn.fhir.jpa.model.util.CodeSystemHash;
 import ca.uhn.fhir.jpa.search.lastn.json.CodeJson;
 import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.util.LastNParameterHelper;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
@@ -70,6 +75,7 @@ import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilde
 import org.elasticsearch.search.aggregations.metrics.ParsedTopHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nullable;
@@ -77,8 +83,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -93,29 +102,31 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	public static final String OBSERVATION_CODE_INDEX_SCHEMA_FILE = "ObservationCodeIndexSchema.json";
 
 	// Aggregation Constants
-	private final String GROUP_BY_SUBJECT = "group_by_subject";
-	private final String GROUP_BY_SYSTEM = "group_by_system";
-	private final String GROUP_BY_CODE = "group_by_code";
-	private final String MOST_RECENT_EFFECTIVE = "most_recent_effective";
+	private static final String GROUP_BY_SUBJECT = "group_by_subject";
+	private static final String GROUP_BY_SYSTEM = "group_by_system";
+	private static final String GROUP_BY_CODE = "group_by_code";
+	private static final String MOST_RECENT_EFFECTIVE = "most_recent_effective";
 
 	// Observation index document element names
-	private final String OBSERVATION_IDENTIFIER_FIELD_NAME = "identifier";
-	private final String OBSERVATION_SUBJECT_FIELD_NAME = "subject";
-	private final String OBSERVATION_CODEVALUE_FIELD_NAME = "codeconceptcodingcode";
-	private final String OBSERVATION_CODESYSTEM_FIELD_NAME = "codeconceptcodingsystem";
-	private final String OBSERVATION_CODEHASH_FIELD_NAME = "codeconceptcodingcode_system_hash";
-	private final String OBSERVATION_CODEDISPLAY_FIELD_NAME = "codeconceptcodingdisplay";
-	private final String OBSERVATION_CODE_TEXT_FIELD_NAME = "codeconcepttext";
-	private final String OBSERVATION_EFFECTIVEDTM_FIELD_NAME = "effectivedtm";
-	private final String OBSERVATION_CATEGORYHASH_FIELD_NAME = "categoryconceptcodingcode_system_hash";
-	private final String OBSERVATION_CATEGORYVALUE_FIELD_NAME = "categoryconceptcodingcode";
-	private final String OBSERVATION_CATEGORYSYSTEM_FIELD_NAME = "categoryconceptcodingsystem";
-	private final String OBSERVATION_CATEGORYDISPLAY_FIELD_NAME = "categoryconceptcodingdisplay";
-	private final String OBSERVATION_CATEGORYTEXT_FIELD_NAME = "categoryconcepttext";
+	private static final String OBSERVATION_IDENTIFIER_FIELD_NAME = "identifier";
+	private static final String OBSERVATION_SUBJECT_FIELD_NAME = "subject";
+	private static final String OBSERVATION_CODEVALUE_FIELD_NAME = "codeconceptcodingcode";
+	private static final String OBSERVATION_CODESYSTEM_FIELD_NAME = "codeconceptcodingsystem";
+	private static final String OBSERVATION_CODEHASH_FIELD_NAME = "codeconceptcodingcode_system_hash";
+	private static final String OBSERVATION_CODEDISPLAY_FIELD_NAME = "codeconceptcodingdisplay";
+	private static final String OBSERVATION_CODE_TEXT_FIELD_NAME = "codeconcepttext";
+	private static final String OBSERVATION_EFFECTIVEDTM_FIELD_NAME = "effectivedtm";
+	private static final String OBSERVATION_CATEGORYHASH_FIELD_NAME = "categoryconceptcodingcode_system_hash";
+	private static final String OBSERVATION_CATEGORYVALUE_FIELD_NAME = "categoryconceptcodingcode";
+	private static final String OBSERVATION_CATEGORYSYSTEM_FIELD_NAME = "categoryconceptcodingsystem";
+	private static final String OBSERVATION_CATEGORYDISPLAY_FIELD_NAME = "categoryconceptcodingdisplay";
+	private static final String OBSERVATION_CATEGORYTEXT_FIELD_NAME = "categoryconcepttext";
 
 	// Code index document element names
-	private final String CODE_HASH = "codingcode_system_hash";
-	private final String CODE_TEXT = "text";
+	private static final String CODE_HASH = "codingcode_system_hash";
+	private static final String CODE_TEXT = "text";
+
+	private static final String OBSERVATION_RESOURCE_NAME = "Observation";
 
 	private final RestHighLevelClient myRestHighLevelClient;
 
@@ -123,6 +134,9 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 
 	@Autowired
 	private PartitionSettings myPartitionSettings;
+
+	@Autowired
+	private FhirContext myContext;
 
 	//This constructor used to inject a dummy partitionsettings in test.
 	public ElasticsearchSvcImpl(PartitionSettings thePartitionSetings, String theProtocol, String theHostname, @Nullable String theUsername, @Nullable String thePassword) {
@@ -730,6 +744,55 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	public void close() throws IOException {
 		myRestHighLevelClient.close();
 	}
+
+	@Override
+	public List<IBaseResource> getObservationResources(Collection<ResourcePersistentId> thePids) {
+		SearchRequest searchRequest = buildObservationResourceSearchRequest(thePids);
+		try {
+			// wip mb what is the limit to an ES hit count?  10k?  We may need to chunk this :-(
+			SearchResponse observationDocumentResponse = executeSearchRequest(searchRequest);
+			SearchHit[] observationDocumentHits = observationDocumentResponse.getHits().getHits();
+			IParser parser = TolerantJsonParser.createWithLenientErrorHandling(myContext, null);
+			Class<? extends IBaseResource> resourceType = myContext.getResourceDefinition(OBSERVATION_RESOURCE_NAME).getImplementingClass();
+			/**
+			 * @see ca.uhn.fhir.jpa.dao.BaseHapiFhirDao#toResource(Class, IBaseResourceEntity, Collection, boolean) for
+			 * details about parsing raw json to BaseResource
+			 */
+			// WIP what do we do with partition?
+			// WIP what do we do with deleted observation resources
+			// WIP how do you handle provenance?
+			// Parse using tolerant parser
+			return Arrays.stream(observationDocumentHits)
+				.map(this::parseObservationJson)
+				.map(observationJson -> parser.parseResource(resourceType, observationJson.getResource()))
+				.collect(Collectors.toList());
+		} catch (IOException theE) {
+			// WIP do we fallback to JPA search then?
+			throw new InvalidRequestException("Unable to execute observation document query for provided IDs " + thePids, theE);
+		}
+	}
+
+	private ObservationJson parseObservationJson(SearchHit theSearchHit) {
+		try {
+			return objectMapper.readValue(theSearchHit.getSourceAsString(), ObservationJson.class);
+		} catch (JsonProcessingException exp) {
+			throw new InvalidRequestException("Unable to parse the observation resource json", exp);
+		}
+	}
+
+	private SearchRequest buildObservationResourceSearchRequest(Collection<ResourcePersistentId> thePids) {
+		SearchRequest searchRequest = new SearchRequest(OBSERVATION_INDEX);
+		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+		// Query
+		BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+		List<String> pidParams = thePids.stream().map(Object::toString).collect(Collectors.toList());
+		boolQueryBuilder.must(QueryBuilders.termsQuery(OBSERVATION_IDENTIFIER_FIELD_NAME, pidParams));
+		searchSourceBuilder.query(boolQueryBuilder);
+		searchSourceBuilder.size(thePids.size());
+		searchRequest.source(searchSourceBuilder);
+		return searchRequest;
+	}
+
 
 	private IndexRequest createIndexRequest(String theIndexName, String theDocumentId, String theObservationDocument, String theDocumentType) {
 		IndexRequest request = new IndexRequest(theIndexName);

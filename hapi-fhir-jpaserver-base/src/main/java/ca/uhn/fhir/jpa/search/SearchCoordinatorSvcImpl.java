@@ -542,7 +542,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 			List<IBaseResource> resources = new ArrayList<>();
 			theSb.loadResourcesByPid(pids, includedPidsList, resources, false, theRequestDetails);
-
 			// Hook: STORAGE_PRESHOW_RESOURCES
 			resources = InterceptorUtil.fireStoragePreshowResource(resources, theRequestDetails, myInterceptorBroadcaster);
 
