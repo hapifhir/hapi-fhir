@@ -283,7 +283,7 @@ public class DaoConfig {
 	 * of characters will be stored inline in the <code>HFJ_RES_VER</code> table instead of using a
 	 * separate LOB column.
 	 *
-	 * @since 7.0.0
+	 * @since 5.7.0
 	 */
 	private int myInlineResourceTextBelowSize = 0;
 
@@ -325,7 +325,7 @@ public class DaoConfig {
 	 * of characters will be stored inline in the <code>HFJ_RES_VER</code> table instead of using a
 	 * separate LOB column.
 	 *
-	 * @since 7.0.0
+	 * @since 5.7.0
 	 */
 	public int getInlineResourceTextBelowSize() {
 		return myInlineResourceTextBelowSize;
@@ -336,7 +336,7 @@ public class DaoConfig {
 	 * of characters will be stored inline in the <code>HFJ_RES_VER</code> table instead of using a
 	 * separate LOB column.
 	 *
-	 * @since 7.0.0
+	 * @since 5.7.0
 	 */
 	public void setInlineResourceTextBelowSize(int theInlineResourceTextBelowSize) {
 		myInlineResourceTextBelowSize = theInlineResourceTextBelowSize;

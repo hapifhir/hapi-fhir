@@ -1,0 +1,8 @@
+---
+type: perf
+issue: 3267
+title: "A new JPA setting has been added to DaoConfig settings called **Inline Resource Text Below Size**. When
+   this setting is set to a positive value, any resources with a total serialized length smaller than the given
+   number will be stored as an inline VARCHAR2 text value on the HFJ_RES_VER table, instead of using an external
+   LOB column. This improves read/write performance (often by a significant amount) at the expense of a slightly larger
+   amount of disk usage."

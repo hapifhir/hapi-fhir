@@ -2319,12 +2319,15 @@ public class FhirResourceDaoR4LegacySearchBuilderTest extends BaseJpaR4Test {
 		{
 			// Don't load synchronous
 			SearchParameterMap map = new SearchParameterMap();
-			map.setLastUpdated(new DateRangeParam().setUpperBound(new DateParam(ParamPrefixEnum.LESSTHAN, "2022-01-01")));
+			map.setLastUpdated(new DateRangeParam().setUpperBound(new DateParam(ParamPrefixEnum.LESSTHAN, "2042-01-01")));
+
+			myCaptureQueriesListener.clear();
 			IBundleProvider found = myPatientDao.search(map);
 			Set<String> dates = new HashSet<>();
 			String searchId = found.getUuid();
 			for (int i = 0; i < 9; i++) {
 				List<IBaseResource> resources = found.getResources(i, i + 1);
+				myCaptureQueriesListener.logSelectQueries();
 				if (resources.size() != 1) {
 					int finalI = i;
 					int finalI1 = i;
