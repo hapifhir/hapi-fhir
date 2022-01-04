@@ -621,7 +621,6 @@ public class SearchCoordinatorSvcImplTest {
 	 */
 	@Test
 	public void testFetchAllResultsReturnsNull() {
-
 		when(myDaoRegistry.getResourceDao(anyString())).thenReturn(myCallingDao);
 		when(myCallingDao.getContext()).thenReturn(ourCtx);
 
