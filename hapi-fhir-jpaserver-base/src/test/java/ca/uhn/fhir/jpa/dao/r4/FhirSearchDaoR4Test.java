@@ -40,7 +40,6 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 		assert !TransactionSynchronizationManager.isActualTransactionActive();
 	}
 
-	//TODO - remove
 	@Test
 	public void testSearchReturnsExpectedPatientsWhenContentTypeUsed() {
 		// setup

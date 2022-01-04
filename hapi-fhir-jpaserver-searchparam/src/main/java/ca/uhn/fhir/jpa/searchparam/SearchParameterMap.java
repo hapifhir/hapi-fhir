@@ -92,7 +92,6 @@ public class SearchParameterMap implements Serializable {
 
 	/**
 	 * Creates and returns a copy of this map
-	 * @return
 	 */
 	@JsonIgnore
 	@Override
