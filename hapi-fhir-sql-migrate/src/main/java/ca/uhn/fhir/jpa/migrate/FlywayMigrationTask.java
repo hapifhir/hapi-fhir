@@ -65,6 +65,11 @@ public class FlywayMigrationTask implements JavaMigration {
 	}
 
 	@Override
+	public boolean isBaselineMigration() {
+		return false;
+	}
+
+	@Override
 	public boolean canExecuteInTransaction() {
 		return false;
 	}

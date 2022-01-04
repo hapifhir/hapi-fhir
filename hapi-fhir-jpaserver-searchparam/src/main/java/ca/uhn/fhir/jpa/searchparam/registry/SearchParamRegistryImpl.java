@@ -88,6 +88,13 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 	private IInterceptorService myInterceptorBroadcaster;
 	private IResourceChangeListenerCache myResourceChangeListenerCache;
 
+	/**
+	 * Constructor
+	 */
+	public SearchParamRegistryImpl() {
+		super();
+	}
+
 	@Override
 	public RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName) {
 		requiresActiveSearchParams();
@@ -156,7 +163,8 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 	private void initializeActiveSearchParams(Collection<IBaseResource> theJpaSearchParams) {
 		StopWatch sw = new StopWatch();
 
-		RuntimeSearchParamCache searchParams = RuntimeSearchParamCache.fromReadOnlySearchParmCache(getBuiltInSearchParams());
+		ReadOnlySearchParamCache builtInSearchParams = getBuiltInSearchParams();
+		RuntimeSearchParamCache searchParams = RuntimeSearchParamCache.fromReadOnlySearchParmCache(builtInSearchParams);
 		long overriddenCount = overrideBuiltinSearchParamsWithActiveJpaSearchParams(searchParams, theJpaSearchParams);
 		ourLog.trace("Have overridden {} built-in search parameters", overriddenCount);
 		removeInactiveSearchParams(searchParams);

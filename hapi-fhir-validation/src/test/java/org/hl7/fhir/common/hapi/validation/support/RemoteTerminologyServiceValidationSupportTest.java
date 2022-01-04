@@ -60,7 +60,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 	private static final String VALUE_SET_URL = "http://value.set/url";
 	private static final String ERROR_MESSAGE = "This is an error message";
 
-	private static FhirContext ourCtx = FhirContext.forR4();
+	private static FhirContext ourCtx = FhirContext.forR4Cached();
 
 	@RegisterExtension
 	public RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(ourCtx);

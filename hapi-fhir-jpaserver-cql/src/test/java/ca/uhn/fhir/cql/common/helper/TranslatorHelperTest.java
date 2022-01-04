@@ -17,7 +17,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
@@ -130,7 +130,7 @@ public class TranslatorHelperTest implements CqlProviderTestBase {
 		CqlTranslator translator = null;
 		try {
 			MockedStatic<CqlTranslator> cqlTranslator = mockStatic(CqlTranslator.class);
-			when(CqlTranslator.fromStream(any(InputStream.class), any(ModelManager.class), any(LibraryManager.class), Matchers.<CqlTranslator.Options>anyVararg())).thenThrow(IOException.class);
+			when(CqlTranslator.fromStream(any(InputStream.class), any(ModelManager.class), any(LibraryManager.class), any())).thenThrow(IOException.class);
 			translator = TranslatorHelper.getTranslator(new ByteArrayInputStream("INVALID-FILENAME".getBytes(StandardCharsets.UTF_8)), libraryManager, modelManager);
 			fail();
 		} catch (IllegalArgumentException | IOException e) {

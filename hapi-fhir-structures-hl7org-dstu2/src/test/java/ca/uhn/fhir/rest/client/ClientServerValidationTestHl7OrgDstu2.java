@@ -21,7 +21,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -94,7 +94,7 @@ public class ClientServerValidationTestHl7OrgDstu2 {
 		myCtx.newRestfulGenericClient("http://foo").read(new UriDt("http://foo/Patient/123"));
 
 		// Conformance only loaded once, then 3 reads
-		verify(myHttpClient, times(4)).execute(Matchers.any(HttpUriRequest.class));
+		verify(myHttpClient, times(4)).execute(ArgumentMatchers.any(HttpUriRequest.class));
 	}
 
 	@Test

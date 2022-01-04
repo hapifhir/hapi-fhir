@@ -81,14 +81,14 @@ public class BaseJpaResourceProviderObservationR5 extends JpaResourceProviderR5<
 		startRequest(theServletRequest);
 		try {
 			SearchParameterMap paramMap = new SearchParameterMap();
-			paramMap.add(Observation.SP_CATEGORY, theCategory);
-			paramMap.add(Observation.SP_CODE, theCode);
-			paramMap.add(Observation.SP_DATE, theDate);
+			paramMap.add(org.hl7.fhir.r4.model.Observation.SP_CATEGORY, theCategory);
+			paramMap.add(org.hl7.fhir.r4.model.Observation.SP_CODE, theCode);
+			paramMap.add(org.hl7.fhir.r4.model.Observation.SP_DATE, theDate);
 			if (thePatient != null) {
-				paramMap.add(Observation.SP_PATIENT, thePatient);
+				paramMap.add(org.hl7.fhir.r4.model.Observation.SP_PATIENT, thePatient);
 			}
 			if (theSubject != null) {
-				paramMap.add(Observation.SP_SUBJECT, theSubject);
+				paramMap.add(org.hl7.fhir.r4.model.Observation.SP_SUBJECT, theSubject);
 			}
 			if (theMax != null) {
 				paramMap.setLastNMax(theMax.getValue());
