@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.searchparam.util;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ public class LastNParameterHelper {
 
 	private static boolean isLastNParameterDstu3(String theParamName) {
 		return (theParamName.equals(org.hl7.fhir.dstu3.model.Observation.SP_SUBJECT) || theParamName.equals(org.hl7.fhir.dstu3.model.Observation.SP_PATIENT)
-			|| theParamName.equals(org.hl7.fhir.dstu3.model.Observation.SP_CATEGORY) || theParamName.equals(org.hl7.fhir.r5.model.Observation.SP_CODE))
+			|| theParamName.equals(org.hl7.fhir.dstu3.model.Observation.SP_CATEGORY) || theParamName.equals(org.hl7.fhir.r4.model.Observation.SP_CODE))
 			|| theParamName.equals(org.hl7.fhir.dstu3.model.Observation.SP_DATE);
 	}
 
@@ -70,14 +70,14 @@ public class LastNParameterHelper {
 	}
 
 	private static boolean isLastNParameterR5(String theParamName) {
-		return (theParamName.equals(org.hl7.fhir.r5.model.Observation.SP_SUBJECT) || theParamName.equals(org.hl7.fhir.r5.model.Observation.SP_PATIENT)
-			|| theParamName.equals(org.hl7.fhir.r5.model.Observation.SP_CATEGORY) || theParamName.equals(org.hl7.fhir.r5.model.Observation.SP_CODE))
-			|| theParamName.equals(org.hl7.fhir.r5.model.Observation.SP_DATE);
+		return (theParamName.equals(org.hl7.fhir.r4.model.Observation.SP_SUBJECT) || theParamName.equals(org.hl7.fhir.r4.model.Observation.SP_PATIENT)
+			|| theParamName.equals(org.hl7.fhir.r4.model.Observation.SP_CATEGORY) || theParamName.equals(org.hl7.fhir.r4.model.Observation.SP_CODE))
+			|| theParamName.equals(org.hl7.fhir.r4.model.Observation.SP_DATE);
 	}
 
 	public static String getSubjectParamName(FhirContext theContext) {
 		if (theContext.getVersion().getVersion() == FhirVersionEnum.R5) {
-			return org.hl7.fhir.r5.model.Observation.SP_SUBJECT;
+			return org.hl7.fhir.r4.model.Observation.SP_SUBJECT;
 		} else if (theContext.getVersion().getVersion() == FhirVersionEnum.R4) {
 			return org.hl7.fhir.r4.model.Observation.SP_SUBJECT;
 		} else if (theContext.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
@@ -89,7 +89,7 @@ public class LastNParameterHelper {
 
 	public static String getPatientParamName(FhirContext theContext) {
 		if (theContext.getVersion().getVersion() == FhirVersionEnum.R5) {
-			return org.hl7.fhir.r5.model.Observation.SP_PATIENT;
+			return org.hl7.fhir.r4.model.Observation.SP_PATIENT;
 		} else if (theContext.getVersion().getVersion() == FhirVersionEnum.R4) {
 			return org.hl7.fhir.r4.model.Observation.SP_PATIENT;
 		} else if (theContext.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
@@ -101,7 +101,7 @@ public class LastNParameterHelper {
 
 	public static String getEffectiveParamName(FhirContext theContext) {
 		if (theContext.getVersion().getVersion() == FhirVersionEnum.R5) {
-			return org.hl7.fhir.r5.model.Observation.SP_DATE;
+			return org.hl7.fhir.r4.model.Observation.SP_DATE;
 		} else if (theContext.getVersion().getVersion() == FhirVersionEnum.R4) {
 			return org.hl7.fhir.r4.model.Observation.SP_DATE;
 		} else if (theContext.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
@@ -113,7 +113,7 @@ public class LastNParameterHelper {
 
 	public static String getCategoryParamName(FhirContext theContext) {
 		if (theContext.getVersion().getVersion() == FhirVersionEnum.R5) {
-			return org.hl7.fhir.r5.model.Observation.SP_CATEGORY;
+			return org.hl7.fhir.r4.model.Observation.SP_CATEGORY;
 		} else if (theContext.getVersion().getVersion() == FhirVersionEnum.R4) {
 			return org.hl7.fhir.r4.model.Observation.SP_CATEGORY;
 		} else if (theContext.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
@@ -125,7 +125,7 @@ public class LastNParameterHelper {
 
 	public static String getCodeParamName(FhirContext theContext) {
 		if (theContext.getVersion().getVersion() == FhirVersionEnum.R5) {
-			return org.hl7.fhir.r5.model.Observation.SP_CODE;
+			return org.hl7.fhir.r4.model.Observation.SP_CODE;
 		} else if (theContext.getVersion().getVersion() == FhirVersionEnum.R4) {
 			return org.hl7.fhir.r4.model.Observation.SP_CODE;
 		} else if (theContext.getVersion().getVersion() == FhirVersionEnum.DSTU3) {

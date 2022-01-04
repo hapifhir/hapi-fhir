@@ -68,6 +68,7 @@ import org.mockito.internal.stubbing.answers.ThrowsException;
 import org.slf4j.LoggerFactory;
 
 import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -2094,7 +2095,7 @@ public class JsonParserDstu2Test {
 		Patient p = parser.parseResource(Patient.class, input);
 
 		ArgumentCaptor<String> capt = ArgumentCaptor.forClass(String.class);
-		verify(peh, times(0)).unknownElement(Mockito.isNull(IParseLocation.class), capt.capture());
+		verify(peh, times(0)).unknownElement(Mockito.isNull(), capt.capture());
 
 		assertEquals("Smith", p.getName().get(0).getGiven().get(0).getValue());
 		assertExtensionMetadata(p, "fhir-request-method", false, StringDt.class, "POST");
@@ -2105,7 +2106,7 @@ public class JsonParserDstu2Test {
 
 	@Test
 	public void testParseWithWrongTypeObjectShouldBeArray() throws Exception {
-		String input = IOUtils.toString(getClass().getResourceAsStream("/invalid_metadata.json"));
+		String input = IOUtils.toString(getClass().getResourceAsStream("/invalid_metadata.json"), StandardCharsets.UTF_8);
 		try {
 			ourCtx.newJsonParser().parseResource(Conformance.class, input);
 			fail();

@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,12 @@ public class ClasspathUtil {
 		// nothing
 	}
 
-	public static String loadResource(String theClasspath) {
+	/**
+	 * Load a classpath resource, throw an {@link InternalErrorException} if not found
+	 *
+	 * @throws InternalErrorException If the resource can't be found
+	 */
+	public static String loadResource(String theClasspath) throws InternalErrorException {
 		return loadResource(theClasspath, Function.identity());
 	}
 
@@ -61,7 +66,7 @@ public class ClasspathUtil {
 	 * @throws InternalErrorException If the resource can't be found
 	 */
 	@Nonnull
-	public static InputStream loadResourceAsStream(String theClasspath) {
+	public static InputStream loadResourceAsStream(String theClasspath) throws InternalErrorException {
 		String classpath = theClasspath;
 		if (classpath.startsWith("classpath:")) {
 			classpath = classpath.substring("classpath:".length());

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.searchparam.registry;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,6 +89,13 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 	private IInterceptorService myInterceptorBroadcaster;
 	private IResourceChangeListenerCache myResourceChangeListenerCache;
 
+	/**
+	 * Constructor
+	 */
+	public SearchParamRegistryImpl() {
+		super();
+	}
+
 	@Override
 	public RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName) {
 		requiresActiveSearchParams();
@@ -157,7 +164,8 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 	private void initializeActiveSearchParams(Collection<IBaseResource> theJpaSearchParams) {
 		StopWatch sw = new StopWatch();
 
-		RuntimeSearchParamCache searchParams = RuntimeSearchParamCache.fromReadOnlySearchParmCache(getBuiltInSearchParams());
+		ReadOnlySearchParamCache builtInSearchParams = getBuiltInSearchParams();
+		RuntimeSearchParamCache searchParams = RuntimeSearchParamCache.fromReadOnlySearchParmCache(builtInSearchParams);
 		long overriddenCount = overrideBuiltinSearchParamsWithActiveJpaSearchParams(searchParams, theJpaSearchParams);
 		ourLog.trace("Have overridden {} built-in search parameters", overriddenCount);
 		removeInactiveSearchParams(searchParams);

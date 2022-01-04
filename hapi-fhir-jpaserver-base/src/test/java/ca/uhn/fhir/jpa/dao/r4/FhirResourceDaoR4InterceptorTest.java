@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -463,14 +463,14 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		IServerOperationInterceptor interceptor = mock(IServerOperationInterceptor.class);
 		myInterceptorRegistry.registerInterceptor(interceptor);
 
-		verify(interceptor, times(0)).resourceCreated(Mockito.isNull(RequestDetails.class), any());
+		verify(interceptor, times(0)).resourceCreated(Mockito.isNull(), any());
 
 		Patient p = new Patient();
 		p.addName().setFamily("PATIENT");
 		IIdType id = myPatientDao.create(p, (RequestDetails) null).getId();
 		assertEquals(1L, id.getVersionIdPartAsLong().longValue());
 
-		verify(interceptor, times(1)).resourceCreated(Mockito.isNull(RequestDetails.class), any());
+		verify(interceptor, times(1)).resourceCreated(Mockito.isNull(), any());
 	}
 
 	@Test
@@ -478,8 +478,8 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		IServerOperationInterceptor interceptor = mock(IServerOperationInterceptor.class);
 		myInterceptorRegistry.registerInterceptor(interceptor);
 
-		verify(interceptor, times(0)).resourceCreated(Mockito.isNull(RequestDetails.class), any());
-		verify(interceptor, times(0)).resourceDeleted(Mockito.isNull(RequestDetails.class), any());
+		verify(interceptor, times(0)).resourceCreated(Mockito.isNull(), any());
+		verify(interceptor, times(0)).resourceDeleted(Mockito.isNull(), any());
 
 		Patient p = new Patient();
 		p.addName().setFamily("PATIENT");
@@ -489,8 +489,8 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		p.addName().setFamily("2");
 		myPatientDao.delete(p.getIdElement().toUnqualifiedVersionless());
 
-		verify(interceptor, times(1)).resourceCreated(Mockito.isNull(RequestDetails.class), any());
-		verify(interceptor, times(1)).resourceDeleted(Mockito.isNull(RequestDetails.class), any());
+		verify(interceptor, times(1)).resourceCreated(Mockito.isNull(), any());
+		verify(interceptor, times(1)).resourceDeleted(Mockito.isNull(), any());
 	}
 
 	/**
@@ -602,9 +602,9 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		IServerOperationInterceptor interceptor = mock(IServerOperationInterceptor.class);
 		myInterceptorRegistry.registerInterceptor(interceptor);
 
-		verify(interceptor, times(0)).resourceCreated(Mockito.isNull(RequestDetails.class), any());
-		verify(interceptor, times(0)).resourceUpdated(Mockito.isNull(RequestDetails.class), any());
-		verify(interceptor, times(0)).resourceUpdated(Mockito.isNull(RequestDetails.class), any(), any());
+		verify(interceptor, times(0)).resourceCreated(Mockito.isNull(), any());
+		verify(interceptor, times(0)).resourceUpdated(Mockito.isNull(), any());
+		verify(interceptor, times(0)).resourceUpdated(Mockito.isNull(), any(), any());
 
 		Patient p = new Patient();
 		p.addName().setFamily("PATIENT");
@@ -614,9 +614,9 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		p.addName().setFamily("2");
 		myPatientDao.update(p);
 
-		verify(interceptor, times(1)).resourceCreated(Mockito.isNull(RequestDetails.class), any());
-		verify(interceptor, times(1)).resourceUpdated(Mockito.isNull(RequestDetails.class), any());
-		verify(interceptor, times(1)).resourceUpdated(Mockito.isNull(RequestDetails.class), any(), any());
+		verify(interceptor, times(1)).resourceCreated(Mockito.isNull(), any());
+		verify(interceptor, times(1)).resourceUpdated(Mockito.isNull(), any());
+		verify(interceptor, times(1)).resourceUpdated(Mockito.isNull(), any(), any());
 	}
 
 	private class MyOneResourceAnswer implements Answer {

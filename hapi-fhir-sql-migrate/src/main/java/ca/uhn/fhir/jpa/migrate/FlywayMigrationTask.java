@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate;
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,6 +62,11 @@ public class FlywayMigrationTask implements JavaMigration {
 
 	@Override
 	public boolean isUndo() {
+		return false;
+	}
+
+	@Override
+	public boolean isBaselineMigration() {
 		return false;
 	}
 

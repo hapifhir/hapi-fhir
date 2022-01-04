@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -398,7 +398,13 @@ class ModelScanner {
 						ourLog.warn(b.toString());
 						continue;
 					}
-					providesMembershipInCompartments.add(next.name());
+					String name = next.name();
+
+					// As of 2021-12-28 the R5 structures incorrectly have this prefix
+					if (name.startsWith("Base FHIR compartment definition for ")) {
+						name = name.substring("Base FHIR compartment definition for ".length());
+					}
+					providesMembershipInCompartments.add(name);
 				}
 
 				List<RuntimeSearchParam.Component> components = null;

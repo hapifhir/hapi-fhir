@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.term.job;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.term.job;
 
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
+import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,15 +42,13 @@ public class TermCodeSystemDeleteTasklet implements Tasklet {
 	@Autowired
 	private ITermCodeSystemDao myTermCodeSystemDao;
 
-	@Autowired
-	private ITermCodeSystemVersionDao myCodeSystemVersionDao;
-
 	@Override
 	public RepeatStatus execute(@NotNull StepContribution contribution, ChunkContext context) throws Exception {
 		long codeSystemPid = (Long) context.getStepContext().getJobParameters().get(JOB_PARAM_CODE_SYSTEM_ID);
-		ourLog.info("Deleting code system {}", codeSystemPid);
 
-		myTermCodeSystemDao.findById(codeSystemPid).orElseThrow(IllegalStateException::new);
+		TermCodeSystem cs = myTermCodeSystemDao.findById(codeSystemPid).orElseThrow(IllegalStateException::new);
+		ourLog.info("Deleting code system {} / {}", codeSystemPid, cs.getCodeSystemUri());
+
 		myTermCodeSystemDao.deleteById(codeSystemPid);
 		ourLog.info("Code system {} deleted", codeSystemPid);
 

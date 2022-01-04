@@ -133,7 +133,7 @@ The HFJ_RESOURCE table indicates a single resource of any type in the database. 
 
 The HFJ_RES_VER table contains individual versions of a resource. If the resource `Patient/1` has 3 versions, there will be 3 rows in this table.
 
-The complete raw contents of the resource is stored in the `RES_TEXT` column, using the encoding specified in the `RES_ENCODING` column.
+The complete raw contents of the resource is stored in either the `RES_TEXT` or the `RES_TEXT_VC` column, using the encoding specified in the `RES_ENCODING` column.
 
 ## Columns
 
@@ -206,10 +206,19 @@ The complete raw contents of the resource is stored in the `RES_TEXT` column, us
         <tr>
             <td>RES_TEXT</td>
             <td></td>
-            <td>byte[]</td>
+            <td>byte[] (SQL LOB)</td>
             <td></td>
             <td>
-                Contains the actual full text of the resource being stored. 
+                Contains the actual full text of the resource being stored, stored in a binary LOB.
+            </td>        
+        </tr>
+        <tr>
+            <td>RES_TEXT_VC</td>
+            <td></td>
+            <td>String (SQL VARCHAR2)</td>
+            <td></td>
+            <td>
+                Contains the actual full text of the resource being stored, stored in a textual VARCHAR2 column. Only one of <code>RES_TEXT</code> and <code>RES_TEXT_VC</code> will be populated for any given row. The other column in either case will be <i>null</i>. 
             </td>        
         </tr>
     </tbody>

@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,9 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  */
 
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import java.util.HashSet;
 
 public final class OperationRuleTestUtil {
 	private OperationRuleTestUtil() {}
@@ -33,12 +36,24 @@ public final class OperationRuleTestUtil {
 		return ((OperationRule)theRule).isAppliesToServer();
 	}
 
-	public static boolean isAllowAllResponses(IAuthRule theRule) {
-		return ((OperationRule)theRule).isAllowAllResponses();
-	}
-
 	public static boolean isAppliesToAnyType(IAuthRule theRule) {
 		return ((OperationRule)theRule).isAppliesToAnyType();
+	}
+
+	public static boolean isAppliesToAnyInstance(IAuthRule theRule) {
+		return ((OperationRule)theRule).isAppliesToAnyInstance();
+	}
+
+	public static HashSet<Class<? extends IBaseResource>> getAppliesToTypes(IAuthRule theRule) {
+		return ((OperationRule)theRule).getAppliesToTypes();
+	}
+
+	public static HashSet<Class<? extends IBaseResource>> getAppliesToInstancesOfType(IAuthRule theRule) {
+		return ((OperationRule)theRule).getAppliesToInstancesOfType();
+	}
+
+	public static boolean isAllowAllResponses(IAuthRule theRule) {
+		return ((OperationRule)theRule).isAllowAllResponses();
 	}
 
 	public static String getGroupId(IAuthRule theRule) {

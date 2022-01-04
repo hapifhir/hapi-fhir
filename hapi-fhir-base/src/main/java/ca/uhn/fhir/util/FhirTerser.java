@@ -64,7 +64,7 @@ import static org.apache.commons.lang3.StringUtils.substring;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -339,6 +339,10 @@ public class FhirTerser {
 
 	@SuppressWarnings("unchecked")
 	private <T extends IBase> List<T> getValues(BaseRuntimeElementCompositeDefinition<?> theCurrentDef, IBase theCurrentObj, List<String> theSubList, Class<T> theWantedClass, boolean theCreate, boolean theAddExtension) {
+		if (theSubList.isEmpty()) {
+			return Collections.emptyList();
+		}
+
 		String name = theSubList.get(0);
 		List<T> retVal = new ArrayList<>();
 
@@ -683,7 +687,15 @@ public class FhirTerser {
 
 		parts.add(thePath.substring(currentStart));
 
-		if (parts.size() > 0 && parts.get(0).equals(theElementDef.getName())) {
+		String firstPart = parts.get(0);
+		if (Character.isUpperCase(firstPart.charAt(0)) && theElementDef instanceof RuntimeResourceDefinition) {
+			if (firstPart.equals(theElementDef.getName())) {
+				parts = parts.subList(1, parts.size());
+			} else {
+				parts = Collections.emptyList();
+				return parts;
+			}
+		} else if (firstPart.equals(theElementDef.getName())) {
 			parts = parts.subList(1, parts.size());
 		}
 

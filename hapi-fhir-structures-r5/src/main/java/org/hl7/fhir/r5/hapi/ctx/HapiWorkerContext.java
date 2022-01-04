@@ -33,6 +33,7 @@ import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r5.terminologies.ValueSetExpander;
 import org.hl7.fhir.r5.utils.validation.IResourceValidator;
+import org.hl7.fhir.r5.utils.validation.ValidationContextCarrier;
 import org.hl7.fhir.utilities.TimeTracker;
 import org.hl7.fhir.utilities.TranslationServices;
 import org.hl7.fhir.utilities.i18n.I18nBase;
@@ -181,6 +182,11 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 		String code = theCode.getCode();
 		String display = theCode.getDisplay();
 		return validateCode(theOptions, system, null, code, display, theVs);
+	}
+
+	@Override
+	public ValidationResult validateCode(ValidationOptions options, Coding code, ValueSet vs, ValidationContextCarrier ctxt) {
+		return validateCode(options, code, vs);
 	}
 
 	@Override
@@ -390,6 +396,11 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 			throw new FHIRException(Msg.code(224) + "Could not find resource: " + theUri);
 		}
 		return retVal;
+	}
+
+	@Override
+	public <T extends Resource> T fetchResource(Class<T> theClass, String theUri, String theVersion) {
+		return fetchResource(theClass, theUri + "|" + theVersion);
 	}
 
 	@Override

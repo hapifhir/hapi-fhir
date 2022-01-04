@@ -89,6 +89,7 @@ public class SyntheaPerfTest extends BaseJpaTest {
 		myDaoConfig.setMatchUrlCacheEnabled(true);
 		myDaoConfig.setDeleteEnabled(false);
 		myCtx.getParserOptions().setAutoContainReferenceTargetsWithNoId(false);
+		myDaoConfig.setInlineResourceTextBelowSize(4000);
 
 		assertTrue(myDaoConfig.isMassIngestionMode());
 

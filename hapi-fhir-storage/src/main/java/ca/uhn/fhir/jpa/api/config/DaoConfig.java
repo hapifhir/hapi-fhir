@@ -30,7 +30,7 @@ import java.util.TreeSet;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -283,7 +283,7 @@ public class DaoConfig {
 	 * of characters will be stored inline in the <code>HFJ_RES_VER</code> table instead of using a
 	 * separate LOB column.
 	 *
-	 * @since 7.0.0
+	 * @since 5.7.0
 	 */
 	private int myInlineResourceTextBelowSize = 0;
 
@@ -325,7 +325,7 @@ public class DaoConfig {
 	 * of characters will be stored inline in the <code>HFJ_RES_VER</code> table instead of using a
 	 * separate LOB column.
 	 *
-	 * @since 7.0.0
+	 * @since 5.7.0
 	 */
 	public int getInlineResourceTextBelowSize() {
 		return myInlineResourceTextBelowSize;
@@ -336,7 +336,7 @@ public class DaoConfig {
 	 * of characters will be stored inline in the <code>HFJ_RES_VER</code> table instead of using a
 	 * separate LOB column.
 	 *
-	 * @since 7.0.0
+	 * @since 5.7.0
 	 */
 	public void setInlineResourceTextBelowSize(int theInlineResourceTextBelowSize) {
 		myInlineResourceTextBelowSize = theInlineResourceTextBelowSize;

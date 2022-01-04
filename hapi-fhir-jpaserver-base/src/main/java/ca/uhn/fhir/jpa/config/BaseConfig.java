@@ -156,6 +156,7 @@ import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValid
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.hl7.fhir.utilities.npm.FilesystemPackageCacheManager;
+import org.hl7.fhir.utilities.npm.PackageClient;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
@@ -190,7 +191,7 @@ import java.util.Date;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -377,8 +378,8 @@ public abstract class BaseConfig {
 	public IHapiPackageCacheManager packageCacheManager() {
 		JpaPackageCache retVal = new JpaPackageCache();
 		retVal.getPackageServers().clear();
-		retVal.getPackageServers().add(FilesystemPackageCacheManager.PRIMARY_SERVER);
-		retVal.getPackageServers().add(FilesystemPackageCacheManager.SECONDARY_SERVER);
+		retVal.getPackageServers().add(PackageClient.PRIMARY_SERVER);
+		retVal.getPackageServers().add(PackageClient.SECONDARY_SERVER);
 		return retVal;
 	}
 

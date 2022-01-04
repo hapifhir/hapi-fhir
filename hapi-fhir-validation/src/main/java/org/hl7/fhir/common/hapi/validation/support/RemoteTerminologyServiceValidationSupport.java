@@ -112,12 +112,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 
 		// at this point codeSystem couldn't be extracted for a multi-include ValueSet. Just on case it was
 		// because the format was not well handled, let's allow to watch the VS by an easy logging change
-		try {
-			ourLog.trace("CodeSystem couldn't be extracted for code: {} for ValueSet: {}",
-				theCode, JsonUtil.serialize(theValueSet));
-		} catch (IOException theE) {
-			ourLog.error("IOException trying to serialize ValueSet to json: " + theE);
-		}
+		ourLog.trace("CodeSystem couldn't be extracted for code: {} for ValueSet: {}", theCode, theValueSet.getId());
 		return null;
 	}
 

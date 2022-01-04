@@ -4,7 +4,7 @@ package ca.uhn.fhir.validation;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.validation.schematron.SchematronProvider;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -42,6 +43,8 @@ import java.util.concurrent.Future;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 
 /**
@@ -276,24 +279,43 @@ public class FhirValidator {
 				return new ConcurrentValidationTask(entryPathPrefix, future);
 			}).collect(Collectors.toList());
 
-		List<SingleValidationMessage> validationMessages = new ArrayList<>();
+		List<SingleValidationMessage> validationMessages = buildValidationMessages(validationTasks);
+		return new ValidationResult(myContext, validationMessages);
+	}
+
+	static List<SingleValidationMessage> buildValidationMessages(List<ConcurrentValidationTask> validationTasks) {
+		List<SingleValidationMessage> retval = new ArrayList<>();
 		try {
 			for (ConcurrentValidationTask validationTask : validationTasks) {
 				ValidationResult result = validationTask.getFuture().get();
 				final String bundleEntryPathPrefix = validationTask.getResourcePathPrefix();
 				List<SingleValidationMessage> messages = result.getMessages().stream()
 					.map(message -> {
-						String currentPath = message.getLocationString().substring(message.getLocationString().indexOf('.'));
+						String currentPath;
+
+						String locationString = StringUtils.defaultIfEmpty(message.getLocationString(), "");
+
+						int dotIndex = locationString.indexOf('.');
+						if (dotIndex >= 0) {
+							currentPath = locationString.substring(dotIndex);
+						} else {
+							if (isBlank(bundleEntryPathPrefix) || isBlank(locationString)) {
+								currentPath = locationString;
+							} else {
+								currentPath = "." + locationString;
+							}
+						}
+
 						message.setLocationString(bundleEntryPathPrefix + currentPath);
 						return message;
 					})
 					.collect(Collectors.toList());
-				validationMessages.addAll(messages);
+				retval.addAll(messages);
 			}
 		} catch (InterruptedException | ExecutionException exp) {
 			throw new InternalErrorException(exp);
 		}
-		return new ValidationResult(myContext, new ArrayList<>(validationMessages));
+		return retval;
 	}
 
 	private ValidationResult validateResource(IValidationContext<IBaseResource> theValidationContext) {
@@ -352,11 +374,11 @@ public class FhirValidator {
 	}
 
 	// Simple Tuple to keep track of bundle path and associate aync future task
-	private static class ConcurrentValidationTask {
+	static class ConcurrentValidationTask {
 		private final String myResourcePathPrefix;
 		private final Future<ValidationResult> myFuture;
 
-		private ConcurrentValidationTask(String theResourcePathPrefix, Future<ValidationResult> theFuture) {
+		ConcurrentValidationTask(String theResourcePathPrefix, Future<ValidationResult> theFuture) {
 			myResourcePathPrefix = theResourcePathPrefix;
 			myFuture = theFuture;
 		}

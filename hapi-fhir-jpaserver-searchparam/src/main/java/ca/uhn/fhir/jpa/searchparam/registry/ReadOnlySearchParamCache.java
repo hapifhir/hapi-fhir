@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.searchparam.registry;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,8 +66,8 @@ public class ReadOnlySearchParamCache {
 	}
 
 	protected Map<String, RuntimeSearchParam> getSearchParamMap(String theResourceName) {
-		Map<String, RuntimeSearchParam> retval = myResourceNameToSpNameToSp.get(theResourceName);
-		if (retval == null) {
+		Map<String, RuntimeSearchParam> retVal = myResourceNameToSpNameToSp.get(theResourceName);
+		if (retVal == null) {
 			return Collections.emptyMap();
 		}
 		return Collections.unmodifiableMap(myResourceNameToSpNameToSp.get(theResourceName));
@@ -92,11 +92,36 @@ public class ReadOnlySearchParamCache {
 
 		Set<String> resourceNames = theFhirContext.getResourceTypes();
 
+		IBaseBundle allSearchParameterBundle = null;
 		if (theFhirContext.getVersion().getVersion() == FhirVersionEnum.R4) {
-			IBaseBundle allSearchParameterBundle = (IBaseBundle) theFhirContext.newJsonParser().parseResource(ClasspathUtil.loadResourceAsStream("org/hl7/fhir/r4/model/sp/search-parameters.json"));
+			allSearchParameterBundle = (IBaseBundle) theFhirContext.newJsonParser().parseResource(ClasspathUtil.loadResourceAsStream("org/hl7/fhir/r4/model/sp/search-parameters.json"));
+		} else if (theFhirContext.getVersion().getVersion() == FhirVersionEnum.R5) {
+			allSearchParameterBundle = (IBaseBundle) theFhirContext.newXmlParser().parseResource(ClasspathUtil.loadResourceAsStream("org/hl7/fhir/r5/model/sp/search-parameters.xml"));
+		}
+
+		if (allSearchParameterBundle != null) {
 			for (IBaseResource next : BundleUtil.toListOfResources(theFhirContext, allSearchParameterBundle)) {
 				RuntimeSearchParam nextCanonical = theCanonicalizer.canonicalizeSearchParameter(next);
+
 				if (nextCanonical != null) {
+
+					// Force status to ACTIVE - For whatever reason the R5 draft SPs ship with
+					// a status of DRAFT which means the server doesn't actually apply them.
+					// At least this was the case as of 2021-12-24 - JA
+					nextCanonical = new RuntimeSearchParam(
+						nextCanonical.getId(),
+						nextCanonical.getUri(),
+						nextCanonical.getName(),
+						nextCanonical.getDescription(),
+						nextCanonical.getPath(),
+						nextCanonical.getParamType(),
+						nextCanonical.getProvidesMembershipInCompartments(),
+						nextCanonical.getTargets(),
+						RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE,
+						nextCanonical.getComboSearchParamType(),
+						nextCanonical.getComponents(),
+						nextCanonical.getBase());
+
 					Collection<String> base = nextCanonical.getBase();
 					if (base.contains("Resource") || base.contains("DomainResource")) {
 						base = resourceNames;
