@@ -23,6 +23,7 @@
 <li>JANSI (CLI): 2.3.2 -> 2.4.0</li>
 <li>Jetty Server (CLI): 9.4.43.v20210629 -> 9.4.44.v20210927</li>
 <li>Spring Boot (Boot): 2.5.0 -> 2.6.2</li>
+<li>Swagger UI (OpenAPI): 3.46.0 -> 4.1.3</li>
 </ul>
 "
 
