@@ -2452,7 +2452,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		{
 			// Don't load synchronous
 			SearchParameterMap map = new SearchParameterMap();
-			map.setLastUpdated(new DateRangeParam().setUpperBound(new DateParam(ParamPrefixEnum.LESSTHAN, "2022-01-01")));
+			map.setLastUpdated(new DateRangeParam().setUpperBound(new DateParam(ParamPrefixEnum.LESSTHAN, "2042-01-01")));
 			IBundleProvider found = myPatientDao.search(map);
 			Set<String> dates = new HashSet<>();
 			String searchId = found.getUuid();

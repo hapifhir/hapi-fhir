@@ -283,12 +283,17 @@ public class DaoConfig {
 	 * of characters will be stored inline in the <code>HFJ_RES_VER</code> table instead of using a
 	 * separate LOB column.
 	 *
-	 * @since 7.0.0
+	 * @since 5.7.0
 	 */
 	private int myInlineResourceTextBelowSize = 0;
 
 	/**
-	 * @see FhirValidator#isConcurrentBundleValidation()
+	 * @since 5.7.0
+	 */
+	private boolean myStoreResourceInLuceneIndex;
+
+  /** 
+   * @see FhirValidator#isConcurrentBundleValidation()
 	 * @since 5.7.0
 	 */
 	private boolean myConcurrentBundleValidation;
@@ -320,7 +325,7 @@ public class DaoConfig {
 	 * of characters will be stored inline in the <code>HFJ_RES_VER</code> table instead of using a
 	 * separate LOB column.
 	 *
-	 * @since 7.0.0
+	 * @since 5.7.0
 	 */
 	public int getInlineResourceTextBelowSize() {
 		return myInlineResourceTextBelowSize;
@@ -331,7 +336,7 @@ public class DaoConfig {
 	 * of characters will be stored inline in the <code>HFJ_RES_VER</code> table instead of using a
 	 * separate LOB column.
 	 *
-	 * @since 7.0.0
+	 * @since 5.7.0
 	 */
 	public void setInlineResourceTextBelowSize(int theInlineResourceTextBelowSize) {
 		myInlineResourceTextBelowSize = theInlineResourceTextBelowSize;
@@ -2732,7 +2737,33 @@ public class DaoConfig {
 	}
 
 	/**
-	 * @see FhirValidator#isConcurrentBundleValidation()
+	 * Is storing of Resource in Lucene index enabled?
+	 *
+	 * @since 5.7.0
+	 */
+	public boolean isStoreResourceInLuceneIndex() {
+		return myStoreResourceInLuceneIndex;
+	}
+
+	/**
+	 * <p>
+	 * Enable Resource to be stored inline with Lucene index mappings.
+	 * This is useful in cases where after performing a search operation the resulting resource identifiers don't have to be
+	 * looked up in the persistent storage, but rather the inline stored resource can be used instead.
+	 * </p>
+	 * <p>
+	 * For e.g - Storing Observation resource in lucene index would be useful when performing
+	 * <a href="https://www.hl7.org/fhir/observation-operation-lastn.html">$lastn</a> operation.
+	 * </p>
+	 *
+	 * @since 5.7.0
+	 */
+	public void setStoreResourceInLuceneIndex(boolean theStoreResourceInLuceneIndex) {
+		myStoreResourceInLuceneIndex = theStoreResourceInLuceneIndex;
+  }
+  
+	/** 
+   * @see FhirValidator#isConcurrentBundleValidation()
 	 * @since 5.7.0
 	 */
 	public boolean isConcurrentBundleValidation() {

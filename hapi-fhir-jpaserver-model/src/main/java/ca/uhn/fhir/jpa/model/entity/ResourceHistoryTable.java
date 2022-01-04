@@ -43,7 +43,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -97,10 +96,8 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@OptimisticLock(excluded = true)
 	private byte[] myResource;
 
-	// TODO: JA For future use or removal
-	//	@Column(name = "RES_TEXT_VC", length = RES_TEXT_VC_MAX_LENGTH, nullable = true)
-	//	@OptimisticLock(excluded = true)
-	@Transient
+	@Column(name = "RES_TEXT_VC", length = RES_TEXT_VC_MAX_LENGTH, nullable = true)
+	@OptimisticLock(excluded = true)
 	private String myResourceTextVc;
 
 	@Column(name = "RES_ENCODING", nullable = false, length = ENCODING_COL_LENGTH)
@@ -155,6 +152,20 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@Override
 	public Long getId() {
 		return myId;
+	}
+
+	/**
+	 * Do not delete, required for java bean introspection
+	 */
+	public Long getMyId() {
+		return myId;
+	}
+
+	/**
+	 * Do not delete, required for java bean introspection
+	 */
+	public void setMyId(Long theId) {
+		myId = theId;
 	}
 
 	public byte[] getResource() {
@@ -240,4 +251,12 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 		getResourceTable().setForcedId(theForcedId);
 	}
 
+	/**
+	 * Returns <code>true</code> if there is a populated resource text (i.e.
+	 * either {@link #getResource()} or {@link #getResourceTextVc()} return a non null
+	 * value.
+	 */
+	public boolean hasResource() {
+		return myResource != null || myResourceTextVc != null;
+	}
 }
