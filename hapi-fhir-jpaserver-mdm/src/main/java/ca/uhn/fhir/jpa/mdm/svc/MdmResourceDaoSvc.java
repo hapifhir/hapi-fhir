@@ -80,6 +80,7 @@ public class MdmResourceDaoSvc {
 		SearchParameterMap map = buildEidSearchParameterMap(theEid, theResourceType);
 
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResourceType);
+		// FIXME KHS add partition to this search
 		IBundleProvider search = resourceDao.search(map);
 		List<IBaseResource> resources = search.getResources(0, MAX_MATCHING_GOLDEN_RESOURCES);
 

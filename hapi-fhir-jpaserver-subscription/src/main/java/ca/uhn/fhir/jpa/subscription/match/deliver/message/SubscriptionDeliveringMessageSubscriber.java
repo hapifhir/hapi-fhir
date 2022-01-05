@@ -43,7 +43,7 @@ import java.net.URISyntaxException;
 
 @Scope("prototype")
 public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDeliverySubscriber {
-	private static Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringMessageSubscriber.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringMessageSubscriber.class);
 
 	@Autowired
 	private IChannelFactory myChannelFactory;
@@ -66,6 +66,8 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 		ResourceModifiedMessage payload = new ResourceModifiedMessage(myFhirContext, thePayloadResource, theMsg.getOperationType());
 		payload.setMessageKey(theMsg.getMessageKeyOrNull());
 		payload.setTransactionId(theMsg.getTransactionId());
+		// FIXME add a test for the following line
+//		payload.setPartitionId(theMsg.getRequestPartitionId());
 		ResourceModifiedJsonMessage message = new ResourceModifiedJsonMessage(payload);
 		theChannelProducer.send(message);
 		ourLog.debug("Delivering {} message payload {} for {}", theMsg.getOperationType(), theMsg.getPayloadId(), theSubscription.getIdElement(myFhirContext).toUnqualifiedVersionless().getValue());

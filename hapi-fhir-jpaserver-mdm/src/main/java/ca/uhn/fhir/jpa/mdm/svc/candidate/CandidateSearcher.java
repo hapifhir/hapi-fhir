@@ -59,6 +59,7 @@ public class CandidateSearcher {
 		searchParameterMap.setLoadSynchronousUpTo(myMdmSettings.getCandidateSearchLimit());
 
 		IFhirResourceDao<?> resourceDao = myDaoRegistry.getResourceDao(theResourceType);
+		// FIXME KHS add partition to this search
 		IBundleProvider retval = resourceDao.search(searchParameterMap);
 
 		if (retval.size() != null && retval.size() >= myMdmSettings.getCandidateSearchLimit()) {
