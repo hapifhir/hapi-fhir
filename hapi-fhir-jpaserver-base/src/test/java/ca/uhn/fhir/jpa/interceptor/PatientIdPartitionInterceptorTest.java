@@ -92,6 +92,23 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		});
 	}
 
+	/**
+	 * This is an edge case where a client assigned ID has a Java hashCode equal to Integer.MIN_VALUE.
+	 */
+	@Test
+	public void testCreatePatient_polygenelubricants() {
+		Patient patient = new Patient();
+		patient.setId("Patient/polygenelubricants");
+		patient.setActive(true);
+		DaoMethodOutcome update = myPatientDao.update(patient);
+
+		runInTransaction(() -> {
+			ResourceTable pt = myResourceTableDao.findAll().iterator().next();
+			assertEquals("polygenelubricants", pt.getIdDt().getIdPart());
+			assertEquals(8648, pt.getPartitionId().getPartitionId());
+		});
+	}
+
 	@Test
 	public void testCreatePatient_NonClientAssignedId() {
 		Patient patient = new Patient();

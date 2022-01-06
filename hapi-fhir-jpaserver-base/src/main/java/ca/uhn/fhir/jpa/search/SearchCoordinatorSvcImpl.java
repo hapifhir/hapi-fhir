@@ -1058,7 +1058,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		 * search, and starts it.
 		 */
 		private void doSearch() {
-
 			/*
 			 * If the user has explicitly requested a _count, perform a
 			 *
@@ -1071,7 +1070,17 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			if (wantCount) {
 				ourLog.trace("Performing count");
 				ISearchBuilder sb = newSearchBuilder();
-				Iterator<Long> countIterator = sb.createCountQuery(myParams, mySearch.getUuid(), myRequest, myRequestPartitionId);
+
+				/*
+				 * createCountQuery
+				 * NB: (see createQuery below)
+				 * Because FulltextSearchSvcImpl will (internally)
+				 * mutate the myParams (searchmap),
+				 * (specifically removing the _content and _text filters)
+				 * we will have to clone those parameters here so that
+				 * the "correct" params are used in createQuery below
+				 */
+				Iterator<Long> countIterator = sb.createCountQuery(myParams.clone(), mySearch.getUuid(), myRequest, myRequestPartitionId);
 				Long count = countIterator.hasNext() ? countIterator.next() : 0L;
 				ourLog.trace("Got count {}", count);
 
@@ -1145,7 +1154,18 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			}
 
 			/*
+			 * createQuery
 			 * Construct the SQL query we'll be sending to the database
+			 *
+			 * NB: (See createCountQuery above)
+			 * We will pass the original myParams here (not a copy)
+			 * because we actually _want_ the mutation of the myParams to happen.
+			 * Specifically because SearchBuilder itself will _expect_
+			 * not to have these parameters when dumping back
+			 * to our DB.
+			 *
+			 * This is an odd implementation behaviour, but the change
+			 * for this will require a lot more handling at higher levels
 			 */
 			try (IResultIterator resultIterator = sb.createQuery(myParams, mySearchRuntimeDetails, myRequest, myRequestPartitionId)) {
 				assert (resultIterator != null);
