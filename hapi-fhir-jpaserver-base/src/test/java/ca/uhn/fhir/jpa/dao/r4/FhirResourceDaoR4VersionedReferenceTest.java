@@ -8,7 +8,10 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.BundleBuilder;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -16,6 +19,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.Goal;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
@@ -43,6 +47,7 @@ import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4VersionedReferenceTest.class);
@@ -832,6 +837,20 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		assertThat(versionedPatientReference, is(equalTo("Patient/RED/_history/1")));
 	}
 
+	@Test
+	public void bundleTransaction_withRequestUrlNotRelativePath_doesNotProcess() {
+		Bundle bundle = myFhirCtx.newJsonParser().parseResource(Bundle.class,
+			new InputStreamReader(
+				FhirResourceDaoR4VersionedReferenceTest.class.getResourceAsStream("/transaction-with-full-request-url.json")));
+
+		try {
+			mySystemDao.transaction(new ServletRequestDetails(),
+				bundle);
+			fail("We expect invalid full urls to fail");
+		} catch (InvalidRequestException ex) {
+			System.out.println(ex.getMessage());
+		}
+	}
 
 	@Test
 	@DisplayName("Bundle transaction with AutoVersionReferenceAtPath on and with existing Patient resource should create")
