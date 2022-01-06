@@ -839,15 +839,34 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 	public void bundleTransaction_withRequestUrlNotRelativePath_doesNotProcess() {
 		Bundle bundle = myFhirCtx.newJsonParser().parseResource(Bundle.class,
 			new InputStreamReader(
-				FhirResourceDaoR4VersionedReferenceTest.class.getResourceAsStream("/transaction-with-full-request-url.json")));
+				FhirResourceDaoR4VersionedReferenceTest.class.getResourceAsStream("/transaction-bundles/transaction-with-full-request-url.json")));
 
 		try {
+			// test
 			mySystemDao.transaction(new ServletRequestDetails(),
 				bundle);
 			fail("We expect invalid full urls to fail");
 		} catch (InvalidRequestException ex) {
 			Assertions.assertTrue(ex.getMessage().contains("Unable to perform POST, URL provided is invalid:"));
 		}
+	}
+
+	@Test
+	public void bundleTransaction_withRequestURLWithPrecedingSlash_processesAsExpected() {
+		Bundle bundle = myFhirCtx.newJsonParser().parseResource(Bundle.class,
+			new InputStreamReader(FhirResourceDaoR4VersionedReferenceTest.class.getResourceAsStream("/transaction-bundles/transaction-with-preceding-slash-request-url.json")));
+
+		// test
+		Bundle outcome = mySystemDao.transaction(new SystemRequestDetails(),
+			bundle);
+
+		// verify it was created
+		Assertions.assertEquals(1, outcome.getEntry().size());
+		IdType idType = new IdType(bundle.getEntry().get(0)
+				.getResource().getId());
+		// the bundle above contains an observation, so we'll verify it was created here
+		Observation obs = myObservationDao.read(idType);
+		Assertions.assertNotNull(obs);
 	}
 
 	@Test
