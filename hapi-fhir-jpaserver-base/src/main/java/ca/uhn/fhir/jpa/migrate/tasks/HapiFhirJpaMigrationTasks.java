@@ -149,7 +149,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("HFJ_RES_VER")
 			.addColumn("20220102.1", "RES_TEXT_VC")
 			.nullable()
-			.type(ColumnTypeEnum.STRING, 2000);
+			.type(ColumnTypeEnum.STRING, 4000);
 
 	}
 
