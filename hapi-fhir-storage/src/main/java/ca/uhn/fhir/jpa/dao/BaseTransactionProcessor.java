@@ -120,6 +120,7 @@ import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -1556,8 +1557,12 @@ public abstract class BaseTransactionProcessor {
 	private String extractAndVerifyTransactionUrlForEntry(IBase theEntry, String theVerb, String theResourceType) {
 		String url = extractTransactionUrlOrThrowException(theEntry, theVerb);
 
-		// urls are heartlessly insensitive to case, so we'll use equalsIgnoreCase
-		if (!url.equalsIgnoreCase(theResourceType) || !url.equalsIgnoreCase("/" + theResourceType)) {
+		// because urls are heartlessly insensitive to case,
+		// we'll lowercase to do the check
+		String urlLower = url.toLowerCase();
+		String resourceType = theResourceType.toLowerCase();
+		if (!(urlLower.startsWith(resourceType) || urlLower.startsWith("/" + resourceType))) {
+			ourLog.debug("Expected {} but received {}", theResourceType, url);
 			String msg = myContext.getLocalizer().getMessage(BaseStorageDao.class, "transactionInvalidUrl", theVerb, url);
 			throw new InvalidRequestException(msg);
 		}
