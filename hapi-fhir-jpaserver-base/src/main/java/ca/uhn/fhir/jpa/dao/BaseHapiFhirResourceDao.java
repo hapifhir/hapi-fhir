@@ -461,31 +461,62 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		});
 	}
 
+	/**
+	 * Creates a base method outcome for a delete request for the provided ID.
+	 *
+	 * Additional information may be set on the outcome.
+	 *
+	 * @param theId - the id of the object being deleted. Eg: Patient/123
+	 */
+	private DaoMethodOutcome createMethodOutcomeForDelete(String theId) {
+		DaoMethodOutcome outcome = new DaoMethodOutcome();
+
+		IIdType id = getContext().getVersion().newIdType();
+		id.setValue(theId);
+		outcome.setId(id);
+
+		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(getContext());
+		String message = getContext().getLocalizer().getMessage(BaseStorageDao.class, "successfulDeletes", 1, 0);
+		String severity = "information";
+		String code = "informational";
+		OperationOutcomeUtil.addIssue(getContext(), oo, severity, message, null, code);
+		outcome.setOperationOutcome(oo);
+
+		return outcome;
+	}
+
 	@Override
-	public DaoMethodOutcome delete(IIdType theId, DeleteConflictList theDeleteConflicts, RequestDetails theRequestDetails, @Nonnull TransactionDetails theTransactionDetails) {
+	public DaoMethodOutcome delete(IIdType theId,
+											 DeleteConflictList theDeleteConflicts,
+											 RequestDetails theRequestDetails,
+											 @Nonnull TransactionDetails theTransactionDetails) {
 		validateIdPresentForDelete(theId);
 		validateDeleteEnabled();
 
-		final ResourceTable entity = readEntityLatestVersion(theId, theRequestDetails, theTransactionDetails);
+		final ResourceTable entity;
+		try {
+			entity = readEntityLatestVersion(theId, theRequestDetails, theTransactionDetails);
+		} catch (ResourceNotFoundException ex) {
+			// we don't want to throw 404s.
+			// if not found, return an outcome anyways.
+			// Because no object actually existed, we'll
+			// just set the id and nothing else
+			DaoMethodOutcome outcome = createMethodOutcomeForDelete(theId.getValue());
+			outcome.setNop(true);
+			return outcome;
+		}
+
 		if (theId.hasVersionIdPart() && Long.parseLong(theId.getVersionIdPart()) != entity.getVersion()) {
 			throw new ResourceVersionConflictException("Trying to delete " + theId + " but this is not the current version");
 		}
 
 		// Don't delete again if it's already deleted
 		if (entity.getDeleted() != null) {
-			DaoMethodOutcome outcome = new DaoMethodOutcome().setPersistentId(new ResourcePersistentId(entity.getResourceId()));
+			DaoMethodOutcome outcome = createMethodOutcomeForDelete(entity.getIdDt().getValue());
+
+			// used to exist, so we'll set the persistent id
+			outcome.setPersistentId(new ResourcePersistentId(entity.getResourceId()));
 			outcome.setEntity(entity);
-
-			IIdType id = getContext().getVersion().newIdType();
-			id.setValue(entity.getIdDt().getValue());
-			outcome.setId(id);
-
-			IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(getContext());
-			String message = getContext().getLocalizer().getMessage(BaseStorageDao.class, "successfulDeletes", 1, 0);
-			String severity = "information";
-			String code = "informational";
-			OperationOutcomeUtil.addIssue(getContext(), oo, severity, message, null, code);
-			outcome.setOperationOutcome(oo);
 
 			return outcome;
 		}
