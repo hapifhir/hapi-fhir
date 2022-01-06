@@ -29,6 +29,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Date;
@@ -836,10 +837,8 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void bundleTransaction_withRequestUrlNotRelativePath_doesNotProcess() {
-		Bundle bundle = myFhirCtx.newJsonParser().parseResource(Bundle.class,
-			new InputStreamReader(
-				FhirResourceDaoR4VersionedReferenceTest.class.getResourceAsStream("/transaction-bundles/transaction-with-full-request-url.json")));
+	public void bundleTransaction_withRequestUrlNotRelativePath_doesNotProcess() throws IOException {
+		Bundle bundle = loadResourceFromClasspath(Bundle.class, "/transaction-bundles/transaction-with-full-request-url.json");
 
 		try {
 			// test
@@ -852,9 +851,8 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void bundleTransaction_withRequestURLWithPrecedingSlash_processesAsExpected() {
-		Bundle bundle = myFhirCtx.newJsonParser().parseResource(Bundle.class,
-			new InputStreamReader(FhirResourceDaoR4VersionedReferenceTest.class.getResourceAsStream("/transaction-bundles/transaction-with-preceding-slash-request-url.json")));
+	public void bundleTransaction_withRequestURLWithPrecedingSlash_processesAsExpected() throws IOException {
+		Bundle bundle = loadResourceFromClasspath(Bundle.class, "/transaction-bundles/transaction-with-preceding-slash-request-url.json");
 
 		// test
 		Bundle outcome = mySystemDao.transaction(new SystemRequestDetails(),
