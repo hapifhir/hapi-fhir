@@ -8,6 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.quartz.JobExecutionContext;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 
@@ -23,7 +24,11 @@ class TermReindexingSvcImplTest {
 		TermReindexingSvcImpl.Job innerJob = new TermReindexingSvcImpl.Job();
 
 		// validates that inner Job has an myTermReindexingSvc field of class ITermReindexingSvc
-		ReflectionTestUtils.setField(innerJob, "myTermReindexingSvc", jobReindexingSvc);
+		try {
+			ReflectionTestUtils.setField(innerJob, "myTermReindexingSvc", jobReindexingSvc);
+		} catch (Exception theE) {
+			fail("ITermReindexingSvc implementation inner Job doesn't have a 'myTermReindexingSvc' property");
+		}
 
 		innerJob.execute(myJobExecutionContext);
 
