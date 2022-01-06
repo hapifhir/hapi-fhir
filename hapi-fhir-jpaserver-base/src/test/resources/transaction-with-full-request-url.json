@@ -5,7 +5,7 @@
 		{
 			"request": {
 				"method": "POST",
-				"url": "http://shuang.aws.zeus.health:8005/fhir/Goal". // Note this is fully qualified
+				"url": "http://shuang.aws.zeus.health:8005/fhir/Goal"
 			},
 			"resource": {
 				"resourceType": "Goal",

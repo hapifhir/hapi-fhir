@@ -848,7 +848,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 				bundle);
 			fail("We expect invalid full urls to fail");
 		} catch (InvalidRequestException ex) {
-			System.out.println(ex.getMessage());
+			Assertions.assertTrue(ex.getMessage().contains("Unable to perform POST, URL provided is invalid:"));
 		}
 	}
 
