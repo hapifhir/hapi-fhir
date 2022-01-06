@@ -894,9 +894,16 @@ public abstract class BaseTransactionProcessor {
 				switch (verb) {
 					case "POST": {
 						// CREATE
-						// we don't use the extracted url,
-						// but we must validate it all the same
-						extractAndVerifyTransactionUrlForEntry(nextReqEntry, verb, resourceType);
+						/*
+						 * To preserve existing functionality,
+						 * we will only verify that the request url is
+						 * valid if it's provided at all.
+						 * Otherwise, we'll ignore it
+						 */
+						String url = myVersionAdapter.getEntryRequestUrl(nextReqEntry);
+						if (isNotBlank(url)) {
+							extractAndVerifyTransactionUrlForEntry(nextReqEntry, verb, resourceType);
+						}
 						validateResourcePresent(res, order, verb);
 						@SuppressWarnings("rawtypes")
 						IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
@@ -1556,16 +1563,37 @@ public abstract class BaseTransactionProcessor {
 	private String extractAndVerifyTransactionUrlForEntry(IBase theEntry, String theVerb, String theResourceType) {
 		String url = extractTransactionUrlOrThrowException(theEntry, theVerb);
 
-		// because urls are heartlessly insensitive to case,
-		// we'll lowercase to do the check
-		String urlLower = url.toLowerCase();
-		String resourceType = theResourceType.toLowerCase();
-		if (!(urlLower.startsWith(resourceType) || urlLower.startsWith("/" + resourceType))) {
+		// url will not be blank; but resourceType could be null
+		// preserving existing functionality, in which some resourceTypes could be null
+		// we'll ensure that it either matches the existing url,
+		// or the existing url is not a full url
+		if (!isValidResourceTypeUrl(url, theResourceType)) {
 			ourLog.debug("Expected {} but received {}", theResourceType, url);
 			String msg = myContext.getLocalizer().getMessage(BaseStorageDao.class, "transactionInvalidUrl", theVerb, url);
 			throw new InvalidRequestException(msg);
 		}
 		return url;
+	}
+
+	/**
+	 * Returns true if the provided url is a valid entry request.url for the provided
+	 * resource type.
+	 *
+	 * Due to backwards compatibility,
+	 * if theResourceType is null, this will only check that theUrl is not
+	 * a url that starts with http (ie, not a full url).
+	 */
+	private boolean isValidResourceTypeUrl(@Nonnull String theUrl, String theResourceType) {
+		// because urls are heartlessly insensitive to case,
+		// we'll lowercase to do the check
+		String urlLower = theUrl.toLowerCase();
+		if (isNotBlank(theResourceType)) {
+			String resourceType = theResourceType.toLowerCase();
+			return (urlLower.startsWith(resourceType) || urlLower.startsWith("/" + resourceType));
+		}
+		else {
+			return !urlLower.startsWith("http");
+		}
 	}
 
 	/**
