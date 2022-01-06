@@ -6,7 +6,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>5.6.2</version>
+	<version>5.7.0-PRE9-SNAPSHOT</version>
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
 	<url>https://hapifhir.io</url>
@@ -766,7 +766,7 @@
 
     <properties>
 
-        <fhir_core_version>5.5.7</fhir_core_version>
+        <fhir_core_version>5.6.21</fhir_core_version>
         <ucum_version>1.0.3</ucum_version>
 
         <surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
@@ -788,29 +788,29 @@
         <commons_codec_version>1.15</commons_codec_version>
         <commons_compress_version>1.21</commons_compress_version>
         <commons_text_version>1.9</commons_text_version>
-        <commons_io_version>2.8.0</commons_io_version>
+        <commons_io_version>2.11.0</commons_io_version>
         <commons_lang3_version>3.12.0</commons_lang3_version>
         <com_jamesmurty_utils_version>1.2</com_jamesmurty_utils_version>
         <cql_version>1.5.0</cql_version>
         <derby_version>10.14.2.0</derby_version>
         <!--<derby_version>10.15.1.3</derby_version>-->
-        <error_prone_core_version>2.5.1</error_prone_core_version>
-        <mockito_version>3.9.0</mockito_version>
+        <error_prone_core_version>2.10.0</error_prone_core_version>
+        <mockito_version>4.2.0</mockito_version>
         <nullaway_version>0.7.9</nullaway_version>
-        <guava_version>30.1.1-jre</guava_version>
-        <gson_version>2.8.6</gson_version>
+        <guava_version>31.0.1-jre</guava_version>
+        <gson_version>2.8.9</gson_version>
         <jaxb_bundle_version>2.2.11_1</jaxb_bundle_version>
         <jaxb_api_version>2.3.1</jaxb_api_version>
         <jaxb_core_version>2.3.0.1</jaxb_core_version>
         <jaxb_runtime_version>3.0.0</jaxb_runtime_version>
         <jena_version>4.2.0</jena_version>
         <jersey_version>3.0.3</jersey_version>
-        <jetty_version>9.4.43.v20210629</jetty_version>
+        <jetty_version>9.4.44.v20210927</jetty_version>
         <jsr305_version>3.0.2</jsr305_version>
-        <junit_version>5.7.1</junit_version>
+        <junit_version>5.8.2</junit_version>
         <flexmark_version>0.50.40</flexmark_version>
-        <flyway_version>6.5.4</flyway_version>
-        <hibernate_version>5.4.30.Final</hibernate_version>
+        <flyway_version>8.3.0</flyway_version>
+        <hibernate_version>5.4.33</hibernate_version>
         <hibernate_search_version>6.0.3.Final</hibernate_search_version>
         <!-- Update lucene version when you update hibernate-search version -->
         <lucene_version>8.7.0</lucene_version>
@@ -818,7 +818,7 @@
         <hibernate_validator_version>6.1.5.Final</hibernate_validator_version>
         <httpcore_version>4.4.13</httpcore_version>
         <httpclient_version>4.5.13</httpclient_version>
-        <jackson_version>2.12.3</jackson_version>
+        <jackson_version>2.13.1</jackson_version>
         <jackson_databind_version>${jackson_version}</jackson_databind_version>
         <maven_assembly_plugin_version>3.3.0</maven_assembly_plugin_version>
         <maven_license_plugin_version>1.8</maven_license_plugin_version>
@@ -828,20 +828,21 @@
         <resteasy_version>4.0.0.Beta3</resteasy_version>
         <ph_schematron_version>5.6.5</ph_schematron_version>
         <ph_commons_version>9.5.4</ph_commons_version>
-        <plexus_compiler_api_version>2.8.8</plexus_compiler_api_version>
+        <plexus_compiler_api_version>2.9.0</plexus_compiler_api_version>
         <servicemix_saxon_version>9.8.0-15</servicemix_saxon_version>
         <servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
-        <slf4j_version>1.7.30</slf4j_version>
-        <log4j_to_slf4j_version>2.11.1</log4j_to_slf4j_version>
-        <spring_version>5.3.7</spring_version>
-        <spring_data_version>2.5.0</spring_data_version>
+        <swagger_version>2.1.12</swagger_version>
+        <slf4j_version>1.7.32</slf4j_version>
+        <log4j_to_slf4j_version>2.17.1</log4j_to_slf4j_version>
+        <spring_version>5.3.14</spring_version>
+        <spring_data_version>2.6.0</spring_data_version>
         <spring_batch_version>4.3.3</spring_batch_version>
-        <spring_boot_version>2.5.0</spring_boot_version>
+        <spring_boot_version>2.6.2</spring_boot_version>
         <spring_retry_version>1.2.2.RELEASE</spring_retry_version>
 
         <stax2_api_version>3.1.4</stax2_api_version>
-        <testcontainers_version>1.16.0</testcontainers_version>
-        <thymeleaf-version>3.0.12.RELEASE</thymeleaf-version>
+        <testcontainers_version>1.16.2</testcontainers_version>
+        <thymeleaf-version>3.0.14.RELEASE</thymeleaf-version>
         <woodstox_core_asl_version>4.4.1</woodstox_core_asl_version>
 
         <!-- We are aiming to still work on a very old version of SLF4j even though we depend on the newest, just to be nice to users of the API. This version is tested in the hapi-fhir-cobertura. -->
@@ -872,7 +873,7 @@
 			<dependency>
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-classic</artifactId>
-				<version>1.2.3</version>
+				<version>1.2.10</version>
 			</dependency>
 			<dependency>
 				<groupId>com.atlassian.commonmark</groupId>
@@ -961,7 +962,7 @@
 			<dependency>
 				<groupId>com.h2database</groupId>
 				<artifactId>h2</artifactId>
-				<version>1.4.200</version>
+				<version>2.0.204</version>
 			</dependency>
 			<dependency>
 				<groupId>com.helger</groupId>
@@ -1016,7 +1017,7 @@
 			<dependency>
 				<groupId>commons-cli</groupId>
 				<artifactId>commons-cli</artifactId>
-				<version>1.4</version>
+				<version>1.5.0</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-codec</groupId>
@@ -1056,12 +1057,12 @@
 			<dependency>
 				<groupId>org.jdom</groupId>
 				<artifactId>jdom2</artifactId>
-				<version>2.0.6</version>
+				<version>2.0.6.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jetbrains</groupId>
 				<artifactId>annotations</artifactId>
-				<version>21.0.1</version>
+				<version>23.0.0</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-io</groupId>
@@ -1138,7 +1139,7 @@
 			<dependency>
 				<groupId>com.microsoft.sqlserver</groupId>
 				<artifactId>mssql-jdbc</artifactId>
-				<version>9.2.1.jre8</version>
+				<version>9.4.1.jre8</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.servlet</groupId>
@@ -1170,30 +1171,30 @@
 				<version>4.13.2</version>
 			</dependency>
 			<dependency>
-				<groupId>io.swagger</groupId>
-				<artifactId>swagger-annotations</artifactId>
-				<version>1.6.2</version>
-			</dependency>
-			<dependency>
 				<groupId>io.swagger.core.v3</groupId>
 				<artifactId>swagger-models</artifactId>
-				<version>2.1.7</version>
+				<version>${swagger_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.swagger.core.v3</groupId>
 				<artifactId>swagger-core</artifactId>
-				<version>2.1.7</version>
+				<version>${swagger_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>mysql</groupId>
 				<artifactId>mysql-connector-java</artifactId>
-				<version>8.0.24</version>
+				<version>8.0.27</version>
 			</dependency>
-            <dependency>
-                <groupId>net.sourceforge.htmlunit</groupId>
-                <artifactId>htmlunit</artifactId>
-                <version>2.49.1</version>
-            </dependency>
+			<dependency>
+				<groupId>org.springdoc</groupId>
+				<artifactId>springdoc-openapi-ui</artifactId>
+				<version>1.5.13</version>
+			</dependency>
+			<dependency>
+				 <groupId>net.sourceforge.htmlunit</groupId>
+				 <artifactId>htmlunit</artifactId>
+				 <version>2.56.0</version>
+			</dependency>
 			<dependency>
 				<groupId>net.sf.json-lib</groupId>
 				<artifactId>json-lib</artifactId>
@@ -1225,7 +1226,7 @@
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-dbcp2</artifactId>
-				<version>2.8.0</version>
+				<version>2.9.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
@@ -1321,17 +1322,17 @@
 			<dependency>
 				<groupId>org.apache.maven.scm</groupId>
 				<artifactId>maven-scm-api</artifactId>
-				<version>1.11.2</version>
+				<version>1.12.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.maven.scm</groupId>
 				<artifactId>maven-scm-manager-plexus</artifactId>
-				<version>1.11.2</version>
+				<version>1.12.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.maven.scm</groupId>
 				<artifactId>maven-scm-provider-gitexe</artifactId>
-				<version>1.11.2</version>
+				<version>1.12.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.maven.wagon</groupId>
@@ -1381,7 +1382,7 @@
 			<dependency>
 				<groupId>org.awaitility</groupId>
 				<artifactId>awaitility</artifactId>
-				<version>4.1.0</version>
+				<version>4.1.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.codehaus.plexus</groupId>
@@ -1492,7 +1493,7 @@
 			<dependency>
 				<groupId>org.fusesource.jansi</groupId>
 				<artifactId>jansi</artifactId>
-				<version>2.3.2</version>
+				<version>2.4.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.glassfish</groupId>
@@ -1709,7 +1710,7 @@
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>42.2.24</version>
+				<version>42.3.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.quartz-scheduler</groupId>
@@ -1758,6 +1759,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>
+				<artifactId>spring-expression</artifactId>
+				<version>${spring_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
 				<artifactId>spring-jdbc</artifactId>
 				<version>${spring_version}</version>
 			</dependency>
@@ -1787,6 +1793,11 @@
 				<version>${spring_version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-webmvc</artifactId>
+				<version>${spring_version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-starter-test</artifactId>
 				<version>${spring_boot_version}</version>
@@ -1804,11 +1815,6 @@
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-web</artifactId>
-				<version>${spring_version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework</groupId>
-				<artifactId>spring-webmvc</artifactId>
 				<version>${spring_version}</version>
 			</dependency>
 			<dependency>
@@ -1901,7 +1907,7 @@
 			<dependency>
 				<groupId>org.webjars</groupId>
 				<artifactId>swagger-ui</artifactId>
-				<version>3.46.0</version>
+				<version>4.1.3</version>
 			</dependency>
 			<dependency>
 				<groupId>org.xmlunit</groupId>
@@ -2161,7 +2167,7 @@
 				<plugin>
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
-					<version>0.8.6</version>
+					<version>0.8.7</version>
 					<configuration>
 						<excludes>
 							<exclude>ca/uhn/fhir/model/dstu2/**/*.class</exclude>
@@ -2519,6 +2525,7 @@
 								<echo>Adding Google analytics in target/site for &lt;body&gt;</echo>
 								<replace dir="target/site" summary="true">
 									<include name="**/*.html"></include>
+									<!--suppress UnresolvedMavenProperty -->
 									<replacefilter token="#build#" value="${label}"/>
 									<replacefilter token="#version#" value="${project.version}"/>
 									<replacetoken><![CDATA[</body>]]></replacetoken>
@@ -2831,7 +2838,7 @@
 		<profile>
 			<id>CI</id>
 			<properties>
-				<surefire_jvm_args>-Dspring.test.context.cache.maxSize=2 -Dfile.encoding=UTF-8 -Xmx2648m -XX:-TieredCompilation -Xverify:none -Dfile.encoding=UTF-8 -Xss128M -XX:MetaspaceSize=512M -XX:MaxMetaspaceSize=2048M -XX:ReservedCodeCacheSize=220M</surefire_jvm_args>
+				<surefire_jvm_args>-Dspring.test.context.cache.maxSize=2 -Dfile.encoding=UTF-8 -Xmx2648m -XX:-TieredCompilation -Dfile.encoding=UTF-8 -Xss128M -XX:MetaspaceSize=512M -XX:MaxMetaspaceSize=2048M -XX:ReservedCodeCacheSize=220M</surefire_jvm_args>
 			</properties>
 			<build>
 				<plugins>
@@ -2843,6 +2850,7 @@
 								<id>validate</id>
 								<phase>generate-sources</phase>
 								<configuration>
+									<!--suppress UnresolvedMavenProperty -->
 									<configLocation>${maven.multiModuleProjectDirectory}/src/checkstyle/checkstyle_config_nofixmes.xml</configLocation>
 									<encoding>UTF-8</encoding>
 									<consoleOutput>true</consoleOutput>
@@ -2894,9 +2902,20 @@
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-compiler-plugin</artifactId>
 						<configuration>
+							<fork>true</fork>
 							<compilerArgs>
 								<arg>-XDcompilePolicy=simple</arg>
 								<arg>-Xplugin:ErrorProne</arg>
+								<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
+								<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>
+								<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED</arg>
+								<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED</arg>
+								<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED</arg>
+								<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED</arg>
+								<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED</arg>
+								<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED</arg>
+								<arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>
+								<arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED</arg>
 							</compilerArgs>
 							<annotationProcessorPaths>
 								<path>
@@ -2913,7 +2932,7 @@
 		<profile>
 			<id>FASTINSTALL</id>
 			<properties>
-				<maven.test.skip>true</maven.test.skip>
+				<skipTests>true</skipTests>
 			</properties>
 			<!-- Profile for a quick local mvn install after a git pull.
 			     We assume upstream ran these checks as part of the build. -->

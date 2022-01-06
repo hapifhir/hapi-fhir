@@ -20,7 +20,7 @@ import org.hl7.fhir.r5.model.UnsignedIntType;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,14 +81,14 @@ public class BaseJpaResourceProviderObservationR5 extends JpaResourceProviderR5<
 		startRequest(theServletRequest);
 		try {
 			SearchParameterMap paramMap = new SearchParameterMap();
-			paramMap.add(Observation.SP_CATEGORY, theCategory);
-			paramMap.add(Observation.SP_CODE, theCode);
-			paramMap.add(Observation.SP_DATE, theDate);
+			paramMap.add(org.hl7.fhir.r4.model.Observation.SP_CATEGORY, theCategory);
+			paramMap.add(org.hl7.fhir.r4.model.Observation.SP_CODE, theCode);
+			paramMap.add(org.hl7.fhir.r4.model.Observation.SP_DATE, theDate);
 			if (thePatient != null) {
-				paramMap.add(Observation.SP_PATIENT, thePatient);
+				paramMap.add(org.hl7.fhir.r4.model.Observation.SP_PATIENT, thePatient);
 			}
 			if (theSubject != null) {
-				paramMap.add(Observation.SP_SUBJECT, theSubject);
+				paramMap.add(org.hl7.fhir.r4.model.Observation.SP_SUBJECT, theSubject);
 			}
 			if (theMax != null) {
 				paramMap.setLastNMax(theMax.getValue());

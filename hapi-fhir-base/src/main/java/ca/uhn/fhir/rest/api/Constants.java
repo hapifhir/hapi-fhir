@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,6 +73,7 @@ public class Constants {
 	public static final String CT_OCTET_STREAM = "application/octet-stream";
 	public static final String CT_TEXT = "text/plain";
 	public static final String CT_TEXT_WITH_UTF8 = CT_TEXT + CHARSET_UTF8_CTSUFFIX;
+	public static final String CT_TEXT_CDA = "text/xml+cda";
 	public static final String CT_X_FORM_URLENCODED = "application/x-www-form-urlencoded";
 	public static final String CT_XML = "application/xml";
 	public static final String CT_XML_PATCH = "application/xml-patch+xml";
@@ -201,6 +202,14 @@ public class Constants {
 	public static final String PARAM_TAGS = "_tags";
 	public static final String PARAM_TEXT = "_text";
 	public static final String PARAM_VALIDATE = "_validate";
+
+	/**
+	 * $member-match operation
+	 */
+	public static final String PARAM_MEMBER_PATIENT = "MemberPatient";
+	public static final String PARAM_OLD_COVERAGE = "OldCoverage";
+	public static final String PARAM_NEW_COVERAGE = "NewCoverage";
+
 	public static final String PARAMQUALIFIER_MISSING = ":missing";
 	public static final String PARAMQUALIFIER_MISSING_FALSE = "false";
 	public static final String PARAMQUALIFIER_MISSING_TRUE = "true";

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,14 +89,12 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
-import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -390,21 +388,9 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		return Optional.empty();
 	}
 
-	@NotNull
+	@Nonnull
 	private PersistedJpaSearchFirstPageBundleProvider submitSearch(IDao theCallingDao, SearchParameterMap theParams, String theResourceType, RequestDetails theRequestDetails, String theSearchUuid, ISearchBuilder theSb, String theQueryString, RequestPartitionId theRequestPartitionId, Search theSearch) {
 		StopWatch w = new StopWatch();
-//		Search search = new Search();
-		//TODO GGG MOVE THIS POPULATE AND ALSO THE HOOK CALL HIGHER UP IN THE STACK.
-//		populateSearchEntity(theParams, theResourceType, theSearchUuid, theQueryString, search, theRequestPartitionId);
-
-//		 Interceptor call: STORAGE_PRESEARCH_REGISTERED
-//		HookParams params = new HookParams()
-//			.add(ICachedSearchDetails.class, search)
-//			.add(RequestDetails.class, theRequestDetails)
-//			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
-//			.add(SearchParameterMap.class, theParams);
-//		CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRESEARCH_REGISTERED, params);
-
 		SearchTask task = new SearchTask(theSearch, theCallingDao, theParams, theResourceType, theRequestDetails, theRequestPartitionId);
 		myIdToSearchTask.put(theSearch.getUuid(), task);
 		task.call();
@@ -556,7 +542,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 			List<IBaseResource> resources = new ArrayList<>();
 			theSb.loadResourcesByPid(pids, includedPidsList, resources, false, theRequestDetails);
-
 			// Hook: STORAGE_PRESHOW_RESOURCES
 			resources = InterceptorUtil.fireStoragePreshowResource(resources, theRequestDetails, myInterceptorBroadcaster);
 
@@ -841,7 +826,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 			txTemplate.execute(new TransactionCallbackWithoutResult() {
 				@Override
-				protected void doInTransactionWithoutResult(@Nonnull @NotNull TransactionStatus theArg0) {
+				protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theArg0) {
 					doSaveSearch();
 				}
 
@@ -853,7 +838,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 			txTemplate.execute(new TransactionCallbackWithoutResult() {
 				@Override
-				protected void doInTransactionWithoutResult(@Nonnull @NotNull TransactionStatus theArg0) {
+				protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theArg0) {
 					if (mySearch.getId() == null) {
 						doSaveSearch();
 					}
@@ -1072,7 +1057,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		 * search, and starts it.
 		 */
 		private void doSearch() {
-
 			/*
 			 * If the user has explicitly requested a _count, perform a
 			 *
@@ -1085,7 +1069,17 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			if (wantCount) {
 				ourLog.trace("Performing count");
 				ISearchBuilder sb = newSearchBuilder();
-				Iterator<Long> countIterator = sb.createCountQuery(myParams, mySearch.getUuid(), myRequest, myRequestPartitionId);
+
+				/*
+				 * createCountQuery
+				 * NB: (see createQuery below)
+				 * Because FulltextSearchSvcImpl will (internally)
+				 * mutate the myParams (searchmap),
+				 * (specifically removing the _content and _text filters)
+				 * we will have to clone those parameters here so that
+				 * the "correct" params are used in createQuery below
+				 */
+				Iterator<Long> countIterator = sb.createCountQuery(myParams.clone(), mySearch.getUuid(), myRequest, myRequestPartitionId);
 				Long count = countIterator.hasNext() ? countIterator.next() : 0L;
 				ourLog.trace("Got count {}", count);
 
@@ -1159,7 +1153,18 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			}
 
 			/*
+			 * createQuery
 			 * Construct the SQL query we'll be sending to the database
+			 *
+			 * NB: (See createCountQuery above)
+			 * We will pass the original myParams here (not a copy)
+			 * because we actually _want_ the mutation of the myParams to happen.
+			 * Specifically because SearchBuilder itself will _expect_
+			 * not to have these parameters when dumping back
+			 * to our DB.
+			 *
+			 * This is an odd implementation behaviour, but the change
+			 * for this will require a lot more handling at higher levels
 			 */
 			try (IResultIterator resultIterator = sb.createQuery(myParams, mySearchRuntimeDetails, myRequest, myRequestPartitionId)) {
 				assert (resultIterator != null);

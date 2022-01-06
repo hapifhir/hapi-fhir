@@ -18,7 +18,7 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,12 +96,12 @@ public class ValidationContext<T> extends BaseValidationContext<T> implements IV
 		IEncoder encoder = new IEncoder() {
 			@Override
 			public String encode() {
-				return theContext.newXmlParser().encodeResourceToString(theResource);
+				return theContext.newJsonParser().encodeResourceToString(theResource);
 			}
 
 			@Override
 			public EncodingEnum getEncoding() {
-				return EncodingEnum.XML;
+				return EncodingEnum.JSON;
 			}
 		};
 		return new ValidationContext<>(theContext, theResource, encoder, options);

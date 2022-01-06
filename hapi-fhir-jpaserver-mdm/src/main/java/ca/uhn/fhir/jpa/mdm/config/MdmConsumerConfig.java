@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.mdm.config;
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.batch.mdm.MdmBatchJobSubmitterFactoryImpl;
 import ca.uhn.fhir.jpa.dao.mdm.MdmLinkDeleteSvc;
 import ca.uhn.fhir.jpa.interceptor.MdmSearchExpandingInterceptor;
 import ca.uhn.fhir.jpa.mdm.broker.MdmMessageHandler;
+import ca.uhn.fhir.jpa.mdm.broker.MdmMessageKeySvc;
 import ca.uhn.fhir.jpa.mdm.broker.MdmQueueConsumerLoader;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkFactory;
@@ -104,6 +105,10 @@ public class MdmConsumerConfig {
 		return new MdmMessageHandler();
 	}
 
+	@Bean
+	MdmMessageKeySvc mdmMessageKeySvc() {
+		return new MdmMessageKeySvc();
+	}
 	@Bean
 	MdmMatchLinkSvc mdmMatchLinkSvc() {
 		return new MdmMatchLinkSvc();
@@ -257,8 +262,16 @@ public class MdmConsumerConfig {
 	}
 
 	@Bean
-	MdmControllerHelper mdmProviderHelper(FhirContext theFhirContext, IResourceLoader theResourceLoader, IMdmSettings theMdmSettings, MessageHelper messageHelper) {
-		return new MdmControllerHelper(theFhirContext, theResourceLoader, theMdmSettings, messageHelper);
+	MdmControllerHelper mdmProviderHelper(FhirContext theFhirContext,
+													  IResourceLoader theResourceLoader,
+													  IMdmSettings theMdmSettings,
+													  IMdmMatchFinderSvc theMdmMatchFinderSvc,
+													  MessageHelper messageHelper) {
+		return new MdmControllerHelper(theFhirContext,
+			theResourceLoader,
+			theMdmMatchFinderSvc,
+			theMdmSettings,
+			messageHelper);
 	}
 
 	@Bean

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription.model;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,12 @@ package ca.uhn.fhir.jpa.subscription.model;
 
 import ca.uhn.fhir.rest.server.messaging.json.BaseJsonMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class ResourceDeliveryJsonMessage extends BaseJsonMessage<ResourceDeliveryMessage> {
+	private static final ObjectMapper ourObjectMapper = new ObjectMapper().registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
 
 	@JsonProperty("payload")
 	private ResourceDeliveryMessage myPayload;
@@ -57,5 +60,13 @@ public class ResourceDeliveryJsonMessage extends BaseJsonMessage<ResourceDeliver
 		return new ToStringBuilder(this)
 			.append("myPayload", myPayload)
 			.toString();
+	}
+
+	public static ResourceDeliveryJsonMessage fromJson(String theJson) throws JsonProcessingException {
+		return ourObjectMapper.readValue(theJson, ResourceDeliveryJsonMessage.class);
+	}
+
+	public String asJson() throws JsonProcessingException {
+		return ourObjectMapper.writeValueAsString(this);
 	}
 }

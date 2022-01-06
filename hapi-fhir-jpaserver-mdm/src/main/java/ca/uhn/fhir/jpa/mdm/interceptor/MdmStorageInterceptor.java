@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.mdm.interceptor;
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.mdm.interceptor;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
@@ -181,7 +182,7 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	 * We assume that if we have RequestDetails, then this was an HTTP request and not an internal one.
 	 */
 	private boolean isInternalRequest(RequestDetails theRequestDetails) {
-		return theRequestDetails == null;
+		return theRequestDetails == null || theRequestDetails instanceof SystemRequestDetails;
 	}
 
 	private void forbidIfMdmManagedTagIsPresent(IBaseResource theResource) {

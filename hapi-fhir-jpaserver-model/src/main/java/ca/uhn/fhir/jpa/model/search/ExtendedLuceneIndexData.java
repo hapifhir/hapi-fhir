@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.search;
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,9 @@ package ca.uhn.fhir.jpa.model.search;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.TokenParam;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
-import org.apache.commons.lang3.StringUtils;
 import org.hibernate.search.engine.backend.document.DocumentElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

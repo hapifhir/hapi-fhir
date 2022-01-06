@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -638,8 +638,8 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		retVal.setVersion(myVersion);
 		retVal.setTransientForcedId(getTransientForcedId());
 
-		retVal.setPublished(getPublished());
-		retVal.setUpdated(getUpdated());
+		retVal.setPublished(getPublishedDate());
+		retVal.setUpdated(getUpdatedDate());
 		retVal.setFhirVersion(getFhirVersion());
 		retVal.setDeleted(getDeleted());
 		retVal.setResourceTable(this);

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription.model;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ package ca.uhn.fhir.jpa.subscription.model;
 import ca.uhn.fhir.rest.server.messaging.json.BaseJsonMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+
+import javax.annotation.Nullable;
 
 public class ResourceModifiedJsonMessage extends BaseJsonMessage<ResourceModifiedMessage> {
 
@@ -50,6 +52,15 @@ public class ResourceModifiedJsonMessage extends BaseJsonMessage<ResourceModifie
 
 	public void setPayload(ResourceModifiedMessage thePayload) {
 		myPayload = thePayload;
+	}
+
+	@Override
+	@Nullable
+	public String getMessageKeyOrNull() {
+		if (myPayload == null) {
+			return null;
+		}
+		return myPayload.getMessageKeyOrNull();
 	}
 
 	@Override

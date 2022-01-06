@@ -50,6 +50,11 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		super(theFhirContext);
 	}
 
+	public RemoteTerminologyServiceValidationSupport(FhirContext theFhirContext, String theBaseUrl) {
+		super(theFhirContext);
+		myBaseUrl = theBaseUrl;
+	}
+
 	@Override
 	public CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		return invokeRemoteValidateCode(theCodeSystem, theCode, theDisplay, theValueSetUrl, null);
@@ -107,12 +112,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 
 		// at this point codeSystem couldn't be extracted for a multi-include ValueSet. Just on case it was
 		// because the format was not well handled, let's allow to watch the VS by an easy logging change
-		try {
-			ourLog.trace("CodeSystem couldn't be extracted for code: {} for ValueSet: {}",
-				theCode, JsonUtil.serialize(theValueSet));
-		} catch (IOException theE) {
-			ourLog.error("IOException trying to serialize ValueSet to json: " + theE);
-		}
+		ourLog.trace("CodeSystem couldn't be extracted for code: {} for ValueSet: {}", theCode, theValueSet.getId());
 		return null;
 	}
 
@@ -165,7 +165,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 				IBaseParameters outcome = client
 					.operation()
 					.onType((Class<? extends IBaseResource>) codeSystemClass)
-					.named(JpaConstants.OPERATION_LOOKUP)
+					.named("$lookup")
 					.withParameters(params)
 					.useHttpGet()
 					.execute();

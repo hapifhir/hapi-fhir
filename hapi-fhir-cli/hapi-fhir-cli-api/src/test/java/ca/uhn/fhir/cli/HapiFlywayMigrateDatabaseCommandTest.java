@@ -13,6 +13,7 @@ import org.springframework.jdbc.core.support.AbstractLobCreatingPreparedStatemen
 import org.springframework.jdbc.support.lob.DefaultLobHandler;
 import org.springframework.jdbc.support.lob.LobCreator;
 
+import javax.annotation.Nonnull;
 import javax.validation.constraints.NotNull;
 import java.io.File;
 import java.io.IOException;
@@ -43,8 +44,8 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 
 		File location = getLocation("migrator_h2_test_340_current");
 
-		String url = "jdbc:h2:" + location.getAbsolutePath() + ";create=true";
-		DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "", "");
+		String url = "jdbc:h2:" + location.getAbsolutePath();
+		DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "SA", "SA");
 
 		String initSql = "/persistence_create_h2_340.sql";
 		executeSqlStatements(connectionProperties, initSql);
@@ -59,8 +60,8 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 			BaseFlywayMigrateDatabaseCommand.MIGRATE_DATABASE,
 			"-d", "H2_EMBEDDED",
 			"-u", url,
-			"-n", "",
-			"-p", ""
+			"-n", "SA",
+			"-p", "SA"
 		};
 
 		assertFalse(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_RES_REINDEX_JOB"));
@@ -118,7 +119,7 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 
 		File location = getLocation("migrator_h2_test_340_current_noflyway");
 
-		String url = "jdbc:h2:" + location.getAbsolutePath() + ";create=true";
+		String url = "jdbc:h2:" + location.getAbsolutePath();
 		DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "", "");
 
 		String initSql = "/persistence_create_h2_340.sql";
@@ -159,7 +160,7 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 
 		File location = getLocation("migrator_h2_test_340_dryrun");
 
-		String url = "jdbc:h2:" + location.getAbsolutePath() + ";create=true";
+		String url = "jdbc:h2:" + location.getAbsolutePath();
 		DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "", "");
 
 		String initSql = "/persistence_create_h2_340.sql";
@@ -228,8 +229,8 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 
 		File location = getLocation("migrator_h2_test_empty_current");
 
-		String url = "jdbc:h2:" + location.getAbsolutePath() + ";create=true";
-		DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "", "");
+		String url = "jdbc:h2:" + location.getAbsolutePath();
+		DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "SA", "SA");
 
 		ourLog.info("**********************************************");
 		ourLog.info("Starting Migration...");
@@ -239,8 +240,8 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 			BaseFlywayMigrateDatabaseCommand.MIGRATE_DATABASE,
 			"-d", "H2_EMBEDDED",
 			"-u", url,
-			"-n", "",
-			"-p", ""
+			"-n", "SA",
+			"-p", "SA"
 		};
 
 		assertFalse(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_RESOURCE"));
@@ -255,7 +256,7 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 
 		File location = getLocation("migrator_h2_test_empty_current_noflyway");
 
-		String url = "jdbc:h2:" + location.getAbsolutePath() + ";create=true";
+		String url = "jdbc:h2:" + location.getAbsolutePath();
 		DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "", "");
 
 		ourLog.info("**********************************************");
@@ -278,7 +279,7 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 		assertTrue(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_BLK_EXPORT_JOB")); // Late table
 	}
 
-	@NotNull
+	@Nonnull
 	private File getLocation(String theDatabaseName) throws IOException {
 		File directory = new File(DB_DIRECTORY);
 		if (directory.exists()) {

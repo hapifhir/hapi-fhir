@@ -30,7 +30,13 @@ import javax.persistence.EntityManagerFactory;
 public class TestJPAConfig {
 	@Bean
 	public DaoConfig daoConfig() {
-		return new DaoConfig();
+		DaoConfig retVal = new DaoConfig();
+
+		if ("true".equals(System.getProperty("mass_ingestion_mode"))) {
+			retVal.setMassIngestionMode(true);
+		}
+
+		return retVal;
 	}
 
 	@Bean

@@ -65,7 +65,7 @@ import ca.uhn.fhir.jpa.delete.DeleteConflictFinderService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.delete.DeleteExpungeJobSubmitterImpl;
 import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.graphql.JpaStorageServices;
+import ca.uhn.fhir.jpa.graphql.DaoRegistryGraphQLStorageServices;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
 import ca.uhn.fhir.jpa.interceptor.MdmSearchExpandingInterceptor;
@@ -86,6 +86,7 @@ import ca.uhn.fhir.jpa.provider.DiffProvider;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
+import ca.uhn.fhir.jpa.provider.r4.MemberMatcherR4Helper;
 import ca.uhn.fhir.jpa.reindex.ReindexJobSubmitterImpl;
 import ca.uhn.fhir.jpa.sched.AutowiringSpringBeanJobFactory;
 import ca.uhn.fhir.jpa.sched.HapiSchedulerServiceImpl;
@@ -124,7 +125,6 @@ import ca.uhn.fhir.jpa.search.cache.DatabaseSearchResultCacheSvcImpl;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.search.elastic.IndexNamePrefixLayoutStrategy;
-import ca.uhn.fhir.jpa.search.reindex.BlockPolicy;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexer;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
@@ -150,13 +150,20 @@ import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
 import ca.uhn.fhir.rest.server.provider.DeleteExpungeProvider;
 import ca.uhn.fhir.rest.server.provider.ReindexProvider;
+import ca.uhn.fhir.util.ThreadPoolUtil;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.hl7.fhir.utilities.npm.FilesystemPackageCacheManager;
+import org.hl7.fhir.utilities.npm.PackageClient;
+import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
+import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.launch.support.SimpleJobOperator;
+import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
@@ -175,7 +182,6 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
@@ -185,7 +191,7 @@ import java.util.Date;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -228,6 +234,9 @@ public abstract class BaseConfig {
 	private Integer searchCoordCorePoolSize = 20;
 	private Integer searchCoordMaxPoolSize = 100;
 	private Integer searchCoordQueueCapacity = 200;
+
+	@Autowired
+	private JobLauncher myJobLauncher;
 
 	/**
 	 * Subclasses may override this method to provide settings such as search coordinator pool sizes.
@@ -279,6 +288,18 @@ public abstract class BaseConfig {
 		return new CascadingDeleteInterceptor(theFhirContext, theDaoRegistry, theInterceptorBroadcaster);
 	}
 
+	@Bean
+	public SimpleJobOperator jobOperator(JobExplorer jobExplorer, JobRepository jobRepository, JobRegistry jobRegistry) {
+		SimpleJobOperator jobOperator = new SimpleJobOperator();
+
+		jobOperator.setJobExplorer(jobExplorer);
+		jobOperator.setJobRepository(jobRepository);
+		jobOperator.setJobRegistry(jobRegistry);
+		jobOperator.setJobLauncher(myJobLauncher);
+
+		return jobOperator;
+	}
+
 
 	@Lazy
 	@Bean
@@ -302,7 +323,7 @@ public abstract class BaseConfig {
 	@Bean
 	@Lazy
 	public IGraphQLStorageServices graphqlStorageServices() {
-		return new JpaStorageServices();
+		return new DaoRegistryGraphQLStorageServices();
 	}
 
 	@Bean
@@ -357,8 +378,8 @@ public abstract class BaseConfig {
 	public IHapiPackageCacheManager packageCacheManager() {
 		JpaPackageCache retVal = new JpaPackageCache();
 		retVal.getPackageServers().clear();
-		retVal.getPackageServers().add(FilesystemPackageCacheManager.PRIMARY_SERVER);
-		retVal.getPackageServers().add(FilesystemPackageCacheManager.SECONDARY_SERVER);
+		retVal.getPackageServers().add(PackageClient.PRIMARY_SERVER);
+		retVal.getPackageServers().add(PackageClient.SECONDARY_SERVER);
 		return retVal;
 	}
 
@@ -405,17 +426,8 @@ public abstract class BaseConfig {
 
 	@Bean(name= BatchConstants.JOB_LAUNCHING_TASK_EXECUTOR)
 	public TaskExecutor jobLaunchingTaskExecutor() {
-		ThreadPoolTaskExecutor asyncTaskExecutor = new ThreadPoolTaskExecutor();
-		asyncTaskExecutor.setCorePoolSize(0);
-		asyncTaskExecutor.setMaxPoolSize(10);
-		asyncTaskExecutor.setQueueCapacity(0);
-		asyncTaskExecutor.setAllowCoreThreadTimeOut(true);
-		asyncTaskExecutor.setThreadNamePrefix("JobLauncher-");
-		asyncTaskExecutor.setRejectedExecutionHandler(new BlockPolicy());
-		asyncTaskExecutor.initialize();
-		return asyncTaskExecutor;
+		return ThreadPoolUtil.newThreadPool(0, 10, "job-launcher-");
 	}
-
 
 	@Bean
 	public IResourceReindexingSvc resourceReindexingSvc() {
@@ -931,6 +943,14 @@ public abstract class BaseConfig {
 	public UnknownCodeSystemWarningValidationSupport unknownCodeSystemWarningValidationSupport() {
 		return new UnknownCodeSystemWarningValidationSupport(fhirContext());
 	}
+
+	@Lazy
+	@Bean
+	public MemberMatcherR4Helper memberMatcherR4Helper(FhirContext theFhirContext) {
+		return new MemberMatcherR4Helper(theFhirContext);
+	}
+
+
 
 	public static void configureEntityManagerFactory(LocalContainerEntityManagerFactoryBean theFactory, FhirContext theCtx) {
 		theFactory.setJpaDialect(hibernateJpaDialect(theCtx.getLocalizer()));

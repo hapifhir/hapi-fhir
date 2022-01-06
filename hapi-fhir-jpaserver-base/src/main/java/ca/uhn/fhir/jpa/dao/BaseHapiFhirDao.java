@@ -92,6 +92,7 @@ import ca.uhn.fhir.util.XmlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Sets;
+import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import org.apache.commons.lang3.NotImplementedException;
@@ -133,6 +134,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -159,7 +161,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -511,7 +513,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			theEntity.setResourceType(toResourceName(theResource));
 		}
 
-		byte[] bytes;
+		byte[] resourceBinary;
+		String resourceText;
 		ResourceEncodingEnum encoding;
 		boolean changed = false;
 
@@ -574,7 +577,37 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 				theEntity.setFhirVersion(myContext.getVersion().getVersion());
 
-				bytes = encodeResource(theResource, encoding, excludeElements, myContext);
+				HashFunction sha256 = Hashing.sha256();
+				HashCode hashCode;
+				String encodedResource = encodeResource(theResource, encoding, excludeElements, myContext);
+				if (getConfig().getInlineResourceTextBelowSize() > 0 && encodedResource.length() < getConfig().getInlineResourceTextBelowSize()) {
+					resourceText = encodedResource;
+					resourceBinary = null;
+					encoding = ResourceEncodingEnum.JSON;
+					hashCode = sha256.hashUnencodedChars(encodedResource);
+				} else {
+					resourceText = null;
+					switch (encoding) {
+						case JSON:
+							resourceBinary = encodedResource.getBytes(Charsets.UTF_8);
+							break;
+						case JSONC:
+							resourceBinary = GZipUtil.compress(encodedResource);
+							break;
+						default:
+						case DEL:
+							resourceBinary = new byte[0];
+							break;
+					}
+					hashCode = sha256.hashBytes(resourceBinary);
+				}
+
+				String hashSha256 = hashCode.toString();
+				if (hashSha256.equals(theEntity.getHashSha256()) == false) {
+					changed = true;
+				}
+				theEntity.setHashSha256(hashSha256);
+
 
 				if (sourceExtension != null) {
 					IBaseExtension<?, ?> newSourceExtension = ((IBaseHasExtensions) meta).addExtension();
@@ -582,17 +615,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					newSourceExtension.setValue(sourceExtension.getValue());
 				}
 
-				HashFunction sha256 = Hashing.sha256();
-				String hashSha256 = sha256.hashBytes(bytes).toString();
-				if (hashSha256.equals(theEntity.getHashSha256()) == false) {
-					changed = true;
-				}
-				theEntity.setHashSha256(hashSha256);
-
 			} else {
 
 				encoding = null;
-				bytes = null;
+				resourceBinary = null;
+				resourceText = null;
 
 			}
 
@@ -604,9 +631,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			}
 
 		} else {
+
 			theEntity.setHashSha256(null);
-			bytes = null;
+			resourceBinary = null;
+			resourceText = null;
 			encoding = ResourceEncodingEnum.DEL;
+
 		}
 
 		if (thePerformIndexing && !changed) {
@@ -625,17 +655,18 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				if (currentHistoryVersion == null) {
 					currentHistoryVersion = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(theEntity.getId(), theEntity.getVersion());
 				}
-				if (currentHistoryVersion == null || currentHistoryVersion.getResource() == null) {
+				if (currentHistoryVersion == null || !currentHistoryVersion.hasResource()) {
 					changed = true;
 				} else {
-					changed = !Arrays.equals(currentHistoryVersion.getResource(), bytes);
+					changed = !Arrays.equals(currentHistoryVersion.getResource(), resourceBinary);
 				}
 			}
 		}
 
 		EncodedResource retVal = new EncodedResource();
 		retVal.setEncoding(encoding);
-		retVal.setResource(bytes);
+		retVal.setResourceBinary(resourceBinary);
+		retVal.setResourceText(resourceText);
 		retVal.setChanged(changed);
 
 		return retVal;
@@ -905,6 +936,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		// 1. get resource, it's encoding and the tags if any
 		byte[] resourceBytes;
+		String resourceText;
 		ResourceEncodingEnum resourceEncoding;
 		@Nullable
 		Collection<? extends BaseTag> tagList = Collections.emptyList();
@@ -915,6 +947,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		if (theEntity instanceof ResourceHistoryTable) {
 			ResourceHistoryTable history = (ResourceHistoryTable) theEntity;
 			resourceBytes = history.getResource();
+			resourceText = history.getResourceTextVc();
 			resourceEncoding = history.getEncoding();
 			switch (getConfig().getTagStorageMode()) {
 				case VERSIONED:
@@ -952,6 +985,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			}
 			resourceBytes = history.getResource();
 			resourceEncoding = history.getEncoding();
+			resourceText = history.getResourceTextVc();
 			switch (getConfig().getTagStorageMode()) {
 				case VERSIONED:
 				case NON_VERSIONED:
@@ -974,6 +1008,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			// This is the search View
 			ResourceSearchView view = (ResourceSearchView) theEntity;
 			resourceBytes = view.getResource();
+			resourceText = view.getResourceTextVc();
 			resourceEncoding = view.getEncoding();
 			version = view.getVersion();
 			provenanceRequestId = view.getProvenanceRequestId();
@@ -997,7 +1032,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 
 		// 2. get The text
-		String resourceText = decodeResource(resourceBytes, resourceEncoding);
+		String decodedResourceText;
+		if (resourceText != null) {
+			decodedResourceText = resourceText;
+		} else {
+			decodedResourceText = decodeResource(resourceBytes, resourceEncoding);
+		}
 
 		// 3. Use the appropriate custom type if one is specified in the context
 		Class<R> resourceType = theResourceType;
@@ -1027,7 +1067,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			IParser parser = new TolerantJsonParser(getContext(theEntity.getFhirVersion()), errorHandler, theEntity.getId());
 
 			try {
-				retVal = parser.parseResource(resourceType, resourceText);
+				retVal = parser.parseResource(resourceType, decodedResourceText);
 			} catch (Exception e) {
 				StringBuilder b = new StringBuilder();
 				b.append("Failed to parse database resource[");
@@ -1352,7 +1392,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		boolean versionedTags = getConfig().getTagStorageMode() == DaoConfig.TagStorageModeEnum.VERSIONED;
 		final ResourceHistoryTable historyEntry = theEntity.toHistory(versionedTags);
 		historyEntry.setEncoding(theChanged.getEncoding());
-		historyEntry.setResource(theChanged.getResource());
+		historyEntry.setResource(theChanged.getResourceBinary());
+		historyEntry.setResourceTextVc(theChanged.getResourceText());
 
 		ourLog.debug("Saving history entry {}", historyEntry.getIdDt());
 		myResourceHistoryTableDao.save(historyEntry);
@@ -1376,6 +1417,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					.orElse(null);
 			}
 		}
+
 		boolean haveSource = isNotBlank(source) && myConfig.getStoreMetaSourceInformation().isStoreSourceUri();
 		boolean haveRequestId = isNotBlank(requestId) && myConfig.getStoreMetaSourceInformation().isStoreRequestId();
 		if (haveSource || haveRequestId) {
@@ -1693,28 +1735,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		return resourceText;
 	}
 
-	public static byte[] encodeResource(IBaseResource theResource, ResourceEncodingEnum theEncoding, List<String> theExcludeElements, FhirContext theContext) {
-		byte[] bytes;
+	public static String encodeResource(IBaseResource theResource, ResourceEncodingEnum theEncoding, List<String> theExcludeElements, FhirContext theContext) {
 		IParser parser = theEncoding.newParser(theContext);
 		parser.setDontEncodeElements(theExcludeElements);
-		String encoded = parser.encodeResourceToString(theResource);
-
-
-		switch (theEncoding) {
-			case JSON:
-				bytes = encoded.getBytes(Charsets.UTF_8);
-				break;
-			case JSONC:
-				bytes = GZipUtil.compress(encoded);
-				break;
-			default:
-			case DEL:
-				bytes = new byte[0];
-				break;
-		}
-
-		ourLog.debug("Encoded {} chars of resource body as {} bytes", encoded.length(), bytes.length);
-		return bytes;
+		return parser.encodeResourceToString(theResource);
 	}
 
 	private static String parseNarrativeTextIntoWords(IBaseResource theResource) {

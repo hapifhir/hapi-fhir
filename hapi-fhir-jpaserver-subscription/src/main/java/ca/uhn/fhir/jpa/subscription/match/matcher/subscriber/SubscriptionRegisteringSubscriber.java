@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,15 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,13 +47,17 @@ import javax.annotation.Nonnull;
  * Also validates criteria.  If invalid, rejects the subscription without persisting the subscription.
  */
 public class SubscriptionRegisteringSubscriber extends BaseSubscriberForSubscriptionResources implements MessageHandler {
-	private Logger ourLog = LoggerFactory.getLogger(SubscriptionRegisteringSubscriber.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionRegisteringSubscriber.class);
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
 	private SubscriptionRegistry mySubscriptionRegistry;
 	@Autowired
 	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
+	@Autowired
+	private PartitionSettings myPartitionSettings;
+	@Autowired
+	private DaoRegistry myDaoRegistry;
 
 	/**
 	 * Constructor
@@ -77,9 +86,18 @@ public class SubscriptionRegisteringSubscriber extends BaseSubscriberForSubscrip
 			case CREATE:
 			case UPDATE:
 				IBaseResource subscription = payload.getNewPayload(myFhirContext);
+				IBaseResource subscriptionToRegister = subscription;
 				String statusString = mySubscriptionCanonicalizer.getSubscriptionStatus(subscription);
+
+				// reading resource back from db in order to store partition id in the userdata of the resource for partitioned subscriptions
+				if (myPartitionSettings.isPartitioningEnabled()) {
+					IFhirResourceDao subscriptionDao = myDaoRegistry.getSubscriptionDao();
+					RequestDetails systemRequestDetails = new SystemRequestDetails().setRequestPartitionId(payload.getPartitionId());
+					subscriptionToRegister = subscriptionDao.read(subscription.getIdElement(), systemRequestDetails);
+				}
+
 				if ("active".equals(statusString)) {
-					mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(payload.getNewPayload(myFhirContext));
+					mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(subscriptionToRegister);
 				} else {
 					mySubscriptionRegistry.unregisterSubscriptionIfRegistered(payload.getPayloadId(myFhirContext).getIdPart());
 				}

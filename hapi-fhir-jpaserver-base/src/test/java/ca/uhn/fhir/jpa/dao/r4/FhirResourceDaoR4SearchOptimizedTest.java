@@ -1423,7 +1423,6 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		assertEquals(1, myPatientDao.search(m2).size().intValue());
 	}
 
-
 	@Test
 	public void testReferenceOrLinksUseInList_ForcedIds() {
 
@@ -1517,7 +1516,8 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 		// Ensure that the search actually worked
 		assertEquals(5, search.size().intValue());
-
 	}
+
+
 
 }

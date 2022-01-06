@@ -16,8 +16,11 @@ import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.elementmodel.Manager;
 import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.utils.FHIRPathEngine;
-import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.hl7.fhir.r5.utils.XVerExtensionManager;
+import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
+import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;
+import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
+import org.hl7.fhir.r5.utils.validation.constants.IdStatus;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.validation.instance.InstanceValidator;
 import org.slf4j.Logger;
@@ -34,7 +37,7 @@ import java.util.List;
 class ValidatorWrapper {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ValidatorWrapper.class);
-	private IResourceValidator.BestPracticeWarningLevel myBestPracticeWarningLevel;
+	private BestPracticeWarningLevel myBestPracticeWarningLevel;
 	private boolean myAnyExtensionsAllowed;
 	private boolean myErrorForUnknownProfiles;
 	private boolean myNoTerminologyChecks;
@@ -42,7 +45,8 @@ class ValidatorWrapper {
 	private boolean myNoExtensibleWarnings;
 	private boolean myNoBindingMsgSuppressed;
 	private Collection<? extends String> myExtensionDomains;
-	private IResourceValidator.IValidatorResourceFetcher myValidatorResourceFetcher;
+	private IValidatorResourceFetcher myValidatorResourceFetcher;
+	private IValidationPolicyAdvisor myValidationPolicyAdvisor;
 
 	/**
 	 * Constructor
@@ -60,7 +64,7 @@ class ValidatorWrapper {
 		return this;
 	}
 
-	public ValidatorWrapper setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel theBestPracticeWarningLevel) {
+	public ValidatorWrapper setBestPracticeWarningLevel(BestPracticeWarningLevel theBestPracticeWarningLevel) {
 		myBestPracticeWarningLevel = theBestPracticeWarningLevel;
 		return this;
 	}
@@ -95,8 +99,12 @@ class ValidatorWrapper {
 		return this;
 	}
 
+	public ValidatorWrapper setValidationPolicyAdvisor(IValidationPolicyAdvisor validationPolicyAdvisor) {
+		this.myValidationPolicyAdvisor = validationPolicyAdvisor;
+		return this;
+	}
 
-	public ValidatorWrapper setValidatorResourceFetcher(IResourceValidator.IValidatorResourceFetcher validatorResourceFetcher) {
+	public ValidatorWrapper setValidatorResourceFetcher(IValidatorResourceFetcher validatorResourceFetcher) {
 		this.myValidatorResourceFetcher = validatorResourceFetcher;
 		return this;
 	}
@@ -114,11 +122,12 @@ class ValidatorWrapper {
 		v.setAssumeValidRestReferences(isAssumeValidRestReferences());
 		v.setBestPracticeWarningLevel(myBestPracticeWarningLevel);
 		v.setAnyExtensionsAllowed(myAnyExtensionsAllowed);
-		v.setResourceIdRule(IResourceValidator.IdStatus.OPTIONAL);
+		v.setResourceIdRule(IdStatus.OPTIONAL);
 		v.setNoTerminologyChecks(myNoTerminologyChecks);
 		v.setErrorForUnknownProfiles(myErrorForUnknownProfiles);
 		v.getExtensionDomains().addAll(myExtensionDomains);
 		v.setFetcher(myValidatorResourceFetcher);
+		v.setPolicyAdvisor(myValidationPolicyAdvisor);
 		v.setNoExtensibleWarnings(myNoExtensibleWarnings);
 		v.setNoBindingMsgSuppressed(myNoBindingMsgSuppressed);
 		v.setAllowXsiLocation(true);

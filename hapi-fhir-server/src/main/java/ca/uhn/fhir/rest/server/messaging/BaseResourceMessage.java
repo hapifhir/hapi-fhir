@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.messaging;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,12 @@ public abstract class BaseResourceMessage implements IResourceMessage, IModelJso
 
 	@JsonProperty("mediaType")
 	private String myMediaType;
+
+	/**
+	 * This is used by any message going to kafka for topic partition selection purposes.
+	 */
+	@JsonProperty("messageKey")
+	private String myMessageKey;
 
 	/**
 	 * Returns an attribute stored in this message.
@@ -154,6 +160,15 @@ public abstract class BaseResourceMessage implements IResourceMessage, IModelJso
 
 	public void setMediaType(String theMediaType) {
 		myMediaType = theMediaType;
+	}
+
+	@Nullable
+	public String getMessageKeyOrNull() {
+		return myMessageKey;
+	}
+
+	public void setMessageKey(String theMessageKey) {
+		myMessageKey = theMessageKey;
 	}
 
 	public enum OperationTypeEnum {

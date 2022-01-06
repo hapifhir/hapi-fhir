@@ -1,21 +1,18 @@
 package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
-import ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.EmailSenderImpl;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
+import ca.uhn.fhir.rest.server.mail.IMailSvc;
 import ca.uhn.fhir.rest.server.mail.MailConfig;
+import ca.uhn.fhir.rest.server.mail.MailSvc;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.hibernate.dialect.H2Dialect;
-import org.hibernate.search.backend.lucene.cfg.LuceneBackendSettings;
-import org.hibernate.search.backend.lucene.cfg.LuceneIndexSettings;
-import org.hibernate.search.engine.cfg.BackendSettings;
-import org.hibernate.search.mapper.orm.cfg.HibernateOrmMapperSettings;
+import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,8 +29,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-import static ca.uhn.fhir.jpa.dao.BaseJpaTest.buildHeapLuceneHibernateSearchProperties;
-import static ca.uhn.fhir.jpa.dao.BaseJpaTest.buildHibernateSearchProperties;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @Configuration
@@ -65,7 +60,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 					ourLog.error("Exceeded maximum wait for connection", e);
 					logGetConnectionStackTrace();
 //					if ("true".equals(System.getStringProperty("ci"))) {
-					fail("Exceeded maximum wait for connection: " + e.toString());
+					fail("Exceeded maximum wait for connection: " + e);
 //					}
 //					System.exit(1);
 					retVal = null;
@@ -138,7 +133,9 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 
 	@Bean
 	public IEmailSender emailSender() {
-		return new EmailSenderImpl(new MailConfig().setSmtpHostname("localhost").setSmtpPort(3025));
+		final MailConfig mailConfig = new MailConfig().setSmtpHostname("localhost").setSmtpPort(3025);
+		final IMailSvc mailSvc = new MailSvc(mailConfig);
+		return new EmailSenderImpl(mailSvc);
 	}
 
 	@Override
@@ -157,7 +154,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		extraProperties.put("hibernate.format_sql", "false");
 		extraProperties.put("hibernate.show_sql", "false");
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
-		extraProperties.put("hibernate.dialect", H2Dialect.class.getName());
+		extraProperties.put("hibernate.dialect", HapiFhirH2Dialect.class.getName());
 
 		boolean enableLucene = myEnv.getProperty(BaseJpaTest.CONFIG_ENABLE_LUCENE, Boolean.TYPE, BaseJpaTest.CONFIG_ENABLE_LUCENE_DEFAULT_VALUE);
 		Map<String, String> hibernateSearchProperties = BaseJpaTest.buildHibernateSearchProperties(enableLucene);

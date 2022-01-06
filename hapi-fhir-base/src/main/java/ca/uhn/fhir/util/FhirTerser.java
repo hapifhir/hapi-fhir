@@ -41,7 +41,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -64,7 +63,7 @@ import static org.apache.commons.lang3.StringUtils.substring;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,7 +82,6 @@ import static org.apache.commons.lang3.StringUtils.substring;
 public class FhirTerser {
 
 	private static final Pattern COMPARTMENT_MATCHER_PATH = Pattern.compile("([a-zA-Z.]+)\\.where\\(resolve\\(\\) is ([a-zA-Z]+)\\)");
-	private static final EnumSet<OptionsEnum> EMPTY_OPTION_SET = EnumSet.noneOf(OptionsEnum.class);
 	private static final String USER_DATA_KEY_CONTAIN_RESOURCES_COMPLETED = FhirTerser.class.getName() + "_CONTAIN_RESOURCES_COMPLETED";
 	private final FhirContext myContext;
 
@@ -323,11 +321,11 @@ public class FhirTerser {
 	}
 
 	public Optional<String> getSinglePrimitiveValue(IBase theTarget, String thePath) {
-		return getSingleValue(theTarget, thePath, IPrimitiveType.class).map(t->t.getValueAsString());
+		return getSingleValue(theTarget, thePath, IPrimitiveType.class).map(t -> t.getValueAsString());
 	}
 
 	public String getSinglePrimitiveValueOrNull(IBase theTarget, String thePath) {
-		return getSingleValue(theTarget, thePath, IPrimitiveType.class).map(t->t.getValueAsString()).orElse(null);
+		return getSingleValue(theTarget, thePath, IPrimitiveType.class).map(t -> t.getValueAsString()).orElse(null);
 	}
 
 	public <T extends IBase> Optional<T> getSingleValue(IBase theTarget, String thePath, Class<T> theWantedType) {
@@ -340,6 +338,10 @@ public class FhirTerser {
 
 	@SuppressWarnings("unchecked")
 	private <T extends IBase> List<T> getValues(BaseRuntimeElementCompositeDefinition<?> theCurrentDef, IBase theCurrentObj, List<String> theSubList, Class<T> theWantedClass, boolean theCreate, boolean theAddExtension) {
+		if (theSubList.isEmpty()) {
+			return Collections.emptyList();
+		}
+
 		String name = theSubList.get(0);
 		List<T> retVal = new ArrayList<>();
 
@@ -684,7 +686,15 @@ public class FhirTerser {
 
 		parts.add(thePath.substring(currentStart));
 
-		if (parts.size() > 0 && parts.get(0).equals(theElementDef.getName())) {
+		String firstPart = parts.get(0);
+		if (Character.isUpperCase(firstPart.charAt(0)) && theElementDef instanceof RuntimeResourceDefinition) {
+			if (firstPart.equals(theElementDef.getName())) {
+				parts = parts.subList(1, parts.size());
+			} else {
+				parts = Collections.emptyList();
+				return parts;
+			}
+		} else if (firstPart.equals(theElementDef.getName())) {
 			parts = parts.subList(1, parts.size());
 		}
 
@@ -712,9 +722,9 @@ public class FhirTerser {
 	 * Returns <code>true</code> if <code>theSource</code> is in the compartment named <code>theCompartmentName</code>
 	 * belonging to resource <code>theTarget</code>
 	 *
-	 * @param theCompartmentName The name of the compartment
-	 * @param theSource          The potential member of the compartment
-	 * @param theTarget          The owner of the compartment. Note that both the resource type and ID must be filled in on this IIdType or the method will throw an {@link IllegalArgumentException}
+	 * @param theCompartmentName                 The name of the compartment
+	 * @param theSource                          The potential member of the compartment
+	 * @param theTarget                          The owner of the compartment. Note that both the resource type and ID must be filled in on this IIdType or the method will throw an {@link IllegalArgumentException}
 	 * @param theAdditionalCompartmentParamNames If provided, search param names provided here will be considered as included in the given compartment for this comparison.
 	 * @return <code>true</code> if <code>theSource</code> is in the compartment or one of the additional parameters matched.
 	 * @throws IllegalArgumentException If theTarget does not contain both a resource type and ID
@@ -1112,7 +1122,7 @@ public class FhirTerser {
 		});
 	}
 
-	private void containResourcesForEncoding(ContainedResources theContained, IBaseResource theResource, EnumSet<OptionsEnum> theOptions) {
+	private void containResourcesForEncoding(ContainedResources theContained, IBaseResource theResource, boolean theModifyResource) {
 		List<IBaseReference> allReferences = getAllPopulatedChildElementsOfType(theResource, IBaseReference.class);
 		for (IBaseReference next : allReferences) {
 			IBaseResource resource = next.getResource();
@@ -1121,7 +1131,7 @@ public class FhirTerser {
 					IBaseResource potentialTarget = theContained.getExistingIdToContainedResource().remove(next.getReferenceElement().getValue());
 					if (potentialTarget != null) {
 						theContained.addContained(next.getReferenceElement(), potentialTarget);
-						containResourcesForEncoding(theContained, potentialTarget, theOptions);
+						containResourcesForEncoding(theContained, potentialTarget, theModifyResource);
 					}
 				}
 			}
@@ -1136,15 +1146,13 @@ public class FhirTerser {
 						continue;
 					}
 					IIdType id = theContained.addContained(resource);
-					if (theOptions.contains(OptionsEnum.MODIFY_RESOURCE)) {
+					if (theModifyResource) {
 						getContainedResourceList(theResource).add(resource);
 						next.setReference(id.getValue());
 					}
 					if (resource.getIdElement().isLocal() && theContained.hasExistingIdToContainedResource()) {
 						theContained.getExistingIdToContainedResource().remove(resource.getIdElement().getValue());
 					}
-				} else {
-					continue;
 				}
 
 			}
@@ -1161,9 +1169,20 @@ public class FhirTerser {
 	 * @since 5.4.0
 	 */
 	public ContainedResources containResources(IBaseResource theResource, OptionsEnum... theOptions) {
-		EnumSet<OptionsEnum> options = toOptionSet(theOptions);
+		boolean storeAndReuse = false;
+		boolean modifyResource = false;
+		for (OptionsEnum next : theOptions) {
+			switch (next) {
+				case MODIFY_RESOURCE:
+					modifyResource = true;
+					break;
+				case STORE_AND_REUSE_RESULTS:
+					storeAndReuse = true;
+					break;
+			}
+		}
 
-		if (options.contains(OptionsEnum.STORE_AND_REUSE_RESULTS)) {
+		if (storeAndReuse) {
 			Object cachedValue = theResource.getUserData(USER_DATA_KEY_CONTAIN_RESOURCES_COMPLETED);
 			if (cachedValue != null) {
 				return (ContainedResources) cachedValue;
@@ -1184,23 +1203,15 @@ public class FhirTerser {
 			contained.addContained(next);
 		}
 
-		containResourcesForEncoding(contained, theResource, options);
+		if (myContext.getParserOptions().isAutoContainReferenceTargetsWithNoId()) {
+			containResourcesForEncoding(contained, theResource, modifyResource);
+		}
 
-		if (options.contains(OptionsEnum.STORE_AND_REUSE_RESULTS)) {
+		if (storeAndReuse) {
 			theResource.setUserData(USER_DATA_KEY_CONTAIN_RESOURCES_COMPLETED, contained);
 		}
 
 		return contained;
-	}
-
-	private EnumSet<OptionsEnum> toOptionSet(OptionsEnum[] theOptions) {
-		EnumSet<OptionsEnum> options;
-		if (theOptions == null || theOptions.length == 0) {
-			options = EMPTY_OPTION_SET;
-		} else {
-			options = EnumSet.of(theOptions[0], theOptions);
-		}
-		return options;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -1404,13 +1415,12 @@ public class FhirTerser {
 
 	/**
 	 * Clones a resource object, copying all data elements from theSource into a new copy of the same type.
-	 *
+	 * <p>
 	 * Note that:
 	 * <ul>
 	 *    <li>Only FHIR data elements are copied (i.e. user data maps are not copied)</li>
 	 *    <li>If a class extending a HAPI FHIR type (e.g. an instance of a class extending the Patient class) is supplied, an instance of the base type will be returned.</li>
 	 * </ul>
-	 *
 	 *
 	 * @param theSource The source resource
 	 * @return A copy of the source resource

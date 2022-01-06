@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,11 @@ import java.util.Date;
 
 @Entity
 @Table(name = "MPI_LINK", uniqueConstraints = {
+	// TODO GGG DROP this index, and instead use the below one
 	@UniqueConstraint(name = "IDX_EMPI_PERSON_TGT", columnNames = {"PERSON_PID", "TARGET_PID"}),
+	// v---- this one
+	//TODO GGG revisit adding this: @UniqueConstraint(name = "IDX_EMPI_GR_TGT", columnNames = {"GOLDEN_RESOURCE_PID", "TARGET_PID"}),
+	//TODO GGG Should i make individual indices for PERSON/TARGET?
 })
 public class MdmLink implements IMdmLink {
 	public static final int VERSION_LENGTH = 16;

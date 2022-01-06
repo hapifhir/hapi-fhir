@@ -38,6 +38,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -78,6 +79,11 @@ public class JsonParserR4Test extends BaseTest {
 		p.addName().addGiven("GIVEN");
 		b.addEntry().setResource(p);
 		return b;
+	}
+
+	@AfterEach
+	public void afterEach() {
+		ourCtx.getParserOptions().setAutoContainReferenceTargetsWithNoId(true);
 	}
 
 	@Test
@@ -195,6 +201,25 @@ public class JsonParserR4Test extends BaseTest {
 
 		idx = encoded.indexOf("\"Medication\"", idx + 1);
 		assertEquals(-1, idx);
+
+	}
+
+	@Test
+	public void testContainedResourcesNotAutoContainedWhenConfiguredNotToDoSo() {
+		MedicationDispense md = new MedicationDispense();
+		md.addIdentifier().setValue("DISPENSE");
+
+		Medication med = new Medication();
+		med.getCode().setText("MED");
+		md.setMedication(new Reference(med));
+
+		ourCtx.getParserOptions().setAutoContainReferenceTargetsWithNoId(false);
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(md);
+		assertEquals("{\"resourceType\":\"MedicationDispense\",\"identifier\":[{\"value\":\"DISPENSE\"}],\"medicationReference\":{}}", encoded);
+
+		ourCtx.getParserOptions().setAutoContainReferenceTargetsWithNoId(true);
+		encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(md);
+		assertEquals("{\"resourceType\":\"MedicationDispense\",\"contained\":[{\"resourceType\":\"Medication\",\"id\":\"1\",\"code\":{\"text\":\"MED\"}}],\"identifier\":[{\"value\":\"DISPENSE\"}],\"medicationReference\":{\"reference\":\"#1\"}}", encoded);
 
 	}
 

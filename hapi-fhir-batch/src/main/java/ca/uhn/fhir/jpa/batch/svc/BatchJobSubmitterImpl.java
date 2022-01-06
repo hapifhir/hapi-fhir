@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.batch.svc;
  * #%L
  * HAPI FHIR JPA Server - Batch Task Processor
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,8 @@ import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteExcep
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -46,6 +48,7 @@ public class BatchJobSubmitterImpl implements IBatchJobSubmitter {
 	private JobRepository myJobRepository;
 
 	@Override
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public JobExecution runJob(Job theJob, JobParameters theJobParameters) throws JobParametersInvalidException {
 		try {
 			return myJobLauncher.run(theJob, theJobParameters);

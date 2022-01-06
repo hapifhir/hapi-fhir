@@ -42,7 +42,7 @@ import static org.hl7.fhir.instance.model.api.IAnyResource.SP_RES_ID;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,12 +109,12 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 							break;
 						case SEARCH_SYSTEM:
 						case HISTORY_SYSTEM:
-							if (theFlags.contains(AuthorizationFlagsEnum.NO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS)) {
+							if (theFlags.contains(AuthorizationFlagsEnum.DO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS)) {
 								return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
 							}
 							break;
 						case SEARCH_TYPE:
-							if (theFlags.contains(AuthorizationFlagsEnum.NO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS)) {
+							if (theFlags.contains(AuthorizationFlagsEnum.DO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS)) {
 								return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
 							}
 							target.resourceType = theRequestDetails.getResourceName();
@@ -129,13 +129,13 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 							}
 							break;
 						case HISTORY_TYPE:
-							if (theFlags.contains(AuthorizationFlagsEnum.NO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS)) {
+							if (theFlags.contains(AuthorizationFlagsEnum.DO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS)) {
 								return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
 							}
 							target.resourceType = theRequestDetails.getResourceName();
 							break;
 						case HISTORY_INSTANCE:
-							if (theFlags.contains(AuthorizationFlagsEnum.NO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS)) {
+							if (theFlags.contains(AuthorizationFlagsEnum.DO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS)) {
 								return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
 							}
 							target.resourceIds = Collections.singleton(theInputResourceId);
@@ -398,7 +398,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 						 * would match the given compartment. In this case, this
 						 * is a very effective mechanism.
 						 */
-						if (target.getSearchParams() != null && !theFlags.contains(AuthorizationFlagsEnum.NO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS)) {
+						if (target.getSearchParams() != null && !theFlags.contains(AuthorizationFlagsEnum.DO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS)) {
 							for (RuntimeSearchParam nextRuntimeSearchParam : params) {
 								String name = nextRuntimeSearchParam.getName();
 								Verdict verdict = checkForSearchParameterMatchingCompartmentAndReturnSuccessfulVerdictOrNull(target.getSearchParams(), next, name, theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);

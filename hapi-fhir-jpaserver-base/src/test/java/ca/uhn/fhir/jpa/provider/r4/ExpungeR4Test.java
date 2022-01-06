@@ -5,9 +5,15 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
+import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -15,8 +21,9 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.HapiExtensions;
-import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
-
+import org.apache.commons.io.IOUtils;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -26,8 +33,10 @@ import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,6 +45,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.awaitility.Awaitility.await;
@@ -43,6 +54,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -63,8 +76,10 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	@AfterEach
 	public void afterDisableExpunge() {
 		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
-        myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
-    }
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
+
+		ourRestServer.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof CascadingDeleteInterceptor);
+	}
 
 	@BeforeEach
 	public void beforeEnableExpunge() {
@@ -186,6 +201,62 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		}
 		return dao;
 	}
+
+	@Test
+	public void testDeleteCascade() throws IOException {
+		ourRestServer.registerInterceptor(new CascadingDeleteInterceptor(myFhirCtx, myDaoRegistry, myInterceptorRegistry));
+
+		// setup
+		Organization organization = new Organization();
+		organization.setName("FOO");
+		IIdType organizationId = myOrganizationDao.create(organization).getId().toUnqualifiedVersionless();
+
+		Organization organization2 = new Organization();
+		organization2.setName("FOO2");
+		organization2.getPartOf().setReference(organizationId.getValue());
+		IIdType organizationId2 = myOrganizationDao.create(organization2).getId().toUnqualifiedVersionless();
+
+		Patient patient = new Patient();
+		patient.setManagingOrganization(new Reference(organizationId2));
+		IIdType patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+
+		// execute
+		String url = ourServerBase + "/Organization/" + organizationId.getIdPart() + "?" +
+			Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE
+			+ "&" +
+			JpaConstants.PARAM_DELETE_EXPUNGE + "=true"
+			;
+		HttpDelete delete = new HttpDelete(url);
+		try (CloseableHttpResponse response = ourHttpClient.execute(delete)) {
+			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info("Response:\n{}", responseString);
+			assertEquals(200, response.getStatusLine().getStatusCode());
+		}
+
+		runInTransaction(() -> {
+			ResourceTable res;
+			List<ResourceHistoryTable> versions;
+
+			res = myResourceTableDao.findById(patientId.getIdPartAsLong()).orElseThrow(() -> new IllegalStateException());
+			assertNotNull(res.getDeleted());
+			versions = myResourceHistoryTableDao.findAllVersionsForResourceIdInOrder(patientId.getIdPartAsLong());
+			assertEquals(2, versions.size());
+			assertEquals(1L, versions.get(0).getVersion());
+			assertNull(versions.get(0).getDeleted());
+			assertEquals(2L, versions.get(1).getVersion());
+			assertNotNull(versions.get(1).getDeleted());
+
+			res = myResourceTableDao.findById(organizationId.getIdPartAsLong()).orElseThrow(() -> new IllegalStateException());
+			assertNotNull(res.getDeleted());
+			versions = myResourceHistoryTableDao.findAllVersionsForResourceIdInOrder(organizationId.getIdPartAsLong());
+			assertEquals(2, versions.size());
+			assertEquals(1L, versions.get(0).getVersion());
+			assertNull(versions.get(0).getDeleted());
+			assertEquals(2L, versions.get(1).getVersion());
+			assertNotNull(versions.get(1).getDeleted());
+		});
+	}
+
 
 	@Test
 	public void testExpungeInstanceOldVersionsAndDeleted() {
@@ -422,7 +493,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		assertExpunged(myTwoVersionObservationId.withVersion("2"));
 		assertExpunged(myDeletedObservationId);
 	}
-	
+
 	@Test
 	public void testExpungeSystemEverythingWithNormalizedQuantityStorageSupported() {
 		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_STORAGE_SUPPORTED);
@@ -444,7 +515,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		assertExpunged(myTwoVersionObservationId.withVersion("2"));
 		assertExpunged(myDeletedObservationId);
 	}
-	
+
 	@Test
 	public void testExpungeTypeOldVersionsAndDeleted() {
 		createStandardPatients();

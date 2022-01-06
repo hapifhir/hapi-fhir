@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.search;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,12 @@ import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * Extract search params for advanced lucene indexing.
@@ -46,7 +51,6 @@ public class ExtendedLuceneIndexExtractor {
 
 	@NotNull
 	public ExtendedLuceneIndexData extract(ResourceIndexedSearchParams theNewParams) {
-		// wip mb this is testable now.
 		ExtendedLuceneIndexData retVal = new ExtendedLuceneIndexData(myContext);
 
 		theNewParams.myStringParams.forEach(nextParam ->
@@ -59,7 +63,7 @@ public class ExtendedLuceneIndexExtractor {
 
 			// awkwardly, links are shared between different search params if they use the same path,
 			// so we re-build the linkage.
-			// WIP MB is this the right design?  Or should we follow JPA and share these?
+			// WIPMB is this the right design?  Or should we follow JPA and share these?
 			Map<String, List<String>> linkPathToParamName = new HashMap<>();
 			for (String nextParamName : theNewParams.getPopulatedResourceLinkParameters()) {
 				RuntimeSearchParam sp = myParams.get(nextParamName);

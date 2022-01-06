@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.validation;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,14 @@ package ca.uhn.fhir.jpa.validation;
  * #L%
  */
 
-import org.hl7.fhir.r5.utils.IResourceValidator;
+import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
 import org.thymeleaf.util.Validate;
 
 import javax.annotation.Nonnull;
 
 public class ValidationSettings {
 
-	private IResourceValidator.ReferenceValidationPolicy myLocalReferenceValidationDefaultPolicy = IResourceValidator.ReferenceValidationPolicy.IGNORE;
+	private ReferenceValidationPolicy myLocalReferenceValidationDefaultPolicy = ReferenceValidationPolicy.IGNORE;
 
 	/**
 	 * Supplies a default policy for validating local references. Default is {@literal IResourceValidator.ReferenceValidationPolicy.IGNORE}.
@@ -40,7 +40,7 @@ public class ValidationSettings {
 	 * @since 5.1.0
 	 */
 	@Nonnull
-	public IResourceValidator.ReferenceValidationPolicy getLocalReferenceValidationDefaultPolicy() {
+	public ReferenceValidationPolicy getLocalReferenceValidationDefaultPolicy() {
 		return myLocalReferenceValidationDefaultPolicy;
 	}
 
@@ -54,7 +54,7 @@ public class ValidationSettings {
 	 *
 	 * @since 5.1.0
 	 */
-	public void setLocalReferenceValidationDefaultPolicy(@Nonnull IResourceValidator.ReferenceValidationPolicy theLocalReferenceValidationDefaultPolicy) {
+	public void setLocalReferenceValidationDefaultPolicy(@Nonnull ReferenceValidationPolicy theLocalReferenceValidationDefaultPolicy) {
 		Validate.notNull(theLocalReferenceValidationDefaultPolicy, "theLocalReferenceValidationDefaultPolicy must not be null");
 		myLocalReferenceValidationDefaultPolicy = theLocalReferenceValidationDefaultPolicy;
 	}

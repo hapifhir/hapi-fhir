@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -185,7 +185,7 @@ public class MatchResourceUrlService {
 	@Nullable
 	public ResourcePersistentId processMatchUrlUsingCacheOnly(String theResourceType, String theMatchUrl) {
 		ResourcePersistentId existing = null;
-		if (myDaoConfig.getMatchUrlCache()) {
+		if (myDaoConfig.isMatchUrlCacheEnabled()) {
 			String matchUrl = massageForStorage(theResourceType, theMatchUrl);
 			existing = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.MATCH_URL, matchUrl);
 		}

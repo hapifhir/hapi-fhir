@@ -139,7 +139,7 @@ import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LO
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -413,7 +413,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 	}
 
 	@VisibleForTesting
-	@NotNull
+	@Nonnull
 	Properties getProperties(LoadedFileDescriptors theDescriptors, String thePropertiesFile) {
 		Properties retVal = new Properties();
 

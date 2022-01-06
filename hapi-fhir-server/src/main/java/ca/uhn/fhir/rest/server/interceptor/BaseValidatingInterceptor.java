@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ package ca.uhn.fhir.rest.server.interceptor;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -306,8 +307,18 @@ public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnric
 	 * Note: May return null
 	 */
 	protected ValidationResult validate(T theRequest, RequestDetails theRequestDetails) {
-		if (theRequest == null) {
+		if (theRequest == null || theRequestDetails == null) {
 			return null;
+		}
+
+		RestOperationTypeEnum opType = theRequestDetails.getRestOperationType();
+		if (opType != null) {
+			switch (opType) {
+				case GRAPHQL_REQUEST:
+					return null;
+				default:
+					break;
+			}
 		}
 
 		FhirValidator validator;

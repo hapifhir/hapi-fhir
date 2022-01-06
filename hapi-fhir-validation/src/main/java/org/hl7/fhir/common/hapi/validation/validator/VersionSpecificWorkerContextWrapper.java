@@ -24,12 +24,14 @@ import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.formats.IParser;
 import org.hl7.fhir.r5.formats.ParserType;
 import org.hl7.fhir.r5.model.CanonicalResource;
+import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.terminologies.ValueSetExpander;
-import org.hl7.fhir.r5.utils.IResourceValidator;
+import org.hl7.fhir.r5.utils.validation.IResourceValidator;
+import org.hl7.fhir.r5.utils.validation.ValidationContextCarrier;
 import org.hl7.fhir.utilities.TimeTracker;
 import org.hl7.fhir.utilities.TranslationServices;
 import org.hl7.fhir.utilities.i18n.I18nBase;
@@ -330,6 +332,19 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
+	public CodeSystem fetchCodeSystem(String system, String verison) {
+		IBaseResource fetched = myValidationSupportContext.getRootValidationSupport().fetchCodeSystem(system);
+		if (fetched == null) {
+			return null;
+		}
+		try {
+			return (org.hl7.fhir.r5.model.CodeSystem) myModelConverter.toCanonical(fetched);
+		} catch (FHIRException e) {
+			throw new InternalErrorException(e);
+		}
+	}
+
+	@Override
 	public <T extends Resource> T fetchResource(Class<T> class_, String uri) {
 
 		if (isBlank(uri)) {
@@ -355,6 +370,11 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			throw new FHIRException("Can not find resource of type " + class_.getSimpleName() + " with uri " + uri);
 		}
 		return retVal;
+	}
+
+	@Override
+	public <T extends Resource> T fetchResource(Class<T> class_, String uri, String version) {
+		return fetchResource(class_, uri + "|" + version);
 	}
 
 	@Override
@@ -514,14 +534,18 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
-	public ValidationResult validateCode(ValidationOptions theOptions, String system, String code, String display) {
-		ConceptValidationOptions validationOptions = convertConceptValidationOptions(theOptions);
+	public ValueSetExpander.ValueSetExpansionOutcome expandVS(ValueSet source, boolean cacheOk, boolean heiarchical, boolean incompleteOk) {
+		return null;
+	}
 
+	@Override
+	public ValidationResult validateCode(ValidationOptions theOptions, String system, String version, String code, String display) {
+		ConceptValidationOptions validationOptions = convertConceptValidationOptions(theOptions);
 		return doValidation(null, validationOptions, system, code, display);
 	}
 
 	@Override
-	public ValidationResult validateCode(ValidationOptions theOptions, String theSystem, String theCode, String display, org.hl7.fhir.r5.model.ValueSet theValueSet) {
+	public ValidationResult validateCode(ValidationOptions theOptions, String theSystem, String version, String theCode, String display, ValueSet theValueSet) {
 		IBaseResource convertedVs = null;
 
 		try {
@@ -571,6 +595,11 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		String display = theCoding.getDisplay();
 
 		return doValidation(convertedVs, validationOptions, system, code, display);
+	}
+
+	@Override
+	public ValidationResult validateCode(ValidationOptions options, Coding code, ValueSet vs, ValidationContextCarrier ctxt) {
+		return validateCode(options, code, vs);
 	}
 
 	@Override

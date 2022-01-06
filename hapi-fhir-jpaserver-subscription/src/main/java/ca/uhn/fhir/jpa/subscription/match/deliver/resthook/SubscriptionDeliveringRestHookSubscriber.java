@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription.match.deliver.resthook;
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,10 @@ package ca.uhn.fhir.jpa.subscription.match.deliver.resthook;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.match.deliver.BaseSubscriptionDeliverySubscriber;
@@ -43,8 +45,8 @@ import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.messaging.BaseResourceModifiedMessage;
 import ca.uhn.fhir.util.BundleBuilder;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -57,10 +59,10 @@ import org.springframework.messaging.MessagingException;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -163,10 +165,11 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 		return operation;
 	}
 
-	public IBaseResource getResource(IIdType payloadId) throws ResourceGoneException {
+	public IBaseResource getResource(IIdType payloadId, RequestPartitionId thePartitionId, boolean theDeletedOK) throws ResourceGoneException {
 		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(payloadId.getResourceType());
+		SystemRequestDetails systemRequestDetails = new SystemRequestDetails().setRequestPartitionId(thePartitionId);
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceDef.getImplementingClass());
-		return dao.read(payloadId.toVersionless());
+		return dao.read(payloadId.toVersionless(),  systemRequestDetails, theDeletedOK);
 	}
 
 
@@ -178,7 +181,8 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 
 			try {
 				if (payloadId != null) {
-					payloadResource = getResource(payloadId.toVersionless());
+					boolean deletedOK = theMsg.getOperationType() == BaseResourceModifiedMessage.OperationTypeEnum.DELETE;
+					payloadResource = getResource(payloadId.toVersionless(), theMsg.getRequestPartitionId(), deletedOK);
 				} else {
 					return null;
 				}
@@ -251,21 +255,10 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 	 */
 	protected void sendNotification(ResourceDeliveryMessage theMsg) {
 		Map<String, List<String>> params = new HashMap<>();
-		List<Header> headers = new ArrayList<>();
-		if (theMsg.getSubscription().getHeaders() != null) {
-			theMsg.getSubscription().getHeaders().stream().filter(Objects::nonNull).forEach(h -> {
-				final int sep = h.indexOf(':');
-				if (sep > 0) {
-					final String name = h.substring(0, sep);
-					final String value = h.substring(sep + 1);
-					if (StringUtils.isNotBlank(name)) {
-						headers.add(new Header(name.trim(), value.trim()));
-					}
-				}
-			});
-		}
+		CanonicalSubscription subscription = theMsg.getSubscription();
+		List<Header> headers = parseHeadersFromSubscription(subscription);
 
-		StringBuilder url = new StringBuilder(theMsg.getSubscription().getEndpointUrl());
+		StringBuilder url = new StringBuilder(subscription.getEndpointUrl());
 		IHttpClient client = myFhirContext.getRestfulClientFactory().getHttpClient(url, params, "", RequestTypeEnum.POST, headers);
 		IHttpRequest request = client.createParamRequest(myFhirContext, params, null);
 		try {
@@ -273,8 +266,36 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 			// close connection in order to return a possible cached connection to the connection pool
 			response.close();
 		} catch (IOException e) {
-			ourLog.error("Error trying to reach {}: {}", theMsg.getSubscription().getEndpointUrl(), e.toString());
+			ourLog.error("Error trying to reach {}: {}", subscription.getEndpointUrl(), e.toString());
 			throw new ResourceNotFoundException(e.getMessage());
 		}
 	}
+
+	public static List<Header> parseHeadersFromSubscription(CanonicalSubscription subscription) {
+		List<Header> headers = null;
+		if (subscription != null) {
+			for (String h : subscription.getHeaders()) {
+				if (h != null) {
+					final int sep = h.indexOf(':');
+					if (sep > 0) {
+						final String name = h.substring(0, sep);
+						final String value = h.substring(sep + 1);
+						if (isNotBlank(name)) {
+							if (headers == null) {
+								headers = new ArrayList<>();
+							}
+							headers.add(new Header(name.trim(), value.trim()));
+						}
+					}
+				}
+			}
+		}
+		if (headers == null) {
+			headers = Collections.emptyList();
+		} else {
+			headers = Collections.unmodifiableList(headers);
+		}
+		return headers;
+	}
+	
 }

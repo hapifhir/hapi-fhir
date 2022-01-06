@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.mdm.dao;
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -155,7 +155,7 @@ public class MdmLinkDaoSvc {
 		return getMdmLinkWithMatchResult(theSourceResource, MdmMatchResultEnum.POSSIBLE_MATCH);
 	}
 
-	@NotNull
+	@Nonnull
 	private Optional<MdmLink> getMdmLinkWithMatchResult(IBaseResource theSourceResource, MdmMatchResultEnum theMatchResult) {
 		Long pid = myIdHelperService.getPidOrNull(theSourceResource);
 		if (pid == null) {

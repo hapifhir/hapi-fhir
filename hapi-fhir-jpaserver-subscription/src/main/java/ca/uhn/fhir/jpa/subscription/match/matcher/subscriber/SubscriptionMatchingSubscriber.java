@@ -28,6 +28,7 @@ import org.springframework.messaging.MessagingException;
 import javax.annotation.Nonnull;
 import java.util.Collection;
 
+import static ca.uhn.fhir.rest.server.messaging.BaseResourceMessage.OperationTypeEnum.DELETE;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -35,7 +36,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +53,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 
 public class SubscriptionMatchingSubscriber implements MessageHandler {
-	private Logger ourLog = LoggerFactory.getLogger(SubscriptionMatchingSubscriber.class);
+	private final Logger ourLog = LoggerFactory.getLogger(SubscriptionMatchingSubscriber.class);
 	public static final String SUBSCRIPTION_MATCHING_CHANNEL_NAME = "subscription-matching";
 
 	@Autowired
@@ -73,7 +74,6 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 		super();
 	}
 
-
 	@Override
 	public void handleMessage(@Nonnull Message<?> theMessage) throws MessagingException {
 		ourLog.trace("Handling resource modified message: {}", theMessage);
@@ -92,8 +92,8 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 			case CREATE:
 			case UPDATE:
 			case MANUALLY_TRIGGERED:
-				break;
 			case DELETE:
+				break;
 			default:
 				ourLog.trace("Not processing modified message for {}", theMsg.getOperationType());
 				// ignore anything else
@@ -124,7 +124,12 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 		boolean resourceMatched = false;
 
 		for (ActiveSubscription nextActiveSubscription : subscriptions) {
-
+			// skip if the partitions don't match
+			CanonicalSubscription subscription = nextActiveSubscription.getSubscription();
+			if (subscription != null && subscription.getRequestPartitionId() != null && theMsg.getPartitionId() != null
+				&& !theMsg.getPartitionId().hasPartitionId(subscription.getRequestPartitionId())) {
+				continue;
+			}
 			String nextSubscriptionId = getId(nextActiveSubscription);
 
 			if (isNotBlank(theMsg.getSubscriptionId())) {
@@ -137,6 +142,13 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 
 			if (!resourceTypeIsAppropriateForSubscription(nextActiveSubscription, resourceId)) {
 				continue;
+			}
+
+			if (theMsg.getOperationType().equals(DELETE)) {
+				if (! nextActiveSubscription.getSubscription().getSendDeleteMessages()) {
+					ourLog.trace("Not processing modified message for {}", theMsg.getOperationType());
+					return;
+				}
 			}
 
 			InMemoryMatchResult matchResult;
@@ -155,17 +167,21 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 			}
 
 			IBaseResource payload = theMsg.getNewPayload(myFhirContext);
-			CanonicalSubscription subscription = nextActiveSubscription.getSubscription();
 
 			EncodingEnum encoding = null;
-			if (subscription.getPayloadString() != null && !subscription.getPayloadString().isEmpty()) {
+			if (subscription != null && subscription.getPayloadString() != null && !subscription.getPayloadString().isEmpty()) {
 				encoding = EncodingEnum.forContentType(subscription.getPayloadString());
 			}
 			encoding = defaultIfNull(encoding, EncodingEnum.JSON);
 
 			ResourceDeliveryMessage deliveryMsg = new ResourceDeliveryMessage();
+			deliveryMsg.setPartitionId(theMsg.getPartitionId());
 
-			deliveryMsg.setPayload(myFhirContext, payload, encoding);
+			if (payload != null) {
+				deliveryMsg.setPayload(myFhirContext, payload, encoding);
+			} else {
+				deliveryMsg.setPayloadId(theMsg.getPayloadId(myFhirContext));
+			}
 			deliveryMsg.setSubscription(subscription);
 			deliveryMsg.setOperationType(theMsg.getOperationType());
 			deliveryMsg.setTransactionId(theMsg.getTransactionId());

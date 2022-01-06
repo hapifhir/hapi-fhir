@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate;
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ import org.hibernate.tool.schema.extract.spi.SequenceInformationExtractor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nullable;
 import javax.sql.DataSource;
@@ -234,7 +235,8 @@ public class JdbcUtils {
 		DataSource dataSource = Objects.requireNonNull(theConnectionProperties.getDataSource());
 
 		try (Connection connection = dataSource.getConnection()) {
-			return theConnectionProperties.getTxTemplate().execute(t -> {
+			TransactionTemplate txTemplate = theConnectionProperties.getTxTemplate();
+			return txTemplate.execute(t -> {
 				DatabaseMetaData metadata;
 				try {
 					metadata = connection.getMetaData();

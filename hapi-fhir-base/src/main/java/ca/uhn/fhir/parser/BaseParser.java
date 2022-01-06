@@ -4,7 +4,7 @@ package ca.uhn.fhir.parser;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
+import org.apache.commons.io.output.StringBuilderWriter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -268,7 +269,7 @@ public abstract class BaseParser implements IParser {
 
 	@Override
 	public String encodeResourceToString(IBaseResource theResource) throws DataFormatException {
-		Writer stringWriter = new StringWriter();
+		Writer stringWriter = new StringBuilderWriter();
 		try {
 			encodeResourceToWriter(theResource, stringWriter);
 		} catch (IOException e) {
@@ -615,7 +616,7 @@ public abstract class BaseParser implements IParser {
 							if (isBlank(resourceId.getValue())) {
 								resourceId.setValue(fullUrl);
 							} else {
-								if (fullUrl.startsWith("urn:") && fullUrl.endsWith(":" + resourceId.getIdPart())) {
+								if (fullUrl.startsWith("urn:") && fullUrl.length() > resourceId.getIdPart().length() && fullUrl.charAt(fullUrl.length() - resourceId.getIdPart().length() - 1) == ':' && fullUrl.endsWith(resourceId.getIdPart())) {
 									resourceId.setValue(fullUrl);
 								} else {
 									IIdType fullUrlId = myContext.getVersion().newIdType();

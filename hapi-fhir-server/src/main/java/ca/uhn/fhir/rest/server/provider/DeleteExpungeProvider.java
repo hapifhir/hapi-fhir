@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.provider;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
@@ -45,6 +46,9 @@ public class DeleteExpungeProvider {
 		@OperationParam(name = ProviderConstants.OPERATION_DELETE_BATCH_SIZE, typeName = "decimal", min = 0, max = 1) IPrimitiveType<BigDecimal> theBatchSize,
 		RequestDetails theRequestDetails
 	) {
+		if (theUrlsToDeleteExpunge == null) {
+			throw new InvalidRequestException("At least one `url` parameter to $delete-expunge must be provided.");
+		}
 		List<String> urls = theUrlsToDeleteExpunge.stream().map(IPrimitiveType::getValue).collect(Collectors.toList());
 		Integer batchSize = myMultiUrlProcessor.getBatchSize(theBatchSize);
 		return myMultiUrlProcessor.processUrls(urls, batchSize, theRequestDetails);

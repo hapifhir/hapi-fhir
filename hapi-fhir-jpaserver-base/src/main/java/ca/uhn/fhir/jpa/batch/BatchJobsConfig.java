@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.batch;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ import ca.uhn.fhir.jpa.bulk.imprt.job.BulkImportJobConfig;
 import ca.uhn.fhir.jpa.delete.job.DeleteExpungeJobConfig;
 import ca.uhn.fhir.jpa.reindex.job.ReindexEverythingJobConfig;
 import ca.uhn.fhir.jpa.reindex.job.ReindexJobConfig;
+import ca.uhn.fhir.jpa.term.job.TermCodeSystemDeleteJobConfig;
+import ca.uhn.fhir.jpa.term.job.TermCodeSystemVersionDeleteJobConfig;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
@@ -38,7 +40,9 @@ import org.springframework.context.annotation.Import;
 	DeleteExpungeJobConfig.class,
 	ReindexJobConfig.class,
 	ReindexEverythingJobConfig.class,
-	MdmClearJobConfig.class
+	MdmClearJobConfig.class,
+	TermCodeSystemDeleteJobConfig.class,
+	TermCodeSystemVersionDeleteJobConfig.class
 })
 public class BatchJobsConfig {
 }

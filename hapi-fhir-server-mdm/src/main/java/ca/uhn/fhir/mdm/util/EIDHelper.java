@@ -4,7 +4,7 @@ package ca.uhn.fhir.mdm.util;
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,8 @@ public final class EIDHelper {
 	 * @return An optional {@link CanonicalEID} representing the external EID. Absent if the EID is not present.
 	 */
 	public List<CanonicalEID> getExternalEid(IBaseResource theResource) {
-		return CanonicalEID.extractFromResource(myFhirContext, myMdmSettings.getMdmRules().getEnterpriseEIDSystem(), theResource);
+		String resourceType = myFhirContext.getResourceType(theResource);
+		return CanonicalEID.extractFromResource(myFhirContext, myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType(resourceType), theResource);
 	}
 
 	/**

@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.subscription.resthook;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.config.StoppableSubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -15,6 +16,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Observation;
@@ -32,6 +34,7 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import static ca.uhn.fhir.util.HapiExtensions.EX_SEND_DELETE_MESSAGES;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -513,6 +516,39 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		assertEquals("2", observation2.getIdElement().getVersionIdPart());
 		assertEquals("changed", observation2.getNoteFirstRep().getText());
 	}
+
+
+	@Test
+	public void RestHookSubscriptionWithPayloadSendsDeleteRequest() throws Exception {
+		String payload = "application/json";
+		String criteria1 = "[*]";
+
+		Extension sendDeleteMessagesExtension = new Extension()
+			.setUrl(EX_SEND_DELETE_MESSAGES)
+			.setValue(new BooleanType(true));
+
+		waitForActivatedSubscriptionCount(0);
+		createSubscription(criteria1, payload, sendDeleteMessagesExtension);
+		waitForActivatedSubscriptionCount(1);
+
+		myStoppableSubscriptionDeliveringRestHookSubscriber.pause();
+		final CountDownLatch countDownLatch = new CountDownLatch(1);
+		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(countDownLatch);
+
+		ourLog.info("** About to send observation");
+		Observation observation = sendObservation("OB-01", "SNOMED-CT");
+		assertEquals("1", observation.getIdElement().getVersionIdPart());
+
+		// Wait for our delivery channel thread to be paused
+		assertTrue(countDownLatch.await(5L, TimeUnit.SECONDS));
+		// Open the floodgates!
+		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
+
+		ourLog.info("** About to delete observation");
+		myObservationDao.delete(IdDt.of(observation).toUnqualifiedVersionless());
+		ourObservationProvider.waitForDeleteCount(1);
+	}
+
 
 	@Test
 	public void testRestHookSubscriptionGetsLatestVersionWithFlag() throws Exception {

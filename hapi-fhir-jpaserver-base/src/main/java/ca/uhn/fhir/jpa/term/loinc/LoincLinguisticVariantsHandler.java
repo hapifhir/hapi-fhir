@@ -5,6 +5,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
 
 import java.util.List;
 
+import javax.annotation.Nonnull;
 import javax.validation.constraints.NotNull;
 
 import org.apache.commons.csv.CSVRecord;
@@ -15,7 +16,7 @@ import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +74,7 @@ public class LoincLinguisticVariantsHandler implements IZipContentsHandlerCsv {
 		private String myIsoCountry;
 		private String myLanguageName;
 
-		public LinguisticVariant(@NotNull String theId, @NotNull String theIsoLanguage, @NotNull String theIsoCountry, @NotNull String theLanguageName) {
+		public LinguisticVariant(@Nonnull String theId, @Nonnull String theIsoLanguage, @Nonnull String theIsoCountry, @Nonnull String theLanguageName) {
 			this.myId = theId;
 			this.myIsoLanguage = theIsoLanguage;
 			this.myIsoCountry = theIsoCountry;

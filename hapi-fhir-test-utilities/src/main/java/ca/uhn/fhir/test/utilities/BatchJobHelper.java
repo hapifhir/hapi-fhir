@@ -4,7 +4,7 @@ package ca.uhn.fhir.test.utilities;
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,17 +48,31 @@ public class BatchJobHelper {
 		myJobExplorer = theJobExplorer;
 	}
 
+
 	public List<JobExecution> awaitAllBulkJobCompletions(String... theJobNames) {
+		return awaitAllBulkJobCompletions(true, theJobNames);
+	}
+
+	/**
+	 * Await and report for job completions
+	 * @param theFailIfNotJobsFound indicate if must fail in case no matching jobs are found
+	 * @param theJobNames The job names to match
+	 * @return the matched JobExecution(s)
+	 */
+	public List<JobExecution> awaitAllBulkJobCompletions(boolean theFailIfNotJobsFound, String... theJobNames) {
 		assert theJobNames.length > 0;
 
-		List<JobInstance> matchingJobInstances = new ArrayList<>();
-		for (String nextName : theJobNames) {
-			matchingJobInstances.addAll(myJobExplorer.findJobInstancesByJobName(nextName, 0, 100));
+		if (theFailIfNotJobsFound) {
+			await().until(() -> !getJobInstances(theJobNames).isEmpty());
 		}
-		if (matchingJobInstances.isEmpty()) {
-			List<String> wantNames = Arrays.asList(theJobNames);
-			List<String> haveNames = myJobExplorer.getJobNames();
-			fail("There are no jobs running - Want names " + wantNames + " and have names " + haveNames);
+		List<JobInstance> matchingJobInstances = getJobInstances(theJobNames);
+
+		if (theFailIfNotJobsFound) {
+			if (matchingJobInstances.isEmpty()) {
+				List<String> wantNames = Arrays.asList(theJobNames);
+				List<String> haveNames = myJobExplorer.getJobNames();
+				fail("There are no jobs running - Want names " + wantNames + " and have names " + haveNames);
+			}
 		}
 		List<JobExecution> matchingExecutions = matchingJobInstances.stream().flatMap(jobInstance -> myJobExplorer.getJobExecutions(jobInstance).stream()).collect(Collectors.toList());
 		awaitJobCompletions(matchingExecutions);
@@ -66,6 +80,14 @@ public class BatchJobHelper {
 		// Return the final state
 		matchingExecutions = matchingJobInstances.stream().flatMap(jobInstance -> myJobExplorer.getJobExecutions(jobInstance).stream()).collect(Collectors.toList());
 		return matchingExecutions;
+	}
+
+	private List<JobInstance> getJobInstances(String[] theJobNames) {
+		List<JobInstance> matchingJobInstances = new ArrayList<>();
+		for (String nextName : theJobNames) {
+			matchingJobInstances.addAll(myJobExplorer.findJobInstancesByJobName(nextName, 0, 100));
+		}
+		return matchingJobInstances;
 	}
 
 	public JobExecution awaitJobExecution(Long theJobExecutionId) {
@@ -82,7 +104,11 @@ public class BatchJobHelper {
 		await().atMost(120, TimeUnit.SECONDS).until(() -> {
 			JobExecution jobExecution = myJobExplorer.getJobExecution(theJobExecution.getId());
 			ourLog.info("JobExecution {} currently has status: {}- Failures if any: {}", theJobExecution.getId(), jobExecution.getStatus(), jobExecution.getFailureExceptions());
-			return jobExecution.getStatus() == BatchStatus.COMPLETED || jobExecution.getStatus() == BatchStatus.FAILED;
+			// JM: Adding ABANDONED status because given the description, it s similar to FAILURE, and we need to avoid tests failing because
+			// of wait timeouts caused by unmatched statuses. Also adding STOPPED because tests were found where this wait timed out
+			// with jobs keeping that status during the whole wait
+			return jobExecution.getStatus() == BatchStatus.COMPLETED || jobExecution.getStatus() == BatchStatus.FAILED
+				|| jobExecution.getStatus() == BatchStatus.ABANDONED || jobExecution.getStatus() == BatchStatus.STOPPED;
 		});
 	}
 

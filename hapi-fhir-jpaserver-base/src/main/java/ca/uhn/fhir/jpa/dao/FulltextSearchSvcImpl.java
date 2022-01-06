@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,15 +100,12 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		return requiresHibernateSearchAccess;
 	}
 
-
-
-
 	private List<ResourcePersistentId> doSearch(String theResourceType, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
 		// keep this in sync with supportsSomeOf();
 		SearchSession session = Search.session(myEntityManager);
 
 		List<Long> longPids = session.search(ResourceTable.class)
-			//Selects are replacements for projection and convert more cleanly than the old implementation.
+			// Selects are replacements for projection and convert more cleanly than the old implementation.
 			.select(
 				f -> f.field("myId", Long.class)
 			)
@@ -118,11 +115,20 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 					/*
 					 * Handle _content parameter (resource body content)
+					 *
+					 * Posterity:
+					 * We do not want the HAPI-FHIR dao's to process the
+					 * _content parameter, so we remove it from the map here
 					 */
 					List<List<IQueryParameterType>> contentAndTerms = theParams.remove(Constants.PARAM_CONTENT);
 					builder.addStringTextSearch(Constants.PARAM_CONTENT, contentAndTerms);
+
 					/*
 					 * Handle _text parameter (resource narrative content)
+					 *
+					 * Positerity:
+					 * We do not want the HAPI-FHIR dao's to process the
+					 * _text parameter, so we remove it from the map here
 					 */
 					List<List<IQueryParameterType>> textAndTerms = theParams.remove(Constants.PARAM_TEXT);
 					builder.addStringTextSearch(Constants.PARAM_TEXT, textAndTerms);

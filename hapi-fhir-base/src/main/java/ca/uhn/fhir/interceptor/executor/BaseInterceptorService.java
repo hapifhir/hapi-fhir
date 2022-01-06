@@ -4,7 +4,7 @@ package ca.uhn.fhir.interceptor.executor;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -291,7 +291,8 @@ public abstract class BaseInterceptorService<POINTCUT extends IPointcut> impleme
 	}
 
 	private Object doCallHooks(POINTCUT thePointcut, HookParams theParams, Object theRetVal) {
-		List<BaseInvoker> invokers = getInvokersForPointcut(thePointcut);
+		// use new list for loop to avoid ConcurrentModificationException in case invoker gets added while looping
+		List<BaseInvoker> invokers = new ArrayList<>(getInvokersForPointcut(thePointcut));
 
 		/*
 		 * Call each hook in order

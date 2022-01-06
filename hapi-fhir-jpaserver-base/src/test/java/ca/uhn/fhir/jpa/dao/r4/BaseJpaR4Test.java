@@ -60,7 +60,6 @@ import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.interceptor.PerformanceTracingLoggingInterceptor;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.packages.IPackageInstallerSvc;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
@@ -93,8 +92,6 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
-import org.hibernate.search.mapper.orm.Search;
-import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -159,7 +156,15 @@ import org.hl7.fhir.r4.model.Substance;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.hl7.fhir.r5.utils.IResourceValidator;
+import org.hl7.fhir.r5.elementmodel.Element;
+import org.hl7.fhir.r5.model.ElementDefinition;
+import org.hl7.fhir.r5.utils.validation.IResourceValidator;
+import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
+import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
+import org.hl7.fhir.r5.utils.validation.constants.BindingKind;
+import org.hl7.fhir.r5.utils.validation.constants.CodedContentValidationPolicy;
+import org.hl7.fhir.r5.utils.validation.constants.ContainedReferenceValidationPolicy;
+import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -605,11 +610,29 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	protected void validate(IBaseResource theResource) {
 		FhirValidator validatorModule = myFhirCtx.newValidator();
 		FhirInstanceValidator instanceValidator = new FhirInstanceValidator(myValidationSupport);
-		instanceValidator.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Ignore);
+		instanceValidator.setBestPracticeWarningLevel(BestPracticeWarningLevel.Ignore);
+		instanceValidator.setValidatorPolicyAdvisor(new ValidationPolicyAdvisor());
 		validatorModule.registerValidatorModule(instanceValidator);
 		ValidationResult result = validatorModule.validateWithResult(theResource);
 		if (!result.isSuccessful()) {
 			fail(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
+		}
+	}
+
+	public class ValidationPolicyAdvisor implements IValidationPolicyAdvisor {
+		@Override
+		public ReferenceValidationPolicy policyForReference(IResourceValidator validator, Object appContext, String path, String url) {
+			return ReferenceValidationPolicy.CHECK_VALID;
+		}
+
+		@Override
+		public CodedContentValidationPolicy policyForCodedContent(IResourceValidator iResourceValidator, Object o, String s, ElementDefinition elementDefinition, org.hl7.fhir.r5.model.StructureDefinition structureDefinition, BindingKind bindingKind, org.hl7.fhir.r5.model.ValueSet valueSet, List<String> list) {
+			return CodedContentValidationPolicy.CODE;
+		}
+
+		@Override
+		public ContainedReferenceValidationPolicy policyForContained(IResourceValidator validator, Object appContext, String containerType, String containerId, Element.SpecialElement containingResourceType, String path, String url) {
+			return ContainedReferenceValidationPolicy.CHECK_VALID;
 		}
 	}
 

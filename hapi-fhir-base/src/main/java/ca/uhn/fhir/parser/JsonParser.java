@@ -4,7 +4,7 @@ package ca.uhn.fhir.parser;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,7 @@ import java.io.Writer;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -939,7 +940,9 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		}
 
 		JsonLikeObject alternate = alternateVal.getAsObject();
-		for (String nextKey : alternate.keySet()) {
+
+		for (Iterator<String> keyIter = alternate.keyIterator(); keyIter.hasNext(); ) {
+			String nextKey = keyIter.next();
 			JsonLikeValue nextVal = alternate.get(nextKey);
 			if ("extension".equals(nextKey)) {
 				boolean isModifier = false;
@@ -962,12 +965,11 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 	}
 
 	private void parseChildren(JsonLikeObject theObject, ParserState<?> theState) {
-		Set<String> keySet = theObject.keySet();
-
 		int allUnderscoreNames = 0;
 		int handledUnderscoreNames = 0;
 
-		for (String nextName : keySet) {
+		for (Iterator<String> keyIter = theObject.keyIterator(); keyIter.hasNext(); ) {
+			String nextName = keyIter.next();
 			if ("resourceType".equals(nextName)) {
 				continue;
 			} else if ("extension".equals(nextName)) {
@@ -1013,7 +1015,8 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		 * for example.
 		 */
 		if (allUnderscoreNames > handledUnderscoreNames) {
-			for (String alternateName : keySet) {
+			for (Iterator<String> keyIter = theObject.keyIterator(); keyIter.hasNext(); ) {
+				String alternateName = keyIter.next();
 				if (alternateName.startsWith("_") && alternateName.length() > 1) {
 					JsonLikeValue nextValue = theObject.get(alternateName);
 					if (nextValue != null) {
@@ -1116,7 +1119,8 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 				url = getExtensionUrl(jsonElement.getAsString());
 			}
 			theState.enteringNewElementExtension(null, url, theIsModifier, getServerBaseUrl());
-			for (String next : nextExtObj.keySet()) {
+			for (Iterator<String> keyIter = nextExtObj.keyIterator(); keyIter.hasNext(); ) {
+				String next = keyIter.next();
 				if ("url".equals(next)) {
 					continue;
 				} else if ("extension".equals(next)) {
@@ -1146,7 +1150,8 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			 * for example.
 			 */
 			if (allUnderscoreNames > handledUnderscoreNames) {
-				for (String alternateName : nextExtObj.keySet()) {
+				for (Iterator<String> keyIter = nextExtObj.keyIterator(); keyIter.hasNext(); ) {
+					String alternateName = keyIter.next();
 					if (alternateName.startsWith("_") && alternateName.length() > 1) {
 						JsonLikeValue nextValue = nextExtObj.get(alternateName);
 						if (nextValue != null) {

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.tasks;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
 import ca.uhn.fhir.util.VersionEnum;
 
+import javax.persistence.Index;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -50,6 +51,11 @@ import java.util.stream.Collectors;
 public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 	private final Set<FlagEnum> myFlags;
+
+	// H2, Derby, MariaDB, and MySql automatically add indexes to foreign keys
+	public static final DriverTypeEnum[] NON_AUTOMATIC_FK_INDEX_PLATFORMS = new DriverTypeEnum[] {
+		DriverTypeEnum.POSTGRES_9_4, DriverTypeEnum.ORACLE_12C, DriverTypeEnum.MSSQL_2012 };
+
 
 	/**
 	 * Constructor
@@ -76,7 +82,77 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init540(); // 20210218 - 20210520
 		init550(); // 20210520 -
 		init560(); // 20211027 -
+		init570(); // 20211102 -
 	}
+
+
+	/**
+	 * See https://github.com/hapifhir/hapi-fhir/issues/3237 for reasoning for these indexes.
+	 * This adds indexes to various tables to enhance delete-expunge performance, which does deletes by PID.
+	 */
+	private void addIndexesForDeleteExpunge(Builder theVersion) {
+
+		theVersion.onTable( "HFJ_HISTORY_TAG")
+			.addIndex("20211210.2", "IDX_RESHISTTAG_RESID" )
+			.unique(false)
+			.withColumns("RES_ID");
+
+
+		theVersion.onTable( "HFJ_RES_VER_PROV")
+			.addIndex("20211210.3", "FK_RESVERPROV_RES_PID" )
+			.unique(false)
+			.withColumns("RES_PID")
+			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
+
+		theVersion.onTable("HFJ_FORCED_ID")
+			.addIndex("20211210.4", "FK_FORCEDID_RESOURCE")
+			.unique(true)
+			.withColumns("RESOURCE_PID")
+			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
+	}
+
+	private void init570() {
+		Builder version = forVersion(VersionEnum.V5_7_0);
+
+		// both indexes must have same name that indexed FK or SchemaMigrationTest complains because H2 sets this index automatically
+
+		version.onTable("TRM_CONCEPT_PROPERTY")
+			.addIndex("20211102.1", "FK_CONCEPTPROP_CONCEPT")
+			.unique(false)
+			.withColumns("CONCEPT_PID")
+			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
+
+		version.onTable("TRM_CONCEPT_DESIG")
+			.addIndex("20211102.2", "FK_CONCEPTDESIG_CONCEPT")
+			.unique(false)
+			.withColumns("CONCEPT_PID")
+			// H2, Derby, MariaDB, and MySql automatically add indexes to foreign keys
+			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
+
+		version.onTable("TRM_CONCEPT_PC_LINK")
+			.addIndex("20211102.3", "FK_TERM_CONCEPTPC_CHILD")
+			.unique(false)
+			.withColumns("CHILD_PID")
+			// H2, Derby, MariaDB, and MySql automatically add indexes to foreign keys
+			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
+
+		version.onTable("TRM_CONCEPT_PC_LINK")
+			.addIndex("20211102.4", "FK_TERM_CONCEPTPC_PARENT")
+			.unique(false)
+			.withColumns("PARENT_PID")
+			// H2, Derby, MariaDB, and MySql automatically add indexes to foreign keys
+			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
+
+		addIndexesForDeleteExpunge(version);
+
+		// Add inline resource text column
+		version.onTable("HFJ_RES_VER")
+			.addColumn("20220102.1", "RES_TEXT_VC")
+			.nullable()
+			.type(ColumnTypeEnum.STRING, 4000);
+
+	}
+
 
 	private void init560() {
 		init560_20211027();
@@ -160,6 +236,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// HFJ_SEARCH.SEARCH_QUERY_STRING
 		version.onTable("HFJ_SEARCH")
 			.migratePostgresTextClobToBinaryClob("20211003.3", "SEARCH_QUERY_STRING");
+		
+
+		
 	}
 
 	private void init540() {

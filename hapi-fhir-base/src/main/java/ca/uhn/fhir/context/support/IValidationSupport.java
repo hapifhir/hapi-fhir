@@ -4,7 +4,7 @@ package ca.uhn.fhir.context.support;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,6 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -216,6 +215,15 @@ public interface IValidationSupport {
 	}
 
 	/**
+	 * Returns <code>true</code> if a Remote Terminology Service is currently configured
+	 *
+	 * @return Returns <code>true</code> if a Remote Terminology Service is currently configured
+	 */
+	default boolean isRemoteTerminologyServiceConfigured() {
+		return false;
+	}
+
+	/**
 	 * Fetch the given ValueSet by URL
 	 */
 	@Nullable
@@ -330,7 +338,6 @@ public interface IValidationSupport {
 	default TranslateConceptResults translateConcept(TranslateCodeRequest theRequest) {
 		return null;
 	}
-
 
 	enum IssueSeverity {
 		/**

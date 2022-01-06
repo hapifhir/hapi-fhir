@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search.lastn.json;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,6 +74,9 @@ public class ObservationJson {
 
 	@JsonProperty(value = "effectivedtm", required = true)
 	private Date myEffectiveDtm;
+
+	@JsonProperty(value = "resource")
+	private String myResource;
 
 	public ObservationJson() {
 	}
@@ -186,4 +189,11 @@ public class ObservationJson {
 		return myIdentifier;
 	}
 
+	public String getResource() {
+		return myResource;
+	}
+
+	public void setResource(String theResource) {
+		myResource = theResource;
+	}
 }

@@ -4,7 +4,7 @@ package ca.uhn.fhir.mdm.provider;
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,6 @@ public class MdmControllerUtil {
 
 	static IdDt getGoldenIdDtOrThrowException(String theParamName, String theId) {
 		IdDt goldenResourceId = new IdDt(theId);
-		//TODO GGG MDM: maybe add a gate here to only consider resources that can possibly be EMPI'ed?
 		if (goldenResourceId.getIdPart() == null) {
 			throw new InvalidRequestException(theParamName + " is '" + theId + "'.  must have form <resourceType>/<id> where <id> is the id of the resource");
 		}

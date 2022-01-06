@@ -4,7 +4,7 @@ package ca.uhn.fhir.test.utilities;
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,6 +84,13 @@ public interface ITestDataBuilder {
 	 */
 	default Consumer<IBaseResource> withStatus(String theStatus) {
 		return t -> __setPrimitiveChild(getFhirContext(), t, "status", "code", theStatus);
+	}
+
+	/**
+	 * Set Observation.effectiveDate
+	 */
+	default Consumer<IBaseResource> withEffectiveDate(String theDate) {
+		return t -> __setPrimitiveChild(getFhirContext(), t, "effectiveDateTime", "dateTime", theDate);
 	}
 
 	/**

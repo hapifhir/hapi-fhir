@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -991,7 +991,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			myModelConfig.isIndexOnContainedResources()
 				|| anySearchParameterUsesResolve(searchParams, theSearchParamType);
 
-		if (havePathWithResolveExpression) {
+		if (havePathWithResolveExpression && myContext.getParserOptions().isAutoContainReferenceTargetsWithNoId()) {
 			//TODO GGG/JA: At this point, if the Task.basedOn.reference.resource does _not_ have an ID, we will attempt to contain it internally. Wild
 			myContext.newTerser().containResources(theResource, FhirTerser.OptionsEnum.MODIFY_RESOURCE, FhirTerser.OptionsEnum.STORE_AND_REUSE_RESULTS);
 		}
