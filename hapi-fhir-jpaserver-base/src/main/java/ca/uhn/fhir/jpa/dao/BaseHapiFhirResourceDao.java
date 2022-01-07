@@ -502,7 +502,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			// Because no object actually existed, we'll
 			// just set the id and nothing else
 			DaoMethodOutcome outcome = createMethodOutcomeForDelete(theId.getValue());
-			outcome.setNop(true);
 			return outcome;
 		}
 

@@ -162,7 +162,6 @@ class BaseHapiFhirResourceDaoTest {
 		// verify
 		Assertions.assertNotNull(outcome);
 		Assertions.assertEquals(id.getValue(), outcome.getId().getValue());
-		Assertions.assertTrue(outcome.isNop());
 	}
 
 	static class TestResourceDao extends BaseHapiFhirResourceDao<Patient> {
