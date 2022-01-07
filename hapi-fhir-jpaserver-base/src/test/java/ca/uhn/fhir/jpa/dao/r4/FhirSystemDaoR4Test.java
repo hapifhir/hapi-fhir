@@ -2105,21 +2105,6 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testTransactionCreateWithPutUsingAbsoluteUrl() {
-		String methodName = "testTransactionCreateWithPutUsingAbsoluteUrl";
-		Bundle request = new Bundle();
-		request.setType(BundleType.TRANSACTION);
-
-		Patient p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.PUT).setUrl("http://localhost/server/base/Patient/" + methodName);
-
-		mySystemDao.transaction(mySrd, request);
-
-		myPatientDao.read(new IdType("Patient/" + methodName), mySrd);
-	}
-
-	@Test
 	public void testTransactionCreateWithPutUsingUrl() {
 		String methodName = "testTransactionCreateWithPutUsingUrl";
 		Bundle request = new Bundle();
@@ -4084,7 +4069,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		Patient p = new Patient();
 		p.setActive(true);
 		p.setId(IdType.newRandomUuid());
-		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl(p.getId());
+		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST);
 
 		Observation o = new Observation();
 		o.getCode().setText("Some Observation");
@@ -4164,7 +4149,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		Patient p = new Patient();
 		p.setActive(true);
 		p.setId(IdType.newRandomUuid());
-		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl(p.getId());
+		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST);
 
 		Observation o = new Observation();
 		o.getCode().setText("Some Observation");
