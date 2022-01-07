@@ -1,11 +1,19 @@
 package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionValidatingInterceptor;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.HapiExtensions;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,7 +23,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -28,6 +38,10 @@ public class SubscriptionValidatingInterceptorTest {
 	private final FhirContext myCtx = FhirContext.forR4Cached();
 	@Mock
 	private SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
+	@Mock
+	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+	@Mock
+	private DaoConfig myDaoConfig;
 
 	@BeforeEach
 	public void before() {
@@ -36,6 +50,8 @@ public class SubscriptionValidatingInterceptorTest {
 		mySvc.setDaoRegistryForUnitTest(myDaoRegistry);
 		mySvc.setSubscriptionStrategyEvaluatorForUnitTest(mySubscriptionStrategyEvaluator);
 		mySvc.setFhirContextForUnitTest(myCtx);
+		mySvc.setDaoConfigForUnitTest(myDaoConfig);
+		mySvc.setRequestPartitionHelperSvcForUnitTest(myRequestPartitionHelperSvc);
 	}
 
 	@Test
@@ -165,6 +181,77 @@ public class SubscriptionValidatingInterceptorTest {
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), containsString("Subscription.criteria must be populated"));
+		}
+	}
+
+	@Test
+	public void testValidate_Cross_Partition_Subscription(){
+		when(myDaoRegistry.isResourceTypeSupported(eq("Patient"))).thenReturn(true);
+		when(myDaoConfig.isCrossPartitionSubscription()).thenReturn(true);
+		when(myRequestPartitionHelperSvc.determineCreatePartitionForRequest(any(), any(), any())).thenReturn(RequestPartitionId.defaultPartition());
+
+		Subscription subscription = new Subscription();
+		subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
+		subscription.setCriteria("Patient?identifier=foo");
+		subscription.getChannel().setType(Subscription.SubscriptionChannelType.RESTHOOK);
+		subscription.getChannel().setEndpoint("http://foo");
+
+		subscription.addExtension().setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION).setValue(new BooleanType().setValue(true));
+
+		RequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setRestOperationType(RestOperationTypeEnum.CREATE);
+
+		// No asserts here because the function should throw an UnprocessableEntityException exception if the subscription
+		// is invalid
+		mySvc.validateSubmittedSubscription(subscription, requestDetails);
+	}
+
+	@Test
+	public void testValidate_Cross_Partition_Subscription_On_Wrong_Partition(){
+		when(myDaoConfig.isCrossPartitionSubscription()).thenReturn(true);
+		when(myRequestPartitionHelperSvc.determineCreatePartitionForRequest(any(), any(), any())).thenReturn(RequestPartitionId.fromPartitionId(1));
+
+		Subscription subscription = new Subscription();
+		subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
+		subscription.setCriteria("Patient?identifier=foo");
+		subscription.getChannel().setType(Subscription.SubscriptionChannelType.RESTHOOK);
+		subscription.getChannel().setEndpoint("http://foo");
+
+		subscription.addExtension().setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION).setValue(new BooleanType().setValue(true));
+
+		RequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setRestOperationType(RestOperationTypeEnum.CREATE);
+
+		try {
+			mySvc.validateSubmittedSubscription(subscription, requestDetails);
+			fail();
+		}
+		catch (UnprocessableEntityException theUnprocessableEntityException){
+			assertEquals(theUnprocessableEntityException.getMessage(), "Cross partition subscription must be created on the default partition");
+		}
+	}
+
+	@Test
+	public void testValidate_Cross_Partition_Subscription_Without_Setting(){
+		when(myDaoConfig.isCrossPartitionSubscription()).thenReturn(false);
+
+		Subscription subscription = new Subscription();
+		subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
+		subscription.setCriteria("Patient?identifier=foo");
+		subscription.getChannel().setType(Subscription.SubscriptionChannelType.RESTHOOK);
+		subscription.getChannel().setEndpoint("http://foo");
+
+		subscription.addExtension().setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION).setValue(new BooleanType().setValue(true));
+
+		RequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setRestOperationType(RestOperationTypeEnum.CREATE);
+
+		try {
+			mySvc.validateSubmittedSubscription(subscription, requestDetails);
+			fail();
+		}
+		catch (UnprocessableEntityException theUnprocessableEntityException){
+			assertEquals(theUnprocessableEntityException.getMessage(), "Cross partition subscription is not enabled on this server");
 		}
 	}
 
