@@ -2094,13 +2094,13 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		request.addEntry()
 			.setResource(o)
-			.getRequest().setUrl("A").setMethod(HTTPVerb.PUT);
+			.getRequest().setUrl("Observation").setMethod(HTTPVerb.PUT);
 
 		try {
 			mySystemDao.transaction(mySrd, request);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Invalid match URL[Observation?A] - URL has no search parameters", e.getMessage());
+			assertEquals("Invalid match URL[Observation?Observation] - URL has no search parameters", e.getMessage());
 		}
 	}
 
@@ -4069,7 +4069,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		Patient p = new Patient();
 		p.setActive(true);
 		p.setId(IdType.newRandomUuid());
-		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST);
+		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient/" + p.getId());
 
 		Observation o = new Observation();
 		o.getCode().setText("Some Observation");
@@ -4149,7 +4149,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		Patient p = new Patient();
 		p.setActive(true);
 		p.setId(IdType.newRandomUuid());
-		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST);
+		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient/" + p.getId());
 
 		Observation o = new Observation();
 		o.getCode().setText("Some Observation");
