@@ -82,6 +82,7 @@ public class ModelConfig {
 	private Set<String> myTreatReferencesAsLogical = new HashSet<>(DEFAULT_LOGICAL_BASE_URLS);
 	private boolean myDefaultSearchParamsCanBeOverridden = true;
 	private Set<Subscription.SubscriptionChannelType> mySupportedSubscriptionTypes = new HashSet<>();
+	private boolean crossPartitionSubscription = false;
 	private String myEmailFromAddress = "noreply@unknown.com";
 	private String myWebsocketContextPath = DEFAULT_WEBSOCKET_CONTEXT_PATH;
 	/**
@@ -848,6 +849,36 @@ public class ModelConfig {
 			}
 		}
 
+	}
+
+	/**
+	 * If enabled, the server will support cross-partition subscription.
+	 * This subscription will be the responsible for all the requests from all the partitions on this server.
+	 * For example, if the server has 3 partitions, P1, P2, P3
+	 * The subscription will live in the DEFAULT partition. Resource posted to DEFAULT, P1, P2, and P3 will trigger this subscription.
+	 * <p>
+	 * Default is <code>false</code>
+	 * </p>
+	 *
+	 * @since 7.5.0
+	 */
+	public boolean isCrossPartitionSubscription() {
+		return crossPartitionSubscription;
+	}
+
+	/**
+	 * If enabled, the server will support cross-partition subscription.
+	 * This subscription will be the responsible for all the requests from all the partitions on this server.
+	 * For example, if the server has 3 partitions, P1, P2, P3
+	 * The subscription will live in the DEFAULT partition. Resource posted to DEFAULT, P1, P2, and P3 will trigger this subscription.
+	 * <p>
+	 * Default is <code>false</code>
+	 * </p>
+	 *
+	 * @since 7.5.0
+	 */
+	public void setCrossPartitionSubscription(boolean theAllowCrossPartitionSubscription) {
+		crossPartitionSubscription = theAllowCrossPartitionSubscription;
 	}
 
 }
