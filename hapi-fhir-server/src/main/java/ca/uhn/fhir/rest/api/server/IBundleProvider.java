@@ -195,7 +195,7 @@ public interface IBundleProvider {
 	Integer size();
 
 	/**
-	 * This method returns <code>true</code> if the bundle provider knows that at least
+	 * This method returns <code>false</code> if the bundle provider knows that at least
 	 * one result exists.
 	 */
 	default boolean isEmpty() {
