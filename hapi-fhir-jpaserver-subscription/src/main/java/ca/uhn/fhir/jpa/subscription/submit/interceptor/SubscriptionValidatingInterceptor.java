@@ -111,13 +111,15 @@ public class SubscriptionValidatingInterceptor {
 
 		// If the subscription has the cross partition tag &&
 		if (isCrossPartition(theSubscription)) {
-			if (!myDaoConfig.isCrossPartitionSubscription()){
+			if (!myDaoConfig.isCrossPartitionSubscription()) {
 				throw new UnprocessableEntityException("Cross partition subscription is not enabled on this server");
 			}
 
-			if (!Objects.equals(determinePartition(theRequestDetails, theSubscription), RequestPartitionId.defaultPartition())){
+			if (!Objects.equals(determinePartition(theRequestDetails, theSubscription), RequestPartitionId.defaultPartition())) {
 				throw new UnprocessableEntityException("Cross partition subscription must be created on the default partition");
 			}
+
+			subscription.setMyCrossPartitionEnabled(true);
 		}
 
 		mySubscriptionCanonicalizer.setMatchingStrategyTag(theSubscription, null);
@@ -149,8 +151,8 @@ public class SubscriptionValidatingInterceptor {
 		}
 	}
 
-	private RequestPartitionId determinePartition(RequestDetails theRequestDetails, IBaseResource theResource){
-		switch (theRequestDetails.getRestOperationType()){
+	private RequestPartitionId determinePartition(RequestDetails theRequestDetails, IBaseResource theResource) {
+		switch (theRequestDetails.getRestOperationType()) {
 			case CREATE:
 				return myRequestPartitionHelperSvc.determineCreatePartitionForRequest(theRequestDetails, theResource, "Subscription");
 			case UPDATE:
@@ -257,12 +259,12 @@ public class SubscriptionValidatingInterceptor {
 	}
 
 	@VisibleForTesting
-	public void setDaoConfigForUnitTest(DaoConfig theDaoConfig){
+	public void setDaoConfigForUnitTest(DaoConfig theDaoConfig) {
 		myDaoConfig = theDaoConfig;
 	}
 
 	@VisibleForTesting
-	public void setRequestPartitionHelperSvcForUnitTest(IRequestPartitionHelperSvc theRequestPartitionHelperSvc){
+	public void setRequestPartitionHelperSvcForUnitTest(IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
 		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
 	}
 

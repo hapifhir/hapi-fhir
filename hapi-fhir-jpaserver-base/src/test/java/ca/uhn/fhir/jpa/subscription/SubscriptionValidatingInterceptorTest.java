@@ -185,7 +185,7 @@ public class SubscriptionValidatingInterceptorTest {
 	}
 
 	@Test
-	public void testValidate_Cross_Partition_Subscription(){
+	public void testValidate_Cross_Partition_Subscription() {
 		when(myDaoRegistry.isResourceTypeSupported(eq("Patient"))).thenReturn(true);
 		when(myDaoConfig.isCrossPartitionSubscription()).thenReturn(true);
 		when(myRequestPartitionHelperSvc.determineCreatePartitionForRequest(any(), any(), any())).thenReturn(RequestPartitionId.defaultPartition());
@@ -196,7 +196,7 @@ public class SubscriptionValidatingInterceptorTest {
 		subscription.getChannel().setType(Subscription.SubscriptionChannelType.RESTHOOK);
 		subscription.getChannel().setEndpoint("http://foo");
 
-		subscription.addExtension().setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION).setValue(new BooleanType().setValue(true));
+		subscription.addExtension().setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION).setValue(new BooleanType(true));
 
 		RequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setRestOperationType(RestOperationTypeEnum.CREATE);
@@ -207,7 +207,7 @@ public class SubscriptionValidatingInterceptorTest {
 	}
 
 	@Test
-	public void testValidate_Cross_Partition_Subscription_On_Wrong_Partition(){
+	public void testValidate_Cross_Partition_Subscription_On_Wrong_Partition() {
 		when(myDaoConfig.isCrossPartitionSubscription()).thenReturn(true);
 		when(myRequestPartitionHelperSvc.determineCreatePartitionForRequest(any(), any(), any())).thenReturn(RequestPartitionId.fromPartitionId(1));
 
@@ -217,7 +217,7 @@ public class SubscriptionValidatingInterceptorTest {
 		subscription.getChannel().setType(Subscription.SubscriptionChannelType.RESTHOOK);
 		subscription.getChannel().setEndpoint("http://foo");
 
-		subscription.addExtension().setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION).setValue(new BooleanType().setValue(true));
+		subscription.addExtension().setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION).setValue(new BooleanType(true));
 
 		RequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setRestOperationType(RestOperationTypeEnum.CREATE);
@@ -225,14 +225,13 @@ public class SubscriptionValidatingInterceptorTest {
 		try {
 			mySvc.validateSubmittedSubscription(subscription, requestDetails);
 			fail();
-		}
-		catch (UnprocessableEntityException theUnprocessableEntityException){
-			assertEquals(theUnprocessableEntityException.getMessage(), "Cross partition subscription must be created on the default partition");
+		} catch (UnprocessableEntityException theUnprocessableEntityException) {
+			assertEquals("Cross partition subscription must be created on the default partition", theUnprocessableEntityException.getMessage());
 		}
 	}
 
 	@Test
-	public void testValidate_Cross_Partition_Subscription_Without_Setting(){
+	public void testValidate_Cross_Partition_Subscription_Without_Setting() {
 		when(myDaoConfig.isCrossPartitionSubscription()).thenReturn(false);
 
 		Subscription subscription = new Subscription();
@@ -241,7 +240,7 @@ public class SubscriptionValidatingInterceptorTest {
 		subscription.getChannel().setType(Subscription.SubscriptionChannelType.RESTHOOK);
 		subscription.getChannel().setEndpoint("http://foo");
 
-		subscription.addExtension().setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION).setValue(new BooleanType().setValue(true));
+		subscription.addExtension().setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION).setValue(new BooleanType(true));
 
 		RequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setRestOperationType(RestOperationTypeEnum.CREATE);
@@ -249,9 +248,8 @@ public class SubscriptionValidatingInterceptorTest {
 		try {
 			mySvc.validateSubmittedSubscription(subscription, requestDetails);
 			fail();
-		}
-		catch (UnprocessableEntityException theUnprocessableEntityException){
-			assertEquals(theUnprocessableEntityException.getMessage(), "Cross partition subscription is not enabled on this server");
+		} catch (UnprocessableEntityException theUnprocessableEntityException) {
+			assertEquals("Cross partition subscription is not enabled on this server", theUnprocessableEntityException.getMessage());
 		}
 	}
 
