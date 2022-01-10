@@ -1,4 +1,5 @@
 package ca.uhn.fhir.jpa.mdm.provider;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
@@ -113,7 +114,7 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 			myMdmProvider.createLink(mySourcePatientId, myPatientId, MATCH_RESULT,myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), startsWith("Link already exists"));
+			assertThat(e.getMessage(), startsWith(Msg.code(753) + "Link already exists"));
 		}
 		assertLinkCount(1);
 	}
@@ -124,7 +125,7 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 			myMdmProvider.createLink(mySourcePatientId, myPatientId, POSSIBLE_DUPLICATE_RESULT, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("$mdm-create-link illegal matchResult value 'POSSIBLE_DUPLICATE'.  Must be NO_MATCH, MATCH or POSSIBLE_MATCH", e.getMessage());
+			assertEquals(Msg.code(1496) + "$mdm-create-link illegal matchResult value 'POSSIBLE_DUPLICATE'.  Must be NO_MATCH, MATCH or POSSIBLE_MATCH", e.getMessage());
 		}
 	}
 
@@ -156,7 +157,7 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 			fail();
 		} catch (InvalidRequestException e) {
 			String expectedMessage = myMessageHelper.getMessageForFailedGoldenResourceLoad("goldenResourceId", patient.getId());
-			assertEquals(expectedMessage, e.getMessage());
+			assertEquals(Msg.code(1502) + expectedMessage, e.getMessage());
 		}
 	}
 
@@ -169,7 +170,7 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 			myMdmProvider.createLink(mySourcePatientId, new StringType(patient.getIdElement().getValue()), MATCH_RESULT, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(myMessageHelper.getMessageForUnsupportedSourceResource(), e.getMessage());
+			assertEquals(Msg.code(759) + myMessageHelper.getMessageForUnsupportedSourceResource(), e.getMessage());
 		}
 	}
 }
