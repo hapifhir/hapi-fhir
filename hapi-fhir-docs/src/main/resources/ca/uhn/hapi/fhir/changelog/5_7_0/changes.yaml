@@ -15,7 +15,7 @@
 <li>Spring-Data (JPA): 2.5.0 -> 2.6.0</li>
 <li>Hibernate ORM (JPA): 5.4.30.Final -> 5.4.33</li>
 <li>Flyway (JPA): 6.5.4 -> 8.3.0</li>
-<li>H2 (JPA): 1.4.200 -> 2.0.204 (Note that this change requires the use of the HapiFhirH2Dialect instead of the built-in Hibernate H2Dialect due to Hibernate issue <a href='https://hibernate.atlassian.net/browse/HHH-15002'>HHH-15002</a></li>
+<li>H2 (JPA): 1.4.200 -> 2.0.206 (Note that this change requires the use of the HapiFhirH2Dialect instead of the built-in Hibernate H2Dialect due to Hibernate issue <a href='https://hibernate.atlassian.net/browse/HHH-15002'>HHH-15002</a></li>
 <li>Commons-DBCP2 (JPA): .8.0 -> .8.0 -> 2.9.0</li>
 <li>Swagger-Models (OpenAPI Support): 2.1.7 -> 2.1.12</li>
 <li>Thymeleaf (Testpage Overlay): 3.0.12.RELEASE -> 3.0.14.RELEASE (Addresses CVE-2021-43466)</li>
