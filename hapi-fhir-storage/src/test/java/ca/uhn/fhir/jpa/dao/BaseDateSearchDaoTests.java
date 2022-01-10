@@ -33,11 +33,13 @@ public abstract class BaseDateSearchDaoTests {
 	 */
 	IIdType myObservationId;
 
+	//time zone set to EST
 	@BeforeEach
 	public void setTimeZoneEST() {
 		TimeZone.setDefault(TimeZone.getTimeZone("EST"));
 	}
 
+	//reset time zone back to match the system
 	@AfterEach
 	public void resetTimeZone() {
 		TimeZone.setDefault(null);
