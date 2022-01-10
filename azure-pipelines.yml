@@ -17,6 +17,12 @@ jobs:
     timeoutInMinutes: 360
     container: maven:3.8-openjdk-17
     steps:
+      - task: Maven@3
+        displayName: Checkstyle Build
+        inputs:
+           mavenPomFile: 'hapi-fhir-checkstyle/pom.xml'
+           goals: 'clean install'
+           jdkVersionOption: 1.11
       - task: DockerInstaller@0
         displayName: Docker Installer
         inputs:
