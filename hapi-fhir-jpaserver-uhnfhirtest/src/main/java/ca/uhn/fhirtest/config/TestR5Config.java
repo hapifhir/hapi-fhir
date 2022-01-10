@@ -14,14 +14,13 @@ import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhirtest.interceptor.PublicSecurityInterceptor;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.apache.commons.lang3.time.DateUtils;
-import org.hibernate.dialect.PostgreSQL94Dialect;
 import org.hibernate.search.backend.lucene.cfg.LuceneBackendSettings;
 import org.hibernate.search.backend.lucene.cfg.LuceneIndexSettings;
 import org.hibernate.search.engine.cfg.BackendSettings;
-import org.hibernate.search.mapper.orm.cfg.HibernateOrmMapperSettings;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -44,19 +43,14 @@ import java.util.concurrent.TimeUnit;
 @Import(CommonConfig.class)
 @EnableTransactionManagement()
 public class TestR5Config extends BaseJavaConfigR5 {
-	public static final String FHIR_DB_USERNAME = "${fhir.db.username}";
-	public static final String FHIR_DB_PASSWORD = "${fhir.db.password}";
-	public static final String FHIR_LUCENE_LOCATION_R5 = "${fhir.lucene.location.r5}";
+	public static final String FHIR_DB_USERNAME = "fhir.db.username";
+	public static final String FHIR_DB_PASSWORD = "fhir.db.password";
+	public static final String FHIR_LUCENE_LOCATION_R5 = "fhir.lucene.location.r5";
 	public static final Integer COUNT_SEARCH_RESULTS_UP_TO = 50000;
-
-	@Value(TestR5Config.FHIR_DB_USERNAME)
-	private String myDbUsername;
-
-	@Value(TestR5Config.FHIR_DB_PASSWORD)
-	private String myDbPassword;
-
-	@Value(FHIR_LUCENE_LOCATION_R5)
-	private String myFhirLuceneLocation;
+	private static final Logger ourLog = LoggerFactory.getLogger(TestR5Config.class);
+	private String myDbUsername = System.getProperty(TestR5Config.FHIR_DB_USERNAME);
+	private String myDbPassword = System.getProperty(TestR5Config.FHIR_DB_PASSWORD);
+	private String myFhirLuceneLocation = System.getProperty(FHIR_LUCENE_LOCATION_R5);
 
 	@Bean
 	public DaoConfig daoConfig() {
@@ -96,11 +90,11 @@ public class TestR5Config extends BaseJavaConfigR5 {
 		return retVal;
 	}
 
-
-
-
 	@Bean(name = "myPersistenceDataSourceR5", destroyMethod = "close")
 	public DataSource dataSource() {
+		ourLog.info("Starting R5 database with DB username: {}", myDbUsername);
+		ourLog.info("Have system property username: {}", System.getProperty(FHIR_DB_USERNAME));
+
 		BasicDataSource retVal = new BasicDataSource();
 		if (CommonConfig.isLocalTestMode()) {
 			retVal.setUrl("jdbc:derby:memory:fhirtest_r5;create=true");
@@ -204,7 +198,6 @@ public class TestR5Config extends BaseJavaConfigR5 {
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
 		return new PropertySourcesPlaceholderConfigurer();
 	}
-
 
 
 }

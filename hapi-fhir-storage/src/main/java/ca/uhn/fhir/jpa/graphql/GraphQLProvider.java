@@ -44,6 +44,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.utilities.graphql.IGraphQLEngine;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.hl7.fhir.utilities.graphql.ObjectValue;
+import org.hl7.fhir.utilities.graphql.Package;
 import org.hl7.fhir.utilities.graphql.Parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -129,14 +130,21 @@ public class GraphQLProvider {
 	}
 
 	public String processGraphQLRequest(ServletRequestDetails theRequestDetails, IIdType theId, String theQuery) {
+		Package parsedGraphQLRequest;
+		try {
+			parsedGraphQLRequest = Parser.parse(theQuery);
+		} catch (Exception e) {
+			throw new InvalidRequestException("Unable to parse GraphQL Expression: " + e);
+		}
+
+		return processGraphQLRequest(theRequestDetails, theId, parsedGraphQLRequest);
+	}
+
+	private String processGraphQLRequest(ServletRequestDetails theRequestDetails, IIdType theId, Package parsedGraphQLRequest) {
 		IGraphQLEngine engine = engineFactory.get();
 		engine.setAppInfo(theRequestDetails);
 		engine.setServices(myStorageServices);
-		try {
-			engine.setGraphQL(Parser.parse(theQuery));
-		} catch (Exception theE) {
-			throw new InvalidRequestException("Unable to parse GraphQL Expression: " + theE.toString());
-		}
+		engine.setGraphQL(parsedGraphQLRequest);
 
 		try {
 

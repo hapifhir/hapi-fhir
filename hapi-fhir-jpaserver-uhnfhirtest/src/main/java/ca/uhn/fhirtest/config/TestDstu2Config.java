@@ -45,16 +45,11 @@ import java.util.concurrent.TimeUnit;
 @EnableTransactionManagement()
 public class TestDstu2Config extends BaseJavaConfigDstu2 {
 
-	public static final String FHIR_LUCENE_LOCATION_DSTU2 = "${fhir.lucene.location.dstu2}";
+	public static final String FHIR_LUCENE_LOCATION_DSTU2 = "fhir.lucene.location.dstu2";
 
-	@Value(TestDstu3Config.FHIR_DB_USERNAME)
-	private String myDbUsername;
-
-	@Value(TestDstu3Config.FHIR_DB_PASSWORD)
-	private String myDbPassword;
-
-	@Value(FHIR_LUCENE_LOCATION_DSTU2)
-	private String myFhirLuceneLocation;
+	private String myDbUsername = System.getProperty(TestR5Config.FHIR_DB_USERNAME);
+	private String myDbPassword = System.getProperty(TestR5Config.FHIR_DB_PASSWORD);
+	private String myFhirLuceneLocation = System.getProperty(FHIR_LUCENE_LOCATION_DSTU2);
 
 	@Bean
 	public PublicSecurityInterceptor securityInterceptor() {

@@ -44,18 +44,11 @@ import java.util.concurrent.TimeUnit;
 @Import(CommonConfig.class)
 @EnableTransactionManagement()
 public class TestDstu3Config extends BaseJavaConfigDstu3 {
-	public static final String FHIR_DB_USERNAME = "${fhir.db.username}";
-	public  static final String FHIR_DB_PASSWORD = "${fhir.db.password}";
-	public static final String FHIR_LUCENE_LOCATION_DSTU3 = "${fhir.lucene.location.dstu3}";
+	public static final String FHIR_LUCENE_LOCATION_DSTU3 = "fhir.lucene.location.dstu3";
 
-	@Value(TestDstu3Config.FHIR_DB_USERNAME)
-	private String myDbUsername;
-
-	@Value(TestDstu3Config.FHIR_DB_PASSWORD)
-	private String myDbPassword;
-
-	@Value(FHIR_LUCENE_LOCATION_DSTU3)
-	private String myFhirLuceneLocation;
+	private String myDbUsername = System.getProperty(TestR5Config.FHIR_DB_USERNAME);
+	private String myDbPassword = System.getProperty(TestR5Config.FHIR_DB_PASSWORD);
+	private String myFhirLuceneLocation = System.getProperty(FHIR_LUCENE_LOCATION_DSTU3);
 
 	@Bean
 	public DaoConfig daoConfig() {
