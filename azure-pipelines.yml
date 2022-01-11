@@ -24,7 +24,6 @@ jobs:
         inputs:
             mavenPomFile: 'hapi-fhir-checkstyle/pom.xml'
             goals: 'clean install'
-            options: '-P -e -B -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER) -Dmaven.wagon.http.pool=false -Dhttp.keepAlive=false -Dstyle.color=always -Djansi.force=true'
             jdkVersionOption: 1.11
       - task: DockerInstaller@0
         displayName: Docker Installer
