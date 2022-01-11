@@ -241,11 +241,11 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 		myPartitionId = thePartitionId;
 	}
 
-	public boolean isMyCrossPartitionEnabled() {
+	public boolean getCrossPartitionEnabled() {
 		return myCrossPartitionEnabled;
 	}
 
-	public void setMyCrossPartitionEnabled(boolean myCrossPartitionEnabled) {
+	public void setCrossPartitionEnabled(boolean myCrossPartitionEnabled) {
 		this.myCrossPartitionEnabled = myCrossPartitionEnabled;
 	}
 

@@ -61,4 +61,7 @@ public class SubscriptionUtil {
 		populatePrimitiveValue(theContext, theSubscription, "status", theStatus);
 	}
 
+	public static boolean isCrossPartition(IBaseResource theSubscription) {
+		return ExtensionUtil.hasExtension(theSubscription, HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION) && ExtensionUtil.getExtensionByUrl(theSubscription, HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION).getValue().toString().equals("BooleanType[true]");
+	}
 }

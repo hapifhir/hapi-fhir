@@ -127,7 +127,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 			// skip if the partitions don't match
 			CanonicalSubscription subscription = nextActiveSubscription.getSubscription();
 			if (subscription != null && subscription.getRequestPartitionId() != null && theMsg.getPartitionId() != null
-				&& !subscription.isMyCrossPartitionEnabled() && !theMsg.getPartitionId().hasPartitionId(subscription.getRequestPartitionId())) {
+				&& !subscription.getCrossPartitionEnabled() && !theMsg.getPartitionId().hasPartitionId(subscription.getRequestPartitionId())) {
 				continue;
 			}
 			String nextSubscriptionId = getId(nextActiveSubscription);

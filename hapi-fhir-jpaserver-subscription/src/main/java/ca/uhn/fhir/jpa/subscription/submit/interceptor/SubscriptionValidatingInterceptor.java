@@ -39,8 +39,8 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.HapiExtensions;
+import ca.uhn.fhir.util.SubscriptionUtil;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -110,8 +110,8 @@ public class SubscriptionValidatingInterceptor {
 		}
 
 		// If the subscription has the cross partition tag &&
-		if (isCrossPartition(theSubscription)) {
-			if (!myDaoConfig.isCrossPartitionSubscription()) {
+		if (SubscriptionUtil.isCrossPartition(theSubscription)) {
+			if (!myDaoConfig.isCrossPartitionSubscription()){
 				throw new UnprocessableEntityException("Cross partition subscription is not enabled on this server");
 			}
 
@@ -119,7 +119,7 @@ public class SubscriptionValidatingInterceptor {
 				throw new UnprocessableEntityException("Cross partition subscription must be created on the default partition");
 			}
 
-			subscription.setMyCrossPartitionEnabled(true);
+			subscription.setCrossPartitionEnabled(true);
 		}
 
 		mySubscriptionCanonicalizer.setMatchingStrategyTag(theSubscription, null);
@@ -160,10 +160,6 @@ public class SubscriptionValidatingInterceptor {
 			default:
 				return null;
 		}
-	}
-
-	private boolean isCrossPartition(IBaseResource theSubscription) {
-		return ExtensionUtil.hasExtension(theSubscription, HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION) && ExtensionUtil.getExtensionByUrl(theSubscription, HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION).getValue().toString().equals("BooleanType[true]");
 	}
 
 	public void validateQuery(String theQuery, String theFieldName) {
