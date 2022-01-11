@@ -54,6 +54,8 @@ public class HeaderPassthroughOptionTest {
 	private final UploadTerminologyCommand testedCommand =
 		new RequestCapturingUploadTerminologyCommand(myCapturingInterceptor);
 
+	private Object locker = new Object();
+
 	@Mock
 	protected ITermLoaderSvc myTermLoaderSvc;
 
@@ -69,13 +71,14 @@ public class HeaderPassthroughOptionTest {
 		myServer.setHandler(proxyHandler);
 		JettyUtil.startServer(myServer);
 		myPort = JettyUtil.getPortForStartedServer(myServer);
-		writeConceptAndHierarchyFiles();
+//		writeConceptAndHierarchyFiles();
 		when(myTermLoaderSvc.loadCustom(eq("http://foo"), anyList(), any()))
 			.thenReturn(new UploadStatistics(100, new IdType("CodeSystem/101")));
 	}
 
 	@Test
 	public void oneHeader() throws Exception {
+		writeConceptAndHierarchyFiles();
 		String[] args = new String[] {
 			"-v", FHIR_VERSION,
 			"-m", "SNAPSHOT",
@@ -101,6 +104,7 @@ public class HeaderPassthroughOptionTest {
 
 	@Test
 	public void twoHeadersSameKey() throws Exception {
+		writeConceptAndHierarchyFiles();
 		final String headerValue2 = "test header value-2";
 
 		String[] args = new String[] {
@@ -131,6 +135,7 @@ public class HeaderPassthroughOptionTest {
 
 	@Test
 	public void twoHeadersDifferentKeys() throws Exception {
+		writeConceptAndHierarchyFiles();
 		final String headerKey2 = "test-header-key-2";
 		final String headerValue2 = "test header value-2";
 
