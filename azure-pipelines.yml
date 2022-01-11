@@ -17,6 +17,14 @@ jobs:
     timeoutInMinutes: 360
     container: maven:3.8-openjdk-17
     steps:
+      - task: Maven@3
+        env:
+           JAVA_HOME_11_X64: /usr/java/openjdk-17
+        displayName: Checkstyle Build
+        inputs:
+            mavenPomFile: 'hapi-fhir-checkstyle/pom.xml'
+            goals: 'clean install'
+            jdkVersionOption: 1.11
       - task: DockerInstaller@0
         displayName: Docker Installer
         inputs:
@@ -40,14 +48,6 @@ jobs:
           # These are JVM options (and don't show up in the build logs)
           mavenOptions: '-Xmx1024m $(MAVEN_OPTS) -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto'
           jdkVersionOption: 1.11
-      -  task: Maven@3
-         env:
-            JAVA_HOME_11_X64: /usr/java/openjdk-17
-         displayName: Checkstyle Build
-         inputs:
-            mavenPomFile: 'hapi-fhir-checkstyle/pom.xml'
-            goals: 'clean install'
-            jdkVersionOption: 1.11
       - task: CopyFiles@2
         condition: always()
         inputs:
