@@ -98,6 +98,7 @@ public class CanonicalSubscriptionTest {
 	}
 
 	@Test
+	//FIXME LM finish this test
 	public void testLegacyCanonicalSubscription(){
 		String legacyCanonical = "{}";
 	}

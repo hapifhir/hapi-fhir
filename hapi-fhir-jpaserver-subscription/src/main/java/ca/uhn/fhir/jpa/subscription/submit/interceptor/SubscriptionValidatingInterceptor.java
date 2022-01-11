@@ -28,6 +28,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionCriteriaParser;
@@ -115,11 +116,9 @@ public class SubscriptionValidatingInterceptor {
 				throw new UnprocessableEntityException("Cross partition subscription is not enabled on this server");
 			}
 
-			if (!Objects.equals(determinePartition(theRequestDetails, theSubscription), RequestPartitionId.defaultPartition())) {
+			if (!(theRequestDetails instanceof SystemRequestDetails) && !determinePartition(theRequestDetails, theSubscription).isDefaultPartition()) {
 				throw new UnprocessableEntityException("Cross partition subscription must be created on the default partition");
 			}
-
-			subscription.setCrossPartitionEnabled(true);
 		}
 
 		mySubscriptionCanonicalizer.setMatchingStrategyTag(theSubscription, null);
