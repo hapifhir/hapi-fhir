@@ -32,7 +32,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Stack;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -99,7 +98,7 @@ public class JsonLikeParserTest {
 		assertEquals("x1", extension.get("url"), "Expecting '/extension[]/url' = 'x1'; found '"+extension.get("url")+"'");
 	
 	}
-	
+
 	/**
 	 * Repeat the "View" tests with custom JSON-Like structure
 	 */
