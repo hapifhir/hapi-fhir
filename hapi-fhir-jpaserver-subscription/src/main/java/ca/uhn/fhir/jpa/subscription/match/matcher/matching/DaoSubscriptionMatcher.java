@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.matching;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
@@ -77,8 +78,11 @@ public class DaoSubscriptionMatcher implements ISubscriptionMatcher {
 		IFhirResourceDao<? extends IBaseResource> responseDao = myDaoRegistry.getResourceDao(responseResourceDef.getImplementingClass());
 		responseCriteriaUrl.setLoadSynchronousUpTo(1);
 
-		PartitionablePartitionId partitionId = new PartitionablePartitionId(theSubscription.getRequestPartitionId(), null);
-		RequestDetails systemRequestDetails = new SystemRequestDetails().setRequestPartitionId(partitionId.toPartitionId());
+		RequestPartitionId requestPartitionId = new PartitionablePartitionId(theSubscription.getRequestPartitionId(), null).toPartitionId();
+		if (theSubscription.getCrossPartitionEnabled()) {
+			requestPartitionId = RequestPartitionId.allPartitions();
+		}
+		RequestDetails systemRequestDetails = new SystemRequestDetails().setRequestPartitionId(requestPartitionId);
 		return responseDao.search(responseCriteriaUrl, systemRequestDetails);
 	}
 
