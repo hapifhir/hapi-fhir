@@ -2281,6 +2281,11 @@
 							<artifactId>checkstyle</artifactId>
 							<version>8.43</version>
 						</dependency>
+                        <dependency>
+                            <groupId>ca.uhn.hapi.fhir</groupId>
+                            <artifactId>hapi-fhir-checkstyle</artifactId>
+                            <version>5.7.0-PRE9-SNAPSHOT</version>
+                        </dependency>
 					</dependencies>
 				</plugin>
 				<plugin>
