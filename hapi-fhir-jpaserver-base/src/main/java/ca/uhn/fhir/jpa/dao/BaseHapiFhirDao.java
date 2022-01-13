@@ -131,6 +131,7 @@ import javax.persistence.PersistenceContextType;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Root;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
@@ -421,9 +422,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		MemoryCacheService.TagDefinitionCacheKey key = toTagDefinitionMemoryCacheKey(theTagType, theScheme, theTerm);
 
-
 		TagDefinition retVal = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.TAG_DEFINITION, key);
-
 
 		if (retVal == null) {
 			HashMap<MemoryCacheService.TagDefinitionCacheKey, TagDefinition> resolvedTagDefinitions = theTransactionDetails.getOrCreateUserData(HapiTransactionService.XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS, () -> new HashMap<>());
@@ -449,11 +448,15 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				}
 
 				TypedQuery<TagDefinition> q = myEntityManager.createQuery(cq);
-				try {
-					retVal = q.getSingleResult();
-				} catch (NoResultException e) {
-					retVal = new TagDefinition(theTagType, theScheme, theTerm, theLabel);
-					myEntityManager.persist(retVal);
+
+				// synchronize to ensure no duplicates
+				synchronized (this) {
+					try {
+						retVal = q.getSingleResult();
+					} catch (NoResultException e) {
+						retVal = new TagDefinition(theTagType, theScheme, theTerm, theLabel);
+						myEntityManager.persist(retVal);
+					}
 				}
 
 				TransactionSynchronization sync = new AddTagDefinitionToCacheAfterCommitSynchronization(key, retVal);

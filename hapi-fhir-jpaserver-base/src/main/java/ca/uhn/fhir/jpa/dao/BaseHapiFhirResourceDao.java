@@ -331,6 +331,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		doCallHooks(theTransactionDetails, theRequest, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, hookParams);
 
 		// Perform actual DB update
+		// this call will also update the metadata
 		ResourceTable updatedEntity = updateEntity(theRequest, theResource, entity, null, thePerformIndexing, false, theTransactionDetails, false, thePerformIndexing);
 
 		IIdType id = myFhirContext.getVersion().newIdType().setValue(updatedEntity.getIdDt().toUnqualifiedVersionless().getValue());
@@ -368,6 +369,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		// Update the version/last updated in the resource so that interceptors get
 		// the correct version
+		// TODO - the above updateEntity calls updateResourceMetadata
+		// 		Maybe we don't need this call here?
 		updateResourceMetadata(entity, theResource);
 
 		// Populate the PID in the resource so it is available to hooks
