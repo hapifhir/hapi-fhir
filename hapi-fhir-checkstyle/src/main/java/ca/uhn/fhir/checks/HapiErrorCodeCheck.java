@@ -10,6 +10,9 @@ import org.slf4j.LoggerFactory;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * mvn -P CI,ALLMODULES checkstyle:check
+ */
 @StatelessCheck
 public final class HapiErrorCodeCheck extends AbstractCheck {
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiErrorCodeCheck.class);
