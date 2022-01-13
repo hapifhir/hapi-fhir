@@ -173,4 +173,4 @@ None of the limitations listed here are considered permanent. Over time the HAPI
 
 * **Advanced Elasticsearch indexing is not partition optimized**: The results are correctly partitioned, but the extended indexing is not optimized to account for partitions. 
 
-* **Subscriptions are partition aware**: Subscriptions can be placed on any partition and will deliver matching resources from the same partition.
+* **Subscriptions are partition aware**: Subscriptions can be placed on any partition and will deliver matching resources from the same partition. A subscription on the default can deliver resource from all partition if it is placed in the default partition with the cross-partition extension and the server allows cross-partition subscriptions.
