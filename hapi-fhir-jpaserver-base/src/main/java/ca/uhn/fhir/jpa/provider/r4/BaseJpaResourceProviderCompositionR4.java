@@ -82,7 +82,9 @@ public class BaseJpaResourceProviderCompositionR4 extends JpaResourceProviderR4<
 
 			boolean foundCompositionResource = false;
 			Bundle bundle = new Bundle().setType(Bundle.BundleType.DOCUMENT);
-			bundle.
+			for (IBaseResource resource : resourceList) {
+				bundle.addEntry(new Bundle.BundleEntryComponent().setResource((Resource) resource));
+			}
 			return bundle;
 		} finally {
 			endRequest(theServletRequest);
