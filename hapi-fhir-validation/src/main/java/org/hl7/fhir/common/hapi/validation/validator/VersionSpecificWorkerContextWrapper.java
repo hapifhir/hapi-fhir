@@ -341,7 +341,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		try {
 			return (org.hl7.fhir.r5.model.CodeSystem) myModelConverter.toCanonical(fetched);
 		} catch (FHIRException e) {
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(1992) + e);
 		}
 	}
 

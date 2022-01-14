@@ -411,11 +411,11 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
   @Read(type = OperationDefinition.class)
   public OperationDefinition readOperationDefinition(@IdParam IdType theId, RequestDetails theRequestDetails) {
     if (theId == null || theId.hasIdPart() == false) {
-      throw new ResourceNotFoundException(theId);
+      throw new ResourceNotFoundException(Msg.code(1986) + theId);
     }
     List<OperationMethodBinding> sharedDescriptions = getServerConfiguration(theRequestDetails).provideBindings().getOperationIdToBindings().get(theId.getIdPart());
     if (sharedDescriptions == null || sharedDescriptions.isEmpty()) {
-      throw new ResourceNotFoundException(theId);
+      throw new ResourceNotFoundException(Msg.code(1987) + theId);
     }
 
     OperationDefinition op = new OperationDefinition();

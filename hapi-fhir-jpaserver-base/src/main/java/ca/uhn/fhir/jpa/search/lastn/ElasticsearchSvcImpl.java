@@ -769,7 +769,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 				.collect(Collectors.toList());
 		} catch (IOException theE) {
 			// WIP do we fallback to JPA search then?
-			throw new InvalidRequestException("Unable to execute observation document query for provided IDs " + thePids, theE);
+			throw new InvalidRequestException(Msg.code(2003) + "Unable to execute observation document query for provided IDs " + thePids, theE);
 		}
 	}
 
@@ -777,7 +777,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		try {
 			return objectMapper.readValue(theSearchHit.getSourceAsString(), ObservationJson.class);
 		} catch (JsonProcessingException exp) {
-			throw new InvalidRequestException("Unable to parse the observation resource json", exp);
+			throw new InvalidRequestException(Msg.code(2004) + "Unable to parse the observation resource json", exp);
 		}
 	}
 
