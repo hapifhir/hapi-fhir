@@ -17,7 +17,7 @@ import java.util.Set;
 public final class HapiErrorCodeCheck extends AbstractCheck {
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiErrorCodeCheck.class);
 
-	private final Set<Integer> ourCodesUsed = new HashSet<>();
+	private static final Set<Integer> ourCodesUsed = new HashSet<>();
 
 	@Override
 	public int[] getDefaultTokens() {

@@ -96,7 +96,11 @@ public class PartitionRunner {
 	private List<Callable<Void>> buildCallableTasks(Slice<Long> theResourceIds, Consumer<List<Long>> partitionConsumer) {
 		List<Callable<Void>> retval = new ArrayList<>();
 
-		ourLog.info("Splitting batch job of {} entries into chunks of {}", theResourceIds.getContent().size(), myBatchSize);
+		if (myBatchSize > theResourceIds.getContent().size()) {
+			ourLog.info("Splitting batch job of {} entries into chunks of {}", theResourceIds.getContent().size(), myBatchSize);
+		} else {
+			ourLog.info("Creating batch job of {} entries", theResourceIds.getContent().size());
+		}
 		List<List<Long>> partitions = Lists.partition(theResourceIds.getContent(), myBatchSize);
 
 		for (List<Long> nextPartition : partitions) {
