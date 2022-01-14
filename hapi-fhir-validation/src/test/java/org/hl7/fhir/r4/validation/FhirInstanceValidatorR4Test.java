@@ -74,12 +74,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.mockito.MockingDetails;
-import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -87,6 +86,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.Vector;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -101,6 +101,7 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.nullable;
@@ -1567,11 +1568,33 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@AfterAll
 	public static void afterClassClearContext() {
 		myDefaultValidationSupport.flush();
 		myDefaultValidationSupport = null;
 		TestUtil.randomizeLocaleAndTimezone();
+
+		Set<String> bannedClasses = new HashSet<>();
+		bannedClasses.add("org.hl7.fhir.r5.formats.JsonParser");
+		bannedClasses.add("org.hl7.fhir.r5.formats.XmlParser");
+		bannedClasses.add("org.hl7.fhir.r5.formats.RdfParser");
+
+		try {
+			Field f = ClassLoader.class.getDeclaredField("classes");
+			f.setAccessible(true);
+			ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+			Vector<Class<?>> classes = (Vector<Class<?>>) f.get(classLoader);
+			for (Class<?> cls : classes) {
+				String nextName = cls.getName();
+				if (bannedClasses.contains(nextName)) {
+					fail("Unnecessary class loaded: " + nextName);
+				}
+			}
+		} catch (Exception e) {
+			ourLog.warn("Failure getting loaded classes", e);
+		}
+
 	}
 
 
