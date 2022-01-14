@@ -23,6 +23,15 @@ public class GraphQLProviderR4Test extends BaseResourceProviderR4Test {
 	private IIdType myPatientId0;
 
 	@Test
+	public void testFetchSchema() {
+		initTestPatients();
+
+		String uri = ourServerBase + "/Patient/" + myPatientId0.getIdPart() + "/$graphql?query=" + UrlUtil.escapeUrlParam("");
+		HttpGet httpGet = new HttpGet(uri);
+		httpGet.toString();
+	}
+
+	@Test
 	public void testInstanceSimpleRead() throws IOException {
 		initTestPatients();
 
