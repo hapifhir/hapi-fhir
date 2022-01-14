@@ -68,6 +68,7 @@ public final class HapiErrorCodeCheck extends AbstractCheck {
 			DetailAST numberNode = msgNode.getParent().getNextSibling().getFirstChild().getFirstChild();
 			if (TokenTypes.NUM_INT == numberNode.getType()) {
 				Integer code = Integer.valueOf(numberNode.getText());
+				System.out.println("Code # " + code);
 				if (!ourCodesUsed.add(code)) {
 					log(theAst.getLineNo(), "Two different exception messages call Msg.code(" +
 						code +

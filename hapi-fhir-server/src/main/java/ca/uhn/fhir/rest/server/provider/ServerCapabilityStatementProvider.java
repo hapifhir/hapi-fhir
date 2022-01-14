@@ -626,7 +626,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 	@Read(typeName = "OperationDefinition")
 	public IBaseResource readOperationDefinition(@IdParam IIdType theId, RequestDetails theRequestDetails) {
 		if (theId == null || theId.hasIdPart() == false) {
-			throw new ResourceNotFoundException(theId);
+			throw new ResourceNotFoundException(Msg.code(1977) + theId);
 		}
 		RestfulServerConfiguration configuration = getServerConfiguration();
 		Bindings bindings = configuration.provideBindings();
@@ -640,7 +640,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		if (searchBindings != null && !searchBindings.isEmpty()) {
 			return readOperationDefinitionForNamedSearch(searchBindings);
 		}
-		throw new ResourceNotFoundException(theId);
+		throw new ResourceNotFoundException(Msg.code(1978) + theId);
 	}
 
 	private IBaseResource readOperationDefinitionForNamedSearch(List<SearchMethodBinding> bindings) {
