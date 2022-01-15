@@ -117,11 +117,13 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 
 		String theUrl = ourServerBase + "/" + compId + "/$document?_format=json";
 		Bundle bundle = fetchBundle(theUrl, EncodingEnum.JSON);
+		//Ensure each entry has a URL.
+
+		assertThat(bundle.getType(), is(equalTo(Bundle.BundleType.DOCUMENT)));
 		bundle.getEntry().stream()
 				.forEach(entry -> {
-					assertThat(entry.getFullUrl(), is(equalTo("http://localhost:8000/" + entry.getResource().getId())));
+					assertThat(entry.getFullUrl(), is(equalTo(entry.getResource().getIdElement().toVersionless().toString())));
 				});
-
 		assertNull(bundle.getLink("next"));
 
 		Set<String> actual = new HashSet<>();
