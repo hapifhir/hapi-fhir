@@ -17,6 +17,7 @@ import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.base.Charsets;
+import com.google.common.reflect.ClassPath;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
@@ -1568,33 +1569,43 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	@AfterAll
-	public static void afterClassClearContext() {
-		myDefaultValidationSupport.flush();
-		myDefaultValidationSupport = null;
-		TestUtil.randomizeLocaleAndTimezone();
 
+	@AfterAll
+	public static void verifyFormatParsersNotLoaded() throws Exception {
 		Set<String> bannedClasses = new HashSet<>();
 		bannedClasses.add("org.hl7.fhir.r5.formats.JsonParser");
 		bannedClasses.add("org.hl7.fhir.r5.formats.XmlParser");
 		bannedClasses.add("org.hl7.fhir.r5.formats.RdfParser");
 
-		try {
-			Field f = ClassLoader.class.getDeclaredField("classes");
-			f.setAccessible(true);
-			ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-			Vector<Class<?>> classes = (Vector<Class<?>>) f.get(classLoader);
-			for (Class<?> cls : classes) {
-				String nextName = cls.getName();
-				if (bannedClasses.contains(nextName)) {
-					fail("Unnecessary class loaded: " + nextName);
-				}
+		Field f = ClassLoader.class.getDeclaredField("classes");
+		f.setAccessible(true);
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		Vector<Class<?>> classes = (Vector<Class<?>>) f.get(classLoader);
+		for (Class<?> cls : classes) {
+			String nextName = cls.getName();
+			if (bannedClasses.contains(nextName)) {
+				/*
+				 * If this fails, it means we're classloading the
+				 * generated XmlParser/JsonParser classes, which are
+				 * huge and unnecessary.
+				 *
+				 * To figure out why, put a breakpoint
+				 * in the static method in the class
+				 *   org.hl7.fhir.r5.formats.XmlParser
+				 * and then re-run the test.
+				 */
+				fail("Unnecessary class loaded: " + nextName);
 			}
-		} catch (Exception e) {
-			ourLog.warn("Failure getting loaded classes", e);
 		}
+	}
 
+
+	@SuppressWarnings("unchecked")
+	@AfterAll
+	public static void afterClassClearContext() throws IOException, NoSuchFieldException {
+		myDefaultValidationSupport.flush();
+		myDefaultValidationSupport = null;
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 
