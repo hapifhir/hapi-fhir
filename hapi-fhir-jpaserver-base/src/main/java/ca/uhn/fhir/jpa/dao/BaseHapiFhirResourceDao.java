@@ -350,6 +350,24 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				case ANY:
 					ForcedId forcedId = createForcedIdIfNeeded(updatedEntity, theResource.getIdElement(), true);
 					if (forcedId != null) {
+
+						/*
+						 * As of Hibernate 5.6.2, assigning the forced ID to the
+						 * resource table causes an extra update to happen, even
+						 * though the ResourceTable entity isn't actually changed
+						 * (there is a @OneToOne reference on ResourceTable to the
+						 * ForcedId table, but the actual column is on the ForcedId
+						 * table so it doesn't actually make sense to update the table
+						 * when this is set). But to work around that we clear this
+						 * here.
+						 *
+						 * If you get rid of the following line (maybe possible
+						 * in a future version of Hibernate) try running the tests
+						 * in FhirResourceDaoR4QueryCountTest
+						 * JA 20220126
+						 */
+						updatedEntity.setForcedId(null);
+
 						myForcedIdDao.save(forcedId);
 					}
 					break;

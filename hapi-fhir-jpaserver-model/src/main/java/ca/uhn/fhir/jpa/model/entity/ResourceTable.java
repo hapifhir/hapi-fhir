@@ -270,6 +270,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	private transient ResourceHistoryTable myCurrentVersionEntity;
 
 	@OneToOne(optional = true, fetch = FetchType.EAGER, cascade = {}, orphanRemoval = false, mappedBy = "myResource")
+	@OptimisticLock(excluded = true)
 	private ForcedId myForcedId;
 
 	@Transient
