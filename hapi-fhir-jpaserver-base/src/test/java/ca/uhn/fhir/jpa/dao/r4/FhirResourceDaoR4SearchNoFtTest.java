@@ -125,6 +125,7 @@ import org.hl7.fhir.r4.model.Substance;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Timing;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.junit.Ignore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -854,8 +855,8 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	/**
 	 * Per message from David Hay on Skype
 	 */
-	@Test
 	@Disabled
+	@Test
 	public void testEverythingWithLargeSet() throws Exception {
 		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
 
