@@ -135,6 +135,7 @@ import org.hl7.fhir.r4.model.UnsignedIntType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -6102,6 +6103,15 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			response.close();
 		}
 
+	}
+
+	@Test
+	public void testDeleteNonExistentResourceReturns200() throws IOException {
+		HttpDelete delete = new HttpDelete(ourServerBase + "/Patient/A");
+
+		try (CloseableHttpResponse response = ourHttpClient.execute(delete)) {
+			Assertions.assertEquals(200, response.getStatusLine().getStatusCode());
+		}
 	}
 
 	@Test
