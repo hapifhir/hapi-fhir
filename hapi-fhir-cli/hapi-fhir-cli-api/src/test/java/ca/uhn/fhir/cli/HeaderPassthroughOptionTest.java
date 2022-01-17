@@ -54,8 +54,6 @@ public class HeaderPassthroughOptionTest {
 	private final UploadTerminologyCommand testedCommand =
 		new RequestCapturingUploadTerminologyCommand(myCapturingInterceptor);
 
-	private Object locker = new Object();
-
 	@Mock
 	protected ITermLoaderSvc myTermLoaderSvc;
 
@@ -71,7 +69,7 @@ public class HeaderPassthroughOptionTest {
 		myServer.setHandler(proxyHandler);
 		JettyUtil.startServer(myServer);
 		myPort = JettyUtil.getPortForStartedServer(myServer);
-//		writeConceptAndHierarchyFiles();
+		writeConceptAndHierarchyFiles();
 		when(myTermLoaderSvc.loadCustom(eq("http://foo"), anyList(), any()))
 			.thenReturn(new UploadStatistics(100, new IdType("CodeSystem/101")));
 	}
