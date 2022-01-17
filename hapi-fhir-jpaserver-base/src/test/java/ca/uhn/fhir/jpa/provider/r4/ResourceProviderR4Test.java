@@ -6115,6 +6115,31 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void testDeleteSameResourceTwice() throws IOException {
+		String id = "A";
+
+		Patient p = new Patient();
+		p.setId(id);
+		String encoded = myFhirCtx.newJsonParser().encodeResourceToString(p);
+
+		HttpPut put = new HttpPut(ourServerBase + "/Patient/" + id);
+		put.setEntity(new StringEntity(encoded, ContentType.create("application/fhir+json", "UTF-8")));
+		try (CloseableHttpResponse response = ourHttpClient.execute(put)) {
+			assertEquals(201, response.getStatusLine().getStatusCode());
+		}
+
+		HttpDelete delete = new HttpDelete(ourServerBase + "/Patient/" + id);
+
+		for (int i = 0; i < 2; i++) {
+			// multiple deletes of the same resource
+			// should always succeed
+			try (CloseableHttpResponse response = ourHttpClient.execute(delete)) {
+				Assertions.assertEquals(200, response.getStatusLine().getStatusCode());
+			}
+		}
+	}
+
+	@Test
 	public void testUpdateWithClientSuppliedIdWhichDoesntExist() {
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testUpdateWithClientSuppliedIdWhichDoesntExistrpr4");
