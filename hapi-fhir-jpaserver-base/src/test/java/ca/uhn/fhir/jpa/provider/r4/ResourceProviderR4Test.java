@@ -6107,7 +6107,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testDeleteNonExistentResourceReturns200() throws IOException {
-		HttpDelete delete = new HttpDelete(ourServerBase + "/Patient/A");
+		HttpDelete delete = new HttpDelete(ourServerBase + "/Patient/someIdHereThatIsUnique");
 
 		try (CloseableHttpResponse response = ourHttpClient.execute(delete)) {
 			Assertions.assertEquals(200, response.getStatusLine().getStatusCode());
@@ -6116,7 +6116,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testDeleteSameResourceTwice() throws IOException {
-		String id = "A";
+		String id = "mySecondUniqueId";
 
 		Patient p = new Patient();
 		p.setId(id);
