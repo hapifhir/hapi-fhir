@@ -2766,6 +2766,7 @@
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<modules>
+                <module>hapi-fhir-checkstyle</module>
 				<module>hapi-fhir-bom</module>
 				<module>hapi-deployable-pom</module>
 				<module>hapi-fhir-base</module>
