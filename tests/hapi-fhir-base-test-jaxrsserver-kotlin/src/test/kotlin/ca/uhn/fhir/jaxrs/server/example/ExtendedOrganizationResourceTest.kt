@@ -13,7 +13,7 @@ import org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import jakarta.ws.rs.core.Response
+import javax.ws.rs.core.Response
 
 class ExtendedOrganizationResourceTest {
 
