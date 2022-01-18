@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Device;
 import org.hl7.fhir.r4.model.IdType;
@@ -28,6 +29,7 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class ChainingR4SearchTest extends BaseJpaR4Test {
@@ -46,7 +48,6 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
 
-		myModelConfig.setIndexOnContainedResources(false);
 		myModelConfig.setIndexOnContainedResources(new ModelConfig().isIndexOnContainedResources());
 		myModelConfig.setIndexOnContainedResourcesRecursively(new ModelConfig().isIndexOnContainedResourcesRecursively());
 	}
@@ -57,12 +58,11 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		myDaoConfig.setAllowMultipleDelete(true);
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
-		myModelConfig.setIndexOnContainedResources(true);
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 	}
 
 	@Test
-	public void testShouldResolveATwoLinkChainWithStandAloneResources() throws Exception {
+	public void testShouldResolveATwoLinkChainWithStandAloneResourcesWithoutContainedResourceIndexing() throws Exception {
 
 		// setup
 		IIdType oid1;
@@ -78,6 +78,43 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			obs.getSubject().setReference(p.getId());
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			myObservationDao.create(new Observation(), mySrd);
+		}
+
+		String url = "/Observation?subject.name=Smith";
+
+		// execute
+		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+
+		// validate
+		assertEquals(1L, oids.size());
+		assertThat(oids, contains(oid1.getIdPart()));
+	}
+
+	@Test
+	public void testShouldResolveATwoLinkChainWithStandAloneResources() throws Exception {
+
+		// setup
+		myModelConfig.setIndexOnContainedResources(true);
+
+		IIdType oid1;
+
+		{
+			Patient p = new Patient();
+			p.setId(IdType.newRandomUuid());
+			p.addName().setFamily("Smith").addGiven("John");
+			myPatientDao.create(p, mySrd);
+
+			Observation obs = new Observation();
+			obs.getCode().setText("Observation 1");
+			obs.getSubject().setReference(p.getId());
+
+			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			myObservationDao.create(new Observation(), mySrd);
 		}
 
 		String url = "/Observation?subject.name=Smith";
@@ -93,6 +130,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	@Test
 	public void testShouldResolveATwoLinkChainWithAContainedResource() throws Exception {
 		// setup
+		myModelConfig.setIndexOnContainedResources(true);
+
 		IIdType oid1;
 
 		{
@@ -107,6 +146,11 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			obs.getSubject().setReference("#pat");
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			myCaptureQueriesListener.clear();
+			myObservationDao.create(new Observation(), mySrd);
+			myCaptureQueriesListener.logInsertQueries();
 		}
 
 		String url = "/Observation?subject.name=Smith";
@@ -120,11 +164,44 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testShouldNotResolveATwoLinkChainWithAContainedResourceWhenContainedResourceIndexingIsTurnedOff() throws Exception {
+		// setup
+		IIdType oid1;
+
+		{
+			Patient p = new Patient();
+			p.setId("pat");
+			p.addName().setFamily("Smith").addGiven("John");
+
+			Observation obs = new Observation();
+			obs.getContained().add(p);
+			obs.getCode().setText("Observation 1");
+			obs.setValue(new StringType("Test"));
+			obs.getSubject().setReference("#pat");
+
+			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			myObservationDao.create(new Observation(), mySrd);
+		}
+
+		String url = "/Observation?subject.name=Smith";
+
+		// execute
+		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+
+		// validate
+		assertEquals(0L, oids.size());
+	}
+
+	@Test
 	@Disabled
 	public void testShouldResolveATwoLinkChainWithQualifiersWithAContainedResource() throws Exception {
 		// TODO: This test fails because of a known limitation in qualified searches over contained resources.
 		//       Type information for intermediate resources in the chain is not being retained in the indexes.
 		// setup
+		myModelConfig.setIndexOnContainedResources(true);
+
 		IIdType oid1;
 
 		{
@@ -151,6 +228,9 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			obs2.getSubject().setReference("#loc");
 
 			myObservationDao.create(obs2, mySrd);
+
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			myObservationDao.create(new Observation(), mySrd);
 		}
 
 		String url = "/Observation?subject:Patient.name=Smith";
@@ -168,6 +248,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		// Adding support for this case in SMILE-3151
 
 		// setup
+		myModelConfig.setIndexOnContainedResources(true);
+
 		IIdType oid1;
 		IIdType orgId;
 
@@ -188,6 +270,9 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			obs.getSubject().setReference("#pat");
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			myObservationDao.create(new Observation(), mySrd);
 		}
 
 		String url = "/Observation?subject.organization=" + orgId.getValueAsString();
@@ -201,7 +286,49 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testShouldResolveAThreeLinkChainWhereAllResourcesStandAlone() throws Exception {
+	public void testShouldResolveATwoLinkChainToAStandAloneReference() throws Exception {
+		// Adding support for this case in SMILE-3151
+
+		// setup
+		myModelConfig.setIndexOnContainedResources(true);
+
+		IIdType oid1;
+		IIdType orgId;
+
+		{
+			Organization org = new Organization();
+			org.setId(IdType.newRandomUuid());
+			org.setName("HealthCo");
+			orgId = myOrganizationDao.create(org, mySrd).getId();
+
+			Patient p = new Patient();
+			p.addName().setFamily("Smith").addGiven("John");
+			p.getManagingOrganization().setReference(org.getId());
+			myPatientDao.create(p, mySrd);
+
+			Observation obs = new Observation();
+			obs.getContained().add(p);
+			obs.getCode().setText("Observation 1");
+			obs.getSubject().setReference(p.getId());
+
+			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			myObservationDao.create(new Observation(), mySrd);
+		}
+
+		String url = "/Observation?subject.organization=" + orgId.getValueAsString();
+
+		// execute
+		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+
+		// validate
+		assertEquals(1L, oids.size());
+		assertThat(oids, contains(oid1.getIdPart()));
+	}
+
+	@Test
+	public void testShouldResolveAThreeLinkChainWhereAllResourcesStandAloneWithoutContainedResourceIndexing() throws Exception {
 
 		// setup
 		IIdType oid1;
@@ -223,6 +350,77 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			obs.getSubject().setReference(p.getId());
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			Organization dummyOrg = new Organization();
+			dummyOrg.setId(IdType.newRandomUuid());
+			dummyOrg.setName("Dummy");
+			myOrganizationDao.create(dummyOrg, mySrd);
+
+			Patient dummyPatient = new Patient();
+			dummyPatient.setId(IdType.newRandomUuid());
+			dummyPatient.addName().setFamily("Jones").addGiven("Jane");
+			dummyPatient.getManagingOrganization().setReference(dummyOrg.getId());
+			myPatientDao.create(dummyPatient, mySrd);
+
+			Observation dummyObs = new Observation();
+			dummyObs.getCode().setText("Observation 2");
+			dummyObs.getSubject().setReference(dummyPatient.getId());
+			myObservationDao.create(dummyObs, mySrd);
+		}
+
+		String url = "/Observation?subject.organization.name=HealthCo";
+
+		// execute
+		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+
+		// validate
+		assertEquals(1L, oids.size());
+		assertThat(oids, contains(oid1.getIdPart()));
+	}
+
+	@Test
+	public void testShouldResolveAThreeLinkChainWhereAllResourcesStandAlone() throws Exception {
+
+		// setup
+		myModelConfig.setIndexOnContainedResources(true);
+
+		IIdType oid1;
+
+		{
+			Organization org = new Organization();
+			org.setId(IdType.newRandomUuid());
+			org.setName("HealthCo");
+			myOrganizationDao.create(org, mySrd);
+
+			Patient p = new Patient();
+			p.setId(IdType.newRandomUuid());
+			p.addName().setFamily("Smith").addGiven("John");
+			p.getManagingOrganization().setReference(org.getId());
+			myPatientDao.create(p, mySrd);
+
+			Observation obs = new Observation();
+			obs.getCode().setText("Observation 1");
+			obs.getSubject().setReference(p.getId());
+
+			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			Organization dummyOrg = new Organization();
+			dummyOrg.setId(IdType.newRandomUuid());
+			dummyOrg.setName("Dummy");
+			myOrganizationDao.create(dummyOrg, mySrd);
+
+			Patient dummyPatient = new Patient();
+			dummyPatient.setId(IdType.newRandomUuid());
+			dummyPatient.addName().setFamily("Jones").addGiven("Jane");
+			dummyPatient.getManagingOrganization().setReference(dummyOrg.getId());
+			myPatientDao.create(dummyPatient, mySrd);
+
+			Observation dummyObs = new Observation();
+			dummyObs.getCode().setText("Observation 2");
+			dummyObs.getSubject().setReference(dummyPatient.getId());
+			myObservationDao.create(dummyObs, mySrd);
 		}
 
 		String url = "/Observation?subject.organization.name=HealthCo";
@@ -240,6 +438,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		// This is the case that is most relevant to SMILE-2899
 
 		// setup
+		myModelConfig.setIndexOnContainedResources(true);
+
 		IIdType oid1;
 
 		{
@@ -259,6 +459,9 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			obs.getSubject().setReference(p.getId());
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			myObservationDao.create(new Observation(), mySrd);
 		}
 
 		String url = "/Observation?subject.organization.name=HealthCo";
@@ -276,6 +479,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		// Adding support for this case in SMILE-3151
 
 		// setup
+		myModelConfig.setIndexOnContainedResources(true);
+
 		IIdType oid1;
 
 		{
@@ -295,6 +500,9 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			obs.getSubject().setReference("#pat");
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			myObservationDao.create(new Observation(), mySrd);
 		}
 
 		String url = "/Observation?subject.organization.name=HealthCo";
@@ -308,9 +516,49 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testShouldNotResolveAThreeLinkChainWithAllContainedResourcesWhenRecursiveContainedIndexesAreDisabled() throws Exception {
+
+		// setup
+		myModelConfig.setIndexOnContainedResources(true);
+
+		IIdType oid1;
+
+		{
+			Organization org = new Organization();
+			org.setId("org");
+			org.setName("HealthCo");
+
+			Patient p = new Patient();
+			p.setId("pat");
+			p.addName().setFamily("Smith").addGiven("John");
+			p.getManagingOrganization().setReference("#org");
+
+			Observation obs = new Observation();
+			obs.getContained().add(p);
+			obs.getContained().add(org);
+			obs.getCode().setText("Observation 1");
+			obs.getSubject().setReference("#pat");
+
+			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			myObservationDao.create(new Observation(), mySrd);
+		}
+
+		String url = "/Observation?subject.organization.name=HealthCo";
+
+		// execute
+		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+
+		// validate
+		assertEquals(0L, oids.size());
+	}
+
+	@Test
 	public void testShouldResolveAThreeLinkChainWithAllContainedResources() throws Exception {
 
 		// setup
+		myModelConfig.setIndexOnContainedResources(true);
 		myModelConfig.setIndexOnContainedResourcesRecursively(true);
 
 		IIdType oid1;
@@ -332,6 +580,9 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			obs.getSubject().setReference("#pat");
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			myObservationDao.create(new Observation(), mySrd);
 		}
 
 		String url = "/Observation?subject.organization.name=HealthCo";
@@ -350,6 +601,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	public void testShouldResolveAThreeLinkChainWithQualifiersWhereAllResourcesStandAlone() throws Exception {
 
 		// setup
+		myModelConfig.setIndexOnContainedResources(true);
+
 		IIdType oid1;
 
 		{
@@ -379,6 +632,9 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 			oid1 = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
 			myObservationDao.create(obs2, mySrd);
+
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			myObservationDao.create(new Observation(), mySrd);
 		}
 
 		String url = "/Observation?subject:Patient.organization:Organization.name=HealthCo";
@@ -396,6 +652,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		// This is the case that is most relevant to SMILE-2899
 
 		// setup
+		myModelConfig.setIndexOnContainedResources(true);
+
 		IIdType oid1;
 
 		{
@@ -430,6 +688,9 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			obs2.getCode().setText("Observation 2");
 			obs2.getSubject().setReference(d.getId());
 			myObservationDao.create(obs2, mySrd);
+
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			myObservationDao.create(new Observation(), mySrd);
 		}
 
 		String url = "/Observation?subject:Patient.organization:Organization.name=HealthCo";
@@ -447,6 +708,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		// Adding support for this case in SMILE-3151
 
 		// setup
+		myModelConfig.setIndexOnContainedResources(true);
+
 		IIdType oid1;
 
 		{
@@ -477,6 +740,9 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			obs2.getSubject().setReference("#dev");
 
 			myObservationDao.create(obs2, mySrd);
+
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			myObservationDao.create(new Observation(), mySrd);
 		}
 
 		String url = "/Observation?subject:Patient.organization:Organization.name=HealthCo";
@@ -500,6 +766,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		// Adding support for this case in SMILE-3151
 
 		// setup
+		myModelConfig.setIndexOnContainedResources(true);
+
 		IIdType oid1;
 
 		{
@@ -530,6 +798,9 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			obs2.getSubject().setReference("#loc");
 
 			myObservationDao.create(obs2, mySrd);
+
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			myObservationDao.create(new Observation(), mySrd);
 		}
 
 		String url = "/Observation?subject:Patient.organization:Organization.name=HealthCo";
@@ -551,6 +822,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		//       Type information for intermediate resources in the chain is not being retained in the indexes.
 
 		// setup
+		myModelConfig.setIndexOnContainedResources(true);
 		myModelConfig.setIndexOnContainedResourcesRecursively(true);
 
 		IIdType oid1;
@@ -588,6 +860,9 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			obs2.getSubject().setReference("#dev");
 
 			myObservationDao.create(obs2, mySrd);
+
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			myObservationDao.create(new Observation(), mySrd);
 		}
 
 		String url = "/Observation?subject:Patient.organization:Organization.name=HealthCo";
@@ -606,6 +881,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	public void testShouldResolveAFourLinkChainWhereAllResourcesStandAlone() throws Exception {
 
 		// setup
+		myModelConfig.setIndexOnContainedResources(true);
+
 		IIdType oid1;
 
 		{
@@ -630,6 +907,9 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			obs.getSubject().setReference(p.getId());
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			myObservationDao.create(new Observation(), mySrd);
 		}
 
 		String url = "/Observation?subject.organization.partof.name=HealthCo";
@@ -646,6 +926,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	public void testShouldResolveAFourLinkChainWhereTheLastReferenceIsContained() throws Exception {
 
 		// setup
+		myModelConfig.setIndexOnContainedResources(true);
+
 		IIdType oid1;
 
 		{
@@ -670,6 +952,9 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			obs.getSubject().setReference(p.getId());
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			myObservationDao.create(new Observation(), mySrd);
 		}
 
 		String url = "/Observation?subject.organization.partof.name=HealthCo";
@@ -686,6 +971,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	public void testShouldResolveAFourLinkChainWhereTheLastTwoReferencesAreContained() throws Exception {
 
 		// setup
+		myModelConfig.setIndexOnContainedResources(true);
 		myModelConfig.setIndexOnContainedResourcesRecursively(true);
 		IIdType oid1;
 
@@ -711,6 +997,9 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			obs.getSubject().setReference(p.getId());
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			myObservationDao.create(new Observation(), mySrd);
 		}
 
 		String url = "/Observation?subject.organization.partof.name=HealthCo";
@@ -727,6 +1016,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	public void testShouldResolveAFourLinkChainWithAContainedResourceInTheMiddle() throws Exception {
 
 		// setup
+		myModelConfig.setIndexOnContainedResources(true);
+
 		IIdType oid1;
 
 		{
@@ -755,6 +1046,9 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
 			myCaptureQueriesListener.logInsertQueries();
+
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			myObservationDao.create(new Observation(), mySrd);
 		}
 
 		String url = "/Observation?subject.organization.partof.name=HealthCo";
@@ -773,6 +1067,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	public void testShouldResolveAFourLinkChainWhereTheFirstTwoReferencesAreContained() throws Exception {
 
 		// setup
+		myModelConfig.setIndexOnContainedResources(true);
 		myModelConfig.setIndexOnContainedResourcesRecursively(true);
 		IIdType oid1;
 
@@ -799,6 +1094,9 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			obs.getSubject().setReference("#pat");
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			myObservationDao.create(new Observation(), mySrd);
 		}
 
 		String url = "/Observation?subject.organization.partof.name=HealthCo";
@@ -815,6 +1113,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	public void testShouldResolveAFourLinkChainWhereAllReferencesAreContained() throws Exception {
 
 		// setup
+		myModelConfig.setIndexOnContainedResources(true);
 		myModelConfig.setIndexOnContainedResourcesRecursively(true);
 		IIdType oid1;
 
@@ -840,6 +1139,9 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			obs.getSubject().setReference("#pat");
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			myObservationDao.create(new Observation(), mySrd);
 		}
 
 		String url = "/Observation?subject.organization.partof.name=HealthCo";
@@ -850,6 +1152,24 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		// validate
 		assertEquals(1L, oids.size());
 		assertThat(oids, contains(oid1.getIdPart()));
+	}
+
+	@Test
+	public void testShouldThrowAnExceptionForAFiveLinkChain() throws Exception {
+
+		// setup
+		myModelConfig.setIndexOnContainedResources(true);
+		myModelConfig.setIndexOnContainedResourcesRecursively(true);
+
+		String url = "/Observation?subject.organization.partof.partof.name=HealthCo";
+
+		try {
+			// execute
+			searchAndReturnUnqualifiedVersionlessIdValues(url);
+			fail("Expected an exception to be thrown");
+		} catch (InvalidRequestException e) {
+			assertEquals("The search chain subject.organization.partof.partof.name is too long. Only chains up to three references are supported.", e.getMessage());
+		}
 	}
 
 	private List<String> searchAndReturnUnqualifiedVersionlessIdValues(String theUrl) throws IOException {
