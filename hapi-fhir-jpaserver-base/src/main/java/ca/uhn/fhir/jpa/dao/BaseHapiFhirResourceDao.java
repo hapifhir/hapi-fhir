@@ -367,6 +367,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 						 * JA 20220126
 						 */
 						updatedEntity.setForcedId(null);
+						updatedEntity.setTransientForcedId(forcedId.getForcedId());
 
 						myForcedIdDao.save(forcedId);
 					}
