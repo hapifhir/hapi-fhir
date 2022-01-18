@@ -1164,7 +1164,6 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	 */
 	@Test
 	public void testInstanceRuleOkForResourceWithNoId() {
-
 		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -1184,8 +1183,11 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 		Patient p = new Patient();
 		p.setActive(true);
-		p.setId(IdType.newRandomUuid());
-		request.addEntry().setResource(p).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl(p.getId());
+		p.setId("123");
+		request.addEntry().setResource(p).getRequest().setMethod(Bundle.HTTPVerb.POST)
+			.setUrl(
+				"Patient/"+
+					p.getId());
 
 		Observation o = new Observation();
 		o.getCode().setText("Some Observation");

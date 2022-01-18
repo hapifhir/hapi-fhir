@@ -98,7 +98,7 @@ public class JsonLikeParserTest {
 		assertEquals("x1", extension.get("url"), "Expecting '/extension[]/url' = 'x1'; found '"+extension.get("url")+"'");
 	
 	}
-	
+
 	/**
 	 * Repeat the "View" tests with custom JSON-Like structure
 	 */
