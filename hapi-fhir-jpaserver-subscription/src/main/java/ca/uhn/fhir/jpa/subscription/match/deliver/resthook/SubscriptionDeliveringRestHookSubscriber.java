@@ -95,7 +95,6 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 		IClientExecutable<?, ?> operation;
 
 		if (isNotBlank(theSubscription.getPayloadSearchCriteria())) {
-			// TODO SL fix this operation so it sends the correct requests to the REST endpoint
 			operation = createDeliveryRequestTransaction(theSubscription, theClient, thePayloadResource);
 		} else if (thePayloadType != null) {
 			operation = createDeliveryRequestNormal(theMsg, theClient, thePayloadResource);
