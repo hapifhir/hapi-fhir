@@ -28,6 +28,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
@@ -40,6 +41,7 @@ import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import com.google.common.collect.Sets;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
@@ -74,7 +76,8 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
 	@Autowired
 	private ITermReadSvc myTerminologySvc;
-
+	@Autowired
+	private ModelConfig myModelConfig;
 
 	/**
 	 * Constructor
@@ -173,6 +176,9 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 				validateHaveSystemAndCodeForToken(paramName, code, system);
 				codes.addAll(myTerminologySvc.findCodesBelow(system, code));
 			} else if (modifier == TokenParamModifier.OF_TYPE) {
+				if (!myModelConfig.isIndexIdentifierOfType()) {
+					throw new MethodNotAllowedException("The :of-type modifier is not enabled on this server");
+				}
 				paramName = paramName + Constants.PARAMQUALIFIER_TOKEN_OF_TYPE;
 				codes.add(new FhirVersionIndependentConcept(system, code));
 			} else {

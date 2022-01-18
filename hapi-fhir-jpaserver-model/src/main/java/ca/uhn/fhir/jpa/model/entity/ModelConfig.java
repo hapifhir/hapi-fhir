@@ -96,7 +96,7 @@ public class ModelConfig {
 	private boolean myIndexOnContainedResourcesRecursively = false;
 	private boolean myAllowMdmExpansion = false;
 	private boolean myAutoSupportDefaultSearchParams = true;
-	private boolean myIndexIdentifierOfType = true;
+	private boolean myIndexIdentifierOfType = false;
 
 	/**
 	 * Constructor

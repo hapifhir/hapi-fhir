@@ -5139,6 +5139,8 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	@Test
 	public void testTokenOfType() {
+		myModelConfig.setIndexIdentifierOfType(true);
+
 		Patient patient = new Patient();
 		patient
 			.addIdentifier()
@@ -5175,6 +5177,20 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	}
 
+	@Test
+	public void testTokenOfType_Disabled() {
+		try {
+			TokenParam param = new TokenParam()
+				.setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
+				.setValue("MR|bar1")
+				.setModifier(TokenParamModifier.OF_TYPE);
+			SearchParameterMap map = SearchParameterMap.newSynchronous("identifier", param);
+			myPatientDao.search(map, mySrd);
+			fail();
+		} catch (MethodNotAllowedException e) {
+			assertEquals("The :of-type modifier is not enabled on this server", e.getMessage());
+		}
+	}
 
 	@Test
 	public void testTokenTextDisabled_Global() {

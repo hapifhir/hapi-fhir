@@ -1,0 +1,7 @@
+---
+type: remove
+issue: 1892
+title: "In the JPA server, searching using the token `:text` modifier will no longer index and match
+  values in `Identifier.type.text`. Previously we indexed this element, but the FHIR specification does not
+  actually show this field as being indexed for this modifier, and intuitively it doesn't make sense to
+  do so."
