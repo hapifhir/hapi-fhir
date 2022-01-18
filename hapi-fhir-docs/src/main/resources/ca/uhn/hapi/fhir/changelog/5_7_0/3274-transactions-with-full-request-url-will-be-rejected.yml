@@ -1,0 +1,5 @@
+---
+issue: 3274
+type: fix
+title: "Transactions with entries that have request.url values that are fully
+      qualified urls will now be rejected."
