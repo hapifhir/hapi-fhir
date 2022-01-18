@@ -193,9 +193,11 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
-		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 		myModelConfig.setAutoSupportDefaultSearchParams(true);
+		myModelConfig.setIndexIdentifierOfType(new ModelConfig().isIndexIdentifierOfType());
+
 		mySearchParamRegistry.resetForUnitTest();
 	}
 
@@ -5134,6 +5136,45 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		// We expect a new one because we don't cache the search URL for very long search URLs
 		runInTransaction(() -> assertEquals(2, mySearchEntityDao.count()));
 	}
+
+	@Test
+	public void testTokenOfType() {
+		Patient patient = new Patient();
+		patient
+			.addIdentifier()
+			.setSystem("http://foo1")
+			.setValue("bar1")
+			.getType()
+			.addCoding()
+			.setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
+			.setCode("MR");
+		IIdType id1 = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+
+		// Shouldn't match
+		patient = new Patient();
+		patient
+			.addIdentifier()
+			.setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
+			.setValue("MR|bar1");
+		myPatientDao.create(patient);
+
+		TokenParam param = new TokenParam()
+			.setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
+			.setValue("MR|bar1")
+			.setModifier(TokenParamModifier.OF_TYPE);
+		SearchParameterMap map = SearchParameterMap.newSynchronous("identifier", param);
+
+		logAllTokenIndexes();
+
+		myCaptureQueriesListener.clear();
+		IBundleProvider outcome = myPatientDao.search(map, mySrd);
+		List<IIdType> ids = toUnqualifiedVersionlessIds(outcome);
+		myCaptureQueriesListener.logSelectQueries();
+
+		assertThat(ids, contains(id1));
+
+	}
+
 
 	@Test
 	public void testTokenTextDisabled_Global() {

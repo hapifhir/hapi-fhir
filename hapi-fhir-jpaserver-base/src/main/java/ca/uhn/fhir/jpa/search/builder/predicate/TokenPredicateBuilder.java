@@ -35,6 +35,7 @@ import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
@@ -129,7 +130,7 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 			if (nextParameter instanceof TokenParam) {
 				TokenParam id = (TokenParam) nextParameter;
 				system = id.getSystem();
-				code = (id.getValue());
+				code = id.getValue();
 				modifier = id.getModifier();
 			} else if (nextParameter instanceof BaseIdentifierDt) {
 				BaseIdentifierDt id = (BaseIdentifierDt) nextParameter;
@@ -171,6 +172,9 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 				system = determineSystemIfMissing(theSearchParam, code, system);
 				validateHaveSystemAndCodeForToken(paramName, code, system);
 				codes.addAll(myTerminologySvc.findCodesBelow(system, code));
+			} else if (modifier == TokenParamModifier.OF_TYPE) {
+				paramName = paramName + Constants.PARAMQUALIFIER_TOKEN_OF_TYPE;
+				codes.add(new FhirVersionIndependentConcept(system, code));
 			} else {
 				if (modifier == TokenParamModifier.NOT && operation == null) {
 					operation = SearchFilterParser.CompareOperation.ne;

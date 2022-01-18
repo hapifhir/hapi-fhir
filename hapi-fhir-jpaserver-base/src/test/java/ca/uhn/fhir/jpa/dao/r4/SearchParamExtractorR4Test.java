@@ -394,6 +394,49 @@ public class SearchParamExtractorR4Test {
 		assertEquals(2, list.size());
 	}
 
+	@Test
+	public void testExtractIdentifierOfType() {
+
+		ModelConfig modelConfig = new ModelConfig();
+		modelConfig.setIndexIdentifierOfType(true);
+
+		Patient patient = new Patient();
+		patient
+			.addIdentifier()
+			.setSystem("http://foo1")
+			.setValue("bar1")
+			.getType()
+			.addCoding()
+			.setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
+			.setCode("MR");
+		patient
+			.addIdentifier()
+			.setSystem("http://foo2")
+			.setValue("bar2")
+			.getType()
+			.addCoding()
+			.setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
+			.setCode("MR");
+
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(modelConfig, new PartitionSettings(), ourCtx, mySearchParamRegistry);
+		List<ResourceIndexedSearchParamToken> list = extractor
+			.extractSearchParamTokens(patient)
+			.stream()
+			.map(t->(ResourceIndexedSearchParamToken)t)
+			.collect(Collectors.toList());
+		list.forEach(t->t.calculateHashes());
+		ourLog.info("Found tokens:\n * {}", list.stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+
+		assertThat(list, containsInAnyOrder(
+			new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "deceased", null, "false"),
+			new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "identifier", "http://foo1", "bar1"),
+			new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "identifier", "http://foo2", "bar2"),
+			new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "identifier:of-type", "http://terminology.hl7.org/CodeSystem/v2-0203", "MR|bar1"),
+			new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "identifier:of-type", "http://terminology.hl7.org/CodeSystem/v2-0203", "MR|bar2")
+		));
+
+	}
+
 	private static class MySearchParamRegistry implements ISearchParamRegistry, ISearchParamRegistryController {
 
 
