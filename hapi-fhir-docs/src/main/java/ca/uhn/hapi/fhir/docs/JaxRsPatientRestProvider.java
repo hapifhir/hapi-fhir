@@ -35,8 +35,8 @@ import org.hl7.fhir.r4.model.StringType;
 import javax.ejb.Local;
 import javax.ejb.Stateless;
 import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 /**
  * A demo JaxRs Patient Rest Provider

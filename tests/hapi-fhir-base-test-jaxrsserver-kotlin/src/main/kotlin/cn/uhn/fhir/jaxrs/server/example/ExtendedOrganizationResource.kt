@@ -11,7 +11,7 @@ import ca.uhn.fhir.rest.param.StringParam
 import javax.ejb.Stateless
 import javax.ws.rs.Path
 import javax.ws.rs.Produces
-import javax.ws.rs.core.MediaType
+import jakarta.ws.rs.core.MediaType
 
 @Path("Organization")
 @Stateless
