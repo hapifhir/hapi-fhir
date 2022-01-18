@@ -776,7 +776,7 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 			.setResource(updatedValueSet)
 			.getRequest()
 			.setMethod(Bundle.HTTPVerb.PUT)
-			.setUrl(url);
+			.setUrl(myExtensionalVsId.getValueAsString());
 		ourLog.info("Transaction Bundle:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		myClient.transaction().withBundle(bundle).execute();
 
