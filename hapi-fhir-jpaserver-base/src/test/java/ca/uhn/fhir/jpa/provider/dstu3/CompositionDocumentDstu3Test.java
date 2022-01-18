@@ -32,8 +32,10 @@ import java.util.List;
 import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test {
@@ -117,6 +119,12 @@ public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test 
 		String theUrl = ourServerBase + "/" + compId + "/$document?_format=json";
 		Bundle bundle = fetchBundle(theUrl, EncodingEnum.JSON);
 
+		bundle.getEntry().stream()
+			.forEach(entry -> {
+				assertThat(entry.getFullUrl(), is(equalTo(entry.getResource().getIdElement().toVersionless().toString())));
+			});
+
+		assertThat(bundle.getType(), is(equalTo(Bundle.BundleType.DOCUMENT)));
 		assertNull(bundle.getLink("next"));
 
 		Set<String> actual = new HashSet<>();
