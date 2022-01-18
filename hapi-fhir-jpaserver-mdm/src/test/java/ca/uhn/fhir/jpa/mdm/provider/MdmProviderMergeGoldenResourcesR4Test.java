@@ -170,28 +170,28 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 			myMdmProvider.mergeGoldenResources(new StringType("Patient/abc"), myToGoldenPatientId, null, myRequestDetails);
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertEquals(Msg.code(971) + "Resource Patient/abc is not known", e.getMessage());
+			assertEquals(Msg.code(2001) + "Resource Patient/abc is not known", e.getMessage());
 		}
 
 		try {
 			myMdmProvider.mergeGoldenResources(new StringType("Patient/abc"), myToGoldenPatientId, null, myRequestDetails);
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertEquals(Msg.code(971) + "Resource Patient/abc is not known", e.getMessage());
+			assertEquals(Msg.code(2001) + "Resource Patient/abc is not known", e.getMessage());
 		}
 
 		try {
 			myMdmProvider.mergeGoldenResources(new StringType("Organization/abc"), myToGoldenPatientId, null, myRequestDetails);
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertEquals(Msg.code(971) + "Resource Organization/abc is not known", e.getMessage());
+			assertEquals(Msg.code(2001) + "Resource Organization/abc is not known", e.getMessage());
 		}
 
 		try {
 			myMdmProvider.mergeGoldenResources(myFromGoldenPatientId, new StringType("Patient/abc"), null, myRequestDetails);
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertEquals(Msg.code(971) + "Resource Patient/abc is not known", e.getMessage());
+			assertEquals(Msg.code(2001) + "Resource Patient/abc is not known", e.getMessage());
 		}
 	}
 }

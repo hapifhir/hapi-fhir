@@ -503,7 +503,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 			assertThat(responseString, not(containsString("\"name\":\"ORG_NAME\"")));
 
 			OperationOutcome oo = myFhirCtx.newJsonParser().parseResource(OperationOutcome.class, responseString);
-			assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesPattern(Msg.code(1147) + "Unable to execute GraphQL Expression: HTTP 404 " + Msg.code(971) + "Resource Patient/[0-9]+ is not known"));
+			assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesPattern(Msg.code(1147) + "Unable to execute GraphQL Expression: HTTP 404 " + Msg.code(1995) + "Resource Patient/[0-9]+ is not known"));
 		}
 
 	}
@@ -542,7 +542,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 			assertThat(responseString, not(containsString("\"name\":\"ORG_NAME\"")));
 
 			OperationOutcome oo = myFhirCtx.newJsonParser().parseResource(OperationOutcome.class, responseString);
-			assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesPattern(Msg.code(1147) + "Unable to execute GraphQL Expression: HTTP 404 " + Msg.code(971) + "Resource Organization/[0-9]+ is not known"));
+			assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesPattern(Msg.code(1147) + "Unable to execute GraphQL Expression: HTTP 404 " + Msg.code(1995) + "Resource Organization/[0-9]+ is not known"));
 		}
 
 	}

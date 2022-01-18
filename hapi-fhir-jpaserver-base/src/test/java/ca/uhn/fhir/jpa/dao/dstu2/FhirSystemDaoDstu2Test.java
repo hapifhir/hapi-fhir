@@ -178,7 +178,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 		// Bundle.entry[2] is failed read response
 		assertEquals(OperationOutcome.class, resp.getEntry().get(1).getResource().getClass());
 		assertEquals(IssueSeverityEnum.ERROR, ((OperationOutcome) resp.getEntry().get(1).getResource()).getIssue().get(0).getSeverityElement().getValueAsEnum());
-		assertEquals(Msg.code(971) + "Resource Patient/THIS_ID_DOESNT_EXIST is not known", ((OperationOutcome) resp.getEntry().get(1).getResource()).getIssue().get(0).getDiagnostics());
+		assertEquals(Msg.code(2001) + "Resource Patient/THIS_ID_DOESNT_EXIST is not known", ((OperationOutcome) resp.getEntry().get(1).getResource()).getIssue().get(0).getDiagnostics());
 		assertEquals("404 Not Found", resp.getEntry().get(1).getResponse().getStatus());
 
 		// Check POST

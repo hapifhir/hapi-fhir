@@ -367,7 +367,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		OperationOutcome oo = (OperationOutcome) response.getEntry().get(1).getResponse().getOutcome();
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertEquals(IssueSeverity.ERROR, oo.getIssue().get(0).getSeverity());
-		assertEquals(Msg.code(971) + "Resource Patient/BABABABA is not known", oo.getIssue().get(0).getDiagnostics());
+		assertEquals(Msg.code(2001) + "Resource Patient/BABABABA is not known", oo.getIssue().get(0).getDiagnostics());
 	}
 
 	@Test
@@ -888,7 +888,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		Resource oo = resp.getEntry().get(1).getResponse().getOutcome();
 		assertEquals(OperationOutcome.class, oo.getClass());
 		assertEquals(IssueSeverity.ERROR, ((OperationOutcome) oo).getIssue().get(0).getSeverityElement().getValue());
-		assertEquals(Msg.code(971) + "Resource Patient/THIS_ID_DOESNT_EXIST is not known", ((OperationOutcome) oo).getIssue().get(0).getDiagnostics());
+		assertEquals(Msg.code(2001) + "Resource Patient/THIS_ID_DOESNT_EXIST is not known", ((OperationOutcome) oo).getIssue().get(0).getDiagnostics());
 		assertEquals("404 Not Found", resp.getEntry().get(1).getResponse().getStatus());
 
 		// Check POST
@@ -1931,7 +1931,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		OperationOutcome oo = (OperationOutcome) response.getEntry().get(1).getResponse().getOutcome();
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertEquals(IssueSeverity.ERROR, oo.getIssue().get(0).getSeverity());
-		assertEquals(Msg.code(971) + "Resource Patient/BABABABA is not known", oo.getIssue().get(0).getDiagnostics());
+		assertEquals(Msg.code(2001) + "Resource Patient/BABABABA is not known", oo.getIssue().get(0).getDiagnostics());
 	}
 
 	@Test

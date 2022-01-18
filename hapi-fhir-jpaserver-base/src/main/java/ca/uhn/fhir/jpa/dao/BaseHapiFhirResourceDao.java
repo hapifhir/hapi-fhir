@@ -1196,7 +1196,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				.addIfMatchesType(ServletRequestDetails.class, theRequest);
 			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
 			if (accessDetails.isDontReturnResourceAtIndex(0)) {
-				throw new ResourceNotFoundException(Msg.code(1995) + theId);
+				throw new ResourceNotFoundException(Msg.code(1995) + "Resource " + theId + " is not known");
 			}
 		}
 
@@ -1267,7 +1267,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		if (entity == null) {
-			throw new ResourceNotFoundException(Msg.code(1996) + theId);
+			throw new ResourceNotFoundException(Msg.code(1996) + "Resource " + theId + " is not known");
 		}
 
 		if (theId.hasVersionIdPart()) {
