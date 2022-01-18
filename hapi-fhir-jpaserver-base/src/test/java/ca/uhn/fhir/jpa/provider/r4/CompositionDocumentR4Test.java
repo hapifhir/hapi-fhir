@@ -25,8 +25,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -115,7 +117,13 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 
 		String theUrl = ourServerBase + "/" + compId + "/$document?_format=json";
 		Bundle bundle = fetchBundle(theUrl, EncodingEnum.JSON);
+		//Ensure each entry has a URL.
 
+		assertThat(bundle.getType(), is(equalTo(Bundle.BundleType.DOCUMENT)));
+		bundle.getEntry().stream()
+				.forEach(entry -> {
+					assertThat(entry.getFullUrl(), is(equalTo(entry.getResource().getIdElement().toVersionless().toString())));
+				});
 		assertNull(bundle.getLink("next"));
 
 		Set<String> actual = new HashSet<>();
