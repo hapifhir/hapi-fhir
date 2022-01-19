@@ -15,6 +15,7 @@ variables:
 - group: GPG_VARIABLE_GROUP
 - group: SONATYPE_VARIABLE_GROUP
 
+container: maven:3.8-openjdk-17
 steps:
 
   # We need a valid signing key to sign our builds for deployment to sonatype. We have uploaded
@@ -81,6 +82,8 @@ steps:
 
   # 5. Deploy SNAPSHOT build to sonatype
   - task: Maven@3
+    env:
+      JAVA_HOME_11_X64: /usr/java/openjdk-17
     displayName: 'Deploy to Sonatype staging'
     inputs:
       mavenPomFile: '$(System.DefaultWorkingDirectory)/pom.xml'
