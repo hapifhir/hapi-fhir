@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 3314
+jira: SMILE-3464
+title: "Previously, `$binary-access-read` and other operations that return neither method outcomes nor resources were causing no invocation of the `SERVER_OUTGOING_RESPONSE` pointcut. This has been corrected, and those 
+operations will now correctly invoke `SERVER_OUTGOING_RESPONSE`."
