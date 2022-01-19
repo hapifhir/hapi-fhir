@@ -284,7 +284,8 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 			hashPrefixLength = 0;
 		}
 
-		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, StringUtil.left(theValueNormalized, hashPrefixLength));
+		String value = StringUtil.left(theValueNormalized, hashPrefixLength);
+		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, value);
 	}
 
 }

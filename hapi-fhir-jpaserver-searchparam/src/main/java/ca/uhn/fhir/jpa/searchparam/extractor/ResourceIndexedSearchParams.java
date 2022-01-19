@@ -147,15 +147,15 @@ public final class ResourceIndexedSearchParams {
 		theEntity.setResourceLinks(myLinks);
 	}
 
-	public void updateSpnamePrefixForIndexedOnContainedResource(String theSpnamePrefix) {
-		updateSpnamePrefixForIndexedOnContainedResource(myNumberParams, theSpnamePrefix);
-		updateSpnamePrefixForIndexedOnContainedResource(myQuantityParams, theSpnamePrefix);
-		updateSpnamePrefixForIndexedOnContainedResource(myQuantityNormalizedParams, theSpnamePrefix);
-		updateSpnamePrefixForIndexedOnContainedResource(myDateParams, theSpnamePrefix);
-		updateSpnamePrefixForIndexedOnContainedResource(myUriParams, theSpnamePrefix);
-		updateSpnamePrefixForIndexedOnContainedResource(myTokenParams, theSpnamePrefix);
-		updateSpnamePrefixForIndexedOnContainedResource(myStringParams, theSpnamePrefix);
-		updateSpnamePrefixForIndexedOnContainedResource(myCoordsParams, theSpnamePrefix);
+	public void updateSpnamePrefixForIndexedOnContainedResource(String theContainingType, String theSpnamePrefix) {
+		updateSpnamePrefixForIndexedOnContainedResource(theContainingType, myNumberParams, theSpnamePrefix);
+		updateSpnamePrefixForIndexedOnContainedResource(theContainingType, myQuantityParams, theSpnamePrefix);
+		updateSpnamePrefixForIndexedOnContainedResource(theContainingType, myQuantityNormalizedParams, theSpnamePrefix);
+		updateSpnamePrefixForIndexedOnContainedResource(theContainingType, myDateParams, theSpnamePrefix);
+		updateSpnamePrefixForIndexedOnContainedResource(theContainingType, myUriParams, theSpnamePrefix);
+		updateSpnamePrefixForIndexedOnContainedResource(theContainingType, myTokenParams, theSpnamePrefix);
+		updateSpnamePrefixForIndexedOnContainedResource(theContainingType, myStringParams, theSpnamePrefix);
+		updateSpnamePrefixForIndexedOnContainedResource(theContainingType, myCoordsParams, theSpnamePrefix);
 	}
 	
 	public void updateSpnamePrefixForLinksOnContainedResource(String theSpNamePrefix) {
@@ -190,9 +190,10 @@ public final class ResourceIndexedSearchParams {
 		}
 	}
 
-	private void updateSpnamePrefixForIndexedOnContainedResource(Collection<? extends BaseResourceIndexedSearchParam> theParams, @Nonnull String theSpnamePrefix) {
+	private void updateSpnamePrefixForIndexedOnContainedResource(String theContainingType, Collection<? extends BaseResourceIndexedSearchParam> theParams, @Nonnull String theSpnamePrefix) {
 		
 		for (BaseResourceIndexedSearchParam param : theParams) {
+			param.setResourceType(theContainingType);
 			param.setParamName(theSpnamePrefix + "." + param.getParamName());
 
 			// re-calculate hashes

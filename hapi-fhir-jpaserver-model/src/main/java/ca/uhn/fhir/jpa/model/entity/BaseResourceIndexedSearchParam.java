@@ -222,6 +222,7 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 		}
 
 		HashCode hashCode = hasher.hash();
-		return hashCode.asLong();
+		long retVal = hashCode.asLong();
+		return retVal;
 	}
 }
