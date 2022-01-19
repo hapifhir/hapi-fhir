@@ -189,7 +189,6 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 		return retVal + " ]";
 	}
 
-
 	@Override
 	public void invoke(IPointcut thePointcut, HookParams theArgs) {
 		myLastInvoke.set(System.currentTimeMillis());

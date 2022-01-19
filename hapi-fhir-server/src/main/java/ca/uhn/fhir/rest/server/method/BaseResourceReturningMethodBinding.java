@@ -429,26 +429,28 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 
 	@Override
 	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
-
 		IBaseResource response = doInvokeServer(theServer, theRequest);
+		/*
+		 When we write directly to an HttpServletResponse, the invocation returns null. However, we still want to invoke
+		 the SERVER_OUTGOING_RESPONSE pointcut.
+		*/
 		if (response == null) {
+			ResponseDetails responseDetails = new ResponseDetails();
+			responseDetails.setResponseCode(Constants.STATUS_HTTP_200_OK);
+			callOutgoingResponseHook(theRequest, responseDetails);
 			return null;
+		} else {
+			Set<SummaryEnum> summaryMode = RestfulServerUtils.determineSummaryMode(theRequest);
+			ResponseDetails responseDetails = new ResponseDetails();
+			responseDetails.setResponseResource(response);
+			responseDetails.setResponseCode(Constants.STATUS_HTTP_200_OK);
+			if (!callOutgoingResponseHook(theRequest, responseDetails)) {
+				return null;
+			}
+			boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
+
+			return theRequest.getResponse().streamResponseAsResource(responseDetails.getResponseResource(), prettyPrint, summaryMode, responseDetails.getResponseCode(), null, theRequest.isRespondGzip(), isAddContentLocationHeader());
 		}
-
-		Set<SummaryEnum> summaryMode = RestfulServerUtils.determineSummaryMode(theRequest);
-
-		ResponseDetails responseDetails = new ResponseDetails();
-		responseDetails.setResponseResource(response);
-		responseDetails.setResponseCode(Constants.STATUS_HTTP_200_OK);
-
-		if (!callOutgoingResponseHook(theRequest, responseDetails)) {
-			return null;
-		}
-
-		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
-
-		return theRequest.getResponse().streamResponseAsResource(responseDetails.getResponseResource(), prettyPrint, summaryMode, responseDetails.getResponseCode(), null, theRequest.isRespondGzip(), isAddContentLocationHeader());
-
 	}
 
 	public abstract Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException;

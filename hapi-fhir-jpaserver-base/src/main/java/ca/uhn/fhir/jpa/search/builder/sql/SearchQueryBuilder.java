@@ -75,6 +75,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -409,7 +410,7 @@ public class SearchQueryBuilder {
 				// The SQLServerDialect has a bunch of one-off processing to deal with rules on when
 				// a limit can be used, so we can't rely on the flags that the limithandler exposes since
 				// the exact structure of the query depends on the parameters
-				if (sql.contains("TOP(?)")) {
+				if (sql.contains("top(?)")) {
 					bindVariables.add(0, maxResultsToFetch);
 				}
 				if (sql.contains("offset 0 rows fetch next ? rows only")) {
@@ -419,7 +420,7 @@ public class SearchQueryBuilder {
 					bindVariables.add(theOffset);
 					bindVariables.add(maxResultsToFetch);
 				}
-				if (offset != null && sql.contains("__hibernate_row_nr__")) {
+				if (offset != null && sql.contains("__row__")) {
 					bindVariables.add(theOffset + 1);
 					bindVariables.add(theOffset + maxResultsToFetch + 1);
 				}
