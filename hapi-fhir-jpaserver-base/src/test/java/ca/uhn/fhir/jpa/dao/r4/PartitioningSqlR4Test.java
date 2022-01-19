@@ -2194,10 +2194,9 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	public void testSearch_StringParam_SearchOnePartition_IncludePartitionInHashes() {
 		myPartitionSettings.setIncludePartitionInSearchHashes(true);
 
-		// FIXME: restore
-//		createPatient(withPartition(null), withFamily("FAMILY"));
+		createPatient(withPartition(null), withFamily("FAMILY"));
 		IIdType patientId1 = createPatient(withPartition(1), withFamily("FAMILY"));
-//		createPatient(withPartition(2), withFamily("FAMILY"));
+		createPatient(withPartition(2), withFamily("FAMILY"));
 
 		logAllStringIndexes();
 
