@@ -84,7 +84,7 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 			.projectable(Projectable.NO);
 
 		StringIndexFieldTypeOptionsStep<?> keywordFieldType = indexFieldTypeFactory.asString()
-			.normalizer("lowercase")
+		// TODO JB: may have to add normalizer to support case insensitive searches depending on token flags
 			.projectable(Projectable.NO)
 			.aggregable(Aggregable.YES);
 
@@ -121,10 +121,13 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 			// But the standard tokenizers aren't that flexible.  As second best, it would be nice to use elastic multi-fields
 			// to apply three different tokenizers to a single value.
 			// Instead, just be simple and expand into three full fields for now
-			spfield.objectFieldTemplate("tokenIndex", ObjectStructure.FLATTENED).matchingPathGlob("*.token");
-			spfield.fieldTemplate("token-code", keywordFieldType).matchingPathGlob("*.token.code").multiValued();
-			spfield.fieldTemplate("token-code-system", keywordFieldType).matchingPathGlob("*.token.code-system").multiValued();
-			spfield.fieldTemplate("token-system", keywordFieldType).matchingPathGlob("*.token.system").multiValued();
+			String tokenPathGlob = "*.token";
+			spfield.objectFieldTemplate("tokenIndex", ObjectStructure.FLATTENED).matchingPathGlob(tokenPathGlob);
+			spfield.fieldTemplate("token-code", keywordFieldType).matchingPathGlob(tokenPathGlob + ".code").multiValued();
+			spfield.fieldTemplate("token-code-system", keywordFieldType).matchingPathGlob(tokenPathGlob + ".code-system").multiValued();
+			spfield.fieldTemplate("token-system", keywordFieldType).matchingPathGlob(tokenPathGlob + ".system").multiValued();
+
+			// reference
 			spfield.fieldTemplate("reference-value", keywordFieldType).matchingPathGlob("*.reference.value").multiValued();
 
 			// last, since the globs are matched in declaration order, and * matches even nested nodes.

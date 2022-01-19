@@ -1,43 +1,24 @@
 package ca.uhn.fhir.jpa.search.builder.sql;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseJoiningPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.OrderObject;
-import org.junit.jupiter.api.BeforeEach;
+import org.hibernate.dialect.Dialect;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import javax.annotation.Nonnull;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-public class SearchQueryBuilderMySqlTest {
-
-	@Mock
-	private SqlObjectFactory mySqlObjectFactory;
-	@Mock
-	private HibernatePropertiesProvider myHibernatePropertiesProvider;
-
-	private final FhirContext myFhirContext = FhirContext.forR4();
-
-	@BeforeEach
-	public void beforeInitMocks() {
-		MockitoAnnotations.initMocks(this);
-		when(myHibernatePropertiesProvider.getDialect()).thenReturn(new org.hibernate.dialect.MySQL57Dialect());
-	}
-
-	private SearchQueryBuilder createSearchQueryBuilder() {
-		return new SearchQueryBuilder(myFhirContext, new ModelConfig(), new PartitionSettings(), RequestPartitionId.allPartitions(), "Patient", mySqlObjectFactory, myHibernatePropertiesProvider, false);
-	}
+@ExtendWith(MockitoExtension.class)
+public class SearchQueryBuilderDialectMySqlTest extends BaseSearchQueryBuilderDialectTest {
 
 	@Test
 	public void testAddSortNumericNoNullOrder() {
@@ -46,26 +27,6 @@ public class SearchQueryBuilderMySqlTest {
 
 		generatedSql =  buildSqlWithNumericSort(false,null);
 		assertTrue(generatedSql.getSql().endsWith("ORDER BY t1.SP_VALUE_LOW DESC limit ?"));
-
-	}
-
-	private GeneratedSql buildSqlWithNumericSort(Boolean theAscending, OrderObject.NullOrder theNullOrder) {
-		SearchQueryBuilder searchQueryBuilder = createSearchQueryBuilder();
-		when(mySqlObjectFactory.resourceTable(any())).thenReturn(new ResourceTablePredicateBuilder(searchQueryBuilder));
-		when(mySqlObjectFactory.dateIndexTable(any())).thenReturn(new DatePredicateBuilder(searchQueryBuilder));
-
-		BaseJoiningPredicateBuilder firstPredicateBuilder = searchQueryBuilder.getOrCreateFirstPredicateBuilder();
-		DatePredicateBuilder sortPredicateBuilder = searchQueryBuilder.addDatePredicateBuilder(firstPredicateBuilder.getResourceIdColumn());
-
-		Condition hashIdentityPredicate = sortPredicateBuilder.createHashIdentityPredicate("MolecularSequence", "variant-start");
-		searchQueryBuilder.addPredicate(hashIdentityPredicate);
-		if (theNullOrder == null) {
-			searchQueryBuilder.addSortNumeric(sortPredicateBuilder.getColumnValueLow(), theAscending);
-		} else {
-			searchQueryBuilder.addSortNumeric(sortPredicateBuilder.getColumnValueLow(), theAscending, theNullOrder);
-		}
-
-		return searchQueryBuilder.generate(0,500);
 
 	}
 
@@ -181,5 +142,11 @@ public class SearchQueryBuilderMySqlTest {
 		generatedSql = buildSqlWithDateSort(false, OrderObject.NullOrder.LAST);
 		assertTrue(generatedSql.getSql().endsWith("ORDER BY t1.SP_VALUE_LOW DESC limit ?"));
 
+	}
+
+	@Nonnull
+	@Override
+	protected Dialect createDialect() {
+		return new org.hibernate.dialect.MySQL57Dialect();
 	}
 }
