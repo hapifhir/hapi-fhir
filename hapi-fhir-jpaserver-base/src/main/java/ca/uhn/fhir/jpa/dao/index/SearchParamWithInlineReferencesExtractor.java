@@ -31,7 +31,6 @@ import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
@@ -56,12 +55,12 @@ import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import javax.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
@@ -104,6 +103,8 @@ public class SearchParamWithInlineReferencesExtractor {
 	private IResourceIndexedComboStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
 	@Autowired
 	private PartitionSettings myPartitionSettings;
+	@Autowired
+	private MemoryCacheService myMemoryCacheService;
 
 	@VisibleForTesting
 	public void setPartitionSettings(PartitionSettings thePartitionSettings) {
@@ -176,8 +177,8 @@ public class SearchParamWithInlineReferencesExtractor {
 		Set<String> queryStringsToPopulate = extractParameterCombinationsForComboParam(theParams, theResourceType, theParam);
 
 		for (String nextQueryString : queryStringsToPopulate) {
-				ourLog.trace("Adding composite unique SP: {}", nextQueryString);
-				theParams.myComboStringUniques.add(new ResourceIndexedComboStringUnique(theEntity, nextQueryString, theParam.getId()));
+			ourLog.trace("Adding composite unique SP: {}", nextQueryString);
+			theParams.myComboStringUniques.add(new ResourceIndexedComboStringUnique(theEntity, nextQueryString, theParam.getId()));
 		}
 	}
 
@@ -292,12 +293,11 @@ public class SearchParamWithInlineReferencesExtractor {
 		if (paramsListForCompositePart != null) {
 			paramsListForCompositePart = paramsListForCompositePart
 				.stream()
-				.filter(t->t.getParamName().equals(nextCompositeOf.getName()))
+				.filter(t -> t.getParamName().equals(nextCompositeOf.getName()))
 				.collect(Collectors.toList());
 		}
 		return paramsListForCompositePart;
 	}
-
 
 	@VisibleForTesting
 	public void setDaoConfig(DaoConfig theDaoConfig) {
@@ -308,12 +308,6 @@ public class SearchParamWithInlineReferencesExtractor {
 	public void setContext(FhirContext theContext) {
 		myContext = theContext;
 	}
-
-
-	@Autowired
-	private MemoryCacheService myMemoryCacheService;
-
-
 
 	/**
 	 * Handle references within the resource that are match URLs, for example references like "Patient?identifier=foo". These match URLs are resolved and replaced with the ID of the

@@ -1658,19 +1658,17 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		myConfig = theDaoConfig;
 	}
 
-	private class AddTagDefinitionToCacheAfterCommitSynchronization implements TransactionSynchronization {
-
-		private final TagDefinition myTagDefinition;
-		private final MemoryCacheService.TagDefinitionCacheKey myKey;
-
-		public AddTagDefinitionToCacheAfterCommitSynchronization(MemoryCacheService.TagDefinitionCacheKey theKey, TagDefinition theTagDefinition) {
-			myTagDefinition = theTagDefinition;
-			myKey = theKey;
-		}
-
-		@Override
-		public void afterCommit() {
-			myMemoryCacheService.put(MemoryCacheService.CacheEnum.TAG_DEFINITION, myKey, myTagDefinition);
+	public void populateFullTextFields(final FhirContext theContext, final IBaseResource theResource, ResourceTable theEntity, ResourceIndexedSearchParams theNewParams) {
+		if (theEntity.getDeleted() != null) {
+			theEntity.setNarrativeText(null);
+			theEntity.setContentText(null);
+		} else {
+			theEntity.setNarrativeText(parseNarrativeTextIntoWords(theResource));
+			theEntity.setContentText(parseContentTextIntoWords(theContext, theResource));
+			if (myDaoConfig.isAdvancedLuceneIndexing()) {
+				ExtendedLuceneIndexData luceneIndexData = myFulltextSearchSvc.extractLuceneIndexData(theResource, theNewParams);
+				theEntity.setLuceneIndexData(luceneIndexData);
+			}
 		}
 	}
 
@@ -1706,20 +1704,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			}
 		}
 		return retVal.toString();
-	}
-
-	public void populateFullTextFields(final FhirContext theContext, final IBaseResource theResource, ResourceTable theEntity, ResourceIndexedSearchParams theNewParams) {
-		if (theEntity.getDeleted() != null) {
-			theEntity.setNarrativeText(null);
-			theEntity.setContentText(null);
-		} else {
-			theEntity.setNarrativeText(parseNarrativeTextIntoWords(theResource));
-			theEntity.setContentText(parseContentTextIntoWords(theContext, theResource));
-			if (myDaoConfig.isAdvancedLuceneIndexing()) {
-				ExtendedLuceneIndexData luceneIndexData = myFulltextSearchSvc.extractLuceneIndexData(theResource, theNewParams);
-				theEntity.setLuceneIndexData(luceneIndexData);
-			}
-		}
 	}
 
 	public static String decodeResource(byte[] theResourceBytes, ResourceEncodingEnum theResourceEncoding) {
@@ -1803,6 +1787,22 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		if (!theResourceName.equals(theEntity.getResourceType())) {
 			throw new ResourceNotFoundException(
 				"Resource with ID " + theEntity.getIdDt().getIdPart() + " exists but it is not of type " + theResourceName + ", found resource of type " + theEntity.getResourceType());
+		}
+	}
+
+	private class AddTagDefinitionToCacheAfterCommitSynchronization implements TransactionSynchronization {
+
+		private final TagDefinition myTagDefinition;
+		private final MemoryCacheService.TagDefinitionCacheKey myKey;
+
+		public AddTagDefinitionToCacheAfterCommitSynchronization(MemoryCacheService.TagDefinitionCacheKey theKey, TagDefinition theTagDefinition) {
+			myTagDefinition = theTagDefinition;
+			myKey = theKey;
+		}
+
+		@Override
+		public void afterCommit() {
+			myMemoryCacheService.put(MemoryCacheService.CacheEnum.TAG_DEFINITION, myKey, myTagDefinition);
 		}
 	}
 

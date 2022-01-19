@@ -43,16 +43,15 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.FhirTerser;
-
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -107,10 +106,10 @@ public class SearchParamExtractorService {
 			extractSearchIndexParametersForContainedResources(theRequestDetails, containedParams, theResource, theEntity);
 			mergeParams(containedParams, theParams);
 		}
-		
+
 		// Do this after, because we add to strings during both string and token processing, and contained resource if any
 		populateResourceTables(theParams, theEntity);
-		
+
 		// Reference search parameters
 		extractResourceLinks(theRequestPartitionId, theParams, theEntity, theResource, theTransactionDetails, theFailOnInvalidReference, theRequestDetails);
 
@@ -126,8 +125,8 @@ public class SearchParamExtractorService {
 		myModelConfig = theModelConfig;
 	}
 
-	private void extractSearchIndexParametersForContainedResources(RequestDetails theRequestDetails, ResourceIndexedSearchParams theParams, IBaseResource theResource, ResourceTable theEntity) {		
-		
+	private void extractSearchIndexParametersForContainedResources(RequestDetails theRequestDetails, ResourceIndexedSearchParams theParams, IBaseResource theResource, ResourceTable theEntity) {
+
 		FhirTerser terser = myContext.newTerser();
 
 		// 1. get all contained resources
@@ -188,12 +187,12 @@ public class SearchParamExtractorService {
 		for (IBaseResource resource : resources) {
 			if (resource.getIdElement().equals(reference.getReferenceElement()))
 				return resource;
-		}		
+		}
 		return null;
 	}
-	
+
 	private void mergeParams(ResourceIndexedSearchParams theSrcParams, ResourceIndexedSearchParams theTargetParams) {
-	
+
 		theTargetParams.myNumberParams.addAll(theSrcParams.myNumberParams);
 		theTargetParams.myQuantityParams.addAll(theSrcParams.myQuantityParams);
 		theTargetParams.myQuantityNormalizedParams.addAll(theSrcParams.myQuantityNormalizedParams);
@@ -203,7 +202,7 @@ public class SearchParamExtractorService {
 		theTargetParams.myStringParams.addAll(theSrcParams.myStringParams);
 		theTargetParams.myCoordsParams.addAll(theSrcParams.myCoordsParams);
 	}
-	
+
 	private void extractSearchIndexParameters(RequestDetails theRequestDetails, ResourceIndexedSearchParams theParams, IBaseResource theResource, ResourceTable theEntity) {
 
 		// Strings
@@ -276,7 +275,7 @@ public class SearchParamExtractorService {
 	}
 
 	private void populateResourceTables(ResourceIndexedSearchParams theParams, ResourceTable theEntity) {
-		
+
 		populateResourceTable(theParams.myNumberParams, theEntity);
 		populateResourceTable(theParams.myQuantityParams, theEntity);
 		populateResourceTable(theParams.myQuantityNormalizedParams, theEntity);

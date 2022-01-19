@@ -562,7 +562,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			notifyInterceptors(RestOperationTypeEnum.DELETE, requestDetails);
 		}
 
-		RequestPartitionId requestPartitionId = entity.getPartitionId().toPartitionId();
 		ResourceTable savedEntity = updateEntityForDelete(theRequestDetails, theTransactionDetails, entity);
 		resourceToDelete.setId(entity.getIdDt());
 
@@ -1780,7 +1779,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		/*
 		 * Otherwise, we're not in a transaction
 		 */
-		RequestPartitionId requestPartitionId = entity.getPartitionId().toPartitionId();
 		ResourceTable savedEntity = updateInternal(theRequest, resource, thePerformIndexing, theForceUpdateVersion, entity, resourceId, oldResource, theTransactionDetails);
 		DaoMethodOutcome outcome = toMethodOutcome(theRequest, savedEntity, resource).setCreated(wasDeleted);
 

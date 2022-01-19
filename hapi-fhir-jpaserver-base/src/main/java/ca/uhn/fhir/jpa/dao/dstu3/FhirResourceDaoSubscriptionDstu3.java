@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * #L%
  */
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoSubscription;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.ISubscriptionTableDao;
