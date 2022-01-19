@@ -1566,7 +1566,7 @@ public abstract class BaseTransactionProcessor {
 		if (!isValidResourceTypeUrl(url)) {
 			ourLog.debug("Invalid url. Should begin with a resource type: {}", url);
 			String msg = myContext.getLocalizer().getMessage(BaseStorageDao.class, "transactionInvalidUrl", theVerb, url);
-			throw new InvalidRequestException(msg);
+			throw new InvalidRequestException(Msg.code(2006) + msg);
 		}
 		return url;
 	}
