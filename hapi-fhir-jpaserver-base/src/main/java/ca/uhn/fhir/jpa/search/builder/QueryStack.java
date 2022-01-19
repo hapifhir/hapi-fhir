@@ -82,6 +82,7 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
@@ -115,6 +116,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -726,9 +728,9 @@ public class QueryStack {
 	}
 
 	private class ReferenceChainExtractor {
-		private final Map<List<RuntimeSearchParam>,List<LeafNodeDefinition>> myChains = Maps.newHashMap();
+		private final Map<List<RuntimeSearchParam>,Set<LeafNodeDefinition>> myChains = Maps.newHashMap();
 
-		public Map<List<RuntimeSearchParam>,List<LeafNodeDefinition>> getChains() { return myChains; }
+		public Map<List<RuntimeSearchParam>,Set<LeafNodeDefinition>> getChains() { return myChains; }
 
 		private boolean isReferenceParamValid(ReferenceParam theReferenceParam) {
 			return split(theReferenceParam.getChain(), '.').length <= 3;
@@ -778,12 +780,14 @@ public class QueryStack {
 			qualifiersBranch.addAll(theQualifiers);
 			qualifiersBranch.add(nextQualifier);
 
+			boolean searchParamFound = false;
 			for (String nextTarget : thePreviousSearchParam.getTargets()) {
 				RuntimeSearchParam nextSearchParam = null;
 				if (StringUtils.isBlank(theResourceType) || theResourceType.equals(nextTarget)) {
 					nextSearchParam = mySearchParamRegistry.getActiveSearchParam(nextTarget, nextParamName);
 				}
 				if (nextSearchParam != null) {
+					searchParamFound = true;
 					// If we find a search param on this resource type for this parameter name, keep iterating
 					//  Otherwise, abandon this branch and carry on to the next one
 					List<RuntimeSearchParam> searchParamBranch = Lists.newArrayList();
@@ -801,9 +805,9 @@ public class QueryStack {
 							orValues.add(qp);
 						}
 
-						List<LeafNodeDefinition> leafNodes = myChains.get(searchParamBranch);
+						Set<LeafNodeDefinition> leafNodes = myChains.get(searchParamBranch);
 						if (leafNodes == null) {
-							leafNodes = Lists.newArrayList();
+							leafNodes = Sets.newHashSet();
 							myChains.put(searchParamBranch, leafNodes);
 						}
 						leafNodes.add(new LeafNodeDefinition(nextSearchParam, orValues, nextTarget, nextParamName, "", qualifiersBranch));
@@ -812,6 +816,9 @@ public class QueryStack {
 						processNextLinkInChain(searchParamBranch, nextSearchParam, nextChain, theTargetValue, qualifiersBranch, nextQualifier);
 					}
 				}
+			}
+			if (!searchParamFound) {
+				throw new InvalidRequestException(myFhirContext.getLocalizer().getMessage(BaseStorageDao.class, "invalidParameterChain", thePreviousSearchParam.getName() + '.' + theChain));
 			}
 		}
 	}
@@ -861,22 +868,38 @@ public class QueryStack {
 			// TODO: Is theBase ever empty? does it ever contain more than one entry? what's the right way to handle those cases?
 			return new LeafNodeDefinition(myParamDefinition, myOrValues, theBase.stream().findFirst().orElse(null), myLeafParamName, theName, myQualifiers);
 		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+			LeafNodeDefinition that = (LeafNodeDefinition) o;
+			return Objects.equals(myParamDefinition, that.myParamDefinition) && Objects.equals(myOrValues, that.myOrValues) && Objects.equals(myLeafTarget, that.myLeafTarget) && Objects.equals(myLeafParamName, that.myLeafParamName) && Objects.equals(myLeafPathPrefix, that.myLeafPathPrefix) && Objects.equals(myQualifiers, that.myQualifiers);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(myParamDefinition, myOrValues, myLeafTarget, myLeafParamName, myLeafPathPrefix, myQualifiers);
+		}
 	}
 
 	public Condition createPredicateReferenceForContainedResource(@Nullable DbColumn theSourceJoinColumn,
 																					  String theResourceName, String theParamName, List<String> theQualifiers, RuntimeSearchParam theSearchParam,
 																					  List<? extends IQueryParameterType> theList, SearchFilterParser.CompareOperation theOperation,
 																					  RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
+		// A bit of a hack, but we need to turn off cache reuse while in this method so that we don't try to reuse builders across different subselects
+		EnumSet<PredicateBuilderTypeEnum> cachedReusePredicateBuilderTypes = EnumSet.copyOf(myReusePredicateBuilderTypes);
+		myReusePredicateBuilderTypes.clear();
 
 		UnionQuery union = new UnionQuery(SetOperationQuery.Type.UNION);
 
 		ReferenceChainExtractor chainExtractor = new ReferenceChainExtractor();
 		chainExtractor.deriveChains(theSearchParam, theList);
-		Map<List<RuntimeSearchParam>,List<LeafNodeDefinition>> chains = chainExtractor.getChains();
+		Map<List<RuntimeSearchParam>,Set<LeafNodeDefinition>> chains = chainExtractor.getChains();
 
-		Map<List<String>,List<LeafNodeDefinition>> referenceLinks = Maps.newHashMap();
+		Map<List<String>,Set<LeafNodeDefinition>> referenceLinks = Maps.newHashMap();
 		for (List<RuntimeSearchParam> nextChain : chains.keySet()) {
-			List<LeafNodeDefinition> leafNodes = chains.get(nextChain);
+			Set<LeafNodeDefinition> leafNodes = chains.get(nextChain);
 
 			// TODO: Here's the manual stuff. Figure out how to automate this
 			if (nextChain.size() == 1) {
@@ -885,21 +908,21 @@ public class QueryStack {
 					leafNodes
 						.stream()
 						.map(t -> t.withPathPrefix(nextChain.get(0).getBase(), nextChain.get(0).getName()))
-						.collect(Collectors.toList()));
+						.collect(Collectors.toSet()));
 			} else if (nextChain.size() == 2) {
 				updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(nextChain.get(0).getPath(), nextChain.get(1).getPath()), leafNodes);
 				updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(nextChain.get(0).getPath()),
 					leafNodes
 						.stream()
 						.map(t -> t.withPathPrefix(nextChain.get(1).getBase(), nextChain.get(1).getName()))
-						.collect(Collectors.toList()));
+						.collect(Collectors.toSet()));
 				updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(mergePaths(nextChain.get(0).getPath(), nextChain.get(1).getPath())), leafNodes);
 				if (myModelConfig.isIndexOnContainedResourcesRecursively()) {
 					updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(),
 						leafNodes
 							.stream()
 							.map(t -> t.withPathPrefix(nextChain.get(0).getBase(), nextChain.get(0).getName() + "." + nextChain.get(1).getName()))
-							.collect(Collectors.toList()));
+							.collect(Collectors.toSet()));
 				}
 			} else if (nextChain.size() == 3) {
 				updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(nextChain.get(0).getPath(), nextChain.get(1).getPath(), nextChain.get(2).getPath()), leafNodes);
@@ -907,25 +930,25 @@ public class QueryStack {
 					leafNodes
 						.stream()
 						.map(t -> t.withPathPrefix(nextChain.get(2).getBase(), nextChain.get(2).getName()))
-						.collect(Collectors.toList()));
+						.collect(Collectors.toSet()));
 				updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(nextChain.get(0).getPath(), mergePaths(nextChain.get(1).getPath(), nextChain.get(2).getPath())), leafNodes);
 				updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(mergePaths(nextChain.get(0).getPath(), nextChain.get(1).getPath()), nextChain.get(2).getPath()), leafNodes);
 				updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(mergePaths(nextChain.get(0).getPath(), nextChain.get(1).getPath()), nextChain.get(2).getPath()), leafNodes
 					.stream()
 					.map(t -> t.withPathPrefix(nextChain.get(2).getBase(), nextChain.get(2).getName()))
-					.collect(Collectors.toList()));
+					.collect(Collectors.toSet()));
 				if (myModelConfig.isIndexOnContainedResourcesRecursively()) {
 					updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(mergePaths(nextChain.get(0).getPath(), nextChain.get(1).getPath(), nextChain.get(2).getPath())), leafNodes);
 					updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(nextChain.get(0).getPath()),
 						leafNodes
 							.stream()
 							.map(t -> t.withPathPrefix(nextChain.get(1).getBase(), nextChain.get(1).getName() + "." + nextChain.get(2).getName()))
-							.collect(Collectors.toList()));
+							.collect(Collectors.toSet()));
 					updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(),
 						leafNodes
 							.stream()
 							.map(t -> t.withPathPrefix(nextChain.get(0).getBase(), nextChain.get(0).getName() + "." + nextChain.get(1).getName() + "." + nextChain.get(2).getName()))
-							.collect(Collectors.toList()));
+							.collect(Collectors.toSet()));
 				}
 			} else {
 				// TODO: the chain is too long, it isn't practical to hard-code all the possible patterns. If anyone ever needs this, we should revisit the approach
@@ -967,18 +990,23 @@ public class QueryStack {
 			}
 		}
 
+		InCondition inCondition;
 		if (theSourceJoinColumn == null) {
-			return new InCondition(mySqlBuilder.getOrCreateFirstPredicateBuilder().getResourceIdColumn(), union);
+			inCondition = new InCondition(mySqlBuilder.getOrCreateFirstPredicateBuilder().getResourceIdColumn(), union);
 		} else {
 			//-- for the resource link, need join with target_resource_id
-			return new InCondition(theSourceJoinColumn, union);
+			inCondition = new InCondition(theSourceJoinColumn, union);
 		}
+
+		// restore the state of this collection to turn caching back on before we exit
+		myReusePredicateBuilderTypes.addAll(cachedReusePredicateBuilderTypes);
+		return inCondition;
 	}
 
-	private void updateMapOfReferenceLinks(Map<List<String>, List<LeafNodeDefinition>> theReferenceLinksMap, ArrayList<String> thePath, List<LeafNodeDefinition> theLeafNodesToAdd) {
-		List<LeafNodeDefinition> leafNodes = theReferenceLinksMap.get(thePath);
+	private void updateMapOfReferenceLinks(Map<List<String>, Set<LeafNodeDefinition>> theReferenceLinksMap, ArrayList<String> thePath, Set<LeafNodeDefinition> theLeafNodesToAdd) {
+		Set<LeafNodeDefinition> leafNodes = theReferenceLinksMap.get(thePath);
 		if (leafNodes == null) {
-			leafNodes = Lists.newArrayList();
+			leafNodes = Sets.newHashSet();
 			theReferenceLinksMap.put(thePath, leafNodes);
 		}
 		leafNodes.addAll(theLeafNodesToAdd);
@@ -1234,7 +1262,7 @@ public class QueryStack {
 							throw new MethodNotAllowedException(msg);
 						}
 
-						return createPredicateString(theSourceJoinColumn, theResourceName, theSpnamePrefix, theSearchParam, theList, null, theRequestPartitionId);
+						return createPredicateString(theSourceJoinColumn, theResourceName, theSpnamePrefix, theSearchParam, theList, null, theRequestPartitionId, theSqlBuilder);
 					} 
 					
 					modifier = id.getModifier();
@@ -1260,13 +1288,13 @@ public class QueryStack {
 		BaseJoiningPredicateBuilder join;
 		
 		if (paramInverted) {
-			SearchQueryBuilder sqlBuilder = mySqlBuilder.newChildSqlBuilder();
+			SearchQueryBuilder sqlBuilder = theSqlBuilder.newChildSqlBuilder();
 			TokenPredicateBuilder tokenSelector = sqlBuilder.addTokenPredicateBuilder(null);
 			sqlBuilder.addPredicate(tokenSelector.createPredicateToken(tokens, theResourceName, theSpnamePrefix, theSearchParam, theRequestPartitionId));
 			SelectQuery sql = sqlBuilder.getSelect();
 			Expression subSelect = new Subquery(sql);
 			
-			join = mySqlBuilder.getOrCreateFirstPredicateBuilder();
+			join = theSqlBuilder.getOrCreateFirstPredicateBuilder();
 			
 			if (theSourceJoinColumn == null) {
 				predicate = new InCondition(join.getResourceIdColumn(), subSelect).setNegate(true);
@@ -1277,7 +1305,7 @@ public class QueryStack {
 						
 		} else {
 		
-			TokenPredicateBuilder tokenJoin = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.TOKEN, theSourceJoinColumn, paramName, () -> mySqlBuilder.addTokenPredicateBuilder(theSourceJoinColumn)).getResult();
+			TokenPredicateBuilder tokenJoin = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.TOKEN, theSourceJoinColumn, paramName, () -> theSqlBuilder.addTokenPredicateBuilder(theSourceJoinColumn)).getResult();
 
 			if (theList.get(0).getMissing() != null) {
 				return tokenJoin.createPredicateParamMissingForNonReference(theResourceName, paramName, theList.get(0).getMissing(), theRequestPartitionId);
