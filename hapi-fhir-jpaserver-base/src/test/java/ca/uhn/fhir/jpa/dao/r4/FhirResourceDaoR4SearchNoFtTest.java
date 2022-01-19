@@ -170,6 +170,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -3795,6 +3796,8 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		patient.addIdentifier().setSystem("urn:system").setValue("TOKENB");
 		String idBoth = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getValue();
 
+		logAllTokenIndexes();
+
 		patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("TOKENA");
 		String idA = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getValue();
@@ -5151,6 +5154,19 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			.setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
 			.setCode("MR");
 		IIdType id1 = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+
+		runInTransaction(()->{
+			List<ResourceIndexedSearchParamToken> params = myResourceIndexedSearchParamTokenDao
+				.findAll()
+				.stream()
+				.filter(t -> t.getParamName().equals("identifier:of-type"))
+				.collect(Collectors.toList());
+			assertEquals(1, params.size());
+			assertNotNull(params.get(0).getHashSystemAndValue());
+			assertNull(params.get(0).getHashSystem());
+			assertNull(params.get(0).getHashValue());
+
+		});
 
 		// Shouldn't match
 		patient = new Patient();

@@ -225,57 +225,6 @@ public class SearchParamExtractorR4Test {
 
 
 	@Test
-	public void testTokenText_Enabled_Identifier() {
-		Observation obs = new Observation();
-		obs.addIdentifier().setSystem("sys").setValue("val").getType().setText("Help Im a Bug");
-
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), myPartitionSettings, ourCtx, mySearchParamRegistry);
-
-		List<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(obs)
-			.stream()
-			.filter(t -> t.getParamName().equals("identifier"))
-			.sorted(comparing(o -> o.getClass().getName()).reversed())
-			.collect(Collectors.toList());
-		assertEquals(2, tokens.size());
-
-		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.get(0);
-		assertEquals("identifier", token.getParamName());
-		assertEquals("sys", token.getSystem());
-		assertEquals("val", token.getValue());
-
-		ResourceIndexedSearchParamString string = (ResourceIndexedSearchParamString) tokens.get(1);
-		assertEquals("identifier", string.getParamName());
-		assertEquals("Help Im a Bug", string.getValueExact());
-	}
-
-	@Test
-	public void testTokenText_DisabledInSearchParam_Identifier() {
-		RuntimeSearchParam existingCodeSp = mySearchParamRegistry.getActiveSearchParams("Observation").get("identifier");
-		RuntimeSearchParam codeSearchParam = new RuntimeSearchParam(existingCodeSp);
-		codeSearchParam.addExtension(HapiExtensions.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING, new Extension(HapiExtensions.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING, new BooleanType(true)));
-
-		mySearchParamRegistry.addSearchParam(codeSearchParam);
-
-		Observation obs = new Observation();
-		obs.addIdentifier().setSystem("sys").setValue("val").getType().setText("Help Im a Bug");
-
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), myPartitionSettings, ourCtx, mySearchParamRegistry);
-
-		List<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(obs)
-			.stream()
-			.filter(t -> t.getParamName().equals("identifier"))
-			.sorted(comparing(o -> o.getClass().getName()).reversed())
-			.collect(Collectors.toList());
-		assertEquals(1, tokens.size());
-
-		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.get(0);
-		assertEquals("identifier", token.getParamName());
-		assertEquals("sys", token.getSystem());
-		assertEquals("val", token.getValue());
-
-	}
-
-	@Test
 	public void testReferenceWithResolve() {
 		Encounter enc = new Encounter();
 		enc.addLocation().setLocation(new Reference("Location/123"));

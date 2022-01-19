@@ -134,6 +134,10 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 
 	@Override
 	public void calculateHashes() {
+		if (myHashIdentity != null || myHashExact != null || myHashNormalizedPrefix != null) {
+			return;
+		}
+
 		String resourceType = getResourceType();
 		String paramName = getParamName();
 		String valueNormalized = getValueNormalized();

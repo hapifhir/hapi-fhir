@@ -76,11 +76,16 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 		setParamName(theParamName);
 		setLatitude(theLatitude);
 		setLongitude(theLongitude);
+
 		calculateHashes();
 	}
 
 	@Override
 	public void calculateHashes() {
+		if (myHashIdentity != null) {
+			return;
+		}
+
 		String resourceType = getResourceType();
 		String paramName = getParamName();
 		setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));

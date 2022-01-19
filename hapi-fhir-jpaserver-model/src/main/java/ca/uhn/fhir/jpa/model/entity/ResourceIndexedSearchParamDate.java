@@ -129,7 +129,6 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		reComputeValueHighDate(theHigh, theHighString);
 		myOriginalValue = theOriginalValue;
 		calculateHashes();
-		
 	}
 
 	private void computeValueHighDateOrdinal(String theHigh) {
@@ -204,6 +203,10 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 
 	@Override
 	public void calculateHashes() {
+		if (myHashIdentity != null) {
+			return;
+		}
+
 		String resourceType = getResourceType();
 		String paramName = getParamName();
 		setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));

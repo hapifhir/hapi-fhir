@@ -48,6 +48,7 @@ import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.InCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -179,6 +180,14 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 				if (!myModelConfig.isIndexIdentifierOfType()) {
 					throw new MethodNotAllowedException("The :of-type modifier is not enabled on this server");
 				}
+				if (isBlank(system) || isBlank(code)) {
+					throw new InvalidRequestException("Invalid parameter value for :of-type query");
+				}
+				int pipeIdx = code.indexOf('|');
+				if (pipeIdx < 1 || pipeIdx == code.length() - 1) {
+					throw new InvalidRequestException("Invalid parameter value for :of-type query");
+				}
+
 				paramName = paramName + Constants.PARAMQUALIFIER_TOKEN_OF_TYPE;
 				codes.add(new FhirVersionIndependentConcept(system, code));
 			} else {
