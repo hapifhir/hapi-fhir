@@ -26,6 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -209,7 +210,8 @@ public class SubscriptionValidatingInterceptorTest {
 
 		// No asserts here because the function should throw an UnprocessableEntityException exception if the subscription
 		// is invalid
-		mySvc.validateSubmittedSubscription(subscription, requestDetails);
+		;
+		assertDoesNotThrow(() -> mySvc.validateSubmittedSubscription(subscription, requestDetails));
 		Mockito.verify(myDaoConfig, times(1)).isCrossPartitionSubscription();
 		Mockito.verify(myDaoRegistry, times(1)).isResourceTypeSupported(eq("Patient"));
 		Mockito.verify(myRequestPartitionHelperSvc, times(1)).determineCreatePartitionForRequest(isA(RequestDetails.class), isA(Subscription.class), eq("Subscription"));
