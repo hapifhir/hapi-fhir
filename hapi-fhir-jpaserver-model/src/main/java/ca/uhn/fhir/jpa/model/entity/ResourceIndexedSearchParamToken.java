@@ -158,7 +158,7 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 
 		// Searches using the :of-type modifier can never be partial (system-only or value-only) so don't
 		// bother saving these
-		boolean calculatePartialHashes = !paramName.endsWith(Constants.PARAMQUALIFIER_TOKEN_OF_TYPE);
+		boolean calculatePartialHashes = !StringUtils.endsWith(paramName, Constants.PARAMQUALIFIER_TOKEN_OF_TYPE);
 		if (calculatePartialHashes) {
 			setHashSystem(calculateHashSystem(getPartitionSettings(), getPartitionId(), resourceType, paramName, system));
 			setHashValue(calculateHashValue(getPartitionSettings(), getPartitionId(), resourceType, paramName, value));
