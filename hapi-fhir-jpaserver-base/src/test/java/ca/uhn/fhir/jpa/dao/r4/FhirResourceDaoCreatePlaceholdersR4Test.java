@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -32,6 +33,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.startsWith;
@@ -155,9 +157,18 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
 		myDaoConfig.setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.ANY);
 
+		myCaptureQueriesListener.clear();
+
 		Observation o = new Observation();
 		o.setStatus(ObservationStatus.FINAL);
 		IIdType id = myObservationDao.create(o, mySrd).getId();
+
+		myCaptureQueriesListener.logAllQueries();
+
+		runInTransaction(()->{
+			ResourceTable entity = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(()->new IllegalArgumentException());
+			assertEquals(1, entity.getVersion());
+		});
 
 		try {
 			myPatientDao.read(new IdType("Patient/999999999999999"));
@@ -167,11 +178,15 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		}
 
 		o = new Observation();
-		o.setId(id);
+		o.setId(id.getValue());
 		o.setStatus(ObservationStatus.FINAL);
 		o.getSubject().setReference("Patient/999999999999999");
 		myObservationDao.update(o, mySrd);
 
+		runInTransaction(()->{
+			ResourceTable entity = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(()->new IllegalArgumentException());
+			assertEquals(2, entity.getVersion());
+		});
 
 		myPatientDao.read(new IdType("Patient/999999999999999"));
 
