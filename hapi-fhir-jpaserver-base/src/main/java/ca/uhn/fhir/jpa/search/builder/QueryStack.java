@@ -865,7 +865,6 @@ public class QueryStack {
 		}
 
 		public LeafNodeDefinition withPathPrefix(Set<String> theBase, String theName) {
-			// TODO: Is theBase ever empty? does it ever contain more than one entry? what's the right way to handle those cases?
 			return new LeafNodeDefinition(myParamDefinition, myOrValues, theBase.stream().findFirst().orElse(null), myLeafParamName, theName, myQualifiers);
 		}
 
@@ -992,7 +991,7 @@ public class QueryStack {
 
 		InCondition inCondition;
 		if (theSourceJoinColumn == null) {
-			inCondition = new InCondition(mySqlBuilder.getOrCreateFirstPredicateBuilder().getResourceIdColumn(), union);
+			inCondition = new InCondition(mySqlBuilder.getOrCreateFirstPredicateBuilder(false).getResourceIdColumn(), union);
 		} else {
 			//-- for the resource link, need join with target_resource_id
 			inCondition = new InCondition(theSourceJoinColumn, union);
