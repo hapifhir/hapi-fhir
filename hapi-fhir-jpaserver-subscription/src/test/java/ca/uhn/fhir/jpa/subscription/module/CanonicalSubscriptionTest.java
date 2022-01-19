@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.util.Lists;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -87,6 +88,18 @@ public class CanonicalSubscriptionTest {
 		CanonicalSubscription canonicalSubscription = canonicalizer.canonicalize(subscription);
 
 		assertEquals(canonicalSubscription.getCrossPartitionEnabled(), true);
+	}
+
+	@Test
+	public void testSerializeIncorrectMultiPartitionSubscription(){
+		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4());
+		Subscription subscription = makeEmailSubscription();
+		subscription.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new StringType().setValue("false"));
+		CanonicalSubscription canonicalSubscription = canonicalizer.canonicalize(subscription);
+
+		System.out.print(canonicalSubscription);
+
+		assertEquals(canonicalSubscription.getCrossPartitionEnabled(), false);
 	}
 
 	@Test

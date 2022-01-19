@@ -82,7 +82,7 @@ public class ModelConfig {
 	private Set<String> myTreatReferencesAsLogical = new HashSet<>(DEFAULT_LOGICAL_BASE_URLS);
 	private boolean myDefaultSearchParamsCanBeOverridden = true;
 	private Set<Subscription.SubscriptionChannelType> mySupportedSubscriptionTypes = new HashSet<>();
-	private boolean crossPartitionSubscription = false;
+	private boolean myCrossPartitionSubscription = false;
 	private String myEmailFromAddress = "noreply@unknown.com";
 	private String myWebsocketContextPath = DEFAULT_WEBSOCKET_CONTEXT_PATH;
 	/**
@@ -863,7 +863,7 @@ public class ModelConfig {
 	 * @since 7.5.0
 	 */
 	public boolean isCrossPartitionSubscription() {
-		return crossPartitionSubscription;
+		return myCrossPartitionSubscription;
 	}
 
 	/**
@@ -878,7 +878,7 @@ public class ModelConfig {
 	 * @since 7.5.0
 	 */
 	public void setCrossPartitionSubscription(boolean theAllowCrossPartitionSubscription) {
-		crossPartitionSubscription = theAllowCrossPartitionSubscription;
+		myCrossPartitionSubscription = theAllowCrossPartitionSubscription;
 	}
 
 }
