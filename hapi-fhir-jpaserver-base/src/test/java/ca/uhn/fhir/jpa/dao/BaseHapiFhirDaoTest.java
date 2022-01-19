@@ -4,16 +4,26 @@ import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.Appender;
 import org.hl7.fhir.r4.model.Patient;
 import org.jetbrains.annotations.Nullable;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
+import org.slf4j.LoggerFactory;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.persistence.EntityExistsException;
@@ -25,20 +35,26 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -65,14 +81,33 @@ public class BaseHapiFhirDaoTest {
 		}
 	}
 
+	private Logger ourLogger;
+
+	@Mock
+	private Appender<ILoggingEvent> myAppender;
+
 	@Mock
 	private MemoryCacheService myMemoryCacheService;
 
 	@Mock
 	private EntityManager myEntityManager;
 
+	@Mock
+	private PlatformTransactionManager myTransactionManager;
+
 	@InjectMocks
 	private TestDao myTestDao;
+
+	@BeforeEach
+	public void init() {
+		ourLogger = (Logger) LoggerFactory.getLogger(BaseHapiFhirDao.class);
+		ourLogger.addAppender(myAppender);
+	}
+
+	@AfterEach
+	public void end() {
+		ourLogger.detachAppender(myAppender);
+	}
 
 	/**
 	 * Returns a mocked criteria builder
@@ -105,21 +140,42 @@ public class BaseHapiFhirDaoTest {
 
 	@Test
 	public void getTagOrNull_raceCondition_wontUpsertDuplicates() throws InterruptedException, ExecutionException {
+		/*
+		 * We use this boolean to fake a race condition.
+		 * Boolean is used for two reasons:
+		 * 1) We don't want an unstable test (so a fake
+		 * race condition will ensure the test always executes
+		 * exactly as expected... but this just ensures the code
+		 * is not buggy, not that race conditions are actually handled)
+		 * 2) We want the ability (and confidence!) to know
+		 * that a _real_ race condition can be handled. Setting
+		 * this boolean false (and potentially tweaking thread count)
+		 * gives us this confidence.
+		 *
+		 * Set this false to try with a real race condition
+		 */
+		boolean fakeRaceCondition = true;
+
+		// the more threads, the more likely we
+		// are to see race conditions.
+		// We need a lot to ensure at least 2 threads
+		// are in the create method at the same time
+		int threads = fakeRaceCondition ? 2 : 30;
+
 		// setup
 		TagTypeEnum tagType = TagTypeEnum.TAG;
 		String scheme = "http://localhost";
 		String term = "code123";
 		String label = "hollow world";
 		TransactionDetails transactionDetails = new TransactionDetails();
+		String raceConditionError = "Entity exists; if this is logged, you have race condition issues!";
 
 		TagDefinition tagDefinition = new TagDefinition(tagType,
 			scheme,
 			term,
 			label);
 
-		// the more threads, the more likely we
-		// are to see race conditions
-		int threads = 20;
+		ourLogger.setLevel(Level.WARN);
 
 		// mock objects
 		CriteriaBuilder builder = getMockedCriteriaBuilder();
@@ -136,18 +192,28 @@ public class BaseHapiFhirDaoTest {
 				.thenReturn(from);
 		when(myEntityManager.createQuery(any(CriteriaQuery.class)))
 			.thenReturn(query);
+		AtomicBoolean atomicBoolean = new AtomicBoolean(false);
 		when(query.getSingleResult())
 			.thenAnswer(new Answer<TagDefinition>() {
-				private int count = 0;
+				private int count;
 
 				@Override
 				public TagDefinition answer(InvocationOnMock invocationOnMock) throws Throwable {
-					// this delay is to slow down
-					// other threads
-					Thread.sleep(500);
-					if (count == 0) {
-						count++;
-						throw new NoResultException();
+					if (fakeRaceCondition) {
+						// fake
+						// ensure the first 2 accesses throw to
+						// help fake a race condition (2, or possibly the same,
+						// thread failing to access the resource)
+						if (count < 2) {
+							count++;
+							throw new NoResultException();
+						}
+					}
+					else {
+						// real
+						if (!atomicBoolean.get()) {
+							throw new NoResultException();
+						}
 					}
 					return tagDefinition;
 				}
@@ -157,23 +223,25 @@ public class BaseHapiFhirDaoTest {
 
 			@Override
 			public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-				if (count == 0) {
-					count++;
-					/*
-					 * This delay is to ensure other threads
-					 * have time to enter this method at the same time.
-					 *
-					 * How much time we need depends on speed of computer,
-					 * number of threads, etc.
-					 *
-					 * So half second here is "arbitrary", but hopefully
-					 * good enough for failures if getTagOrNull will throw
-					 */
-					Thread.sleep(500);
-					return null;
+				if (fakeRaceCondition) {
+					// fake
+					if (count < 1) {
+						count++;
+						return null;
+					}
+					else {
+						throw new EntityExistsException(raceConditionError);
+					}
 				}
 				else {
-					throw new EntityExistsException("Entity exists; if this is logged, you have race condition issues!");
+					// real
+					if (!atomicBoolean.getAndSet(true)) {
+						// first thread gets null...
+						return null;
+					} else {
+						// all other threads get entity exists exception
+						throw new EntityExistsException(raceConditionError);
+					}
 				}
 			}
 		}).when(myEntityManager).persist(any(Object.class));
@@ -204,11 +272,78 @@ public class BaseHapiFhirDaoTest {
 		);
 
 		// verify
+		Assertions.assertEquals(1, outcomes.size());
+		Assertions.assertEquals(threads, counter.get());
 		Assertions.assertEquals(0, errors.size(),
 			errors.values().stream().map(Throwable::getMessage)
 				.collect(Collectors.joining(", ")));
-		Assertions.assertEquals(1, outcomes.size());
-		Assertions.assertEquals(threads, counter.get());
+
+		// verify we logged some race conditions
+		ArgumentCaptor<ILoggingEvent> captor = ArgumentCaptor.forClass(ILoggingEvent.class);
+		verify(myAppender, Mockito.atLeastOnce())
+			.doAppend(captor.capture());
+		assertTrue(captor.getAllValues().get(0).getMessage()
+			.contains(raceConditionError));
+	}
+
+	@Test
+	public void getTagOrNull_failingForever_throwsInternalErrorAndLogsWarnings() {
+		// setup
+		TagTypeEnum tagType = TagTypeEnum.TAG;
+		String scheme = "http://localhost";
+		String term = "code123";
+		String label = "hollow world";
+		TransactionDetails transactionDetails = new TransactionDetails();
+		String exMsg = "Hi there";
+		String readError = "No read for you";
+
+		ourLogger.setLevel(Level.WARN);
+
+		// mock objects
+		CriteriaBuilder builder = getMockedCriteriaBuilder();
+		TypedQuery<TagDefinition> query = mock(TypedQuery.class);
+		CriteriaQuery<TagDefinition> cq = mock(CriteriaQuery.class);
+		Root<TagDefinition> from = getMockedFrom();
+
+		// when
+		when(myEntityManager.getCriteriaBuilder())
+			.thenReturn(builder);
+		when(builder.createQuery(any(Class.class)))
+			.thenReturn(cq);
+		when(cq.from(any(Class.class)))
+			.thenReturn(from);
+		when(myEntityManager.createQuery(any(CriteriaQuery.class)))
+			.thenReturn(query);
+		when(query.getSingleResult())
+			.thenThrow(new NoResultException(readError));
+		doThrow(new RuntimeException(exMsg))
+			.when(myEntityManager).persist(any(Object.class));
+
+		// test
+		try {
+			myTestDao.getTagOrNull(transactionDetails, tagType, scheme, term, label);
+			fail();
+		} catch (Exception ex) {
+			// verify
+			assertEquals("Tag get/create failed after 10 attempts with error(s): " + exMsg, ex.getMessage());
+
+			ArgumentCaptor<ILoggingEvent> appenderCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
+			verify(myAppender, Mockito.times(10))
+				.doAppend(appenderCaptor.capture());
+			List<ILoggingEvent> events = appenderCaptor.getAllValues();
+			assertEquals(10, events.size());
+			for (int i = 0; i < 10; i++) {
+				String actualMsg = events.get(0).getMessage();
+				assertEquals(
+					"Tag read/write failed: "
+						+ exMsg
+						+ ". "
+						+ "This is not a failure on its own, "
+						+ "but could be useful information in the result of an actual failure.",
+					actualMsg
+				);
+			}
+		}
 	}
 
 	////////// Static access tests

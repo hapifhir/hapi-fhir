@@ -79,6 +79,7 @@ import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -118,8 +119,12 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -148,6 +153,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -246,6 +252,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	private MemoryCacheService myMemoryCacheService;
 	@Autowired(required = false)
 	private IFulltextSearchSvc myFulltextSearchSvc;
+
+	@Autowired
+	private PlatformTransactionManager myTransactionManager;
 
 	@VisibleForTesting
 	public void setSearchParamPresenceSvc(ISearchParamPresenceSvc theSearchParamPresenceSvc) {
@@ -427,35 +436,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			retVal = resolvedTagDefinitions.get(key);
 
 			if (retVal == null) {
-				CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-				CriteriaQuery<TagDefinition> cq = builder.createQuery(TagDefinition.class);
-				Root<TagDefinition> from = cq.from(TagDefinition.class);
-
-				if (isNotBlank(theScheme)) {
-					cq.where(
-						builder.and(
-							builder.equal(from.get("myTagType"), theTagType),
-							builder.equal(from.get("mySystem"), theScheme),
-							builder.equal(from.get("myCode"), theTerm)));
-				} else {
-					cq.where(
-						builder.and(
-							builder.equal(from.get("myTagType"), theTagType),
-							builder.isNull(from.get("mySystem")),
-							builder.equal(from.get("myCode"), theTerm)));
-				}
-
-				TypedQuery<TagDefinition> q = myEntityManager.createQuery(cq);
-
-				// synchronize to ensure no duplicates
-				synchronized (this) {
-					try {
-						retVal = q.getSingleResult();
-					} catch (NoResultException e) {
-						retVal = new TagDefinition(theTagType, theScheme, theTerm, theLabel);
-						myEntityManager.persist(retVal);
-					}
-				}
+				// actual DB hit(s) happen here
+				retVal = getOrCreateTag(theTagType, theScheme, theTerm, theLabel);
 
 				TransactionSynchronization sync = new AddTagDefinitionToCacheAfterCommitSynchronization(key, retVal);
 				TransactionSynchronizationManager.registerSynchronization(sync);
@@ -463,6 +445,98 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				resolvedTagDefinitions.put(key, retVal);
 			}
 		}
+
+		return retVal;
+	}
+
+	/**
+	 * Gets the tag defined by the fed in values, or saves it if it does not
+	 * exist.
+	 *
+	 * Can also throw an InternalErrorException if something bad happens.
+	 */
+	private TagDefinition getOrCreateTag(TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel) {
+		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<TagDefinition> cq = builder.createQuery(TagDefinition.class);
+		Root<TagDefinition> from = cq.from(TagDefinition.class);
+
+		if (isNotBlank(theScheme)) {
+			cq.where(
+				builder.and(
+					builder.equal(from.get("myTagType"), theTagType),
+					builder.equal(from.get("mySystem"), theScheme),
+					builder.equal(from.get("myCode"), theTerm)));
+		} else {
+			cq.where(
+				builder.and(
+					builder.equal(from.get("myTagType"), theTagType),
+					builder.isNull(from.get("mySystem")),
+					builder.equal(from.get("myCode"), theTerm)));
+		}
+
+		TypedQuery<TagDefinition> q = myEntityManager.createQuery(cq);
+
+		TransactionTemplate template = new TransactionTemplate(myTransactionManager);
+		template.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+
+		// this transaction will attempt to get or create the tag,
+		// repeating (on any failure) 10 times.
+		// if it fails more than this, we will throw exceptions
+		TagDefinition retVal = template.execute(new TransactionCallback<TagDefinition>() {
+
+			private static final int TOTAL_ATTEMPTS = 10;
+
+			// do the actual DB call(s) to read and/or write the values
+			private TagDefinition readOrCreate() {
+				TagDefinition val;
+				try {
+					val = q.getSingleResult();
+				} catch (NoResultException e) {
+					val = new TagDefinition(theTagType, theScheme, theTerm, theLabel);
+					myEntityManager.persist(val);
+				}
+				return val;
+			}
+
+			@Override
+			public TagDefinition doInTransaction(TransactionStatus status) {
+				TagDefinition tag = null;
+				int count = 0;
+				HashSet<Throwable> throwables = new HashSet<>();
+				do {
+					try {
+						tag = readOrCreate();
+					} catch (Exception ex) {
+						// log any exceptions - just in case
+						// they may be signs of things to come...
+						ourLog.warn(
+							"Tag read/write failed: "
+							+ ex.getMessage() + ". "
+							+ "This is not a failure on its own, "
+							+ "but could be useful information in the result of an actual failure."
+						);
+						count++;
+						throwables.add(ex);
+					}
+				} while (tag == null && count < TOTAL_ATTEMPTS);
+
+				if (tag == null) {
+					// if tag is still null,
+					// something bad must be happening
+					// - throw
+					String msg = throwables.stream()
+						.map(Throwable::getMessage)
+						.collect(Collectors.joining(", "));
+					throw new InternalErrorException(
+						"Tag get/create failed after "
+						+ TOTAL_ATTEMPTS
+						+ " attempts with error(s): "
+						+ msg
+					);
+				}
+				return tag;
+			}
+		});
 
 		return retVal;
 	}
