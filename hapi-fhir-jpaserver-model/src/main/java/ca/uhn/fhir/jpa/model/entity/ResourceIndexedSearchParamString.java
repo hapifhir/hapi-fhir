@@ -29,10 +29,6 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hibernate.search.engine.backend.types.Projectable;
-import org.hibernate.search.engine.backend.types.Searchable;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -118,7 +114,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		setParamName(theParamName);
 		setValueNormalized(theValueNormalized);
 		setValueExact(theValueExact);
-		calculateHashes();
+		calculateHashes(true);
 	}
 
 	@Override
@@ -133,8 +129,8 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	}
 
 	@Override
-	public void calculateHashes() {
-		if (myHashIdentity != null || myHashExact != null || myHashNormalizedPrefix != null) {
+	public void calculateHashes(boolean theForce) {
+		if (!theForce && (myHashIdentity != null || myHashExact != null || myHashNormalizedPrefix != null)) {
 			return;
 		}
 

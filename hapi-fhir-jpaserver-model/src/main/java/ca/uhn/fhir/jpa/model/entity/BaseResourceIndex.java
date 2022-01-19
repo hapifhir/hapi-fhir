@@ -30,7 +30,17 @@ public abstract class BaseResourceIndex extends BasePartitionable implements Ser
 
 	public abstract void setId(Long theId);
 
-	public abstract void calculateHashes();
+	/**
+	 * Simply calls {@link #calculateHashes(boolean)} with force=false
+	 */
+	public void calculateHashes() {
+		calculateHashes(false);
+	}
+
+	/**
+	 * @param theForce Should indexes be recalculated even if they are already present?
+	 */
+	public abstract void calculateHashes(boolean theForce);
 
 	/**
 	 * Subclasses must implement

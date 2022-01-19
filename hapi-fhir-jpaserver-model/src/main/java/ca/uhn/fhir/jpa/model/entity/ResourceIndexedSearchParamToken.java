@@ -126,7 +126,7 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		setSystem(theSystem);
 		setValue(theValue);
 
-		calculateHashes();
+		calculateHashes(true);
 	}
 
 	@Override
@@ -144,8 +144,8 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 
 
 	@Override
-	public void calculateHashes() {
-		if (myHashIdentity != null || myHashSystem != null || myHashValue != null || myHashSystemAndValue != null) {
+	public void calculateHashes(boolean theForce) {
+		if (!theForce && (myHashIdentity != null || myHashSystem != null || myHashValue != null || myHashSystemAndValue != null)) {
 			return;
 		}
 

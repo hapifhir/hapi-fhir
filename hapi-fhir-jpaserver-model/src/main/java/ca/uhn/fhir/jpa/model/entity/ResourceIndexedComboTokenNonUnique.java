@@ -126,7 +126,11 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex implem
 	}
 
 	@Override
-	public void calculateHashes() {
+	public void calculateHashes(boolean theForce) {
+		if (!theForce && (myHashComplete != null)) {
+			return;
+		}
+
 		PartitionSettings partitionSettings = getPartitionSettings();
 		PartitionablePartitionId partitionId = getPartitionId();
 		String queryString = myIndexString;

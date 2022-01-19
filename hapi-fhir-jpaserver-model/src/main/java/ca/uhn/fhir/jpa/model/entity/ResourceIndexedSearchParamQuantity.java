@@ -39,7 +39,6 @@ import javax.persistence.Table;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.ScaledNumberField;
 
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -83,7 +82,7 @@ public class ResourceIndexedSearchParamQuantity extends ResourceIndexedSearchPar
 		setSystem(theSystem);
 		setValue(theValue);
 		setUnits(theUnits);
-		calculateHashes();
+		calculateHashes(true);
 	}
 
 	@Override

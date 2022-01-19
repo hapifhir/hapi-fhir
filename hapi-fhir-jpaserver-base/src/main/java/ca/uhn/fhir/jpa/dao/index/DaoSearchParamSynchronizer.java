@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.dao.index;
  */
 
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndex;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;

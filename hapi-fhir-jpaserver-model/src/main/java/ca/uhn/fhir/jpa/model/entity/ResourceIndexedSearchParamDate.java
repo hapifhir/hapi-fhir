@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -128,7 +127,7 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		computeValueLowDateOrdinal(theLowString);
 		reComputeValueHighDate(theHigh, theHighString);
 		myOriginalValue = theOriginalValue;
-		calculateHashes();
+		calculateHashes(true);
 	}
 
 	private void computeValueHighDateOrdinal(String theHigh) {
@@ -202,8 +201,8 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	}
 
 	@Override
-	public void calculateHashes() {
-		if (myHashIdentity != null) {
+	public void calculateHashes(boolean theForce) {
+		if (!theForce && (myHashIdentity != null)) {
 			return;
 		}
 
