@@ -2194,9 +2194,12 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	public void testSearch_StringParam_SearchOnePartition_IncludePartitionInHashes() {
 		myPartitionSettings.setIncludePartitionInSearchHashes(true);
 
-		createPatient(withPartition(null), withFamily("FAMILY"));
+		// FIXME: restore
+//		createPatient(withPartition(null), withFamily("FAMILY"));
 		IIdType patientId1 = createPatient(withPartition(1), withFamily("FAMILY"));
-		createPatient(withPartition(2), withFamily("FAMILY"));
+//		createPatient(withPartition(2), withFamily("FAMILY"));
+
+		logAllStringIndexes();
 
 		addReadPartition(1);
 
@@ -2207,7 +2210,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertThat(ids, contains(patientId1));
+		assertThat(ids.toString(), ids, contains(patientId1));
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);

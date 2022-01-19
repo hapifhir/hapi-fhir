@@ -91,7 +91,6 @@ public class ResourceIndexedSearchParamQuantityNormalized extends ResourceIndexe
 		setSystem(theSystem);
 		setValue(theValue);
 		setUnits(theUnits);
-		calculateHashes(true);
 	}
 
 	@Override

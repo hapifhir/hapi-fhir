@@ -120,17 +120,10 @@ public class SearchParamWithInlineReferencesExtractor {
 		mySearchParamRegistry = theSearchParamRegistry;
 	}
 
-	public void populateFromResource(ResourceIndexedSearchParams theParams, TransactionDetails theTransactionDetails, ResourceTable theEntity, IBaseResource theResource, ResourceIndexedSearchParams theExistingParams, RequestDetails theRequest, boolean theFailOnInvalidReference) {
+	public void populateFromResource(RequestPartitionId theRequestPartitionId, ResourceIndexedSearchParams theParams, TransactionDetails theTransactionDetails, ResourceTable theEntity, IBaseResource theResource, ResourceIndexedSearchParams theExistingParams, RequestDetails theRequest, boolean theFailOnInvalidReference) {
 		extractInlineReferences(theResource, theTransactionDetails, theRequest);
 
-		RequestPartitionId partitionId;
-		if (myPartitionSettings.isPartitioningEnabled()) {
-			partitionId = PartitionablePartitionId.toRequestPartitionId(theEntity.getPartitionId());
-		} else {
-			partitionId = RequestPartitionId.allPartitions();
-		}
-
-		mySearchParamExtractorService.extractFromResource(partitionId, theRequest, theParams, theEntity, theResource, theTransactionDetails, theFailOnInvalidReference);
+		mySearchParamExtractorService.extractFromResource(theRequestPartitionId, theRequest, theParams, theEntity, theResource, theTransactionDetails, theFailOnInvalidReference);
 
 		Set<Map.Entry<String, RuntimeSearchParam>> activeSearchParams = mySearchParamRegistry.getActiveSearchParams(theEntity.getResourceType()).entrySet();
 		if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.ENABLED) {

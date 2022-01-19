@@ -209,37 +209,45 @@ public class SearchParamExtractorService {
 		// Strings
 		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamString> strings = extractSearchParamStrings(theResource);
 		handleWarnings(theRequestDetails, myInterceptorBroadcaster, strings);
+		populatePartitionAndCalculateHashes(strings, theEntity);
 		theParams.myStringParams.addAll(strings);
 
 		// Numbers
 		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamNumber> numbers = extractSearchParamNumber(theResource);
 		handleWarnings(theRequestDetails, myInterceptorBroadcaster, numbers);
+		populatePartitionAndCalculateHashes(numbers, theEntity);
 		theParams.myNumberParams.addAll(numbers);
 
 		// Quantities
 		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamQuantity> quantities = extractSearchParamQuantity(theResource);
 		handleWarnings(theRequestDetails, myInterceptorBroadcaster, quantities);
+		populatePartitionAndCalculateHashes(quantities, theEntity);
 		theParams.myQuantityParams.addAll(quantities);
 
 		if (myModelConfig.getNormalizedQuantitySearchLevel().equals(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_STORAGE_SUPPORTED) || myModelConfig.getNormalizedQuantitySearchLevel().equals(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED)) {
 			ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamQuantityNormalized> quantitiesNormalized = extractSearchParamQuantityNormalized(theResource);
 			handleWarnings(theRequestDetails, myInterceptorBroadcaster, quantitiesNormalized);
+			populatePartitionAndCalculateHashes(quantitiesNormalized, theEntity);
 			theParams.myQuantityNormalizedParams.addAll(quantitiesNormalized);
 		}
 
 		// Dates
 		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamDate> dates = extractSearchParamDates(theResource);
 		handleWarnings(theRequestDetails, myInterceptorBroadcaster, dates);
+		populatePartitionAndCalculateHashes(dates, theEntity);
 		theParams.myDateParams.addAll(dates);
 
 		// URIs
 		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamUri> uris = extractSearchParamUri(theResource);
 		handleWarnings(theRequestDetails, myInterceptorBroadcaster, uris);
+		populatePartitionAndCalculateHashes(uris, theEntity);
 		theParams.myUriParams.addAll(uris);
 
 		// Tokens (can result in both Token and String, as we index the display name for
 		// the types: Coding, CodeableConcept)
-		for (BaseResourceIndexedSearchParam next : extractSearchParamTokens(theResource)) {
+		ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> tokens = extractSearchParamTokens(theResource);
+		populatePartitionAndCalculateHashes(tokens, theEntity);
+		for (BaseResourceIndexedSearchParam next : tokens) {
 			if (next instanceof ResourceIndexedSearchParamToken) {
 				theParams.myTokenParams.add((ResourceIndexedSearchParamToken) next);
 			} else if (next instanceof ResourceIndexedSearchParamCoords) {
@@ -250,14 +258,23 @@ public class SearchParamExtractorService {
 		}
 
 		// Specials
-		for (BaseResourceIndexedSearchParam next : extractSearchParamSpecial(theResource)) {
+		ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> specials = extractSearchParamSpecial(theResource);
+		populatePartitionAndCalculateHashes(specials, theEntity);
+		for (BaseResourceIndexedSearchParam next : specials) {
 			if (next instanceof ResourceIndexedSearchParamCoords) {
 				theParams.myCoordsParams.add((ResourceIndexedSearchParamCoords) next);
 			}
 		}
 
 	}
-		
+
+	private <T extends BaseResourceIndexedSearchParam> void populatePartitionAndCalculateHashes(Collection<T> theIndexes, ResourceTable theEntity) {
+		for (BaseResourceIndexedSearchParam t : theIndexes) {
+			t.setPartitionId(theEntity.getPartitionId());
+			t.calculateHashes(true);
+		}
+	}
+
 	private void populateResourceTables(ResourceIndexedSearchParams theParams, ResourceTable theEntity) {
 		
 		populateResourceTable(theParams.myNumberParams, theEntity);

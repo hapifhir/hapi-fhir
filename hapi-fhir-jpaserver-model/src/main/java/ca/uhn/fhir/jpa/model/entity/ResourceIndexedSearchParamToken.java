@@ -125,8 +125,6 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		setParamName(theParamName);
 		setSystem(theSystem);
 		setValue(theValue);
-
-		calculateHashes(true);
 	}
 
 	@Override

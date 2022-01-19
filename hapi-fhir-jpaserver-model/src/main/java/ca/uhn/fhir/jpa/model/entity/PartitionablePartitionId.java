@@ -21,6 +21,8 @@ package ca.uhn.fhir.jpa.model.entity;
  */
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -83,6 +85,13 @@ public class PartitionablePartitionId implements Cloneable {
 
 	public RequestPartitionId toPartitionId() {
 		return RequestPartitionId.fromPartitionId(getPartitionId(), getPartitionDate());
+	}
+
+	@Override
+	public String toString() {
+		return "[" +
+			getPartitionId() +
+			"]";
 	}
 
 	@Nonnull

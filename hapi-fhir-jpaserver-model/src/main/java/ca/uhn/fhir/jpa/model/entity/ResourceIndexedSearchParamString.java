@@ -114,7 +114,6 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		setParamName(theParamName);
 		setValueNormalized(theValueNormalized);
 		setValueExact(theValueExact);
-		calculateHashes(true);
 	}
 
 	@Override
@@ -245,6 +244,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		b.append("resourceId", getResourcePid());
 		b.append("hashNormalizedPrefix", getHashNormalizedPrefix());
 		b.append("valueNormalized", getValueNormalized());
+		b.append("partitionId", getPartitionId());
 		return b.build();
 	}
 

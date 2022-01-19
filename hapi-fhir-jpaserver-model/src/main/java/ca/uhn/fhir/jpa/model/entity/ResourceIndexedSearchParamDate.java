@@ -127,7 +127,6 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		computeValueLowDateOrdinal(theLowString);
 		reComputeValueHighDate(theHigh, theHighString);
 		myOriginalValue = theOriginalValue;
-		calculateHashes(true);
 	}
 
 	private void computeValueHighDateOrdinal(String theHigh) {
