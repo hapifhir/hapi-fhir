@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -26,6 +27,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -1170,6 +1172,46 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		} catch (InvalidRequestException e) {
 			assertEquals("The search chain subject.organization.partof.partof.name is too long. Only chains up to three references are supported.", e.getMessage());
 		}
+	}
+
+	@Test
+	public void testQueryStructure() throws Exception {
+
+		// With indexing of contained resources turned off, we should not see UNION clauses in the query
+		countUnionStatementsInGeneratedQuery("/Observation?patient.name=Smith", 0);
+		countUnionStatementsInGeneratedQuery("/Observation?patient.organization.name=Smith", 0);
+		countUnionStatementsInGeneratedQuery("/Observation?patient.organization.partof.name=Smith", 0);
+
+		// With indexing of contained resources turned on, we take the UNION of several subselects that handle the different patterns of containment
+		//  Keeping in mind that the number of clauses is one greater than the number of UNION keywords,
+		//  this increases as the chain grows longer according to the Fibonacci sequence: (2, 3, 5, 8, 13)
+		myModelConfig.setIndexOnContainedResources(true);
+		countUnionStatementsInGeneratedQuery("/Observation?patient.name=Smith", 1);
+		countUnionStatementsInGeneratedQuery("/Observation?patient.organization.name=Smith", 2);
+		countUnionStatementsInGeneratedQuery("/Observation?patient.organization.partof.name=Smith", 4);
+
+		// With recursive indexing of contained resources turned on, even more containment patterns are considered
+		//  This increases as the chain grows longer as powers of 2: (2, 4, 8, 16, 32)
+		myModelConfig.setIndexOnContainedResourcesRecursively(true);
+		countUnionStatementsInGeneratedQuery("/Observation?patient.name=Smith", 1);
+		countUnionStatementsInGeneratedQuery("/Observation?patient.organization.name=Smith", 3);
+		countUnionStatementsInGeneratedQuery("/Observation?patient.organization.partof.name=Smith", 7);
+
+		// If a reference in the chain has multiple potential target resource types, the number of subselects increases
+		countUnionStatementsInGeneratedQuery("/Observation?subject.name=Smith", 3);
+
+		// If such a reference if qualified to restrict the type, the number goes back down
+		countUnionStatementsInGeneratedQuery("/Observation?subject:Location.name=Smith", 1);
+	}
+
+	private void countUnionStatementsInGeneratedQuery(String theUrl, int theExpectedNumberOfUnions) throws IOException {
+		myCaptureQueriesListener.clear();
+		searchAndReturnUnqualifiedVersionlessIdValues(theUrl);
+		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
+		assertEquals(1, selectQueries.size());
+
+		String sqlQuery = selectQueries.get(0).getSql(true, true).toLowerCase();
+		assertEquals(theExpectedNumberOfUnions, countMatches(sqlQuery, "union"), sqlQuery);
 	}
 
 	private List<String> searchAndReturnUnqualifiedVersionlessIdValues(String theUrl) throws IOException {
