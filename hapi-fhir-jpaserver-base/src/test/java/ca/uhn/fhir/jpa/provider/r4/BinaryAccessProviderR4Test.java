@@ -99,10 +99,6 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESHOW_RESOURCES, interceptor);
 
-		PointcutLatch outgoingResponsePointcutLatch = new PointcutLatch("SERVER_OUTGOING_RESPONSE");
-		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_OUTGOING_RESPONSE, outgoingResponsePointcutLatch);
-
-
 		doAnswer(t -> {
 			Pointcut pointcut = t.getArgument(0, Pointcut.class);
 			HookParams params = t.getArgument(1, HookParams.class);
@@ -119,10 +115,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			"?path=DocumentReference.content.attachment";
 		HttpGet get = new HttpGet(path);
 
-		outgoingResponsePointcutLatch.setExpectedCount(1);
-
 		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
-			outgoingResponsePointcutLatch.awaitExpected();
 			assertEquals(200, resp.getStatusLine().getStatusCode());
 			assertEquals("image/png", resp.getEntity().getContentType().getValue());
 			assertEquals(SOME_BYTES.length, resp.getEntity().getContentLength());
@@ -133,11 +126,6 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		}
 
 		verify(interceptor, times(1)).invoke(eq(Pointcut.STORAGE_PRESHOW_RESOURCES), any());
-		RequestDetails requestDetails = outgoingResponsePointcutLatch.getLatchInvocationParameterOfType(RequestDetails.class);
-		ResponseDetails responseDetails= outgoingResponsePointcutLatch.getLatchInvocationParameterOfType(ResponseDetails.class);
-		assertThat(responseDetails, is(notNullValue()));
-		assertThat(requestDetails, is(notNullValue()));
-		assertThat(requestDetails.getId().toString(), is(equalTo(id.toString())));
 	}
 
 
@@ -186,7 +174,6 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 
 	}
 
-
 	@Test
 	public void testReadNoData() throws IOException {
 		IIdType id = createDocumentReference(false);
@@ -208,23 +195,31 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 
 
 	@Test
-	public void testManualResponseOperationsInvokeServerOutgoingResponsePointcut() throws IOException {
-		IIdType id = createDocumentReference(false);
+	public void testManualResponseOperationsInvokeServerOutgoingResponsePointcut() throws IOException, InterruptedException {
+		IIdType id = createDocumentReference(true);
+
 		PointcutLatch latch = new PointcutLatch(Pointcut.SERVER_OUTGOING_RESPONSE);
-		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.SERVER_OUTGOING_RESPONSE, latch);
-		latch.setExpectedCount(1);
+		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_OUTGOING_RESPONSE, latch);
+
+
 		String path = ourServerBase +
 			"/DocumentReference/" + id.getIdPart() + "/" +
 			JpaConstants.OPERATION_BINARY_ACCESS_READ +
 			"?path=DocumentReference.content.attachment";
-
 		HttpGet get = new HttpGet(path);
+
+		latch.setExpectedCount(1);
 		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+			latch.awaitExpected();
 
-			assertEquals(400, resp.getStatusLine().getStatusCode());
-			String response = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
-			assertThat(response, matchesPattern(".*The resource with ID DocumentReference/[0-9]+ has no data at path.*"));
+			RequestDetails requestDetails = latch.getLatchInvocationParameterOfType(RequestDetails.class);
+			ResponseDetails responseDetails= latch.getLatchInvocationParameterOfType(ResponseDetails.class);
 
+			assertThat(responseDetails, is(notNullValue()));
+			assertThat(requestDetails, is(notNullValue()));
+
+			assertThat(requestDetails.getId().toString(), is(equalTo(id.toString())));
 		}
 	}
 	@Test
