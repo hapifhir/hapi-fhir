@@ -8,6 +8,8 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.BundleBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -27,6 +29,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Date;
@@ -43,6 +46,7 @@ import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4VersionedReferenceTest.class);
@@ -832,6 +836,36 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		assertThat(versionedPatientReference, is(equalTo("Patient/RED/_history/1")));
 	}
 
+	@Test
+	public void bundleTransaction_withRequestUrlNotRelativePath_doesNotProcess() throws IOException {
+		Bundle bundle = loadResourceFromClasspath(Bundle.class, "/transaction-bundles/transaction-with-full-request-url.json");
+
+		try {
+			// test
+			mySystemDao.transaction(new ServletRequestDetails(),
+				bundle);
+			fail("We expect invalid full urls to fail");
+		} catch (InvalidRequestException ex) {
+			Assertions.assertTrue(ex.getMessage().contains("Unable to perform POST, URL provided is invalid:"));
+		}
+	}
+
+	@Test
+	public void bundleTransaction_withRequestURLWithPrecedingSlash_processesAsExpected() throws IOException {
+		Bundle bundle = loadResourceFromClasspath(Bundle.class, "/transaction-bundles/transaction-with-preceding-slash-request-url.json");
+
+		// test
+		Bundle outcome = mySystemDao.transaction(new SystemRequestDetails(),
+			bundle);
+
+		// verify it was created
+		Assertions.assertEquals(1, outcome.getEntry().size());
+		IdType idType = new IdType(bundle.getEntry().get(0)
+				.getResource().getId());
+		// the bundle above contains an observation, so we'll verify it was created here
+		Observation obs = myObservationDao.read(idType);
+		Assertions.assertNotNull(obs);
+	}
 
 	@Test
 	@DisplayName("Bundle transaction with AutoVersionReferenceAtPath on and with existing Patient resource should create")

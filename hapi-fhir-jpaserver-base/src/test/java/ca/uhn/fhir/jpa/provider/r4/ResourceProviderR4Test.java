@@ -135,6 +135,7 @@ import org.hl7.fhir.r4.model.UnsignedIntType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -218,9 +219,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(SearchCoordinatorSvcImpl.DEFAULT_SYNC_SIZE);
 		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(false);
 		mySearchCoordinatorSvcRaw.cancelAllActiveSearches();
-        myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
+		myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 
-        myClient.unregisterInterceptor(myCapturingInterceptor);
+		myClient.unregisterInterceptor(myCapturingInterceptor);
 	}
 
 	@BeforeEach
@@ -6102,6 +6103,40 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			response.close();
 		}
 
+	}
+
+	@Test
+	public void testDeleteNonExistentResourceReturns200() throws IOException {
+		HttpDelete delete = new HttpDelete(ourServerBase + "/Patient/someIdHereThatIsUnique");
+
+		try (CloseableHttpResponse response = ourHttpClient.execute(delete)) {
+			Assertions.assertEquals(200, response.getStatusLine().getStatusCode());
+		}
+	}
+
+	@Test
+	public void testDeleteSameResourceTwice() throws IOException {
+		String id = "mySecondUniqueId";
+
+		Patient p = new Patient();
+		p.setId(id);
+		String encoded = myFhirCtx.newJsonParser().encodeResourceToString(p);
+
+		HttpPut put = new HttpPut(ourServerBase + "/Patient/" + id);
+		put.setEntity(new StringEntity(encoded, ContentType.create("application/fhir+json", "UTF-8")));
+		try (CloseableHttpResponse response = ourHttpClient.execute(put)) {
+			assertEquals(201, response.getStatusLine().getStatusCode());
+		}
+
+		HttpDelete delete = new HttpDelete(ourServerBase + "/Patient/" + id);
+
+		for (int i = 0; i < 2; i++) {
+			// multiple deletes of the same resource
+			// should always succeed
+			try (CloseableHttpResponse response = ourHttpClient.execute(delete)) {
+				Assertions.assertEquals(200, response.getStatusLine().getStatusCode());
+			}
+		}
 	}
 
 	@Test

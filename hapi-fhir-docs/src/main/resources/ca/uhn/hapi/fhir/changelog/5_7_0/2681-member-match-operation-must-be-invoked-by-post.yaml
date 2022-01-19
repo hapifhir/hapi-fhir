@@ -1,0 +1,4 @@
+---
+type: fix
+title: "$member-match operation was allowed to be invoked by GET when it shouldn't have.
+   That is fixed. Operation can only be invoked by POST request"

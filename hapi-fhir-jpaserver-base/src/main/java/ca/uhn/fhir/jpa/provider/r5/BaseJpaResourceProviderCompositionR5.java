@@ -50,7 +50,7 @@ public class BaseJpaResourceProviderCompositionR5 extends JpaResourceProviderR5<
 	 * Composition/123/$document
 	 */
 	@Operation(name = JpaConstants.OPERATION_DOCUMENT, idempotent = true, bundleType=BundleTypeEnum.DOCUMENT)
-	public IBaseBundle getDocumentForComposition(
+	public IBundleProvider getDocumentForComposition(
 
 			javax.servlet.http.HttpServletRequest theServletRequest,
 
@@ -78,14 +78,7 @@ public class BaseJpaResourceProviderCompositionR5 extends JpaResourceProviderR5<
 		startRequest(theServletRequest);
 		try {
 			IBundleProvider bundleProvider = ((IFhirResourceDaoComposition<Composition>) getDao()).getDocumentForComposition(theServletRequest, theId, theCount, theOffset, theLastUpdated, theSortSpec, theRequestDetails);
-			List<IBaseResource> resourceList = bundleProvider.getAllResources();
-
-			boolean foundCompositionResource = false;
-			Bundle bundle = new Bundle().setType(Bundle.BundleType.DOCUMENT);
-			for (IBaseResource resource : resourceList) {
-				bundle.addEntry(new Bundle.BundleEntryComponent().setResource((Resource) resource));
-			}
-			return bundle;
+			return bundleProvider;
 		} finally {
 			endRequest(theServletRequest);
 		}
