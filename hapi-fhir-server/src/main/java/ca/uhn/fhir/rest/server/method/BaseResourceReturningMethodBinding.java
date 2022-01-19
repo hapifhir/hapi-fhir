@@ -430,7 +430,6 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 
 	@Override
 	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
-
 		IBaseResource response = doInvokeServer(theServer, theRequest);
 		//Some manual responses occur, and we still want to call the outgoing hooks for them.
 		if (response == null) {
