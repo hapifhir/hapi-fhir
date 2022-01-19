@@ -1025,7 +1025,7 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 			.setResource(updatedValueSet_v1)
 			.getRequest()
 			.setMethod(Bundle.HTTPVerb.PUT)
-			.setUrl(url);
+			.setUrl(myExtensionalVsId_v1.getValueAsString());
 		ourLog.info("Transaction Bundle:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		myClient.transaction().withBundle(bundle).execute();
 
@@ -1047,7 +1047,7 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 			.setResource(updatedValueSet_v2)
 			.getRequest()
 			.setMethod(Bundle.HTTPVerb.PUT)
-			.setUrl(url);
+			.setUrl(myExtensionalVsId_v2.getValueAsString());
 		ourLog.info("Transaction Bundle:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		myClient.transaction().withBundle(bundle).execute();
 

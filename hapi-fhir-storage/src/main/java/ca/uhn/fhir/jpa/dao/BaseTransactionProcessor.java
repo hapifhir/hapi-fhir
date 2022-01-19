@@ -894,6 +894,16 @@ public abstract class BaseTransactionProcessor {
 				switch (verb) {
 					case "POST": {
 						// CREATE
+						/*
+						 * To preserve existing functionality,
+						 * we will only verify that the request url is
+						 * valid if it's provided at all.
+						 * Otherwise, we'll ignore it
+						 */
+						String url = myVersionAdapter.getEntryRequestUrl(nextReqEntry);
+						if (isNotBlank(url)) {
+							extractAndVerifyTransactionUrlForEntry(nextReqEntry, verb);
+						}
 						validateResourcePresent(res, order, verb);
 						@SuppressWarnings("rawtypes")
 						IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
@@ -920,7 +930,7 @@ public abstract class BaseTransactionProcessor {
 					}
 					case "DELETE": {
 						// DELETE
-						String url = extractTransactionUrlOrThrowException(nextReqEntry, verb);
+						String url = extractAndVerifyTransactionUrlForEntry(nextReqEntry, verb);
 						UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
 						IFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb, url);
 						int status = Constants.STATUS_HTTP_204_NO_CONTENT;
@@ -959,7 +969,7 @@ public abstract class BaseTransactionProcessor {
 						@SuppressWarnings("rawtypes")
 						IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
 
-						String url = extractTransactionUrlOrThrowException(nextReqEntry, verb);
+						String url = extractAndVerifyTransactionUrlForEntry(nextReqEntry, verb);
 
 						DaoMethodOutcome outcome;
 						UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
@@ -1003,7 +1013,7 @@ public abstract class BaseTransactionProcessor {
 						// PATCH
 						validateResourcePresent(res, order, verb);
 
-						String url = extractTransactionUrlOrThrowException(nextReqEntry, verb);
+						String url = extractAndVerifyTransactionUrlForEntry(nextReqEntry, verb);
 						UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
 
 						String matchUrl = toMatchUrl(nextReqEntry);
@@ -1543,6 +1553,58 @@ public abstract class BaseTransactionProcessor {
 		myContext = theContext;
 	}
 
+	/**
+	 * Extracts the transaction url from the entry and verifies it's:
+	 * * not null or bloack
+	 * * is a relative url matching the resourceType it is about
+	 *
+	 * Returns the transaction url (or throws an InvalidRequestException if url is not valid)
+	 */
+	private String extractAndVerifyTransactionUrlForEntry(IBase theEntry, String theVerb) {
+		String url = extractTransactionUrlOrThrowException(theEntry, theVerb);
+
+		if (!isValidResourceTypeUrl(url)) {
+			ourLog.debug("Invalid url. Should begin with a resource type: {}", url);
+			String msg = myContext.getLocalizer().getMessage(BaseStorageDao.class, "transactionInvalidUrl", theVerb, url);
+			throw new InvalidRequestException(msg);
+		}
+		return url;
+	}
+
+	/**
+	 * Returns true if the provided url is a valid entry request.url.
+	 *
+	 * This means:
+	 * a) not an absolute url (does not start with http/https)
+	 * b) starts with either a ResourceType or /ResourceType
+	 */
+	private boolean isValidResourceTypeUrl(@Nonnull String theUrl) {
+		if (UrlUtil.isAbsolute(theUrl)) {
+			return false;
+		} else {
+			int queryStringIndex = theUrl.indexOf("?");
+			String url;
+			if (queryStringIndex > 0) {
+				url = theUrl.substring(0, theUrl.indexOf("?"));
+			} else {
+				url = theUrl;
+			}
+			String[] parts;
+			if (url.startsWith("/")) {
+				parts = url.substring(1).split("/");
+			} else {
+				parts = url.split("/");
+			}
+			Set<String> allResourceTypes = myContext.getResourceTypes();
+
+			return allResourceTypes.contains(parts[0]);
+		}
+	}
+
+	/**
+	 * Extracts the transaction url from the entry and verifies that it is not null/blank
+	 * and returns it
+	 */
 	private String extractTransactionUrlOrThrowException(IBase nextEntry, String verb) {
 		String url = myVersionAdapter.getEntryRequestUrl(nextEntry);
 		if (isBlank(url)) {

@@ -2,7 +2,9 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
+import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
@@ -56,6 +58,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -77,6 +80,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myDaoConfig.setTagStorageMode(new DaoConfig().getTagStorageMode());
 		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(new DaoConfig().isAutoCreatePlaceholderReferenceTargets());
 		myDaoConfig.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(new DaoConfig().isPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets());
+		myDaoConfig.setResourceClientIdStrategy(new DaoConfig().getResourceClientIdStrategy());
 	}
 
 	@Override
@@ -135,6 +139,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.logDeleteQueriesForCurrentThread();
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
 	}
+
 
 	@Test
 	public void testRead() {
@@ -255,6 +260,129 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(4, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
 		myCaptureQueriesListener.logDeleteQueriesForCurrentThread();
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+
+		runInTransaction(() -> {
+			List<ResourceTable> resources = myResourceTableDao.findAll();
+			assertEquals(2, resources.size());
+			assertEquals(1, resources.get(0).getVersion());
+			assertEquals(1, resources.get(1).getVersion());
+		});
+
+	}
+
+	@Test
+	public void testCreateWithServerAssignedId_AnyClientAssignedIdStrategy() {
+		myDaoConfig.setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.ANY);
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+
+		myCaptureQueriesListener.clear();
+
+		IIdType resourceId = runInTransaction(() -> {
+			Patient p = new Patient();
+			p.setUserData("ABAB", "ABAB");
+			p.getMaritalStatus().setText("123");
+			return myPatientDao.create(p).getId().toUnqualifiedVersionless();
+		});
+
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
+		assertEquals(4, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logDeleteQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+
+		runInTransaction(() -> {
+			List<ForcedId> allForcedIds = myForcedIdDao.findAll();
+			for (ForcedId next : allForcedIds) {
+				assertNotNull(next.getResourceId());
+				assertNotNull(next.getForcedId());
+			}
+
+			List<ResourceTable> resources = myResourceTableDao.findAll();
+			String versions = "Resource Versions:\n * " + resources
+				.stream()
+				.map(t->"Resource " + t.getIdDt() + " has version: " + t.getVersion())
+				.collect(Collectors.joining("\n * "));
+
+			for (ResourceTable next : resources) {
+				assertEquals(1, next.getVersion(), versions);
+			}
+		});
+
+		runInTransaction(() -> {
+			Patient patient = myPatientDao.read(resourceId, mySrd);
+			assertEquals(resourceId.getIdPart(), patient.getIdElement().getIdPart());
+			assertEquals("123", patient.getMaritalStatus().getText());
+			assertEquals("1", patient.getIdElement().getVersionIdPart());
+		});
+
+	}
+
+
+	@Test
+	public void testCreateWithClientAssignedId_AnyClientAssignedIdStrategy() {
+		myDaoConfig.setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.ANY);
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+
+		runInTransaction(() -> {
+			Patient p = new Patient();
+			p.setUserData("ABAB", "ABAB");
+			p.getMaritalStatus().setText("123");
+			return myPatientDao.create(p).getId().toUnqualified();
+		});
+
+		runInTransaction(() -> {
+			Patient p = new Patient();
+			p.setId("BBB");
+			p.getMaritalStatus().setText("123");
+			myPatientDao.update(p);
+		});
+
+		myCaptureQueriesListener.clear();
+
+		runInTransaction(() -> {
+			Patient p = new Patient();
+			p.setId("AAA");
+			p.getMaritalStatus().setText("123");
+			myPatientDao.update(p);
+		});
+
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(1, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
+		assertEquals(4, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logDeleteQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+
+		runInTransaction(() -> {
+			List<ForcedId> allForcedIds = myForcedIdDao.findAll();
+			for (ForcedId next : allForcedIds) {
+				assertNotNull(next.getResourceId());
+				assertNotNull(next.getForcedId());
+			}
+
+			List<ResourceTable> resources = myResourceTableDao.findAll();
+			String versions = "Resource Versions:\n * " + resources
+				.stream()
+				.map(t->"Resource " + t.getIdDt() + " has version: " + t.getVersion())
+				.collect(Collectors.joining("\n * "));
+
+			for (ResourceTable next : resources) {
+				assertEquals(1, next.getVersion(), versions);
+			}
+		});
+
+		runInTransaction(() -> {
+			Patient patient = myPatientDao.read(new IdType("Patient/AAA"), mySrd);
+			assertEquals("AAA", patient.getIdElement().getIdPart());
+			assertEquals("123", patient.getMaritalStatus().getText());
+			assertEquals("1", patient.getIdElement().getVersionIdPart());
+		});
+
 	}
 
 	@Test
