@@ -14,11 +14,11 @@ public class ResourceIndexedSearchParamQuantityNormalizedTest {
 		ResourceIndexedSearchParamBaseQuantity val1 = new ResourceIndexedSearchParamQuantityNormalized()
 			.setValue(Double.parseDouble("123"));
 		val1.setPartitionSettings(new PartitionSettings());
-		val1.calculateHashes();
+		val1.calculateHashes(true);
 		ResourceIndexedSearchParamBaseQuantity val2 = new ResourceIndexedSearchParamQuantityNormalized()
 			.setValue(Double.parseDouble("123"));
 		val2.setPartitionSettings(new PartitionSettings());
-		val2.calculateHashes();
+		val2.calculateHashes(true);
 		assertEquals(val1, val1);
 		assertEquals(val1, val2);
 		assertNotEquals(val1, null);

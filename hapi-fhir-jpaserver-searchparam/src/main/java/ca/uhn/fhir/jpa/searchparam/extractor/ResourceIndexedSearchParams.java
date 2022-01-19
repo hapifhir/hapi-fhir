@@ -194,7 +194,9 @@ public final class ResourceIndexedSearchParams {
 		
 		for (BaseResourceIndexedSearchParam param : theParams) {
 			param.setParamName(theSpnamePrefix + "." + param.getParamName());
-			param.calculateHashes(); // re-calculuteHashes
+
+			// re-calculate hashes
+			param.calculateHashes(true);
 		}
 	}
 	
