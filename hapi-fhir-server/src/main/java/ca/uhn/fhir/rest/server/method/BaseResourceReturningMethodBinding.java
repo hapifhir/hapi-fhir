@@ -431,11 +431,12 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 	@Override
 	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
 		IBaseResource response = doInvokeServer(theServer, theRequest);
-		//Some manual responses occur, and we still want to call the outgoing hooks for them.
+		/*
+		 When we write directly to an HttpServletResponse, the invocation returns null. However, we still want to invoke
+		 the SERVER_OUTGOING_RESPONSE pointcut.
+		*/
 		if (response == null) {
 			ResponseDetails responseDetails = new ResponseDetails();
-//			Some manual responses are triggered by requests to specific resources.
-			responseDetails.setResponseResource(theRequest.getResource());
 			responseDetails.setResponseCode(Constants.STATUS_HTTP_200_OK);
 			callOutgoingResponseHook(theRequest, responseDetails);
 			return null;
