@@ -1231,7 +1231,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				newParams = new ResourceIndexedSearchParams();
 
 				RequestPartitionId requestPartitionId;
-				if (entity.getPartitionId() != null) {
+				if (!myPartitionSettings.isPartitioningEnabled()) {
+					requestPartitionId = RequestPartitionId.allPartitions();
+				} else if (entity.getPartitionId() != null) {
 					requestPartitionId = entity.getPartitionId().toPartitionId();
 				} else {
 					requestPartitionId = RequestPartitionId.defaultPartition();

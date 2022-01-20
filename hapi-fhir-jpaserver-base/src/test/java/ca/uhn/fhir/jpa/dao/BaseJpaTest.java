@@ -95,6 +95,7 @@ import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -349,9 +350,16 @@ public abstract class BaseJpaTest extends BaseTest {
 		});
 	}
 
-	protected void logAllStringIndexes() {
+	protected void logAllStringIndexes(String... theParamNames) {
+		String messageSuffix = theParamNames.length > 0 ? " containing " + Arrays.asList(theParamNames) : "";
 		runInTransaction(() -> {
-			ourLog.info("String indexes:\n * {}", myResourceIndexedSearchParamStringDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+			String message = myResourceIndexedSearchParamStringDao
+				.findAll()
+				.stream()
+				.filter(t->theParamNames.length == 0 ? true : Arrays.asList(theParamNames).contains(t.getParamName()))
+				.map(t -> t.toString())
+				.collect(Collectors.joining("\n * "));
+			ourLog.info("String indexes{}:\n * {}", messageSuffix, message);
 		});
 	}
 

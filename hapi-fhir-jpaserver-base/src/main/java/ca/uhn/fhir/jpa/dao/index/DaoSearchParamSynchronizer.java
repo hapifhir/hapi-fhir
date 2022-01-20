@@ -121,7 +121,6 @@ public class DaoSearchParamSynchronizer {
 			// Take a row we were going to remove, and repurpose its ID
 			T entityToReuse = theIndexesToRemove.remove(theIndexesToRemove.size() - 1);
 			entityToReuse.copyMutableValuesFrom(targetEntity);
-			entityToReuse.calculateHashes();
 			theIndexesToAdd.set(addIndex, entityToReuse);
 		}
 	}
