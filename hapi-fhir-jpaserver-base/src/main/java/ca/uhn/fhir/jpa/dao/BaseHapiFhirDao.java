@@ -186,6 +186,9 @@ import static org.apache.commons.lang3.StringUtils.trim;
 @Repository
 public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStorageDao implements IDao, IJpaDao<T>, ApplicationContextAware {
 
+	// total attempts to do a tag transaction
+	private static final int TOTAL_TAG_READ_ATTEMPTS = 10;
+
 	public static final long INDEX_STATUS_INDEXED = 1L;
 	public static final long INDEX_STATUS_INDEXING_FAILED = 2L;
 	public static final String NS_JPA_PROFILE = "https://github.com/hapifhir/hapi-fhir/ns/jpa/profile";
@@ -482,28 +485,28 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		// this transaction will attempt to get or create the tag,
 		// repeating (on any failure) 10 times.
 		// if it fails more than this, we will throw exceptions
-		TagDefinition retVal = template.execute(new TransactionCallback<TagDefinition>() {
+		TagDefinition retVal;
+		int count = 0;
+		HashSet<Throwable> throwables = new HashSet<>();
+		do {
+			retVal = template.execute(new TransactionCallback<TagDefinition>() {
 
-			private static final int TOTAL_ATTEMPTS = 10;
-
-			// do the actual DB call(s) to read and/or write the values
-			private TagDefinition readOrCreate() {
-				TagDefinition val;
-				try {
-					val = q.getSingleResult();
-				} catch (NoResultException e) {
-					val = new TagDefinition(theTagType, theScheme, theTerm, theLabel);
-					myEntityManager.persist(val);
+				// do the actual DB call(s) to read and/or write the values
+				private TagDefinition readOrCreate() {
+					TagDefinition val;
+					try {
+						val = q.getSingleResult();
+					} catch (NoResultException e) {
+						val = new TagDefinition(theTagType, theScheme, theTerm, theLabel);
+						myEntityManager.persist(val);
+					}
+					return val;
 				}
-				return val;
-			}
 
-			@Override
-			public TagDefinition doInTransaction(TransactionStatus status) {
-				TagDefinition tag = null;
-				int count = 0;
-				HashSet<Throwable> throwables = new HashSet<>();
-				do {
+				@Override
+				public TagDefinition doInTransaction(TransactionStatus status) {
+					TagDefinition tag = null;
+
 					try {
 						tag = readOrCreate();
 					} catch (Exception ex) {
@@ -511,32 +514,33 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 						// they may be signs of things to come...
 						ourLog.warn(
 							"Tag read/write failed: "
-							+ ex.getMessage() + ". "
-							+ "This is not a failure on its own, "
-							+ "but could be useful information in the result of an actual failure."
+								+ ex.getMessage() + ". "
+								+ "This is not a failure on its own, "
+								+ "but could be useful information in the result of an actual failure."
 						);
-						count++;
 						throwables.add(ex);
 					}
-				} while (tag == null && count < TOTAL_ATTEMPTS);
 
-				if (tag == null) {
-					// if tag is still null,
-					// something bad must be happening
-					// - throw
-					String msg = throwables.stream()
-						.map(Throwable::getMessage)
-						.collect(Collectors.joining(", "));
-					throw new InternalErrorException(
-						"Tag get/create failed after "
-						+ TOTAL_ATTEMPTS
-						+ " attempts with error(s): "
-						+ msg
-					);
+					return tag;
 				}
-				return tag;
-			}
-		});
+			});
+			count++;
+		} while (retVal == null && count < TOTAL_TAG_READ_ATTEMPTS);
+
+		if (retVal == null) {
+			// if tag is still null,
+			// something bad must be happening
+			// - throw
+			String msg = throwables.stream()
+				.map(Throwable::getMessage)
+				.collect(Collectors.joining(", "));
+			throw new InternalErrorException(
+				"Tag get/create failed after "
+					+ TOTAL_TAG_READ_ATTEMPTS
+					+ " attempts with error(s): "
+					+ msg
+			);
+		}
 
 		return retVal;
 	}
