@@ -70,6 +70,7 @@ public class RestfulServerExtension implements BeforeEachCallback, AfterEachCall
 	private List<Consumer<RestfulServer>> myConsumers = new ArrayList<>();
 	private String myServletPath = "/*";
 	private boolean myKeepAliveBetweenTests;
+	private ServerValidationModeEnum myServerValidationMode = ServerValidationModeEnum.NEVER;
 
 	/**
 	 * Constructor
@@ -138,7 +139,7 @@ public class RestfulServerExtension implements BeforeEachCallback, AfterEachCall
 		myHttpClient = builder.build();
 
 		myFhirContext.getRestfulClientFactory().setSocketTimeout((int) (500 * DateUtils.MILLIS_PER_SECOND));
-		myFhirContext.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+		myFhirContext.getRestfulClientFactory().setServerValidationMode(myServerValidationMode);
 		myFhirClient = myFhirContext.newRestfulGenericClient("http://localhost:" + myPort);
 	}
 
@@ -217,6 +218,11 @@ public class RestfulServerExtension implements BeforeEachCallback, AfterEachCall
 
 	public RestfulServerExtension withServletPath(String theServletPath) {
 		myServletPath = theServletPath;
+		return this;
+	}
+
+	public RestfulServerExtension withValidationMode(ServerValidationModeEnum theValidationMode) {
+		myServerValidationMode = theValidationMode;
 		return this;
 	}
 

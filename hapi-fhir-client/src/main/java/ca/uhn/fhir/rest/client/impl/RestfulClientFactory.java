@@ -36,12 +36,15 @@ import ca.uhn.fhir.rest.client.exceptions.FhirClientInappropriateForServerExcept
 import ca.uhn.fhir.rest.client.method.BaseMethodBinding;
 import ca.uhn.fhir.util.FhirTerser;
 
+import javax.annotation.concurrent.GuardedBy;
+
 /**
  * Base class for a REST client factory implementation
  */
 public abstract class RestfulClientFactory implements IRestfulClientFactory {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulClientFactory.class);
 
+	@GuardedBy("myValidatedServerBaseUrls") // synchronized collection still needed to make access atomic for double lock pattern to work
 	private final Set<String> myValidatedServerBaseUrls = Collections.synchronizedSet(new HashSet<>());
 	private int myConnectionRequestTimeout = DEFAULT_CONNECTION_REQUEST_TIMEOUT;
 	private int myConnectTimeout = DEFAULT_CONNECT_TIMEOUT;
@@ -257,13 +260,21 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 		String serverBase = normalizeBaseUrlForMap(theServerBase);
 
 		switch (getServerValidationMode()) {
-		case NEVER:
-			break;
-		case ONCE:
-			if (!myValidatedServerBaseUrls.contains(serverBase)) {
-				validateServerBase(serverBase, theHttpClient, theClient);
-			}
-			break;
+			case NEVER:
+				break;
+
+			case ONCE:
+				if (myValidatedServerBaseUrls.contains(serverBase)) {
+					break;
+				}
+
+				synchronized (myValidatedServerBaseUrls) {
+					if (!myValidatedServerBaseUrls.contains(serverBase)) {
+						myValidatedServerBaseUrls.add(normalizeBaseUrlForMap(theServerBase));
+						validateServerBase(serverBase, theHttpClient, theClient);
+					}
+				}
+				break;
 		}
 
 	}
@@ -345,9 +356,15 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 			}
 		}
 
-		myValidatedServerBaseUrls.add(normalizeBaseUrlForMap(theServerBase));
+		if (myValidatedServerBaseUrls.contains(theServerBase)) {
+			return;
+		}
 
+		synchronized (myValidatedServerBaseUrls) {
+			myValidatedServerBaseUrls.add(normalizeBaseUrlForMap(theServerBase));
+		}
 	}
+
 
 	/**
 	 * Get the http client for the given server base
