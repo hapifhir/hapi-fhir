@@ -68,8 +68,15 @@ public abstract class ResourceIndexedSearchParamBaseQuantity extends BaseResourc
 	}
 
 	@Override
-	public void calculateHashes(boolean theForce) {
-		if (!theForce && (myHashIdentity != null || myHashIdentityAndUnits != null || myHashIdentitySystemAndUnits != null)) {
+	public void clearHashes() {
+		myHashIdentity = null;
+		myHashIdentityAndUnits = null;
+		myHashIdentitySystemAndUnits = null;
+	}
+
+	@Override
+	public void calculateHashes() {
+		if (myHashIdentity != null || myHashIdentityAndUnits != null || myHashIdentitySystemAndUnits != null) {
 			return;
 		}
 

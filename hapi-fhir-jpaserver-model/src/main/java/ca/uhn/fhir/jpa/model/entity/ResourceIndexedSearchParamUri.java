@@ -95,6 +95,7 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		setResourceType(theResourceType);
 		setParamName(theParamName);
 		setUri(theUri);
+		calculateHashes();
 	}
 
 	@Override
@@ -106,10 +107,16 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		myHashIdentity = source.myHashIdentity;
 	}
 
+	@Override
+	public void clearHashes() {
+		myHashIdentity = null;
+		myHashUri = null;
+	}
+
 
 	@Override
-	public void calculateHashes(boolean theForce) {
-		if (!theForce && (myHashIdentity != null || myHashUri != null)) {
+	public void calculateHashes() {
+		if (myHashIdentity != null || myHashUri != null) {
 			return;
 		}
 

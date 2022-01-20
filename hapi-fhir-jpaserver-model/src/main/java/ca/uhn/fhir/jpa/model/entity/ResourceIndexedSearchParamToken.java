@@ -125,6 +125,7 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		setParamName(theParamName);
 		setSystem(theSystem);
 		setValue(theValue);
+		calculateHashes();
 	}
 
 	@Override
@@ -140,10 +141,18 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		myHashIdentity = source.myHashIdentity;
 	}
 
+	@Override
+	public void clearHashes() {
+		myHashIdentity = null;
+		myHashSystem = null;
+		myHashSystemAndValue = null;
+		myHashValue = null;
+	}
+
 
 	@Override
-	public void calculateHashes(boolean theForce) {
-		if (!theForce && (myHashIdentity != null || myHashSystem != null || myHashValue != null || myHashSystemAndValue != null)) {
+	public void calculateHashes() {
+		if (myHashIdentity != null || myHashSystem != null || myHashValue != null || myHashSystemAndValue != null) {
 			return;
 		}
 

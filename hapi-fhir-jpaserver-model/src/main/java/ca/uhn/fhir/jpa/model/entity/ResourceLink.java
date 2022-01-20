@@ -236,7 +236,12 @@ public class ResourceLink extends BaseResourceIndex {
 	}
 
 	@Override
-	public void calculateHashes(boolean theForce) {
+	public void clearHashes() {
+		// nothing right now
+	}
+
+	@Override
+	public void calculateHashes() {
 		// nothing right now
 	}
 

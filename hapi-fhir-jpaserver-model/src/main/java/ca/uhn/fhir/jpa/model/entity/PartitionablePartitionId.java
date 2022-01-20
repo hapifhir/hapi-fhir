@@ -21,8 +21,8 @@ package ca.uhn.fhir.jpa.model.entity;
  */
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -63,6 +63,21 @@ public class PartitionablePartitionId implements Cloneable {
 	public PartitionablePartitionId setPartitionId(@Nullable Integer thePartitionId) {
 		myPartitionId = thePartitionId;
 		return this;
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (!(theO instanceof PartitionablePartitionId)) {
+			return false;
+		}
+
+		PartitionablePartitionId that = (PartitionablePartitionId) theO;
+		return new EqualsBuilder().append(myPartitionId, that.myPartitionId).append(myPartitionDate, that.myPartitionDate).isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37).append(myPartitionId).append(myPartitionDate).toHashCode();
 	}
 
 	@Nullable

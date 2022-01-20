@@ -66,16 +66,11 @@ public class DaoSearchParamSynchronizer {
 	}
 
 	private <T extends BaseResourceIndex> void synchronize(ResourceTable theEntity, AddRemoveCount theAddRemoveCount, Collection<T> theNewParams, Collection<T> theExistingParams) {
-		Collection<T> newParams = theNewParams;
-		for (T next : newParams) {
-			next.setPartitionId(theEntity.getPartitionId());
-			next.calculateHashes();
-		}
-
 		/*
 		 * HashCodes may have changed as a result of setting the partition ID, so
 		 * create a new set that will reflect the new hashcodes
 		 */
+		Collection<T> newParams = theNewParams;
 		newParams = new HashSet<>(newParams);
 
 		List<T> paramsToRemove = subtract(theExistingParams, newParams);

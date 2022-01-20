@@ -20,6 +20,8 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import org.apache.commons.lang3.ObjectUtils;
+
 import javax.persistence.MappedSuperclass;
 import java.io.Serializable;
 
@@ -30,17 +32,17 @@ public abstract class BaseResourceIndex extends BasePartitionable implements Ser
 
 	public abstract void setId(Long theId);
 
-	/**
-	 * Simply calls {@link #calculateHashes(boolean)} with force=false
-	 */
-	public void calculateHashes() {
-		calculateHashes(false);
-	}
+	public abstract void calculateHashes();
 
-	/**
-	 * @param theForce Should indexes be recalculated even if they are already present?
-	 */
-	public abstract void calculateHashes(boolean theForce);
+	public abstract void clearHashes();
+
+	@Override
+	public void setPartitionId(PartitionablePartitionId thePartitionId) {
+		if (ObjectUtils.notEqual(getPartitionId(), thePartitionId)) {
+			super.setPartitionId(thePartitionId);
+			clearHashes();
+		}
+	}
 
 	/**
 	 * Subclasses must implement

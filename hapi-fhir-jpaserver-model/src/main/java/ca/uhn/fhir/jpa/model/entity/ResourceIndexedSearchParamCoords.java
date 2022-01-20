@@ -75,11 +75,17 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 		setParamName(theParamName);
 		setLatitude(theLatitude);
 		setLongitude(theLongitude);
+		calculateHashes();
 	}
 
 	@Override
-	public void calculateHashes(boolean theForce) {
-		if (!theForce && (myHashIdentity != null)) {
+	public void clearHashes() {
+		myHashIdentity = null;
+	}
+
+	@Override
+	public void calculateHashes() {
+		if (myHashIdentity != null) {
 			return;
 		}
 

@@ -114,6 +114,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		setParamName(theParamName);
 		setValueNormalized(theValueNormalized);
 		setValueExact(theValueExact);
+		calculateHashes();
 	}
 
 	@Override
@@ -128,8 +129,16 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	}
 
 	@Override
-	public void calculateHashes(boolean theForce) {
-		if (!theForce && (myHashIdentity != null || myHashExact != null || myHashNormalizedPrefix != null)) {
+	public void clearHashes() {
+		myHashIdentity = null;
+		myHashNormalizedPrefix = null;
+		myHashExact = null;
+	}
+
+
+	@Override
+	public void calculateHashes() {
+		if (myHashIdentity != null || myHashExact != null || myHashNormalizedPrefix != null) {
 			return;
 		}
 

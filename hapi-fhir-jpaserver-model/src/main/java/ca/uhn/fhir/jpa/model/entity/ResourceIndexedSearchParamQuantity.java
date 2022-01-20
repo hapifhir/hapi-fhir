@@ -82,6 +82,7 @@ public class ResourceIndexedSearchParamQuantity extends ResourceIndexedSearchPar
 		setSystem(theSystem);
 		setValue(theValue);
 		setUnits(theUnits);
+		calculateHashes();
 	}
 
 	@Override

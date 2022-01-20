@@ -75,6 +75,7 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 		setResourceType(theResourceType);
 		setParamName(theParamName);
 		setValue(theValue);
+		calculateHashes();
 	}
 
 	@Override
@@ -86,8 +87,13 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 	}
 
 	@Override
-	public void calculateHashes(boolean theForce) {
-		if (!theForce && (myHashIdentity != null)) {
+	public void clearHashes() {
+		myHashIdentity = null;
+	}
+
+	@Override
+	public void calculateHashes() {
+		if (myHashIdentity != null) {
 			return;
 		}
 		String resourceType = getResourceType();
