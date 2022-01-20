@@ -239,12 +239,6 @@ public abstract class BaseJpaTest extends BaseTest {
 		}
 	}
 
-	//reset time zone back to match the system
-	@BeforeEach
-	public void resetTimeZone() {
-		TimeZone.setDefault(null);
-	}
-
 	@BeforeEach
 	public void beforeInitPartitions() {
 		if (myPartitionConfigSvc != null) {

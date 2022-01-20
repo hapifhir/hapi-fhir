@@ -98,9 +98,10 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 
 		runInTransaction(()->{
 			List<ResourceTable> resources = myResourceTableDao.findAll();
+			LocalDate expectedDate = LocalDate.of(2021, 2, 22);
 			assertEquals(1, resources.size());
 			assertEquals(null, resources.get(0).getPartitionId().getPartitionId());
-			assertEquals(22, resources.get(0).getPartitionId().getPartitionDate().getDayOfMonth());
+			assertEquals(expectedDate.getDayOfMonth(), resources.get(0).getPartitionId().getPartitionDate().getDayOfMonth());
 		});
 	}
 
