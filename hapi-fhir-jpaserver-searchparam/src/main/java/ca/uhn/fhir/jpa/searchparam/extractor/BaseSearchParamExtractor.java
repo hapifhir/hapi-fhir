@@ -1259,6 +1259,11 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	}
 
+	/**
+	 * Note that this should only be called for R4+ servers. Prior to
+	 * R4 the paths could be separated by the word "or" or by a "|"
+	 * character, so we used a slower splitting mechanism.
+	 */
 	@Nonnull
 	public static String[] splitPathsR4(@Nonnull String thePaths) {
 		StringTokenizer tok = new StringTokenizer(thePaths, " |");
@@ -1292,7 +1297,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		}
 	}
 
-	private static String extractValueAsString(BaseRuntimeChildDefinition theChildDefinition, IBase theElement) {
+	protected static String extractValueAsString(BaseRuntimeChildDefinition theChildDefinition, IBase theElement) {
 		return theChildDefinition
 			.getAccessor()
 			.<IPrimitiveType<?>>getFirstValueOrNull(theElement)
@@ -1300,7 +1305,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			.orElse(null);
 	}
 
-	private static Date extractValueAsDate(BaseRuntimeChildDefinition theChildDefinition, IBase theElement) {
+	protected static Date extractValueAsDate(BaseRuntimeChildDefinition theChildDefinition, IBase theElement) {
 		return theChildDefinition
 			.getAccessor()
 			.<IPrimitiveType<Date>>getFirstValueOrNull(theElement)
@@ -1308,7 +1313,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			.orElse(null);
 	}
 
-	private static BigDecimal extractValueAsBigDecimal(BaseRuntimeChildDefinition theChildDefinition, IBase theElement) {
+	protected static BigDecimal extractValueAsBigDecimal(BaseRuntimeChildDefinition theChildDefinition, IBase theElement) {
 		return theChildDefinition
 			.getAccessor()
 			.<IPrimitiveType<BigDecimal>>getFirstValueOrNull(theElement)
@@ -1317,13 +1322,13 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	@SuppressWarnings("unchecked")
-	private static List<IPrimitiveType<Date>> extractValuesAsFhirDates(BaseRuntimeChildDefinition theChildDefinition, IBase theElement) {
+	protected static List<IPrimitiveType<Date>> extractValuesAsFhirDates(BaseRuntimeChildDefinition theChildDefinition, IBase theElement) {
 		return (List) theChildDefinition
 			.getAccessor()
 			.getValues(theElement);
 	}
 
-	private static List<String> extractValuesAsStrings(BaseRuntimeChildDefinition theChildDefinition, IBase theValue) {
+	protected static List<String> extractValuesAsStrings(BaseRuntimeChildDefinition theChildDefinition, IBase theValue) {
 		return theChildDefinition
 			.getAccessor()
 			.getValues(theValue)
@@ -1334,7 +1339,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			.collect(Collectors.toList());
 	}
 
-	private static <T extends Enum<?>> String extractSystem(IBaseEnumeration<T> theBoundCode) {
+	protected static <T extends Enum<?>> String extractSystem(IBaseEnumeration<T> theBoundCode) {
 		if (theBoundCode.getValue() != null) {
 			return theBoundCode.getEnumFactory().toSystem(theBoundCode.getValue());
 		}

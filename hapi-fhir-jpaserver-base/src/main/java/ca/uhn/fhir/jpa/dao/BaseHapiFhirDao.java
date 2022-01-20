@@ -1230,7 +1230,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 				newParams = new ResourceIndexedSearchParams();
 
-				RequestPartitionId requestPartitionId = entity.getPartitionId().toPartitionId();
+				RequestPartitionId requestPartitionId;
+				if (entity.getPartitionId() != null) {
+					requestPartitionId = entity.getPartitionId().toPartitionId();
+				} else {
+					requestPartitionId = RequestPartitionId.defaultPartition();
+				}
 				mySearchParamWithInlineReferencesExtractor.populateFromResource(requestPartitionId, newParams, theTransactionDetails, entity, theResource, existingParams, theRequest, thePerformIndexing);
 
 				changed = populateResourceIntoEntity(theTransactionDetails, theRequest, theResource, entity, true);

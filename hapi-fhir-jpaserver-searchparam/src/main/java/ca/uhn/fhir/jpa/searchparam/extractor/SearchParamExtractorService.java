@@ -483,6 +483,7 @@ public class SearchParamExtractorService {
 	}
 
 	private ResourceLink resolveTargetAndCreateResourceLinkOrReturnNull(@Nonnull RequestPartitionId theRequestPartitionId, ResourceTable theEntity, Date theUpdateTime, RuntimeSearchParam nextSpDef, String theNextPathsUnsplit, PathAndRef nextPathAndRef, IIdType theNextId, String theTypeString, Class<? extends IBaseResource> theType, IBaseReference theReference, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
+		assert theRequestPartitionId != null;
 
 		ResourcePersistentId resolvedResourceId = theTransactionDetails.getResolvedResourceId(theNextId);
 		if (resolvedResourceId != null) {
