@@ -44,7 +44,6 @@ import javax.annotation.concurrent.GuardedBy;
 public abstract class RestfulClientFactory implements IRestfulClientFactory {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulClientFactory.class);
 
-	@GuardedBy("myValidatedServerBaseUrls") // synchronized collection still needed to make access atomic for double lock pattern to work
 	private final Set<String> myValidatedServerBaseUrls = Collections.synchronizedSet(new HashSet<>());
 	private int myConnectionRequestTimeout = DEFAULT_CONNECTION_REQUEST_TIMEOUT;
 	private int myConnectTimeout = DEFAULT_CONNECT_TIMEOUT;
