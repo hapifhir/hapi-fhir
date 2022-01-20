@@ -20,10 +20,12 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.BundleBuilder;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Encounter;
@@ -44,9 +46,14 @@ import org.springframework.data.domain.PageRequest;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -966,6 +973,57 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
 		assertThat(searchSql, containsString("t0.SP_VALUE = '0.0000012'"));
 		assertEquals(1, ids.size());
+	}
+
+	@Test
+	public void testResourceWithTagCreationNoFailures() throws ExecutionException, InterruptedException {
+		ExecutorService pool = Executors.newFixedThreadPool(5);
+		try {
+			Coding tag = new Coding();
+			tag.setCode("code123");
+			tag.setDisplay("Display Name");
+			tag.setSystem("System123");
+
+			Patient p = new Patient();
+			IIdType id = myPatientDao.create(p).getId();
+
+			List<Future<String>> futures = new ArrayList<>();
+			for (int i = 0; i < 50; i++) {
+				Patient updatePatient = new Patient();
+				updatePatient.setId(id.toUnqualifiedVersionless());
+				updatePatient.addIdentifier().setSystem("" + i);
+				updatePatient.setActive(true);
+				updatePatient.getMeta().addTag(tag);
+
+				int finalI = i;
+				Future<String> future = pool.submit(() -> {
+					ourLog.info("Starting update {}", finalI);
+					try {
+						try {
+							myPatientDao.update(updatePatient);
+						} catch (ResourceVersionConflictException e) {
+							assertEquals("The operation has failed with a version constraint failure. This generally means that two clients/threads were trying to update the same resource at the same time, and this request was chosen as the failing request.", e.getMessage());
+						}
+					} catch (Exception e) {
+						ourLog.error("Failure", e);
+						return e.toString();
+					}
+					ourLog.info("Finished update {}", finalI);
+					return null;
+				});
+				futures.add(future);
+			}
+
+			for (Future<String> next : futures) {
+				String nextError = next.get();
+				if (StringUtils.isNotBlank(nextError)) {
+					fail(nextError);
+				}
+			}
+
+		} finally {
+			pool.shutdown();
+		}
 	}
 
 	@Test

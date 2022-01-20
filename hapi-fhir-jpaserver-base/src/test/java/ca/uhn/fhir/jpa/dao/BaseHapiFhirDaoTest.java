@@ -253,7 +253,7 @@ public class BaseHapiFhirDaoTest {
 
 		AtomicInteger counter = new AtomicInteger();
 		for (int i = 0; i < threads; i++) {
-				service.submit(() -> {
+			service.submit(() -> {
 				try {
 					TagDefinition retTag = myTestDao.getTagOrNull(transactionDetails, tagType, scheme, term, label);
 					outcomes.put(retTag.hashCode(), retTag);
@@ -333,7 +333,7 @@ public class BaseHapiFhirDaoTest {
 			List<ILoggingEvent> events = appenderCaptor.getAllValues();
 			assertEquals(10, events.size());
 			for (int i = 0; i < 10; i++) {
-				String actualMsg = events.get(0).getMessage();
+				String actualMsg = events.get(i).getMessage();
 				assertEquals(
 					"Tag read/write failed: "
 						+ exMsg
