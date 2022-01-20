@@ -64,6 +64,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static ca.uhn.fhir.jpa.subscription.util.SubscriptionUtil.createRequestDetailForPartitionedRequest;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Scope("prototype")
@@ -154,7 +155,7 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 		SearchParameterMap payloadSearchMap = myMatchUrlService.translateMatchUrl(payloadUrl, resourceDefinition, MatchUrlService.processIncludes());
 		payloadSearchMap.setLoadSynchronous(true);
 
-		IBundleProvider searchResults = dao.search(payloadSearchMap);
+		IBundleProvider searchResults = dao.search(payloadSearchMap, createRequestDetailForPartitionedRequest(theSubscription));
 
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
 		for (IBaseResource next : searchResults.getAllResources()) {
@@ -169,7 +170,7 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(payloadId.getResourceType());
 		SystemRequestDetails systemRequestDetails = new SystemRequestDetails().setRequestPartitionId(thePartitionId);
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceDef.getImplementingClass());
-		return dao.read(payloadId.toVersionless(),  systemRequestDetails, theDeletedOK);
+		return dao.read(payloadId.toVersionless(), systemRequestDetails, theDeletedOK);
 	}
 
 
@@ -297,5 +298,5 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 		}
 		return headers;
 	}
-	
+
 }

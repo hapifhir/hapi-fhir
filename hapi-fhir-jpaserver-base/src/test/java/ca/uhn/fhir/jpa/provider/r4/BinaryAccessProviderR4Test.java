@@ -9,10 +9,13 @@ import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.interceptor.UserRequestRetryVersionConflictsInterceptor;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.HapiExtensions;
+import ca.uhn.test.concurrency.PointcutLatch;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -20,6 +23,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.Binary;
@@ -37,14 +41,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.matchesPattern;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.eq;
@@ -83,17 +93,19 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testRead() throws IOException {
+	public void testRead() throws IOException, InterruptedException {
 		IIdType id = createDocumentReference(true);
 
 		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESHOW_RESOURCES, interceptor);
+
 		doAnswer(t -> {
 			Pointcut pointcut = t.getArgument(0, Pointcut.class);
 			HookParams params = t.getArgument(1, HookParams.class);
 			ourLog.info("Interceptor invoked with pointcut {} and params {}", pointcut, params);
 			return null;
 		}).when(interceptor).invoke(any(), any());
+
 
 		// Read it back using the operation
 
@@ -102,18 +114,18 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			JpaConstants.OPERATION_BINARY_ACCESS_READ +
 			"?path=DocumentReference.content.attachment";
 		HttpGet get = new HttpGet(path);
-		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
 
+		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
 			assertEquals(200, resp.getStatusLine().getStatusCode());
 			assertEquals("image/png", resp.getEntity().getContentType().getValue());
 			assertEquals(SOME_BYTES.length, resp.getEntity().getContentLength());
 
 			byte[] actualBytes = IOUtils.toByteArray(resp.getEntity().getContent());
 			assertArrayEquals(SOME_BYTES, actualBytes);
+
 		}
 
 		verify(interceptor, times(1)).invoke(eq(Pointcut.STORAGE_PRESHOW_RESOURCES), any());
-
 	}
 
 
@@ -125,7 +137,6 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESHOW_RESOURCES, interceptor);
 
 		// Read it back using the operation
-
 		String path = ourServerBase +
 			"/DocumentReference/" + id.getIdPart() + "/" +
 			JpaConstants.OPERATION_BINARY_ACCESS_READ +
@@ -163,7 +174,6 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 
 	}
 
-
 	@Test
 	public void testReadNoData() throws IOException {
 		IIdType id = createDocumentReference(false);
@@ -181,9 +191,37 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			assertThat(response, matchesPattern(".*The resource with ID DocumentReference/[0-9]+ has no data at path.*"));
 
 		}
-
 	}
 
+
+	@Test
+	public void testManualResponseOperationsInvokeServerOutgoingResponsePointcut() throws IOException, InterruptedException {
+		IIdType id = createDocumentReference(true);
+
+		PointcutLatch latch = new PointcutLatch(Pointcut.SERVER_OUTGOING_RESPONSE);
+		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_OUTGOING_RESPONSE, latch);
+
+
+		String path = ourServerBase +
+			"/DocumentReference/" + id.getIdPart() + "/" +
+			JpaConstants.OPERATION_BINARY_ACCESS_READ +
+			"?path=DocumentReference.content.attachment";
+		HttpGet get = new HttpGet(path);
+
+		latch.setExpectedCount(1);
+		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+			latch.awaitExpected();
+
+			RequestDetails requestDetails = latch.getLatchInvocationParameterOfType(RequestDetails.class);
+			ResponseDetails responseDetails= latch.getLatchInvocationParameterOfType(ResponseDetails.class);
+
+			assertThat(responseDetails, is(notNullValue()));
+			assertThat(requestDetails, is(notNullValue()));
+
+			assertThat(requestDetails.getId().toString(), is(equalTo(id.toString())));
+		}
+	}
 	@Test
 	public void testReadUnknownBlobId() throws IOException {
 		IIdType id = createDocumentReference(false);
