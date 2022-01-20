@@ -40,6 +40,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.session.SearchSession;
+import org.hibernate.search.mapper.orm.work.SearchIndexingPlan;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +48,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
@@ -100,9 +102,15 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		return requiresHibernateSearchAccess;
 	}
 
+	@Override
+	public void reindex(ResourceTable theEntity) {
+		SearchIndexingPlan plan = getSearchSession().indexingPlan();
+		plan.addOrUpdate(theEntity);
+	}
+
 	private List<ResourcePersistentId> doSearch(String theResourceType, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
 		// keep this in sync with supportsSomeOf();
-		SearchSession session = Search.session(myEntityManager);
+		SearchSession session = getSearchSession();
 
 		List<Long> longPids = session.search(ResourceTable.class)
 			// Selects are replacements for projection and convert more cleanly than the old implementation.
@@ -155,6 +163,11 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		return convertLongsToResourcePersistentIds(longPids);
 	}
 
+	@Nonnull
+	private SearchSession getSearchSession() {
+		return Search.session(myEntityManager);
+	}
+
 	private List<ResourcePersistentId> convertLongsToResourcePersistentIds(List<Long> theLongPids) {
 		return theLongPids.stream()
 			.map(ResourcePersistentId::new)
@@ -193,7 +206,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		if (retVal == null) {
 			retVal = new TransactionTemplate(myTxManager).execute(t -> {
 				try {
-					SearchSession searchSession = Search.session(myEntityManager);
+					SearchSession searchSession = getSearchSession();
 					searchSession.search(ResourceTable.class);
 					return Boolean.FALSE;
 				} catch (Exception e) {

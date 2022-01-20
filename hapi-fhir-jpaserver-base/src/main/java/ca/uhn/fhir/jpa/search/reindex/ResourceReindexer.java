@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
@@ -51,6 +52,8 @@ public class ResourceReindexer {
 	private IResourceTableDao myResourceTableDao;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+	@Autowired(required = false)
+	private IFulltextSearchSvc myFulltextSearchSvc;
 
 	private final FhirContext myFhirContext;
 
@@ -99,5 +102,10 @@ public class ResourceReindexer {
 		Class<T> resourceClass = (Class<T>) resourceDefinition.getImplementingClass();
 		final IFhirResourceDao<T> dao = myDaoRegistry.getResourceDao(resourceClass);
 		dao.reindex(theResource, theResourceTable);
+		if (myFulltextSearchSvc != null) {
+			// update the full-text index, if active.
+			myFulltextSearchSvc.reindex(theResourceTable);
+		}
+
 	}
 }
