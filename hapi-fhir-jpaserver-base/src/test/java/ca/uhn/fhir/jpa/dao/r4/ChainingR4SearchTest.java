@@ -1112,6 +1112,51 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testShouldResolveAFourLinkChainWhereTheFirstReferenceAndTheLastReferenceAreContained() throws Exception {
+
+		// setup
+		myModelConfig.setIndexOnContainedResources(true);
+		myModelConfig.setIndexOnContainedResourcesRecursively(true);
+		IIdType oid1;
+
+		{
+			Organization org = new Organization();
+			org.setId("parent");
+			org.setName("HealthCo");
+
+			Organization partOfOrg = new Organization();
+			partOfOrg.getContained().add(org);
+			partOfOrg.setId(IdType.newRandomUuid());
+			partOfOrg.getPartOf().setReference("#parent");
+			myOrganizationDao.create(partOfOrg, mySrd);
+
+			Patient p = new Patient();
+			p.setId("pat");
+			p.addName().setFamily("Smith").addGiven("John");
+			p.getManagingOrganization().setReference(partOfOrg.getId());
+
+			Observation obs = new Observation();
+			obs.getContained().add(p);
+			obs.getCode().setText("Observation 1");
+			obs.getSubject().setReference("#pat");
+
+			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			myObservationDao.create(new Observation(), mySrd);
+		}
+
+		String url = "/Observation?subject.organization.partof.name=HealthCo";
+
+		// execute
+		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+
+		// validate
+		assertEquals(1L, oids.size());
+		assertThat(oids, contains(oid1.getIdPart()));
+	}
+
+	@Test
 	public void testShouldResolveAFourLinkChainWhereAllReferencesAreContained() throws Exception {
 
 		// setup

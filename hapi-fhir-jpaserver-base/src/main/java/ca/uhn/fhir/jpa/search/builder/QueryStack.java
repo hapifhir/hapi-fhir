@@ -1027,10 +1027,11 @@ public class QueryStack {
 			// discrete -> contained -> discrete -> discrete
 			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(mergePaths(nextChain.get(0).getSearchParam().getPath(), nextChain.get(1).getSearchParam().getPath()), nextChain.get(2).getSearchParam().getPath()), leafNodes);
 			// discrete -> contained -> discrete -> contained
-			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(mergePaths(nextChain.get(0).getSearchParam().getPath(), nextChain.get(1).getSearchParam().getPath()), nextChain.get(2).getSearchParam().getPath()), leafNodes
-				.stream()
-				.map(t -> t.withPathPrefix(nextChain.get(2).getResourceType(), nextChain.get(2).getSearchParam().getName()))
-				.collect(Collectors.toSet()));
+			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(mergePaths(nextChain.get(0).getSearchParam().getPath(), nextChain.get(1).getSearchParam().getPath())),
+				leafNodes
+					.stream()
+					.map(t -> t.withPathPrefix(nextChain.get(2).getResourceType(), nextChain.get(2).getSearchParam().getName()))
+					.collect(Collectors.toSet()));
 			if (myModelConfig.isIndexOnContainedResourcesRecursively()) {
 				// discrete -> contained -> contained -> discrete
 				updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(mergePaths(nextChain.get(0).getSearchParam().getPath(), nextChain.get(1).getSearchParam().getPath(), nextChain.get(2).getSearchParam().getPath())), leafNodes);

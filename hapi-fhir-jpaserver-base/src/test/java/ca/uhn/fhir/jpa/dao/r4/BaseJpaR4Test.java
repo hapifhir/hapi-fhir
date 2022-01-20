@@ -371,6 +371,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Qualifier("myOrganizationDaoR4")
 	protected IFhirResourceDao<Organization> myOrganizationDao;
 	@Autowired
+	@Qualifier("myOrganizationAffiliationDaoR4")
+	protected IFhirResourceDao<OrganizationAffiliation> myOrganizationAffiliationDao;
+	@Autowired
 	protected DatabaseBackedPagingProvider myPagingProvider;
 	@Autowired
 	@Qualifier("myBinaryDaoR4")
