@@ -189,8 +189,11 @@ public class DaoRegistryGraphQLStorageServices implements IGraphQLStorageService
 
 		RequestDetails requestDetails = (RequestDetails) theAppInfo;
 		IBundleProvider response = dao.search(params, requestDetails);
-		int size = response.sizeOrThrowNpe();
-		if (response.preferredPageSize() != null && response.preferredPageSize() < size) {
+		Integer size = response.size();
+		//We set size to null in SearchCoordinatorSvcImpl.executeQuery() if matching results exceeds count
+		//so don't throw here
+		if ((response.preferredPageSize() != null && size != null && response.preferredPageSize() < size) ||
+			size == null) {
 			size = response.preferredPageSize();
 		}
 
