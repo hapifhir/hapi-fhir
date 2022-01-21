@@ -1,7 +1,9 @@
 package ca.uhn.fhir.jpa.subscription.submit.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -29,6 +31,10 @@ public class SubscriptionValidatingInterceptorTest {
 	private DaoRegistry myDaoRegistry;
 	@MockBean
 	private SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
+	@MockBean
+	private DaoConfig myDaoConfig;
+	@MockBean
+	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	@BeforeEach
 	public void before() {

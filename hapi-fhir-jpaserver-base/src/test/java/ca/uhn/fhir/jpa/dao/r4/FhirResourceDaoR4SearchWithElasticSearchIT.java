@@ -388,13 +388,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		}
 
 		{
-			// Identifier Type
-			SearchParameterMap map = new SearchParameterMap();
-			map.add("identifier", new TokenParam("Random").setModifier(TokenParamModifier.TEXT));
-			assertObservationSearchMatches(":text matches identifier text", map, id4);
-		}
-
-		{
 			// multiple values means or
 			SearchParameterMap map = new SearchParameterMap();
 			map.add("code", new TokenParam("unique").setModifier(TokenParamModifier.TEXT));

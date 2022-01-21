@@ -292,8 +292,8 @@ public class DaoConfig {
 	 */
 	private boolean myStoreResourceInLuceneIndex;
 
-  /** 
-   * @see FhirValidator#isConcurrentBundleValidation()
+	/**
+	 * @see FhirValidator#isConcurrentBundleValidation()
 	 * @since 5.7.0
 	 */
 	private boolean myConcurrentBundleValidation;
@@ -2760,10 +2760,10 @@ public class DaoConfig {
 	 */
 	public void setStoreResourceInLuceneIndex(boolean theStoreResourceInLuceneIndex) {
 		myStoreResourceInLuceneIndex = theStoreResourceInLuceneIndex;
-  }
-  
-	/** 
-   * @see FhirValidator#isConcurrentBundleValidation()
+	}
+
+	/**
+	 * @see FhirValidator#isConcurrentBundleValidation()
 	 * @since 5.7.0
 	 */
 	public boolean isConcurrentBundleValidation() {
@@ -2777,6 +2777,26 @@ public class DaoConfig {
 	public DaoConfig setConcurrentBundleValidation(boolean theConcurrentBundleValidation) {
 		myConcurrentBundleValidation = theConcurrentBundleValidation;
 		return this;
+	}
+
+	/**
+	 * This setting indicates if a cross-partition subscription can be made.
+	 *
+	 * @see ModelConfig#setCrossPartitionSubscription(boolean)
+	 * @since 7.5.0
+	 */
+	public boolean isCrossPartitionSubscription() {
+		return this.myModelConfig.isCrossPartitionSubscription();
+	}
+
+	/**
+	 * This setting indicates if a cross-partition subscription can be made.
+	 *
+	 * @see ModelConfig#setCrossPartitionSubscription(boolean)
+	 * @since 7.5.0
+	 */
+	public void setCrossPartitionSubscription(boolean theAllowCrossPartitionSubscription) {
+		this.myModelConfig.setCrossPartitionSubscription(theAllowCrossPartitionSubscription);
 	}
 
 	public enum StoreMetaSourceInformationEnum {

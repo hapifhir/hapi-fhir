@@ -24,7 +24,11 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionCriteriaParser;
@@ -33,15 +37,18 @@ import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.HapiExtensions;
+import ca.uhn.fhir.util.SubscriptionUtil;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Objects;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -53,18 +60,22 @@ public class SubscriptionValidatingInterceptor {
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
+	private DaoConfig myDaoConfig;
+	@Autowired
 	private SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
 	@Autowired
 	private FhirContext myFhirContext;
+	@Autowired
+	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
-	public void resourcePreCreate(IBaseResource theResource) {
-		validateSubmittedSubscription(theResource);
+	public void resourcePreCreate(IBaseResource theResource, RequestDetails theRequestDetails) {
+		validateSubmittedSubscription(theResource, theRequestDetails);
 	}
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
-	public void resourcePreCreate(IBaseResource theOldResource, IBaseResource theResource) {
-		validateSubmittedSubscription(theResource);
+	public void resourcePreCreate(IBaseResource theOldResource, IBaseResource theResource, RequestDetails theRequestDetails) {
+		validateSubmittedSubscription(theResource, theRequestDetails);
 	}
 
 	@VisibleForTesting
@@ -72,7 +83,12 @@ public class SubscriptionValidatingInterceptor {
 		myFhirContext = theFhirContext;
 	}
 
+	@Deprecated
 	public void validateSubmittedSubscription(IBaseResource theSubscription) {
+		validateSubmittedSubscription(theSubscription, null);
+	}
+
+	public void validateSubmittedSubscription(IBaseResource theSubscription, RequestDetails theRequestDetails) {
 		if (!"Subscription".equals(myFhirContext.getResourceType(theSubscription))) {
 			return;
 		}
@@ -92,6 +108,17 @@ public class SubscriptionValidatingInterceptor {
 			case NULL:
 				finished = true;
 				break;
+		}
+
+		// If the subscription has the cross partition tag &&
+		if (SubscriptionUtil.isCrossPartition(theSubscription) && !(theRequestDetails instanceof SystemRequestDetails)) {
+			if (!myDaoConfig.isCrossPartitionSubscription()){
+				throw new UnprocessableEntityException("Cross partition subscription is not enabled on this server");
+			}
+
+			if (!determinePartition(theRequestDetails, theSubscription).isDefaultPartition()) {
+				throw new UnprocessableEntityException("Cross partition subscription must be created on the default partition");
+			}
 		}
 
 		mySubscriptionCanonicalizer.setMatchingStrategyTag(theSubscription, null);
@@ -120,6 +147,17 @@ public class SubscriptionValidatingInterceptor {
 			}
 
 
+		}
+	}
+
+	private RequestPartitionId determinePartition(RequestDetails theRequestDetails, IBaseResource theResource) {
+		switch (theRequestDetails.getRestOperationType()) {
+			case CREATE:
+				return myRequestPartitionHelperSvc.determineCreatePartitionForRequest(theRequestDetails, theResource, "Subscription");
+			case UPDATE:
+				return myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(theRequestDetails, "Subscription", theResource.getIdElement());
+			default:
+				return null;
 		}
 	}
 
@@ -213,6 +251,16 @@ public class SubscriptionValidatingInterceptor {
 	@VisibleForTesting
 	public void setDaoRegistryForUnitTest(DaoRegistry theDaoRegistry) {
 		myDaoRegistry = theDaoRegistry;
+	}
+
+	@VisibleForTesting
+	public void setDaoConfigForUnitTest(DaoConfig theDaoConfig) {
+		myDaoConfig = theDaoConfig;
+	}
+
+	@VisibleForTesting
+	public void setRequestPartitionHelperSvcForUnitTest(IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
 	}
 
 
