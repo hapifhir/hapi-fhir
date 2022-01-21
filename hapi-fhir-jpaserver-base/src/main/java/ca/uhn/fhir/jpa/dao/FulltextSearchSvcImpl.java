@@ -24,11 +24,13 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
-import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneSearchBuilder;
-import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneIndexExtractor;
 import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneClauseBuilder;
+import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneIndexExtractor;
+import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneSearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
+import ca.uhn.fhir.jpa.search.autocomplete.AutocompleteResultEntry;
+import ca.uhn.fhir.jpa.search.autocomplete.TokenAutocompleteAggregation;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -38,10 +40,19 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import com.google.gson.JsonObject;
+import org.hibernate.search.backend.elasticsearch.ElasticsearchExtension;
+import org.hibernate.search.engine.search.aggregation.AggregationKey;
+import org.hibernate.search.engine.search.aggregation.SearchAggregation;
+import org.hibernate.search.engine.search.query.SearchResult;
+import org.hibernate.search.engine.search.query.dsl.SearchQueryOptionsStep;
 import org.hibernate.search.mapper.orm.Search;
+import org.hibernate.search.mapper.orm.scope.SearchScope;
+import org.hibernate.search.mapper.orm.search.loading.dsl.SearchLoadingOptionsStep;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hibernate.search.mapper.orm.work.SearchIndexingPlan;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -52,6 +63,7 @@ import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -107,6 +119,36 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		SearchIndexingPlan plan = getSearchSession().indexingPlan();
 		plan.addOrUpdate(theEntity);
 	}
+
+	@Transactional()
+	@Override
+	public List<IBaseCoding> searchMatchingCodes(String theResourceName, String theSPName, String theSearchText) {
+		SearchSession session = getSearchSession();
+
+		// wipmb cleanup
+		SearchScope<ResourceTable> scope = session.scope( ResourceTable.class );
+		AggregationKey<JsonObject> aggName = AggregationKey.of("autocomplete");
+		TokenAutocompleteAggregation tokenAutocompleteAggregation = new TokenAutocompleteAggregation(theSPName);
+		SearchAggregation<JsonObject> aggregation = scope.aggregation().extension(ElasticsearchExtension.get())
+			.fromJson(tokenAutocompleteAggregation.toJsonAggregation())
+			.toAggregation();
+		SearchQueryOptionsStep<?, ?, SearchLoadingOptionsStep, ?, ?> query = session.search(ResourceTable.class)
+			.where(
+				f -> f.bool(b -> {
+				}))
+			.aggregation(aggName, aggregation);
+
+		SearchResult<?> result = query.fetch(0); // we don't care about hits.
+
+
+		JsonObject resultAgg = result.aggregation(aggName);
+		List<AutocompleteResultEntry> aggEntries = tokenAutocompleteAggregation.extractResults(resultAgg);
+		// wipmb parse the results
+		ourLog.warn("XXX agg {}", resultAgg);
+
+		return new ArrayList<>();
+	}
+
 
 	private List<ResourcePersistentId> doSearch(String theResourceType, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
 		// keep this in sync with supportsSomeOf();

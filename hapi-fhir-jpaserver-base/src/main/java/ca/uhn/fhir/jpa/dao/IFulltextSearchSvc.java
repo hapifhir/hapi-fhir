@@ -20,15 +20,16 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import java.util.List;
-
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
-import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import java.util.List;
 
 public interface IFulltextSearchSvc {
 
@@ -60,4 +61,8 @@ public interface IFulltextSearchSvc {
 	 * @param theEntity the fully populated ResourceTable entity
 	 */
 	 void reindex(ResourceTable theEntity);
+
+	 // fixme mb wrap these params into an object?
+	List<IBaseCoding> searchMatchingCodes(String theResourceName, String theSPName, String theSearchText);
+
 }

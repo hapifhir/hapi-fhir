@@ -21,6 +21,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
+import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -33,7 +34,9 @@ import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
+import org.hamcrest.CustomMatcher;
 import org.hamcrest.Matchers;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -60,13 +63,17 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -418,6 +425,70 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	}
 
 
+
+
+	@Test
+	public void testAutocompleteByCodeDisplay() {
+		// wipmb
+
+		// a few different codes
+		Coding mean_blood_pressure = new Coding("http://loinc.org", "8478-0", "Mean blood pressure");
+
+		createObservationWithCode(mean_blood_pressure);
+		createObservationWithCode(new Coding("http://loinc.org", "789-8", "Erythrocytes [#/volume] in Blood by Automated count"));
+		createObservationWithCode(new Coding("http://loinc.org", "788-0", "Erythrocyte distribution width [Ratio] by Automated count"));
+		createObservationWithCode(new Coding("http://loinc.org", "787-2", "MCV [Entitic volume] by Automated count"));
+		createObservationWithCode(new Coding("http://loinc.org", "786-4", "MCHC [Mass/volume] by Automated count"));
+		createObservationWithCode(new Coding("http://loinc.org", "785-6", "MCH [Entitic mass] by Automated count"));
+
+		createObservationWithCode(new Coding("http://loinc.org", "777-3", "Platelets [#/volume] in Blood by Automated count"));
+		createObservationWithCode(new Coding("http://loinc.org", "718-7", "Hemoglobin [Mass/volume] in Blood"));
+		createObservationWithCode(new Coding("http://loinc.org", "6690-2", "Leukocytes [#/volume] in Blood by Automated count"));
+		createObservationWithCode(new Coding("http://loinc.org", "59032-3", "Lactate [Mass/volume] in Blood"));
+		createObservationWithCode(new Coding("http://loinc.org", "4548-4", "Hemoglobin A1c/Hemoglobin.total in Blood"));
+		createObservationWithCode(new Coding("http://loinc.org", "4544-3", "Hematocrit [Volume Fraction] of Blood by Automated count"));
+
+		// some repeats to make sure we only return singles
+		createObservationWithCode(new Coding("http://loinc.org", "88262-1", "Gram positive blood culture panel by Probe in Positive blood culture"));
+		createObservationWithCode(new Coding("http://loinc.org", "88262-1", "Gram positive blood culture panel by Probe in Positive blood culture"));
+		createObservationWithCode(new Coding("http://loinc.org", "88262-1", "Gram positive blood culture panel by Probe in Positive blood culture"));
+
+		List<IBaseCoding> codes = myFulltestSearchSvc.searchMatchingCodes("Observation", "code", "blo");
+		assertThat("finds blood pressure", codes, contains(codeMatching(mean_blood_pressure)));
+	}
+
+	@Nonnull
+	private CodeMatcher codeMatching(Coding theCoding) {
+		return new CodeMatcher(theCoding);
+	}
+
+	public static class CodeMatcher extends CustomMatcher<IBaseCoding> {
+
+		private final IBaseCoding myCode;
+
+		public CodeMatcher(IBaseCoding theCode) {
+			super(theCode.getSystem() + "|" + theCode.getCode());
+			this.myCode = theCode;
+		}
+
+		@Override
+		public boolean matches(Object actual) {
+			if (actual instanceof IBaseCoding) {
+				IBaseCoding coding = (IBaseCoding) actual;
+				return Objects.equals(coding.getSystem(), myCode.getSystem()) &&
+					Objects.equals(coding.getCode(), myCode.getCode());
+			} else {
+				return false;
+			}
+		}
+	}
+	private IIdType createObservationWithCode(Coding c) {
+		Observation obs1 = new Observation();
+		obs1.getCode().addCoding(c);
+		return myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
+	}
+
+
 	@Test
 	public void testStringSearch() {
 		IIdType id1, id2, id3, id4, id5, id6;
@@ -499,6 +570,8 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			assertObservationSearchMatches("contains search matches anywhere", map, id2, id3, id6);
 		}
 	}
+
+
 
 	private void assertObservationSearchMatchesNothing(String message, SearchParameterMap map) {
 		assertObservationSearchMatches(message,map);
