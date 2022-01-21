@@ -62,7 +62,7 @@ public enum TokenParamModifier {
 	/**
 	 * :of-type
 	 */
-	OF_TYPE(":of-type");
+	OF_TYPE(Constants.PARAMQUALIFIER_TOKEN_OF_TYPE);
 
 	private static final Map<String, TokenParamModifier> VALUE_TO_ENUM;
 
@@ -86,5 +86,5 @@ public enum TokenParamModifier {
 	public static TokenParamModifier forValue(String theValue) {
 		return VALUE_TO_ENUM.get(theValue);
 	}
-	
+
 }

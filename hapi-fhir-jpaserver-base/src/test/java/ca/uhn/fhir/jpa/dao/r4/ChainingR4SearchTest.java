@@ -1193,8 +1193,12 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		String url = "/Observation?subject.organization.partof.name=HealthCo";
 
+		logAllStringIndexes();
+
 		// execute
+		myCaptureQueriesListener.clear();
 		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 		// validate
 		assertEquals(1L, oids.size());
