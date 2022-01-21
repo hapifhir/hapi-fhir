@@ -21,10 +21,14 @@ package ca.uhn.fhir.jpa.model.search;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hibernate.search.engine.backend.document.DocumentElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 public class HibernateSearchIndexWriter {
 	private static final Logger ourLog = LoggerFactory.getLogger(HibernateSearchIndexWriter.class);
@@ -72,4 +76,15 @@ public class HibernateSearchIndexWriter {
 		 referenceIndexNode.addValue("value", theValue);
 		 ourLog.trace("Adding Search Param Reference: {} -- {}", theSearchParam, theValue);
     }
+
+	public void writeDateIndex(String theSearchParam, DateRangeParam theValue) {
+		DocumentElement dateIndexNode = getSearchParamIndexNode(theSearchParam, "dt");
+		// Lower bound
+		dateIndexNode.addValue("lower-ord", theValue.getLowerBoundAsDateInteger());
+		dateIndexNode.addValue("lower", LocalDateTime.ofInstant(theValue.getLowerBoundAsInstant().toInstant(), ZoneId.systemDefault()));
+		// Upper bound
+		dateIndexNode.addValue("upper-ord", theValue.getUpperBoundAsDateInteger());
+		dateIndexNode.addValue("upper", LocalDateTime.ofInstant(theValue.getUpperBoundAsInstant().toInstant(), ZoneId.systemDefault()));
+		ourLog.trace("Adding Search Param Reference: {} -- {}", theSearchParam, theValue);
+	}
 }

@@ -38,6 +38,12 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import io.swagger.v3.core.util.Json;
+import org.hibernate.search.backend.elasticsearch.ElasticsearchExtension;
+import org.hibernate.search.engine.search.aggregation.AggregationKey;
+import org.hibernate.search.engine.search.query.SearchQuery;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -50,6 +56,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -93,9 +101,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		// keep this in sync with the guts of doSearch
 		boolean requiresHibernateSearchAccess = myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT) || myParams.isLastN();
 
-		requiresHibernateSearchAccess |=
-			myDaoConfig.isAdvancedLuceneIndexing() &&
-				myAdvancedIndexQueryBuilder.isSupportsSomeOf(myParams);
+		requiresHibernateSearchAccess |= myDaoConfig.isAdvancedLuceneIndexing() && myAdvancedIndexQueryBuilder.isSupportsSomeOf(myParams);
 
 		return requiresHibernateSearchAccess;
 	}
@@ -213,6 +219,56 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	@Override
 	public List<ResourcePersistentId> search(String theResourceName, SearchParameterMap theParams) {
 		return doSearch(theResourceName, theParams, null);
+	}
+
+	@Override
+	public List<ResourcePersistentId> lastN(SearchParameterMap theParams, Integer theMaximumResults) {
+		SearchSession session = Search.session(myEntityManager);
+
+
+		AggregationKey<JsonObject> observationAggregator = AggregationKey.of("observation_aggregator");
+
+		SearchQuery<Long> query = session.search(ResourceTable.class)
+			.extension(ElasticsearchExtension.get())
+			.select(f -> f.field("myId", Long.class))
+			.where(
+				f -> f.bool()
+					.must(f.match().field("myResourceType").matching("Observation"))
+			)
+			.aggregation(observationAggregator, f -> f.fromJson(createObservationAggregator(theParams)))
+			.toQuery();
+		ourLog.info("LastN Query: {}", query.queryString());
+		List<Long> pidList = query.fetchHits(theMaximumResults);
+		return convertLongsToResourcePersistentIds(pidList);
+	}
+
+	private JsonObject createObservationAggregator(SearchParameterMap theParams) {
+		// Top Hits aggregator on effective time
+		JsonObject order = new JsonObject();
+		order.addProperty("order", "desc");
+		JsonObject sortDate = new JsonObject();
+		sortDate.add("sp.date.dt.lower", order);
+		JsonArray sortProperties = new JsonArray();
+		sortProperties.add(sortDate);
+		JsonObject topHits = new JsonObject();
+		topHits.addProperty("size", 1);
+		topHits.add("sort", sortProperties);
+		JsonObject recentEffective = new JsonObject();
+		recentEffective.add("top_hits", topHits);
+
+		// Group by token aggregator
+		JsonObject codeSystemTerm = new JsonObject();
+		codeSystemTerm.addProperty("field", "sp.code.token.code-system");
+
+		JsonObject tokenAggregator = new JsonObject();
+		tokenAggregator.add("terms", codeSystemTerm);
+		tokenAggregator.add("aggregations", recentEffective); // sub-aggregator
+
+
+		JsonObject observationAggregator = new JsonObject();
+		observationAggregator.add("group_by_token", tokenAggregator);
+
+		return observationAggregator;
 	}
 
 }

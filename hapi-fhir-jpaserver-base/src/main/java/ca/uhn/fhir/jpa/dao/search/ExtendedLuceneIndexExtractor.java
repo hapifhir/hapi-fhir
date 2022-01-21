@@ -36,7 +36,7 @@ import java.util.Map;
 
 /**
  * Extract search params for advanced lucene indexing.
- *
+ * <p>
  * This class re-uses the extracted JPA entities to build an ExtendedLuceneIndexData instance.
  */
 public class ExtendedLuceneIndexExtractor {
@@ -58,6 +58,9 @@ public class ExtendedLuceneIndexExtractor {
 
 		theNewParams.myTokenParams.forEach(nextParam ->
 			retVal.addTokenIndexData(nextParam.getParamName(), nextParam.getSystem(), nextParam.getValue()));
+
+		theNewParams.myDateParams.forEach(nextParam ->
+			retVal.addDateIndexData(nextParam.getParamName(), nextParam.getValueLow(), nextParam.getValueHigh()));
 
 		if (!theNewParams.myLinks.isEmpty()) {
 
@@ -87,6 +90,7 @@ public class ExtendedLuceneIndexExtractor {
 				}
 			}
 		}
+
 		return retVal;
 	}
 }

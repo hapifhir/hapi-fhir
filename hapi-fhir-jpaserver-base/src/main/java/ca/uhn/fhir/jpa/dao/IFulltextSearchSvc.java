@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import java.util.List;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -37,7 +38,7 @@ public interface IFulltextSearchSvc {
 	 * consuming entries from theParams when used to query.
 	 *
 	 * @param theResourceName the resource name to restrict the query.
-	 * @param theParams the full query - modified to return only params unused by the index.
+	 * @param theParams       the full query - modified to return only params unused by the index.
 	 * @return the pid list for the matchign resources.
 	 */
 	List<ResourcePersistentId> search(String theResourceName, SearchParameterMap theParams);
@@ -48,5 +49,7 @@ public interface IFulltextSearchSvc {
 
 	ExtendedLuceneIndexData extractLuceneIndexData(IBaseResource theResource, ResourceIndexedSearchParams theNewParams);
 
-    boolean supportsSomeOf(SearchParameterMap myParams);
+	boolean supportsSomeOf(SearchParameterMap myParams);
+
+	List<ResourcePersistentId> lastN(SearchParameterMap theParams, Integer theMaximumResults);
 }

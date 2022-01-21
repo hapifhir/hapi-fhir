@@ -371,13 +371,21 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	private List<ResourcePersistentId> executeLastNAgainstIndex(Integer theMaximumResults) {
-		validateLastNIsEnabled();
-
-		List<String> lastnResourceIds = myIElasticsearchSvc.executeLastN(myParams, myContext, theMaximumResults);
-
-		return lastnResourceIds.stream()
-			.map(lastnResourceId -> myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, lastnResourceId))
-			.collect(Collectors.toList());
+		// Can we use our hibernate search generated index on resource to support lastN?:
+		if (myDaoConfig.isAdvancedLuceneIndexing()) {
+			if (myFulltextSearchSvc == null) {
+				throw new InvalidRequestException("Fulltext search is not enabled on this service, cannot process LastN operation");
+			}
+			return myFulltextSearchSvc.lastN(myParams, theMaximumResults);
+		} else {
+			if (myIElasticsearchSvc == null) {
+				throw new InvalidRequestException("LastN operation is not enabled on this service, can not process this request");
+			}
+			// use the dedicated observation ES/Lucene index to support lastN query
+			return myIElasticsearchSvc.executeLastN(myParams, myContext, theMaximumResults).stream()
+				.map(lastnResourceId -> myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, lastnResourceId))
+				.collect(Collectors.toList());
+		}
 	}
 
 	private List<ResourcePersistentId> queryLuceneForPIDs(RequestDetails theRequest) {
@@ -391,7 +399,6 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 		return pids;
 	}
-
 
 	private void doCreateChunkedQueries(SearchParameterMap theParams, List<Long> thePids, Integer theOffset, SortSpec sort, boolean theCount, RequestDetails theRequest, ArrayList<SearchQueryExecutor> theQueries) {
 		if (thePids.size() < getMaximumPageSize()) {
@@ -1617,12 +1624,6 @@ public class SearchBuilder implements ISearchBuilder {
 
 	public static Predicate[] toPredicateArray(List<Predicate> thePredicates) {
 		return thePredicates.toArray(new Predicate[0]);
-	}
-
-	private void validateLastNIsEnabled() {
-		if (myIElasticsearchSvc == null) {
-			throw new InvalidRequestException("LastN operation is not enabled on this service, can not process this request");
-		}
 	}
 
 	private void validateFullTextSearchIsEnabled() {
