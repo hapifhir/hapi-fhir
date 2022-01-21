@@ -777,7 +777,7 @@ public class QueryStack {
 					ReferenceParam referenceParam = (ReferenceParam) nextOr;
 
 					if (!isReferenceParamValid(referenceParam)) {
-						throw new InvalidRequestException(
+						throw new InvalidRequestException(Msg.code(2007) +
 							"The search chain " + theSearchParam.getName() + "." + referenceParam.getChain() +
 								" is too long. Only chains up to three references are supported.");
 					}
@@ -1051,7 +1051,7 @@ public class QueryStack {
 			}
 		} else {
 			// TODO: the chain is too long, it isn't practical to hard-code all the possible patterns. If anyone ever needs this, we should revisit the approach
-			throw new InvalidRequestException(
+			throw new InvalidRequestException(Msg.code(2008) +
 				"The search chain is too long. Only chains of up to three references are supported.");
 		}
 	}

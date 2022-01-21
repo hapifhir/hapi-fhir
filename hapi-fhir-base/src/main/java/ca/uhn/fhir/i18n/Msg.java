@@ -5,7 +5,7 @@ public final class Msg {
 
 	/**
 	 * IMPORTANT: Please update the following comment after you add a new code
-	 * Last code value: 2006
+	 * Last code value: 2007
 	 */
 
 	private Msg() {}
