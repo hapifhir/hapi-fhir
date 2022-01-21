@@ -322,7 +322,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 		}
 	}
 
-	private void loadStructureDefinitions(Map<String, IBaseResource> theCodeSystems, String theClasspath) {
+	private void loadStructureDefinitions(Map<String, IBaseResource> theStructureDefinitionMap, String theClasspath) {
 		ourLog.info("Loading structure definitions from classpath: {}", theClasspath);
 		try (InputStream valuesetText = DefaultProfileValidationSupport.class.getResourceAsStream(theClasspath)) {
 			if (valuesetText != null) {
@@ -336,7 +336,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 
 							String url = getConformanceResourceUrl(next);
 							if (isNotBlank(url)) {
-								theCodeSystems.put(url, next);
+								theStructureDefinitionMap.put(url, next);
 							}
 
 						}

@@ -17,7 +17,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
 class FhirValidatorTest {
-	private static final String PREFIX = "Brakebills";
+	private static final String ORIG_PREFIX = "Brakebills";
+	private static final String VALID_PREFIX = "Hogwarts";
 	public static final String MESSAGE = "Fillory";
 	@Mock
 	FhirContext myFhirContext;
@@ -33,7 +34,7 @@ class FhirValidatorTest {
 		// validate
 		assertThat(resultMessages, hasSize(1));
 		assertEquals(MESSAGE, resultMessages.get(0).getMessage());
-		assertEquals(PREFIX + ".name.first", resultMessages.get(0).getLocationString());
+		assertEquals(ORIG_PREFIX + ".name.first", resultMessages.get(0).getLocationString());
 	}
 
 	@Test
@@ -47,7 +48,7 @@ class FhirValidatorTest {
 		// validate
 		assertThat(resultMessages, hasSize(1));
 		assertEquals(MESSAGE, resultMessages.get(0).getMessage());
-		assertEquals(PREFIX + ".name", resultMessages.get(0).getLocationString());
+		assertEquals(ORIG_PREFIX + ".name", resultMessages.get(0).getLocationString());
 	}
 
 	@Test
@@ -61,7 +62,7 @@ class FhirValidatorTest {
 		// validate
 		assertThat(resultMessages, hasSize(1));
 		assertEquals(MESSAGE, resultMessages.get(0).getMessage());
-		assertEquals(PREFIX, resultMessages.get(0).getLocationString());
+		assertEquals(ORIG_PREFIX, resultMessages.get(0).getLocationString());
 	}
 
 	@Test
@@ -75,7 +76,7 @@ class FhirValidatorTest {
 		// validate
 		assertThat(resultMessages, hasSize(1));
 		assertEquals(MESSAGE, resultMessages.get(0).getMessage());
-		assertEquals(PREFIX + ".patient", resultMessages.get(0).getLocationString());
+		assertEquals(ORIG_PREFIX + ".patient", resultMessages.get(0).getLocationString());
 	}
 
 	private List<FhirValidator.ConcurrentValidationTask> buildTasks(String theLocation) {
@@ -86,7 +87,7 @@ class FhirValidatorTest {
 		CompletableFuture<ValidationResult> future = new CompletableFuture<>();
 		future.complete(result);
 		List<FhirValidator.ConcurrentValidationTask> tasks = new ArrayList<>();
-		FhirValidator.ConcurrentValidationTask task = new FhirValidator.ConcurrentValidationTask(PREFIX, future);
+		FhirValidator.ConcurrentValidationTask task = new FhirValidator.ConcurrentValidationTask(ORIG_PREFIX, VALID_PREFIX, future);
 		tasks.add(task);
 		return tasks;
 	}
