@@ -269,7 +269,7 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 
 				synchronized (myValidatedServerBaseUrls) {
 					if (!myValidatedServerBaseUrls.contains(serverBase)) {
-						myValidatedServerBaseUrls.add(normalizeBaseUrlForMap(theServerBase));
+						myValidatedServerBaseUrls.add(serverBase);
 						validateServerBase(serverBase, theHttpClient, theClient);
 					}
 				}
@@ -355,12 +355,13 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 			}
 		}
 
-		if (myValidatedServerBaseUrls.contains(theServerBase)) {
+		String serverBase = normalizeBaseUrlForMap(theServerBase);
+		if (myValidatedServerBaseUrls.contains(serverBase)) {
 			return;
 		}
 
 		synchronized (myValidatedServerBaseUrls) {
-			myValidatedServerBaseUrls.add(normalizeBaseUrlForMap(theServerBase));
+			myValidatedServerBaseUrls.add(serverBase);
 		}
 	}
 
