@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search.builder;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilderToken;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
@@ -1014,7 +1015,7 @@ public class QueryStack {
 
 		InCondition inCondition;
 		if (theSourceJoinColumn == null) {
-			inCondition = new InCondition(mySqlBuilder.getOrCreateFirstPredicateBuilder(false).getResourceIdColumn(), union);
+			inCondition = new InCondition(mySqlBuilder.getOrCreateFirstPredicateBuilder().getResourceIdColumn(), union);
 		} else {
 			//-- for the resource link, need join with target_resource_id
 			inCondition = new InCondition(theSourceJoinColumn, union);
