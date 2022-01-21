@@ -557,6 +557,8 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		sd.setUrl("http://foo.com");
 		DaoMethodOutcome result = myStructureDefinitionDao.create(sd);
 		assertTrue(result.getCreated());
+		StructureDefinition readSd = myStructureDefinitionDao.read(result.getId());
+		assertEquals("http://foo.com", readSd.getUrl());
 		SearchParameterMap map = SearchParameterMap.newSynchronous();
 		IBundleProvider bundle = myStructureDefinitionDao.search(map);
 		assertEquals(1, bundle.size());
