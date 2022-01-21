@@ -266,7 +266,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 	}
 
 	@Nonnull
-	private Condition createPredicateSourcePaths(List<String> thePathsToMatch) {
+	public Condition createPredicateSourcePaths(List<String> thePathsToMatch) {
 		return toEqualToOrInPredicate(myColumnSrcPath, generatePlaceholders(thePathsToMatch));
 	}
 
