@@ -534,6 +534,12 @@
 			<version>2.5.0</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<!-- fixme mb move up to parent, and specify the version. reconcile with cdr version -->
+			<groupId>com.jayway.jsonpath</groupId>
+			<artifactId>json-path</artifactId>
+			<version>2.5.0</version>
+		</dependency>
 	</dependencies>
 
 
