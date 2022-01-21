@@ -17,7 +17,6 @@ import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.base.Charsets;
-import com.google.common.reflect.ClassPath;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
@@ -63,6 +62,7 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.r4.terminologies.ValueSetExpander;
 import org.hl7.fhir.r4.utils.FHIRPathEngine;
+import org.hl7.fhir.r5.test.utils.ClassesLoadedFlags;
 import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
 import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;
 import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
@@ -79,7 +79,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -87,7 +87,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.Vector;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -1572,35 +1571,21 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 	@AfterAll
 	public static void verifyFormatParsersNotLoaded() throws Exception {
-		Set<String> bannedClasses = new HashSet<>();
-		bannedClasses.add("org.hl7.fhir.r5.formats.JsonParser");
-		bannedClasses.add("org.hl7.fhir.r5.formats.XmlParser");
-		bannedClasses.add("org.hl7.fhir.r5.formats.RdfParser");
-
-		Field f = ClassLoader.class.getDeclaredField("classes");
-		f.setAccessible(true);
-		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-		Vector<Class<?>> classes = (Vector<Class<?>>) f.get(classLoader);
-		for (Class<?> cls : classes) {
-			String nextName = cls.getName();
-			if (bannedClasses.contains(nextName)) {
-				/*
-				 * If this fails, it means we're classloading the
-				 * generated XmlParser/JsonParser classes, which are
-				 * huge and unnecessary.
-				 *
-				 * To figure out why, put a breakpoint
-				 * in the static method in the class
-				 *   org.hl7.fhir.r5.formats.XmlParser
-				 * and then re-run the test.
-				 */
-				fail("Unnecessary class loaded: " + nextName);
-			}
-		}
+		/*
+		 * If this fails, it means we're classloading the
+		 * generated XmlParser/JsonParser classes, which are
+		 * huge and unnecessary.
+		 *
+		 * To figure out why, put a breakpoint
+		 * in the static method in the class
+		 *   org.hl7.fhir.r5.formats.XmlParser
+		 * and then re-run the test.
+		 */
+		assertFalse(ClassesLoadedFlags.ourJsonParserBaseLoaded);
+		assertFalse(ClassesLoadedFlags.ourXmlParserBaseLoaded);
 	}
 
 
-	@SuppressWarnings("unchecked")
 	@AfterAll
 	public static void afterClassClearContext() throws IOException, NoSuchFieldException {
 		myDefaultValidationSupport.flush();
