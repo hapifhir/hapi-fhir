@@ -36,6 +36,8 @@ import ca.uhn.fhir.rest.client.exceptions.FhirClientInappropriateForServerExcept
 import ca.uhn.fhir.rest.client.method.BaseMethodBinding;
 import ca.uhn.fhir.util.FhirTerser;
 
+import javax.annotation.concurrent.GuardedBy;
+
 /**
  * Base class for a REST client factory implementation
  */
@@ -257,13 +259,21 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 		String serverBase = normalizeBaseUrlForMap(theServerBase);
 
 		switch (getServerValidationMode()) {
-		case NEVER:
-			break;
-		case ONCE:
-			if (!myValidatedServerBaseUrls.contains(serverBase)) {
-				validateServerBase(serverBase, theHttpClient, theClient);
-			}
-			break;
+			case NEVER:
+				break;
+
+			case ONCE:
+				if (myValidatedServerBaseUrls.contains(serverBase)) {
+					break;
+				}
+
+				synchronized (myValidatedServerBaseUrls) {
+					if (!myValidatedServerBaseUrls.contains(serverBase)) {
+						myValidatedServerBaseUrls.add(serverBase);
+						validateServerBase(serverBase, theHttpClient, theClient);
+					}
+				}
+				break;
 		}
 
 	}
@@ -345,9 +355,16 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 			}
 		}
 
-		myValidatedServerBaseUrls.add(normalizeBaseUrlForMap(theServerBase));
+		String serverBase = normalizeBaseUrlForMap(theServerBase);
+		if (myValidatedServerBaseUrls.contains(serverBase)) {
+			return;
+		}
 
+		synchronized (myValidatedServerBaseUrls) {
+			myValidatedServerBaseUrls.add(serverBase);
+		}
 	}
+
 
 	/**
 	 * Get the http client for the given server base
