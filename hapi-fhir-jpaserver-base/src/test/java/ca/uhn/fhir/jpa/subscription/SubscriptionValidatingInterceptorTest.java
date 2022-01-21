@@ -210,7 +210,6 @@ public class SubscriptionValidatingInterceptorTest {
 
 		// No asserts here because the function should throw an UnprocessableEntityException exception if the subscription
 		// is invalid
-		;
 		assertDoesNotThrow(() -> mySvc.validateSubmittedSubscription(subscription, requestDetails));
 		Mockito.verify(myDaoConfig, times(1)).isCrossPartitionSubscription();
 		Mockito.verify(myDaoRegistry, times(1)).isResourceTypeSupported(eq("Patient"));
