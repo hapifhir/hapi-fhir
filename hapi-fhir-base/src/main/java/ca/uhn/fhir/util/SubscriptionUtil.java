@@ -5,11 +5,15 @@ import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.thymeleaf.util.Validate;
 
 import java.util.List;
+import java.util.Objects;
 
 /*
  * #%L
@@ -61,4 +65,18 @@ public class SubscriptionUtil {
 		populatePrimitiveValue(theContext, theSubscription, "status", theStatus);
 	}
 
+	public static boolean isCrossPartition(IBaseResource theSubscription) {
+		if (theSubscription instanceof IBaseHasExtensions) {
+			IBaseExtension extension = ExtensionUtil.getExtensionByUrl(theSubscription, HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION);
+			if (Objects.nonNull(extension)) {
+				try {
+					IBaseBooleanDatatype booleanDatatype = (IBaseBooleanDatatype) (extension.getValue());
+					return booleanDatatype.getValue();
+				} catch (ClassCastException theClassCastException) {
+					return false;
+				}
+			}
+		}
+		return false;
+	}
 }
