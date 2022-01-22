@@ -292,7 +292,7 @@ public class FhirValidator {
 		return new ValidationResult(myContext, validationMessages);
 	}
 
-	private IBaseResource withoutContainedResources(IBaseResource theEntry) {
+	IBaseResource withoutContainedResources(IBaseResource theEntry) {
 		if (TerserUtil.hasValues(myContext, theEntry, "contained")) {
 			IBaseResource deepCopy = TerserUtil.clone(myContext, theEntry);
 			TerserUtil.clearField(myContext, deepCopy, "contained");
