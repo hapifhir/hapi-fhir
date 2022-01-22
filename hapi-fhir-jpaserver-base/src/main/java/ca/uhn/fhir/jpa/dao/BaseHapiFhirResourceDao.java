@@ -343,23 +343,25 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				case ANY:
 					boolean createForPureNumericIds = true;
 					createForcedIdIfNeeded(updatedEntity, theResource.getIdElement().getIdPart(), createForPureNumericIds, persistentId, theRequestPartitionId);
+					// for client ID mode ANY, we will always have a forced ID. If we ever
+					// stop populating the transient forced ID be warned that we use it
+					// (and expect it to be set correctly) farther below.
+					assert updatedEntity.getTransientForcedId() != null;
 					break;
 			}
 		}
 
+		// Populate the resource with it's actual final stored ID from the entity
 		theResource.setId(entity.getIdDt());
 
-		IIdType id = theResource.getIdElement().toUnqualifiedVersionless();
-		theTransactionDetails.addResolvedResourceId(id, persistentId);
-
-		ResourcePersistentId resourcePersistentId = new ResourcePersistentId(entity.getResourceId());
-		resourcePersistentId.setAssociatedResourceId(entity.getIdType(myFhirContext));
-
-		theTransactionDetails.addResolvedResourceId(resourcePersistentId.getAssociatedResourceId(), resourcePersistentId);
+		// Pre-cache the resource ID
+		persistentId.setAssociatedResourceId(entity.getIdType(myFhirContext));
+		myIdHelperService.addResolvedPidToForcedId(persistentId, theRequestPartitionId, getResourceName(), entity.getTransientForcedId(), null);
+		theTransactionDetails.addResolvedResourceId(persistentId.getAssociatedResourceId(), persistentId);
 
 		// Pre-cache the match URL
 		if (theIfNoneExist != null) {
-			myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, getResourceName(), theIfNoneExist, resourcePersistentId);
+			myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, getResourceName(), theIfNoneExist, persistentId);
 		}
 
 		// Update the version/last updated in the resource so that interceptors get
@@ -422,7 +424,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				 */
 				theEntity.setTransientForcedId(forcedId.getForcedId());
 				myForcedIdDao.save(forcedId);
-				myIdHelperService.addResolvedPidToForcedId(thePersistentId, theRequestPartitionId, theEntity.getResourceType(), forcedId.getForcedId(), theEntity.getDeleted());
 			}
 		}
 	}
