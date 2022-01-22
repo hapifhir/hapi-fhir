@@ -1,0 +1,4 @@
+---
+type: fix
+title: "Conformance validation should happen once per client-endpoint, no matter the number of threads
+   executing the requests, but was happening once per client-endpoint-thread. This is now fixed."

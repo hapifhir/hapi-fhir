@@ -20,6 +20,8 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import org.apache.commons.lang3.ObjectUtils;
+
 import javax.persistence.MappedSuperclass;
 import java.io.Serializable;
 
@@ -31,6 +33,16 @@ public abstract class BaseResourceIndex extends BasePartitionable implements Ser
 	public abstract void setId(Long theId);
 
 	public abstract void calculateHashes();
+
+	public abstract void clearHashes();
+
+	@Override
+	public void setPartitionId(PartitionablePartitionId thePartitionId) {
+		if (ObjectUtils.notEqual(getPartitionId(), thePartitionId)) {
+			super.setPartitionId(thePartitionId);
+			clearHashes();
+		}
+	}
 
 	/**
 	 * Subclasses must implement

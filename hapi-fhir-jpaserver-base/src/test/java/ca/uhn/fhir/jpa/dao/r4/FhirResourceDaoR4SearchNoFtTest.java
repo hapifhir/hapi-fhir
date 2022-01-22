@@ -125,7 +125,6 @@ import org.hl7.fhir.r4.model.Substance;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Timing;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.junit.Ignore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -170,6 +169,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -193,9 +193,11 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
-		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 		myModelConfig.setAutoSupportDefaultSearchParams(true);
+		myModelConfig.setIndexIdentifierOfType(new ModelConfig().isIndexIdentifierOfType());
+
 		mySearchParamRegistry.resetForUnitTest();
 	}
 
@@ -3793,6 +3795,8 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		patient.addIdentifier().setSystem("urn:system").setValue("TOKENB");
 		String idBoth = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getValue();
 
+		logAllTokenIndexes();
+
 		patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("TOKENA");
 		String idA = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getValue();
@@ -5133,6 +5137,74 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		assertEquals(1, results.getResources(0, 10).size());
 		// We expect a new one because we don't cache the search URL for very long search URLs
 		runInTransaction(() -> assertEquals(2, mySearchEntityDao.count()));
+	}
+
+	@Test
+	public void testTokenOfType() {
+		myModelConfig.setIndexIdentifierOfType(true);
+
+		Patient patient = new Patient();
+		patient
+			.addIdentifier()
+			.setSystem("http://foo1")
+			.setValue("bar1")
+			.getType()
+			.addCoding()
+			.setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
+			.setCode("MR");
+		IIdType id1 = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+
+		runInTransaction(()->{
+			List<ResourceIndexedSearchParamToken> params = myResourceIndexedSearchParamTokenDao
+				.findAll()
+				.stream()
+				.filter(t -> t.getParamName().equals("identifier:of-type"))
+				.collect(Collectors.toList());
+			assertEquals(1, params.size());
+			assertNotNull(params.get(0).getHashSystemAndValue());
+			assertNull(params.get(0).getHashSystem());
+			assertNull(params.get(0).getHashValue());
+
+		});
+
+		// Shouldn't match
+		patient = new Patient();
+		patient
+			.addIdentifier()
+			.setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
+			.setValue("MR|bar1");
+		myPatientDao.create(patient);
+
+		TokenParam param = new TokenParam()
+			.setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
+			.setValue("MR|bar1")
+			.setModifier(TokenParamModifier.OF_TYPE);
+		SearchParameterMap map = SearchParameterMap.newSynchronous("identifier", param);
+
+		logAllTokenIndexes();
+
+		myCaptureQueriesListener.clear();
+		IBundleProvider outcome = myPatientDao.search(map, mySrd);
+		List<IIdType> ids = toUnqualifiedVersionlessIds(outcome);
+		myCaptureQueriesListener.logSelectQueries();
+
+		assertThat(ids, contains(id1));
+
+	}
+
+	@Test
+	public void testTokenOfType_Disabled() {
+		try {
+			TokenParam param = new TokenParam()
+				.setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
+				.setValue("MR|bar1")
+				.setModifier(TokenParamModifier.OF_TYPE);
+			SearchParameterMap map = SearchParameterMap.newSynchronous("identifier", param);
+			myPatientDao.search(map, mySrd);
+			fail();
+		} catch (MethodNotAllowedException e) {
+			assertEquals("The :of-type modifier is not enabled on this server", e.getMessage());
+		}
 	}
 
 	@Test
