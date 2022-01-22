@@ -408,13 +408,17 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				 * (there is a @OneToOne reference on ResourceTable to the
 				 * ForcedId table, but the actual column is on the ForcedId
 				 * table so it doesn't actually make sense to update the table
-				 * when this is set). But to work around that we clear this
-				 * here.
+				 * when this is set). But to work around that we avoid
+				 * actually assigning ResourceTable#myForcedId here.
 				 *
-				 * If you get rid of the following line (maybe possible
-				 * in a future version of Hibernate) try running the tests
-				 * in FhirResourceDaoR4QueryCountTest
-				 * JA 20220126
+				 * It's conceivable they may fix this in the future, or
+				 * they may not.
+				 *
+				 * If you want to try assigning the forced it to the resource
+				 * entity (by calliong ResourceTable#setForcedId) try running
+				 * the tests FhirResourceDaoR4QueryCountTest to verify that
+				 * nothing has broken as a result.
+				 * JA 20220121
 				 */
 				theEntity.setTransientForcedId(forcedId.getForcedId());
 				myForcedIdDao.save(forcedId);
