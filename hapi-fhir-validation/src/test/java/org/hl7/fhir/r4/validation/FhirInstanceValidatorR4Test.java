@@ -62,6 +62,7 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.r4.terminologies.ValueSetExpander;
 import org.hl7.fhir.r4.utils.FHIRPathEngine;
+import org.hl7.fhir.r5.test.utils.ClassesLoadedFlags;
 import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
 import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;
 import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
@@ -74,12 +75,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.mockito.MockingDetails;
-import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -101,6 +101,7 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.nullable;
@@ -1567,8 +1568,26 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		}
 	}
 
+
 	@AfterAll
-	public static void afterClassClearContext() {
+	public static void verifyFormatParsersNotLoaded() throws Exception {
+		/*
+		 * If this fails, it means we're classloading the
+		 * generated XmlParser/JsonParser classes, which are
+		 * huge and unnecessary.
+		 *
+		 * To figure out why, put a breakpoint
+		 * in the static method in the class
+		 *   org.hl7.fhir.r5.formats.XmlParser
+		 * and then re-run the test.
+		 */
+		assertFalse(ClassesLoadedFlags.ourJsonParserBaseLoaded);
+		assertFalse(ClassesLoadedFlags.ourXmlParserBaseLoaded);
+	}
+
+
+	@AfterAll
+	public static void afterClassClearContext() throws IOException, NoSuchFieldException {
 		myDefaultValidationSupport.flush();
 		myDefaultValidationSupport = null;
 		TestUtil.randomizeLocaleAndTimezone();
