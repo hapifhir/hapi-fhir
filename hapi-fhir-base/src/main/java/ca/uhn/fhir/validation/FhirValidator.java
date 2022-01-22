@@ -280,7 +280,6 @@ public class FhirValidator {
 					resourceToValidate = entry;
 				}
 
-				// FIXME KHS make configurable
 				String entryPathPrefix = String.format("Bundle.entry[%d].resource.ofType(%s)", index, resourceToValidate.fhirType());
 				Future<ValidationResult> future = myExecutorService.submit(() -> {
 					IValidationContext<IBaseResource> entryValidationContext = ValidationContext.forResource(theValidationContext.getFhirContext(), resourceToValidate, theOptions);
