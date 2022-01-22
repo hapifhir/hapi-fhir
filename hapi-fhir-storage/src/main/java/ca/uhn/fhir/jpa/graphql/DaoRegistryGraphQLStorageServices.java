@@ -46,6 +46,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -197,6 +198,7 @@ public class DaoRegistryGraphQLStorageServices implements IGraphQLStorageService
 			size = response.preferredPageSize();
 		}
 
+		Validate.notNull(size, "size is null");
 		theMatches.addAll(response.getResources(0, size));
 
 	}
