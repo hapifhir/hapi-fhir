@@ -23,6 +23,8 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.OptimisticLock;
 
 import javax.persistence.CascadeType;
@@ -57,6 +59,15 @@ import java.util.Collection;
 	@Index(name = "IDX_RESVER_DATE", columnList = "RES_UPDATED")
 })
 public class ResourceHistoryTable extends BaseHasResource implements Serializable {
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+			.append("resourceId", myResourceId)
+			.append("resourceType", myResourceType)
+			.append("resourceVersion", myResourceVersion)
+			.append("pid", myId)
+			.toString();
+	}
 
 	public static final String IDX_RESVER_ID_VER = "IDX_RESVER_ID_VER";
 

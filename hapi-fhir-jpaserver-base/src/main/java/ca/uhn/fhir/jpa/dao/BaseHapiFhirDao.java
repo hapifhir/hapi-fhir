@@ -35,7 +35,6 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
-import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
@@ -134,7 +133,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -272,28 +270,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		if (myApplicationContext == null) {
 			myApplicationContext = theApplicationContext;
 		}
-	}
-
-	/**
-	 * Returns the newly created forced ID. If the entity already had a forced ID, or if
-	 * none was created, returns null.
-	 */
-	protected ForcedId createForcedIdIfNeeded(ResourceTable theEntity, IIdType theId, boolean theCreateForPureNumericIds) {
-		ForcedId retVal = null;
-		if (theId.isEmpty() == false && theId.hasIdPart() && theEntity.getForcedId() == null) {
-			if (theCreateForPureNumericIds || !IdHelperService.isValidPid(theId)) {
-				retVal = new ForcedId();
-				retVal.setResourceType(theEntity.getResourceType());
-				retVal.setForcedId(theId.getIdPart());
-				retVal.setResource(theEntity);
-				retVal.setPartitionId(theEntity.getPartitionId());
-				theEntity.setForcedId(retVal);
-			}
-		} else if (theEntity.getForcedId() != null) {
-			retVal = theEntity.getForcedId();
-		}
-
-		return retVal;
 	}
 
 	private void extractTagsHapi(TransactionDetails theTransactionDetails, IResource theResource, ResourceTable theEntity, Set<ResourceTag> allDefs) {

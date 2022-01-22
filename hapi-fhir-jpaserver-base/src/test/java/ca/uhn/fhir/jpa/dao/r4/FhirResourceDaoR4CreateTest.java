@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -559,8 +560,25 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		assertTrue(result.getCreated());
 		StructureDefinition readSd = myStructureDefinitionDao.read(result.getId());
 		assertEquals("http://foo.com", readSd.getUrl());
+
+		logAllResources();
+		logAllResourceVersions();
+
+		runInTransaction(()->{
+			List<ResourceTable> resources = myResourceTableDao.findAll();
+			assertEquals(1, resources.size());
+			assertEquals(1, resources.get(0).getVersion());
+
+			List<ResourceHistoryTable> resourceVersions = myResourceHistoryTableDao.findAll();
+			assertEquals(1, resourceVersions.size());
+			assertEquals(1, resourceVersions.get(0).getVersion());
+		});
+
 		SearchParameterMap map = SearchParameterMap.newSynchronous();
+
+		myCaptureQueriesListener.clear();
 		IBundleProvider bundle = myStructureDefinitionDao.search(map);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(1, bundle.size());
 	}
 

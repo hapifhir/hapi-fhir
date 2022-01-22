@@ -301,21 +301,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 
-		boolean serverAssignedId;
-		if (isNotBlank(theResource.getIdElement().getIdPart())) {
-			if (theResource.getUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED) == Boolean.TRUE) {
-				createForcedIdIfNeeded(entity, theResource.getIdElement(), true);
-				serverAssignedId = true;
-			} else {
-				validateResourceIdCreation(theResource, theRequest);
-				boolean createForPureNumericIds = getConfig().getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ALPHANUMERIC;
-				createForcedIdIfNeeded(entity, theResource.getIdElement(), createForPureNumericIds);
-				serverAssignedId = false;
-			}
-		} else {
-			serverAssignedId = true;
-		}
-
 		// Notify interceptors
 		if (theRequest != null) {
 			ActionRequestDetails requestDetails = new ActionRequestDetails(theRequest, getContext(), theResource);
@@ -330,50 +315,42 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			.add(TransactionDetails.class, theTransactionDetails);
 		doCallHooks(theTransactionDetails, theRequest, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, hookParams);
 
+		String resourceIdBeforeStorage = theResource.getIdElement().getIdPart();
+		boolean resourceHadIdBeforeStorage = isNotBlank(resourceIdBeforeStorage);
+		boolean resourceIdWasServerAssigned = theResource.getUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED) == Boolean.TRUE;
+		if (resourceHadIdBeforeStorage && !resourceIdWasServerAssigned) {
+			validateResourceIdCreation(theResource, theRequest);
+		}
+
 		// Perform actual DB update
 		ResourceTable updatedEntity = updateEntity(theRequest, theResource, entity, null, thePerformIndexing, false, theTransactionDetails, false, thePerformIndexing);
 
-		IIdType id = myFhirContext.getVersion().newIdType().setValue(updatedEntity.getIdDt().toUnqualifiedVersionless().getValue());
+		// Store the resource forced ID if necessary
 		ResourcePersistentId persistentId = new ResourcePersistentId(updatedEntity.getResourceId());
-		theTransactionDetails.addResolvedResourceId(id, persistentId);
-		if (entity.getForcedId() != null) {
-			myIdHelperService.addResolvedPidToForcedId(persistentId, theRequestPartitionId, updatedEntity.getResourceType(), updatedEntity.getForcedId().getForcedId(), updatedEntity.getDeleted());
-		}
-
-		theResource.setId(entity.getIdDt());
-
-		if (serverAssignedId) {
+		if (resourceHadIdBeforeStorage) {
+			if (resourceIdWasServerAssigned) {
+				boolean createForPureNumericIds = true;
+				createForcedIdIfNeeded(entity, resourceIdBeforeStorage, createForPureNumericIds, persistentId, theRequestPartitionId);
+			} else {
+				boolean createForPureNumericIds = getConfig().getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ALPHANUMERIC;
+				createForcedIdIfNeeded(entity, resourceIdBeforeStorage, createForPureNumericIds, persistentId, theRequestPartitionId);
+			}
+		} else {
 			switch (getConfig().getResourceClientIdStrategy()) {
 				case NOT_ALLOWED:
 				case ALPHANUMERIC:
 					break;
 				case ANY:
-					ForcedId forcedId = createForcedIdIfNeeded(updatedEntity, theResource.getIdElement(), true);
-					if (forcedId != null) {
-
-						/*
-						 * As of Hibernate 5.6.2, assigning the forced ID to the
-						 * resource table causes an extra update to happen, even
-						 * though the ResourceTable entity isn't actually changed
-						 * (there is a @OneToOne reference on ResourceTable to the
-						 * ForcedId table, but the actual column is on the ForcedId
-						 * table so it doesn't actually make sense to update the table
-						 * when this is set). But to work around that we clear this
-						 * here.
-						 *
-						 * If you get rid of the following line (maybe possible
-						 * in a future version of Hibernate) try running the tests
-						 * in FhirResourceDaoR4QueryCountTest
-						 * JA 20220126
-						 */
-						updatedEntity.setForcedId(null);
-						updatedEntity.setTransientForcedId(forcedId.getForcedId());
-
-						myForcedIdDao.save(forcedId);
-					}
+					boolean createForPureNumericIds = true;
+					createForcedIdIfNeeded(updatedEntity, theResource.getIdElement().getIdPart(), createForPureNumericIds, persistentId, theRequestPartitionId);
 					break;
 			}
 		}
+
+		theResource.setId(entity.getIdDt());
+
+		IIdType id = theResource.getIdElement().toUnqualifiedVersionless();
+		theTransactionDetails.addResolvedResourceId(id, persistentId);
 
 		ResourcePersistentId resourcePersistentId = new ResourcePersistentId(entity.getResourceId());
 		resourcePersistentId.setAssociatedResourceId(entity.getIdType(myFhirContext));
@@ -411,14 +388,39 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulCreate", outcome.getId(), w.getMillisAndRestart());
 		outcome.setOperationOutcome(createInfoOperationOutcome(msg));
 
-		String forcedId = null;
-		if (updatedEntity.getForcedId() != null) {
-			forcedId = updatedEntity.getForcedId().getForcedId();
-		}
-		myIdHelperService.addResolvedPidToForcedId(persistentId, theRequestPartitionId, getResourceName(), forcedId, null);
-
 		ourLog.debug(msg);
 		return outcome;
+	}
+
+	private void createForcedIdIfNeeded(ResourceTable theEntity, String theResourceId, boolean theCreateForPureNumericIds, ResourcePersistentId thePersistentId, RequestPartitionId theRequestPartitionId) {
+		if (isNotBlank(theResourceId) && theEntity.getForcedId() == null) {
+			if (theCreateForPureNumericIds || !IdHelperService.isValidPid(theResourceId)) {
+				ForcedId forcedId = new ForcedId();
+				forcedId.setResourceType(theEntity.getResourceType());
+				forcedId.setForcedId(theResourceId);
+				forcedId.setResource(theEntity);
+				forcedId.setPartitionId(theEntity.getPartitionId());
+
+				/*
+				 * As of Hibernate 5.6.2, assigning the forced ID to the
+				 * resource table causes an extra update to happen, even
+				 * though the ResourceTable theEntity isn't actually changed
+				 * (there is a @OneToOne reference on ResourceTable to the
+				 * ForcedId table, but the actual column is on the ForcedId
+				 * table so it doesn't actually make sense to update the table
+				 * when this is set). But to work around that we clear this
+				 * here.
+				 *
+				 * If you get rid of the following line (maybe possible
+				 * in a future version of Hibernate) try running the tests
+				 * in FhirResourceDaoR4QueryCountTest
+				 * JA 20220126
+				 */
+				theEntity.setTransientForcedId(forcedId.getForcedId());
+				myForcedIdDao.save(forcedId);
+				myIdHelperService.addResolvedPidToForcedId(thePersistentId, theRequestPartitionId, theEntity.getResourceType(), forcedId.getForcedId(), theEntity.getDeleted());
+			}
+		}
 	}
 
 	void validateResourceIdCreation(T theResource, RequestDetails theRequest) {
