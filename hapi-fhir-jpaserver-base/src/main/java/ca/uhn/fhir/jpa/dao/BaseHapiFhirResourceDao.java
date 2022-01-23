@@ -406,7 +406,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				/*
 				 * As of Hibernate 5.6.2, assigning the forced ID to the
 				 * resource table causes an extra update to happen, even
-				 * though the ResourceTable theEntity isn't actually changed
+				 * though the ResourceTable entity isn't actually changed
 				 * (there is a @OneToOne reference on ResourceTable to the
 				 * ForcedId table, but the actual column is on the ForcedId
 				 * table so it doesn't actually make sense to update the table
@@ -417,7 +417,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				 * they may not.
 				 *
 				 * If you want to try assigning the forced it to the resource
-				 * entity (by calliong ResourceTable#setForcedId) try running
+				 * entity (by calling ResourceTable#setForcedId) try running
 				 * the tests FhirResourceDaoR4QueryCountTest to verify that
 				 * nothing has broken as a result.
 				 * JA 20220121

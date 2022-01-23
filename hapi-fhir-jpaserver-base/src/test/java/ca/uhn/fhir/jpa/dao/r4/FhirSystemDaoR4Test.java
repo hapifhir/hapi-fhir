@@ -2694,6 +2694,10 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		assertEquals(1, logAllResources());
 		assertEquals(1, logAllResourceVersions());
+
+		IBundleProvider encounters = myEncounterDao.search(SearchParameterMap.newSynchronous("identifier", new TokenParam("urn:foo", "12345")));
+		assertEquals(1, encounters.getAllResourceIds().size());
+
 	}
 
 	@Test
