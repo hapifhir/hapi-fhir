@@ -460,7 +460,7 @@ class TerserUtilTest {
 			Patient p1 = new Patient();
 			p1.addName().setFamily("Doe");
 
-			TerserUtil.clearField(ourFhirContext, "name", p1);
+			TerserUtil.clearField(ourFhirContext, p1, "name");
 
 			assertEquals(0, p1.getName().size());
 		}

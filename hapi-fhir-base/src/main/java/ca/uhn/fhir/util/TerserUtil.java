@@ -315,12 +315,11 @@ public final class TerserUtil {
 
 	/**
 	 * Clears the specified field on the resource provided
-	 *
-	 * @param theFhirContext Context holding resource definition
-	 * @param theFieldName
+	 *  @param theFhirContext Context holding resource definition
 	 * @param theResource
+	 * @param theFieldName
 	 */
-	public static void clearField(FhirContext theFhirContext, String theFieldName, IBaseResource theResource) {
+	public static void clearField(FhirContext theFhirContext, IBaseResource theResource, String theFieldName) {
 		BaseRuntimeChildDefinition childDefinition = getBaseRuntimeChildDefinition(theFhirContext, theFieldName, theResource);
 		clear(childDefinition.getAccessor().getValues(theResource));
 	}
@@ -341,7 +340,7 @@ public final class TerserUtil {
 
 	/**
 	 * Sets the provided field with the given values. This method will add to the collection of existing field values
-	 * in case of multiple cardinality. Use {@link #clearField(FhirContext, String, IBaseResource)}
+	 * in case of multiple cardinality. Use {@link #clearField(FhirContext, IBaseResource, String)}
 	 * to remove values before setting
 	 *
 	 * @param theFhirContext Context holding resource definition
@@ -355,7 +354,7 @@ public final class TerserUtil {
 
 	/**
 	 * Sets the provided field with the given values. This method will add to the collection of existing field values
-	 * in case of multiple cardinality. Use {@link #clearField(FhirContext, String, IBaseResource)}
+	 * in case of multiple cardinality. Use {@link #clearField(FhirContext, IBaseResource, String)}
 	 * to remove values before setting
 	 *
 	 * @param theFhirContext Context holding resource definition
