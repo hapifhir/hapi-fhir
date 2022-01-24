@@ -29,10 +29,6 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hibernate.search.engine.backend.types.Projectable;
-import org.hibernate.search.engine.backend.types.Searchable;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -133,7 +129,19 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	}
 
 	@Override
+	public void clearHashes() {
+		myHashIdentity = null;
+		myHashNormalizedPrefix = null;
+		myHashExact = null;
+	}
+
+
+	@Override
 	public void calculateHashes() {
+		if (myHashIdentity != null || myHashExact != null || myHashNormalizedPrefix != null) {
+			return;
+		}
+
 		String resourceType = getResourceType();
 		String paramName = getParamName();
 		String valueNormalized = getValueNormalized();
@@ -245,6 +253,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		b.append("resourceId", getResourcePid());
 		b.append("hashNormalizedPrefix", getHashNormalizedPrefix());
 		b.append("valueNormalized", getValueNormalized());
+		b.append("partitionId", getPartitionId());
 		return b.build();
 	}
 
@@ -284,7 +293,8 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 			hashPrefixLength = 0;
 		}
 
-		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, StringUtil.left(theValueNormalized, hashPrefixLength));
+		String value = StringUtil.left(theValueNormalized, hashPrefixLength);
+		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, value);
 	}
 
 }

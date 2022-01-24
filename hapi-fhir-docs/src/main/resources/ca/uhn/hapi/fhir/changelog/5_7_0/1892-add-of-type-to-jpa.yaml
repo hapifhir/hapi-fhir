@@ -1,0 +1,5 @@
+---
+type: add
+issue: 1892
+title: "In the JPA server, the token `:of-type` modifier is now supported. This is an optional feature and
+  must be explicitly enabled (default is disabled)."

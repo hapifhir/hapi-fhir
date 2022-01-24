@@ -76,6 +76,7 @@ public class HeaderPassthroughOptionTest {
 
 	@Test
 	public void oneHeader() throws Exception {
+		writeConceptAndHierarchyFiles();
 		String[] args = new String[] {
 			"-v", FHIR_VERSION,
 			"-m", "SNAPSHOT",
@@ -101,6 +102,7 @@ public class HeaderPassthroughOptionTest {
 
 	@Test
 	public void twoHeadersSameKey() throws Exception {
+		writeConceptAndHierarchyFiles();
 		final String headerValue2 = "test header value-2";
 
 		String[] args = new String[] {
@@ -131,6 +133,7 @@ public class HeaderPassthroughOptionTest {
 
 	@Test
 	public void twoHeadersDifferentKeys() throws Exception {
+		writeConceptAndHierarchyFiles();
 		final String headerKey2 = "test-header-key-2";
 		final String headerValue2 = "test header value-2";
 

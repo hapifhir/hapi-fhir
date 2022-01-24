@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.dao;
 import java.util.List;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -50,6 +51,16 @@ public interface IFulltextSearchSvc {
 	ExtendedLuceneIndexData extractLuceneIndexData(IBaseResource theResource, ResourceIndexedSearchParams theNewParams);
 
 	boolean supportsSomeOf(SearchParameterMap myParams);
+
+	/**
+	 * Re-publish the resource to the full-text index.
+	 *
+	 * During update, hibernate search only republishes the entity if it has changed.
+	 * During $reindex, we want to force the re-index.
+	 *
+	 * @param theEntity the fully populated ResourceTable entity
+	 */
+	 void reindex(ResourceTable theEntity);
 
 	List<ResourcePersistentId> lastN(SearchParameterMap theParams, Integer theMaximumResults);
 }

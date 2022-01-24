@@ -1,0 +1,6 @@
+---
+type: perf
+issue: 3312
+backport: 5.5.5
+title: "Improves the performance of the query for searching by chained search parameter 
+when the `Index Contained Resources` feature is enabled."

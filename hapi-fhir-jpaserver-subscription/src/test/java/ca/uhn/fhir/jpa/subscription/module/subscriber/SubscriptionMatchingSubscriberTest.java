@@ -15,7 +15,9 @@ import ca.uhn.fhir.jpa.subscription.module.standalone.BaseBlockingQueueSubscriba
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceModifiedMessage;
+import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.Lists;
+import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Subscription;
 import org.junit.jupiter.api.BeforeEach;
@@ -283,18 +285,94 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		mySubscriptionResourceNotMatched.awaitExpected();
 	}
 
+	@Test
+	public void testCrossPartitionSubscriptionForResourceOnTheSamePartitionMatch() throws InterruptedException {
+		myPartitionSettings.setPartitioningEnabled(true);
+		myDaoConfig.setCrossPartitionSubscription(true);
+		String payload = "application/fhir+json";
+
+		String code = "1000000050";
+		String criteria = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+
+		RequestPartitionId subscriptionPartitionId = RequestPartitionId.defaultPartition();
+		Subscription subscription = makeActiveSubscription(criteria, payload, ourListenerServerBase);
+		subscription.addExtension().setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION).setValue(new BooleanType(true));
+		mockSubscriptionRead(subscriptionPartitionId, subscription);
+		sendSubscription(subscription, subscriptionPartitionId, true);
+
+		ourObservationListener.setExpectedCount(1);
+		mySubscriptionResourceMatched.setExpectedCount(1);
+		sendObservation(code, "SNOMED-CT", subscriptionPartitionId);
+		mySubscriptionResourceMatched.awaitExpected();
+		ourObservationListener.awaitExpected();
+	}
+
+	@Test
+	public void testCrossPartitionSubscriptionForResourceOnDifferentPartitionMatch() throws InterruptedException {
+		myPartitionSettings.setPartitioningEnabled(true);
+		myDaoConfig.setCrossPartitionSubscription(true);
+		String payload = "application/fhir+json";
+
+		String code = "1000000050";
+		String criteria = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+
+		RequestPartitionId subscriptionPartitionId = RequestPartitionId.defaultPartition();
+		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(1);
+		Subscription subscription = makeActiveSubscription(criteria, payload, ourListenerServerBase);
+		subscription.addExtension().setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION).setValue(new BooleanType(true));
+		mockSubscriptionRead(subscriptionPartitionId, subscription);
+		sendSubscription(subscription, subscriptionPartitionId, true);
+
+		ourObservationListener.setExpectedCount(1);
+		mySubscriptionResourceMatched.setExpectedCount(1);
+		sendObservation(code, "SNOMED-CT", requestPartitionId);
+		mySubscriptionResourceMatched.awaitExpected();
+		ourObservationListener.awaitExpected();
+	}
+
+	@Test
+	public void testCrossPartitionSubscriptionForMultipleResourceOnDifferentPartitionMatch() throws InterruptedException {
+		myPartitionSettings.setPartitioningEnabled(true);
+		myDaoConfig.setCrossPartitionSubscription(true);
+		String payload = "application/fhir+json";
+
+		String code = "1000000050";
+		String criteria = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+
+		RequestPartitionId subscriptionPartitionId = RequestPartitionId.defaultPartition();
+		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(1);
+		RequestPartitionId requestPartitionId2 = RequestPartitionId.fromPartitionId(2);
+		Subscription subscription = makeActiveSubscription(criteria, payload, ourListenerServerBase);
+		subscription.addExtension().setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION).setValue(new BooleanType(true));
+		mockSubscriptionRead(subscriptionPartitionId, subscription);
+		sendSubscription(subscription, subscriptionPartitionId, true);
+
+		ourObservationListener.setExpectedCount(2);
+		mySubscriptionResourceMatched.setExpectedCount(2);
+		sendObservation(code, "SNOMED-CT", requestPartitionId);
+		sendObservation(code, "SNOMED-CT", requestPartitionId2);
+		mySubscriptionResourceMatched.awaitExpected();
+		ourObservationListener.awaitExpected();
+	}
+
 	@Nested
 	public class TestDeleteMessages {
 		private final SubscriptionMatchingSubscriber subscriber = new SubscriptionMatchingSubscriber();
-		@Mock ResourceModifiedMessage message;
-		@Mock IInterceptorBroadcaster myInterceptorBroadcaster;
-		@Mock SubscriptionRegistry mySubscriptionRegistry;
-		@Mock(answer = Answers.RETURNS_DEEP_STUBS) ActiveSubscription myActiveSubscription;
-		@Mock CanonicalSubscription myCanonicalSubscription;
-		@Mock SubscriptionCriteriaParser.SubscriptionCriteria mySubscriptionCriteria;
+		@Mock
+		ResourceModifiedMessage message;
+		@Mock
+		IInterceptorBroadcaster myInterceptorBroadcaster;
+		@Mock
+		SubscriptionRegistry mySubscriptionRegistry;
+		@Mock(answer = Answers.RETURNS_DEEP_STUBS)
+		ActiveSubscription myActiveSubscription;
+		@Mock
+		CanonicalSubscription myCanonicalSubscription;
+		@Mock
+		SubscriptionCriteriaParser.SubscriptionCriteria mySubscriptionCriteria;
 
 		@Test
-		public void testAreNotIgnored()  {
+		public void testAreNotIgnored() {
 			ReflectionTestUtils.setField(subscriber, "myInterceptorBroadcaster", myInterceptorBroadcaster);
 			ReflectionTestUtils.setField(subscriber, "mySubscriptionRegistry", mySubscriptionRegistry);
 
@@ -352,7 +430,6 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 			verify(message, atLeastOnce()).getPayloadId(null);
 		}
 	}
-
 
 
 	private void mockSubscriptionRead(RequestPartitionId theRequestPartitionId, Subscription subscription) {

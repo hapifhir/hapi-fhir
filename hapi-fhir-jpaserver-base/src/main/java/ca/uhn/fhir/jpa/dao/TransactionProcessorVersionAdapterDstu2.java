@@ -32,6 +32,7 @@ import ca.uhn.fhir.model.dstu2.valueset.IssueTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -116,6 +117,11 @@ public class TransactionProcessorVersionAdapterDstu2 implements ITransactionProc
 	@Override
 	public String getFullUrl(Bundle.Entry theEntry) {
 		return theEntry.getFullUrl();
+	}
+
+	@Override
+	public void setFullUrl(Bundle.Entry theEntry, String theFullUrl) {
+		theEntry.setFullUrl(theFullUrl);
 	}
 
 	@Override

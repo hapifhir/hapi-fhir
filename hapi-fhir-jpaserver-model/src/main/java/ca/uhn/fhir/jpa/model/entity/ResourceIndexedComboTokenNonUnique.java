@@ -82,6 +82,7 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex implem
 		myPartitionSettings = thePartitionSettings;
 		myResource = theEntity;
 		myIndexString = theQueryString;
+		calculateHashes();
 	}
 
 	public String getIndexString() {
@@ -126,7 +127,16 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex implem
 	}
 
 	@Override
+	public void clearHashes() {
+		myHashComplete = null;
+	}
+
+	@Override
 	public void calculateHashes() {
+		if (myHashComplete != null) {
+			return;
+		}
+
 		PartitionSettings partitionSettings = getPartitionSettings();
 		PartitionablePartitionId partitionId = getPartitionId();
 		String queryString = myIndexString;

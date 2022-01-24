@@ -139,6 +139,8 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 			spfield.fieldTemplate("token-system", keywordFieldType).matchingPathGlob(tokenPathGlob + ".system").multiValued();
 
 			// reference
+
+			// reference
 			spfield.fieldTemplate("reference-value", keywordFieldType).matchingPathGlob("*.reference.value").multiValued();
 
 			// date
