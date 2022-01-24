@@ -20,6 +20,7 @@ package ca.uhn.fhir.test.utilities;
  * #L%
  */
 
+import ca.uhn.fhir.util.StopWatch;
 import org.awaitility.core.ConditionTimeoutException;
 import org.hamcrest.Matchers;
 import org.slf4j.Logger;
@@ -43,6 +44,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.oneOf;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class BatchJobHelper {
@@ -113,9 +115,9 @@ public class BatchJobHelper {
 			} catch (ConditionTimeoutException e) {
 				StringBuilder msg = new StringBuilder();
 				msg.append("Failed waiting for job to complete.\n");
-				msg.append("Error: ").append(e.toString()).append("\n");
+				msg.append("Error: ").append(e).append("\n");
 				msg.append("Statuses:");
-				for (JobExecution next  : theJobs) {
+				for (JobExecution next : theJobs) {
 					JobExecution execution = myJobExplorer.getJobExecution(next.getId());
 					msg.append("\n * Execution ")
 						.append(execution.getId())
@@ -133,14 +135,14 @@ public class BatchJobHelper {
 				JobExecution jobExecution = myJobExplorer.getJobExecution(theJobExecution.getId());
 				ourLog.info("JobExecution {} currently has status: {}- Failures if any: {}", theJobExecution.getId(), jobExecution.getStatus(), jobExecution.getFailureExceptions());
 				return jobExecution.getStatus();
-			}, Matchers.anyOf(
+			}, Matchers.oneOf(
 				// JM: Adding ABANDONED status because given the description, it s similar to FAILURE, and we need to avoid tests failing because
 				// of wait timeouts caused by unmatched statuses. Also adding STOPPED because tests were found where this wait timed out
 				// with jobs keeping that status during the whole wait
-				equalTo(BatchStatus.COMPLETED),
-				equalTo(BatchStatus.FAILED),
-				equalTo(BatchStatus.ABANDONED),
-				equalTo(BatchStatus.STOPPED)
+				BatchStatus.COMPLETED,
+				BatchStatus.FAILED,
+				BatchStatus.ABANDONED,
+				BatchStatus.STOPPED
 			));
 	}
 
@@ -161,4 +163,24 @@ public class BatchJobHelper {
 		return stepExecutions.iterator().next();
 	}
 
+	public void ensureNoRunningJobs() {
+		for (String nextJobName : myJobExplorer.getJobNames()) {
+			List<JobInstance> instances = myJobExplorer.getJobInstances(nextJobName, 0, 10000);
+			for (JobInstance nextInstance : instances) {
+				List<JobExecution> executions = myJobExplorer.getJobExecutions(nextInstance);
+				for (JobExecution nextExecution : executions) {
+					ourLog.info("Have job execution {} in status: {}", nextExecution.getId(), nextExecution.getStatus());
+					try {
+						await().until(() -> myJobExplorer.getJobExecution(nextExecution.getId()).getStatus(), oneOf(BatchStatus.STOPPED, BatchStatus.ABANDONED, BatchStatus.FAILED, BatchStatus.COMPLETED));
+					} catch (ConditionTimeoutException e) {
+						JobExecution execution = myJobExplorer.getJobExecution(nextExecution.getId());
+						fail("Execution " + execution + "\n" +
+							"Instance: " + nextInstance + "\n" +
+							"Job: " + nextJobName);
+					}
+
+				}
+			}
+		}
+	}
 }
