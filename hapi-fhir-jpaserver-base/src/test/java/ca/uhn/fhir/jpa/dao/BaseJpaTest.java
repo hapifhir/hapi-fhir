@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
@@ -595,7 +596,7 @@ public abstract class BaseJpaTest extends BaseTest {
 
 	protected int logAllResourceVersions() {
 		return runInTransaction(() -> {
-			List<ResourceTable> resources = myResourceTableDao.findAll();
+			List<ResourceHistoryTable> resources = myResourceHistoryTableDao.findAll();
 			ourLog.info("Resources Versions:\n * {}", resources.stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 			return resources.size();
 		});

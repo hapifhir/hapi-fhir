@@ -938,6 +938,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(1, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 		runInTransaction(() -> assertEquals(4, myResourceTableDao.count()));
+		logAllResources();
 
 		// Run it again - This time even the match URL should be cached
 
