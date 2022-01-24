@@ -20,6 +20,8 @@ package ca.uhn.fhir.test.utilities;
  * #L%
  */
 
+import org.awaitility.core.ConditionTimeoutException;
+import org.hamcrest.Matchers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -37,7 +39,10 @@ import java.util.stream.Collectors;
 
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class BatchJobHelper {
@@ -55,15 +60,18 @@ public class BatchJobHelper {
 
 	/**
 	 * Await and report for job completions
+	 *
 	 * @param theFailIfNotJobsFound indicate if must fail in case no matching jobs are found
-	 * @param theJobNames The job names to match
+	 * @param theJobNames           The job names to match
 	 * @return the matched JobExecution(s)
 	 */
 	public List<JobExecution> awaitAllBulkJobCompletions(boolean theFailIfNotJobsFound, String... theJobNames) {
 		assert theJobNames.length > 0;
 
 		if (theFailIfNotJobsFound) {
-			await().until(() -> !getJobInstances(theJobNames).isEmpty());
+			await()
+				.alias("Wait for jobs to exist named: " + Arrays.asList(theJobNames))
+				.until(() -> getJobInstances(theJobNames), not(empty()));
 		}
 		List<JobInstance> matchingJobInstances = getJobInstances(theJobNames);
 
@@ -97,19 +105,43 @@ public class BatchJobHelper {
 	}
 
 	protected void awaitJobCompletions(Collection<JobExecution> theJobs) {
-		theJobs.forEach(jobExecution -> awaitJobCompletion(jobExecution));
+		// This intermittently fails for unknown reasons, so I've added a bunch
+		// of extra junk here to improve what we output when it fails
+		for (JobExecution jobExecution : theJobs) {
+			try {
+				awaitJobCompletion(jobExecution);
+			} catch (ConditionTimeoutException e) {
+				StringBuilder msg = new StringBuilder();
+				msg.append("Failed waiting for job to complete.\n");
+				msg.append("Error: ").append(e.toString()).append("\n");
+				msg.append("Statuses:");
+				for (JobExecution next  : theJobs) {
+					JobExecution execution = myJobExplorer.getJobExecution(next.getId());
+					msg.append("\n * Execution ")
+						.append(execution.getId())
+						.append(" has status ")
+						.append(execution.getStatus());
+				}
+				fail(msg.toString());
+			}
+		}
 	}
 
 	public void awaitJobCompletion(JobExecution theJobExecution) {
-		await().atMost(120, TimeUnit.SECONDS).until(() -> {
-			JobExecution jobExecution = myJobExplorer.getJobExecution(theJobExecution.getId());
-			ourLog.info("JobExecution {} currently has status: {}- Failures if any: {}", theJobExecution.getId(), jobExecution.getStatus(), jobExecution.getFailureExceptions());
-			// JM: Adding ABANDONED status because given the description, it s similar to FAILURE, and we need to avoid tests failing because
-			// of wait timeouts caused by unmatched statuses. Also adding STOPPED because tests were found where this wait timed out
-			// with jobs keeping that status during the whole wait
-			return jobExecution.getStatus() == BatchStatus.COMPLETED || jobExecution.getStatus() == BatchStatus.FAILED
-				|| jobExecution.getStatus() == BatchStatus.ABANDONED || jobExecution.getStatus() == BatchStatus.STOPPED;
-		});
+		await()
+			.atMost(120, TimeUnit.SECONDS).until(() -> {
+				JobExecution jobExecution = myJobExplorer.getJobExecution(theJobExecution.getId());
+				ourLog.info("JobExecution {} currently has status: {}- Failures if any: {}", theJobExecution.getId(), jobExecution.getStatus(), jobExecution.getFailureExceptions());
+				return jobExecution.getStatus();
+			}, Matchers.anyOf(
+				// JM: Adding ABANDONED status because given the description, it s similar to FAILURE, and we need to avoid tests failing because
+				// of wait timeouts caused by unmatched statuses. Also adding STOPPED because tests were found where this wait timed out
+				// with jobs keeping that status during the whole wait
+				equalTo(BatchStatus.COMPLETED),
+				equalTo(BatchStatus.FAILED),
+				equalTo(BatchStatus.ABANDONED),
+				equalTo(BatchStatus.STOPPED)
+			));
 	}
 
 	public int getReadCount(Long theJobExecutionId) {
