@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -36,6 +37,7 @@ import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SampledData;
 import org.hl7.fhir.r4.model.SearchParameter;
+import org.hl7.fhir.r4.model.StructureDefinition;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -86,7 +88,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		obs.setSubject(new Reference("Patient/A"));
 		myObservationDao.create(obs, mySrd);
 
-		runInTransaction(() ->{
+		runInTransaction(() -> {
 			List<ResourceLink> allLinks = myResourceLinkDao.findAll();
 			List<String> paths = allLinks
 				.stream()
@@ -115,7 +117,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		enc.addReasonReference(new Reference("#cont"));
 		myEncounterDao.create(enc, mySrd);
 
-		runInTransaction(() ->{
+		runInTransaction(() -> {
 			List<ResourceLink> allLinks = myResourceLinkDao.findAll();
 			Optional<ResourceLink> link = allLinks
 				.stream()
@@ -147,7 +149,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		enc.addReasonReference(new Reference("#obs"));
 		myEncounterDao.create(enc, mySrd);
 
-		runInTransaction(() ->{
+		runInTransaction(() -> {
 			List<ResourceIndexedSearchParamString> allParams = myResourceIndexedSearchParamStringDao.findAll();
 			Optional<ResourceIndexedSearchParamString> link = allParams
 				.stream()
@@ -185,7 +187,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		enc.addReasonReference(new Reference("#obs"));
 		myEncounterDao.create(enc, mySrd);
 
-		runInTransaction(() ->{
+		runInTransaction(() -> {
 			List<ResourceIndexedSearchParamString> allParams = myResourceIndexedSearchParamStringDao.findAll();
 			Optional<ResourceIndexedSearchParamString> firstOrg = allParams
 				.stream()
@@ -233,7 +235,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		enc.addReasonReference(new Reference("#cont"));
 		myEncounterDao.create(enc, mySrd);
 
-		runInTransaction(() ->{
+		runInTransaction(() -> {
 			List<ResourceLink> allLinks = myResourceLinkDao.findAll();
 			Optional<ResourceLink> link = allLinks
 				.stream()
@@ -275,7 +277,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		enc.addReasonReference(new Reference("#obs2"));
 		myEncounterDao.create(enc, mySrd);
 
-		runInTransaction(() ->{
+		runInTransaction(() -> {
 			List<ResourceLink> allLinks = myResourceLinkDao.findAll();
 			Optional<ResourceLink> link = allLinks
 				.stream()
@@ -547,6 +549,38 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		ourLog.info("ID2: {}", id2);
 	}
 
+	@Test
+	public void testCreateAndSearchWithUuidResourceStrategy() {
+		myDaoConfig.setResourceServerIdStrategy(DaoConfig.IdStrategyEnum.UUID);
+		myDaoConfig.setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.ANY);
+
+		StructureDefinition sd = new StructureDefinition();
+		sd.setUrl("http://foo.com");
+		DaoMethodOutcome result = myStructureDefinitionDao.create(sd);
+		assertTrue(result.getCreated());
+		StructureDefinition readSd = myStructureDefinitionDao.read(result.getId());
+		assertEquals("http://foo.com", readSd.getUrl());
+
+		logAllResources();
+		logAllResourceVersions();
+
+		runInTransaction(()->{
+			List<ResourceTable> resources = myResourceTableDao.findAll();
+			assertEquals(1, resources.size());
+			assertEquals(1, resources.get(0).getVersion());
+
+			List<ResourceHistoryTable> resourceVersions = myResourceHistoryTableDao.findAll();
+			assertEquals(1, resourceVersions.size());
+			assertEquals(1, resourceVersions.get(0).getVersion());
+		});
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+
+		myCaptureQueriesListener.clear();
+		IBundleProvider bundle = myStructureDefinitionDao.search(map);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(1, bundle.size());
+	}
 
 	@Test
 	public void testTransactionCreateWithUuidResourceStrategy() {
@@ -653,14 +687,14 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		assertTrue(myObservationDao.create(obs).getCreated());
 
 		// Same value should be placed in both quantity tables
-		runInTransaction(()->{
-			List<ResourceIndexedSearchParamQuantity> quantityIndexes = myResourceIndexedSearchParamQuantityDao.findAll().stream().filter(t->t.getParamName().equals("value-quantity")).collect(Collectors.toList());
+		runInTransaction(() -> {
+			List<ResourceIndexedSearchParamQuantity> quantityIndexes = myResourceIndexedSearchParamQuantityDao.findAll().stream().filter(t -> t.getParamName().equals("value-quantity")).collect(Collectors.toList());
 			assertEquals(1, quantityIndexes.size());
 			assertEquals("1.2", Double.toString(quantityIndexes.get(0).getValue().doubleValue()));
 			assertEquals("http://unitsofmeasure.org", quantityIndexes.get(0).getSystem());
 			assertEquals("cm", quantityIndexes.get(0).getUnits());
 
-			List<ResourceIndexedSearchParamQuantityNormalized> normalizedQuantityIndexes = myResourceIndexedSearchParamQuantityNormalizedDao.findAll().stream().filter(t->t.getParamName().equals("value-quantity")).collect(Collectors.toList());
+			List<ResourceIndexedSearchParamQuantityNormalized> normalizedQuantityIndexes = myResourceIndexedSearchParamQuantityNormalizedDao.findAll().stream().filter(t -> t.getParamName().equals("value-quantity")).collect(Collectors.toList());
 			assertEquals(1, normalizedQuantityIndexes.size());
 			assertEquals("0.012", Double.toString(normalizedQuantityIndexes.get(0).getValue()));
 			assertEquals("http://unitsofmeasure.org", normalizedQuantityIndexes.get(0).getSystem());
@@ -695,15 +729,15 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logInsertQueries();
 
 		// Original value should be in Quantity index, normalized should be in normalized table
-		runInTransaction(()->{
-			List<ResourceIndexedSearchParamQuantity> quantityIndexes = myResourceIndexedSearchParamQuantityDao.findAll().stream().filter(t->t.getParamName().equals("value-quantity")).collect(Collectors.toList());
+		runInTransaction(() -> {
+			List<ResourceIndexedSearchParamQuantity> quantityIndexes = myResourceIndexedSearchParamQuantityDao.findAll().stream().filter(t -> t.getParamName().equals("value-quantity")).collect(Collectors.toList());
 			assertEquals(1, quantityIndexes.size());
 			double d = quantityIndexes.get(0).getValue().doubleValue();
 			assertEquals("1.2E-6", Double.toString(d));
 			assertEquals("http://unitsofmeasure.org", quantityIndexes.get(0).getSystem());
 			assertEquals("mm", quantityIndexes.get(0).getUnits());
 
-			List<ResourceIndexedSearchParamQuantityNormalized> normalizedQuantityIndexes = myResourceIndexedSearchParamQuantityNormalizedDao.findAll().stream().filter(t->t.getParamName().equals("value-quantity")).collect(Collectors.toList());
+			List<ResourceIndexedSearchParamQuantityNormalized> normalizedQuantityIndexes = myResourceIndexedSearchParamQuantityNormalizedDao.findAll().stream().filter(t -> t.getParamName().equals("value-quantity")).collect(Collectors.toList());
 			assertEquals(1, normalizedQuantityIndexes.size());
 			assertEquals("1.2E-9", Double.toString(normalizedQuantityIndexes.get(0).getValue()));
 			assertEquals("http://unitsofmeasure.org", normalizedQuantityIndexes.get(0).getSystem());
@@ -722,7 +756,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			.setUnits("m")
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
-		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true,true);
+		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY_NRML t0"));
 		assertThat(searchSql, containsString("t0.SP_VALUE = '1.2E-9'"));
 		assertEquals(1, ids.size());
@@ -735,7 +769,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			.setUnits("mm")
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
-		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true,true);
+		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY_NRML t0"));
 		assertThat(searchSql, containsString("t0.SP_VALUE = '1.2E-9'"));
 		assertEquals(1, ids.size());
@@ -746,7 +780,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			.setValue(new BigDecimal("0.0000012"))
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
-		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true,true);
+		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
 		assertThat(searchSql, containsString("t0.SP_VALUE = '0.0000012'"));
 		assertEquals(1, ids.size());
@@ -770,14 +804,14 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		assertTrue(myObservationDao.create(obs).getCreated());
 
 		// Original value should be in Quantity index, normalized should be in normalized table
-		runInTransaction(()->{
-			List<ResourceIndexedSearchParamQuantity> quantityIndexes = myResourceIndexedSearchParamQuantityDao.findAll().stream().filter(t->t.getParamName().equals("value-quantity")).collect(Collectors.toList());
+		runInTransaction(() -> {
+			List<ResourceIndexedSearchParamQuantity> quantityIndexes = myResourceIndexedSearchParamQuantityDao.findAll().stream().filter(t -> t.getParamName().equals("value-quantity")).collect(Collectors.toList());
 			assertEquals(1, quantityIndexes.size());
 			assertEquals("149597.870691", Double.toString(quantityIndexes.get(0).getValue().doubleValue()));
 			assertEquals("http://unitsofmeasure.org", quantityIndexes.get(0).getSystem());
 			assertEquals("mm", quantityIndexes.get(0).getUnits());
 
-			List<ResourceIndexedSearchParamQuantityNormalized> normalizedQuantityIndexes = myResourceIndexedSearchParamQuantityNormalizedDao.findAll().stream().filter(t->t.getParamName().equals("value-quantity")).collect(Collectors.toList());
+			List<ResourceIndexedSearchParamQuantityNormalized> normalizedQuantityIndexes = myResourceIndexedSearchParamQuantityNormalizedDao.findAll().stream().filter(t -> t.getParamName().equals("value-quantity")).collect(Collectors.toList());
 			assertEquals(1, normalizedQuantityIndexes.size());
 			assertEquals("149.597870691", Double.toString(normalizedQuantityIndexes.get(0).getValue()));
 			assertEquals("http://unitsofmeasure.org", normalizedQuantityIndexes.get(0).getSystem());
@@ -822,14 +856,14 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		assertTrue(myObservationDao.create(obs).getCreated());
 
 		// Original value should be in Quantity index, normalized should be in normalized table
-		runInTransaction(()->{
-			List<ResourceIndexedSearchParamQuantity> quantityIndexes = myResourceIndexedSearchParamQuantityDao.findAll().stream().filter(t->t.getParamName().equals("value-quantity")).collect(Collectors.toList());
+		runInTransaction(() -> {
+			List<ResourceIndexedSearchParamQuantity> quantityIndexes = myResourceIndexedSearchParamQuantityDao.findAll().stream().filter(t -> t.getParamName().equals("value-quantity")).collect(Collectors.toList());
 			assertEquals(1, quantityIndexes.size());
 			assertEquals("95.7412345", Double.toString(quantityIndexes.get(0).getValue().doubleValue()));
 			assertEquals("http://unitsofmeasure.org", quantityIndexes.get(0).getSystem());
 			assertEquals("kg/dL", quantityIndexes.get(0).getUnits());
 
-			List<ResourceIndexedSearchParamQuantityNormalized> normalizedQuantityIndexes = myResourceIndexedSearchParamQuantityNormalizedDao.findAll().stream().filter(t->t.getParamName().equals("value-quantity")).collect(Collectors.toList());
+			List<ResourceIndexedSearchParamQuantityNormalized> normalizedQuantityIndexes = myResourceIndexedSearchParamQuantityNormalizedDao.findAll().stream().filter(t -> t.getParamName().equals("value-quantity")).collect(Collectors.toList());
 			assertEquals(1, normalizedQuantityIndexes.size());
 			assertEquals("9.57412345E8", Double.toString(normalizedQuantityIndexes.get(0).getValue()));
 			assertEquals("http://unitsofmeasure.org", normalizedQuantityIndexes.get(0).getSystem());
@@ -883,7 +917,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			.setUnits("kg/dL")
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
-		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true,true);
+		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
 		assertThat(searchSql, containsString("t0.SP_VALUE = '95.7412345'"));
 		assertEquals(1, ids.size());
@@ -911,15 +945,15 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logInsertQueries();
 
 		// Original value should be in Quantity index, normalized should be in normalized table
-		runInTransaction(()->{
-			List<ResourceIndexedSearchParamQuantity> quantityIndexes = myResourceIndexedSearchParamQuantityDao.findAll().stream().filter(t->t.getParamName().equals("value-quantity")).collect(Collectors.toList());
+		runInTransaction(() -> {
+			List<ResourceIndexedSearchParamQuantity> quantityIndexes = myResourceIndexedSearchParamQuantityDao.findAll().stream().filter(t -> t.getParamName().equals("value-quantity")).collect(Collectors.toList());
 			assertEquals(1, quantityIndexes.size());
 			double d = quantityIndexes.get(0).getValue().doubleValue();
 			assertEquals("1.2E-6", Double.toString(d));
 			assertEquals("http://unitsofmeasure.org", quantityIndexes.get(0).getSystem());
 			assertEquals("mm", quantityIndexes.get(0).getUnits());
 
-			List<ResourceIndexedSearchParamQuantityNormalized> normalizedQuantityIndexes = myResourceIndexedSearchParamQuantityNormalizedDao.findAll().stream().filter(t->t.getParamName().equals("value-quantity")).collect(Collectors.toList());
+			List<ResourceIndexedSearchParamQuantityNormalized> normalizedQuantityIndexes = myResourceIndexedSearchParamQuantityNormalizedDao.findAll().stream().filter(t -> t.getParamName().equals("value-quantity")).collect(Collectors.toList());
 			assertEquals(1, normalizedQuantityIndexes.size());
 			assertEquals("1.2E-9", Double.toString(normalizedQuantityIndexes.get(0).getValue()));
 			assertEquals("http://unitsofmeasure.org", normalizedQuantityIndexes.get(0).getSystem());
@@ -938,7 +972,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			.setUnits("m")
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
-		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true,true);
+		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
 		assertThat(searchSql, containsString("t0.SP_VALUE = '1.2E-9'"));
 		assertEquals(0, ids.size());
@@ -951,7 +985,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			.setUnits("mm")
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
-		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true,true);
+		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
 		assertThat(searchSql, containsString("t0.SP_VALUE = '0.0000012'"));
 		assertEquals(1, ids.size());
@@ -962,7 +996,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			.setValue(new BigDecimal("0.0000012"))
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
-		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true,true);
+		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
 		assertThat(searchSql, containsString("t0.SP_VALUE = '0.0000012'"));
 		assertEquals(1, ids.size());
@@ -988,15 +1022,15 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logInsertQueries();
 
 		// Original value should be in Quantity index, no normalized should be in normalized table
-		runInTransaction(()->{
-			List<ResourceIndexedSearchParamQuantity> quantityIndexes = myResourceIndexedSearchParamQuantityDao.findAll().stream().filter(t->t.getParamName().equals("value-quantity")).collect(Collectors.toList());
+		runInTransaction(() -> {
+			List<ResourceIndexedSearchParamQuantity> quantityIndexes = myResourceIndexedSearchParamQuantityDao.findAll().stream().filter(t -> t.getParamName().equals("value-quantity")).collect(Collectors.toList());
 			assertEquals(1, quantityIndexes.size());
 			double d = quantityIndexes.get(0).getValue().doubleValue();
 			assertEquals("1.2E-6", Double.toString(d));
 			assertEquals("http://unitsofmeasure.org", quantityIndexes.get(0).getSystem());
 			assertEquals("mm", quantityIndexes.get(0).getUnits());
 
-			List<ResourceIndexedSearchParamQuantityNormalized> normalizedQuantityIndexes = myResourceIndexedSearchParamQuantityNormalizedDao.findAll().stream().filter(t->t.getParamName().equals("value-quantity")).collect(Collectors.toList());
+			List<ResourceIndexedSearchParamQuantityNormalized> normalizedQuantityIndexes = myResourceIndexedSearchParamQuantityNormalizedDao.findAll().stream().filter(t -> t.getParamName().equals("value-quantity")).collect(Collectors.toList());
 			assertEquals(0, normalizedQuantityIndexes.size());
 		});
 
@@ -1012,7 +1046,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			.setUnits("m")
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
-		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true,true);
+		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
 		assertThat(searchSql, containsString("t0.SP_VALUE = '1.2E-9'"));
 		assertEquals(0, ids.size());
@@ -1025,7 +1059,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			.setUnits("mm")
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
-		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true,true);
+		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
 		assertThat(searchSql, containsString("t0.SP_VALUE = '0.0000012'"));
 		assertEquals(1, ids.size());
@@ -1036,7 +1070,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			.setValue(new BigDecimal("0.0000012"))
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
-		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true,true);
+		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
 		assertThat(searchSql, containsString("t0.SP_VALUE = '0.0000012'"));
 		assertEquals(1, ids.size());

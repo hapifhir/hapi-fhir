@@ -168,7 +168,7 @@ public class BaseJpaResourceProviderPatientR4 extends JpaResourceProviderR4<Pati
 	 * Basic implementation matching by coverage id or by coverage identifier. Not matching by
 	 * Beneficiary (Patient) demographics in this version
 	 */
-	@Operation(name = ProviderConstants.OPERATION_MEMBER_MATCH, idempotent = true, returnParameters = {
+	@Operation(name = ProviderConstants.OPERATION_MEMBER_MATCH, idempotent = false, returnParameters = {
 		@OperationParam(name = "MemberIdentifier", type = StringDt.class)
 	})
 	public Parameters patientMemberMatch(

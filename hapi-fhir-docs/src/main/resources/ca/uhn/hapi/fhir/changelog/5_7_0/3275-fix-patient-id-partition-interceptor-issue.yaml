@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3275
+title: "In rare cases where patient ID String happened to have hashCode equal to Integer.MIN_VALUE,
+   PatientIdPartitionInterceptor would generate an invalid partition ID. This has been fixed."

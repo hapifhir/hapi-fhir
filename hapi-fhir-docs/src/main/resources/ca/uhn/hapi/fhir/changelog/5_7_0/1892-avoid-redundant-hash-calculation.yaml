@@ -1,0 +1,4 @@
+---
+type: perf
+issue: 1892
+title: "A redundant set of hash calculations in the JPA server was eliminated."

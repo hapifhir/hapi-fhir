@@ -1040,7 +1040,7 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 			.setResource(updatedValueSet_v1)
 			.getRequest()
 			.setMethod(Bundle.HTTPVerb.PUT)
-			.setUrl(url);
+			.setUrl("ValueSet/" + updatedValueSet_v1.getIdElement().getIdPart());
 		ourLog.info("Transaction Bundle:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		ourClient.transaction().withBundle(bundle).execute();
 
@@ -1062,7 +1062,7 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 			.setResource(updatedValueSet_v2)
 			.getRequest()
 			.setMethod(Bundle.HTTPVerb.PUT)
-			.setUrl(url);
+			.setUrl("ValueSet/" + updatedValueSet_v2.getIdElement().getIdPart());
 		ourLog.info("Transaction Bundle:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		ourClient.transaction().withBundle(bundle).execute();
 

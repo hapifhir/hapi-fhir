@@ -182,7 +182,7 @@ public class GiantTransactionPerfTest {
 		myTransactionProcessor.setModelConfig(myDaoConfig.getModelConfig());
 		myTransactionProcessor.setHapiTransactionService(myHapiTransactionService);
 		myTransactionProcessor.setDaoRegistry(myDaoRegistry);
-		myTransactionProcessor.setPartitionSettingsForUnitTest(myPartitionSettings);
+		myTransactionProcessor.setPartitionSettingsForUnitTest(this.myPartitionSettings);
 		myTransactionProcessor.setIdHelperServiceForUnitTest(myIdHelperService);
 		myTransactionProcessor.setFhirContextForUnitTest(myCtx);
 		myTransactionProcessor.start();
@@ -190,6 +190,7 @@ public class GiantTransactionPerfTest {
 		mySystemDao = new FhirSystemDaoR4();
 		mySystemDao.setTransactionProcessorForUnitTest(myTransactionProcessor);
 		mySystemDao.setDaoConfigForUnitTest(myDaoConfig);
+		mySystemDao.setPartitionSettingsForUnitTest(myPartitionSettings);
 		mySystemDao.start();
 
 		when(myAppCtx.getBean(eq(IInstanceValidatorModule.class))).thenReturn(myInstanceValidatorSvc);
@@ -228,7 +229,7 @@ public class GiantTransactionPerfTest {
 		mySearchParamExtractor = new SearchParamExtractorR4();
 		mySearchParamExtractor.setContext(myCtx);
 		mySearchParamExtractor.setSearchParamRegistry(mySearchParamRegistry);
-		mySearchParamExtractor.setPartitionSettings(myPartitionSettings);
+		mySearchParamExtractor.setPartitionSettings(this.myPartitionSettings);
 		mySearchParamExtractor.setModelConfig(myDaoConfig.getModelConfig());
 		mySearchParamExtractor.start();
 
@@ -243,7 +244,7 @@ public class GiantTransactionPerfTest {
 		mySearchParamWithInlineReferencesExtractor = new SearchParamWithInlineReferencesExtractor();
 		mySearchParamWithInlineReferencesExtractor.setDaoConfig(myDaoConfig);
 		mySearchParamWithInlineReferencesExtractor.setContext(myCtx);
-		mySearchParamWithInlineReferencesExtractor.setPartitionSettings(myPartitionSettings);
+		mySearchParamWithInlineReferencesExtractor.setPartitionSettings(this.myPartitionSettings);
 		mySearchParamWithInlineReferencesExtractor.setSearchParamExtractorService(mySearchParamExtractorSvc);
 		mySearchParamWithInlineReferencesExtractor.setSearchParamRegistry(mySearchParamRegistry);
 		mySearchParamWithInlineReferencesExtractor.setDaoSearchParamSynchronizer(myDaoSearchParamSynchronizer);
@@ -263,6 +264,7 @@ public class GiantTransactionPerfTest {
 		myEobDao.setDaoSearchParamSynchronizer(myDaoSearchParamSynchronizer);
 		myEobDao.setDaoConfigForUnitTest(myDaoConfig);
 		myEobDao.setIdHelperSvcForUnitTest(myIdHelperService);
+		myEobDao.setPartitionSettingsForUnitTest(myPartitionSettings);
 		myEobDao.start();
 
 		myDaoRegistry.setResourceDaos(Lists.newArrayList(myEobDao));

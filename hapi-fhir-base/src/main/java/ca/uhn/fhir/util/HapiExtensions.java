@@ -136,6 +136,11 @@ public class HapiExtensions {
 	public static final String EX_SEND_DELETE_MESSAGES = "http://hapifhir.io/fhir/StructureDefinition/subscription-send-delete-messages";
 
 	/**
+	 * This entension allows subscriptions to be marked as cross partition and with correct settings, listen to incoming resources from all partitions.
+	 */
+	public static final String EXTENSION_SUBSCRIPTION_CROSS_PARTITION = "https://smilecdr.com/fhir/ns/StructureDefinition/subscription-cross-partition";
+
+	/**
 	 * Non instantiable
 	 */
 	private HapiExtensions() {

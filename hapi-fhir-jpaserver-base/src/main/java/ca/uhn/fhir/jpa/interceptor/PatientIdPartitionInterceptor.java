@@ -236,7 +236,7 @@ public class PatientIdPartitionInterceptor {
 	 */
 	@SuppressWarnings("unused")
 	protected int providePartitionIdForPatientId(RequestDetails theRequestDetails, String theResourceIdPart) {
-		return Math.abs(theResourceIdPart.hashCode()) % 15000;
+		return Math.abs(theResourceIdPart.hashCode() % 15000);
 	}
 
 	/**
