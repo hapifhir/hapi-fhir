@@ -177,14 +177,14 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 				codes.addAll(myTerminologySvc.findCodesBelow(system, code));
 			} else if (modifier == TokenParamModifier.OF_TYPE) {
 				if (!myModelConfig.isIndexIdentifierOfType()) {
-					throw new MethodNotAllowedException("The :of-type modifier is not enabled on this server");
+					throw new MethodNotAllowedException(Msg.code(2012) + "The :of-type modifier is not enabled on this server");
 				}
 				if (isBlank(system) || isBlank(code)) {
-					throw new InvalidRequestException("Invalid parameter value for :of-type query");
+					throw new InvalidRequestException(Msg.code(2013) + "Invalid parameter value for :of-type query");
 				}
 				int pipeIdx = code.indexOf('|');
 				if (pipeIdx < 1 || pipeIdx == code.length() - 1) {
-					throw new InvalidRequestException("Invalid parameter value for :of-type query");
+					throw new InvalidRequestException(Msg.code(2014) + "Invalid parameter value for :of-type query");
 				}
 
 				paramName = paramName + Constants.PARAMQUALIFIER_TOKEN_OF_TYPE;

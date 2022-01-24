@@ -1765,7 +1765,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			mySystemDao.transaction(mySrd, inputBundle);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Unable to process Transaction - Request contains multiple anonymous entries (Bundle.entry.fullUrl not populated) with conditional URL: \"Encounter?identifier=urn:foo|12345\". Does transaction request contain duplicates?", e.getMessage());
+			assertEquals(Msg.code(2008) + "Unable to process Transaction - Request contains multiple anonymous entries (Bundle.entry.fullUrl not populated) with conditional URL: \"Encounter?identifier=urn:foo|12345\". Does transaction request contain duplicates?", e.getMessage());
 		}
 
 	}
@@ -2018,7 +2018,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		try {
 			mySystemDao.transaction(mySrd, request);
 		} catch (InvalidRequestException e) {
-			assertEquals("Unable to process Transaction - Request contains multiple anonymous entries (Bundle.entry.fullUrl not populated) with conditional URL: \"Patient?identifier=urn%3Asystem%7CtestTransactionCreateWithDuplicateMatchUrl01\". Does transaction request contain duplicates?", e.getMessage());
+			assertEquals(Msg.code(2008) + "Unable to process Transaction - Request contains multiple anonymous entries (Bundle.entry.fullUrl not populated) with conditional URL: \"Patient?identifier=urn%3Asystem%7CtestTransactionCreateWithDuplicateMatchUrl01\". Does transaction request contain duplicates?", e.getMessage());
 		}
 	}
 
@@ -2702,7 +2702,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			mySystemDao.transaction(mySrd, inputBundle);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Unable to process Transaction - Request contains multiple anonymous entries (Bundle.entry.fullUrl not populated) with conditional URL: \"Encounter?identifier=urn:foo|12345\". Does transaction request contain duplicates?", e.getMessage());
+			assertEquals(Msg.code(2008) + "Unable to process Transaction - Request contains multiple anonymous entries (Bundle.entry.fullUrl not populated) with conditional URL: \"Encounter?identifier=urn:foo|12345\". Does transaction request contain duplicates?", e.getMessage());
 		}
 	}
 

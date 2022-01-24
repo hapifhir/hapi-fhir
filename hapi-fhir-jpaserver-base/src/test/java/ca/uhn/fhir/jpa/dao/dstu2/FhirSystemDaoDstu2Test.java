@@ -432,7 +432,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 			mySystemDao.transaction(mySrd, request);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Unable to process Transaction - Request contains multiple anonymous entries (Bundle.entry.fullUrl not populated) with conditional URL: \"Patient?identifier=urn%3Asystem%7CtestTransactionCreateWithDuplicateMatchUrl01\". Does transaction request contain duplicates?", e.getMessage());
+			assertEquals(Msg.code(2008) + "Unable to process Transaction - Request contains multiple anonymous entries (Bundle.entry.fullUrl not populated) with conditional URL: \"Patient?identifier=urn%3Asystem%7CtestTransactionCreateWithDuplicateMatchUrl01\". Does transaction request contain duplicates?", e.getMessage());
 		}
 	}
 

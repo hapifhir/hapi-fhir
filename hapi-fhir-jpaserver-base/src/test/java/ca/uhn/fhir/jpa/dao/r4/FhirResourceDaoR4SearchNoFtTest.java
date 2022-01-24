@@ -5204,7 +5204,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			myPatientDao.search(map, mySrd);
 			fail();
 		} catch (MethodNotAllowedException e) {
-			assertEquals("The :of-type modifier is not enabled on this server", e.getMessage());
+			assertEquals(Msg.code(2012) + "The :of-type modifier is not enabled on this server", e.getMessage());
 		}
 	}
 

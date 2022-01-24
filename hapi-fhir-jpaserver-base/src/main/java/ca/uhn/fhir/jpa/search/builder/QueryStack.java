@@ -1051,7 +1051,7 @@ public class QueryStack {
 			}
 		} else {
 			// TODO: the chain is too long, it isn't practical to hard-code all the possible patterns. If anyone ever needs this, we should revisit the approach
-			throw new InvalidRequestException(Msg.code(2008) +
+			throw new InvalidRequestException(Msg.code(2011) +
 				"The search chain is too long. Only chains of up to three references are supported.");
 		}
 	}
