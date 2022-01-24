@@ -420,7 +420,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			accumulator.addParameter().setName("count").setValue(new IntegerType(count));
 		}
 
-
 		expandValueSetIntoAccumulator(theValueSetToExpand, theExpansionOptions, accumulator, theFilter, true);
 
 		if (accumulator.getTotalConcepts() != null) {
@@ -428,6 +427,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		}
 
 		ValueSet valueSet = new ValueSet();
+		valueSet.setUrl(theValueSetToExpand.getUrl());
 		valueSet.setId(theValueSetToExpand.getId());
 		valueSet.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		valueSet.setCompose(theValueSetToExpand.getCompose());

@@ -563,7 +563,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					bundleProvider.setSize(null);
 				}
 			}
-
+			bundleProvider.setPreferredPageSize(theParams.getCount());
 			return bundleProvider;
 		});
 	}
