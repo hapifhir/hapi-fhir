@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneSearchBuilder;
 import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneIndexExtractor;
 import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneClauseBuilder;
+import ca.uhn.fhir.jpa.dao.search.LastNAggregationBuilder;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -68,6 +69,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FulltextSearchSvcImpl.class);
+	public static final String OBSERVATION_RES_TYPE = "Observation";
 	@Autowired
 	protected IForcedIdDao myForcedIdDao;
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
@@ -244,44 +246,17 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		SearchQuery<Long> query = session.search(ResourceTable.class)
 			.extension(ElasticsearchExtension.get())
 			.select(f -> f.field("myId", Long.class))
-			.where(
-				f -> f.bool()
-					.must(f.match().field("myResourceType").matching("Observation"))
-			)
-			.aggregation(observationAggregator, f -> f.fromJson(createObservationAggregator(theParams)))
+			.where(f -> f.bool(b -> {
+				// Must match observation type
+				b.must(f.match().field("myResourceType").matching(OBSERVATION_RES_TYPE));
+				ExtendedLuceneClauseBuilder builder = new ExtendedLuceneClauseBuilder(myFhirContext, b, f);
+				myAdvancedIndexQueryBuilder.addAndConsumeAdvancedQueryClauses(builder, OBSERVATION_RES_TYPE, theParams, mySearchParamRegistry);
+			}))
+			.aggregation(observationAggregator, f -> f.fromJson(new LastNAggregationBuilder(theParams).build()))
 			.toQuery();
-		ourLog.info("LastN Query: {}", query.queryString());
+		ourLog.info("FulltextSearch LastN Query: {}", query.queryString());
 		List<Long> pidList = query.fetchHits(theMaximumResults);
 		return convertLongsToResourcePersistentIds(pidList);
-	}
-
-	private JsonObject createObservationAggregator(SearchParameterMap theParams) {
-		// Top Hits aggregator on effective time
-		JsonObject order = new JsonObject();
-		order.addProperty("order", "desc");
-		JsonObject sortDate = new JsonObject();
-		sortDate.add("sp.date.dt.lower", order);
-		JsonArray sortProperties = new JsonArray();
-		sortProperties.add(sortDate);
-		JsonObject topHits = new JsonObject();
-		topHits.addProperty("size", 1);
-		topHits.add("sort", sortProperties);
-		JsonObject recentEffective = new JsonObject();
-		recentEffective.add("top_hits", topHits);
-
-		// Group by token aggregator
-		JsonObject codeSystemTerm = new JsonObject();
-		codeSystemTerm.addProperty("field", "sp.code.token.code-system");
-
-		JsonObject tokenAggregator = new JsonObject();
-		tokenAggregator.add("terms", codeSystemTerm);
-		tokenAggregator.add("aggregations", recentEffective); // sub-aggregator
-
-
-		JsonObject observationAggregator = new JsonObject();
-		observationAggregator.add("group_by_token", tokenAggregator);
-
-		return observationAggregator;
 	}
 
 }

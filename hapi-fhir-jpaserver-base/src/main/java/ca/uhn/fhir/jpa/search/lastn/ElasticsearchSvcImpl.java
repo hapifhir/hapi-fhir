@@ -76,6 +76,8 @@ import org.elasticsearch.search.aggregations.metrics.ParsedTopHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nullable;
@@ -92,6 +94,8 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class ElasticsearchSvcImpl implements IElasticsearchSvc {
+
+	private static final Logger ourLog = LoggerFactory.getLogger(ElasticsearchSvcImpl.class);
 
 	// Index Constants
 	public static final String OBSERVATION_INDEX = "observation_index";
@@ -223,6 +227,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 				}
 				SearchRequest myLastNRequest = buildObservationsSearchRequest(subject, theSearchParameterMap, theFhirContext,
 					createObservationSubjectAggregationBuilder(getMaxParameter(theSearchParameterMap), topHitsInclude));
+				ourLog.debug("ElasticSearch query: {}", myLastNRequest.source().toString());
 				try {
 					SearchResponse lastnResponse = executeSearchRequest(myLastNRequest);
 					searchResults.addAll(buildObservationList(lastnResponse, setValue, theSearchParameterMap, theFhirContext,
@@ -234,6 +239,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		} else {
 			SearchRequest myLastNRequest = buildObservationsSearchRequest(theSearchParameterMap, theFhirContext,
 				createObservationCodeAggregationBuilder(getMaxParameter(theSearchParameterMap), topHitsInclude));
+			ourLog.debug("ElasticSearch query: {}", myLastNRequest.source().toString());
 			try {
 				SearchResponse lastnResponse = executeSearchRequest(myLastNRequest);
 				searchResults.addAll(buildObservationList(lastnResponse, setValue, theSearchParameterMap, theFhirContext,
