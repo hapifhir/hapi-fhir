@@ -89,6 +89,7 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
+import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.validation.FhirValidator;
@@ -172,6 +173,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.event.Level;
+import org.springframework.batch.core.repository.dao.JobExecutionDao;
+import org.springframework.batch.core.repository.dao.JobInstanceDao;
+import org.springframework.batch.core.repository.dao.MapJobExecutionDao;
+import org.springframework.batch.core.repository.dao.MapJobInstanceDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
@@ -203,8 +208,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	private static IValidationSupport ourJpaValidationSupportChainR4;
 	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
 
-	@Autowired
-	protected BatchJobHelper myBatchJobHelper;
 	@Autowired
 	protected IPackageInstallerSvc myPackageInstallerSvc;
 	@Autowired
@@ -495,11 +498,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	protected DaoRegistry myDaoRegistry;
 	@Autowired
-	private IValidationSupport myJpaValidationSupportChainR4;
-	private PerformanceTracingLoggingInterceptor myPerformanceTracingLoggingInterceptor;
-	@Autowired
-	private IBulkDataExportSvc myBulkDataExportSvc;
-	@Autowired
 	protected IdHelperService myIdHelperService;
 	@Autowired
 	protected IBatchJobSubmitter myBatchJobSubmitter;
@@ -507,6 +505,11 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	protected ValidationSettings myValidationSettings;
 	@Autowired
 	protected IMdmLinkDao myMdmLinkDao;
+	@Autowired
+	private IValidationSupport myJpaValidationSupportChainR4;
+	private PerformanceTracingLoggingInterceptor myPerformanceTracingLoggingInterceptor;
+	@Autowired
+	private IBulkDataExportSvc myBulkDataExportSvc;
 
 	@AfterEach()
 	public void afterCleanupDao() {
@@ -521,8 +524,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		myPagingProvider.setMaximumPageSize(BasePagingProvider.DEFAULT_MAX_PAGE_SIZE);
 
 		myPartitionSettings.setPartitioningEnabled(false);
-
-		myBatchJobHelper.ensureNoRunningJobs();
 	}
 
 	@AfterEach
@@ -569,7 +570,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 	@AfterEach
 	public void afterPurgeDatabase() {
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			myMdmLinkDao.deleteAll();
 		});
 		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataExportSvc);
@@ -628,23 +629,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		}
 	}
 
-	public class ValidationPolicyAdvisor implements IValidationPolicyAdvisor {
-		@Override
-		public ReferenceValidationPolicy policyForReference(IResourceValidator validator, Object appContext, String path, String url) {
-			return ReferenceValidationPolicy.CHECK_VALID;
-		}
-
-		@Override
-		public CodedContentValidationPolicy policyForCodedContent(IResourceValidator iResourceValidator, Object o, String s, ElementDefinition elementDefinition, org.hl7.fhir.r5.model.StructureDefinition structureDefinition, BindingKind bindingKind, org.hl7.fhir.r5.model.ValueSet valueSet, List<String> list) {
-			return CodedContentValidationPolicy.CODE;
-		}
-
-		@Override
-		public ContainedReferenceValidationPolicy policyForContained(IResourceValidator validator, Object appContext, String containerType, String containerId, Element.SpecialElement containingResourceType, String path, String url) {
-			return ContainedReferenceValidationPolicy.CHECK_VALID;
-		}
-	}
-
 	@SuppressWarnings("unchecked")
 	protected void upload(String theClasspath) throws IOException {
 		String resource = loadResource(theClasspath);
@@ -653,7 +637,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceParsed.getIdElement().getResourceType());
 		dao.update(resourceParsed);
 	}
-
 
 	protected void assertHierarchyContains(String... theStrings) {
 		List<String> hierarchy = runInTransaction(() -> {
@@ -670,6 +653,72 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		} else {
 			assertThat("\n" + String.join("\n", hierarchy), hierarchy, contains(theStrings));
 		}
+	}
+
+	protected ValueSet.ConceptReferenceDesignationComponent assertConceptContainsDesignation(ValueSet.ValueSetExpansionContainsComponent theConcept, String theLanguage, String theUseSystem, String theUseCode, String theUseDisplay, String theDesignationValue) {
+		Stream<ValueSet.ConceptReferenceDesignationComponent> stream = theConcept.getDesignation().stream();
+		if (theLanguage != null) {
+			stream = stream.filter(designation -> theLanguage.equalsIgnoreCase(designation.getLanguage()));
+		}
+		if (theUseSystem != null) {
+			stream = stream.filter(designation -> theUseSystem.equalsIgnoreCase(designation.getUse().getSystem()));
+		}
+		if (theUseCode != null) {
+			stream = stream.filter(designation -> theUseCode.equalsIgnoreCase(designation.getUse().getCode()));
+		}
+		if (theUseDisplay != null) {
+			stream = stream.filter(designation -> theUseDisplay.equalsIgnoreCase(designation.getUse().getDisplay()));
+		}
+		if (theDesignationValue != null) {
+			stream = stream.filter(designation -> theDesignationValue.equalsIgnoreCase(designation.getValue()));
+		}
+
+		Optional<ValueSet.ConceptReferenceDesignationComponent> first = stream.findFirst();
+		if (!first.isPresent()) {
+			String failureMessage = String.format("Concept %s did not contain designation [%s|%s|%s|%s|%s] ", theConcept, theLanguage, theUseSystem, theUseCode, theUseDisplay, theDesignationValue);
+			fail(failureMessage);
+			return null;
+		} else {
+			return first.get();
+		}
+	}
+
+	protected ValueSet.ValueSetExpansionContainsComponent assertExpandedValueSetContainsConcept(ValueSet theValueSet, String theSystem, String theCode, String theDisplay, Integer theDesignationCount) {
+		List<ValueSet.ValueSetExpansionContainsComponent> contains = theValueSet.getExpansion().getContains();
+
+		Stream<ValueSet.ValueSetExpansionContainsComponent> stream = contains.stream();
+		if (theSystem != null) {
+			stream = stream.filter(concept -> theSystem.equalsIgnoreCase(concept.getSystem()));
+		}
+		if (theCode != null) {
+			stream = stream.filter(concept -> theCode.equalsIgnoreCase(concept.getCode()));
+		}
+		if (theDisplay != null) {
+			stream = stream.filter(concept -> theDisplay.equalsIgnoreCase(concept.getDisplay()));
+		}
+		if (theDesignationCount != null) {
+			stream = stream.filter(concept -> concept.getDesignation().size() == theDesignationCount);
+		}
+
+		Optional<ValueSet.ValueSetExpansionContainsComponent> first = stream.findFirst();
+		if (!first.isPresent()) {
+			String expandedValueSetString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(theValueSet);
+			String failureMessage = String.format("Expanded ValueSet %s did not contain concept [%s|%s|%s] with [%d] designations. Outcome:\n%s", theValueSet.getId(), theSystem, theCode, theDisplay, theDesignationCount, expandedValueSetString);
+			fail(failureMessage);
+			return null;
+		} else {
+			return first.get();
+		}
+	}
+
+	public List<String> getExpandedConceptsByValueSetUrl(String theValuesetUrl) {
+		return runInTransaction(() -> {
+			List<TermValueSet> valueSets = myTermValueSetDao.findTermValueSetByUrl(Pageable.unpaged(), theValuesetUrl);
+			assertEquals(1, valueSets.size());
+			TermValueSet valueSet = valueSets.get(0);
+			List<TermValueSetConcept> concepts = valueSet.getConcepts();
+			return concepts.stream().map(concept -> concept.getCode()).collect(Collectors.toList());
+		});
 	}
 
 	private static void flattenExpansionHierarchy(List<String> theFlattenedHierarchy, List<TermConcept> theCodes, String thePrefix) {
@@ -801,70 +850,20 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		return uuid;
 	}
 
-
-	protected ValueSet.ConceptReferenceDesignationComponent assertConceptContainsDesignation(ValueSet.ValueSetExpansionContainsComponent theConcept, String theLanguage, String theUseSystem, String theUseCode, String theUseDisplay, String theDesignationValue) {
-		Stream<ValueSet.ConceptReferenceDesignationComponent> stream = theConcept.getDesignation().stream();
-		if (theLanguage != null) {
-			stream = stream.filter(designation -> theLanguage.equalsIgnoreCase(designation.getLanguage()));
-		}
-		if (theUseSystem != null) {
-			stream = stream.filter(designation -> theUseSystem.equalsIgnoreCase(designation.getUse().getSystem()));
-		}
-		if (theUseCode != null) {
-			stream = stream.filter(designation -> theUseCode.equalsIgnoreCase(designation.getUse().getCode()));
-		}
-		if (theUseDisplay != null) {
-			stream = stream.filter(designation -> theUseDisplay.equalsIgnoreCase(designation.getUse().getDisplay()));
-		}
-		if (theDesignationValue != null) {
-			stream = stream.filter(designation -> theDesignationValue.equalsIgnoreCase(designation.getValue()));
+	public class ValidationPolicyAdvisor implements IValidationPolicyAdvisor {
+		@Override
+		public ReferenceValidationPolicy policyForReference(IResourceValidator validator, Object appContext, String path, String url) {
+			return ReferenceValidationPolicy.CHECK_VALID;
 		}
 
-		Optional<ValueSet.ConceptReferenceDesignationComponent> first = stream.findFirst();
-		if (!first.isPresent()) {
-			String failureMessage = String.format("Concept %s did not contain designation [%s|%s|%s|%s|%s] ", theConcept, theLanguage, theUseSystem, theUseCode, theUseDisplay, theDesignationValue);
-			fail(failureMessage);
-			return null;
-		} else {
-			return first.get();
-		}
-	}
-
-	protected ValueSet.ValueSetExpansionContainsComponent assertExpandedValueSetContainsConcept(ValueSet theValueSet, String theSystem, String theCode, String theDisplay, Integer theDesignationCount) {
-		List<ValueSet.ValueSetExpansionContainsComponent> contains = theValueSet.getExpansion().getContains();
-
-		Stream<ValueSet.ValueSetExpansionContainsComponent> stream = contains.stream();
-		if (theSystem != null) {
-			stream = stream.filter(concept -> theSystem.equalsIgnoreCase(concept.getSystem()));
-		}
-		if (theCode != null) {
-			stream = stream.filter(concept -> theCode.equalsIgnoreCase(concept.getCode()));
-		}
-		if (theDisplay != null) {
-			stream = stream.filter(concept -> theDisplay.equalsIgnoreCase(concept.getDisplay()));
-		}
-		if (theDesignationCount != null) {
-			stream = stream.filter(concept -> concept.getDesignation().size() == theDesignationCount);
+		@Override
+		public CodedContentValidationPolicy policyForCodedContent(IResourceValidator iResourceValidator, Object o, String s, ElementDefinition elementDefinition, org.hl7.fhir.r5.model.StructureDefinition structureDefinition, BindingKind bindingKind, org.hl7.fhir.r5.model.ValueSet valueSet, List<String> list) {
+			return CodedContentValidationPolicy.CODE;
 		}
 
-		Optional<ValueSet.ValueSetExpansionContainsComponent> first = stream.findFirst();
-		if (!first.isPresent()) {
-			String expandedValueSetString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(theValueSet);
-			String failureMessage = String.format("Expanded ValueSet %s did not contain concept [%s|%s|%s] with [%d] designations. Outcome:\n%s", theValueSet.getId(), theSystem, theCode, theDisplay, theDesignationCount, expandedValueSetString);
-			fail(failureMessage);
-			return null;
-		} else {
-			return first.get();
+		@Override
+		public ContainedReferenceValidationPolicy policyForContained(IResourceValidator validator, Object appContext, String containerType, String containerId, Element.SpecialElement containingResourceType, String path, String url) {
+			return ContainedReferenceValidationPolicy.CHECK_VALID;
 		}
-	}
-
-	public List<String> getExpandedConceptsByValueSetUrl(String theValuesetUrl) {
-		return runInTransaction(() -> {
-			List<TermValueSet> valueSets = myTermValueSetDao.findTermValueSetByUrl(Pageable.unpaged(), theValuesetUrl);
-			assertEquals(1, valueSets.size());
-			TermValueSet valueSet = valueSets.get(0);
-			List<TermValueSetConcept> concepts = valueSet.getConcepts();
-			return concepts.stream().map(concept -> concept.getCode()).collect(Collectors.toList());
-		});
 	}
 }
