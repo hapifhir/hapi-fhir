@@ -23,9 +23,13 @@ import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
 
-import javax.ws.rs.core.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.context.FhirContext;
