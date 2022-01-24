@@ -762,7 +762,7 @@ public abstract class BaseTransactionProcessor {
 						if (isNotBlank(conditionalUrl)) {
 							if (!keysWithNoFullUrl.add(key)) {
 								throw new InvalidRequestException(
-									"Unable to process " + theActionName + " - Request contains multiple anonymous entries (Bundle.entry.fullUrl not populated) with conditional URL: \"" + UrlUtil.sanitizeUrlPart(conditionalUrl) + "\". Does transaction request contain duplicates?");
+									Msg.code(2008) + "Unable to process " + theActionName + " - Request contains multiple anonymous entries (Bundle.entry.fullUrl not populated) with conditional URL: \"" + UrlUtil.sanitizeUrlPart(conditionalUrl) + "\". Does transaction request contain duplicates?");
 							}
 						}
 					} else {
