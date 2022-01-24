@@ -113,11 +113,11 @@ public class SubscriptionValidatingInterceptor {
 		// If the subscription has the cross partition tag &&
 		if (SubscriptionUtil.isCrossPartition(theSubscription) && !(theRequestDetails instanceof SystemRequestDetails)) {
 			if (!myDaoConfig.isCrossPartitionSubscription()){
-				throw new UnprocessableEntityException("Cross partition subscription is not enabled on this server");
+				throw new UnprocessableEntityException(Msg.code(2009) + "Cross partition subscription is not enabled on this server");
 			}
 
 			if (!determinePartition(theRequestDetails, theSubscription).isDefaultPartition()) {
-				throw new UnprocessableEntityException("Cross partition subscription must be created on the default partition");
+				throw new UnprocessableEntityException(Msg.code(2010) + "Cross partition subscription must be created on the default partition");
 			}
 		}
 
