@@ -29,6 +29,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
@@ -36,16 +37,19 @@ import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import com.google.common.collect.Sets;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.InCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -74,7 +78,8 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
 	@Autowired
 	private ITermReadSvc myTerminologySvc;
-
+	@Autowired
+	private ModelConfig myModelConfig;
 
 	/**
 	 * Constructor
@@ -130,7 +135,7 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 			if (nextParameter instanceof TokenParam) {
 				TokenParam id = (TokenParam) nextParameter;
 				system = id.getSystem();
-				code = (id.getValue());
+				code = id.getValue();
 				modifier = id.getModifier();
 			} else if (nextParameter instanceof BaseIdentifierDt) {
 				BaseIdentifierDt id = (BaseIdentifierDt) nextParameter;
@@ -170,6 +175,20 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 				system = determineSystemIfMissing(theSearchParam, code, system);
 				validateHaveSystemAndCodeForToken(paramName, code, system);
 				codes.addAll(myTerminologySvc.findCodesBelow(system, code));
+			} else if (modifier == TokenParamModifier.OF_TYPE) {
+				if (!myModelConfig.isIndexIdentifierOfType()) {
+					throw new MethodNotAllowedException("The :of-type modifier is not enabled on this server");
+				}
+				if (isBlank(system) || isBlank(code)) {
+					throw new InvalidRequestException("Invalid parameter value for :of-type query");
+				}
+				int pipeIdx = code.indexOf('|');
+				if (pipeIdx < 1 || pipeIdx == code.length() - 1) {
+					throw new InvalidRequestException("Invalid parameter value for :of-type query");
+				}
+
+				paramName = paramName + Constants.PARAMQUALIFIER_TOKEN_OF_TYPE;
+				codes.add(new FhirVersionIndependentConcept(system, code));
 			} else {
 				if (modifier == TokenParamModifier.NOT && operation == null) {
 					operation = SearchFilterParser.CompareOperation.ne;

@@ -15,6 +15,7 @@ import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboTokensNonUniqueDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamDateDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamStringDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
@@ -25,6 +26,7 @@ import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
@@ -94,6 +96,7 @@ import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -168,6 +171,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected IResourceLinkDao myResourceLinkDao;
 	@Autowired
 	protected IResourceIndexedSearchParamTokenDao myResourceIndexedSearchParamTokenDao;
+	@Autowired
+	protected IResourceIndexedSearchParamStringDao myResourceIndexedSearchParamStringDao;
 	@Autowired
 	protected IResourceIndexedSearchParamDateDao myResourceIndexedSearchParamDateDao;
 	@Autowired
@@ -344,6 +349,19 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected void logAllTokenIndexes() {
 		runInTransaction(() -> {
 			ourLog.info("Token indexes:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+		});
+	}
+
+	protected void logAllStringIndexes(String... theParamNames) {
+		String messageSuffix = theParamNames.length > 0 ? " containing " + Arrays.asList(theParamNames) : "";
+		runInTransaction(() -> {
+			String message = myResourceIndexedSearchParamStringDao
+				.findAll()
+				.stream()
+				.filter(t->theParamNames.length == 0 ? true : Arrays.asList(theParamNames).contains(t.getParamName()))
+				.map(t -> t.toString())
+				.collect(Collectors.joining("\n * "));
+			ourLog.info("String indexes{}:\n * {}", messageSuffix, message);
 		});
 	}
 
@@ -579,7 +597,7 @@ public abstract class BaseJpaTest extends BaseTest {
 
 	protected int logAllResourceVersions() {
 		return runInTransaction(() -> {
-			List<ResourceTable> resources = myResourceTableDao.findAll();
+			List<ResourceHistoryTable> resources = myResourceHistoryTableDao.findAll();
 			ourLog.info("Resources Versions:\n * {}", resources.stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 			return resources.size();
 		});

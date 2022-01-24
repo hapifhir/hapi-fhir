@@ -132,6 +132,7 @@ public class IdHelperService {
 	@Nonnull
 	public IResourceLookup resolveResourceIdentity(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theResourceId) throws ResourceNotFoundException {
 		assert myDontCheckActiveTransactionForUnitTest || TransactionSynchronizationManager.isSynchronizationActive();
+		assert theRequestPartitionId != null;
 
 		IdDt id = new IdDt(theResourceType, theResourceId);
 		Map<String, List<IResourceLookup>> matches = translateForcedIdToPids(theRequestPartitionId,
@@ -378,6 +379,8 @@ public class IdHelperService {
 	}
 
 	private Map<String, List<IResourceLookup>> translateForcedIdToPids(@Nonnull RequestPartitionId theRequestPartitionId, Collection<IIdType> theId) {
+		assert theRequestPartitionId != null;
+
 		theId.forEach(id -> Validate.isTrue(id.hasIdPart()));
 
 		if (theId.isEmpty()) {

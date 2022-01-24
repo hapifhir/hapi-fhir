@@ -51,12 +51,7 @@ public class ModelConfig {
 	 * <li><code>"http://hl7.org/fhir/StructureDefinition/*"</code></li>
 	 * </ul>
 	 */
-	public static final Set<String> DEFAULT_LOGICAL_BASE_URLS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
-		"http://hl7.org/fhir/ValueSet/*",
-		"http://hl7.org/fhir/CodeSystem/*",
-		"http://hl7.org/fhir/valueset-*",
-		"http://hl7.org/fhir/codesystem-*",
-		"http://hl7.org/fhir/StructureDefinition/*")));
+	public static final Set<String> DEFAULT_LOGICAL_BASE_URLS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList("http://hl7.org/fhir/ValueSet/*", "http://hl7.org/fhir/CodeSystem/*", "http://hl7.org/fhir/valueset-*", "http://hl7.org/fhir/codesystem-*", "http://hl7.org/fhir/StructureDefinition/*")));
 
 	public static final String DEFAULT_WEBSOCKET_CONTEXT_PATH = "/websocket";
 
@@ -83,6 +78,7 @@ public class ModelConfig {
 	private Set<String> myTreatReferencesAsLogical = new HashSet<>(DEFAULT_LOGICAL_BASE_URLS);
 	private boolean myDefaultSearchParamsCanBeOverridden = true;
 	private Set<Subscription.SubscriptionChannelType> mySupportedSubscriptionTypes = new HashSet<>();
+	private boolean myCrossPartitionSubscription = false;
 	private String myEmailFromAddress = "noreply@unknown.com";
 	private String myWebsocketContextPath = DEFAULT_WEBSOCKET_CONTEXT_PATH;
 	/**
@@ -102,6 +98,7 @@ public class ModelConfig {
 	private boolean myIndexOnContainedResourcesRecursively = false;
 	private boolean myAllowMdmExpansion = false;
 	private boolean myAutoSupportDefaultSearchParams = true;
+	private boolean myIndexIdentifierOfType = false;
 
 	/**
 	 * Constructor
@@ -110,6 +107,32 @@ public class ModelConfig {
 		setPeriodIndexStartOfTime(new DateTimeType(DEFAULT_PERIOD_INDEX_START_OF_TIME));
 		setPeriodIndexEndOfTime(new DateTimeType(DEFAULT_PERIOD_INDEX_END_OF_TIME));
 		setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
+	}
+
+	/**
+	 * If set to <code>true</code> (default is <code>false</code>) the
+	 * <code>:of-type</code> modifier on token search parameters for
+	 * identifiers will be supported. Enabling this causes additional
+	 * indexing overhead (although very minor) so it is disabled unless it is
+	 * actually needed.
+	 *
+	 * @since 5.7.0
+	 */
+	public boolean isIndexIdentifierOfType() {
+		return myIndexIdentifierOfType;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is <code>false</code>) the
+	 * <code>:of-type</code> modifier on token search parameters for
+	 * identifiers will be supported. Enabling this causes additional
+	 * indexing overhead (although very minor) so it is disabled unless it is
+	 * actually needed.
+	 *
+	 * @since 5.7.0
+	 */
+	public void setIndexIdentifierOfType(boolean theIndexIdentifierOfType) {
+		myIndexIdentifierOfType = theIndexIdentifierOfType;
 	}
 
 	/**
@@ -817,7 +840,7 @@ public class ModelConfig {
 	 * Disabling this obviously reduces the options for searching however.
 	 * </p>
 	 *
-	 * @since 6.0.0
+	 * @since 5.7.0
 	 */
 	public boolean isAutoSupportDefaultSearchParams() {
 		return myAutoSupportDefaultSearchParams;
@@ -833,7 +856,7 @@ public class ModelConfig {
 	 * Disabling this obviously reduces the options for searching however.
 	 * </p>
 	 *
-	 * @since 6.0.0
+	 * @since 5.7.0
 	 */
 	public void setAutoSupportDefaultSearchParams(boolean theAutoSupportDefaultSearchParams) {
 		myAutoSupportDefaultSearchParams = theAutoSupportDefaultSearchParams;
@@ -849,6 +872,36 @@ public class ModelConfig {
 			}
 		}
 
+	}
+
+	/**
+	 * If enabled, the server will support cross-partition subscription.
+	 * This subscription will be the responsible for all the requests from all the partitions on this server.
+	 * For example, if the server has 3 partitions, P1, P2, P3
+	 * The subscription will live in the DEFAULT partition. Resource posted to DEFAULT, P1, P2, and P3 will trigger this subscription.
+	 * <p>
+	 * Default is <code>false</code>
+	 * </p>
+	 *
+	 * @since 7.5.0
+	 */
+	public boolean isCrossPartitionSubscription() {
+		return myCrossPartitionSubscription;
+	}
+
+	/**
+	 * If enabled, the server will support cross-partition subscription.
+	 * This subscription will be the responsible for all the requests from all the partitions on this server.
+	 * For example, if the server has 3 partitions, P1, P2, P3
+	 * The subscription will live in the DEFAULT partition. Resource posted to DEFAULT, P1, P2, and P3 will trigger this subscription.
+	 * <p>
+	 * Default is <code>false</code>
+	 * </p>
+	 *
+	 * @since 7.5.0
+	 */
+	public void setCrossPartitionSubscription(boolean theAllowCrossPartitionSubscription) {
+		myCrossPartitionSubscription = theAllowCrossPartitionSubscription;
 	}
 
 }

@@ -860,6 +860,7 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 			obs.getSubject().setReference("#patient1");
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+			logAllStringIndexes("subject.family");
 
 			ourLog.info("Input: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
@@ -878,7 +879,9 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 			}
 
 			// -- update
-			oid1 = myObservationDao.update(createdObs, mySrd).getId().toUnqualifiedVersionless();
+			myObservationDao.update(createdObs, mySrd).getId().toUnqualifiedVersionless();
+			logAllStringIndexes("subject.family");
+
 		}
 
 		{
@@ -892,9 +895,11 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 			obs.getSubject().setReference("#patient1");
 
 			myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+			logAllStringIndexes("subject.family");
 
 			ourLog.info("Input: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
+
 
 		{
 			Patient p = new Patient();

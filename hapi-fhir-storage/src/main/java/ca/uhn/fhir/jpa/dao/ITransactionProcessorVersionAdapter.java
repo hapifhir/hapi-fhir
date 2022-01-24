@@ -56,6 +56,8 @@ public interface ITransactionProcessorVersionAdapter<BUNDLE extends IBaseBundle,
 
 	String getFullUrl(BUNDLEENTRY theEntry);
 
+	void setFullUrl(BUNDLEENTRY theEntry, String theFullUrl);
+
 	String getEntryIfNoneExist(BUNDLEENTRY theEntry);
 
 	String getEntryRequestUrl(BUNDLEENTRY theEntry);
@@ -75,4 +77,5 @@ public interface ITransactionProcessorVersionAdapter<BUNDLE extends IBaseBundle,
 	void setRequestVerb(BUNDLEENTRY theEntry, String theVerb);
 
 	void setRequestUrl(BUNDLEENTRY theEntry, String theUrl);
+
 }

@@ -1,0 +1,9 @@
+---
+type: fix
+issue: 3325
+title: "In HAPI FHIR 5.6.0, a regression meant that JPA server FHIR transactions containing two identical 
+  conditional operations (for example, a transaction with two conditional create operations where the 
+  conditional URL was identical for both) could result in resources being saved in an inconsistent state.
+  This scenario will now be result in the server returning an HTTP 400 error instead. Note that there is 
+  no meaning defined in the FHIR specification for duplicate entries in a FHIR transaction bundle, so it
+  has never been recommended to do this."

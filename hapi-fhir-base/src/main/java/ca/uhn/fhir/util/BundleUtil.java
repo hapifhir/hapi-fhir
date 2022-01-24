@@ -230,7 +230,7 @@ public class BundleUtil {
 		retVal.addAll(partsToIBaseMap.values());
 
 		//Blow away the entries and reset them in the right order.
-		TerserUtil.clearField(theContext, "entry", theBundle);
+		TerserUtil.clearField(theContext, theBundle, "entry");
 		TerserUtil.setField(theContext, "entry", theBundle, retVal.toArray(new IBase[0]));
 	}
 

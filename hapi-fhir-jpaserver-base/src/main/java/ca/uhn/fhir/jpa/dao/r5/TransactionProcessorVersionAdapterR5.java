@@ -115,6 +115,12 @@ public class TransactionProcessorVersionAdapterR5 implements ITransactionProcess
 		return theEntry.getFullUrl();
 	}
 
+
+	@Override
+	public void setFullUrl(Bundle.BundleEntryComponent theEntry, String theFullUrl) {
+		theEntry.setFullUrl(theFullUrl);
+	}
+
 	@Override
 	public String getEntryIfNoneExist(Bundle.BundleEntryComponent theEntry) {
 		return theEntry.getRequest().getIfNoneExist();

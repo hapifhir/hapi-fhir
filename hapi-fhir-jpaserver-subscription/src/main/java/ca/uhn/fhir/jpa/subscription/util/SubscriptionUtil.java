@@ -33,6 +33,11 @@ public class SubscriptionUtil {
 
 	public static RequestDetails createRequestDetailForPartitionedRequest(CanonicalSubscription theSubscription) {
 		RequestPartitionId requestPartitionId = new PartitionablePartitionId(theSubscription.getRequestPartitionId(), null).toPartitionId();
+
+		if (theSubscription.getCrossPartitionEnabled()) {
+			requestPartitionId = RequestPartitionId.allPartitions();
+		}
+
 		return new SystemRequestDetails().setRequestPartitionId(requestPartitionId);
 	}
 }

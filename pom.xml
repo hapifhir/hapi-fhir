@@ -767,7 +767,7 @@
 
     <properties>
 
-        <fhir_core_version>5.6.21</fhir_core_version>
+        <fhir_core_version>5.6.27</fhir_core_version>
         <ucum_version>1.0.3</ucum_version>
 
         <surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
@@ -963,7 +963,7 @@
 			<dependency>
 				<groupId>com.h2database</groupId>
 				<artifactId>h2</artifactId>
-				<version>2.0.206</version>
+				<version>2.1.210</version>
 			</dependency>
 			<dependency>
 				<groupId>com.helger</groupId>

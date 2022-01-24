@@ -27,6 +27,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.TerserUtil;
 import ca.uhn.fhir.validation.schematron.SchematronProvider;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -69,6 +70,7 @@ public class FhirValidator {
 	private List<IValidatorModule> myValidators = new ArrayList<>();
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	private boolean myConcurrentBundleValidation;
+	private boolean mySkipContainedReferenceValidation;
 
 	private ExecutorService myExecutorService;
 
@@ -270,10 +272,18 @@ public class FhirValidator {
 		// Async validation tasks
 		List<ConcurrentValidationTask> validationTasks = IntStream.range(0, entries.size())
 			.mapToObj(index -> {
+				IBaseResource resourceToValidate;
 				IBaseResource entry = entries.get(index);
-				String entryPathPrefix = String.format("Bundle.entry[%d].resource.ofType(%s)", index, entry.fhirType());
+
+				if (mySkipContainedReferenceValidation) {
+					resourceToValidate = withoutContainedResources(entry);
+				} else {
+					resourceToValidate = entry;
+				}
+
+				String entryPathPrefix = String.format("Bundle.entry[%d].resource.ofType(%s)", index, resourceToValidate.fhirType());
 				Future<ValidationResult> future = myExecutorService.submit(() -> {
-					IValidationContext<IBaseResource> entryValidationContext = ValidationContext.forResource(theValidationContext.getFhirContext(), entry, theOptions);
+					IValidationContext<IBaseResource> entryValidationContext = ValidationContext.forResource(theValidationContext.getFhirContext(), resourceToValidate, theOptions);
 					return validateResource(entryValidationContext);
 				});
 				return new ConcurrentValidationTask(entryPathPrefix, future);
@@ -281,6 +291,16 @@ public class FhirValidator {
 
 		List<SingleValidationMessage> validationMessages = buildValidationMessages(validationTasks);
 		return new ValidationResult(myContext, validationMessages);
+	}
+
+	IBaseResource withoutContainedResources(IBaseResource theEntry) {
+		if (TerserUtil.hasValues(myContext, theEntry, "contained")) {
+			IBaseResource deepCopy = TerserUtil.clone(myContext, theEntry);
+			TerserUtil.clearField(myContext, deepCopy, "contained");
+			return deepCopy;
+		} else {
+			return theEntry;
+		}
 	}
 
 	static List<SingleValidationMessage> buildValidationMessages(List<ConcurrentValidationTask> validationTasks) {
@@ -370,6 +390,23 @@ public class FhirValidator {
 	 */
 	public FhirValidator setConcurrentBundleValidation(boolean theConcurrentBundleValidation) {
 		myConcurrentBundleValidation = theConcurrentBundleValidation;
+		return this;
+	}
+
+	/**
+	 * If this is true, any resource that has contained resources will first be deep-copied and then the contained
+	 * resources remove from the copy and this copy without contained resources will be validated.
+	 */
+	public boolean isSkipContainedReferenceValidation() {
+		return mySkipContainedReferenceValidation;
+	}
+
+	/**
+	 * If this is true, any resource that has contained resources will first be deep-copied and then the contained
+	 * resources remove from the copy and this copy without contained resources will be validated.
+	 */
+	public FhirValidator setSkipContainedReferenceValidation(boolean theSkipContainedReferenceValidation) {
+		mySkipContainedReferenceValidation = theSkipContainedReferenceValidation;
 		return this;
 	}
 

@@ -90,7 +90,7 @@ public class FhirResourceDaoCodeSystemDstu3 extends BaseHapiFhirResourceDao<Code
 	public IValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, Coding theCoding, RequestDetails theRequestDetails) {
 		return lookupCode(theCode, theSystem, theCoding, null, theRequestDetails);
 	}
-	
+
 	@Nonnull
 	@Override
 	public IValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, Coding theCoding, IPrimitiveType<String> theDisplayLanguage, RequestDetails theRequestDetails) {
@@ -98,7 +98,7 @@ public class FhirResourceDaoCodeSystemDstu3 extends BaseHapiFhirResourceDao<Code
 		boolean haveCode = theCode != null && theCode.isEmpty() == false;
 		boolean haveSystem = theSystem != null && theSystem.isEmpty() == false;
 		boolean haveDisplayLanguage = theDisplayLanguage != null && theDisplayLanguage.isEmpty() == false;
-		
+
 		if (!haveCoding && !(haveSystem && haveCode)) {
 			throw new InvalidRequestException(Msg.code(1075) + "No code, coding, or codeableConcept provided to validate");
 		}
@@ -120,11 +120,11 @@ public class FhirResourceDaoCodeSystemDstu3 extends BaseHapiFhirResourceDao<Code
 			system = theSystem.getValue();
 		}
 
-		String displayLanguage = null; 
+		String displayLanguage = null;
 		if (haveDisplayLanguage) {
 			displayLanguage = theDisplayLanguage.getValue();
 		}
-		
+
 		ourLog.debug("Looking up {} / {}", system, code);
 
 		if (myValidationSupport.isCodeSystemSupported(new ValidationSupportContext(myValidationSupport), system)) {

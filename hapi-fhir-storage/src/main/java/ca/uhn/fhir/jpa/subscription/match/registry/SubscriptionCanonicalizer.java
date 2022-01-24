@@ -32,6 +32,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.HapiExtensions;
+import ca.uhn.fhir.util.SubscriptionUtil;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
@@ -96,6 +97,7 @@ public class SubscriptionCanonicalizer {
 			retVal.setIdElement(subscription.getIdElement());
 			retVal.setPayloadString(subscription.getChannel().getPayload());
 			retVal.setTags(extractTags(subscription));
+			retVal.setCrossPartitionEnabled(SubscriptionUtil.isCrossPartition(theSubscription));
 		} catch (FHIRException theE) {
 			throw new InternalErrorException(Msg.code(557) + theE);
 		}
@@ -136,6 +138,7 @@ public class SubscriptionCanonicalizer {
 			retVal.setPayloadString(subscription.getChannel().getPayload());
 			retVal.setPayloadSearchCriteria(getExtensionString(subscription, HapiExtensions.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA));
 			retVal.setTags(extractTags(subscription));
+			retVal.setCrossPartitionEnabled(SubscriptionUtil.isCrossPartition(theSubscription));
 
 			if (retVal.getChannelType() == CanonicalSubscriptionChannelType.EMAIL) {
 				String from;
@@ -236,6 +239,7 @@ public class SubscriptionCanonicalizer {
 		retVal.setPayloadSearchCriteria(getExtensionString(subscription, HapiExtensions.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA));
 		retVal.setTags(extractTags(subscription));
 		setPartitionIdOnReturnValue(theSubscription, retVal);
+		retVal.setCrossPartitionEnabled(SubscriptionUtil.isCrossPartition(theSubscription));
 
 		if (retVal.getChannelType() == CanonicalSubscriptionChannelType.EMAIL) {
 			String from;
