@@ -158,9 +158,6 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4Test.class);
 
-	@Autowired
-	private BatchJobHelper myBatchJobHelper;
-
 	@AfterEach
 	public final void after() {
 		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
