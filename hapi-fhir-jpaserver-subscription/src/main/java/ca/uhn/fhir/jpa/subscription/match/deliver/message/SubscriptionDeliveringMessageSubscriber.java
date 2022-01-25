@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,8 +67,7 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 		ResourceModifiedMessage payload = new ResourceModifiedMessage(myFhirContext, thePayloadResource, theMsg.getOperationType());
 		payload.setMessageKey(theMsg.getMessageKeyOrNull());
 		payload.setTransactionId(theMsg.getTransactionId());
-		// FIXME add a test for the following line
-//		payload.setPartitionId(theMsg.getRequestPartitionId());
+		payload.setPartitionId(theMsg.getRequestPartitionId());
 		ResourceModifiedJsonMessage message = new ResourceModifiedJsonMessage(payload);
 		theChannelProducer.send(message);
 		ourLog.debug("Delivering {} message payload {} for {}", theMsg.getOperationType(), theMsg.getPayloadId(), theSubscription.getIdElement(myFhirContext).toUnqualifiedVersionless().getValue());
@@ -120,5 +120,10 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 	private String extractQueueNameFromEndpoint(String theEndpointUrl) throws URISyntaxException {
 		URI uri = new URI(theEndpointUrl);
 		return uri.getSchemeSpecificPart();
+	}
+
+	@VisibleForTesting
+	public void setChannelFactoryForUnitTest(IChannelFactory theChannelFactory) {
+		myChannelFactory = theChannelFactory;
 	}
 }
