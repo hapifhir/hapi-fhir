@@ -34,41 +34,77 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest.Builder;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.api.server.IRestfulResponse;
+import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
+import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.ResourceBinding;
+import ca.uhn.fhir.rest.server.RestfulServerConfiguration;
+import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.provider.ServerCapabilityStatementProvider;
+import ca.uhn.fhir.util.ReflectionUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu2.hapi.rest.server.ServerConformanceProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest.Builder;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.api.server.IRestfulResponse;
-import ca.uhn.fhir.rest.server.*;
-import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
-import ca.uhn.fhir.util.ReflectionUtil;
-import java.util.stream.Collectors;
+import javax.annotation.PostConstruct;
+import javax.ws.rs.GET;
+import javax.ws.rs.OPTIONS;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This is the conformance provider for the jax rs servers. It requires all providers to be registered during startup because the conformance profile is generated during the postconstruct phase.
- * 
+ *
  * @author Peter Van Houte | peter.vanhoute@agfa.com | Agfa Healthcare
  */
-@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+@Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProvider implements IResourceProvider {
 
-	/** the logger */
+	/**
+	 * the logger
+	 */
 	private static final org.slf4j.Logger ourLog = LoggerFactory.getLogger(AbstractJaxRsConformanceProvider.class);
-	/** the server bindings */
+	/**
+	 * the server bindings
+	 */
 	private ResourceBinding myServerBinding = new ResourceBinding();
-	/** the resource bindings */
+	/**
+	 * the resource bindings
+	 */
 	private ConcurrentHashMap<String, ResourceBinding> myResourceNameToBinding = new ConcurrentHashMap<String, ResourceBinding>();
-	/** the server configuration */
+	/**
+	 * the server configuration
+	 */
 	private RestfulServerConfiguration serverConfiguration = new RestfulServerConfiguration();
 
-	/** the conformance. It is created once during startup */
+	/**
+	 * the conformance. It is created once during startup
+	 */
 	private org.hl7.fhir.r4.model.CapabilityStatement myR4CapabilityStatement;
 	private org.hl7.fhir.dstu3.model.CapabilityStatement myDstu3CapabilityStatement;
 	private org.hl7.fhir.dstu2016may.model.Conformance myDstu2_1Conformance;
@@ -78,13 +114,10 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 
 	/**
 	 * Constructor allowing the description, servername and server to be set
-	 * 
-	 * @param implementationDescription
-	 *           the implementation description. If null, "" is used
-	 * @param serverName
-	 *           the server name. If null, "" is used
-	 * @param serverVersion
-	 *           the server version. If null, "" is used
+	 *
+	 * @param implementationDescription the implementation description. If null, "" is used
+	 * @param serverName                the server name. If null, "" is used
+	 * @param serverVersion             the server version. If null, "" is used
 	 */
 	protected AbstractJaxRsConformanceProvider(String implementationDescription, String serverName, String serverVersion) {
 		serverConfiguration.setFhirContext(getFhirContext());
@@ -95,15 +128,11 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 
 	/**
 	 * Constructor allowing the description, servername and server to be set
-	 * 
-	 * @param ctx
-	 *           the {@link FhirContext} instance.
-	 * @param implementationDescription
-	 *           the implementation description. If null, "" is used
-	 * @param serverName
-	 *           the server name. If null, "" is used
-	 * @param serverVersion
-	 *           the server version. If null, "" is used
+	 *
+	 * @param ctx                       the {@link FhirContext} instance.
+	 * @param implementationDescription the implementation description. If null, "" is used
+	 * @param serverName                the server name. If null, "" is used
+	 * @param serverVersion             the server version. If null, "" is used
 	 */
 	protected AbstractJaxRsConformanceProvider(FhirContext ctx, String implementationDescription, String serverName, String serverVersion) {
 		super(ctx);
@@ -168,15 +197,15 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 
 	/**
 	 * This method must return all the resource providers which need to be included in the conformance
-	 * 
+	 *
 	 * @return a map of the resource providers and their corresponding classes. This class needs to be given explicitly because retrieving the interface using {@link Object#getClass()} may not give the
-	 *         correct interface in a jee environment.
+	 * correct interface in a jee environment.
 	 */
 	protected abstract ConcurrentHashMap<Class<? extends IResourceProvider>, IResourceProvider> getProviders();
 
 	/**
 	 * This method will retrieve the conformance using the http OPTIONS method
-	 * 
+	 *
 	 * @return the response containing the conformance
 	 */
 	@OPTIONS
@@ -187,7 +216,7 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 
 	/**
 	 * This method will retrieve the conformance using the http GET method
-	 * 
+	 *
 	 * @return the response containing the conformance
 	 */
 	@GET
@@ -198,7 +227,7 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 		Builder request = getRequest(RequestTypeEnum.OPTIONS, RestOperationTypeEnum.METADATA);
 		IRestfulResponse response = request.build().getResponse();
 		response.addHeader(Constants.HEADER_CORS_ALLOW_ORIGIN, "*");
-		
+
 		IBaseResource conformance;
 		FhirVersionEnum fhirContextVersion = super.getFhirContext().getVersion().getVersion();
 		switch (fhirContextVersion) {
@@ -220,7 +249,7 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 			default:
 				throw new ConfigurationException(Msg.code(592) + "Unsupported Fhir version: " + fhirContextVersion);
 		}
-		
+
 		if (conformance != null) {
 			Set<SummaryEnum> summaryMode = Collections.emptySet();
 			return (Response) response.streamResponseAsResource(conformance, false, summaryMode, Constants.STATUS_HTTP_200_OK, null, true, false);
@@ -230,11 +259,9 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 
 	/**
 	 * This method will add a provider to the conformance. This method is almost an exact copy of {@link ca.uhn.fhir.rest.server.RestfulServer#findResourceMethods(Object)}
-	 * 
-	 * @param theProvider
-	 *           an instance of the provider interface
-	 * @param theProviderInterface
-	 *           the class describing the providers interface
+	 *
+	 * @param theProvider          an instance of the provider interface
+	 * @param theProviderInterface the class describing the providers interface
 	 * @return the numbers of basemethodbindings added
 	 * @see ca.uhn.fhir.rest.server.RestfulServer#findResourceMethods(Object)
 	 */
