@@ -392,7 +392,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			case RESOURCE: {
 				IBundleProvider result = (IBundleProvider) resultObj;
 				if (result.size() == 0) {
-					throw new ResourceNotFoundException(Msg.code(436) + theRequest.getId());
+					throw new ResourceNotFoundException(Msg.code(436) + "Resource " + theRequest.getId() + " is not known");
 				} else if (result.size() > 1) {
 					throw new InternalErrorException(Msg.code(437) + "Method returned multiple resources");
 				}
