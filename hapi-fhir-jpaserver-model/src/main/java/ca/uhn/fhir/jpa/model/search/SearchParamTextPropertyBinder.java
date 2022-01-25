@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.model.search;
 import org.hibernate.search.engine.backend.document.DocumentElement;
 import org.hibernate.search.engine.backend.document.model.dsl.IndexSchemaElement;
 import org.hibernate.search.engine.backend.document.model.dsl.IndexSchemaObjectField;
+import org.hibernate.search.engine.backend.types.Aggregable;
 import org.hibernate.search.engine.backend.types.ObjectStructure;
 import org.hibernate.search.engine.backend.types.Projectable;
 import org.hibernate.search.engine.backend.types.dsl.IndexFieldTypeFactory;
@@ -40,11 +41,10 @@ import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING
 
 /**
  * Allows hibernate search to index
- *
+ * <p>
  * CodeableConcept.text
  * Coding.display
  * Identifier.type.text
- *
  */
 public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBridge<ExtendedLuceneIndexData> {
 
@@ -69,22 +69,24 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 		//create them adhoc. https://docs.jboss.org/hibernate/search/6.0/reference/en-US/html_single/#mapper-orm-bridge-index-field-dsl-dynamic
 		//I _think_ im doing the right thing here by indicating that everything matching this template uses this analyzer.
 		IndexFieldTypeFactory indexFieldTypeFactory = thePropertyBindingContext.typeFactory();
-		StringIndexFieldTypeOptionsStep<?> standardAnalyzer =
-			indexFieldTypeFactory.asString()
-				// TODO mb Once Ken finishes extracting a common base, we can share these constants with HapiElasticsearchAnalysisConfigurer and HapiLuceneAnalysisConfigurer
-				.analyzer("standardAnalyzer")
-				.projectable(Projectable.NO);
+		// TODO mb Once Ken finishes extracting a common base, we can share these constants with HapiElasticsearchAnalysisConfigurer and HapiLuceneAnalysisConfigurer
+		StringIndexFieldTypeOptionsStep<?> standardAnalyzer = indexFieldTypeFactory.asString()
+			.analyzer("standardAnalyzer")
+			.projectable(Projectable.NO);
 
 		StringIndexFieldTypeOptionsStep<?> exactAnalyzer =
 			indexFieldTypeFactory.asString()
 				.analyzer("exactAnalyzer") // default max-length is 256.  Is that enough for code system uris?
 				.projectable(Projectable.NO);
 
-		StringIndexFieldTypeOptionsStep<?> normStringAnalyzer =
-			indexFieldTypeFactory.asString()
-				.analyzer("normStringAnalyzer")
-				.projectable(Projectable.NO);
+		StringIndexFieldTypeOptionsStep<?> normStringAnalyzer = indexFieldTypeFactory.asString()
+			.analyzer("normStringAnalyzer")
+			.projectable(Projectable.NO);
 
+		// TODO JB: may have to add normalizer to support case insensitive searches depending on token flags
+		StringIndexFieldTypeOptionsStep<?> keywordFieldType = indexFieldTypeFactory.asString()
+			.projectable(Projectable.NO)
+			.aggregable(Aggregable.YES);
 
 
 		// the old style for _text and _contains
@@ -119,11 +121,14 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 			// But the standard tokenizers aren't that flexible.  As second best, it would be nice to use elastic multi-fields
 			// to apply three different tokenizers to a single value.
 			// Instead, just be simple and expand into three full fields for now
-			spfield.objectFieldTemplate("tokenIndex", ObjectStructure.FLATTENED).matchingPathGlob("*.token");
-			spfield.fieldTemplate("token-code", exactAnalyzer).matchingPathGlob("*.token.code").multiValued();
-			spfield.fieldTemplate("token-code-system", exactAnalyzer).matchingPathGlob("*.token.code-system").multiValued();
-			spfield.fieldTemplate("token-system", exactAnalyzer).matchingPathGlob("*.token.system").multiValued();
-			spfield.fieldTemplate("reference-value", exactAnalyzer).matchingPathGlob("*.reference.value").multiValued();
+			String tokenPathGlob = "*.token";
+			spfield.objectFieldTemplate("tokenIndex", ObjectStructure.FLATTENED).matchingPathGlob(tokenPathGlob);
+			spfield.fieldTemplate("token-code", keywordFieldType).matchingPathGlob(tokenPathGlob + ".code").multiValued();
+			spfield.fieldTemplate("token-code-system", keywordFieldType).matchingPathGlob(tokenPathGlob + ".code-system").multiValued();
+			spfield.fieldTemplate("token-system", keywordFieldType).matchingPathGlob(tokenPathGlob + ".system").multiValued();
+
+			// reference
+			spfield.fieldTemplate("reference-value", keywordFieldType).matchingPathGlob("*.reference.value").multiValued();
 
 			// last, since the globs are matched in declaration order, and * matches even nested nodes.
 			spfield.objectFieldTemplate("spObject", ObjectStructure.FLATTENED).matchingPathGlob("*");

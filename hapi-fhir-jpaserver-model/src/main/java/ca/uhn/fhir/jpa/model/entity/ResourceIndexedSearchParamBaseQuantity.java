@@ -60,12 +60,26 @@ public abstract class ResourceIndexedSearchParamBaseQuantity extends BaseResourc
 	@Column(name = "HASH_IDENTITY", nullable = true)
 	private Long myHashIdentity;
 
+	/**
+	 * Constructor
+	 */
 	public ResourceIndexedSearchParamBaseQuantity() {
 		super();
 	}
 
 	@Override
+	public void clearHashes() {
+		myHashIdentity = null;
+		myHashIdentityAndUnits = null;
+		myHashIdentitySystemAndUnits = null;
+	}
+
+	@Override
 	public void calculateHashes() {
+		if (myHashIdentity != null || myHashIdentityAndUnits != null || myHashIdentitySystemAndUnits != null) {
+			return;
+		}
+
 		String resourceType = getResourceType();
 		String paramName = getParamName();
 		String units = getUnits();

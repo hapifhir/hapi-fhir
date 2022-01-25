@@ -31,6 +31,7 @@ import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 
@@ -97,7 +98,10 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	}
 
 	public void setParamName(String theName) {
-		myParamName = theName;
+		if (!StringUtils.equals(myParamName, theName)) {
+			myParamName = theName;
+			clearHashes();
+		}
 	}
 
 	public ResourceTable getResource() {
@@ -222,6 +226,7 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 		}
 
 		HashCode hashCode = hasher.hash();
-		return hashCode.asLong();
+		long retVal = hashCode.asLong();
+		return retVal;
 	}
 }

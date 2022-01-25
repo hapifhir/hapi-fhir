@@ -23,6 +23,8 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.OptimisticLock;
 
 import javax.persistence.CascadeType;
@@ -57,9 +59,7 @@ import java.util.Collection;
 	@Index(name = "IDX_RESVER_DATE", columnList = "RES_UPDATED")
 })
 public class ResourceHistoryTable extends BaseHasResource implements Serializable {
-
 	public static final String IDX_RESVER_ID_VER = "IDX_RESVER_ID_VER";
-
 	/**
 	 * @see ResourceEncodingEnum
 	 */
@@ -74,32 +74,24 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESOURCE_HISTORY_ID")
 	@Column(name = "PID")
 	private Long myId;
-
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "RES_ID", nullable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_RESOURCE_HISTORY_RESOURCE"))
 	private ResourceTable myResourceTable;
-
 	@Column(name = "RES_ID", nullable = false, updatable = false, insertable = false)
 	private Long myResourceId;
-
 	@Column(name = "RES_TYPE", length = ResourceTable.RESTYPE_LEN, nullable = false)
 	private String myResourceType;
-
 	@Column(name = "RES_VER", nullable = false)
 	private Long myResourceVersion;
-
 	@OneToMany(mappedBy = "myResourceHistory", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	private Collection<ResourceHistoryTag> myTags;
-
 	@Column(name = "RES_TEXT", length = Integer.MAX_VALUE - 1, nullable = true)
 	@Lob()
 	@OptimisticLock(excluded = true)
 	private byte[] myResource;
-
 	@Column(name = "RES_TEXT_VC", length = RES_TEXT_VC_MAX_LENGTH, nullable = true)
 	@OptimisticLock(excluded = true)
 	private String myResourceTextVc;
-
 	@Column(name = "RES_ENCODING", nullable = false, length = ENCODING_COL_LENGTH)
 	@Enumerated(EnumType.STRING)
 	@OptimisticLock(excluded = true)
@@ -107,8 +99,21 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@OneToOne(mappedBy = "myResourceHistoryTable", cascade = {CascadeType.REMOVE})
 	private ResourceHistoryProvenanceEntity myProvenance;
 
+	/**
+	 * Constructor
+	 */
 	public ResourceHistoryTable() {
 		super();
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+			.append("resourceId", myResourceId)
+			.append("resourceType", myResourceType)
+			.append("resourceVersion", myResourceVersion)
+			.append("pid", myId)
+			.toString();
 	}
 
 	public String getResourceTextVc() {

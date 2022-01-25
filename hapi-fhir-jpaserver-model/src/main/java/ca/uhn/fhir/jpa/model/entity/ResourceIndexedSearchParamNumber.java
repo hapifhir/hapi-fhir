@@ -86,9 +86,16 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 		myHashIdentity = source.myHashIdentity;
 	}
 
+	@Override
+	public void clearHashes() {
+		myHashIdentity = null;
+	}
 
 	@Override
 	public void calculateHashes() {
+		if (myHashIdentity != null) {
+			return;
+		}
 		String resourceType = getResourceType();
 		String paramName = getParamName();
 		setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));

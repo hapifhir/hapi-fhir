@@ -13,7 +13,6 @@ import ca.uhn.fhir.util.bundle.BundleEntryParts;
 import ca.uhn.fhir.util.bundle.EntryListAccumulator;
 import ca.uhn.fhir.util.bundle.ModifiableBundleEntry;
 import ca.uhn.fhir.util.bundle.SearchBundleEntryParts;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
@@ -27,7 +26,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -231,7 +229,7 @@ public class BundleUtil {
 		retVal.addAll(partsToIBaseMap.values());
 
 		//Blow away the entries and reset them in the right order.
-		TerserUtil.clearField(theContext, "entry", theBundle);
+		TerserUtil.clearField(theContext, theBundle, "entry");
 		TerserUtil.setField(theContext, "entry", theBundle, retVal.toArray(new IBase[0]));
 	}
 

@@ -26,6 +26,8 @@ import java.util.List;
 
 import javax.interceptor.Interceptors;
 import javax.ws.rs.*;
+
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 

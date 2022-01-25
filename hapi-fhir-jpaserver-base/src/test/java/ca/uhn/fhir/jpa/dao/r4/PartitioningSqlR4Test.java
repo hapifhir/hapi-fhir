@@ -1318,8 +1318,11 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testSearch_IdParamSecond_ForcedId_SpecificPartition() {
-		IIdType patientIdNull = createPatient(withPartition(null), withId("PT-NULL"), withActiveTrue());
+		// FIXME: move down
 		IIdType patientId1 = createPatient(withPartition(1), withId("PT-1"), withActiveTrue());
+		logAllTokenIndexes();
+
+		IIdType patientIdNull = createPatient(withPartition(null), withId("PT-NULL"), withActiveTrue());
 		IIdType patientId2 = createPatient(withPartition(2), withId("PT-2"), withActiveTrue());
 
 		/* *******************************
@@ -2198,6 +2201,8 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		IIdType patientId1 = createPatient(withPartition(1), withFamily("FAMILY"));
 		createPatient(withPartition(2), withFamily("FAMILY"));
 
+		logAllStringIndexes();
+
 		addReadPartition(1);
 
 		myCaptureQueriesListener.clear();
@@ -2207,7 +2212,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertThat(ids, contains(patientId1));
+		assertThat(ids.toString(), ids, contains(patientId1));
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
