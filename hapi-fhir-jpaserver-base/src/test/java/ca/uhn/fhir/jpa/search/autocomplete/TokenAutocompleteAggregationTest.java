@@ -48,7 +48,7 @@ class TokenAutocompleteAggregationTest {
 	public void testResultExtraction() {
 		TokenAutocompleteAggregation autocompleteAggregation = new TokenAutocompleteAggregation("code");
 
-		List<AutocompleteResultEntry> hits = autocompleteAggregation.extractResults(parsedResult);
+		List<TokenAutocompleteHit> hits = autocompleteAggregation.extractResults(parsedResult);
 
 		assertThat(hits, is(not(empty())));
 		assertThat(hits, (hasSize(3)));
@@ -59,9 +59,61 @@ class TokenAutocompleteAggregationTest {
 		TokenAutocompleteAggregation autocompleteAggregation = new TokenAutocompleteAggregation("code");
 		JsonObject bucket = (JsonObject) parsedResult.getAsJsonArray("buckets").get(0);
 
-		AutocompleteResultEntry entry = autocompleteAggregation.bucketToEntry(bucket);
+		TokenAutocompleteHit entry = autocompleteAggregation.bucketToEntry(bucket);
 		assertThat(entry.mySystemCode, equalTo("http://loinc.org|88262-1"));
 		assertThat(entry.myDisplayText, equalTo("Gram positive blood culture panel by Probe in Positive blood culture"));
+
+	}
+
+	/**
+	 * wipmb until we move to nested, we may have multiple Coding in a code.  This is broken.
+	 */
+	@Test
+	public void testMultiValuedBucketExtraction() {
+		TokenAutocompleteAggregation autocompleteAggregation = new TokenAutocompleteAggregation("code");
+		JsonObject bucket = new Gson().fromJson("{" +
+			"  \"key\": \"http://loinc.org|2708-6\"," +
+			"  \"doc_count\": 14," +
+			"  \"nestedTopNAgg\": {" +
+			"    \"hits\": {" +
+			"      \"total\": {" +
+			"        \"value\": 14," +
+			"        \"relation\": \"eq\"" +
+			"      }," +
+			"      \"max_score\": 1.0000025," +
+			"      \"hits\": [" +
+			"        {" +
+			"          \"_index\": \"resourcetable-000001\"," +
+			"          \"_type\": \"_doc\"," +
+			"          \"_id\": \"1393284\"," +
+			"          \"_score\": 1.0000025," +
+			"          \"_source\": {" +
+			"            \"sp\": {" +
+			"              \"code\": {" +
+			"                \"string\": {" +
+			"                  \"exact\": [" +
+			"                    \"Oxygen saturation in Arterial blood by Pulse oximetry\"," +
+			"                    \"Oxygen saturation in Arterial blood\"" +
+			"                  ]" +
+			"                }," +
+			"                \"token\": {" +
+			"                  \"code-system\": [" +
+			"                    \"http://loinc.org|2708-6\"," +
+			"                    \"http://loinc.org|59408-5\"" +
+			"                  ]" +
+			"                }" +
+			"              }" +
+			"            }" +
+			"          }" +
+			"        }" +
+			"      ]" +
+			"    }" +
+			"  }" +
+			"}", JsonObject.class);
+
+		TokenAutocompleteHit entry = autocompleteAggregation.bucketToEntry(bucket);
+		assertThat(entry.mySystemCode, equalTo("http://loinc.org|2708-6"));
+		assertThat(entry.myDisplayText, equalTo("Oxygen saturation in Arterial blood by Pulse oximetry"));
 
 	}
 

@@ -21,7 +21,6 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
-import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -73,7 +72,9 @@ import java.util.stream.Collectors;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -453,8 +454,11 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		createObservationWithCode(new Coding("http://loinc.org", "88262-1", "Gram positive blood culture panel by Probe in Positive blood culture"));
 		createObservationWithCode(new Coding("http://loinc.org", "88262-1", "Gram positive blood culture panel by Probe in Positive blood culture"));
 
-		List<IBaseCoding> codes = myFulltestSearchSvc.searchMatchingCodes("Observation", "code", "blo");
-		assertThat("finds blood pressure", codes, contains(codeMatching(mean_blood_pressure)));
+		List<IBaseCoding> codes = myFulltestSearchSvc.tokenAutocompleteSearch("Observation", "code", "blo");
+		assertThat("finds blood pressure", codes, hasItem(codeMatching(mean_blood_pressure)));
+
+		codes = myFulltestSearchSvc.tokenAutocompleteSearch("Observation", "code", "nuclear");
+		assertThat("doesn't find nuclear", codes, is(empty()));
 	}
 
 	@Nonnull

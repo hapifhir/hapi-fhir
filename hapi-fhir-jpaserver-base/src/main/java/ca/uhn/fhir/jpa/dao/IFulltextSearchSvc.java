@@ -62,7 +62,7 @@ public interface IFulltextSearchSvc {
 	 */
 	 void reindex(ResourceTable theEntity);
 
-	 // fixme mb wrap these params into an object?
-	List<IBaseCoding> searchMatchingCodes(String theResourceName, String theSPName, String theSearchText);
+	 // wipmb wrap these params into an object?
+	List<IBaseCoding> tokenAutocompleteSearch(String theResourceName, String theSPName, String theSearchText);
 
 }

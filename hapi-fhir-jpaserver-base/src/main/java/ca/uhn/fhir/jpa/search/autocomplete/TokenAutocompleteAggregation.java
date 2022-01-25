@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.search.autocomplete;
 import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneClauseBuilder;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
@@ -20,7 +21,7 @@ import java.util.stream.StreamSupport;
 /**
  * Compose the autocomplete aggregation, and parse the results.
  */
-public class TokenAutocompleteAggregation {
+class TokenAutocompleteAggregation {
 	static final String NESTED_AGG_NAME = "nestedTopNAgg";
 	/**
 	 * Aggregation template json.
@@ -52,14 +53,20 @@ public class TokenAutocompleteAggregation {
 		.build();
 	static final ParseContext parseContext = JsonPath.using(configuration);
 
-	final String mySpName;
+	private final String mySpName;
 
 	// wipmb
-	public TokenAutocompleteAggregation(String theSpName) {
+	TokenAutocompleteAggregation(String theSpName) {
 		mySpName = theSpName;
 	}
 
-	public JsonObject toJsonAggregation() {
+	/**
+	 * Generate the JSON for the ES aggregation query.
+	 *
+	 * @return the JSON
+	 */
+	JsonObject toJsonAggregation() {
+		// clone and modify the template with the actual field names.
 		JsonObject result = AGGREGATION_TEMPLATE.deepCopy();
 		DocumentContext documentContext = parseContext.parse(result);
 		documentContext.set("terms.field", ExtendedLuceneClauseBuilder.getTokenSystemCodeFieldPath(mySpName));
@@ -67,12 +74,17 @@ public class TokenAutocompleteAggregation {
 		return result;
 	}
 
+	/**
+	 * Parse the aggregation buckets into TokenAutocompleteResultEntry
+	 *
+	 * @param theAggregationResult the ES aggregation JSON
+	 */
 	@Nonnull
-	public List<AutocompleteResultEntry> extractResults(@Nonnull JsonObject theAggregationResult) {
+	List<TokenAutocompleteHit> extractResults(@Nonnull JsonObject theAggregationResult) {
 		Validate.notNull(theAggregationResult);
 
 		JsonArray buckets = theAggregationResult.getAsJsonArray("buckets");
-		List<AutocompleteResultEntry> result = StreamSupport.stream(buckets.spliterator(), false)
+		List<TokenAutocompleteHit> result = StreamSupport.stream(buckets.spliterator(), false)
 			.map(b-> bucketToEntry((JsonObject) b))
 			.collect(Collectors.toList());
 
@@ -80,25 +92,32 @@ public class TokenAutocompleteAggregation {
 	}
 
 	/**
-	 * Extract the results from the aggregation bucket
-	 *
-	 * @param theBucketJson
-	 * @return
+	 * Extract the result from the top-n aggregation bucket.
+	 * The inner bucket contains matching hits
 	 */
 	@Nonnull
-	AutocompleteResultEntry bucketToEntry(JsonObject theBucketJson) {
+	TokenAutocompleteHit bucketToEntry(JsonObject theBucketJson) {
 		// wrap the JsonObject for JSONPath.
 		DocumentContext documentContext = parseContext.parse(theBucketJson);
 
-		// jsonpath caches the paths, so keep it simple
+	   // The outer bucket is keyed by the token value (i.e. "system|code").
 		String bucketKey = documentContext.read("key", String.class);
 
+		// The inner bucket has a hits array, and we only need the first.
 		JsonObject spRootNode = documentContext.read(NESTED_AGG_NAME + ".hits.hits[0]._source.sp");
 		// MB - JsonPath doesn't have placeholders, and I don't want to screw-up quoting mySpName, so read it explicitly
 		JsonObject spNode = spRootNode.getAsJsonObject(mySpName);
-		String displayText = parseContext.parse(spNode).read("string.exact", String.class);
+		// wipmb Is this an array, or an object?  Multi-coded objects will probably have an array.  Ugh.  Need to go Nested!
+		//String displayText = parseContext.parse(spNode).read("string.exact", String.class);
+		JsonElement exactNode = spNode.get("string").getAsJsonObject().get("exact");
+		String displayText;
+		if (exactNode.isJsonArray()) {
+			displayText = exactNode.getAsJsonArray().get(0).getAsString();
+		} else {
+			displayText = exactNode.getAsString();
+		}
 
-		return new AutocompleteResultEntry(bucketKey,displayText);
+		return new TokenAutocompleteHit(bucketKey,displayText);
 	}
 
 }
