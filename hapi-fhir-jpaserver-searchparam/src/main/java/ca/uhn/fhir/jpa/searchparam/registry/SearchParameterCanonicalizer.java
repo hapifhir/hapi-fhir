@@ -374,6 +374,7 @@ public class SearchParameterCanonicalizer {
 	private void setEncoder(RuntimeSearchParam theRuntimeSearchParam, IBaseDatatype theValue) {
 		if (theValue instanceof IPrimitiveType) {
 			String stringValue = ((IPrimitiveType<?>) theValue).getValueAsString();
+			// FIXME LS parse out to support DOUBLE_METAPHONE(7) format when we instantiate it, ensure the number gets to where it needs to go
 			PhoneticEncoderEnum encoderEnum = EnumUtils.getEnum(PhoneticEncoderEnum.class, stringValue);
 			if (encoderEnum != null) {
 				theRuntimeSearchParam.setPhoneticEncoder(encoderEnum.getPhoneticEncoder());
