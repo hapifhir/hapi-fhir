@@ -155,6 +155,7 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_TYPE;
 import static org.apache.commons.lang3.StringUtils.countMatches;
+import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -5118,7 +5119,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		StringOrListParam or = new StringOrListParam();
 		or.addOr(new StringParam("A1"));
 		for (int i = 0; i < 50; i++) {
-			or.addOr(new StringParam(StringUtils.leftPad("", 200, (char) ('A' + i))));
+			or.addOr(new StringParam(leftPad("", 200, (char) ('A' + i))));
 		}
 		map.add(Patient.SP_NAME, or);
 		IBundleProvider results = myPatientDao.search(map);
@@ -5130,7 +5131,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		or.addOr(new StringParam("A1"));
 		or.addOr(new StringParam("A1"));
 		for (int i = 0; i < 50; i++) {
-			or.addOr(new StringParam(StringUtils.leftPad("", 200, (char) ('A' + i))));
+			or.addOr(new StringParam(leftPad("", 200, (char) ('A' + i))));
 		}
 		map.add(Patient.SP_NAME, or);
 		results = myPatientDao.search(map);
@@ -5154,7 +5155,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			.setCode("MR");
 		IIdType id1 = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			List<ResourceIndexedSearchParamToken> params = myResourceIndexedSearchParamTokenDao
 				.findAll()
 				.stream()
@@ -5401,9 +5402,9 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		SearchParameterMap map = new SearchParameterMap();
 		StringOrListParam or = new StringOrListParam();
 		or.addOr(new StringParam("A1"));
-		or.addOr(new StringParam(StringUtils.leftPad("", 200, 'A')));
-		or.addOr(new StringParam(StringUtils.leftPad("", 200, 'B')));
-		or.addOr(new StringParam(StringUtils.leftPad("", 200, 'C')));
+		or.addOr(new StringParam(leftPad("", 200, 'A')));
+		or.addOr(new StringParam(leftPad("", 200, 'B')));
+		or.addOr(new StringParam(leftPad("", 200, 'C')));
 		map.add(Patient.SP_NAME, or);
 		IBundleProvider results = myPatientDao.search(map);
 		assertEquals(1, results.getResources(0, 10).size());
@@ -5412,9 +5413,9 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		map = new SearchParameterMap();
 		or = new StringOrListParam();
 		or.addOr(new StringParam("A1"));
-		or.addOr(new StringParam(StringUtils.leftPad("", 200, 'A')));
-		or.addOr(new StringParam(StringUtils.leftPad("", 200, 'B')));
-		or.addOr(new StringParam(StringUtils.leftPad("", 200, 'C')));
+		or.addOr(new StringParam(leftPad("", 200, 'A')));
+		or.addOr(new StringParam(leftPad("", 200, 'B')));
+		or.addOr(new StringParam(leftPad("", 200, 'C')));
 		map.add(Patient.SP_NAME, or);
 		results = myPatientDao.search(map);
 		assertEquals(1, results.getResources(0, 10).size());
@@ -5550,6 +5551,68 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		List<String> values = toUnqualifiedVersionlessIdValues(results);
 		assertThat(values.toString(), values, containsInAnyOrder(patientId.getValue(), encId.getValue(), conditionId.getValue(), epId.getValue()));
 
+	}
+
+	@Test
+	public void testInvalidInclude() {
+
+		// Empty is ignored (should not fail)
+		{
+			SearchParameterMap map = new SearchParameterMap()
+				.addInclude(new Include(""));
+			assertEquals(0, myPatientDao.search(map, mySrd).sizeOrThrowNpe());
+		}
+
+		// Very long
+		String longString = leftPad("", 10000, 'A');
+		try {
+			SearchParameterMap map = new SearchParameterMap()
+				.addInclude(new Include("Patient:" + longString));
+			myPatientDao.search(map, mySrd);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Invalid _include parameter value: \"Patient:" + longString + "\". Unknown search parameter \"" + longString + "\" for resource type \"Patient\". Valid search parameters for this search are: [general-practitioner, link, organization]", e.getMessage());
+		}
+
+		// Invalid
+		try {
+			SearchParameterMap map = new SearchParameterMap()
+				.addInclude(new Include(":"));
+			myPatientDao.search(map, mySrd);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Invalid _include parameter value: \":\". ", e.getMessage());
+		}
+
+		// Unknown resource
+		try {
+			SearchParameterMap map = new SearchParameterMap()
+				.addInclude(new Include("Foo:patient"));
+			myPatientDao.search(map, mySrd);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Invalid _include parameter value: \"Foo:patient\". Invalid/unsupported resource type: \"Foo\"", e.getMessage());
+		}
+
+		// Unknown param
+		try {
+			SearchParameterMap map = new SearchParameterMap()
+				.addInclude(new Include("Patient:foo"));
+			myPatientDao.search(map, mySrd);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Invalid _include parameter value: \"Patient:foo\". Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [general-practitioner, link, organization]", e.getMessage());
+		}
+
+		// Unknown target type
+		try {
+			SearchParameterMap map = new SearchParameterMap()
+				.addInclude(new Include("Patient:organization:Foo"));
+			myPatientDao.search(map, mySrd);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Invalid _include parameter value: \"Patient:organization:Foo\". Invalid/unsupported resource type: \"Foo\"", e.getMessage());
+		}
 	}
 
 	private String toStringMultiline(List<?> theResults) {
