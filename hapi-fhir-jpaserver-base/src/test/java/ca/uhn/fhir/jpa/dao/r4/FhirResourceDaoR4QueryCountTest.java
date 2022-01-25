@@ -303,7 +303,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			List<ResourceTable> resources = myResourceTableDao.findAll();
 			String versions = "Resource Versions:\n * " + resources
 				.stream()
-				.map(t->"Resource " + t.getIdDt() + " has version: " + t.getVersion())
+				.map(t -> "Resource " + t.getIdDt() + " has version: " + t.getVersion())
 				.collect(Collectors.joining("\n * "));
 
 			for (ResourceTable next : resources) {
@@ -368,7 +368,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			List<ResourceTable> resources = myResourceTableDao.findAll();
 			String versions = "Resource Versions:\n * " + resources
 				.stream()
-				.map(t->"Resource " + t.getIdDt() + " has version: " + t.getVersion())
+				.map(t -> "Resource " + t.getIdDt() + " has version: " + t.getVersion())
 				.collect(Collectors.joining("\n * "));
 
 			for (ResourceTable next : resources) {
@@ -554,9 +554,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	public void assertNoPartitionSelectors() {
 		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
 		for (SqlQuery next : selectQueries) {
-			assertEquals(0, StringUtils.countMatches(next.getSql(true, true).toLowerCase(), "partition_id is null"));
-			assertEquals(0, StringUtils.countMatches(next.getSql(true, true).toLowerCase(), "partition_id="));
-			assertEquals(0, StringUtils.countMatches(next.getSql(true, true).toLowerCase(), "partition_id ="));
+			assertEquals(0, StringUtils.countMatches(next.getSql(true, true).toLowerCase(), "partition_id is null"), () -> next.getSql(true, true));
+			assertEquals(0, StringUtils.countMatches(next.getSql(true, true).toLowerCase(), "partition_id="), () -> next.getSql(true, true));
+			assertEquals(0, StringUtils.countMatches(next.getSql(true, true).toLowerCase(), "partition_id ="), () -> next.getSql(true, true));
 		}
 	}
 
@@ -938,6 +938,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(1, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 		runInTransaction(() -> assertEquals(4, myResourceTableDao.count()));
+		logAllResources();
 
 		// Run it again - This time even the match URL should be cached
 

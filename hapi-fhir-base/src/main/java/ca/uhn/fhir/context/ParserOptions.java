@@ -55,7 +55,7 @@ public class ParserOptions {
 	 * serialized.
 	 * </p>
 	 *
-	 * @since 6.0.0
+	 * @since 5.7.0
 	 */
 	public boolean isAutoContainReferenceTargetsWithNoId() {
 		return myAutoContainReferenceTargetsWithNoId;
@@ -72,7 +72,7 @@ public class ParserOptions {
 	 * serialized.
 	 * </p>
 	 *
-	 * @since 6.0.0
+	 * @since 5.7.0
 	 */
 	public void setAutoContainReferenceTargetsWithNoId(boolean theAllowAutoContainedReferences) {
 		myAutoContainReferenceTargetsWithNoId = theAllowAutoContainedReferences;

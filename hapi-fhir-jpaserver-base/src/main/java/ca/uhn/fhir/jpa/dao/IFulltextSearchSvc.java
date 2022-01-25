@@ -20,6 +20,8 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import java.util.List;
+
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
