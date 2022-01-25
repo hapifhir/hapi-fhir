@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
- * Use aggregations to implement a search of most-frequent token search params values for a give SearchParameter.
+ * Use aggregations to implement a search of most-frequent token search params values.
  */
 public class TokenAutocompleteSearch {
 	private static final Logger ourLog = LoggerFactory.getLogger(TokenAutocompleteSearch.class);

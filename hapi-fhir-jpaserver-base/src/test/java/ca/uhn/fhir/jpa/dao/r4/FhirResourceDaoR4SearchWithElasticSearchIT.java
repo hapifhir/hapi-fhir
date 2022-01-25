@@ -423,13 +423,13 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 	@Test
 	public void testAutocompleteByCodeDisplay() {
-		// wipmb
+		// wipmb Current IT.
 
 		// a few different codes
 		Coding mean_blood_pressure = new Coding("http://loinc.org", "8478-0", "Mean blood pressure");
 
-		createObservationWithCode(mean_blood_pressure);
 		createObservationWithCode(new Coding("http://loinc.org", "789-8", "Erythrocytes [#/volume] in Blood by Automated count"));
+		createObservationWithCode(mean_blood_pressure);
 		createObservationWithCode(new Coding("http://loinc.org", "788-0", "Erythrocyte distribution width [Ratio] by Automated count"));
 		createObservationWithCode(new Coding("http://loinc.org", "787-2", "MCV [Entitic volume] by Automated count"));
 		createObservationWithCode(new Coding("http://loinc.org", "786-4", "MCHC [Mass/volume] by Automated count"));
@@ -448,14 +448,14 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		createObservationWithCode(new Coding("http://loinc.org", "88262-1", "Gram positive blood culture panel by Probe in Positive blood culture"));
 
 		List<IBaseCoding> codes = myFulltestSearchSvc.tokenAutocompleteSearch("Observation", "code", "blo");
-		assertThat("finds blood pressure", codes, hasItem(codeMatching(mean_blood_pressure)));
+		assertThat("finds blood pressure", codes, hasItem(matchingCode(mean_blood_pressure)));
 
 		codes = myFulltestSearchSvc.tokenAutocompleteSearch("Observation", "code", "nuclear");
 		assertThat("doesn't find nuclear", codes, is(empty()));
 	}
 
 	@Nonnull
-	private CodeMatcher codeMatching(Coding theCoding) {
+	private CodeMatcher matchingCode(Coding theCoding) {
 		return new CodeMatcher(theCoding);
 	}
 
@@ -469,14 +469,14 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		}
 
 		@Override
-		public boolean matches(Object actual) {
-			if (actual instanceof IBaseCoding) {
-				IBaseCoding coding = (IBaseCoding) actual;
-				return Objects.equals(coding.getSystem(), myCode.getSystem()) &&
-					Objects.equals(coding.getCode(), myCode.getCode());
-			} else {
+		public boolean matches(Object theCandidate) {
+			if (!(theCandidate instanceof IBaseCoding)) {
 				return false;
 			}
+			IBaseCoding coding = (IBaseCoding) theCandidate;
+			return
+				Objects.equals(coding.getSystem(), myCode.getSystem()) &&
+				Objects.equals(coding.getCode(), myCode.getCode());
 		}
 	}
 	private IIdType createObservationWithCode(Coding c) {
