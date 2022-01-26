@@ -138,7 +138,7 @@ public interface IBundleProvider {
 	/**
 	 * Get all resources
 	 *
-	 * @return getResources(0, this.size ()).  Return an empty list if size() is zero.
+	 * @return <code>getResources(0, this.size())</code>.  Return an empty list if <code>this.size()</code> is zero.
 	 * @throws ConfigurationException if size() is null
 	 */
 	@Nonnull
