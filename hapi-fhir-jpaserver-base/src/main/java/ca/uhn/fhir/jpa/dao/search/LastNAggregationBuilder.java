@@ -3,11 +3,13 @@ package ca.uhn.fhir.jpa.dao.search;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import io.swagger.v3.core.util.Json;
 
+/**
+ * Builds JSON aggregation block for ES query
+ */
 public class LastNAggregationBuilder {
 	public static final String SP_CODE_TOKEN_CODE_SYSTEM = "sp.code.token.code-system";
-	public static final String SP_DATE_DT_LOWER = "sp.date.dt.lower";
+	public static final String SP_DATE_DT_UPPER = "sp.date.dt.upper";
 	private final SearchParameterMap myParams;
 
 	public LastNAggregationBuilder(SearchParameterMap theParams) {
@@ -40,7 +42,7 @@ public class LastNAggregationBuilder {
 		order.addProperty("order", "desc");
 
 		JsonObject sortDate = new JsonObject();
-		sortDate.add(SP_DATE_DT_LOWER, order);
+		sortDate.add(SP_DATE_DT_UPPER, order);
 
 		JsonArray sortProperties = new JsonArray();
 		sortProperties.add(sortDate);

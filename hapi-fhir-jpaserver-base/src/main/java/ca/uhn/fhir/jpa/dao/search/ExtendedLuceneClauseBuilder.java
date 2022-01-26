@@ -23,6 +23,8 @@ package ca.uhn.fhir.jpa.dao.search;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -36,6 +38,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -70,7 +76,7 @@ public class ExtendedLuceneClauseBuilder {
 			} else if (nextOr instanceof TokenParam) {
 				TokenParam nextOrToken = (TokenParam) nextOr;
 				nextValueTrimmed = nextOrToken.getValue();
-			} else if (nextOr instanceof ReferenceParam){
+			} else if (nextOr instanceof ReferenceParam) {
 				ReferenceParam referenceParam = (ReferenceParam) nextOr;
 				nextValueTrimmed = referenceParam.getValue();
 				if (nextValueTrimmed.contains("/_history")) {
@@ -222,17 +228,114 @@ public class ExtendedLuceneClauseBuilder {
 		}
 	}
 
-    public void addReferenceUnchainedSearch(String theSearchParamName, List<List<IQueryParameterType>> theReferenceAndOrTerms) {
-		 String fieldPath = "sp." + theSearchParamName + ".reference.value";
-		 for (List<? extends IQueryParameterType> nextAnd : theReferenceAndOrTerms) {
-			 Set<String> terms = extractOrStringParams(nextAnd);
-			 ourLog.trace("reference unchained search {}", terms);
+	public void addReferenceUnchainedSearch(String theSearchParamName, List<List<IQueryParameterType>> theReferenceAndOrTerms) {
+		String fieldPath = "sp." + theSearchParamName + ".reference.value";
+		for (List<? extends IQueryParameterType> nextAnd : theReferenceAndOrTerms) {
+			Set<String> terms = extractOrStringParams(nextAnd);
+			ourLog.trace("reference unchained search {}", terms);
 
-			 List<? extends PredicateFinalStep> orTerms = terms.stream()
-				 .map(s -> myPredicateFactory.match().field(fieldPath).matching(s))
-				 .collect(Collectors.toList());
+			List<? extends PredicateFinalStep> orTerms = terms.stream()
+				.map(s -> myPredicateFactory.match().field(fieldPath).matching(s))
+				.collect(Collectors.toList());
 
-			 myRootClause.must(orPredicateOrSingle(orTerms));
-		 }
-	 }
+			myRootClause.must(orPredicateOrSingle(orTerms));
+		}
+	}
+
+	/**
+	 * Create date clause from date params. The date lower and upper bounds are taken
+	 * into considertion when generating date query ranges
+	 *
+	 * <p>Example 1 ('eq' prefix/empty): <code>http://fhirserver/Observation?date=2021-01-01</code>
+	 * would generate the following search clause
+	 * <pre>
+	 * {@code
+	 * {
+	 *  "bool": {
+	 *    "must": [{
+	 *      "range": {
+	 *        "sp.date.dt.lower": { "gte": "2010-01-01T07:00:00.000000000Z" }
+	 *      }
+	 *    }, {
+	 *      "range": {
+	 *        "sp.date.dt.upper": { "lte": "2010-01-01T07:00:00.000000000Z" }
+	 *      }
+	 *    }],
+	 *    "minimum_should_match": "0"
+	 *  }
+	 * }
+	 * }
+	 * </pre>
+	 *
+	 * <p>Example 2 ('ge' prefix): <code>http://fhirserver/Observation?date=ge2021-01-01</code>
+	 * <pre>
+	 * {@code
+	 * {
+	 *   "range":{
+	 *     "sp.date.dt.lower":{ "gte":"2021-01-01T07:00:00.000000000Z" }
+	 *   }
+	 * }
+	 * }
+	 * </pre>
+	 *
+	 * <p>Example 3 between dates: <code>http://fhirserver/Observation?date=ge2010-01-01&date=le2020-01</code></p>
+	 * <pre>
+	 * {@code
+	 * {
+	 *   "range":{
+	 *     "sp.date.dt.lower":{ "gte":"2010-01-01T07:00:00.000000000Z" }
+	 *   },
+	 *   "range":{
+	 *     "sp.date.dt.upper":{ "lte":"2020-01-01T07:00:00.000000000Z" }
+	 *   }
+	 * }
+	 * }
+	 * </pre>
+	 *
+	 * @param theSearchParamName
+	 * @param theDateAndOrTerms
+	 */
+	public void addDateUnmodifiedSearch(String theSearchParamName, List<List<IQueryParameterType>> theDateAndOrTerms) {
+		for (List<? extends IQueryParameterType> nextAnd : theDateAndOrTerms) {
+			// comma separated list of dates(OR list) on a date param is not applicable so grab
+			// first from default list
+			DateParam dateParam = (DateParam) nextAnd.stream().findFirst()
+				.orElseThrow(() -> new IllegalArgumentException("Date param is missing value"));
+
+			List<? extends PredicateFinalStep> terms = generateDateSearchTerms(theSearchParamName, dateParam);
+			if (terms.size() == 1) {
+				myRootClause.must(terms.get(0));
+			} else {
+				BooleanPredicateClausesStep<?> andTerms = myPredicateFactory.bool();
+				terms.forEach(andTerms::must);
+				myRootClause.must(andTerms);
+			}
+		}
+	}
+
+	private List<? extends PredicateFinalStep> generateDateSearchTerms(String theSearchParamName, DateParam theDateParam) {
+		String fieldPathLower = "sp." + theSearchParamName + ".dt.lower";
+		String fieldPathUpper = "sp." + theSearchParamName + ".dt.upper";
+
+		Instant dateInstant = theDateParam.getValue().toInstant();
+		ParamPrefixEnum dateParamPrefix = theDateParam.getPrefix();
+
+		if (ParamPrefixEnum.GREATERTHAN == dateParamPrefix ||
+			ParamPrefixEnum.STARTS_AFTER == dateParamPrefix) {
+			return Collections.singletonList(myPredicateFactory.range().field(fieldPathLower).greaterThan(dateInstant));
+		} else if (ParamPrefixEnum.LESSTHAN == dateParamPrefix ||
+			ParamPrefixEnum.ENDS_BEFORE == dateParamPrefix) {
+			return Collections.singletonList(myPredicateFactory.range().field(fieldPathUpper).lessThan(dateInstant));
+		} else if (ParamPrefixEnum.LESSTHAN_OR_EQUALS == dateParamPrefix) {
+			return Collections.singletonList(myPredicateFactory.range().field(fieldPathUpper).atMost(dateInstant));
+		} else if (ParamPrefixEnum.GREATERTHAN_OR_EQUALS == dateParamPrefix) {
+			return Collections.singletonList(myPredicateFactory.range().field(fieldPathLower).atLeast(dateInstant));
+		} else {
+			// For equality prefix we would like the date to fall between the lower and upper bound
+			return Arrays.asList(
+				myPredicateFactory.range().field(fieldPathLower).atLeast(dateInstant),
+				myPredicateFactory.range().field(fieldPathUpper).atMost(dateInstant)
+			);
+		}
+	}
 }

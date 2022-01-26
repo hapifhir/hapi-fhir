@@ -37,6 +37,7 @@ import org.hibernate.search.mapper.pojo.bridge.runtime.PropertyBridgeWriteContex
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_EXACT;
@@ -92,7 +93,7 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 			.projectable(Projectable.NO)
 			.aggregable(Aggregable.YES);
 
-		StandardIndexFieldTypeOptionsStep<?, LocalDateTime> dateTimeFieldType = indexFieldTypeFactory.asLocalDateTime()
+		StandardIndexFieldTypeOptionsStep<?, Instant> dateTimeFieldType = indexFieldTypeFactory.asInstant()
 			.projectable(Projectable.NO)
 			.sortable(Sortable.YES);
 
@@ -146,10 +147,10 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 			// date
 			String dateTimePathGlob = "*.dt";
 			spfield.objectFieldTemplate("datetimeIndex", ObjectStructure.FLATTENED).matchingPathGlob(dateTimePathGlob);
-			spfield.fieldTemplate("datetime-lower-ordinal", dateTimeOrdinalFieldType).matchingPathGlob(dateTimePathGlob + ".lower-ord").multiValued();
-			spfield.fieldTemplate("datetime-lower-value", dateTimeFieldType).matchingPathGlob(dateTimePathGlob + ".lower").multiValued();
-			spfield.fieldTemplate("datetime-upper-ordinal", dateTimeOrdinalFieldType).matchingPathGlob(dateTimePathGlob + ".upper-ord").multiValued();
-			spfield.fieldTemplate("datetime-upper-value", dateTimeFieldType).matchingPathGlob(dateTimePathGlob + ".upper").multiValued();
+			spfield.fieldTemplate("datetime-lower-ordinal", dateTimeOrdinalFieldType).matchingPathGlob(dateTimePathGlob + ".lower-ord");
+			spfield.fieldTemplate("datetime-lower-value", dateTimeFieldType).matchingPathGlob(dateTimePathGlob + ".lower");
+			spfield.fieldTemplate("datetime-upper-ordinal", dateTimeOrdinalFieldType).matchingPathGlob(dateTimePathGlob + ".upper-ord");
+			spfield.fieldTemplate("datetime-upper-value", dateTimeFieldType).matchingPathGlob(dateTimePathGlob + ".upper");
 
 			// last, since the globs are matched in declaration order, and * matches even nested nodes.
 			spfield.objectFieldTemplate("spObject", ObjectStructure.FLATTENED).matchingPathGlob("*");

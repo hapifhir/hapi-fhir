@@ -27,9 +27,6 @@ import org.hibernate.search.engine.backend.document.DocumentElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-
 public class HibernateSearchIndexWriter {
 	private static final Logger ourLog = LoggerFactory.getLogger(HibernateSearchIndexWriter.class);
 	public static final String IDX_STRING_NORMALIZED = "norm";
@@ -71,20 +68,20 @@ public class HibernateSearchIndexWriter {
 		ourLog.debug("Adding Search Param Token: {} -- {}", theSearchParam, theValue);
 	}
 
-    public void writeReferenceIndex(String theSearchParam, String theValue) {
-		 DocumentElement referenceIndexNode = getSearchParamIndexNode(theSearchParam, "reference");
-		 referenceIndexNode.addValue("value", theValue);
-		 ourLog.trace("Adding Search Param Reference: {} -- {}", theSearchParam, theValue);
-    }
+	public void writeReferenceIndex(String theSearchParam, String theValue) {
+		DocumentElement referenceIndexNode = getSearchParamIndexNode(theSearchParam, "reference");
+		referenceIndexNode.addValue("value", theValue);
+		ourLog.trace("Adding Search Param Reference: {} -- {}", theSearchParam, theValue);
+	}
 
 	public void writeDateIndex(String theSearchParam, DateRangeParam theValue) {
 		DocumentElement dateIndexNode = getSearchParamIndexNode(theSearchParam, "dt");
 		// Lower bound
 		dateIndexNode.addValue("lower-ord", theValue.getLowerBoundAsDateInteger());
-		dateIndexNode.addValue("lower", LocalDateTime.ofInstant(theValue.getLowerBoundAsInstant().toInstant(), ZoneId.systemDefault()));
+		dateIndexNode.addValue("lower", theValue.getLowerBoundAsInstant().toInstant());
 		// Upper bound
 		dateIndexNode.addValue("upper-ord", theValue.getUpperBoundAsDateInteger());
-		dateIndexNode.addValue("upper", LocalDateTime.ofInstant(theValue.getUpperBoundAsInstant().toInstant(), ZoneId.systemDefault()));
+		dateIndexNode.addValue("upper", theValue.getUpperBoundAsInstant().toInstant());
 		ourLog.trace("Adding Search Param Reference: {} -- {}", theSearchParam, theValue);
 	}
 }
