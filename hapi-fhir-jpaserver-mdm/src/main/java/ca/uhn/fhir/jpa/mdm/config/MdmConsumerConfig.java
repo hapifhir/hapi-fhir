@@ -72,24 +72,20 @@ import ca.uhn.fhir.mdm.rules.svc.MdmResourceMatcherSvc;
 import ca.uhn.fhir.mdm.util.EIDHelper;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
 import ca.uhn.fhir.mdm.util.MessageHelper;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.validation.IResourceLoader;
 import org.slf4j.Logger;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 @Configuration
+@Import(MdmCommonConfig.class)
 public class MdmConsumerConfig {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	@Bean
 	IMdmStorageInterceptor mdmStorageInterceptor() {
 		return new MdmStorageInterceptor();
-	}
-
-	@Bean
-    MdmSearchExpandingInterceptor myMdmSearchExpandingInterceptorInterceptor() {
-		return new MdmSearchExpandingInterceptor();
 	}
 
 	@Bean
@@ -169,10 +165,6 @@ public class MdmConsumerConfig {
 		return new MdmProviderLoader();
 	}
 
-	@Bean
-	MdmRuleValidator mdmRuleValidator(FhirContext theFhirContext, ISearchParamRegistry theSearchParamRetriever) {
-		return new MdmRuleValidator(theFhirContext, theSearchParamRetriever);
-	}
 
 	@Bean
 	IMdmMatchFinderSvc mdmMatchFinderSvc() {
@@ -195,10 +187,6 @@ public class MdmConsumerConfig {
 		return new MdmModelConverterSvcImpl();
 	}
 
-	@Bean
-	IMdmBatchJobSubmitterFactory mdmBatchJobSubmitterFactory() {
-		return new MdmBatchJobSubmitterFactoryImpl();
-	}
 
 	@Bean
 	MdmCandidateSearchSvc mdmCandidateSearchSvc() {
@@ -249,11 +237,6 @@ public class MdmConsumerConfig {
 	@Bean
 	MdmLoader mdmLoader() {
 		return new MdmLoader();
-	}
-
-	@Bean
-	MdmLinkDeleteSvc mdmLinkDeleteSvc() {
-		return new MdmLinkDeleteSvc();
 	}
 
 	@Bean
