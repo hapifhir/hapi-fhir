@@ -23,13 +23,14 @@ package ca.uhn.fhir.jpa.searchparam.registry;
 import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.context.phonetic.PhoneticEncoderWrapper;
+import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.DatatypeUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.HapiExtensions;
+import ca.uhn.fhir.util.PhoneticEncoderUtils;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.SearchParameter;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -377,9 +378,9 @@ public class SearchParameterCanonicalizer {
 			// every string creates a completely new encoder wrapper.
 			// this is fine, because the runtime search parameters are constructed at startup
 			// for every saved value
-			PhoneticEncoderWrapper wrapper = PhoneticEncoderWrapper.getEncoderWrapper(stringValue);
-			if (wrapper != null) {
-				theRuntimeSearchParam.setPhoneticEncoder(wrapper.getPhoneticEncoder());
+			IPhoneticEncoder encoder = PhoneticEncoderUtils.getEncoder(stringValue);
+			if (encoder != null) {
+				theRuntimeSearchParam.setPhoneticEncoder(encoder);
 			}
 			else {
 				ourLog.error("Invalid PhoneticEncoderEnum value '" + stringValue + "'");

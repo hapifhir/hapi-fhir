@@ -81,6 +81,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
@@ -234,11 +235,11 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 			"fuzzymodified");
 
 		// verify the encoders are different!
-		Assertions.assertNotEquals(paramdefault, parammodified);
+		assertNotEquals(paramdefault, parammodified);
 		String encodedDefault = paramdefault.encode(testString);
 		String encodedMod = parammodified.encode(testString);
-		Assertions.assertEquals(modifiedLength, encodedMod.length());
-		Assertions.assertNotEquals(encodedDefault.length(), encodedMod.length());
+		assertEquals(modifiedLength, encodedMod.length());
+		assertNotEquals(encodedDefault.length(), encodedMod.length());
 	}
 
 	/**
@@ -356,7 +357,6 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 			assertEquals("SearchParameter.base is missing", e.getMessage());
 		}
 	}
-
 
 	@Test
 	@Disabled

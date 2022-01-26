@@ -1,5 +1,9 @@
-package ca.uhn.fhir.context.phonetic;
+package ca.uhn.fhir.util;
 
+import ca.uhn.fhir.context.phonetic.ApacheEncoder;
+import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
+import ca.uhn.fhir.context.phonetic.NumericEncoder;
+import ca.uhn.fhir.context.phonetic.PhoneticEncoderEnum;
 import org.apache.commons.codec.language.Caverphone1;
 import org.apache.commons.codec.language.Caverphone2;
 import org.apache.commons.codec.language.ColognePhonetic;
@@ -13,28 +17,48 @@ import org.apache.commons.lang3.EnumUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PhoneticEncoderWrapper {
-	private static final Logger ourLog = LoggerFactory.getLogger(PhoneticEncoderWrapper.class);
+public class PhoneticEncoderUtils {
+	// embedded class only for parameter returns
+	private static class ParsedValues {
+		public int MaxCodeLength;
+		public String EncoderString;
 
-	private final IPhoneticEncoder myEncoder;
-
-	public PhoneticEncoderWrapper(IPhoneticEncoder thePhoneticEncoder) {
-		myEncoder = thePhoneticEncoder;
+		public ParsedValues(String theString, int theMaxCode) {
+			MaxCodeLength = theMaxCode;
+			EncoderString = theString;
+		}
 	}
 
-	public IPhoneticEncoder getPhoneticEncoder() {
-		return myEncoder;
-	}
+	private static final Logger ourLog = LoggerFactory.getLogger(PhoneticEncoderUtils.class);
 
 	/**
 	 * Creates the phonetic encoder wrapper from
 	 * an input string.
 	 *
+	 * <p>
 	 * String must be in the format of...
+	 *	</p>
 	 *
 	 * PhoneticEncoderEnum(MAX_LENGTH)
+	 *
+	 * @return The IPhoneticEncoder
 	 */
-	public static PhoneticEncoderWrapper getEncoderWrapper(String theString) {
+	public static IPhoneticEncoder getEncoder(String theString) {
+		ParsedValues values = parseIntValue(theString);
+		String encoderType = values.EncoderString;
+		int encoderMaxString = values.MaxCodeLength;
+
+		IPhoneticEncoder encoder = getEncoderFromString(encoderType, encoderMaxString);
+		if (encoder != null) {
+			return encoder;
+		}
+		else {
+			ourLog.warn("Invalid phonetic param string " + theString);
+			return null;
+		}
+	}
+
+	private static ParsedValues parseIntValue(String theString) {
 		String encoderType = null;
 		int encoderMaxString = -1;
 
@@ -44,12 +68,17 @@ public class PhoneticEncoderWrapper {
 			if (theString.charAt(len - 1) == ')') {
 				encoderType = theString.substring(0, braceIndex);
 				String num = theString.substring(braceIndex + 1, len - 1);
-
 				try {
 					encoderMaxString = Integer.parseInt(num);
 				} catch (NumberFormatException ex) {
-					encoderType = null;
+					// invalid number parse error
+					encoderMaxString = -1;
+				}
+
+				if (encoderMaxString < 0) {
+					// parse error
 					ourLog.error("Invalid encoder max character length: " + num);
+					encoderType = null;
 				}
 			}
 			// else - parse error
@@ -58,14 +87,7 @@ public class PhoneticEncoderWrapper {
 			encoderType = theString;
 		}
 
-		IPhoneticEncoder encoder = getEncoderFromString(encoderType, encoderMaxString);
-		if (encoder != null) {
-			return new PhoneticEncoderWrapper(encoder);
-		}
-		else {
-			ourLog.warn("Invalid phonetic param string " + theString);
-			return null;
-		}
+		return new ParsedValues(encoderType, encoderMaxString);
 	}
 
 	private static IPhoneticEncoder getEncoderFromString(String theName, int theMax) {
@@ -124,7 +146,7 @@ public class PhoneticEncoderWrapper {
 					// we don't ever expect to be here
 					// this log message is purely for devs who update this
 					// enum, but not this method
-					ourLog.info("Unhandled PhoneticParamEnum value " + enumVal.name());
+					ourLog.error("Unhandled PhoneticParamEnum value " + enumVal.name());
 					break;
 			}
 		}

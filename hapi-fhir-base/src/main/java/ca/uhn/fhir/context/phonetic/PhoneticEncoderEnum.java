@@ -47,7 +47,7 @@ public enum PhoneticEncoderEnum {
 	/**
 	 * Do not construct this enum via constructor.
 	 *
-	 * Use PhoneticEncoderWrapper instead.
+	 * Use {@link ca.uhn.fhir.util.PhoneticEncoderUtils} instead.
 	 */
 	@Deprecated
 	PhoneticEncoderEnum(IPhoneticEncoder thePhoneticEncoder) {
