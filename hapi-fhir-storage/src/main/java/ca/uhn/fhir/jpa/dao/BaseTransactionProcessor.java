@@ -98,6 +98,7 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -153,8 +154,6 @@ public abstract class BaseTransactionProcessor {
 	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
-	@Autowired
-	private MatchResourceUrlService myMatchResourceUrlService;
 	@Autowired
 	private HapiTransactionService myHapiTransactionService;
 	@Autowired
@@ -477,19 +476,18 @@ public abstract class BaseTransactionProcessor {
 		 * we try to handle the resource with the placeholder first.
 		 */
 		Set<String> placeholderIds = new HashSet<>();
-		final List<IBase> entries = requestEntries;
-		for (IBase nextEntry : entries) {
+		for (IBase nextEntry : requestEntries) {
 			String fullUrl = myVersionAdapter.getFullUrl(nextEntry);
 			if (isNotBlank(fullUrl) && fullUrl.startsWith(URN_PREFIX)) {
 				placeholderIds.add(fullUrl);
 			}
 		}
-		entries.sort(new TransactionSorter(placeholderIds));
+		requestEntries.sort(new TransactionSorter(placeholderIds));
 
 		// perform all writes
 		prepareThenExecuteTransactionWriteOperations(theRequestDetails, theActionName,
 			transactionDetails, transactionStopWatch,
-			response, originalRequestOrder, entries);
+			response, originalRequestOrder, requestEntries);
 
 		// perform all gets
 		// (we do these last so that the gets happen on the final state of the DB;
@@ -711,11 +709,11 @@ public abstract class BaseTransactionProcessor {
 
 	/**
 	 * Searches for duplicate conditional creates and consolidates them.
-	 *
-	 * @param theEntries
 	 */
-	private void consolidateDuplicateConditionals(List<IBase> theEntries) {
+	private void consolidateDuplicateConditionals(RequestDetails theRequestDetails, String theActionName, List<IBase> theEntries) {
+		final Set<String> keysWithNoFullUrl = new HashSet<>();
 		final HashMap<String, String> keyToUuid = new HashMap<>();
+
 		for (int index = 0, originalIndex = 0; index < theEntries.size(); index++, originalIndex++) {
 			IBase nextReqEntry = theEntries.get(index);
 			IBaseResource resource = myVersionAdapter.getResource(nextReqEntry);
@@ -724,37 +722,69 @@ public abstract class BaseTransactionProcessor {
 				String entryFullUrl = myVersionAdapter.getFullUrl(nextReqEntry);
 				String requestUrl = myVersionAdapter.getEntryRequestUrl(nextReqEntry);
 				String ifNoneExist = myVersionAdapter.getEntryRequestIfNoneExist(nextReqEntry);
-				String key = verb + "|" + requestUrl + "|" + ifNoneExist;
 
 				// Conditional UPDATE
-				boolean consolidateEntry = false;
-				if ("PUT".equals(verb)) {
-					if (isNotBlank(entryFullUrl) && isNotBlank(requestUrl)) {
-						int questionMarkIndex = requestUrl.indexOf('?');
-						if (questionMarkIndex >= 0 && requestUrl.length() > (questionMarkIndex + 1)) {
-							consolidateEntry = true;
+				boolean consolidateEntryCandidate = false;
+				String conditionalUrl;
+				switch (verb) {
+					case "PUT":
+						conditionalUrl = requestUrl;
+						if (isNotBlank(requestUrl)) {
+							int questionMarkIndex = requestUrl.indexOf('?');
+							if (questionMarkIndex >= 0 && requestUrl.length() > (questionMarkIndex + 1)) {
+								consolidateEntryCandidate = true;
+							}
 						}
-					}
+						break;
+
+					// Conditional CREATE
+					case "POST":
+						conditionalUrl = ifNoneExist;
+						if (isNotBlank(ifNoneExist)) {
+							if (isBlank(entryFullUrl) || !entryFullUrl.equals(requestUrl)) {
+								consolidateEntryCandidate = true;
+							}
+						}
+						break;
+
+					default:
+						continue;
 				}
 
-				// Conditional CREATE
-				if ("POST".equals(verb)) {
-					if (isNotBlank(entryFullUrl) && isNotBlank(requestUrl) && isNotBlank(ifNoneExist)) {
-						if (!entryFullUrl.equals(requestUrl)) {
-							consolidateEntry = true;
-						}
-					}
+				if (isNotBlank(conditionalUrl) && !conditionalUrl.contains("?")) {
+					conditionalUrl = myContext.getResourceType(resource) + "?" + conditionalUrl;
 				}
 
-				if (consolidateEntry) {
-					if (!keyToUuid.containsKey(key)) {
-						keyToUuid.put(key, entryFullUrl);
+				String key = verb + "|" + conditionalUrl;
+				if (consolidateEntryCandidate) {
+					if (isBlank(entryFullUrl)) {
+						if (isNotBlank(conditionalUrl)) {
+							if (!keysWithNoFullUrl.add(key)) {
+								throw new InvalidRequestException(
+									"Unable to process " + theActionName + " - Request contains multiple anonymous entries (Bundle.entry.fullUrl not populated) with conditional URL: \"" + UrlUtil.sanitizeUrlPart(conditionalUrl) + "\". Does transaction request contain duplicates?");
+							}
+						}
 					} else {
-						ourLog.info("Discarding transaction bundle entry {} as it contained a duplicate conditional {}", originalIndex, verb);
-						theEntries.remove(index);
-						index--;
-						String existingUuid = keyToUuid.get(key);
-						replaceReferencesInEntriesWithConsolidatedUUID(theEntries, entryFullUrl, existingUuid);
+						if (!keyToUuid.containsKey(key)) {
+							keyToUuid.put(key, entryFullUrl);
+						} else {
+							String msg = "Discarding transaction bundle entry " + originalIndex + " as it contained a duplicate conditional " + verb;
+							ourLog.info(msg);
+							// Interceptor broadcast: JPA_PERFTRACE_INFO
+							if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_WARNING, myInterceptorBroadcaster, theRequestDetails)) {
+								StorageProcessingMessage message = new StorageProcessingMessage().setMessage(msg);
+								HookParams params = new HookParams()
+									.add(RequestDetails.class, theRequestDetails)
+									.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+									.add(StorageProcessingMessage.class, message);
+								CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.JPA_PERFTRACE_INFO, params);
+							}
+
+							theEntries.remove(index);
+							index--;
+							String existingUuid = keyToUuid.get(key);
+							replaceReferencesInEntriesWithConsolidatedUUID(theEntries, entryFullUrl, existingUuid);
+						}
 					}
 				}
 			}
@@ -869,7 +899,7 @@ public abstract class BaseTransactionProcessor {
 			/*
 			 * Look for duplicate conditional creates and consolidate them
 			 */
-			consolidateDuplicateConditionals(theEntries);
+			consolidateDuplicateConditionals(theRequest, theActionName, theEntries);
 
 			/*
 			 * Loop through the request and process any entries of type
@@ -894,6 +924,16 @@ public abstract class BaseTransactionProcessor {
 				switch (verb) {
 					case "POST": {
 						// CREATE
+						/*
+						 * To preserve existing functionality,
+						 * we will only verify that the request url is
+						 * valid if it's provided at all.
+						 * Otherwise, we'll ignore it
+						 */
+						String url = myVersionAdapter.getEntryRequestUrl(nextReqEntry);
+						if (isNotBlank(url)) {
+							extractAndVerifyTransactionUrlForEntry(nextReqEntry, verb);
+						}
 						validateResourcePresent(res, order, verb);
 						@SuppressWarnings("rawtypes")
 						IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
@@ -920,7 +960,7 @@ public abstract class BaseTransactionProcessor {
 					}
 					case "DELETE": {
 						// DELETE
-						String url = extractTransactionUrlOrThrowException(nextReqEntry, verb);
+						String url = extractAndVerifyTransactionUrlForEntry(nextReqEntry, verb);
 						UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
 						IFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb, url);
 						int status = Constants.STATUS_HTTP_204_NO_CONTENT;
@@ -959,7 +999,7 @@ public abstract class BaseTransactionProcessor {
 						@SuppressWarnings("rawtypes")
 						IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
 
-						String url = extractTransactionUrlOrThrowException(nextReqEntry, verb);
+						String url = extractAndVerifyTransactionUrlForEntry(nextReqEntry, verb);
 
 						DaoMethodOutcome outcome;
 						UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
@@ -1003,7 +1043,7 @@ public abstract class BaseTransactionProcessor {
 						// PATCH
 						validateResourcePresent(res, order, verb);
 
-						String url = extractTransactionUrlOrThrowException(nextReqEntry, verb);
+						String url = extractAndVerifyTransactionUrlForEntry(nextReqEntry, verb);
 						UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
 
 						String matchUrl = toMatchUrl(nextReqEntry);
@@ -1543,6 +1583,58 @@ public abstract class BaseTransactionProcessor {
 		myContext = theContext;
 	}
 
+	/**
+	 * Extracts the transaction url from the entry and verifies it's:
+	 * * not null or bloack
+	 * * is a relative url matching the resourceType it is about
+	 *
+	 * Returns the transaction url (or throws an InvalidRequestException if url is not valid)
+	 */
+	private String extractAndVerifyTransactionUrlForEntry(IBase theEntry, String theVerb) {
+		String url = extractTransactionUrlOrThrowException(theEntry, theVerb);
+
+		if (!isValidResourceTypeUrl(url)) {
+			ourLog.debug("Invalid url. Should begin with a resource type: {}", url);
+			String msg = myContext.getLocalizer().getMessage(BaseStorageDao.class, "transactionInvalidUrl", theVerb, url);
+			throw new InvalidRequestException(msg);
+		}
+		return url;
+	}
+
+	/**
+	 * Returns true if the provided url is a valid entry request.url.
+	 *
+	 * This means:
+	 * a) not an absolute url (does not start with http/https)
+	 * b) starts with either a ResourceType or /ResourceType
+	 */
+	private boolean isValidResourceTypeUrl(@Nonnull String theUrl) {
+		if (UrlUtil.isAbsolute(theUrl)) {
+			return false;
+		} else {
+			int queryStringIndex = theUrl.indexOf("?");
+			String url;
+			if (queryStringIndex > 0) {
+				url = theUrl.substring(0, theUrl.indexOf("?"));
+			} else {
+				url = theUrl;
+			}
+			String[] parts;
+			if (url.startsWith("/")) {
+				parts = url.substring(1).split("/");
+			} else {
+				parts = url.split("/");
+			}
+			Set<String> allResourceTypes = myContext.getResourceTypes();
+
+			return allResourceTypes.contains(parts[0]);
+		}
+	}
+
+	/**
+	 * Extracts the transaction url from the entry and verifies that it is not null/blank
+	 * and returns it
+	 */
 	private String extractTransactionUrlOrThrowException(IBase nextEntry, String verb) {
 		String url = myVersionAdapter.getEntryRequestUrl(nextEntry);
 		if (isBlank(url)) {

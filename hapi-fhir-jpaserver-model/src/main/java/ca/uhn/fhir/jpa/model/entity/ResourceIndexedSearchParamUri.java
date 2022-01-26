@@ -107,9 +107,19 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		myHashIdentity = source.myHashIdentity;
 	}
 
+	@Override
+	public void clearHashes() {
+		myHashIdentity = null;
+		myHashUri = null;
+	}
+
 
 	@Override
 	public void calculateHashes() {
+		if (myHashIdentity != null || myHashUri != null) {
+			return;
+		}
+
 		String resourceType = getResourceType();
 		String paramName = getParamName();
 		String uri = getUri();

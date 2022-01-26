@@ -301,21 +301,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 
-		boolean serverAssignedId;
-		if (isNotBlank(theResource.getIdElement().getIdPart())) {
-			if (theResource.getUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED) == Boolean.TRUE) {
-				createForcedIdIfNeeded(entity, theResource.getIdElement(), true);
-				serverAssignedId = true;
-			} else {
-				validateResourceIdCreation(theResource, theRequest);
-				boolean createForPureNumericIds = getConfig().getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ALPHANUMERIC;
-				createForcedIdIfNeeded(entity, theResource.getIdElement(), createForPureNumericIds);
-				serverAssignedId = false;
-			}
-		} else {
-			serverAssignedId = true;
-		}
-
 		// Notify interceptors
 		if (theRequest != null) {
 			ActionRequestDetails requestDetails = new ActionRequestDetails(theRequest, getContext(), theResource);
@@ -330,40 +315,53 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			.add(TransactionDetails.class, theTransactionDetails);
 		doCallHooks(theTransactionDetails, theRequest, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, hookParams);
 
+		String resourceIdBeforeStorage = theResource.getIdElement().getIdPart();
+		boolean resourceHadIdBeforeStorage = isNotBlank(resourceIdBeforeStorage);
+		boolean resourceIdWasServerAssigned = theResource.getUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED) == Boolean.TRUE;
+		if (resourceHadIdBeforeStorage && !resourceIdWasServerAssigned) {
+			validateResourceIdCreation(theResource, theRequest);
+		}
+
 		// Perform actual DB update
 		ResourceTable updatedEntity = updateEntity(theRequest, theResource, entity, null, thePerformIndexing, false, theTransactionDetails, false, thePerformIndexing);
 
-		IIdType id = myFhirContext.getVersion().newIdType().setValue(updatedEntity.getIdDt().toUnqualifiedVersionless().getValue());
+		// Store the resource forced ID if necessary
 		ResourcePersistentId persistentId = new ResourcePersistentId(updatedEntity.getResourceId());
-		theTransactionDetails.addResolvedResourceId(id, persistentId);
-		if (entity.getForcedId() != null) {
-			myIdHelperService.addResolvedPidToForcedId(persistentId, theRequestPartitionId, updatedEntity.getResourceType(), updatedEntity.getForcedId().getForcedId(), updatedEntity.getDeleted());
-		}
-
-		theResource.setId(entity.getIdDt());
-
-		if (serverAssignedId) {
+		if (resourceHadIdBeforeStorage) {
+			if (resourceIdWasServerAssigned) {
+				boolean createForPureNumericIds = true;
+				createForcedIdIfNeeded(entity, resourceIdBeforeStorage, createForPureNumericIds, persistentId, theRequestPartitionId);
+			} else {
+				boolean createForPureNumericIds = getConfig().getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ALPHANUMERIC;
+				createForcedIdIfNeeded(entity, resourceIdBeforeStorage, createForPureNumericIds, persistentId, theRequestPartitionId);
+			}
+		} else {
 			switch (getConfig().getResourceClientIdStrategy()) {
 				case NOT_ALLOWED:
 				case ALPHANUMERIC:
 					break;
 				case ANY:
-					ForcedId forcedId = createForcedIdIfNeeded(updatedEntity, theResource.getIdElement(), true);
-					if (forcedId != null) {
-						myForcedIdDao.save(forcedId);
-					}
+					boolean createForPureNumericIds = true;
+					createForcedIdIfNeeded(updatedEntity, theResource.getIdElement().getIdPart(), createForPureNumericIds, persistentId, theRequestPartitionId);
+					// for client ID mode ANY, we will always have a forced ID. If we ever
+					// stop populating the transient forced ID be warned that we use it
+					// (and expect it to be set correctly) farther below.
+					assert updatedEntity.getTransientForcedId() != null;
 					break;
 			}
 		}
 
-		ResourcePersistentId resourcePersistentId = new ResourcePersistentId(entity.getResourceId());
-		resourcePersistentId.setAssociatedResourceId(entity.getIdType(myFhirContext));
+		// Populate the resource with it's actual final stored ID from the entity
+		theResource.setId(entity.getIdDt());
 
-		theTransactionDetails.addResolvedResourceId(resourcePersistentId.getAssociatedResourceId(), resourcePersistentId);
+		// Pre-cache the resource ID
+		persistentId.setAssociatedResourceId(entity.getIdType(myFhirContext));
+		myIdHelperService.addResolvedPidToForcedId(persistentId, theRequestPartitionId, getResourceName(), entity.getTransientForcedId(), null);
+		theTransactionDetails.addResolvedResourceId(persistentId.getAssociatedResourceId(), persistentId);
 
 		// Pre-cache the match URL
 		if (theIfNoneExist != null) {
-			myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, getResourceName(), theIfNoneExist, resourcePersistentId);
+			myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, getResourceName(), theIfNoneExist, persistentId);
 		}
 
 		// Update the version/last updated in the resource so that interceptors get
@@ -392,14 +390,42 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulCreate", outcome.getId(), w.getMillisAndRestart());
 		outcome.setOperationOutcome(createInfoOperationOutcome(msg));
 
-		String forcedId = null;
-		if (updatedEntity.getForcedId() != null) {
-			forcedId = updatedEntity.getForcedId().getForcedId();
-		}
-		myIdHelperService.addResolvedPidToForcedId(persistentId, theRequestPartitionId, getResourceName(), forcedId, null);
-
 		ourLog.debug(msg);
 		return outcome;
+	}
+
+	private void createForcedIdIfNeeded(ResourceTable theEntity, String theResourceId, boolean theCreateForPureNumericIds, ResourcePersistentId thePersistentId, RequestPartitionId theRequestPartitionId) {
+		if (isNotBlank(theResourceId) && theEntity.getForcedId() == null) {
+			if (theCreateForPureNumericIds || !IdHelperService.isValidPid(theResourceId)) {
+				ForcedId forcedId = new ForcedId();
+				forcedId.setResourceType(theEntity.getResourceType());
+				forcedId.setForcedId(theResourceId);
+				forcedId.setResource(theEntity);
+				forcedId.setPartitionId(theEntity.getPartitionId());
+
+				/*
+				 * As of Hibernate 5.6.2, assigning the forced ID to the
+				 * resource table causes an extra update to happen, even
+				 * though the ResourceTable entity isn't actually changed
+				 * (there is a @OneToOne reference on ResourceTable to the
+				 * ForcedId table, but the actual column is on the ForcedId
+				 * table so it doesn't actually make sense to update the table
+				 * when this is set). But to work around that we avoid
+				 * actually assigning ResourceTable#myForcedId here.
+				 *
+				 * It's conceivable they may fix this in the future, or
+				 * they may not.
+				 *
+				 * If you want to try assigning the forced it to the resource
+				 * entity (by calling ResourceTable#setForcedId) try running
+				 * the tests FhirResourceDaoR4QueryCountTest to verify that
+				 * nothing has broken as a result.
+				 * JA 20220121
+				 */
+				theEntity.setTransientForcedId(forcedId.getForcedId());
+				myForcedIdDao.save(forcedId);
+			}
+		}
 	}
 
 	void validateResourceIdCreation(T theResource, RequestDetails theRequest) {
@@ -461,31 +487,61 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		});
 	}
 
+	/**
+	 * Creates a base method outcome for a delete request for the provided ID.
+	 *
+	 * Additional information may be set on the outcome.
+	 *
+	 * @param theId - the id of the object being deleted. Eg: Patient/123
+	 */
+	private DaoMethodOutcome createMethodOutcomeForDelete(String theId) {
+		DaoMethodOutcome outcome = new DaoMethodOutcome();
+
+		IIdType id = getContext().getVersion().newIdType();
+		id.setValue(theId);
+		outcome.setId(id);
+
+		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(getContext());
+		String message = getContext().getLocalizer().getMessage(BaseStorageDao.class, "successfulDeletes", 1, 0);
+		String severity = "information";
+		String code = "informational";
+		OperationOutcomeUtil.addIssue(getContext(), oo, severity, message, null, code);
+		outcome.setOperationOutcome(oo);
+
+		return outcome;
+	}
+
 	@Override
-	public DaoMethodOutcome delete(IIdType theId, DeleteConflictList theDeleteConflicts, RequestDetails theRequestDetails, @Nonnull TransactionDetails theTransactionDetails) {
+	public DaoMethodOutcome delete(IIdType theId,
+											 DeleteConflictList theDeleteConflicts,
+											 RequestDetails theRequestDetails,
+											 @Nonnull TransactionDetails theTransactionDetails) {
 		validateIdPresentForDelete(theId);
 		validateDeleteEnabled();
 
-		final ResourceTable entity = readEntityLatestVersion(theId, theRequestDetails, theTransactionDetails);
+		final ResourceTable entity;
+		try {
+			entity = readEntityLatestVersion(theId, theRequestDetails, theTransactionDetails);
+		} catch (ResourceNotFoundException ex) {
+			// we don't want to throw 404s.
+			// if not found, return an outcome anyways.
+			// Because no object actually existed, we'll
+			// just set the id and nothing else
+			DaoMethodOutcome outcome = createMethodOutcomeForDelete(theId.getValue());
+			return outcome;
+		}
+
 		if (theId.hasVersionIdPart() && Long.parseLong(theId.getVersionIdPart()) != entity.getVersion()) {
 			throw new ResourceVersionConflictException("Trying to delete " + theId + " but this is not the current version");
 		}
 
 		// Don't delete again if it's already deleted
 		if (entity.getDeleted() != null) {
-			DaoMethodOutcome outcome = new DaoMethodOutcome().setPersistentId(new ResourcePersistentId(entity.getResourceId()));
+			DaoMethodOutcome outcome = createMethodOutcomeForDelete(entity.getIdDt().getValue());
+
+			// used to exist, so we'll set the persistent id
+			outcome.setPersistentId(new ResourcePersistentId(entity.getResourceId()));
 			outcome.setEntity(entity);
-
-			IIdType id = getContext().getVersion().newIdType();
-			id.setValue(entity.getIdDt().getValue());
-			outcome.setId(id);
-
-			IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(getContext());
-			String message = getContext().getLocalizer().getMessage(BaseStorageDao.class, "successfulDeletes", 1, 0);
-			String severity = "information";
-			String code = "informational";
-			OperationOutcomeUtil.addIssue(getContext(), oo, severity, message, null, code);
-			outcome.setOperationOutcome(oo);
 
 			return outcome;
 		}

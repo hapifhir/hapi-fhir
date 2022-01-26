@@ -74,6 +74,8 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 	private String myPayloadSearchCriteria;
 	@JsonProperty("partitionId")
 	private Integer myPartitionId;
+	@JsonProperty("crossPartitionEnabled")
+	private boolean myCrossPartitionEnabled;
 	@JsonProperty("sendDeleteMessages")
 	private boolean mySendDeleteMessages;
 
@@ -239,6 +241,14 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 		myPartitionId = thePartitionId;
 	}
 
+	public boolean getCrossPartitionEnabled() {
+		return myCrossPartitionEnabled;
+	}
+
+	public void setCrossPartitionEnabled(boolean myCrossPartitionEnabled) {
+		this.myCrossPartitionEnabled = myCrossPartitionEnabled;
+	}
+
 	/**
 	 * For now we're using the R4 triggerdefinition, but this
 	 * may change in the future when things stabilize
@@ -247,7 +257,9 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 		return myTrigger;
 	}
 
-	public boolean getSendDeleteMessages() { return mySendDeleteMessages; }
+	public boolean getSendDeleteMessages() {
+		return mySendDeleteMessages;
+	}
 
 	public void setSendDeleteMessages(boolean theSendDeleteMessages) {
 		mySendDeleteMessages = theSendDeleteMessages;

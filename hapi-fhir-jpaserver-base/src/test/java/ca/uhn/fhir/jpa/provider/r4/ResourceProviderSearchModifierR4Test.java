@@ -1,12 +1,15 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -44,7 +47,9 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
 		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
-		
+
+		myModelConfig.setIndexIdentifierOfType(new ModelConfig().isIndexIdentifierOfType());
+
 		myClient.unregisterInterceptor(myCapturingInterceptor);
 	}
 
@@ -199,7 +204,75 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		assertEquals(obsList.get(5).toString(), ids.get(3));
 	}
 
+	@Test
+	public void testSearch_OfType_PartialBlocked() {
+		myModelConfig.setIndexIdentifierOfType(true);
 
+		try {
+			String uri = ourServerBase + "/Patient?identifier:of-type=A";
+			myClient.search().byUrl(uri).execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("HTTP 400 Bad Request: Invalid parameter value for :of-type query", e.getMessage());
+		}
+
+		try {
+			String uri = ourServerBase + "/Patient?identifier:of-type=A|B";
+			myClient.search().byUrl(uri).execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("HTTP 400 Bad Request: Invalid parameter value for :of-type query", e.getMessage());
+		}
+
+		try {
+			String uri = ourServerBase + "/Patient?identifier:of-type=A|B|";
+			myClient.search().byUrl(uri).execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("HTTP 400 Bad Request: Invalid parameter value for :of-type query", e.getMessage());
+		}
+
+		try {
+			String uri = ourServerBase + "/Patient?identifier:of-type=|B|C";
+			myClient.search().byUrl(uri).execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("HTTP 400 Bad Request: Invalid parameter value for :of-type query", e.getMessage());
+		}
+
+		try {
+			String uri = ourServerBase + "/Patient?identifier:of-type=||C";
+			myClient.search().byUrl(uri).execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("HTTP 400 Bad Request: Invalid parameter value for :of-type query", e.getMessage());
+		}
+
+		try {
+			String uri = ourServerBase + "/Patient?identifier:of-type=|B|";
+			myClient.search().byUrl(uri).execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("HTTP 400 Bad Request: Invalid parameter value for :of-type query", e.getMessage());
+		}
+
+		try {
+			String uri = ourServerBase + "/Patient?identifier:of-type=A||";
+			myClient.search().byUrl(uri).execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("HTTP 400 Bad Request: Invalid parameter value for :of-type query", e.getMessage());
+		}
+
+		try {
+			String uri = ourServerBase + "/Patient?identifier:of-type=||";
+			myClient.search().byUrl(uri).execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("HTTP 400 Bad Request: Invalid parameter value for :of-type query", e.getMessage());
+		}
+
+	}
 	
 	private List<String> searchAndReturnUnqualifiedVersionlessIdValues(String uri) throws IOException {
 		List<String> ids;

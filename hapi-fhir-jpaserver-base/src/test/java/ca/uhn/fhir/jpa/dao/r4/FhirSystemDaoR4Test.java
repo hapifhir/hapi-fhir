@@ -49,7 +49,6 @@ import org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.CarePlan;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Communication;
 import org.hl7.fhir.r4.model.Condition;
@@ -1231,7 +1230,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		ourLog.info("Patient TEMP UUID: {}", patient.getId());
 		String s = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(transactionBundle);
 		System.out.println(s);
-		Bundle outcome= mySystemDao.transaction(null, transactionBundle);
+		Bundle outcome = mySystemDao.transaction(null, transactionBundle);
 		String patientLocation = outcome.getEntry().get(0).getResponse().getLocation();
 		assertThat(patientLocation, matchesPattern("Patient/[a-z0-9-]+/_history/1"));
 		String observationLocation = outcome.getEntry().get(1).getResponse().getLocation();
@@ -1263,8 +1262,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		try {
 			mySystemDao.transaction(null, transactionBundle);
 			fail();
-		}  catch (PreconditionFailedException e) {
-			assertThat(e.getMessage(), is(equalTo("Invalid conditional URL \"Patient?identifier=http://example.com/mrns|" + conditionalUrlIdentifierValue +"\". The given resource is not matched by this URL.")));
+		} catch (PreconditionFailedException e) {
+			assertThat(e.getMessage(), is(equalTo("Invalid conditional URL \"Patient?identifier=http://example.com/mrns|" + conditionalUrlIdentifierValue + "\". The given resource is not matched by this URL.")));
 		}
 	}
 
@@ -1737,6 +1736,39 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertThat(responseTypes.toString(), responseTypes, contains("Practitioner", "Observation", "Observation"));
 	}
 
+	@Test
+	public void testTransactionWithDuplicateConditionalUpdateOnlyCreatesOne() {
+		Bundle inputBundle = new Bundle();
+		inputBundle.setType(Bundle.BundleType.TRANSACTION);
+
+		Encounter enc1 = new Encounter();
+		enc1.addIdentifier().setSystem("urn:foo").setValue("12345");
+		enc1.getClass_().setDisplay("ENC1");
+		inputBundle
+			.addEntry()
+			.setResource(enc1)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("Encounter?identifier=urn:foo|12345");
+		Encounter enc2 = new Encounter();
+		enc2.addIdentifier().setSystem("urn:foo").setValue("12345");
+		enc2.getClass_().setDisplay("ENC2");
+		inputBundle
+			.addEntry()
+			.setResource(enc2)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("Encounter?identifier=urn:foo|12345");
+
+		try {
+			mySystemDao.transaction(mySrd, inputBundle);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Unable to process Transaction - Request contains multiple anonymous entries (Bundle.entry.fullUrl not populated) with conditional URL: \"Encounter?identifier=urn:foo|12345\". Does transaction request contain duplicates?", e.getMessage());
+		}
+
+	}
+
 
 	@Test
 	public void testTransactionCreateInlineMatchUrlWithTwoMatches() {
@@ -1982,9 +2014,11 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setIfNoneExist("Patient?identifier=urn%3Asystem%7C" + methodName);
 
-		mySystemDao.transaction(mySrd, request);
-		assertEquals(1, logAllResources());
-		assertEquals(1, logAllResourceVersions());
+		try {
+			mySystemDao.transaction(mySrd, request);
+		} catch (InvalidRequestException e) {
+			assertEquals("Unable to process Transaction - Request contains multiple anonymous entries (Bundle.entry.fullUrl not populated) with conditional URL: \"Patient?identifier=urn%3Asystem%7CtestTransactionCreateWithDuplicateMatchUrl01\". Does transaction request contain duplicates?", e.getMessage());
+		}
 	}
 
 	@Test
@@ -2094,29 +2128,14 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		request.addEntry()
 			.setResource(o)
-			.getRequest().setUrl("A").setMethod(HTTPVerb.PUT);
+			.getRequest().setUrl("Observation").setMethod(HTTPVerb.PUT);
 
 		try {
 			mySystemDao.transaction(mySrd, request);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Invalid match URL[Observation?A] - URL has no search parameters", e.getMessage());
+			assertEquals("Invalid match URL[Observation?Observation] - URL has no search parameters", e.getMessage());
 		}
-	}
-
-	@Test
-	public void testTransactionCreateWithPutUsingAbsoluteUrl() {
-		String methodName = "testTransactionCreateWithPutUsingAbsoluteUrl";
-		Bundle request = new Bundle();
-		request.setType(BundleType.TRANSACTION);
-
-		Patient p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.PUT).setUrl("http://localhost/server/base/Patient/" + methodName);
-
-		mySystemDao.transaction(mySrd, request);
-
-		myPatientDao.read(new IdType("Patient/" + methodName), mySrd);
 	}
 
 	@Test
@@ -2678,37 +2697,12 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			.setMethod(HTTPVerb.POST)
 			.setIfNoneExist("Encounter?identifier=urn:foo|12345");
 
-		mySystemDao.transaction(mySrd, inputBundle);
-		assertEquals(1, logAllResources());
-		assertEquals(1, logAllResourceVersions());
-	}
-
-	@Test
-	public void testTransactionDoubleConditionalUpdateOnlyCreatesOne() {
-		Bundle inputBundle = new Bundle();
-		inputBundle.setType(Bundle.BundleType.TRANSACTION);
-
-		Encounter enc1 = new Encounter();
-		enc1.addIdentifier().setSystem("urn:foo").setValue("12345");
-		inputBundle
-			.addEntry()
-			.setResource(enc1)
-			.getRequest()
-			.setMethod(HTTPVerb.PUT)
-			.setUrl("Encounter?identifier=urn:foo|12345");
-		Encounter enc2 = new Encounter();
-		enc2.addIdentifier().setSystem("urn:foo").setValue("12345");
-		inputBundle
-			.addEntry()
-			.setResource(enc2)
-			.getRequest()
-			.setMethod(HTTPVerb.PUT)
-			.setUrl("Encounter?identifier=urn:foo|12345");
-
-		mySystemDao.transaction(mySrd, inputBundle);
-
-		assertEquals(1, logAllResources());
-		assertEquals(1, logAllResourceVersions());
+		try {
+			mySystemDao.transaction(mySrd, inputBundle);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Unable to process Transaction - Request contains multiple anonymous entries (Bundle.entry.fullUrl not populated) with conditional URL: \"Encounter?identifier=urn:foo|12345\". Does transaction request contain duplicates?", e.getMessage());
+		}
 	}
 
 	@Test
@@ -3461,8 +3455,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			assertThat(e.getMessage(), containsString("Resource type 'Practicioner' is not valid for this path"));
 		}
 
-		runInTransaction(()->assertThat(myResourceTableDao.findAll(), empty()));
-		runInTransaction(()->assertThat(myResourceIndexedSearchParamStringDao.findAll(), empty()));
+		runInTransaction(() -> assertThat(myResourceTableDao.findAll(), empty()));
+		runInTransaction(() -> assertThat(myResourceIndexedSearchParamStringDao.findAll(), empty()));
 
 	}
 
@@ -4084,7 +4078,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		Patient p = new Patient();
 		p.setActive(true);
 		p.setId(IdType.newRandomUuid());
-		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl(p.getId());
+		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient/" + p.getId());
 
 		Observation o = new Observation();
 		o.getCode().setText("Some Observation");
@@ -4164,7 +4158,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		Patient p = new Patient();
 		p.setActive(true);
 		p.setId(IdType.newRandomUuid());
-		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl(p.getId());
+		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient/" + p.getId());
 
 		Observation o = new Observation();
 		o.getCode().setText("Some Observation");

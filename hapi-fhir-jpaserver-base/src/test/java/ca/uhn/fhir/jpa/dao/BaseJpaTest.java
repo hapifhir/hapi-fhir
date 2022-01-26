@@ -15,6 +15,7 @@ import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboTokensNonUniqueDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamDateDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamStringDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
@@ -25,6 +26,7 @@ import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
@@ -48,6 +50,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.test.BaseTest;
+import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import ca.uhn.fhir.test.utilities.LoggingExtension;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
@@ -79,6 +82,10 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.batch.core.repository.dao.JobExecutionDao;
+import org.springframework.batch.core.repository.dao.JobInstanceDao;
+import org.springframework.batch.core.repository.dao.MapJobExecutionDao;
+import org.springframework.batch.core.repository.dao.MapJobInstanceDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.orm.jpa.JpaTransactionManager;
@@ -94,6 +101,7 @@ import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -168,6 +176,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	@Autowired
 	protected IResourceIndexedSearchParamTokenDao myResourceIndexedSearchParamTokenDao;
 	@Autowired
+	protected IResourceIndexedSearchParamStringDao myResourceIndexedSearchParamStringDao;
+	@Autowired
 	protected IResourceIndexedSearchParamDateDao myResourceIndexedSearchParamDateDao;
 	@Autowired
 	protected IResourceIndexedComboTokensNonUniqueDao myResourceIndexedComboTokensNonUniqueDao;
@@ -190,6 +200,21 @@ public abstract class BaseJpaTest extends BaseTest {
 	private IForcedIdDao myForcedIdDao;
 	@Autowired(required = false)
 	protected IFulltextSearchSvc myFulltestSearchSvc;
+	@Autowired(required = false)
+	protected BatchJobHelper myBatchJobHelper;
+	@Autowired(required = false)
+	private JobExecutionDao myMapJobExecutionDao;
+	@Autowired(required = false)
+	private JobInstanceDao myMapJobInstanceDao;
+
+	@AfterEach
+	public void afterEnsureNoStaleBatchJobs() {
+		if (myMapJobInstanceDao != null) {
+			myBatchJobHelper.ensureNoRunningJobs();
+			ProxyUtil.getSingletonTarget(myMapJobExecutionDao, MapJobExecutionDao.class).clear();
+			ProxyUtil.getSingletonTarget(myMapJobInstanceDao, MapJobInstanceDao.class).clear();
+		}
+	}
 
 	@AfterEach
 	public void afterPerformCleanup() {
@@ -343,6 +368,19 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected void logAllTokenIndexes() {
 		runInTransaction(() -> {
 			ourLog.info("Token indexes:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+		});
+	}
+
+	protected void logAllStringIndexes(String... theParamNames) {
+		String messageSuffix = theParamNames.length > 0 ? " containing " + Arrays.asList(theParamNames) : "";
+		runInTransaction(() -> {
+			String message = myResourceIndexedSearchParamStringDao
+				.findAll()
+				.stream()
+				.filter(t->theParamNames.length == 0 ? true : Arrays.asList(theParamNames).contains(t.getParamName()))
+				.map(t -> t.toString())
+				.collect(Collectors.joining("\n * "));
+			ourLog.info("String indexes{}:\n * {}", messageSuffix, message);
 		});
 	}
 
@@ -578,7 +616,7 @@ public abstract class BaseJpaTest extends BaseTest {
 
 	protected int logAllResourceVersions() {
 		return runInTransaction(() -> {
-			List<ResourceTable> resources = myResourceTableDao.findAll();
+			List<ResourceHistoryTable> resources = myResourceHistoryTableDao.findAll();
 			ourLog.info("Resources Versions:\n * {}", resources.stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 			return resources.size();
 		});

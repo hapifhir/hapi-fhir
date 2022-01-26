@@ -178,6 +178,10 @@ public class MemoryCacheService {
 		TAG_DEFINITION(TagDefinitionCacheKey.class),
 		RESOURCE_LOOKUP(String.class),
 		FORCED_ID_TO_PID(String.class),
+		/**
+		 * Key type: {@literal Long}
+		 * Value type: {@literal Optional<String>}
+		 */
 		PID_TO_FORCED_ID(Long.class),
 		CONCEPT_TRANSLATION(TranslationQuery.class),
 		MATCH_URL(String.class),

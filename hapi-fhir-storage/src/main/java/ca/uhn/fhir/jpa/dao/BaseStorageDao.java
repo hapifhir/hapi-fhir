@@ -259,7 +259,7 @@ public abstract class BaseStorageDao {
 	 * <p>
 	 * We only do this if thePerformIndexing is true because if it's false, that means
 	 * we're in a FHIR transaction during the first phase of write operation processing,
-	 * meaning that the versions of other resources may not have need updated yet. For example
+	 * meaning that the versions of other resources may not have need updatd yet. For example
 	 * we're about to store an Observation with a reference to a Patient, and that Patient
 	 * is also being updated in the same transaction, during the first "no index" phase,
 	 * the Patient will not yet have its version number incremented, so it would be wrong
