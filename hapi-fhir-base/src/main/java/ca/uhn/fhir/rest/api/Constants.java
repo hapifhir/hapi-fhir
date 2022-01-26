@@ -290,6 +290,7 @@ public class Constants {
 	public static final String SUBSCRIPTION_MULTITYPE_SUFFIX = "]";
 	public static final String SUBSCRIPTION_MULTITYPE_STAR = "*";
 	public static final String SUBSCRIPTION_STAR_CRITERIA = SUBSCRIPTION_MULTITYPE_PREFIX + SUBSCRIPTION_MULTITYPE_STAR + SUBSCRIPTION_MULTITYPE_SUFFIX;
+	public static final String INCLUDE_STAR = "*";
 
 	static {
 		CHARSET_UTF8 = StandardCharsets.UTF_8;
