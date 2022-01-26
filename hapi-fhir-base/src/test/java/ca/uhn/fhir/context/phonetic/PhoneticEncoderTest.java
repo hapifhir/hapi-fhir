@@ -1,6 +1,6 @@
 package ca.uhn.fhir.context.phonetic;
 
-import ca.uhn.fhir.util.PhoneticEncoderUtils;
+import ca.uhn.fhir.util.PhoneticEncoderUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -23,7 +23,7 @@ public class PhoneticEncoderTest {
 	@ParameterizedTest
 	@EnumSource(PhoneticEncoderEnum.class)
 	public void testEncodeAddress(PhoneticEncoderEnum thePhoneticEncoderEnum) {
-		IPhoneticEncoder encoder = PhoneticEncoderUtils.getEncoder(thePhoneticEncoderEnum.name());
+		IPhoneticEncoder encoder = PhoneticEncoderUtil.getEncoder(thePhoneticEncoderEnum.name());
 		Assertions.assertNotNull(encoder);
 		String encoded = encoder.encode(ADDRESS_LINE);
 		ourLog.info("{}: {}", thePhoneticEncoderEnum.name(), encoded);

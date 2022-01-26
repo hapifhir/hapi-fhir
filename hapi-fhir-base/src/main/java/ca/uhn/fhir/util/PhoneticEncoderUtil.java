@@ -17,19 +17,31 @@ import org.apache.commons.lang3.EnumUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PhoneticEncoderUtils {
+public final class PhoneticEncoderUtil {
+
 	// embedded class only for parameter returns
 	private static class ParsedValues {
-		public int MaxCodeLength;
-		public String EncoderString;
+		private final Integer maxCodeLength;
+		private final String encoderString;
 
-		public ParsedValues(String theString, int theMaxCode) {
-			MaxCodeLength = theMaxCode;
-			EncoderString = theString;
+		public ParsedValues(String theString, Integer theMaxCode) {
+			maxCodeLength = theMaxCode;
+			encoderString = theString;
+		}
+
+		public Integer getMaxCodeLength() {
+			return maxCodeLength;
+		}
+
+		public String getEncoderString() {
+			return encoderString;
 		}
 	}
 
-	private static final Logger ourLog = LoggerFactory.getLogger(PhoneticEncoderUtils.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(PhoneticEncoderUtil.class);
+
+	private PhoneticEncoderUtil() {
+	}
 
 	/**
 	 * Creates the phonetic encoder wrapper from
@@ -45,8 +57,8 @@ public class PhoneticEncoderUtils {
 	 */
 	public static IPhoneticEncoder getEncoder(String theString) {
 		ParsedValues values = parseIntValue(theString);
-		String encoderType = values.EncoderString;
-		int encoderMaxString = values.MaxCodeLength;
+		String encoderType = values.getEncoderString();
+		Integer encoderMaxString = values.getMaxCodeLength();
 
 		IPhoneticEncoder encoder = getEncoderFromString(encoderType, encoderMaxString);
 		if (encoder != null) {
@@ -60,7 +72,7 @@ public class PhoneticEncoderUtils {
 
 	private static ParsedValues parseIntValue(String theString) {
 		String encoderType = null;
-		int encoderMaxString = -1;
+		Integer encoderMaxString = null;
 
 		int braceIndex = theString.indexOf("(");
 		if (braceIndex != -1) {
@@ -72,10 +84,9 @@ public class PhoneticEncoderUtils {
 					encoderMaxString = Integer.parseInt(num);
 				} catch (NumberFormatException ex) {
 					// invalid number parse error
-					encoderMaxString = -1;
 				}
 
-				if (encoderMaxString < 0) {
+				if (encoderMaxString == null) {
 					// parse error
 					ourLog.error("Invalid encoder max character length: " + num);
 					encoderType = null;
@@ -90,7 +101,7 @@ public class PhoneticEncoderUtils {
 		return new ParsedValues(encoderType, encoderMaxString);
 	}
 
-	private static IPhoneticEncoder getEncoderFromString(String theName, int theMax) {
+	private static IPhoneticEncoder getEncoderFromString(String theName, Integer theMax) {
 		IPhoneticEncoder encoder = null;
 		PhoneticEncoderEnum enumVal = EnumUtils.getEnum(PhoneticEncoderEnum.class, theName);
 
@@ -110,7 +121,7 @@ public class PhoneticEncoderUtils {
 					break;
 				case DOUBLE_METAPHONE:
 					DoubleMetaphone doubleMetaphone = new DoubleMetaphone();
-					if (theMax >= 0) {
+					if (theMax != null) {
 						doubleMetaphone.setMaxCodeLen(theMax);
 					}
 					encoder = new ApacheEncoder(theName, doubleMetaphone);
@@ -121,7 +132,7 @@ public class PhoneticEncoderUtils {
 					break;
 				case METAPHONE:
 					Metaphone metaphone = new Metaphone();
-					if (theMax >= 0) {
+					if (theMax != null) {
 						metaphone.setMaxCodeLen(theMax);
 					}
 					encoder = new ApacheEncoder(theName, metaphone);

@@ -16,9 +16,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class PhoneticEncoderUtilsTests {
+public class PhoneticEncoderUtilTests {
 
-	private final Logger myLogger  = (Logger) LoggerFactory.getLogger(PhoneticEncoderUtils.class);
+	private final Logger myLogger  = (Logger) LoggerFactory.getLogger(PhoneticEncoderUtil.class);
 
 	private ListAppender<ILoggingEvent> myListAppender;
 
@@ -35,7 +35,7 @@ public class PhoneticEncoderUtilsTests {
 		String enumString = enumVal.name() + "(" + num + ")";
 
 		// test
-		IPhoneticEncoder encoder = PhoneticEncoderUtils.getEncoder(enumString);
+		IPhoneticEncoder encoder = PhoneticEncoderUtil.getEncoder(enumString);
 
 		assertNotNull(encoder);
 		assertEquals(enumVal.name(), encoder.name());
@@ -45,7 +45,7 @@ public class PhoneticEncoderUtilsTests {
 	public void getEncoder_withNoNumber_parsesOutCorrectValue() {
 		// test
 		for (PhoneticEncoderEnum enumVal : PhoneticEncoderEnum.values()) {
-			IPhoneticEncoder encoder = PhoneticEncoderUtils.getEncoder(enumVal.name());
+			IPhoneticEncoder encoder = PhoneticEncoderUtil.getEncoder(enumVal.name());
 
 			assertNotNull(encoder);
 			assertEquals(enumVal.name(), encoder.name());
@@ -59,7 +59,7 @@ public class PhoneticEncoderUtilsTests {
 		String num = "A";
 
 		// test
-		IPhoneticEncoder encoder = PhoneticEncoderUtils.getEncoder(
+		IPhoneticEncoder encoder = PhoneticEncoderUtil.getEncoder(
 			PhoneticEncoderEnum.METAPHONE.name() + "(" + num + ")"
 		);
 
@@ -79,7 +79,7 @@ public class PhoneticEncoderUtilsTests {
 		myLogger.setLevel(Level.WARN);
 		String theString = "Not a valid encoder value";
 
-		IPhoneticEncoder encoder = PhoneticEncoderUtils.getEncoder(theString);
+		IPhoneticEncoder encoder = PhoneticEncoderUtil.getEncoder(theString);
 
 		// verify
 		assertNull(encoder);
@@ -97,7 +97,7 @@ public class PhoneticEncoderUtilsTests {
 		myLogger.setLevel(Level.ERROR);
 
 		// test
-		IPhoneticEncoder encoder = PhoneticEncoderUtils.getEncoder(PhoneticEncoderEnum.METAPHONE.name() + "()");
+		IPhoneticEncoder encoder = PhoneticEncoderUtil.getEncoder(PhoneticEncoderEnum.METAPHONE.name() + "()");
 
 		verifyOutcome_getEncoder_NumberParseFailure(encoder, "");
 	}
@@ -108,7 +108,7 @@ public class PhoneticEncoderUtilsTests {
 
 		// test
 		String num = "-1";
-		IPhoneticEncoder encoder = PhoneticEncoderUtils.getEncoder(PhoneticEncoderEnum.METAPHONE.name() + "(" + num + ")");
+		IPhoneticEncoder encoder = PhoneticEncoderUtil.getEncoder(PhoneticEncoderEnum.METAPHONE.name() + "(" + num + ")");
 
 		verifyOutcome_getEncoder_NumberParseFailure(encoder, num);
 	}
@@ -119,7 +119,7 @@ public class PhoneticEncoderUtilsTests {
 
 		// test
 		String num = "(";
-		IPhoneticEncoder encoder = PhoneticEncoderUtils.getEncoder(PhoneticEncoderEnum.METAPHONE.name() + "(" + num + ")");
+		IPhoneticEncoder encoder = PhoneticEncoderUtil.getEncoder(PhoneticEncoderEnum.METAPHONE.name() + "(" + num + ")");
 
 		verifyOutcome_getEncoder_NumberParseFailure(encoder, num);
 	}
@@ -127,7 +127,7 @@ public class PhoneticEncoderUtilsTests {
 	@Test
 	public void getEncoder_maxInt_returnsWrapper() {
 		// test
-		IPhoneticEncoder encoder = PhoneticEncoderUtils.getEncoder(
+		IPhoneticEncoder encoder = PhoneticEncoderUtil.getEncoder(
 			PhoneticEncoderEnum.METAPHONE.name() + "(" + Integer.MAX_VALUE + ")"
 		);
 

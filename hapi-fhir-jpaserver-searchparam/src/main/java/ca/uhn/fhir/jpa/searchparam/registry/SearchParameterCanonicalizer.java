@@ -30,7 +30,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.DatatypeUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.HapiExtensions;
-import ca.uhn.fhir.util.PhoneticEncoderUtils;
+import ca.uhn.fhir.util.PhoneticEncoderUtil;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.SearchParameter;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -378,7 +378,7 @@ public class SearchParameterCanonicalizer {
 			// every string creates a completely new encoder wrapper.
 			// this is fine, because the runtime search parameters are constructed at startup
 			// for every saved value
-			IPhoneticEncoder encoder = PhoneticEncoderUtils.getEncoder(stringValue);
+			IPhoneticEncoder encoder = PhoneticEncoderUtil.getEncoder(stringValue);
 			if (encoder != null) {
 				theRuntimeSearchParam.setPhoneticEncoder(encoder);
 			}

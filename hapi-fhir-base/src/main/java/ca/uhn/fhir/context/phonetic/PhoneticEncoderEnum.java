@@ -20,6 +20,7 @@ package ca.uhn.fhir.context.phonetic;
  * #L%
  */
 
+import ca.uhn.fhir.util.PhoneticEncoderUtil;
 import org.apache.commons.codec.language.Caverphone1;
 import org.apache.commons.codec.language.Caverphone2;
 import org.apache.commons.codec.language.ColognePhonetic;
@@ -47,7 +48,7 @@ public enum PhoneticEncoderEnum {
 	/**
 	 * Do not construct this enum via constructor.
 	 *
-	 * Use {@link ca.uhn.fhir.util.PhoneticEncoderUtils} instead.
+	 * Use {@link PhoneticEncoderUtil} instead.
 	 */
 	@Deprecated
 	PhoneticEncoderEnum(IPhoneticEncoder thePhoneticEncoder) {
