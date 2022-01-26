@@ -86,7 +86,8 @@ public final class PhoneticEncoderUtil {
 					// invalid number parse error
 				}
 
-				if (encoderMaxString == null) {
+				if (encoderMaxString == null
+						|| encoderMaxString < 0) {
 					// parse error
 					ourLog.error("Invalid encoder max character length: " + num);
 					encoderType = null;
