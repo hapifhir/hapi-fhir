@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
@@ -32,7 +33,9 @@ import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,10 +92,10 @@ public class MdmSubscriptionLoader {
 
 	synchronized void updateIfNotPresent(IBaseResource theSubscription) {
 		try {
-			mySubscriptionDao.read(theSubscription.getIdElement());
+			mySubscriptionDao.read(theSubscription.getIdElement(), SystemRequestDetails.forDefaultPartition());
 		} catch (ResourceNotFoundException | ResourceGoneException e) {
-			ourLog.info("Creating subsription " + theSubscription.getIdElement());
-			mySubscriptionDao.update(theSubscription);
+			ourLog.info("Creating subscription " + theSubscription.getIdElement());
+			mySubscriptionDao.update(theSubscription, SystemRequestDetails.forDefaultPartition());
 		}
 	}
 
@@ -103,6 +106,7 @@ public class MdmSubscriptionLoader {
 		retval.setStatus(org.hl7.fhir.dstu3.model.Subscription.SubscriptionStatus.REQUESTED);
 		retval.setCriteria(theCriteria);
 		retval.getMeta().addTag().setSystem(MdmConstants.SYSTEM_MDM_MANAGED).setCode(MdmConstants.CODE_HAPI_MDM_MANAGED);
+		retval.addExtension().setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION).setValue(new org.hl7.fhir.dstu3.model.BooleanType().setValue(true));
 		org.hl7.fhir.dstu3.model.Subscription.SubscriptionChannelComponent channel = retval.getChannel();
 		channel.setType(org.hl7.fhir.dstu3.model.Subscription.SubscriptionChannelType.MESSAGE);
 		channel.setEndpoint("channel:" + myChannelNamer.getChannelName(IMdmSettings.EMPI_CHANNEL_NAME, new ChannelProducerSettings()));
@@ -117,6 +121,7 @@ public class MdmSubscriptionLoader {
 		retval.setStatus(Subscription.SubscriptionStatus.REQUESTED);
 		retval.setCriteria(theCriteria);
 		retval.getMeta().addTag().setSystem(MdmConstants.SYSTEM_MDM_MANAGED).setCode(MdmConstants.CODE_HAPI_MDM_MANAGED);
+		retval.addExtension().setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION).setValue(new BooleanType().setValue(true));
 		Subscription.SubscriptionChannelComponent channel = retval.getChannel();
 		channel.setType(Subscription.SubscriptionChannelType.MESSAGE);
 		channel.setEndpoint("channel:" + myChannelNamer.getChannelName(IMdmSettings.EMPI_CHANNEL_NAME, new ChannelProducerSettings()));
