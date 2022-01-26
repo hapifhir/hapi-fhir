@@ -1,5 +1,6 @@
 package ca.uhn.fhir.context.phonetic;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.slf4j.Logger;
@@ -10,7 +11,7 @@ import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class PhoneticEncoderTest {
+public class PhoneticEncoderTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(PhoneticEncoderTest.class);
 
 	private static final String NUMBER = "123";
@@ -21,7 +22,9 @@ class PhoneticEncoderTest {
 	@ParameterizedTest
 	@EnumSource(PhoneticEncoderEnum.class)
 	public void testEncodeAddress(PhoneticEncoderEnum thePhoneticEncoderEnum) {
-		String encoded = thePhoneticEncoderEnum.getPhoneticEncoder().encode(ADDRESS_LINE);
+		PhoneticEncoderWrapper wrapper = PhoneticEncoderWrapper.getEncoderWrapper(thePhoneticEncoderEnum.name());
+		Assertions.assertNotNull(wrapper);
+		String encoded = wrapper.getPhoneticEncoder().encode(ADDRESS_LINE);
 		ourLog.info("{}: {}", thePhoneticEncoderEnum.name(), encoded);
 		if (thePhoneticEncoderEnum == PhoneticEncoderEnum.NUMERIC) {
 			assertEquals(NUMBER + SUITE, encoded);

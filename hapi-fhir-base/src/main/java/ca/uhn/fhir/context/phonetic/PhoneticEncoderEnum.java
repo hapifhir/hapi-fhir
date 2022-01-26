@@ -44,10 +44,23 @@ public enum PhoneticEncoderEnum {
 
 	private final IPhoneticEncoder myPhoneticEncoder;
 
+	/**
+	 * Do not construct this enum via constructor.
+	 *
+	 * Use PhoneticEncoderWrapper instead.
+	 */
+	@Deprecated
 	PhoneticEncoderEnum(IPhoneticEncoder thePhoneticEncoder) {
 		myPhoneticEncoder = thePhoneticEncoder;
 	}
 
+	/**
+	 * Use PhoneticEncoderWrapper.getEncoderWrapper(PhoneticEncoderEnum.name())
+	 *
+	 * This is a deprecated method of getting the encoder (as they
+	 * are static across the server and non-configurable).
+	 */
+	@Deprecated
 	public IPhoneticEncoder getPhoneticEncoder() {
 		return myPhoneticEncoder;
 	}

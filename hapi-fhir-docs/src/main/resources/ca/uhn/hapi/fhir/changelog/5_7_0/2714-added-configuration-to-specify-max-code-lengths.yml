@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2714
+title: "Added ability to specify max code lengths for supported
+      Phonetic Encoders (Metaphone, Double_Metaphone)."

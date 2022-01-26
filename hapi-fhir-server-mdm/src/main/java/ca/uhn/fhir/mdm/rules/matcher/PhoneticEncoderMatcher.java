@@ -22,6 +22,7 @@ package ca.uhn.fhir.mdm.rules.matcher;
 
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.context.phonetic.PhoneticEncoderEnum;
+import ca.uhn.fhir.context.phonetic.PhoneticEncoderWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +32,8 @@ public class PhoneticEncoderMatcher implements IMdmStringMatcher {
 	private final IPhoneticEncoder myStringEncoder;
 
 	public PhoneticEncoderMatcher(PhoneticEncoderEnum thePhoneticEnum) {
-		myStringEncoder = thePhoneticEnum.getPhoneticEncoder();
+		PhoneticEncoderWrapper wrapper = PhoneticEncoderWrapper.getEncoderWrapper(thePhoneticEnum.name());
+		myStringEncoder = wrapper.getPhoneticEncoder();
 	}
 
 	@Override
