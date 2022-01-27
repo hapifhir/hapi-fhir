@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.model.search;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
@@ -42,7 +41,7 @@ public class ExtendedLuceneIndexData {
 	final SetMultimap<String, String> mySearchParamStrings = HashMultimap.create();
 	final SetMultimap<String, TokenParam> mySearchParamTokens = HashMultimap.create();
 	final SetMultimap<String, String> mySearchParamLinks = HashMultimap.create();
-	final SetMultimap<String, DateRangeParam> mySearchParamDates = HashMultimap.create();
+	final SetMultimap<String, DateSearchIndexData> mySearchParamDates = HashMultimap.create();
 
 	public ExtendedLuceneIndexData(FhirContext theFhirContext) {
 		this.myFhirContext = theFhirContext;
@@ -70,7 +69,7 @@ public class ExtendedLuceneIndexData {
 		mySearchParamLinks.put(theSpName, theTargetResourceId);
 	}
 
-	public void addDateIndexData(String theSpName, Date theLowerBound, Date theUpperBound) {
-		mySearchParamDates.put(theSpName, new DateRangeParam(theLowerBound, theUpperBound));
+	public void addDateIndexData(String theSpName, Date theLowerBound, int theLowerBoundOrdinal, Date theUpperBound, int theUpperBoundOrdinal) {
+		mySearchParamDates.put(theSpName, new DateSearchIndexData(theLowerBound, theLowerBoundOrdinal, theUpperBound, theUpperBoundOrdinal));
 	}
 }

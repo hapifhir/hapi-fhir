@@ -280,7 +280,7 @@ public class ExtendedLuceneClauseBuilder {
 	 * {@code
 	 * {
 	 *   "range":{
-	 *     "sp.date.dt.upper":{ "gt": "2020-01-01T15:00:00.001000000Z" }
+	 *     "sp.date.dt.upper":{ "gt": "2020-01-01T15:00:00.000000000Z" }
 	 *   }
 	 * }
 	 * }
@@ -370,10 +370,12 @@ public class ExtendedLuceneClauseBuilder {
 			predicateSteps.forEach(booleanStep::must);
 			return booleanStep;
 		} else if (ParamPrefixEnum.GREATERTHAN == prefix || ParamPrefixEnum.STARTS_AFTER == prefix) {
+			// TODO JB: more fine tuning needed for STARTS_AFTER
 			return myPredicateFactory.range().field(upperOrdinalField).greaterThan(upperBoundAsOrdinal);
 		} else if (ParamPrefixEnum.GREATERTHAN_OR_EQUALS == prefix) {
 			return myPredicateFactory.range().field(upperOrdinalField).atLeast(upperBoundAsOrdinal);
 		} else if (ParamPrefixEnum.LESSTHAN == prefix || ParamPrefixEnum.ENDS_BEFORE == prefix) {
+			// TODO JB: more fine tuning needed for END_BEFORE
 			return myPredicateFactory.range().field(lowerOrdinalField).lessThan(lowerBoundAsOrdinal);
 		} else if (ParamPrefixEnum.LESSTHAN_OR_EQUALS == prefix) {
 			return myPredicateFactory.range().field(lowerOrdinalField).atMost(lowerBoundAsOrdinal);

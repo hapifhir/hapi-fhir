@@ -60,7 +60,8 @@ public class ExtendedLuceneIndexExtractor {
 			retVal.addTokenIndexData(nextParam.getParamName(), nextParam.getSystem(), nextParam.getValue()));
 
 		theNewParams.myDateParams.forEach(nextParam ->
-			retVal.addDateIndexData(nextParam.getParamName(), nextParam.getValueLow(), nextParam.getValueHigh()));
+			retVal.addDateIndexData(nextParam.getParamName(), nextParam.getValueLow(), nextParam.getValueLowDateOrdinal(),
+				nextParam.getValueHigh(), nextParam.getValueHighDateOrdinal()));
 
 		if (!theNewParams.myLinks.isEmpty()) {
 

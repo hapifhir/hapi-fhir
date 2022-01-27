@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.model.search;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hibernate.search.engine.backend.document.DocumentElement;
 import org.slf4j.Logger;
@@ -74,14 +73,14 @@ public class HibernateSearchIndexWriter {
 		ourLog.trace("Adding Search Param Reference: {} -- {}", theSearchParam, theValue);
 	}
 
-	public void writeDateIndex(String theSearchParam, DateRangeParam theValue) {
+	public void writeDateIndex(String theSearchParam, DateSearchIndexData theValue) {
 		DocumentElement dateIndexNode = getSearchParamIndexNode(theSearchParam, "dt");
 		// Lower bound
-		dateIndexNode.addValue("lower-ord", theValue.getLowerBoundAsDateInteger());
-		dateIndexNode.addValue("lower", theValue.getLowerBoundAsInstant().toInstant());
+		dateIndexNode.addValue("lower-ord", theValue.getLowerBoundOrdinal());
+		dateIndexNode.addValue("lower", theValue.getLowerBoundDate().toInstant());
 		// Upper bound
-		dateIndexNode.addValue("upper-ord", theValue.getUpperBoundAsDateInteger());
-		dateIndexNode.addValue("upper", theValue.getUpperBoundAsInstant().toInstant());
+		dateIndexNode.addValue("upper-ord", theValue.getUpperBoundOrdinal());
+		dateIndexNode.addValue("upper", theValue.getUpperBoundDate().toInstant());
 		ourLog.trace("Adding Search Param Reference: {} -- {}", theSearchParam, theValue);
 	}
 }
