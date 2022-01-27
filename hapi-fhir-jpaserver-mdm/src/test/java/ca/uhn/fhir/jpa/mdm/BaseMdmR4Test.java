@@ -74,7 +74,6 @@ import static org.slf4j.LoggerFactory.getLogger;
 @ContextConfiguration(classes = {MdmSubmitterConfig.class, MdmConsumerConfig.class, TestMdmConfigR4.class, SubscriptionProcessorConfig.class})
 abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 
-
 	public static final String NAME_GIVEN_JANE = "Jane";
 	public static final String NAME_GIVEN_PAUL = "Paul";
 	public static final String TEST_NAME_FAMILY = "Doe";
