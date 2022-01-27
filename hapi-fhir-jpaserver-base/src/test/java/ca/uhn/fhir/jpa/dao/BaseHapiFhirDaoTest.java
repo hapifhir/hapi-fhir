@@ -199,7 +199,7 @@ public class BaseHapiFhirDaoTest {
 		AtomicBoolean atomicBoolean = new AtomicBoolean(false);
 		when(query.getSingleResult())
 			.thenAnswer(new Answer<TagDefinition>() {
-				private int count;
+				private final AtomicInteger count = new AtomicInteger();
 
 				@Override
 				public TagDefinition answer(InvocationOnMock invocationOnMock) throws Throwable {
@@ -208,8 +208,8 @@ public class BaseHapiFhirDaoTest {
 						// ensure the first 2 accesses throw to
 						// help fake a race condition (2, or possibly the same,
 						// thread failing to access the resource)
-						if (count < 2) {
-							count++;
+						if (count.get() < 2) {
+							count.incrementAndGet();
 							throw new NoResultException();
 						}
 					}
@@ -223,14 +223,14 @@ public class BaseHapiFhirDaoTest {
 				}
 			});
 		doAnswer(new Answer() {
-			private int count = 0;
+			private final AtomicInteger count = new AtomicInteger();
 
 			@Override
 			public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
 				if (fakeRaceCondition) {
 					// fake
-					if (count < 1) {
-						count++;
+					if (count.get() < 1) {
+						count.incrementAndGet();
 						return null;
 					}
 					else {
