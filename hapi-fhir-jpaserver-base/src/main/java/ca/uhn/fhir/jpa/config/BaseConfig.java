@@ -527,10 +527,6 @@ public abstract class BaseConfig {
 		return new MdmLinkExpandSvc();
 	}
 
-	@Bean
-	IMdmBatchJobSubmitterFactory mdmBatchJobSubmitterFactory() {
-		return new MdmBatchJobSubmitterFactoryImpl();
-	}
 
 	@Bean
 	IMdmClearJobSubmitter mdmClearJobSubmitter() {
