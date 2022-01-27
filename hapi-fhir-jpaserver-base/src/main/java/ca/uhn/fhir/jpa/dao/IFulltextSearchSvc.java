@@ -24,12 +24,13 @@ import java.util.List;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
+import ca.uhn.fhir.jpa.search.autocomplete.TokenAutocompleteValueSetSearch;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
-import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -45,6 +46,8 @@ public interface IFulltextSearchSvc {
 	 * @return the pid list for the matchign resources.
 	 */
 	List<ResourcePersistentId> search(String theResourceName, SearchParameterMap theParams);
+
+	IBaseResource tokenAutocompleteValueSetSearch(TokenAutocompleteValueSetSearch.Options theOptions);
 
 	List<ResourcePersistentId> everything(String theResourceName, SearchParameterMap theParams, RequestDetails theRequest);
 
@@ -63,8 +66,5 @@ public interface IFulltextSearchSvc {
 	 * @param theEntity the fully populated ResourceTable entity
 	 */
 	 void reindex(ResourceTable theEntity);
-
-	 // wipmb wrap these params into an object?
-	List<IBaseCoding> tokenAutocompleteSearch(String theResourceName, String theSPName, String theSearchText);
 
 }

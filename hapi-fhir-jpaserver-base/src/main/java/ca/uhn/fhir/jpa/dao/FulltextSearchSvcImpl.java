@@ -29,7 +29,7 @@ import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneIndexExtractor;
 import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneSearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
-import ca.uhn.fhir.jpa.search.autocomplete.TokenAutocompleteSearch;
+import ca.uhn.fhir.jpa.search.autocomplete.TokenAutocompleteValueSetSearch;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -43,7 +43,6 @@ import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hibernate.search.mapper.orm.work.SearchIndexingPlan;
 import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -112,13 +111,13 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 	@Transactional()
 	@Override
-	public List<IBaseCoding> tokenAutocompleteSearch(String theResourceName, String theSPName, String theSearchText) {
+	public IBaseResource tokenAutocompleteValueSetSearch(TokenAutocompleteValueSetSearch.Options theOptions) {
 
-		TokenAutocompleteSearch autocomplete = new TokenAutocompleteSearch(myFhirContext, getSearchSession());
+		TokenAutocompleteValueSetSearch autocomplete = new TokenAutocompleteValueSetSearch(myFhirContext, getSearchSession());
 
-		List<IBaseCoding> results = autocomplete.search(theResourceName, theSPName, theSearchText);
+		IBaseResource result = autocomplete.search(theOptions);
 
-		return results;
+		return result;
 	}
 
 

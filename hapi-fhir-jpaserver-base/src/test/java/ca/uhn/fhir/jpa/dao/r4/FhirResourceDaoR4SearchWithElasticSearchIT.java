@@ -16,6 +16,7 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.search.autocomplete.TokenAutocompleteSearch;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
@@ -35,6 +36,7 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 import org.hamcrest.CustomMatcher;
 import org.hamcrest.Matchers;
+import org.hibernate.search.mapper.orm.Search;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -61,8 +63,10 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
+import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -91,6 +95,8 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	protected DaoConfig myDaoConfig;
 	@Autowired
 	protected PlatformTransactionManager myTxManager;
+	@Autowired
+	protected EntityManager myEntityManager;
 	@Autowired
 	protected ISearchParamPresenceSvc mySearchParamPresenceSvc;
 	@Autowired
@@ -447,11 +453,17 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		createObservationWithCode(new Coding("http://loinc.org", "88262-1", "Gram positive blood culture panel by Probe in Positive blood culture"));
 		createObservationWithCode(new Coding("http://loinc.org", "88262-1", "Gram positive blood culture panel by Probe in Positive blood culture"));
 
-		List<IBaseCoding> codes = myFulltestSearchSvc.tokenAutocompleteSearch("Observation", "code", "blo");
+		List<IBaseCoding> codes = autocompleteSearch("Observation", "code", "blo");
 		assertThat("finds blood pressure", codes, hasItem(matchingCode(mean_blood_pressure)));
 
-		codes = myFulltestSearchSvc.tokenAutocompleteSearch("Observation", "code", "nuclear");
+		codes = autocompleteSearch("Observation", "code", "nuclear");
 		assertThat("doesn't find nuclear", codes, is(empty()));
+	}
+
+	List<IBaseCoding> autocompleteSearch(String theResourceType, String theSPName, String theSearchText) {
+		return new TransactionTemplate(myTxManager).execute(s->
+			new TokenAutocompleteSearch(myFhirCtx, Search.session(myEntityManager))
+				.search(theResourceType, theSPName, theSearchText));
 	}
 
 	@Nonnull
