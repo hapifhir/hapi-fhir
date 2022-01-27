@@ -27,6 +27,13 @@
 			<groupId>org.opencds.cqf.cql</groupId>
 			<artifactId>evaluator.engine</artifactId>
 			<version>${cql-evaluator.version}</version>
+			<exclusions>
+				<!-- we exclude this because we don't want javax.mail and will use jakarta.mail instead -->
+				<exclusion>
+					<groupId>com.sun.mail</groupId>
+					<artifactId>javax.mail</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.opencds.cqf.cql</groupId>
