@@ -22,14 +22,19 @@ package ca.uhn.fhir.jpa.dao.search;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.DateUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.search.engine.search.common.BooleanOperator;
 import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
 import org.hibernate.search.engine.search.predicate.dsl.PredicateFinalStep;
@@ -40,10 +45,11 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.time.Instant;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -58,6 +64,8 @@ public class ExtendedLuceneClauseBuilder {
 	final FhirContext myFhirContext;
 	final SearchPredicateFactory myPredicateFactory;
 	final BooleanPredicateClausesStep<?> myRootClause;
+
+	final List<TemporalPrecisionEnum> ordinalSearchPrecisions = Arrays.asList(TemporalPrecisionEnum.YEAR, TemporalPrecisionEnum.MONTH, TemporalPrecisionEnum.DAY);
 
 	public ExtendedLuceneClauseBuilder(FhirContext myFhirContext, BooleanPredicateClausesStep<?> myRootClause, SearchPredicateFactory myPredicateFactory) {
 		this.myFhirContext = myFhirContext;
@@ -246,7 +254,7 @@ public class ExtendedLuceneClauseBuilder {
 	 * Create date clause from date params. The date lower and upper bounds are taken
 	 * into considertion when generating date query ranges
 	 *
-	 * <p>Example 1 ('eq' prefix/empty): <code>http://fhirserver/Observation?date=2021-01-01</code>
+	 * <p>Example 1 ('eq' prefix/empty): <code>http://fhirserver/Observation?date=eq2020</code>
 	 * would generate the following search clause
 	 * <pre>
 	 * {@code
@@ -254,25 +262,25 @@ public class ExtendedLuceneClauseBuilder {
 	 *  "bool": {
 	 *    "must": [{
 	 *      "range": {
-	 *        "sp.date.dt.lower": { "gte": "2010-01-01T07:00:00.000000000Z" }
+	 *        "sp.date.dt.lower-ord": { "gte": "20200101" }
 	 *      }
 	 *    }, {
 	 *      "range": {
-	 *        "sp.date.dt.upper": { "lte": "2010-01-01T07:00:00.000000000Z" }
+	 *        "sp.date.dt.upper-ord": { "lte": "20201231" }
 	 *      }
-	 *    }],
-	 *    "minimum_should_match": "0"
+	 *    }]
 	 *  }
 	 * }
 	 * }
 	 * </pre>
 	 *
-	 * <p>Example 2 ('ge' prefix): <code>http://fhirserver/Observation?date=ge2021-01-01</code>
+	 * <p>Example 2 ('gt' prefix): <code>http://fhirserver/Observation?date=gt2020-01-01T08:00:00.000</code>
+	 * <p>No timezone in the query will be taken as localdatetime(for e.g MST/UTC-07:00 in this case) converted to UTC before comparison</p>
 	 * <pre>
 	 * {@code
 	 * {
 	 *   "range":{
-	 *     "sp.date.dt.lower":{ "gte":"2021-01-01T07:00:00.000000000Z" }
+	 *     "sp.date.dt.upper":{ "gt": "2020-01-01T15:00:00.001000000Z" }
 	 *   }
 	 * }
 	 * }
@@ -283,11 +291,31 @@ public class ExtendedLuceneClauseBuilder {
 	 * {@code
 	 * {
 	 *   "range":{
-	 *     "sp.date.dt.lower":{ "gte":"2010-01-01T07:00:00.000000000Z" }
+	 *     "sp.date.dt.upper-ord":{ "gte":"20100101" }
 	 *   },
 	 *   "range":{
-	 *     "sp.date.dt.upper":{ "lte":"2020-01-01T07:00:00.000000000Z" }
+	 *     "sp.date.dt.lower-ord":{ "lte":"20200101" }
 	 *   }
+	 * }
+	 * }
+	 * </pre>
+	 *
+	 * <p>Example 4 not equal: <code>http://fhirserver/Observation?date=ne2021</code></p>
+	 * <pre>
+	 * {@code
+	 * {
+	 *    "bool": {
+	 *       "should": [{
+	 *          "range": {
+	 *             "sp.date.dt.upper-ord": { "lt": "20210101" }
+	 *          }
+	 *       }, {
+	 *          "range": {
+	 *             "sp.date.dt.lower-ord": { "gt": "20211231" }
+	 *          }
+	 *       }],
+	 *       "minimum_should_match": "1"
+	 *    }
 	 * }
 	 * }
 	 * </pre>
@@ -299,43 +327,110 @@ public class ExtendedLuceneClauseBuilder {
 		for (List<? extends IQueryParameterType> nextAnd : theDateAndOrTerms) {
 			// comma separated list of dates(OR list) on a date param is not applicable so grab
 			// first from default list
-			DateParam dateParam = (DateParam) nextAnd.stream().findFirst()
-				.orElseThrow(() -> new IllegalArgumentException("Date param is missing value"));
-
-			List<? extends PredicateFinalStep> terms = generateDateSearchTerms(theSearchParamName, dateParam);
-			if (terms.size() == 1) {
-				myRootClause.must(terms.get(0));
-			} else {
-				BooleanPredicateClausesStep<?> andTerms = myPredicateFactory.bool();
-				terms.forEach(andTerms::must);
-				myRootClause.must(andTerms);
+			if (nextAnd.size() > 1) {
+				throw new InvalidRequestException("OR (,) searches on DATE search parameters are not supported for ElasticSearch/Lucene");
 			}
+			DateParam dateParam = (DateParam) nextAnd.stream().findFirst()
+				.orElseThrow(() -> new InvalidRequestException("Date param is missing value"));
+
+			boolean isOrdinalSearch = ordinalSearchPrecisions.contains(dateParam.getPrecision());
+
+			PredicateFinalStep searchPredicate = isOrdinalSearch
+				? generateDateOrdinalSearchTerms(theSearchParamName, dateParam)
+				: generateDateInstantSearchTerms(theSearchParamName, dateParam);
+
+			myRootClause.must(searchPredicate);
 		}
 	}
 
-	private List<? extends PredicateFinalStep> generateDateSearchTerms(String theSearchParamName, DateParam theDateParam) {
-		String fieldPathLower = "sp." + theSearchParamName + ".dt.lower";
-		String fieldPathUpper = "sp." + theSearchParamName + ".dt.upper";
+	private PredicateFinalStep generateDateOrdinalSearchTerms(String theSearchParamName, DateParam theDateParam) {
+		String lowerOrdinalField = "sp." + theSearchParamName + ".dt.lower-ord";
+		String upperOrdinalField = "sp." + theSearchParamName + ".dt.upper-ord";
+		int lowerBoundAsOrdinal;
+		int upperBoundAsOrdinal;
+		ParamPrefixEnum prefix = theDateParam.getPrefix();
 
-		Instant dateInstant = theDateParam.getValue().toInstant();
-		ParamPrefixEnum dateParamPrefix = theDateParam.getPrefix();
-
-		if (ParamPrefixEnum.GREATERTHAN == dateParamPrefix ||
-			ParamPrefixEnum.STARTS_AFTER == dateParamPrefix) {
-			return Collections.singletonList(myPredicateFactory.range().field(fieldPathLower).greaterThan(dateInstant));
-		} else if (ParamPrefixEnum.LESSTHAN == dateParamPrefix ||
-			ParamPrefixEnum.ENDS_BEFORE == dateParamPrefix) {
-			return Collections.singletonList(myPredicateFactory.range().field(fieldPathUpper).lessThan(dateInstant));
-		} else if (ParamPrefixEnum.LESSTHAN_OR_EQUALS == dateParamPrefix) {
-			return Collections.singletonList(myPredicateFactory.range().field(fieldPathUpper).atMost(dateInstant));
-		} else if (ParamPrefixEnum.GREATERTHAN_OR_EQUALS == dateParamPrefix) {
-			return Collections.singletonList(myPredicateFactory.range().field(fieldPathLower).atLeast(dateInstant));
-		} else {
-			// For equality prefix we would like the date to fall between the lower and upper bound
-			return Arrays.asList(
-				myPredicateFactory.range().field(fieldPathLower).atLeast(dateInstant),
-				myPredicateFactory.range().field(fieldPathUpper).atMost(dateInstant)
-			);
+		// default when handling 'Day' temporal types
+		lowerBoundAsOrdinal = upperBoundAsOrdinal = DateUtils.convertDateToDayInteger(theDateParam.getValue());
+		TemporalPrecisionEnum precision = theDateParam.getPrecision();
+		// complete the date from 'YYYY' and 'YYYY-MM' temporal types
+		if (precision == TemporalPrecisionEnum.YEAR || precision == TemporalPrecisionEnum.MONTH) {
+			Pair<String, String> completedDate = DateUtils.getCompletedDate(theDateParam.getValueAsString());
+			lowerBoundAsOrdinal = Integer.parseInt(completedDate.getLeft().replace("-", ""));
+			upperBoundAsOrdinal = Integer.parseInt(completedDate.getRight().replace("-", ""));
 		}
+
+		if (Objects.isNull(prefix) || prefix == ParamPrefixEnum.EQUAL) {
+			// For equality prefix we would like the date to fall between the lower and upper bound
+			List<? extends PredicateFinalStep> predicateSteps = Arrays.asList(
+				myPredicateFactory.range().field(lowerOrdinalField).atLeast(lowerBoundAsOrdinal),
+				myPredicateFactory.range().field(upperOrdinalField).atMost(upperBoundAsOrdinal)
+			);
+			BooleanPredicateClausesStep<?> booleanStep = myPredicateFactory.bool();
+			predicateSteps.forEach(booleanStep::must);
+			return booleanStep;
+		} else if (ParamPrefixEnum.GREATERTHAN == prefix || ParamPrefixEnum.STARTS_AFTER == prefix) {
+			return myPredicateFactory.range().field(upperOrdinalField).greaterThan(upperBoundAsOrdinal);
+		} else if (ParamPrefixEnum.GREATERTHAN_OR_EQUALS == prefix) {
+			return myPredicateFactory.range().field(upperOrdinalField).atLeast(upperBoundAsOrdinal);
+		} else if (ParamPrefixEnum.LESSTHAN == prefix || ParamPrefixEnum.ENDS_BEFORE == prefix) {
+			return myPredicateFactory.range().field(lowerOrdinalField).lessThan(lowerBoundAsOrdinal);
+		} else if (ParamPrefixEnum.LESSTHAN_OR_EQUALS == prefix) {
+			return myPredicateFactory.range().field(lowerOrdinalField).atMost(lowerBoundAsOrdinal);
+		} else if (ParamPrefixEnum.NOT_EQUAL == prefix) {
+			List<? extends PredicateFinalStep> predicateSteps = Arrays.asList(
+				myPredicateFactory.range().field(upperOrdinalField).lessThan(lowerBoundAsOrdinal),
+				myPredicateFactory.range().field(lowerOrdinalField).greaterThan(upperBoundAsOrdinal)
+			);
+			BooleanPredicateClausesStep<?> booleanStep = myPredicateFactory.bool();
+			predicateSteps.forEach(booleanStep::should);
+			booleanStep.minimumShouldMatchNumber(1);
+			return booleanStep;
+		}
+		throw new InvalidRequestException("Date search param does not support prefix of type: " + prefix);
+	}
+
+	private PredicateFinalStep generateDateInstantSearchTerms(String theSearchParamName, DateParam theDateParam) {
+		String lowerInstantField = "sp." + theSearchParamName + ".dt.lower";
+		String upperInstantField = "sp." + theSearchParamName + ".dt.upper";
+		ParamPrefixEnum prefix = theDateParam.getPrefix();
+
+		if (ParamPrefixEnum.NOT_EQUAL == prefix) {
+			Instant dateInstant = theDateParam.getValue().toInstant();
+			List<? extends PredicateFinalStep> predicateSteps = Arrays.asList(
+				myPredicateFactory.range().field(upperInstantField).lessThan(dateInstant),
+				myPredicateFactory.range().field(lowerInstantField).greaterThan(dateInstant)
+			);
+			BooleanPredicateClausesStep<?> booleanStep = myPredicateFactory.bool();
+			predicateSteps.forEach(booleanStep::should);
+			booleanStep.minimumShouldMatchNumber(1);
+			return booleanStep;
+		}
+
+		// Consider lower and upper bounds for building range predicates
+		DateRangeParam dateRange = new DateRangeParam(theDateParam);
+		Instant lowerBoundAsInstant = Optional.ofNullable(dateRange.getLowerBoundAsInstant()).map(Date::toInstant).orElse(null);
+		Instant upperBoundAsInstant = Optional.ofNullable(dateRange.getUpperBoundAsInstant()).map(Date::toInstant).orElse(null);
+
+		if (Objects.isNull(prefix) || prefix == ParamPrefixEnum.EQUAL) {
+			// For equality prefix we would like the date to fall between the lower and upper bound
+			List<? extends PredicateFinalStep> predicateSteps = Arrays.asList(
+				myPredicateFactory.range().field(lowerInstantField).atLeast(lowerBoundAsInstant),
+				myPredicateFactory.range().field(upperInstantField).atMost(upperBoundAsInstant)
+			);
+			BooleanPredicateClausesStep<?> booleanStep = myPredicateFactory.bool();
+			predicateSteps.forEach(booleanStep::must);
+			return booleanStep;
+		} else if (ParamPrefixEnum.GREATERTHAN == prefix || ParamPrefixEnum.STARTS_AFTER == prefix) {
+			return myPredicateFactory.range().field(upperInstantField).greaterThan(lowerBoundAsInstant);
+		} else if (ParamPrefixEnum.GREATERTHAN_OR_EQUALS == prefix) {
+			return myPredicateFactory.range().field(upperInstantField).atLeast(lowerBoundAsInstant);
+		} else if (ParamPrefixEnum.LESSTHAN == prefix || ParamPrefixEnum.ENDS_BEFORE == prefix) {
+			return myPredicateFactory.range().field(lowerInstantField).lessThan(upperBoundAsInstant);
+		} else if (ParamPrefixEnum.LESSTHAN_OR_EQUALS == prefix) {
+			return myPredicateFactory.range().field(lowerInstantField).atMost(upperBoundAsInstant);
+		}
+
+		throw new InvalidRequestException("Date search param does not support prefix of type: " + prefix);
 	}
 }
