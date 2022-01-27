@@ -39,6 +39,7 @@ public enum PhoneticEncoderEnum {
 	MATCH_RATING_APPROACH(new ApacheEncoder("MATCH_RATING_APPROACH", new MatchRatingApproachEncoder())),
 	METAPHONE(new ApacheEncoder("METAPHONE", new Metaphone())),
 	NYSIIS(new ApacheEncoder("NYSIIS", new Nysiis())),
+	NYSIIS_LONG(new ApacheEncoder("NYSIIS_LONG", new Nysiis(false))),
 	REFINED_SOUNDEX(new ApacheEncoder("REFINED_SOUNDEX", new RefinedSoundex())),
 	SOUNDEX(new ApacheEncoder("SOUNDEX", new Soundex())),
 	NUMERIC(new NumericEncoder());

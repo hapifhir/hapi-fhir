@@ -142,6 +142,10 @@ public final class PhoneticEncoderUtil {
 					Nysiis nysiis = new Nysiis();
 					encoder = new ApacheEncoder(theName, nysiis);
 					break;
+				case NYSIIS_LONG:
+					Nysiis nysiis1_long = new Nysiis(false);
+					encoder = new ApacheEncoder(theName, nysiis1_long);
+					break;
 				case REFINED_SOUNDEX:
 					RefinedSoundex refinedSoundex = new RefinedSoundex();
 					encoder = new ApacheEncoder(theName, refinedSoundex);
