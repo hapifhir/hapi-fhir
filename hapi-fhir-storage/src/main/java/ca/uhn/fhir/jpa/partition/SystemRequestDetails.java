@@ -62,7 +62,9 @@ public class SystemRequestDetails extends RequestDetails {
 	}
 
 	public static SystemRequestDetails forDefaultPartition(){
-		return new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.defaultPartition());
+		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
+		systemRequestDetails.setTenantId("DEFAULT");
+		return systemRequestDetails;
 	}
 
 	private ListMultimap<String, String> myHeaders;
