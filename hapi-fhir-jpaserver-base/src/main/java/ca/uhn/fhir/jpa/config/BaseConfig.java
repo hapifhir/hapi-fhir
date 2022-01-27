@@ -521,21 +521,12 @@ public abstract class BaseConfig {
 		return new RequestTenantPartitionInterceptor();
 	}
 
-	@Bean
-	@Lazy
-	public MdmSearchExpandingInterceptor mdmSearchExpandingInterceptor() {
-		return new MdmSearchExpandingInterceptor();
-	}
 
 	@Bean
 	public MdmLinkExpandSvc mdmLinkExpandSvc() {
 		return new MdmLinkExpandSvc();
 	}
 
-	@Bean
-	IMdmBatchJobSubmitterFactory mdmBatchJobSubmitterFactory() {
-		return new MdmBatchJobSubmitterFactoryImpl();
-	}
 
 	@Bean
 	IMdmClearJobSubmitter mdmClearJobSubmitter() {

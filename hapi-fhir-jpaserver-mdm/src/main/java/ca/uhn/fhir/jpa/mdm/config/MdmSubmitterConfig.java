@@ -33,9 +33,11 @@ import ca.uhn.fhir.mdm.rules.config.MdmRuleValidator;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 
 @Configuration
+@Import(MdmCommonConfig.class)
 public class MdmSubmitterConfig {
 
 	@Bean
@@ -46,16 +48,6 @@ public class MdmSubmitterConfig {
 	@Bean
 	MdmSearchParamSvc mdmSearchParamSvc() {
 		return new MdmSearchParamSvc();
-	}
-
-	@Bean
-	MdmRuleValidator mdmRuleValidator(FhirContext theFhirContext, ISearchParamRegistry theSearchParamRetriever) {
-		return new MdmRuleValidator(theFhirContext, theSearchParamRetriever);
-	}
-
-	@Bean
-	MdmLinkDeleteSvc mdmLinkDeleteSvc() {
-		return new MdmLinkDeleteSvc();
 	}
 
 	@Bean
