@@ -16,7 +16,13 @@ public class FlywayDbCompatibilityTest {
 		assertThat(sqlServerType.getName(), is(equalTo("Azure Synapse")));
 
 		DatabaseType oracleType = DatabaseTypeRegister.getDatabaseTypeForUrl("jdbc:oracle:thin:@//host:port/service");
-		assertThat(oracleType.getName(), is(equalTo("Azure Synapse")));
+		assertThat(oracleType.getName(), is(equalTo("Oracle")));
+
+		DatabaseType mySqlType = DatabaseTypeRegister.getDatabaseTypeForUrl("jdbc:mysql://localhost:3306/cdr?serverTimezone=Canada/Eastern");
+		assertThat(mySqlType.getName(), is(equalTo("mySQL")));
+
+		DatabaseType postgresType = DatabaseTypeRegister.getDatabaseTypeForUrl("jdbc:postgres://localhost:5432/cdr");
+		assertThat(mySqlType.getName(), is(equalTo("mySQL")));
 
 	}
 
