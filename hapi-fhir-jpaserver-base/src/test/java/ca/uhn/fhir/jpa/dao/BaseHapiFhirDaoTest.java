@@ -76,8 +76,12 @@ public class BaseHapiFhirDaoTest {
 														 String theLabel) {
 			// we need to init synchronization due to what
 			// the underlying class is doing
-			TransactionSynchronizationManager.initSynchronization();
-			return super.getTagOrNull(theDetails, theEnum, theScheme, theTerm, theLabel);
+			try {
+				TransactionSynchronizationManager.initSynchronization();
+				return super.getTagOrNull(theDetails, theEnum, theScheme, theTerm, theLabel);
+			} finally {
+				TransactionSynchronizationManager.clearSynchronization();
+			}
 		}
 	}
 
