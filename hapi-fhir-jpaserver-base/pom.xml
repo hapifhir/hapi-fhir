@@ -15,6 +15,13 @@
 	<name>HAPI FHIR JPA Server</name>
 
 	<dependencies>
+
+		<dependency>
+			<groupId>com.graphql-java</groupId>
+			<artifactId>graphql-java</artifactId>
+			<version>17.3</version>
+		</dependency>
+
 		<!--
 				<dependency>
 					<groupId>com.fasterxml.jackson.jaxrs</groupId>

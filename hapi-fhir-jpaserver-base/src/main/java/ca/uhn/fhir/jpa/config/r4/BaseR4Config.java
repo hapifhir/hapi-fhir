@@ -19,6 +19,7 @@ import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Meta;
@@ -85,8 +86,8 @@ public class BaseR4Config extends BaseConfigDstu3Plus {
 
 	@Bean(name = GRAPHQL_PROVIDER_NAME)
 	@Lazy
-	public GraphQLProvider graphQLProvider() {
-		return new GraphQLProviderWithIntrospection(fhirContextR4(), validationSupportChain(), graphqlStorageServices());
+	public GraphQLProvider graphQLProvider(ISearchParamRegistry theSearchParamRegistry) {
+		return new GraphQLProviderWithIntrospection(fhirContextR4(), validationSupportChain(), graphqlStorageServices(), theSearchParamRegistry);
 	}
 
 	@Bean(name = "myResourceCountsCache")

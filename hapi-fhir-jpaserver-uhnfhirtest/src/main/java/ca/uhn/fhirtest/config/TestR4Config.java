@@ -75,7 +75,9 @@ public class TestR4Config extends BaseJavaConfigR4 {
 
 	@Bean
 	public ModelConfig modelConfig() {
-		return daoConfig().getModelConfig();
+		ModelConfig retVal = daoConfig().getModelConfig();
+		retVal.setIndexIdentifierOfType(true);
+		return retVal;
 	}
 
 

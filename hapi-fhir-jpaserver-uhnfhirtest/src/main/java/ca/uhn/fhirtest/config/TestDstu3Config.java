@@ -78,9 +78,10 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 
 	@Bean
 	public ModelConfig modelConfig() {
-		return daoConfig().getModelConfig();
+		ModelConfig retVal = daoConfig().getModelConfig();
+		retVal.setIndexIdentifierOfType(true);
+		return retVal;
 	}
-
 
 	@Override
 	@Bean

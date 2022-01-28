@@ -79,7 +79,9 @@ public class TestR5Config extends BaseJavaConfigR5 {
 
 	@Bean
 	public ModelConfig modelConfig() {
-		return daoConfig().getModelConfig();
+		ModelConfig retVal = daoConfig().getModelConfig();
+		retVal.setIndexIdentifierOfType(true);
+		return retVal;
 	}
 
 	@Override
