@@ -44,7 +44,7 @@ jobs:
         condition: always()
         inputs:
           sourceFolder: '$(System.DefaultWorkingDirectory)/'
-          contents: '**/target/*output.txt'
+          contents: '**/target/*-reports/*.txt'
           targetFolder: '$(Build.ArtifactStagingDirectory)'
       - task: PublishPipelineArtifact@1
         displayName: 'Publish Full Test Output'
