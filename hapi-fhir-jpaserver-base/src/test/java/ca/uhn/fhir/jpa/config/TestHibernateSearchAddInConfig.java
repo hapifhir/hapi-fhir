@@ -59,7 +59,6 @@ public class TestHibernateSearchAddInConfig {
 		}
 
 		@Bean(autowire = Autowire.BY_TYPE)
-		@Primary
 		public IFulltextSearchSvc searchDaoR4() {
 			if (isLuceneEnabled()) {
 				ourLog.info("Hibernate Search: FulltextSearchSvcImpl present");
@@ -71,7 +70,34 @@ public class TestHibernateSearchAddInConfig {
 		}
 	}
 
+	/**
+	 * Disable Hibernate Search, and do not provide a IFulltextSearchSvc bean.
+	 @TestPropertySource(properties = {
+	 BaseJpaTest.CONFIG_ENABLE_LUCENE_FALSE
+	 })
+
+	 */
 	@Configuration
+	public static class None {
+		@Bean
+		IHibernateSearchConfigurer hibernateSearchConfigurer() {
+			Map<String, String> hibernateSearchProperties = BaseJpaTest.buildHibernateSearchProperties(false);
+			return (theProperties) -> {
+				theProperties.putAll(hibernateSearchProperties);
+			};
+		}
+
+		@Bean(autowire = Autowire.BY_TYPE)
+		@Primary
+		public IFulltextSearchSvc searchDaoR4() {
+			ourLog.info("Hibernate Search: FulltextSearchSvcImpl not available");
+			return null;
+		}
+
+	}
+
+
+		@Configuration
 	public static class Elasticsearch {
 		@Bean
 		@Primary // override the default

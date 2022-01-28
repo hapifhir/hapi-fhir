@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.subscription.module.matcher;
 
 import ca.uhn.fhir.context.FhirContext;
 
+import ca.uhn.fhir.jpa.config.TestHibernateSearchAddInConfig;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -85,11 +86,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-@TestPropertySource(properties = {
-	BaseJpaTest.CONFIG_ENABLE_LUCENE_FALSE
-})
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TestR4Config.class})
+@ContextConfiguration(classes = {TestR4Config.class, TestHibernateSearchAddInConfig.None.class})
 public class InMemorySubscriptionMatcherR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(InMemorySubscriptionMatcherR4Test.class);
 

@@ -129,7 +129,7 @@ import static org.mockito.Mockito.when;
 	UnregisterScheduledProcessor.SCHEDULING_DISABLED_EQUALS_TRUE
 })
 public abstract class BaseJpaTest extends BaseTest {
-	// wipmb jpaproperties
+	// wipmb remove these in favour of TestHibernateSearchAddInConfig
 	public static final String CONFIG_ENABLE_LUCENE="hapi_test.enable_lucene";
 	public static final String CONFIG_ENABLE_LUCENE_FALSE = CONFIG_ENABLE_LUCENE + "=false";
 	public static final boolean CONFIG_ENABLE_LUCENE_DEFAULT_VALUE = true;

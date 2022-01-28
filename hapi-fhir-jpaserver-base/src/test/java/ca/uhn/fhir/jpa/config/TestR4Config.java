@@ -171,6 +171,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 
 		hibernateSearchConfigurer.apply(extraProperties);
 
+		// wipmb
 		ourLog.info("XXXXX {} jpaProperties: {}", this.getClass().getSimpleName(), extraProperties);
 
 		return extraProperties;
