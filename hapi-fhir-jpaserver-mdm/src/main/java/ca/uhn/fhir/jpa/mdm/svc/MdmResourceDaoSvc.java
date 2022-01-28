@@ -20,14 +20,18 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmConstants;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -52,10 +56,11 @@ public class MdmResourceDaoSvc {
 
 	public DaoMethodOutcome upsertGoldenResource(IAnyResource theGoldenResource, String theResourceType) {
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResourceType);
+		RequestDetails requestDetails = new SystemRequestDetails().setRequestPartitionId((RequestPartitionId) theGoldenResource.getUserData(Constants.RESOURCE_PARTITION_ID));
 		if (theGoldenResource.getIdElement().hasIdPart()) {
-			return resourceDao.update(theGoldenResource);
+			return resourceDao.update(theGoldenResource, requestDetails);
 		} else {
-			return resourceDao.create(theGoldenResource);
+			return resourceDao.create(theGoldenResource, requestDetails);
 		}
 	}
 

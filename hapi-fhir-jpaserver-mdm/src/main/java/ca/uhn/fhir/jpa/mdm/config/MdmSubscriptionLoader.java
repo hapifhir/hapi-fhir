@@ -92,10 +92,10 @@ public class MdmSubscriptionLoader {
 
 	synchronized void updateIfNotPresent(IBaseResource theSubscription) {
 		try {
-			mySubscriptionDao.read(theSubscription.getIdElement(), SystemRequestDetails.forDefaultPartition());
+			mySubscriptionDao.read(theSubscription.getIdElement(), SystemRequestDetails.forAllPartition());
 		} catch (ResourceNotFoundException | ResourceGoneException e) {
 			ourLog.info("Creating subscription " + theSubscription.getIdElement());
-			mySubscriptionDao.update(theSubscription, SystemRequestDetails.forDefaultPartition());
+			mySubscriptionDao.update(theSubscription, SystemRequestDetails.forAllPartition());
 		}
 	}
 

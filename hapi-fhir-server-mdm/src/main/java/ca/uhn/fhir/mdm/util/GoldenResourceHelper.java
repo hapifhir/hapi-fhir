@@ -31,6 +31,7 @@ import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.FhirTerser;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -96,6 +97,9 @@ public class GoldenResourceHelper {
 
 		MdmResourceUtil.setMdmManaged(newGoldenResource);
 		MdmResourceUtil.setGoldenResource(newGoldenResource);
+
+		// add the partition id to the new resource
+		newGoldenResource.setUserData(Constants.RESOURCE_PARTITION_ID, theIncomingResource.getUserData(Constants.RESOURCE_PARTITION_ID));
 
 		return (T) newGoldenResource;
 	}
