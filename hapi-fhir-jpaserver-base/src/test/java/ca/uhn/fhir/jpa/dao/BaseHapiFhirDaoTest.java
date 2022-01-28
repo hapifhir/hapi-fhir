@@ -291,7 +291,7 @@ public class BaseHapiFhirDaoTest {
 		);
 
 		Assertions.assertEquals(threads, persistInt.get(), " not enough persists " + persistInt.get());
-		Assertions.assertEquals(threads, getSingleResultInt.get(), " not enough gets " + getSingleResultInt.get());
+		Assertions.assertEquals(threads + 1, getSingleResultInt.get(), " not enough gets " + getSingleResultInt.get());
 
 
 		// verify
