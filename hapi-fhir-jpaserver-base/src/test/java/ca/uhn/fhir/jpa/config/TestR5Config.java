@@ -26,7 +26,6 @@ import java.sql.Connection;
 import java.util.Map;
 import java.util.Properties;
 
-import static ca.uhn.fhir.jpa.dao.BaseJpaTest.buildHeapLuceneHibernateSearchProperties;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @Configuration

@@ -7,7 +7,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
-import ca.uhn.fhir.jpa.config.TestElasticSearchAddInConfig;
+import ca.uhn.fhir.jpa.config.TestHibernateSearchAddInConfig;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
@@ -51,7 +51,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 @RequiresDocker
-@ContextConfiguration(classes = {TestR4Config.class, TestElasticSearchAddInConfig.class})
+@ContextConfiguration(classes = {TestR4Config.class, TestHibernateSearchAddInConfig.Elasticsearch.class})
 public class FhirResourceDaoR4TerminologyElasticsearchIT extends BaseJpaTest {
 
 	public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";

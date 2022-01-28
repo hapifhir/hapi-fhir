@@ -5,10 +5,7 @@ import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.batch.svc.BatchJobSubmitterImpl;
 import ca.uhn.fhir.jpa.binstore.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
-import ca.uhn.fhir.jpa.dao.BaseJpaTest;
-import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
-import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
-import ca.uhn.fhir.jpa.search.elastic.ElasticsearchHibernatePropertiesBuilder;
+import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
@@ -17,13 +14,8 @@ import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
 import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
-import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import org.hibernate.jpa.HibernatePersistenceProvider;
-import org.hibernate.search.backend.elasticsearch.index.IndexStatus;
-import org.hibernate.search.mapper.orm.schema.management.SchemaManagementStrategyName;
-import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,19 +23,16 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.testcontainers.elasticsearch.ElasticsearchContainer;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
-import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-import static ca.uhn.fhir.jpa.dao.BaseJpaTest.buildHeapLuceneHibernateSearchProperties;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @Configuration
-@Import({TestJPAConfig.class, BatchJobsConfig.class})
+@Import({TestJPAConfig.class, BatchJobsConfig.class, TestHibernateSearchAddInConfig.DefaultLuceneOrNone.class})
 @EnableTransactionManagement()
 public class TestR4Config extends BaseJavaConfigR4 {
 
@@ -169,23 +158,8 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		return retVal;
 	}
 
-	// wipmb pull this stuff out.
-	boolean isLuceneEnabled() {
-		boolean enableLucene = myEnv.getProperty(BaseJpaTest.CONFIG_ENABLE_LUCENE, Boolean.TYPE, BaseJpaTest.CONFIG_ENABLE_LUCENE_DEFAULT_VALUE);
-		return enableLucene;
-	}
-
-	@Bean(autowire = Autowire.BY_TYPE)
-	public IFulltextSearchSvc searchDaoR4() {
-		if (isLuceneEnabled()) {
-			return new FulltextSearchSvcImpl();
-		} else {
-			return null;
-		}
-	}
-
-	@Autowired(required = false)
-	ElasticsearchContainer myESContainer;
+	@Autowired
+	TestHibernateSearchAddInConfig.IHibernateSearchConfigurer hibernateSearchConfigurer;
 
 	@Bean
 	public Properties jpaProperties() {
@@ -195,27 +169,8 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
 		extraProperties.put("hibernate.dialect", HapiFhirH2Dialect.class.getName());
 
-		Map<String, String> hibernateSearchProperties = BaseJpaTest.buildHibernateSearchProperties(isLuceneEnabled());
-		extraProperties.putAll(hibernateSearchProperties);
+		hibernateSearchConfigurer.apply(extraProperties);
 
-		if (myESContainer != null) {
-			int httpPort = myESContainer.getMappedPort(9200);//9200 is the HTTP port
-			String host = myESContainer.getHost();
-
-			ourLog.info("Hibernate Search: using elasticsearch - host {} {}", host, httpPort);
-
-			new ElasticsearchHibernatePropertiesBuilder()
-				.setDebugIndexSyncStrategy("read-sync")
-				.setDebugPrettyPrintJsonLog(true)
-				.setIndexSchemaManagementStrategy(SchemaManagementStrategyName.CREATE)
-				.setIndexManagementWaitTimeoutMillis(10000)
-				.setRequiredIndexStatus(IndexStatus.YELLOW)
-				.setHosts(host + ":" + httpPort)
-				.setProtocol("http")
-				.setUsername("")
-				.setPassword("")
-				.apply(extraProperties);
-		}
 		ourLog.info("XXXXX {} jpaProperties: {}", this.getClass().getSimpleName(), extraProperties);
 
 		return extraProperties;
