@@ -29,7 +29,7 @@ import java.util.Properties;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @Configuration
-@Import(TestJPAConfig.class)
+@Import({TestJPAConfig.class, TestHibernateSearchAddInConfig.DefaultLuceneOrNone.class})
 @EnableTransactionManagement()
 public class TestR5Config extends BaseJavaConfigR5 {
 
@@ -143,6 +143,9 @@ public class TestR5Config extends BaseJavaConfigR5 {
 		return retVal;
 	}
 
+	@Autowired
+	TestHibernateSearchAddInConfig.IHibernateSearchConfigurer hibernateSearchConfigurer;
+
 	private Properties jpaProperties() {
 		Properties extraProperties = new Properties();
 		extraProperties.put("hibernate.format_sql", "false");
@@ -150,9 +153,9 @@ public class TestR5Config extends BaseJavaConfigR5 {
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
 		extraProperties.put("hibernate.dialect", HapiFhirH2Dialect.class.getName());
 
-		boolean enableLucene = myEnv.getProperty(BaseJpaTest.CONFIG_ENABLE_LUCENE, Boolean.TYPE, BaseJpaTest.CONFIG_ENABLE_LUCENE_DEFAULT_VALUE);
-		Map<String, String> hibernateSearchProperties = BaseJpaTest.buildHibernateSearchProperties(enableLucene);
-		extraProperties.putAll(hibernateSearchProperties);
+		hibernateSearchConfigurer.apply(extraProperties);
+
+		ourLog.info("jpaProperties: {}", extraProperties);
 
 		return extraProperties;
 	}
