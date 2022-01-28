@@ -4,7 +4,6 @@ import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
-import ca.uhn.fhir.util.ThreadPoolUtil;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -24,7 +23,6 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -103,14 +101,11 @@ public class BaseHapiFhirDaoTest {
 	@Mock
 	private PlatformTransactionManager myTransactionManager;
 
-	private ThreadPoolTaskExecutor myExecutor;
-
 	@InjectMocks
 	private TestDao myTestDao;
 
 	@BeforeEach
 	public void init() {
-		myExecutor = ThreadPoolUtil.newThreadPool(10, 30, "test-");
 		ourLogger = (Logger) LoggerFactory.getLogger(BaseHapiFhirDao.class);
 		ourLogger.addAppender(myAppender);
 	}
@@ -267,22 +262,27 @@ public class BaseHapiFhirDaoTest {
 		ConcurrentHashMap<Integer, Throwable> errors = new ConcurrentHashMap<>();
 
 		AtomicInteger counter = new AtomicInteger();
-		ArrayList<Future> futures = new ArrayList<>();
-		for (int i = 0; i < threads; i++) {
-			futures.add(service.submit(() -> {
-				try {
-					TagDefinition retTag = myTestDao.getTagOrNull(transactionDetails, tagType, scheme, term, label);
-					outcomes.put(retTag.hashCode(), retTag);
-					counter.incrementAndGet();
-				} catch (Exception ex) {
-					errors.put(ex.hashCode(), ex);
-				}
-			}));
+		Runnable task = () -> {
+			try {
+				TagDefinition retTag = myTestDao.getTagOrNull(transactionDetails, tagType, scheme, term, label);
+				outcomes.put(retTag.hashCode(), retTag);
+				counter.incrementAndGet();
+			} catch (Exception ex) {
+				errors.put(ex.hashCode(), ex);
+			}
+		};
+
+		try {
+			ArrayList<Future> futures = new ArrayList<>();
+			for (int i = 0; i < threads; i++) {
+				futures.add(service.submit(task));
+			}
+			for (Future f : futures) {
+				f.get();
+			}
+		} finally {
+			service.shutdown();
 		}
-		for (Future f : futures) {
-			f.get();
-		}
-		service.shutdown();
 		// should not take a second per thread.
 		// but will take some time, due to the delays above.
 		// a second per thread seems like a good threshold.
@@ -290,9 +290,8 @@ public class BaseHapiFhirDaoTest {
 			service.awaitTermination(threads, TimeUnit.SECONDS)
 		);
 
-		Assertions.assertEquals(threads, persistInt.get(), " not enough persists " + persistInt.get());
-		Assertions.assertEquals(threads + 1, getSingleResultInt.get(), " not enough gets " + getSingleResultInt.get());
-
+		Assertions.assertEquals(threads + 1, getSingleResultInt.get(), "Not enough gets " + getSingleResultInt.get());
+		Assertions.assertEquals(threads, persistInt.get(), "Not enough persists " + persistInt.get());
 
 		// verify
 		Assertions.assertEquals(1, outcomes.size());
