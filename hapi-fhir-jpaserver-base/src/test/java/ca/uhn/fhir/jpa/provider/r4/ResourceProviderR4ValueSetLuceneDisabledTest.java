@@ -60,7 +60,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TestR4Config.class, TestHibernateSearchAddInConfig.None.class})
+@ContextConfiguration(classes = {TestR4Config.class, TestHibernateSearchAddInConfig.NoFT.class})
 @SuppressWarnings({"Duplicates"})
 public class ResourceProviderR4ValueSetLuceneDisabledTest  extends BaseJpaTest {
 
