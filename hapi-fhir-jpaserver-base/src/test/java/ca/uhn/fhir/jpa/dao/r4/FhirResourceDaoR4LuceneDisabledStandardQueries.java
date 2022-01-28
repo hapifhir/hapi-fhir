@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.config.TestHibernateSearchAddInConfig;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.BaseDateSearchDaoTests;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
@@ -22,10 +23,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @ExtendWith(SpringExtension.class)
-@TestPropertySource(properties = {
-	BaseJpaTest.CONFIG_ENABLE_LUCENE_FALSE
-})
-@ContextConfiguration(classes = {TestR4Config.class})
+@ContextConfiguration(classes = {TestR4Config.class, TestHibernateSearchAddInConfig.None.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class FhirResourceDaoR4LuceneDisabledStandardQueries extends BaseJpaTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4LuceneDisabledStandardQueries.class);
