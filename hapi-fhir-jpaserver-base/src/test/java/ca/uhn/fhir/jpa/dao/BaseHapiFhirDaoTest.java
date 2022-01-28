@@ -179,8 +179,6 @@ public class BaseHapiFhirDaoTest {
 			term,
 			label);
 
-		ourLogger.setLevel(Level.WARN);
-
 		// mock objects
 		CriteriaBuilder builder = getMockedCriteriaBuilder();
 		TypedQuery<TagDefinition> query = mock(TypedQuery.class);
@@ -249,6 +247,8 @@ public class BaseHapiFhirDaoTest {
 				}
 			}
 		}).when(myEntityManager).persist(any(Object.class));
+
+		ourLogger.setLevel(Level.WARN);
 
 		// test
 		ExecutorService service = Executors.newFixedThreadPool(threads);
