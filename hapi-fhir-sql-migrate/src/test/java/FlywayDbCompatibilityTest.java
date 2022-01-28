@@ -19,11 +19,13 @@ public class FlywayDbCompatibilityTest {
 		assertThat(oracleType.getName(), is(equalTo("Oracle")));
 
 		DatabaseType mySqlType = DatabaseTypeRegister.getDatabaseTypeForUrl("jdbc:mysql://localhost:3306/cdr?serverTimezone=Canada/Eastern");
-		assertThat(mySqlType.getName(), is(equalTo("mySQL")));
+		assertThat(mySqlType.getName(), is(equalTo("MySQL")));
 
-		DatabaseType postgresType = DatabaseTypeRegister.getDatabaseTypeForUrl("jdbc:postgres://localhost:5432/cdr");
-		assertThat(mySqlType.getName(), is(equalTo("mySQL")));
+		DatabaseType postgresType = DatabaseTypeRegister.getDatabaseTypeForUrl("jdbc:postgresql://localhost:5432/cdr");
+		assertThat(postgresType.getName(), is(equalTo("CockroachDB")));
 
+		DatabaseType mariaDbType = DatabaseTypeRegister.getDatabaseTypeForUrl("jdbc:mariadb://localhost:3306/cdr");
+		assertThat(mariaDbType.getName(), is(equalTo("MariaDB")));
 	}
 
 }
