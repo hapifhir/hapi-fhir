@@ -61,7 +61,7 @@ public class TestHibernateSearchAddInConfig {
 
 		@Bean(
 			autowire = Autowire.BY_TYPE,
-			name={"searchDaoDstu3", "searchDaoR4"})
+			name={"searchDao", "searchDaoDstu2", "searchDaoDstu3", "searchDaoR4"})
 		public IFulltextSearchSvc searchDao() {
 			if (isLuceneEnabled()) {
 				ourLog.info("Hibernate Search: FulltextSearchSvcImpl present");
@@ -92,9 +92,9 @@ public class TestHibernateSearchAddInConfig {
 
 		@Bean(
 			autowire = Autowire.BY_TYPE,
-			name={"searchDaoDstu3", "searchDaoR4"})
+			name={"searchDao", "searchDaoDstu2", "searchDaoDstu3", "searchDaoR4"})
 		@Primary
-		public IFulltextSearchSvc searchDaoR4() {
+		public IFulltextSearchSvc searchDao() {
 			ourLog.info("Hibernate Search: FulltextSearchSvcImpl not available");
 			return null;
 		}
