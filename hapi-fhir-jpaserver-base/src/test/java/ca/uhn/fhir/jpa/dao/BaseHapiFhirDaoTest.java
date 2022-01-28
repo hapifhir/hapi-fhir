@@ -261,9 +261,6 @@ public class BaseHapiFhirDaoTest {
 
 		ourLogger.setLevel(Level.WARN);
 
-		Assertions.assertEquals(threads, persistInt.get(), " not enough persists " + persistInt.get());
-		Assertions.assertEquals(threads, getSingleResultInt.get(), " not enough gets " + getSingleResultInt.get());
-
 		// test
 		ExecutorService service = Executors.newFixedThreadPool(threads);
 		ConcurrentHashMap<Integer, TagDefinition> outcomes = new ConcurrentHashMap<>();
@@ -292,6 +289,10 @@ public class BaseHapiFhirDaoTest {
 		Assertions.assertTrue(
 			service.awaitTermination(threads, TimeUnit.SECONDS)
 		);
+
+		Assertions.assertEquals(threads, persistInt.get(), " not enough persists " + persistInt.get());
+		Assertions.assertEquals(threads, getSingleResultInt.get(), " not enough gets " + getSingleResultInt.get());
+
 
 		// verify
 		Assertions.assertEquals(1, outcomes.size());
