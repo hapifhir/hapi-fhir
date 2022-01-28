@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.config;
 
-import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
@@ -24,14 +23,13 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
 @Configuration
-@Import({TestJPAConfig.class, TestHibernateSearchAddInConfig.DefaultLuceneOrNone.class})
+@Import({TestJPAConfig.class, TestHibernateSearchAddInConfig.DefaultLuceneHeap.class})
 @EnableTransactionManagement()
 public class TestDstu2Config extends BaseJavaConfigDstu2 {
 	private static final Logger ourLog = LoggerFactory.getLogger(TestDstu2Config.class);

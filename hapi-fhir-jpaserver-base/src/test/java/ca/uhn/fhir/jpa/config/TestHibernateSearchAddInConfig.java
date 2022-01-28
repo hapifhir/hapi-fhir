@@ -1,32 +1,41 @@
 package ca.uhn.fhir.jpa.config;
 
-import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer;
 import ca.uhn.fhir.jpa.search.elastic.ElasticsearchHibernatePropertiesBuilder;
 import ca.uhn.fhir.jpa.search.lastn.ElasticsearchSvcImpl;
 import ca.uhn.fhir.jpa.search.lastn.config.TestElasticsearchContainerHelper;
+import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import org.hibernate.search.backend.elasticsearch.index.IndexStatus;
+import org.hibernate.search.backend.lucene.cfg.LuceneBackendSettings;
+import org.hibernate.search.backend.lucene.cfg.LuceneIndexSettings;
+import org.hibernate.search.engine.cfg.BackendSettings;
+import org.hibernate.search.mapper.orm.cfg.HibernateOrmMapperSettings;
 import org.hibernate.search.mapper.orm.schema.management.SchemaManagementStrategyName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowire;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.core.env.Environment;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 
 import javax.annotation.PreDestroy;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+/**
+ * Configurations for Hibernate Search: off, lucene, or elastic.
+ * 
+ * We use {@link DefaultLuceneHeap} by default in our JPA test configs.
+ * Turn off by adding {@link NoFT} to the test Contexts.
+ * Use Elasticsearch instead via docker by adding {@link Elasticsearch} to the test Contexts;
+ */
 public class TestHibernateSearchAddInConfig {
 	private static final Logger ourLog = LoggerFactory.getLogger(TestHibernateSearchAddInConfig.class);
-	private static String[] SEARCH_DAO_ALIASES= {"searchDaoDstu3", "searchDaoR4"};
 
 	/**
 	 * Add Hibernate Search config to JPA properties.
@@ -36,64 +45,51 @@ public class TestHibernateSearchAddInConfig {
 	}
 
 	/**
-	 * Our default config - Lucene in-memory or disabled by property;
+	 * Our default config - Lucene in-memory.
 	 *
-	 * wipmb can we move the property to a configuration?
+	 * Override by adding {@link NoFT} or {@link Elasticsearch} to your test class contexts.
 	 */
 	@Configuration
-	public static class DefaultLuceneOrNone {
-		@Autowired
-		protected Environment myEnv;
-
-		// wipmb split this into default and NoFT configs.
-		boolean isLuceneEnabled() {
-			boolean enableLucene = myEnv.getProperty(BaseJpaTest.CONFIG_ENABLE_LUCENE, Boolean.TYPE, BaseJpaTest.CONFIG_ENABLE_LUCENE_DEFAULT_VALUE);
-			return enableLucene;
-		}
+	public static class DefaultLuceneHeap {
 
 		@Bean
 		IHibernateSearchConfigurer hibernateSearchConfigurer() {
-			Map<String, String> hibernateSearchProperties = BaseJpaTest.buildHibernateSearchProperties(isLuceneEnabled());
-			return (theProperties) -> {
-				theProperties.putAll(hibernateSearchProperties);
-			};
+			ourLog.warn("Hibernate Search: using lucene - local-heap");
+
+			Map<String, String> luceneHeapProperties = new HashMap<>();
+			luceneHeapProperties.put(BackendSettings.backendKey(BackendSettings.TYPE), "lucene");
+			luceneHeapProperties.put(BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER), HapiLuceneAnalysisConfigurer.class.getName());
+			luceneHeapProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_TYPE), "local-heap");
+			luceneHeapProperties.put(BackendSettings.backendKey(LuceneBackendSettings.LUCENE_VERSION), "LUCENE_CURRENT");
+			luceneHeapProperties.put(HibernateOrmMapperSettings.ENABLED, "true");
+			
+			return (theProperties) ->
+				theProperties.putAll(luceneHeapProperties);
 		}
 
-		@Bean(
-			autowire = Autowire.BY_TYPE,
-			name={"searchDao", "searchDaoDstu2", "searchDaoDstu3", "searchDaoR4", "searchDaoR5"})
+
+		@Bean(name={"searchDao", "searchDaoDstu2", "searchDaoDstu3", "searchDaoR4", "searchDaoR5"})
 		public IFulltextSearchSvc searchDao() {
-			if (isLuceneEnabled()) {
-				ourLog.info("Hibernate Search: FulltextSearchSvcImpl present");
-				return new FulltextSearchSvcImpl();
-			} else {
-				ourLog.info("Hibernate Search: FulltextSearchSvcImpl not available");
-				return null;
-			}
+			ourLog.info("Hibernate Search: FulltextSearchSvcImpl present");
+			return new FulltextSearchSvcImpl();
 		}
 	}
 
 	/**
 	 * Disable Hibernate Search, and do not provide a IFulltextSearchSvc bean.
-	 @TestPropertySource(properties = {
-	 BaseJpaTest.CONFIG_ENABLE_LUCENE_FALSE
-	 })
-
 	 */
 	@Configuration
 	public static class NoFT {
 		@Bean
 		IHibernateSearchConfigurer hibernateSearchConfigurer() {
-			Map<String, String> hibernateSearchProperties = BaseJpaTest.buildHibernateSearchProperties(false);
+			ourLog.info("Hibernate Search is disabled");
 			return (theProperties) -> {
-				theProperties.putAll(hibernateSearchProperties);
+				theProperties.put("hibernate.search.enabled", "false");
 			};
 		}
 
-		@Bean(
-			autowire = Autowire.BY_TYPE,
-			name={"searchDao", "searchDaoDstu2", "searchDaoDstu3", "searchDaoR4", "searchDaoR5"})
-		@Primary
+		@Primary // force override of default bean which might have a variety of names
+		@Bean(name={"searchDao", "searchDaoDstu2", "searchDaoDstu3", "searchDaoR4", "searchDaoR5"})
 		public IFulltextSearchSvc searchDao() {
 			ourLog.info("Hibernate Search: FulltextSearchSvcImpl not available");
 			return null;
@@ -102,7 +98,12 @@ public class TestHibernateSearchAddInConfig {
 	}
 
 
-		@Configuration
+	/**
+	 * Enable our Fulltext search with an Elasticsearch container instead of our default Lucene heap.
+	 *
+	 * Make sure you add {@link RequiresDocker} annotation to any uses.
+	 */
+	@Configuration
 	public static class Elasticsearch {
 		@Bean
 		@Primary // override the default

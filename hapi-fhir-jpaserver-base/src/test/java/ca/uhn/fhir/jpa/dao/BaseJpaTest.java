@@ -129,10 +129,6 @@ import static org.mockito.Mockito.when;
 	UnregisterScheduledProcessor.SCHEDULING_DISABLED_EQUALS_TRUE
 })
 public abstract class BaseJpaTest extends BaseTest {
-	// wipmb remove these in favour of TestHibernateSearchAddInConfig
-	public static final String CONFIG_ENABLE_LUCENE="hapi_test.enable_lucene";
-	public static final String CONFIG_ENABLE_LUCENE_FALSE = CONFIG_ENABLE_LUCENE + "=false";
-	public static final boolean CONFIG_ENABLE_LUCENE_DEFAULT_VALUE = true;
 
 	protected static final String CM_URL = "http://example.com/my_concept_map";
 	protected static final String CS_URL = "http://example.com/my_code_system";
@@ -650,31 +646,6 @@ public abstract class BaseJpaTest extends BaseTest {
 			assertEquals(termValueSetConcept.getOrder(), theValueSet.getConcepts().indexOf(termValueSetConcept));
 			return termValueSetConcept;
 		}
-	}
-
-	@Nonnull
-	public static Map<String, String> buildHibernateSearchProperties(boolean enableLucene) {
-		Map<String, String> hibernateSearchProperties;
-		if (enableLucene) {
-			ourLog.info("Hibernate Search is enabled");
-			hibernateSearchProperties = buildHeapLuceneHibernateSearchProperties();
-		} else {
-			ourLog.info("Hibernate Search is disabled");
-			hibernateSearchProperties = new HashMap<>();
-			hibernateSearchProperties.put("hibernate.search.enabled", "false");
-		}
-		return hibernateSearchProperties;
-	}
-
-	public static Map<String, String> buildHeapLuceneHibernateSearchProperties() {
-		Map<String, String> props = new HashMap<>();
-		ourLog.warn("Hibernate Search: using lucene - local-heap");
-		props.put(BackendSettings.backendKey(BackendSettings.TYPE), "lucene");
-		props.put(BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER), HapiLuceneAnalysisConfigurer.class.getName());
-		props.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_TYPE), "local-heap");
-		props.put(BackendSettings.backendKey(LuceneBackendSettings.LUCENE_VERSION), "LUCENE_CURRENT");
-		props.put(HibernateOrmMapperSettings.ENABLED, "true");
-		return props;
 	}
 
 	@BeforeAll
