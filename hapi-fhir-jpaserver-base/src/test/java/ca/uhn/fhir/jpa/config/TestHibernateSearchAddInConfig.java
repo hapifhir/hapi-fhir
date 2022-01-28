@@ -26,6 +26,7 @@ import java.util.Properties;
 
 public class TestHibernateSearchAddInConfig {
 	private static final Logger ourLog = LoggerFactory.getLogger(TestHibernateSearchAddInConfig.class);
+	private static String[] SEARCH_DAO_ALIASES= {"searchDaoDstu3", "searchDaoR4"};
 
 	/**
 	 * Add Hibernate Search config to JPA properties.
@@ -58,8 +59,10 @@ public class TestHibernateSearchAddInConfig {
 			};
 		}
 
-		@Bean(autowire = Autowire.BY_TYPE)
-		public IFulltextSearchSvc searchDaoR4() {
+		@Bean(
+			autowire = Autowire.BY_TYPE,
+			name={"searchDaoDstu3", "searchDaoR4"})
+		public IFulltextSearchSvc searchDao() {
 			if (isLuceneEnabled()) {
 				ourLog.info("Hibernate Search: FulltextSearchSvcImpl present");
 				return new FulltextSearchSvcImpl();
@@ -78,7 +81,7 @@ public class TestHibernateSearchAddInConfig {
 
 	 */
 	@Configuration
-	public static class None {
+	public static class NoFT {
 		@Bean
 		IHibernateSearchConfigurer hibernateSearchConfigurer() {
 			Map<String, String> hibernateSearchProperties = BaseJpaTest.buildHibernateSearchProperties(false);
@@ -87,7 +90,9 @@ public class TestHibernateSearchAddInConfig {
 			};
 		}
 
-		@Bean(autowire = Autowire.BY_TYPE)
+		@Bean(
+			autowire = Autowire.BY_TYPE,
+			name={"searchDaoDstu3", "searchDaoR4"})
 		@Primary
 		public IFulltextSearchSvc searchDaoR4() {
 			ourLog.info("Hibernate Search: FulltextSearchSvcImpl not available");
