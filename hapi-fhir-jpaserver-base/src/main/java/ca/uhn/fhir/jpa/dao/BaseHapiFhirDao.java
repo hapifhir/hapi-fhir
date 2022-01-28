@@ -467,41 +467,51 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		int count = 0;
 		HashSet<Throwable> throwables = new HashSet<>();
 		do {
-			retVal = template.execute(new TransactionCallback<TagDefinition>() {
+			try {
+				retVal = template.execute(new TransactionCallback<TagDefinition>() {
 
-				// do the actual DB call(s) to read and/or write the values
-				private TagDefinition readOrCreate() {
-					TagDefinition val;
-					try {
-						val = q.getSingleResult();
-					} catch (NoResultException e) {
-						val = new TagDefinition(theTagType, theScheme, theTerm, theLabel);
-						myEntityManager.persist(val);
-					}
-					return val;
-				}
-
-				@Override
-				public TagDefinition doInTransaction(TransactionStatus status) {
-					TagDefinition tag = null;
-
-					try {
-						tag = readOrCreate();
-					} catch (Exception ex) {
-						// log any exceptions - just in case
-						// they may be signs of things to come...
-						ourLog.warn(
-							"Tag read/write failed: "
-								+ ex.getMessage() + ". "
-								+ "This is not a failure on its own, "
-								+ "but could be useful information in the result of an actual failure."
-						);
-						throwables.add(ex);
+					// do the actual DB call(s) to read and/or write the values
+					private TagDefinition readOrCreate() {
+						TagDefinition val;
+						try {
+							val = q.getSingleResult();
+						} catch (NoResultException e) {
+							val = new TagDefinition(theTagType, theScheme, theTerm, theLabel);
+							myEntityManager.persist(val);
+						}
+						return val;
 					}
 
-					return tag;
-				}
-			});
+					@Override
+					public TagDefinition doInTransaction(TransactionStatus status) {
+						TagDefinition tag = null;
+
+						try {
+							tag = readOrCreate();
+						} catch (Exception ex) {
+							// log any exceptions - just in case
+							// they may be signs of things to come...
+							ourLog.warn(
+								"Tag read/write failed: "
+									+ ex.getMessage() + ". "
+									+ "This is not a failure on its own, "
+									+ "but could be useful information in the result of an actual failure."
+							);
+							throwables.add(ex);
+						}
+
+						return tag;
+					}
+				});
+			} catch (Exception ex) {
+				// transaction template can fail if connections to db are exhausted
+				// and/or timeout
+				ourLog.warn("Transaction failed with: "
+					+ ex.getMessage() + ". "
+					+ "Transaction will rollback and be reattempted."
+				);
+				retVal = null;
+			}
 			count++;
 		} while (retVal == null && count < TOTAL_TAG_READ_ATTEMPTS);
 

@@ -41,8 +41,10 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 		 * We use a randomized number of maximum threads in order to try
 		 * and catch any potential deadlocks caused by database connection
 		 * starvation
+		 *
+		 * A minimum of 2 is required for most transactions.
 		 */
-		ourMaxThreads = (int) (Math.random() * 6.0) + 1;
+		ourMaxThreads = (int) (Math.random() * 6.0) + 2;
 
 		if ("true".equals(System.getProperty("single_db_connection"))) {
 			ourMaxThreads = 1;
