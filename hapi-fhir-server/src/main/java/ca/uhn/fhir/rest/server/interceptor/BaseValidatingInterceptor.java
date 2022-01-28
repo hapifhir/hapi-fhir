@@ -124,7 +124,7 @@ public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnric
 	 * Subclasses may change this behaviour by providing alternate behaviour.
 	 */
 	protected void fail(RequestDetails theRequestDetails, ValidationResult theValidationResult) {
-		throw new UnprocessableEntityException(Msg.code(330) + theRequestDetails.getServer().getFhirContext(), theValidationResult.toOperationOutcome());
+		throw new UnprocessableEntityException(Msg.code(330) + theValidationResult.getMessages().get(0).getMessage(), theValidationResult.toOperationOutcome());
 	}
 
 	/**
