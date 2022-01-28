@@ -110,7 +110,7 @@ public class BaseHapiFhirDaoTest {
 
 	@BeforeEach
 	public void init() {
-//		myExecutor = ThreadPoolUtil.newThreadPool(10, 30, "test-");
+		myExecutor = ThreadPoolUtil.newThreadPool(10, 30, "test-");
 		ourLogger = (Logger) LoggerFactory.getLogger(BaseHapiFhirDao.class);
 		ourLogger.addAppender(myAppender);
 	}
@@ -202,12 +202,14 @@ public class BaseHapiFhirDaoTest {
 		when(myEntityManager.createQuery(any(CriteriaQuery.class)))
 			.thenReturn(query);
 		AtomicBoolean atomicBoolean = new AtomicBoolean(false);
+		AtomicInteger getSingleResultInt = new AtomicInteger();
 		when(query.getSingleResult())
 			.thenAnswer(new Answer<TagDefinition>() {
 				private final AtomicInteger count = new AtomicInteger();
 
 				@Override
 				public TagDefinition answer(InvocationOnMock invocationOnMock) throws Throwable {
+					getSingleResultInt.incrementAndGet();
 					if (fakeRaceCondition) {
 						// fake
 						// ensure the first 2 accesses throw to
@@ -227,11 +229,13 @@ public class BaseHapiFhirDaoTest {
 					return tagDefinition;
 				}
 			});
+		AtomicInteger persistInt = new AtomicInteger();
 		doAnswer(new Answer() {
 			private final AtomicInteger count = new AtomicInteger();
 
 			@Override
 			public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+				persistInt.incrementAndGet();
 				if (fakeRaceCondition) {
 					// fake
 					if (count.get() < 1) {
@@ -256,6 +260,9 @@ public class BaseHapiFhirDaoTest {
 		}).when(myEntityManager).persist(any(Object.class));
 
 		ourLogger.setLevel(Level.WARN);
+
+		Assertions.assertEquals(threads, persistInt.get(), " not enough persists " + persistInt.get());
+		Assertions.assertEquals(threads, getSingleResultInt.get(), " not enough gets " + getSingleResultInt.get());
 
 		// test
 		ExecutorService service = Executors.newFixedThreadPool(threads);
