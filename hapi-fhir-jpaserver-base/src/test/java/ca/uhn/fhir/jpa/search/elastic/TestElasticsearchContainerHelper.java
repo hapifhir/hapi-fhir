@@ -1,10 +1,5 @@
-package ca.uhn.fhir.jpa.search.lastn.config;
+package ca.uhn.fhir.jpa.search.elastic;
 
-import com.github.dockerjava.api.exception.InternalServerErrorException;
-import org.junit.jupiter.api.extension.BeforeAllCallback;
-import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-import org.junit.jupiter.api.extension.ExecutionCondition;
-import org.junit.jupiter.api.extension.ExtensionContext;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 
 import java.time.Duration;

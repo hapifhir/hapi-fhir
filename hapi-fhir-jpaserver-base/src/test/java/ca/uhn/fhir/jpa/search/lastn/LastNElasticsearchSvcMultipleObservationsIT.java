@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.search.lastn;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.search.lastn.config.TestElasticsearchContainerHelper;
+import ca.uhn.fhir.jpa.search.elastic.TestElasticsearchContainerHelper;
 import ca.uhn.fhir.jpa.search.lastn.json.CodeJson;
 import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -42,6 +42,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -57,7 +59,6 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 	static private final Calendar baseObservationDate = new GregorianCalendar();
 	@Container
 	public static ElasticsearchContainer elasticsearchContainer = TestElasticsearchContainerHelper.getEmbeddedElasticSearch();
-	private static ObjectMapper ourMapperNonPrettyPrint;
 	private static boolean indexLoaded = false;
 	private final Map<String, Map<String, List<Date>>> createdPatientObservationMap = new HashMap<>();
 	private final FhirContext myFhirContext = FhirContext.forR4Cached();
@@ -480,7 +481,7 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 
 	}
 
-	private void createMultiplePatientsAndObservations() throws IOException {
+	/*private void createMultiplePatientsAndObservations() throws IOException {
 		// Create CodeableConcepts for two Codes, each with three codings.
 		String codeableConceptId1 = UUID.randomUUID().toString();
 		CodeJson codeJson1 = new CodeJson();
@@ -491,7 +492,7 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 		String codeableConceptId2 = UUID.randomUUID().toString();
 		CodeJson codeJson2 = new CodeJson();
 		codeJson2.setCodeableConceptText("Test Codeable Concept Field for Second Code");
-		codeJson2.setCodeableConceptId(codeableConceptId1);
+		codeJson2.setCodeableConceptId(codeableConceptId2);
 		codeJson2.addCoding("http://mycodes.org/fhir/observation-code", "test-code-2", "2-Observation Code2");
 
 		// Create CodeableConcepts for two categories, each with three codings.
@@ -526,12 +527,10 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 				if (entryCount % 2 == 1) {
 					observationJson.setCategories(categoryConcepts1);
 					observationJson.setCode(codeJson1);
-					observationJson.setCode_concept_id(codeableConceptId1);
 					assertTrue(elasticsearchSvc.createOrUpdateObservationCodeIndex(codeableConceptId1, codeJson1));
 				} else {
 					observationJson.setCategories(categoryConcepts2);
 					observationJson.setCode(codeJson2);
-					observationJson.setCode_concept_id(codeableConceptId2);
 					assertTrue(elasticsearchSvc.createOrUpdateObservationCodeIndex(codeableConceptId2, codeJson2));
 				}
 
@@ -568,6 +567,45 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
 		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
 
+	}*/
+
+	private void createMultiplePatientsAndObservations() throws IOException {
+		List<Integer> patientIds = IntStream.range(0, 10).boxed().collect(Collectors.toList());
+		List<ObservationJson> observations = LastNTestDataGenerator.createMultipleObservationJson(patientIds);
+
+		observations.forEach(observation -> {
+			CodeJson codeJson = observation.getCode();
+			assertTrue(elasticsearchSvc.createOrUpdateObservationCodeIndex(codeJson.getCodeableConceptId(), codeJson));
+			assertTrue(elasticsearchSvc.createOrUpdateObservationIndex(observation.getIdentifier(), observation));
+
+			String subject = observation.getSubject();
+			if (createdPatientObservationMap.containsKey(subject)) {
+				Map<String, List<Date>> observationCodeMap = createdPatientObservationMap.get(subject);
+				if (observationCodeMap.containsKey(observation.getCode_concept_id())) {
+					List<Date> observationDates = observationCodeMap.get(observation.getCode_concept_id());
+					// Want dates to be sorted in descending order
+					observationDates.add(0, observation.getEffectiveDtm());
+					// Only keep the three most recent dates for later check.
+					if (observationDates.size() > 3) {
+						observationDates.remove(3);
+					}
+				} else {
+					ArrayList<Date> observationDates = new ArrayList<>();
+					observationDates.add(observation.getEffectiveDtm());
+					observationCodeMap.put(observation.getCode_concept_id(), observationDates);
+				}
+			} else {
+				ArrayList<Date> observationDates = new ArrayList<>();
+				observationDates.add(observation.getEffectiveDtm());
+				Map<String, List<Date>> codeObservationMap = new HashMap<>();
+				codeObservationMap.put(observation.getCode_concept_id(), observationDates);
+				createdPatientObservationMap.put(subject, codeObservationMap);
+			}
+		});
+
+		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
+		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
+
 	}
 
 	@Test
@@ -584,14 +622,5 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 		assertNotEquals(observationCode1, observationCode2);
 
 	}
-
-	@BeforeAll
-	public static void beforeClass() {
-		ourMapperNonPrettyPrint = new ObjectMapper();
-		ourMapperNonPrettyPrint.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-		ourMapperNonPrettyPrint.disable(SerializationFeature.INDENT_OUTPUT);
-		ourMapperNonPrettyPrint.disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
-	}
-
 
 }

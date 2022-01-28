@@ -134,7 +134,6 @@ public class ObservationLastNIndexPersistSvc {
 		myElasticsearchSvc.createOrUpdateObservationCodeIndex(codeableConceptField.getCodeableConceptId(), codeableConceptField);
 
 		theIndexedObservation.setCode(codeableConceptField);
-		theIndexedObservation.setCode_concept_id(codeableConceptField.getCodeableConceptId());
 	}
 
 	private void addCategoriesToObservationIndex(List<IBase> observationCategoryCodeableConcepts,
