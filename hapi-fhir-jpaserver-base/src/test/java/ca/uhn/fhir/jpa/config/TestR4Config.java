@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @Configuration
-@Import({TestJPAConfig.class, BatchJobsConfig.class, TestHibernateSearchAddInConfig.DefaultLuceneOrNone.class})
+@Import({TestJPAConfig.class, BatchJobsConfig.class, TestHibernateSearchAddInConfig.DefaultLuceneHeap.class})
 @EnableTransactionManagement()
 public class TestR4Config extends BaseJavaConfigR4 {
 

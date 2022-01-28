@@ -749,7 +749,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	public List<IBaseResource> getObservationResources(Collection<ResourcePersistentId> thePids) {
 		SearchRequest searchRequest = buildObservationResourceSearchRequest(thePids);
 		try {
-			// wip mb what is the limit to an ES hit count?  10k?  We may need to chunk this :-(
+			// wipmb what is the limit to an ES hit count?  10k?  We may need to chunk this :-(
 			SearchResponse observationDocumentResponse = executeSearchRequest(searchRequest);
 			SearchHit[] observationDocumentHits = observationDocumentResponse.getHits().getHits();
 			IParser parser = TolerantJsonParser.createWithLenientErrorHandling(myContext, null);
@@ -758,16 +758,16 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 			 * @see ca.uhn.fhir.jpa.dao.BaseHapiFhirDao#toResource(Class, IBaseResourceEntity, Collection, boolean) for
 			 * details about parsing raw json to BaseResource
 			 */
-			// WIP what do we do with partition?
-			// WIP what do we do with deleted observation resources
-			// WIP how do you handle provenance?
+			// wipmb what do we do with partition?
+			// wipmb what do we do with deleted observation resources
+			// wipmb how do you handle provenance?
 			// Parse using tolerant parser
 			return Arrays.stream(observationDocumentHits)
 				.map(this::parseObservationJson)
 				.map(observationJson -> parser.parseResource(resourceType, observationJson.getResource()))
 				.collect(Collectors.toList());
 		} catch (IOException theE) {
-			// WIP do we fallback to JPA search then?
+			// wipmb do we fallback to JPA search then?
 			throw new InvalidRequestException("Unable to execute observation document query for provided IDs " + thePids, theE);
 		}
 	}
