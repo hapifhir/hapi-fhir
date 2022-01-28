@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+import ca.uhn.fhir.jpa.search.elastic.ElasticsearchHibernatePropertiesBuilder;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
@@ -18,7 +19,10 @@ import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import org.hibernate.jpa.HibernatePersistenceProvider;
+import org.hibernate.search.backend.elasticsearch.index.IndexStatus;
+import org.hibernate.search.mapper.orm.schema.management.SchemaManagementStrategyName;
 import org.springframework.beans.factory.annotation.Autowire;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.annotation.Bean;
@@ -27,6 +31,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.testcontainers.elasticsearch.ElasticsearchContainer;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -164,6 +169,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		return retVal;
 	}
 
+	// wipmb pull this stuff out.
 	boolean isLuceneEnabled() {
 		boolean enableLucene = myEnv.getProperty(BaseJpaTest.CONFIG_ENABLE_LUCENE, Boolean.TYPE, BaseJpaTest.CONFIG_ENABLE_LUCENE_DEFAULT_VALUE);
 		return enableLucene;
@@ -178,6 +184,9 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		}
 	}
 
+	@Autowired(required = false)
+	ElasticsearchContainer myESContainer;
+
 	@Bean
 	public Properties jpaProperties() {
 		Properties extraProperties = new Properties();
@@ -189,6 +198,24 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		Map<String, String> hibernateSearchProperties = BaseJpaTest.buildHibernateSearchProperties(isLuceneEnabled());
 		extraProperties.putAll(hibernateSearchProperties);
 
+		if (myESContainer != null) {
+			int httpPort = myESContainer.getMappedPort(9200);//9200 is the HTTP port
+			String host = myESContainer.getHost();
+
+			ourLog.info("Hibernate Search: using elasticsearch - host {} {}", host, httpPort);
+
+			new ElasticsearchHibernatePropertiesBuilder()
+				.setDebugIndexSyncStrategy("read-sync")
+				.setDebugPrettyPrintJsonLog(true)
+				.setIndexSchemaManagementStrategy(SchemaManagementStrategyName.CREATE)
+				.setIndexManagementWaitTimeoutMillis(10000)
+				.setRequiredIndexStatus(IndexStatus.YELLOW)
+				.setHosts(host + ":" + httpPort)
+				.setProtocol("http")
+				.setUsername("")
+				.setPassword("")
+				.apply(extraProperties);
+		}
 		ourLog.info("XXXXX {} jpaProperties: {}", this.getClass().getSimpleName(), extraProperties);
 
 		return extraProperties;
