@@ -1,0 +1,14 @@
+---
+type: add
+issue: 3335
+jira: 3603
+title: "Added ability to specify max code lengths for supported
+      Phonetic Encoders (Metaphone, Double_Metaphone).
+      To specify max code length, append the code length to the searchparameter-phonetic-encoder
+      extension in brackets after the encoder type.
+      eg:
+      {
+         \"url\": \"http://hapifhir.io/fhir/StructureDefinition/searchparameter-phonetic-encoder\",
+         \"valueString\": \"METAPHONE(5)\"
+      }
+      "
