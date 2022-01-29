@@ -41,7 +41,7 @@ import static org.mockito.Mockito.when;
 
 public class LoggingInterceptorTest {
 
-	private static FhirContext ourCtx = FhirContext.forR4();
+	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private static int ourPort;
 	private static Server ourServer;
 	private Logger myLoggerRoot;
