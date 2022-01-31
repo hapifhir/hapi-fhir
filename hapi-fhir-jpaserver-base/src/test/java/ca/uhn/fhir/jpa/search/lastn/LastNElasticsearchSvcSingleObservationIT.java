@@ -27,6 +27,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 
 import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.CATEGORYFIRSTCODINGSYSTEM;
@@ -35,7 +36,6 @@ import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.CATEGORYTHIRDC
 import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.CODEFIRSTCODINGCODE;
 import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.CODEFIRSTCODINGDISPLAY;
 import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.CODEFIRSTCODINGSYSTEM;
-import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.SINGLE_OBSERVATION_EFFECTIVE_DT;
 import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.FIRSTCATEGORYFIRSTCODINGCODE;
 import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.FIRSTCATEGORYFIRSTCODINGDISPLAY;
 import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.FIRSTCATEGORYSECONDCODINGCODE;
@@ -43,9 +43,8 @@ import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.FIRSTCATEGORYS
 import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.FIRSTCATEGORYTEXT;
 import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.FIRSTCATEGORYTHIRDCODINGCODE;
 import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.FIRSTCATEGORYTHIRDCODINGDISPLAY;
-import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.OBSERVATION_CODE_CONCEPT_TEXT_1;
 import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.OBSERVATIONSINGLECODEID;
-import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.SINGLE_OBSERVATION_RESOURCE_PID;
+import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.OBSERVATION_CODE_CONCEPT_TEXT_1;
 import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.SECONDCATEGORYFIRSTCODINGCODE;
 import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.SECONDCATEGORYFIRSTCODINGDISPLAY;
 import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.SECONDCATEGORYSECONDCODINGCODE;
@@ -53,7 +52,9 @@ import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.SECONDCATEGORY
 import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.SECONDCATEGORYTEXT;
 import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.SECONDCATEGORYTHIRDCODINGCODE;
 import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.SECONDCATEGORYTHIRDCODINGDISPLAY;
+import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.SINGLE_OBSERVATION_RESOURCE_PID;
 import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.SINGLE_OBSERVATION_SUBJECT_ID;
+import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.TEST_BASELINE_TIMESTAMP;
 import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.THIRDCATEGORYFIRSTCODINGCODE;
 import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.THIRDCATEGORYFIRSTCODINGDISPLAY;
 import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.THIRDCATEGORYSECONDCODINGCODE;
@@ -110,7 +111,7 @@ public class LastNElasticsearchSvcSingleObservationIT {
 		searchParameterMap.add(Observation.SP_CATEGORY, new TokenAndListParam().addAnd(new TokenOrListParam().addOr(categoryParam)));
 		TokenParam codeParam = new TokenParam(CODEFIRSTCODINGSYSTEM, CODEFIRSTCODINGCODE);
 		searchParameterMap.add(Observation.SP_CODE, new TokenAndListParam().addAnd(new TokenOrListParam().addOr(codeParam)));
-		searchParameterMap.add(Observation.SP_DATE, new DateParam(ParamPrefixEnum.EQUAL, SINGLE_OBSERVATION_EFFECTIVE_DT));
+		searchParameterMap.add(Observation.SP_DATE, new DateParam(ParamPrefixEnum.EQUAL, new Date(TEST_BASELINE_TIMESTAMP)));
 
 		searchParameterMap.setLastNMax(3);
 
@@ -134,7 +135,7 @@ public class LastNElasticsearchSvcSingleObservationIT {
 
 		assertEquals(SINGLE_OBSERVATION_SUBJECT_ID, observation.getSubject());
 		assertEquals(SINGLE_OBSERVATION_RESOURCE_PID, observation.getIdentifier());
-		assertEquals(SINGLE_OBSERVATION_EFFECTIVE_DT, observation.getEffectiveDtm());
+		assertEquals(new Date(TEST_BASELINE_TIMESTAMP), observation.getEffectiveDtm());
 		assertEquals(OBSERVATIONSINGLECODEID, observation.getCode_concept_id());
 
 		List<String> category_concept_text_values = observation.getCategory_concept_text();

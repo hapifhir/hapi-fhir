@@ -15,27 +15,28 @@ import java.util.stream.IntStream;
 
 public class LastNTestDataGenerator {
 
-	private static final Calendar baseObservationDate = new GregorianCalendar();
+	public static final long TEST_BASELINE_TIMESTAMP = new Date().toInstant().toEpochMilli();
+
 	public static final String SINGLE_OBSERVATION_RESOURCE_PID = "123";
 	public static final String SINGLE_OBSERVATION_SUBJECT_ID = "Patient/4567";
-	public static final Date SINGLE_OBSERVATION_EFFECTIVE_DT = new Date();
+
 	public static final String FIRSTCATEGORYTEXT = "Test Codeable Concept Field for first category";
 	public static final String CATEGORYFIRSTCODINGSYSTEM = "http://mycodes.org/fhir/observation-category";
 	public static final String CATEGORYSECONDCODINGSYSTEM = "http://myalternatecodes.org/fhir/observation-category";
 	public static final String CATEGORYTHIRDCODINGSYSTEM = "http://mysecondaltcodes.org/fhir/observation-category";
 	public static final String FIRSTCATEGORYFIRSTCODINGCODE = "test-heart-rate";
-	public static final String FIRSTCATEGORYFIRSTCODINGDISPLAY = "test-heart-rate display";
+	public static final String FIRSTCATEGORYFIRSTCODINGDISPLAY = "Test Heart Rate";
 	public static final String FIRSTCATEGORYSECONDCODINGCODE = "test-alt-heart-rate";
-	public static final String FIRSTCATEGORYSECONDCODINGDISPLAY = "test-alt-heart-rate display";
+	public static final String FIRSTCATEGORYSECONDCODINGDISPLAY = "Test HeartRate";
 	public static final String FIRSTCATEGORYTHIRDCODINGCODE = "test-2nd-alt-heart-rate";
-	public static final String FIRSTCATEGORYTHIRDCODINGDISPLAY = "test-2nd-alt-heart-rate display";
+	public static final String FIRSTCATEGORYTHIRDCODINGDISPLAY = "Test Heart-Rate";
 	public static final String SECONDCATEGORYTEXT = "Test Codeable Concept Field for for second category";
 	public static final String SECONDCATEGORYFIRSTCODINGCODE = "test-vital-signs";
-	public static final String SECONDCATEGORYFIRSTCODINGDISPLAY = "test-vital-signs display";
+	public static final String SECONDCATEGORYFIRSTCODINGDISPLAY = "Test Vital Signs";
 	public static final String SECONDCATEGORYSECONDCODINGCODE = "test-alt-vitals";
-	public static final String SECONDCATEGORYSECONDCODINGDISPLAY = "test-alt-vitals display";
+	public static final String SECONDCATEGORYSECONDCODINGDISPLAY = "Test Vital-Signs";
 	public static final String SECONDCATEGORYTHIRDCODINGCODE = "test-2nd-alt-vitals";
-	public static final String SECONDCATEGORYTHIRDCODINGDISPLAY = "test-2nd-alt-vitals display";
+	public static final String SECONDCATEGORYTHIRDCODINGDISPLAY = "Test Vitals";
 	public static final String THIRDCATEGORYTEXT = "Test Codeable Concept Field for third category";
 	public static final String THIRDCATEGORYFIRSTCODINGCODE = "test-vital-panel";
 	public static final String THIRDCATEGORYFIRSTCODINGDISPLAY = "test-vitals-panel display";
@@ -48,16 +49,16 @@ public class LastNTestDataGenerator {
 	public static final String OBSERVATION_CODE_CONCEPT_TEXT_2 = "Test Codeable Concept Field for Second Code";
 	public static final String CODEFIRSTCODINGSYSTEM = "http://mycodes.org/fhir/observation-code";
 	public static final String CODEFIRSTCODINGCODE = "test-code-1";
-	public static final String CODEFIRSTCODINGDISPLAY = "1-Observation-Code-1";
+	public static final String CODEFIRSTCODINGDISPLAY = "1-Observation Code1";
 	public static final String CODE_SECOND_CODING_SYSTEM = "http://mycodes.org/fhir/observation-code";
 	public static final String CODE_SECOND_CODING_CODE = "test-code-2";
-	public static final String CODE_SECOND_CODING_DISPLAY = "2-Observation-Code-2";
+	public static final String CODE_SECOND_CODING_DISPLAY = "2-Observation Code2";
 
 	public static ObservationJson createSingleObservationJson() {
 		ObservationJson indexedObservation = new ObservationJson();
 		indexedObservation.setIdentifier(SINGLE_OBSERVATION_RESOURCE_PID);
 		indexedObservation.setSubject(SINGLE_OBSERVATION_SUBJECT_ID);
-		indexedObservation.setEffectiveDtm(SINGLE_OBSERVATION_EFFECTIVE_DT);
+		indexedObservation.setEffectiveDtm(new Date(TEST_BASELINE_TIMESTAMP));
 
 		indexedObservation.setCategories(createCategoryCodeableConcepts());
 
@@ -122,26 +123,23 @@ public class LastNTestDataGenerator {
 
 		// For each patient - create 10 observations
 		return thePatientIds.stream()
-			.flatMap(patientId -> {
-				boolean isOdd = patientId % 2 == 1;
-				return IntStream.range(0, 10)
-					.mapToObj(index -> {
-						ObservationJson observationJson = new ObservationJson();
-						String identifier = String.valueOf((index + patientId * 10L));
-						observationJson.setIdentifier(identifier);
-						observationJson.setSubject(String.valueOf(patientId));
-						if (isOdd) {
-							observationJson.setCategories(categoryConcepts1);
-							observationJson.setCode(codeJson1);
-						} else {
-							observationJson.setCategories(categoryConcepts2);
-							observationJson.setCode(codeJson2);
-						}
-						Date effectiveDtm = new Date(baseObservationDate.getTimeInMillis() - ((10L - index) * 3600L * 1000L));
-						observationJson.setEffectiveDtm(effectiveDtm);
-						return observationJson;
-					});
-			})
+			.flatMap(patientId -> IntStream.range(0, 10)
+				.mapToObj(index -> {
+					ObservationJson observationJson = new ObservationJson();
+					String identifier = String.valueOf((index + patientId * 10L));
+					observationJson.setIdentifier(identifier);
+					observationJson.setSubject(String.valueOf(patientId));
+					if (index % 2 == 1) {
+						observationJson.setCategories(categoryConcepts1);
+						observationJson.setCode(codeJson1);
+					} else {
+						observationJson.setCategories(categoryConcepts2);
+						observationJson.setCode(codeJson2);
+					}
+					Date effectiveDtm = new Date(TEST_BASELINE_TIMESTAMP - ((10L - index) * 3600L * 1000L));
+					observationJson.setEffectiveDtm(effectiveDtm);
+					return observationJson;
+				}))
 			.collect(Collectors.toList());
 	}
 
