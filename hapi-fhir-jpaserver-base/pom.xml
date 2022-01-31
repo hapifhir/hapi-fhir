@@ -528,17 +528,13 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<!-- wipmb move up to parent, and specify the version. reconcile with cdr version -->
 			<groupId>com.jayway.jsonpath</groupId>
 			<artifactId>json-path-assert</artifactId>
-			<version>2.5.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<!-- wipmb move up to parent, and specify the version. reconcile with cdr version -->
 			<groupId>com.jayway.jsonpath</groupId>
 			<artifactId>json-path</artifactId>
-			<version>2.5.0</version>
 		</dependency>
 	</dependencies>
 
