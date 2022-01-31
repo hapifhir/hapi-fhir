@@ -524,7 +524,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				.map(Throwable::getMessage)
 				.collect(Collectors.joining(", "));
 			throw new InternalErrorException(
-				"Tag get/create failed after "
+				Msg.code(2019) +
+					"Tag get/create failed after "
 					+ TOTAL_TAG_READ_ATTEMPTS
 					+ " attempts with error(s): "
 					+ msg
