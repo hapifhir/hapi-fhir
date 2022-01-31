@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoDstu3TerminologyTest;
 import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -259,7 +260,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: $lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1076) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
 		}
 		//@formatter:on
 	}
@@ -277,7 +278,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: $lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1076) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
 		}
 		//@formatter:on
 	}
@@ -294,7 +295,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: No code, coding, or codeableConcept provided to validate", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1075) + "No code, coding, or codeableConcept provided to validate", e.getMessage());
 		}
 		//@formatter:on
 	}

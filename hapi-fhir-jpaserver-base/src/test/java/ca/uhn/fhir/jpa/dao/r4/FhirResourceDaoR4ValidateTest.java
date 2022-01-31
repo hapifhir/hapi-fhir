@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -288,7 +289,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			myStructureDefinitionDao.generateSnapshot(sd, null, null, null);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertEquals("StructureDefinition[id=null, url=http://sd] has no base", e.getMessage());
+			assertEquals(Msg.code(704) + "StructureDefinition[id=null, url=http://sd] has no base", e.getMessage());
 		}
 
 		myStructureDefinitionDao.create(sd);
@@ -310,7 +311,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			myObservationDao.validate(obs, null, null, null, ValidationModeEnum.CREATE, null, mySrd);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertEquals("StructureDefinition[id=null, url=http://sd] has no base", e.getMessage());
+			assertEquals(Msg.code(704) + "StructureDefinition[id=null, url=http://sd] has no base", e.getMessage());
 		}
 	}
 

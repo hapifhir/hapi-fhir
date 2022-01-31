@@ -1,5 +1,6 @@
 package org.hl7.fhir.common.hapi.validation.validator;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.util.XmlUtil;
@@ -116,7 +117,7 @@ class ValidatorWrapper {
 		try {
 			v = new InstanceValidator(theWorkerContext, evaluationCtx, xverManager);
 		} catch (Exception e) {
-			throw new ConfigurationException(e);
+			throw new ConfigurationException(Msg.code(648) + e);
 		}
 
 		v.setAssumeValidRestReferences(isAssumeValidRestReferences());
@@ -190,7 +191,7 @@ class ValidatorWrapper {
 			v.validate(null, messages, inputStream, format, profileUrls);
 
 		} else {
-			throw new IllegalArgumentException("Unknown encoding: " + encoding);
+			throw new IllegalArgumentException(Msg.code(649) + "Unknown encoding: " + encoding);
 		}
 
 		for (int i = 0; i < messages.size(); i++) {

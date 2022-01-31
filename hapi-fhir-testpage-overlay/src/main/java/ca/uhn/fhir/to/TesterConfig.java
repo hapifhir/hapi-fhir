@@ -1,5 +1,6 @@
 package ca.uhn.fhir.to;
 
+import ca.uhn.fhir.i18n.Msg;
 import java.util.*;
 
 import javax.annotation.PostConstruct;
@@ -104,7 +105,7 @@ public class TesterConfig {
 			String[] nextSplit = nextRaw.split(",");
 
 			if (nextSplit.length < 3) {
-				throw new IllegalArgumentException("Invalid serveer line '" + nextRaw + "' - Must be comma separated");
+				throw new IllegalArgumentException(Msg.code(195) + "Invalid serveer line '" + nextRaw + "' - Must be comma separated");
 			} else {
 				Validate.notBlank(nextSplit[0], "theId can not be blank");
 				Validate.notBlank(nextSplit[1], "theVersion can not be blank");

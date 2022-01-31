@@ -1,5 +1,6 @@
 package ca.uhn.fhir.tinder.parser;
 
+import ca.uhn.fhir.i18n.Msg;
 import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -76,7 +77,7 @@ public class ResourceGeneratorUsingModel extends BaseStructureParser {
 					.map(t -> def.getSearchParams().stream().filter(y -> y.getUri().equals(t.getReference())).findFirst().orElseThrow(() -> new IllegalStateException()))
 					.collect(Collectors.toList());
 				if (nextSearchParam.getParamType() == RestSearchParameterTypeEnum.COMPOSITE && compositeOfParams.size() != 2) {
-					throw new IllegalStateException("Search param " + nextSearchParam.getName() + " on base " + nextSearchParam.getBase() + " has components: " + nextSearchParam.getComponents());
+					throw new IllegalStateException(Msg.code(163) + "Search param " + nextSearchParam.getName() + " on base " + nextSearchParam.getBase() + " has components: " + nextSearchParam.getComponents());
 				}
 
 				param.setName(nextSearchParam.getName());

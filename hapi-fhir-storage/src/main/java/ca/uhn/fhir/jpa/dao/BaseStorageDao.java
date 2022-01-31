@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -187,7 +188,7 @@ public abstract class BaseStorageDao {
 	private void verifyResourceTypeIsAppropriateForDao(IBaseResource theResource) {
 		String type = getContext().getResourceType(theResource);
 		if (getResourceName() != null && !getResourceName().equals(type)) {
-			throw new InvalidRequestException(getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "incorrectResourceType", type, getResourceName()));
+			throw new InvalidRequestException(Msg.code(520) + getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "incorrectResourceType", type, getResourceName()));
 		}
 	}
 
@@ -197,7 +198,7 @@ public abstract class BaseStorageDao {
 	private void verifyResourceIdIsValid(IBaseResource theResource) {
 		if (theResource.getIdElement().hasIdPart()) {
 			if (!theResource.getIdElement().isIdPartValid()) {
-				throw new InvalidRequestException(getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "failedToCreateWithInvalidId", theResource.getIdElement().getIdPart()));
+				throw new InvalidRequestException(Msg.code(521) + getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "failedToCreateWithInvalidId", theResource.getIdElement().getIdPart()));
 			}
 		}
 	}
@@ -212,7 +213,7 @@ public abstract class BaseStorageDao {
 			bundleType = defaultString(bundleType);
 			if (!allowedBundleTypes.contains(bundleType)) {
 				String message = myFhirContext.getLocalizer().getMessage(BaseStorageDao.class, "invalidBundleTypeForStorage", (isNotBlank(bundleType) ? bundleType : "(missing)"));
-				throw new UnprocessableEntityException(message);
+				throw new UnprocessableEntityException(Msg.code(522) + message);
 			}
 		}
 	}
@@ -299,7 +300,7 @@ public abstract class BaseStorageDao {
 						// resource not found
 						// and no autocreateplaceholders set...
 						// we throw
-						throw new ResourceNotFoundException(referenceElement);
+						throw new ResourceNotFoundException(Msg.code(523) + referenceElement);
 					}
 					String newTargetReference = referenceElement.withVersion(version.toString()).getValue();
 					nextReference.setReference(newTargetReference);
@@ -470,7 +471,7 @@ public abstract class BaseStorageDao {
 			if (param == null) {
 				Collection<String> validNames = mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(getResourceName());
 				String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "invalidSearchParameter", qualifiedParamName.getParamName(), getResourceName(), validNames);
-				throw new InvalidRequestException(msg);
+				throw new InvalidRequestException(Msg.code(524) + msg);
 			}
 
 			// Should not be null since the check above would have caught it
@@ -489,8 +490,7 @@ public abstract class BaseStorageDao {
 	public void notifyInterceptors(RestOperationTypeEnum theOperationType, IServerInterceptor.ActionRequestDetails theRequestDetails) {
 		if (theRequestDetails.getId() != null && theRequestDetails.getId().hasResourceType() && isNotBlank(theRequestDetails.getResourceType())) {
 			if (theRequestDetails.getId().getResourceType().equals(theRequestDetails.getResourceType()) == false) {
-				throw new InternalErrorException(
-					"Inconsistent server state - Resource types don't match: " + theRequestDetails.getId().getResourceType() + " / " + theRequestDetails.getResourceType());
+				throw new InternalErrorException(Msg.code(525) + "Inconsistent server state - Resource types don't match: " + theRequestDetails.getId().getResourceType() + " / " + theRequestDetails.getResourceType());
 			}
 		}
 

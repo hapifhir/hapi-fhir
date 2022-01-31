@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.partition;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -48,7 +49,7 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 		try {
 			myPartitionConfigSvc.createPartition(partition);
 		} catch (MethodNotAllowedException e) {
-			assertEquals("Can not invoke this operation in unnamed partition mode", e.getMessage());
+			assertEquals(Msg.code(1313) + "Can not invoke this operation in unnamed partition mode", e.getMessage());
 		}
 	}
 
@@ -98,7 +99,7 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 			myPartitionConfigSvc.updatePartition(partition);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Partition name \"NAME123\" is already defined", e.getMessage());
+			assertEquals(Msg.code(1309) + "Partition name \"NAME123\" is already defined", e.getMessage());
 		}
 	}
 
@@ -112,7 +113,7 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 			myPartitionConfigSvc.updatePartition(partition);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Partition must have an ID and a Name", e.getMessage());
+			assertEquals(Msg.code(1310) + "Partition must have an ID and a Name", e.getMessage());
 		}
 	}
 
@@ -149,7 +150,7 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 			myPartitionConfigSvc.createPartition(partition);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Partition name \"NAME 123\" is not valid", e.getMessage());
+			assertEquals(Msg.code(1312) + "Partition name \"NAME 123\" is not valid", e.getMessage());
 		}
 
 	}
@@ -164,7 +165,7 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 			myPartitionConfigSvc.updatePartition(partition);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("No partition exists with ID 123", e.getMessage());
+			assertEquals(Msg.code(1307) + "No partition exists with ID 123", e.getMessage());
 		}
 
 	}

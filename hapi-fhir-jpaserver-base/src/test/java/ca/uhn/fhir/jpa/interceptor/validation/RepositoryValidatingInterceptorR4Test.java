@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.interceptor.validation;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -117,7 +118,7 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 			myPatientDao.create(patient);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertEquals("Resource of type \"Patient\" does not declare conformance to profile from: [http://foo/Profile1, http://foo/Profile2]", e.getMessage());
+			assertEquals(Msg.code(575) + "Resource of type \"Patient\" does not declare conformance to profile from: [http://foo/Profile1, http://foo/Profile2]", e.getMessage());
 		}
 
 		// No profile blocked
@@ -127,7 +128,7 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 			myPatientDao.create(patient);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertEquals("Resource of type \"Patient\" does not declare conformance to profile from: [http://foo/Profile1, http://foo/Profile2]", e.getMessage());
+			assertEquals(Msg.code(575) + "Resource of type \"Patient\" does not declare conformance to profile from: [http://foo/Profile1, http://foo/Profile2]", e.getMessage());
 		}
 
 	}
@@ -153,7 +154,7 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 			myPatientDao.metaDeleteOperation(id, metaDel, mySrd);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertEquals("Resource of type \"Patient\" does not declare conformance to profile from: [http://foo/Profile1, http://foo/Profile2]", e.getMessage());
+			assertEquals(Msg.code(575) + "Resource of type \"Patient\" does not declare conformance to profile from: [http://foo/Profile1, http://foo/Profile2]", e.getMessage());
 		}
 
 		patient = myPatientDao.read(id);
@@ -177,7 +178,7 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 			myPatientDao.create(patient);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertEquals("Resource of type \"Patient\" must not declare conformance to profile: http://profile-bad", e.getMessage());
+			assertEquals(Msg.code(575) + "Resource of type \"Patient\" must not declare conformance to profile: http://profile-bad", e.getMessage());
 		}
 
 	}
@@ -203,7 +204,7 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 			myPatientDao.metaAddOperation(id, metaDel, mySrd);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertEquals("Resource of type \"Patient\" must not declare conformance to profile: http://profile-bad", e.getMessage());
+			assertEquals(Msg.code(575) + "Resource of type \"Patient\" must not declare conformance to profile: http://profile-bad", e.getMessage());
 		}
 
 		// Explicitly adding the profile is blocked using patch
@@ -231,7 +232,7 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 			myPatientDao.patch(id, null, PatchTypeEnum.FHIR_PATCH_JSON, null, patch, mySrd);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertEquals("Resource of type \"Patient\" must not declare conformance to profile: http://profile-bad2", e.getMessage());
+			assertEquals(Msg.code(575) + "Resource of type \"Patient\" must not declare conformance to profile: http://profile-bad2", e.getMessage());
 		} catch (Exception e) {
 			myCaptureQueriesListener.logAllQueriesForCurrentThread();
 			fail(e.toString());

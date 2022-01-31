@@ -1,5 +1,6 @@
 package ca.uhn.fhir.tinder.model;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
@@ -32,7 +33,7 @@ public abstract class Child extends BaseElement {
 		if ("CodeDt".equals(singleType) || "CodeableConceptDt".equals(singleType)) {
 			return "Bound" + singleType;
 		}
-		throw new IllegalStateException();
+		throw new IllegalStateException(Msg.code(188));
 	}
 
 	public String getCardMaxForChildAnnotation() {
@@ -191,7 +192,7 @@ public abstract class Child extends BaseElement {
 		while (!clazz.getSuperclass().equals(BasePrimitive.class)) {
 			clazz = clazz.getSuperclass();
 			if (clazz.equals(Object.class)) {
-				throw new Error("Parent of " + name + " is not BasePrimitive");
+				throw new Error(Msg.code(189) + "Parent of " + name + " is not BasePrimitive");
 			}
 		}
 

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.TestUtil;
@@ -216,7 +217,7 @@ public class FhirResourceDaoR4SourceTest extends BaseJpaR4Test {
 		try {
 			myPatientDao.search(params);
 		} catch (InvalidRequestException e) {
-			assertEquals(e.getMessage(), "The _source parameter is disabled on this server");
+			assertEquals(e.getMessage(), Msg.code(1216) + "The _source parameter is disabled on this server");
 		}
 	}
 

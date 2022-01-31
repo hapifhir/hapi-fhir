@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.interceptor;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -55,7 +56,7 @@ public class BanUnsupportedHttpMethodsInterceptor extends InterceptorAdapter {
 			return true;
 		}
 		
-		throw new MethodNotAllowedException("Method not supported: " + theRequest.getMethod());
+		throw new MethodNotAllowedException(Msg.code(329) + "Method not supported: " + theRequest.getMethod());
 	}
 
 }

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
@@ -161,7 +162,7 @@ public class BaseJpaResourceProviderCodeSystemR4 extends JpaResourceProviderR4<C
 				if (theCoding != null) {
 					if (theCoding.hasSystem()) {
 						if (codeSystemUrl != null && !codeSystemUrl.equalsIgnoreCase(theCoding.getSystem())) {
-							throw new InvalidRequestException("Coding.system '" + theCoding.getSystem() + "' does not equal param url '" + theCodeSystemUrl + "'. Unable to validate-code.");
+							throw new InvalidRequestException(Msg.code(1160) + "Coding.system '" + theCoding.getSystem() + "' does not equal param url '" + theCodeSystemUrl + "'. Unable to validate-code.");
 						}
 						codeSystemUrl = theCoding.getSystem();
 						code = theCoding.getCode();

@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
@@ -182,7 +183,7 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 			myTermSvc.expandValueSet(null, vs);
 			fail();
 		} catch (InternalErrorException e) {
-			assertEquals("Expansion of ValueSet produced too many codes (maximum 50) - Operation aborted!", e.getMessage());
+			assertEquals(Msg.code(832) + "Expansion of ValueSet produced too many codes (maximum 50) - Operation aborted!", e.getMessage());
 		}
 
 		// Increase the max so it won't exceed

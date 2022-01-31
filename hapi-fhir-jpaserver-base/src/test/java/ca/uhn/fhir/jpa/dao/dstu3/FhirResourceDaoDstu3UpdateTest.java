@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -148,7 +149,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 				id = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 				fail();
 			} catch (UnprocessableEntityException e) {
-				assertEquals("Resource contains 4 meta entries (tag/profile/security label), maximum is 3", e.getMessage());
+				assertEquals(Msg.code(932) + "Resource contains 4 meta entries (tag/profile/security label), maximum is 3", e.getMessage());
 			}
 		}
 	}
@@ -174,7 +175,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 				myPatientDao.metaAddOperation(id, meta, null);
 				fail();
 			} catch (UnprocessableEntityException e) {
-				assertEquals("Resource contains 4 meta entries (tag/profile/security label), maximum is 3", e.getMessage());
+				assertEquals(Msg.code(932) + "Resource contains 4 meta entries (tag/profile/security label), maximum is 3", e.getMessage());
 			}
 
 		}
@@ -599,7 +600,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 			myOrganizationDao.update(p2, mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Existing resource ID[Patient/" + p1id.getIdPartAsLong() + "] is of type[Patient] - Cannot update with [Organization]", e.getMessage());
+			assertEquals(Msg.code(930) + "Existing resource ID[Patient/" + p1id.getIdPartAsLong() + "] is of type[Patient] - Cannot update with [Organization]", e.getMessage());
 		}
 
 		try {
@@ -607,7 +608,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 			myOrganizationDao.update(p2, mySrd);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Incorrect resource type (Patient) for this DAO, wanted: Organization", e.getMessage());
+			assertEquals(Msg.code(996) + "Incorrect resource type (Patient) for this DAO, wanted: Organization", e.getMessage());
 		}
 
 	}
@@ -636,7 +637,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 			myPatientDao.update(p, mySrd);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Can not process entity with ID[123:456], this is not a valid FHIR ID", e.getMessage());
+			assertEquals(Msg.code(521) + "Can not process entity with ID[123:456], this is not a valid FHIR ID", e.getMessage());
 		}
 	}
 

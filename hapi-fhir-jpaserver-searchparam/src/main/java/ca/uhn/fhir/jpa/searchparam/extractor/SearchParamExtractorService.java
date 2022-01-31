@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -326,7 +327,7 @@ public class SearchParamExtractorService {
 		if (isBlank(typeString)) {
 			String msg = "Invalid resource reference found at path[" + path + "] - Does not contain resource type - " + nextId.getValue();
 			if (theFailOnInvalidReference) {
-				throw new InvalidRequestException(msg);
+				throw new InvalidRequestException(Msg.code(505) + msg);
 			} else {
 				ourLog.debug(msg);
 				return;
@@ -338,7 +339,7 @@ public class SearchParamExtractorService {
 		} catch (DataFormatException e) {
 			String msg = "Invalid resource reference found at path[" + path + "] - Resource type is unknown or not supported on this server - " + nextId.getValue();
 			if (theFailOnInvalidReference) {
-				throw new InvalidRequestException(msg);
+				throw new InvalidRequestException(Msg.code(506) + msg);
 			} else {
 				ourLog.debug(msg);
 				return;
@@ -354,7 +355,7 @@ public class SearchParamExtractorService {
 		if (isNotBlank(baseUrl)) {
 			if (!myModelConfig.getTreatBaseUrlsAsLocal().contains(baseUrl) && !myModelConfig.isAllowExternalReferences()) {
 				String msg = myContext.getLocalizer().getMessage(BaseSearchParamExtractor.class, "externalReferenceNotAllowed", nextId.getValue());
-				throw new InvalidRequestException(msg);
+				throw new InvalidRequestException(Msg.code(507) + msg);
 			} else {
 				ResourceLink resourceLink = ResourceLink.forAbsoluteReference(thePathAndRef.getPath(), theEntity, nextId, transactionDate);
 				if (theParams.myLinks.add(resourceLink)) {
@@ -369,7 +370,7 @@ public class SearchParamExtractorService {
 		if (StringUtils.isBlank(targetId)) {
 			String msg = "Invalid resource reference found at path[" + path + "] - Does not contain resource ID - " + nextId.getValue();
 			if (theFailOnInvalidReference) {
-				throw new InvalidRequestException(msg);
+				throw new InvalidRequestException(Msg.code(508) + msg);
 			} else {
 				ourLog.debug(msg);
 				return;

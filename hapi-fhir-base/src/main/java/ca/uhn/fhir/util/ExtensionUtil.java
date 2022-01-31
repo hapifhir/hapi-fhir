@@ -22,6 +22,7 @@ package ca.uhn.fhir.util;
 
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -105,7 +106,7 @@ public class ExtensionUtil {
 
 	private static IBaseHasExtensions validateExtensionSupport(IBase theBase) {
 		if (!(theBase instanceof IBaseHasExtensions)) {
-			throw new IllegalArgumentException(String.format("Expected instance that supports extensions, but got %s", theBase));
+			throw new IllegalArgumentException(Msg.code(1747) + String.format("Expected instance that supports extensions, but got %s", theBase));
 		}
 		return (IBaseHasExtensions) theBase;
 	}

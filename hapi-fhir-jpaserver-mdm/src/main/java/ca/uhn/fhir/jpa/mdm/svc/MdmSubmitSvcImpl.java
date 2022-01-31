@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -109,7 +110,7 @@ public class MdmSubmitSvcImpl implements IMdmSubmitSvc {
 				total += loadPidsAndSubmitToMdmChannel(theSearchBuilder, pidBatch);
 			} while (query.hasNext());
 		} catch (IOException theE) {
-			throw new InternalErrorException("Failure while attempting to query resources for " + ProviderConstants.OPERATION_MDM_SUBMIT, theE);
+			throw new InternalErrorException(Msg.code(749) + "Failure while attempting to query resources for " + ProviderConstants.OPERATION_MDM_SUBMIT, theE);
 		}
 		ourLog.info("MDM Submit complete.  Submitted a total of {} resources.", total);
 		return total;
@@ -162,7 +163,7 @@ public class MdmSubmitSvcImpl implements IMdmSubmitSvc {
 
 	private void validateSourceType(String theResourceType) {
 		if(!myMdmSettings.getMdmRules().getMdmTypes().contains(theResourceType)) {
-			throw new InvalidRequestException(ProviderConstants.OPERATION_MDM_SUBMIT + " does not support resource type: " + theResourceType);
+			throw new InvalidRequestException(Msg.code(750) + ProviderConstants.OPERATION_MDM_SUBMIT + " does not support resource type: " + theResourceType);
 		}
 	}
 

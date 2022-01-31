@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.client.method;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -72,7 +73,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 
 		if (isBlank(theOperationName)) {
-			throw new ConfigurationException("Method '" + theMethod.getName() + "' on type " + theMethod.getDeclaringClass().getName() + " is annotated with @" + Operation.class.getSimpleName()
+			throw new ConfigurationException(Msg.code(1452) + "Method '" + theMethod.getName() + "' on type " + theMethod.getDeclaringClass().getName() + " is annotated with @" + Operation.class.getSimpleName()
 				+ " but this annotation has no name defined");
 		}
 		if (theOperationName.startsWith("$") == false) {
@@ -205,8 +206,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 				continue;
 			}
 			if (!(value instanceof IPrimitiveType)) {
-				throw new IllegalArgumentException(
-					"Can not invoke operation as HTTP GET when it has parameters with a composite (non priitive) datatype as the value. Found value: " + value.getClass().getName());
+				throw new IllegalArgumentException(Msg.code(1453) + "Can not invoke operation as HTTP GET when it has parameters with a composite (non priitive) datatype as the value. Found value: " + value.getClass().getName());
 			}
 			IPrimitiveType<?> primitive = (IPrimitiveType<?>) value;
 			params.get(nextName).add(primitive.getValueAsString());

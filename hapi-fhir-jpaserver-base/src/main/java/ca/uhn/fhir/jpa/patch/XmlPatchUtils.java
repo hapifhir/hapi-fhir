@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.patch;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -45,7 +46,7 @@ public class XmlPatchUtils {
 		try {
 			Patcher.patch(new ByteArrayInputStream(inputResource.getBytes(Constants.CHARSET_UTF8)), new ByteArrayInputStream(thePatchBody.getBytes(Constants.CHARSET_UTF8)), result);
 		} catch (IOException e) {
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(1266) + e);
 		}
 		
 		String resultString = toUtf8String(result.toByteArray());

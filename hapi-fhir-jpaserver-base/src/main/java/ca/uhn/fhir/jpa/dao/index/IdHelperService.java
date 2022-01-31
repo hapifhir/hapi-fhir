@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.dao.index;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
@@ -139,7 +140,7 @@ public class IdHelperService {
 
 		// We only pass 1 input in so only 0..1 will come back
 		if (matches.isEmpty() || !matches.containsKey(theResourceId)) {
-			throw new ResourceNotFoundException(id);
+			throw new ResourceNotFoundException(Msg.code(2001) + "Resource " + id + " is not known");
 		}
 
 		if (matches.size() > 1 || matches.get(theResourceId).size() > 1) {
@@ -149,7 +150,7 @@ public class IdHelperService {
 			 *  2. The unique constraint on this column-pair has been dropped
 			 */
 			String msg = myFhirCtx.getLocalizer().getMessage(IdHelperService.class, "nonUniqueForcedId");
-			throw new PreconditionFailedException(msg);
+			throw new PreconditionFailedException(Msg.code(1099) + msg);
 		}
 
 		return matches.get(theResourceId).get(0);
@@ -190,7 +191,7 @@ public class IdHelperService {
 						// fetches from cache using a function that checks cache first...
 						List<ResourcePersistentId> resolvedIds = resolveResourcePersistentIdsWithCache(theRequestPartitionId, ids);
 						if (resolvedIds.isEmpty()) {
-							throw new ResourceNotFoundException(ids.get(0));
+							throw new ResourceNotFoundException(Msg.code(1100) + ids.get(0));
 						}
 						return resolvedIds.get(0);
 					});
@@ -245,7 +246,7 @@ public class IdHelperService {
 
 		for (IIdType id : theIds) {
 			if (!id.hasIdPart()) {
-				throw new InvalidRequestException("Parameter value missing in request");
+				throw new InvalidRequestException(Msg.code(1101) + "Parameter value missing in request");
 			}
 		}
 
@@ -632,8 +633,7 @@ public class IdHelperService {
 	public Long getPidOrThrowException(@Nonnull IAnyResource theResource) {
 		Long retVal = (Long) theResource.getUserData(RESOURCE_PID);
 		if (retVal == null) {
-			throw new IllegalStateException(
-				String.format("Unable to find %s in the user data for %s with ID %s", RESOURCE_PID, theResource, theResource.getId())
+			throw new IllegalStateException(Msg.code(1102) + String.format("Unable to find %s in the user data for %s with ID %s", RESOURCE_PID, theResource, theResource.getId())
 			);
 		}
 		return retVal;
@@ -642,7 +642,7 @@ public class IdHelperService {
 	public IIdType resourceIdFromPidOrThrowException(Long thePid) {
 		Optional<ResourceTable> optionalResource = myResourceTableDao.findById(thePid);
 		if (!optionalResource.isPresent()) {
-			throw new ResourceNotFoundException("Requested resource not found");
+			throw new ResourceNotFoundException(Msg.code(1103) + "Requested resource not found");
 		}
 		return optionalResource.get().getIdDt().toVersionless();
 	}

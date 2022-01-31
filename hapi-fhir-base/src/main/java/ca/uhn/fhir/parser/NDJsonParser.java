@@ -20,14 +20,16 @@ package ca.uhn.fhir.parser;
  * #L%
  */
 
-import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.BundleUtil;
-import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import java.io.IOException;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.List;
@@ -72,7 +74,7 @@ public class NDJsonParser extends BaseParser {
 	protected void doEncodeResourceToWriter(IBaseResource theResource, Writer theWriter, EncodeContext theEncodeContext) throws IOException {
                 // We only encode bundles to NDJSON.
                 if (!(IBaseBundle.class.isAssignableFrom(theResource.getClass()))) {
-                        throw new IllegalArgumentException("NDJsonParser can only encode Bundle types.  Received " + theResource.getClass().getName());
+                        throw new IllegalArgumentException(Msg.code(1833) + "NDJsonParser can only encode Bundle types.  Received " + theResource.getClass().getName());
                 }
 
                 // Ok, convert the bundle to a list of resources.
@@ -95,7 +97,7 @@ public class NDJsonParser extends BaseParser {
 	public <T extends IBaseResource> T doParseResource(Class<T> theResourceType, Reader theReader) throws DataFormatException {
                 // We can only parse to bundles.
                 if ((theResourceType != null) && (!(IBaseBundle.class.isAssignableFrom(theResourceType)))) {
-                        throw new DataFormatException("NDJsonParser can only parse to Bundle types.  Received " + theResourceType.getName());
+                        throw new DataFormatException(Msg.code(1834) + "NDJsonParser can only parse to Bundle types.  Received " + theResourceType.getName());
                 }
 
                 try {
@@ -114,7 +116,7 @@ public class NDJsonParser extends BaseParser {
 
                         return (T) myBuilder.getBundle();
                 } catch (IOException err) {
-                        throw new DataFormatException(err.getMessage());
+                        throw new DataFormatException(Msg.code(1835) + err.getMessage());
                 }
 	}
 }

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.tinder;
 
+import ca.uhn.fhir.i18n.Msg;
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -58,7 +59,7 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 		} else if ("R5".equals(fhirVersion)) {
 			myCtx = FhirContext.forR5();
 		} else {
-			throw new MojoFailureException("Unknown version: " + fhirVersion);
+			throw new MojoFailureException(Msg.code(117) + "Unknown version: " + fhirVersion);
 		}
 
 		ourLog.info("Looking for files in directory: {}", targetDirectory.getAbsolutePath());
@@ -71,7 +72,7 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 			try {
 				inputString = IOUtils.toString(new FileInputStream(nextFile), StandardCharsets.UTF_8);
 			} catch (IOException e) {
-				throw new MojoFailureException("Failed to read file: " + nextFile, e);
+				throw new MojoFailureException(Msg.code(118) + "Failed to read file: " + nextFile, e);
 			}
 
 			IParser parser = EncodingEnum.detectEncoding(inputString).newParser(myCtx);
@@ -119,7 +120,7 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 					w.append(outputString);
 					w.close();
 				} catch (IOException e) {
-					throw new MojoFailureException("Failed to write " + nextFile, e);
+					throw new MojoFailureException(Msg.code(119) + "Failed to write " + nextFile, e);
 				}
 
 			}

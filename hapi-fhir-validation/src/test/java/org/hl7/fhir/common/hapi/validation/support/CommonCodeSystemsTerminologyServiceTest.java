@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.i18n.Msg;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -229,7 +230,7 @@ public class CommonCodeSystemsTerminologyServiceTest {
 
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("Can not handle version: DSTU3", e.getMessage());
+			assertEquals(Msg.code(696) + "Can not handle version: DSTU3", e.getMessage());
 		}
 	}
 

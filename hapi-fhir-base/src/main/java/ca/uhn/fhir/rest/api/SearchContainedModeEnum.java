@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.api;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.UrlUtil;
 
@@ -67,7 +68,7 @@ public enum SearchContainedModeEnum {
 
 		SearchContainedModeEnum retVal = codeToEnum.get(theCode);
 		if (retVal == null) {
-			throw new InvalidRequestException("Invalid contained mode: " + UrlUtil.sanitizeUrlPart(theCode));
+			throw new InvalidRequestException(Msg.code(1963) + "Invalid contained mode: " + UrlUtil.sanitizeUrlPart(theCode));
 		}
 
 		return retVal;

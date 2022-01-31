@@ -1,5 +1,6 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
@@ -318,7 +319,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		try {
 			map = (ArrayNode) new ObjectMapper().readTree(input);
 		} catch (JsonProcessingException e) {
-			throw new ConfigurationException(e);
+			throw new ConfigurationException(Msg.code(694) + e);
 		}
 
 		languagesMap = new HashMap<>();
@@ -490,7 +491,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 			}
 			case DSTU2_1:
 			default:
-				throw new IllegalArgumentException("Can not handle version: " + theValueSet.getStructureFhirVersionEnum());
+				throw new IllegalArgumentException(Msg.code(695) + "Can not handle version: " + theValueSet.getStructureFhirVersionEnum());
 		}
 		return url;
 	}
@@ -508,7 +509,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 			}
 			case DSTU3:
 			default:
-				throw new IllegalArgumentException("Can not handle version: " + theCodeSystem.getStructureFhirVersionEnum());
+				throw new IllegalArgumentException(Msg.code(696) + "Can not handle version: " + theCodeSystem.getStructureFhirVersionEnum());
 		}
 		return url;
 	}

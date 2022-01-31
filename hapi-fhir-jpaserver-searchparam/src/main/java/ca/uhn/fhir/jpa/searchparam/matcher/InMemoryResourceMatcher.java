@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.searchparam.matcher;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -240,7 +241,7 @@ public class InMemoryResourceMatcher {
 			if (Constants.PARAM_CONTENT.equals(theParamName) || Constants.PARAM_TEXT.equals(theParamName)) {
 				return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName, InMemoryMatchResult.PARAM);
 			} else {
-				throw new InvalidRequestException("Unknown search parameter " + theParamName + " for resource type " + theResourceName);
+				throw new InvalidRequestException(Msg.code(509) + "Unknown search parameter " + theParamName + " for resource type " + theResourceName);
 			}
 		}
 	}

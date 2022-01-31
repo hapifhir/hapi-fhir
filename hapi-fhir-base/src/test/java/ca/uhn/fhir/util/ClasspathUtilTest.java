@@ -1,5 +1,6 @@
 package ca.uhn.fhir.util;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.junit.jupiter.api.Test;
 
@@ -18,7 +19,7 @@ public class ClasspathUtilTest {
 		try {
 			ClasspathUtil.loadResource("/FOOOOOO");
 		} catch (InternalErrorException e) {
-			assertEquals("Unable to find classpath resource: /FOOOOOO", e.getMessage());
+			assertEquals(Msg.code(1758) + "Unable to find classpath resource: /FOOOOOO", e.getMessage());
 		}
 	}
 
@@ -27,7 +28,7 @@ public class ClasspathUtilTest {
 		try {
 			ClasspathUtil.loadResourceAsStream("/FOOOOOO");
 		} catch (InternalErrorException e) {
-			assertEquals("Unable to find classpath resource: /FOOOOOO", e.getMessage());
+			assertEquals(Msg.code(1758) + "Unable to find classpath resource: /FOOOOOO", e.getMessage());
 		}
 	}
 

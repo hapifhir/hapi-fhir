@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.term;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -162,7 +163,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 		CodeSystem codeSystem = myTerminologySvc.fetchCanonicalCodeSystemFromCompleteContext(theSystem);
 		if (codeSystem.getContent() != CodeSystem.CodeSystemContentMode.NOTPRESENT) {
-			throw new InvalidRequestException("CodeSystem with url[" + Constants.codeSystemWithDefaultDescription(theSystem) + "] can not apply a delta - wrong content mode: " + codeSystem.getContent());
+			throw new InvalidRequestException(Msg.code(844) + "CodeSystem with url[" + Constants.codeSystemWithDefaultDescription(theSystem) + "] can not apply a delta - wrong content mode: " + codeSystem.getContent());
 		}
 
 		Validate.notNull(cs);
@@ -190,7 +191,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 		TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(theSystem);
 		if (cs == null) {
-			throw new InvalidRequestException("Unknown code system: " + theSystem);
+			throw new InvalidRequestException(Msg.code(845) + "Unknown code system: " + theSystem);
 		}
 		IIdType target = cs.getResource().getIdDt();
 
@@ -521,7 +522,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 				nextParentOpt = myConceptDao.findByCodeSystemAndCode(theCsv, nextParentCode).orElse(null);
 			}
 			if (nextParentOpt == null) {
-				throw new InvalidRequestException("Unable to add code \"" + nextCodeToAdd + "\" to unknown parent: " + nextParentCode);
+				throw new InvalidRequestException(Msg.code(846) + "Unable to add code \"" + nextCodeToAdd + "\" to unknown parent: " + nextParentCode);
 			}
 			parentConceptsWeShouldLinkTo.add(nextParentOpt);
 		}
@@ -587,7 +588,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 						parentConcept = myConceptDao.findByCodeSystemAndCode(theCsv, parentCode).orElse(null);
 					}
 					if (parentConcept == null) {
-						throw new IllegalArgumentException("Unknown parent code: " + parentCode);
+						throw new IllegalArgumentException(Msg.code(847) + "Unknown parent code: " + parentCode);
 					}
 
 					nextChild.getParents().get(i).setParent(parentConcept);
@@ -712,7 +713,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		// Throw exception if the TermCodeSystemVersion is being duplicated.
 		if (codeSystemVersionEntity != null) {
 			if (!ObjectUtil.equals(codeSystemVersionEntity.getResource().getId(), theCodeSystemResourceTable.getId())) {
-				throw new UnprocessableEntityException(msg);
+				throw new UnprocessableEntityException(Msg.code(848) + msg);
 			}
 		}
 	}
@@ -731,7 +732,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 		theConcept.setCodeSystemVersion(theCodeSystemVersion);
 		if (theConceptsStack.contains(theConcept.getCode())) {
-			throw new InvalidRequestException("CodeSystem contains circular reference around code " + theConcept.getCode());
+			throw new InvalidRequestException(Msg.code(849) + "CodeSystem contains circular reference around code " + theConcept.getCode());
 		}
 		theConceptsStack.add(theConcept.getCode());
 

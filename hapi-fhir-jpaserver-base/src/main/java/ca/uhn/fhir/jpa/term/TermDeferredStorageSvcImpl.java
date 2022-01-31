@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.term;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
@@ -374,7 +375,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 			myCurrentJobExecutions.add(jobExecution);
 
 		} catch (JobParametersInvalidException theE) {
-			throw new InternalErrorException("Offline job submission for TermCodeSystemVersion: " +
+			throw new InternalErrorException(Msg.code(850) + "Offline job submission for TermCodeSystemVersion: " +
 				theCodeSystemVersionPid + " failed: " + theE);
 		}
 	}
@@ -391,7 +392,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 			myCurrentJobExecutions.add(jobExecution);
 
 		} catch (JobParametersInvalidException theE) {
-			throw new InternalErrorException("Offline job submission for TermCodeSystem: " +
+			throw new InternalErrorException(Msg.code(851) + "Offline job submission for TermCodeSystem: " +
 				theCodeSystemPid + " failed: " + theE);
 		}
 	}
