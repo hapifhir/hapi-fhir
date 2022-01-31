@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.migrate;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddTableRawSqlTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTest;
@@ -39,7 +40,7 @@ public class SchemaMigratorTest extends BaseTest {
 			schemaMigrator.validate();
 			fail();
 		} catch (ConfigurationException e) {
-			assertThat(e.getMessage(), startsWith("The database schema for "));
+			assertThat(e.getMessage(), startsWith(Msg.code(27) + "The database schema for "));
 			assertThat(e.getMessage(), endsWith(" is out of date.  Current database schema version is unknown.  Schema version required by application is 1.1.  Please run the database migrator."));
 		}
 

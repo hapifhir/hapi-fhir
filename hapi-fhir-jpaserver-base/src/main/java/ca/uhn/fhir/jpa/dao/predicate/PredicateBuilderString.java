@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
@@ -103,7 +104,7 @@ public class PredicateBuilderString extends BasePredicateBuilder implements IPre
 		if (theParameter instanceof TokenParam) {
 			TokenParam id = (TokenParam) theParameter;
 			if (!id.isText()) {
-				throw new IllegalStateException("Trying to process a text search on a non-text token parameter");
+				throw new IllegalStateException(Msg.code(1047) + "Trying to process a text search on a non-text token parameter");
 			}
 			rawSearchTerm = id.getValue();
 		} else if (theParameter instanceof StringParam) {
@@ -111,7 +112,7 @@ public class PredicateBuilderString extends BasePredicateBuilder implements IPre
 			rawSearchTerm = id.getValue();
 			if (id.isContains()) {
 				if (!myDaoConfig.isAllowContainsSearches()) {
-					throw new MethodNotAllowedException(":contains modifier is disabled on this server");
+					throw new MethodNotAllowedException(Msg.code(1048) + ":contains modifier is disabled on this server");
 				}
 			} else {
 				rawSearchTerm = theSearchParam.encode(rawSearchTerm);
@@ -120,11 +121,11 @@ public class PredicateBuilderString extends BasePredicateBuilder implements IPre
 			IPrimitiveDatatype<?> id = (IPrimitiveDatatype<?>) theParameter;
 			rawSearchTerm = id.getValueAsString();
 		} else {
-			throw new IllegalArgumentException("Invalid token type: " + theParameter.getClass());
+			throw new IllegalArgumentException(Msg.code(1049) + "Invalid token type: " + theParameter.getClass());
 		}
 
 		if (rawSearchTerm.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
-			throw new InvalidRequestException("Parameter[" + paramName + "] has length (" + rawSearchTerm.length() + ") that is longer than maximum allowed ("
+			throw new InvalidRequestException(Msg.code(1050) + "Parameter[" + paramName + "] has length (" + rawSearchTerm.length() + ") that is longer than maximum allowed ("
 				+ ResourceIndexedSearchParamString.MAX_LENGTH + "): " + rawSearchTerm);
 		}
 
@@ -212,7 +213,7 @@ public class PredicateBuilderString extends BasePredicateBuilder implements IPre
 				Predicate singleCode = theBuilder.lessThanOrEqualTo(theFrom.get("myValueNormalized").as(String.class), likeExpression);
 				predicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, paramName, theFrom, singleCode, theRequestPartitionId);
 			} else {
-				throw new IllegalArgumentException("Don't yet know how to handle operation " + operation + " on a string");
+				throw new IllegalArgumentException(Msg.code(1051) + "Don't yet know how to handle operation " + operation + " on a string");
 			}
 
 			return predicate;

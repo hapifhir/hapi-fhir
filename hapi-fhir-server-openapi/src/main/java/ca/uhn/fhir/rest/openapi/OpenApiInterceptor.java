@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.openapi;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -170,7 +171,7 @@ public class OpenApiInterceptor {
 			InputStream resourceAsStream = ClasspathUtil.loadResourceAsStream(resourceName);
 			props.load(resourceAsStream);
 		} catch (IOException e) {
-			throw new ConfigurationException("Failed to load resource: " + resourceName);
+			throw new ConfigurationException(Msg.code(239) + "Failed to load resource: " + resourceName);
 		}
 		mySwaggerUiVersion = props.getProperty("version");
 		return mySwaggerUiVersion;
@@ -785,7 +786,7 @@ public class OpenApiInterceptor {
 			case OPTIONS:
 			case TRACE:
 			default:
-				throw new IllegalStateException();
+				throw new IllegalStateException(Msg.code(240));
 		}
 	}
 

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.context;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -24,7 +25,7 @@ public class RuntimeResourceDefinitionDstu3Test {
 			ourCtx.getResourceDefinition("Bundle").getImplementingClass(Patient.class);
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals("Unable to convert class org.hl7.fhir.dstu3.model.Bundle to class org.hl7.fhir.dstu3.model.Patient", e.getMessage());
+			assertEquals(Msg.code(1732) + "Unable to convert class org.hl7.fhir.dstu3.model.Bundle to class org.hl7.fhir.dstu3.model.Patient", e.getMessage());
 		}
 	}
 

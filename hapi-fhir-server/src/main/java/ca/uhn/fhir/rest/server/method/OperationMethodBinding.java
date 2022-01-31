@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.method;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
@@ -102,13 +103,13 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		for (Annotation[] nextParamAnnotations : theMethod.getParameterAnnotations()) {
 			for (Annotation nextParam : nextParamAnnotations) {
 				if (nextParam instanceof OptionalParam || nextParam instanceof RequiredParam) {
-					throw new ConfigurationException("Illegal method parameter annotation @" + nextParam.annotationType().getSimpleName() + " on method: " + theMethod.toString());
+					throw new ConfigurationException(Msg.code(421) + "Illegal method parameter annotation @" + nextParam.annotationType().getSimpleName() + " on method: " + theMethod.toString());
 				}
 			}
 		}
 
 		if (isBlank(theOperationName)) {
-			throw new ConfigurationException("Method '" + theMethod.getName() + "' on type " + theMethod.getDeclaringClass().getName() + " is annotated with @" + Operation.class.getSimpleName()
+			throw new ConfigurationException(Msg.code(422) + "Method '" + theMethod.getName() + "' on type " + theMethod.getDeclaringClass().getName() + " is annotated with @" + Operation.class.getSimpleName()
 				+ " but this annotation has no name defined");
 		}
 		if (theOperationName.startsWith("$") == false) {
@@ -127,7 +128,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 				setResourceName(null);
 			}
 		} catch (DataFormatException e) {
-			throw new ConfigurationException("Failed to bind method " + theMethod + " - " + e.getMessage(), e);
+			throw new ConfigurationException(Msg.code(423) + "Failed to bind method " + theMethod + " - " + e.getMessage(), e);
 		}
 
 		if (theMethod.getReturnType().equals(IBundleProvider.class)) {
@@ -169,7 +170,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 				}
 				if (!next.type().equals(IBase.class)) {
 					if (next.type().isInterface() || Modifier.isAbstract(next.type().getModifiers())) {
-						throw new ConfigurationException("Invalid value for @OperationParam.type(): " + next.type().getName());
+						throw new ConfigurationException(Msg.code(424) + "Invalid value for @OperationParam.type(): " + next.type().getName());
 					}
 					type.setType(theContext.getElementDefinition(next.type()).getName());
 				}
@@ -179,7 +180,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 		// Parameter Validation
 		if (myCanOperateAtInstanceLevel && !isGlobalMethod() && getResourceName() == null) {
-			throw new ConfigurationException("@" + Operation.class.getSimpleName() + " method is an instance level method (it has an @" + IdParam.class.getSimpleName() + " parameter) but is not marked as global() and is not declared in a resource provider: " + theMethod.getName());
+			throw new ConfigurationException(Msg.code(425) + "@" + Operation.class.getSimpleName() + " method is an instance level method (it has an @" + IdParam.class.getSimpleName() + " parameter) but is not marked as global() and is not declared in a resource provider: " + theMethod.getName());
 		}
 
 	}
@@ -314,15 +315,15 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		} else if (theRequest.getRequestType() == RequestTypeEnum.GET) {
 			if (!myIdempotent) {
 				String message = getContext().getLocalizer().getMessage(OperationMethodBinding.class, "methodNotSupported", theRequest.getRequestType(), RequestTypeEnum.POST.name());
-				throw new MethodNotAllowedException(message, RequestTypeEnum.POST);
+				throw new MethodNotAllowedException(Msg.code(426) + message, RequestTypeEnum.POST);
 			}
 		} else {
 			if (!myIdempotent) {
 				String message = getContext().getLocalizer().getMessage(OperationMethodBinding.class, "methodNotSupported", theRequest.getRequestType(), RequestTypeEnum.POST.name());
-				throw new MethodNotAllowedException(message, RequestTypeEnum.POST);
+				throw new MethodNotAllowedException(Msg.code(427) + message, RequestTypeEnum.POST);
 			}
 			String message = getContext().getLocalizer().getMessage(OperationMethodBinding.class, "methodNotSupported", theRequest.getRequestType(), RequestTypeEnum.GET.name(), RequestTypeEnum.POST.name());
-			throw new MethodNotAllowedException(message, RequestTypeEnum.GET, RequestTypeEnum.POST);
+			throw new MethodNotAllowedException(Msg.code(428) + message, RequestTypeEnum.GET, RequestTypeEnum.POST);
 		}
 
 		if (myIdParamIndex != null) {

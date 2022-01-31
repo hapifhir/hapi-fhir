@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.migrate;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.taskdef.ColumnTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -107,7 +108,7 @@ public class JdbcUtils {
 					return indexNames;
 
 				} catch (SQLException e) {
-					throw new InternalErrorException(e);
+					throw new InternalErrorException(Msg.code(29) + e);
 				}
 			});
 		}
@@ -132,10 +133,10 @@ public class JdbcUtils {
 					}
 
 				} catch (SQLException e) {
-					throw new InternalErrorException(e);
+					throw new InternalErrorException(Msg.code(30) + e);
 				}
 
-				throw new InternalErrorException("Can't find index: " + theIndexName + " on table " + theTableName);
+				throw new InternalErrorException(Msg.code(31) + "Can't find index: " + theIndexName + " on table " + theTableName);
 			});
 		}
 	}
@@ -195,7 +196,7 @@ public class JdbcUtils {
 									//See git
 									return new ColumnType(ColumnTypeEnum.BLOB, length);
 								} else {
-									throw new IllegalArgumentException("Don't know how to handle datatype " + dataType + " for column " + theColumnName + " on table " + theTableName);
+									throw new IllegalArgumentException(Msg.code(32) + "Don't know how to handle datatype " + dataType + " for column " + theColumnName + " on table " + theTableName);
 								}
 							case Types.VARBINARY:
 								if (DriverTypeEnum.MSSQL_2012.equals(theConnectionProperties.getDriverType())) {
@@ -203,7 +204,7 @@ public class JdbcUtils {
 									return new ColumnType(ColumnTypeEnum.BLOB, length);
 
 								} else {
-									throw new IllegalArgumentException("Don't know how to handle datatype " + dataType + " for column " + theColumnName + " on table " + theTableName);
+									throw new IllegalArgumentException(Msg.code(33) + "Don't know how to handle datatype " + dataType + " for column " + theColumnName + " on table " + theTableName);
 								}
 							case Types.CLOB:
 								return new ColumnType(ColumnTypeEnum.CLOB, length);
@@ -212,7 +213,7 @@ public class JdbcUtils {
 							case Types.FLOAT:
 								return new ColumnType(ColumnTypeEnum.FLOAT, length);
 							default:
-								throw new IllegalArgumentException("Don't know how to handle datatype " + dataType + " for column " + theColumnName + " on table " + theTableName);
+								throw new IllegalArgumentException(Msg.code(34) + "Don't know how to handle datatype " + dataType + " for column " + theColumnName + " on table " + theTableName);
 						}
 
 					}
@@ -221,7 +222,7 @@ public class JdbcUtils {
 					return null;
 
 				} catch (SQLException e) {
-					throw new InternalErrorException(e);
+					throw new InternalErrorException(Msg.code(35) + e);
 				}
 
 			});
@@ -267,7 +268,7 @@ public class JdbcUtils {
 
 					return fkNames;
 				} catch (SQLException e) {
-					throw new InternalErrorException(e);
+					throw new InternalErrorException(Msg.code(36) + e);
 				}
 			});
 		}
@@ -308,7 +309,7 @@ public class JdbcUtils {
 
 					return fkNames;
 				} catch (SQLException e) {
-					throw new InternalErrorException(e);
+					throw new InternalErrorException(Msg.code(37) + e);
 				}
 			});
 		}
@@ -340,7 +341,7 @@ public class JdbcUtils {
 
 					return columnNames;
 				} catch (SQLException e) {
-					throw new InternalErrorException(e);
+					throw new InternalErrorException(Msg.code(38) + e);
 				}
 			});
 		}
@@ -433,7 +434,7 @@ public class JdbcUtils {
 					}
 					return sequenceNames;
 				} catch (SQLException e) {
-					throw new InternalErrorException(e);
+					throw new InternalErrorException(Msg.code(39) + e);
 				}
 			});
 		}
@@ -466,7 +467,7 @@ public class JdbcUtils {
 
 					return columnNames;
 				} catch (SQLException e) {
-					throw new InternalErrorException(e);
+					throw new InternalErrorException(Msg.code(40) + e);
 				}
 			});
 		}
@@ -495,14 +496,14 @@ public class JdbcUtils {
 							} else if ("NO".equalsIgnoreCase(nullable)) {
 								return false;
 							} else {
-								throw new IllegalStateException("Unknown nullable: " + nullable);
+								throw new IllegalStateException(Msg.code(41) + "Unknown nullable: " + nullable);
 							}
 						}
 					}
 
-					throw new IllegalStateException("Did not find column " + theColumnName);
+					throw new IllegalStateException(Msg.code(42) + "Did not find column " + theColumnName);
 				} catch (SQLException e) {
-					throw new InternalErrorException(e);
+					throw new InternalErrorException(Msg.code(43) + e);
 				}
 			});
 		}

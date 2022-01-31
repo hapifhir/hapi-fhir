@@ -20,6 +20,7 @@ package ca.uhn.fhir.model.primitive;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -31,8 +32,8 @@ import org.apache.commons.lang3.time.FastDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.TimeZone;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -69,7 +70,7 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	public BaseDateTimeDt(Date theDate, TemporalPrecisionEnum thePrecision) {
 		setValue(theDate, thePrecision);
 		if (isPrecisionAllowed(thePrecision) == false) {
-			throw new DataFormatException("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support " + thePrecision + " precision): " + theDate);
+			throw new DataFormatException(Msg.code(1880) + "Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support " + thePrecision + " precision): " + theDate);
 		}
 	}
 
@@ -549,7 +550,7 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	 */
 	public BaseDateTimeDt setPrecision(TemporalPrecisionEnum thePrecision) throws DataFormatException {
 		if (thePrecision == null) {
-			throw new NullPointerException("Precision may not be null");
+			throw new NullPointerException(Msg.code(1881) + "Precision may not be null");
 		}
 		myPrecision = thePrecision;
 		updateStringValue();
@@ -664,11 +665,11 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	}
 
 	private void throwBadDateFormat(String theValue) {
-		throw new DataFormatException("Invalid date/time format: \"" + theValue + "\"");
+		throw new DataFormatException(Msg.code(1882) + "Invalid date/time format: \"" + theValue + "\"");
 	}
 
 	private void throwBadDateFormat(String theValue, String theMesssage) {
-		throw new DataFormatException("Invalid date/time format: \"" + theValue + "\": " + theMesssage);
+		throw new DataFormatException(Msg.code(1883) + "Invalid date/time format: \"" + theValue + "\": " + theMesssage);
 	}
 
 	/**
@@ -731,13 +732,13 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 
 	private void validateValueInRange(long theValue, long theMinimum, long theMaximum) {
 		if (theValue < theMinimum || theValue > theMaximum) {
-			throw new IllegalArgumentException("Value " + theValue + " is not between allowable range: " + theMinimum + " - " + theMaximum);
+			throw new IllegalArgumentException(Msg.code(1884) + "Value " + theValue + " is not between allowable range: " + theMinimum + " - " + theMaximum);
 		}
 	}
 
 	private void validatePrecisionAndThrowDataFormatException(String theValue, TemporalPrecisionEnum thePrecision) {
 		if (isPrecisionAllowed(thePrecision) == false) {
-			throw new DataFormatException("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support " + thePrecision + " precision): " + theValue);
+			throw new DataFormatException(Msg.code(1885) + "Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support " + thePrecision + " precision): " + theValue);
 		}
 	}
 

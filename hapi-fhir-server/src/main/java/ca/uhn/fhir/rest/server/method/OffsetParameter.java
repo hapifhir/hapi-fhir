@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.method;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import java.lang.reflect.Method;
 import java.util.Collection;
 
@@ -50,7 +51,7 @@ public class OffsetParameter implements IParameter {
 						IntegerDt since = new IntegerDt(sinceParams[0]);
 						return ParameterUtil.fromInteger(myType, since);
 					} catch (DataFormatException e) {
-						throw new InvalidRequestException("Invalid " + Constants.PARAM_OFFSET + " value: " + sinceParams[0]);
+						throw new InvalidRequestException(Msg.code(461) + "Invalid " + Constants.PARAM_OFFSET + " value: " + sinceParams[0]);
 					}
 				}
 			}
@@ -61,10 +62,10 @@ public class OffsetParameter implements IParameter {
 	@Override
 	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
 		if (theOuterCollectionType != null) {
-			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type '" +theMethod.getDeclaringClass().getCanonicalName()+ "' is annotated with @" + Offset.class.getName() + " but can not be of collection type");
+			throw new ConfigurationException(Msg.code(462) + "Method '" + theMethod.getName() + "' in type '" +theMethod.getDeclaringClass().getCanonicalName()+ "' is annotated with @" + Offset.class.getName() + " but can not be of collection type");
 		}
 		if (!ParameterUtil.isBindableIntegerType(theParameterType)) {
-			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type '" +theMethod.getDeclaringClass().getCanonicalName()+ "' is annotated with @" + Offset.class.getName() + " but type '" + theParameterType + "' is an invalid type, must be one of Integer or IntegerType");
+			throw new ConfigurationException(Msg.code(463) + "Method '" + theMethod.getName() + "' in type '" +theMethod.getDeclaringClass().getCanonicalName()+ "' is annotated with @" + Offset.class.getName() + " but type '" + theParameterType + "' is an invalid type, must be one of Integer or IntegerType");
 		}
 		myType = theParameterType;
 	}

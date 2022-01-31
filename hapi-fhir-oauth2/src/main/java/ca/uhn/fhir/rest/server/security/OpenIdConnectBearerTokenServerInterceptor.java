@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.security;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import java.text.ParseException;
 import java.util.Date;
 
@@ -83,10 +84,10 @@ public class OpenIdConnectBearerTokenServerInterceptor extends InterceptorAdapte
 	public void authenticate(HttpServletRequest theRequest) throws AuthenticationException {
 		String token = theRequest.getHeader(Constants.HEADER_AUTHORIZATION);
 		if (token == null) {
-			throw new AuthenticationException("Not authorized (no authorization header found in request)");
+			throw new AuthenticationException(Msg.code(241) + "Not authorized (no authorization header found in request)");
 		}
 		if (!token.startsWith(Constants.HEADER_AUTHORIZATION_VALPREFIX_BEARER)) {
-			throw new AuthenticationException("Not authorized (authorization header does not contain a bearer token)");
+			throw new AuthenticationException(Msg.code(242) + "Not authorized (authorization header does not contain a bearer token)");
 		}
 
 		token = token.substring(Constants.HEADER_AUTHORIZATION_VALPREFIX_BEARER.length());
@@ -95,7 +96,7 @@ public class OpenIdConnectBearerTokenServerInterceptor extends InterceptorAdapte
 		try {
 			idToken = SignedJWT.parse(token);
 		} catch (ParseException e) {
-			throw new AuthenticationException("Not authorized (bearer token could not be validated)", e);
+			throw new AuthenticationException(Msg.code(243) + "Not authorized (bearer token could not be validated)", e);
 		}
 
 		// validate our ID Token over a number of tests
@@ -103,7 +104,7 @@ public class OpenIdConnectBearerTokenServerInterceptor extends InterceptorAdapte
 		try {
 			idClaims = idToken.getJWTClaimsSet();
 		} catch (ParseException e) {
-			throw new AuthenticationException("Not authorized (bearer token could not be validated)", e);
+			throw new AuthenticationException(Msg.code(244) + "Not authorized (bearer token could not be validated)", e);
 		}
 
 		String issuer = idClaims.getIssuer();
@@ -111,13 +112,13 @@ public class OpenIdConnectBearerTokenServerInterceptor extends InterceptorAdapte
 		ServerConfiguration serverConfig = myServerConfigurationService.getServerConfiguration(issuer);
 		if (serverConfig == null) {
 			ourLog.error("No server configuration found for issuer: " + issuer);
-			throw new AuthenticationException("Not authorized (no server configuration found for issuer " + issuer + ")");
+			throw new AuthenticationException(Msg.code(245) + "Not authorized (no server configuration found for issuer " + issuer + ")");
 		}
 
 		RegisteredClient clientConfig = myClientConfigurationService.getClientConfiguration(serverConfig);
 		if (clientConfig == null) {
 			ourLog.error("No client configuration found for issuer: " + issuer);
-			throw new AuthenticationException("Not authorized (no client configuration found for issuer " + issuer + ")");
+			throw new AuthenticationException(Msg.code(246) + "Not authorized (no client configuration found for issuer " + issuer + ")");
 		}
 
 		// check the signature
@@ -135,22 +136,22 @@ public class OpenIdConnectBearerTokenServerInterceptor extends InterceptorAdapte
 
 		if (jwtValidator != null) {
 			if (!jwtValidator.validateSignature(idToken)) {
-				throw new AuthenticationException("Not authorized (signature validation failed)");
+				throw new AuthenticationException(Msg.code(247) + "Not authorized (signature validation failed)");
 			}
 		} else {
 			ourLog.error("No validation service found. Skipping signature validation");
-			throw new AuthenticationException("Not authorized (can't determine signature validator)");
+			throw new AuthenticationException(Msg.code(248) + "Not authorized (can't determine signature validator)");
 		}
 
 		// check expiration
 		if (idClaims.getExpirationTime() == null) {
-			throw new AuthenticationException("Id Token does not have required expiration claim");
+			throw new AuthenticationException(Msg.code(249) + "Id Token does not have required expiration claim");
 		} else {
 			// it's not null, see if it's expired
 			Date minAllowableExpirationTime = new Date(System.currentTimeMillis() - (myTimeSkewAllowance * 1000L));
 			Date expirationTime = idClaims.getExpirationTime();
 			if (!expirationTime.after(minAllowableExpirationTime)) {
-				throw new AuthenticationException("Id Token is expired: " + idClaims.getExpirationTime());
+				throw new AuthenticationException(Msg.code(250) + "Id Token is expired: " + idClaims.getExpirationTime());
 			}
 		}
 
@@ -158,18 +159,18 @@ public class OpenIdConnectBearerTokenServerInterceptor extends InterceptorAdapte
 		if (idClaims.getNotBeforeTime() != null) {
 			Date now = new Date(System.currentTimeMillis() + (myTimeSkewAllowance * 1000));
 			if (now.before(idClaims.getNotBeforeTime())) {
-				throw new AuthenticationException("Id Token not valid untill: " + idClaims.getNotBeforeTime());
+				throw new AuthenticationException(Msg.code(251) + "Id Token not valid untill: " + idClaims.getNotBeforeTime());
 			}
 		}
 
 		// check issued at
 		if (idClaims.getIssueTime() == null) {
-			throw new AuthenticationException("Id Token does not have required issued-at claim");
+			throw new AuthenticationException(Msg.code(252) + "Id Token does not have required issued-at claim");
 		} else {
 			// since it's not null, see if it was issued in the future
 			Date now = new Date(System.currentTimeMillis() + (myTimeSkewAllowance * 1000));
 			if (now.before(idClaims.getIssueTime())) {
-				throw new AuthenticationException("Id Token was issued in the future: " + idClaims.getIssueTime());
+				throw new AuthenticationException(Msg.code(253) + "Id Token was issued in the future: " + idClaims.getIssueTime());
 			}
 		}
 

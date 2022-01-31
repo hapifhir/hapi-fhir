@@ -20,7 +20,12 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
-import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -114,9 +119,9 @@ public class OperationOutcomeUtil {
 		try {
 			return (IBaseOperationOutcome) ooDef.getImplementingClass().newInstance();
 		} catch (InstantiationException e) {
-			throw new InternalErrorException("Unable to instantiate OperationOutcome", e);
+			throw new InternalErrorException(Msg.code(1803) + "Unable to instantiate OperationOutcome", e);
 		} catch (IllegalAccessException e) {
-			throw new InternalErrorException("Unable to instantiate OperationOutcome", e);
+			throw new InternalErrorException(Msg.code(1804) + "Unable to instantiate OperationOutcome", e);
 		}
 	}
 

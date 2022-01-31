@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -184,7 +185,7 @@ public class HistoryBuilder {
 		if (myPartitionSettings.isPartitioningEnabled()) {
 			if (thePartitionId.isAllPartitions()) {
 				String msg = myCtx.getLocalizer().getMessage(HistoryBuilder.class, "noSystemOrTypeHistoryForPartitionAwareServer");
-				throw new InvalidRequestException(msg);
+				throw new InvalidRequestException(Msg.code(953) + msg);
 			}
 		}
 	}

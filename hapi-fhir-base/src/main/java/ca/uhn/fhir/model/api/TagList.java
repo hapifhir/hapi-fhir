@@ -20,6 +20,10 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.util.CoverageIgnore;
+import org.hl7.fhir.instance.model.api.IBase;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,10 +31,6 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-
-import org.hl7.fhir.instance.model.api.IBase;
-
-import ca.uhn.fhir.util.CoverageIgnore;
 
 /**
  * A collection of tags present on a single resource. TagList is backed by a {@link LinkedHashSet}, so the order of
@@ -270,7 +270,7 @@ public class TagList implements Set<Tag>, Serializable, IBase {
 	@Override
 	@CoverageIgnore
 	public List<String> getFormatCommentsPre() {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(1895));
 	}
 
 	/**
@@ -279,17 +279,17 @@ public class TagList implements Set<Tag>, Serializable, IBase {
 	@Override
 	@CoverageIgnore
 	public List<String> getFormatCommentsPost() {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(1896));
 	}
 
 	@Override
 	public Object getUserData(String theName) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(1897));
 	}
 
 	@Override
 	public void setUserData(String theName, Object theValue) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(1898));
 	}
 
 }

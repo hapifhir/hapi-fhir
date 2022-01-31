@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.predicate.querystack;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinEnum;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndex;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
@@ -57,7 +58,7 @@ public class QueryRootEntryIndexTable extends QueryRootEntry {
 
 	@Override
 	void orderBy(List<Order> theOrders) {
-		throw new IllegalStateException();
+		throw new IllegalStateException(Msg.code(1072));
 	}
 
 	@Override
@@ -110,7 +111,7 @@ public class QueryRootEntryIndexTable extends QueryRootEntry {
 					myParamType = SearchBuilderJoinEnum.COORDS;
 					break;
 				default:
-					throw new IllegalStateException();
+					throw new IllegalStateException(Msg.code(1073));
 			}
 
 			myQuery.select(myResourcePidColumn);
@@ -140,6 +141,6 @@ public class QueryRootEntryIndexTable extends QueryRootEntry {
 
 	@Override
 	public Subquery<Long> subqueryForTagNegation() {
-		throw new IllegalStateException();
+		throw new IllegalStateException(Msg.code(1074));
 	}
 }

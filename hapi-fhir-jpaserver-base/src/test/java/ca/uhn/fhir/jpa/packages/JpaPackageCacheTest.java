@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.packages;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
@@ -70,7 +71,7 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 			myPackageCacheManager.loadPackage("basisprofil.de", "99");
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertEquals("Unable to locate package basisprofil.de#99", e.getMessage());
+			assertEquals(Msg.code(1301) + "Unable to locate package basisprofil.de#99", e.getMessage());
 		}
 	}
 
@@ -97,7 +98,7 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 			myPackageCacheManager.loadPackage("basisprofil.de", "99");
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertEquals("Unable to locate package basisprofil.de#99", e.getMessage());
+			assertEquals(Msg.code(1301) + "Unable to locate package basisprofil.de#99", e.getMessage());
 		}
 
 		logAllResources();
@@ -131,7 +132,7 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 			myPackageCacheManager.loadPackage("hl7.fhir.uv.shorthand", "99");
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertEquals("Unable to locate package hl7.fhir.uv.shorthand#99", e.getMessage());
+			assertEquals(Msg.code(1301) + "Unable to locate package hl7.fhir.uv.shorthand#99", e.getMessage());
 		}
 
 		PackageDeleteOutcomeJson deleteOutcomeJson = myPackageCacheManager.uninstallPackage("hl7.fhir.uv.shorthand", "0.12.0");

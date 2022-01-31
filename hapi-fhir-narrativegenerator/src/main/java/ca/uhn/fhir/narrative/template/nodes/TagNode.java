@@ -1,5 +1,6 @@
 package ca.uhn.fhir.narrative.template.nodes;
 
+import ca.uhn.fhir.i18n.Msg;
 import java.io.File;
 import java.util.Map;
 
@@ -19,7 +20,7 @@ class TagNode implements LNode {
 
     public TagNode(String tagName, Tag tag, Flavor flavor, LNode... tokens) {
         if (tag == null) {
-            throw new IllegalArgumentException("no tag available named: " + tagName);
+            throw new IllegalArgumentException(Msg.code(730) + "no tag available named: " + tagName);
         }
         this.tag = tag;
         this.tokens = tokens;

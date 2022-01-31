@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.expunge;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.collect.Lists;
@@ -70,7 +71,7 @@ public class PartitionRunner {
 				return;
 			} catch (Exception e) {
 				ourLog.error("Error while " + myProcessName, e);
-				throw new InternalErrorException(e);
+				throw new InternalErrorException(Msg.code(1084) + e);
 			}
 		}
 
@@ -86,7 +87,7 @@ public class PartitionRunner {
 			Thread.currentThread().interrupt();
 		} catch (ExecutionException e) {
 			ourLog.error("Error while " + myProcessName, e);
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(1085) + e);
 		} finally {
 			executorService.shutdown();
 		}
@@ -133,7 +134,7 @@ public class PartitionRunner {
 			try {
 				executorQueue.put(theRunnable);
 			} catch (InterruptedException e) {
-				throw new RejectedExecutionException("Task " + theRunnable.toString() +
+				throw new RejectedExecutionException(Msg.code(1086) + "Task " + theRunnable.toString() +
 					" rejected from " + e);
 			}
 			ourLog.info("Slot become available after {}ms", sw.getMillis());

@@ -20,6 +20,7 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.util.ParametersUtil;
@@ -210,7 +211,7 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 		try {
 			theField.set(theTarget, theValue);
 		} catch (IllegalAccessException e) {
-			throw new ConfigurationException("Failed to set value", e);
+			throw new ConfigurationException(Msg.code(1736) + "Failed to set value", e);
 		}
 	}
 
@@ -218,7 +219,7 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 		try {
 			return theField.get(theTarget);
 		} catch (IllegalAccessException e) {
-			throw new ConfigurationException("Failed to get value", e);
+			throw new ConfigurationException(Msg.code(1737) + "Failed to get value", e);
 		}
 	}
 

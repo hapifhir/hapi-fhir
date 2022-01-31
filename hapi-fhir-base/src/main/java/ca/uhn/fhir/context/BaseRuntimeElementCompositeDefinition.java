@@ -20,6 +20,7 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IBoundCodeableConcept;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IElement;
@@ -131,10 +132,10 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 
 	void addChild(BaseRuntimeChildDefinition theNext) {
 		if (theNext == null) {
-			throw new NullPointerException();
+			throw new NullPointerException(Msg.code(1698));
 		}
 		if (theNext.getExtensionUrl() != null) {
-			throw new IllegalArgumentException("Shouldn't haven an extension URL, use addExtension instead");
+			throw new IllegalArgumentException(Msg.code(1699) + "Shouldn't haven an extension URL, use addExtension instead");
 		}
 		myChildren.add(theNext);
 	}
@@ -149,7 +150,7 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 		validateSealed();
 		BaseRuntimeChildDefinition retVal = myNameToChild.get(theName);
 		if (retVal == null) {
-			throw new DataFormatException("Unknown child name '" + theName + "' in element " + getName() + " - Valid names are: " + new TreeSet<String>(myNameToChild.keySet()));
+			throw new DataFormatException(Msg.code(1700) + "Unknown child name '" + theName + "' in element " + getName() + " - Valid names are: " + new TreeSet<String>(myNameToChild.keySet()));
 		}
 		return retVal;
 	}
@@ -281,7 +282,7 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 						}
 					}
 					if (order == Child.REPLACE_PARENT) {
-						throw new ConfigurationException("Field " + nextField.getName() + "' on target type " + declaringClass.getSimpleName() + " has order() of REPLACE_PARENT (" + Child.REPLACE_PARENT
+						throw new ConfigurationException(Msg.code(1701) + "Field " + nextField.getName() + "' on target type " + declaringClass.getSimpleName() + " has order() of REPLACE_PARENT (" + Child.REPLACE_PARENT
 							+ ") but no parent element with extension URL " + extensionAttr.url() + " could be found on type " + nextField.getDeclaringClass().getSimpleName());
 					}
 
@@ -308,7 +309,7 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 						}
 					}
 					if (order == Child.REPLACE_PARENT) {
-						throw new ConfigurationException("Field " + nextField.getName() + "' on target type " + declaringClass.getSimpleName() + " has order() of REPLACE_PARENT (" + Child.REPLACE_PARENT
+						throw new ConfigurationException(Msg.code(1702) + "Field " + nextField.getName() + "' on target type " + declaringClass.getSimpleName() + " has order() of REPLACE_PARENT (" + Child.REPLACE_PARENT
 							+ ") but no parent element with name " + elementName + " could be found on type " + nextField.getDeclaringClass().getSimpleName());
 					}
 
@@ -317,7 +318,7 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 			}
 
 			if (order < 0 && order != Child.ORDER_UNKNOWN) {
-				throw new ConfigurationException("Invalid order '" + order + "' on @Child for field '" + nextField.getName() + "' on target type: " + declaringClass);
+				throw new ConfigurationException(Msg.code(1703) + "Invalid order '" + order + "' on @Child for field '" + nextField.getName() + "' on target type: " + declaringClass);
 			}
 
 			if (order != Child.ORDER_UNKNOWN && !orderIsReplaceParent) {
@@ -339,11 +340,11 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 			List<Class<? extends IBase>> choiceTypes = next.getChoiceTypes();
 
 			if (orderMap.containsKey(order)) {
-				throw new ConfigurationException("Detected duplicate field order '" + childAnnotation.order() + "' for element named '" + elementName + "' in type '" + declaringClass.getCanonicalName() + "' - Already had: " + orderMap.get(order).getElementName());
+				throw new ConfigurationException(Msg.code(1704) + "Detected duplicate field order '" + childAnnotation.order() + "' for element named '" + elementName + "' in type '" + declaringClass.getCanonicalName() + "' - Already had: " + orderMap.get(order).getElementName());
 			}
 
 			if (elementNames.contains(elementName)) {
-				throw new ConfigurationException("Detected duplicate field name '" + elementName + "' in type '" + declaringClass.getCanonicalName() + "'");
+				throw new ConfigurationException(Msg.code(1705) + "Detected duplicate field name '" + elementName + "' in type '" + declaringClass.getCanonicalName() + "'");
 			}
 
 			Class<?> nextElementType = next.getElementType();
@@ -393,7 +394,7 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 							refTypesList.add(myContext.getVersion().getVersion().isRi() ? IAnyResource.class : IResource.class);
 							continue;
 						} else if (IBaseResource.class.isAssignableFrom(nextType) == false) {
-							throw new ConfigurationException("Field '" + nextField.getName() + "' in class '" + nextField.getDeclaringClass().getCanonicalName() + "' is of type " + BaseResourceReferenceDt.class + " but contains a non-resource type: " + nextType.getCanonicalName());
+							throw new ConfigurationException(Msg.code(1706) + "Field '" + nextField.getName() + "' in class '" + nextField.getDeclaringClass().getCanonicalName() + "' is of type " + BaseResourceReferenceDt.class + " but contains a non-resource type: " + nextType.getCanonicalName());
 						}
 						refTypesList.add((Class<? extends IBaseResource>) nextType);
 					}
@@ -439,7 +440,7 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 					}
 
 				} else {
-					throw new ConfigurationException("Field '" + elementName + "' in type '" + declaringClass.getCanonicalName() + "' is not a valid child type: " + nextElementType);
+					throw new ConfigurationException(Msg.code(1707) + "Field '" + elementName + "' in type '" + declaringClass.getCanonicalName() + "' is not a valid child type: " + nextElementType);
 				}
 
 				Binding bindingAnnotation = ModelScanner.pullAnnotation(nextField, Binding.class);
@@ -485,7 +486,7 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 				}
 				for (String nextName : next.getValidChildNames()) {
 					if (myNameToChild.containsKey(nextName)) {
-						throw new ConfigurationException("Duplicate child name[" + nextName + "] in Element[" + getName() + "]");
+						throw new ConfigurationException(Msg.code(1708) + "Duplicate child name[" + nextName + "] in Element[" + getName() + "]");
 					}
 					myNameToChild.put(nextName, next);
 				}

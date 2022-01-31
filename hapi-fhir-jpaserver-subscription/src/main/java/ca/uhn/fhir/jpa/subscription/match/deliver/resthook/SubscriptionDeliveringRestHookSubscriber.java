@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.subscription.match.deliver.resthook;
  */
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -267,8 +268,8 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 			// close connection in order to return a possible cached connection to the connection pool
 			response.close();
 		} catch (IOException e) {
-			ourLog.error("Error trying to reach {}: {}", subscription.getEndpointUrl(), e.toString());
-			throw new ResourceNotFoundException(e.getMessage());
+			ourLog.error("Error trying to reach {}: {}", theMsg.getSubscription().getEndpointUrl(), e.toString());
+			throw new ResourceNotFoundException(Msg.code(5) + e.getMessage());
 		}
 	}
 

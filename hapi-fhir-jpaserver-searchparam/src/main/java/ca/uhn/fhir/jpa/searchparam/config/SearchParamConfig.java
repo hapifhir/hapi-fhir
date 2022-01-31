@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.searchparam.config;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCacheRefresher;
@@ -69,7 +70,7 @@ public class SearchParamConfig {
 			case DSTU2_HL7ORG:
 			case DSTU2_1:
 			default:
-				throw new IllegalStateException("Can not handle version: " + myFhirContext.getVersion().getVersion());
+				throw new IllegalStateException(Msg.code(501) + "Can not handle version: " + myFhirContext.getVersion().getVersion());
 		}
 	}
 

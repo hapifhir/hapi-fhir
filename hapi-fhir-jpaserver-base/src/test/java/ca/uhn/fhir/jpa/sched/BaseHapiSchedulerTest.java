@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.sched;
 
+import ca.uhn.fhir.i18n.Msg;
 import org.junit.jupiter.api.Test;
 import org.quartz.SchedulerException;
 
@@ -16,7 +17,7 @@ public class BaseHapiSchedulerTest {
 			sched.init();
 			fail();
 		} catch (SchedulerException e) {
-			assertEquals("java.lang.NullPointerException: No instance name supplied", e.getMessage());
+			assertEquals(Msg.code(1633) + "java.lang.NullPointerException: No instance name supplied", e.getMessage());
 		}
 	}
 

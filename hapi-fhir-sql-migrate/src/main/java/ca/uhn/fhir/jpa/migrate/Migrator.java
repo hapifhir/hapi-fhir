@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.migrate;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.slf4j.Logger;
@@ -92,7 +93,7 @@ public class Migrator {
 						description = next.getClass().getSimpleName();
 					}
 					String prefix = "Failure executing task \"" + description + "\", aborting! Cause: ";
-					throw new InternalErrorException(prefix + e.toString(), e);
+					throw new InternalErrorException(Msg.code(44) + prefix + e.toString(), e);
 				}
 
 				myChangesCount += next.getChangesCount();

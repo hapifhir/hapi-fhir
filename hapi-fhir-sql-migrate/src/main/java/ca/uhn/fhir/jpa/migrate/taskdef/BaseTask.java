@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -148,7 +149,7 @@ public abstract class BaseTask {
 						ourLog.debug("Error was: {}", e.getMessage(), e);
 						return 0;
 					} else {
-						throw new DataAccessException("Failed during task " + getFlywayVersion() + ": " + e, e) {
+						throw new DataAccessException(Msg.code(61) + "Failed during task " + getFlywayVersion() + ": " + e, e) {
 							private static final long serialVersionUID = 8211678931579252166L;
 						};
 					}
@@ -238,7 +239,7 @@ public abstract class BaseTask {
 	public void validateVersion() {
 		Matcher matcher = versionPattern.matcher(mySchemaVersion);
 		if (!matcher.matches()) {
-			throw new IllegalStateException("The version " + mySchemaVersion + " does not match the expected pattern " + MIGRATION_VERSION_PATTERN);
+			throw new IllegalStateException(Msg.code(62) + "The version " + mySchemaVersion + " does not match the expected pattern " + MIGRATION_VERSION_PATTERN);
 		}
 	}
 
