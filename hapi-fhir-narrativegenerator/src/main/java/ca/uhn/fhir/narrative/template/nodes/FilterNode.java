@@ -1,5 +1,6 @@
 package ca.uhn.fhir.narrative.template.nodes;
 
+import ca.uhn.fhir.i18n.Msg;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -13,7 +14,7 @@ public class FilterNode implements LNode {
 
     public FilterNode(String filterName, Filter filter) {
         if (filter == null) {
-            throw new IllegalArgumentException("no filter available  named: " + filterName);
+            throw new IllegalArgumentException(Msg.code(731) + "no filter available  named: " + filterName);
         }
         this.filter = filter;
         this.params = new ArrayList<LNode>();
@@ -36,6 +37,6 @@ public class FilterNode implements LNode {
 
     @Override
     public Object render(Map<String, Object> context) {
-        throw new RuntimeException("cannot render a filter");
+        throw new RuntimeException(Msg.code(732) + "cannot render a filter");
     }
 }

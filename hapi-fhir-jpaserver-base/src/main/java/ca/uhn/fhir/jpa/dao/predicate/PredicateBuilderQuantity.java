@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
@@ -118,7 +119,7 @@ public class PredicateBuilderQuantity extends BasePredicateBuilder implements IP
 		} else if (operation == SearchFilterParser.CompareOperation.eq) {
 			cmpValue = ParamPrefixEnum.EQUAL;
 		} else if (operation != null) {
-			throw new IllegalArgumentException("Invalid operator specified for quantity type");
+			throw new IllegalArgumentException(Msg.code(1045) + "Invalid operator specified for quantity type");
 		}
 
 		if (theParam instanceof BaseQuantityDt) {
@@ -138,7 +139,7 @@ public class PredicateBuilderQuantity extends BasePredicateBuilder implements IP
 			}
 			valueValue = param.getValue();
 		} else {
-			throw new IllegalArgumentException("Invalid quantity type: " + theParam.getClass());
+			throw new IllegalArgumentException(Msg.code(1046) + "Invalid quantity type: " + theParam.getClass());
 		}
 
 		if (myDontUseHashesForSearch) {

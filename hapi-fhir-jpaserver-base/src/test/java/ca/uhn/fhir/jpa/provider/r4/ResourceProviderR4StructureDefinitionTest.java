@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -92,7 +93,7 @@ public class ResourceProviderR4StructureDefinitionTest extends BaseResourceProvi
 				.returnResourceType(StructureDefinition.class)
 				.execute();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: Must supply either an ID or a StructureDefinition or a URL (but not more than one of these things)", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1770) + "Must supply either an ID or a StructureDefinition or a URL (but not more than one of these things)", e.getMessage());
 		}
 	}
 
@@ -107,7 +108,7 @@ public class ResourceProviderR4StructureDefinitionTest extends BaseResourceProvi
 				.returnResourceType(StructureDefinition.class)
 				.execute();
 		} catch (ResourceNotFoundException e) {
-			assertEquals("HTTP 404 Not Found: No StructureDefiniton found with url = 'http://hl7.org/fhir/StructureDefinition/FOO'", e.getMessage());
+			assertEquals("HTTP 404 Not Found: " + Msg.code(1159) + "No StructureDefiniton found with url = 'http://hl7.org/fhir/StructureDefinition/FOO'", e.getMessage());
 		}
 	}
 

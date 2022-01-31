@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.provider;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
@@ -123,11 +124,11 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		}
 
 		if (!haveId && !haveIdentifier && !haveValueSet) {
-			throw new InvalidRequestException("$expand operation at the type level (no ID specified) requires a url or a valueSet as a part of the request.");
+			throw new InvalidRequestException(Msg.code(1133) + "$expand operation at the type level (no ID specified) requires a url or a valueSet as a part of the request.");
 		}
 
 		if (moreThanOneTrue(haveId, haveIdentifier, haveValueSet)) {
-			throw new InvalidRequestException("$expand must EITHER be invoked at the instance level, or have a url specified, or have a ValueSet specified. Can not combine these options.");
+			throw new InvalidRequestException(Msg.code(1134) + "$expand must EITHER be invoked at the instance level, or have a url specified, or have a ValueSet specified. Can not combine these options.");
 		}
 
 		ValueSetExpansionOptions options = createValueSetExpansionOptions(myDaoConfig, theOffset, theCount, theIncludeHierarchy, theFilter);
@@ -259,7 +260,7 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 			if (theOffset.getValue() >= 0) {
 				offset = theOffset.getValue();
 			} else {
-				throw new InvalidRequestException("offset parameter for $expand operation must be >= 0 when specified. offset: " + theOffset.getValue());
+				throw new InvalidRequestException(Msg.code(1135) + "offset parameter for $expand operation must be >= 0 when specified. offset: " + theOffset.getValue());
 			}
 		}
 
@@ -268,7 +269,7 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 			if (theCount.getValue() >= 0) {
 				count = theCount.getValue();
 			} else {
-				throw new InvalidRequestException("count parameter for $expand operation must be >= 0 when specified. count: " + theCount.getValue());
+				throw new InvalidRequestException(Msg.code(1136) + "count parameter for $expand operation must be >= 0 when specified. count: " + theCount.getValue());
 			}
 		}
 		int countMax = theDaoConfig.getPreExpandValueSetsMaxCount();

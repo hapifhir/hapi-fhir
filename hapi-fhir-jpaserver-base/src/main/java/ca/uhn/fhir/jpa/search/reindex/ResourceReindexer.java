@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.search.reindex;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -83,7 +84,7 @@ public class ResourceReindexer {
 		IBaseResource resource = dao.readByPid(new ResourcePersistentId(theResourceTable.getId()), true);
 
 		if (resource == null) {
-			throw new InternalErrorException("Could not find resource version " + theResourceTable.getIdDt().toUnqualified().getValue() + " in database");
+			throw new InternalErrorException(Msg.code(1171) + "Could not find resource version " + theResourceTable.getIdDt().toUnqualified().getValue() + " in database");
 		}
 
 		Long actualVersion = resource.getIdElement().getVersionIdPartAsLong();

@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.search.reindex;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -165,7 +166,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 			try {
 				myContext.getResourceType(theType);
 			} catch (DataFormatException e) {
-				throw new InvalidRequestException("Unknown resource type: " + theType);
+				throw new InvalidRequestException(Msg.code(1170) + "Unknown resource type: " + theType);
 			}
 			myReindexJobDao.markAllOfTypeAsDeleted(theType);
 			typeDesc = theType;

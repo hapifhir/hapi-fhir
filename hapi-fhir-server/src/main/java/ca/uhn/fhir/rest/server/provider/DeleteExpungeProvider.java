@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.server.provider;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -47,7 +48,7 @@ public class DeleteExpungeProvider {
 		RequestDetails theRequestDetails
 	) {
 		if (theUrlsToDeleteExpunge == null) {
-			throw new InvalidRequestException("At least one `url` parameter to $delete-expunge must be provided.");
+			throw new InvalidRequestException(Msg.code(1976) + "At least one `url` parameter to $delete-expunge must be provided.");
 		}
 		List<String> urls = theUrlsToDeleteExpunge.stream().map(IPrimitiveType::getValue).collect(Collectors.toList());
 		Integer batchSize = myMultiUrlProcessor.getBatchSize(theBatchSize);

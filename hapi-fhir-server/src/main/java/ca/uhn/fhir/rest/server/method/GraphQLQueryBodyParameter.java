@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.server.method;
  */
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -65,7 +66,7 @@ public class GraphQLQueryBodyParameter implements IParameter {
 					return jsonNode.get("query").asText();
 				}
 			} catch (IOException e) {
-				throw new InternalErrorException(e);
+				throw new InternalErrorException(Msg.code(356) + e);
 			}
 		}
 
@@ -73,7 +74,7 @@ public class GraphQLQueryBodyParameter implements IParameter {
 			try {
 				return IOUtils.toString(requestReader);
 			} catch (IOException e) {
-				throw new InternalErrorException(e);
+				throw new InternalErrorException(Msg.code(357) + e);
 			}
 		}
 
@@ -83,10 +84,10 @@ public class GraphQLQueryBodyParameter implements IParameter {
 	@Override
 	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
 		if (theOuterCollectionType != null) {
-			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type '" +theMethod.getDeclaringClass().getCanonicalName()+ "' is annotated with @" + Count.class.getName() + " but can not be of collection type");
+			throw new ConfigurationException(Msg.code(358) + "Method '" + theMethod.getName() + "' in type '" +theMethod.getDeclaringClass().getCanonicalName()+ "' is annotated with @" + Count.class.getName() + " but can not be of collection type");
 		}
 		if (!String.class.equals(theParameterType)) {
-			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type '" +theMethod.getDeclaringClass().getCanonicalName()+ "' is annotated with @" + Count.class.getName() + " but type '" + theParameterType + "' is an invalid type, must be one of Integer or IntegerType");
+			throw new ConfigurationException(Msg.code(359) + "Method '" + theMethod.getName() + "' in type '" +theMethod.getDeclaringClass().getCanonicalName()+ "' is annotated with @" + Count.class.getName() + " but type '" + theParameterType + "' is an invalid type, must be one of Integer or IntegerType");
 		}
 		myType = theParameterType;
 	}

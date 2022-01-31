@@ -1,5 +1,6 @@
 package ca.uhn.fhir.tinder.parser;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.ExtensionDt;
@@ -93,7 +94,7 @@ public abstract class BaseStructureParser {
 		} else if (myVersion.equals("r5")) {
 			myCtx = FhirContext.forR5();
 		} else {
-			throw new MojoFailureException("Unknown version: " + myVersion);
+			throw new MojoFailureException(Msg.code(151) + "Unknown version: " + myVersion);
 		}
 
 		myIsRi = myCtx.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3);
@@ -235,7 +236,7 @@ public abstract class BaseStructureParser {
 										if (file.exists()) {
 											return "ca.uhn.fhir.model.primitive." + nextType;
 										}
-										throw new MojoFailureException("Unknown type: " + nextType + " - Have locally defined names: " + new TreeSet<String>(myLocallyDefinedClassNames.keySet()));
+										throw new MojoFailureException(Msg.code(152) + "Unknown type: " + nextType + " - Have locally defined names: " + new TreeSet<String>(myLocallyDefinedClassNames.keySet()));
 									}
 								}
 							}
@@ -252,7 +253,7 @@ public abstract class BaseStructureParser {
 				return (ca.uhn.fhir.model.api.annotation.SimpleSetter.Parameter) next;
 			}
 		}
-		throw new IllegalArgumentException(theBase.getCanonicalName() + " has @" + SimpleSetter.class.getCanonicalName() + " constructor with no/invalid parameter annotation");
+		throw new IllegalArgumentException(Msg.code(153) + theBase.getCanonicalName() + " has @" + SimpleSetter.class.getCanonicalName() + " constructor with no/invalid parameter annotation");
 	}
 
 	/**
@@ -361,7 +362,7 @@ public abstract class BaseStructureParser {
 			} else if (next instanceof Composite) {
 				myLocallyDefinedClassNames.put(next.getName() + "Dt", "composite");
 			} else {
-				throw new IllegalStateException(next.getClass() + "");
+				throw new IllegalStateException(Msg.code(154) + next.getClass() + "");
 			}
 		}
 	}
@@ -604,14 +605,14 @@ public abstract class BaseStructureParser {
 			theOutputDirectory.mkdirs();
 		}
 		if (!theOutputDirectory.isDirectory()) {
-			throw new MojoFailureException(theOutputDirectory + " is not a directory");
+			throw new MojoFailureException(Msg.code(155) + theOutputDirectory + " is not a directory");
 		}
 		if (theResourceOutputDirectory != null) {
 			if (!theResourceOutputDirectory.exists()) {
 				theResourceOutputDirectory.mkdirs();
 			}
 			if (!theResourceOutputDirectory.isDirectory()) {
-				throw new MojoFailureException(theResourceOutputDirectory + " is not a directory");
+				throw new MojoFailureException(Msg.code(156) + theResourceOutputDirectory + " is not a directory");
 			}
 		}
 
@@ -648,7 +649,7 @@ public abstract class BaseStructureParser {
 			try {
 				write(next, f, thePackageBase);
 			} catch (IOException e) {
-				throw new MojoFailureException("Failed to write structure", e);
+				throw new MojoFailureException(Msg.code(157) + "Failed to write structure", e);
 			}
 
 			if (next instanceof Resource) {
@@ -656,7 +657,7 @@ public abstract class BaseStructureParser {
 			} else if (next instanceof Composite) {
 				myNameToDatatypeClass.put(next.getElementName(), thePackageBase + ".composite." + className);
 			} else {
-				throw new IllegalStateException(next.getClass().toString());
+				throw new IllegalStateException(Msg.code(158) + next.getClass().toString());
 			}
 		}
 
@@ -707,7 +708,7 @@ public abstract class BaseStructureParser {
 
 				w.close();
 			} catch (IOException e) {
-				throw new MojoFailureException(e.getMessage(), e);
+				throw new MojoFailureException(Msg.code(159) + e.getMessage(), e);
 			}
 		}
 	}
@@ -750,7 +751,7 @@ public abstract class BaseStructureParser {
 		} else if ("r5".equals(version)) {
 			versionEnum = FhirVersionEnum.R5;
 		} else {
-			throw new IllegalArgumentException("Unknown version: " + version);
+			throw new IllegalArgumentException(Msg.code(160) + "Unknown version: " + version);
 		}
 		return versionEnum;
 	}

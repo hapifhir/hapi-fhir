@@ -1,5 +1,6 @@
 package ca.uhn.fhir.narrative.template.filters;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.narrative.template.LValue;
 
 import java.util.Arrays;
@@ -101,7 +102,7 @@ public abstract class Filter extends LValue {
      */
     public final void checkParams(Object[] params, int expected) {
         if(params == null || params.length != expected) {
-            throw new RuntimeException("Liquid error: wrong number of arguments (" +
+            throw new RuntimeException(Msg.code(726) + "Liquid error: wrong number of arguments (" +
                     (params == null ? 0 : params.length + 1) + " for " + (expected + 1) + ")");
         }
     }
@@ -121,7 +122,7 @@ public abstract class Filter extends LValue {
     protected Object get(int index, Object... params) {
 
         if (index >= params.length) {
-            throw new RuntimeException("error in filter '" + name +
+            throw new RuntimeException(Msg.code(727) + "error in filter '" + name +
                     "': cannot get param index: " + index +
                     " from: " + Arrays.toString(params));
         }
@@ -142,7 +143,7 @@ public abstract class Filter extends LValue {
         Filter filter = FILTERS.get(name);
 
         if (filter == null) {
-            throw new RuntimeException("unknown filter: " + name);
+            throw new RuntimeException(Msg.code(728) + "unknown filter: " + name);
         }
 
         return filter;

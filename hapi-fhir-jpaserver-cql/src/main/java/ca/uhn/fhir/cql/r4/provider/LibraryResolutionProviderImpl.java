@@ -20,6 +20,7 @@ package ca.uhn.fhir.cql.r4.provider;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.cql.common.provider.LibraryResolutionProvider;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -60,7 +61,7 @@ public class LibraryResolutionProviderImpl implements LibraryResolutionProvider<
 		try {
 			return myLibraryDao.read(new IdType(libraryId), theRequestDetails);
 		} catch (Exception e) {
-			throw new IllegalArgumentException(String.format("Could not resolve library id %s", libraryId));
+			throw new IllegalArgumentException(Msg.code(1665) + String.format("Could not resolve library id %s", libraryId));
 		}
 	}
 
@@ -71,7 +72,7 @@ public class LibraryResolutionProviderImpl implements LibraryResolutionProvider<
 			x -> x.getVersion());
 
 		if (library == null) {
-			throw new IllegalArgumentException(String.format("Could not resolve library name %s", libraryName));
+			throw new IllegalArgumentException(Msg.code(1666) + String.format("Could not resolve library name %s", libraryName));
 		}
 
 		return library;

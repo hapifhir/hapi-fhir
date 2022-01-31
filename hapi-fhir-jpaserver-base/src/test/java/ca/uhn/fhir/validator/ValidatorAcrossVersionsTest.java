@@ -2,6 +2,7 @@ package ca.uhn.fhir.validator;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.dstu2.resource.QuestionnaireResponse;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.validation.FhirValidator;
@@ -25,7 +26,7 @@ public class ValidatorAcrossVersionsTest {
 			ctxDstu2.getResourceDefinition(org.hl7.fhir.dstu3.model.Patient.class);
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals("This context is for FHIR version \"DSTU2\" but the class \"org.hl7.fhir.dstu3.model.Patient\" is for version \"DSTU3\"", e.getMessage());
+			assertEquals(Msg.code(1731) + "This context is for FHIR version \"DSTU2\" but the class \"org.hl7.fhir.dstu3.model.Patient\" is for version \"DSTU3\"", e.getMessage());
 		}
 		
 	}

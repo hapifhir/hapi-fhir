@@ -15,6 +15,7 @@
 			<!-- The (?i) below means Case Insensitive -->
 			<property name="format" value="(?i)FIXME"/>
 		</module>
+		<module name="ca.uhn.fhir.checks.HapiErrorCodeCheck"/>
 	</module>
 
 </module>

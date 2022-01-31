@@ -6,6 +6,7 @@ import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.test.utilities.LoggingExtension;
@@ -1365,7 +1366,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		all = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(2, all.size());
 		assertThat(all.get(0).getMessage(), containsString("Validation failed for 'http://unitsofmeasure.org#Heck'"));
-		assertThat(all.get(1).getMessage(), containsString("The value provided ('Heck') is not in the value set 'Body Temperature Units' (http://hl7.org/fhir/ValueSet/ucum-bodytemp|4.0.1), and a code is required from this value set) (error message = Failed to expand ValueSet 'http://hl7.org/fhir/ValueSet/ucum-bodytemp' (in-memory). Could not validate code null#Heck. Error was: Unable to expand ValueSet because CodeSystem could not be found: http://unitsofmeasure.org)"));
+		assertThat(all.get(1).getMessage(), containsString("The value provided ('Heck') is not in the value set 'Body Temperature Units' (http://hl7.org/fhir/ValueSet/ucum-bodytemp|4.0.1), and a code is required from this value set) (error message = Failed to expand ValueSet 'http://hl7.org/fhir/ValueSet/ucum-bodytemp' (in-memory). Could not validate code null#Heck. Error was: " + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://unitsofmeasure.org)"));
 
 	}
 

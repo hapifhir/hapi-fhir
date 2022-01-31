@@ -20,13 +20,14 @@ package ca.uhn.fhir.rest.param.binder;
  * #L%
  */
 
-import java.lang.reflect.Constructor;
-import java.util.List;
-
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+
+import java.lang.reflect.Constructor;
+import java.util.List;
 
 class BaseBinder<T> {
 	private List<Class<? extends IQueryParameterType>> myCompositeTypes;
@@ -40,7 +41,7 @@ class BaseBinder<T> {
 		
 		if (myType.equals(CompositeParam.class)) {
 			if (myCompositeTypes.size() != 2) {
-				throw new ConfigurationException("Search parameter of type " + myType.getName() + " must have 2 composite types declared in parameter annotation, found " + theCompositeTypes.size());
+				throw new ConfigurationException(Msg.code(1959) + "Search parameter of type " + myType.getName() + " must have 2 composite types declared in parameter annotation, found " + theCompositeTypes.size());
 			}
 		}
 		
@@ -51,7 +52,7 @@ class BaseBinder<T> {
 			}
 			myConstructor = myType.getConstructor(types);
 		} catch (NoSuchMethodException e) {
-			throw new ConfigurationException("Query parameter type " + theType.getName() + " has no constructor with types " + theCompositeTypes);
+			throw new ConfigurationException(Msg.code(1960) + "Query parameter type " + theType.getName() + " has no constructor with types " + theCompositeTypes);
 		}
 	}
 
@@ -65,7 +66,7 @@ class BaseBinder<T> {
 			T dt = myConstructor.newInstance(args);
 			return dt;
 		} catch (final Exception e) {
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(1961) + e);
 		}
 	}
 

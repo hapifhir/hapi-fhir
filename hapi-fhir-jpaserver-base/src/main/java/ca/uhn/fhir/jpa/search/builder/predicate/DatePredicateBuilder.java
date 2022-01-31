@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
@@ -88,7 +89,7 @@ public class DatePredicateBuilder extends BaseSearchParamPredicateBuilder {
 				range,
 				theOperation);
 		} else {
-			throw new IllegalArgumentException("Invalid token type: " + theParam.getClass());
+			throw new IllegalArgumentException(Msg.code(1251) + "Invalid token type: " + theParam.getClass());
 		}
 
 		return p;
@@ -155,7 +156,7 @@ public class DatePredicateBuilder extends BaseSearchParamPredicateBuilder {
 					ub = ComboCondition.or(ub, theFrom.createPredicate(highValueField, ParamPrefixEnum.LESSTHAN_OR_EQUALS, genericUpperBound));
 				}
 			} else {
-				throw new InvalidRequestException("lowerBound and upperBound value not correctly specified for comparing " + theOperation);
+				throw new InvalidRequestException(Msg.code(1252) + "lowerBound and upperBound value not correctly specified for comparing " + theOperation);
 			}
 		} else if (theOperation == SearchFilterParser.CompareOperation.gt || theOperation == SearchFilterParser.CompareOperation.ge) {
 			// use upper bound first, e.g value between 6 and 10
@@ -170,12 +171,12 @@ public class DatePredicateBuilder extends BaseSearchParamPredicateBuilder {
 					lb = ComboCondition.or(lb, theFrom.createPredicate(lowValueField, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, genericLowerBound));
 				}
 			} else {
-				throw new InvalidRequestException("upperBound and lowerBound value not correctly specified for compare theOperation");
+				throw new InvalidRequestException(Msg.code(1253) + "upperBound and lowerBound value not correctly specified for compare theOperation");
 			}
 		} else if (theOperation == SearchFilterParser.CompareOperation.ne) {
 			if ((lowerBoundInstant == null) ||
 				(upperBoundInstant == null)) {
-				throw new InvalidRequestException("lowerBound and/or upperBound value not correctly specified for compare theOperation");
+				throw new InvalidRequestException(Msg.code(1254) + "lowerBound and/or upperBound value not correctly specified for compare theOperation");
 			}
 			lt = theFrom.createPredicate(lowValueField, ParamPrefixEnum.LESSTHAN, genericLowerBound);
 			gt = theFrom.createPredicate(highValueField, ParamPrefixEnum.GREATERTHAN, genericUpperBound);
@@ -207,7 +208,7 @@ public class DatePredicateBuilder extends BaseSearchParamPredicateBuilder {
 				}
 			}
 		} else {
-			throw new InvalidRequestException(String.format("Unsupported operator specified, operator=%s",
+			throw new InvalidRequestException(Msg.code(1255) + String.format("Unsupported operator specified, operator=%s",
 				theOperation.name()));
 		}
 		if (isOrdinalComparison) {
@@ -250,7 +251,7 @@ public class DatePredicateBuilder extends BaseSearchParamPredicateBuilder {
 				column = myColumnValueHighDateOrdinal;
 				break;
 			default:
-				throw new IllegalArgumentException();
+				throw new IllegalArgumentException(Msg.code(1256));
 		}
 
 		return createConditionForValueWithComparator(theComparator, column, theValue);

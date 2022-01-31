@@ -22,6 +22,7 @@ package ca.uhn.fhir.validation;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -108,7 +109,7 @@ public class SchemaBaseValidator implements IValidatorModule {
 			theContext.addValidationMessage(message);
 		} catch (SAXException | IOException e) {
 			// Catch all
-			throw new ConfigurationException("Could not load/parse schema file", e);
+			throw new ConfigurationException(Msg.code(1967) + "Could not load/parse schema file", e);
 		}
 	}
 
@@ -140,7 +141,7 @@ public class SchemaBaseValidator implements IValidatorModule {
 				}
 				schema = schemaFactory.newSchema(new Source[]{baseSource});
 			} catch (SAXException e) {
-				throw new ConfigurationException("Could not load/parse schema file: " + "fhir-single.xsd", e);
+				throw new ConfigurationException(Msg.code(1968) + "Could not load/parse schema file: " + "fhir-single.xsd", e);
 			}
 			myKeyToSchema.put(key, schema);
 			return schema;
@@ -181,7 +182,7 @@ public class SchemaBaseValidator implements IValidatorModule {
 
 			}
 
-			throw new ConfigurationException("Unknown schema: " + theSystemId);
+			throw new ConfigurationException(Msg.code(1969) + "Unknown schema: " + theSystemId);
 		}
 	}
 

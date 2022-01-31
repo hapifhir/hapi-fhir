@@ -1,5 +1,6 @@
 package ca.uhn.fhir.tinder;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.tinder.parser.DatatypeGeneratorUsingSpreadsheet;
 import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;
 import org.apache.commons.lang3.StringUtils;
@@ -53,10 +54,10 @@ public class TinderStructuresMojo extends AbstractMojo {
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {		
 		if (StringUtils.isBlank(packageName)) {
-			throw new MojoFailureException("Package not specified");
+			throw new MojoFailureException(Msg.code(101) + "Package not specified");
 		}
 		if (packageName.contains("..") || packageName.endsWith(".")) {
-			throw new MojoFailureException("Invalid package specified");
+			throw new MojoFailureException(Msg.code(102) + "Invalid package specified");
 		}
 
 		ourLog.info("Beginning HAPI-FHIR Tinder Code Generation...");
@@ -76,7 +77,7 @@ public class TinderStructuresMojo extends AbstractMojo {
 		try {
 			vsp.parse();
 		} catch (Exception e) {
-			throw new MojoFailureException("Failed to load valuesets", e);
+			throw new MojoFailureException(Msg.code(103) + "Failed to load valuesets", e);
 		}
 
 		/*
@@ -94,7 +95,7 @@ public class TinderStructuresMojo extends AbstractMojo {
 				dtp.parse();
 				dtp.markResourcesForImports();
 			} catch (Exception e) {
-				throw new MojoFailureException("Failed to load datatypes", e);
+				throw new MojoFailureException(Msg.code(104) + "Failed to load datatypes", e);
 			}
 			dtp.bindValueSets(vsp);
 
@@ -109,7 +110,7 @@ public class TinderStructuresMojo extends AbstractMojo {
 				rp.parse();
 				rp.markResourcesForImports();
 			} catch (Exception e) {
-				throw new MojoFailureException("Failed to load resources", e);
+				throw new MojoFailureException(Msg.code(105) + "Failed to load resources", e);
 			}
 
 			rp.bindValueSets(vsp);

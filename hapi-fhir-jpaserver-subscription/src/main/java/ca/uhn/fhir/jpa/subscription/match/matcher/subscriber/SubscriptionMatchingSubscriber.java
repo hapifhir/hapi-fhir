@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -228,7 +229,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 			}
 		} catch (RuntimeException e) {
 			ourLog.error("Failed to send message to Delivery Channel", e);
-			throw new RuntimeException("Failed to send message to Delivery Channel", e);
+			throw new RuntimeException(Msg.code(7) + "Failed to send message to Delivery Channel", e);
 		}
 	}
 

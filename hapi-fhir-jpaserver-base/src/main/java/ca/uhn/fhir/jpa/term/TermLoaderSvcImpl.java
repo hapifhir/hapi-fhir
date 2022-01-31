@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
@@ -61,7 +62,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.xml.sax.SAXException;
 
 import javax.annotation.Nonnull;
-import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -227,7 +227,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 				uploadProperties.getProperty(LOINC_CODESYSTEM_MAKE_CURRENT.getCode(), "true"));
 
 			if (StringUtils.isBlank(codeSystemVersionId) && ! isMakeCurrentVersion) {
-				throw new InvalidRequestException("'" + LOINC_CODESYSTEM_VERSION.getCode() +
+				throw new InvalidRequestException(Msg.code(864) + "'" + LOINC_CODESYSTEM_VERSION.getCode() +
 					"' property is required when '" + LOINC_CODESYSTEM_MAKE_CURRENT.getCode() + "' property is 'false'");
 			}
 
@@ -325,7 +325,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 				}
 			}
 		} catch (IOException | SAXException e) {
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(865) + e);
 		}
 
 		cs.setVersion(codeSystemVersion.getCodeSystemVersionId());
@@ -420,7 +420,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		try (InputStream propertyStream = ca.uhn.fhir.jpa.term.TermLoaderSvcImpl.class.getResourceAsStream("/ca/uhn/fhir/jpa/term/loinc/loincupload.properties")) {
 			retVal.load(propertyStream);
 		} catch (IOException e) {
-			throw new InternalErrorException("Failed to process loinc.properties", e);
+			throw new InternalErrorException(Msg.code(866) + "Failed to process loinc.properties", e);
 		}
 
 		for (FileDescriptor next : theDescriptors.getUncompressedFileDescriptors()) {
@@ -430,7 +430,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 						retVal.load(inputStream);
 					}
 				} catch (IOException e) {
-					throw new InternalErrorException("Failed to read " + thePropertiesFile, e);
+					throw new InternalErrorException(Msg.code(867) + "Failed to read " + thePropertiesFile, e);
 				}
 			}
 		}
@@ -445,7 +445,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 						String contents = IOUtils.toString(next.getInputStream(), Charsets.UTF_8);
 						return Optional.of(contents);
 					} catch (IOException e) {
-						throw new InternalErrorException(e);
+						throw new InternalErrorException(Msg.code(868) + e);
 					}
 				}
 			}
@@ -463,7 +463,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 			String imgthlaCsString = IOUtils.toString(BaseTermReadSvcImpl.class.getResourceAsStream("/ca/uhn/fhir/jpa/term/imgthla/imgthla.xml"), Charsets.UTF_8);
 			imgthlaCs = FhirContext.forR4().newXmlParser().parseResource(CodeSystem.class, imgthlaCsString);
 		} catch (IOException e) {
-			throw new InternalErrorException("Failed to load imgthla.xml", e);
+			throw new InternalErrorException(Msg.code(869) + "Failed to load imgthla.xml", e);
 		}
 
 		boolean foundHlaNom = false;
@@ -494,7 +494,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 					ourLog.warn("Lines read from {}:  {}", nextFilename, lnr.getLineNumber());
 
 				} catch (IOException e) {
-					throw new InternalErrorException(e);
+					throw new InternalErrorException(Msg.code(870) + e);
 				} finally {
 					IOUtils.closeQuietly(reader);
 				}
@@ -519,7 +519,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 					ourLog.warn("Lines read from {}:  {}", nextFilename, lnr.getLineNumber());
 
 				} catch (IOException e) {
-					throw new InternalErrorException(e);
+					throw new InternalErrorException(Msg.code(871) + e);
 				} finally {
 					IOUtils.closeQuietly(reader);
 				}
@@ -530,11 +530,11 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		}
 
 		if (!foundHlaNom) {
-			throw new InvalidRequestException("Did not find file matching " + IMGTHLA_HLA_NOM_TXT);
+			throw new InvalidRequestException(Msg.code(872) + "Did not find file matching " + IMGTHLA_HLA_NOM_TXT);
 		}
 
 		if (!foundHlaXml) {
-			throw new InvalidRequestException("Did not find file matching " + IMGTHLA_HLA_XML);
+			throw new InvalidRequestException(Msg.code(873) + "Did not find file matching " + IMGTHLA_HLA_XML);
 		}
 
 		int valueSetCount = valueSets.size();
@@ -543,7 +543,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		ourLog.info("Have {} total concepts, {} root concepts, {} ValueSets", conceptCount, rootConceptCount, valueSetCount);
 
 		// remove this when fully implemented ...
-		throw new InternalErrorException("HLA nomenclature terminology upload not yet fully implemented.");
+		throw new InternalErrorException(Msg.code(874) + "HLA nomenclature terminology upload not yet fully implemented.");
 
 //		IIdType target = storeCodeSystem(theRequestDetails, codeSystemVersion, imgthlaCs, valueSets, conceptMaps);
 //
@@ -562,12 +562,12 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		iterateOverZipFile(theDescriptors, "loinc.xml", false, false, loincXmlHandler);
 		String loincCsString = loincXmlHandler.getContents();
 		if (isBlank(loincCsString)) {
-			throw new InvalidRequestException("Did not find loinc.xml in the ZIP distribution.");
+			throw new InvalidRequestException(Msg.code(875) + "Did not find loinc.xml in the ZIP distribution.");
 		}
 
 		CodeSystem loincCs = FhirContext.forR4().newXmlParser().parseResource(CodeSystem.class, loincCsString);
 		if (isNotBlank(loincCs.getVersion())) {
-			throw new InvalidRequestException("'loinc.xml' file must not have a version defined. To define a version use '" +
+			throw new InvalidRequestException(Msg.code(876) + "'loinc.xml' file must not have a version defined. To define a version use '" +
 				LOINC_CODESYSTEM_VERSION.getCode() + "' property of 'loincupload.properties' file");
 		}
 
@@ -855,14 +855,14 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 					theHandler.handle(reader, nextFilename);
 
 				} catch (IOException e) {
-					throw new InternalErrorException(e);
+					throw new InternalErrorException(Msg.code(877) + e);
 				}
 			}
 
 		}
 
 		if (!foundMatch && theRequireMatch) {
-			throw new InvalidRequestException("Did not find file matching " + theFileNamePart);
+			throw new InvalidRequestException(Msg.code(878) + "Did not find file matching " + theFileNamePart);
 		}
 	}
 

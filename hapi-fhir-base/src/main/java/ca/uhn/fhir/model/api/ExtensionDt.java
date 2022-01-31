@@ -20,18 +20,18 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.List;
-
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.primitive.StringDt;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.primitive.StringDt;
+import java.util.ArrayList;
+import java.util.List;
 
 @DatatypeDef(name = "Extension")
 public class ExtensionDt extends BaseIdentifiableElement implements ICompositeDatatype, IBaseExtension<ExtensionDt, IDatatype> {
@@ -116,7 +116,7 @@ public class ExtensionDt extends BaseIdentifiableElement implements ICompositeDa
 	 */
 	public IPrimitiveDatatype<?> getValueAsPrimitive() {
 		if (!(getValue() instanceof IPrimitiveDatatype)) {
-			throw new ClassCastException("Extension with URL["+myUrl+"] can not be cast to primitive type, type is: "+ getClass().getCanonicalName());
+			throw new ClassCastException(Msg.code(1887) + "Extension with URL["+myUrl+"] can not be cast to primitive type, type is: "+ getClass().getCanonicalName());
 		}
 		return (IPrimitiveDatatype<?>) getValue();
 	}

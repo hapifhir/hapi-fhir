@@ -1,5 +1,6 @@
 package ca.uhn.fhir.to;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -265,7 +266,7 @@ public class BaseController {
 		String resourceName = sanitizeUrlPart(defaultString(theReq.getParameter(PARAM_RESOURCE)));
 		RuntimeResourceDefinition def = getContext(theRequest).getResourceDefinition(resourceName);
 		if (def == null) {
-			throw new ServletException("Invalid resourceName: " + resourceName);
+			throw new ServletException(Msg.code(192) + "Invalid resourceName: " + resourceName);
 		}
 		return def;
 	}
@@ -296,7 +297,7 @@ public class BaseController {
 			case DSTU2_HL7ORG:
 				break;
 		}
-		throw new IllegalStateException("Unknown version: " + theRequest.getFhirVersion(myConfig));
+		throw new IllegalStateException(Msg.code(193) + "Unknown version: " + theRequest.getFhirVersion(myConfig));
 	}
 
 	private IResource loadAndAddConfDstu2(HttpServletRequest theServletRequest, final HomeRequest theRequest, final ModelMap theModel) {
@@ -749,7 +750,7 @@ public class BaseController {
 //				try {
 //					bytes = IOUtils.toByteArray(respEntity.getContent());
 //				} catch (IllegalStateException e) {
-//					throw new InternalErrorException(e);
+//					throw new InternalErrorException(Msg.code(194) + e);
 //				}
 //
 //				myResponseBody = new String(bytes, "UTF-8");

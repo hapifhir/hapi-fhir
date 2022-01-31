@@ -19,6 +19,7 @@ package ca.uhn.fhir.rest.client.apache;
  * limitations under the License.
  * #L%
  */
+import ca.uhn.fhir.i18n.Msg;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -65,7 +66,7 @@ public class ApacheHttpResponse extends BaseHttpResponse implements IHttpRespons
 				try {
 					this.myEntityBytes = IOUtils.toByteArray(respEntity);
 				} catch (IllegalStateException e) {
-					throw new InternalErrorException(e);
+					throw new InternalErrorException(Msg.code(1478) + e);
 				}
 			}
 		}

@@ -19,6 +19,7 @@ package ca.uhn.fhir.rest.server;
  * limitations under the License.
  * #L%
  */
+import ca.uhn.fhir.i18n.Msg;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.ArrayList;
@@ -241,7 +242,7 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 		for (IBaseResource next : resourceList) {
 			if (next.getIdElement() == null || next.getIdElement().isEmpty()) {
 				if (!(next instanceof BaseOperationOutcome)) {
-					throw new InternalErrorException("Server method returned resource of type[" + next.getClass().getSimpleName() + "] with no ID specified (IResource#setId(IdDt) must be called)");
+					throw new InternalErrorException(Msg.code(776) + "Server method returned resource of type[" + next.getClass().getSimpleName() + "] with no ID specified (IResource#setId(IdDt) must be called)");
 				}
 			}
 			if (theServer.getAddProfileTag() != AddProfileTagEnum.NEVER) {
@@ -361,7 +362,7 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 
 	@Override
 	public void initializeWithBundleResource(IBaseResource theResource) {
-		throw new UnsupportedOperationException("DSTU1 server doesn't support resource style bundles");
+		throw new UnsupportedOperationException(Msg.code(777) + "DSTU1 server doesn't support resource style bundles");
 	}
 
 	@Override
