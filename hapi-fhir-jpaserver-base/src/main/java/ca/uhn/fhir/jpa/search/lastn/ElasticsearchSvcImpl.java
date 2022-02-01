@@ -767,7 +767,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 				.map(observationJson -> parser.parseResource(resourceType, observationJson.getResource()))
 				.collect(Collectors.toList());
 		} catch (IOException theE) {
-			// WIPMB do we fallback to JPA search then?
+			// wipmb do we fallback to JPA search then?
 			throw new InvalidRequestException(Msg.code(2003) + "Unable to execute observation document query for provided IDs " + thePids, theE);
 		}
 	}
