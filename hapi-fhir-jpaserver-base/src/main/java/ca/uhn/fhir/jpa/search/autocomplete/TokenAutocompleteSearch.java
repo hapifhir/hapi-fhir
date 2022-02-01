@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.StringParam;
 import com.google.gson.JsonObject;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.search.backend.elasticsearch.ElasticsearchExtension;
 import org.hibernate.search.engine.search.aggregation.AggregationKey;
 import org.hibernate.search.engine.search.aggregation.SearchAggregation;
@@ -52,6 +53,13 @@ public class TokenAutocompleteSearch {
 
 		TokenAutocompleteAggregation tokenAutocompleteAggregation = new TokenAutocompleteAggregation(theSPName);
 
+		if (theSearchText.equals(StringUtils.stripEnd(theSearchText,null))) {
+			// no trailing whitespace.  Add a wildcard to act like match_bool_prefix
+			//  https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-match-bool-prefix-query.html
+			theSearchText = theSearchText + "*";
+		}
+		String queryText = theSearchText;
+
 		// compose the query json
 		SearchQueryOptionsStep<?, ?, SearchLoadingOptionsStep, ?, ?> query = mySession.search(ResourceTable.class)
 			.where(
@@ -62,9 +70,7 @@ public class TokenAutocompleteSearch {
 						b.must(f.match().field("myResourceType").matching(theResourceType));
 					}
 
-					// wipmb What search should we do?  Maybe we should match_bool_prefix instead of re-using :text?
-					//  https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-match-bool-prefix-query.html
-					StringParam stringParam = new StringParam(theSearchText + "*");
+					StringParam stringParam = new StringParam(queryText);
 					List<List<IQueryParameterType>> andOrTerms = Collections.singletonList(Collections.singletonList(stringParam));
 					clauseBuilder.addStringTextSearch(theSPName, andOrTerms);
 

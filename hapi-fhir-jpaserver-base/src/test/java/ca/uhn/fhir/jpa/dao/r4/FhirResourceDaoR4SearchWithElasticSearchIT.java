@@ -454,7 +454,11 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		createObservationWithCode(new Coding("http://loinc.org", "88262-1", "Gram positive blood culture panel by Probe in Positive blood culture"));
 		createObservationWithCode(new Coding("http://loinc.org", "88262-1", "Gram positive blood culture panel by Probe in Positive blood culture"));
 
-		List<IBaseCoding> codes = autocompleteSearch("Observation", "code", "blo");
+		List<IBaseCoding> codes;
+		codes = autocompleteSearch("Observation", "code", "blo");
+		assertThat("finds blood pressure", codes, hasItem(matchingCode(mean_blood_pressure)));
+
+		codes = autocompleteSearch("Observation", "code", "pressure");
 		assertThat("finds blood pressure", codes, hasItem(matchingCode(mean_blood_pressure)));
 
 		codes = autocompleteSearch("Observation", "code", "nuclear");

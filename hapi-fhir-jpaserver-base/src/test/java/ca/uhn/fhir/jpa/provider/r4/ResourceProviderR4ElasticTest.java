@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.config.TestHibernateSearchAddInConfig;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.rest.api.Constants;
@@ -15,10 +16,14 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -39,23 +44,38 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceProviderR4ElasticTest.class);
 
+	@Autowired
+	DaoConfig myDaoConfig;
+
+	@BeforeEach
+	public void beforeEach() {
+		myDaoConfig.setAdvancedLuceneIndexing(true);
+	}
+
+	@AfterEach
+	public void afterEach() {
+		myDaoConfig.setAdvancedLuceneIndexing(new DaoConfig().isAdvancedLuceneIndexing());
+	}
+
+
 	/**
 	 * wipmb TODO-LIST
-	 * - Fix {@link TestR4Config#jpaProperties()}
-	 *
-	 * - Add logging to {@link TestR4Config#jpaProperties()}
-	 * {@link TestHibernateSearchAddInConfig}
-	 * {@link ca.uhn.fhir.jpa.config.TestJPAConfig}
-	 * {@link TestR4Config}
-	 * {@link ca.uhn.fhir.jpa.config.TestR5Config}
+	 * - docs
+	 * - link to docs
+	 * - parse and validate options
 	 */
 
-	// wipmb test the provider here
+	/**
+	 * Test new contextDirection extension for NIH.
+	 *
+	 * wipmb link to docs
+	 */
 	@Test
 	public void testAutocompleteDirectionExisting() throws IOException {
 		// given
 		Coding mean_blood_pressure = new Coding("http://loinc.org", "8478-0", "Mean blood pressure");
-		createObservationWithCode(new Coding("http://loinc.org", "789-8", "Erythrocytes [#/volume] in Blood by Automated count"));
+		Coding blood_count = new Coding("http://loinc.org", "789-8", "Erythrocytes [#/volume] in Blood by Automated count");
+		createObservationWithCode(blood_count);
 		createObservationWithCode(mean_blood_pressure);
 		createObservationWithCode(mean_blood_pressure);
 		createObservationWithCode(mean_blood_pressure);
@@ -73,7 +93,7 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 			assertThat(valueSet, is(not(nullValue())));
 			List<ValueSet.ValueSetExpansionContainsComponent> expansions = valueSet.getExpansion().getContains();
 			assertThat(expansions, hasItem(valueSetExpansionMatching(mean_blood_pressure)));
-			// wipmb what else?
+			assertThat(expansions, not(hasItem(valueSetExpansionMatching(blood_count))));
 		}
 
 	}
@@ -87,11 +107,10 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 			protected boolean matchesSafely(ValueSet.ValueSetExpansionContainsComponent theItem, Description mismatchDescription) {
 				return
 					Objects.equals(theItem.getSystem(), theTarget.getSystem()) &&
-					Objects.equals(theItem.getCode(), theTarget.getCode());
+						Objects.equals(theItem.getCode(), theTarget.getCode());
 			}
 		};
 	}
-
 
 	private IIdType createObservationWithCode(Coding c) {
 		// wipmb share with FhirResourceDaoR4SearchWithElasticSearchIT
@@ -99,7 +118,5 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 		obs1.getCode().addCoding(c);
 		return myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
 	}
-
-
 
 }
