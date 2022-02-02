@@ -25,6 +25,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("ValueSetAutocompleteOptions validation and parsing")
 class ValueSetAutocompleteOptionsTest {
+	static final int ERROR_AUTOCOMPLETE_ONLY_TYPE_LEVEL = 2020;
+	static final int ERROR_AUTOCOMPLETE_REQUIRES_CONTEXT = 2021;
+	static final int ERROR_REQUIRES_EXTENDED_INDEXING = 2022;
 
 	private IPrimitiveType<String> myContext;
 	private IPrimitiveType<String> myFilter;
@@ -123,14 +126,14 @@ class ValueSetAutocompleteOptionsTest {
 		public void withId() {
 			myId = new IdDt("123");
 
-			assertParseThrowsInvalidRequestWithErrorCode(ValueSetAutocompleteOptions.ERROR_AUTOCOMPLETE_ONLY_TYPE_LEVEL);
+			assertParseThrowsInvalidRequestWithErrorCode(ERROR_AUTOCOMPLETE_ONLY_TYPE_LEVEL);
 		}
 
 		@Test
 		public void withValueSetIdentifier() {
 			myUrl = new StringDt("http://example.com");
 
-			assertParseThrowsInvalidRequestWithErrorCode(ValueSetAutocompleteOptions.ERROR_AUTOCOMPLETE_ONLY_TYPE_LEVEL);
+			assertParseThrowsInvalidRequestWithErrorCode(ERROR_AUTOCOMPLETE_ONLY_TYPE_LEVEL);
 		}
 
 		@Test
@@ -138,14 +141,14 @@ class ValueSetAutocompleteOptionsTest {
 			myValueSet = new ValueSet();
 			myValueSet.addIdentifier().setValue("anId");
 
-			assertParseThrowsInvalidRequestWithErrorCode(ValueSetAutocompleteOptions.ERROR_AUTOCOMPLETE_ONLY_TYPE_LEVEL);
+			assertParseThrowsInvalidRequestWithErrorCode(ERROR_AUTOCOMPLETE_ONLY_TYPE_LEVEL);
 		}
 
 		@Test
 		public void withoutContext() {
 			myFilter = new StringDt("blood");
 
-			assertParseThrowsInvalidRequestWithErrorCode(ValueSetAutocompleteOptions.ERROR_AUTOCOMPLETE_REQUIRES_CONTEXT);
+			assertParseThrowsInvalidRequestWithErrorCode(ERROR_AUTOCOMPLETE_REQUIRES_CONTEXT);
 		}
 
 		@Test
@@ -153,7 +156,7 @@ class ValueSetAutocompleteOptionsTest {
 			myFilter = new StringDt("blood");
 			myContext = new StringDt("");
 
-			assertParseThrowsInvalidRequestWithErrorCode(ValueSetAutocompleteOptions.ERROR_AUTOCOMPLETE_REQUIRES_CONTEXT);
+			assertParseThrowsInvalidRequestWithErrorCode(ERROR_AUTOCOMPLETE_REQUIRES_CONTEXT);
 		}
 
 		@Test
@@ -161,7 +164,7 @@ class ValueSetAutocompleteOptionsTest {
 		    // given
 			myDaoConfig.setAdvancedLuceneIndexing(false);
 
-			assertParseThrowsInvalidRequestWithErrorCode(ValueSetAutocompleteOptions.ERROR_REQUIRES_EXTENDED_INDEXING);
+			assertParseThrowsInvalidRequestWithErrorCode(ERROR_REQUIRES_EXTENDED_INDEXING);
 		}
 
 

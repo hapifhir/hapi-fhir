@@ -1,12 +1,14 @@
 package ca.uhn.fhir.jpa.search.autocomplete;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneClauseBuilder;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.StringParam;
 import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.hibernate.search.backend.elasticsearch.ElasticsearchExtension;
 import org.hibernate.search.engine.search.aggregation.AggregationKey;
 import org.hibernate.search.engine.search.aggregation.SearchAggregation;
@@ -78,7 +80,7 @@ class TokenAutocompleteSearch {
 							break;
 						case "":
 						default:
-							throw new IllegalArgumentException("Autocomplete only accepts text search for now.");
+							throw new IllegalArgumentException(Msg.code(2023) + "Autocomplete only accepts text search for now.");
 
 					}
 
