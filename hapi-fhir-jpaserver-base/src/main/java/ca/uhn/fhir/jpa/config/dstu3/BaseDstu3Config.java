@@ -81,7 +81,7 @@ public class BaseDstu3Config extends BaseConfigDstu3Plus {
 	@Bean(name = GRAPHQL_PROVIDER_NAME)
 	@Lazy
 	public GraphQLProvider graphQLProvider(ISearchParamRegistry theSearchParamRegistry) {
-		return new GraphQLProviderWithIntrospection(fhirContextDstu3(), validationSupportChain(), graphqlStorageServices(), theSearchParamRegistry);
+		return new GraphQLProviderWithIntrospection(fhirContextDstu3(), validationSupportChain(), graphqlStorageServices(), theSearchParamRegistry, daoRegistry());
 	}
 
 	@Bean

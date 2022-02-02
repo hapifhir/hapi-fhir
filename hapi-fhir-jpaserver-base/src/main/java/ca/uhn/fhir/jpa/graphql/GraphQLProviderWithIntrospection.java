@@ -23,8 +23,10 @@ package ca.uhn.fhir.jpa.graphql;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.StringUtil;
@@ -58,9 +60,12 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.MessageSupplier.msg;
 
@@ -71,15 +76,17 @@ public class GraphQLProviderWithIntrospection extends GraphQLProvider {
 	private final IValidationSupport myValidationSupport;
 	private final ISearchParamRegistry mySearchParamRegistry;
 	private final VersionSpecificWorkerContextWrapper myContext;
+	private final IDaoRegistry myDaoRegistry;
 
 	/**
 	 * Constructor
 	 */
-	public GraphQLProviderWithIntrospection(FhirContext theFhirContext, IValidationSupport theValidationSupport, IGraphQLStorageServices theIGraphQLStorageServices, ISearchParamRegistry theSearchParamRegistry) {
+	public GraphQLProviderWithIntrospection(FhirContext theFhirContext, IValidationSupport theValidationSupport, IGraphQLStorageServices theIGraphQLStorageServices, ISearchParamRegistry theSearchParamRegistry, IDaoRegistry theDaoRegistry) {
 		super(theFhirContext, theValidationSupport, theIGraphQLStorageServices);
 
 		myValidationSupport = theValidationSupport;
 		mySearchParamRegistry = theSearchParamRegistry;
+		myDaoRegistry = theDaoRegistry;
 
 		myContext = VersionSpecificWorkerContextWrapper.newVersionSpecificWorkerContextWrapper(theValidationSupport);
 		myGenerator = new GraphQLSchemaGenerator(myContext, VersionUtil.getVersion());
@@ -95,27 +102,39 @@ public class GraphQLProviderWithIntrospection extends GraphQLProvider {
 		if (theQueryBody.contains("__schema")) {
 			EnumSet<GraphQLSchemaGenerator.FHIROperationType> operations;
 			if (theId != null) {
-				operations = EnumSet.of(GraphQLSchemaGenerator.FHIROperationType.READ);
-			} else {
-				operations = EnumSet.of(GraphQLSchemaGenerator.FHIROperationType.SEARCH);
+				throw new InvalidRequestException("GraphQL introspection not supported at instance level. Please try at server- or instance- level.");
 			}
-			return generateSchema(theQueryBody, theRequestDetails.getResourceName(), operations);
+
+			operations = EnumSet.of(GraphQLSchemaGenerator.FHIROperationType.READ, GraphQLSchemaGenerator.FHIROperationType.SEARCH);
+
+			Collection<String> resourceTypes;
+			if (theRequestDetails.getResourceName() != null) {
+				resourceTypes = Collections.singleton(theRequestDetails.getResourceName());
+			} else {
+				resourceTypes = new HashSet<>();
+				for (String next : myContext.getResourceNames()) {
+					if (myDaoRegistry.isResourceTypeSupported(next)) {
+						resourceTypes.add(next);
+					}
+				}
+				resourceTypes = resourceTypes
+					.stream()
+					.sorted()
+					.collect(Collectors.toList());
+			}
+
+			return generateSchema(theQueryBody, resourceTypes, operations);
 		} else {
 			return super.processGraphQlPostRequest(theServletRequestDetails, theRequestDetails, theId, theQueryBody);
 		}
 	}
 
-	private String generateSchema(String theQueryBody, String theResourceName, EnumSet<GraphQLSchemaGenerator.FHIROperationType> theOperations) {
+	private String generateSchema(String theQueryBody, Collection<String> theResourceTypes, EnumSet<GraphQLSchemaGenerator.FHIROperationType> theOperations) {
 
 		final StringBuilder schemaBuilder = new StringBuilder();
 		try (Writer writer = new StringBuilderWriter(schemaBuilder)) {
 			// Generate FHIR base types schemas
-			myGenerator.generateTypes(writer);
-
-			// Generate schemas for the resource type
-			StructureDefinition sd = fetchStructureDefinition(theResourceName);
-			List<SearchParameter> parameters = toR5SearchParams(mySearchParamRegistry.getActiveSearchParams(theResourceName).values());
-			myGenerator.generateResource(writer, sd, parameters, theOperations);
+			myGenerator.generateTypes(writer, theOperations);
 
 			// Fix up a few things that are missing from the generated schema
 			writer
@@ -127,17 +146,29 @@ public class GraphQLProviderWithIntrospection extends GraphQLProvider {
 				.append("\n  id: [token]" + "\n}")
 				.append("\n");
 
-			writer.append("\ntype Query {");
-			if (theOperations.contains(GraphQLSchemaGenerator.FHIROperationType.READ)) {
-				writer
-					.append("\n  ")
-					.append(theResourceName)
-					.append("(id: String): ")
-					.append(theResourceName);
+			// Generate schemas for the resource types
+			for (String nextResourceType : theResourceTypes) {
+				StructureDefinition sd = fetchStructureDefinition(nextResourceType);
+				List<SearchParameter> parameters = toR5SearchParams(mySearchParamRegistry.getActiveSearchParams(nextResourceType).values());
+				myGenerator.generateResource(writer, sd, parameters, theOperations);
 			}
-			if (theOperations.contains(GraphQLSchemaGenerator.FHIROperationType.SEARCH)) {
-				myGenerator.generateListAccessQuery(writer, parameters, theResourceName);
-				myGenerator.generateConnectionAccessQuery(writer, parameters, theResourceName);
+
+			// Generate queries
+			writer.append("\ntype Query {");
+			for (String nextResourceType : theResourceTypes) {
+				if (theOperations.contains(GraphQLSchemaGenerator.FHIROperationType.READ)) {
+					writer
+						.append("\n  ")
+						.append(nextResourceType)
+						.append("(id: String): ")
+						.append(nextResourceType)
+						.append("\n");
+				}
+				if (theOperations.contains(GraphQLSchemaGenerator.FHIROperationType.SEARCH)) {
+					List<SearchParameter> parameters = toR5SearchParams(mySearchParamRegistry.getActiveSearchParams(nextResourceType).values());
+					myGenerator.generateListAccessQuery(writer, parameters, nextResourceType);
+					myGenerator.generateConnectionAccessQuery(writer, parameters, nextResourceType);
+				}
 			}
 			writer.append("\n}");
 
@@ -148,6 +179,7 @@ public class GraphQLProviderWithIntrospection extends GraphQLProvider {
 
 		String schema = schemaBuilder.toString().replace("\r", "");
 
+		// Set these to INFO if you're testing, then set back before committing
 		ourLog.debug("Schema generated: {} chars", schema.length());
 		ourLog.debug("Schema generated: {}", msg(() -> StringUtil.prependLineNumbers(schema)));
 

@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
@@ -40,6 +41,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class GraphQLR4RawTest {
 
@@ -49,6 +51,8 @@ public class GraphQLR4RawTest {
 	private static String ourNextRetVal;
 	private static IdType ourLastId;
 	private static String ourLastQuery;
+	private static String ourLastResourceType;
+
 	@RegisterExtension
 	private final RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(ourCtx)
 		.registerProvider(new MyPatientResourceProvider())
@@ -59,10 +63,11 @@ public class GraphQLR4RawTest {
 		ourNextRetVal = null;
 		ourLastId = null;
 		ourLastQuery = null;
+		ourLastResourceType = null;
 	}
 
 	@Test
-	public void testGraphInstance() throws Exception {
+	public void testGraphInstance_Get() throws Exception {
 		ourNextRetVal = "{\"foo\"}";
 
 
@@ -85,7 +90,25 @@ public class GraphQLR4RawTest {
 	}
 
 	@Test
-	public void testGraphPostContentTypeJson() throws Exception {
+	public void testGraphInstance_Get_UnsupportedResourceType() throws Exception {
+		ourNextRetVal = "{\"foo\"}";
+
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + myRestfulServerExtension.getPort() + "/Condition/123/$graphql?query=" + UrlUtil.escapeUrlParam("{name{family,given}}"));
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		try {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(responseContent);
+			assertEquals(404, status.getStatusLine().getStatusCode());
+			assertThat(responseContent, containsString("Unknown resource type"));
+		} finally {
+			IOUtils.closeQuietly(status.getEntity().getContent());
+		}
+
+	}
+
+	@Test
+	public void testGraphInstance_Post_ContentTypeJson() throws Exception {
 		ourNextRetVal = "{\"foo\"}";
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + myRestfulServerExtension.getPort() + "/Patient/123/$graphql");
@@ -112,7 +135,7 @@ public class GraphQLR4RawTest {
 	}
 
 	@Test
-	public void testGraphPostContentTypeGraphql() throws Exception {
+	public void testGraphInstance_Post_ContentTypeGraphql() throws Exception {
 		ourNextRetVal = "{\"foo\"}";
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + myRestfulServerExtension.getPort() + "/Patient/123/$graphql");
@@ -131,6 +154,7 @@ public class GraphQLR4RawTest {
 			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), startsWith("application/json"));
 			assertEquals("Patient/123", ourLastId.getValue());
 			assertEquals("{name{family,given}}", ourLastQuery);
+			assertEquals("Patient", ourLastResourceType);
 
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
@@ -139,22 +163,33 @@ public class GraphQLR4RawTest {
 	}
 
 	@Test
-	public void testGraphInstanceUnknownType() throws Exception {
+	public void testGraphBase_Post_ListQuery() throws Exception {
 		ourNextRetVal = "{\"foo\"}";
 
+		HttpPost httpPost = new HttpPost("http://localhost:" + myRestfulServerExtension.getPort() + "/$graphql");
+		StringEntity entity = new StringEntity("{\"query\": \"{PatientList(date: \\\"2022\\\") {name{family,given}}}\"}");
+		httpPost.setEntity(entity);
+		httpPost.setHeader("Accept", "application/json");
+		httpPost.setHeader("Content-type", "application/json");
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + myRestfulServerExtension.getPort() + "/Condition/123/$graphql?query=" + UrlUtil.escapeUrlParam("{name{family,given}}"));
-		CloseableHttpResponse status = ourClient.execute(httpGet);
+		CloseableHttpResponse status = ourClient.execute(httpPost);
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertEquals(404, status.getStatusLine().getStatusCode());
-			assertThat(responseContent, containsString("Unknown resource type"));
+			assertEquals(200, status.getStatusLine().getStatusCode());
+
+			assertEquals("{\"foo\"}", responseContent);
+			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), startsWith("application/json"));
+			assertNull(ourLastId);
+			assertNull(ourLastResourceType);
+			assertEquals("{PatientList(date: \"2022\") {name{family,given}}}", ourLastQuery);
+
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
 
 	}
+
 
 	@Test
 	public void testGraphSystem() throws Exception {
@@ -203,8 +238,9 @@ public class GraphQLR4RawTest {
 		}
 
 		@GraphQL(type = RequestTypeEnum.POST)
-		public String processPost(@IdParam IdType theId, @GraphQLQueryBody String theQuery) {
+		public String processPost(RequestDetails theRequestDetails, @IdParam IdType theId, @GraphQLQueryBody String theQuery) {
 			ourLastId = theId;
+			ourLastResourceType = theRequestDetails.getResourceName();
 			ourLastQuery = theQuery;
 			return ourNextRetVal;
 		}

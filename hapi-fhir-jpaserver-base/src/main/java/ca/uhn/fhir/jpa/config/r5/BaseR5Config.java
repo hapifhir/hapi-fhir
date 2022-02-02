@@ -85,7 +85,7 @@ public class BaseR5Config extends BaseConfigDstu3Plus {
 	@Bean(name = GRAPHQL_PROVIDER_NAME)
 	@Lazy
 	public GraphQLProvider graphQLProvider(ISearchParamRegistry theSearchParamRegistry) {
-		return new GraphQLProviderWithIntrospection(fhirContextR5(), validationSupportChain(), graphqlStorageServices(), theSearchParamRegistry);
+		return new GraphQLProviderWithIntrospection(fhirContextR5(), validationSupportChain(), graphqlStorageServices(), theSearchParamRegistry, daoRegistry());
 	}
 
 	@Bean(name = "myResourceCountsCache")
