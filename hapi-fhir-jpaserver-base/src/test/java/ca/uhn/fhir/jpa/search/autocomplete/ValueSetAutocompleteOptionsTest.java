@@ -1,9 +1,9 @@
 package ca.uhn.fhir.jpa.search.autocomplete;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
-import ca.uhn.fhir.model.primitive.PositiveIntDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -28,12 +28,16 @@ class ValueSetAutocompleteOptionsTest {
 
 	private IPrimitiveType<String> myContext;
 	private IPrimitiveType<String> myFilter;
-	private IPrimitiveType<Integer> myOffset;
 	private IPrimitiveType<Integer> myCount;
 	private IIdType myId;
 	private IPrimitiveType<String> myUrl;
 	private ValueSet myValueSet;
 	private ValueSetAutocompleteOptions myOptionsResult;
+	private DaoConfig myDaoConfig = new DaoConfig();
+
+	{
+		myDaoConfig.setAdvancedLuceneIndexing(true);
+	}
 
 	@Test
 	public void validWithBroadSPReference() {
@@ -152,6 +156,15 @@ class ValueSetAutocompleteOptionsTest {
 			assertParseThrowsInvalidRequestWithErrorCode(ValueSetAutocompleteOptions.ERROR_AUTOCOMPLETE_REQUIRES_CONTEXT);
 		}
 
+		@Test
+		public void whenAdvancedIndexingOff() {
+		    // given
+			myDaoConfig.setAdvancedLuceneIndexing(false);
+
+			assertParseThrowsInvalidRequestWithErrorCode(ValueSetAutocompleteOptions.ERROR_REQUIRES_EXTENDED_INDEXING);
+		}
+
+
 
 		private void assertParseThrowsInvalidRequestWithErrorCode(int theErrorCode) {
 			InvalidRequestException e = assertThrows(InvalidRequestException.class, ValueSetAutocompleteOptionsTest.this::parseOptions);
@@ -161,7 +174,7 @@ class ValueSetAutocompleteOptionsTest {
 	}
 
 	void parseOptions() {
-		myOptionsResult = ValueSetAutocompleteOptions.validateAndParseOptions(myContext, myFilter, myCount, myId, myUrl, myValueSet);
+		myOptionsResult = ValueSetAutocompleteOptions.validateAndParseOptions(myDaoConfig, myContext, myFilter, myCount, myId, myUrl, myValueSet);
 	}
 
 }

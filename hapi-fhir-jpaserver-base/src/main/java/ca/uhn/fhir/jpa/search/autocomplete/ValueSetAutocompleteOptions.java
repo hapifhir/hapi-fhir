@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.search.autocomplete;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.util.DatatypeUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -15,6 +15,7 @@ public class ValueSetAutocompleteOptions {
 
 	static final int ERROR_AUTOCOMPLETE_ONLY_TYPE_LEVEL = 2020;
 	static final int ERROR_AUTOCOMPLETE_REQUIRES_CONTEXT = 2021;
+	static final int ERROR_REQUIRES_EXTENDED_INDEXING = 2022;
 
 	private String myResourceType;
 	private String mySearchParamCode;
@@ -23,6 +24,7 @@ public class ValueSetAutocompleteOptions {
 	private Integer myCount;
 
 	public static ValueSetAutocompleteOptions validateAndParseOptions(
+		DaoConfig theDaoConfig,
 		IPrimitiveType<String> theContext,
 		IPrimitiveType<String> theFilter,
 		IPrimitiveType<Integer> theCount,
@@ -36,6 +38,9 @@ public class ValueSetAutocompleteOptions {
 		if (haveId || haveIdentifier || haveValueSet) {
 			throw new InvalidRequestException(Msg.code(ERROR_AUTOCOMPLETE_ONLY_TYPE_LEVEL) + "$expand with contexDirection='existing' is only supported at the type leve. It is not supported at instance level, with a url specified, or with a ValueSet .");
 		}
+		if (!theDaoConfig.isAdvancedLuceneIndexing()) {
+			throw new InvalidRequestException(Msg.code(ERROR_AUTOCOMPLETE_ONLY_TYPE_LEVEL) + "$expand with contexDirection='existing' requires Extended Lucene Indexing.");
+		}
 		ValueSetAutocompleteOptions result = new ValueSetAutocompleteOptions();
 
 		result.parseContext(theContext);
@@ -48,7 +53,7 @@ public class ValueSetAutocompleteOptions {
 
 	private void parseContext(IPrimitiveType<String> theContextWrapper) {
 		if (theContextWrapper == null || theContextWrapper.isEmpty()) {
-			throw new InvalidRequestException(Msg.code(ERROR_AUTOCOMPLETE_REQUIRES_CONTEXT) + "$expand with contexDirection='existing' requires a context");
+			throw new InvalidRequestException(Msg.code(ERROR_REQUIRES_EXTENDED_INDEXING) + "$expand with contexDirection='existing' requires a context");
 		}
 		String theContext = theContextWrapper.getValue();
 		int separatorIdx = theContext.indexOf('.');
