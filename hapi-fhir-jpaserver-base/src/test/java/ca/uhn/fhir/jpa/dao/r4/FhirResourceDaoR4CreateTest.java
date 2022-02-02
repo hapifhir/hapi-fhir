@@ -60,10 +60,7 @@ import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.matchesPattern;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -1012,7 +1009,8 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 	@Test
 	public void testResourceWithTagCreationNoFailures() throws ExecutionException, InterruptedException {
-		ExecutorService pool = Executors.newFixedThreadPool(5);
+		// this was 5, but our random connection pool runs as small as 3, and this solution needs a spare connection to be safe.
+		ExecutorService pool = Executors.newFixedThreadPool(2);
 		try {
 			Coding tag = new Coding();
 			tag.setCode("code123");
@@ -1037,7 +1035,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 						try {
 							myPatientDao.update(updatePatient);
 						} catch (ResourceVersionConflictException e) {
-							assertEquals("The operation has failed with a version constraint failure. This generally means that two clients/threads were trying to update the same resource at the same time, and this request was chosen as the failing request.", e.getMessage());
+							assertThat(e.getMessage(), startsWith(Msg.code(550) + Msg.code(823)));
 						}
 					} catch (Exception e) {
 						ourLog.error("Failure", e);

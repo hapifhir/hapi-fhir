@@ -15,6 +15,7 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -148,6 +149,7 @@ public class BaseHapiFhirDaoTest {
 		return from;
 	}
 
+	@Disabled
 	@Test
 	public void getTagOrNull_raceCondition_wontUpsertDuplicates() throws InterruptedException, ExecutionException {
 		/*
@@ -365,7 +367,7 @@ public class BaseHapiFhirDaoTest {
 			fail();
 		} catch (Exception ex) {
 			// verify
-			assertEquals("Tag get/create failed after 10 attempts with error(s): " + exMsg, ex.getMessage());
+			assertEquals("HAPI-2019: Tag get/create failed after 10 attempts with error(s): " + exMsg, ex.getMessage());
 
 			ArgumentCaptor<ILoggingEvent> appenderCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
 			verify(myAppender, Mockito.times(10))

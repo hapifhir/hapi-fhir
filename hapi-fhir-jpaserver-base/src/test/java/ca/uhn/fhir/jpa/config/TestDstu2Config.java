@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.config;
 
-import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
@@ -12,6 +11,7 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,14 +23,13 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
 @Configuration
-@Import(TestJPAConfig.class)
+@Import({TestJPAConfig.class, TestHibernateSearchAddInConfig.DefaultLuceneHeap.class})
 @EnableTransactionManagement()
 public class TestDstu2Config extends BaseJavaConfigDstu2 {
 	private static final Logger ourLog = LoggerFactory.getLogger(TestDstu2Config.class);
@@ -145,6 +144,9 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 		return ourMaxThreads;
 	}
 
+	@Autowired
+	TestHibernateSearchAddInConfig.IHibernateSearchConfigurer hibernateSearchConfigurer;
+
 	private Properties jpaProperties() {
 		Properties extraProperties = new Properties();
 		extraProperties.put("hibernate.format_sql", "true");
@@ -152,9 +154,9 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
 		extraProperties.put("hibernate.dialect", HapiFhirH2Dialect.class.getName());
 
-		boolean enableLucene = myEnv.getProperty(BaseJpaTest.CONFIG_ENABLE_LUCENE, Boolean.TYPE, BaseJpaTest.CONFIG_ENABLE_LUCENE_DEFAULT_VALUE);
-		Map<String, String> hibernateSearchProperties = BaseJpaTest.buildHibernateSearchProperties(enableLucene);
-		extraProperties.putAll(hibernateSearchProperties);
+		hibernateSearchConfigurer.apply(extraProperties);
+
+		ourLog.info("jpaProperties: {}", extraProperties);
 
 		return extraProperties;
 	}
