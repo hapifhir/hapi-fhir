@@ -82,6 +82,7 @@ public class CreateBulkExportEntityTasklet implements Tasklet {
 			bulkDataExportOptions.setResourceTypes(resourceTypeSet);
 			bulkDataExportOptions.setSince(since);
 			bulkDataExportOptions.setFilters(filterSet);
+
 			//Set export style
 			String exportStyle = (String)jobParameters.get("exportStyle");
 			bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.valueOf(exportStyle));
