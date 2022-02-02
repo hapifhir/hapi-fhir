@@ -61,9 +61,8 @@ public class ExtendedLuceneIndexExtractor {
 
 		if (!theNewParams.myLinks.isEmpty()) {
 
-			// awkwardly, links are shared between different search params if they use the same path,
+			// awkwardly, links are indexed by jsonpath, not by search param.
 			// so we re-build the linkage.
-			// WIPMB is this the right design?  Or should we follow JPA and share these?
 			Map<String, List<String>> linkPathToParamName = new HashMap<>();
 			for (String nextParamName : theNewParams.getPopulatedResourceLinkParameters()) {
 				RuntimeSearchParam sp = myParams.get(nextParamName);

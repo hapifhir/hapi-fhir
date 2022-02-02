@@ -83,8 +83,8 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 			.analyzer("normStringAnalyzer")
 			.projectable(Projectable.NO);
 
-		// TODO JB: may have to add normalizer to support case insensitive searches depending on token flags
 		StringIndexFieldTypeOptionsStep<?> keywordFieldType = indexFieldTypeFactory.asString()
+		// TODO JB: may have to add normalizer to support case insensitive searches depending on token flags
 			.projectable(Projectable.NO)
 			.aggregable(Aggregable.YES);
 

@@ -29,7 +29,9 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.config.BaseConfig;
+import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteOptions;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -65,6 +67,8 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 	@Autowired
 	@Qualifier(BaseConfig.JPA_VALIDATION_SUPPORT_CHAIN)
 	private ValidationSupportChain myValidationSupportChain;
+	@Autowired
+	private IFulltextSearchSvc myFulltextSearch;
 
 	public void setDaoConfig(DaoConfig theDaoConfig) {
 		myDaoConfig = theDaoConfig;
@@ -90,6 +94,8 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		@OperationParam(name = "url", min = 0, max = 1, typeName = "uri") IPrimitiveType<String> theUrl,
 		@OperationParam(name = "valueSetVersion", min = 0, max = 1, typeName = "string") IPrimitiveType<String> theValueSetVersion,
 		@OperationParam(name = "filter", min = 0, max = 1, typeName = "string") IPrimitiveType<String> theFilter,
+		@OperationParam(name = "context", min = 0, max = 1, typeName = "string") IPrimitiveType<String> theContext,
+		@OperationParam(name = "contextDirection", min = 0, max = 1, typeName = "string") IPrimitiveType<String> theContextDirection,
 		@OperationParam(name = "offset", min = 0, max = 1, typeName = "integer") IPrimitiveType<Integer> theOffset,
 		@OperationParam(name = "count", min = 0, max = 1, typeName = "integer") IPrimitiveType<Integer> theCount,
 		@OperationParam(name = JpaConstants.OPERATION_EXPAND_PARAM_INCLUDE_HIERARCHY, min = 0, max = 1, typeName = "boolean") IPrimitiveType<Boolean> theIncludeHierarchy,
@@ -99,6 +105,22 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		boolean haveIdentifier = theUrl != null && isNotBlank(theUrl.getValue());
 		boolean haveValueSet = theValueSet != null && !theValueSet.isEmpty();
 		boolean haveValueSetVersion = theValueSetVersion != null && !theValueSetVersion.isEmpty();
+		boolean haveContextDirection = theContextDirection != null && !theContextDirection.isEmpty();
+		boolean haveContext = theContext != null && !theContext.isEmpty();
+
+		boolean isAutocompleteExtension = haveContext && haveContextDirection && "existing".equals(theContextDirection.getValue());
+
+		if (isAutocompleteExtension) {
+			// this is a funky extension for NIH.  Do our own thing and return.
+			ValueSetAutocompleteOptions options = ValueSetAutocompleteOptions.validateAndParseOptions(myDaoConfig, theContext, theFilter, theCount, theId, theUrl, theValueSet);
+			startRequest(theServletRequest);
+			try {
+
+				return myFulltextSearch.tokenAutocompleteValueSetSearch(options);
+			} finally {
+				endRequest(theServletRequest);
+			}
+		}
 
 		if (!haveId && !haveIdentifier && !haveValueSet) {
 			throw new InvalidRequestException(Msg.code(1133) + "$expand operation at the type level (no ID specified) requires a url or a valueSet as a part of the request.");
@@ -265,3 +287,4 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		return false;
 	}
 }
+
