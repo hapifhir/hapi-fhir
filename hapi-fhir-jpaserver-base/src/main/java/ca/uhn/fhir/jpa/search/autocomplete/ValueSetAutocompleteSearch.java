@@ -27,11 +27,7 @@ public class ValueSetAutocompleteSearch {
 	}
 
 	public IBaseResource search(ValueSetAutocompleteOptions theOptions) {
-		if (!"text".equals(theOptions.getSearchParamModifier())) {
-			// wipmb where to validate this?  Top level?
-			throw new IllegalArgumentException("Only support :text searches");
-		}
-		List<TokenAutocompleteHit> aggEntries = myAutocompleteSearch.search(theOptions.getResourceType(), theOptions.getSearchParamCode(), theOptions.getFilter(), (int) theOptions.getCount().orElse(DEFAULT_SIZE));
+		List<TokenAutocompleteHit> aggEntries = myAutocompleteSearch.search(theOptions.getResourceType(), theOptions.getSearchParamCode(), theOptions.getFilter(), theOptions.getSearchParamModifier(), (int) theOptions.getCount().orElse(DEFAULT_SIZE));
 
 		ValueSet result = new ValueSet();
 		ValueSet.ValueSetExpansionComponent expansion = new ValueSet.ValueSetExpansionComponent();
@@ -43,11 +39,11 @@ public class ValueSetAutocompleteSearch {
 		return result;
 	}
 
-	// wipmb R4 only?
 	ValueSet.ValueSetExpansionContainsComponent makeCoding(TokenAutocompleteHit theSearchHit) {
 		TokenParam tokenParam = new TokenParam();
 		tokenParam.setValueAsQueryToken(myFhirContext, null, null, theSearchHit.mySystemCode);
 
+		// R4 only for now.
 //		IBaseCoding coding = TerserUtil.newElement(myFhirContext, "Coding");
 		ValueSet.ValueSetExpansionContainsComponent coding = new ValueSet.ValueSetExpansionContainsComponent();
 		coding.setCode(tokenParam.getValue());

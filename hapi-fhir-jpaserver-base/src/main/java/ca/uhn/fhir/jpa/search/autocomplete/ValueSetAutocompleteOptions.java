@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.search.autocomplete;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.DatatypeUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -12,27 +13,23 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ValueSetAutocompleteOptions {
 
-	// fixme get real values from Msg.class
-	static final int ERROR_AUTOCOMPLETE_ONLY_TYPE_LEVEL = 1111;
-	static final int ERROR_AUTOCOMPLETE_REQUIRES_CONTEXT = 2222;
+	static final int ERROR_AUTOCOMPLETE_ONLY_TYPE_LEVEL = 2020;
+	static final int ERROR_AUTOCOMPLETE_REQUIRES_CONTEXT = 2021;
 
 	private String myResourceType;
 	private String mySearchParamCode;
 	private String mySearchParamModifier;
 	private String myFilter;
 	private Integer myCount;
-	// wipmb is offset needed?
-	private Integer myOffset;
 
 	public static ValueSetAutocompleteOptions validateAndParseOptions(
 		IPrimitiveType<String> theContext,
 		IPrimitiveType<String> theFilter,
-		IPrimitiveType<Integer> theOffset,
 		IPrimitiveType<Integer> theCount,
 		IIdType theId,
 		IPrimitiveType<String> theUrl,
-		IBaseResource theValueSet) {
-		// fixme this needs validation.  !haveId, !haveIdentifier, theFilter etc.
+		IBaseResource theValueSet)
+	{
 		boolean haveId = theId != null && theId.hasIdPart();
 		boolean haveIdentifier = theUrl != null && isNotBlank(theUrl.getValue());
 		boolean haveValueSet = theValueSet != null && !theValueSet.isEmpty();
@@ -44,19 +41,9 @@ public class ValueSetAutocompleteOptions {
 		result.parseContext(theContext);
 		result.myFilter =
 			theFilter == null ? null : theFilter.getValue();
-		result.myCount = primitiveToNullable(theCount);
-		result.myOffset = primitiveToNullable(theOffset);
+		result.myCount = IPrimitiveType.toValueOrNull(theCount);
 
 		return result;
-	}
-
-	// wipmb Is this a helper somewhere?
-	private static <T> T primitiveToNullable(IPrimitiveType<T> thePrimitiveType) {
-		if (thePrimitiveType == null || thePrimitiveType.isEmpty()) {
-			return null;
-		} else {
-			return thePrimitiveType.getValue();
-		}
 	}
 
 	private void parseContext(IPrimitiveType<String> theContextWrapper) {
@@ -100,9 +87,5 @@ public class ValueSetAutocompleteOptions {
 
 	public Optional<Integer> getCount() {
 		return Optional.ofNullable(myCount);
-	}
-
-	public Optional<Integer> getOffset() {
-		return Optional.ofNullable(myOffset);
 	}
 }

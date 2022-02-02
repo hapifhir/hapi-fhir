@@ -112,7 +112,7 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 
 		if (isAutocompleteExtension) {
 			// this is a funky extension for NIH.  Do our own thing and return.
-			ValueSetAutocompleteOptions options = ValueSetAutocompleteOptions.validateAndParseOptions(theContext, theFilter, theOffset, theCount, theId, theUrl, theValueSet);
+			ValueSetAutocompleteOptions options = ValueSetAutocompleteOptions.validateAndParseOptions(theContext, theFilter, theCount, theId, theUrl, theValueSet);
 			startRequest(theServletRequest);
 			try {
 

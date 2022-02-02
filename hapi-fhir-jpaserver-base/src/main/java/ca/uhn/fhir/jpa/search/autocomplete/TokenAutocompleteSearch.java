@@ -48,10 +48,8 @@ class TokenAutocompleteSearch {
 	 * @param theSearchText The search test (e.g. "bloo")
 	 * @return A collection of Coding elements
 	 */
-
 	@Nonnull
-	public List<TokenAutocompleteHit> search(String theResourceType, String theSPName, String theSearchText, int theCount) {
-		// wipmb cleanup
+	public List<TokenAutocompleteHit> search(String theResourceType, String theSPName, String theSearchText, String theSearchModifier, int theCount) {
 
 		TokenAutocompleteAggregation tokenAutocompleteAggregation = new TokenAutocompleteAggregation(theSPName, theCount);
 
@@ -71,23 +69,30 @@ class TokenAutocompleteSearch {
 					if (isNotBlank(theResourceType)) {
 						b.must(f.match().field("myResourceType").matching(theResourceType));
 					}
+					
+					switch(theSearchModifier) {
+						case "text":
+							StringParam stringParam = new StringParam(queryText);
+							List<List<IQueryParameterType>> andOrTerms = Collections.singletonList(Collections.singletonList(stringParam));
+							clauseBuilder.addStringTextSearch(theSPName, andOrTerms);
+							break;
+						case "":
+						default:
+							throw new IllegalArgumentException("Autocomplete only accepts text search for now.");
 
-					StringParam stringParam = new StringParam(queryText);
-					List<List<IQueryParameterType>> andOrTerms = Collections.singletonList(Collections.singletonList(stringParam));
-					clauseBuilder.addStringTextSearch(theSPName, andOrTerms);
+					}
+
 
 				}))
 			.aggregation(AGGREGATION_KEY, buildESAggregation(tokenAutocompleteAggregation));
 
 		// run the query, but with 0 results.  We only care about the aggregations.
-		query.toQuery().queryString();
 		SearchResult<?> result = query.fetch(0);
 
-		// parse out the top-n results from the aggregation json.
+		// extract the top-n results from the aggregation json.
 		JsonObject resultAgg = result.aggregation(AGGREGATION_KEY);
 		List<TokenAutocompleteHit> aggEntries = tokenAutocompleteAggregation.extractResults(resultAgg);
-		// wipmb parse the results
-		ourLog.warn("XXX agg {}", resultAgg); // wipmb remove this.
+
 		return aggEntries;
 	}
 

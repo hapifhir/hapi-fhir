@@ -55,19 +55,8 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 	}
 
 
-	/*
-	 * wipmb TODO-LIST
-	 * - docs
-	 * - link to docs
-	 * - parse and validate options
-	 */
-
 	/**
 	 * Test new contextDirection extension for NIH.
-	 *
-	 * wipmb what if the sp isn't of type token?  do we check, or discard results without tokens?
-	 * wipmb link to docs
-	 // wipmb what are the RequestDetails for?  Partitions?
 	 */
 	@Test
 	public void testAutocompleteDirectionExisting() throws IOException {

@@ -57,7 +57,6 @@ class TokenAutocompleteAggregation {
 	private final String mySpName;
 	private final int myCount;
 
-	// wipmb
 	public TokenAutocompleteAggregation(String theSpName, int theCount) {
 		Validate.notEmpty(theSpName);
 		Validate.isTrue(theCount>0, "count must be positive");
@@ -111,10 +110,8 @@ class TokenAutocompleteAggregation {
 
 		// The inner bucket has a hits array, and we only need the first.
 		JsonObject spRootNode = documentContext.read(NESTED_AGG_NAME + ".hits.hits[0]._source.sp");
-		// MB - JsonPath doesn't have placeholders, and I don't want to screw-up quoting mySpName, so read it explicitly
+		// MB - JsonPath doesn't have placeholders, and I don't want to screw-up quoting mySpName, so read the JsonObject explicitly
 		JsonObject spNode = spRootNode.getAsJsonObject(mySpName);
-		// wipmb Is this an array, or an object?  Multi-coded objects will probably have an array.  Ugh.  Need to go Nested!
-		//String displayText = parseContext.parse(spNode).read("string.exact", String.class);
 		JsonElement exactNode = spNode.get("string").getAsJsonObject().get("exact");
 		String displayText;
 		if (exactNode.isJsonArray()) {

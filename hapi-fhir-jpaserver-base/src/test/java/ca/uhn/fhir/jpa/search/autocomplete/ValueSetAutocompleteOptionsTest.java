@@ -99,17 +99,6 @@ class ValueSetAutocompleteOptionsTest {
 		parseOptions();
 
 		assertThat(myOptionsResult.getCount(), is(equalTo(Optional.empty())));
-		assertThat(myOptionsResult.getOffset(), is(equalTo(Optional.empty())));
-	}
-
-	@Test
-	public void parsesOffset() {
-		myContext = new StringDt("Observation.code:text");
-		myOffset = new PositiveIntDt(22);
-
-		parseOptions();
-
-		assertThat(myOptionsResult.getOffset(), is(equalTo(Optional.of(22))));
 	}
 
 	@Test
@@ -172,7 +161,7 @@ class ValueSetAutocompleteOptionsTest {
 	}
 
 	void parseOptions() {
-		myOptionsResult = ValueSetAutocompleteOptions.validateAndParseOptions(myContext, myFilter, myOffset, myCount, myId, myUrl, myValueSet);
+		myOptionsResult = ValueSetAutocompleteOptions.validateAndParseOptions(myContext, myFilter, myCount, myId, myUrl, myValueSet);
 	}
 
 }

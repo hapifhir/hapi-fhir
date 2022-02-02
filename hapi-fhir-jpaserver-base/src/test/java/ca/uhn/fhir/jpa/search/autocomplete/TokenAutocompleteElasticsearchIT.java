@@ -24,8 +24,6 @@ import org.hl7.fhir.r4.model.Observation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Answers;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
@@ -89,7 +87,6 @@ public class TokenAutocompleteElasticsearchIT extends BaseJpaTest {
 	}
 	@Test
 	public void testAutocompleteByCodeDisplay() {
-		// wipmb Current IT.
 
 		// a few different codes
 		Coding mean_blood_pressure = new Coding("http://loinc.org", "8478-0", "Mean blood pressure");
@@ -127,7 +124,7 @@ public class TokenAutocompleteElasticsearchIT extends BaseJpaTest {
 	List<TokenAutocompleteHit> autocompleteSearch(String theResourceType, String theSPName, String theSearchText) {
 		return new TransactionTemplate(myTxManager).execute(s -> {
 			TokenAutocompleteSearch tokenAutocompleteSearch = new TokenAutocompleteSearch(myFhirCtx, Search.session(myEntityManager));
-			return  tokenAutocompleteSearch.search(theResourceType, theSPName, theSearchText, 30);
+			return  tokenAutocompleteSearch.search(theResourceType, theSPName, theSearchText, "text",30);
 		});
 	}
 

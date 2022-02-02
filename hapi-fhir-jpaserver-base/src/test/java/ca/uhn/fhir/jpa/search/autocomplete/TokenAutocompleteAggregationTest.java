@@ -91,7 +91,7 @@ class TokenAutocompleteAggregationTest {
 		}
 
 		/**
-		 * wipmb until we move to nested, we may have multiple Coding in a code.  This is broken.
+		 * Until we move to nested, we may have multiple Coding in a code.  This is broken.
 		 */
 		@Test
 		public void testMultiValuedBucketExtraction() {
