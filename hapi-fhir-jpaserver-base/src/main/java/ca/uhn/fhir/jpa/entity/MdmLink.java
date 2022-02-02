@@ -124,6 +124,9 @@ public class MdmLink implements IMdmLink {
 	@Column(name = "RULE_COUNT")
 	private Long myRuleCount;
 
+	@Column(name = "PARTITION_ID")
+	private Integer myPartitionId;
+
 	public MdmLink() {}
 
 	public MdmLink(String theVersion) {
@@ -331,6 +334,7 @@ public class MdmLink implements IMdmLink {
 			.append("myHadToCreateNewResource", myHadToCreateNewGoldenResource)
 			.append("myScore", myScore)
 			.append("myRuleCount", myRuleCount)
+			.append("myPartitionId", myPartitionId)
 			.toString();
 	}
 
@@ -344,6 +348,14 @@ public class MdmLink implements IMdmLink {
 
 	public void setRuleCount(Long theRuleCount) {
 		myRuleCount = theRuleCount;
+	}
+
+	public Integer getMyPartitionId() {
+		return myPartitionId;
+	}
+
+	public void setMyPartitionId(Integer thePartitionId) {
+		myPartitionId = thePartitionId;
 	}
 
 }

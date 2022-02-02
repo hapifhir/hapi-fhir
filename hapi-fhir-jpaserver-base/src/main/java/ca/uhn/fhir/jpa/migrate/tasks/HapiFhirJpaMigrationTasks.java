@@ -40,7 +40,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
 import ca.uhn.fhir.util.VersionEnum;
 
-import javax.persistence.Index;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -53,8 +52,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	private final Set<FlagEnum> myFlags;
 
 	// H2, Derby, MariaDB, and MySql automatically add indexes to foreign keys
-	public static final DriverTypeEnum[] NON_AUTOMATIC_FK_INDEX_PLATFORMS = new DriverTypeEnum[] {
-		DriverTypeEnum.POSTGRES_9_4, DriverTypeEnum.ORACLE_12C, DriverTypeEnum.MSSQL_2012 };
+	public static final DriverTypeEnum[] NON_AUTOMATIC_FK_INDEX_PLATFORMS = new DriverTypeEnum[]{
+		DriverTypeEnum.POSTGRES_9_4, DriverTypeEnum.ORACLE_12C, DriverTypeEnum.MSSQL_2012};
 
 
 	/**
@@ -92,14 +91,14 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	 */
 	private void addIndexesForDeleteExpunge(Builder theVersion) {
 
-		theVersion.onTable( "HFJ_HISTORY_TAG")
-			.addIndex("20211210.2", "IDX_RESHISTTAG_RESID" )
+		theVersion.onTable("HFJ_HISTORY_TAG")
+			.addIndex("20211210.2", "IDX_RESHISTTAG_RESID")
 			.unique(false)
 			.withColumns("RES_ID");
 
 
-		theVersion.onTable( "HFJ_RES_VER_PROV")
-			.addIndex("20211210.3", "FK_RESVERPROV_RES_PID" )
+		theVersion.onTable("HFJ_RES_VER_PROV")
+			.addIndex("20211210.3", "FK_RESVERPROV_RES_PID")
 			.unique(false)
 			.withColumns("RES_PID")
 			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
@@ -151,6 +150,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.nullable()
 			.type(ColumnTypeEnum.STRING, 4000);
 
+		// Add partition id column for mdm
+		version.onTable("MPI_LINK")
+			.addColumn("20220102.2", "PARTITION_ID")
+			.nullable()
+			.type(ColumnTypeEnum.INT);
 	}
 
 
@@ -180,15 +184,15 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		// Bump ConceptMap display lengths
 		version.onTable("TRM_CONCEPT_MAP_GRP_ELM_TGT")
-			.modifyColumn("20210617.1","TARGET_DISPLAY").nullable().withType(ColumnTypeEnum.STRING, 500);
+			.modifyColumn("20210617.1", "TARGET_DISPLAY").nullable().withType(ColumnTypeEnum.STRING, 500);
 		version.onTable("TRM_CONCEPT_MAP_GRP_ELEMENT")
 			.modifyColumn("20210617.2", "SOURCE_DISPLAY").nullable().withType(ColumnTypeEnum.STRING, 500);
 
 		version.onTable("HFJ_BLK_EXPORT_JOB")
-			.modifyColumn("20210624.1","REQUEST").nonNullable().withType(ColumnTypeEnum.STRING, 1024);
+			.modifyColumn("20210624.1", "REQUEST").nonNullable().withType(ColumnTypeEnum.STRING, 1024);
 
 		version.onTable("HFJ_IDX_CMP_STRING_UNIQ")
-			.modifyColumn("20210713.1","IDX_STRING").nonNullable().withType(ColumnTypeEnum.STRING, 500);
+			.modifyColumn("20210713.1", "IDX_STRING").nonNullable().withType(ColumnTypeEnum.STRING, 500);
 
 		version.onTable("HFJ_RESOURCE")
 			.addColumn("20210720.1", "SP_CMPTOKS_PRESENT").nullable().type(ColumnTypeEnum.BOOLEAN);
@@ -220,7 +224,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.addColumn("20210915.1", "EXPANDED_AT")
 			.nullable()
 			.type(ColumnTypeEnum.DATE_TIMESTAMP);
-        
+
 		/*
 		 * Replace CLOB columns with BLOB columns
 		 */
@@ -236,9 +240,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// HFJ_SEARCH.SEARCH_QUERY_STRING
 		version.onTable("HFJ_SEARCH")
 			.migratePostgresTextClobToBinaryClob("20211003.3", "SEARCH_QUERY_STRING");
-		
 
-		
 	}
 
 	private void init540() {
