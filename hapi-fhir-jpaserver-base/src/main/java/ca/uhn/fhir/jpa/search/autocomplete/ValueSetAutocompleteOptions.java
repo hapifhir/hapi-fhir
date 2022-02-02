@@ -39,7 +39,7 @@ public class ValueSetAutocompleteOptions {
 			throw new InvalidRequestException(Msg.code(ERROR_AUTOCOMPLETE_ONLY_TYPE_LEVEL) + "$expand with contexDirection='existing' is only supported at the type leve. It is not supported at instance level, with a url specified, or with a ValueSet .");
 		}
 		if (!theDaoConfig.isAdvancedLuceneIndexing()) {
-			throw new InvalidRequestException(Msg.code(ERROR_AUTOCOMPLETE_ONLY_TYPE_LEVEL) + "$expand with contexDirection='existing' requires Extended Lucene Indexing.");
+			throw new InvalidRequestException(Msg.code(ERROR_REQUIRES_EXTENDED_INDEXING) + "$expand with contexDirection='existing' requires Extended Lucene Indexing.");
 		}
 		ValueSetAutocompleteOptions result = new ValueSetAutocompleteOptions();
 
@@ -53,7 +53,7 @@ public class ValueSetAutocompleteOptions {
 
 	private void parseContext(IPrimitiveType<String> theContextWrapper) {
 		if (theContextWrapper == null || theContextWrapper.isEmpty()) {
-			throw new InvalidRequestException(Msg.code(ERROR_REQUIRES_EXTENDED_INDEXING) + "$expand with contexDirection='existing' requires a context");
+			throw new InvalidRequestException(Msg.code(ERROR_AUTOCOMPLETE_REQUIRES_CONTEXT) + "$expand with contexDirection='existing' requires a context");
 		}
 		String theContext = theContextWrapper.getValue();
 		int separatorIdx = theContext.indexOf('.');
