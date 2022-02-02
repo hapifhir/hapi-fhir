@@ -48,10 +48,10 @@ public class TokenAutocompleteSearch {
 	 * @return A collection of Coding elements
 	 */
 	@Nonnull
-	public List<IBaseCoding> search(String theResourceType, String theSPName, String theSearchText) {
+	public List<IBaseCoding> search(String theResourceType, String theSPName, String theSearchText, int theCount) {
 		// wipmb cleanup
 
-		TokenAutocompleteAggregation tokenAutocompleteAggregation = new TokenAutocompleteAggregation(theSPName);
+		TokenAutocompleteAggregation tokenAutocompleteAggregation = new TokenAutocompleteAggregation(theSPName, theCount);
 
 		if (theSearchText.equals(StringUtils.stripEnd(theSearchText,null))) {
 			// no trailing whitespace.  Add a wildcard to act like match_bool_prefix

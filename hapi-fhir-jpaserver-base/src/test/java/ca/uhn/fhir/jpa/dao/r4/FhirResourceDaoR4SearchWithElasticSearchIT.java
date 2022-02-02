@@ -72,6 +72,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -468,7 +469,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	List<IBaseCoding> autocompleteSearch(String theResourceType, String theSPName, String theSearchText) {
 		return new TransactionTemplate(myTxManager).execute(s->
 			new TokenAutocompleteSearch(myFhirCtx, Search.session(myEntityManager))
-				.search(theResourceType, theSPName, theSearchText));
+				.search(theResourceType, theSPName, theSearchText, 30));
 	}
 
 	@Nonnull

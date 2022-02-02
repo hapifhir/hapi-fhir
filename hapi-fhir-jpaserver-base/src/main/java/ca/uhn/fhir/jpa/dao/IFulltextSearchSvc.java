@@ -24,6 +24,7 @@ import java.util.List;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
+import ca.uhn.fhir.jpa.provider.ValueSetAutocompleteOptions;
 import ca.uhn.fhir.jpa.search.autocomplete.TokenAutocompleteValueSetSearch;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
@@ -47,7 +48,7 @@ public interface IFulltextSearchSvc {
 	 */
 	List<ResourcePersistentId> search(String theResourceName, SearchParameterMap theParams);
 
-	IBaseResource tokenAutocompleteValueSetSearch(TokenAutocompleteValueSetSearch.Options theOptions);
+	IBaseResource tokenAutocompleteValueSetSearch(ValueSetAutocompleteOptions theOptions);
 
 	List<ResourcePersistentId> everything(String theResourceName, SearchParameterMap theParams, RequestDetails theRequest);
 

@@ -15,6 +15,7 @@ import org.apache.commons.lang3.Validate;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -54,10 +55,14 @@ class TokenAutocompleteAggregation {
 	static final ParseContext parseContext = JsonPath.using(configuration);
 
 	private final String mySpName;
+	private final int myCount;
 
 	// wipmb
-	TokenAutocompleteAggregation(String theSpName) {
+	public TokenAutocompleteAggregation(String theSpName, int theCount) {
+		Validate.notEmpty(theSpName);
+		Validate.isTrue(theCount>0, "count must be positive");
 		mySpName = theSpName;
+		myCount = theCount;
 	}
 
 	/**
@@ -70,6 +75,7 @@ class TokenAutocompleteAggregation {
 		JsonObject result = AGGREGATION_TEMPLATE.deepCopy();
 		DocumentContext documentContext = parseContext.parse(result);
 		documentContext.set("terms.field", ExtendedLuceneClauseBuilder.getTokenSystemCodeFieldPath(mySpName));
+		documentContext.set("terms.size", myCount);
 		documentContext.set("aggs." + NESTED_AGG_NAME + ".top_hits._source.includes[0]","sp." + mySpName);
 		return result;
 	}

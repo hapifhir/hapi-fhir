@@ -46,7 +46,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -114,7 +113,7 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 
 		if (isAutocompleteExtension) {
 			// this is a funky extension for NIH.  Do our own thing and return.
-			ValueSetAutocompleteOptions options = createAutoCompleteOptions(theRequestDetails, theContext, theFilter, theOffset, theCount);
+			ValueSetAutocompleteOptions options = ValueSetAutocompleteOptions.validateAndParseOptions(theContext, theFilter, theOffset, theCount, theId, theUrl, theValueSet);
 			startRequest(theServletRequest);
 			try {
 				return autocompleteValueSet(options);
@@ -155,19 +154,8 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 
 	@Nonnull
 	private IBaseResource autocompleteValueSet(ValueSetAutocompleteOptions theOptions) {
-		TokenAutocompleteValueSetSearch.Options options = new TokenAutocompleteValueSetSearch.Options("Observation", "code", "pressure");
 
-		return myFulltextSearch.tokenAutocompleteValueSetSearch(options);
-	}
-
-	private ValueSetAutocompleteOptions createAutoCompleteOptions(RequestDetails theRequestDetails, IPrimitiveType<String> theContext, IPrimitiveType<String> theFilter, IPrimitiveType<Integer> theOffset, IPrimitiveType<Integer> theCount) {
-		// fixme this needs validation.  !haveId, !haveIdentifier, theFilter etc.
-		// do we need offset, or just count?
-		return new ValueSetAutocompleteOptions();
-	}
-
-	public static class ValueSetAutocompleteOptions {
-		
+		return myFulltextSearch.tokenAutocompleteValueSetSearch(theOptions);
 	}
 
 	@SuppressWarnings("unchecked")

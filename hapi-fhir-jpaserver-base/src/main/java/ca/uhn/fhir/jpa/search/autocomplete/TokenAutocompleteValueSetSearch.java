@@ -1,6 +1,10 @@
 package ca.uhn.fhir.jpa.search.autocomplete;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.provider.ValueSetAutocompleteOptions;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.param.TokenParam;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -14,27 +18,20 @@ import java.util.List;
 public class TokenAutocompleteValueSetSearch {
 	private final FhirContext myFhirContext;
 	private final TokenAutocompleteSearch myAutocompleteSearch;
+	static final int DEFAULT_SIZE = 30;
 
 	public TokenAutocompleteValueSetSearch(FhirContext theFhirContext, SearchSession theSession) {
 		myFhirContext = theFhirContext;
 		myAutocompleteSearch = new TokenAutocompleteSearch(myFhirContext, theSession);
 	}
 
-	public static class Options {
-		final String myResourceType;
-		final String mySearchParameterCode;
-		final String mySearchText;
-
-		public Options(String theResourceType, String theSearchParameterCode, String theSearchText) {
-			myResourceType = theResourceType;
-			mySearchParameterCode = theSearchParameterCode;
-			mySearchText = theSearchText;
+	public IBaseResource search(ValueSetAutocompleteOptions theOptions) {
+		if (!Constants.PARAMQUALIFIER_TOKEN_TEXT.equals(theOptions.getSearchParamModifier())) {
+			// wipmb where to validate this?  Top level?
+			throw new IllegalArgumentException("Only support :text searches");
 		}
-	}
-
-	public IBaseResource search(Options theOptions) {
 		List<IBaseCoding> codings = myAutocompleteSearch
-			.search(theOptions.myResourceType, theOptions.mySearchParameterCode, theOptions.mySearchText);
+			.search(theOptions.getResourceType(), theOptions.getSearchParamCode(), theOptions.getFilter(), theOptions.getCount().orElse(DEFAULT_SIZE));
 
 		ValueSet result = new ValueSet();
 		ValueSet.ValueSetExpansionComponent expansion = new ValueSet.ValueSetExpansionComponent();

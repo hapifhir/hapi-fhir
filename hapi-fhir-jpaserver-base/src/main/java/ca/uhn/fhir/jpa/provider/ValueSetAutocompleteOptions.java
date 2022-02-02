@@ -1,0 +1,107 @@
+package ca.uhn.fhir.jpa.provider;
+
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import java.util.Optional;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
+public class ValueSetAutocompleteOptions {
+
+	// fixme get real values from Msg.class
+	static final int ERROR_AUTOCOMPLETE_ONLY_TYPE_LEVEL = 1111;
+	static final int ERROR_AUTOCOMPLETE_REQUIRES_CONTEXT = 2222;
+
+	private String myResourceType;
+	private String mySearchParamCode;
+	private String mySearchParamModifier;
+	private String myFilter;
+	private Integer myCount;
+	private Integer myOffset;
+
+	public static ValueSetAutocompleteOptions validateAndParseOptions(
+		IPrimitiveType<String> theContext,
+		IPrimitiveType<String> theFilter,
+		IPrimitiveType<Integer> theOffset,
+		IPrimitiveType<Integer> theCount,
+		IIdType theId,
+		IPrimitiveType<String> theUrl,
+		IBaseResource theValueSet) {
+		// fixme this needs validation.  !haveId, !haveIdentifier, theFilter etc.
+		boolean haveId = theId != null && theId.hasIdPart();
+		boolean haveIdentifier = theUrl != null && isNotBlank(theUrl.getValue());
+		boolean haveValueSet = theValueSet != null && !theValueSet.isEmpty();
+		if (haveId || haveIdentifier || haveValueSet) {
+			throw new InvalidRequestException(Msg.code(ERROR_AUTOCOMPLETE_ONLY_TYPE_LEVEL) + "$expand with contexDirection='existing' is only supported at the type leve. It is not supported at instance level, with a url specified, or with a ValueSet .");
+		}
+		ValueSetAutocompleteOptions result = new ValueSetAutocompleteOptions();
+
+		result.parseContext(theContext);
+		result.myFilter =
+			theFilter == null ? null : theFilter.getValue();
+		result.myCount = primitiveToNullable(theCount);
+		result.myOffset = primitiveToNullable(theOffset);
+
+		return result;
+	}
+
+	// wipmb Is this a helper somewhere?
+	private static <T> T primitiveToNullable(IPrimitiveType<T> thePrimitiveType) {
+		if (thePrimitiveType == null || thePrimitiveType.isEmpty()) {
+			return null;
+		} else {
+			return thePrimitiveType.getValue();
+		}
+	}
+
+	private void parseContext(IPrimitiveType<String> theContextWrapper) {
+		if (theContextWrapper == null || theContextWrapper.isEmpty()) {
+			throw new InvalidRequestException(Msg.code(ERROR_AUTOCOMPLETE_REQUIRES_CONTEXT) + "$expand with contexDirection='existing' requires a context");
+		}
+		String theContext = theContextWrapper.getValue();
+		int separatorIdx = theContext.indexOf('.');
+		String codeWithPossibleModifier;
+		if (separatorIdx >= 0) {
+			myResourceType = theContext.substring(0, separatorIdx);
+			codeWithPossibleModifier = theContext.substring(separatorIdx + 1);
+		} else {
+			codeWithPossibleModifier = theContext;
+		}
+		int modifierIdx = codeWithPossibleModifier.indexOf(':');
+		if (modifierIdx >= 0) {
+			mySearchParamCode = codeWithPossibleModifier.substring(0, modifierIdx);
+			mySearchParamModifier = codeWithPossibleModifier.substring(modifierIdx + 1);
+		} else {
+			mySearchParamCode = codeWithPossibleModifier;
+		}
+
+	}
+
+	public String getResourceType() {
+		return myResourceType;
+	}
+
+	public String getSearchParamCode() {
+		return mySearchParamCode;
+	}
+
+	public String getSearchParamModifier() {
+		return mySearchParamModifier;
+	}
+
+	public String getFilter() {
+		return myFilter;
+	}
+
+	public Optional<Integer> getCount() {
+		return Optional.ofNullable(myCount);
+	}
+
+	public Optional<Integer> getOffset() {
+		return Optional.ofNullable(myOffset);
+	}
+}
