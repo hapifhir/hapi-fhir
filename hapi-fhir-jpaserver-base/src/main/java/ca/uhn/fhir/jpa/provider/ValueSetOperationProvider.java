@@ -31,7 +31,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.search.autocomplete.TokenAutocompleteValueSetSearch;
+import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteOptions;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -51,7 +51,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -116,7 +115,8 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 			ValueSetAutocompleteOptions options = ValueSetAutocompleteOptions.validateAndParseOptions(theContext, theFilter, theOffset, theCount, theId, theUrl, theValueSet);
 			startRequest(theServletRequest);
 			try {
-				return autocompleteValueSet(options);
+
+				return myFulltextSearch.tokenAutocompleteValueSetSearch(options);
 			} finally {
 				endRequest(theServletRequest);
 			}
@@ -150,12 +150,6 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		} finally {
 			endRequest(theServletRequest);
 		}
-	}
-
-	@Nonnull
-	private IBaseResource autocompleteValueSet(ValueSetAutocompleteOptions theOptions) {
-
-		return myFulltextSearch.tokenAutocompleteValueSetSearch(theOptions);
 	}
 
 	@SuppressWarnings("unchecked")

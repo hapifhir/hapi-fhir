@@ -17,7 +17,6 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.search.autocomplete.TokenAutocompleteSearch;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
@@ -35,10 +34,7 @@ import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
-import org.hamcrest.CustomMatcher;
 import org.hamcrest.Matchers;
-import org.hibernate.search.mapper.orm.Search;
-import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -64,23 +60,15 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -425,84 +413,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			assertObservationSearchMatchesNothing("search with shared prefix does not match", map);
 		}
 	}
-
-
-
-
-	@Test
-	public void testAutocompleteByCodeDisplay() {
-		// wipmb Current IT.
-
-		// a few different codes
-		Coding mean_blood_pressure = new Coding("http://loinc.org", "8478-0", "Mean blood pressure");
-
-		createObservationWithCode(new Coding("http://loinc.org", "789-8", "Erythrocytes [#/volume] in Blood by Automated count"));
-		createObservationWithCode(mean_blood_pressure);
-		createObservationWithCode(new Coding("http://loinc.org", "788-0", "Erythrocyte distribution width [Ratio] by Automated count"));
-		createObservationWithCode(new Coding("http://loinc.org", "787-2", "MCV [Entitic volume] by Automated count"));
-		createObservationWithCode(new Coding("http://loinc.org", "786-4", "MCHC [Mass/volume] by Automated count"));
-		createObservationWithCode(new Coding("http://loinc.org", "785-6", "MCH [Entitic mass] by Automated count"));
-
-		createObservationWithCode(new Coding("http://loinc.org", "777-3", "Platelets [#/volume] in Blood by Automated count"));
-		createObservationWithCode(new Coding("http://loinc.org", "718-7", "Hemoglobin [Mass/volume] in Blood"));
-		createObservationWithCode(new Coding("http://loinc.org", "6690-2", "Leukocytes [#/volume] in Blood by Automated count"));
-		createObservationWithCode(new Coding("http://loinc.org", "59032-3", "Lactate [Mass/volume] in Blood"));
-		createObservationWithCode(new Coding("http://loinc.org", "4548-4", "Hemoglobin A1c/Hemoglobin.total in Blood"));
-		createObservationWithCode(new Coding("http://loinc.org", "4544-3", "Hematocrit [Volume Fraction] of Blood by Automated count"));
-
-		// some repeats to make sure we only return singles
-		createObservationWithCode(new Coding("http://loinc.org", "88262-1", "Gram positive blood culture panel by Probe in Positive blood culture"));
-		createObservationWithCode(new Coding("http://loinc.org", "88262-1", "Gram positive blood culture panel by Probe in Positive blood culture"));
-		createObservationWithCode(new Coding("http://loinc.org", "88262-1", "Gram positive blood culture panel by Probe in Positive blood culture"));
-
-		List<IBaseCoding> codes;
-		codes = autocompleteSearch("Observation", "code", "blo");
-		assertThat("finds blood pressure", codes, hasItem(matchingCode(mean_blood_pressure)));
-
-		codes = autocompleteSearch("Observation", "code", "pressure");
-		assertThat("finds blood pressure", codes, hasItem(matchingCode(mean_blood_pressure)));
-
-		codes = autocompleteSearch("Observation", "code", "nuclear");
-		assertThat("doesn't find nuclear", codes, is(empty()));
-	}
-
-	List<IBaseCoding> autocompleteSearch(String theResourceType, String theSPName, String theSearchText) {
-		return new TransactionTemplate(myTxManager).execute(s->
-			new TokenAutocompleteSearch(myFhirCtx, Search.session(myEntityManager))
-				.search(theResourceType, theSPName, theSearchText, 30));
-	}
-
-	@Nonnull
-	private CodeMatcher matchingCode(Coding theCoding) {
-		return new CodeMatcher(theCoding);
-	}
-
-	public static class CodeMatcher extends CustomMatcher<IBaseCoding> {
-
-		private final IBaseCoding myCode;
-
-		public CodeMatcher(IBaseCoding theCode) {
-			super(theCode.getSystem() + "|" + theCode.getCode());
-			this.myCode = theCode;
-		}
-
-		@Override
-		public boolean matches(Object theCandidate) {
-			if (!(theCandidate instanceof IBaseCoding)) {
-				return false;
-			}
-			IBaseCoding coding = (IBaseCoding) theCandidate;
-			return
-				Objects.equals(coding.getSystem(), myCode.getSystem()) &&
-				Objects.equals(coding.getCode(), myCode.getCode());
-		}
-	}
-	private IIdType createObservationWithCode(Coding c) {
-		Observation obs1 = new Observation();
-		obs1.getCode().addCoding(c);
-		return myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
-	}
-
 
 	@Test
 	public void testStringSearch() {

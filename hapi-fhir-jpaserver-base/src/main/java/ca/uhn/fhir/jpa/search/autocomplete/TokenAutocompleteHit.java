@@ -15,7 +15,6 @@ class TokenAutocompleteHit {
 	@Nonnull
 	final String mySystemCode;
 	final String myDisplayText;
-	// wipmb add count?
 
 	TokenAutocompleteHit(@Nonnull String theSystemCode, String theDisplayText) {
 		Validate.notEmpty(theSystemCode);
@@ -23,15 +22,8 @@ class TokenAutocompleteHit {
 		myDisplayText = theDisplayText;
 	}
 
-	IBaseCoding makeCoding(FhirContext theFhirContext) {
-		TokenParam tokenParam = new TokenParam();
-		tokenParam.setValueAsQueryToken(theFhirContext, null, null, mySystemCode);
-
-		IBaseCoding coding = TerserUtil.newElement(theFhirContext, "Coding");
-		coding.setCode(tokenParam.getValue());
-		coding.setSystem(tokenParam.getSystem());
-		coding.setDisplay(myDisplayText);
-
-		return coding;
+	@Nonnull
+	public String getSystemCode() {
+		return mySystemCode;
 	}
 }

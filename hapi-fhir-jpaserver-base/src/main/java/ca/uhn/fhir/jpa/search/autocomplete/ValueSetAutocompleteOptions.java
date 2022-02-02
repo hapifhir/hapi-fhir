@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.provider;
+package ca.uhn.fhir.jpa.search.autocomplete;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -21,6 +21,7 @@ public class ValueSetAutocompleteOptions {
 	private String mySearchParamModifier;
 	private String myFilter;
 	private Integer myCount;
+	// wipmb is offset needed?
 	private Integer myOffset;
 
 	public static ValueSetAutocompleteOptions validateAndParseOptions(

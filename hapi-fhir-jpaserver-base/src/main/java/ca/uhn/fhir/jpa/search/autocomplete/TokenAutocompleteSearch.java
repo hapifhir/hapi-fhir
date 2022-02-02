@@ -28,7 +28,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 /**
  * Use aggregations to implement a search of most-frequent token search params values.
  */
-public class TokenAutocompleteSearch {
+class TokenAutocompleteSearch {
 	private static final Logger ourLog = LoggerFactory.getLogger(TokenAutocompleteSearch.class);
 	private static final AggregationKey<JsonObject> AGGREGATION_KEY = AggregationKey.of("autocomplete");
 
@@ -40,6 +40,7 @@ public class TokenAutocompleteSearch {
 		mySession = theSession;
 	}
 
+
 	/**
 	 * Search for tokens indexed by theSPName on theResourceType matching  theSearchText.
 	 * @param theResourceType The resource type (e.g. Observation)
@@ -47,8 +48,9 @@ public class TokenAutocompleteSearch {
 	 * @param theSearchText The search test (e.g. "bloo")
 	 * @return A collection of Coding elements
 	 */
+
 	@Nonnull
-	public List<IBaseCoding> search(String theResourceType, String theSPName, String theSearchText, int theCount) {
+	public List<TokenAutocompleteHit> search(String theResourceType, String theSPName, String theSearchText, int theCount) {
 		// wipmb cleanup
 
 		TokenAutocompleteAggregation tokenAutocompleteAggregation = new TokenAutocompleteAggregation(theSPName, theCount);
@@ -78,6 +80,7 @@ public class TokenAutocompleteSearch {
 			.aggregation(AGGREGATION_KEY, buildESAggregation(tokenAutocompleteAggregation));
 
 		// run the query, but with 0 results.  We only care about the aggregations.
+		query.toQuery().queryString();
 		SearchResult<?> result = query.fetch(0);
 
 		// parse out the top-n results from the aggregation json.
@@ -85,10 +88,7 @@ public class TokenAutocompleteSearch {
 		List<TokenAutocompleteHit> aggEntries = tokenAutocompleteAggregation.extractResults(resultAgg);
 		// wipmb parse the results
 		ourLog.warn("XXX agg {}", resultAgg); // wipmb remove this.
-
-		return aggEntries.stream()
-			.map(e->e.makeCoding(myFhirContext))
-			.collect(Collectors.toList());
+		return aggEntries;
 	}
 
 	/**

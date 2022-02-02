@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.config.TestHibernateSearchAddInConfig;
-import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import org.apache.commons.io.IOUtils;
@@ -12,7 +11,6 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -23,7 +21,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -58,7 +55,7 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 	}
 
 
-	/**
+	/*
 	 * wipmb TODO-LIST
 	 * - docs
 	 * - link to docs
@@ -91,7 +88,7 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 			assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatusLine().getStatusCode());
 			String text = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ValueSet valueSet = myFhirCtx.newXmlParser().parseResource(ValueSet.class, text);
-			ourLog.info(text);
+			ourLog.info("testAutocompleteDirectionExisting {}", text);
 			assertThat(valueSet, is(not(nullValue())));
 			List<ValueSet.ValueSetExpansionContainsComponent> expansions = valueSet.getExpansion().getContains();
 			assertThat(expansions, hasItem(valueSetExpansionMatching(mean_blood_pressure)));
@@ -107,18 +104,16 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 			}
 
 			protected boolean matchesSafely(ValueSet.ValueSetExpansionContainsComponent theItem, Description mismatchDescription) {
-				return
-					Objects.equals(theItem.getSystem(), theTarget.getSystem()) &&
+				return Objects.equals(theItem.getSystem(), theTarget.getSystem()) &&
 						Objects.equals(theItem.getCode(), theTarget.getCode());
 			}
 		};
 	}
 
-	private IIdType createObservationWithCode(Coding c) {
-		// wipmb share with FhirResourceDaoR4SearchWithElasticSearchIT
-		Observation obs1 = new Observation();
-		obs1.getCode().addCoding(c);
-		return myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
+	private void createObservationWithCode(Coding c) {
+		Observation observation = new Observation();
+		observation.getCode().addCoding(c);
+		myObservationDao.create(observation, mySrd).getId().toUnqualifiedVersionless();
 	}
 
 }
