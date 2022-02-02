@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -1012,7 +1013,10 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 	@Test
 	public void testResourceWithTagCreationNoFailures() throws ExecutionException, InterruptedException {
-		ExecutorService pool = Executors.newFixedThreadPool(5);
+		// we need to leave at least one free thread
+		// due to a REQUIRED_NEW transaction internally
+		int maxThreadsUsed = TestR4Config.ourMaxThreads - 1;
+		ExecutorService pool = Executors.newFixedThreadPool(Math.min(maxThreadsUsed, 5));
 		try {
 			Coding tag = new Coding();
 			tag.setCode("code123");
@@ -1037,7 +1041,9 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 						try {
 							myPatientDao.update(updatePatient);
 						} catch (ResourceVersionConflictException e) {
-							assertEquals("The operation has failed with a version constraint failure. This generally means that two clients/threads were trying to update the same resource at the same time, and this request was chosen as the failing request.", e.getMessage());
+							assertTrue(e.getMessage().contains(
+								"The operation has failed with a version constraint failure. This generally means that two clients/threads were trying to update the same resource at the same time, and this request was chosen as the failing request."
+							));
 						}
 					} catch (Exception e) {
 						ourLog.error("Failure", e);
