@@ -148,6 +148,7 @@ public class BaseHapiFhirDaoTest {
 		return from;
 	}
 
+	// fixme these tests are misbehaving.
 	@Test
 	public void getTagOrNull_raceCondition_wontUpsertDuplicates() throws InterruptedException, ExecutionException {
 		/*
