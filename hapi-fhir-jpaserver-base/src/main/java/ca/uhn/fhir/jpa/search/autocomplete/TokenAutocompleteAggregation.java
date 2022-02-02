@@ -80,9 +80,10 @@ class TokenAutocompleteAggregation {
 	}
 
 	/**
-	 * Parse the aggregation buckets into TokenAutocompleteResultEntry
+	 * Extract hits from the aggregation buckets
 	 *
 	 * @param theAggregationResult the ES aggregation JSON
+	 * @return A list of TokenAutocompleteHit, one per aggregation bucket.
 	 */
 	@Nonnull
 	List<TokenAutocompleteHit> extractResults(@Nonnull JsonObject theAggregationResult) {
