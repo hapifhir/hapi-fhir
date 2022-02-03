@@ -333,7 +333,7 @@ public class ExtendedLuceneClauseBuilder {
 			// comma separated list of dates(OR list) on a date param is not applicable so grab
 			// first from default list
 			if (nextAnd.size() > 1) {
-				throw new InvalidRequestException("OR (,) searches on DATE search parameters are not supported for ElasticSearch/Lucene");
+				throw new IllegalArgumentException(Msg.code(1090) + "OR (,) searches on DATE search parameters are not supported for ElasticSearch/Lucene");
 			}
 			DateParam dateParam = (DateParam) nextAnd.stream().findFirst()
 				.orElseThrow(() -> new InvalidRequestException("Date param is missing value"));
@@ -394,7 +394,7 @@ public class ExtendedLuceneClauseBuilder {
 			booleanStep.minimumShouldMatchNumber(1);
 			return booleanStep;
 		}
-		throw new InvalidRequestException("Date search param does not support prefix of type: " + prefix);
+		throw new IllegalArgumentException(Msg.code(1091) + "Date search param does not support prefix of type: " + prefix);
 	}
 
 	private PredicateFinalStep generateDateInstantSearchTerms(String theSearchParamName, DateParam theDateParam) {
@@ -438,6 +438,6 @@ public class ExtendedLuceneClauseBuilder {
 			return myPredicateFactory.range().field(lowerInstantField).atMost(upperBoundAsInstant);
 		}
 
-		throw new InvalidRequestException("Date search param does not support prefix of type: " + prefix);
+		throw new IllegalArgumentException(Msg.code(1091) + "Date search param does not support prefix of type: " + prefix);
 	}
 }
