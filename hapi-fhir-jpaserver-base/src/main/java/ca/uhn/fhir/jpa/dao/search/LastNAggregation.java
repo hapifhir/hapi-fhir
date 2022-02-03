@@ -37,41 +37,41 @@ public class LastNAggregation {
 	 */
 	public JsonObject toAggregation() {
 		JsonObject lastNAggregation = myJsonParser.fromJson(
-			"{\n" +
-				"   \"terms\":{\n" +
-				"      \"field\":\"" + SP_CODE_TOKEN_CODE_AND_SYSTEM + "\",\n" +
-				"      \"size\":100,\n" +
-				"      \"min_doc_count\":1\n" +
-				"   },\n" +
-				"   \"aggs\":{\n" +
-				"      \"" + MOST_RECENT_EFFECTIVE_SUB_AGGREGATION + "\":{\n" +
-				"         \"top_hits\":{\n" +
-				"            \"size\":" + myLastNMax + ",\n" +
-				"            \"sort\":[\n" +
-				"               {\n" +
-				"                  \"" + SP_DATE_DT_UPPER + "\":{\n" +
-				"                     \"order\":\"desc\"\n" +
-				"                  }\n" +
-				"               }\n" +
-				"            ],\n" +
-				"            \"_source\":[\n" +
-				"               \"myId\"\n" +
-				"            ]\n" +
-				"         }\n" +
-				"      }\n" +
-				"   }\n" +
+			"{" +
+				"   \"terms\":{" +
+				"      \"field\":\"" + SP_CODE_TOKEN_CODE_AND_SYSTEM + "\"," +
+				"      \"size\":100," +
+				"      \"min_doc_count\":1" +
+				"   }," +
+				"   \"aggs\":{" +
+				"      \"" + MOST_RECENT_EFFECTIVE_SUB_AGGREGATION + "\":{" +
+				"         \"top_hits\":{" +
+				"            \"size\":" + myLastNMax + "," +
+				"            \"sort\":[" +
+				"               {" +
+				"                  \"" + SP_DATE_DT_UPPER + "\":{" +
+				"                     \"order\":\"desc\"" +
+				"                  }" +
+				"               }" +
+				"            ]," +
+				"            \"_source\":[" +
+				"               \"myId\"" +
+				"            ]" +
+				"         }" +
+				"      }" +
+				"   }" +
 				"}", JsonObject.class);
 		if (myAggregateOnSubject) {
 			lastNAggregation = myJsonParser.fromJson(
-				"{\n" +
-					"  \"terms\": {\n" +
-					"    \"field\": \"" + SP_SUBJECT + "\",\n" +
-					"    \"size\": 100,\n" +
-					"    \"min_doc_count\": 1\n" +
-					"  },\n" +
-					"  \"aggs\": {\n" +
-					"    \"" + GROUP_BY_CODE_SYSTEM_SUB_AGGREGATION + "\": " + myJsonParser.toJson(lastNAggregation) + "\n" +
-					"  }\n" +
+				"{" +
+					"  \"terms\": {" +
+					"    \"field\": \"" + SP_SUBJECT + "\"," +
+					"    \"size\": 100," +
+					"    \"min_doc_count\": 1" +
+					"  }," +
+					"  \"aggs\": {" +
+					"    \"" + GROUP_BY_CODE_SYSTEM_SUB_AGGREGATION + "\": " + myJsonParser.toJson(lastNAggregation) + "" +
+					"  }" +
 					"}", JsonObject.class);
 		}
 		return lastNAggregation;
