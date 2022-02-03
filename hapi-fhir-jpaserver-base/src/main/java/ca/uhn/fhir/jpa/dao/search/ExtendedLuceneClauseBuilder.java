@@ -438,6 +438,6 @@ public class ExtendedLuceneClauseBuilder {
 			return myPredicateFactory.range().field(lowerInstantField).atMost(upperBoundAsInstant);
 		}
 
-		throw new IllegalArgumentException(Msg.code(2025) + "Date search param does not support prefix of type: " + prefix);
+		throw new IllegalArgumentException(Msg.code(2026) + "Date search param does not support prefix of type: " + prefix);
 	}
 }
