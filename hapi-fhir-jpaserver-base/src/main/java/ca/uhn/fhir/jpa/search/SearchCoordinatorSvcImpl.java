@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.search;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -30,9 +31,11 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
+import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilderReference;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchInclude;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
@@ -49,6 +52,7 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -65,8 +69,10 @@ import ca.uhn.fhir.rest.server.method.PageMethodBinding;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.AsyncUtil;
 import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.util.UrlUtil;
 import co.elastic.apm.api.ElasticApm;
 import co.elastic.apm.api.Span;
 import co.elastic.apm.api.Transaction;
@@ -109,8 +115,11 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Component("mySearchCoordinatorSvc")
 public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
@@ -152,6 +161,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	private PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
+	@Autowired
+	private ISearchParamRegistry mySearchParamRegistry;
 
 	/**
 	 * Constructor
@@ -257,7 +268,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 			if (sw.getMillis() > myMaxMillisToWaitForRemoteResults) {
 				ourLog.error("Search {} of type {} for {}{} timed out after {}ms", search.getId(), search.getSearchType(), search.getResourceType(), search.getSearchQueryString(), sw.getMillis());
-				throw new InternalErrorException("Request timed out after " + sw.getMillis() + "ms");
+				throw new InternalErrorException(Msg.code(1163) + "Request timed out after " + sw.getMillis() + "ms");
 			}
 
 			// If the search was saved in "pass complete mode" it's probably time to
@@ -318,6 +329,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			.add(SearchParameterMap.class, theParams);
 		CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRESEARCH_REGISTERED, params);
 
+		validateSearch(theParams);
+
 		Class<? extends IBaseResource> resourceTypeClass = myContext.getResourceDefinition(theResourceType).getImplementingClass();
 		final ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(theCallingDao, theResourceType, resourceTypeClass);
 		sb.setFetchSize(mySyncSize);
@@ -354,6 +367,56 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		PersistedJpaSearchFirstPageBundleProvider retVal = submitSearch(theCallingDao, theParams, theResourceType, theRequestDetails, searchUuid, sb, queryString, theRequestPartitionId, search);
 		retVal.setCacheStatus(cacheStatus);
 		return retVal;
+	}
+
+	private void validateSearch(SearchParameterMap theParams) {
+		validateIncludes(theParams.getIncludes(), Constants.PARAM_INCLUDE);
+		validateIncludes(theParams.getRevIncludes(), Constants.PARAM_REVINCLUDE);
+	}
+
+	private void validateIncludes(Set<Include> includes, String name) {
+		for (Include next : includes) {
+			String value = next.getValue();
+			if (value.equals(Constants.INCLUDE_STAR) || isBlank(value)) {
+				continue;
+			}
+
+			String paramType = next.getParamType();
+			String paramName = next.getParamName();
+			String paramTargetType = next.getParamTargetType();
+
+			if (isBlank(paramType) || isBlank(paramName)) {
+				String msg = myContext.getLocalizer().getMessageSanitized(SearchCoordinatorSvcImpl.class, "invalidInclude", name, value, "");
+				throw new InvalidRequestException(Msg.code(2018) + msg);
+			}
+
+			if (!myDaoRegistry.isResourceTypeSupported(paramType)) {
+				String resourceTypeMsg = myContext.getLocalizer().getMessageSanitized(PredicateBuilderReference.class, "invalidResourceType", paramType);
+				String msg = myContext.getLocalizer().getMessage(SearchCoordinatorSvcImpl.class, "invalidInclude", UrlUtil.sanitizeUrlPart(name), UrlUtil.sanitizeUrlPart(value), resourceTypeMsg); // last param is pre-sanitized
+				throw new InvalidRequestException(Msg.code(2017) + msg);
+			}
+
+			if (isNotBlank(paramTargetType) && !myDaoRegistry.isResourceTypeSupported(paramTargetType)) {
+				String resourceTypeMsg = myContext.getLocalizer().getMessageSanitized(PredicateBuilderReference.class, "invalidResourceType", paramTargetType);
+				String msg = myContext.getLocalizer().getMessage(SearchCoordinatorSvcImpl.class, "invalidInclude", UrlUtil.sanitizeUrlPart(name), UrlUtil.sanitizeUrlPart(value), resourceTypeMsg); // last param is pre-sanitized
+				throw new InvalidRequestException(Msg.code(2016) + msg);
+			}
+
+			if (!Constants.INCLUDE_STAR.equals(paramName) && mySearchParamRegistry.getActiveSearchParam(paramType, paramName) == null) {
+				List<String> validNames = mySearchParamRegistry
+					.getActiveSearchParams(paramType)
+					.values()
+					.stream()
+					.filter(t -> t.getParamType() == RestSearchParameterTypeEnum.REFERENCE)
+					.map(t -> UrlUtil.sanitizeUrlPart(t.getName()))
+					.sorted()
+					.collect(Collectors.toList());
+				String searchParamMessage = myContext.getLocalizer().getMessage(BaseStorageDao.class, "invalidSearchParameter", UrlUtil.sanitizeUrlPart(paramName), UrlUtil.sanitizeUrlPart(paramType), validNames);
+				String msg = myContext.getLocalizer().getMessage(SearchCoordinatorSvcImpl.class, "invalidInclude", UrlUtil.sanitizeUrlPart(name), UrlUtil.sanitizeUrlPart(value), searchParamMessage); // last param is pre-sanitized
+				throw new InvalidRequestException(Msg.code(2015) + msg);
+			}
+
+		}
 	}
 
 	@Override
@@ -497,7 +560,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				}
 			} catch (IOException e) {
 				ourLog.error("IO failure during database access", e);
-				throw new InternalErrorException(e);
+				throw new InternalErrorException(Msg.code(1164) + e);
 			}
 
 			JpaPreResourceAccessDetails accessDetails = new JpaPreResourceAccessDetails(pids, () -> theSb);
@@ -597,7 +660,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			if (theCacheControlDirective.getMaxResults() != null) {
 				loadSynchronousUpTo = theCacheControlDirective.getMaxResults();
 				if (loadSynchronousUpTo > myDaoConfig.getCacheControlNoStoreMaxResultsUpperLimit()) {
-					throw new InvalidRequestException(Constants.HEADER_CACHE_CONTROL + " header " + Constants.CACHE_CONTROL_MAX_RESULTS + " value must not exceed " + myDaoConfig.getCacheControlNoStoreMaxResultsUpperLimit());
+					throw new InvalidRequestException(Msg.code(1165) + Constants.HEADER_CACHE_CONTROL + " header " + Constants.CACHE_CONTROL_MAX_RESULTS + " value must not exceed " + myDaoConfig.getCacheControlNoStoreMaxResultsUpperLimit());
 				}
 			} else {
 				loadSynchronousUpTo = 100;
@@ -672,6 +735,95 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		return wantOnlyCount ||
 			SearchTotalModeEnum.ACCURATE.equals(myParams.getSearchTotalMode()) ||
 			(myParams.getSearchTotalMode() == null && SearchTotalModeEnum.ACCURATE.equals(myDaoConfig.getDefaultTotalMode()));
+	}
+
+	private static boolean isWantOnlyCount(SearchParameterMap myParams) {
+		return SummaryEnum.COUNT.equals(myParams.getSummaryMode())
+			| INTEGER_0.equals(myParams.getCount());
+	}
+
+	public static void populateSearchEntity(SearchParameterMap theParams, String theResourceType, String theSearchUuid, String theQueryString, Search theSearch, RequestPartitionId theRequestPartitionId) {
+		theSearch.setDeleted(false);
+		theSearch.setUuid(theSearchUuid);
+		theSearch.setCreated(new Date());
+		theSearch.setTotalCount(null);
+		theSearch.setNumFound(0);
+		theSearch.setPreferredPageSize(theParams.getCount());
+		theSearch.setSearchType(theParams.getEverythingMode() != null ? SearchTypeEnum.EVERYTHING : SearchTypeEnum.SEARCH);
+		theSearch.setLastUpdated(theParams.getLastUpdated());
+		theSearch.setResourceType(theResourceType);
+		theSearch.setStatus(SearchStatusEnum.LOADING);
+		theSearch.setSearchQueryString(theQueryString, theRequestPartitionId);
+
+		if (theParams.hasIncludes()) {
+			for (Include next : theParams.getIncludes()) {
+				theSearch.addInclude(new SearchInclude(theSearch, next.getValue(), false, next.isRecurse()));
+			}
+		}
+
+		for (Include next : theParams.getRevIncludes()) {
+			theSearch.addInclude(new SearchInclude(theSearch, next.getValue(), true, next.isRecurse()));
+		}
+	}
+
+	/**
+	 * Creates a {@link Pageable} using a start and end index
+	 */
+	@SuppressWarnings("WeakerAccess")
+	@Nullable
+	public static Pageable toPage(final int theFromIndex, int theToIndex) {
+		int pageSize = theToIndex - theFromIndex;
+		if (pageSize < 1) {
+			return null;
+		}
+
+		int pageIndex = theFromIndex / pageSize;
+
+		Pageable page = new AbstractPageRequest(pageIndex, pageSize) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public long getOffset() {
+				return theFromIndex;
+			}
+
+			@Override
+			public Sort getSort() {
+				return Sort.unsorted();
+			}
+
+			@Override
+			public Pageable next() {
+				return null;
+			}
+
+			@Override
+			public Pageable previous() {
+				return null;
+			}
+
+			@Override
+			public Pageable first() {
+				return null;
+			}
+
+			@Override
+			public Pageable withPage(int theI) {
+				return null;
+			}
+		};
+
+		return page;
+	}
+
+	static void verifySearchHasntFailedOrThrowInternalErrorException(Search theSearch) {
+		if (theSearch.getStatus() == SearchStatusEnum.FAILED) {
+			Integer status = theSearch.getFailureCode();
+			status = defaultIfNull(status, 500);
+
+			String message = theSearch.getFailureMessage();
+			throw BaseServerResponseException.newInstance(status, message);
+		}
 	}
 
 	/**
@@ -1210,7 +1362,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 			} catch (IOException e) {
 				ourLog.error("IO failure during database access", e);
-				throw new InternalErrorException(e);
+				throw new InternalErrorException(Msg.code(1166) + e);
 			}
 		}
 	}
@@ -1251,95 +1403,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			return super.call();
 		}
 
-	}
-
-	private static boolean isWantOnlyCount(SearchParameterMap myParams) {
-		return SummaryEnum.COUNT.equals(myParams.getSummaryMode())
-			| INTEGER_0.equals(myParams.getCount());
-	}
-
-	public static void populateSearchEntity(SearchParameterMap theParams, String theResourceType, String theSearchUuid, String theQueryString, Search theSearch, RequestPartitionId theRequestPartitionId) {
-		theSearch.setDeleted(false);
-		theSearch.setUuid(theSearchUuid);
-		theSearch.setCreated(new Date());
-		theSearch.setTotalCount(null);
-		theSearch.setNumFound(0);
-		theSearch.setPreferredPageSize(theParams.getCount());
-		theSearch.setSearchType(theParams.getEverythingMode() != null ? SearchTypeEnum.EVERYTHING : SearchTypeEnum.SEARCH);
-		theSearch.setLastUpdated(theParams.getLastUpdated());
-		theSearch.setResourceType(theResourceType);
-		theSearch.setStatus(SearchStatusEnum.LOADING);
-		theSearch.setSearchQueryString(theQueryString, theRequestPartitionId);
-
-		if (theParams.hasIncludes()) {
-			for (Include next : theParams.getIncludes()) {
-				theSearch.addInclude(new SearchInclude(theSearch, next.getValue(), false, next.isRecurse()));
-			}
-		}
-
-		for (Include next : theParams.getRevIncludes()) {
-			theSearch.addInclude(new SearchInclude(theSearch, next.getValue(), true, next.isRecurse()));
-		}
-	}
-
-	/**
-	 * Creates a {@link Pageable} using a start and end index
-	 */
-	@SuppressWarnings("WeakerAccess")
-	@Nullable
-	public static Pageable toPage(final int theFromIndex, int theToIndex) {
-		int pageSize = theToIndex - theFromIndex;
-		if (pageSize < 1) {
-			return null;
-		}
-
-		int pageIndex = theFromIndex / pageSize;
-
-		Pageable page = new AbstractPageRequest(pageIndex, pageSize) {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public long getOffset() {
-				return theFromIndex;
-			}
-
-			@Override
-			public Sort getSort() {
-				return Sort.unsorted();
-			}
-
-			@Override
-			public Pageable next() {
-				return null;
-			}
-
-			@Override
-			public Pageable previous() {
-				return null;
-			}
-
-			@Override
-			public Pageable first() {
-				return null;
-			}
-
-			@Override
-			public Pageable withPage(int theI) {
-				return null;
-			}
-		};
-
-		return page;
-	}
-
-	static void verifySearchHasntFailedOrThrowInternalErrorException(Search theSearch) {
-		if (theSearch.getStatus() == SearchStatusEnum.FAILED) {
-			Integer status = theSearch.getFailureCode();
-			status = defaultIfNull(status, 500);
-
-			String message = theSearch.getFailureMessage();
-			throw BaseServerResponseException.newInstance(status, message);
-		}
 	}
 
 }

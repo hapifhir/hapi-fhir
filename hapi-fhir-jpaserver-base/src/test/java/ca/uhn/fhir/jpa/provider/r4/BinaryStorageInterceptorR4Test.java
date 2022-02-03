@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.binstore.BinaryStorageInterceptor;
@@ -280,7 +281,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 			myDocumentReferenceDao.update(docRef, mySrd);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Illegal extension found in request payload - URL \"http://hapifhir.io/fhir/StructureDefinition/externalized-binary-id\" and value \"12345-67890\"", e.getMessage());
+			assertEquals(Msg.code(1329) + "Illegal extension found in request payload - URL \"http://hapifhir.io/fhir/StructureDefinition/externalized-binary-id\" and value \"12345-67890\"", e.getMessage());
 		}
 	}
 

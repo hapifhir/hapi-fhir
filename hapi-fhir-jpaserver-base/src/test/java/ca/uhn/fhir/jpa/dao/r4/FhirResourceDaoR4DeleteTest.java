@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -92,7 +93,7 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 			myPatientDao.delete(pId);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertEquals("Resource deletion is not permitted on this server", e.getMessage());
+			assertEquals(Msg.code(966) + "Resource deletion is not permitted on this server", e.getMessage());
 		}
 	}
 

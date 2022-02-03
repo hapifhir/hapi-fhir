@@ -1,6 +1,7 @@
 package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
@@ -217,7 +218,7 @@ public class UploadTerminologyCommandTest {
 			});
 			fail();
 		} catch (Error e) {
-			assertThat(e.toString(), containsString("HTTP 400 Bad Request: Request has parameter codeSystem of type Patient but method expects type CodeSystem"));
+			assertThat(e.toString(), containsString("HTTP 400 Bad Request: " + Msg.code(362) + "Request has parameter codeSystem of type Patient but method expects type CodeSystem"));
 		}
 	}
 

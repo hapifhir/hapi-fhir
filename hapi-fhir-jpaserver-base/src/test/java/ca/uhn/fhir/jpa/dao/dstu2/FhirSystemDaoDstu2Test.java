@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.dstu2;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
@@ -177,7 +178,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 		// Bundle.entry[2] is failed read response
 		assertEquals(OperationOutcome.class, resp.getEntry().get(1).getResource().getClass());
 		assertEquals(IssueSeverityEnum.ERROR, ((OperationOutcome) resp.getEntry().get(1).getResource()).getIssue().get(0).getSeverityElement().getValueAsEnum());
-		assertEquals("Resource Patient/THIS_ID_DOESNT_EXIST is not known", ((OperationOutcome) resp.getEntry().get(1).getResource()).getIssue().get(0).getDiagnostics());
+		assertEquals(Msg.code(2001) + "Resource Patient/THIS_ID_DOESNT_EXIST is not known", ((OperationOutcome) resp.getEntry().get(1).getResource()).getIssue().get(0).getDiagnostics());
 		assertEquals("404 Not Found", resp.getEntry().get(1).getResponse().getStatus());
 
 		// Check POST
@@ -431,7 +432,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 			mySystemDao.transaction(mySrd, request);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Unable to process Transaction - Request contains multiple anonymous entries (Bundle.entry.fullUrl not populated) with conditional URL: \"Patient?identifier=urn%3Asystem%7CtestTransactionCreateWithDuplicateMatchUrl01\". Does transaction request contain duplicates?", e.getMessage());
+			assertEquals(Msg.code(2008) + "Unable to process Transaction - Request contains multiple anonymous entries (Bundle.entry.fullUrl not populated) with conditional URL: \"Patient?identifier=urn%3Asystem%7CtestTransactionCreateWithDuplicateMatchUrl01\". Does transaction request contain duplicates?", e.getMessage());
 		}
 	}
 
@@ -453,7 +454,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 			mySystemDao.transaction(mySrd, request);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(e.getMessage(), "Unable to process Transaction - Request would cause multiple resources to match URL: \"Patient?identifier=urn%3Asystem%7CtestTransactionCreateWithDuplicateMatchUrl02\". Does transaction request contain duplicates?");
+			assertEquals(e.getMessage(), Msg.code(542) + "Unable to process Transaction - Request would cause multiple resources to match URL: \"Patient?identifier=urn%3Asystem%7CtestTransactionCreateWithDuplicateMatchUrl02\". Does transaction request contain duplicates?");
 		}
 	}
 
@@ -472,7 +473,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 			mySystemDao.transaction(mySrd, request);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Failed to parse match URL[Patient?identifier   identifiertestTransactionCreateWithInvalidMatchUrl] - URL is invalid (must not contain spaces)", e.getMessage());
+			assertEquals(Msg.code(1744) + "Failed to parse match URL[Patient?identifier   identifiertestTransactionCreateWithInvalidMatchUrl] - URL is invalid (must not contain spaces)", e.getMessage());
 		}
 
 		try {
@@ -480,7 +481,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 			mySystemDao.transaction(mySrd, request);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Invalid match URL[Patient?identifier=] - URL has no search parameters", e.getMessage());
+			assertEquals(Msg.code(518) + "Invalid match URL[Patient?identifier=] - URL has no search parameters", e.getMessage());
 		}
 
 		try {
@@ -488,7 +489,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 			mySystemDao.transaction(mySrd, request);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Failed to parse match URL[Patient?foo=bar] - Resource type Patient does not have a parameter with name: foo", e.getMessage());
+			assertEquals(Msg.code(488) + "Failed to parse match URL[Patient?foo=bar] - Resource type Patient does not have a parameter with name: foo", e.getMessage());
 		}
 	}
 
@@ -1035,7 +1036,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 			mySystemDao.transaction(mySrd, request);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Transaction bundle contains multiple resources with ID: Patient/testTransactionFailsWithDusplicateIds", e.getMessage());
+			assertEquals(Msg.code(535) + "Transaction bundle contains multiple resources with ID: Patient/testTransactionFailsWithDusplicateIds", e.getMessage());
 		}
 	}
 
@@ -1261,7 +1262,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 			mySystemDao.transaction(mySrd, request);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Unable to process transaction where incoming Bundle.type = searchset", e.getMessage());
+			assertEquals(Msg.code(527) + "Unable to process transaction where incoming Bundle.type = searchset", e.getMessage());
 		}
 
 	}
@@ -1606,7 +1607,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 			mySystemDao.transaction(mySrd, request);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Unable to process transaction where incoming Bundle.type = searchset", e.getMessage());
+			assertEquals(Msg.code(527) + "Unable to process transaction where incoming Bundle.type = searchset", e.getMessage());
 		}
 
 	}

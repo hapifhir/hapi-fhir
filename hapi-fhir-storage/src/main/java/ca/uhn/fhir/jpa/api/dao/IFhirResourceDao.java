@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.api.dao;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
@@ -170,7 +171,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * Read a resource by its internal PID
 	 */
 	default T readByPid(ResourcePersistentId thePid, boolean theDeletedOk) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(571));
 	}
 
 	/**

@@ -1,5 +1,6 @@
 package ca.uhn.fhirtest.interceptor;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.provider.BaseJpaSystemProvider;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -46,13 +47,13 @@ public class PublicSecurityInterceptor extends AuthorizationInterceptor {
 		}
 
 		if (!authHeader.startsWith("Bearer ")) {
-			throw new ForbiddenOperationException("Invalid bearer token, must be in the form \"Authorization: Bearer [token]\"");
+			throw new ForbiddenOperationException(Msg.code(1978) + "Invalid bearer token, must be in the form \"Authorization: Bearer [token]\"");
 		}
 		
 		String token = authHeader.substring("Bearer ".length()).trim();
 		if (!myTokens.contains(token)) {
 			ourLog.error("Invalid token '{}' - Valid are: {}", token, myTokens);
-			throw new ForbiddenOperationException("Unknown/expired bearer token");
+			throw new ForbiddenOperationException(Msg.code(1979) + "Unknown/expired bearer token");
 		}
 		
 		ourLog.info("User logged in with bearer token: " + token.substring(0, 4) + "...");

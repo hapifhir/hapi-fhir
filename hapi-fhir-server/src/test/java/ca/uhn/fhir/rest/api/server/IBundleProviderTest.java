@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.api.server;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -54,7 +55,7 @@ public class IBundleProviderTest {
 			provider.getAllResources();
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals("Attempt to request all resources from an asynchronous search result.  The SearchParameterMap for this search probably should have been synchronous.", e.getMessage());
+			assertEquals(Msg.code(464) + "Attempt to request all resources from an asynchronous search result.  The SearchParameterMap for this search probably should have been synchronous.", e.getMessage());
 		}
 	}
 }

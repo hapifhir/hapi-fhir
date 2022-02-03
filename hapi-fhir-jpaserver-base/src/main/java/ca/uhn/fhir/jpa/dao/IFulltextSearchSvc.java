@@ -25,10 +25,11 @@ import java.util.List;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
-import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteOptions;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface IFulltextSearchSvc {
@@ -43,6 +44,13 @@ public interface IFulltextSearchSvc {
 	 * @return the pid list for the matchign resources.
 	 */
 	List<ResourcePersistentId> search(String theResourceName, SearchParameterMap theParams);
+
+	/**
+	 * Autocomplete search for NIH $expand contextDirection=existing
+	 * @param theOptions operation options
+	 * @return a ValueSet with the search hits as the expansion.
+	 */
+	IBaseResource tokenAutocompleteValueSetSearch(ValueSetAutocompleteOptions theOptions);
 
 	List<ResourcePersistentId> everything(String theResourceName, SearchParameterMap theParams, RequestDetails theRequest);
 
@@ -63,4 +71,5 @@ public interface IFulltextSearchSvc {
 	 void reindex(ResourceTable theEntity);
 
 	List<ResourcePersistentId> lastN(SearchParameterMap theParams, Integer theMaximumResults);
+
 }

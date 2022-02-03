@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.util.jsonpatch;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.patch.JsonPatchUtils;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -113,7 +114,7 @@ public class JsonPatchUtilsTest extends BaseJpaTest {
 			JsonPatchUtils.apply(ourCtx, toUpdate, patchText);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Failed to apply JSON patch to Observation: Unknown element 'derivedFromXXX' found during parse", e.getMessage());
+			assertEquals(Msg.code(1271) + "Failed to apply JSON patch to Observation: " + Msg.code(1825) + "Unknown element 'derivedFromXXX' found during parse", e.getMessage());
 		}
 
 	}

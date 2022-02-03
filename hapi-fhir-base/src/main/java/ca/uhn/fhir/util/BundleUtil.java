@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -235,7 +236,7 @@ public class BundleUtil {
 
 	private static void validatePartsNotNull(LinkedHashSet<IBase> theDeleteParts) {
 		if (theDeleteParts == null) {
-			throw new IllegalStateException("This transaction contains a cycle, so it cannot be sorted.");
+			throw new IllegalStateException(Msg.code(1745) + "This transaction contains a cycle, so it cannot be sorted.");
 		}
 	}
 

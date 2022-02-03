@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
@@ -246,7 +247,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			client.read().resource(Patient.class).withId("1").execute();
 			fail();
 		} catch (FhirClientConnectionException e) {
-			assertEquals(null, e.getMessage());
+			assertEquals(Msg.code(1360) + "java.lang.IllegalStateException", e.getMessage());
 		}
 
 		try {
@@ -1120,7 +1121,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 				.withId("Patient/123")
 				.execute();
 		} catch (IllegalArgumentException e) {
-			assertEquals("Unable to determine encoding of patch", e.getMessage());
+			assertEquals(Msg.code(1386) +"Unable to determine encoding of patch", e.getMessage());
 		}
 	}
 
@@ -1459,7 +1460,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			fail();
 		} catch (FhirClientConnectionException e) {
 			assertEquals(
-				"Failed to parse response from server when performing GET to URL http://example.com/fhir/Patient/123?_elements=identifier%2Cname - ca.uhn.fhir.parser.DataFormatException: Invalid JSON content detected, missing required element: 'resourceType'",
+				Msg.code(1359) + "Failed to parse response from server when performing GET to URL http://example.com/fhir/Patient/123?_elements=identifier%2Cname - ca.uhn.fhir.parser.DataFormatException: "+ Msg.code(1838) +  "Invalid JSON content detected, missing required element: 'resourceType'",
 				e.getMessage());
 		}
 	}
@@ -1838,7 +1839,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			client.transaction().withBundle("FOO");
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("Unable to determing encoding of request (body does not appear to be valid XML or JSON)", e.getMessage());
+			assertEquals(Msg.code(1395) + "Unable to determing encoding of request (body does not appear to be valid XML or JSON)", e.getMessage());
 		}
 
 		// Create
@@ -1846,7 +1847,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			client.create().resource("FOO").execute();
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("Unable to determing encoding of request (body does not appear to be valid XML or JSON)", e.getMessage());
+			assertEquals(Msg.code(1368) + "Unable to determing encoding of request (body does not appear to be valid XML or JSON)", e.getMessage());
 		}
 
 		// Update
@@ -1854,7 +1855,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			client.update().resource("FOO").execute();
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("Unable to determing encoding of request (body does not appear to be valid XML or JSON)", e.getMessage());
+			assertEquals(Msg.code(1368) + "Unable to determing encoding of request (body does not appear to be valid XML or JSON)", e.getMessage());
 		}
 
 		// Validate
@@ -1862,7 +1863,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			client.validate().resource("FOO").execute();
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("Unable to determing encoding of request (body does not appear to be valid XML or JSON)", e.getMessage());
+			assertEquals(Msg.code(1368) + "Unable to determing encoding of request (body does not appear to be valid XML or JSON)", e.getMessage());
 		}
 
 	}

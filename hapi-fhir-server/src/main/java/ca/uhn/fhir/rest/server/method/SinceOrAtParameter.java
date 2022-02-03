@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.method;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import java.util.Set;
 
 class SinceOrAtParameter extends SearchParameter {
@@ -63,7 +64,7 @@ class SinceOrAtParameter extends SearchParameter {
 //					try {
 //						return ParameterUtil.fromInstant(myType, sinceParams);
 //					} catch (DataFormatException e) {
-//						throw new InvalidRequestException("Invalid " + Constants.PARAM_SINCE + " value: " + sinceParams[0]);
+//						throw new InvalidRequestException(Msg.code(451) + "Invalid " + Constants.PARAM_SINCE + " value: " + sinceParams[0]);
 //					}
 //				}
 //			}
@@ -74,12 +75,12 @@ class SinceOrAtParameter extends SearchParameter {
 //	@Override
 //	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
 //		if (theOuterCollectionType != null) {
-//			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type '" + "' is annotated with @" + myAnnotationType.getName() + " but can not be of collection type");
+//			throw new ConfigurationException(Msg.code(452) + "Method '" + theMethod.getName() + "' in type '" + "' is annotated with @" + myAnnotationType.getName() + " but can not be of collection type");
 //		}
 //		if (ParameterUtil.getBindableInstantTypes().contains(theParameterType)) {
 //			myType = theParameterType;
 //		} else { 
-//			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type '" + "' is annotated with @" + myAnnotationType.getName() + " but is an invalid type, must be one of: " + ParameterUtil.getBindableInstantTypes());
+//			throw new ConfigurationException(Msg.code(453) + "Method '" + theMethod.getName() + "' in type '" + "' is annotated with @" + myAnnotationType.getName() + " but is an invalid type, must be one of: " + ParameterUtil.getBindableInstantTypes());
 //		}
 //	}
 

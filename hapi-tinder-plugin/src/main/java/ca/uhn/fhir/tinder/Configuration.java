@@ -1,5 +1,6 @@
 package ca.uhn.fhir.tinder;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.tinder.parser.BaseStructureSpreadsheetParser;
@@ -45,7 +46,7 @@ public class Configuration {
 				packageSuffix = ".r4";
 				break;
 			default:
-				throw new IllegalArgumentException("Unknown version configured: " + version);
+				throw new IllegalArgumentException(Msg.code(92) + "Unknown version configured: " + version);
 		}
 
 		this.version = version;
@@ -56,7 +57,7 @@ public class Configuration {
 			try {
 				p.load(fhirContext.getVersion().getFhirVersionPropertiesFile());
 			} catch (IOException e) {
-				throw new IllegalArgumentException("Failed to load version property file", e);
+				throw new IllegalArgumentException(Msg.code(93) + "Failed to load version property file", e);
 			}
 
 			ourLog.debug("Property file contains: {}", p);

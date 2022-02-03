@@ -20,20 +20,20 @@ package ca.uhn.fhir.rest.param;
  * #L%
  */
 
-import java.math.BigDecimal;
-import java.util.List;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.base.composite.BaseQuantityDt;
+import ca.uhn.fhir.model.primitive.DecimalDt;
+import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.util.CoverageIgnore;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.primitive.DecimalDt;
-import ca.uhn.fhir.model.primitive.UriDt;
-import ca.uhn.fhir.util.CoverageIgnore;
+import java.math.BigDecimal;
+import java.util.List;
 
 public class QuantityParam extends BaseParamWithPrefix<QuantityParam> implements IQueryParameterType {
 
@@ -317,7 +317,7 @@ public class QuantityParam extends BaseParamWithPrefix<QuantityParam> implements
         } else if (theParam instanceof QuantityParam) {
             return (QuantityParam) theParam;
         } else {
-            throw new IllegalArgumentException("Invalid quantity type: " + theParam.getClass());
+            throw new IllegalArgumentException(Msg.code(1948) + "Invalid quantity type: " + theParam.getClass());
         }
     }
 }

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.okhttp.client;
 
+import ca.uhn.fhir.i18n.Msg;
 import java.io.*;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +63,7 @@ public class OkHttpRestfulResponse extends BaseHttpResponse implements IHttpResp
 				try {
 					myEntityBytes = IOUtils.toByteArray(responseEntity);
 				} catch (IllegalStateException e) {
-					throw new InternalErrorException(e);
+					throw new InternalErrorException(Msg.code(465) + e);
 				}
 			}
 		}

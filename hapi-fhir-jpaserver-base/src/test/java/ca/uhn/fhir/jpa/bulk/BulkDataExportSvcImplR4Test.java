@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.bulk;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -210,7 +211,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			myBulkDataExportSvc.submitJob(options);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Invalid output format: application/fhir+json", e.getMessage());
+			assertEquals(Msg.code(786) + "Invalid output format: application/fhir+json", e.getMessage());
 		}
 	}
 
@@ -223,7 +224,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			myBulkDataExportSvc.submitJob(options);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Binary resources may not be exported with bulk export", e.getMessage());
+			assertEquals(Msg.code(787) + "Binary resources may not be exported with bulk export", e.getMessage());
 		}
 	}
 
@@ -233,7 +234,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			myBulkDataExportSvc.submitJob(buildBulkDataForResourceTypes(Sets.newHashSet("Patient", "FOO")));
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Unknown or unsupported resource type: FOO", e.getMessage());
+			assertEquals(Msg.code(788) + "Unknown or unsupported resource type: FOO", e.getMessage());
 		}
 	}
 
@@ -247,7 +248,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			myBulkDataExportSvc.submitJob(options);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Invalid _typeFilter value \"Observation?code=123\". Resource type does not appear in _type list", e.getMessage());
+			assertEquals(Msg.code(790) + "Invalid _typeFilter value \"Observation?code=123\". Resource type does not appear in _type list", e.getMessage());
 		}
 	}
 
@@ -261,7 +262,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			myBulkDataExportSvc.submitJob(options);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Invalid _typeFilter value \"Hello\". Must be in the form [ResourceType]?[params]", e.getMessage());
+			assertEquals(Msg.code(789) + "Invalid _typeFilter value \"Hello\". Must be in the form [ResourceType]?[params]", e.getMessage());
 		}
 	}
 

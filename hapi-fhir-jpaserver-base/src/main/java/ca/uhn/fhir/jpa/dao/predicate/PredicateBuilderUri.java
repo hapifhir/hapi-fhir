@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
@@ -146,7 +147,7 @@ public class PredicateBuilderUri extends BasePredicateBuilder implements IPredic
 						} else if (operation == SearchFilterParser.CompareOperation.ew) {
 							uriPredicate = myCriteriaBuilder.like(join.get("myUri").as(String.class), createRightMatchLikeExpression(value));
 						} else {
-							throw new IllegalArgumentException(String.format("Unsupported operator specified in _filter clause, %s",
+							throw new IllegalArgumentException(Msg.code(1070) + String.format("Unsupported operator specified in _filter clause, %s",
 								operation.toString()));
 						}
 
@@ -159,7 +160,7 @@ public class PredicateBuilderUri extends BasePredicateBuilder implements IPredic
 				}
 
 			} else {
-				throw new IllegalArgumentException("Invalid URI type: " + nextOr.getClass());
+				throw new IllegalArgumentException(Msg.code(1071) + "Invalid URI type: " + nextOr.getClass());
 			}
 
 		}

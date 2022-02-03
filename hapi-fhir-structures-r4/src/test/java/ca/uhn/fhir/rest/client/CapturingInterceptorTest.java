@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.client.apache.ApacheHttpResponse;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
@@ -121,7 +122,7 @@ public class CapturingInterceptorTest {
 			interceptor.interceptResponse(response);
 		});
 
-		assertEquals("Unable to buffer the entity for capturing", exception.getMessage());
+		assertEquals(Msg.code(1404) + "Unable to buffer the entity for capturing", exception.getMessage());
 		assertEquals(expectedCause, exception.getCause());
 
 	}

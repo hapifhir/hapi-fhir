@@ -20,6 +20,7 @@ package ca.uhn.fhir.cql.dstu3.provider;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.cql.common.provider.EvaluationProviderFactory;
 import ca.uhn.fhir.cql.common.provider.LibraryResolutionProvider;
 import ca.uhn.fhir.cql.dstu3.evaluation.MeasureEvaluation;
@@ -90,7 +91,7 @@ public class MeasureOperationsProvider {
 		Measure measure = myMeasureDao.read(theId, theRequestDetails);
 
 		if (measure == null) {
-			throw new RuntimeException("Could not find Measure/" + theId.getIdPart());
+			throw new RuntimeException(Msg.code(1639) + "Could not find Measure/" + theId.getIdPart());
 		}
 
 		seed.setup(measure, periodStart, periodEnd, productLine, source, user, pass, theRequestDetails);
@@ -107,7 +108,7 @@ public class MeasureOperationsProvider {
 				case "population":
 					return evaluator.evaluatePopulationMeasure(seed.getMeasure(), seed.getContext(), theRequestDetails);
 				default:
-					throw new IllegalArgumentException("Invalid report type: " + reportType);
+					throw new IllegalArgumentException(Msg.code(1640) + "Invalid report type: " + reportType);
 			}
 		}
 

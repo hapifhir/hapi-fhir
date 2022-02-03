@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -82,7 +83,7 @@ public class AddIdGeneratorTask extends BaseTask {
 				sql = "create sequence " + myGeneratorName + " start with 1 increment by 50";
 				break;
 			default:
-				throw new IllegalStateException();
+				throw new IllegalStateException(Msg.code(63));
 		}
 
 		if (isNotBlank(sql)) {

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.model.primitive;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
@@ -192,13 +193,13 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 	@Override
 	public void applyTo(IBaseResource theResouce) {
 		if (theResouce == null) {
-			throw new NullPointerException("theResource can not be null");
+			throw new NullPointerException(Msg.code(1875) + "theResource can not be null");
 		} else if (theResouce instanceof IResource) {
 			((IResource) theResouce).setId(new IdDt(getValue()));
 		} else if (theResouce instanceof IAnyResource) {
 			((IAnyResource) theResouce).setId(getValue());
 		} else {
-			throw new IllegalArgumentException("Unknown resource class type, does not implement IResource or extend Resource");
+			throw new IllegalArgumentException(Msg.code(1876) + "Unknown resource class type, does not implement IResource or extend Resource");
 		}
 	}
 
@@ -686,7 +687,7 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 	 */
 	public static IdDt of(IBaseResource theResouce) {
 		if (theResouce == null) {
-			throw new NullPointerException("theResource can not be null");
+			throw new NullPointerException(Msg.code(1877) + "theResource can not be null");
 		}
 		IIdType retVal = theResouce.getIdElement();
 		if (retVal == null) {
@@ -700,14 +701,14 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 
 	private static String toPlainStringWithNpeThrowIfNeeded(BigDecimal theIdPart) {
 		if (theIdPart == null) {
-			throw new NullPointerException("BigDecimal ID can not be null");
+			throw new NullPointerException(Msg.code(1878) + "BigDecimal ID can not be null");
 		}
 		return theIdPart.toPlainString();
 	}
 
 	private static String toPlainStringWithNpeThrowIfNeeded(Long theIdPart) {
 		if (theIdPart == null) {
-			throw new NullPointerException("Long ID can not be null");
+			throw new NullPointerException(Msg.code(1879) + "Long ID can not be null");
 		}
 		return theIdPart.toString();
 	}

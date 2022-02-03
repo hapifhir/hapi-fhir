@@ -27,9 +27,12 @@ import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneClauseBuilder;
 import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneIndexExtractor;
 import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneSearchBuilder;
+import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneSearchBuilder;
 import ca.uhn.fhir.jpa.dao.search.LastNAggregationBuilder;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
+import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteOptions;
+import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteSearch;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -78,7 +81,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	private DaoConfig myDaoConfig;
-	private ExtendedLuceneSearchBuilder myAdvancedIndexQueryBuilder = new ExtendedLuceneSearchBuilder();
+	final private ExtendedLuceneSearchBuilder myAdvancedIndexQueryBuilder = new ExtendedLuceneSearchBuilder();
 
 	private Boolean ourDisabled;
 
@@ -232,6 +235,16 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		return doSearch(theResourceName, theParams, null);
 	}
 
+	@Transactional()
+	@Override
+	public IBaseResource tokenAutocompleteValueSetSearch(ValueSetAutocompleteOptions theOptions) {
+
+		ValueSetAutocompleteSearch autocomplete = new ValueSetAutocompleteSearch(myFhirContext, getSearchSession());
+
+		IBaseResource result = autocomplete.search(theOptions);
+
+		return result;
+	}
 	@Override
 	public List<ResourcePersistentId> lastN(SearchParameterMap theParams, Integer theMaximumResults) {
 		SearchSession session = Search.session(myEntityManager);

@@ -20,6 +20,7 @@ package ca.uhn.fhir.model.dstu2.composite;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,12 +55,12 @@ public class ContainedDt extends BaseContainedDt {
 
 	@Override
 	public Object getUserData(String theName) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(580));
 	}
 
 	@Override
 	public void setUserData(String theName, Object theValue) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(581));
 	}
 
 }

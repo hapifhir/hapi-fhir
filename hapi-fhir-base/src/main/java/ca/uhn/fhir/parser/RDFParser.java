@@ -20,7 +20,17 @@ package ca.uhn.fhir.parser;
  * #L%
  */
 
-import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeChildContainedResources;
+import ca.uhn.fhir.context.RuntimeChildDirectResource;
+import ca.uhn.fhir.context.RuntimeChildExtension;
+import ca.uhn.fhir.context.RuntimeChildNarrativeDefinition;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -28,17 +38,40 @@ import ca.uhn.fhir.util.rdf.RDFUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.irix.IRIs;
-import org.apache.jena.irix.SetupJenaIRI;
-import org.apache.jena.rdf.model.*;
+import org.apache.jena.rdf.model.Literal;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.riot.Lang;
-import org.apache.jena.riot.system.IRIResolver;
 import org.apache.jena.vocabulary.RDF;
-import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBaseDatatypeElement;
+import org.hl7.fhir.instance.model.api.IBaseElement;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBaseXhtml;
+import org.hl7.fhir.instance.model.api.IDomainResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.INarrative;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import java.io.*;
-import java.util.*;
+import java.io.Reader;
+import java.io.Writer;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import static ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum.*;
+import static ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum.ID_DATATYPE;
+import static ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum.PRIMITIVE_DATATYPE;
+import static ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum.PRIMITIVE_XHTML;
+import static ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum.PRIMITIVE_XHTML_HL7ORG;
 
 /**
  * This class is the FHIR RDF parser/encoder. Users should not interact with this class directly, but should use
@@ -150,7 +183,7 @@ public class RDFParser extends BaseParser {
 
 		RuntimeResourceDefinition resDef = getContext().getResourceDefinition(resource);
 		if (resDef == null) {
-			throw new ConfigurationException("Unknown resource type: " + resource.getClass());
+			throw new ConfigurationException(Msg.code(1845) + "Unknown resource type: " + resource.getClass());
 		}
 
 		if (!containedResource) {
@@ -158,7 +191,7 @@ public class RDFParser extends BaseParser {
 		}
 
 		if (!(resource instanceof IAnyResource)) {
-			throw new IllegalStateException("Unsupported resource found: " + resource.getClass().getName());
+			throw new IllegalStateException(Msg.code(1846) + "Unsupported resource found: " + resource.getClass().getName());
 		}
 
 		// Create absolute IRI for the resource
@@ -399,7 +432,7 @@ public class RDFParser extends BaseParser {
 				case EXTENSION_DECLARED:
 				case UNDECL_EXT:
 				default: {
-					throw new IllegalStateException("Unexpected node - should not happen: " + childDef.getName());
+					throw new IllegalStateException(Msg.code(1847) + "Unexpected node - should not happen: " + childDef.getName());
 				}
 			}
 		} finally {

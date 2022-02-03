@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.patch;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
@@ -140,7 +141,7 @@ public class FhirPatch {
 
 			} else {
 
-				throw new InvalidRequestException("Unknown patch operation type: " + type);
+				throw new InvalidRequestException(Msg.code(1267) + "Unknown patch operation type: " + type);
 
 			}
 
@@ -165,13 +166,13 @@ public class FhirPatch {
 					List<IBase> existingValues = new ArrayList<>(childDef.getAccessor().getValues(next));
 					if (removeIndex == null || removeIndex >= existingValues.size()) {
 						String msg = myContext.getLocalizer().getMessage(FhirPatch.class, "invalidMoveSourceIndex", removeIndex, path, existingValues.size());
-						throw new InvalidRequestException(msg);
+						throw new InvalidRequestException(Msg.code(1268) + msg);
 					}
 					IBase newValue = existingValues.remove(removeIndex.intValue());
 
 					if (insertIndex == null || insertIndex > existingValues.size()) {
 						String msg = myContext.getLocalizer().getMessage(FhirPatch.class, "invalidMoveDestinationIndex", insertIndex, path, existingValues.size());
-						throw new InvalidRequestException(msg);
+						throw new InvalidRequestException(Msg.code(1269) + msg);
 					}
 					existingValues.add(insertIndex, newValue);
 
@@ -225,7 +226,7 @@ public class FhirPatch {
 					List<IBase> existingValues = new ArrayList<>(childDef.getAccessor().getValues(next));
 					if (insertIndex == null || insertIndex > existingValues.size()) {
 						String msg = myContext.getLocalizer().getMessage(FhirPatch.class, "invalidInsertIndex", insertIndex, path, existingValues.size());
-						throw new InvalidRequestException(msg);
+						throw new InvalidRequestException(Msg.code(1270) + msg);
 					}
 					existingValues.add(insertIndex, newValue);
 

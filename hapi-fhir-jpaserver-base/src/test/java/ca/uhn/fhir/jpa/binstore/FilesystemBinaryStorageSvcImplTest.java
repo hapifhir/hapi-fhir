@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.binstore;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.PayloadTooLargeException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.apache.commons.io.FileUtils;
@@ -89,7 +90,7 @@ public class FilesystemBinaryStorageSvcImplTest {
 			mySvc.fetchBlob(new IdType("Patient/123"), "1111111");
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertEquals("Unknown blob ID: 1111111 for resource ID Patient/123", e.getMessage());
+			assertEquals(Msg.code(1327) + "Unknown blob ID: 1111111 for resource ID Patient/123", e.getMessage());
 		}
 	}
 
@@ -127,7 +128,7 @@ public class FilesystemBinaryStorageSvcImplTest {
 			mySvc.storeBlob(id, null, contentType, new ByteArrayInputStream(SOME_BYTES));
 			fail();
 		} catch (PayloadTooLargeException e) {
-			assertEquals("Binary size exceeds maximum: 5", e.getMessage());
+			assertEquals(Msg.code(1343) + "Binary size exceeds maximum: 5", e.getMessage());
 		}
 
 

@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.r5;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import org.hl7.fhir.r5.model.QuestionnaireResponse;
 
@@ -46,7 +47,7 @@ public class FhirResourceDaoQuestionnaireResponseR5 extends BaseHapiFhirResource
 //		ValidationResult result = val.validateWithResult(getContext().newJsonParser().parseResource(getContext().newJsonParser().encodeResourceToString(theResource)));
 //		if (!result.isSuccessful()) {
 //			IBaseOperationOutcome oo = getContext().newJsonParser().parseResource(OperationOutcome.class, getContext().newJsonParser().encodeResourceToString(result.toOperationOutcome()));
-//			throw new UnprocessableEntityException(getContext(), oo);
+//			throw new UnprocessableEntityException(Msg.code(1123) + getContext(), oo);
 //		}
 //	}
 //
@@ -76,7 +77,7 @@ public class FhirResourceDaoQuestionnaireResponseR5 extends BaseHapiFhirResource
 //				return (T) vs;
 //			} else {
 //				// Should not happen, validator will only ask for these two
-//				throw new IllegalStateException("Unexpected request to load resource of type " + theType);
+//				throw new IllegalStateException(Msg.code(1124) + "Unexpected request to load resource of type " + theType);
 //			}
 //
 //		}

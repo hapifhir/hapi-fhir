@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoObservation;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
@@ -112,7 +113,7 @@ public abstract class BaseHapiFhirResourceDaoObservation<T extends IBaseResource
 						ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(requestPartitionId, ref.getResourceType(), ref.getIdPart());
 						orderedSubjectReferenceMap.put(pid.getIdAsLong(), nextOr);
 					} else {
-						throw new IllegalArgumentException("Invalid token type (expecting ReferenceParam): " + nextOr.getClass());
+						throw new IllegalArgumentException(Msg.code(942) + "Invalid token type (expecting ReferenceParam): " + nextOr.getClass());
 					}
 				}
 			}

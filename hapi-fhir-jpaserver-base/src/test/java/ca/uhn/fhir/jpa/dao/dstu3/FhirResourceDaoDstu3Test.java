@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
@@ -499,7 +500,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			myBundleDao.create(bundle, mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Unable to store a Bundle resource on this server with a Bundle.type value of: (missing). Note that if you are trying to perform a FHIR transaction or batch operation you should POST the Bundle resource to the Base URL of the server, not to the /Bundle endpoint.", e.getMessage());
+			assertEquals(Msg.code(522) + "Unable to store a Bundle resource on this server with a Bundle.type value of: (missing). Note that if you are trying to perform a FHIR transaction or batch operation you should POST the Bundle resource to the Base URL of the server, not to the /Bundle endpoint.", e.getMessage());
 		}
 
 		bundle = new Bundle();
@@ -509,7 +510,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			myBundleDao.create(bundle, mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Unable to store a Bundle resource on this server with a Bundle.type value of: searchset. Note that if you are trying to perform a FHIR transaction or batch operation you should POST the Bundle resource to the Base URL of the server, not to the /Bundle endpoint.", e.getMessage());
+			assertEquals(Msg.code(522) + "Unable to store a Bundle resource on this server with a Bundle.type value of: searchset. Note that if you are trying to perform a FHIR transaction or batch operation you should POST the Bundle resource to the Base URL of the server, not to the /Bundle endpoint.", e.getMessage());
 		}
 
 		bundle = new Bundle();
@@ -667,7 +668,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			myPatientDao.create(p);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Resource Organization/" + orgId.getIdPart() + " is deleted, specified in path: Patient.managingOrganization", e.getMessage());
+			assertEquals(Msg.code(1096) + "Resource Organization/" + orgId.getIdPart() + " is deleted, specified in path: Patient.managingOrganization", e.getMessage());
 		}
 	}
 
@@ -729,7 +730,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			myPatientDao.create(p, mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Invalid reference found at path 'Patient.managingOrganization'. Resource type 'Observation' is not valid for this path", e.getMessage());
+			assertEquals(Msg.code(931) + "Invalid reference found at path 'Patient.managingOrganization'. Resource type 'Observation' is not valid for this path", e.getMessage());
 		}
 
 		try {
@@ -738,7 +739,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			myPatientDao.create(p, mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Resource contains reference to unknown resource ID Organization/" + id1.getIdPart(), e.getMessage());
+			assertEquals(Msg.code(1095) + "Resource contains reference to unknown resource ID Organization/" + id1.getIdPart(), e.getMessage());
 		}
 
 		// Now with a forced ID
@@ -754,7 +755,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			myPatientDao.create(p, mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Invalid reference found at path 'Patient.managingOrganization'. Resource type 'Observation' is not valid for this path", e.getMessage());
+			assertEquals(Msg.code(931) + "Invalid reference found at path 'Patient.managingOrganization'. Resource type 'Observation' is not valid for this path", e.getMessage());
 		}
 
 		try {
@@ -763,7 +764,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			myPatientDao.create(p, mySrd);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Resource Organization/testCreateWithIllegalReference not found, specified in path: Patient.managingOrganization", e.getMessage());
+			assertEquals(Msg.code(1094) + "Resource Organization/testCreateWithIllegalReference not found, specified in path: Patient.managingOrganization", e.getMessage());
 		}
 
 	}
@@ -838,7 +839,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			dao.create(resource, mySrd);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Incorrect resource type detected for endpoint, found Patient but expected NamingSystem", e.getMessage());
+			assertEquals(Msg.code(520) + "Incorrect resource type detected for endpoint, found Patient but expected NamingSystem", e.getMessage());
 		}
 	}
 
@@ -1112,14 +1113,14 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			myPatientDao.deleteByUrl("Patient?organization._profile.identifier=http://foo", mySrd);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Invalid parameter chain: organization._profile.identifier", e.getMessage());
+			assertEquals(Msg.code(1242) + "Invalid parameter chain: organization._profile.identifier", e.getMessage());
 		}
 
 		try {
 			myOrganizationDao.deleteByUrl("Organization?_profile.identifier=http://foo", mySrd);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Invalid parameter chain: _profile.identifier", e.getMessage());
+			assertEquals(Msg.code(487) + "Invalid parameter chain: _profile.identifier", e.getMessage());
 		}
 
 	}
@@ -1177,14 +1178,14 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			myPatientDao.deleteByUrl("Patient?organization._tag.identifier=http://foo|term", mySrd);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Invalid parameter chain: organization._tag.identifier", e.getMessage());
+			assertEquals(Msg.code(1242) + "Invalid parameter chain: organization._tag.identifier", e.getMessage());
 		}
 
 		try {
 			myOrganizationDao.deleteByUrl("Organization?_tag.identifier=http://foo|term", mySrd);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Invalid parameter chain: _tag.identifier", e.getMessage());
+			assertEquals(Msg.code(487) + "Invalid parameter chain: _tag.identifier", e.getMessage());
 		}
 
 	}
@@ -1592,7 +1593,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			myPatientDao.history(new IdType("Patient/FOOFOOFOO"), null, null, null, mySrd);
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertEquals("Resource Patient/FOOFOOFOO is not known", e.getMessage());
+			assertEquals(Msg.code(2001) + "Resource Patient/FOOFOOFOO is not known", e.getMessage());
 		}
 	}
 
@@ -2005,7 +2006,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			found = toList(myPatientDao.search(new SearchParameterMap(Patient.SP_BIRTHDATE + "AAAA", new DateParam(ParamPrefixEnum.GREATERTHAN, "2000-01-01")).setLoadSynchronous(true)));
 			assertEquals(0, found.size());
 		} catch (InvalidRequestException e) {
-			assertEquals("Unknown search parameter \"birthdateAAAA\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _lastUpdated, active, address, address-city, address-country, address-postalcode, address-state, address-use, animal-breed, animal-species, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
+			assertEquals(Msg.code(1223) + "Unknown search parameter \"birthdateAAAA\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _lastUpdated, active, address, address-city, address-country, address-postalcode, address-state, address-use, animal-breed, animal-species, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
 		}
 	}
 
@@ -2146,28 +2147,28 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			myPatientDao.read(id.withVersion("0"), mySrd);
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertEquals("Version \"0\" is not valid for resource Patient/" + id.getIdPart(), e.getMessage());
+			assertEquals(Msg.code(979) + "Version \"0\" is not valid for resource Patient/" + id.getIdPart(), e.getMessage());
 		}
 
 		try {
 			myPatientDao.read(id.withVersion("2"), mySrd);
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertEquals("Version \"2\" is not valid for resource Patient/" + id.getIdPart(), e.getMessage());
+			assertEquals(Msg.code(979) + "Version \"2\" is not valid for resource Patient/" + id.getIdPart(), e.getMessage());
 		}
 
 		try {
 			myPatientDao.read(id.withVersion("H"), mySrd);
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertEquals("Version \"H\" is not valid for resource Patient/" + id.getIdPart(), e.getMessage());
+			assertEquals(Msg.code(978) + "Version \"H\" is not valid for resource Patient/" + id.getIdPart(), e.getMessage());
 		}
 
 		try {
 			myPatientDao.read(new IdType("Patient/9999999999999/_history/1"), mySrd);
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertEquals("Resource Patient/9999999999999/_history/1 is not known", e.getMessage());
+			assertEquals(Msg.code(1996) + "Resource Patient/9999999999999/_history/1 is not known", e.getMessage());
 		}
 
 	}
@@ -3412,7 +3413,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 	public static void assertConflictException(ResourceVersionConflictException e) {
 		assertThat(e.getMessage(), matchesPattern(
-			"Unable to delete [a-zA-Z]+/[0-9]+ because at least one resource has a reference to this resource. First reference found was resource [a-zA-Z]+/[0-9]+ in path [a-zA-Z]+.[a-zA-Z]+"));
+			Msg.code(550) + Msg.code(515) + "Unable to delete [a-zA-Z]+/[0-9]+ because at least one resource has a reference to this resource. First reference found was resource [a-zA-Z]+/[0-9]+ in path [a-zA-Z]+.[a-zA-Z]+"));
 	}
 
 	private static List<String> toStringList(List<UriType> theUriType) {

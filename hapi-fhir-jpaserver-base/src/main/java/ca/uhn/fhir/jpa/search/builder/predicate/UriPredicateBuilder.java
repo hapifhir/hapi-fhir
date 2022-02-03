@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -160,7 +161,7 @@ public class UriPredicateBuilder extends BaseSearchParamPredicateBuilder {
 					} else if (theOperation == SearchFilterParser.CompareOperation.ew) {
 						uriPredicate = BinaryCondition.like(myColumnUri, generatePlaceholder(createRightMatchLikeExpression(value)));
 					} else {
-						throw new IllegalArgumentException(String.format("Unsupported operator specified in _filter clause, %s",
+						throw new IllegalArgumentException(Msg.code(1226) + String.format("Unsupported operator specified in _filter clause, %s",
 							theOperation.toString()));
 					}
 
@@ -168,7 +169,7 @@ public class UriPredicateBuilder extends BaseSearchParamPredicateBuilder {
 				}
 
 			} else {
-				throw new IllegalArgumentException("Invalid URI type: " + nextOr.getClass());
+				throw new IllegalArgumentException(Msg.code(1227) + "Invalid URI type: " + nextOr.getClass());
 			}
 
 		}

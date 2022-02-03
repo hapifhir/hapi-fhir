@@ -1,5 +1,6 @@
 package ca.uhn.fhir.tinder.parser;
 
+import ca.uhn.fhir.i18n.Msg;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.io.InputStream;
@@ -32,7 +33,7 @@ public class CompartmentParser {
 		String resName = "/compartment/" + myVersion + "/compartments.xml";
 		InputStream nextRes = getClass().getResourceAsStream(resName);
 		if (nextRes == null) {
-			throw new MojoFailureException("Unknown base resource name: " + resName);
+			throw new MojoFailureException(Msg.code(178) + "Unknown base resource name: " + resName);
 		}
 
 		ourLog.debug("Reading compartment file {}", resName);
@@ -41,7 +42,7 @@ public class CompartmentParser {
 		try {
 			file = XMLUtils.parse(nextRes, false);
 		} catch (Exception e) {
-			throw new Exception("Failed during reading: " + resName, e);
+			throw new Exception(Msg.code(179) + "Failed during reading: " + resName, e);
 		}
 
 		Element resourcesSheet = null;
@@ -53,7 +54,7 @@ public class CompartmentParser {
 		}
 
 		if (resourcesSheet == null) {
-			throw new Exception("Failed to find worksheet with name 'Data Elements' in spreadsheet: " + resName);
+			throw new Exception(Msg.code(180) + "Failed to find worksheet with name 'Data Elements' in spreadsheet: " + resName);
 		}
 
 		Element table = (Element) resourcesSheet.getElementsByTagName("Table").item(0);
@@ -111,7 +112,7 @@ public class CompartmentParser {
 				Resource element = myResourceDef;
 				SearchParameter sp = element.getSearchParameterByName(parts[0]);
 				if (sp == null) {
-					throw new MojoFailureException("Can't find child named " + parts[0] + " - Valid names: " + element.getSearchParameterNames());
+					throw new MojoFailureException(Msg.code(181) + "Can't find child named " + parts[0] + " - Valid names: " + element.getSearchParameterNames());
 				}
 				
 				sp.addCompartment(compartment);

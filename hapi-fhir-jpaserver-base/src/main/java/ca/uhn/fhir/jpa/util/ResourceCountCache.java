@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.util;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
@@ -69,7 +70,7 @@ public class ResourceCountCache {
 		try {
 			retVal = myFetcher.call();
 		} catch (Exception e) {
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(799) + e);
 		}
 
 		myCapabilityStatement.set(retVal);
