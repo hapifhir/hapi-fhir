@@ -27,8 +27,7 @@ import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneClauseBuilder;
 import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneIndexExtractor;
 import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneSearchBuilder;
-import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneSearchBuilder;
-import ca.uhn.fhir.jpa.dao.search.LastNAggregationBuilder;
+import ca.uhn.fhir.jpa.dao.search.LastNOperation;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
 import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteOptions;
@@ -42,10 +41,6 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import com.google.gson.JsonObject;
-import org.hibernate.search.backend.elasticsearch.ElasticsearchExtension;
-import org.hibernate.search.engine.search.aggregation.AggregationKey;
-import org.hibernate.search.engine.search.query.SearchQuery;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hibernate.search.mapper.orm.work.SearchIndexingPlan;
@@ -68,7 +63,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FulltextSearchSvcImpl.class);
-	public static final String OBSERVATION_RES_TYPE = "Observation";
 	@Autowired
 	protected IForcedIdDao myForcedIdDao;
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
@@ -241,30 +235,12 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 		ValueSetAutocompleteSearch autocomplete = new ValueSetAutocompleteSearch(myFhirContext, getSearchSession());
 
-		IBaseResource result = autocomplete.search(theOptions);
-
-		return result;
+		return autocomplete.search(theOptions);
 	}
 	@Override
 	public List<ResourcePersistentId> lastN(SearchParameterMap theParams, Integer theMaximumResults) {
-		SearchSession session = Search.session(myEntityManager);
-
-
-		AggregationKey<JsonObject> observationAggregator = AggregationKey.of("observation_aggregator");
-
-		SearchQuery<Long> query = session.search(ResourceTable.class)
-			.extension(ElasticsearchExtension.get())
-			.select(f -> f.field("myId", Long.class))
-			.where(f -> f.bool(b -> {
-				// Must match observation type
-				b.must(f.match().field("myResourceType").matching(OBSERVATION_RES_TYPE));
-				ExtendedLuceneClauseBuilder builder = new ExtendedLuceneClauseBuilder(myFhirContext, b, f);
-				myAdvancedIndexQueryBuilder.addAndConsumeAdvancedQueryClauses(builder, OBSERVATION_RES_TYPE, theParams, mySearchParamRegistry);
-			}))
-			.aggregation(observationAggregator, f -> f.fromJson(new LastNAggregationBuilder(theParams).build()))
-			.toQuery();
-		ourLog.info("FulltextSearch LastN Query: {}", query.queryString());
-		List<Long> pidList = query.fetchHits(theMaximumResults);
+		List<Long> pidList = new LastNOperation(getSearchSession(), myFhirContext, mySearchParamRegistry)
+			.executeLastN(theParams, theMaximumResults);
 		return convertLongsToResourcePersistentIds(pidList);
 	}
 

@@ -161,7 +161,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 	@Autowired
 	TestHibernateSearchAddInConfig.IHibernateSearchConfigurer hibernateSearchConfigurer;
 
-	private Properties jpaProperties() {
+	Properties jpaProperties() {
 		Properties extraProperties = new Properties();
 		extraProperties.put("hibernate.format_sql", "false");
 		extraProperties.put("hibernate.show_sql", "false");

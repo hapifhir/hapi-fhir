@@ -79,26 +79,10 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 
 		// execute Observation ID search (Composite Aggregation) last 3 observations for each patient
 		SearchParameterMap searchParameterMap = new SearchParameterMap();
-		ReferenceParam subjectParam = new ReferenceParam("Patient", "", "0");
-		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
-		subjectParam = new ReferenceParam("Patient", "", "1");
-		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
-		subjectParam = new ReferenceParam("Patient", "", "2");
-		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
-		subjectParam = new ReferenceParam("Patient", "", "3");
-		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
-		subjectParam = new ReferenceParam("Patient", "", "4");
-		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
-		subjectParam = new ReferenceParam("Patient", "", "5");
-		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
-		subjectParam = new ReferenceParam("Patient", "", "6");
-		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
-		subjectParam = new ReferenceParam("Patient", "", "7");
-		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
-		subjectParam = new ReferenceParam("Patient", "", "8");
-		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
-		subjectParam = new ReferenceParam("Patient", "", "9");
-		searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
+		IntStream.range(0, 10).forEach(index -> {
+			ReferenceParam subjectParam = new ReferenceParam("Patient", "", String.valueOf(index));
+			searchParameterMap.add(Observation.SP_SUBJECT, buildReferenceAndListParam(subjectParam));
+		});
 		searchParameterMap.setLastNMax(3);
 
 		List<ObservationJson> observations = elasticsearchSvc.executeLastNWithAllFieldsForTest(searchParameterMap, myFhirContext);

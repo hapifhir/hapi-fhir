@@ -377,7 +377,9 @@ public class SearchBuilder implements ISearchBuilder {
 			if (myFulltextSearchSvc == null) {
 				throw new InvalidRequestException("Fulltext search is not enabled on this service, cannot process LastN operation");
 			}
-			return myFulltextSearchSvc.lastN(myParams, theMaximumResults);
+			return myFulltextSearchSvc.lastN(myParams, theMaximumResults)
+				.stream().map(lastNResourceId -> myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, String.valueOf(lastNResourceId)))
+				.collect(Collectors.toList());
 		} else {
 			if (myIElasticsearchSvc == null) {
 				throw new InvalidRequestException("LastN operation is not enabled on this service, can not process this request");
