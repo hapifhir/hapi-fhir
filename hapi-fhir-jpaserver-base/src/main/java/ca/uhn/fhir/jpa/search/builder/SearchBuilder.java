@@ -375,14 +375,14 @@ public class SearchBuilder implements ISearchBuilder {
 		// Can we use our hibernate search generated index on resource to support lastN?:
 		if (myDaoConfig.isAdvancedLuceneIndexing()) {
 			if (myFulltextSearchSvc == null) {
-				throw new InvalidRequestException(Msg.code(1203) + "LastN operation is not enabled on this service, can not process this request");
+				throw new InvalidRequestException(Msg.code(2026) + "LastN operation is not enabled on this service, can not process this request");
 			}
 			return myFulltextSearchSvc.lastN(myParams, theMaximumResults)
 				.stream().map(lastNResourceId -> myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, String.valueOf(lastNResourceId)))
 				.collect(Collectors.toList());
 		} else {
 			if (myIElasticsearchSvc == null) {
-				throw new InvalidRequestException(Msg.code(1203)+"LastN operation is not enabled on this service, can not process this request");
+				throw new InvalidRequestException(Msg.code(2026) + "LastN operation is not enabled on this service, can not process this request");
 			}
 			// use the dedicated observation ES/Lucene index to support lastN query
 			return myIElasticsearchSvc.executeLastN(myParams, myContext, theMaximumResults).stream()
