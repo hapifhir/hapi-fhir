@@ -177,7 +177,6 @@ public class BaseHapiFhirDaoTest {
 		String scheme = "http://localhost";
 		String term = "code123";
 		String label = "hollow world";
-		TransactionDetails transactionDetails = new TransactionDetails();
 		String raceConditionError = "Entity exists; if this is logged, you have race condition issues!";
 
 		TagDefinition tagDefinition = new TagDefinition(tagType,
@@ -273,7 +272,7 @@ public class BaseHapiFhirDaoTest {
 		Runnable task = () -> {
 			latch.countDown();
 			try {
-				TagDefinition retTag = myTestDao.getTagOrNull(transactionDetails, tagType, scheme, term, label);
+				TagDefinition retTag = myTestDao.getTagOrNull(new TransactionDetails(), tagType, scheme, term, label);
 				outcomes.put(retTag.hashCode(), retTag);
 				counter.incrementAndGet();
 			} catch (Exception ex) {
@@ -365,7 +364,7 @@ public class BaseHapiFhirDaoTest {
 			fail();
 		} catch (Exception ex) {
 			// verify
-			assertEquals("Tag get/create failed after 10 attempts with error(s): " + exMsg, ex.getMessage());
+			assertTrue(ex.getMessage().contains("Tag get/create failed after 10 attempts with error(s): " + exMsg));
 
 			ArgumentCaptor<ILoggingEvent> appenderCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
 			verify(myAppender, Mockito.times(10))
