@@ -364,7 +364,7 @@ public class BaseHapiFhirDaoTest {
 			fail();
 		} catch (Exception ex) {
 			// verify
-			assertEquals("Tag get/create failed after 10 attempts with error(s): " + exMsg, ex.getMessage());
+			assertTrue(ex.getMessage().contains("Tag get/create failed after 10 attempts with error(s): " + exMsg));
 
 			ArgumentCaptor<ILoggingEvent> appenderCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
 			verify(myAppender, Mockito.times(10))
