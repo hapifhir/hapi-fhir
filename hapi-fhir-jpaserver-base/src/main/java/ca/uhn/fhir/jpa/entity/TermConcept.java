@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.search.DeferConceptIndexingRoutingBinder;
@@ -421,7 +422,7 @@ public class TermConcept implements Serializable {
 					retVal.add(new IValidationSupport.CodingConceptProperty(next.getKey(), next.getCodeSystem(), next.getValue(), next.getDisplay()));
 					break;
 				default:
-					throw new IllegalStateException("Don't know how to handle " + next.getType());
+					throw new IllegalStateException(Msg.code(830) + "Don't know how to handle " + next.getType());
 			}
 		}
 		return retVal;

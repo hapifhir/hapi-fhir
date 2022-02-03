@@ -1,5 +1,6 @@
 package ca.uhn.fhir.narrative.template.filters;
 
+import ca.uhn.fhir.i18n.Msg;
 import java.util.*;
 import java.util.Map;
 
@@ -19,7 +20,7 @@ class Sort extends Filter {
         }
 
         if(!super.isArray(value)) {
-            throw new RuntimeException("cannot sort: " + value);
+            throw new RuntimeException(Msg.code(715) + "cannot sort: " + value);
         }
 
         Object[] array = super.asArray(value);
@@ -67,7 +68,7 @@ class Sort extends Filter {
             Comparable thatValue = that.get(property);
 
             if(thisValue == null || thatValue == null) {
-                throw new RuntimeException("Liquid error: comparison of Hash with Hash failed");
+                throw new RuntimeException(Msg.code(716) + "Liquid error: comparison of Hash with Hash failed");
             }
 
             return thisValue.compareTo(thatValue);

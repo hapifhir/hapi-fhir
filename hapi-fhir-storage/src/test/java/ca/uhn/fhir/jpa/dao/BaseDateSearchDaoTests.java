@@ -8,6 +8,8 @@ import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -15,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -30,6 +33,17 @@ public abstract class BaseDateSearchDaoTests {
 	 */
 	IIdType myObservationId;
 
+	//time zone set to EST
+	@BeforeEach
+	public void setTimeZoneEST() {
+		TimeZone.setDefault(TimeZone.getTimeZone("EST"));
+	}
+
+	//reset time zone back to match the system
+	@AfterEach
+	public void resetTimeZone() {
+		TimeZone.setDefault(null);
+	}
 
 	/**
 	 * Test for our date search operators.
@@ -55,7 +69,6 @@ public abstract class BaseDateSearchDaoTests {
 		if (isShouldSkip(theResourceDate, theQuery)) {
 			return;
 		}
-
 		// setup
 		myObservationId = fixture.createObservationWithEffectiveDate(theResourceDate);
 

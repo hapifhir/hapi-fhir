@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.term.loinc;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
@@ -185,7 +186,7 @@ public class LoincRsnaPlaybookHandler extends BaseLoincHandler implements IZipCo
 				loincCodePropName = "rad-view-view-type";
 				break;
 			default:
-				throw new InternalErrorException("Unknown PartTypeName: " + partTypeName);
+				throw new InternalErrorException(Msg.code(912) + "Unknown PartTypeName: " + partTypeName);
 		}
 
 		TermConcept code = myCode2Concept.get(loincNumber);

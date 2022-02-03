@@ -21,6 +21,7 @@ package ca.uhn.fhir.context;
  */
 
 import ca.uhn.fhir.context.RuntimeSearchParam.RuntimeSearchParamStatusEnum;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IDatatype;
@@ -178,8 +179,7 @@ class ModelScanner {
 		ResourceDef resourceDefinition = pullAnnotation(theClass, ResourceDef.class);
 		if (resourceDefinition != null) {
 			if (!IBaseResource.class.isAssignableFrom(theClass)) {
-				throw new ConfigurationException(
-					"Resource type contains a @" + ResourceDef.class.getSimpleName() + " annotation but does not implement " + IResource.class.getCanonicalName() + ": " + theClass.getCanonicalName());
+				throw new ConfigurationException(Msg.code(1714) + "Resource type contains a @" + ResourceDef.class.getSimpleName() + " annotation but does not implement " + IResource.class.getCanonicalName() + ": " + theClass.getCanonicalName());
 			}
 			@SuppressWarnings("unchecked")
 			Class<? extends IBaseResource> resClass = (Class<? extends IBaseResource>) theClass;
@@ -208,8 +208,7 @@ class ModelScanner {
 			if (IResourceBlock.class.isAssignableFrom(theClass) || IBaseBackboneElement.class.isAssignableFrom(theClass) || IBaseDatatypeElement.class.isAssignableFrom(theClass)) {
 				scanBlock(theClass);
 			} else {
-				throw new ConfigurationException(
-					"Type contains a @" + Block.class.getSimpleName() + " annotation but does not implement " + IResourceBlock.class.getCanonicalName() + ": " + theClass.getCanonicalName());
+				throw new ConfigurationException(Msg.code(1715) + "Type contains a @" + Block.class.getSimpleName() + " annotation but does not implement " + IResourceBlock.class.getCanonicalName() + ": " + theClass.getCanonicalName());
 			}
 		}
 
@@ -218,7 +217,7 @@ class ModelScanner {
 				return;
 			}
 
-			throw new ConfigurationException("Resource class[" + theClass.getName() + "] does not contain any valid HAPI-FHIR annotations");
+			throw new ConfigurationException(Msg.code(1716) + "Resource class[" + theClass.getName() + "] does not contain any valid HAPI-FHIR annotations");
 		}
 	}
 
@@ -230,7 +229,7 @@ class ModelScanner {
 		// Just in case someone messes up when upgrading from DSTU2
 		if (myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
 			if (BaseIdentifiableElement.class.isAssignableFrom(theClass)) {
-				throw new ConfigurationException("@Block class for version " + myContext.getVersion().getVersion().name() + " should not extend " + BaseIdentifiableElement.class.getSimpleName() + ": " + theClass.getName());
+				throw new ConfigurationException(Msg.code(1717) + "@Block class for version " + myContext.getVersion().getVersion().name() + " should not extend " + BaseIdentifiableElement.class.getSimpleName() + ": " + theClass.getName());
 			}
 		}
 
@@ -267,7 +266,7 @@ class ModelScanner {
 
 		String resourceName = theDatatypeDefinition.name();
 		if (isBlank(resourceName)) {
-			throw new ConfigurationException("Resource type @" + ResourceDef.class.getSimpleName() + " annotation contains no resource name: " + theClass.getCanonicalName());
+			throw new ConfigurationException(Msg.code(1718) + "Resource type @" + ResourceDef.class.getSimpleName() + " annotation contains no resource name: " + theClass.getCanonicalName());
 		}
 
 		BaseRuntimeElementDefinition<?> elementDef;
@@ -314,7 +313,7 @@ class ModelScanner {
 				parent = parent.getSuperclass();
 			}
 			if (isBlank(resourceName)) {
-				throw new ConfigurationException("Resource type @" + ResourceDef.class.getSimpleName() + " annotation contains no resource name(): " + theClass.getCanonicalName()
+				throw new ConfigurationException(Msg.code(1719) + "Resource type @" + ResourceDef.class.getSimpleName() + " annotation contains no resource name(): " + theClass.getCanonicalName()
 					+ " - This is only allowed for types that extend other resource types ");
 			}
 		}
@@ -331,7 +330,7 @@ class ModelScanner {
 		String resourceId = resourceDefinition.id();
 		if (!isBlank(resourceId)) {
 			if (myIdToResourceDefinition.containsKey(resourceId)) {
-				throw new ConfigurationException("The following resource types have the same ID of '" + resourceId + "' - " + theClass.getCanonicalName() + " and "
+				throw new ConfigurationException(Msg.code(1720) + "The following resource types have the same ID of '" + resourceId + "' - " + theClass.getCanonicalName() + " and "
 					+ myIdToResourceDefinition.get(resourceId).getImplementingClass().getCanonicalName());
 			}
 		}
@@ -384,7 +383,7 @@ class ModelScanner {
 			if (searchParam != null) {
 				RestSearchParameterTypeEnum paramType = RestSearchParameterTypeEnum.forCode(searchParam.type().toLowerCase());
 				if (paramType == null) {
-					throw new ConfigurationException("Search param " + searchParam.name() + " has an invalid type: " + searchParam.type());
+					throw new ConfigurationException(Msg.code(1721) + "Search param " + searchParam.name() + " has an invalid type: " + searchParam.type());
 				}
 				Set<String> providesMembershipInCompartments;
 				providesMembershipInCompartments = new HashSet<>();
@@ -453,7 +452,7 @@ class ModelScanner {
 		if (List.class.equals(nextElementType)) {
 			nextElementType = ReflectionUtil.getGenericCollectionTypeOfField(next);
 		} else if (Collection.class.isAssignableFrom(nextElementType)) {
-			throw new ConfigurationException("Field '" + next.getName() + "' in type '" + next.getClass().getCanonicalName() + "' is a Collection - Only java.util.List curently supported");
+			throw new ConfigurationException(Msg.code(1722) + "Field '" + next.getName() + "' in type '" + next.getClass().getCanonicalName() + "' is a Collection - Only java.util.List curently supported");
 		}
 		return nextElementType;
 	}
@@ -462,7 +461,7 @@ class ModelScanner {
 	static IValueSetEnumBinder<Enum<?>> getBoundCodeBinder(Field theNext) {
 		Class<?> bound = getGenericCollectionTypeOfCodedField(theNext);
 		if (bound == null) {
-			throw new ConfigurationException("Field '" + theNext + "' has no parameter for " + BoundCodeDt.class.getSimpleName() + " to determine enum type");
+			throw new ConfigurationException(Msg.code(1723) + "Field '" + theNext + "' has no parameter for " + BoundCodeDt.class.getSimpleName() + " to determine enum type");
 		}
 
 		String fieldName = "VALUESET_BINDER";
@@ -470,7 +469,7 @@ class ModelScanner {
 			Field bindingField = bound.getField(fieldName);
 			return (IValueSetEnumBinder<Enum<?>>) bindingField.get(null);
 		} catch (Exception e) {
-			throw new ConfigurationException("Field '" + theNext + "' has type parameter " + bound.getCanonicalName() + " but this class has no valueset binding field (must have a field called " + fieldName + ")", e);
+			throw new ConfigurationException(Msg.code(1724) + "Field '" + theNext + "' has type parameter " + bound.getCanonicalName() + " but this class has no valueset binding field (must have a field called " + fieldName + ")", e);
 		}
 	}
 
@@ -540,7 +539,7 @@ class ModelScanner {
 							}
 
 						} catch (ClassNotFoundException e) {
-							throw new ConfigurationException("Unknown class[" + nextValue + "] for data type definition: " + nextKey.substring("datatype.".length()), e);
+							throw new ConfigurationException(Msg.code(1725) + "Unknown class[" + nextValue + "] for data type definition: " + nextKey.substring("datatype.".length()), e);
 						}
 					}
 				} else if (nextKey.startsWith("resource.")) {
@@ -553,19 +552,19 @@ class ModelScanner {
 							continue;
 						}
 						if (!IBaseResource.class.isAssignableFrom(nextClass)) {
-							throw new ConfigurationException("Class is not assignable from " + IBaseResource.class.getSimpleName() + ": " + nextValue);
+							throw new ConfigurationException(Msg.code(1726) + "Class is not assignable from " + IBaseResource.class.getSimpleName() + ": " + nextValue);
 						}
 
 						theResourceTypes.put(resName, nextClass);
 					} catch (ClassNotFoundException e) {
-						throw new ConfigurationException("Unknown class[" + nextValue + "] for resource definition: " + nextKey.substring("resource.".length()), e);
+						throw new ConfigurationException(Msg.code(1727) + "Unknown class[" + nextValue + "] for resource definition: " + nextKey.substring("resource.".length()), e);
 					}
 				} else {
-					throw new ConfigurationException("Unexpected property in version property file: " + nextKey + "=" + nextValue);
+					throw new ConfigurationException(Msg.code(1728) + "Unexpected property in version property file: " + nextKey + "=" + nextValue);
 				}
 			}
 		} catch (IOException e) {
-			throw new ConfigurationException("Failed to load model property file from classpath: " + "/ca/uhn/fhir/model/dstu/model.properties");
+			throw new ConfigurationException(Msg.code(1729) + "Failed to load model property file from classpath: " + "/ca/uhn/fhir/model/dstu/model.properties");
 		}
 
 		return retVal;

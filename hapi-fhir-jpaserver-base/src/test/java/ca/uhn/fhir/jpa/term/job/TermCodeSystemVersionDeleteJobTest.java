@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.term.job;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
@@ -154,7 +155,7 @@ public class TermCodeSystemVersionDeleteJobTest extends BaseJpaR4Test {
 			JobParametersInvalidException.class,
 			() -> myJobSubmitter.runJob(myTermCodeSystemVersionDeleteJob, new JobParameters())
 		);
-		assertEquals("This job needs Parameter: '" + JOB_PARAM_CODE_SYSTEM_VERSION_ID + "'", thrown.getMessage());
+		assertEquals(Msg.code(919) + "This job needs Parameter: '" + JOB_PARAM_CODE_SYSTEM_VERSION_ID + "'", thrown.getMessage());
 	}
 
 
@@ -168,7 +169,7 @@ public class TermCodeSystemVersionDeleteJobTest extends BaseJpaR4Test {
 			JobParametersInvalidException.class,
 			() -> myJobSubmitter.runJob(myTermCodeSystemVersionDeleteJob, jobParameters)
 		);
-		assertEquals("'" + JOB_PARAM_CODE_SYSTEM_VERSION_ID + "' parameter is null", thrown.getMessage());
+		assertEquals(Msg.code(920) + "'" + JOB_PARAM_CODE_SYSTEM_VERSION_ID + "' parameter is null", thrown.getMessage());
 	}
 
 
@@ -182,7 +183,7 @@ public class TermCodeSystemVersionDeleteJobTest extends BaseJpaR4Test {
 			JobParametersInvalidException.class,
 			() -> myJobSubmitter.runJob(myTermCodeSystemVersionDeleteJob, jobParameters)
 		);
-		assertEquals("Invalid parameter '" + JOB_PARAM_CODE_SYSTEM_VERSION_ID + "' value: 0", thrown.getMessage());
+		assertEquals(Msg.code(921) + "Invalid parameter '" + JOB_PARAM_CODE_SYSTEM_VERSION_ID + "' value: 0", thrown.getMessage());
 	}
 
 

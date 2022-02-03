@@ -20,7 +20,9 @@ package ca.uhn.fhir.jpa.subscription.match.deliver;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -93,7 +95,7 @@ public abstract class BaseSubscriptionDeliverySubscriber implements MessageHandl
 				return;
 			}
 
-			throw new MessagingException(theMessage, errorMsg, e);
+			throw new MessagingException(theMessage, Msg.code(2) + errorMsg, e);
 		}
 	}
 

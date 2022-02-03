@@ -1,6 +1,7 @@
 package ca.uhn.fhir.mdm.rules.json;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.rules.similarity.MdmSimilarityEnum;
 import ca.uhn.fhir.mdm.rules.svc.BaseMdmRulesR4Test;
@@ -73,7 +74,7 @@ public class MdmRulesJsonR4Test extends BaseMdmRulesR4Test {
 			vectorMatchResultMap.getVector("bad");
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals("There is no matchField with name bad", e.getMessage());
+			assertEquals(Msg.code(1523) + "There is no matchField with name bad", e.getMessage());
 		}
 	}
 

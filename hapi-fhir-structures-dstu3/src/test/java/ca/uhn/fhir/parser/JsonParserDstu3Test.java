@@ -1,6 +1,7 @@
 package ca.uhn.fhir.parser;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation;
 import ca.uhn.fhir.parser.PatientWithExtendedContactDstu3.CustomContactComponent;
@@ -152,7 +153,7 @@ public class JsonParserDstu3Test {
 			p.parseResource(input);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Failed to parse JSON encoded FHIR content: Unexpected character ('=' (code 61)): was expecting a colon to separate field name and value\n" +
+			assertEquals(Msg.code(1861) + "Failed to parse JSON encoded FHIR content: Unexpected character ('=' (code 61)): was expecting a colon to separate field name and value\n" +
 				" at [Source: UNKNOWN; line: 4, column: 18]", e.getMessage());
 		}
 	}
@@ -170,7 +171,7 @@ public class JsonParserDstu3Test {
 			p.parseResource(input);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Found incorrect type for element context - Expected OBJECT and found SCALAR (STRING)", e.getMessage());
+			assertEquals(Msg.code(1820) + "Found incorrect type for element context - Expected OBJECT and found SCALAR (STRING)", e.getMessage());
 		}
 	}
 
@@ -1494,7 +1495,7 @@ public class JsonParserDstu3Test {
 			p.parseResource(IOUtils.toString(JsonParserDstu3Test.class.getResourceAsStream("/Patient.json.txt"), Charsets.UTF_8));
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Found incorrect type for element assigner - Expected OBJECT and found SCALAR (STRING)", e.getMessage());
+			assertEquals(Msg.code(1820) + "Found incorrect type for element assigner - Expected OBJECT and found SCALAR (STRING)", e.getMessage());
 		}
 
 	}
@@ -1603,7 +1604,7 @@ public class JsonParserDstu3Test {
 			parser.parseResource(ValueSet.class, res);
 			fail("DataFormat Invalid attribute exception should be thrown");
 		} catch (DataFormatException e) {
-			assertEquals("[element=\"op\"] Invalid attribute value \"n\": Unknown FilterOperator code 'n'", e.getMessage());
+			assertEquals(Msg.code(1821) + "[element=\"op\"] Invalid attribute value \"n\": Unknown FilterOperator code 'n'", e.getMessage());
 		}
 	}
 
@@ -2072,13 +2073,13 @@ public class JsonParserDstu3Test {
 			ourCtx.newJsonParser().parseResource("FOO");
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Failed to parse JSON encoded FHIR content: Content does not appear to be FHIR JSON, first non-whitespace character was: 'F' (must be '{')", e.getMessage());
+			assertEquals(Msg.code(1861) + "Failed to parse JSON encoded FHIR content: " + Msg.code(1859) +  "Content does not appear to be FHIR JSON, first non-whitespace character was: 'F' (must be '{')", e.getMessage());
 		}
 		try {
 			ourCtx.newJsonParser().parseResource("[\"aaa\"]");
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Failed to parse JSON encoded FHIR content: Content does not appear to be FHIR JSON, first non-whitespace character was: '[' (must be '{')", e.getMessage());
+			assertEquals(Msg.code(1861) + "Failed to parse JSON encoded FHIR content: " + Msg.code(1859) +  "Content does not appear to be FHIR JSON, first non-whitespace character was: '[' (must be '{')", e.getMessage());
 		}
 
 		assertEquals(Bundle.class, ourCtx.newJsonParser().parseResource("  {\"resourceType\" : \"Bundle\"}").getClass());
@@ -2110,7 +2111,7 @@ public class JsonParserDstu3Test {
 			parser.parseResource(input);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Resource is missing required element 'url' in parent element 'extension'", e.getMessage());
+			assertEquals(Msg.code(1822) + "Resource is missing required element 'url' in parent element 'extension'", e.getMessage());
 		}
 
 	}
@@ -2140,7 +2141,7 @@ public class JsonParserDstu3Test {
 			parser.parseResource(input);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Resource is missing required element 'url' in parent element 'modifierExtension'", e.getMessage());
+			assertEquals(Msg.code(1822) + "Resource is missing required element 'url' in parent element 'modifierExtension'", e.getMessage());
 		}
 
 	}
@@ -2294,7 +2295,7 @@ public class JsonParserDstu3Test {
 			jsonParser.parseResource(input);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Missing required element 'resourceType' from JSON resource object, unable to parse", e.getMessage());
+			assertEquals(Msg.code(1843) + "Missing required element 'resourceType' from JSON resource object, unable to parse", e.getMessage());
 		}
 	}
 
@@ -2338,7 +2339,7 @@ public class JsonParserDstu3Test {
 			ourCtx.newJsonParser().parseResource(Bundle.class, bundle);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Failed to parse JSON encoded FHIR content: Unexpected close marker '}': expected ']' (for root starting at [Source: UNKNOWN; line: 1])\n" +
+			assertEquals(Msg.code(1861) + "Failed to parse JSON encoded FHIR content: Unexpected close marker '}': expected ']' (for root starting at [Source: UNKNOWN; line: 1])\n" +
 				" at [Source: UNKNOWN; line: 4, column: 3]", e.getMessage());
 		}
 	}
@@ -2377,14 +2378,14 @@ public class JsonParserDstu3Test {
 			p.parseResource(encoded.replace("Observation", "observation"));
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Unknown resource type 'observation': Resource names are case sensitive, found similar name: 'Observation'", e.getMessage());
+			assertEquals(Msg.code(1815) + "Unknown resource type 'observation': Resource names are case sensitive, found similar name: 'Observation'", e.getMessage());
 		}
 
 		try {
 			p.parseResource(encoded.replace("valueSampledData", "valueSampleddata"));
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Unknown element 'valueSampleddata' found during parse", e.getMessage());
+			assertEquals(Msg.code(1825) + "Unknown element 'valueSampleddata' found during parse", e.getMessage());
 		}
 	}
 

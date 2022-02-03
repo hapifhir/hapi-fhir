@@ -9,7 +9,7 @@ class Strip_HTML extends Filter {
      */
     @Override
     public Object apply(Object value, Object... params) {
-   	 throw new UnsupportedOperationException();
+   	 throw new UnsupportedOperationException(Msg.code(723));
 //
 //        String html = super.asString(value);
 //

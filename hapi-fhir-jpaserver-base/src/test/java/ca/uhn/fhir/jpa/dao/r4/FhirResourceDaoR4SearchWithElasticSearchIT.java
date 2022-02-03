@@ -9,7 +9,8 @@ import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
-import ca.uhn.fhir.jpa.config.TestR4ConfigWithElasticSearch;
+import ca.uhn.fhir.jpa.config.TestHibernateSearchAddInConfig;
+import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
@@ -60,6 +61,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -73,7 +75,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(SpringExtension.class)
 @RequiresDocker
-@ContextConfiguration(classes = {TestR4ConfigWithElasticSearch.class})
+@ContextConfiguration(classes = {TestR4Config.class, TestHibernateSearchAddInConfig.Elasticsearch.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";
@@ -83,6 +85,8 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	protected DaoConfig myDaoConfig;
 	@Autowired
 	protected PlatformTransactionManager myTxManager;
+	@Autowired
+	protected EntityManager myEntityManager;
 	@Autowired
 	protected ISearchParamPresenceSvc mySearchParamPresenceSvc;
 	@Autowired
@@ -410,7 +414,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		}
 	}
 
-
 	@Test
 	public void testStringSearch() {
 		IIdType id1, id2, id3, id4, id5, id6;
@@ -492,6 +495,8 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			assertObservationSearchMatches("contains search matches anywhere", map, id2, id3, id6);
 		}
 	}
+
+
 
 	private void assertObservationSearchMatchesNothing(String message, SearchParameterMap map) {
 		assertObservationSearchMatches(message,map);

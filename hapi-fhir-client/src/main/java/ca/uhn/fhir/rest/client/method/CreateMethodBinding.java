@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client.method;
 
+import ca.uhn.fhir.i18n.Msg;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
@@ -79,12 +80,12 @@ public class CreateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	protected void validateResourceIdAndUrlIdForNonConditionalOperation(IBaseResource theResource, String theResourceId, String theUrlId, String theMatchUrl) {
 		if (isNotBlank(theUrlId)) {
 			String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "idInUrlForCreate", theUrlId);
-			throw new InvalidRequestException(msg);
+			throw new InvalidRequestException(Msg.code(1411) + msg);
 		}
 		if (getContext().getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
 			if (isNotBlank(theResourceId)) {
 				String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "idInBodyForCreate", theResourceId);
-				throw new InvalidRequestException(msg);
+				throw new InvalidRequestException(Msg.code(1412) + msg);
 			}
 		} else {
 			theResource.setId((IIdType)null);

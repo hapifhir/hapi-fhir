@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.cache;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -96,7 +97,7 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 			myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, map, myMaleTestCallback, TEST_REFRESH_INTERVAL);
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("SearchParameterMap SearchParameterMap[] cannot be evaluated in-memory: Parameter: <_lastUpdated> Reason: Standard parameters not supported.  Only search parameter maps that can be evaluated in-memory may be registered.", e.getMessage());
+			assertEquals(Msg.code(482) + "SearchParameterMap SearchParameterMap[] cannot be evaluated in-memory: Parameter: <_lastUpdated> Reason: Standard parameters not supported.  Only search parameter maps that can be evaluated in-memory may be registered.", e.getMessage());
 		}
 	}
 

@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.provider.dstu3;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -71,7 +72,7 @@ public class BaseJpaResourceProviderCodeSystemDstu3 extends JpaResourceProviderD
 			result.throwNotFoundIfAppropriate();
 			return (Parameters) result.toParameters(theRequestDetails.getFhirContext(), theProperties);
 		} catch (FHIRException e) {
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(1153) + e);
 		} finally {
 			endRequest(theServletRequest);
 		}

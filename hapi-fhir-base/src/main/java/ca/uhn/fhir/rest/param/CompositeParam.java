@@ -19,18 +19,19 @@ package ca.uhn.fhir.rest.param;
  * limitations under the License.
  * #L%
  */
-import static org.apache.commons.lang3.StringUtils.isBlank;
 
-import java.util.List;
-
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class CompositeParam<A extends IQueryParameterType, B extends IQueryParameterType> extends BaseParam implements IQueryParameterType {
 
@@ -48,16 +49,16 @@ public class CompositeParam<A extends IQueryParameterType, B extends IQueryParam
 		try {
 			myLeftType = theLeftType.newInstance();
 		} catch (InstantiationException e) {
-			throw new ConfigurationException("Failed to instantiate type: " + myLeftType, e);
+			throw new ConfigurationException(Msg.code(1943) + "Failed to instantiate type: " + myLeftType, e);
 		} catch (IllegalAccessException e) {
-			throw new ConfigurationException("Failed to instantiate type: " + myLeftType, e);
+			throw new ConfigurationException(Msg.code(1944) + "Failed to instantiate type: " + myLeftType, e);
 		}
 		try {
 			myRightType = theRightType.newInstance();
 		} catch (InstantiationException e) {
-			throw new ConfigurationException("Failed to instantiate type: " + myRightType, e);
+			throw new ConfigurationException(Msg.code(1945) + "Failed to instantiate type: " + myRightType, e);
 		} catch (IllegalAccessException e) {
-			throw new ConfigurationException("Failed to instantiate type: " + myRightType, e);
+			throw new ConfigurationException(Msg.code(1946) + "Failed to instantiate type: " + myRightType, e);
 		}
 	}
 
@@ -87,7 +88,7 @@ public class CompositeParam<A extends IQueryParameterType, B extends IQueryParam
 		} else {
 			List<String> parts = ParameterUtil.splitParameterString(theValue, '$', false);
 			if (parts.size() > 2) {
-				throw new InvalidRequestException("Invalid value for composite parameter (only one '$' is valid for this parameter, others must be escaped). Value was: " + theValue);
+				throw new InvalidRequestException(Msg.code(1947) + "Invalid value for composite parameter (only one '$' is valid for this parameter, others must be escaped). Value was: " + theValue);
 			}
 			myLeftType.setValueAsQueryToken(theContext, theParamName, theQualifier, parts.get(0));
 			if (parts.size() > 1) {

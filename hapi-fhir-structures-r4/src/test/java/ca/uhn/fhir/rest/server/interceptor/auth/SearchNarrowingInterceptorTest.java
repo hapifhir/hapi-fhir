@@ -62,7 +62,7 @@ public class SearchNarrowingInterceptorTest {
 	private static List<Resource> ourReturn;
 	private static Server ourServer;
 	private static IGenericClient ourClient;
-	private static AuthorizedList ourNextCompartmentList;
+	private static AuthorizedList ourNextAuthorizedList;
 	private static Bundle.BundleEntryRequestComponent ourLastBundleRequest;
 
 
@@ -76,13 +76,13 @@ public class SearchNarrowingInterceptorTest {
 		ourLastPatientParam = null;
 		ourLastPerformerParam = null;
 		ourLastCodeParam = null;
-		ourNextCompartmentList = null;
+		ourNextAuthorizedList = null;
 	}
 
 	@Test
 	public void testReturnNull() {
 
-		ourNextCompartmentList = null;
+		ourNextAuthorizedList = null;
 
 		ourClient
 			.search()
@@ -97,10 +97,31 @@ public class SearchNarrowingInterceptorTest {
 		assertNull(ourLastIdParam);
 	}
 
-	@Test
-	public void testNarrowObservationsByPatientContext_ClientRequestedNoParams() {
 
-		ourNextCompartmentList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
+	@Test
+	public void testNarrowCode_InSelected_ClientRequestedNoParams() {
+		ourNextAuthorizedList = new AuthorizedList()
+			.addCodeInValueSet("Observation", "code", "http://myvs");
+
+		ourClient
+			.search()
+			.forResource("Observation")
+			.execute();
+
+		assertEquals("Patient.search", ourLastHitMethod);
+		assertNull(ourLastCodeParam);
+		assertNull(ourLastSubjectParam);
+		assertNull(ourLastPerformerParam);
+		assertNull(ourLastPatientParam);
+		assertNull(ourLastIdParam);
+
+	}
+
+
+	@Test
+	public void testNarrowCompartment_ObservationsByPatientContext_ClientRequestedNoParams() {
+		ourNextAuthorizedList = new AuthorizedList()
+			.addCompartments("Patient/123", "Patient/456");
 
 		ourClient
 			.search()
@@ -116,9 +137,9 @@ public class SearchNarrowingInterceptorTest {
 	}
 
 	@Test
-	public void testNarrowObservationsByPatientContext_ClientRequestedBundleNoParams() {
+	public void testNarrowCompartment_ObservationsByPatientContext_ClientRequestedBundleNoParams() {
 
-		ourNextCompartmentList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
+		ourNextAuthorizedList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
 
 		Bundle bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.TRANSACTION);
@@ -134,49 +155,10 @@ public class SearchNarrowingInterceptorTest {
 		assertEquals("Patient?_id=" + URLEncoder.encode("Patient/123,Patient/456"), ourLastBundleRequest.getUrl());
 	}
 
-	/**
-	 * Should not make any changes
-	 */
 	@Test
-	public void testNarrowObservationsByPatientResources_ClientRequestedNoParams() {
+	public void testNarrowCompartment_PatientByPatientContext_ClientRequestedNoParams() {
 
-		ourNextCompartmentList = new AuthorizedList().addResources("Patient/123", "Patient/456");
-
-		ourClient
-			.search()
-			.forResource("Observation")
-			.execute();
-
-		assertEquals("Observation.search", ourLastHitMethod);
-		assertNull(ourLastIdParam);
-		assertNull(ourLastCodeParam);
-		assertNull(ourLastSubjectParam);
-		assertNull(ourLastPerformerParam);
-		assertNull(ourLastPatientParam);
-	}
-
-	@Test
-	public void testNarrowPatientByPatientResources_ClientRequestedNoParams() {
-
-		ourNextCompartmentList = new AuthorizedList().addResources("Patient/123", "Patient/456");
-
-		ourClient
-			.search()
-			.forResource("Patient")
-			.execute();
-
-		assertEquals("Patient.search", ourLastHitMethod);
-		assertNull(ourLastCodeParam);
-		assertNull(ourLastSubjectParam);
-		assertNull(ourLastPerformerParam);
-		assertNull(ourLastPatientParam);
-		assertThat(toStrings(ourLastIdParam), Matchers.contains("Patient/123,Patient/456"));
-	}
-
-	@Test
-	public void testNarrowPatientByPatientContext_ClientRequestedNoParams() {
-
-		ourNextCompartmentList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
+		ourNextAuthorizedList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
 
 		ourClient
 			.search()
@@ -189,9 +171,9 @@ public class SearchNarrowingInterceptorTest {
 	}
 
 	@Test
-	public void testNarrowPatientByPatientContext_ClientRequestedSomeOverlap() {
+	public void testNarrowCompartment_PatientByPatientContext_ClientRequestedSomeOverlap() {
 
-		ourNextCompartmentList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
+		ourNextAuthorizedList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
 
 		ourClient
 			.search()
@@ -205,9 +187,9 @@ public class SearchNarrowingInterceptorTest {
 	}
 
 	@Test
-	public void testNarrowObservationsByPatientContext_ClientRequestedSomeOverlap() {
+	public void testNarrowCompartment_ObservationsByPatientContext_ClientRequestedSomeOverlap() {
 
-		ourNextCompartmentList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
+		ourNextAuthorizedList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
 
 		ourClient
 			.search()
@@ -225,9 +207,9 @@ public class SearchNarrowingInterceptorTest {
 	}
 
 	@Test
-	public void testNarrowObservationsByPatientContext_ClientRequestedSomeOverlap_ShortIds() {
+	public void testNarrowCompartment_ObservationsByPatientContext_ClientRequestedSomeOverlap_ShortIds() {
 
-		ourNextCompartmentList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
+		ourNextAuthorizedList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
 
 		ourClient
 			.search()
@@ -245,9 +227,9 @@ public class SearchNarrowingInterceptorTest {
 	}
 
 	@Test
-	public void testNarrowObservationsByPatientContext_ClientRequestedSomeOverlap_UseSynonym() {
+	public void testNarrowCompartment_ObservationsByPatientContext_ClientRequestedSomeOverlap_UseSynonym() {
 
-		ourNextCompartmentList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
+		ourNextAuthorizedList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
 
 		ourClient
 			.search()
@@ -265,9 +247,9 @@ public class SearchNarrowingInterceptorTest {
 	}
 
 	@Test
-	public void testNarrowObservationsByPatientContext_ClientRequestedNoOverlap() {
+	public void testNarrowCompartment_ObservationsByPatientContext_ClientRequestedNoOverlap() {
 
-		ourNextCompartmentList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
+		ourNextAuthorizedList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
 
 		try {
 			ourClient
@@ -286,9 +268,9 @@ public class SearchNarrowingInterceptorTest {
 	}
 
 	@Test
-	public void testNarrowObservationsByPatientContext_ClientRequestedNoOverlap_UseSynonym() {
+	public void testNarrowCompartment_ObservationsByPatientContext_ClientRequestedNoOverlap_UseSynonym() {
 
-		ourNextCompartmentList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
+		ourNextAuthorizedList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
 
 		try {
 			ourClient
@@ -307,9 +289,9 @@ public class SearchNarrowingInterceptorTest {
 	}
 
 	@Test
-	public void testNarrowObservationsByPatientContext_ClientRequestedBadParameter() {
+	public void testNarrowCompartment_ObservationsByPatientContext_ClientRequestedBadParameter() {
 
-		ourNextCompartmentList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
+		ourNextAuthorizedList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
 
 		try {
 			ourClient
@@ -327,9 +309,9 @@ public class SearchNarrowingInterceptorTest {
 	}
 
 	@Test
-	public void testNarrowObservationsByPatientContext_ClientRequestedBadPermission() {
+	public void testNarrowCompartment_ObservationsByPatientContext_ClientRequestedBadPermission() {
 
-		ourNextCompartmentList = new AuthorizedList().addCompartments("Patient/");
+		ourNextAuthorizedList = new AuthorizedList().addCompartments("Patient/");
 
 		try {
 			ourClient
@@ -344,6 +326,45 @@ public class SearchNarrowingInterceptorTest {
 		}
 
 		assertNull(ourLastHitMethod);
+	}
+
+	/**
+	 * Should not make any changes
+	 */
+	@Test
+	public void testNarrowResources_ObservationsByPatientResources_ClientRequestedNoParams() {
+		ourNextAuthorizedList = new AuthorizedList()
+			.addResources("Patient/123", "Patient/456");
+
+		ourClient
+			.search()
+			.forResource("Observation")
+			.execute();
+
+		assertEquals("Observation.search", ourLastHitMethod);
+		assertNull(ourLastIdParam);
+		assertNull(ourLastCodeParam);
+		assertNull(ourLastSubjectParam);
+		assertNull(ourLastPerformerParam);
+		assertNull(ourLastPatientParam);
+	}
+
+	@Test
+	public void testNarrowResources_PatientByPatientResources_ClientRequestedNoParams() {
+		ourNextAuthorizedList = new AuthorizedList()
+			.addResources("Patient/123", "Patient/456");
+
+		ourClient
+			.search()
+			.forResource("Patient")
+			.execute();
+
+		assertEquals("Patient.search", ourLastHitMethod);
+		assertNull(ourLastCodeParam);
+		assertNull(ourLastSubjectParam);
+		assertNull(ourLastPerformerParam);
+		assertNull(ourLastPatientParam);
+		assertThat(toStrings(ourLastIdParam), Matchers.contains("Patient/123,Patient/456"));
 	}
 
 	private List<String> toStrings(BaseAndListParam<? extends IQueryParameterOr<?>> theParams) {
@@ -393,7 +414,7 @@ public class SearchNarrowingInterceptorTest {
 			@OptionalParam(name = Observation.SP_SUBJECT) ReferenceAndListParam theSubjectParam,
 			@OptionalParam(name = Observation.SP_PATIENT) ReferenceAndListParam thePatientParam,
 			@OptionalParam(name = Observation.SP_PERFORMER) ReferenceAndListParam thePerformerParam,
-			@OptionalParam(name = "code") TokenAndListParam theCodeParam
+			@OptionalParam(name = Observation.SP_CODE) TokenAndListParam theCodeParam
 		) {
 			ourLastHitMethod = "Observation.search";
 			ourLastIdParam = theIdParam;
@@ -418,10 +439,10 @@ public class SearchNarrowingInterceptorTest {
 	private static class MySearchNarrowingInterceptor extends SearchNarrowingInterceptor {
 		@Override
 		protected AuthorizedList buildAuthorizedList(RequestDetails theRequestDetails) {
-			if (ourNextCompartmentList == null) {
+			if (ourNextAuthorizedList == null) {
 				return null;
 			}
-			return ourNextCompartmentList;
+			return ourNextAuthorizedList;
 		}
 	}
 

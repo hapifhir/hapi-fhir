@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -82,7 +83,7 @@ public class TransactionProcessorVersionAdapterDstu3 implements ITransactionProc
 		try {
 			resp.setType(Bundle.BundleType.fromCode(theBundleType));
 		} catch (FHIRException theE) {
-			throw new InternalErrorException("Unknown bundle type: " + theBundleType);
+			throw new InternalErrorException(Msg.code(548) + "Unknown bundle type: " + theBundleType);
 		}
 		return resp;
 	}

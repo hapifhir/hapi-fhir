@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.client.method;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import java.lang.reflect.Method;
 
 import org.hl7.fhir.instance.model.api.IBaseConformance;
@@ -38,7 +39,7 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 		MethodReturnTypeEnum methodReturnType = getMethodReturnType();
 		Class<?> genericReturnType = (Class<?>) theMethod.getGenericReturnType();
 		if (methodReturnType != MethodReturnTypeEnum.RESOURCE || !IBaseConformance.class.isAssignableFrom(genericReturnType)) {
-			throw new ConfigurationException("Conformance resource provider method '" + theMethod.getName() + "' should return a Conformance resource class, returns: " + theMethod.getReturnType());
+			throw new ConfigurationException(Msg.code(1426) + "Conformance resource provider method '" + theMethod.getName() + "' should return a Conformance resource class, returns: " + theMethod.getReturnType());
 		}
 
 	}

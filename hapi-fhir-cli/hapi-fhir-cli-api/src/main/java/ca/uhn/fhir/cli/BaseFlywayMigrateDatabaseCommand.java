@@ -20,6 +20,7 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.BaseMigrator;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.FlywayMigrator;
@@ -106,7 +107,7 @@ public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends B
 		try {
 			driverType = DriverTypeEnum.valueOf(driverTypeString);
 		} catch (Exception e) {
-			throw new ParseException("Invalid driver type \"" + driverTypeString + "\". Valid values are: " + driverOptions());
+			throw new ParseException(Msg.code(1535) + "Invalid driver type \"" + driverTypeString + "\". Valid values are: " + driverOptions());
 		}
 
 		boolean dryRun = theCommandLine.hasOption("r");

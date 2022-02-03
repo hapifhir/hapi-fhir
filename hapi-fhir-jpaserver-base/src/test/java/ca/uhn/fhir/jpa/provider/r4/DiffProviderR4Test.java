@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
@@ -242,7 +243,7 @@ public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: Unable to diff two resources of different types", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1129) + "Unable to diff two resources of different types", e.getMessage());
 		}
 	}
 

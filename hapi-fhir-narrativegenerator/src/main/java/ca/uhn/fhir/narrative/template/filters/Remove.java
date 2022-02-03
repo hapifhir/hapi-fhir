@@ -15,7 +15,7 @@ class Remove extends Filter {
         Object needle = super.get(0, params);
 
         if (needle == null) {
-            throw new RuntimeException("invalid pattern: " + needle);
+            throw new RuntimeException(Msg.code(718) + "invalid pattern: " + needle);
         }
 
         return original.replace(String.valueOf(needle), "");

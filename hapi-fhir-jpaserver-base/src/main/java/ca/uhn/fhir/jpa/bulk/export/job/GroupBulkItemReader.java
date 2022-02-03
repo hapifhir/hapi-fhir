@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.bulk.export.job;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.batch.config.BatchConstants;
@@ -270,7 +271,7 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 	private RuntimeSearchParam validateSearchParameters(SearchParameterMap expandedSpMap) {
 		RuntimeSearchParam runtimeSearchParam = getPatientSearchParamForCurrentResourceType();
 		if (expandedSpMap.get(runtimeSearchParam.getName()) != null) {
-			throw new IllegalArgumentException(String.format("Group Bulk Export manually modifies the Search Parameter called [%s], so you may not include this search parameter in your _typeFilter!", runtimeSearchParam.getName()));
+			throw new IllegalArgumentException(Msg.code(792) + String.format("Group Bulk Export manually modifies the Search Parameter called [%s], so you may not include this search parameter in your _typeFilter!", runtimeSearchParam.getName()));
 		}
 		return runtimeSearchParam;
 	}

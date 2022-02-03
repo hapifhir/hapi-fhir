@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.test;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.Constants;
@@ -99,7 +100,7 @@ public abstract class BaseJpaTest {
 			try {
 				return theRunnable.call();
 			} catch (Exception theE) {
-				throw new InternalErrorException(theE);
+				throw new InternalErrorException(Msg.code(72) + theE);
 			}
 		});
 	}

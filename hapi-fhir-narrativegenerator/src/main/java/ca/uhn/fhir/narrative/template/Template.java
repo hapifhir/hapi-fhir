@@ -1,5 +1,6 @@
 package ca.uhn.fhir.narrative.template;
 
+import ca.uhn.fhir.i18n.Msg;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -73,7 +74,7 @@ public class Template {
             root = (CommonTree) parser.parse().getTree();
         }
         catch (RecognitionException e) {
-            throw new RuntimeException("could not parse input: " + input, e);
+            throw new RuntimeException(Msg.code(712) + "could not parse input: " + input, e);
         }
     }
 
@@ -99,7 +100,7 @@ public class Template {
             root = (CommonTree) parser.parse().getTree();
         }
         catch (RecognitionException e) {
-            throw new RuntimeException("could not parse input from " + file, e);
+            throw new RuntimeException(Msg.code(713) + "could not parse input from " + file, e);
         }
     }
 
@@ -173,7 +174,7 @@ public class Template {
             return rendered == null ? "" : String.valueOf(rendered);
         }
         catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(Msg.code(714) + e);
         }
     }
 

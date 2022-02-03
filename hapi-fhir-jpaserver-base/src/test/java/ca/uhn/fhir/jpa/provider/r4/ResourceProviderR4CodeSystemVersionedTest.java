@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TerminologyTest;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -622,7 +623,7 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: Unable to test subsumption across different code system versions", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(904) + "Unable to test subsumption across different code system versions", e.getMessage());
 		}
 	}
 
