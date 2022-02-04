@@ -1,13 +1,12 @@
 package ca.uhn.fhirtest.config;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu2;
+import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
-import ca.uhn.fhir.jpa.util.DerbyTenSevenHapiFhirDialect;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.validation.IValidatorModule;
@@ -15,15 +14,11 @@ import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhirtest.interceptor.PublicSecurityInterceptor;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.apache.commons.lang3.time.DateUtils;
-import org.hibernate.dialect.PostgreSQL94Dialect;
 import org.hibernate.search.backend.lucene.cfg.LuceneBackendSettings;
 import org.hibernate.search.backend.lucene.cfg.LuceneIndexSettings;
 import org.hibernate.search.engine.cfg.BackendSettings;
-import org.hibernate.search.mapper.orm.cfg.HibernateOrmMapperSettings;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -102,7 +97,7 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 	public DataSource dataSource() {
 		BasicDataSource retVal = new BasicDataSource();
 		if (CommonConfig.isLocalTestMode()) {
-			retVal.setUrl("jdbc:derby:memory:fhirtest_dstu2;create=true");
+			retVal.setUrl("jdbc:h2:mem:fhirtest_dstu2");
 		} else {
 			retVal.setDriver(new org.postgresql.Driver());
 			retVal.setUrl("jdbc:postgresql://localhost/fhirtest_dstu2");
@@ -144,7 +139,7 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 	private Properties jpaProperties() {
 		Properties extraProperties = new Properties();
 		if (CommonConfig.isLocalTestMode()) {
-			extraProperties.put("hibernate.dialect", DerbyTenSevenHapiFhirDialect.class.getName());
+			extraProperties.put("hibernate.dialect", HapiFhirH2Dialect.class.getName());
 		} else {
 			extraProperties.put("hibernate.dialect", HapiFhirPostgres94Dialect.class.getName());
 		}
@@ -168,6 +163,7 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 
 	/**
 	 * Bean which validates incoming requests
+	 *
 	 * @param theInstanceValidator
 	 */
 	@Bean

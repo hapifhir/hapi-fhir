@@ -56,7 +56,7 @@ import javax.annotation.Nullable;
 import java.util.function.Supplier;
 
 public class GraphQLProvider {
-	private Logger ourLog = LoggerFactory.getLogger(GraphQLProvider.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(GraphQLProvider.class);
 
 	private final Supplier<IGraphQLEngine> myEngineFactory;
 	private final IGraphQLStorageServices myStorageServices;
@@ -137,7 +137,7 @@ public class GraphQLProvider {
 		try {
 			parsedGraphQLRequest = Parser.parse(theQuery);
 		} catch (Exception e) {
-			throw new InvalidRequestException("Unable to parse GraphQL Expression: " + e);
+			throw new InvalidRequestException(Msg.code(1146) + "Unable to parse GraphQL Expression: " + e);
 		}
 
 		return processGraphQLRequest(theRequestDetails, theId, parsedGraphQLRequest);
@@ -147,15 +147,7 @@ public class GraphQLProvider {
 		IGraphQLEngine engine = myEngineFactory.get();
 		engine.setAppInfo(theRequestDetails);
 		engine.setServices(myStorageServices);
-<<<<<<< HEAD
 		engine.setGraphQL(parsedGraphQLRequest);
-=======
-		try {
-			engine.setGraphQL(Parser.parse(theQuery));
-		} catch (Exception theE) {
-			throw new InvalidRequestException(Msg.code(1146) + "Unable to parse GraphQL Expression: " + theE.toString());
-		}
->>>>>>> master
 
 		try {
 
@@ -185,7 +177,7 @@ public class GraphQLProvider {
 				ourLog.error("Failure during GraphQL processing", e);
 			}
 			b.append(e.getMessage());
-			throw new UnclassifiedServerFailureException(statusCode, Msg.code(1147) + b.toString());
+			throw new UnclassifiedServerFailureException(statusCode, Msg.code(1147) + b);
 		}
 	}
 

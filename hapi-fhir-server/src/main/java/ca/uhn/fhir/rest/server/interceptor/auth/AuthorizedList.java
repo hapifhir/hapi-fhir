@@ -107,7 +107,7 @@ public class AuthorizedList {
 		Validate.notBlank(theSearchParameterName, "theSearchParameterName must not be missing or null");
 		Validate.notBlank(theValueSetUrl, "theResourceUrl must not be missing or null");
 
-		myAllowedCodeInValueSets.add(new AllowedCodeInValueSet(theResourceName, theSearchParameterName, theValueSetUrl))
+//		myAllowedCodeInValueSets.add(new AllowedCodeInValueSet(theResourceName, theSearchParameterName, theValueSetUrl))
 
 		return this;
 	}

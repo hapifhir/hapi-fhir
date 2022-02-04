@@ -16,6 +16,7 @@ import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.QuantityParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -102,6 +103,10 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 				.collect(Collectors.toList());
 			assertThat(paths.toString(), paths, contains("Observation.subject", "Observation.subject.where(resolve() is Patient)"));
 		});
+
+		myCaptureQueriesListener.clear();
+		assertEquals(1, myObservationDao.search(SearchParameterMap.newSynchronous("patient", new ReferenceParam("Patient/A"))).sizeOrThrowNpe());
+		myCaptureQueriesListener.logSelectQueries();
 	}
 
 	@Test

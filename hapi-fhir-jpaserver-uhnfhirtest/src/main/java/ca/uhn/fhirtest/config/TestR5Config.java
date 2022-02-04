@@ -2,6 +2,7 @@ package ca.uhn.fhirtest.config;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.config.BaseJavaConfigR5;
+import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
@@ -99,7 +100,7 @@ public class TestR5Config extends BaseJavaConfigR5 {
 
 		BasicDataSource retVal = new BasicDataSource();
 		if (CommonConfig.isLocalTestMode()) {
-			retVal.setUrl("jdbc:derby:memory:fhirtest_r5;create=true");
+			retVal.setUrl("jdbc:h2:mem:fhirtest_r5");
 		} else {
 			retVal.setDriver(new org.postgresql.Driver());
 			retVal.setUrl("jdbc:postgresql://localhost/fhirtest_r5");
@@ -142,7 +143,7 @@ public class TestR5Config extends BaseJavaConfigR5 {
 	private Properties jpaProperties() {
 		Properties extraProperties = new Properties();
 		if (CommonConfig.isLocalTestMode()) {
-			extraProperties.put("hibernate.dialect", DerbyTenSevenHapiFhirDialect.class.getName());
+			extraProperties.put("hibernate.dialect", HapiFhirH2Dialect.class.getName());
 		} else {
 			extraProperties.put("hibernate.dialect", HapiFhirPostgres94Dialect.class.getName());
 		}
