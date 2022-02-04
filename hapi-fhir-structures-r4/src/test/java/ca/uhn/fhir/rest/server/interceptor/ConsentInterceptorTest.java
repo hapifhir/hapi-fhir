@@ -2,6 +2,7 @@ package ca.uhn.fhir.rest.server.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.BundleInclusionRule;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
@@ -456,7 +457,7 @@ public class ConsentInterceptorTest {
 		verify(myConsentSvc, times(0)).completeOperationSuccess(any(), any());
 		verify(myConsentSvc, times(1)).completeOperationFailure(any(), myExceptionCaptor.capture(), any());
 
-		assertEquals("Failed to call access method: java.lang.NullPointerException: A MESSAGE", myExceptionCaptor.getValue().getMessage());
+		assertEquals(Msg.code(389) + "Failed to call access method: java.lang.NullPointerException: A MESSAGE", myExceptionCaptor.getValue().getMessage());
 	}
 
 	public static class DummyPatientResourceProvider extends HashMapResourceProvider<Patient> {

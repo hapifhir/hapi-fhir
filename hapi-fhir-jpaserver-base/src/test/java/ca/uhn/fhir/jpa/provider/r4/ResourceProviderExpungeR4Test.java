@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
@@ -195,7 +196,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 				.execute();
 			fail();
 		} catch (MethodNotAllowedException e){
-			assertEquals("HTTP 405 Method Not Allowed: $expunge is not enabled on this server", e.getMessage());
+			assertEquals("HTTP 405 Method Not Allowed: " + Msg.code(968) + "$expunge is not enabled on this server", e.getMessage());
 		}
 		// Only deleted and prior patients
 		assertStillThere(myOneVersionPatientId);

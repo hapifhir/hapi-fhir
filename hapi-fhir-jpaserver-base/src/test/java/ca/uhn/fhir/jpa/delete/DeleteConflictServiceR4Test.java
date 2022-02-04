@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.delete;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.model.DeleteConflict;
@@ -61,7 +62,7 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 			myOrganizationDao.delete(organizationId);
 			fail();
 		} catch (ResourceVersionConflictException e) {
-			assertEquals("Unable to delete Organization/" + organizationId.getIdPart() + " because at least one resource has a reference to this resource. First reference found was resource Patient/" + patientId.getIdPart() + " in path Patient.managingOrganization", e.getMessage());
+			assertEquals(Msg.code(550) + Msg.code(515) + "Unable to delete Organization/" + organizationId.getIdPart() + " because at least one resource has a reference to this resource. First reference found was resource Patient/" + patientId.getIdPart() + " in path Patient.managingOrganization", e.getMessage());
 		}
 		assertEquals(1, myDeleteInterceptor.myDeleteConflictList.size());
 		assertEquals(1, myDeleteInterceptor.myCallCount);
@@ -158,7 +159,7 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 			// Needs a fourth and final pass to ensure that all conflicts are now gone.
 			fail();
 		} catch (ResourceVersionConflictException e) {
-			assertEquals(DeleteConflictService.MAX_RETRY_ATTEMPTS_EXCEEDED_MSG, e.getMessage());
+			assertEquals(Msg.code(550) + Msg.code(821) + DeleteConflictService.MAX_RETRY_ATTEMPTS_EXCEEDED_MSG, e.getMessage());
 		}
 
 		// Try again with Maximum conflict count set to 6.
@@ -195,7 +196,7 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 			myOrganizationDao.delete(organizationId);
 			fail();
 		} catch (ResourceVersionConflictException e) {
-			assertEquals(DeleteConflictService.MAX_RETRY_ATTEMPTS_EXCEEDED_MSG, e.getMessage());
+			assertEquals(Msg.code(550) + Msg.code(821) + DeleteConflictService.MAX_RETRY_ATTEMPTS_EXCEEDED_MSG, e.getMessage());
 		}
 		assertEquals(1 + DeleteConflictService.MAX_RETRY_ATTEMPTS, myDeleteInterceptor.myCallCount);
 	}

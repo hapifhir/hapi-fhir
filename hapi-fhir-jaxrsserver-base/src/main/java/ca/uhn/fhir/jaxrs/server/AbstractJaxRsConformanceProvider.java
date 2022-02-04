@@ -20,6 +20,20 @@ package ca.uhn.fhir.jaxrs.server;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.annotation.PostConstruct;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -175,7 +189,7 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 				myDstu2Conformance = dstu2ServerConformanceProvider.getServerConformance(null, null);
 				break;
 			default:
-				throw new ConfigurationException("Unsupported Fhir version: " + fhirContextVersion);
+				throw new ConfigurationException(Msg.code(591) + "Unsupported Fhir version: " + fhirContextVersion);
 		}
 
 		myInitialized = true;
@@ -233,7 +247,7 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 				conformance = myDstu2Conformance;
 				break;
 			default:
-				throw new ConfigurationException("Unsupported Fhir version: " + fhirContextVersion);
+				throw new ConfigurationException(Msg.code(592) + "Unsupported Fhir version: " + fhirContextVersion);
 		}
 
 		if (conformance != null) {
@@ -268,10 +282,10 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 			// }
 
 			if (!Modifier.isPublic(m.getModifiers())) {
-				throw new ConfigurationException("Method '" + m.getName() + "' is not public, FHIR RESTful methods must be public");
+				throw new ConfigurationException(Msg.code(593) + "Method '" + m.getName() + "' is not public, FHIR RESTful methods must be public");
 			} else {
 				if (Modifier.isStatic(m.getModifiers())) {
-					throw new ConfigurationException("Method '" + m.getName() + "' is static, FHIR RESTful methods must not be static");
+					throw new ConfigurationException(Msg.code(594) + "Method '" + m.getName() + "' is static, FHIR RESTful methods must not be static");
 				} else {
 					ourLog.debug("Scanning public method: {}#{}", theProvider.getClass(), m.getName());
 
@@ -297,7 +311,7 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 								Package pack = annotation.annotationType().getPackage();
 								if (pack.equals(IdParam.class.getPackage())) {
 									if (!allowableParams.contains(annotation.annotationType())) {
-										throw new ConfigurationException("Method[" + m.toString() + "] is not allowed to have a parameter annotated with " + annotation);
+										throw new ConfigurationException(Msg.code(595) + "Method[" + m.toString() + "] is not allowed to have a parameter annotated with " + annotation);
 									}
 								}
 							}
@@ -329,7 +343,7 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 			case DSTU2:
 				return Class.class.cast(ca.uhn.fhir.model.dstu2.resource.Conformance.class);
 			default:
-				throw new ConfigurationException("Unsupported Fhir version: " + fhirContextVersion);
+				throw new ConfigurationException(Msg.code(596) + "Unsupported Fhir version: " + fhirContextVersion);
 		}
 	}
 

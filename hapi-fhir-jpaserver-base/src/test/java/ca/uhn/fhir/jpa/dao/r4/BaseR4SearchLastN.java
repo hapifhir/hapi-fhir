@@ -4,7 +4,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoObservation;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
-import ca.uhn.fhir.jpa.config.TestR4ConfigWithElasticsearchClient;
+import ca.uhn.fhir.jpa.config.TestHibernateSearchAddInConfig;
+import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.search.lastn.ElasticsearchSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -53,7 +54,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 @RequiresDocker
-@ContextConfiguration(classes = {TestR4ConfigWithElasticsearchClient.class})
+@ContextConfiguration(classes = {TestR4Config.class, TestHibernateSearchAddInConfig.Elasticsearch.class})
 abstract public class BaseR4SearchLastN extends BaseJpaTest {
 
 	private static final Map<String, String> observationPatientMap = new HashMap<>();

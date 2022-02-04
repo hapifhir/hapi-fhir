@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
@@ -462,7 +463,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			myClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|101").execute();
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertEquals("HTTP 403 Forbidden: Access denied by default policy (no applicable rules)", e.getMessage());
+			assertEquals("HTTP 403 Forbidden: " + Msg.code(334) + "Access denied by default policy (no applicable rules)", e.getMessage());
 		}
 
 		patient = new Patient();
@@ -473,7 +474,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			myClient.update().resource(patient).execute();
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertEquals("HTTP 403 Forbidden: Access denied by default policy (no applicable rules)", e.getMessage());
+			assertEquals("HTTP 403 Forbidden: " + Msg.code(334) + "Access denied by default policy (no applicable rules)", e.getMessage());
 		}
 
 	}
@@ -543,7 +544,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 				myClient.transaction().withBundle(request).execute();
 				fail();
 			} catch (ForbiddenOperationException e) {
-				assertEquals("HTTP 403 Forbidden: Access denied by default policy (no applicable rules)", e.getMessage());
+				assertEquals("HTTP 403 Forbidden: " + Msg.code(334) + "Access denied by default policy (no applicable rules)", e.getMessage());
 			}
 		}
 
@@ -564,7 +565,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 				myClient.transaction().withBundle(request).execute();
 				fail();
 			} catch (ForbiddenOperationException e) {
-				assertEquals("HTTP 403 Forbidden: Access denied by default policy (no applicable rules)", e.getMessage());
+				assertEquals("HTTP 403 Forbidden: " + Msg.code(334) + "Access denied by default policy (no applicable rules)", e.getMessage());
 			}
 		}
 
@@ -1573,7 +1574,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 				Bundle result = myClient.search().byUrl(url).returnBundle(Bundle.class).execute();
 				fail();
 			} catch (ForbiddenOperationException e) {
-				assertThat(e.getMessage(), startsWith("HTTP 403 Forbidden: Access denied by rule"));
+				assertThat(e.getMessage(), startsWith("HTTP 403 Forbidden: " + Msg.code(333) + "Access denied by rule"));
 			}
 		}
 

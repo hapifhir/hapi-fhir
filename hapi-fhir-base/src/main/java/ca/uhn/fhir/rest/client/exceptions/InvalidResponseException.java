@@ -30,32 +30,31 @@ public class InvalidResponseException extends BaseServerResponseException {
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param theMessage
 	 *            The message
 	 */
-	public InvalidResponseException(int theStatusCode, String theMessage) {
+	public InvalidResponseException(String theMessage, int theStatusCode) {
 		super(theStatusCode, theMessage);
 	}
 
 	/**
 	 * Constructor
-	 * 
-	 * @param theMessage
+	 *  @param theMessage
 	 *            The message
 	 * @param theCause The cause
 	 */
-	public InvalidResponseException(int theStatusCode, String theMessage, Throwable theCause) {
+	public InvalidResponseException(String theMessage, int theStatusCode, Throwable theCause) {
 		super(theStatusCode, theMessage, theCause);
 	}
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param theCause
 	 *            The underlying cause exception
 	 */
-	public InvalidResponseException(int theStatusCode, Throwable theCause) {
+	public InvalidResponseException(Throwable theCause, int theStatusCode) {
 		super(theStatusCode, theCause.toString(), theCause);
 	}
 

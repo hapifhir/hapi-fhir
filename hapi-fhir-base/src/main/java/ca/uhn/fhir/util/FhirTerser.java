@@ -12,6 +12,7 @@ import ca.uhn.fhir.context.RuntimeChildDirectResource;
 import ca.uhn.fhir.context.RuntimeExtensionDtDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IIdentifiableElement;
 import ca.uhn.fhir.model.api.IResource;
@@ -183,7 +184,7 @@ public class FhirTerser {
 			if (theIgnoreMissingFields) {
 				return theSource;
 			}
-			throw new DataFormatException("Can not copy value from primitive of type " + theSource.getClass().getName() + " into type " + theTarget.getClass().getName());
+			throw new DataFormatException(Msg.code(1788) + "Can not copy value from primitive of type " + theSource.getClass().getName() + " into type " + theTarget.getClass().getName());
 		}
 
 		BaseRuntimeElementCompositeDefinition<?> sourceDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(theSource.getClass());
@@ -202,7 +203,7 @@ public class FhirTerser {
 					if (theIgnoreMissingFields) {
 						continue;
 					}
-					throw new DataFormatException("Type " + theTarget.getClass().getName() + " does not have a child with name " + elementName);
+					throw new DataFormatException(Msg.code(1789) + "Type " + theTarget.getClass().getName() + " does not have a child with name " + elementName);
 				}
 
 				BaseRuntimeElementDefinition<?> element = myContext.getElementDefinition(nextValue.getClass());
@@ -288,7 +289,7 @@ public class FhirTerser {
 		List<String> parts = Arrays.asList(thePath.split("\\."));
 		List<String> subList = parts.subList(1, parts.size());
 		if (subList.size() < 1) {
-			throw new ConfigurationException("Invalid path: " + thePath);
+			throw new ConfigurationException(Msg.code(1790) + "Invalid path: " + thePath);
 		}
 		return getDefinition(def, subList);
 
@@ -306,7 +307,7 @@ public class FhirTerser {
 
 		BaseRuntimeElementDefinition<?> def = myContext.getElementDefinition(theTarget.getClass());
 		if (!(def instanceof BaseRuntimeElementCompositeDefinition)) {
-			throw new IllegalArgumentException("Target is not a composite type: " + theTarget.getClass().getName());
+			throw new IllegalArgumentException(Msg.code(1791) + "Target is not a composite type: " + theTarget.getClass().getName());
 		}
 
 		BaseRuntimeElementCompositeDefinition<?> currentDef = (BaseRuntimeElementCompositeDefinition<?>) def;
@@ -699,7 +700,7 @@ public class FhirTerser {
 		}
 
 		if (parts.size() < 1) {
-			throw new ConfigurationException("Invalid path: " + thePath);
+			throw new ConfigurationException(Msg.code(1792) + "Invalid path: " + thePath);
 		}
 		return parts;
 	}
@@ -897,7 +898,7 @@ public class FhirTerser {
 				}
 				case EXTENSION_DECLARED:
 				case UNDECL_EXT: {
-					throw new IllegalStateException("state should not happen: " + theDefinition.getChildType());
+					throw new IllegalStateException(Msg.code(1793) + "state should not happen: " + theDefinition.getChildType());
 				}
 				case CONTAINED_RESOURCE_LIST: {
 					if (theElement != null) {
@@ -1012,7 +1013,7 @@ public class FhirTerser {
 								nextValue = (IBase) nextValueObject;
 							} catch (ClassCastException e) {
 								String s = "Found instance of " + nextValueObject.getClass() + " - Did you set a field value to the incorrect type? Expected " + IBase.class.getName();
-								throw new ClassCastException(s);
+								throw new ClassCastException(Msg.code(1794) + s);
 							}
 							if (nextValue == null) {
 								continue;
@@ -1051,7 +1052,7 @@ public class FhirTerser {
 			case CONTAINED_RESOURCE_LIST:
 			case EXTENSION_DECLARED:
 			case UNDECL_EXT: {
-				throw new IllegalStateException("state should not happen: " + def.getChildType());
+				throw new IllegalStateException(Msg.code(1795) + "state should not happen: " + def.getChildType());
 			}
 		}
 
@@ -1269,7 +1270,7 @@ public class FhirTerser {
 
 			BaseRuntimeChildDefinition nextChild = def.getChildByName(nextPart);
 			if (nextChild == null) {
-				throw new DataFormatException("Invalid path " + thePath + ": Element of type " + def.getName() + " has no child named " + nextPart + ". Valid names: " + def.getChildrenAndExtension().stream().map(t -> t.getElementName()).sorted().collect(Collectors.joining(", ")));
+				throw new DataFormatException(Msg.code(1796) + "Invalid path " + thePath + ": Element of type " + def.getName() + " has no child named " + nextPart + ". Valid names: " + def.getChildrenAndExtension().stream().map(t -> t.getElementName()).sorted().collect(Collectors.joining(", ")));
 			}
 
 			List<IBase> childValues = nextChild.getAccessor().getValues(target);
@@ -1283,7 +1284,7 @@ public class FhirTerser {
 						if (theElementsToAdd == -1) {
 							return (List<T>) Collections.singletonList(childValues.get(0));
 						} else if (nextChild.getMax() == 1 && !childValues.get(0).isEmpty()) {
-							throw new DataFormatException("Element at path " + thePath + " is not repeatable and not empty");
+							throw new DataFormatException(Msg.code(1797) + "Element at path " + thePath + " is not repeatable and not empty");
 						} else if (nextChild.getMax() == 1 && childValues.get(0).isEmpty()) {
 							return (List<T>) Collections.singletonList(childValues.get(0));
 						}
@@ -1299,7 +1300,7 @@ public class FhirTerser {
 						return (List<T>) Collections.singletonList(childValue);
 					} else {
 						if (nextChild.getMax() == 1) {
-							throw new DataFormatException("Can not add multiple values at path " + thePath + ": Element does not repeat");
+							throw new DataFormatException(Msg.code(1798) + "Can not add multiple values at path " + thePath + ": Element does not repeat");
 						}
 
 						List<T> values = (List<T>) Lists.newArrayList(childValue);
@@ -1320,7 +1321,7 @@ public class FhirTerser {
 			if (!lastPart) {
 				BaseRuntimeElementDefinition<?> nextDef = myContext.getElementDefinition(target.getClass());
 				if (!(nextDef instanceof BaseRuntimeElementCompositeDefinition)) {
-					throw new DataFormatException("Invalid path " + thePath + ": Element of type " + def.getName() + " has no child named " + nextPart + " (this is a primitive type)");
+					throw new DataFormatException(Msg.code(1799) + "Invalid path " + thePath + ": Element of type " + def.getName() + " has no child named " + nextPart + " (this is a primitive type)");
 				}
 				def = (BaseRuntimeElementCompositeDefinition<?>) nextDef;
 			}
@@ -1350,7 +1351,7 @@ public class FhirTerser {
 	public <T extends IBase> T addElement(@Nonnull IBase theTarget, @Nonnull String thePath, @Nullable String theValue) {
 		T value = (T) doAddElement(theTarget, thePath, 1).get(0);
 		if (!(value instanceof IPrimitiveType)) {
-			throw new DataFormatException("Element at path " + thePath + " is not a primitive datatype. Found: " + myContext.getElementDefinition(value.getClass()).getName());
+			throw new DataFormatException(Msg.code(1800) + "Element at path " + thePath + " is not a primitive datatype. Found: " + myContext.getElementDefinition(value.getClass()).getName());
 		}
 
 		((IPrimitiveType<?>) value).setValueAsString(theValue);
@@ -1381,7 +1382,7 @@ public class FhirTerser {
 	public <T extends IBase> T setElement(@Nonnull IBase theTarget, @Nonnull String thePath, @Nullable String theValue) {
 		T value = (T) doAddElement(theTarget, thePath, -1).get(0);
 		if (!(value instanceof IPrimitiveType)) {
-			throw new DataFormatException("Element at path " + thePath + " is not a primitive datatype. Found: " + myContext.getElementDefinition(value.getClass()).getName());
+			throw new DataFormatException(Msg.code(1801) + "Element at path " + thePath + " is not a primitive datatype. Found: " + myContext.getElementDefinition(value.getClass()).getName());
 		}
 
 		((IPrimitiveType<?>) value).setValueAsString(theValue);
@@ -1405,7 +1406,7 @@ public class FhirTerser {
 		for (IBase target : targets) {
 
 			if (!(target instanceof IPrimitiveType)) {
-				throw new DataFormatException("Element at path " + thePath + " is not a primitive datatype. Found: " + myContext.getElementDefinition(target.getClass()).getName());
+				throw new DataFormatException(Msg.code(1802) + "Element at path " + thePath + " is not a primitive datatype. Found: " + myContext.getElementDefinition(target.getClass()).getName());
 			}
 
 			((IPrimitiveType<?>) target).setValueAsString(valuesIter.next());

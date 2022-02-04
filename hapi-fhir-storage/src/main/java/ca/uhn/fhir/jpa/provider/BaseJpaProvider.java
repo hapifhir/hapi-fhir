@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
@@ -109,7 +110,7 @@ public class BaseJpaProvider {
 		boolean haveAt = theAt != null && (theAt.getLowerBoundAsInstant() != null || theAt.getUpperBoundAsInstant() != null);
 		if (haveAt && theSince != null) {
 			String msg = getContext().getLocalizer().getMessage(BaseJpaProvider.class, "cantCombintAtAndSince");
-			throw new InvalidRequestException(msg);
+			throw new InvalidRequestException(Msg.code(553) + msg);
 		}
 
 		if (haveAt) {

@@ -20,6 +20,7 @@ package ca.uhn.fhir.mdm.rules.json;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 
@@ -79,7 +80,7 @@ public class VectorMatchResultMap {
 		for (String fieldMatchName : splitFieldMatchNames(theFieldMatchNames)) {
 			int index = getFieldMatchIndex(fieldMatchName);
 			if (index == -1) {
-				throw new ConfigurationException("There is no matchField with name " + fieldMatchName);
+				throw new ConfigurationException(Msg.code(1523) + "There is no matchField with name " + fieldMatchName);
 			}
 			retval |= (1 << index);
 		}

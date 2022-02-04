@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.client.method;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -61,7 +62,7 @@ class IncludeParameter extends BaseQueryParameter {
 
 		mySpecType = theSpecType;
 		if (mySpecType != Include.class && mySpecType != String.class) {
-			throw new ConfigurationException("Invalid @" + IncludeParam.class.getSimpleName() + " parameter type: " + mySpecType);
+			throw new ConfigurationException(Msg.code(1462) + "Invalid @" + IncludeParam.class.getSimpleName() + " parameter type: " + mySpecType);
 		}
 
 	}

@@ -10,6 +10,7 @@ package ca.uhn.fhir.to.util;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -30,11 +31,11 @@ public class WebUtil {
 		try {
 			InputStream resourceAsStream = WebUtil.class.getResourceAsStream(resourceName);
 			if (resourceAsStream == null) {
-				throw new ConfigurationException("Failed to load resource: " + resourceName);
+				throw new ConfigurationException(Msg.code(196) + "Failed to load resource: " + resourceName);
 			}
 			props.load(resourceAsStream);
 		} catch (IOException e) {
-			throw new ConfigurationException("Failed to load resource: " + resourceName);
+			throw new ConfigurationException(Msg.code(197) + "Failed to load resource: " + resourceName);
 		}
 		String version = props.getProperty("version");
 		addWebjarWithVersion(theRegistry, name, version);

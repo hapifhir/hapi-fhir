@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.term.job;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.JobParametersValidator;
@@ -34,21 +35,20 @@ public class TermCodeSystemVersionDeleteJobParameterValidator implements JobPara
 	@Override
 	public void validate(JobParameters theJobParameters) throws JobParametersInvalidException {
 		if (theJobParameters == null) {
-			throw new JobParametersInvalidException("This job needs Parameter: '" + JOB_PARAM_CODE_SYSTEM_VERSION_ID + "'");
+			throw new JobParametersInvalidException(Msg.code(918) + "This job needs Parameter: '" + JOB_PARAM_CODE_SYSTEM_VERSION_ID + "'");
 		}
 
 		if ( ! theJobParameters.getParameters().containsKey(JOB_PARAM_CODE_SYSTEM_VERSION_ID)) {
-			throw new JobParametersInvalidException("This job needs Parameter: '" + JOB_PARAM_CODE_SYSTEM_VERSION_ID + "'");
+			throw new JobParametersInvalidException(Msg.code(919) + "This job needs Parameter: '" + JOB_PARAM_CODE_SYSTEM_VERSION_ID + "'");
 		}
 
 		Long termCodeSystemPid = theJobParameters.getLong(JOB_PARAM_CODE_SYSTEM_VERSION_ID);
 		if (termCodeSystemPid == null) {
-			throw new JobParametersInvalidException("'" + JOB_PARAM_CODE_SYSTEM_VERSION_ID + "' parameter is null");
+			throw new JobParametersInvalidException(Msg.code(920) + "'" + JOB_PARAM_CODE_SYSTEM_VERSION_ID + "' parameter is null");
 		}
 
 		if (termCodeSystemPid <= 0) {
-			throw new JobParametersInvalidException(
-				"Invalid parameter '" + JOB_PARAM_CODE_SYSTEM_VERSION_ID + "' value: " + termCodeSystemPid);
+			throw new JobParametersInvalidException(Msg.code(921) + "Invalid parameter '" + JOB_PARAM_CODE_SYSTEM_VERSION_ID + "' value: " + termCodeSystemPid);
 		}
 	}
 }

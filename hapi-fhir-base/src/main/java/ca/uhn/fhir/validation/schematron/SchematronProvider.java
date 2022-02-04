@@ -20,12 +20,13 @@ package ca.uhn.fhir.validation.schematron;
  * #L%
  */
 
-import java.lang.reflect.Constructor;
-
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.IValidatorModule;
+
+import java.lang.reflect.Constructor;
 
 public class SchematronProvider {
 
@@ -50,7 +51,7 @@ public class SchematronProvider {
 		try {
 			return (Class<? extends IValidatorModule>) Class.forName("ca.uhn.fhir.validation.schematron.SchematronBaseValidator");
 		} catch (ClassNotFoundException e) {
-			throw new IllegalStateException("Cannot resolve schematron validator ", e);
+			throw new IllegalStateException(Msg.code(1973) + "Cannot resolve schematron validator ", e);
 		}
 	}
 	
@@ -61,7 +62,7 @@ public class SchematronProvider {
 			Constructor<? extends IValidatorModule> constructor = cls.getConstructor(FhirContext.class);
 			return constructor.newInstance(myContext);
 		} catch (Exception e) {
-			throw new IllegalStateException("Cannot construct schematron validator ", e);
+			throw new IllegalStateException(Msg.code(1974) + "Cannot construct schematron validator ", e);
 		}
 	}
 }

@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.binstore;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -56,36 +57,36 @@ public class NullBinaryStorageSvcImpl implements IBinaryStorageSvc {
 
 	@Override
 	public String newBlobId() {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(1345));
 	}
 
 	@Override
 	public StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType, InputStream theInputStream) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(1346));
 	}
 
 	@Override
 	public StoredDetails fetchBlobDetails(IIdType theResourceId, String theBlobId) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(1347));
 	}
 
 	@Override
 	public boolean writeBlob(IIdType theResourceId, String theBlobId, OutputStream theOutputStream) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(1348));
 	}
 
 	@Override
 	public void expungeBlob(IIdType theIdElement, String theBlobId) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(1349));
 	}
 
 	@Override
 	public byte[] fetchBlob(IIdType theResourceId, String theBlobId) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(1350));
 	}
 
 	@Override
 	public byte[] fetchDataBlobFromBinary(IBaseBinary theResource) throws IOException {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(1351));
 	}
 }

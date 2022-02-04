@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.client.method;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import java.lang.reflect.Method;
 import java.util.*;
 
@@ -67,13 +68,13 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
 		IIdType id = (IIdType) theArgs[getIdParameterIndex()];
 		if (id == null) {
-			throw new NullPointerException("ID can not be null");
+			throw new NullPointerException(Msg.code(1472) + "ID can not be null");
 		}
 
 		if (id.hasResourceType() == false) {
 			id = id.withResourceType(getResourceName());
 		} else if (getResourceName().equals(id.getResourceType()) == false) {
-			throw new InvalidRequestException("ID parameter has the wrong resource type, expected '" + getResourceName() + "', found: " + id.getResourceType());
+			throw new InvalidRequestException(Msg.code(1473) + "ID parameter has the wrong resource type, expected '" + getResourceName() + "', found: " + id.getResourceType());
 		}
 
 		HttpDeleteClientInvocation retVal = createDeleteInvocation(getContext(), id, Collections.emptyMap());

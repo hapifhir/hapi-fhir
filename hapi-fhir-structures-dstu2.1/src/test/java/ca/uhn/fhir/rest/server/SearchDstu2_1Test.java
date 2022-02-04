@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -77,7 +78,7 @@ public class SearchDstu2_1Test {
 			assertEquals(400, status.getStatusLine().getStatusCode());
 			
 			OperationOutcome oo = (OperationOutcome) ourCtx.newXmlParser().parseResource(responseContent);
-			assertEquals("Invalid search parameter \"identifier.chain\". Parameter contains a chain (.chain) and chains are not supported for this parameter (chaining is only allowed on reference parameters)", oo.getIssue().get(0).getDiagnostics());
+			assertEquals(Msg.code(1935) + "Invalid search parameter \"identifier.chain\". Parameter contains a chain (.chain) and chains are not supported for this parameter (chaining is only allowed on reference parameters)", oo.getIssue().get(0).getDiagnostics());
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}

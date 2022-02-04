@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.IPointcut;
@@ -122,7 +123,7 @@ public class ServerExceptionDstu3Test {
 			String responseContent = new String(responseContentBytes, Charsets.UTF_8);
 			ourLog.info(status.getStatusLine().toString());
 			ourLog.info(responseContent);
-			assertThat(responseContent, containsString("\"diagnostics\":\"Failed to call access method: java.lang.NullPointerException: Hello\""));
+			assertThat(responseContent, containsString("\"diagnostics\":\"" + Msg.code(389) + "Failed to call access method: java.lang.NullPointerException: Hello\""));
 		}
 
 	}
@@ -139,7 +140,7 @@ public class ServerExceptionDstu3Test {
 			String responseContent = new String(responseContentBytes, Charsets.UTF_8);
 			ourLog.info(status.getStatusLine().toString());
 			ourLog.info(responseContent);
-			assertThat(responseContent, containsString("\"diagnostics\":\"Failed to call access method: java.io.IOException: Hello\""));
+			assertThat(responseContent, containsString("\"diagnostics\":\"" + Msg.code(389) + "Failed to call access method: java.io.IOException: Hello\""));
 		}
 
 	}

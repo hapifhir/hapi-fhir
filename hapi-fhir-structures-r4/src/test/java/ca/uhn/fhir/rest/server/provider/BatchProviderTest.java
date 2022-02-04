@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.provider;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.api.server.storage.IReindexJobSubmitter;
@@ -127,7 +128,7 @@ public class BatchProviderTest extends BaseR4ServerTest {
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: $reindex must specify either everything=true or provide at least one value for url", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: "+ Msg.code(318) +"$reindex must specify either everything=true or provide at least one value for url", e.getMessage());
 		}
 	}
 

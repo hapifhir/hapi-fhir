@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.util.jsonpatch;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
@@ -72,12 +73,12 @@ public class JsonPatchUtils {
 				String resourceType = theCtx.getResourceType(theResourceToUpdate);
 				resourceId = defaultString(resourceId, resourceType);
 				String msg = theCtx.getLocalizer().getMessage(JsonPatchUtils.class, "failedToApplyPatch", resourceId, e.getMessage());
-				throw new InvalidRequestException(msg);
+				throw new InvalidRequestException(Msg.code(818) + msg);
 			}
 			return retVal;
 
 		} catch (IOException | JsonPatchException theE) {
-			throw new InvalidRequestException(theE.getMessage());
+			throw new InvalidRequestException(Msg.code(819) + theE.getMessage());
 		}
 
 	}

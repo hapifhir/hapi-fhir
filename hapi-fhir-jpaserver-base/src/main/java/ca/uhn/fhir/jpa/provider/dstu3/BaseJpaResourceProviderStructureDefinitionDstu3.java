@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoStructureDefinition;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -63,7 +64,7 @@ public class BaseJpaResourceProviderStructureDefinitionDstu3 extends JpaResource
 			map.add(StructureDefinition.SP_URL, new UriParam(theUrl.getValue()));
 			IBundleProvider outcome = getDao().search(map, theRequestDetails);
 			if (outcome.size() == 0) {
-				throw new ResourceNotFoundException("No StructureDefiniton found with url = '" + theUrl.getValue() + "'");
+				throw new ResourceNotFoundException(Msg.code(1152) + "No StructureDefiniton found with url = '" + theUrl.getValue() + "'");
 			}
 			sd = (StructureDefinition) outcome.getResources(0, 1).get(0);
 		}

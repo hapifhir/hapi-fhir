@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.search.elastic;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.jpa.search.lastn.ElasticsearchRestClientFactory;
 import org.apache.commons.lang3.StringUtils;
@@ -156,7 +157,7 @@ public class ElasticsearchHibernatePropertiesBuilder {
 			assert acknowledgedResponse.isAcknowledged();
 		} catch (IOException theE) {
 			theE.printStackTrace();
-			throw new ConfigurationException("Couldn't connect to the elasticsearch server to create necessary templates. Ensure the Elasticsearch user has permissions to create templates.");
+			throw new ConfigurationException(Msg.code(1169) + "Couldn't connect to the elasticsearch server to create necessary templates. Ensure the Elasticsearch user has permissions to create templates.");
 		}
 	}
 }

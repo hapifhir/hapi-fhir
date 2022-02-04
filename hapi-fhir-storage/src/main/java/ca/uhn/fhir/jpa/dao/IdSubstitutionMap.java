@@ -25,8 +25,6 @@ import com.google.common.collect.MultimapBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import javax.annotation.Nonnull;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

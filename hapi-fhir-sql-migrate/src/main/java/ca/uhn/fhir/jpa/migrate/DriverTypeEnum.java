@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.migrate;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.dbcp2.BasicDataSource;
@@ -103,7 +104,7 @@ public enum DriverTypeEnum {
 				retval = "sqlserver2012.sql";
 				break;
 			default:
-				throw new ConfigurationException("No schema initialization script available for driver " + this);
+				throw new ConfigurationException(Msg.code(45) + "No schema initialization script available for driver " + this);
 		}
 		return retval;
 	}
@@ -133,7 +134,7 @@ public enum DriverTypeEnum {
 		try {
 			Class.forName(myDriverClassName).getConstructor().newInstance();
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-			throw new InternalErrorException("Unable to find driver class: " + myDriverClassName, e);
+			throw new InternalErrorException(Msg.code(46) + "Unable to find driver class: " + myDriverClassName, e);
 		}
 
 		DataSourceTransactionManager transactionManager = new DataSourceTransactionManager();

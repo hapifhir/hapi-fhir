@@ -19,6 +19,7 @@ package ca.uhn.fhir.jpa.binstore;
  * limitations under the License.
  * #L%
  */
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -110,7 +111,7 @@ public class BinaryAccessProvider {
 			StoredDetails blobDetails = myBinaryStorageSvc.fetchBlobDetails(theResourceId, blobId);
 			if (blobDetails == null) {
 				String msg = myCtx.getLocalizer().getMessage(BinaryAccessProvider.class, "unknownBlobId");
-				throw new InvalidRequestException(msg);
+				throw new InvalidRequestException(Msg.code(1331) + msg);
 			}
 
 			theServletResponse.setStatus(200);
@@ -136,7 +137,7 @@ public class BinaryAccessProvider {
 			byte[] data = target.getData();
 			if (data == null) {
 				String msg = myCtx.getLocalizer().getMessage(BinaryAccessProvider.class, "noAttachmentDataPresent", sanitizeUrlPart(theResourceId), sanitizeUrlPart(thePath));
-				throw new InvalidRequestException(msg);
+				throw new InvalidRequestException(Msg.code(1332) + msg);
 			}
 
 			theServletResponse.setStatus(200);
@@ -172,10 +173,10 @@ public class BinaryAccessProvider {
 
 		String requestContentType = theServletRequest.getContentType();
 		if (isBlank(requestContentType)) {
-			throw new InvalidRequestException("No content-target supplied");
+			throw new InvalidRequestException(Msg.code(1333) + "No content-target supplied");
 		}
 		if (EncodingEnum.forContentTypeStrict(requestContentType) != null) {
-			throw new InvalidRequestException("This operation is for binary content, got: " + requestContentType);
+			throw new InvalidRequestException(Msg.code(1334) + "This operation is for binary content, got: " + requestContentType);
 		}
 
 		long size = theServletRequest.getContentLength();
@@ -233,7 +234,7 @@ public class BinaryAccessProvider {
 		String resType = this.myCtx.getResourceType(theResource);
 		if (!type.isPresent()) {
 			String msg = this.myCtx.getLocalizer().getMessageSanitized(BinaryAccessProvider.class, "unknownPath", resType, thePath);
-			throw new InvalidRequestException(msg);
+			throw new InvalidRequestException(Msg.code(1335) + msg);
 		}
 		IBase element = type.get();
 
@@ -242,7 +243,7 @@ public class BinaryAccessProvider {
 		if (binaryTarget.isPresent() == false) {
 			BaseRuntimeElementDefinition<?> def2 = myCtx.getElementDefinition(element.getClass());
 			String msg = this.myCtx.getLocalizer().getMessageSanitized(BinaryAccessProvider.class, "unknownType", resType, thePath, def2.getName());
-			throw new InvalidRequestException(msg);
+			throw new InvalidRequestException(Msg.code(1336) + msg);
 		} else {
 			return binaryTarget.get();
 		}
@@ -337,16 +338,16 @@ public class BinaryAccessProvider {
 
 	private String validateResourceTypeAndPath(@IdParam IIdType theResourceId, @OperationParam(name = "path", min = 1, max = 1) IPrimitiveType<String> thePath) {
 		if (isBlank(theResourceId.getResourceType())) {
-			throw new InvalidRequestException("No resource type specified");
+			throw new InvalidRequestException(Msg.code(1337) + "No resource type specified");
 		}
 		if (isBlank(theResourceId.getIdPart())) {
-			throw new InvalidRequestException("No ID specified");
+			throw new InvalidRequestException(Msg.code(1338) + "No ID specified");
 		}
 		if (thePath == null || isBlank(thePath.getValue())) {
 			if ("Binary".equals(theResourceId.getResourceType())) {
 				return "Binary";
 			}
-			throw new InvalidRequestException("No path specified");
+			throw new InvalidRequestException(Msg.code(1339) + "No path specified");
 		}
 
 		return thePath.getValue();
@@ -357,7 +358,7 @@ public class BinaryAccessProvider {
 		String resourceType = theResourceId.getResourceType();
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceType);
 		if (dao == null) {
-			throw new InvalidRequestException("Unknown/unsupported resource type: " + sanitizeUrlPart(resourceType));
+			throw new InvalidRequestException(Msg.code(1340) + "Unknown/unsupported resource type: " + sanitizeUrlPart(resourceType));
 		}
 		return dao;
 	}

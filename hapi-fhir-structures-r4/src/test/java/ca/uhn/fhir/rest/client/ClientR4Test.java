@@ -2,6 +2,7 @@ package ca.uhn.fhir.rest.client;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.rest.annotation.At;
@@ -338,7 +339,7 @@ public class ClientR4Test {
 			ourCtx.newRestfulClient(ITestClientWithCreateWithInvalidParameterType.class, "http://foo");
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals("Method 'createPatient' is annotated with @ResourceParam but has a type that is not an implementation of org.hl7.fhir.instance.model.api.IBaseResource", e.getMessage());
+			assertEquals(Msg.code(1435) + "Method 'createPatient' is annotated with @ResourceParam but has a type that is not an implementation of org.hl7.fhir.instance.model.api.IBaseResource", e.getMessage());
 		}
 	}
 
@@ -360,7 +361,7 @@ public class ClientR4Test {
 			ourCtx.newRestfulClient(ITestClientWithCreateWithValidAndInvalidParameterType.class, "http://foo");
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals("Parameter #2/2 of method 'createPatient' on type 'ca.uhn.fhir.rest.client.ClientR4Test.ITestClientWithCreateWithValidAndInvalidParameterType' has no recognized FHIR interface parameter annotations. Don't know how to handle this parameter", e.getMessage());
+			assertEquals(Msg.code(1438) + "Parameter #2/2 of method 'createPatient' on type 'ca.uhn.fhir.rest.client.ClientR4Test.ITestClientWithCreateWithValidAndInvalidParameterType' has no recognized FHIR interface parameter annotations. Don't know how to handle this parameter", e.getMessage());
 		}
 	}
 
@@ -1116,7 +1117,7 @@ public class ClientR4Test {
 			client.getPatientWithAt(new InstantType("2010-10-01T01:02:03.0Z"));
 			fail();
 		} catch (UnsupportedOperationException e) {
-			assertEquals("The method 'getPatientWithAt' in type ITestClientWithUnannotatedMethod has no handler. Did you forget to annotate it with a RESTful method annotation?", e.getMessage());
+			assertEquals(Msg.code(1403) + "The method 'getPatientWithAt' in type ITestClientWithUnannotatedMethod has no handler. Did you forget to annotate it with a RESTful method annotation?", e.getMessage());
 		}
 
 	}
@@ -1356,7 +1357,7 @@ public class ClientR4Test {
 			client.read().resource("Patient").withId("1").execute();
 			fail();
 		} catch (FhirClientConnectionException e) {
-			assertEquals("Failed to retrieve the server metadata statement during client initialization. URL used was http://testValidateServerBaseWithInvalidResponse/metadata", e.getMessage());
+			assertEquals(Msg.code(1357) + "Failed to retrieve the server metadata statement during client initialization. URL used was http://testValidateServerBaseWithInvalidResponse/metadata", e.getMessage());
 		}
 
 	}
@@ -1459,7 +1460,7 @@ public class ClientR4Test {
 		try {
 			ourCtx.newRestfulClient(ITestClientWithAndOr2.class, "http://foo");
 		} catch (ConfigurationException e) {
-			assertEquals("Argument #0 of Method 'search' in type 'ca.uhn.fhir.rest.client.ClientR4Test.ITestClientWithAndOr2' is of an invalid generic type (can not be a collection of a collection of a collection)", e.getMessage());
+			assertEquals(Msg.code(1433) + "Argument #0 of Method 'search' in type 'ca.uhn.fhir.rest.client.ClientR4Test.ITestClientWithAndOr2' is of an invalid generic type (can not be a collection of a collection of a collection)", e.getMessage());
 		}
 	}
 

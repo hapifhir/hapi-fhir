@@ -20,6 +20,7 @@ package ca.uhn.fhir.cql.common.provider;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +42,7 @@ public class CqlProviderFactory {
 			case R4:
 				return myApplicationContext.getBean(ca.uhn.fhir.cql.r4.provider.MeasureOperationsProvider.class);
 			default:
-				throw new ConfigurationException("CQL is not supported for FHIR version " + myFhirContext.getVersion().getVersion());
+				throw new ConfigurationException(Msg.code(1654) + "CQL is not supported for FHIR version " + myFhirContext.getVersion().getVersion());
 		}
 	}
 }

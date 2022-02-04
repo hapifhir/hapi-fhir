@@ -20,6 +20,7 @@ package ca.uhn.hapi.fhir.docs;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
@@ -432,7 +433,7 @@ public class ValidatorExamples {
          // validation failure
          ValidationResult result = validator.validateWithResult(resource);
          if (result.isSuccessful() == false) {
-            throw new Exception("We failed!");
+            throw new Exception(Msg.code(640) + "We failed!");
          }
          
       }

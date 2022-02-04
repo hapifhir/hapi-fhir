@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.sched;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.jpa.model.sched.IHapiScheduler;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
@@ -156,7 +157,7 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService, Sma
 			}
 		} catch (Exception e) {
 			ourLog.error("Failed to start scheduler", e);
-			throw new ConfigurationException("Failed to start scheduler", e);
+			throw new ConfigurationException(Msg.code(1632) + "Failed to start scheduler", e);
 		}
 	}
 

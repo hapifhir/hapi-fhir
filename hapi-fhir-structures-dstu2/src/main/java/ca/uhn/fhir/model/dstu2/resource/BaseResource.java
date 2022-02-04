@@ -1,5 +1,6 @@
 package ca.uhn.fhir.model.dstu2.resource;
 
+import ca.uhn.fhir.i18n.Msg;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -163,12 +164,12 @@ public abstract class BaseResource extends BaseElement implements IResource {
 
 			@Override
 			public Object getUserData(String theName) {
-				throw new UnsupportedOperationException();
+				throw new UnsupportedOperationException(Msg.code(582));
 			}
 
 			@Override
 			public void setUserData(String theName, Object theValue) {
-				throw new UnsupportedOperationException();
+				throw new UnsupportedOperationException(Msg.code(583));
 			}
 
 			@Override

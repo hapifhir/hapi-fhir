@@ -1,0 +1,7 @@
+---
+issue: 3156
+type: fix
+jira: smile-3382
+title: "Fixed race condition in BaseHapiFhirDao that resulted in exceptions
+      being thrown when multiple resources in a single bundle transaction
+      had the same tags."

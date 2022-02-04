@@ -1,5 +1,6 @@
 package ca.uhn.fhir.tinder;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingModel;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -37,7 +38,7 @@ public class TinderSourcesGeneratorMojo extends AbstractGeneratorMojo {
 			gen.setTemplate(templateName);
 			gen.writeAll(packageDirectoryBase, null, configuration.getPackageBase());
 		} catch (Exception e) {
-			throw new MojoFailureException("Failed to generate server", e);
+			throw new MojoFailureException(Msg.code(106) + "Failed to generate server", e);
 		}
 
 		myProject.addCompileSourceRoot(configuration.getTargetDirectory().getAbsolutePath());

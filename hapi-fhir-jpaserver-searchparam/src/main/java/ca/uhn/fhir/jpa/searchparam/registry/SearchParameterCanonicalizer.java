@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.searchparam.registry;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -85,7 +86,7 @@ public class SearchParameterCanonicalizer {
 			case DSTU2_1:
 				// Non-supported - these won't happen so just fall through
 			default:
-				throw new InternalErrorException("SearchParameter canonicalization not supported for FHIR version" + myFhirContext.getVersion().getVersion());
+				throw new InternalErrorException(Msg.code(510) + "SearchParameter canonicalization not supported for FHIR version" + myFhirContext.getVersion().getVersion());
 		}
 
 		if (retVal != null) {

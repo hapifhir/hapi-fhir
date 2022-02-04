@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.interceptor.partition;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -63,7 +64,7 @@ public class RequestTenantPartitionInterceptor {
 		// We will use the tenant ID that came from the request as the partition name
 		String tenantId = theRequestDetails.getTenantId();
 		if (isBlank(tenantId)) {
-			throw new InternalErrorException("No tenant ID has been specified");
+			throw new InternalErrorException(Msg.code(343) + "No tenant ID has been specified");
 		}
 
 		return RequestPartitionId.fromPartitionName(tenantId);

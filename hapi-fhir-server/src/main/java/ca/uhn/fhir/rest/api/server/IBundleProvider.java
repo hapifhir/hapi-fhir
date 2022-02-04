@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.api.server;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -147,7 +148,7 @@ public interface IBundleProvider {
 
 		Integer size = size();
 		if (size == null) {
-			throw new ConfigurationException("Attempt to request all resources from an asynchronous search result.  The SearchParameterMap for this search probably should have been synchronous.");
+			throw new ConfigurationException(Msg.code(464) + "Attempt to request all resources from an asynchronous search result.  The SearchParameterMap for this search probably should have been synchronous.");
 		}
 		if (size > 0) {
 			retval.addAll(getResources(0, size));

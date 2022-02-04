@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.search;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
@@ -77,7 +78,7 @@ public class ExtendedLuceneClauseBuilder {
 					nextValueTrimmed = nextValueTrimmed.substring(0, nextValueTrimmed.indexOf("/_history"));
 				}
 			} else {
-				throw new IllegalArgumentException("Unsupported full-text param type: " + nextOr.getClass());
+				throw new IllegalArgumentException(Msg.code(1088) + "Unsupported full-text param type: " + nextOr.getClass());
 			}
 			if (isNotBlank(nextValueTrimmed)) {
 				terms.add(nextValueTrimmed);
@@ -111,7 +112,6 @@ public class ExtendedLuceneClauseBuilder {
 			return;
 		}
 		for (List<? extends IQueryParameterType> nextAnd : theAndOrTerms) {
-			String indexFieldPrefix = "sp." + theSearchParamName + ".token";
 
 			ourLog.debug("addTokenUnmodifiedSearch {} {}", theSearchParamName, nextAnd);
 			List<? extends PredicateFinalStep> clauses = nextAnd.stream().map(orTerm -> {
@@ -119,21 +119,21 @@ public class ExtendedLuceneClauseBuilder {
 					TokenParam token = (TokenParam) orTerm;
 					if (StringUtils.isBlank(token.getSystem())) {
 						// bare value
-						return myPredicateFactory.match().field(indexFieldPrefix + ".code").matching(token.getValue());
+						return myPredicateFactory.match().field("sp." + theSearchParamName + ".token" + ".code").matching(token.getValue());
 					} else if (StringUtils.isBlank(token.getValue())) {
 						// system without value
-						return myPredicateFactory.match().field(indexFieldPrefix + ".system").matching(token.getSystem());
+						return myPredicateFactory.match().field("sp." + theSearchParamName + ".token" + ".system").matching(token.getSystem());
 					} else {
 						// system + value
-						return myPredicateFactory.match().field(indexFieldPrefix + ".code-system").matching(token.getValueAsQueryToken(this.myFhirContext));
+						return myPredicateFactory.match().field(getTokenSystemCodeFieldPath(theSearchParamName)).matching(token.getValueAsQueryToken(this.myFhirContext));
 					}
 				} else if (orTerm instanceof StringParam) {
 					// MB I don't quite understand why FhirResourceDaoR4SearchNoFtTest.testSearchByIdParamWrongType() uses String but here we are
 					StringParam string = (StringParam) orTerm;
 					// treat a string as a code with no system (like _id)
-					return myPredicateFactory.match().field(indexFieldPrefix + ".code").matching(string.getValue());
+					return myPredicateFactory.match().field("sp." + theSearchParamName + ".token" + ".code").matching(string.getValue());
 				} else {
-					throw new IllegalArgumentException("Unexpected param type for token search-param: " + orTerm.getClass().getName());
+					throw new IllegalArgumentException(Msg.code(1089) + "Unexpected param type for token search-param: " + orTerm.getClass().getName());
 				}
 			}).collect(Collectors.toList());
 
@@ -141,6 +141,11 @@ public class ExtendedLuceneClauseBuilder {
 			myRootClause.must(finalClause);
 		}
 
+	}
+
+	@Nonnull
+	public static String getTokenSystemCodeFieldPath(@Nonnull String theSearchParamName) {
+		return "sp." + theSearchParamName + ".token" + ".code-system";
 	}
 
 	public void addStringTextSearch(String theSearchParamName, List<List<IQueryParameterType>> stringAndOrTerms) {

@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
@@ -120,7 +121,7 @@ public class CreateDstu2_1Test {
 		assertEquals(400, status.getStatusLine().getStatusCode());
 
 		assertThat(responseContent, containsString("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\""));
-		assertThat(responseContent, containsString("Failed to parse request body as XML resource. Error was: com.ctc.wstx.exc.WstxUnexpectedCharException: Unexpected character 'F'"));
+		assertThat(responseContent, containsString(Msg.code(450) + "Failed to parse request body as XML resource. Error was: " + Msg.code(1852) + "com.ctc.wstx.exc.WstxUnexpectedCharException: Unexpected character 'F'"));
 
 	}
 

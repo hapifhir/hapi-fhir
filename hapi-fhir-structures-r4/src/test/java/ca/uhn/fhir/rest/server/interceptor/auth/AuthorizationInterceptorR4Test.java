@@ -2,6 +2,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -114,7 +115,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class AuthorizationInterceptorR4Test {
 
-	private static final String ERR403 = "{\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"error\",\"code\":\"processing\",\"diagnostics\":\"Access denied by default policy (no applicable rules)\"}]}";
+	private static final String ERR403 = "{\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"error\",\"code\":\"processing\",\"diagnostics\":\""+ Msg.code(334) + "Access denied by default policy (no applicable rules)\"}]}";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(AuthorizationInterceptorR4Test.class);
 	private static CloseableHttpClient ourClient;
 	private static String ourConditionalCreateId;
@@ -533,7 +534,7 @@ public class AuthorizationInterceptorR4Test {
 				.build();
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage(), is(equalTo("too:many:colons is not a valid search parameter. Search parameters must be in the form resourcetype:parametercode, e.g. 'Device:patient'")));
+			assertThat(e.getMessage(), is(equalTo(Msg.code(342) + "too:many:colons is not a valid search parameter. Search parameters must be in the form resourcetype:parametercode, e.g. 'Device:patient'")));
 		}
 
 
@@ -548,7 +549,7 @@ public class AuthorizationInterceptorR4Test {
 				.build();
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage(), is(equalTo("no-colons is not a valid search parameter. Search parameters must be in the form resourcetype:parametercode, e.g. 'Device:patient'")));
+			assertThat(e.getMessage(), is(equalTo(Msg.code(341) + "no-colons is not a valid search parameter. Search parameters must be in the form resourcetype:parametercode, e.g. 'Device:patient'")));
 		}
 	}
 

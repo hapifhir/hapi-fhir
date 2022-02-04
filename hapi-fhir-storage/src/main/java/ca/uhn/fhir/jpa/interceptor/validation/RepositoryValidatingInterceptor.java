@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.interceptor.validation;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
@@ -142,9 +143,9 @@ public class RepositoryValidatingInterceptor {
 	protected void handleFailure(IRepositoryValidatingRule.RuleEvaluation theOutcome) {
 		if (theOutcome.getOperationOutcome() != null) {
 			String firstIssue = OperationOutcomeUtil.getFirstIssueDetails(myFhirContext, theOutcome.getOperationOutcome());
-			throw new PreconditionFailedException(firstIssue, theOutcome.getOperationOutcome());
+			throw new PreconditionFailedException(Msg.code(574) + firstIssue, theOutcome.getOperationOutcome());
 		}
-		throw new PreconditionFailedException(theOutcome.getFailureDescription());
+		throw new PreconditionFailedException(Msg.code(575) + theOutcome.getFailureDescription());
 	}
 
 }

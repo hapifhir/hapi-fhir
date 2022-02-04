@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.StringDt;
 import org.apache.commons.lang3.Validate;
@@ -38,7 +39,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -156,7 +156,7 @@ public class ParametersUtil {
 				addClientParameter(theContext, next, theTargetResource, paramChild, paramChildElem, theName);
 			}
 		} else {
-			throw new IllegalArgumentException("Don't know how to handle value of type " + theValue.getClass() + " for parameter " + theName);
+			throw new IllegalArgumentException(Msg.code(1806) + "Don't know how to handle value of type " + theValue.getClass() + " for parameter " + theName);
 		}
 	}
 
