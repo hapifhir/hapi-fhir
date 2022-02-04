@@ -997,7 +997,7 @@ public class SearchBuilder implements ISearchBuilder {
 						continue;
 					}
 
-					paths = param.getPathsSplit();
+					paths = param.getPathsSplitForResourceType(resType);
 
 					String targetResourceType = defaultString(nextInclude.getParamTargetType(), null);
 					for (String nextPath : paths) {
