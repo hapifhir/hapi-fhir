@@ -167,5 +167,4 @@
 2019-12-31T23:59:59.999Z,gt2019, False
 2019-12-31T23:59:59.999Z,lt2020, True
 2019-12-31T23:59:59.999Z,le2019-12-31T23:59:59.998Z, False
-2019-12-31T23:59:59.999Z,gt2019-12-31T23:59:59.998Z, False #Dateparam add 1 to millisecond precision when gt prefix - so fail
-2019-12-31T23:59:59.999Z,sa2019-12-31T23:59:59.998Z, False #Dateparam add 1 to millisecond precision when gt prefix - so fail
+2019-12-31T23:59:59.999Z,gt2019-12-31T23:59:59.998Z, True

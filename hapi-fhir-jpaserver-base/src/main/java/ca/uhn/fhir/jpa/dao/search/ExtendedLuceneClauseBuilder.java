@@ -416,8 +416,8 @@ public class ExtendedLuceneClauseBuilder {
 
 		// Consider lower and upper bounds for building range predicates
 		DateRangeParam dateRange = new DateRangeParam(theDateParam);
-		Instant lowerBoundAsInstant = Optional.ofNullable(dateRange.getLowerBoundAsInstant()).map(Date::toInstant).orElse(null);
-		Instant upperBoundAsInstant = Optional.ofNullable(dateRange.getUpperBoundAsInstant()).map(Date::toInstant).orElse(null);
+		Instant lowerBoundAsInstant = Optional.ofNullable(dateRange.getLowerBound()).map(param -> param.getValue().toInstant()).orElse(null);
+		Instant upperBoundAsInstant = Optional.ofNullable(dateRange.getUpperBound()).map(param -> param.getValue().toInstant()).orElse(null);
 
 		if (Objects.isNull(prefix) || prefix == ParamPrefixEnum.EQUAL) {
 			// For equality prefix we would like the date to fall between the lower and upper bound
