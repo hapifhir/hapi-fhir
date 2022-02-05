@@ -20,8 +20,9 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -43,6 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -78,6 +80,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	private final String myRequestRuleListKey = AuthorizationInterceptor.class.getName() + "_" + myInstanceIndex + "_RULELIST";
 	private PolicyEnum myDefaultPolicy = PolicyEnum.DENY;
 	private Set<AuthorizationFlagsEnum> myFlags = Collections.emptySet();
+	private IValidationSupport myValidationSupport;
 
 	/**
 	 * Constructor
@@ -137,6 +140,15 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		}
 
 		return verdict;
+	}
+
+	/**
+	 * @since 6.0.0
+	 */
+	@Nullable
+	@Override
+	public IValidationSupport getValidationSupport() {
+		return myValidationSupport;
 	}
 
 	/**
@@ -435,11 +447,52 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		handleUserOperation(theRequest, theNewResource, RestOperationTypeEnum.UPDATE, thePointcut);
 	}
 
+	/**
+	 * Sets a validation support module that will be used for terminology-based rules
+	 *
+	 * @param theValidationSupport The validation support. Null is also acceptable (this is the default),
+	 *                             in which case the validation support module associated with the {@link FhirContext}
+	 *                             will be used.
+	 * @since 6.0.0
+	 */
+	public AuthorizationInterceptor setValidationSupport(IValidationSupport theValidationSupport) {
+		myValidationSupport = theValidationSupport;
+		return this;
+	}
+
 	private enum OperationExamineDirection {
 		BOTH,
 		IN,
 		NONE,
 		OUT,
+	}
+
+	static List<IBaseResource> toListOfResourcesAndExcludeContainer(IBaseResource theResponseObject, FhirContext fhirContext) {
+		if (theResponseObject == null) {
+			return Collections.emptyList();
+		}
+
+		List<IBaseResource> retVal;
+
+		boolean isContainer = false;
+		if (theResponseObject instanceof IBaseBundle) {
+			isContainer = true;
+		} else if (theResponseObject instanceof IBaseParameters) {
+			isContainer = true;
+		}
+
+		if (!isContainer) {
+			return Collections.singletonList(theResponseObject);
+		}
+
+		retVal = fhirContext.newTerser().getAllPopulatedChildElementsOfType(theResponseObject, IBaseResource.class);
+
+		// Exclude the container
+		if (retVal.size() > 0 && retVal.get(0) == theResponseObject) {
+			retVal = retVal.subList(1, retVal.size());
+		}
+
+		return retVal;
 	}
 
 	public static class Verdict {
@@ -476,34 +529,6 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			return b.build();
 		}
 
-	}
-
-	static List<IBaseResource> toListOfResourcesAndExcludeContainer(IBaseResource theResponseObject, FhirContext fhirContext) {
-		if (theResponseObject == null) {
-			return Collections.emptyList();
-		}
-
-		List<IBaseResource> retVal;
-
-		boolean isContainer = false;
-		if (theResponseObject instanceof IBaseBundle) {
-			isContainer = true;
-		} else if (theResponseObject instanceof IBaseParameters) {
-			isContainer = true;
-		}
-
-		if (!isContainer) {
-			return Collections.singletonList(theResponseObject);
-		}
-
-		retVal = fhirContext.newTerser().getAllPopulatedChildElementsOfType(theResponseObject, IBaseResource.class);
-
-		// Exclude the container
-		if (retVal.size() > 0 && retVal.get(0) == theResponseObject) {
-			retVal = retVal.subList(1, retVal.size());
-		}
-
-		return retVal;
 	}
 
 }

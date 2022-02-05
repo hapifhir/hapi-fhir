@@ -112,6 +112,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
 
 public class AuthorizationInterceptorR4Test {
 
@@ -792,16 +793,281 @@ public class AuthorizationInterceptorR4Test {
 	}
 
 	@Test
-	public void testCodeIn() {
+	public void testCodeIn_Search_BanList() throws IOException {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-					.allow("Rule 1").read().resourcesOfType("Observation")..transaction().withAnyOperation().andApplyNormalRules().andThen()
+					.deny("Rule 1").read().resourcesOfType("Observation").withCodeInValueSet("code", "http://hl7.org/fhir/ValueSet/administrative-gender").andThen()
+					.allowAll()
 					.build();
 			}
 		});
 
+		HttpGet httpGet;
+		String response;
+		Observation observation;
+		CloseableHttpResponse status;
+
+		// Banned code present
+		ourHitMethod = false;
+		observation = createObservation(10, "Patient/2");
+		observation
+			.getCode()
+			.addCoding()
+			.setSystem("http://hl7.org/fhir/administrative-gender")
+			.setCode("male");
+		ourReturn = Collections.singletonList(observation);
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation/10");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertThat(response, containsString("Access denied by rule: Rule 1"));
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		// Acceptable code present
+		ourHitMethod = false;
+		observation = createObservation(10, "Patient/2");
+		observation
+			.getCode()
+			.addCoding()
+			.setSystem("http://hl7.org/fhir/administrative-gender")
+			.setCode("foo");
+		ourReturn = Collections.singletonList(observation);
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation/10");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		// Both Unacceptable and Acceptable code present
+		ourHitMethod = false;
+		observation = createObservation(10, "Patient/2");
+		observation
+			.getCode()
+			.addCoding()
+			.setSystem("http://hl7.org/fhir/administrative-gender")
+			.setCode("foo");
+		observation
+			.getCode()
+			.addCoding()
+			.setSystem("http://hl7.org/fhir/administrative-gender")
+			.setCode("male");
+		ourReturn = Collections.singletonList(observation);
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation/10");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertThat(response, containsString("Access denied by rule: Rule 1"));
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+	}
+
+
+	@Test
+	public void testCodeIn_Search_AllowList() throws IOException {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("Rule 1").read().resourcesOfType("Observation").withCodeInValueSet("code", "http://hl7.org/fhir/ValueSet/administrative-gender").andThen()
+					.build();
+			}
+		});
+
+		HttpGet httpGet;
+		String response;
+		Observation observation;
+		CloseableHttpResponse status;
+
+		// Allowed code present - Read
+		ourHitMethod = false;
+		observation = createObservation(10, "Patient/2");
+		observation
+			.getCode()
+			.addCoding()
+			.setSystem("http://hl7.org/fhir/administrative-gender")
+			.setCode("male");
+		ourReturn = Collections.singletonList(observation);
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation/10");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		// No acceptable code present - Read
+		ourHitMethod = false;
+		observation = createObservation(10, "Patient/2");
+		observation
+			.getCode()
+			.addCoding()
+			.setSystem("http://hl7.org/fhir/administrative-gender")
+			.setCode("foo");
+		ourReturn = Collections.singletonList(observation);
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation/10");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertThat(response, containsString("Access denied by default policy"));
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		// Both Unacceptable and Acceptable code present
+		ourHitMethod = false;
+		observation = createObservation(10, "Patient/2");
+		observation
+			.getCode()
+			.addCoding()
+			.setSystem("http://hl7.org/fhir/administrative-gender")
+			.setCode("foo");
+		observation
+			.getCode()
+			.addCoding()
+			.setSystem("http://hl7.org/fhir/administrative-gender")
+			.setCode("male");
+		ourReturn = Collections.singletonList(observation);
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation/10");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		// Allowed code present - Search
+		ourHitMethod = false;
+		observation = createObservation(10, "Patient/2");
+		observation
+			.getCode()
+			.addCoding()
+			.setSystem("http://hl7.org/fhir/administrative-gender")
+			.setCode("male");
+		ourReturn = Collections.singletonList(observation);
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		// No acceptable code present - Search
+		ourHitMethod = false;
+		observation = createObservation(10, "Patient/2");
+		observation
+			.getCode()
+			.addCoding()
+			.setSystem("http://hl7.org/fhir/administrative-gender")
+			.setCode("foo");
+		ourReturn = Collections.singletonList(observation);
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertThat(response, containsString("Access denied by default policy"));
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+	}
+
+
+	@Test
+	public void testCodeIn_TransactionCreate() throws IOException {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow().transaction().withAnyOperation().andApplyNormalRules().andThen()
+					.deny("Rule 1").write().resourcesOfType("Observation").withCodeInValueSet("code", "http://hl7.org/fhir/ValueSet/administrative-gender").andThen()
+					.allowAll()
+					.build();
+			}
+		});
+
+		HttpPost httpPost;
+		String response;
+		Observation observation;
+		CloseableHttpResponse status;
+
+		observation = createObservation(10, "Patient/2");
+		observation
+			.getCode()
+			.addCoding()
+			.setSystem("http://hl7.org/fhir/administrative-gender")
+			.setCode("male");
+
+		Bundle input = new Bundle();
+		input.setType(Bundle.BundleType.TRANSACTION);
+		input
+			.addEntry()
+			.setResource(observation)
+			.getRequest()
+			.setUrl("/Observation")
+			.setMethod(Bundle.HTTPVerb.POST);
+
+		Bundle output = new Bundle();
+		output.setType(Bundle.BundleType.TRANSACTIONRESPONSE);
+		output.addEntry().setResource(createPatient(1));
+
+		// Transaction with resource containing banned code
+		ourReturn = Collections.singletonList(output);
+		ourHitMethod = false;
+		httpPost = new HttpPost("http://localhost:" + ourPort + "/");
+		httpPost.setEntity(createFhirResourceEntity(input));
+		status = ourClient.execute(httpPost);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertThat(response, containsString("Access denied by rule: Rule 1"));
+		assertEquals(403, status.getStatusLine().getStatusCode());
+
+		// Transaction with resource containing acceptable code
+		observation.getCode().getCoding().clear();
+		observation.getCode().addCoding().setSystem("http://foo").setCode("bar");
+		ourReturn = Collections.singletonList(output);
+		ourHitMethod = false;
+		httpPost = new HttpPost("http://localhost:" + ourPort + "/");
+		httpPost.setEntity(createFhirResourceEntity(input));
+		status = ourClient.execute(httpPost);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+
+	}
+
+	@Test
+	public void testCodeIn_InvalidSearchParam() throws IOException {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("Rule 1").read().resourcesOfType("Observation").withCodeInValueSet("blah", "http://hl7.org/fhir/ValueSet/administrative-gender").andThen()
+					.build();
+			}
+		});
+
+		HttpGet httpGet;
+		String response;
+		Observation observation;
+		CloseableHttpResponse status;
+
+		// Allowed code present - Read
+		ourHitMethod = false;
+		observation = createObservation(10, "Patient/2");
+		observation
+			.getCode()
+			.addCoding()
+			.setSystem("http://hl7.org/fhir/administrative-gender")
+			.setCode("male");
+		ourReturn = Collections.singletonList(observation);
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation/10");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertEquals(500, status.getStatusLine().getStatusCode());
+		assertThat(response, containsString("HAPI-2025: Unknown SearchParameter for resource Observation: blah"));
+		assertTrue(ourHitMethod);
 	}
 
 

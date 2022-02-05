@@ -346,10 +346,6 @@ public class UrlUtil {
 		String url = theUrl;
 		UrlParts retVal = new UrlParts();
 		if (url.startsWith("http")) {
-			if (url.startsWith("/")) {
-				url = url.substring(1);
-			}
-
 			int qmIdx = url.indexOf('?');
 			if (qmIdx != -1) {
 				retVal.setParams(defaultIfBlank(url.substring(qmIdx + 1), null));
@@ -375,7 +371,7 @@ public class UrlUtil {
 		if (url.length() > 1 && url.charAt(0) == '/' && Character.isLetter(url.charAt(1)) && url.contains("?")) {
 			url = url.substring(1);
 		}
-		int nextStart = 0;
+		int nextStart = parsingStart;
 		boolean nextIsHistory = false;
 
 		for (int idx = parsingStart; idx < url.length(); idx++) {

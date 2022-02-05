@@ -472,22 +472,26 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				}
 
 				private RuleBuilderFinished finished() {
-					Validate.isTrue(myRule == null, "Can not call finished() twice");
-					myRule = new RuleImplOp(myRuleName);
-					myRule.setMode(myRuleMode);
-					myRule.setOp(myRuleOp);
-					myRule.setAppliesTo(myAppliesTo);
-					myRule.setAppliesToTypes(myAppliesToTypes);
-					myRule.setAppliesToInstances(myAppliesToInstances);
-					myRule.setClassifierType(myClassifierType);
-					myRule.setClassifierCompartmentName(myInCompartmentName);
-					myRule.setClassifierCompartmentOwners(myInCompartmentOwners);
-					myRule.setAppliesToDeleteCascade(myOnCascade);
-					myRule.setAppliesToDeleteExpunge(myOnExpunge);
-					myRule.setAdditionalSearchParamsForCompartmentTypes(myAdditionalSearchParamsForCompartmentTypes);
-					myRules.add(myRule);
+					return finished(new RuleImplOp(myRuleName));
+				}
 
-					return new RuleBuilderFinished(myRule);
+				private RuleBuilderFinished finished(RuleImplOp theRule) {
+					Validate.isTrue(myRule == null, "Can not call finished() twice");
+					myRule = theRule;
+					theRule.setMode(myRuleMode);
+					theRule.setOp(myRuleOp);
+					theRule.setAppliesTo(myAppliesTo);
+					theRule.setAppliesToTypes(myAppliesToTypes);
+					theRule.setAppliesToInstances(myAppliesToInstances);
+					theRule.setClassifierType(myClassifierType);
+					theRule.setClassifierCompartmentName(myInCompartmentName);
+					theRule.setClassifierCompartmentOwners(myInCompartmentOwners);
+					theRule.setAppliesToDeleteCascade(myOnCascade);
+					theRule.setAppliesToDeleteExpunge(myOnExpunge);
+					theRule.setAdditionalSearchParamsForCompartmentTypes(myAdditionalSearchParamsForCompartmentTypes);
+					myRules.add(theRule);
+
+					return new RuleBuilderFinished(theRule);
 				}
 
 				@Override
@@ -552,6 +556,14 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				public IAuthRuleBuilderRuleOpClassifierFinished withAnyId() {
 					myClassifierType = ClassifierTypeEnum.ANY_ID;
 					return finished();
+				}
+
+				@Override
+				public IAuthRuleBuilderRuleOpClassifierFinished withCodeInValueSet(@Nonnull String theSearchParameterName, @Nonnull String theValueSetUrl) {
+					SearchParameterAndValueSetRuleImpl rule = new SearchParameterAndValueSetRuleImpl(myRuleName);
+					rule.setSearchParameterName(theSearchParameterName);
+					rule.setValueSetUrl(theValueSetUrl);
+					return finished(rule);
 				}
 
 				RuleBuilderFinished addInstances(Collection<IIdType> theInstances) {

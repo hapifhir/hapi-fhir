@@ -89,7 +89,9 @@ public abstract class BaseConfigDstu3Plus extends BaseConfig {
 		CachingValidationSupport.CacheTimeouts cacheTimeouts = CachingValidationSupport.CacheTimeouts.defaultValues()
 			.setTranslateCodeMillis(1000);
 
-		return new CachingValidationSupport(jpaValidationSupportChain(), cacheTimeouts);
+		CachingValidationSupport retVal = new CachingValidationSupport(jpaValidationSupportChain(), cacheTimeouts);
+		fhirContext().setValidationSupport(retVal);
+		return retVal;
 	}
 
 	@Bean(name = "myInstanceValidator")

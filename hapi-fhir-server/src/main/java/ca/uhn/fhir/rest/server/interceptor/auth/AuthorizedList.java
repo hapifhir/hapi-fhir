@@ -120,6 +120,7 @@ public class AuthorizedList {
 	 * @param theSearchParameterName The search parameter name, e.g. <code>code</code>
 	 * @param theValueSetUrl         The valueset URL, e.g. <code>http://my-value-set</code>
 	 * @return Returns a reference to <code>this</code> for easy chaining
+	 * @see AuthorizationInterceptor If search narrowing by code is being used for security reasons, consider also using AuthorizationInterceptor as a failsafe to ensure that no inapproproiate resources are returned
 	 * @since 6.0.0
 	 */
 	public AuthorizedList addCodeInValueSet(@Nonnull String theResourceName, @Nonnull String theSearchParameterName, @Nonnull String theValueSetUrl) {
@@ -138,6 +139,7 @@ public class AuthorizedList {
 	 * @param theSearchParameterName The search parameter name, e.g. <code>code</code>
 	 * @param theValueSetUrl         The valueset URL, e.g. <code>http://my-value-set</code>
 	 * @return Returns a reference to <code>this</code> for easy chaining
+	 * @see AuthorizationInterceptor If search narrowing by code is being used for security reasons, consider also using AuthorizationInterceptor as a failsafe to ensure that no inapproproiate resources are returned
 	 * @since 6.0.0
 	 */
 	public AuthorizedList addCodeNotInValueSet(@Nonnull String theResourceName, @Nonnull String theSearchParameterName, @Nonnull String theValueSetUrl) {
