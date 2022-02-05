@@ -322,6 +322,8 @@ public class Builder {
 				private final String myVersion;
 				private final boolean myUnique;
 				private String[] myIncludeColumns;
+				private boolean myForceInclude;
+				private boolean myOnline;
 
 				public BuilderAddIndexUnique(String theVersion, boolean theUnique) {
 					myVersion = theVersion;
@@ -344,8 +346,10 @@ public class Builder {
 					task.setUnique(myUnique);
 					task.setColumns(theColumnNames);
 					task.setDoNothing(theDoNothing);
+					task.setOnline(myOnline);
 					if (myIncludeColumns != null) {
 						task.setIncludeColumns(myIncludeColumns);
+						task.setForceInclude(myForceInclude);
 					}
 					addTask(task);
 					return task;
@@ -353,6 +357,23 @@ public class Builder {
 
 				public BuilderAddIndexUnique includeColumns(String... theIncludeColumns) {
 					myIncludeColumns = theIncludeColumns;
+					return this;
+				}
+
+				/**
+				 * Append the INCLUDE columns in the index columns when INCLUDE is not supported.
+				 */
+				public BuilderAddIndexUnique forceInclude(boolean theFlag) {
+					myForceInclude = theFlag;
+					return this;
+				}
+
+				/**
+				 * Add the index without locking the table.
+				 * FIXME - should we always do this?
+				 */
+				public BuilderAddIndexUnique online(boolean theOnlineFlag) {
+					myOnline = theOnlineFlag;
 					return this;
 				}
 			}

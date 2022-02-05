@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -39,10 +40,13 @@ import java.util.Set;
 public class AddIndexTask extends BaseTableTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(AddIndexTask.class);
+
 	private String myIndexName;
 	private List<String> myColumns;
 	private Boolean myUnique;
 	private List<String> myIncludeColumns = Collections.emptyList();
+	private boolean myForceInclude;
+	private boolean myOnline;
 
 	public AddIndexTask(String theProductVersion, String theSchemaVersion) {
 		super(theProductVersion, theSchemaVersion);
@@ -96,9 +100,11 @@ public class AddIndexTask extends BaseTableTask {
 	@Nonnull
 	String generateSql() {
 		String unique = myUnique ? "unique " : "";
-		String columns = String.join(", ", myColumns);
 		String includeClause = "";
 		String mssqlWhereClause = "";
+		// we may need to shove the INCLUDE into the USING list
+		List<String> indexedColumns = new ArrayList<>(myColumns);
+
 		if (!myIncludeColumns.isEmpty()) {
 			switch (getDriverType()) {
 				case POSTGRES_9_4:
@@ -113,9 +119,14 @@ public class AddIndexTask extends BaseTableTask {
 					// These platforms don't support the include clause
 					// Per:
 					// https://use-the-index-luke.com/blog/2019-04/include-columns-in-btree-indexes#postgresql-limitations
+					if (myForceInclude) {
+						// we add the include columns to the main list
+						indexedColumns.addAll(myIncludeColumns);
+					}
 					break;
 			}
 		}
+		String columns = String.join(", ", indexedColumns);
 		if (myUnique && getDriverType() == DriverTypeEnum.MSSQL_2012) {
 			mssqlWhereClause = " WHERE (";
 			for (int i = 0; i < myColumns.size(); i++) {
@@ -126,31 +137,33 @@ public class AddIndexTask extends BaseTableTask {
 			}
 			mssqlWhereClause += ")";
 		}
-		String sql = "create " + unique + "index " + myIndexName + " on " + getTableName() + "(" + columns + ")" + includeClause + mssqlWhereClause;
+		String postgresOnline = "";
+		String oracleOnlineDeferred = "";
+		if (myOnline) {
+			switch (getDriverType()) {
+				case POSTGRES_9_4:
+					postgresOnline = "CONCURRENTLY ";
+					break;
+				case ORACLE_12C:
+					// FIXME MB test oracle
+					oracleOnlineDeferred = " ONLINE DEFERRED";
+					break;
+				case MSSQL_2012:
+					oracleOnlineDeferred = " WITH (ONLINE = ON)";
+					break;
+				default:
+			}
+		}
+
+
+		String sql =
+			"create " + unique + "index " + postgresOnline + myIndexName +
+			" on " + getTableName() + "(" + columns + ")" + includeClause +  mssqlWhereClause + oracleOnlineDeferred;
 		return sql;
 	}
 
 	public void setColumns(String... theColumns) {
 		setColumns(Arrays.asList(theColumns));
-	}
-
-	@Override
-	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
-		super.generateEquals(theBuilder, theOtherObject);
-
-		AddIndexTask otherObject = (AddIndexTask) theOtherObject;
-		theBuilder.append(myIndexName, otherObject.myIndexName);
-		theBuilder.append(myColumns, otherObject.myColumns);
-		theBuilder.append(myUnique, otherObject.myUnique);
-
-	}
-
-	@Override
-	protected void generateHashCode(HashCodeBuilder theBuilder) {
-		super.generateHashCode(theBuilder);
-		theBuilder.append(myIndexName);
-		theBuilder.append(myColumns);
-		theBuilder.append(myUnique);
 	}
 
 	public void setIncludeColumns(String... theIncludeColumns) {
@@ -161,4 +174,45 @@ public class AddIndexTask extends BaseTableTask {
 		Validate.notNull(theIncludeColumns);
 		myIncludeColumns = theIncludeColumns;
 	}
+
+	/**
+	 * Force the INCLUDE columns into the USING columns
+	 * when driver doesn't suppport INCLUDE.
+	 */
+	public void setForceInclude(boolean theForceFlag) {
+		myForceInclude = theForceFlag;
+	}
+
+	/**
+	 * Add Index without locking the table.
+	 */
+	public void setOnline(boolean theFlag) {
+		myOnline = theFlag;
+	}
+	@Override
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
+		super.generateEquals(theBuilder, theOtherObject);
+
+		AddIndexTask otherObject = (AddIndexTask) theOtherObject;
+		theBuilder.append(myIndexName, otherObject.myIndexName);
+		theBuilder.append(myColumns, otherObject.myColumns);
+		theBuilder.append(myUnique, otherObject.myUnique);
+		theBuilder.append(myIncludeColumns, otherObject.myIncludeColumns);
+		theBuilder.append(myForceInclude, otherObject.myForceInclude);
+		theBuilder.append(myOnline, otherObject.myOnline);
+
+	}
+
+	@Override
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+		super.generateHashCode(theBuilder);
+		theBuilder.append(myIndexName);
+		theBuilder.append(myColumns);
+		theBuilder.append(myUnique);
+		// fixme myIncludeColumns was missing.  Is that a problem?
+		theBuilder.append(myIncludeColumns);
+		theBuilder.append(myForceInclude);
+		theBuilder.append(myOnline);
+	}
+
 }
