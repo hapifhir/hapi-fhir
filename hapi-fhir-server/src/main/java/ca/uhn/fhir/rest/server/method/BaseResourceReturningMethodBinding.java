@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.method;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -94,8 +95,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			Class<?> collectionType = ReflectionUtil.getGenericCollectionTypeOfMethodReturnType(theMethod);
 			if (collectionType != null) {
 				if (!Object.class.equals(collectionType) && !IBaseResource.class.isAssignableFrom(collectionType)) {
-					throw new ConfigurationException(
-						"Method " + theMethod.getDeclaringClass().getSimpleName() + "#" + theMethod.getName() + " returns an invalid collection generic type: " + collectionType);
+					throw new ConfigurationException(Msg.code(433) + "Method " + theMethod.getDeclaringClass().getSimpleName() + "#" + theMethod.getName() + " returns an invalid collection generic type: " + collectionType);
 				}
 			}
 
@@ -113,8 +113,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		} else if (void.class.equals(methodReturnType)) {
 			myMethodReturnType = MethodReturnTypeEnum.VOID;
 		} else {
-			throw new ConfigurationException(
-				"Invalid return type '" + methodReturnType.getCanonicalName() + "' on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
+			throw new ConfigurationException(Msg.code(434) + "Invalid return type '" + methodReturnType.getCanonicalName() + "' on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
 		}
 
 		if (theReturnResourceType != null) {
@@ -240,7 +239,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		for (IBaseResource next : resourceList) {
 			if (next.getIdElement() == null || next.getIdElement().isEmpty()) {
 				if (!(next instanceof IBaseOperationOutcome)) {
-					throw new InternalErrorException("Server method returned resource of type[" + next.getClass().getSimpleName() + "] with no ID specified (IResource#setId(IdDt) must be called)");
+					throw new InternalErrorException(Msg.code(435) + "Server method returned resource of type[" + next.getClass().getSimpleName() + "] with no ID specified (IResource#setId(IdDt) must be called)");
 				}
 			}
 		}
@@ -393,9 +392,9 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			case RESOURCE: {
 				IBundleProvider result = (IBundleProvider) resultObj;
 				if (result.size() == 0) {
-					throw new ResourceNotFoundException(theRequest.getId());
+					throw new ResourceNotFoundException(Msg.code(436) + "Resource " + theRequest.getId() + " is not known");
 				} else if (result.size() > 1) {
-					throw new InternalErrorException("Method returned multiple resources");
+					throw new InternalErrorException(Msg.code(437) + "Method returned multiple resources");
 				}
 
 				IBaseResource resource = result.getResources(0, 1).get(0);
@@ -403,7 +402,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				break;
 			}
 			default:
-				throw new IllegalStateException(); // should not happen
+				throw new IllegalStateException(Msg.code(438)); // should not happen
 		}
 		return responseObject;
 	}

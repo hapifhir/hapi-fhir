@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.demo;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import org.apache.commons.cli.ParseException;
@@ -58,7 +59,7 @@ public class ContextHolder {
 				break;
 			case DSTU2_HL7ORG:
 			default:
-				throw new ParseException("FHIR version not supported by this command: " + theCtx.getVersion().getVersion());
+				throw new ParseException(Msg.code(1531) + "FHIR version not supported by this command: " + theCtx.getVersion().getVersion());
 		}
 
 		ourCtx = theCtx;

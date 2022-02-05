@@ -16,7 +16,7 @@ class Replace extends Filter {
         String replacement = "";
 
         if (needle == null) {
-            throw new RuntimeException("invalid pattern: " + needle);
+            throw new RuntimeException(Msg.code(721) + "invalid pattern: " + needle);
         }
 
         if (params.length >= 2) {
@@ -24,7 +24,7 @@ class Replace extends Filter {
             Object obj = super.get(1, params);
 
             if (obj == null) {
-                throw new RuntimeException("invalid replacement: " + needle);
+                throw new RuntimeException(Msg.code(722) + "invalid replacement: " + needle);
             }
 
             replacement = super.asString(super.get(1, params));

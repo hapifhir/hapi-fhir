@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.partition;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
@@ -115,7 +116,7 @@ public class PartitionManagementProviderTest {
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: No Partition ID supplied", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1314) + "No Partition ID supplied", e.getMessage());
 		}
 		verify(myPartitionConfigSvc, times(0)).createPartition(any());
 	}
@@ -158,7 +159,7 @@ public class PartitionManagementProviderTest {
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: No Partition ID supplied", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1314) + "No Partition ID supplied", e.getMessage());
 		}
 		verify(myPartitionConfigSvc, times(0)).getPartitionById(any());
 	}
@@ -199,7 +200,7 @@ public class PartitionManagementProviderTest {
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: No Partition ID supplied", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1314) + "No Partition ID supplied", e.getMessage());
 		}
 		verify(myPartitionConfigSvc, times(0)).createPartition(any());
 	}
@@ -235,7 +236,7 @@ public class PartitionManagementProviderTest {
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: No Partition ID supplied", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1314) + "No Partition ID supplied", e.getMessage());
 		}
 		verify(myPartitionConfigSvc, times(0)).createPartition(any());
 	}

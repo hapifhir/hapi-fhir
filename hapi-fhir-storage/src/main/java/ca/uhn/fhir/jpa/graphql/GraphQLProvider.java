@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.graphql;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -103,7 +104,7 @@ public class GraphQLProvider {
 			case DSTU2_HL7ORG:
 			case DSTU2_1:
 			default: {
-				throw new UnsupportedOperationException("GraphQL not supported for version: " + theFhirContext.getVersion().getVersion());
+				throw new UnsupportedOperationException(Msg.code(1143) + "GraphQL not supported for version: " + theFhirContext.getVersion().getVersion());
 			}
 		}
 
@@ -116,7 +117,7 @@ public class GraphQLProvider {
 		if (theQueryUrl != null) {
 			return processGraphQLRequest(theRequestDetails, theId, theQueryUrl);
 		}
-		throw new InvalidRequestException("Unable to parse empty GraphQL expression");
+		throw new InvalidRequestException(Msg.code(1144) + "Unable to parse empty GraphQL expression");
 	}
 
 	@Description(value="This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.")
@@ -125,7 +126,7 @@ public class GraphQLProvider {
 		if (theQueryBody != null) {
 			return processGraphQLRequest(theRequestDetails, theId, theQueryBody);
 		}
-		throw new InvalidRequestException("Unable to parse empty GraphQL expression");
+		throw new InvalidRequestException(Msg.code(1145) + "Unable to parse empty GraphQL expression");
 	}
 
 	public String processGraphQLRequest(ServletRequestDetails theRequestDetails, IIdType theId, String theQuery) {
@@ -135,7 +136,7 @@ public class GraphQLProvider {
 		try {
 			engine.setGraphQL(Parser.parse(theQuery));
 		} catch (Exception theE) {
-			throw new InvalidRequestException("Unable to parse GraphQL Expression: " + theE.toString());
+			throw new InvalidRequestException(Msg.code(1146) + "Unable to parse GraphQL Expression: " + theE.toString());
 		}
 
 		try {
@@ -166,7 +167,7 @@ public class GraphQLProvider {
 				ourLog.error("Failure during GraphQL processing", e);
 			}
 			b.append(e.getMessage());
-			throw new UnclassifiedServerFailureException(statusCode, b.toString());
+			throw new UnclassifiedServerFailureException(statusCode, Msg.code(1147) + b.toString());
 		}
 	}
 
@@ -174,7 +175,7 @@ public class GraphQLProvider {
 	public void initialize(RestfulServer theServer) {
 		ourLog.trace("Initializing GraphQL provider");
 		if (!theServer.getFhirContext().getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
-			throw new ConfigurationException("Can not use " + getClass().getName() + " provider on server with FHIR " + theServer.getFhirContext().getVersion().getVersion().name() + " context");
+			throw new ConfigurationException(Msg.code(1148) + "Can not use " + getClass().getName() + " provider on server with FHIR " + theServer.getFhirContext().getVersion().getVersion().name() + " context");
 		}
 	}
 

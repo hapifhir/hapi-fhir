@@ -10,7 +10,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.search.reindex.BlockPolicy;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.util.FileUtil;
 import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.r4.model.Bundle;

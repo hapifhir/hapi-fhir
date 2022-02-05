@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
@@ -133,7 +134,7 @@ public class FhirPathFilterInterceptorTest {
 			String responseText = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response:\n{}", responseText);
 			assertEquals(400, response.getStatusLine().getStatusCode());
-			assertThat(responseText, containsString("Error parsing FHIRPath expression: Error performing *: left operand has more than one value"));
+			assertThat(responseText, containsString(Msg.code(327) + "Error parsing FHIRPath expression: "+Msg.code(255) + "org.hl7.fhir.exceptions.PathEngineException: Error performing *: left operand has more than one value"));
 		}
 
 	}

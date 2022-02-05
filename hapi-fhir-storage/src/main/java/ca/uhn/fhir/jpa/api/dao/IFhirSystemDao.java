@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.api.dao;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -80,7 +81,7 @@ public interface IFhirSystemDao<T, MT> extends IDao {
 	 * This form of the transaction processor can handle write operations only (no reads)
 	 */
 	default T transactionNested(RequestDetails theRequestDetails, T theResources) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(570));
 	}
 
 }

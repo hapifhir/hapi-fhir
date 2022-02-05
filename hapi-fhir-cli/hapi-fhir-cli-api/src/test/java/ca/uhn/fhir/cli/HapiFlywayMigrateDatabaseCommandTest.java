@@ -14,7 +14,6 @@ import org.springframework.jdbc.support.lob.DefaultLobHandler;
 import org.springframework.jdbc.support.lob.LobCreator;
 
 import javax.annotation.Nonnull;
-import javax.validation.constraints.NotNull;
 import java.io.File;
 import java.io.IOException;
 import java.sql.PreparedStatement;
@@ -28,7 +27,9 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class HapiFlywayMigrateDatabaseCommandTest {
 

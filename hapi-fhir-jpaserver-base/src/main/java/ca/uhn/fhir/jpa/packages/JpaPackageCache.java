@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.packages;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -174,7 +175,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		try {
 			return NpmPackage.fromPackage(inputStream);
 		} catch (IOException e) {
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(1294) + e);
 		}
 	}
 
@@ -190,7 +191,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 				.setLastModified(thePackageVersion.getUpdatedTime());
 			return retVal;
 		} catch (IOException e) {
-			throw new InternalErrorException("Failed to load package. There was a problem reading binaries", e);
+			throw new InternalErrorException(Msg.code(1295) + "Failed to load package. There was a problem reading binaries", e);
 		}
 	}
 
@@ -208,7 +209,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		} else {
 			byte[] value = BinaryUtil.getOrCreateData(myCtx, theBinary).getValue();
 			if (value == null) {
-				throw new InternalErrorException("Failed to fetch blob from Binary/" + theBinary.getIdElement());
+				throw new InternalErrorException(Msg.code(1296) + "Failed to fetch blob from Binary/" + theBinary.getIdElement());
 			}
 			return value;
 		}
@@ -231,16 +232,16 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 		NpmPackage npmPackage = NpmPackage.fromPackage(new ByteArrayInputStream(bytes));
 		if (!npmPackage.id().equalsIgnoreCase(thePackageId)) {
-			throw new InvalidRequestException("Package ID " + npmPackage.id() + " doesn't match expected: " + thePackageId);
+			throw new InvalidRequestException(Msg.code(1297) + "Package ID " + npmPackage.id() + " doesn't match expected: " + thePackageId);
 		}
 		if (!PackageVersionComparator.isEquivalent(thePackageVersionId, npmPackage.version())) {
-			throw new InvalidRequestException("Package ID " + npmPackage.version() + " doesn't match expected: " + thePackageVersionId);
+			throw new InvalidRequestException(Msg.code(1298) + "Package ID " + npmPackage.version() + " doesn't match expected: " + thePackageVersionId);
 		}
 
 		String packageVersionId = npmPackage.version();
 		FhirVersionEnum fhirVersion = FhirVersionEnum.forVersionString(npmPackage.fhirVersion());
 		if (fhirVersion == null) {
-			throw new InvalidRequestException("Unknown FHIR version: " + npmPackage.fhirVersion());
+			throw new InvalidRequestException(Msg.code(1299) + "Unknown FHIR version: " + npmPackage.fhirVersion());
 		}
 		FhirContext packageContext = getFhirContext(fhirVersion);
 
@@ -302,7 +303,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 						contents = packageFolder.fetchFile(nextFile);
 						contentsString = toUtf8String(contents);
 					} catch (IOException e) {
-						throw new InternalErrorException(e);
+						throw new InternalErrorException(Msg.code(1300) + e);
 					}
 
 					IBaseResource resource;
@@ -431,7 +432,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 		InputStreamWithSrc pkg = super.loadFromPackageServer(thePackageId, thePackageVersion);
 		if (pkg == null) {
-			throw new ResourceNotFoundException("Unable to locate package " + thePackageId + "#" + thePackageVersion);
+			throw new ResourceNotFoundException(Msg.code(1301) + "Unable to locate package " + thePackageId + "#" + thePackageVersion);
 		}
 
 		try {
@@ -469,7 +470,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			try {
 				return loadPackage(theInstallationSpec.getName(), theInstallationSpec.getVersion());
 			} catch (IOException e) {
-				throw new InternalErrorException(e);
+				throw new InternalErrorException(Msg.code(1302) + e);
 			}
 		});
 	}
@@ -492,11 +493,11 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 				.build()
 				.execute(new HttpGet(thePackageUrl))) {
 				if (request.getStatusLine().getStatusCode() != 200) {
-					throw new ResourceNotFoundException("Received HTTP " + request.getStatusLine().getStatusCode() + " from URL: " + thePackageUrl);
+					throw new ResourceNotFoundException(Msg.code(1303) + "Received HTTP " + request.getStatusLine().getStatusCode() + " from URL: " + thePackageUrl);
 				}
 				return IOUtils.toByteArray(request.getEntity().getContent());
 			} catch (IOException e) {
-				throw new InternalErrorException("Error loading \"" + thePackageUrl + "\": " + e.getMessage());
+				throw new InternalErrorException(Msg.code(1304) + "Error loading \"" + thePackageUrl + "\": " + e.getMessage());
 			}
 		}
 	}
@@ -534,7 +535,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			FhirContext packageContext = getFhirContext(contents.getFhirVersion());
 			return EncodingEnum.detectEncoding(resourceContents).newParser(packageContext).parseResource(resourceContents);
 		} catch (Exception e) {
-			throw new RuntimeException("Failed to load package resource " + contents, e);
+			throw new RuntimeException(Msg.code(1305) + "Failed to load package resource " + contents, e);
 		}
 	}
 
@@ -545,7 +546,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 		Optional<NpmPackageEntity> pkg = myPackageDao.findByPackageId(thePackageId);
 		if (!pkg.isPresent()) {
-			throw new ResourceNotFoundException("Unknown package ID: " + thePackageId);
+			throw new ResourceNotFoundException(Msg.code(1306) + "Unknown package ID: " + thePackageId);
 		}
 
 		List<NpmPackageVersionEntity> packageVersions = new ArrayList<>(myPackageVersionDao.findByPackageId(thePackageId));

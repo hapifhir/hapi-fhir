@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.IResourceProvenanceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -57,7 +58,7 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 			myPatientDao.search(map);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Error parsing _filter syntax: Expression did not terminate at 13", e.getMessage());
+			assertEquals(Msg.code(1221) + "Error parsing _filter syntax: " + Msg.code(1056) + "Expression did not terminate at 13", e.getMessage());
 		}
 	}
 
@@ -212,7 +213,7 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		try {
 			myPatientDao.search(map);
 		} catch (InvalidRequestException e) {
-			assertEquals("_filter parameter is disabled on this server", e.getMessage());
+			assertEquals(Msg.code(1222) + "_filter parameter is disabled on this server", e.getMessage());
 		}
 	}
 
@@ -1232,7 +1233,7 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		try {
 			myPatientDao.search(map);
 		} catch (InvalidRequestException e) {
-			assertEquals("Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_content, _id, _lastUpdated, _profile, _security, _source, _tag, _text, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
+			assertEquals(Msg.code(1206) + "Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_content, _id, _lastUpdated, _profile, _security, _source, _tag, _text, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
 		}
 	}
 

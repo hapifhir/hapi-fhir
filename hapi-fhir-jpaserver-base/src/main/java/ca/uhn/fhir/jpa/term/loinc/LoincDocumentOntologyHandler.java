@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.term.loinc;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
@@ -89,7 +90,7 @@ public class LoincDocumentOntologyHandler extends BaseLoincHandler implements IZ
 				loincCodePropName = "document-type-of-service";
 				break;
 			default:
-				throw new InternalErrorException("Unknown PartTypeName: " + partTypeName);
+				throw new InternalErrorException(Msg.code(917) + "Unknown PartTypeName: " + partTypeName);
 		}
 
 		TermConcept code = myCode2Concept.get(loincNumber);

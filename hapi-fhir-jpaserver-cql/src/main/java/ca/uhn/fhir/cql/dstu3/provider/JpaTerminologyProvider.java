@@ -20,6 +20,7 @@ package ca.uhn.fhir.cql.dstu3.provider;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.LookupCodeResult;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
@@ -89,7 +90,7 @@ public class JpaTerminologyProvider implements TerminologyProvider {
 			if (valueSet.getVersion() != null
 				|| (valueSet.getCodeSystems() != null && valueSet.getCodeSystems().size() > 0)) {
 				if (!(valueSet.getCodeSystems().size() == 1 && valueSet.getCodeSystems().get(0).getVersion() == null)) {
-					throw new UnsupportedOperationException(String.format(
+					throw new UnsupportedOperationException(Msg.code(1643) + String.format(
 						"Could not expand value set %s; version and code system bindings are not supported at this time.",
 						valueSet.getId()));
 				}
@@ -99,16 +100,16 @@ public class JpaTerminologyProvider implements TerminologyProvider {
 				.search(SearchParameterMap.newSynchronous().add(ValueSet.SP_URL, new UriParam(valueSet.getId())));
 			List<IBaseResource> valueSets = bundleProvider.getAllResources();
 			if (valueSets.isEmpty()) {
-				throw new IllegalArgumentException(String.format("Could not resolve value set %s.", valueSet.getId()));
+				throw new IllegalArgumentException(Msg.code(1644) + String.format("Could not resolve value set %s.", valueSet.getId()));
 			} else if (valueSets.size() == 1) {
 				vs = (ValueSet) valueSets.get(0);
 			} else {
-				throw new IllegalArgumentException("Found more than 1 ValueSet with url: " + valueSet.getId());
+				throw new IllegalArgumentException(Msg.code(1645) + "Found more than 1 ValueSet with url: " + valueSet.getId());
 			}
 		} else {
 			vs = myValueSetDao.read(new IdType(valueSet.getId()));
 			if (vs == null) {
-				throw new IllegalArgumentException(String.format("Could not resolve value set %s.", valueSet.getId()));
+				throw new IllegalArgumentException(Msg.code(1646) + String.format("Could not resolve value set %s.", valueSet.getId()));
 			}
 		}
 

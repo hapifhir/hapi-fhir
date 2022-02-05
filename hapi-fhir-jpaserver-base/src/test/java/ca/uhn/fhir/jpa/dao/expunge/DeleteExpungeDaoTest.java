@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.expunge;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.batch.listener.PidReaderCounterListener;
@@ -74,7 +75,7 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 
 		// Get not implemented HTTP 400 error
 		assertEquals(Constants.STATUS_HTTP_400_BAD_REQUEST, e.getStatusCode());
-		assertEquals("_expunge cannot be used with _cascade", e.getMessage());
+		assertEquals(Msg.code(964) + "_expunge cannot be used with _cascade", e.getMessage());
 
 
 		// Try to delete with header 'X-Cascade' = delete
@@ -86,7 +87,7 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 
 		// Get not implemented HTTP 400 error
 		assertEquals(Constants.STATUS_HTTP_400_BAD_REQUEST, e.getStatusCode());
-		assertEquals("_expunge cannot be used with _cascade", e.getMessage());
+		assertEquals(Msg.code(964) + "_expunge cannot be used with _cascade", e.getMessage());
 	}
 
 

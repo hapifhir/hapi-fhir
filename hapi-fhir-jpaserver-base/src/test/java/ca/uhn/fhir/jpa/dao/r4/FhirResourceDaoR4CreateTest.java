@@ -1,7 +1,9 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -21,10 +23,12 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.BundleBuilder;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Encounter;
@@ -46,9 +50,14 @@ import org.springframework.data.domain.PageRequest;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -322,7 +331,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			myObservationDao.create(obs, "identifier=A%20B", new SystemRequestDetails());
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Failed to process conditional create. The supplied resource did not satisfy the conditional URL.", e.getMessage());
+			assertEquals(Msg.code(929) + "Failed to process conditional create. The supplied resource did not satisfy the conditional URL.", e.getMessage());
 		}
 	}
 
@@ -347,7 +356,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			mySystemDao.transaction(new SystemRequestDetails(), (Bundle) bb.getBundle());
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Failed to process conditional create. The supplied resource did not satisfy the conditional URL.", e.getMessage());
+			assertEquals(Msg.code(929) + "Failed to process conditional create. The supplied resource did not satisfy the conditional URL.", e.getMessage());
 		}
 	}
 
@@ -433,7 +442,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			myPatientDao.update(p);
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertEquals("No resource exists on this server resource with ID[AAA], and client-assigned IDs are not enabled.", e.getMessage());
+			assertEquals(Msg.code(959) + "No resource exists on this server resource with ID[AAA], and client-assigned IDs are not enabled.", e.getMessage());
 		}
 	}
 
@@ -664,7 +673,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			mySearchParameterDao.update(sp);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Can not override built-in search parameter Patient:birthdate because overriding is disabled on this server", e.getMessage());
+			assertEquals(Msg.code(1111) + "Can not override built-in search parameter Patient:birthdate because overriding is disabled on this server", e.getMessage());
 		}
 
 	}
@@ -1000,6 +1009,62 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
 		assertThat(searchSql, containsString("t0.SP_VALUE = '0.0000012'"));
 		assertEquals(1, ids.size());
+	}
+
+	@Test
+	public void testResourceWithTagCreationNoFailures() throws ExecutionException, InterruptedException {
+		// we need to leave at least one free thread
+		// due to a REQUIRED_NEW transaction internally
+		int maxThreadsUsed = TestR4Config.ourMaxThreads - 1;
+		ExecutorService pool = Executors.newFixedThreadPool(Math.min(maxThreadsUsed, 5));
+		try {
+			Coding tag = new Coding();
+			tag.setCode("code123");
+			tag.setDisplay("Display Name");
+			tag.setSystem("System123");
+
+			Patient p = new Patient();
+			IIdType id = myPatientDao.create(p).getId();
+
+			List<Future<String>> futures = new ArrayList<>();
+			for (int i = 0; i < 50; i++) {
+				Patient updatePatient = new Patient();
+				updatePatient.setId(id.toUnqualifiedVersionless());
+				updatePatient.addIdentifier().setSystem("" + i);
+				updatePatient.setActive(true);
+				updatePatient.getMeta().addTag(tag);
+
+				int finalI = i;
+				Future<String> future = pool.submit(() -> {
+					ourLog.info("Starting update {}", finalI);
+					try {
+						try {
+							myPatientDao.update(updatePatient);
+						} catch (ResourceVersionConflictException e) {
+							assertTrue(e.getMessage().contains(
+								"The operation has failed with a version constraint failure. This generally means that two clients/threads were trying to update the same resource at the same time, and this request was chosen as the failing request."
+							));
+						}
+					} catch (Exception e) {
+						ourLog.error("Failure", e);
+						return e.toString();
+					}
+					ourLog.info("Finished update {}", finalI);
+					return null;
+				});
+				futures.add(future);
+			}
+
+			for (Future<String> next : futures) {
+				String nextError = next.get();
+				if (StringUtils.isNotBlank(nextError)) {
+					fail(nextError);
+				}
+			}
+
+		} finally {
+			pool.shutdown();
+		}
 	}
 
 	@Test

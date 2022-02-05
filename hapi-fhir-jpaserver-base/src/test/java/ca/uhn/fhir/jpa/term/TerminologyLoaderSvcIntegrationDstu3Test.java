@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
@@ -245,7 +246,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(new UriType("http://loinc.org/vs"), null, new StringType("10013-1-9999999999"), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
 		assertFalse(result.isOk());
-		assertEquals("Failed to expand ValueSet 'http://loinc.org/vs' (in-memory). Could not validate code http://loinc.org#10013-1-9999999999", result.getMessage());
+		assertEquals("Failed to expand ValueSet 'http://loinc.org/vs' (in-memory). Could not validate code http://loinc.org#10013-1-9999999999. Error was: " + Msg.code(702) + "null", result.getMessage());
 	}
 
 	private Set<String> toExpandedCodes(ValueSet theExpanded) {

@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.index;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -341,7 +342,7 @@ public class SearchParamWithInlineReferencesExtractor {
 				RuntimeResourceDefinition matchResourceDef = myContext.getResourceDefinition(resourceTypeString);
 				if (matchResourceDef == null) {
 					String msg = myContext.getLocalizer().getMessage(BaseHapiFhirDao.class, "invalidMatchUrlInvalidResourceType", nextId.getValue(), resourceTypeString);
-					throw new InvalidRequestException(msg);
+					throw new InvalidRequestException(Msg.code(1090) + msg);
 				}
 				Class<? extends IBaseResource> matchResourceType = matchResourceDef.getImplementingClass();
 
@@ -359,12 +360,12 @@ public class SearchParamWithInlineReferencesExtractor {
 						myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.MATCH_URL, nextIdText, match);
 					} else {
 						String msg = myContext.getLocalizer().getMessage(BaseHapiFhirDao.class, "invalidMatchUrlNoMatches", nextId.getValue());
-						throw new ResourceNotFoundException(msg);
+						throw new ResourceNotFoundException(Msg.code(1091) + msg);
 					}
 
 				} else if (matches.size() > 1) {
 					String msg = myContext.getLocalizer().getMessage(BaseHapiFhirDao.class, "invalidMatchUrlMultipleMatches", nextId.getValue());
-					throw new PreconditionFailedException(msg);
+					throw new PreconditionFailedException(Msg.code(1092) + msg);
 				} else {
 					match = matches.iterator().next();
 				}
@@ -405,7 +406,7 @@ public class SearchParamWithInlineReferencesExtractor {
 						}
 
 						String msg = myContext.getLocalizer().getMessage(BaseHapiFhirDao.class, "uniqueIndexConflictFailure", theEntity.getResourceType(), next.getIndexString(), existing.getResource().getIdDt().toUnqualifiedVersionless().getValue(), searchParameterId);
-						throw new PreconditionFailedException(msg);
+						throw new PreconditionFailedException(Msg.code(1093) + msg);
 					}
 				}
 				ourLog.debug("Persisting unique index: {}", next);

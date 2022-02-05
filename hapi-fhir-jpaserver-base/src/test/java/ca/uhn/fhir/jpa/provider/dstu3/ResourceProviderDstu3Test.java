@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
@@ -502,7 +503,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: Unable to perform search for unqualified chain 'subject' as this SearchParameter does not declare any target types. Add a qualifier of the form 'subject:[ResourceType]' to perform this search.", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1245) + "Unable to perform search for unqualified chain 'subject' as this SearchParameter does not declare any target types. Add a qualifier of the form 'subject:[ResourceType]' to perform this search.", e.getMessage());
 		}
 
 		// Qualified
@@ -523,7 +524,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 				.returnBundle(Bundle.class)
 				.execute();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: Invalid/unsupported resource type: \"FOO\"", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1250) + "Invalid/unsupported resource type: \"FOO\"", e.getMessage());
 		}
 
 	}
@@ -950,7 +951,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			ourLog.info(responseString);
 			assertEquals(400, response.getStatusLine().getStatusCode());
 			OperationOutcome oo = myFhirCtx.newXmlParser().parseResource(OperationOutcome.class, responseString);
-			assertEquals("Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)",
+			assertEquals(Msg.code(365) + "Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)",
 				oo.getIssue().get(0).getDiagnostics());
 
 		} finally {
@@ -1033,7 +1034,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			//@formatter:on
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertEquals("HTTP 412 Precondition Failed: Failed to DELETE resource with match URL \"Patient?identifier=testDeleteConditionalMultiple\" because this search matched 2 resources",
+			assertEquals("HTTP 412 Precondition Failed: " + Msg.code(962) + "Failed to DELETE resource with match URL \"Patient?identifier=testDeleteConditionalMultiple\" because this search matched 2 resources",
 				e.getMessage());
 		}
 
@@ -2229,7 +2230,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			assertEquals(400, response.getStatusLine().getStatusCode());
 			OperationOutcome oo = myFhirCtx.newXmlParser().parseResource(OperationOutcome.class, respString);
 			assertEquals(
-				"Can not update resource, resource body must contain an ID element which matches the request URL for update (PUT) operation - Resource body ID of \"AAA\" does not match URL ID of \""
+				Msg.code(420) + "Can not update resource, resource body must contain an ID element which matches the request URL for update (PUT) operation - Resource body ID of \"AAA\" does not match URL ID of \""
 					+ id.getIdPart() + "\"",
 				oo.getIssue().get(0).getDiagnostics());
 		} finally {
@@ -4049,7 +4050,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			assertEquals(400, response.getStatusLine().getStatusCode());
 			OperationOutcome oo = myFhirCtx.newJsonParser().parseResource(OperationOutcome.class, new InputStreamReader(response.getEntity().getContent()));
 			assertEquals(
-				"Can not update resource, resource body must contain an ID element which matches the request URL for update (PUT) operation - Resource body ID of \"FOO\" does not match URL ID of \""
+				Msg.code(420) + "Can not update resource, resource body must contain an ID element which matches the request URL for update (PUT) operation - Resource body ID of \"FOO\" does not match URL ID of \""
 					+ p1id.getIdPart() + "\"",
 				oo.getIssue().get(0).getDiagnostics());
 		} finally {
@@ -4067,7 +4068,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		try {
 			assertEquals(400, response.getStatusLine().getStatusCode());
 			OperationOutcome oo = myFhirCtx.newJsonParser().parseResource(OperationOutcome.class, new InputStreamReader(response.getEntity().getContent()));
-			assertEquals("Can not update resource, resource body must contain an ID element for update (PUT) operation", oo.getIssue().get(0).getDiagnostics());
+			assertEquals(Msg.code(419) + "Can not update resource, resource body must contain an ID element for update (PUT) operation", oo.getIssue().get(0).getDiagnostics());
 		} finally {
 			response.close();
 		}
@@ -4353,7 +4354,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			assertEquals(400, response.getStatusLine().getStatusCode());
 			OperationOutcome oo = myFhirCtx.newXmlParser().parseResource(OperationOutcome.class, responseString);
 			assertEquals(
-				"Can not update resource, resource body must contain an ID element which matches the request URL for update (PUT) operation - Resource body ID of \"333\" does not match URL ID of \"A2\"",
+				Msg.code(420) + "Can not update resource, resource body must contain an ID element which matches the request URL for update (PUT) operation - Resource body ID of \"333\" does not match URL ID of \"A2\"",
 				oo.getIssue().get(0).getDiagnostics());
 		} finally {
 			response.close();

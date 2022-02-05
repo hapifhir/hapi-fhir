@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.searchparam.registry;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
@@ -275,7 +276,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 	public ReadOnlySearchParamCache getActiveSearchParams() {
 		requiresActiveSearchParams();
 		if (myActiveSearchParams == null) {
-			throw new IllegalStateException("SearchParamRegistry has not been initialized");
+			throw new IllegalStateException(Msg.code(511) + "SearchParamRegistry has not been initialized");
 		}
 		return ReadOnlySearchParamCache.fromRuntimeSearchParamCache(myActiveSearchParams);
 	}

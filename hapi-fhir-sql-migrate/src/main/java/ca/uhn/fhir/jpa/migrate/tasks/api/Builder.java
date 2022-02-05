@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.migrate.tasks.api;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddForeignKeyTask;
@@ -395,11 +396,11 @@ public class Builder {
 				public void withType(ColumnTypeEnum theColumnType, Integer theLength) {
 					if (theColumnType == ColumnTypeEnum.STRING) {
 						if (theLength == null || theLength == 0) {
-							throw new IllegalArgumentException("Can not specify length 0 for column of type " + theColumnType);
+							throw new IllegalArgumentException(Msg.code(52) + "Can not specify length 0 for column of type " + theColumnType);
 						}
 					} else {
 						if (theLength != null) {
-							throw new IllegalArgumentException("Can not specify length for column of type " + theColumnType);
+							throw new IllegalArgumentException(Msg.code(53) + "Can not specify length for column of type " + theColumnType);
 						}
 					}
 

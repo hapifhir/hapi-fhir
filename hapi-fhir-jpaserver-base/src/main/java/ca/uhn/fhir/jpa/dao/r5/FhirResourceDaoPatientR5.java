@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.r5;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
@@ -53,7 +54,7 @@ public class FhirResourceDaoPatientR5 extends BaseHapiFhirResourceDao<Patient> i
 			paramMap.setCount(theCount.getValue());
 		}
 		if (theOffset != null) {
-			throw new IllegalArgumentException("Everything operation does not support offset searching");
+			throw new IllegalArgumentException(Msg.code(1122) + "Everything operation does not support offset searching");
 		}
 		if (theContent != null) {
 			paramMap.add(Constants.PARAM_CONTENT, theContent);

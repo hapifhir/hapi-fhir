@@ -1,5 +1,6 @@
 package ca.uhn.fhir.tinder.parser;
 
+import ca.uhn.fhir.i18n.Msg;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,7 +38,7 @@ public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 			try {
 				new CompartmentParser(getVersion(), (Resource) theTarget).parse();
 			} catch (Exception e) {
-				throw new MojoFailureException(e.toString(), e);
+				throw new MojoFailureException(Msg.code(161) + e.toString(), e);
 			}
 		}
 		
@@ -61,7 +62,7 @@ public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 			InputStream nextRes = getClass().getResourceAsStream(resName);
 			myInputStreams.add(nextRes);
 			if (nextRes == null) {
-				throw new MojoFailureException("Unknown base resource name: " + resName);
+				throw new MojoFailureException(Msg.code(162) + "Unknown base resource name: " + resName);
 			}
 		}
 	}

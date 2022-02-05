@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.apache.commons.lang3.Validate;
@@ -63,7 +64,7 @@ public class DropForeignKeyTask extends BaseTableTask {
 				sqls.add("alter table " + theTableName + " drop constraint " + theConstraintName);
 				break;
 			default:
-				throw new IllegalStateException();
+				throw new IllegalStateException(Msg.code(59));
 		}
 		return sqls;
 	}

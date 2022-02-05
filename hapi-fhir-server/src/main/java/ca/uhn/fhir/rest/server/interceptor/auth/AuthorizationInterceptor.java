@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
@@ -214,7 +215,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 
 			default:
 				// Should not happen
-				throw new IllegalStateException("Unable to apply security to event of type " + theOperation);
+				throw new IllegalStateException(Msg.code(332) + "Unable to apply security to event of type " + theOperation);
 		}
 
 	}
@@ -294,9 +295,9 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	protected void handleDeny(Verdict decision) {
 		if (decision.getDecidingRule() != null) {
 			String ruleName = defaultString(decision.getDecidingRule().getName(), "(unnamed rule)");
-			throw new ForbiddenOperationException("Access denied by rule: " + ruleName);
+			throw new ForbiddenOperationException(Msg.code(333) + "Access denied by rule: " + ruleName);
 		}
-		throw new ForbiddenOperationException("Access denied by default policy (no applicable rules)");
+		throw new ForbiddenOperationException(Msg.code(334) + "Access denied by default policy (no applicable rules)");
 	}
 
 	private void handleUserOperation(RequestDetails theRequest, IBaseResource theResource, RestOperationTypeEnum theOperation, Pointcut thePointcut) {

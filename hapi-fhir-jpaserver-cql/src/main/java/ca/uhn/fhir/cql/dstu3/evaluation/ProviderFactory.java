@@ -20,6 +20,7 @@ package ca.uhn.fhir.cql.dstu3.evaluation;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.cql.common.provider.EvaluationProviderFactory;
 import ca.uhn.fhir.cql.common.retrieve.JpaFhirRetrieveProvider;
@@ -72,8 +73,7 @@ public class ProviderFactory implements EvaluationProviderFactory {
 			return new CompositeDataProvider(this.fhirModelResolver, retrieveProvider);
 		}
 
-		throw new IllegalArgumentException(
-                String.format("Can't construct a data provider for model %s version %s", model, version));
+		throw new IllegalArgumentException(Msg.code(1650) + String.format("Can't construct a data provider for model %s version %s", model, version));
     }
 
     public TerminologyProvider createTerminologyProvider(String model, String version, String url, String user,

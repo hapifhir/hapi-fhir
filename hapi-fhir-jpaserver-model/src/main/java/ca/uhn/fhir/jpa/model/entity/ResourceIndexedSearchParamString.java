@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -214,7 +215,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 
 	public ResourceIndexedSearchParamString setValueExact(String theValueExact) {
 		if (defaultString(theValueExact).length() > MAX_LENGTH) {
-			throw new IllegalArgumentException("Value is too long: " + theValueExact.length());
+			throw new IllegalArgumentException(Msg.code(1529) + "Value is too long: " + theValueExact.length());
 		}
 		myValueExact = theValueExact;
 		return this;
@@ -226,7 +227,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 
 	public ResourceIndexedSearchParamString setValueNormalized(String theValueNormalized) {
 		if (defaultString(theValueNormalized).length() > MAX_LENGTH) {
-			throw new IllegalArgumentException("Value is too long: " + theValueNormalized.length());
+			throw new IllegalArgumentException(Msg.code(1530) + "Value is too long: " + theValueNormalized.length());
 		}
 		myValueNormalized = theValueNormalized;
 		return this;

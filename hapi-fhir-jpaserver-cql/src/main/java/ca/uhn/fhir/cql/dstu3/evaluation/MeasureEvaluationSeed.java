@@ -20,6 +20,7 @@ package ca.uhn.fhir.cql.dstu3.evaluation;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.cql.common.helper.DateHelper;
 import ca.uhn.fhir.cql.common.helper.UsingHelper;
 import ca.uhn.fhir.cql.common.provider.EvaluationProviderFactory;
@@ -90,8 +91,7 @@ public class MeasureEvaluationSeed {
 		List<Triple<String, String, String>> usingDefs = UsingHelper.getUsingUrlAndVersion(library.getUsings());
 
 		if (usingDefs.size() > 1) {
-			throw new IllegalArgumentException(
-				"Evaluation of Measure using multiple Models is not supported at this time.");
+			throw new IllegalArgumentException(Msg.code(1647) + "Evaluation of Measure using multiple Models is not supported at this time.");
 		}
 
 		// If there are no Usings, there is probably not any place the Terminology

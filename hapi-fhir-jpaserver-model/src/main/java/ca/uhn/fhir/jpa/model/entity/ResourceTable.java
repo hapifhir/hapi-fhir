@@ -23,9 +23,9 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
+import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
 import ca.uhn.fhir.jpa.model.search.ResourceTableRoutingBinder;
 import ca.uhn.fhir.jpa.model.search.SearchParamTextPropertyBinder;
-import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -45,7 +45,23 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyBi
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyValue;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.NamedEntityGraph;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+import javax.persistence.Version;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -53,8 +69,6 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import static org.apache.commons.lang3.StringUtils.defaultString;
 
 @Indexed(routingBinder= @RoutingBinderRef(type = ResourceTableRoutingBinder.class))
 @Entity

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.context;
 
+import ca.uhn.fhir.i18n.Msg;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -16,7 +17,7 @@ public class BaseRuntimeElementDefinitionTest {
 			def.newInstance(123);
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals("Failed to instantiate type:org.hl7.fhir.r4.model.StringType", e.getMessage());
+			assertEquals(Msg.code(1696) + "Failed to instantiate type:org.hl7.fhir.r4.model.StringType", e.getMessage());
 		}
 	}
 

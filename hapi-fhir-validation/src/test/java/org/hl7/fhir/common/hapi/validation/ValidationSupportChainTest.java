@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.i18n.Msg;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.junit.jupiter.api.Test;
 
@@ -21,7 +22,7 @@ public class ValidationSupportChainTest {
 		try {
 			new ValidationSupportChain(ctx3, ctx4);
 		} catch (ConfigurationException e) {
-			assertEquals("Trying to add validation support of version R4 to chain with 1 entries of version DSTU3", e.getMessage());
+			assertEquals(Msg.code(709) + "Trying to add validation support of version R4 to chain with 1 entries of version DSTU3", e.getMessage());
 		}
 
 	}
@@ -32,7 +33,7 @@ public class ValidationSupportChainTest {
 		try {
 			new ValidationSupportChain(ctx);
 		} catch (ConfigurationException e) {
-			assertEquals("Can not add validation support: getFhirContext() returns null", e.getMessage());
+			assertEquals(Msg.code(708) + "Can not add validation support: getFhirContext() returns null", e.getMessage());
 		}
 	}
 
