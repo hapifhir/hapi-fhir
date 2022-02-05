@@ -152,7 +152,7 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 	private void createExternalCsAndLocalVs() {
 		runInTransaction(()-> {
 			CodeSystem codeSystem = createExternalCs();
-			createLocalVs(codeSystem);
+			createLocalVsForCodeSystem(codeSystem);
 		});
 	}
 
@@ -163,7 +163,7 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 		});
 	}
 
-	private void createLocalVs(CodeSystem codeSystem) {
+	private void createLocalVsForCodeSystem(CodeSystem codeSystem) {
 		myLocalVs = new ValueSet();
 		myLocalVs.setUrl(URL_MY_VALUE_SET);
 		ConceptSetComponent include = myLocalVs.getCompose().addInclude();

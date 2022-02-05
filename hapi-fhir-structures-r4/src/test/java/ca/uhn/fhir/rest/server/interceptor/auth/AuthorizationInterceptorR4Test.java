@@ -162,7 +162,7 @@ public class AuthorizationInterceptorR4Test {
 		return new StringEntity(out, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8"));
 	}
 
-	private Resource createObservation(Integer theId, String theSubjectId) {
+	private Observation createObservation(Integer theId, String theSubjectId) {
 		Observation retVal = new Observation();
 		if (theId != null) {
 			retVal.setId(new IdType("Observation", (long) theId));
@@ -790,6 +790,20 @@ public class AuthorizationInterceptorR4Test {
 		extractResponseAndClose(status);
 		assertEquals(403, status.getStatusLine().getStatusCode());
 	}
+
+	@Test
+	public void testCodeIn() {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("Rule 1").read().resourcesOfType("Observation")..transaction().withAnyOperation().andApplyNormalRules().andThen()
+					.build();
+			}
+		});
+
+	}
+
 
 	@Test
 	public void testBatchWhenTransactionWrongBundleType() throws Exception {

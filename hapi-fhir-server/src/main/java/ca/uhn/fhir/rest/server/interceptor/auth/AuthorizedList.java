@@ -23,6 +23,8 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.apache.commons.lang3.Validate;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,11 +35,19 @@ public class AuthorizedList {
 
 	private List<String> myAllowedCompartments;
 	private List<String> myAllowedInstances;
+	private List<AllowedCodeInValueSet> myAllowedCodeInValueSets;
 
+	@Nullable
 	List<String> getAllowedCompartments() {
 		return myAllowedCompartments;
 	}
 
+	@Nullable
+	List<AllowedCodeInValueSet> getAllowedCodeInValueSets() {
+		return myAllowedCodeInValueSets;
+	}
+
+	@Nullable
 	List<String> getAllowedInstances() {
 		return myAllowedInstances;
 	}
@@ -99,6 +109,51 @@ public class AuthorizedList {
 		for (String next : theResources) {
 			addResource(next);
 		}
+		return this;
+	}
+
+	/**
+	 * If specified, any search for <code>theResourceName</code> will automatically include a parameter indicating that
+	 * the token search parameter <code>theSearchParameterName</code> must have a value in the ValueSet with URL <code>theValueSetUrl</code>.
+	 *
+	 * @param theResourceName        The resource name, e.g. <code>Observation</code>
+	 * @param theSearchParameterName The search parameter name, e.g. <code>code</code>
+	 * @param theValueSetUrl         The valueset URL, e.g. <code>http://my-value-set</code>
+	 * @return Returns a reference to <code>this</code> for easy chaining
+	 * @since 6.0.0
+	 */
+	public AuthorizedList addCodeInValueSet(@Nonnull String theResourceName, @Nonnull String theSearchParameterName, @Nonnull String theValueSetUrl) {
+		Validate.notBlank(theResourceName, "theResourceName must not be missing or null");
+		Validate.notBlank(theSearchParameterName, "theSearchParameterName must not be missing or null");
+		Validate.notBlank(theValueSetUrl, "theResourceUrl must not be missing or null");
+
+		return doAddCodeInValueSet(theResourceName, theSearchParameterName, theValueSetUrl, false);
+	}
+
+	/**
+	 * If specified, any search for <code>theResourceName</code> will automatically include a parameter indicating that
+	 * the token search parameter <code>theSearchParameterName</code> must have a value not in the ValueSet with URL <code>theValueSetUrl</code>.
+	 *
+	 * @param theResourceName        The resource name, e.g. <code>Observation</code>
+	 * @param theSearchParameterName The search parameter name, e.g. <code>code</code>
+	 * @param theValueSetUrl         The valueset URL, e.g. <code>http://my-value-set</code>
+	 * @return Returns a reference to <code>this</code> for easy chaining
+	 * @since 6.0.0
+	 */
+	public AuthorizedList addCodeNotInValueSet(@Nonnull String theResourceName, @Nonnull String theSearchParameterName, @Nonnull String theValueSetUrl) {
+		Validate.notBlank(theResourceName, "theResourceName must not be missing or null");
+		Validate.notBlank(theSearchParameterName, "theSearchParameterName must not be missing or null");
+		Validate.notBlank(theValueSetUrl, "theResourceUrl must not be missing or null");
+
+		return doAddCodeInValueSet(theResourceName, theSearchParameterName, theValueSetUrl, true);
+	}
+
+	private AuthorizedList doAddCodeInValueSet(String theResourceName, String theSearchParameterName, String theValueSetUrl, boolean negate) {
+		if (myAllowedCodeInValueSets == null) {
+			myAllowedCodeInValueSets = new ArrayList<>();
+		}
+		myAllowedCodeInValueSets.add(new AllowedCodeInValueSet(theResourceName, theSearchParameterName, theValueSetUrl, negate));
+
 		return this;
 	}
 }

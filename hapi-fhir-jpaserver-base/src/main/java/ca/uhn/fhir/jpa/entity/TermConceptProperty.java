@@ -218,6 +218,7 @@ public class TermConceptProperty implements Serializable {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+			.append("conceptPid", myConcept.getId())
 			.append("key", myKey)
 			.append("value", getValue())
 			.toString();

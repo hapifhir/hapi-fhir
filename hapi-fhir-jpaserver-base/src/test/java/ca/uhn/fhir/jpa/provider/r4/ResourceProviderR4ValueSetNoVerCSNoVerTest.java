@@ -159,7 +159,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 	private void createExternalCsAndLocalVs() {
 		runInTransaction(() -> {
 			CodeSystem codeSystem = createExternalCs();
-			createLocalVs(codeSystem);
+			createLocalVsForCodeSystem(codeSystem);
 		});
 	}
 
@@ -197,7 +197,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		myLocalValueSetId = myValueSetDao.create(myLocalVs, mySrd).getId().toUnqualifiedVersionless();
 	}
 
-	private void createLocalVs(CodeSystem codeSystem) {
+	private void createLocalVsForCodeSystem(CodeSystem codeSystem) {
 		myLocalVs = new ValueSet();
 		myLocalVs.setUrl(URL_MY_VALUE_SET);
 		ConceptSetComponent include = myLocalVs.getCompose().addInclude();
