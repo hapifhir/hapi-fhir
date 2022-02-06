@@ -23,6 +23,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.Constants;
@@ -193,7 +194,7 @@ public class SearchNarrowingInterceptor {
 						 * caller is forbidden from accessing the resources they requested.
 						 */
 						if (!restrictedExistingList) {
-							throw new ForbiddenOperationException("Value not permitted for parameter " + UrlUtil.escapeUrlParam(nextParamName));
+							throw new ForbiddenOperationException(Msg.code(2026) + "Value not permitted for parameter " + UrlUtil.escapeUrlParam(nextParamName));
 						}
 
 					} else {
