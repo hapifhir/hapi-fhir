@@ -88,6 +88,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	 */
 	public AuthorizationInterceptor() {
 		super();
+		setTroubleshootingLog(ourLog);
 	}
 
 	/**
@@ -98,7 +99,6 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	public AuthorizationInterceptor(PolicyEnum theDefaultPolicy) {
 		this();
 		setDefaultPolicy(theDefaultPolicy);
-		setTroubleshootingLog(ourLog);
 	}
 
 	@Nonnull
