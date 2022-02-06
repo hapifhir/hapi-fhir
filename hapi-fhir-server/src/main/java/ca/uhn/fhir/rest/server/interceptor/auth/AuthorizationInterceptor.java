@@ -81,6 +81,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	private PolicyEnum myDefaultPolicy = PolicyEnum.DENY;
 	private Set<AuthorizationFlagsEnum> myFlags = Collections.emptySet();
 	private IValidationSupport myValidationSupport;
+	private Logger myTroubleshootingLog;
 
 	/**
 	 * Constructor
@@ -97,6 +98,18 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	public AuthorizationInterceptor(PolicyEnum theDefaultPolicy) {
 		this();
 		setDefaultPolicy(theDefaultPolicy);
+		setTroubleshootingLog(ourLog);
+	}
+
+	@Nonnull
+	@Override
+	public Logger getTroubleshootingLog() {
+		return myTroubleshootingLog;
+	}
+
+	public void setTroubleshootingLog(@Nonnull Logger theTroubleshootingLog) {
+		Validate.notNull(theTroubleshootingLog, "theTroubleshootingLog must not be null");
+		myTroubleshootingLog = theTroubleshootingLog;
 	}
 
 	private void applyRulesAndFailIfDeny(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId,
@@ -149,6 +162,19 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	@Override
 	public IValidationSupport getValidationSupport() {
 		return myValidationSupport;
+	}
+
+	/**
+	 * Sets a validation support module that will be used for terminology-based rules
+	 *
+	 * @param theValidationSupport The validation support. Null is also acceptable (this is the default),
+	 *                             in which case the validation support module associated with the {@link FhirContext}
+	 *                             will be used.
+	 * @since 6.0.0
+	 */
+	public AuthorizationInterceptor setValidationSupport(IValidationSupport theValidationSupport) {
+		myValidationSupport = theValidationSupport;
+		return this;
 	}
 
 	/**
@@ -375,7 +401,6 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		applyRulesAndFailIfDeny(restOperationType, theRequestDetails, null, null, null, thePointcut);
 	}
 
-
 	private void checkPointcutAndFailIfDeny(RequestDetails theRequestDetails, Pointcut thePointcut, @Nonnull IBaseResource theInputResource) {
 		applyRulesAndFailIfDeny(theRequestDetails.getRestOperationType(), theRequestDetails, theInputResource, theInputResource.getIdElement(), null, thePointcut);
 	}
@@ -445,19 +470,6 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			handleUserOperation(theRequest, theOldResource, RestOperationTypeEnum.UPDATE, thePointcut);
 		}
 		handleUserOperation(theRequest, theNewResource, RestOperationTypeEnum.UPDATE, thePointcut);
-	}
-
-	/**
-	 * Sets a validation support module that will be used for terminology-based rules
-	 *
-	 * @param theValidationSupport The validation support. Null is also acceptable (this is the default),
-	 *                             in which case the validation support module associated with the {@link FhirContext}
-	 *                             will be used.
-	 * @since 6.0.0
-	 */
-	public AuthorizationInterceptor setValidationSupport(IValidationSupport theValidationSupport) {
-		myValidationSupport = theValidationSupport;
-		return this;
 	}
 
 	private enum OperationExamineDirection {

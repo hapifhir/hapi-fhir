@@ -46,6 +46,7 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 
 	private String mySearchParameterName;
 	private String myValueSetUrl;
+	private boolean myWantCode;
 
 	/**
 	 * Constructor
@@ -54,6 +55,10 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 	 */
 	SearchParameterAndValueSetRuleImpl(String theRuleName) {
 		super(theRuleName);
+	}
+
+	void setWantCode(boolean theWantCode) {
+		myWantCode = theWantCode;
 	}
 
 	public void setSearchParameterName(String theSearchParameterName) {
@@ -101,24 +106,56 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 			throw new InternalErrorException(Msg.code(2025) + "Unknown SearchParameter for resource " + resourceDefinition.getName() + ": " + mySearchParameterName);
 		}
 
+		theRuleApplier
+			.getTroubleshootingLog()
+			.debug("Applying {}:{} rule for valueSet: {}", mySearchParameterName, myWantCode ? "in" : "not-in", myValueSetUrl);
+
 		List<String> paths = searchParameter.getPathsSplitForResourceType(resourceDefinition.getName());
 
 		for (String nextPath : paths) {
 			List<ICompositeType> foundCodeableConcepts = theFhirContext.newFhirPath().evaluate(theResource, nextPath, ICompositeType.class);
+			int codeCount = 0;
+			int matchCount = 0;
 			for (ICompositeType nextCodeableConcept : foundCodeableConcepts) {
 				for (IBase nextCoding : terser.getValues(nextCodeableConcept, "coding")) {
 					String system = terser.getSinglePrimitiveValueOrNull(nextCoding, "system");
 					String code = terser.getSinglePrimitiveValueOrNull(nextCoding, "code");
 					if (isNotBlank(system) && isNotBlank(code)) {
+						codeCount++;
 						IValidationSupport.CodeValidationResult validateCodeResult = validationSupport.validateCode(validationSupportContext, conceptValidationOptions, system, code, null, myValueSetUrl);
 						if (validateCodeResult != null) {
 							if (validateCodeResult.isOk()) {
-								return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+								if (myWantCode) {
+									AuthorizationInterceptor.Verdict verdict = newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+									theRuleApplier
+										.getTroubleshootingLog()
+										.debug("Code {}:{} was found in VS - Verdict: {}", system, code, verdict);
+									return verdict;
+								} else {
+									matchCount++;
+									break;
+								}
+							} else {
+								theRuleApplier
+									.getTroubleshootingLog()
+									.debug("Code {}:{} was not found in VS", system, code);
 							}
 						}
 					}
 				}
 			}
+
+			if (!myWantCode) {
+				if ((getMode() == PolicyEnum.ALLOW && matchCount == 0) ||
+					(getMode() == PolicyEnum.DENY && matchCount < codeCount)) {
+					AuthorizationInterceptor.Verdict verdict = newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+					theRuleApplier
+						.getTroubleshootingLog()
+						.debug("Code was found in VS - Verdict: {}", verdict);
+					return verdict;
+				}
+			}
+
 		}
 
 		return null;

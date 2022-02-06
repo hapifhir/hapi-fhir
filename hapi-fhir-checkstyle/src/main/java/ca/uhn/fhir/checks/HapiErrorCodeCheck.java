@@ -1,6 +1,5 @@
 package ca.uhn.fhir.checks;
 
-import com.puppycrawl.tools.checkstyle.DetailNodeTreeStringPrinter;
 import com.puppycrawl.tools.checkstyle.StatelessCheck;
 import com.puppycrawl.tools.checkstyle.api.AbstractCheck;
 import com.puppycrawl.tools.checkstyle.api.DetailAST;
@@ -9,9 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * mvn -P CI,ALLMODULES checkstyle:check
@@ -77,7 +74,7 @@ public final class HapiErrorCodeCheck extends AbstractCheck {
 						").  Each thrown exception throw call Msg.code() with a different code. " +
 						"Previously found at: " + ourCodesUsed.get(code));
 				} else {
-					String location = getFileContents().getFileName() + ":" + instantiation.getLineNo() + ":" + instantiation.getColumnNo();
+					String location = getFileContents().getFileName() + ":" + instantiation.getLineNo() + ":" + instantiation.getColumnNo() + "(" + code + ")";
 					ourCodesUsed.put(code, location);
 				}
 			} else {

@@ -974,6 +974,152 @@ public class AuthorizationInterceptorR4Test {
 
 
 	@Test
+	public void testCodeNotIn_AllowSearch() throws IOException {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("Rule 1").read().resourcesOfType("Observation").withCodeNotInValueSet("code", "http://hl7.org/fhir/ValueSet/administrative-gender").andThen()
+					.build();
+			}
+		});
+
+		HttpGet httpGet;
+		String response;
+		Observation observation;
+		CloseableHttpResponse status;
+
+		// Allowed code present - Read
+		ourHitMethod = false;
+		observation = createObservation(10, "Patient/2");
+		observation
+			.getCode()
+			.addCoding()
+			.setSystem("http://hl7.org/fhir/administrative-gender")
+			.setCode("male");
+		ourReturn = Collections.singletonList(observation);
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation/10");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertThat(response, containsString("Access denied by default policy"));
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		// No acceptable code present - Read
+		ourHitMethod = false;
+		observation = createObservation(10, "Patient/2");
+		observation
+			.getCode()
+			.addCoding()
+			.setSystem("http://hl7.org/fhir/administrative-gender")
+			.setCode("foo");
+		ourReturn = Collections.singletonList(observation);
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation/10");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		// Both Unacceptable and Acceptable code present - Should not pass since one of the codes is in the VS
+		ourHitMethod = false;
+		observation = createObservation(10, "Patient/2");
+		observation
+			.getCode()
+			.addCoding()
+			.setSystem("http://hl7.org/fhir/administrative-gender")
+			.setCode("foo");
+		observation
+			.getCode()
+			.addCoding()
+			.setSystem("http://hl7.org/fhir/administrative-gender")
+			.setCode("male");
+		ourReturn = Collections.singletonList(observation);
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation/10");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+	}
+
+	@Test
+	public void testCodeNotIn_DenySearch() throws IOException {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.deny("Rule 1").read().resourcesOfType("Observation").withCodeNotInValueSet("code", "http://hl7.org/fhir/ValueSet/administrative-gender").andThen()
+					.allowAll()
+					.build();
+			}
+		});
+
+		HttpGet httpGet;
+		String response;
+		Observation observation;
+		CloseableHttpResponse status;
+
+		// Allowed code present - Read
+		ourHitMethod = false;
+		observation = createObservation(10, "Patient/2");
+		observation
+			.getCode()
+			.addCoding()
+			.setSystem("http://hl7.org/fhir/administrative-gender")
+			.setCode("male");
+		ourReturn = Collections.singletonList(observation);
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation/10");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		// No acceptable code present - Read
+		ourHitMethod = false;
+		observation = createObservation(10, "Patient/2");
+		observation
+			.getCode()
+			.addCoding()
+			.setSystem("http://hl7.org/fhir/administrative-gender")
+			.setCode("foo");
+		ourReturn = Collections.singletonList(observation);
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation/10");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertThat(response, containsString("Access denied by rule: Rule 1"));
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		// Both Unacceptable and Acceptable code present - Should not pass since one of the codes is in the VS
+		ourHitMethod = false;
+		observation = createObservation(10, "Patient/2");
+		observation
+			.getCode()
+			.addCoding()
+			.setSystem("http://hl7.org/fhir/administrative-gender")
+			.setCode("foo");
+		observation
+			.getCode()
+			.addCoding()
+			.setSystem("http://hl7.org/fhir/administrative-gender")
+			.setCode("male");
+		ourReturn = Collections.singletonList(observation);
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation/10");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+	}
+
+
+	@Test
 	public void testCodeIn_TransactionCreate() throws IOException {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override

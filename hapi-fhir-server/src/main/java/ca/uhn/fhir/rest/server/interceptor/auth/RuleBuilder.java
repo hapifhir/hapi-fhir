@@ -563,6 +563,16 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					SearchParameterAndValueSetRuleImpl rule = new SearchParameterAndValueSetRuleImpl(myRuleName);
 					rule.setSearchParameterName(theSearchParameterName);
 					rule.setValueSetUrl(theValueSetUrl);
+					rule.setWantCode(true);
+					return finished(rule);
+				}
+
+				@Override
+				public IAuthRuleFinished withCodeNotInValueSet(@Nonnull String theSearchParameterName, @Nonnull String theValueSetUrl) {
+					SearchParameterAndValueSetRuleImpl rule = new SearchParameterAndValueSetRuleImpl(myRuleName);
+					rule.setSearchParameterName(theSearchParameterName);
+					rule.setValueSetUrl(theValueSetUrl);
+					rule.setWantCode(false);
 					return finished(rule);
 				}
 
