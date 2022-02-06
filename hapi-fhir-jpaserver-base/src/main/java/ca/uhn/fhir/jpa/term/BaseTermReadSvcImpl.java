@@ -274,7 +274,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		String directParentPids = "";
 
 		if (theExpansionOptions != null && theExpansionOptions.isIncludeHierarchy()) {
-			theConcept
+			directParentPids = theConcept
 				.getParents()
 				.stream()
 				.map(t -> t.getParent().getId().toString())
