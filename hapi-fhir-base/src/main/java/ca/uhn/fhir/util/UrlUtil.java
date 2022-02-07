@@ -368,9 +368,6 @@ public class UrlUtil {
 			}
 		}
 
-		if (url.length() > 1 && url.charAt(0) == '/' && Character.isLetter(url.charAt(1)) && url.contains("?")) {
-			url = url.substring(1);
-		}
 		int nextStart = parsingStart;
 		boolean nextIsHistory = false;
 
