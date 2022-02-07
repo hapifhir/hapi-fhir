@@ -201,8 +201,6 @@ import static org.mockito.Mockito.mock;
 @ContextConfiguration(classes = {TestR4Config.class})
 public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuilder {
 	public static final String MY_VALUE_SET = "my-value-set";
-	private static IValidationSupport ourJpaValidationSupportChainR4;
-	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
 
 	@Autowired
 	protected IPackageInstallerSvc myPackageInstallerSvc;
@@ -535,12 +533,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		TermConceptMappingSvcImpl.clearOurLastResultsFromTranslationWithReverseCache();
 		TermDeferredStorageSvcImpl termDeferredStorageSvc = AopTestUtils.getTargetObject(myTerminologyDeferredStorageSvc);
 		termDeferredStorageSvc.clearDeferred();
-	}
-
-	@AfterEach()
-	public void afterGrabCaches() {
-		ourValueSetDao = myValueSetDao;
-		ourJpaValidationSupportChainR4 = myJpaValidationSupportChainR4;
 	}
 
 	@BeforeEach
