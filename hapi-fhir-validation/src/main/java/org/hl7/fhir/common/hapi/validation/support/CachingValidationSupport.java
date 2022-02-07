@@ -65,8 +65,8 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 		super(theWrap.getFhirContext(), theWrap);
 		myExpandValueSetCache = Caffeine
 			.newBuilder()
-			.expireAfterWrite(theCacheTimeouts.getValidateCodeMillis(), TimeUnit.MILLISECONDS)
-			.maximumSize(500)
+			.expireAfterWrite(theCacheTimeouts.getExpandValueSetMillis(), TimeUnit.MILLISECONDS)
+			.maximumSize(100)
 			.build();
 		myValidateCodeCache = Caffeine
 			.newBuilder()
@@ -323,7 +323,7 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 		public static CacheTimeouts defaultValues() {
 			return new CacheTimeouts()
 				.setLookupCodeMillis(10 * DateUtils.MILLIS_PER_MINUTE)
-				.setExpandValueSetMillis(10 * DateUtils.MILLIS_PER_MINUTE)
+				.setExpandValueSetMillis(1 * DateUtils.MILLIS_PER_MINUTE)
 				.setTranslateCodeMillis(10 * DateUtils.MILLIS_PER_MINUTE)
 				.setValidateCodeMillis(10 * DateUtils.MILLIS_PER_MINUTE)
 				.setMiscMillis(10 * DateUtils.MILLIS_PER_MINUTE);

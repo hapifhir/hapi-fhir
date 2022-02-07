@@ -766,10 +766,10 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		}
 	}
 
-	@AfterAll
-	public static void afterClassClearContextBaseJpaR4Test() {
-		ourValueSetDao.purgeCaches();
-		ourJpaValidationSupportChainR4.invalidateCaches();
+	@AfterEach
+	public void afterEachClearCaches() {
+		myValueSetDao.purgeCaches();
+		myJpaValidationSupportChainR4.invalidateCaches();
 	}
 
 	/**
