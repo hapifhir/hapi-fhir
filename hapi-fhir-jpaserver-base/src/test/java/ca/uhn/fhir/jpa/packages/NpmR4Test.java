@@ -59,6 +59,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -924,17 +926,36 @@ public class NpmR4Test extends BaseJpaR4Test {
 			map.add(StructureDefinition.SP_URL, new UriParam("https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/LogicalModel/Laborbefund"));
 			IBundleProvider result = myStructureDefinitionDao.search(map);
 			assertEquals(1, result.sizeOrThrowNpe());
-			List<IBaseResource> resources = result.getResources(0,1);
-			assertFalse(((StructureDefinition)resources.get(0)).hasSnapshot());
+			List<IBaseResource> resources = result.getResources(0, 1);
+			assertFalse(((StructureDefinition) resources.get(0)).hasSnapshot());
 
 			// Confirm that DiagnosticLab (a resource StructureDefinition with differential but no snapshot) was created with a generated snapshot.
 			map = SearchParameterMap.newSynchronous();
 			map.add(StructureDefinition.SP_URL, new UriParam("https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab"));
 			result = myStructureDefinitionDao.search(map);
 			assertEquals(1, result.sizeOrThrowNpe());
-			resources = result.getResources(0,1);
-			assertTrue(((StructureDefinition)resources.get(0)).hasSnapshot());
+			resources = result.getResources(0, 1);
+			assertTrue(((StructureDefinition) resources.get(0)).hasSnapshot());
 
+		});
+	}
+
+	@Test
+	public void testInstallR4PackageFromFile() {
+
+		Path currentRelativePath = Paths.get("");
+		String s = currentRelativePath.toAbsolutePath().toString();
+		System.out.println("Current absolute path is: " + s);
+
+		String fileUrl = "file:" + s + "/src/test/resources/packages/de.basisprofil.r4-1.2.0.tgz";
+
+		myPackageInstallerSvc.install(new PackageInstallationSpec()
+			.setName("de.basisprofil.r4")
+			.setVersion("1.2.0")
+			.setPackageUrl(fileUrl)
+		);
+		runInTransaction(() -> {
+			assertTrue(myPackageVersionDao.findByPackageIdAndVersion("de.basisprofil.r4", "1.2.0").isPresent());
 		});
 	}
 

@@ -88,7 +88,11 @@ import javax.transaction.Transactional;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -473,7 +477,14 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 	protected byte[] loadPackageUrlContents(String thePackageUrl) {
 		if (thePackageUrl.startsWith("classpath:")) {
-			return ClasspathUtil.loadResourceAsByteArray(thePackageUrl.substring("classpath:".length()));
+			return ClasspathUtil.loadResourceAsByteArray(thePackageUrl.substring("classpath:" .length()));
+		} else if (thePackageUrl.startsWith("file:")) {
+			try {
+				byte[] bytes = Files.readAllBytes(Paths.get(new URI(thePackageUrl)));
+				return bytes;
+			} catch (IOException | URISyntaxException e) {
+				throw new InternalErrorException(Msg.code(2024) + "Error loading \"" + thePackageUrl + "\": " + e.getMessage());
+			}
 		} else {
 			HttpClientConnectionManager connManager = new BasicHttpClientConnectionManager();
 			try (CloseableHttpResponse request = HttpClientBuilder

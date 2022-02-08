@@ -1,0 +1,4 @@
+---
+type: add
+issue: 3347
+title: "Added ability to load Implementation Guide packages from filesystem by supporting the file:/ syntax of url."
