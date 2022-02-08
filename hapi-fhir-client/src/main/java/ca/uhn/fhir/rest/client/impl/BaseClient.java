@@ -162,7 +162,7 @@ public abstract class BaseClient implements IRestfulClient {
 
 	@Override
 	public <T extends IBaseResource> T fetchResourceFromUrl(Class<T> theResourceType, String theUrl) {
-		BaseHttpClientInvocation clientInvocation = new HttpGetClientInvocation(getFhirContext(), theUrl);
+		BaseHttpClientInvocation clientInvocation = new HttpGetClientInvocation(getFhirContext(), theUrl, false);
 		ResourceResponseHandler<T> binding = new ResourceResponseHandler<>(theResourceType);
 		return invokeClient(getFhirContext(), binding, clientInvocation, null, false, false, null, null, null, null, null);
 	}

@@ -93,9 +93,9 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 		IIdType id = ((IIdType) theArgs[myIdIndex]);
 		String resourceName = getResourceName();
 		if (id.hasVersionIdPart()) {
-			retVal = createVReadInvocation(getContext(), new IdDt(resourceName, id.getIdPart(), id.getVersionIdPart()), resourceName);
+			retVal = createVReadInvocation(getContext(), new IdDt(resourceName, id.getIdPart(), id.getVersionIdPart()), resourceName, false);
 		} else {
-			retVal = createReadInvocation(getContext(), id, resourceName);
+			retVal = createReadInvocation(getContext(), id, resourceName, false);
 		}
 
 		for (int idx = 0; idx < theArgs.length; idx++) {
@@ -137,20 +137,20 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 		return mySupportsVersion;
 	}
 
-	public static HttpGetClientInvocation createAbsoluteReadInvocation(FhirContext theContext, IIdType theId) {
-		return new HttpGetClientInvocation(theContext, theId.toVersionless().getValue());
+	public static HttpGetClientInvocation createAbsoluteReadInvocation(FhirContext theContext, IIdType theId, boolean useHead) {
+		return new HttpGetClientInvocation(theContext, theId.toVersionless().getValue(), useHead);
 	}
 
-	public static HttpGetClientInvocation createAbsoluteVReadInvocation(FhirContext theContext, IIdType theId) {
-		return new HttpGetClientInvocation(theContext, theId.getValue());
+	public static HttpGetClientInvocation createAbsoluteVReadInvocation(FhirContext theContext, IIdType theId, boolean useHead) {
+		return new HttpGetClientInvocation(theContext, theId.getValue(), useHead);
 	}
 
-	public static HttpGetClientInvocation createReadInvocation(FhirContext theContext, IIdType theId, String theResourceName) {
-		return new HttpGetClientInvocation(theContext, new IdDt(theResourceName, theId.getIdPart()).getValue());
+	public static HttpGetClientInvocation createReadInvocation(FhirContext theContext, IIdType theId, String theResourceName, boolean useHead) {
+		return new HttpGetClientInvocation(theContext, new IdDt(theResourceName, theId.getIdPart()).getValue(), useHead);
 	}
 
-	public static HttpGetClientInvocation createVReadInvocation(FhirContext theContext, IIdType theId, String theResourceName) {
-		return new HttpGetClientInvocation(theContext, new IdDt(theResourceName, theId.getIdPart(), theId.getVersionIdPart()).getValue());
+	public static HttpGetClientInvocation createVReadInvocation(FhirContext theContext, IIdType theId, String theResourceName, boolean useHead) {
+		return new HttpGetClientInvocation(theContext, new IdDt(theResourceName, theId.getIdPart(), theId.getVersionIdPart()).getValue(), useHead);
 	}
 
 	@Override

@@ -72,6 +72,8 @@ public class ApacheHttpClient extends BaseHttpClient implements IHttpClient {
 			HttpPut httpPut = new HttpPut(url);
 			httpPut.setEntity(theEntity);
 			return httpPut;
+		case HEAD:
+			return new HttpHead(url);
 		case GET:
 		default:
 			return new HttpGet(url);

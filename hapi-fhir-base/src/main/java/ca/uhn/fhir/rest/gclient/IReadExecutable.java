@@ -34,4 +34,13 @@ public interface IReadExecutable<T extends IBaseResource> extends IClientExecuta
 	 */
 	IReadIfNoneMatch<T> ifVersionMatches(String theVersion);
 
+	/**
+	 * Send a HEAD request instead of a GET.
+	 * This returns the same status code and headers as a GET request, but without the response body.
+	 * It is useful for detecting if a resource exists.
+	 * 
+	 * When using this option, the Resource returned from calling {@link IClientExecutable#execute()} will only have 
+	 * the ID set, since the resource body is not fetched from the server.
+	 */
+	IReadExecutable<T> useHead(boolean useHead);
 }

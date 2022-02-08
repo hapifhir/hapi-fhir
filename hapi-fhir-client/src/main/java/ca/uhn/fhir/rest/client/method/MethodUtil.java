@@ -102,7 +102,7 @@ public class MethodUtil {
 	}
 
 	public static HttpGetClientInvocation createConformanceInvocation(FhirContext theContext) {
-		return new HttpGetClientInvocation(theContext, "metadata");
+		return new HttpGetClientInvocation(theContext, "metadata", false);
 	}
 
 	public static HttpPostClientInvocation createCreateInvocation(IBaseResource theResource, FhirContext theContext) {

@@ -145,7 +145,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 			}
 		}
 
-		HttpGetClientInvocation retVal = new HttpGetClientInvocation(theContext, b.toString());
+		HttpGetClientInvocation retVal = new HttpGetClientInvocation(theContext, b.toString(), false);
 		return retVal;
 	}
 

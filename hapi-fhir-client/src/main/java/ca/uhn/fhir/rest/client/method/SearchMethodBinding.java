@@ -23,7 +23,6 @@ package ca.uhn.fhir.rest.client.method;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
@@ -47,7 +46,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	private String myCompartmentName;
@@ -158,7 +156,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	public static BaseHttpClientInvocation createSearchInvocation(FhirContext theContext, String theSearchUrl, UrlSourceEnum theUrlSource, Map<String, List<String>> theParams) {
-		return new HttpGetClientInvocation(theContext, theParams, theUrlSource, theSearchUrl);
+		return new HttpGetClientInvocation(theContext, theParams, theUrlSource, false, theSearchUrl);
 	}
 
 
@@ -199,16 +197,16 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		case GET:
 		default:
 			if (compartmentSearch) {
-				invocation = new HttpGetClientInvocation(theContext, theParameters, theResourceName, theId.getIdPart(), theCompartmentName);
+				invocation = new HttpGetClientInvocation(theContext, theParameters, false, theResourceName, theId.getIdPart(), theCompartmentName);
 			} else {
-				invocation = new HttpGetClientInvocation(theContext, theParameters, theResourceName);
+				invocation = new HttpGetClientInvocation(theContext, theParameters, false, theResourceName);
 			}
 			break;
 		case GET_WITH_SEARCH:
 			if (compartmentSearch) {
-				invocation = new HttpGetClientInvocation(theContext, theParameters, theResourceName, theId.getIdPart(), theCompartmentName, Constants.PARAM_SEARCH);
+				invocation = new HttpGetClientInvocation(theContext, theParameters, false, theResourceName, theId.getIdPart(), theCompartmentName, Constants.PARAM_SEARCH);
 			} else {
-				invocation = new HttpGetClientInvocation(theContext, theParameters, theResourceName, Constants.PARAM_SEARCH);
+				invocation = new HttpGetClientInvocation(theContext, theParameters, false, theResourceName, Constants.PARAM_SEARCH);
 			}
 			break;
 		case POST:

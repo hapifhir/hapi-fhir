@@ -43,20 +43,23 @@ public class HttpGetClientInvocation extends BaseHttpClientInvocation {
 	private final Map<String, List<String>> myParameters;
 	private final String myUrlPath;
 	private final UrlSourceEnum myUrlSource;
+	private final boolean doHeadRequest;
 
-	public HttpGetClientInvocation(FhirContext theContext, Map<String, List<String>> theParameters, String... theUrlFragments) {
-		this(theContext, theParameters, UrlSourceEnum.GENERATED, theUrlFragments);
+	public HttpGetClientInvocation(FhirContext theContext, Map<String, List<String>> theParameters, boolean useHead, String... theUrlFragments) {
+		this(theContext, theParameters, UrlSourceEnum.GENERATED, useHead, theUrlFragments);
 	}
 
-	public HttpGetClientInvocation(FhirContext theContext, Map<String, List<String>> theParameters, UrlSourceEnum theUrlSource, String... theUrlFragments) {
+	public HttpGetClientInvocation(FhirContext theContext, Map<String, List<String>> theParameters, UrlSourceEnum theUrlSource, boolean useHead, String... theUrlFragments) {
 		super(theContext);
 		myParameters = theParameters;
+		doHeadRequest = useHead;
 		myUrlPath = StringUtils.join(theUrlFragments, '/');
 		myUrlSource = theUrlSource;
 	}
 
-	public HttpGetClientInvocation(FhirContext theContext, String theUrlPath) {
+	public HttpGetClientInvocation(FhirContext theContext, String theUrlPath, boolean useHead) {
 		super(theContext);
+		doHeadRequest = useHead;
 		myParameters = new HashMap<>();
 		myUrlPath = theUrlPath;
 		myUrlSource = UrlSourceEnum.GENERATED;
@@ -103,7 +106,8 @@ public class HttpGetClientInvocation extends BaseHttpClientInvocation {
 
 		appendExtraParamsWithQuestionMark(theExtraParams, b, first);
 
-		IHttpRequest retVal = super.createHttpRequest(b.toString(), theEncoding, RequestTypeEnum.GET);
+		IHttpRequest retVal = super.createHttpRequest(b.toString(), theEncoding, 
+			doHeadRequest ? RequestTypeEnum.HEAD : RequestTypeEnum.GET);
 		retVal.setUrlSource(myUrlSource);
 
 		return retVal;

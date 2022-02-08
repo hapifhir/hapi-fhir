@@ -208,7 +208,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	private <T extends IBaseResource> T doReadOrVRead(final Class<T> theType, IIdType theId, boolean theVRead, ICallable<T> theNotModifiedHandler, String theIfVersionMatches, Boolean thePrettyPrint,
 																	  SummaryEnum theSummary, EncodingEnum theEncoding, Set<String> theSubsetElements, String theCustomAcceptHeaderValue,
-																	  Map<String, List<String>> theCustomHeaders) {
+																	  Map<String, List<String>> theCustomHeaders, boolean useHead) {
 		String resName = toResourceName(theType);
 		IIdType id = theId;
 		if (!id.hasBaseUrl()) {
@@ -218,15 +218,15 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		HttpGetClientInvocation invocation;
 		if (id.hasBaseUrl()) {
 			if (theVRead) {
-				invocation = ReadMethodBinding.createAbsoluteVReadInvocation(getFhirContext(), id);
+				invocation = ReadMethodBinding.createAbsoluteVReadInvocation(getFhirContext(), id, useHead);
 			} else {
-				invocation = ReadMethodBinding.createAbsoluteReadInvocation(getFhirContext(), id);
+				invocation = ReadMethodBinding.createAbsoluteReadInvocation(getFhirContext(), id, useHead);
 			}
 		} else {
 			if (theVRead) {
-				invocation = ReadMethodBinding.createVReadInvocation(getFhirContext(), id, resName);
+				invocation = ReadMethodBinding.createVReadInvocation(getFhirContext(), id, resName, useHead);
 			} else {
-				invocation = ReadMethodBinding.createReadInvocation(getFhirContext(), id, resName);
+				invocation = ReadMethodBinding.createReadInvocation(getFhirContext(), id, resName, useHead);
 			}
 		}
 		if (isKeepResponses()) {
@@ -238,17 +238,28 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		boolean allowHtmlResponse = SummaryEnum.TEXT.equals(theSummary);
-		ResourceResponseHandler<T> binding = new ResourceResponseHandler<>(theType, (Class<? extends IBaseResource>) null, id, allowHtmlResponse);
-
-		if (theNotModifiedHandler == null) {
-			return invokeClient(myContext, binding, invocation, theEncoding, thePrettyPrint, myLogRequestAndResponse, theSummary, theSubsetElements, null, theCustomAcceptHeaderValue, theCustomHeaders);
+		IClientResponseHandler<T> binding;
+		if (useHead) {
+			binding = (theResponseMimeType, theResponseInputStream, theResponseStatusCode, theHeaders) -> {
+				@SuppressWarnings("unchecked") 
+				T result = (T) myContext.getResourceDefinition(theType).newInstance();
+				result.setId(theId);
+				return result;
+			};
+		} else {
+			binding = new ResourceResponseHandler<>(theType, (Class<? extends IBaseResource>) null, id, allowHtmlResponse);
 		}
+
 		try {
 			return invokeClient(myContext, binding, invocation, theEncoding, thePrettyPrint, myLogRequestAndResponse, theSummary, theSubsetElements, null, theCustomAcceptHeaderValue, theCustomHeaders);
 		} catch (NotModifiedException e) {
-			return theNotModifiedHandler.call();
+			if (theNotModifiedHandler != null) {
+				return theNotModifiedHandler.call();
+			}
+			else {
+				throw e;
+			}
 		}
-
 	}
 
 	@Override
@@ -338,7 +349,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	@Override
 	public <T extends IBaseResource> T read(final Class<T> theType, UriDt theUrl) {
 		IdDt id = theUrl instanceof IdDt ? ((IdDt) theUrl) : new IdDt(theUrl);
-		return doReadOrVRead(theType, id, false, null, null, false, null, null, null, null, null);
+		return doReadOrVRead(theType, id, false, null, null, false, null, null, null, null, null, false);
 	}
 
 	@Override
@@ -416,7 +427,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		if (!theId.hasVersionIdPart()) {
 			throw new IllegalArgumentException(Msg.code(1367) + myContext.getLocalizer().getMessage(I18N_NO_VERSION_ID_FOR_VREAD, theId.getValue()));
 		}
-		return doReadOrVRead(theType, theId, true, null, null, false, null, null, null, null, null);
+		return doReadOrVRead(theType, theId, true, null, null, false, null, null, null, null, null, false);
 	}
 
 	@Override
@@ -1676,13 +1687,14 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private String myIfVersionMatches;
 		private ICallable myNotModifiedHandler;
 		private RuntimeResourceDefinition myType;
+		private boolean myUseHead;
 
 		@Override
 		public Object execute() {// AAA
 			if (myId.hasVersionIdPart()) {
-				return doReadOrVRead(myType.getImplementingClass(), myId, true, myNotModifiedHandler, myIfVersionMatches, myPrettyPrint, mySummaryMode, myParamEncoding, getSubsetElements(), getCustomAcceptHeaderValue(), myCustomHeaderValues);
+				return doReadOrVRead(myType.getImplementingClass(), myId, true, myNotModifiedHandler, myIfVersionMatches, myPrettyPrint, mySummaryMode, myParamEncoding, getSubsetElements(), getCustomAcceptHeaderValue(), myCustomHeaderValues, myUseHead);
 			}
-			return doReadOrVRead(myType.getImplementingClass(), myId, false, myNotModifiedHandler, myIfVersionMatches, myPrettyPrint, mySummaryMode, myParamEncoding, getSubsetElements(), getCustomAcceptHeaderValue(), myCustomHeaderValues);
+			return doReadOrVRead(myType.getImplementingClass(), myId, false, myNotModifiedHandler, myIfVersionMatches, myPrettyPrint, mySummaryMode, myParamEncoding, getSubsetElements(), getCustomAcceptHeaderValue(), myCustomHeaderValues, myUseHead);
 		}
 
 		@Override
@@ -1718,6 +1730,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 					return ReadInternal.this;
 				}
 			};
+		}
+
+		@Override
+		public IReadExecutable useHead(boolean useHead) {
+			myUseHead = useHead;
+			return ReadInternal.this;
 		}
 
 		private void processUrl() {

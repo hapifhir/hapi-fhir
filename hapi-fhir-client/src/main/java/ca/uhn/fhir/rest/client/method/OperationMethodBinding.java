@@ -211,7 +211,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 			IPrimitiveType<?> primitive = (IPrimitiveType<?>) value;
 			params.get(nextName).add(primitive.getValueAsString());
 		}
-		return new HttpGetClientInvocation(theContext, params, b.toString());
+		return new HttpGetClientInvocation(theContext, params, false, b.toString());
 	}
 
 	public static BaseHttpClientInvocation createProcessMsgInvocation(FhirContext theContext, String theOperationName, IBaseBundle theInput, Map<String, List<String>> urlParams) {
