@@ -1,6 +1,6 @@
 # Search Narrowing Interceptor
 
-The [SearchNarrowingInterceptor](/hapi-fhir/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/auth/SearchNarrowingInterceptor.html) can be used to automatically narrow/constrain the scope of FHIR searches.
+The [SearchNarrowingInterceptor](/hapi-fhir/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/auth/SearchNarrowingInterceptor.html) can be used to automatically narrow or constrain the scope of FHIR searches.
 
 * [SearchNarrowingInterceptor JavaDoc](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/auth/SearchNarrowingInterceptor.html)
 * [SearchNarrowingInterceptor Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/interceptor/auth/SearchNarrowingInterceptor.java)
