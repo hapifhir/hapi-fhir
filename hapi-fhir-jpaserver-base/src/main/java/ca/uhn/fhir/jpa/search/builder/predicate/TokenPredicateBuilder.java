@@ -185,7 +185,7 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 						throw new ResourceNotFoundException(Msg.code(2024) + "Unknown ValueSet: " + UrlUtil.escapeUrlParam(code));
 					}
 					IValidationSupport.ValueSetExpansionOutcome expanded = myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), new ValueSetExpansionOptions(), valueSet);
-					extractValueSetCodesIntoList(expanded.getValueSet(), codes);
+					codes.addAll(extractValueSetCodes(expanded.getValueSet()));
 				} else {
 					codes.addAll(myTerminologySvc.expandValueSetIntoConceptList(null, code));
 				}
@@ -260,7 +260,8 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 		return predicate;
 	}
 
-	private void extractValueSetCodesIntoList(IBaseResource theValueSet, List<FhirVersionIndependentConcept> theCodes) {
+	private List<FhirVersionIndependentConcept> extractValueSetCodes(IBaseResource theValueSet) {
+		List<FhirVersionIndependentConcept> retVal = new ArrayList<>();
 
 		RuntimeResourceDefinition vsDef = myContext.getResourceDefinition("ValueSet");
 		BaseRuntimeChildDefinition expansionChild = vsDef.getChildByName("expansion");
@@ -291,11 +292,12 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 					.map(t->t.getValueAsString())
 					.orElse(null);
 				if (isNotBlank(system) && isNotBlank(code)) {
-					theCodes.add(new FhirVersionIndependentConcept(system, code));
+					retVal.add(new FhirVersionIndependentConcept(system, code));
 				}
 			}
 		}
 
+		return retVal;
 	}
 
 	private String determineSystemIfMissing(RuntimeSearchParam theSearchParam, String code, String theSystem) {

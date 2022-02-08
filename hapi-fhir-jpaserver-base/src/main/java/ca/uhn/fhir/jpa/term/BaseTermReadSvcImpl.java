@@ -567,8 +567,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			String systemVersion = conceptView.getConceptSystemVersion();
 
 			//-- this is quick solution, may need to revisit
-			if (!applyFilter(display, filterDisplayValue))
-				continue;
+			if (!applyFilter(display, filterDisplayValue)) {
+				continue;}
 
 			Long conceptPid = conceptView.getConceptPid();
 			if (!pidToConcept.containsKey(conceptPid)) {
@@ -1803,7 +1803,9 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				assert valueSet != null;
 
 				ValueSetConceptAccumulator accumulator = new ValueSetConceptAccumulator(valueSetToExpand, myTermValueSetDao, myValueSetConceptDao, myValueSetConceptDesignationDao);
-				expandValueSet(null, valueSet, accumulator);
+				ValueSetExpansionOptions options = new ValueSetExpansionOptions();
+				options.setIncludeHierarchy(true);
+				expandValueSet(options, valueSet, accumulator);
 
 				// We are done with this ValueSet.
 				txTemplate.execute(t -> {
