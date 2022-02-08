@@ -80,7 +80,7 @@ class TokenAutocompleteSearch {
 							break;
 						case "":
 						default:
-							throw new IllegalArgumentException(Msg.code(2023) + "Autocomplete only accepts text search for now.");
+							throw new IllegalArgumentException(Msg.code(2030) + "Autocomplete only accepts text search for now.");
 
 					}
 
