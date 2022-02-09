@@ -125,6 +125,9 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	public void beforePurgeDatabase() {
 		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataExportSvc);
 		myDaoConfig.setAdvancedLuceneIndexing(true);
+		// we don't support chained or contained yet, but turn it on to test we don't blow up.
+		myDaoConfig.getModelConfig().setIndexOnContainedResources(true);
+		myDaoConfig.getModelConfig().setIndexOnContainedResourcesRecursively(true);
 	}
 
 	@Override
@@ -499,6 +502,31 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	private void assertObservationSearchMatches(String message, SearchParameterMap map, IIdType  ...iIdTypes) {
 		assertThat(message, toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(iIdTypes)));
 	}
+
+	/**
+	 * We were throwing when indexing contained.
+	 * https://github.com/hapifhir/hapi-fhir/issues/3371
+	 */
+	@Test
+	public void ignoreContainedResources_noError() {
+	    // given
+		String json =
+			"{" +
+			"\"resourceType\": \"Observation\"," +
+			"\"contained\": [{" +
+			"\"resourceType\": \"Patient\"," +
+			"\"id\": \"contained-patient\"," +
+			"\"name\": [{ \"family\": \"Smith\"}]" +
+			"}]," +
+			"\"subject\": { \"reference\": \"#contained-patient\" }" +
+			"}";
+		Observation o = myFhirCtx.newJsonParser().parseResource(Observation.class, json);
+
+		myObservationDao.create(o, mySrd).getId().toUnqualifiedVersionless();
+
+		// no error.
+	}
+	
 
 	@Test
 	public void testExpandWithIsAInExternalValueSet() {
