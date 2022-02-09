@@ -20,10 +20,10 @@ package ca.uhn.fhir.jpa.searchparam;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
@@ -203,7 +203,7 @@ public class MatchUrlService {
 				} else if (Constants.PARAM_REVINCLUDE.equals(theParamName)) {
 					for (QualifiedParamList nextQualifiedList : theValues) {
 						for (String nextValue : nextQualifiedList) {
-							theMapToPopulate.addInclude(new Include(nextValue, ParameterUtil.isIncludeIterate(nextQualifiedList.getQualifier())));
+							theMapToPopulate.addRevInclude(new Include(nextValue, ParameterUtil.isIncludeIterate(nextQualifiedList.getQualifier())));
 						}
 					}
 				}

@@ -127,8 +127,9 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 		for (ActiveSubscription nextActiveSubscription : subscriptions) {
 			// skip if the partitions don't match
 			CanonicalSubscription subscription = nextActiveSubscription.getSubscription();
-			if (subscription != null && subscription.getRequestPartitionId() != null && theMsg.getPartitionId() != null
-				&& !subscription.getCrossPartitionEnabled() && !theMsg.getPartitionId().hasPartitionId(subscription.getRequestPartitionId())) {
+			if (subscription != null && subscription.getRequestPartitionId() != null && theMsg.getPartitionId() != null &&
+				theMsg.getPartitionId().hasPartitionIds() && !subscription.getCrossPartitionEnabled() &&
+				!theMsg.getPartitionId().hasPartitionId(subscription.getRequestPartitionId())) {
 				continue;
 			}
 			String nextSubscriptionId = getId(nextActiveSubscription);
@@ -146,7 +147,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 			}
 
 			if (theMsg.getOperationType().equals(DELETE)) {
-				if (! nextActiveSubscription.getSubscription().getSendDeleteMessages()) {
+				if (!nextActiveSubscription.getSubscription().getSendDeleteMessages()) {
 					ourLog.trace("Not processing modified message for {}", theMsg.getOperationType());
 					return;
 				}
