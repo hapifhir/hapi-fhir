@@ -152,7 +152,7 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 	private void createExternalCsAndLocalVs() {
 		runInTransaction(()-> {
 			CodeSystem codeSystem = createExternalCs();
-			createLocalVs(codeSystem);
+			createLocalVsForCodeSystem(codeSystem);
 		});
 	}
 
@@ -163,7 +163,7 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 		});
 	}
 
-	private void createLocalVs(CodeSystem codeSystem) {
+	private void createLocalVsForCodeSystem(CodeSystem codeSystem) {
 		myLocalVs = new ValueSet();
 		myLocalVs.setUrl(URL_MY_VALUE_SET);
 		ConceptSetComponent include = myLocalVs.getCompose().addInclude();
@@ -357,7 +357,7 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 				.execute();
 		} catch (ResourceNotFoundException e) {
 			assertEquals(404, e.getStatusCode());
-			assertEquals("HTTP 404 Not Found: " + Msg.code(886) + "Unknown ValueSet: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fbogus", e.getMessage());
+			assertEquals("HTTP 404 Not Found: HAPI-2030: Can not find ValueSet with URL: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fbogus", e.getMessage());
 		}
 	}
 
@@ -405,7 +405,7 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 				.execute();
 		} catch (ResourceNotFoundException e) {
 			assertEquals(404, e.getStatusCode());
-			assertEquals("HTTP 404 Not Found: " + Msg.code(886) + "Unknown ValueSet: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fbogus", e.getMessage());
+			assertEquals("HTTP 404 Not Found: HAPI-2030: Can not find ValueSet with URL: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fbogus", e.getMessage());
 		}
 	}
 

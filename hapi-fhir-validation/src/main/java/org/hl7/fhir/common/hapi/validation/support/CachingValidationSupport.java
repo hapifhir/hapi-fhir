@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
@@ -22,11 +23,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -35,6 +36,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class CachingValidationSupport extends BaseValidationSupportWrapper implements IValidationSupport {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(CachingValidationSupport.class);
+	public static final ValueSetExpansionOptions EMPTY_EXPANSION_OPTIONS = new ValueSetExpansionOptions();
 
 	private final Cache<String, Object> myCache;
 	private final Cache<String, Object> myValidateCodeCache;
@@ -42,6 +44,7 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	private final Cache<String, Object> myLookupCodeCache;
 	private final ThreadPoolExecutor myBackgroundExecutor;
 	private final Map<Object, Object> myNonExpiringCache;
+	private final Cache<String, Object> myExpandValueSetCache;
 
 	/**
 	 * Constuctor with default timeouts
@@ -60,6 +63,11 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	 */
 	public CachingValidationSupport(IValidationSupport theWrap, CacheTimeouts theCacheTimeouts) {
 		super(theWrap.getFhirContext(), theWrap);
+		myExpandValueSetCache = Caffeine
+			.newBuilder()
+			.expireAfterWrite(theCacheTimeouts.getExpandValueSetMillis(), TimeUnit.MILLISECONDS)
+			.maximumSize(100)
+			.build();
 		myValidateCodeCache = Caffeine
 			.newBuilder()
 			.expireAfterWrite(theCacheTimeouts.getValidateCodeMillis(), TimeUnit.MILLISECONDS)
@@ -147,6 +155,22 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	}
 
 	@Override
+	public ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext, ValueSetExpansionOptions theExpansionOptions, @Nonnull IBaseResource theValueSetToExpand) {
+		if (!theValueSetToExpand.getIdElement().hasIdPart()) {
+			return super.expandValueSet(theValidationSupportContext, theExpansionOptions, theValueSetToExpand);
+		}
+
+		ValueSetExpansionOptions expansionOptions = defaultIfNull(theExpansionOptions, EMPTY_EXPANSION_OPTIONS);
+		String key = "expandValueSet " +
+			theValueSetToExpand.getIdElement().getValue() + " " +
+			expansionOptions.isIncludeHierarchy() + " " +
+			expansionOptions.getFilter() + " " +
+			expansionOptions.getOffset() + " " +
+			expansionOptions.getCount();
+		return loadFromCache(myExpandValueSetCache, key, t -> super.expandValueSet(theValidationSupportContext, theExpansionOptions, theValueSetToExpand));
+	}
+
+	@Override
 	public CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		String key = "validateCode " + theCodeSystem + " " + theCode + " " + defaultIfBlank(theValueSetUrl, "NO_VS");
 		return loadFromCache(myValidateCodeCache, key, t -> super.validateCode(theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, theValueSetUrl));
@@ -215,7 +239,7 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 			retVal = (T) myNonExpiringCache.get(theKey);
 			if (retVal != null) {
 
-				Runnable loaderTask = ()->{
+				Runnable loaderTask = () -> {
 					T loadedItem = loadFromCache(theCache, theKey, theLoader);
 					myNonExpiringCache.put(theKey, loadedItem);
 				};
@@ -233,6 +257,7 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 
 	@Override
 	public void invalidateCaches() {
+		myExpandValueSetCache.invalidateAll();
 		myLookupCodeCache.invalidateAll();
 		myCache.invalidateAll();
 		myValidateCodeCache.invalidateAll();
@@ -248,6 +273,16 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 		private long myLookupCodeMillis;
 		private long myValidateCodeMillis;
 		private long myMiscMillis;
+		private long myExpandValueSetMillis;
+
+		public long getExpandValueSetMillis() {
+			return myExpandValueSetMillis;
+		}
+
+		public CacheTimeouts setExpandValueSetMillis(long theExpandValueSetMillis) {
+			myExpandValueSetMillis = theExpandValueSetMillis;
+			return this;
+		}
 
 		public long getTranslateCodeMillis() {
 			return myTranslateCodeMillis;
@@ -288,6 +323,7 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 		public static CacheTimeouts defaultValues() {
 			return new CacheTimeouts()
 				.setLookupCodeMillis(10 * DateUtils.MILLIS_PER_MINUTE)
+				.setExpandValueSetMillis(1 * DateUtils.MILLIS_PER_MINUTE)
 				.setTranslateCodeMillis(10 * DateUtils.MILLIS_PER_MINUTE)
 				.setValidateCodeMillis(10 * DateUtils.MILLIS_PER_MINUTE)
 				.setMiscMillis(10 * DateUtils.MILLIS_PER_MINUTE);
