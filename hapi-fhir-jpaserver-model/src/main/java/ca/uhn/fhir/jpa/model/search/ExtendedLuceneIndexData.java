@@ -48,7 +48,7 @@ public class ExtendedLuceneIndexData {
 
 	private <V> BiConsumer<String, V> ifNotContained(BiConsumer<String, V> theIndexWriter) {
 		return (s,v) -> {
-			// Ignore contained resources.
+			// Ignore contained resources for now.
 			if (!s.contains(".")) {
 				theIndexWriter.accept(s,v);
 			}

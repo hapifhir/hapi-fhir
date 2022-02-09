@@ -59,7 +59,7 @@ public class ExtendedLuceneSearchBuilder {
 				// each and clause may have a different modifier, so split down to the ORs
 				.flatMap(andList -> andList.getValue().stream())
 				.flatMap(Collection::stream)
-				.anyMatch(this::isParamSupported);
+				.anyMatch(this::isParamTypeSupported);
 	}
 
 	/**
@@ -67,7 +67,7 @@ public class ExtendedLuceneSearchBuilder {
 	 *
 	 * NOTE - keep this in sync with addAndConsumeAdvancedQueryClauses() below.
 	 */
-	private boolean isParamSupported(IQueryParameterType param) {
+	private boolean isParamTypeSupported(IQueryParameterType param) {
 		String modifier = StringUtils.defaultString(param.getQueryParameterQualifier(), EMPTY_MODIFIER);
 		if (param instanceof TokenParam) {
 			switch (modifier) {
