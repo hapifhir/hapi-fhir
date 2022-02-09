@@ -40,7 +40,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
 import ca.uhn.fhir.util.VersionEnum;
 
-import javax.persistence.Index;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -83,12 +82,81 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init550(); // 20210520 -
 		init560(); // 20211027 -
 		init570(); // 20211102 -
+		init600(); // 20211102 -
 	}
+
+	private void init600() {
+		Builder version = forVersion(VersionEnum.V6_0_0);
+
+		/*
+		 * New indexing for the core SPIDX tables.
+		 * Ensure all queries can be satisfied by the index directly, either as first or second column in a hash or sort join.
+		 */
+		// new date search indexes
+		version.onTable( "HFJ_SPIDX_DATE")
+			.addIndex("20220207.1", "IDX_SP_DATE_HASH_V2" )
+			.unique(false)
+			.online(true)
+			.withColumns("HASH_IDENTITY", "SP_VALUE_LOW", "SP_VALUE_HIGH", "PARTITION_ID",  "RES_ID");
+
+		version.onTable( "HFJ_SPIDX_DATE")
+			.dropIndex("20220207.2", "IDX_SP_DATE_HASH");
+
+		version.onTable( "HFJ_SPIDX_DATE")
+			.addIndex("20220207.3", "IDX_SP_DATE_HASH_HIGH_V2" )
+			.unique(false)
+			.online(true)
+			.withColumns("HASH_IDENTITY", "SP_VALUE_HIGH", "PARTITION_ID",  "RES_ID");
+
+		version.onTable( "HFJ_SPIDX_DATE")
+			.dropIndex("20220207.4", "IDX_SP_DATE_HASH_HIGH");
+
+		version.onTable( "HFJ_SPIDX_DATE")
+			.dropIndex("20220207.5", "IDX_SP_DATE_HASH_LOW");
+
+		version.onTable( "HFJ_SPIDX_DATE")
+			.addIndex("20220207.6", "IDX_SP_DATE_ORD_HASH_V2" )
+			.unique(false)
+			.online(true)
+			.withColumns("HASH_IDENTITY", "SP_VALUE_LOW_DATE_ORDINAL", "SP_VALUE_HIGH_DATE_ORDINAL", "PARTITION_ID", "RES_ID");
+
+		version.onTable( "HFJ_SPIDX_DATE")
+			.dropIndex("20220207.7", "IDX_SP_DATE_ORD_HASH");
+
+		version.onTable( "HFJ_SPIDX_DATE")
+			.addIndex("20220207.8", "IDX_SP_DATE_ORD_HASH_HIGH_V2" )
+			.unique(false)
+			.online(true)
+			.withColumns("HASH_IDENTITY", "SP_VALUE_HIGH_DATE_ORDINAL", "PARTITION_ID", "RES_ID");
+
+		version.onTable( "HFJ_SPIDX_DATE")
+			.dropIndex("20220207.9", "IDX_SP_DATE_ORD_HASH_HIGH");
+
+		version.onTable( "HFJ_SPIDX_DATE")
+			.dropIndex("20220207.10", "IDX_SP_DATE_ORD_HASH_LOW");
+
+		version.onTable( "HFJ_SPIDX_DATE")
+			.addIndex("20220207.11", "IDX_SP_DATE_RESID_V2" )
+			.unique(false)
+			.online(true)
+			.withColumns("RES_ID", "HASH_IDENTITY", "SP_VALUE_LOW", "SP_VALUE_HIGH", "SP_VALUE_LOW_DATE_ORDINAL", "SP_VALUE_HIGH_DATE_ORDINAL", "PARTITION_ID");
+
+		version.onTable( "HFJ_SPIDX_DATE")
+			.dropIndex("20220207.12", "IDX_SP_DATE_RESID");
+
+
+		// fixme turn old index migrations into a no-op
+		// fixme start last_updated deprecation.
+		// fixme talk to Yue Shi about testing our migrations and this change. Release smoke test on oldest version supported.
+		// fixme do we need to make drop concurrent+deferred?
+
+	}
+
 
 
 	/**
 	 * See https://github.com/hapifhir/hapi-fhir/issues/3237 for reasoning for these indexes.
-	 * This adds indexes to various tables to enhance delete-expunge performance, which does deletes by PID.
+	 * This adds indexes to various tables to enhance delete-expunge performance, which deletes by PID.
 	 */
 	private void addIndexesForDeleteExpunge(Builder theVersion) {
 
