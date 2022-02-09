@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.batch2.model;
+package ca.uhn.fhir.batch2.model;
 
 import org.apache.commons.lang3.Validate;
 

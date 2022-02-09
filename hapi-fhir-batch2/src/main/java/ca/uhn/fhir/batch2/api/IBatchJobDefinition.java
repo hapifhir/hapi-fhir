@@ -1,7 +1,7 @@
-package ca.uhn.fhir.jpa.batch2.api;
+package ca.uhn.fhir.batch2.api;
 
-import ca.uhn.fhir.jpa.batch2.model.JobDefinitionParameter;
-import ca.uhn.fhir.jpa.batch2.model.JobDefinitionStep;
+import ca.uhn.fhir.batch2.model.JobDefinitionParameter;
+import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 
 import java.util.List;
 

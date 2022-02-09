@@ -1,9 +1,9 @@
-package ca.uhn.fhir.jpa.batch2.config;
+package ca.uhn.fhir.batch2.config;
 
-import ca.uhn.fhir.jpa.batch2.api.IJobDefinitionRegistry;
-import ca.uhn.fhir.jpa.batch2.api.IJobInstancePersister;
-import ca.uhn.fhir.jpa.batch2.impl.JobDefinitionRegistryImpl;
-import ca.uhn.fhir.jpa.batch2.model.JobWorkNotification;
+import ca.uhn.fhir.batch2.api.IJobDefinitionRegistry;
+import ca.uhn.fhir.batch2.api.IJobInstancePersister;
+import ca.uhn.fhir.batch2.impl.JobDefinitionRegistryImpl;
+import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;

@@ -1,7 +1,8 @@
-package ca.uhn.fhir.jpa.batch2.impl;
+package ca.uhn.fhir.batch2.impl;
 
-import ca.uhn.fhir.jpa.batch2.model.JobDefinitionParameter;
-import ca.uhn.fhir.jpa.batch2.model.JobInstanceParameter;
+import ca.uhn.fhir.batch2.impl.JobInstanceCoordinatorImpl;
+import ca.uhn.fhir.batch2.model.JobDefinitionParameter;
+import ca.uhn.fhir.batch2.model.JobInstanceParameter;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.Lists;
 import org.junit.jupiter.api.Test;
@@ -29,9 +30,9 @@ public class JobInstanceCoordinatorImplTest {
 
 		try {
 			JobInstanceCoordinatorImpl.validateParameters(definitions, instances);
-			fail();
+			Assertions.fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Missing required parameter: bar", e.getMessage());
+			Assertions.assertEquals("Missing required parameter: bar", e.getMessage());
 		}
 	}
 
@@ -49,9 +50,9 @@ public class JobInstanceCoordinatorImplTest {
 
 		try {
 			JobInstanceCoordinatorImpl.validateParameters(definitions, instances);
-			fail();
+			Assertions.fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Missing required parameter: bar", e.getMessage());
+			Assertions.assertEquals("Missing required parameter: bar", e.getMessage());
 		}
 	}
 
@@ -68,9 +69,9 @@ public class JobInstanceCoordinatorImplTest {
 
 		try {
 			JobInstanceCoordinatorImpl.validateParameters(definitions, instances);
-			fail();
+			Assertions.fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Illegal repeating parameter: foo", e.getMessage());
+			Assertions.assertEquals("Illegal repeating parameter: foo", e.getMessage());
 		}
 	}
 
@@ -83,7 +84,7 @@ public class JobInstanceCoordinatorImplTest {
 
 		List<JobInstanceParameter> instances = Lists.newArrayList();
 
-		assertDoesNotThrow(() -> JobInstanceCoordinatorImpl.validateParameters(definitions, instances));
+		Assertions.assertDoesNotThrow(() -> JobInstanceCoordinatorImpl.validateParameters(definitions, instances));
 	}
 
 	@Test
@@ -96,9 +97,9 @@ public class JobInstanceCoordinatorImplTest {
 
 		try {
 			JobInstanceCoordinatorImpl.validateParameters(definitions, instances);
-			fail();
+			Assertions.fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Unexpected parameter: foo", e.getMessage());
+			Assertions.assertEquals("Unexpected parameter: foo", e.getMessage());
 		}
 	}
 

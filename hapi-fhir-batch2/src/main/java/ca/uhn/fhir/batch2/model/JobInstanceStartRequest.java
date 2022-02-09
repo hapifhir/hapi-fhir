@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.batch2.model;
+package ca.uhn.fhir.batch2.model;
 
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
