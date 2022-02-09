@@ -144,21 +144,6 @@ public class AddIndexTest extends BaseTest {
 				assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL)", sql);
 			}
 
-			@Test
-			public void includeForce_addsToUnsuppored() {
-				myTask.setDriverType(DriverTypeEnum.ORACLE_12C);
-				myTask.setForceInclude(true);
-				sql = myTask.generateSql();
-				assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL, FOO1, FOO2)", sql);
-			}
-
-			@Test
-			public void includeForce_usesIncludeWhenSupported() {
-				myTask.setDriverType(DriverTypeEnum.MSSQL_2012);
-				myTask.setForceInclude(true);
-				sql = myTask.generateSql();
-				assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL) INCLUDE (FOO1, FOO2)", sql);
-			}
 		}
 
 		@Nested
