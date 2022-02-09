@@ -45,7 +45,6 @@ public class AddIndexTask extends BaseTableTask {
 	private List<String> myColumns;
 	private Boolean myUnique;
 	private List<String> myIncludeColumns = Collections.emptyList();
-	private boolean myForceInclude;
 	private boolean myOnline;
 
 	public AddIndexTask(String theProductVersion, String theSchemaVersion) {
@@ -119,10 +118,6 @@ public class AddIndexTask extends BaseTableTask {
 					// These platforms don't support the include clause
 					// Per:
 					// https://use-the-index-luke.com/blog/2019-04/include-columns-in-btree-indexes#postgresql-limitations
-					if (myForceInclude) {
-						// we add the include columns to the main list
-						indexedColumns.addAll(myIncludeColumns);
-					}
 					break;
 			}
 		}
@@ -176,14 +171,6 @@ public class AddIndexTask extends BaseTableTask {
 	}
 
 	/**
-	 * Force the INCLUDE columns into the USING columns
-	 * when driver doesn't suppport INCLUDE.
-	 */
-	public void setForceInclude(boolean theForceFlag) {
-		myForceInclude = theForceFlag;
-	}
-
-	/**
 	 * Add Index without locking the table.
 	 */
 	public void setOnline(boolean theFlag) {
@@ -198,7 +185,6 @@ public class AddIndexTask extends BaseTableTask {
 		theBuilder.append(myColumns, otherObject.myColumns);
 		theBuilder.append(myUnique, otherObject.myUnique);
 		theBuilder.append(myIncludeColumns, otherObject.myIncludeColumns);
-		theBuilder.append(myForceInclude, otherObject.myForceInclude);
 		theBuilder.append(myOnline, otherObject.myOnline);
 
 	}
@@ -211,7 +197,6 @@ public class AddIndexTask extends BaseTableTask {
 		theBuilder.append(myUnique);
 		// fixme myIncludeColumns was missing.  Is that a problem?
 		theBuilder.append(myIncludeColumns);
-		theBuilder.append(myForceInclude);
 		theBuilder.append(myOnline);
 	}
 

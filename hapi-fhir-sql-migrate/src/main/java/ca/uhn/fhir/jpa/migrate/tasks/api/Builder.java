@@ -116,7 +116,6 @@ public class Builder {
 	 *
 	 * @param theVersion The version of the migration.
 	 * @param theDriverToSql Map of driver types to SQL statements.
-	 * @return
 	 */
 	public Builder executeRawSql(String theVersion, Map<DriverTypeEnum, String> theDriverToSql) {
 		Map<DriverTypeEnum, List<String>> singleSqlStatementMap = new HashMap<>();
@@ -134,7 +133,6 @@ public class Builder {
 	 *
 	 * @param theVersion The version of the migration.
 	 * @param theDriverToSqls Map of driver types to list of SQL statements.
-	 * @return
 	 */
 	public Builder executeRawSqls(String theVersion, Map<DriverTypeEnum, List<String>> theDriverToSqls) {
 		ExecuteRawSqlTask executeRawSqlTask = new ExecuteRawSqlTask(myRelease, theVersion);
@@ -322,7 +320,6 @@ public class Builder {
 				private final String myVersion;
 				private final boolean myUnique;
 				private String[] myIncludeColumns;
-				private boolean myForceInclude;
 				private boolean myOnline;
 
 				public BuilderAddIndexUnique(String theVersion, boolean theUnique) {
@@ -349,7 +346,6 @@ public class Builder {
 					task.setOnline(myOnline);
 					if (myIncludeColumns != null) {
 						task.setIncludeColumns(myIncludeColumns);
-						task.setForceInclude(myForceInclude);
 					}
 					addTask(task);
 					return task;
@@ -361,16 +357,7 @@ public class Builder {
 				}
 
 				/**
-				 * Append the INCLUDE columns in the index columns when INCLUDE is not supported.
-				 */
-				public BuilderAddIndexUnique forceInclude(boolean theFlag) {
-					myForceInclude = theFlag;
-					return this;
-				}
-
-				/**
 				 * Add the index without locking the table.
-				 * FIXME - should we always do this?
 				 */
 				public BuilderAddIndexUnique online(boolean theOnlineFlag) {
 					myOnline = theOnlineFlag;
@@ -475,7 +462,7 @@ public class Builder {
 			}
 		}
 
-		public class BuilderAddColumnWithName {
+		public static class BuilderAddColumnWithName {
 			private final String myRelease;
 			private final String myVersion;
 			private final String myColumnName;
