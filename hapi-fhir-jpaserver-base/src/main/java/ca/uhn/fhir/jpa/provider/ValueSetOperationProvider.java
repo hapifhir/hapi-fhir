@@ -20,11 +20,11 @@ package ca.uhn.fhir.jpa.provider;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
@@ -75,6 +75,10 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 	private IValidationSupport myValidationSupport;
 	@Autowired
 	private IFulltextSearchSvc myFulltextSearch;
+
+	public void setValidationSupport(IValidationSupport theValidationSupport) {
+		myValidationSupport = theValidationSupport;
+	}
 
 	public void setDaoConfig(DaoConfig theDaoConfig) {
 		myDaoConfig = theDaoConfig;
