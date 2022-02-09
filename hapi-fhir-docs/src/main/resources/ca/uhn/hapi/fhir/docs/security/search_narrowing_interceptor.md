@@ -1,6 +1,6 @@
 # Search Narrowing Interceptor
 
-The [SearchNarrowingInterceptor](/hapi-fhir/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/auth/SearchNarrowingInterceptor.html) can be used to automatically narrow/constrain the scope of FHIR searches.
+The [SearchNarrowingInterceptor](/hapi-fhir/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/auth/SearchNarrowingInterceptor.html) can be used to automatically narrow or constrain the scope of FHIR searches.
 
 * [SearchNarrowingInterceptor JavaDoc](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/auth/SearchNarrowingInterceptor.html)
 * [SearchNarrowingInterceptor Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/interceptor/auth/SearchNarrowingInterceptor.java)
@@ -29,7 +29,7 @@ An example of this interceptor follows:
 
 SearchNarrowingInterceptor can also be used to narrow searches by automatically appending `token:in` and `token:not-in` parameters.
 
-In the example below, searches would be narrows as shown below:
+In the example below, searches are narrowed as shown below:
 
 * Searches for http://localhost:8000/Observation become http://localhost:8000/Observation?code:in=http://hl7.org/fhir/ValueSet/observation-vitalsignresult
 * Searches for http://localhost:8000/Encounter become http://localhost:8000/Encounter?class:not-in=http://my-forbidden-encounter-classes
