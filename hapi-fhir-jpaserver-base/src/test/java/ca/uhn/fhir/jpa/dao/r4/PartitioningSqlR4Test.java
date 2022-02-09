@@ -623,7 +623,8 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	public void testCreateInTransaction_ServerId_WithPartition() {
 		createUniqueCompositeSp();
 		createRequestId();
-
+		ourLog.info("Starting testCreateInTransaction_ServerId_WithPartition");
+		ourLog.info("Setting up partitionId {} with date {}", myPartitionId, myPartitionDate);
 		addCreatePartition(myPartitionId, myPartitionDate);
 		addCreatePartition(myPartitionId, myPartitionDate);
 		addCreatePartition(myPartitionId, myPartitionDate);

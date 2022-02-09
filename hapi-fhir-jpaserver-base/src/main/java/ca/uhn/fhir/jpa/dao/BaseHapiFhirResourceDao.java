@@ -41,6 +41,7 @@ import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
@@ -258,7 +259,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		ResourceTable entity = new ResourceTable();
 		entity.setResourceType(toResourceName(theResource));
-		entity.setPartitionId(myRequestPartitionHelperService.toStoragePartition(theRequestPartitionId));
+		PartitionablePartitionId partitionablePartitionId = myRequestPartitionHelperService.toStoragePartition(theRequestPartitionId);
+		ourLog.info("Setting Entity for resource {} to partition id {} which has date {}", theResource, partitionablePartitionId, partitionablePartitionId.getPartitionDate());
+		entity.setPartitionId(partitionablePartitionId);
 		entity.setCreatedByMatchUrl(theIfNoneExist);
 		entity.setVersion(1);
 
