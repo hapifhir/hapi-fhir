@@ -54,4 +54,11 @@ public class BasePartitionable implements Serializable {
 		myPartitionId = thePartitionId;
 	}
 
+	@Override
+	public String toString() {
+		return "BasePartitionable{" +
+			"myPartitionId=" + myPartitionId +
+			", myPartitionIdValue=" + myPartitionIdValue +
+			'}';
+	}
 }

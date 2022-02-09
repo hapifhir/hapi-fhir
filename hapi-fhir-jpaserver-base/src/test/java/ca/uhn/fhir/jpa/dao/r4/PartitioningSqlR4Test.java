@@ -658,6 +658,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		runInTransaction(() -> {
 			// HFJ_RESOURCE
 			ResourceTable resourceTable = myResourceTableDao.findById(patientId).orElseThrow(IllegalArgumentException::new);
+			ourLog.info("Found resourceTable {}, which contains partition id {} with date {}", resourceTable.getId(), resourceTable.getPartitionId(), resourceTable.getPartitionId().getPartitionDate());
 			assertEquals(myPartitionId, resourceTable.getPartitionId().getPartitionId().intValue());
 			assertEquals(myPartitionDate, resourceTable.getPartitionId().getPartitionDate());
 		});
