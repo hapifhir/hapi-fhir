@@ -57,6 +57,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test {
@@ -797,6 +798,41 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 	}
 
 	@Test
+	public void testUpdateConditionalOverExistingUnique() {
+		createUniqueIndexPatientIdentifierCount1();
+
+		Patient pt = new Patient();
+		pt.addIdentifier().setSystem("urn").setValue("111");
+		IIdType id = myPatientDao.create(pt).getId().toUnqualifiedVersionless();
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus status) {
+				List<ResourceIndexedComboStringUnique> all = myResourceIndexedCompositeStringUniqueDao.findAll();
+				assertEquals(1, all.size());
+			}
+		});
+
+		pt = new Patient();
+		pt.addIdentifier().setSystem("urn").setValue("111");
+		pt.setActive(true);
+		String version = myPatientDao.update(pt, "Patient?first-identifier=urn|111").getId().getVersionIdPart();
+		assertEquals("2", version);
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus status) {
+				List<ResourceIndexedComboStringUnique> all = myResourceIndexedCompositeStringUniqueDao.findAll();
+				assertEquals(1, all.size());
+			}
+		});
+
+		pt = myPatientDao.read(id);
+		assertTrue(pt.getActive());
+
+	}
+
+	@Test
 	public void testIndexTransactionWithMatchUrl() {
 		Patient pt2 = new Patient();
 		pt2.setGender(Enumerations.AdministrativeGender.MALE);
@@ -1255,7 +1291,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		pt1.setManagingOrganization(new Reference("Organization/ORG"));
 		myPatientDao.update(pt1, "Patient?name=FAMILY1&organization.name=ORG").getId().toUnqualifiedVersionless();
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
 			assertEquals(1, uniques.size());
 			assertEquals("Patient/" + id1.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
