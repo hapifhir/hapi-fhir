@@ -90,7 +90,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		/*
 		 * New indexing for the core SPIDX tables.
-		 * Ensure all queries can be satisfied by the index directly, either as first or second column in a hash or sort join.
+		 * Ensure all queries can be satisfied by the index directly,
+		 * either as left or right table in a hash or sort join.
 		 */
 		// new date search indexes
 		version.onTable( "HFJ_SPIDX_DATE")
@@ -144,6 +145,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable( "HFJ_SPIDX_DATE")
 			.dropIndex("20220207.12", "IDX_SP_DATE_RESID");
 
+		// dropped and not replaced.  Column to be deleted.
+		version.onTable( "HFJ_SPIDX_DATE")
+			.dropIndex("20220207.13", "IDX_SP_DATE_UPDATED");
 	}
 
 	/**
