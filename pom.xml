@@ -2773,7 +2773,7 @@
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<modules>
-                <module>hapi-fhir-checkstyle</module>
+				<module>hapi-fhir-checkstyle</module>
 				<module>hapi-fhir-bom</module>
 				<module>hapi-deployable-pom</module>
 				<module>hapi-fhir-base</module>
@@ -2788,7 +2788,6 @@
 				<module>hapi-fhir-server-openapi</module>
 				<module>hapi-fhir-converter</module>
 				<module>hapi-fhir-validation</module>
-				<!--<module>hapi-fhir-narrativegenerator</module>-->
 				<module>hapi-fhir-structures-dstu2</module>
 				<module>hapi-fhir-structures-hl7org-dstu2</module>
 				<module>hapi-fhir-validation-resources-dstu2</module>
