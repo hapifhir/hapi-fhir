@@ -382,7 +382,7 @@ public class SearchBuilder implements ISearchBuilder {
 				.collect(Collectors.toList());
 		} else {
 			if (myIElasticsearchSvc == null) {
-				throw new InvalidRequestException(Msg.code(2028) + "LastN operation is not enabled on this service, can not process this request");
+				throw new InvalidRequestException(Msg.code(2033) + "LastN operation is not enabled on this service, can not process this request");
 			}
 			// use the dedicated observation ES/Lucene index to support lastN query
 			return myIElasticsearchSvc.executeLastN(myParams, myContext, theMaximumResults).stream()

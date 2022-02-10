@@ -333,7 +333,7 @@ public class ExtendedLuceneClauseBuilder {
 			// comma separated list of dates(OR list) on a date param is not applicable so grab
 			// first from default list
 			if (nextAnd.size() > 1) {
-				throw new IllegalArgumentException(Msg.code(2024) + "OR (,) searches on DATE search parameters are not supported for ElasticSearch/Lucene");
+				throw new IllegalArgumentException(Msg.code(2032) + "OR (,) searches on DATE search parameters are not supported for ElasticSearch/Lucene");
 			}
 			DateParam dateParam = (DateParam) nextAnd.stream().findFirst()
 				.orElseThrow(() -> new InvalidRequestException("Date param is missing value"));
