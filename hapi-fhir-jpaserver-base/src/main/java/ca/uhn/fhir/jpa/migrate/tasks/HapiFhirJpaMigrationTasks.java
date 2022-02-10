@@ -94,60 +94,68 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		 * either as left or right table in a hash or sort join.
 		 */
 		// new date search indexes
-		version.onTable( "HFJ_SPIDX_DATE")
+		Builder.BuilderWithTableName dateTable = version.onTable("HFJ_SPIDX_DATE");
+		dateTable
 			.addIndex("20220207.1", "IDX_SP_DATE_HASH_V2" )
 			.unique(false)
 			.online(true)
-			.withColumns("HASH_IDENTITY", "SP_VALUE_LOW", "SP_VALUE_HIGH", "PARTITION_ID",  "RES_ID");
+			.withColumns("HASH_IDENTITY", "SP_VALUE_LOW", "SP_VALUE_HIGH", "RES_ID", "PARTITION_ID");
 
-		version.onTable( "HFJ_SPIDX_DATE")
-			.dropIndex("20220207.2", "IDX_SP_DATE_HASH");
+		dateTable.dropIndexOnline("20220207.2", "IDX_SP_DATE_HASH");
+		dateTable.dropIndexOnline("20220207.3", "IDX_SP_DATE_HASH_LOW");
 
-		version.onTable( "HFJ_SPIDX_DATE")
-			.addIndex("20220207.3", "IDX_SP_DATE_HASH_HIGH_V2" )
+		dateTable
+			.addIndex("20220207.4", "IDX_SP_DATE_HASH_HIGH_V2" )
 			.unique(false)
 			.online(true)
-			.withColumns("HASH_IDENTITY", "SP_VALUE_HIGH", "PARTITION_ID",  "RES_ID");
+			.withColumns("HASH_IDENTITY", "SP_VALUE_HIGH", "RES_ID", "PARTITION_ID");
 
-		version.onTable( "HFJ_SPIDX_DATE")
-			.dropIndex("20220207.4", "IDX_SP_DATE_HASH_HIGH");
+		dateTable.dropIndexOnline("20220207.5", "IDX_SP_DATE_HASH_HIGH");
 
-		version.onTable( "HFJ_SPIDX_DATE")
-			.dropIndex("20220207.5", "IDX_SP_DATE_HASH_LOW");
-
-		version.onTable( "HFJ_SPIDX_DATE")
+		dateTable
 			.addIndex("20220207.6", "IDX_SP_DATE_ORD_HASH_V2" )
 			.unique(false)
 			.online(true)
-			.withColumns("HASH_IDENTITY", "SP_VALUE_LOW_DATE_ORDINAL", "SP_VALUE_HIGH_DATE_ORDINAL", "PARTITION_ID", "RES_ID");
+			.withColumns("HASH_IDENTITY", "SP_VALUE_LOW_DATE_ORDINAL", "SP_VALUE_HIGH_DATE_ORDINAL", "RES_ID", "PARTITION_ID");
 
-		version.onTable( "HFJ_SPIDX_DATE")
-			.dropIndex("20220207.7", "IDX_SP_DATE_ORD_HASH");
+		dateTable.dropIndexOnline("20220207.7", "IDX_SP_DATE_ORD_HASH");
 
-		version.onTable( "HFJ_SPIDX_DATE")
+		dateTable
 			.addIndex("20220207.8", "IDX_SP_DATE_ORD_HASH_HIGH_V2" )
 			.unique(false)
 			.online(true)
-			.withColumns("HASH_IDENTITY", "SP_VALUE_HIGH_DATE_ORDINAL", "PARTITION_ID", "RES_ID");
+			.withColumns("HASH_IDENTITY", "SP_VALUE_HIGH_DATE_ORDINAL", "RES_ID", "PARTITION_ID");
 
-		version.onTable( "HFJ_SPIDX_DATE")
-			.dropIndex("20220207.9", "IDX_SP_DATE_ORD_HASH_HIGH");
+		dateTable.dropIndexOnline("20220207.9", "IDX_SP_DATE_ORD_HASH_HIGH");
+		dateTable.dropIndexOnline("20220207.10", "IDX_SP_DATE_ORD_HASH_LOW");
 
-		version.onTable( "HFJ_SPIDX_DATE")
-			.dropIndex("20220207.10", "IDX_SP_DATE_ORD_HASH_LOW");
-
-		version.onTable( "HFJ_SPIDX_DATE")
+		dateTable
 			.addIndex("20220207.11", "IDX_SP_DATE_RESID_V2" )
 			.unique(false)
 			.online(true)
 			.withColumns("RES_ID", "HASH_IDENTITY", "SP_VALUE_LOW", "SP_VALUE_HIGH", "SP_VALUE_LOW_DATE_ORDINAL", "SP_VALUE_HIGH_DATE_ORDINAL", "PARTITION_ID");
 
-		version.onTable( "HFJ_SPIDX_DATE")
-			.dropIndex("20220207.12", "IDX_SP_DATE_RESID");
+		// Move the automatic FK to the new index FK17s70oa59rm9n61k9thjqrsqm
+		dateTable.dropForeignKey("20220207.12", "FK17S70OA59RM9N61K9THJQRSQM", "HFJ_RESOURCE");
+		dateTable.dropIndexOnline("20220207.13", "IDX_SP_DATE_RESID");
+		dateTable.dropIndexOnline("20220207.14", "FK17S70OA59RM9N61K9THJQRSQM");
 
+	// ugh. I hate this name, but myResource is in BaseResourceIndexedSearchParam so hard to fight.
+		dateTable.addForeignKey("20220207.15", "FK17S70OA59RM9N61K9THJQRSQM")
+			.toColumn("RES_ID").references("HFJ_RESOURCE", "RES_ID");
 		// dropped and not replaced.  Column to be deleted.
-		version.onTable( "HFJ_SPIDX_DATE")
-			.dropIndex("20220207.13", "IDX_SP_DATE_UPDATED");
+		dateTable.dropIndexOnline("20220207.16", "IDX_SP_DATE_UPDATED");
+
+		// new token search indexing
+
+		// wipmb turn old index migrations into a no-op
+		// wipmb start last_updated deprecation.
+		// wipmb talk to Yue Shi about testing our migrations and this change. Release smoke test on oldest version supported.
+		// wipmb do we need to make drop concurrent+deferred?
+		// wipmb MB test oracle
+		// wipmb AddIndexTask.myIncludeColumns is not in hashcode.  Do we care?
+		//theBuilder.append(myIncludeColumns);
+
 	}
 
 	/**
@@ -311,7 +319,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		//-- add index on HFJ_SPIDX_DATE
 		version.onTable("HFJ_SPIDX_DATE").addIndex("20210309.1", "IDX_SP_DATE_HASH_HIGH")
-			.unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_HIGH");
+			.unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_HIGH")
+			.doNothing();
 
 		//-- add index on HFJ_FORCED_ID
 		version.onTable("HFJ_FORCED_ID").addIndex("20210309.2", "IDX_FORCEID_FID")
@@ -527,9 +536,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder version = forVersion(VersionEnum.V5_0_1);
 
 		Builder.BuilderWithTableName spidxDate = version.onTable("HFJ_SPIDX_DATE");
-		spidxDate.addIndex("20200514.1", "IDX_SP_DATE_HASH_LOW").unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_LOW");
-		spidxDate.addIndex("20200514.2", "IDX_SP_DATE_ORD_HASH").unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_LOW_DATE_ORDINAL", "SP_VALUE_HIGH_DATE_ORDINAL");
-		spidxDate.addIndex("20200514.3", "IDX_SP_DATE_ORD_HASH_LOW").unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_LOW_DATE_ORDINAL");
+		spidxDate.addIndex("20200514.1", "IDX_SP_DATE_HASH_LOW").unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_LOW")
+			.doNothing();
+		spidxDate.addIndex("20200514.2", "IDX_SP_DATE_ORD_HASH").unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_LOW_DATE_ORDINAL", "SP_VALUE_HIGH_DATE_ORDINAL")
+			.doNothing();
+		spidxDate.addIndex("20200514.3", "IDX_SP_DATE_ORD_HASH_LOW").unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_LOW_DATE_ORDINAL")
+			.doNothing();
 
 		// MPI_LINK
 		version.addIdGenerator("20200517.1", "SEQ_EMPI_LINK_ID");
@@ -1113,7 +1125,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			spidxDate
 				.addIndex("20180903.8", "IDX_SP_DATE_HASH")
 				.unique(false)
-				.withColumns("HASH_IDENTITY", "SP_VALUE_LOW", "SP_VALUE_HIGH");
+				.withColumns("HASH_IDENTITY", "SP_VALUE_LOW", "SP_VALUE_HIGH")
+				.doNothing();
 			spidxDate
 				.dropIndex("20180903.9", "IDX_SP_DATE");
 			spidxDate
