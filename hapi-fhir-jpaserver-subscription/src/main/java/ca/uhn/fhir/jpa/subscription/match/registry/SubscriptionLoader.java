@@ -242,7 +242,8 @@ public class SubscriptionLoader implements IResourceChangeListener {
 			return;
 		}
 		IFhirResourceDao<?> subscriptionDao = getSubscriptionDao();
-		List<IBaseResource> resourceList = theResourceIds.stream().map(subscriptionDao::read).collect(Collectors.toList());
+		SystemRequestDetails systemRequestDetails = SystemRequestDetails.forAllPartition();
+		List<IBaseResource> resourceList = theResourceIds.stream().map(n -> subscriptionDao.read(n, systemRequestDetails)).collect(Collectors.toList());
 		updateSubscriptionRegistry(resourceList);
 	}
 
