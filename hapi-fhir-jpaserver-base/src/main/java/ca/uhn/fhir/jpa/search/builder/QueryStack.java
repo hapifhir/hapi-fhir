@@ -730,13 +730,13 @@ public class QueryStack {
 
 	private class ChainElement {
 		private final String myResourceType;
-		private final RuntimeSearchParam mySearchParam;
+		private final String mySearchParameterName;
 		private final String myPath;
 
-		public ChainElement(String theResourceType, RuntimeSearchParam theSearchParam) {
+		public ChainElement(String theResourceType, String theSearchParameterName, String thePath) {
 			this.myResourceType = theResourceType;
-			this.mySearchParam = theSearchParam;
-			this.myPath = extractPath(theResourceType, theSearchParam);
+			this.mySearchParameterName = theSearchParameterName;
+			this.myPath = thePath;
 		}
 
 		public String getResourceType() {
@@ -745,34 +745,19 @@ public class QueryStack {
 
 		public String getPath() { return myPath; }
 		
-		public String getSearchParameterName() { return mySearchParam.getName(); }
-
-		private String extractPath(String theResourceType, RuntimeSearchParam theSearchParam) {
-			List<String> pathsForType = theSearchParam.getPathsSplit().stream()
-				.map(String::trim)
-				.filter(t -> t.startsWith(theResourceType))
-				.collect(Collectors.toList());
-			if (pathsForType.isEmpty()) {
-				ourLog.warn("Search parameter {} does not have a path for resource type {}.", theSearchParam.getName(), theResourceType);
-				return "";
-			} else if (pathsForType.size() > 1) {
-				ourLog.warn("Search parameter {} has multiple paths for resource type {}. Selecting {}", theSearchParam.getName(), theResourceType, pathsForType.get(0));
-			}
-
-			return pathsForType.get(0);
-		}
+		public String getSearchParameterName() { return mySearchParameterName; }
 
 		@Override
 		public boolean equals(Object o) {
 			if (this == o) return true;
 			if (o == null || getClass() != o.getClass()) return false;
 			ChainElement that = (ChainElement) o;
-			return myResourceType.equals(that.myResourceType) && mySearchParam.equals(that.mySearchParam);
+			return myResourceType.equals(that.myResourceType) && mySearchParameterName.equals(that.mySearchParameterName) && myPath.equals(that.myPath);
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(myResourceType, mySearchParam);
+			return Objects.hash(myResourceType, mySearchParameterName, myPath);
 		}
 	}
 
@@ -785,25 +770,40 @@ public class QueryStack {
 			return split(theReferenceParam.getChain(), '.').length <= 3;
 		}
 
+		private List<String> extractPaths(String theResourceType, RuntimeSearchParam theSearchParam) {
+			List<String> pathsForType = theSearchParam.getPathsSplit().stream()
+				.map(String::trim)
+				.filter(t -> t.startsWith(theResourceType))
+				.collect(Collectors.toList());
+			if (pathsForType.isEmpty()) {
+				ourLog.warn("Search parameter {} does not have a path for resource type {}.", theSearchParam.getName(), theResourceType);
+			}
+
+			return pathsForType;
+		}
+
 		public void deriveChains(String theResourceType, RuntimeSearchParam theSearchParam, List<? extends IQueryParameterType> theList) {
-			List<ChainElement> searchParams = Lists.newArrayList();
-			searchParams.add(new ChainElement(theResourceType, theSearchParam));
-			for (IQueryParameterType nextOr : theList) {
-				String targetValue = nextOr.getValueAsQueryToken(myFhirContext);
-				if (nextOr instanceof ReferenceParam) {
-					ReferenceParam referenceParam = (ReferenceParam) nextOr;
+			List<String> paths = extractPaths(theResourceType, theSearchParam);
+			for (String path : paths) {
+				List<ChainElement> searchParams = Lists.newArrayList();
+				searchParams.add(new ChainElement(theResourceType, theSearchParam.getName(), path));
+				for (IQueryParameterType nextOr : theList) {
+					String targetValue = nextOr.getValueAsQueryToken(myFhirContext);
+					if (nextOr instanceof ReferenceParam) {
+						ReferenceParam referenceParam = (ReferenceParam) nextOr;
 
-					if (!isReferenceParamValid(referenceParam)) {
-						throw new InvalidRequestException(Msg.code(2007) +
-							"The search chain " + theSearchParam.getName() + "." + referenceParam.getChain() +
+						if (!isReferenceParamValid(referenceParam)) {
+							throw new InvalidRequestException(Msg.code(2007) +
+								"The search chain " + theSearchParam.getName() + "." + referenceParam.getChain() +
 								" is too long. Only chains up to three references are supported.");
+						}
+
+						String targetChain = referenceParam.getChain();
+						List<String> qualifiers = Lists.newArrayList(referenceParam.getResourceType());
+
+						processNextLinkInChain(searchParams, theSearchParam, targetChain, targetValue, qualifiers, referenceParam.getResourceType());
+
 					}
-
-					String targetChain = referenceParam.getChain();
-					List<String> qualifiers = Lists.newArrayList(referenceParam.getResourceType());
-
-					processNextLinkInChain(searchParams, theSearchParam, targetChain, targetValue, qualifiers, referenceParam.getResourceType());
-
 				}
 			}
 		}
@@ -839,9 +839,6 @@ public class QueryStack {
 					searchParamFound = true;
 					// If we find a search param on this resource type for this parameter name, keep iterating
 					//  Otherwise, abandon this branch and carry on to the next one
-					List<ChainElement> searchParamBranch = Lists.newArrayList();
-					searchParamBranch.addAll(theSearchParams);
-
 					if (StringUtils.isEmpty(nextChain)) {
 						// We've reached the end of the chain
 						ArrayList<IQueryParameterType> orValues = Lists.newArrayList();
@@ -854,16 +851,21 @@ public class QueryStack {
 							orValues.add(qp);
 						}
 
-						Set<LeafNodeDefinition> leafNodes = myChains.get(searchParamBranch);
+						Set<LeafNodeDefinition> leafNodes = myChains.get(theSearchParams);
 						if (leafNodes == null) {
 							leafNodes = Sets.newHashSet();
-							myChains.put(searchParamBranch, leafNodes);
+							myChains.put(theSearchParams, leafNodes);
 						}
 						leafNodes.add(new LeafNodeDefinition(nextSearchParam, orValues, nextTarget, nextParamName, "", qualifiersBranch));
 					} else {
+						List<String> nextPaths = extractPaths(nextTarget, nextSearchParam);
+						for (String nextPath : nextPaths) {
+							List<ChainElement> searchParamBranch = Lists.newArrayList();
+							searchParamBranch.addAll(theSearchParams);
 
-						searchParamBranch.add(new ChainElement(nextTarget, nextSearchParam));
-						processNextLinkInChain(searchParamBranch, nextSearchParam, nextChain, theTargetValue, qualifiersBranch, nextQualifier);
+							searchParamBranch.add(new ChainElement(nextTarget, nextSearchParam.getName(), nextPath));
+							processNextLinkInChain(searchParamBranch, nextSearchParam, nextChain, theTargetValue, qualifiersBranch, nextQualifier);
+						}
 					}
 				}
 			}
