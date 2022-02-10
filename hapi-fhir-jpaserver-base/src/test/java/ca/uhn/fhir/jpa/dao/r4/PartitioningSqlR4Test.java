@@ -1319,7 +1319,6 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testSearch_IdParamSecond_ForcedId_SpecificPartition() {
-		// FIXME: move down
 		IIdType patientId1 = createPatient(withPartition(1), withId("PT-1"), withActiveTrue());
 		logAllTokenIndexes();
 

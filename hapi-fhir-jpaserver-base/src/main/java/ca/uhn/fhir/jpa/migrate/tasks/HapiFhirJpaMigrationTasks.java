@@ -144,15 +144,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable( "HFJ_SPIDX_DATE")
 			.dropIndex("20220207.12", "IDX_SP_DATE_RESID");
 
-
-		// fixme turn old index migrations into a no-op
-		// fixme start last_updated deprecation.
-		// fixme talk to Yue Shi about testing our migrations and this change. Release smoke test on oldest version supported.
-		// fixme do we need to make drop concurrent+deferred?
-
 	}
-
-
 
 	/**
 	 * See https://github.com/hapifhir/hapi-fhir/issues/3237 for reasoning for these indexes.

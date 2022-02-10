@@ -140,7 +140,6 @@ public class AddIndexTask extends BaseTableTask {
 					postgresOnline = "CONCURRENTLY ";
 					break;
 				case ORACLE_12C:
-					// FIXME MB test oracle
 					oracleOnlineDeferred = " ONLINE DEFERRED";
 					break;
 				case MSSQL_2012:
@@ -195,8 +194,6 @@ public class AddIndexTask extends BaseTableTask {
 		theBuilder.append(myIndexName);
 		theBuilder.append(myColumns);
 		theBuilder.append(myUnique);
-		// fixme myIncludeColumns was missing.  Is that a problem?
-		theBuilder.append(myIncludeColumns);
 		theBuilder.append(myOnline);
 	}
 
