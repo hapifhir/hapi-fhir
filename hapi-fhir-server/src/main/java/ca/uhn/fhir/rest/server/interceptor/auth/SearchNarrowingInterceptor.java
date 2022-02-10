@@ -23,6 +23,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.Constants;
@@ -31,23 +32,31 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
+import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletSubRequestDetails;
 import ca.uhn.fhir.rest.server.util.ServletRequestUtil;
 import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.bundle.ModifiableBundleEntry;
 import com.google.common.collect.ArrayListMultimap;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -75,8 +84,6 @@ import java.util.stream.Collectors;
  * @see AuthorizationInterceptor
  */
 public class SearchNarrowingInterceptor {
-	private static final Logger ourLog = LoggerFactory.getLogger(SearchNarrowingInterceptor.class);
-
 
 	/**
 	 * Subclasses should override this method to supply the set of compartments that
@@ -106,7 +113,6 @@ public class SearchNarrowingInterceptor {
 
 		FhirContext ctx = theRequestDetails.getServer().getFhirContext();
 		RuntimeResourceDefinition resDef = ctx.getResourceDefinition(theRequestDetails.getResourceName());
-		HashMap<String, List<String>> parameterToOrValues = new HashMap<>();
 		AuthorizedList authorizedList = buildAuthorizedList(theRequestDetails);
 		if (authorizedList == null) {
 			return true;
@@ -118,19 +124,27 @@ public class SearchNarrowingInterceptor {
 		 */
 		Collection<String> compartments = authorizedList.getAllowedCompartments();
 		if (compartments != null) {
-			processResourcesOrCompartments(theRequestDetails, resDef, parameterToOrValues, compartments, true);
+			Map<String, List<String>> parameterToOrValues =	processResourcesOrCompartments(theRequestDetails, resDef, compartments, true);
+			applyParametersToRequestDetails(theRequestDetails, parameterToOrValues, true);
 		}
 		Collection<String> resources = authorizedList.getAllowedInstances();
 		if (resources != null) {
-			processResourcesOrCompartments(theRequestDetails, resDef, parameterToOrValues, resources, false);
+			Map<String, List<String>> parameterToOrValues = processResourcesOrCompartments(theRequestDetails, resDef, resources, false);
+			applyParametersToRequestDetails(theRequestDetails, parameterToOrValues, true);
+		}
+		List<AllowedCodeInValueSet> allowedCodeInValueSet = authorizedList.getAllowedCodeInValueSets();
+		if (allowedCodeInValueSet != null) {
+			Map<String, List<String>> parameterToOrValues = processAllowedCodes(resDef, allowedCodeInValueSet);
+			applyParametersToRequestDetails(theRequestDetails, parameterToOrValues, false);
 		}
 
-		/*
-		 * Add any param values to the actual request
-		 */
-		if (parameterToOrValues.size() > 0) {
+		return true;
+	}
+
+	private void applyParametersToRequestDetails(RequestDetails theRequestDetails, @Nullable Map<String, List<String>> theParameterToOrValues, boolean thePatientIdMode) {
+		if (theParameterToOrValues != null) {
 			Map<String, String[]> newParameters = new HashMap<>(theRequestDetails.getParameters());
-			for (Map.Entry<String, List<String>> nextEntry : parameterToOrValues.entrySet()) {
+			for (Map.Entry<String, List<String>> nextEntry : theParameterToOrValues.entrySet()) {
 				String nextParamName = nextEntry.getKey();
 				List<String> nextAllowedValues = nextEntry.getValue();
 
@@ -151,43 +165,54 @@ public class SearchNarrowingInterceptor {
 					 * requested, and the values that the user is allowed to see
 					 */
 					String[] existingValues = newParameters.get(nextParamName);
-					List<String> nextAllowedValueIds = nextAllowedValues
-						.stream()
-						.map(t -> t.lastIndexOf("/") > -1 ? t.substring(t.lastIndexOf("/") + 1) : t)
-						.collect(Collectors.toList());
-					boolean restrictedExistingList = false;
-					for (int i = 0; i < existingValues.length; i++) {
 
-						String nextExistingValue = existingValues[i];
-						List<String> nextRequestedValues = QualifiedParamList.splitQueryStringByCommasIgnoreEscape(null, nextExistingValue);
-						List<String> nextPermittedValues = ListUtils.union(
-							ListUtils.intersection(nextRequestedValues, nextAllowedValues),
-							ListUtils.intersection(nextRequestedValues, nextAllowedValueIds)
-						);
-						if (nextPermittedValues.size() > 0) {
-							restrictedExistingList = true;
-							existingValues[i] = ParameterUtil.escapeAndJoinOrList(nextPermittedValues);
+					if (thePatientIdMode) {
+						List<String> nextAllowedValueIds = nextAllowedValues
+							.stream()
+							.map(t -> t.lastIndexOf("/") > -1 ? t.substring(t.lastIndexOf("/") + 1) : t)
+							.collect(Collectors.toList());
+						boolean restrictedExistingList = false;
+						for (int i = 0; i < existingValues.length; i++) {
+
+							String nextExistingValue = existingValues[i];
+							List<String> nextRequestedValues = QualifiedParamList.splitQueryStringByCommasIgnoreEscape(null, nextExistingValue);
+							List<String> nextPermittedValues = ListUtils.union(
+								ListUtils.intersection(nextRequestedValues, nextAllowedValues),
+								ListUtils.intersection(nextRequestedValues, nextAllowedValueIds)
+							);
+							if (nextPermittedValues.size() > 0) {
+								restrictedExistingList = true;
+								existingValues[i] = ParameterUtil.escapeAndJoinOrList(nextPermittedValues);
+							}
+
 						}
 
+						/*
+						 * If none of the values that were requested by the client overlap at all
+						 * with the values that the user is allowed to see, the client shouldn't
+						 * get *any* results back. We return an error code indicating that the
+						 * caller is forbidden from accessing the resources they requested.
+						 */
+						if (!restrictedExistingList) {
+							throw new ForbiddenOperationException(Msg.code(2026) + "Value not permitted for parameter " + UrlUtil.escapeUrlParam(nextParamName));
+						}
+
+					} else {
+
+						int existingValuesCount = existingValues.length;
+						String[] newValues = Arrays.copyOf(existingValues, existingValuesCount + nextAllowedValues.size());
+						for (int i = 0; i < nextAllowedValues.size(); i++) {
+							newValues[existingValuesCount + i] = nextAllowedValues.get(i);
+						}
+						newParameters.put(nextParamName, newValues);
+
 					}
 
-					/*
-					 * If none of the values that were requested by the client overlap at all
-					 * with the values that the user is allowed to see, the client shouldn't
-					 * get *any* results back. We return an error code indicating that the
-					 * caller is forbidden from accessing the resources they requested.
-					 */
-					if (!restrictedExistingList) {
-						theResponse.setStatus(Constants.STATUS_HTTP_403_FORBIDDEN);
-						return false;
-					}
 				}
 
 			}
 			theRequestDetails.setParameters(newParameters);
 		}
-
-		return true;
 	}
 
 	@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)
@@ -202,37 +227,10 @@ public class SearchNarrowingInterceptor {
 		BundleUtil.processEntries(ctx, bundle, processor);
 	}
 
-	private class BundleEntryUrlProcessor implements Consumer<ModifiableBundleEntry> {
-		private final FhirContext myFhirContext;
-		private final ServletRequestDetails myRequestDetails;
-		private final HttpServletRequest myRequest;
-		private final HttpServletResponse myResponse;
+	@Nullable
+	private Map<String, List<String>> processResourcesOrCompartments(RequestDetails theRequestDetails, RuntimeResourceDefinition theResDef, Collection<String> theResourcesOrCompartments, boolean theAreCompartments) {
+		Map<String, List<String>> retVal = null;
 
-		public BundleEntryUrlProcessor(FhirContext theFhirContext, ServletRequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse) {
-			myFhirContext = theFhirContext;
-			myRequestDetails = theRequestDetails;
-			myRequest = theRequest;
-			myResponse = theResponse;
-		}
-
-		@Override
-		public void accept(ModifiableBundleEntry theModifiableBundleEntry) {
-			ArrayListMultimap<String, String> paramValues = ArrayListMultimap.create();
-
-			String url = theModifiableBundleEntry.getRequestUrl();
-
-			ServletSubRequestDetails subServletRequestDetails = ServletRequestUtil.getServletSubRequestDetails(myRequestDetails, url, paramValues);
-			BaseMethodBinding<?> method = subServletRequestDetails.getServer().determineResourceMethod(subServletRequestDetails, url);
-			RestOperationTypeEnum restOperationType = method.getRestOperationType();
-			subServletRequestDetails.setRestOperationType(restOperationType);
-
-			incomingRequestPostProcessed(subServletRequestDetails, myRequest, myResponse);
-
-			theModifiableBundleEntry.setRequestUrl(myFhirContext, ServletRequestUtil.extractUrl(subServletRequestDetails));
-		}
-	}
-
-	private void processResourcesOrCompartments(RequestDetails theRequestDetails, RuntimeResourceDefinition theResDef, HashMap<String, List<String>> theParameterToOrValues, Collection<String> theResourcesOrCompartments, boolean theAreCompartments) {
 		String lastCompartmentName = null;
 		String lastSearchParamName = null;
 		for (String nextCompartment : theResourcesOrCompartments) {
@@ -262,11 +260,43 @@ public class SearchNarrowingInterceptor {
 			}
 
 			if (searchParamName != null) {
-				List<String> orValues = theParameterToOrValues.computeIfAbsent(searchParamName, t -> new ArrayList<>());
+				if (retVal == null) {
+					retVal = new HashMap<>();
+				}
+				List<String> orValues = retVal.computeIfAbsent(searchParamName, t -> new ArrayList<>());
 				orValues.add(nextCompartment);
 			}
 		}
+
+		return retVal;
 	}
+
+	@Nullable
+	private Map<String, List<String>> processAllowedCodes(RuntimeResourceDefinition theResDef, List<AllowedCodeInValueSet> theAllowedCodeInValueSet) {
+		Map<String, List<String>> retVal = null;
+
+		for (AllowedCodeInValueSet next : theAllowedCodeInValueSet) {
+			if (!next.getResourceName().equals(theResDef.getName())) {
+				continue;
+			}
+
+			String paramName;
+			if (next.isNegate()) {
+				paramName = next.getSearchParameterName() + Constants.PARAMQUALIFIER_TOKEN_NOT_IN;
+			} else {
+				paramName = next.getSearchParameterName() + Constants.PARAMQUALIFIER_TOKEN_IN;
+			}
+
+			if (retVal == null) {
+				retVal = new HashMap<>();
+			}
+			retVal.computeIfAbsent(paramName, k->new ArrayList<>()).add(next.getValueSetUrl());
+		}
+
+		return retVal;
+	}
+
+
 
 	private String selectBestSearchParameterForCompartment(RequestDetails theRequestDetails, RuntimeResourceDefinition theResDef, String compartmentName) {
 		String searchParamName = null;
@@ -330,6 +360,36 @@ public class SearchNarrowingInterceptor {
 			return searchParam.getPath();
 		} else {
 			return searchParam.getPath().substring(0, qualifierIndex);
+		}
+	}
+
+	private class BundleEntryUrlProcessor implements Consumer<ModifiableBundleEntry> {
+		private final FhirContext myFhirContext;
+		private final ServletRequestDetails myRequestDetails;
+		private final HttpServletRequest myRequest;
+		private final HttpServletResponse myResponse;
+
+		public BundleEntryUrlProcessor(FhirContext theFhirContext, ServletRequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse) {
+			myFhirContext = theFhirContext;
+			myRequestDetails = theRequestDetails;
+			myRequest = theRequest;
+			myResponse = theResponse;
+		}
+
+		@Override
+		public void accept(ModifiableBundleEntry theModifiableBundleEntry) {
+			ArrayListMultimap<String, String> paramValues = ArrayListMultimap.create();
+
+			String url = theModifiableBundleEntry.getRequestUrl();
+
+			ServletSubRequestDetails subServletRequestDetails = ServletRequestUtil.getServletSubRequestDetails(myRequestDetails, url, paramValues);
+			BaseMethodBinding<?> method = subServletRequestDetails.getServer().determineResourceMethod(subServletRequestDetails, url);
+			RestOperationTypeEnum restOperationType = method.getRestOperationType();
+			subServletRequestDetails.setRestOperationType(restOperationType);
+
+			incomingRequestPostProcessed(subServletRequestDetails, myRequest, myResponse);
+
+			theModifiableBundleEntry.setRequestUrl(myFhirContext, ServletRequestUtil.extractUrl(subServletRequestDetails));
 		}
 	}
 

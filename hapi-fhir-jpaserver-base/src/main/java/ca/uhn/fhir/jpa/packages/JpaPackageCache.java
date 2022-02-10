@@ -483,7 +483,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 				byte[] bytes = Files.readAllBytes(Paths.get(new URI(thePackageUrl)));
 				return bytes;
 			} catch (IOException | URISyntaxException e) {
-				throw new InternalErrorException(Msg.code(2029) + "Error loading \"" + thePackageUrl + "\": " + e.getMessage());
+				throw new InternalErrorException(Msg.code(2031) + "Error loading \"" + thePackageUrl + "\": " + e.getMessage());
 			}
 		} else {
 			HttpClientConnectionManager connManager = new BasicHttpClientConnectionManager();
