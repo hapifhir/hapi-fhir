@@ -298,11 +298,21 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				throw new IllegalStateException(Msg.code(336) + "Unable to apply security to event of applies to type " + myAppliesTo);
 		}
 
+		return applyRuleLogic(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theFlags, ctx, target, theRuleApplier);
+	}
+
+	/**
+	 * Apply any special processing logic specific to this rule.
+	 * This is intended to be overridden.
+	 *
+	 * TODO: At this point {@link RuleImplOp} handles "any ID" and "in compartment" logic - It would be nice to split these into separate classes.
+	 */
+	protected Verdict applyRuleLogic(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, Set<AuthorizationFlagsEnum> theFlags, FhirContext theFhirContext, RuleTarget theRuleTarget, IRuleApplier theRuleApplier) {
 		switch (myClassifierType) {
 			case ANY_ID:
 				break;
 			case IN_COMPARTMENT:
-				return applyRuleToCompartment(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theFlags, ctx, target);
+				return applyRuleToCompartment(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theFlags, theFhirContext, theRuleTarget);
 			default:
 				throw new IllegalStateException(Msg.code(337) + "Unable to apply security to event of applies to type " + myAppliesTo);
 		}
@@ -704,4 +714,5 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 	public void setAdditionalSearchParamsForCompartmentTypes(AdditionalCompartmentSearchParameters theAdditionalParameters) {
 		myAdditionalCompartmentSearchParamMap = theAdditionalParameters;
 	}
+
 }

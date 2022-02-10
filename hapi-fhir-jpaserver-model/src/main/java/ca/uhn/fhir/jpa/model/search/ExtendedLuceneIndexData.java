@@ -28,6 +28,8 @@ import org.hibernate.search.engine.backend.document.DocumentElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Date;
+
 /**
  * Collects our lucene extended indexing data.
  *
@@ -39,6 +41,7 @@ public class ExtendedLuceneIndexData {
 	final SetMultimap<String, String> mySearchParamStrings = HashMultimap.create();
 	final SetMultimap<String, TokenParam> mySearchParamTokens = HashMultimap.create();
 	final SetMultimap<String, String> mySearchParamLinks = HashMultimap.create();
+	final SetMultimap<String, DateSearchIndexData> mySearchParamDates = HashMultimap.create();
 
 	public ExtendedLuceneIndexData(FhirContext theFhirContext) {
 		this.myFhirContext = theFhirContext;
@@ -51,6 +54,7 @@ public class ExtendedLuceneIndexData {
 		mySearchParamStrings.forEach(indexWriter::writeStringIndex);
 		mySearchParamTokens.forEach(indexWriter::writeTokenIndex);
 		mySearchParamLinks.forEach(indexWriter::writeReferenceIndex);
+		mySearchParamDates.forEach(indexWriter::writeDateIndex);
 	}
 
 	public void addStringIndexData(String theSpName, String theText) {
@@ -61,7 +65,11 @@ public class ExtendedLuceneIndexData {
 		mySearchParamTokens.put(theSpName, new TokenParam(theSystem, theValue));
 	}
 
-	public void addResourceLinkIndexData(String theSpName, String theTargetResourceId){
+	public void addResourceLinkIndexData(String theSpName, String theTargetResourceId) {
 		mySearchParamLinks.put(theSpName, theTargetResourceId);
+	}
+
+	public void addDateIndexData(String theSpName, Date theLowerBound, int theLowerBoundOrdinal, Date theUpperBound, int theUpperBoundOrdinal) {
+		mySearchParamDates.put(theSpName, new DateSearchIndexData(theLowerBound, theLowerBoundOrdinal, theUpperBound, theUpperBoundOrdinal));
 	}
 }

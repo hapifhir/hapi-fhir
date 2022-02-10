@@ -229,7 +229,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 			assertNotNull(theResource);
 			assertTrue(!myCreateRequestPartitionIds.isEmpty(), "No create partitions left in interceptor");
 			RequestPartitionId retVal = myCreateRequestPartitionIds.remove(0);
-			ourLog.info("Returning partition for create: {}", retVal);
+			ourLog.info("Returning partition [{}] for create of resource {} with date {}", retVal, theResource, retVal.getPartitionDate());
 			return retVal;
 		}
 

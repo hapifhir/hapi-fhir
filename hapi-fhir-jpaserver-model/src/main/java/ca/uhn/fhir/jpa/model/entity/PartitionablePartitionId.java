@@ -104,9 +104,10 @@ public class PartitionablePartitionId implements Cloneable {
 
 	@Override
 	public String toString() {
-		return "[" +
-			getPartitionId() +
-			"]";
+		return "PartitionablePartitionId{" +
+			"myPartitionId=" + myPartitionId +
+			", myPartitionDate=" + myPartitionDate +
+			'}';
 	}
 
 	@Nonnull

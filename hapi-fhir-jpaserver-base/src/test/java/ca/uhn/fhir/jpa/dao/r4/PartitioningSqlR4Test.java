@@ -623,7 +623,8 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	public void testCreateInTransaction_ServerId_WithPartition() {
 		createUniqueCompositeSp();
 		createRequestId();
-
+		ourLog.info("Starting testCreateInTransaction_ServerId_WithPartition");
+		ourLog.info("Setting up partitionId {} with date {}", myPartitionId, myPartitionDate);
 		addCreatePartition(myPartitionId, myPartitionDate);
 		addCreatePartition(myPartitionId, myPartitionDate);
 		addCreatePartition(myPartitionId, myPartitionDate);
@@ -657,6 +658,9 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		runInTransaction(() -> {
 			// HFJ_RESOURCE
 			ResourceTable resourceTable = myResourceTableDao.findById(patientId).orElseThrow(IllegalArgumentException::new);
+			ourLog.info("Found resourceTable {}, which contains partition id {} with date {}", resourceTable.getId(), resourceTable.getPartitionId(), resourceTable.getPartitionId().getPartitionDate());
+			ourLog.info("in test: myPartitionDate = {}", myPartitionDate);
+			ourLog.info("in test: resourceTablePartDate = {}", resourceTable.getPartitionId().getPartitionDate());
 			assertEquals(myPartitionId, resourceTable.getPartitionId().getPartitionId().intValue());
 			assertEquals(myPartitionDate, resourceTable.getPartitionId().getPartitionDate());
 		});
@@ -1319,12 +1323,11 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testSearch_IdParamSecond_ForcedId_SpecificPartition() {
-		// FIXME: move down
 		IIdType patientId1 = createPatient(withPartition(1), withId("PT-1"), withActiveTrue());
-		logAllTokenIndexes();
-
 		IIdType patientIdNull = createPatient(withPartition(null), withId("PT-NULL"), withActiveTrue());
 		IIdType patientId2 = createPatient(withPartition(2), withId("PT-2"), withActiveTrue());
+
+		logAllTokenIndexes();
 
 		/* *******************************
 		 * _id param is second parameter
