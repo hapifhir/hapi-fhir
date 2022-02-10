@@ -731,35 +731,18 @@ public class QueryStack {
 	private class ChainElement {
 		private final String myResourceType;
 		private final RuntimeSearchParam mySearchParam;
-		private final String myPath;
 
 		public ChainElement(String theResourceType, RuntimeSearchParam theSearchParam) {
 			this.myResourceType = theResourceType;
 			this.mySearchParam = theSearchParam;
-			this.myPath = extractPath(theResourceType, theSearchParam);
 		}
 
 		public String getResourceType() {
 			return myResourceType;
 		}
 
-		public String getPath() { return myPath; }
-		
-		public String getSearchParameterName() { return mySearchParam.getName(); }
-
-		private String extractPath(String theResourceType, RuntimeSearchParam theSearchParam) {
-			List<String> pathsForType = theSearchParam.getPathsSplit().stream()
-				.map(String::trim)
-				.filter(t -> t.startsWith(theResourceType))
-				.collect(Collectors.toList());
-			if (pathsForType.isEmpty()) {
-				ourLog.warn("Search parameter {} does not have a path for resource type {}.", theSearchParam.getName(), theResourceType);
-				return "";
-			} else if (pathsForType.size() > 1) {
-				ourLog.warn("Search parameter {} has multiple paths for resource type {}. Selecting {}", theSearchParam.getName(), theResourceType, pathsForType.get(0));
-			}
-
-			return pathsForType.get(0);
+		public RuntimeSearchParam getSearchParam() {
+			return mySearchParam;
 		}
 
 		@Override
@@ -1005,65 +988,65 @@ public class QueryStack {
 		// Note: the first element in each chain is assumed to be discrete. This may need to change when we add proper support for `_contained`
 		if (nextChain.size() == 1) {
 			// discrete -> discrete
-			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(nextChain.get(0).getPath()), leafNodes);
+			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(nextChain.get(0).getSearchParam().getPath()), leafNodes);
 			// discrete -> contained
 			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(),
 				leafNodes
 					.stream()
-					.map(t -> t.withPathPrefix(nextChain.get(0).getResourceType(), nextChain.get(0).getSearchParameterName()))
+					.map(t -> t.withPathPrefix(nextChain.get(0).getResourceType(), nextChain.get(0).getSearchParam().getName()))
 					.collect(Collectors.toSet()));
 		} else if (nextChain.size() == 2) {
 			// discrete -> discrete -> discrete
-			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(nextChain.get(0).getPath(), nextChain.get(1).getPath()), leafNodes);
+			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(nextChain.get(0).getSearchParam().getPath(), nextChain.get(1).getSearchParam().getPath()), leafNodes);
 			// discrete -> discrete -> contained
-			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(nextChain.get(0).getPath()),
+			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(nextChain.get(0).getSearchParam().getPath()),
 				leafNodes
 					.stream()
-					.map(t -> t.withPathPrefix(nextChain.get(1).getResourceType(), nextChain.get(1).getSearchParameterName()))
+					.map(t -> t.withPathPrefix(nextChain.get(1).getResourceType(), nextChain.get(1).getSearchParam().getName()))
 					.collect(Collectors.toSet()));
 			// discrete -> contained -> discrete
-			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(mergePaths(nextChain.get(0).getPath(), nextChain.get(1).getPath())), leafNodes);
+			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(mergePaths(nextChain.get(0).getSearchParam().getPath(), nextChain.get(1).getSearchParam().getPath())), leafNodes);
 			if (myModelConfig.isIndexOnContainedResourcesRecursively()) {
 				// discrete -> contained -> contained
 				updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(),
 					leafNodes
 						.stream()
-						.map(t -> t.withPathPrefix(nextChain.get(0).getResourceType(), nextChain.get(0).getSearchParameterName() + "." + nextChain.get(1).getSearchParameterName()))
+						.map(t -> t.withPathPrefix(nextChain.get(0).getResourceType(), nextChain.get(0).getSearchParam().getName() + "." + nextChain.get(1).getSearchParam().getName()))
 						.collect(Collectors.toSet()));
 			}
 		} else if (nextChain.size() == 3) {
 			// discrete -> discrete -> discrete -> discrete
-			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(nextChain.get(0).getPath(), nextChain.get(1).getPath(), nextChain.get(2).getPath()), leafNodes);
+			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(nextChain.get(0).getSearchParam().getPath(), nextChain.get(1).getSearchParam().getPath(), nextChain.get(2).getSearchParam().getPath()), leafNodes);
 			// discrete -> discrete -> discrete -> contained
-			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(nextChain.get(0).getPath(), nextChain.get(1).getPath()),
+			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(nextChain.get(0).getSearchParam().getPath(), nextChain.get(1).getSearchParam().getPath()),
 				leafNodes
 					.stream()
-					.map(t -> t.withPathPrefix(nextChain.get(2).getResourceType(), nextChain.get(2).getSearchParameterName()))
+					.map(t -> t.withPathPrefix(nextChain.get(2).getResourceType(), nextChain.get(2).getSearchParam().getName()))
 					.collect(Collectors.toSet()));
 			// discrete -> discrete -> contained -> discrete
-			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(nextChain.get(0).getPath(), mergePaths(nextChain.get(1).getPath(), nextChain.get(2).getPath())), leafNodes);
+			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(nextChain.get(0).getSearchParam().getPath(), mergePaths(nextChain.get(1).getSearchParam().getPath(), nextChain.get(2).getSearchParam().getPath())), leafNodes);
 			// discrete -> contained -> discrete -> discrete
-			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(mergePaths(nextChain.get(0).getPath(), nextChain.get(1).getPath()), nextChain.get(2).getPath()), leafNodes);
+			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(mergePaths(nextChain.get(0).getSearchParam().getPath(), nextChain.get(1).getSearchParam().getPath()), nextChain.get(2).getSearchParam().getPath()), leafNodes);
 			// discrete -> contained -> discrete -> contained
-			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(mergePaths(nextChain.get(0).getPath(), nextChain.get(1).getPath())),
+			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(mergePaths(nextChain.get(0).getSearchParam().getPath(), nextChain.get(1).getSearchParam().getPath())),
 				leafNodes
 					.stream()
-					.map(t -> t.withPathPrefix(nextChain.get(2).getResourceType(), nextChain.get(2).getSearchParameterName()))
+					.map(t -> t.withPathPrefix(nextChain.get(2).getResourceType(), nextChain.get(2).getSearchParam().getName()))
 					.collect(Collectors.toSet()));
 			if (myModelConfig.isIndexOnContainedResourcesRecursively()) {
 				// discrete -> contained -> contained -> discrete
-				updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(mergePaths(nextChain.get(0).getPath(), nextChain.get(1).getPath(), nextChain.get(2).getPath())), leafNodes);
+				updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(mergePaths(nextChain.get(0).getSearchParam().getPath(), nextChain.get(1).getSearchParam().getPath(), nextChain.get(2).getSearchParam().getPath())), leafNodes);
 				// discrete -> discrete -> contained -> contained
-				updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(nextChain.get(0).getPath()),
+				updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(nextChain.get(0).getSearchParam().getPath()),
 					leafNodes
 						.stream()
-						.map(t -> t.withPathPrefix(nextChain.get(1).getResourceType(), nextChain.get(1).getSearchParameterName() + "." + nextChain.get(2).getSearchParameterName()))
+						.map(t -> t.withPathPrefix(nextChain.get(1).getResourceType(), nextChain.get(1).getSearchParam().getName() + "." + nextChain.get(2).getSearchParam().getName()))
 						.collect(Collectors.toSet()));
 				// discrete -> contained -> contained -> contained
 				updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(),
 					leafNodes
 						.stream()
-						.map(t -> t.withPathPrefix(nextChain.get(0).getResourceType(), nextChain.get(0).getSearchParameterName() + "." + nextChain.get(1).getSearchParameterName() + "." + nextChain.get(2).getSearchParameterName()))
+						.map(t -> t.withPathPrefix(nextChain.get(0).getResourceType(), nextChain.get(0).getSearchParam().getName() + "." + nextChain.get(1).getSearchParam().getName() + "." + nextChain.get(2).getSearchParam().getName()))
 						.collect(Collectors.toSet()));
 			}
 		} else {
