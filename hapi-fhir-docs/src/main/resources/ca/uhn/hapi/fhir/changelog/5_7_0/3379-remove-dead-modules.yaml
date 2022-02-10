@@ -1,0 +1,4 @@
+---
+type: change
+issue: 3379
+title: "Removed the following modules from the HAPI-FHIR project: `hapi-fhir-testpage-interceptor`, `hapi-fhir-structures-dstu`, `hapi-fhir-oauth2`, `hapi-fhir-narrativegenerator`."
