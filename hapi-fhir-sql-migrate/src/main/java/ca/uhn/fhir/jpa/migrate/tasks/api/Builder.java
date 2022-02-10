@@ -189,6 +189,15 @@ public class Builder {
 			return new BuilderCompleteTask(task);
 		}
 
+		/**
+		 * Drop index without taking write lock on PG, Oracle, MSSQL.
+		 */
+		public BuilderCompleteTask dropIndexOnline(String theVersion, String theIndexName) {
+			DropIndexTask task = dropIndexOptional(false, theVersion, theIndexName);
+			task.setOnline(true);
+			return new BuilderCompleteTask(task);
+		}
+
 		public void dropIndexStub(String theVersion, String theIndexName) {
 			dropIndexOptional(true, theVersion, theIndexName);
 		}

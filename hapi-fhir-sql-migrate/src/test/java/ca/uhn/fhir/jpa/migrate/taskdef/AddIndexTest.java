@@ -115,7 +115,7 @@ public class AddIndexTest extends BaseTest {
 	@Nested
 	public class SqlFeatures {
 		private AddIndexTask myTask;
-		private String sql;
+		private String mySql;
 
 
 		@Nested
@@ -135,13 +135,13 @@ public class AddIndexTest extends BaseTest {
 
 				// MSSQL supports include clause
 				myTask.setDriverType(DriverTypeEnum.MSSQL_2012);
-				sql = myTask.generateSql();
-				assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL) INCLUDE (FOO1, FOO2)", sql);
+				mySql = myTask.generateSql();
+				assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL) INCLUDE (FOO1, FOO2)", mySql);
 
 				// Oracle does not support include clause
 				myTask.setDriverType(DriverTypeEnum.ORACLE_12C);
-				sql = myTask.generateSql();
-				assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL)", sql);
+				mySql = myTask.generateSql();
+				assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL)", mySql);
 			}
 
 		}
@@ -162,8 +162,8 @@ public class AddIndexTest extends BaseTest {
 			@EnumSource()
 			public void noAffectOff(DriverTypeEnum theDriver) {
 				myTask.setDriverType(theDriver);
-				sql = myTask.generateSql();
-				assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL)", sql);
+				mySql = myTask.generateSql();
+				assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL)", mySql);
 			}
 
 			@ParameterizedTest(name = "{index}: {0}")
@@ -171,20 +171,20 @@ public class AddIndexTest extends BaseTest {
 			public void platformSyntaxWhenOn(DriverTypeEnum theDriver) {
 				myTask.setDriverType(theDriver);
 				myTask.setOnline(true);
-				sql = myTask.generateSql();
+				mySql = myTask.generateSql();
 				switch (theDriver) {
 					case POSTGRES_9_4:
-						assertEquals("create index CONCURRENTLY IDX_ANINDEX on SOMETABLE(PID, TEXTCOL)", sql);
+						assertEquals("create index CONCURRENTLY IDX_ANINDEX on SOMETABLE(PID, TEXTCOL)", mySql);
 						break;
 					case ORACLE_12C:
-						assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL) ONLINE DEFERRED", sql);
+						assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL) ONLINE DEFERRED", mySql);
 						break;
 					case MSSQL_2012:
-						assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL) WITH (ONLINE = ON)", sql);
+						assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL) WITH (ONLINE = ON)", mySql);
 						break;
 					default:
 						// unsupported is ok.  But it means we lock the table for a bit.
-						assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL)", sql);
+						assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL)", mySql);
 						break;
 				}
 			}
