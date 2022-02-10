@@ -21,6 +21,7 @@ package ca.uhn.fhir.context.support;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.apache.commons.lang3.Validate;
@@ -245,7 +246,7 @@ public interface IValidationSupport {
 	 * @return Returns a validation result object
 	 */
 	@Nullable
-	default CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	default CodeValidationResult validateCode(@Nonnull ValidationSupportContext theValidationSupportContext, @Nonnull ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		return null;
 	}
 
@@ -711,7 +712,7 @@ public interface IValidationSupport {
 
 		public void throwNotFoundIfAppropriate() {
 			if (isFound() == false) {
-				throw new ResourceNotFoundException("Unable to find code[" + getSearchedForCode() + "] in system[" + getSearchedForSystem() + "]");
+				throw new ResourceNotFoundException(Msg.code(1738) + "Unable to find code[" + getSearchedForCode() + "] in system[" + getSearchedForSystem() + "]");
 			}
 		}
 
@@ -755,7 +756,7 @@ public interface IValidationSupport {
 						IValidationSupport.CodingConceptProperty prop = (IValidationSupport.CodingConceptProperty) next;
 						ParametersUtil.addPartCoding(theContext, property, "value", prop.getCodeSystem(), prop.getCode(), prop.getDisplay());
 					} else {
-						throw new IllegalStateException("Don't know how to handle " + next.getClass());
+						throw new IllegalStateException(Msg.code(1739) + "Don't know how to handle " + next.getClass());
 					}
 				}
 			}

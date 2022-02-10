@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.param;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.BaseDateTimeDt;
@@ -197,7 +198,7 @@ public class DateParam extends BaseParamWithPrefix<DateParam> implements /*IQuer
 		if (theParameters.size() == 1) {
 			setValueAsString(theParameters.get(0));
 		} else if (theParameters.size() > 1) {
-			throw new InvalidRequestException("This server does not support multi-valued dates for this parameter: " + theParameters);
+			throw new InvalidRequestException(Msg.code(1939) + "This server does not support multi-valued dates for this parameter: " + theParameters);
 		}
 		
 	}

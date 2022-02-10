@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.mdm.broker;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -149,14 +150,14 @@ public class MdmMessageHandler implements MessageHandler {
 			case DELETE:
 			default:
 				ourLog.trace("Not creating an MdmTransactionContext for {}", theMsg.getOperationType());
-				throw new InvalidRequestException("We can't handle non-update/create operations in MDM");
+				throw new InvalidRequestException(Msg.code(734) + "We can't handle non-update/create operations in MDM");
 		}
 		return new MdmTransactionContext(transactionLogMessages, mdmOperation, theResourceType);
 	}
 
 	private void validateResourceType(String theResourceType) {
 		if (!myMdmSettings.isSupportedMdmType(theResourceType)) {
-			throw new IllegalStateException("Unsupported resource type submitted to MDM matching queue: " + theResourceType);
+			throw new IllegalStateException(Msg.code(735) + "Unsupported resource type submitted to MDM matching queue: " + theResourceType);
 		}
 	}
 

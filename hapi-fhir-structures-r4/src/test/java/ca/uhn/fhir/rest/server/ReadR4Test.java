@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
@@ -119,7 +120,7 @@ public class ReadR4Test {
 				" <issue>",
 				"  <severity value=\"error\"/>",
 				"  <code value=\"processing\"/>",
-				"  <diagnostics value=\"Invalid query parameter(s) for this request: &quot;[_contained]&quot;\"/>",
+				"  <diagnostics value=\""+ Msg.code(384) + "Invalid query parameter(s) for this request: &quot;[_contained]&quot;\"/>",
 				" </issue>",
 				"</OperationOutcome>"
 			));
@@ -136,7 +137,7 @@ public class ReadR4Test {
 				" <issue>",
 				"  <severity value=\"error\"/>",
 				"  <code value=\"processing\"/>",
-				"  <diagnostics value=\"Invalid query parameter(s) for this request: &quot;[_containedType]&quot;\"/>",
+				"  <diagnostics value=\""+ Msg.code(384) + "Invalid query parameter(s) for this request: &quot;[_containedType]&quot;\"/>",
 				" </issue>",
 				"</OperationOutcome>"
 			));
@@ -153,7 +154,7 @@ public class ReadR4Test {
 				" <issue>",
 				"  <severity value=\"error\"/>",
 				"  <code value=\"processing\"/>",
-				"  <diagnostics value=\"Invalid query parameter(s) for this request: &quot;[_count]&quot;\"/>",
+				"  <diagnostics value=\"" + Msg.code(384) + "Invalid query parameter(s) for this request: &quot;[_count]&quot;\"/>",
 				" </issue>",
 				"</OperationOutcome>"
 			));
@@ -170,7 +171,7 @@ public class ReadR4Test {
 				" <issue>",
 				"  <severity value=\"error\"/>",
 				"  <code value=\"processing\"/>",
-				"  <diagnostics value=\"Invalid query parameter(s) for this request: &quot;[_include]&quot;\"/>",
+				"  <diagnostics value=\""+ Msg.code(384)+ "Invalid query parameter(s) for this request: &quot;[_include]&quot;\"/>",
 				" </issue>",
 				"</OperationOutcome>"
 			));
@@ -187,7 +188,7 @@ public class ReadR4Test {
 				" <issue>",
 				"  <severity value=\"error\"/>",
 				"  <code value=\"processing\"/>",
-				"  <diagnostics value=\"Invalid query parameter(s) for this request: &quot;[_revinclude]&quot;\"/>",
+				"  <diagnostics value=\""+ Msg.code(384) + "Invalid query parameter(s) for this request: &quot;[_revinclude]&quot;\"/>",
 				" </issue>",
 				"</OperationOutcome>"
 			));
@@ -204,7 +205,7 @@ public class ReadR4Test {
 				" <issue>",
 				"  <severity value=\"error\"/>",
 				"  <code value=\"processing\"/>",
-				"  <diagnostics value=\"Invalid query parameter(s) for this request: &quot;[_sort]&quot;\"/>",
+				"  <diagnostics value=\""+ Msg.code(384) + "Invalid query parameter(s) for this request: &quot;[_sort]&quot;\"/>",
 				" </issue>",
 				"</OperationOutcome>"
 			));
@@ -221,7 +222,7 @@ public class ReadR4Test {
 				" <issue>",
 				"  <severity value=\"error\"/>",
 				"  <code value=\"processing\"/>",
-				"  <diagnostics value=\"Invalid query parameter(s) for this request: &quot;[_total]&quot;\"/>",
+				"  <diagnostics value=\"" + Msg.code(384) + "Invalid query parameter(s) for this request: &quot;[_total]&quot;\"/>",
 				" </issue>",
 				"</OperationOutcome>"
 			));

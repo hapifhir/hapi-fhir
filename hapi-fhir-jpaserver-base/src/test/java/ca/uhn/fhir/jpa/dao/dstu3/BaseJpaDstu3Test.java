@@ -426,14 +426,10 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 		return retVal;
 	}
 
-	@AfterAll
-	public static void afterClassClearContextBaseJpaDstu3Test() {
-		if (ourValueSetDao != null) {
-			ourValueSetDao.purgeCaches();
-		}
-		if (ourJpaValidationSupportChainDstu3 != null) {
-			ourJpaValidationSupportChainDstu3.invalidateCaches();
-		}
+	@AfterEach
+	public void afterEachClearCaches() {
+		myValueSetDao.purgeCaches();
+		myJpaValidationSupportChainDstu3.invalidateCaches();
 	}
 
 	/**

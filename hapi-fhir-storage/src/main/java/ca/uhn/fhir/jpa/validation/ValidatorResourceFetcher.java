@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.validation;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -80,7 +81,7 @@ public class ValidatorResourceFetcher implements IValidatorResourceFetcher {
 		try {
 			return new JsonParser(myVersionSpecificContextWrapper).parse(myFhirContext.newJsonParser().encodeResourceToString(target), resourceType);
 		} catch (Exception e) {
-			throw new FHIRException(e);
+			throw new FHIRException(Msg.code(576) + e);
 		}
 	}
 
@@ -91,7 +92,7 @@ public class ValidatorResourceFetcher implements IValidatorResourceFetcher {
 
 	@Override
 	public byte[] fetchRaw(IResourceValidator iResourceValidator, String s) throws MalformedURLException, IOException {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(577));
 	}
 
 	@Override

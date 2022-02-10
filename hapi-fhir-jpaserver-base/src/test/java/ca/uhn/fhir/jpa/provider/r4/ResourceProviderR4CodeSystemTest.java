@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TerminologyTest;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -222,7 +223,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: $lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1109) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
 		}
 	}
 
@@ -238,7 +239,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: $lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1109) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
 		}
 	}
 
@@ -253,7 +254,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: No code, coding, or codeableConcept provided to validate", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1108) + "No code, coding, or codeableConcept provided to validate", e.getMessage());
 		}
 	}
 
@@ -382,7 +383,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: Unable to test subsumption across different code systems", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(903) + "Unable to test subsumption across different code systems", e.getMessage());
 		}
 	}
 
@@ -541,7 +542,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 			myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: Either CodeSystem ID or CodeSystem identifier must be provided. Unable to validate.", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(908) + "Either CodeSystem ID or CodeSystem identifier must be provided. Unable to validate.", e.getMessage());
 		}
 	}
 
@@ -571,7 +572,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 			myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: No code, coding, or codeableConcept provided to validate.", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(906) + "No code, coding, or codeableConcept provided to validate.", e.getMessage());
 		}
 	}
 
@@ -587,7 +588,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 			myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: $validate-code can only validate (code) OR (coding) OR (codeableConcept)", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(907) + "$validate-code can only validate (code) OR (coding) OR (codeableConcept)", e.getMessage());
 		}
 	}
 
@@ -602,7 +603,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 			myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: Coding.system 'http://url2' does not equal with CodeSystem.url 'http://acme.org'. Unable to validate.", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(910) + "Coding.system 'http://url2' does not equal with CodeSystem.url 'http://acme.org'. Unable to validate.", e.getMessage());
 		}
 	}
 
@@ -651,7 +652,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 			myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: Coding.system 'http://url2' does not equal with CodeSystem.url 'http://acme.org'. Unable to validate.", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(910) + "Coding.system 'http://url2' does not equal with CodeSystem.url 'http://acme.org'. Unable to validate.", e.getMessage());
 		}
 	}
 
@@ -782,7 +783,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 			myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: Coding.system 'http://url2' does not equal with CodeSystem.url 'http://acme.org'. Unable to validate.", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(909) + "Coding.system 'http://url2' does not equal with CodeSystem.url 'http://acme.org'. Unable to validate.", e.getMessage());
 		}
 	}
 

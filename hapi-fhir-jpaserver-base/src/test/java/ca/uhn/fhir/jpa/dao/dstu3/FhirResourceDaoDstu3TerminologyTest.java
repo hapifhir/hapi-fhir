@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -249,7 +250,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 			myCodeSystemDao.create(codeSystem, mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Can not create multiple CodeSystem resources with CodeSystem.url \"http://example.com/my_code_system\", already have one with resource ID: CodeSystem/" + id.getIdPart(), e.getMessage());
+			assertEquals(Msg.code(848) + "Can not create multiple CodeSystem resources with CodeSystem.url \"http://example.com/my_code_system\", already have one with resource ID: CodeSystem/" + id.getIdPart(), e.getMessage());
 		}
 	}
 
@@ -290,7 +291,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 			myValueSetDao.expand(vs, null);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Invalid filter, must have fields populated: property op value", e.getMessage());
+			assertEquals(Msg.code(891) + "Invalid filter, must have fields populated: property op value", e.getMessage());
 		}
 	}
 
@@ -484,7 +485,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 			myValueSetDao.expand(vs, null);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("ValueSet contains exclude criteria with no system defined", e.getMessage());
+			assertEquals(Msg.code(890) + "ValueSet contains exclude criteria with no system defined", e.getMessage());
 		}
 	}
 
@@ -728,7 +729,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 			myObservationDao.search(params).size();
 			fail();
 		} catch (InternalErrorException e) {
-			assertEquals("Expansion of ValueSet produced too many codes (maximum 1) - Operation aborted!", e.getMessage());
+			assertEquals(Msg.code(885) + "Expansion of ValueSet produced too many codes (maximum 1) - Operation aborted!", e.getMessage());
 		}
 	}
 
@@ -805,7 +806,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), empty());
 		} catch (ResourceNotFoundException e) {
 			//noinspection SpellCheckingInspection
-			assertEquals("Unknown ValueSet: http%3A%2F%2Fexample.com%2Fmy_value_set", e.getMessage());
+			assertEquals(Msg.code(2024) + "Unknown ValueSet: http%3A%2F%2Fexample.com%2Fmy_value_set", e.getMessage());
 		}
 	}
 

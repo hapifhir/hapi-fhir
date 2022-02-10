@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.method;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -186,13 +187,13 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 				int index = theFromIndex;
 				for (IBaseResource nextResource : retVal) {
 					if (nextResource.getIdElement() == null || isBlank(nextResource.getIdElement().getIdPart())) {
-						throw new InternalErrorException("Server provided resource at index " + index + " with no ID set (using IResource#setId(IdDt))");
+						throw new InternalErrorException(Msg.code(410) + "Server provided resource at index " + index + " with no ID set (using IResource#setId(IdDt))");
 					}
 					if (isBlank(nextResource.getIdElement().getVersionIdPart()) && nextResource instanceof IResource) {
 						//TODO: Use of a deprecated method should be resolved.
 						IdDt versionId = ResourceMetadataKeyEnum.VERSION_ID.get((IResource) nextResource);
 						if (versionId == null || versionId.isEmpty()) {
-							throw new InternalErrorException("Server provided resource at index " + index + " with no Version ID set (using IResource#setId(IdDt))");
+							throw new InternalErrorException(Msg.code(411) + "Server provided resource at index " + index + " with no Version ID set (using IResource#setId(IdDt))");
 						}
 					}
 					index++;

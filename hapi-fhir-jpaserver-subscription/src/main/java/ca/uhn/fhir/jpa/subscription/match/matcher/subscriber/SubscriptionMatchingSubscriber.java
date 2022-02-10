@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -126,8 +127,9 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 		for (ActiveSubscription nextActiveSubscription : subscriptions) {
 			// skip if the partitions don't match
 			CanonicalSubscription subscription = nextActiveSubscription.getSubscription();
-			if (subscription != null && subscription.getRequestPartitionId() != null && theMsg.getPartitionId() != null
-				&& !subscription.getCrossPartitionEnabled() && !theMsg.getPartitionId().hasPartitionId(subscription.getRequestPartitionId())) {
+			if (subscription != null && subscription.getRequestPartitionId() != null && theMsg.getPartitionId() != null &&
+				theMsg.getPartitionId().hasPartitionIds() && !subscription.getCrossPartitionEnabled() &&
+				!theMsg.getPartitionId().hasPartitionId(subscription.getRequestPartitionId())) {
 				continue;
 			}
 			String nextSubscriptionId = getId(nextActiveSubscription);
@@ -145,7 +147,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 			}
 
 			if (theMsg.getOperationType().equals(DELETE)) {
-				if (! nextActiveSubscription.getSubscription().getSendDeleteMessages()) {
+				if (!nextActiveSubscription.getSubscription().getSendDeleteMessages()) {
 					ourLog.trace("Not processing modified message for {}", theMsg.getOperationType());
 					return;
 				}
@@ -228,7 +230,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 			}
 		} catch (RuntimeException e) {
 			ourLog.error("Failed to send message to Delivery Channel", e);
-			throw new RuntimeException("Failed to send message to Delivery Channel", e);
+			throw new RuntimeException(Msg.code(7) + "Failed to send message to Delivery Channel", e);
 		}
 	}
 

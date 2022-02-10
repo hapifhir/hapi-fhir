@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.search.builder;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -366,18 +367,28 @@ public class SearchBuilder implements ISearchBuilder {
 
 	private void failIfUsed(String theParamName) {
 		if (myParams.containsKey(theParamName)) {
-			throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + theParamName);
+			throw new InvalidRequestException(Msg.code(1192) + "Fulltext search is not enabled on this service, can not process parameter: " + theParamName);
 		}
 	}
 
 	private List<ResourcePersistentId> executeLastNAgainstIndex(Integer theMaximumResults) {
-		validateLastNIsEnabled();
-
-		List<String> lastnResourceIds = myIElasticsearchSvc.executeLastN(myParams, myContext, theMaximumResults);
-
-		return lastnResourceIds.stream()
-			.map(lastnResourceId -> myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, lastnResourceId))
-			.collect(Collectors.toList());
+		// Can we use our hibernate search generated index on resource to support lastN?:
+		if (myDaoConfig.isAdvancedLuceneIndexing()) {
+			if (myFulltextSearchSvc == null) {
+				throw new InvalidRequestException(Msg.code(2027) + "LastN operation is not enabled on this service, can not process this request");
+			}
+			return myFulltextSearchSvc.lastN(myParams, theMaximumResults)
+				.stream().map(lastNResourceId -> myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, String.valueOf(lastNResourceId)))
+				.collect(Collectors.toList());
+		} else {
+			if (myIElasticsearchSvc == null) {
+				throw new InvalidRequestException(Msg.code(2033) + "LastN operation is not enabled on this service, can not process this request");
+			}
+			// use the dedicated observation ES/Lucene index to support lastN query
+			return myIElasticsearchSvc.executeLastN(myParams, myContext, theMaximumResults).stream()
+				.map(lastnResourceId -> myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, lastnResourceId))
+				.collect(Collectors.toList());
+		}
 	}
 
 	private List<ResourcePersistentId> queryLuceneForPIDs(RequestDetails theRequest) {
@@ -391,7 +402,6 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 		return pids;
 	}
-
 
 	private void doCreateChunkedQueries(SearchParameterMap theParams, List<Long> thePids, Integer theOffset, SortSpec sort, boolean theCount, RequestDetails theRequest, ArrayList<SearchQueryExecutor> theQueries) {
 		if (thePids.size() < getMaximumPageSize()) {
@@ -420,7 +430,7 @@ public class SearchBuilder implements ISearchBuilder {
 					ids.add(((TokenParam) param).getValue());
 				} else {
 					// we do not expect the _id parameter to be a non-string value
-					throw new IllegalArgumentException("_id parameter must be a StringParam or TokenParam");
+					throw new IllegalArgumentException(Msg.code(1193) + "_id parameter must be a StringParam or TokenParam");
 				}
 			}
 		}
@@ -626,7 +636,7 @@ public class SearchBuilder implements ISearchBuilder {
 			RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(myResourceName, theSort.getParamName());
 			if (param == null) {
 				String msg = myContext.getLocalizer().getMessageSanitized(BaseStorageDao.class, "invalidSortParameter", theSort.getParamName(), getResourceName(), mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(getResourceName()));
-				throw new InvalidRequestException(msg);
+				throw new InvalidRequestException(Msg.code(1194) + msg);
 			}
 
 			switch (param.getParamType()) {
@@ -654,10 +664,10 @@ public class SearchBuilder implements ISearchBuilder {
 				case COMPOSITE:
 					List<RuntimeSearchParam> compositeList = JpaParamUtil.resolveComponentParameters(mySearchParamRegistry, param);
 					if (compositeList == null) {
-						throw new InvalidRequestException("The composite _sort parameter " + theSort.getParamName() + " is not defined by the resource " + myResourceName);
+						throw new InvalidRequestException(Msg.code(1195) + "The composite _sort parameter " + theSort.getParamName() + " is not defined by the resource " + myResourceName);
 					}
 					if (compositeList.size() != 2) {
-						throw new InvalidRequestException("The composite _sort parameter " + theSort.getParamName()
+						throw new InvalidRequestException(Msg.code(1196) + "The composite _sort parameter " + theSort.getParamName()
 							+ " must have 2 composite types declared in parameter annotation, found "
 							+ compositeList.size());
 					}
@@ -671,7 +681,7 @@ public class SearchBuilder implements ISearchBuilder {
 				case SPECIAL:
 				case HAS:
 				default:
-					throw new InvalidRequestException("This server does not support _sort specifications of type " + param.getParamType() + " - Can't serve _sort=" + theSort.getParamName());
+					throw new InvalidRequestException(Msg.code(1197) + "This server does not support _sort specifications of type " + param.getParamType() + " - Can't serve _sort=" + theSort.getParamName());
 			}
 
 		}
@@ -703,7 +713,7 @@ public class SearchBuilder implements ISearchBuilder {
 			case HAS:
 			case SPECIAL:
 			default:
-				throw new InvalidRequestException("Don't know how to handle composite parameter with type of " + theParamType + " on _sort=" + theParamName);
+				throw new InvalidRequestException(Msg.code(1198) + "Don't know how to handle composite parameter with type of " + theParamType + " on _sort=" + theParamName);
 		}
 
 	}
@@ -996,7 +1006,7 @@ public class SearchBuilder implements ISearchBuilder {
 						continue;
 					}
 
-					paths = param.getPathsSplit();
+					paths = param.getPathsSplitForResourceType(resType);
 
 					String targetResourceType = defaultString(nextInclude.getParamTargetType(), null);
 					for (String nextPath : paths) {
@@ -1619,20 +1629,14 @@ public class SearchBuilder implements ISearchBuilder {
 		return thePredicates.toArray(new Predicate[0]);
 	}
 
-	private void validateLastNIsEnabled() {
-		if (myIElasticsearchSvc == null) {
-			throw new InvalidRequestException("LastN operation is not enabled on this service, can not process this request");
-		}
-	}
-
 	private void validateFullTextSearchIsEnabled() {
 		if (myFulltextSearchSvc == null) {
 			if (myParams.containsKey(Constants.PARAM_TEXT)) {
-				throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
+				throw new InvalidRequestException(Msg.code(1200) + "Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
 			} else if (myParams.containsKey(Constants.PARAM_CONTENT)) {
-				throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
+				throw new InvalidRequestException(Msg.code(1201) + "Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
 			} else {
-				throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process qualifier :text");
+				throw new InvalidRequestException(Msg.code(1202) + "Fulltext search is not enabled on this service, can not process qualifier :text");
 			}
 		}
 	}

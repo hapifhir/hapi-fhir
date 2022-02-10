@@ -16,7 +16,6 @@ import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.batch.config.NonPersistedBatchConfigurer;
 import ca.uhn.fhir.jpa.batch.job.PartitionedUrlValidator;
-import ca.uhn.fhir.jpa.batch.mdm.MdmBatchJobSubmitterFactoryImpl;
 import ca.uhn.fhir.jpa.batch.mdm.MdmClearJobSubmitterImpl;
 import ca.uhn.fhir.jpa.batch.reader.BatchResourceSearcher;
 import ca.uhn.fhir.jpa.batch.svc.BatchJobSubmitterImpl;
@@ -68,7 +67,6 @@ import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.graphql.DaoRegistryGraphQLStorageServices;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
-import ca.uhn.fhir.jpa.interceptor.MdmSearchExpandingInterceptor;
 import ca.uhn.fhir.jpa.interceptor.OverridePathBasedReferentialIntegrityForDeletesInterceptor;
 import ca.uhn.fhir.jpa.interceptor.validation.RepositoryValidatingRuleBuilder;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
@@ -140,7 +138,6 @@ import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.validation.JpaResourceLoader;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
-import ca.uhn.fhir.mdm.api.IMdmBatchJobSubmitterFactory;
 import ca.uhn.fhir.mdm.api.IMdmClearJobSubmitter;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
@@ -155,7 +152,6 @@ import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
-import org.hl7.fhir.utilities.npm.FilesystemPackageCacheManager;
 import org.hl7.fhir.utilities.npm.PackageClient;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
@@ -521,21 +517,12 @@ public abstract class BaseConfig {
 		return new RequestTenantPartitionInterceptor();
 	}
 
-	@Bean
-	@Lazy
-	public MdmSearchExpandingInterceptor mdmSearchExpandingInterceptor() {
-		return new MdmSearchExpandingInterceptor();
-	}
 
 	@Bean
 	public MdmLinkExpandSvc mdmLinkExpandSvc() {
 		return new MdmLinkExpandSvc();
 	}
 
-	@Bean
-	IMdmBatchJobSubmitterFactory mdmBatchJobSubmitterFactory() {
-		return new MdmBatchJobSubmitterFactoryImpl();
-	}
 
 	@Bean
 	IMdmClearJobSubmitter mdmClearJobSubmitter() {

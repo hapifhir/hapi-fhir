@@ -20,19 +20,19 @@ package ca.uhn.fhir.model.base.composite;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.instance.model.api.IBaseReference;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseReference;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public abstract class BaseResourceReferenceDt extends BaseIdentifiableElement implements IBaseDatatype, IBaseReference {
 
@@ -97,10 +97,10 @@ public abstract class BaseResourceReferenceDt extends BaseIdentifiableElement im
 
 		IdDt resourceId = getReference();
 		if (resourceId == null || isBlank(resourceId.getValue())) {
-			throw new IllegalStateException("Reference has no resource ID defined");
+			throw new IllegalStateException(Msg.code(1905) + "Reference has no resource ID defined");
 		}
 		if (isBlank(resourceId.getBaseUrl()) || isBlank(resourceId.getResourceType())) {
-			throw new IllegalStateException("Reference is not complete (must be in the form [baseUrl]/[resource type]/[resource ID]) - Reference is: " + resourceId.getValue());
+			throw new IllegalStateException(Msg.code(1906) + "Reference is not complete (must be in the form [baseUrl]/[resource type]/[resource ID]) - Reference is: " + resourceId.getValue());
 		}
 
 		String resourceUrl = resourceId.getValue();

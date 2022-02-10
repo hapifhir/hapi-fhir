@@ -21,6 +21,7 @@ package ca.uhn.test.concurrency;
  */
 
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.IPointcut;
@@ -91,7 +92,7 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 	public void setExpectedCount(int theCount, boolean theExactMatch) {
 		if (myCountdownLatch.get() != null) {
 			String previousStack = myCountdownLatchSetStacktrace.get();
-			throw new PointcutLatchException("setExpectedCount() called before previous awaitExpected() completed. Previous set stack:\n" + previousStack);
+			throw new PointcutLatchException(Msg.code(1480) + "setExpectedCount() called before previous awaitExpected() completed. Previous set stack:\n" + previousStack);
 		}
 		myExactMatch = theExactMatch;
 		createLatch(theCount);
@@ -115,7 +116,7 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 		myCalledWith.set(Collections.synchronizedList(new ArrayList<>()));
 		myCountdownLatch.set(new CountDownLatch(theCount));
 		try {
-			throw new Exception();
+			throw new Exception(Msg.code(1481));
 		} catch (Exception e) {
 			myCountdownLatchSetStacktrace.set(ExceptionUtils.getStackTrace(e));
 		}
@@ -126,7 +127,7 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 		if (myFailures.get() != null) {
 			myFailures.get().add(failure);
 		} else {
-			throw new PointcutLatchException("trying to set failure on latch that hasn't been created: " + failure);
+			throw new PointcutLatchException(Msg.code(1482) + "trying to set failure on latch that hasn't been created: " + failure);
 		}
 	}
 
@@ -145,7 +146,7 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 			CountDownLatch latch = myCountdownLatch.get();
 			Validate.notNull(latch, getName() + " awaitExpected() called before setExpected() called.");
 			if (!latch.await(timeoutSecond, TimeUnit.SECONDS)) {
-				throw new AssertionError(getName() + " timed out waiting " + timeoutSecond + " seconds for latch to countdown from " + myInitialCount + " to 0.  Is " + latch.getCount() + ".");
+				throw new AssertionError(Msg.code(1483) + getName() + " timed out waiting " + timeoutSecond + " seconds for latch to countdown from " + myInitialCount + " to 0.  Is " + latch.getCount() + ".");
 			}
 
 			// Defend against ConcurrentModificationException
@@ -159,7 +160,7 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 				}
 				error += String.join("\n", failures);
 				error += "\nLatch called with values: " + toCalledWithString();
-				throw new AssertionError(error);
+				throw new AssertionError(Msg.code(1484) + error);
 			}
 		} finally {
 			clear();
@@ -195,7 +196,7 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 		CountDownLatch latch = myCountdownLatch.get();
 		if (myExactMatch) {
 			if (latch == null) {
-				throw new PointcutLatchException("invoke() for " + myName + " called outside of setExpectedCount() .. awaitExpected().  Probably got more invocations than expected or clear() was called before invoke() arrived with args: " + theArgs, theArgs);
+				throw new PointcutLatchException(Msg.code(1485) + "invoke() for " + myName + " called outside of setExpectedCount() .. awaitExpected().  Probably got more invocations than expected or clear() was called before invoke() arrived with args: " + theArgs, theArgs);
 			} else if (latch.getCount() <= 0) {
 				addFailure("invoke() called when countdown was zero.");
 			}

@@ -60,6 +60,8 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -218,6 +220,8 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	protected SubscriptionLoader mySubscriptionLoader;
 	@Autowired
 	private IBulkDataExportSvc myBulkDataExportSvc;
+	@Autowired
+	private ValidationSupportChain myJpaValidationSupportChain;
 
 	@BeforeEach
 	public void beforeFlushFT() {
@@ -269,6 +273,12 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 		retVal.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		retVal.afterPropertiesSet();
 		return retVal;
+	}
+
+	@AfterEach
+	public void afterEachClearCaches() {
+		myValueSetDao.purgeCaches();
+		myJpaValidationSupportChain.invalidateCaches();
 	}
 
 

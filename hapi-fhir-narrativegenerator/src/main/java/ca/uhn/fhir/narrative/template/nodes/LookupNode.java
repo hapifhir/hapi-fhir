@@ -1,5 +1,6 @@
 package ca.uhn.fhir.narrative.template.nodes;
 
+import ca.uhn.fhir.i18n.Msg;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -38,7 +39,7 @@ class LookupNode implements LNode {
 		try {
 			retVal = fpEngine.evaluate((Base)resContext, id);
 		} catch (FHIRException e) {
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(729) + e);
 		} 
 		// terser.getValues(resContext, id);
 

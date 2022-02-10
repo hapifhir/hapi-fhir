@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.reindex;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
@@ -67,7 +68,7 @@ public class ReindexJobSubmitterImpl implements IReindexJobSubmitter {
 		}
 		RequestListJson requestListJson = myPartitionedUrlValidator.buildRequestListJson(theRequest, theUrlsToReindex);
 		if (!myDaoConfig.isReindexEnabled()) {
-			throw new ForbiddenOperationException("Reindexing is disabled on this server.");
+			throw new ForbiddenOperationException(Msg.code(1273) + "Reindexing is disabled on this server.");
 		}
 
 		/*
@@ -90,7 +91,7 @@ public class ReindexJobSubmitterImpl implements IReindexJobSubmitter {
 		}
 		RequestPartitionId requestPartitionId = myPartitionedUrlValidator.requestPartitionIdFromRequest(theRequest);
 		if (!myDaoConfig.isReindexEnabled()) {
-			throw new ForbiddenOperationException("Reindexing is disabled on this server.");
+			throw new ForbiddenOperationException(Msg.code(1274) + "Reindexing is disabled on this server.");
 		}
 
 		/*

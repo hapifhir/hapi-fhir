@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
@@ -159,7 +160,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 			mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Could not find any of the PartLink files: [AccessoryFiles/PartFile/LoincPartLink_Primary.csv, AccessoryFiles/PartFile/LoincPartLink_Supplementary.csv] nor [AccessoryFiles/PartFile/LoincPartLink.csv]", e.getMessage());
+			assertEquals(Msg.code(863) + "Could not find any of the PartLink files: [AccessoryFiles/PartFile/LoincPartLink_Primary.csv, AccessoryFiles/PartFile/LoincPartLink_Supplementary.csv] nor [AccessoryFiles/PartFile/LoincPartLink.csv]", e.getMessage());
 		}
 
 		// Missing LoincPartLink_Supplementary
@@ -168,7 +169,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 			mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Could not find any of the PartLink files: [AccessoryFiles/PartFile/LoincPartLink_Supplementary.csv] nor [AccessoryFiles/PartFile/LoincPartLink.csv]", e.getMessage());
+			assertEquals(Msg.code(863) + "Could not find any of the PartLink files: [AccessoryFiles/PartFile/LoincPartLink_Supplementary.csv] nor [AccessoryFiles/PartFile/LoincPartLink.csv]", e.getMessage());
 		}
 
 		// Both Split and Single PartLink files
@@ -178,7 +179,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 			mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Only either the single PartLink file or the split PartLink files can be present. Found both the single PartLink file, AccessoryFiles/PartFile/LoincPartLink.csv, and the split PartLink files: [AccessoryFiles/PartFile/LoincPartLink_Primary.csv, AccessoryFiles/PartFile/LoincPartLink_Supplementary.csv]", e.getMessage());
+			assertEquals(Msg.code(863) + "Only either the single PartLink file or the split PartLink files can be present. Found both the single PartLink file, AccessoryFiles/PartFile/LoincPartLink.csv, and the split PartLink files: [AccessoryFiles/PartFile/LoincPartLink_Primary.csv, AccessoryFiles/PartFile/LoincPartLink_Supplementary.csv]", e.getMessage());
 		}
 
 	}
@@ -932,7 +933,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 			InvalidRequestException thrown = assertThrows(InvalidRequestException.class,
 				() -> testedSvc.loadLoinc(mockFileDescriptorList, mySrd) );
 
-			assertEquals("'" + LOINC_CODESYSTEM_VERSION.getCode() + "' property is required when '" +
+			assertEquals(Msg.code(864) + "'" + LOINC_CODESYSTEM_VERSION.getCode() + "' property is required when '" +
 				LOINC_CODESYSTEM_MAKE_CURRENT.getCode() + "' property is 'false'", thrown.getMessage());
 		}
 

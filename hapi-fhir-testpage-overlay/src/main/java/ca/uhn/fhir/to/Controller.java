@@ -1,5 +1,6 @@
 package ca.uhn.fhir.to;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.Include;
@@ -317,7 +318,7 @@ public class Controller extends BaseController {
 				haveSearchParams = extractSearchParamsR5CapabilityStatement(conformance, resourceName, includes, revIncludes, sortParams, haveSearchParams, queryIncludes);
 				break;
 			default:
-				throw new IllegalStateException("Unknown FHIR version: " + theRequest.getFhirVersion(myConfig));
+				throw new IllegalStateException(Msg.code(190) + "Unknown FHIR version: " + theRequest.getFhirVersion(myConfig));
 		}
 
 		theModel.put("includes", includes);
@@ -871,7 +872,7 @@ public class Controller extends BaseController {
 			} else if ("<".equals(parts.get(0))) {
 				matcher = param.lessThan();
 			} else {
-				throw new Error("Unknown qualifier: " + parts.get(0));
+				throw new Error(Msg.code(191) + "Unknown qualifier: " + parts.get(0));
 			}
 			IAndUnits number = matcher.number(parts.get(1));
 

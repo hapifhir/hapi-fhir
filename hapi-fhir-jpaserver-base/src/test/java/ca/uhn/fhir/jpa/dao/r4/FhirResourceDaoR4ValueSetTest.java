@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -71,7 +72,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 			myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Either ValueSet ID or ValueSet identifier or system and code must be provided. Unable to validate.", e.getMessage());
+			assertEquals(Msg.code(901) + "Either ValueSet ID or ValueSet identifier or system and code must be provided. Unable to validate.", e.getMessage());
 		}
 	}
 
@@ -255,7 +256,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 			myValueSetDao.expand(vs, null);
 			fail();
 		} catch (InternalErrorException e) {
-			assertEquals("Expansion of ValueSet produced too many codes (maximum 50) - Operation aborted!", e.getMessage());
+			assertEquals(Msg.code(832) + "Expansion of ValueSet produced too many codes (maximum 50) - Operation aborted!", e.getMessage());
 		}
 	}
 

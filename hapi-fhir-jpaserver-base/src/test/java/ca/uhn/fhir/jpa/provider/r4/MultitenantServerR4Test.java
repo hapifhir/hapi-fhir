@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -336,7 +337,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			mySystemDao.transaction(requestDetails, input);
 			fail();
 		} catch (MethodNotAllowedException e) {
-			assertEquals("Can not call transaction GET methods from this context", e.getMessage());
+			assertEquals(Msg.code(531) + "Can not call transaction GET methods from this context", e.getMessage());
 		}
 
 	}

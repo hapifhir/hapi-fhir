@@ -36,7 +36,7 @@ import java.util.Map;
 
 /**
  * Extract search params for advanced lucene indexing.
- *
+ * <p>
  * This class re-uses the extracted JPA entities to build an ExtendedLuceneIndexData instance.
  */
 public class ExtendedLuceneIndexExtractor {
@@ -59,11 +59,14 @@ public class ExtendedLuceneIndexExtractor {
 		theNewParams.myTokenParams.forEach(nextParam ->
 			retVal.addTokenIndexData(nextParam.getParamName(), nextParam.getSystem(), nextParam.getValue()));
 
+		theNewParams.myDateParams.forEach(nextParam ->
+			retVal.addDateIndexData(nextParam.getParamName(), nextParam.getValueLow(), nextParam.getValueLowDateOrdinal(),
+				nextParam.getValueHigh(), nextParam.getValueHighDateOrdinal()));
+
 		if (!theNewParams.myLinks.isEmpty()) {
 
-			// awkwardly, links are shared between different search params if they use the same path,
+			// awkwardly, links are indexed by jsonpath, not by search param.
 			// so we re-build the linkage.
-			// WIPMB is this the right design?  Or should we follow JPA and share these?
 			Map<String, List<String>> linkPathToParamName = new HashMap<>();
 			for (String nextParamName : theNewParams.getPopulatedResourceLinkParameters()) {
 				RuntimeSearchParam sp = myParams.get(nextParamName);
@@ -87,6 +90,7 @@ public class ExtendedLuceneIndexExtractor {
 				}
 			}
 		}
+
 		return retVal;
 	}
 }

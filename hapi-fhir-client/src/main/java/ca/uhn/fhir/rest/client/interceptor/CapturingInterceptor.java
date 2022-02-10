@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.client.interceptor;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -83,7 +84,7 @@ public class CapturingInterceptor {
 				theResponse.bufferEntity();
 			}
 		} catch (IOException e) {
-			throw new InternalErrorException("Unable to buffer the entity for capturing", e);
+			throw new InternalErrorException(Msg.code(1404) + "Unable to buffer the entity for capturing", e);
 		}
 	}
 

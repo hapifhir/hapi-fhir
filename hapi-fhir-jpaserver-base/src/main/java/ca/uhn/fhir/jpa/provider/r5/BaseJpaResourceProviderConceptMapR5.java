@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.provider.r5;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
 import ca.uhn.fhir.jpa.api.model.TranslationRequest;
@@ -92,7 +93,7 @@ public class BaseJpaResourceProviderConceptMapR5 extends JpaResourceProviderR5<C
 		// <editor-fold desc="Filters">
 		if ((!haveSourceCode && !haveSourceCoding && !haveSourceCodeableConcept)
 			|| moreThanOneTrue(haveSourceCode, haveSourceCoding, haveSourceCodeableConcept)) {
-			throw new InvalidRequestException("One (and only one) of the in parameters (code, coding, codeableConcept) must be provided, to identify the code that is to be translated.");
+			throw new InvalidRequestException(Msg.code(1161) + "One (and only one) of the in parameters (code, coding, codeableConcept) must be provided, to identify the code that is to be translated.");
 		}
 
 		TranslationRequest translationRequest = new TranslationRequest();

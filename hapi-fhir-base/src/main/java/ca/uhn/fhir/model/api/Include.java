@@ -1,12 +1,13 @@
 package ca.uhn.fhir.model.api;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import ca.uhn.fhir.i18n.Msg;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.io.Serializable;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
  * #%L
@@ -189,7 +190,7 @@ public class Include implements Serializable {
 
 	public void setValue(String theValue) {
 		if (myImmutable) {
-			throw new IllegalStateException("Can not change the value of this include");
+			throw new IllegalStateException(Msg.code(1888) + "Can not change the value of this include");
 		}
 
 		String value = defaultString(theValue);
@@ -274,7 +275,7 @@ public class Include implements Serializable {
 		String paramType = getParamType();
 		String paramName = getParamName();
 		if (isBlank(paramType) || isBlank(paramName)) {
-			throw new IllegalStateException("This include does not contain a value in the format [ResourceType]:[paramName]");
+			throw new IllegalStateException(Msg.code(1889) + "This include does not contain a value in the format [ResourceType]:[paramName]");
 		}
 		b.append(paramType);
 		b.append(":");

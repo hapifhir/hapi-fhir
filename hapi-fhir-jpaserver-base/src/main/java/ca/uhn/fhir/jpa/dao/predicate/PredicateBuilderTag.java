@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
@@ -66,7 +67,7 @@ public class PredicateBuilderTag extends BasePredicateBuilder {
 		} else if (Constants.PARAM_SECURITY.equals(theParamName)) {
 			tagType = TagTypeEnum.SECURITY_LABEL;
 		} else {
-			throw new IllegalArgumentException("Param name: " + theParamName); // shouldn't happen
+			throw new IllegalArgumentException(Msg.code(1030) + "Param name: " + theParamName); // shouldn't happen
 		}
 
 		List<Pair<String, String>> notTags = Lists.newArrayList();
@@ -91,7 +92,7 @@ public class PredicateBuilderTag extends BasePredicateBuilder {
 					if (isNotBlank(nextParam.getValue())) {
 						haveTags = true;
 					} else if (isNotBlank(nextParam.getSystem())) {
-						throw new InvalidRequestException("Invalid " + theParamName + " parameter (must supply a value/code and not just a system): " + nextParam.getValueAsQueryToken(myContext));
+						throw new InvalidRequestException(Msg.code(1031) + "Invalid " + theParamName + " parameter (must supply a value/code and not just a system): " + nextParam.getValueAsQueryToken(myContext));
 					}
 				} else {
 					UriParam nextParam = (UriParam) nextParamUncasted;

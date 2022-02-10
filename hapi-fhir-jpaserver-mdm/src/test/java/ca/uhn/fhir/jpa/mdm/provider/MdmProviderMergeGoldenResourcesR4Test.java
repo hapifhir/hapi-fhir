@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
@@ -130,7 +131,7 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 			fail();
 		} catch (InvalidRequestException e) {
 			String message = myMessageHelper.getMessageForFailedGoldenResourceLoad("fromGoldenResourceId", fromGoldenResourceId.getValue());
-			assertEquals(e.getMessage(), message);
+			assertEquals(e.getMessage(), Msg.code(1502) + message);
 		}
 	}
 
@@ -140,19 +141,19 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 			myMdmProvider.mergeGoldenResources(null, null, null, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("fromGoldenResourceId cannot be null", e.getMessage());
+			assertEquals(Msg.code(1494) + "fromGoldenResourceId cannot be null", e.getMessage());
 		}
 		try {
 			myMdmProvider.mergeGoldenResources(null, myToGoldenPatientId, null, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("fromGoldenResourceId cannot be null", e.getMessage());
+			assertEquals(Msg.code(1494) + "fromGoldenResourceId cannot be null", e.getMessage());
 		}
 		try {
 			myMdmProvider.mergeGoldenResources(myFromGoldenPatientId, null, null, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("toGoldenResourceId cannot be null", e.getMessage());
+			assertEquals(Msg.code(1494) + "toGoldenResourceId cannot be null", e.getMessage());
 		}
 	}
 
@@ -162,35 +163,35 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 			myMdmProvider.mergeGoldenResources(new StringType("Patient/1"), new StringType("Patient/1"), null, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("fromGoldenResourceId must be different from toGoldenResourceId", e.getMessage());
+			assertEquals(Msg.code(1493) + "fromGoldenResourceId must be different from toGoldenResourceId", e.getMessage());
 		}
 
 		try {
 			myMdmProvider.mergeGoldenResources(new StringType("Patient/abc"), myToGoldenPatientId, null, myRequestDetails);
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertEquals("Resource Patient/abc is not known", e.getMessage());
+			assertEquals(Msg.code(2001) + "Resource Patient/abc is not known", e.getMessage());
 		}
 
 		try {
 			myMdmProvider.mergeGoldenResources(new StringType("Patient/abc"), myToGoldenPatientId, null, myRequestDetails);
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertEquals("Resource Patient/abc is not known", e.getMessage());
+			assertEquals(Msg.code(2001) + "Resource Patient/abc is not known", e.getMessage());
 		}
 
 		try {
 			myMdmProvider.mergeGoldenResources(new StringType("Organization/abc"), myToGoldenPatientId, null, myRequestDetails);
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertEquals("Resource Organization/abc is not known", e.getMessage());
+			assertEquals(Msg.code(2001) + "Resource Organization/abc is not known", e.getMessage());
 		}
 
 		try {
 			myMdmProvider.mergeGoldenResources(myFromGoldenPatientId, new StringType("Patient/abc"), null, myRequestDetails);
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertEquals("Resource Patient/abc is not known", e.getMessage());
+			assertEquals(Msg.code(2001) + "Resource Patient/abc is not known", e.getMessage());
 		}
 	}
 }

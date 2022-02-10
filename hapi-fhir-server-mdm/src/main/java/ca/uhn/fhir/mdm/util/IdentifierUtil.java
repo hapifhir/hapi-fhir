@@ -20,6 +20,7 @@ package ca.uhn.fhir.mdm.util;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -44,7 +45,7 @@ public final class IdentifierUtil {
 			org.hl7.fhir.r5.model.Identifier ident = (org.hl7.fhir.r5.model.Identifier) theIdentifier;
 			retval.setSystem(ident.getSystem()).setValue(ident.getValue());
 		} else {
-			throw new InternalErrorException("Expected 'Identifier' type but was '" + theIdentifier.getClass().getName() + "'");
+			throw new InternalErrorException(Msg.code(1486) + "Expected 'Identifier' type but was '" + theIdentifier.getClass().getName() + "'");
 		}
 		return retval;
 	}
@@ -66,6 +67,6 @@ public final class IdentifierUtil {
 			case DSTU3:
 				return (T) eid.toDSTU3();
 		}
-		throw new IllegalStateException("Unsupported FHIR version " + theFhirContext.getVersion().getVersion());
+		throw new IllegalStateException(Msg.code(1487) + "Unsupported FHIR version " + theFhirContext.getVersion().getVersion());
 	}
 }
