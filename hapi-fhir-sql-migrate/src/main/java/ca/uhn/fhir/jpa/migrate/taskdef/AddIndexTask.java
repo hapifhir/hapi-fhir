@@ -99,11 +99,9 @@ public class AddIndexTask extends BaseTableTask {
 	@Nonnull
 	String generateSql() {
 		String unique = myUnique ? "unique " : "";
+		String columns = String.join(", ", myColumns);
 		String includeClause = "";
 		String mssqlWhereClause = "";
-		// we may need to shove the INCLUDE into the USING list
-		List<String> indexedColumns = new ArrayList<>(myColumns);
-
 		if (!myIncludeColumns.isEmpty()) {
 			switch (getDriverType()) {
 				case POSTGRES_9_4:
@@ -121,7 +119,6 @@ public class AddIndexTask extends BaseTableTask {
 					break;
 			}
 		}
-		String columns = String.join(", ", indexedColumns);
 		if (myUnique && getDriverType() == DriverTypeEnum.MSSQL_2012) {
 			mssqlWhereClause = " WHERE (";
 			for (int i = 0; i < myColumns.size(); i++) {
