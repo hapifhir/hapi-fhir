@@ -24,8 +24,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestR4Config.class, TestHibernateSearchAddInConfig.NoFT.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-public class FhirResourceDaoR4LuceneDisabledStandardQueries extends BaseJpaTest {
-	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4LuceneDisabledStandardQueries.class);
+public class FhirResourceDaoR4StandardQueriesNoFT extends BaseJpaTest {
+	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4StandardQueriesNoFT.class);
 	@Autowired
 	PlatformTransactionManager myTxManager;
 	@Autowired
@@ -49,7 +49,7 @@ public class FhirResourceDaoR4LuceneDisabledStandardQueries extends BaseJpaTest 
 	@Nested
 	public class DateSearchTests extends BaseDateSearchDaoTests {
 		@Override
-		protected Fixture getFixture() {
+		protected Fixture constructFixture() {
 			DaoTestDataBuilder testDataBuilder = new DaoTestDataBuilder(myFhirCtx, myDaoRegistry, new SystemRequestDetails());
 			return new TestDataBuilderFixture<>(testDataBuilder, myObservationDao);
 		}
