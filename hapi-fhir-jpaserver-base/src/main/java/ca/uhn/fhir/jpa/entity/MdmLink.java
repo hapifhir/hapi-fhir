@@ -350,11 +350,11 @@ public class MdmLink implements IMdmLink {
 		myRuleCount = theRuleCount;
 	}
 
-	public Integer getMyPartitionId() {
+	public Integer getPartitionId() {
 		return myPartitionId;
 	}
 
-	public void setMyPartitionId(Integer thePartitionId) {
+	public void setPartitionId(Integer thePartitionId) {
 		myPartitionId = thePartitionId;
 	}
 

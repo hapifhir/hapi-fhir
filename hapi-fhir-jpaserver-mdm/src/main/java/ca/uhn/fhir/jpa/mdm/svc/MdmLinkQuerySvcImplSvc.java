@@ -53,7 +53,12 @@ public class MdmLinkQuerySvcImplSvc implements IMdmLinkQuerySvc {
 	@Override
 	@Transactional
 	public Page<MdmLinkJson> queryLinks(IIdType theGoldenResourceId, IIdType theSourceResourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest) {
-		Example<MdmLink> exampleLink = exampleLinkFromParameters(theGoldenResourceId, theSourceResourceId, theMatchResult, theLinkSource);
+		return queryLinks(theGoldenResourceId, theSourceResourceId, theMatchResult, theLinkSource, theMdmContext, thePageRequest, null);
+	}
+
+	@Override
+	public Page<MdmLinkJson> queryLinks(IIdType theGoldenResourceId, IIdType theSourceResourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest, Integer thePartitionId) {
+		Example<MdmLink> exampleLink = exampleLinkFromParameters(theGoldenResourceId, theSourceResourceId, theMatchResult, theLinkSource, thePartitionId);
 		Page<MdmLink> mdmLinkByExample = myMdmLinkDaoSvc.findMdmLinkByExample(exampleLink, thePageRequest);
 		Page<MdmLinkJson> map = mdmLinkByExample.map(myMdmModelConverterSvc::toJson);
 		return map;
@@ -62,13 +67,13 @@ public class MdmLinkQuerySvcImplSvc implements IMdmLinkQuerySvc {
 	@Override
 	@Transactional
 	public Page<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest) {
-		Example<MdmLink> exampleLink = exampleLinkFromParameters(null, null, MdmMatchResultEnum.POSSIBLE_DUPLICATE, null);
+		Example<MdmLink> exampleLink = exampleLinkFromParameters(null, null, MdmMatchResultEnum.POSSIBLE_DUPLICATE, null, null);
 		Page<MdmLink> mdmLinkPage = myMdmLinkDaoSvc.findMdmLinkByExample(exampleLink, thePageRequest);
 		Page<MdmLinkJson> map = mdmLinkPage.map(myMdmModelConverterSvc::toJson);
 		return map;
 	}
 
-	private Example<MdmLink> exampleLinkFromParameters(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource) {
+	private Example<MdmLink> exampleLinkFromParameters(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, Integer thePartitionId) {
 		MdmLink mdmLink = myMdmLinkDaoSvc.newMdmLink();
 		if (theGoldenResourceId != null) {
 			mdmLink.setGoldenResourcePid(myIdHelperService.getPidOrThrowException(theGoldenResourceId));
@@ -82,6 +87,10 @@ public class MdmLinkQuerySvcImplSvc implements IMdmLinkQuerySvc {
 		if (theLinkSource != null) {
 			mdmLink.setLinkSource(theLinkSource);
 		}
+		if (thePartitionId != null) {
+			mdmLink.setPartitionId(thePartitionId);
+		}
+
 		return Example.of(mdmLink);
 	}
 }

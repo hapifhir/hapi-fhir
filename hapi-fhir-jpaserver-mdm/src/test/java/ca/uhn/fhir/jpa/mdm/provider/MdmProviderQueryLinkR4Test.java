@@ -68,7 +68,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 
 	@Test
 	public void testQueryLinkOneMatch() {
-		Parameters result = (Parameters) myMdmProvider.queryLinks(mySourcePatientId, myPatientId, null, null, new UnsignedIntType(0), new UnsignedIntType(10), myRequestDetails);
+		Parameters result = (Parameters) myMdmProvider.queryLinks(mySourcePatientId, myPatientId, null, null, new UnsignedIntType(0), new UnsignedIntType(10), null, myRequestDetails);
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(result));
 		List<Parameters.ParametersParameterComponent> list = getParametersByName(result, "link");
 		assertThat(list, hasSize(1));
@@ -86,7 +86,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 		int count = 2;
 		StopWatch sw = new StopWatch();
 		while (true)  {
-			Parameters result = (Parameters) myMdmProvider.queryLinks(null, null, null, myLinkSource, new UnsignedIntType(offset), new UnsignedIntType(count), myRequestDetails);
+			Parameters result = (Parameters) myMdmProvider.queryLinks(null, null, null, myLinkSource, new UnsignedIntType(offset), new UnsignedIntType(count), null, myRequestDetails);
 			List<Parameters.ParametersParameterComponent> parameter = result.getParameter();
 
 
@@ -132,6 +132,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 				null, myLinkSource,
 				new UnsignedIntType(offset),
 				new UnsignedIntType(count),
+				null,
 				myRequestDetails);
 		} catch (InvalidRequestException e) {
 			//Then
@@ -148,6 +149,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 				null, myLinkSource,
 				new UnsignedIntType(offset),
 				new UnsignedIntType(count),
+				null,
 				myRequestDetails);
 		} catch (InvalidRequestException e) {
 			//Then
@@ -164,6 +166,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 				null, myLinkSource,
 				new UnsignedIntType(offset),
 				new UnsignedIntType(count),
+				null,
 				myRequestDetails);
 		} catch (InvalidRequestException e) {
 			//Then
@@ -179,7 +182,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 		IAnyResource goldenResource = getGoldenResourceFromTargetResource(patient);
 		IIdType goldenResourceId = goldenResource.getIdElement().toVersionless();
 
-		Parameters result = (Parameters) myMdmProvider.queryLinks(null, null, null, myLinkSource, new UnsignedIntType(0), new UnsignedIntType(10), myRequestDetails);
+		Parameters result = (Parameters) myMdmProvider.queryLinks(null, null, null, myLinkSource, new UnsignedIntType(0), new UnsignedIntType(10),null, myRequestDetails);
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(result));
 		List<Parameters.ParametersParameterComponent> list = getParametersByName(result, "link");
 		assertThat(list, hasSize(4));

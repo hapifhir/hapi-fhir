@@ -183,7 +183,9 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 												 @Description(formalDefinition = "Results from this method are returned across multiple pages. This parameter controls the size of those pages.")
 												 @OperationParam(name = Constants.PARAM_COUNT, min = 0, max = 1, typeName = "integer")
 														 IPrimitiveType<Integer> theCount,
-
+												 @Description(formalDefinition = "If multitenancy is enabled, this parameter limits the search results to a specific partition")
+												 @OperationParam(name = Constants.PARTITION_NAME, min = 0, max = 1, typeName = "string")
+														 String thePartitionName,
 												 ServletRequestDetails theRequestDetails) {
 		MdmPageRequest mdmPageRequest = new MdmPageRequest(theOffset, theCount, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
 		Page<MdmLinkJson> mdmLinkJson = myMdmControllerSvc.queryLinks(extractStringOrNull(theGoldenResourceId),

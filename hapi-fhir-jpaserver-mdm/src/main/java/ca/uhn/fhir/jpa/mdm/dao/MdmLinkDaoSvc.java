@@ -80,7 +80,7 @@ public class MdmLinkDaoSvc {
 		}
 		RequestPartitionId partitionId = (RequestPartitionId) theSourceResource.getUserData(Constants.RESOURCE_PARTITION_ID);
 		if (partitionId != null && partitionId.hasPartitionIds() && partitionId.getFirstPartitionIdOrNull() != null) {
-			mdmLink.setMyPartitionId(partitionId.getFirstPartitionIdOrNull());
+			mdmLink.setPartitionId(partitionId.getFirstPartitionIdOrNull());
 		}
 
 		String message = String.format("Creating MdmLink from %s to %s -> %s", theGoldenResource.getIdElement().toUnqualifiedVersionless(), theSourceResource.getIdElement().toUnqualifiedVersionless(), theMatchOutcome);
