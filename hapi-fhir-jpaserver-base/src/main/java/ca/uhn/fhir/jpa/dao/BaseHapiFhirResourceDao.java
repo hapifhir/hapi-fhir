@@ -260,7 +260,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		ResourceTable entity = new ResourceTable();
 		entity.setResourceType(toResourceName(theResource));
 		PartitionablePartitionId partitionablePartitionId = myRequestPartitionHelperService.toStoragePartition(theRequestPartitionId);
-		ourLog.info("Setting Entity for resource {} to partition id {} which has date {}", theResource, partitionablePartitionId, partitionablePartitionId.getPartitionDate());
+		ourLog.debug("Setting Entity for resource {} to partition id {} which has date {}", theResource, partitionablePartitionId, partitionablePartitionId.getPartitionDate());
 		entity.setPartitionId(partitionablePartitionId);
 		entity.setCreatedByMatchUrl(theIfNoneExist);
 		entity.setVersion(1);
