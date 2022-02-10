@@ -356,7 +356,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			}
 		}
 		else{
-			ourLog.warn("Failed to upload resource of type {} with identifier {} - Error: Resource failed validation", theResource.fhirType(), theResource.getIdElement().getValue());
+			ourLog.warn("Failed to upload resource of type {} with ID {} - Error: Resource failed validation", theResource.fhirType(), theResource.getIdElement().getValue());
 		}
 	}
 
@@ -400,18 +400,18 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 			String code = SearchParameterUtil.getCode(myFhirContext, theResource);
 			if (defaultString(code).startsWith("_")) {
-				ourLog.warn("Failed to validate resource of type {} with url {} - Error: Resource code starts with \"_\"", theResource.fhirType(), theResource.getIdElement().getValue());
+				ourLog.warn("Failed to validate resource of type {} with url {} - Error: Resource code starts with \"_\"", theResource.fhirType(), SearchParameterUtil.getURL(myFhirContext, theResource));
 				return false;
 			}
 
 			String expression = SearchParameterUtil.getExpression(myFhirContext, theResource);
 			if (isBlank(expression)) {
-				ourLog.warn("Failed to validate resource of type {} with url {} - Error: Resource expression is blank", theResource.fhirType(), theResource.getIdElement().getValue());
+				ourLog.warn("Failed to validate resource of type {} with url {} - Error: Resource expression is blank", theResource.fhirType(), SearchParameterUtil.getURL(myFhirContext, theResource));
 				return false;
 			}
 
 			if (SearchParameterUtil.getBaseAsStrings(myFhirContext, theResource).isEmpty()) {
-				ourLog.warn("Failed to validate resource of type {} with url {} - Error: Resource base is empty", theResource.fhirType(), theResource.getIdElement().getValue());
+				ourLog.warn("Failed to validate resource of type {} with url {} - Error: Resource base is empty", theResource.fhirType(), SearchParameterUtil.getURL(myFhirContext, theResource));
 				return false;
 			}
 
@@ -419,7 +419,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 		List<IPrimitiveType> statusTypes = myFhirContext.newFhirPath().evaluate(theResource, "status", IPrimitiveType.class);
 		if (statusTypes.size() > 0 && !statusTypes.get(0).getValueAsString().equals("active")) {
-			ourLog.warn("Failed to validate resource of type {} with identifier {} - Error: Resource status not equal to \"active\"", theResource.fhirType(), theResource.getIdElement().getValue());
+			ourLog.warn("Failed to validate resource of type {} with ID {} - Error: Resource status not equal to \"active\"", theResource.fhirType(), theResource.getIdElement().getValue());
 			return false;
 		}
 
