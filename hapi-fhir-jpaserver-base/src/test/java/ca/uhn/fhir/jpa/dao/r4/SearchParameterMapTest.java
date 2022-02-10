@@ -38,6 +38,7 @@ public class SearchParameterMapTest extends BaseTest {
 		SearchParameterMap params = new SearchParameterMap();
 
 		params.add("_id", new StringOrListParam().addOr(new StringParam("123")).addOr(new StringParam("456")));
+		params.add("given", new StringOrListParam().addOr(new StringParam("Gary")).addOr(new StringParam("Ken ")));
 
 		params.setSummaryMode(SummaryEnum.COUNT);
 
@@ -45,7 +46,7 @@ public class SearchParameterMapTest extends BaseTest {
 
 		params.setCount(10);
 
-		params.setLastUpdated(new DateRangeParam(new DateParam()));
+		params.setLastUpdated(new DateRangeParam(new DateParam("2020-01-01")));
 
 		params.setSearchTotalMode(SearchTotalModeEnum.ACCURATE);
 
