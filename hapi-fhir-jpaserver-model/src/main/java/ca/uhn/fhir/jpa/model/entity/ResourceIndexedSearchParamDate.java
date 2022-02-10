@@ -27,10 +27,14 @@ import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -98,6 +102,12 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	 */
 	@Column(name = "HASH_IDENTITY", nullable = true)
 	private Long myHashIdentity;
+
+	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = {})
+	@JoinColumn( nullable = false,
+		name = "RES_ID", referencedColumnName = "RES_ID",
+		foreignKey = @ForeignKey(name="FK_SP_DATE_RES"))
+	private ResourceTable myResource;
 
 	/**
 	 * Constructor
@@ -376,4 +386,15 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		return (long) DateUtils.convertDateToDayInteger(theDate);
 	}
 
+	@Override
+	public ResourceTable getResource() {
+		return myResource;
+	}
+
+	@Override
+	public BaseResourceIndexedSearchParam setResource(ResourceTable theResource) {
+		myResource = theResource;
+		setResourceType(theResource.getResourceType());
+		return this;
+	}
 }

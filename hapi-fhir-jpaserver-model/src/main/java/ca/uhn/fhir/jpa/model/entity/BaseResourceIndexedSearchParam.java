@@ -69,10 +69,6 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	@Column(name = "SP_NAME", length = MAX_SP_NAME, nullable = false)
 	private String myParamName;
 
-	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = {})
-	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false)
-	private ResourceTable myResource;
-
 	@Column(name = "RES_ID", insertable = false, updatable = false, nullable = false)
 	private Long myResourcePid;
 
@@ -105,15 +101,12 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 		}
 	}
 
-	public ResourceTable getResource() {
-		return myResource;
-	}
-
-	public BaseResourceIndexedSearchParam setResource(ResourceTable theResource) {
-		myResource = theResource;
-		myResourceType = theResource.getResourceType();
-		return this;
-	}
+	// MB pushed these down to the individual SP classes so we could name the FK in the join annotation
+	/**
+	 * Get the Resource this SP indexes
+	 */
+	public abstract ResourceTable getResource();
+	public abstract BaseResourceIndexedSearchParam setResource(ResourceTable theResource);
 
 	@Override
 	public <T extends BaseResourceIndex> void copyMutableValuesFrom(T theSource) {

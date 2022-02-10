@@ -95,66 +95,63 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		 */
 		// new date search indexes
 		Builder.BuilderWithTableName dateTable = version.onTable("HFJ_SPIDX_DATE");
+
+		// replace and drop IDX_SP_DATE_HASH
 		dateTable
 			.addIndex("20220207.1", "IDX_SP_DATE_HASH_V2" )
 			.unique(false)
 			.online(true)
 			.withColumns("HASH_IDENTITY", "SP_VALUE_LOW", "SP_VALUE_HIGH", "RES_ID", "PARTITION_ID");
-
 		dateTable.dropIndexOnline("20220207.2", "IDX_SP_DATE_HASH");
+
+		// drop redundant
 		dateTable.dropIndexOnline("20220207.3", "IDX_SP_DATE_HASH_LOW");
 
+		// replace and drop IDX_SP_DATE_HASH_HIGH
 		dateTable
 			.addIndex("20220207.4", "IDX_SP_DATE_HASH_HIGH_V2" )
 			.unique(false)
 			.online(true)
 			.withColumns("HASH_IDENTITY", "SP_VALUE_HIGH", "RES_ID", "PARTITION_ID");
-
 		dateTable.dropIndexOnline("20220207.5", "IDX_SP_DATE_HASH_HIGH");
 
+		// replace and drop IDX_SP_DATE_ORD_HASH
 		dateTable
 			.addIndex("20220207.6", "IDX_SP_DATE_ORD_HASH_V2" )
 			.unique(false)
 			.online(true)
 			.withColumns("HASH_IDENTITY", "SP_VALUE_LOW_DATE_ORDINAL", "SP_VALUE_HIGH_DATE_ORDINAL", "RES_ID", "PARTITION_ID");
-
 		dateTable.dropIndexOnline("20220207.7", "IDX_SP_DATE_ORD_HASH");
 
+		// replace and drop IDX_SP_DATE_ORD_HASH_HIGH
 		dateTable
 			.addIndex("20220207.8", "IDX_SP_DATE_ORD_HASH_HIGH_V2" )
 			.unique(false)
 			.online(true)
 			.withColumns("HASH_IDENTITY", "SP_VALUE_HIGH_DATE_ORDINAL", "RES_ID", "PARTITION_ID");
-
 		dateTable.dropIndexOnline("20220207.9", "IDX_SP_DATE_ORD_HASH_HIGH");
+
+		// drop redundant
 		dateTable.dropIndexOnline("20220207.10", "IDX_SP_DATE_ORD_HASH_LOW");
 
+		// replace and drop IDX_SP_DATE_RESID
 		dateTable
 			.addIndex("20220207.11", "IDX_SP_DATE_RESID_V2" )
 			.unique(false)
 			.online(true)
 			.withColumns("RES_ID", "HASH_IDENTITY", "SP_VALUE_LOW", "SP_VALUE_HIGH", "SP_VALUE_LOW_DATE_ORDINAL", "SP_VALUE_HIGH_DATE_ORDINAL", "PARTITION_ID");
-
-		// Move the automatic FK to the new index FK17s70oa59rm9n61k9thjqrsqm
+		// some engines tie the FK constraint to a particular index.
+		// So we need to drop and recreate the constraint to drop the old RES_ID index.
+		// Rename it while we're at it.  FK17s70oa59rm9n61k9thjqrsqm was not a pretty name.
 		dateTable.dropForeignKey("20220207.12", "FK17S70OA59RM9N61K9THJQRSQM", "HFJ_RESOURCE");
 		dateTable.dropIndexOnline("20220207.13", "IDX_SP_DATE_RESID");
 		dateTable.dropIndexOnline("20220207.14", "FK17S70OA59RM9N61K9THJQRSQM");
 
-	// ugh. I hate this name, but myResource is in BaseResourceIndexedSearchParam so hard to fight.
-		dateTable.addForeignKey("20220207.15", "FK17S70OA59RM9N61K9THJQRSQM")
+		dateTable.addForeignKey("20220207.15", "FK_SP_DATE_RES")
 			.toColumn("RES_ID").references("HFJ_RESOURCE", "RES_ID");
-		// dropped and not replaced.  Column to be deleted.
+
+		// drop obsolete
 		dateTable.dropIndexOnline("20220207.16", "IDX_SP_DATE_UPDATED");
-
-		// new token search indexing
-
-		// wipmb turn old index migrations into a no-op
-		// wipmb start last_updated deprecation.
-		// wipmb talk to Yue Shi about testing our migrations and this change. Release smoke test on oldest version supported.
-		// wipmb do we need to make drop concurrent+deferred?
-		// wipmb MB test oracle
-		// wipmb AddIndexTask.myIncludeColumns is not in hashcode.  Do we care?
-		//theBuilder.append(myIncludeColumns);
 
 	}
 
