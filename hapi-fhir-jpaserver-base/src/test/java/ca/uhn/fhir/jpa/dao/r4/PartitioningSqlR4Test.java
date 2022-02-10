@@ -623,7 +623,8 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	public void testCreateInTransaction_ServerId_WithPartition() {
 		createUniqueCompositeSp();
 		createRequestId();
-
+		ourLog.info("Starting testCreateInTransaction_ServerId_WithPartition");
+		ourLog.info("Setting up partitionId {} with date {}", myPartitionId, myPartitionDate);
 		addCreatePartition(myPartitionId, myPartitionDate);
 		addCreatePartition(myPartitionId, myPartitionDate);
 		addCreatePartition(myPartitionId, myPartitionDate);
@@ -657,6 +658,9 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		runInTransaction(() -> {
 			// HFJ_RESOURCE
 			ResourceTable resourceTable = myResourceTableDao.findById(patientId).orElseThrow(IllegalArgumentException::new);
+			ourLog.info("Found resourceTable {}, which contains partition id {} with date {}", resourceTable.getId(), resourceTable.getPartitionId(), resourceTable.getPartitionId().getPartitionDate());
+			ourLog.info("in test: myPartitionDate = {}", myPartitionDate);
+			ourLog.info("in test: resourceTablePartDate = {}", resourceTable.getPartitionId().getPartitionDate());
 			assertEquals(myPartitionId, resourceTable.getPartitionId().getPartitionId().intValue());
 			assertEquals(myPartitionDate, resourceTable.getPartitionId().getPartitionDate());
 		});

@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
@@ -11,12 +12,15 @@ import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.config.TestHibernateSearchAddInConfig;
 import ca.uhn.fhir.jpa.config.TestR4Config;
+import ca.uhn.fhir.jpa.dao.BaseDateSearchDaoTests;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
+import ca.uhn.fhir.jpa.dao.DaoTestDataBuilder;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
@@ -52,6 +56,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -123,6 +128,8 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	private IBulkDataExportSvc myBulkDataExportSvc;
 	@Autowired
 	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
+	@Autowired
+	private DaoRegistry myDaoRegistry;
 	private boolean myContainsSettings;
 
 	@BeforeEach
@@ -239,6 +246,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		}
 
 	}
+
 	@Test
 	public void testResourceCodeTokenSearch() {
 		IIdType id1, id2, id2b, id3;
@@ -307,7 +315,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 	@Test
 	public void testResourceCodeTextSearch() {
-		IIdType id1,id2,id3,id4;
+		IIdType id1, id2, id3, id4;
 
 		{
 			Observation obs1 = new Observation();
@@ -457,7 +465,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		}
 
 
-
 		// run searches
 
 		{
@@ -499,9 +506,10 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 
 	private void assertObservationSearchMatchesNothing(String message, SearchParameterMap map) {
-		assertObservationSearchMatches(message,map);
+		assertObservationSearchMatches(message, map);
 	}
-	private void assertObservationSearchMatches(String message, SearchParameterMap map, IIdType  ...iIdTypes) {
+
+	private void assertObservationSearchMatches(String message, SearchParameterMap map, IIdType... iIdTypes) {
 		assertThat(message, toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(iIdTypes)));
 	}
 
@@ -529,15 +537,15 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		ValueSet vs = new ValueSet();
 		ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
 		include.setSystem(URL_MY_CODE_SYSTEM);
-	
+
 		ValueSet result = myValueSetDao.expand(vs, new ValueSetExpansionOptions().setFilter("child"));
-				
+
 		logAndValidateValueSet(result);
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
 		ourLog.info(resp);
-		
-		assertThat(resp, stringContainsInOrder("<code value=\"childCA\"/>","<display value=\"Child CA\"/>"));
+
+		assertThat(resp, stringContainsInOrder("<code value=\"childCA\"/>", "<display value=\"Child CA\"/>"));
 	}
 
 	@Test
@@ -547,15 +555,15 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		ValueSet vs = new ValueSet();
 		ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
 		include.setSystem(URL_MY_CODE_SYSTEM);
-	
+
 		ValueSet result = myValueSetDao.expand(vs, new ValueSetExpansionOptions().setFilter("chi"));
-				
+
 		logAndValidateValueSet(result);
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
 		ourLog.info(resp);
-		
-		assertThat(resp, stringContainsInOrder("<code value=\"childCA\"/>","<display value=\"Child CA\"/>"));
+
+		assertThat(resp, stringContainsInOrder("<code value=\"childCA\"/>", "<display value=\"Child CA\"/>"));
 	}
 
 	@Test
@@ -565,17 +573,17 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		ValueSet vs = new ValueSet();
 		ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
 		include.setSystem(URL_MY_CODE_SYSTEM);
-	
+
 		ValueSet result = myValueSetDao.expand(vs, new ValueSetExpansionOptions().setFilter("hil"));
-				
+
 		logAndValidateValueSet(result);
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
 		ourLog.info(resp);
-		
-		assertThat(resp, not(stringContainsInOrder("<code value=\"childCA\"/>","<display value=\"Child CA\"/>")));
+
+		assertThat(resp, not(stringContainsInOrder("<code value=\"childCA\"/>", "<display value=\"Child CA\"/>")));
 	}
-	
+
 	@Test
 	public void testExpandVsWithMultiInclude_All() throws IOException {
 		CodeSystem cs = loadResource(myFhirCtx, CodeSystem.class, "/r4/expand-multi-cs.json");
@@ -700,5 +708,15 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		assertEquals(0, result.getMessages().size());
 
 	}
+
+	/*@Nested
+	public class DateSearchTests extends BaseDateSearchDaoTests {
+
+		@Override
+		protected Fixture getFixture() {
+			DaoTestDataBuilder testDataBuilder = new DaoTestDataBuilder(myFhirCtx, myDaoRegistry, new SystemRequestDetails());
+			return new TestDataBuilderFixture<>(testDataBuilder, myObservationDao);
+		}
+	}*/
 
 }

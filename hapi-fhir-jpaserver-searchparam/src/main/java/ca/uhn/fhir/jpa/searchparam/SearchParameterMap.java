@@ -115,12 +115,13 @@ public class SearchParameterMap implements Serializable {
 		map.setSearchContainedMode(getSearchContainedMode());
 
 		for (Map.Entry<String, List<List<IQueryParameterType>>> entry : mySearchParameterMap.entrySet()) {
-			List<List<IQueryParameterType>> params = entry.getValue();
-			for (List<IQueryParameterType> p : params) {
-				for (IQueryParameterType t : p) {
-					map.add(entry.getKey(), t);
-				}
+			List<List<IQueryParameterType>> andParams = entry.getValue();
+			List<List<IQueryParameterType>> newAndParams = new ArrayList<>();
+			for(List<IQueryParameterType> orParams: andParams) {
+				List<IQueryParameterType> newOrParams = new ArrayList<>(orParams);
+				newAndParams.add(newOrParams);
 			}
+			map.put(entry.getKey(), newAndParams);
 		}
 
 		return map;
