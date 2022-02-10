@@ -19,6 +19,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
@@ -135,7 +136,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	@BeforeEach
 	public void beforePurgeDatabase() {
 		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataExportSvc);
-		myDaoConfig.setAdvancedLuceneIndexing(true);
 	}
 
 	@Override
@@ -149,14 +149,16 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	}
 
 	@BeforeEach
-	public void enableContains() {
-		myContainsSettings = myDaoConfig.isAllowContainsSearches();
+	public void enableContainsAndLucene() {
 		myDaoConfig.setAllowContainsSearches(true);
+		myDaoConfig.setAdvancedLuceneIndexing(true);
 	}
 
 	@AfterEach
 	public void restoreContains() {
-		myDaoConfig.setAllowContainsSearches(myContainsSettings);
+		DaoConfig defaultConfig = new DaoConfig();
+		myDaoConfig.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
+		myDaoConfig.setAdvancedLuceneIndexing(defaultConfig.isAdvancedLuceneIndexing());
 	}
 
 	@Test
@@ -513,6 +515,48 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		assertThat(message, toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(iIdTypes)));
 	}
 
+	@Nested
+	public class WithContainedIndexing {
+		@BeforeEach
+		public void enableContains() {
+			// we don't support chained or contained yet, but turn it on to test we don't blow up.
+			myDaoConfig.getModelConfig().setIndexOnContainedResources(true);
+			myDaoConfig.getModelConfig().setIndexOnContainedResourcesRecursively(true);
+		}
+
+		@AfterEach
+		public void restoreContains() {
+			ModelConfig defaultModelConfig = new ModelConfig();
+			myDaoConfig.getModelConfig().setIndexOnContainedResources(defaultModelConfig.isIndexOnContainedResources());
+			myDaoConfig.getModelConfig().setIndexOnContainedResourcesRecursively(defaultModelConfig.isIndexOnContainedResourcesRecursively());
+		}
+		/**
+		 * We were throwing when indexing contained.
+		 * https://github.com/hapifhir/hapi-fhir/issues/3371
+		 */
+		@Test
+		public void ignoreContainedResources_noError() {
+			// given
+			String json =
+				"{" +
+					"\"resourceType\": \"Observation\"," +
+					"\"contained\": [{" +
+					"\"resourceType\": \"Patient\"," +
+					"\"id\": \"contained-patient\"," +
+					"\"name\": [{ \"family\": \"Smith\"}]" +
+					"}]," +
+					"\"subject\": { \"reference\": \"#contained-patient\" }" +
+					"}";
+			Observation o = myFhirCtx.newJsonParser().parseResource(Observation.class, json);
+
+			myObservationDao.create(o, mySrd).getId().toUnqualifiedVersionless();
+
+			// no error.
+		}
+	}
+
+
+
 	@Test
 	public void testExpandWithIsAInExternalValueSet() {
 		createExternalCsAndLocalVs();
@@ -528,7 +572,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("childAAA", "childAAB"));
 	}
-
 
 	@Test
 	public void testExpandWithFilter() {
