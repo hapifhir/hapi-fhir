@@ -342,4 +342,43 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 	}
 
+	@Test
+	public void testPartitionAccessWithPagedRequest() {
+		final String PARTITION_1 = "PARTITION_1";
+		final String PARTITION_2 = "PARTITION_2";
+
+		// We're going to create 3 patients, then request all patients, giving us two pages of results
+		myPagingProvider.setMaximumPageSize(2);
+
+		// Create Partitions
+		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
+		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2));
+
+		// Create patients
+
+		IIdType idA = createPatient(withTenant(PARTITION_1), withActiveTrue());
+		createPatient(withTenant(PARTITION_1), withActiveFalse());
+
+		IIdType idB = createPatient(withTenant(PARTITION_2), withActiveTrue());
+		createPatient(withTenant(PARTITION_2), withActiveFalse());
+
+		runInTransaction(() -> {
+			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(() -> new IllegalStateException());
+			System.out.println("Partition A -> " + resourceTable.getPartitionId());
+		});
+
+		runInTransaction(() -> {
+			ResourceTable resourceTable = myResourceTableDao.findById(idB.getIdPartAsLong()).orElseThrow(() -> new IllegalStateException());
+			System.out.println("Partition B -> " + resourceTable.getPartitionId());
+		});
+
+
+		// Now read back
+
+		myTenantClientInterceptor.setTenantId(PARTITION_2);
+		Patient response = myClient.read().resource(Patient.class).withId(idA).execute();
+		assertTrue(response.getActive());
+
+	}
+	// Iantorno
 }

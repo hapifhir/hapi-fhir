@@ -58,6 +58,7 @@ public class UrlBaseTenantIdentificationStrategy implements ITenantIdentificatio
 			theRequestDetails.setTenantId(tenantId);
 		}
 
+		
 		if (tenantId == null) {
 			HapiLocalizer localizer = theRequestDetails.getServer().getFhirContext().getLocalizer();
 			throw new InvalidRequestException(Msg.code(307) + localizer.getMessage(RestfulServer.class, "rootRequest.multitenant"));
