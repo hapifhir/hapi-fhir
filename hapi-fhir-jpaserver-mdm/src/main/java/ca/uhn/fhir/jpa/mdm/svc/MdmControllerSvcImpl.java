@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
 import ca.uhn.fhir.mdm.api.IMdmBatchJobSubmitterFactory;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
@@ -38,6 +38,7 @@ import ca.uhn.fhir.mdm.provider.MdmControllerUtil;
 import ca.uhn.fhir.rest.server.provider.MultiUrlProcessor;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -69,7 +70,7 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 	@Autowired
 	IMdmLinkCreateSvc myIMdmLinkCreateSvc;
 	@Autowired
-	IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+	IPartitionLookupSvc myPartitionLookupSvc;
 	@Autowired
 	IMdmBatchJobSubmitterFactory myMdmBatchJobSubmitterFactory;
 
@@ -89,7 +90,7 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 
 	@Override
 	public Page<MdmLinkJson> queryLinks(@Nullable String theGoldenResourceId, @Nullable String theSourceResourceId, @Nullable String theMatchResult, @Nullable String theLinkSource, MdmTransactionContext theMdmTransactionContext, MdmPageRequest thePageRequest) {
-		return queryLinks(theGoldenResourceId, theSourceResourceId, theMatchResult, theLinkSource, theMdmTransactionContext, null);
+		return queryLinks(theGoldenResourceId, theSourceResourceId, theMatchResult, theLinkSource, theMdmTransactionContext, thePageRequest, null);
 	}
 
 	@Override
@@ -98,9 +99,8 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 		IIdType sourceId = MdmControllerUtil.extractSourceIdDtOrNull(ProviderConstants.MDM_QUERY_LINKS_RESOURCE_ID, theSourceResourceId);
 		MdmMatchResultEnum matchResult = MdmControllerUtil.extractMatchResultOrNull(theMatchResult);
 		MdmLinkSourceEnum linkSource = MdmControllerUtil.extractLinkSourceOrNull(theLinkSource);
-		// FIXME find a way to get the partitionId from the partition name
-		Integer partitionId = 0;
-		return myMdmLinkQuerySvc.queryLinks(goldenResourceId, sourceId, matchResult, linkSource, theMdmTransactionContext, thePageRequest);
+		Integer partitionId = extractPartitionIdOrNull(thePartitionName);
+		return myMdmLinkQuerySvc.queryLinks(goldenResourceId, sourceId, matchResult, linkSource, theMdmTransactionContext, thePageRequest, partitionId);
 	}
 
 	@Override
@@ -142,5 +142,12 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 		IAnyResource target = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, theTargetGoldenResourceId);
 
 		myIMdmLinkUpdaterSvc.notDuplicateGoldenResource(goldenResource, target, theMdmTransactionContext);
+	}
+
+	private Integer extractPartitionIdOrNull(String thePartitionName){
+		if (StringUtils.isNotBlank(thePartitionName)) {
+			return myPartitionLookupSvc.getPartitionByName(thePartitionName).getId();
+		}
+		return null;
 	}
 }

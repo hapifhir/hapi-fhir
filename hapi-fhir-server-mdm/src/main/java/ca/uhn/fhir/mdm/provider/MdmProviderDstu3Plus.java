@@ -185,13 +185,14 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 														 IPrimitiveType<Integer> theCount,
 												 @Description(formalDefinition = "If multitenancy is enabled, this parameter limits the search results to a specific partition")
 												 @OperationParam(name = Constants.PARTITION_NAME, min = 0, max = 1, typeName = "string")
-														 String thePartitionName,
+														 IPrimitiveType<String> thePartitionName,
 												 ServletRequestDetails theRequestDetails) {
 		MdmPageRequest mdmPageRequest = new MdmPageRequest(theOffset, theCount, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
 		Page<MdmLinkJson> mdmLinkJson = myMdmControllerSvc.queryLinks(extractStringOrNull(theGoldenResourceId),
 			extractStringOrNull(theResourceId), extractStringOrNull(theMatchResult), extractStringOrNull(theLinkSource),
 			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.QUERY_LINKS,
-				getResourceType(ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, theGoldenResourceId)), mdmPageRequest);
+				getResourceType(ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, theGoldenResourceId)),
+			mdmPageRequest, extractStringOrNull(thePartitionName));
 
 		return parametersFromMdmLinks(mdmLinkJson, true, theRequestDetails, mdmPageRequest);
 	}
