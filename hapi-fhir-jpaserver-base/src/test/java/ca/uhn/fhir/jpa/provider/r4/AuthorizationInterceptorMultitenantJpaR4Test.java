@@ -2,13 +2,11 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Observation;
@@ -36,7 +34,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 
 	@Test
 	public void testCreateInTenant_Allowed() {
-		enableAuthorizationInterceptor(() -> new RuleBuilder()
+		setupAuthorizationInterceptorWithRules(() -> new RuleBuilder()
 			.allow().create().allResources().withAnyId().forTenantIds(TENANT_A)
 			.build());
 
@@ -53,7 +51,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 		createPatient(withTenant(TENANT_A), withActiveTrue());
 		IIdType idB = createPatient(withTenant(TENANT_B), withActiveFalse());
 
-		enableAuthorizationInterceptor(() -> new RuleBuilder()
+		setupAuthorizationInterceptorWithRules(() -> new RuleBuilder()
 			.allow().create().allResources().withAnyId().forTenantIds(TENANT_A)
 			.build());
 
@@ -71,7 +69,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 		IIdType idA = createPatient(withTenant(TENANT_A), withActiveTrue());
 		createPatient(withTenant(TENANT_B), withActiveFalse());
 
-		enableAuthorizationInterceptor(() -> new RuleBuilder()
+		setupAuthorizationInterceptorWithRules(() -> new RuleBuilder()
 			.allow().read().allResources().withAnyId().forTenantIds(TENANT_A)
 			.build());
 
@@ -85,7 +83,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 		createPatient(withTenant(TENANT_A), withActiveTrue());
 		IIdType idB = createPatient(withTenant(TENANT_B), withActiveFalse());
 
-		enableAuthorizationInterceptor(() -> new RuleBuilder()
+		setupAuthorizationInterceptorWithRules(() -> new RuleBuilder()
 			.allow().read().allResources().withAnyId().forTenantIds(TENANT_A)
 			.build());
 
@@ -102,7 +100,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 	public void testReadInDefaultTenant_Allowed() {
 		IIdType idA = createPatient(withTenant("DEFAULT"), withActiveTrue());
 
-		enableAuthorizationInterceptor(() -> new RuleBuilder()
+		setupAuthorizationInterceptorWithRules(() -> new RuleBuilder()
 			.allow().read().allResources().withAnyId().forTenantIds("DEFAULT")
 			.build());
 
@@ -115,7 +113,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 	public void testReadInDefaultTenant_Blocked() {
 		IIdType idA = createPatient(withTenant(TENANT_A), withActiveTrue());
 
-		enableAuthorizationInterceptor(() -> new RuleBuilder()
+		setupAuthorizationInterceptorWithRules(() -> new RuleBuilder()
 			.allow().read().allResources().withAnyId().forTenantIds("DEFAULT")
 			.build());
 
@@ -135,7 +133,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 		IIdType patientId = createPatient(withTenant(TENANT_A), withActiveTrue());
 		createObservation(withTenant(TENANT_B), withSubject(patientId.toUnqualifiedVersionless()));
 
-		enableAuthorizationInterceptor(() -> new RuleBuilder()
+		setupAuthorizationInterceptorWithRules(() -> new RuleBuilder()
 			.allow().read().allResources().withAnyId().forTenantIds(TENANT_A, TENANT_B)
 			.build());
 
@@ -157,7 +155,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 		IIdType patientId = createPatient(withTenant(TENANT_A), withActiveTrue());
 		createObservation(withTenant(TENANT_B), withSubject(patientId.toUnqualifiedVersionless()));
 
-		enableAuthorizationInterceptor(() -> new RuleBuilder()
+		setupAuthorizationInterceptorWithRules(() -> new RuleBuilder()
 			.allow().read().allResources().withAnyId().forTenantIds(TENANT_A)
 			.build());
 
@@ -190,7 +188,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 			observationIds.add(id);
 		}
 
-		enableAuthorizationInterceptor(() -> new RuleBuilder()
+		setupAuthorizationInterceptorWithRules(() -> new RuleBuilder()
 			.allow().read().allResources().withAnyId().forTenantIds(TENANT_A)
 			.build());
 
@@ -225,9 +223,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 			fail();
 		} catch (ForbiddenOperationException e) {
 			// good
-			System.out.println();
 		}
-
 	}
 
 	@Test
@@ -240,7 +236,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 		createPatient(withTenant(TENANT_A), withActiveTrue());
 		createPatient(withTenant(TENANT_A), withActiveTrue());
 
-		enableAuthorizationInterceptor(() -> new RuleBuilder()
+		setupAuthorizationInterceptorWithRules(() -> new RuleBuilder()
 			.allow().read().allResources().withAnyId().forTenantIds(TENANT_A)
 			.build());
 
@@ -260,7 +256,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 
 		// Now come in as an imposter from a diff tenant with a stolen next link
 		// Request as a user with only access to TENANT_B
-		enableAuthorizationInterceptor(() -> new RuleBuilder()
+		setupAuthorizationInterceptorWithRules(() -> new RuleBuilder()
 			.allow().read().allResources().withAnyId().forTenantIds(TENANT_B)
 			.build());
 
