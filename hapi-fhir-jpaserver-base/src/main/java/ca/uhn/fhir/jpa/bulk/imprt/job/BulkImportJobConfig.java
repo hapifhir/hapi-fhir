@@ -177,7 +177,7 @@ public class BulkImportJobConfig {
 
 	@Bean
 	@StepScope
-	public ItemWriter<ParsedBulkImportRecord> bulkImportFileWriter() {
+	public BulkImportFileWriter bulkImportFileWriter() {
 		return new BulkImportFileWriter();
 	}
 

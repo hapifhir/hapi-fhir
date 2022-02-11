@@ -15,7 +15,6 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -149,7 +148,6 @@ public class BaseHapiFhirDaoTest {
 		return from;
 	}
 
-	@Disabled
 	@Test
 	public void getTagOrNull_raceCondition_wontUpsertDuplicates() throws InterruptedException, ExecutionException {
 		/*
@@ -179,7 +177,6 @@ public class BaseHapiFhirDaoTest {
 		String scheme = "http://localhost";
 		String term = "code123";
 		String label = "hollow world";
-		TransactionDetails transactionDetails = new TransactionDetails();
 		String raceConditionError = "Entity exists; if this is logged, you have race condition issues!";
 
 		TagDefinition tagDefinition = new TagDefinition(tagType,
@@ -275,7 +272,7 @@ public class BaseHapiFhirDaoTest {
 		Runnable task = () -> {
 			latch.countDown();
 			try {
-				TagDefinition retTag = myTestDao.getTagOrNull(transactionDetails, tagType, scheme, term, label);
+				TagDefinition retTag = myTestDao.getTagOrNull(new TransactionDetails(), tagType, scheme, term, label);
 				outcomes.put(retTag.hashCode(), retTag);
 				counter.incrementAndGet();
 			} catch (Exception ex) {
@@ -367,7 +364,7 @@ public class BaseHapiFhirDaoTest {
 			fail();
 		} catch (Exception ex) {
 			// verify
-			assertEquals("HAPI-2019: Tag get/create failed after 10 attempts with error(s): " + exMsg, ex.getMessage());
+			assertTrue(ex.getMessage().contains("Tag get/create failed after 10 attempts with error(s): " + exMsg));
 
 			ArgumentCaptor<ILoggingEvent> appenderCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
 			verify(myAppender, Mockito.times(10))

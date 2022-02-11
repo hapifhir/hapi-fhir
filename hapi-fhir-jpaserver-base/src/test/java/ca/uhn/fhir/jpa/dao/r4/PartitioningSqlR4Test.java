@@ -8,7 +8,6 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
-import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
@@ -67,7 +66,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.test.context.TestPropertySource;
 
 import java.util.Date;
 import java.util.List;
@@ -1319,12 +1317,11 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testSearch_IdParamSecond_ForcedId_SpecificPartition() {
-		// FIXME: move down
 		IIdType patientId1 = createPatient(withPartition(1), withId("PT-1"), withActiveTrue());
-		logAllTokenIndexes();
-
 		IIdType patientIdNull = createPatient(withPartition(null), withId("PT-NULL"), withActiveTrue());
 		IIdType patientId2 = createPatient(withPartition(2), withId("PT-2"), withActiveTrue());
+
+		logAllTokenIndexes();
 
 		/* *******************************
 		 * _id param is second parameter

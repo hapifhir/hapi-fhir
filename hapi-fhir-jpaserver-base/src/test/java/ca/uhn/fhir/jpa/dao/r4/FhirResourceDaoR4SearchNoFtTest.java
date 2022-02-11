@@ -1965,6 +1965,29 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testSearchWithRevIncludeDoesntSelectWrongResourcesWithSameSpName() {
+		Patient pt = new Patient();
+		pt.setActive(true);
+		IIdType ptId = myPatientDao.create(pt, mySrd).getId().toUnqualifiedVersionless();
+
+		Encounter enc = new Encounter();
+		enc.setStatus(Encounter.EncounterStatus.ARRIVED);
+		enc.getSubject().setReference(ptId.getValue());
+		IIdType encId = myEncounterDao.create(enc, mySrd).getId().toUnqualifiedVersionless();
+
+		Observation obs = new Observation();
+		obs.getSubject().setReference(ptId.getValue());
+		myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap map = new SearchParameterMap()
+			.addRevInclude(Encounter.INCLUDE_PATIENT);
+		IBundleProvider outcome = myPatientDao.search(map);
+		List<IIdType> ids = toUnqualifiedVersionlessIds(outcome);
+		assertThat(ids, contains(ptId, encId));
+
+	}
+
+	@Test
 	public void testSearchWithRevIncludeStarQualified() {
 
 		Patient pt = new Patient();
