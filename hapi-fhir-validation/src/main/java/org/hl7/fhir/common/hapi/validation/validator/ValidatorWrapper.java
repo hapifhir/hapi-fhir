@@ -198,9 +198,11 @@ class ValidatorWrapper {
 			ValidationMessage next = messages.get(i);
 			String message = next.getMessage();
 
-			// TODO: are these still needed?
+			// TODO: Are the first 2 message still needed?
+			// NOTE: Leave the check for the 3rd message so it always gets removed when present! See hapi-fhir issue #3344.
 			if ("Binding has no source, so can't be checked".equals(message) ||
-				"ValueSet http://hl7.org/fhir/ValueSet/mimetypes not found".equals(message)) {
+				"ValueSet http://hl7.org/fhir/ValueSet/mimetypes not found".equals(message) ||
+				message.startsWith("No issues detected during validation")) {
 				messages.remove(i);
 				i--;
 			}
