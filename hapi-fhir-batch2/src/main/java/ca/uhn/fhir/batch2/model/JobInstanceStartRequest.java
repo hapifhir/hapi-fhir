@@ -3,6 +3,7 @@ package ca.uhn.fhir.batch2.model;
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class JobInstanceStartRequest implements IModelJson {
@@ -22,11 +23,13 @@ public class JobInstanceStartRequest implements IModelJson {
 	}
 
 	public List<JobInstanceParameter> getParameters() {
+		if (myParameters == null) {
+			myParameters = new ArrayList<>();
+		}
 		return myParameters;
 	}
 
-	public void setParameters(List<JobInstanceParameter> theParameters) {
-		myParameters = theParameters;
+	public void addParameter(JobInstanceParameter theJobInstanceParameter) {
+		getParameters().add(theJobInstanceParameter);
 	}
-
 }

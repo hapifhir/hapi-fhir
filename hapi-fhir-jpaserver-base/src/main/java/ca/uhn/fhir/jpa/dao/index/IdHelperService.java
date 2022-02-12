@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.cross.ResourceLookup;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -242,6 +243,20 @@ public class IdHelperService {
 	 */
 	@Nonnull
 	public List<ResourcePersistentId> resolveResourcePersistentIdsWithCache(RequestPartitionId theRequestPartitionId, List<IIdType> theIds) {
+		boolean onlyForcedIds = false;
+		return resolveResourcePersistentIdsWithCache(theRequestPartitionId, theIds, onlyForcedIds);
+	}
+
+	/**
+	 * Given a collection of resource IDs (resource type + id), resolves the internal persistent IDs.
+	 * <p>
+	 * This implementation will always try to use a cache for performance, meaning that it can resolve resources that
+	 * are deleted (but note that forced IDs can't change, so the cache can't return incorrect results)
+	 *
+	 * @param theOnlyForcedIds If <code>true</code>, resources which are not existing forced IDs will not be resolved
+	 */
+	@Nonnull
+	public List<ResourcePersistentId> resolveResourcePersistentIdsWithCache(RequestPartitionId theRequestPartitionId, List<IIdType> theIds, boolean theOnlyForcedIds) {
 		assert myDontCheckActiveTransactionForUnitTest || TransactionSynchronizationManager.isSynchronizationActive();
 
 		for (IIdType id : theIds) {
@@ -260,7 +275,9 @@ public class IdHelperService {
 		for (IIdType nextId : theIds) {
 			if (myDaoConfig.getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ANY) {
 				if (nextId.isIdPartValidLong()) {
-					retVal.add(new ResourcePersistentId(nextId.getIdPartAsLong()).setAssociatedResourceId(nextId));
+					if (!theOnlyForcedIds) {
+						retVal.add(new ResourcePersistentId(nextId.getIdPartAsLong()).setAssociatedResourceId(nextId));
+					}
 					continue;
 				}
 			}
@@ -275,62 +292,63 @@ public class IdHelperService {
 			idsToCheck.add(nextId);
 		}
 
-		if (idsToCheck.size() > 0) {
-			CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
-			CriteriaQuery<ForcedId> criteriaQuery = cb.createQuery(ForcedId.class);
-			Root<ForcedId> from = criteriaQuery.from(ForcedId.class);
-
-			List<Predicate> predicates = new ArrayList<>(idsToCheck.size());
-			for (IIdType next : idsToCheck) {
-
-				List<Predicate> andPredicates = new ArrayList<>(3);
-
-				if (isNotBlank(next.getResourceType())) {
-					Predicate typeCriteria = cb.equal(from.get("myResourceType").as(String.class), next.getResourceType());
-					andPredicates.add(typeCriteria);
-				}
-
-				Predicate idCriteria = cb.equal(from.get("myForcedId").as(String.class), next.getIdPart());
-				andPredicates.add(idCriteria);
-
-				if (theRequestPartitionId.isDefaultPartition() && myPartitionSettings.getDefaultPartitionId() == null) {
-					Predicate partitionIdCriteria = cb.isNull(from.get("myPartitionIdValue").as(Integer.class));
-					andPredicates.add(partitionIdCriteria);
-				} else if (!theRequestPartitionId.isAllPartitions()) {
-					List<Integer> partitionIds = theRequestPartitionId.getPartitionIds();
-					partitionIds = replaceDefaultPartitionIdIfNonNull(myPartitionSettings, partitionIds);
-
-					if (partitionIds.size() > 1) {
-						Predicate partitionIdCriteria = from.get("myPartitionIdValue").as(Integer.class).in(partitionIds);
-						andPredicates.add(partitionIdCriteria);
-					} else {
-						Predicate partitionIdCriteria = cb.equal(from.get("myPartitionIdValue").as(Integer.class), partitionIds.get(0));
-						andPredicates.add(partitionIdCriteria);
-					}
-				}
-
-				predicates.add(cb.and(andPredicates.toArray(EMPTY_PREDICATE_ARRAY)));
-			}
-
-			criteriaQuery.where(cb.or(predicates.toArray(EMPTY_PREDICATE_ARRAY)));
-
-			TypedQuery<ForcedId> query = myEntityManager.createQuery(criteriaQuery);
-			List<ForcedId> results = query.getResultList();
-			for (ForcedId nextId : results) {
-				// Check if the nextId has a resource ID. It may have a null resource ID if a commit is still pending.
-				if (nextId.getResourceId() != null) {
-					ResourcePersistentId persistentId = new ResourcePersistentId(nextId.getResourceId());
-					populateAssociatedResourceId(nextId.getResourceType(), nextId.getForcedId(), persistentId);
-					retVal.add(persistentId);
-
-					String key = toForcedIdToPidKey(theRequestPartitionId, nextId.getResourceType(), nextId.getForcedId());
-					myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, persistentId);
-				}
-			}
-
-		}
+		new QueryChunker<IIdType>().chunk(idsToCheck, SearchBuilder.getMaximumPageSize() / 2, ids -> doResolvePersistentIds(theRequestPartitionId, ids, retVal));
 
 		return retVal;
+	}
+
+	private void doResolvePersistentIds(RequestPartitionId theRequestPartitionId, List<IIdType> theIds, List<ResourcePersistentId> theListToPopulate) {
+		CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<ForcedId> criteriaQuery = cb.createQuery(ForcedId.class);
+		Root<ForcedId> from = criteriaQuery.from(ForcedId.class);
+
+		List<Predicate> predicates = new ArrayList<>(theIds.size());
+		for (IIdType next : theIds) {
+
+			List<Predicate> andPredicates = new ArrayList<>(3);
+
+			if (isNotBlank(next.getResourceType())) {
+				Predicate typeCriteria = cb.equal(from.get("myResourceType").as(String.class), next.getResourceType());
+				andPredicates.add(typeCriteria);
+			}
+
+			Predicate idCriteria = cb.equal(from.get("myForcedId").as(String.class), next.getIdPart());
+			andPredicates.add(idCriteria);
+
+			if (theRequestPartitionId.isDefaultPartition() && myPartitionSettings.getDefaultPartitionId() == null) {
+				Predicate partitionIdCriteria = cb.isNull(from.get("myPartitionIdValue").as(Integer.class));
+				andPredicates.add(partitionIdCriteria);
+			} else if (!theRequestPartitionId.isAllPartitions()) {
+				List<Integer> partitionIds = theRequestPartitionId.getPartitionIds();
+				partitionIds = replaceDefaultPartitionIdIfNonNull(myPartitionSettings, partitionIds);
+
+				if (partitionIds.size() > 1) {
+					Predicate partitionIdCriteria = from.get("myPartitionIdValue").as(Integer.class).in(partitionIds);
+					andPredicates.add(partitionIdCriteria);
+				} else {
+					Predicate partitionIdCriteria = cb.equal(from.get("myPartitionIdValue").as(Integer.class), partitionIds.get(0));
+					andPredicates.add(partitionIdCriteria);
+				}
+			}
+
+			predicates.add(cb.and(andPredicates.toArray(EMPTY_PREDICATE_ARRAY)));
+		}
+
+		criteriaQuery.where(cb.or(predicates.toArray(EMPTY_PREDICATE_ARRAY)));
+
+		TypedQuery<ForcedId> query = myEntityManager.createQuery(criteriaQuery);
+		List<ForcedId> results = query.getResultList();
+		for (ForcedId nextId : results) {
+			// Check if the nextId has a resource ID. It may have a null resource ID if a commit is still pending.
+			if (nextId.getResourceId() != null) {
+				ResourcePersistentId persistentId = new ResourcePersistentId(nextId.getResourceId());
+				populateAssociatedResourceId(nextId.getResourceType(), nextId.getForcedId(), persistentId);
+				theListToPopulate.add(persistentId);
+
+				String key = toForcedIdToPidKey(theRequestPartitionId, nextId.getResourceType(), nextId.getForcedId());
+				myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, persistentId);
+			}
+		}
 	}
 
 	private void populateAssociatedResourceId(String nextResourceType, String forcedId, ResourcePersistentId persistentId) {

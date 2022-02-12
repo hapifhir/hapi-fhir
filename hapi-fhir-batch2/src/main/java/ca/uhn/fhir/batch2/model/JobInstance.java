@@ -2,8 +2,13 @@ package ca.uhn.fhir.batch2.model;
 
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.commons.lang3.Validate;
 
-public class JobWorkNotification implements IModelJson {
+import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.List;
+
+public class JobInstance implements IModelJson {
 
 	@JsonProperty(value = "jobDefinitionId")
 	private String myJobDefinitionId;
@@ -11,14 +16,29 @@ public class JobWorkNotification implements IModelJson {
 	@JsonProperty(value = "jobDefinitionVersion")
 	private int myJobDefinitionVersion;
 
-	@JsonProperty(value = "targetStepId")
-	private String myTargetStepId;
-
-	@JsonProperty(value = "chunkId")
-	private String myChunkId;
-
 	@JsonProperty(value = "instanceId")
 	private String myInstanceId;
+
+	@JsonProperty(value = "status")
+	private StatusEnum myStatus;
+
+	@JsonProperty(value = "parameters")
+	private List<JobInstanceParameter> myParameters;
+
+	public List<JobInstanceParameter> getParameters() {
+		if (myParameters == null) {
+			myParameters = new ArrayList<>();
+		}
+		return myParameters;
+	}
+
+	public StatusEnum getStatus() {
+		return myStatus;
+	}
+
+	public void setStatus(StatusEnum theStatus) {
+		myStatus = theStatus;
+	}
 
 	public String getJobDefinitionId() {
 		return myJobDefinitionId;
@@ -36,27 +56,16 @@ public class JobWorkNotification implements IModelJson {
 		myJobDefinitionVersion = theJobDefinitionVersion;
 	}
 
-	public String getTargetStepId() {
-		return myTargetStepId;
-	}
-
-	public void setTargetStepId(String theTargetStepId) {
-		myTargetStepId = theTargetStepId;
-	}
-
-	public String getChunkId() {
-		return myChunkId;
-	}
-
-	public void setChunkId(String theChunkId) {
-		myChunkId = theChunkId;
+	public String getInstanceId() {
+		return myInstanceId;
 	}
 
 	public void setInstanceId(String theInstanceId) {
 		myInstanceId = theInstanceId;
 	}
 
-	public String getInstanceId() {
-		return myInstanceId;
+	public void addParameter(@Nonnull JobInstanceParameter theParameter) {
+		Validate.notNull(theParameter);
+		getParameters().add(theParameter);
 	}
 }

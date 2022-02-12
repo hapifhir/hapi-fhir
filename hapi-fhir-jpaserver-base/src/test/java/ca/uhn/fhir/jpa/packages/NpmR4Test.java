@@ -588,19 +588,14 @@ public class NpmR4Test extends BaseJpaR4Test {
 
 		runInTransaction(() -> {
 			NpmPackageMetadataJson metadata = myPackageCacheManager.loadPackageMetadata("hl7.fhir.uv.shorthand");
-			try {
-				ourLog.info(JsonUtil.serialize(metadata));
+			ourLog.info(JsonUtil.serialize(metadata));
 
-				assertEquals("0.12.0", metadata.getDistTags().getLatest());
+			assertEquals("0.12.0", metadata.getDistTags().getLatest());
 
-				assertThat(metadata.getVersions().keySet(), contains("0.12.0", "0.11.1"));
+			assertThat(metadata.getVersions().keySet(), contains("0.12.0", "0.11.1"));
 
-				NpmPackageMetadataJson.Version version0120 = metadata.getVersions().get("0.12.0");
-				assertEquals(3001, version0120.getBytes());
-
-			} catch (IOException e) {
-				throw new InternalErrorException(e);
-			}
+			NpmPackageMetadataJson.Version version0120 = metadata.getVersions().get("0.12.0");
+			assertEquals(3001, version0120.getBytes());
 		});
 
 	}

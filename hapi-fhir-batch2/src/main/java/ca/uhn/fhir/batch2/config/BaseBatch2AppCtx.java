@@ -1,15 +1,16 @@
 package ca.uhn.fhir.batch2.config;
 
-import ca.uhn.fhir.batch2.api.IJobDefinitionRegistry;
-import ca.uhn.fhir.batch2.api.IJobInstancePersister;
-import ca.uhn.fhir.batch2.impl.JobDefinitionRegistryImpl;
-import ca.uhn.fhir.batch2.model.JobWorkNotification;
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.impl.JobDefinitionRegistry;
+import ca.uhn.fhir.batch2.impl.JobCoordinatorImpl;
+import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
-import ca.uhn.fhir.jpa.subscription.model.ChannelRetryConfiguration;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -19,26 +20,41 @@ public abstract class BaseBatch2AppCtx {
 	public static final String CHANNEL_NAME = "batch2-work-notification";
 
 	@Bean
-	public IJobDefinitionRegistry jobDefinitionRegistry() {
-		return new JobDefinitionRegistryImpl();
+	public JobDefinitionRegistry jobDefinitionRegistry() {
+		return new JobDefinitionRegistry();
 	}
 
-	public abstract IJobInstancePersister batchJobInstancePersister();
-
-	public abstract IChannelFactory batch2ChannelFactory();
+	@Bean
+	public abstract IJobPersistence batchJobInstancePersister();
 
 	@Bean
-	public IChannelProducer batchProcessingChannelProducer() {
+	public IJobCoordinator jobCoordinator(@Autowired IChannelFactory theChannelFactory, IJobPersistence theJobInstancePersister, JobDefinitionRegistry theJobDefinitionRegistry) {
+		return new JobCoordinatorImpl(
+			batchProcessingChannelProducer(theChannelFactory),
+			batchProcessingChannelReceiver(theChannelFactory),
+			theJobInstancePersister,
+			theJobDefinitionRegistry
+		);
+	}
+
+	@Bean
+	public IChannelProducer batchProcessingChannelProducer(@Autowired IChannelFactory theChannelFactory) {
 		ChannelProducerSettings settings = new ChannelProducerSettings()
 			.setConcurrentConsumers(1);
-		return batch2ChannelFactory().getOrCreateProducer(CHANNEL_NAME, JobWorkNotification.class, settings);
+		return theChannelFactory.getOrCreateProducer(CHANNEL_NAME, JobWorkNotificationJsonMessage.class, settings);
 	}
 
 	@Bean
-	public IChannelReceiver batchProcessingChannelReceiver() {
+	public IChannelReceiver batchProcessingChannelReceiver(@Autowired IChannelFactory theChannelFactory) {
 		ChannelConsumerSettings settings = new ChannelConsumerSettings()
 			.setConcurrentConsumers(1);
-		return batch2ChannelFactory().getOrCreateReceiver(CHANNEL_NAME, JobWorkNotification.class, settings);
+		return theChannelFactory.getOrCreateReceiver(CHANNEL_NAME, JobWorkNotificationJsonMessage.class, settings);
 	}
+
+	@Bean
+	public Batch2JobRegisterer batch2JobRegisterer() {
+		return new Batch2JobRegisterer();
+	}
+
 
 }

@@ -1,0 +1,291 @@
+package ca.uhn.fhir.batch2.impl;
+
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IJobStepWorker;
+import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.batch2.model.JobDefinition;
+import ca.uhn.fhir.batch2.model.JobDefinitionParameter;
+import ca.uhn.fhir.batch2.model.JobDefinitionStep;
+import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.JobInstanceParameter;
+import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
+import ca.uhn.fhir.batch2.model.JobWorkNotification;
+import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
+import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
+import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
+import org.apache.commons.lang3.Validate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.MessagingException;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
+public class JobCoordinatorImpl implements IJobCoordinator {
+
+	private static final Logger ourLog = LoggerFactory.getLogger(JobCoordinatorImpl.class);
+	private final IChannelProducer myWorkChannelProducer;
+	private final IChannelReceiver myWorkChannelReceiver;
+	private final IJobPersistence myJobInstancePersister;
+	private final JobDefinitionRegistry myJobDefinitionRegistry;
+	private final MessageHandler myReceiverHandler = new WorkChannelMessageHandler();
+
+	/**
+	 * Constructor
+	 */
+	public JobCoordinatorImpl(
+		@Nonnull IChannelProducer theWorkChannelProducer,
+		@Nonnull IChannelReceiver theWorkChannelReceiver,
+		@Nonnull IJobPersistence theJobInstancePersister,
+		@Nonnull JobDefinitionRegistry theJobDefinitionRegistry) {
+		myWorkChannelProducer = theWorkChannelProducer;
+		myWorkChannelReceiver = theWorkChannelReceiver;
+		myJobInstancePersister = theJobInstancePersister;
+		myJobDefinitionRegistry = theJobDefinitionRegistry;
+	}
+
+	@Override
+	public void startJob(JobInstanceStartRequest theStartRequest) {
+		JobDefinition jobDefinition = myJobDefinitionRegistry
+			.getLatestJobDefinition(theStartRequest.getJobDefinitionId())
+			.orElseThrow(() -> new IllegalArgumentException("Unknown job definition ID: " + theStartRequest.getJobDefinitionId()));
+
+		String firstStepId = jobDefinition.getSteps().get(0).getStepId();
+
+		validateParameters(jobDefinition.getParameters(), theStartRequest.getParameters());
+
+		String instanceId = UUID.randomUUID().toString();
+		String jobDefinitionId = jobDefinition.getJobDefinitionId();
+		int jobDefinitionVersion = jobDefinition.getJobDefinitionVersion();
+
+		JobInstance instance = new JobInstance();
+		instance.setJobDefinitionId(jobDefinitionId);
+		instance.setJobDefinitionVersion(jobDefinitionVersion);
+		instance.setStatus(StatusEnum.QUEUED);
+		instance.setInstanceId(instanceId);
+		instance.getParameters().addAll(theStartRequest.getParameters());
+
+		myJobInstancePersister.storeNewInstance(instance);
+
+		sendWorkChannelMessage(jobDefinitionId, jobDefinitionVersion, instanceId, firstStepId, null);
+	}
+
+	private void executeStep(@Nullable WorkChunk theWorkChunk, String jobDefinitionId, String targetStepId, ListMultimap<String, JobInstanceParameter> parameters, IJobStepWorker worker, IJobDataSink dataSink) {
+
+		Map<String, Object> data = null;
+		if (theWorkChunk != null) {
+			data = theWorkChunk.getData();
+		}
+
+		StepExecutionDetails stepExecutionDetails = new StepExecutionDetails(parameters, data);
+		try {
+			worker.run(stepExecutionDetails, dataSink);
+		} catch (Exception e) {
+			ourLog.error("Failure executing job {} step {}", jobDefinitionId, targetStepId, e);
+			myJobInstancePersister.markWorkChunkAsErrored(theWorkChunk.getId(), e.toString());
+			throw new InternalErrorException(e);
+		}
+
+	}
+
+	@PostConstruct
+	public void start() {
+		myWorkChannelReceiver.subscribe(myReceiverHandler);
+	}
+
+	@PreDestroy
+	public void stop() {
+		myWorkChannelReceiver.unsubscribe(myReceiverHandler);
+	}
+
+
+	private void sendWorkChannelMessage(String theJobDefinitionId, int jobDefinitionVersion, String theInstanceId, String theTargetStepId, String theChunkId) {
+		JobWorkNotificationJsonMessage message = new JobWorkNotificationJsonMessage();
+		JobWorkNotification workNotification = new JobWorkNotification();
+		workNotification.setJobDefinitionId(theJobDefinitionId);
+		workNotification.setJobDefinitionVersion(jobDefinitionVersion);
+		workNotification.setChunkId(theChunkId);
+		workNotification.setInstanceId(theInstanceId);
+		workNotification.setTargetStepId(theTargetStepId);
+		message.setPayload(workNotification);
+
+		ourLog.info("Sending work notification for job[{}] instance[{}] step[{}] chunk[{}]", theJobDefinitionId, theInstanceId, theTargetStepId, theChunkId);
+		myWorkChannelProducer.send(message);
+	}
+
+	private void handleWorkChannelMessage(JobWorkNotificationJsonMessage theMessage) {
+		JobWorkNotification payload = theMessage.getPayload();
+
+		String chunkId = payload.getChunkId();
+		WorkChunk chunk = null;
+		if (chunkId != null) {
+			Optional<WorkChunk> chunkOpt = myJobInstancePersister.fetchWorkChunkAndMarkInProgress(chunkId);
+			if (!chunkOpt.isPresent()) {
+				ourLog.error("Unable to find chunk with ID {} - Aborting", chunkId);
+				return;
+			}
+			chunk = chunkOpt.get();
+		}
+
+		String jobDefinitionId = payload.getJobDefinitionId();
+		int jobDefinitionVersion = payload.getJobDefinitionVersion();
+		Optional<JobDefinition> opt = myJobDefinitionRegistry.getJobDefinition(jobDefinitionId, jobDefinitionVersion);
+		if (!opt.isPresent()) {
+			String msg = "Unknown job definition ID[" + jobDefinitionId + "] version[" + jobDefinitionVersion + "]";
+			ourLog.warn(msg);
+			throw new InternalErrorException(msg);
+		}
+		JobDefinition definition = opt.get();
+
+		JobDefinitionStep targetStep = null;
+		JobDefinitionStep nextStep = null;
+		String targetStepId = payload.getTargetStepId();
+		for (int i = 0; i < definition.getSteps().size(); i++) {
+			JobDefinitionStep step = definition.getSteps().get(i);
+			if (step.getStepId().equals(targetStepId)) {
+				targetStep = step;
+				if (i < definition.getSteps().size()) {
+					nextStep = definition.getSteps().get(i + 1);
+				}
+				break;
+			}
+		}
+
+		if (targetStep == null) {
+			String msg = "Unknown step[" + targetStepId + "] for job definition ID[" + jobDefinitionId + "] version[" + jobDefinitionVersion + "]";
+			ourLog.warn(msg);
+			throw new InternalErrorException(msg);
+		}
+
+		if (chunk != null) {
+			Validate.isTrue(chunk.getTargetStepId().equals(targetStep.getStepId()), "Chunk %s has target step %s but expected %s", chunkId, chunk.getTargetStepId(), targetStep.getStepId());
+		}
+
+		Optional<JobInstance> instanceOpt;
+		if (chunkId == null) {
+			instanceOpt = myJobInstancePersister.fetchInstanceAndMarkInProgress(payload.getInstanceId());
+		} else {
+			instanceOpt = myJobInstancePersister.fetchInstance(payload.getInstanceId());
+		}
+		JobInstance instance = instanceOpt.orElseThrow(() -> new InternalErrorException("Unknown instance: " + payload.getInstanceId()));
+		String instanceId = instance.getInstanceId();
+
+		ListMultimap<String, JobInstanceParameter> parameters = validateParameters(definition.getParameters(), instance.getParameters());
+		IJobStepWorker worker = targetStep.getJobStepWorker();
+
+		IJobDataSink dataSink;
+		if (nextStep != null) {
+			dataSink = new JobDataSink(jobDefinitionId, jobDefinitionVersion, nextStep, instanceId);
+		} else {
+			dataSink = new FinalStepDataSink(jobDefinitionId);
+		}
+
+		executeStep(chunk, jobDefinitionId, targetStepId, parameters, worker, dataSink);
+
+		if (chunk != null) {
+			myJobInstancePersister.markWorkChunkAsCompleted(chunkId);
+		}
+	}
+
+	static ListMultimap<String, JobInstanceParameter> validateParameters(List<JobDefinitionParameter> theDefinitionParameters, List<JobInstanceParameter> theInstanceParameters) {
+		ListMultimap<String, JobInstanceParameter> retVal = ArrayListMultimap.create();
+		Set<String> paramNames = new HashSet<>();
+		for (JobDefinitionParameter nextDefinition : theDefinitionParameters) {
+			paramNames.add(nextDefinition.getName());
+
+			List<JobInstanceParameter> instances = theInstanceParameters
+				.stream()
+				.filter(t -> nextDefinition.getName().equals(t.getName()))
+				.filter(t -> isNotBlank(t.getValue()))
+				.collect(Collectors.toList());
+
+			if (nextDefinition.isRequired() && instances.size() < 1) {
+				throw new InvalidRequestException("Missing required parameter: " + nextDefinition.getName());
+			}
+
+			if (!nextDefinition.isRepeating() && instances.size() > 1) {
+				throw new InvalidRequestException("Illegal repeating parameter: " + nextDefinition.getName());
+			}
+
+			retVal.putAll(nextDefinition.getName(), instances);
+		}
+
+		for (JobInstanceParameter next : theInstanceParameters) {
+			if (!paramNames.contains(next.getName())) {
+				throw new InvalidRequestException("Unexpected parameter: " + next.getName());
+			}
+		}
+
+		return retVal;
+	}
+
+	private class WorkChannelMessageHandler implements MessageHandler {
+		@Override
+		public void handleMessage(Message<?> theMessage) throws MessagingException {
+			handleWorkChannelMessage((JobWorkNotificationJsonMessage) theMessage);
+		}
+	}
+
+	private class JobDataSink implements IJobDataSink {
+		private final String myJobDefinitionId;
+		private final int myJobDefinitionVersion;
+		private final JobDefinitionStep mySecondStep;
+		private final String myInstanceId;
+
+		public JobDataSink(String theJobDefinitionId, int theJobDefinitionVersion, JobDefinitionStep theSecondStep, String theInstanceId) {
+			myJobDefinitionId = theJobDefinitionId;
+			myJobDefinitionVersion = theJobDefinitionVersion;
+			mySecondStep = theSecondStep;
+			myInstanceId = theInstanceId;
+		}
+
+		@Override
+		public void accept(Map<String, Object> theData) {
+			String jobDefinitionId = myJobDefinitionId;
+			int jobDefinitionVersion = myJobDefinitionVersion;
+			String instanceId = myInstanceId;
+			String targetStepId = mySecondStep.getStepId();
+			String chunkId = myJobInstancePersister.storeWorkChunk(jobDefinitionId, jobDefinitionVersion, targetStepId, instanceId, theData);
+
+			sendWorkChannelMessage(jobDefinitionId, jobDefinitionVersion, instanceId, targetStepId, chunkId);
+		}
+	}
+
+	private static class FinalStepDataSink implements IJobDataSink {
+		private final String myJobDefinitionId;
+
+		/**
+		 * Constructor
+		 */
+		private FinalStepDataSink(String theJobDefinitionId) {
+			myJobDefinitionId = theJobDefinitionId;
+		}
+
+		@Override
+		public void accept(Map<String, Object> theData) {
+			ourLog.error("Illegal attempt to store data during final step of job " + myJobDefinitionId);
+			throw new UnsupportedOperationException();
+		}
+	}
+}

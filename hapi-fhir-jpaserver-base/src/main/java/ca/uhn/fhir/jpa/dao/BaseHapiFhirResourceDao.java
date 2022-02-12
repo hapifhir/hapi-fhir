@@ -1375,7 +1375,15 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			throw new ResourceNotFoundException(Msg.code(1997) + theId);
 		}
 
-		ResourcePersistentId persistentId = myIdHelperService.resolveResourcePersistentIds(theRequestPartitionId, getResourceName(), theId.getIdPart());
+		ResourcePersistentId persistentId = null;
+		if (theTransactionDetails != null && theTransactionDetails.hasResolvedResourceIds()) {
+			persistentId = theTransactionDetails.getResolvedResourceId(theId);
+		}
+
+		if (persistentId == null) {
+			persistentId = myIdHelperService.resolveResourcePersistentIds(theRequestPartitionId, getResourceName(), theId.getIdPart());
+		}
+
 		ResourceTable entity = myEntityManager.find(ResourceTable.class, persistentId.getId());
 		if (entity == null) {
 			throw new ResourceNotFoundException(Msg.code(1998) + theId);

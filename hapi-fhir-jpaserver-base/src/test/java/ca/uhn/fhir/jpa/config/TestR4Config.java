@@ -3,6 +3,8 @@ package ca.uhn.fhir.jpa.config;
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.batch.svc.BatchJobSubmitterImpl;
+import ca.uhn.fhir.jpa.batch2.Batch2JobsConfig;
+import ca.uhn.fhir.jpa.batch2.JpaBatch2AppCtx;
 import ca.uhn.fhir.jpa.binstore.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
@@ -32,7 +34,7 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @Configuration
-@Import({TestJPAConfig.class, BatchJobsConfig.class, TestHibernateSearchAddInConfig.DefaultLuceneHeap.class})
+@Import({TestJPAConfig.class, JpaBatch2AppCtx.class, Batch2JobsConfig.class, BatchJobsConfig.class, TestHibernateSearchAddInConfig.DefaultLuceneHeap.class})
 @EnableTransactionManagement()
 public class TestR4Config extends BaseJavaConfigR4 {
 

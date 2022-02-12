@@ -98,8 +98,7 @@ public class IdHelperServiceTest {
 		Map<String, ResourcePersistentId> map = myHelperService.resolveResourcePersistentIds(
 			partitionId,
 			resourceType,
-			patientIdsToResolve
-		);
+			patientIdsToResolve);
 
 		Assertions.assertFalse(map.isEmpty());
 		for (String id : patientIdsToResolve) {
