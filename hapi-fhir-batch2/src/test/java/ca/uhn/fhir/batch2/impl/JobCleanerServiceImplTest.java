@@ -4,14 +4,15 @@ import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
-import ca.uhn.fhir.rest.server.interceptor.ResponseSizeCapturingInterceptor;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Date;
 
@@ -23,12 +24,14 @@ import static ca.uhn.fhir.batch2.impl.JobCoordinatorImplTest.createInstance;
 import static ca.uhn.fhir.batch2.impl.JobCoordinatorImplTest.createWorkChunk;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 public class JobCleanerServiceImplTest {
 
 	@Mock
@@ -46,8 +49,8 @@ public class JobCleanerServiceImplTest {
 
 	@Test
 	public void testInProgress_CalculateProgress_FirstStepNotYetComplete() {
-		when(myJobPersistence.fetchInstances(any(), eq(0))).thenReturn(Lists.newArrayList(createInstance()));
-		when(myJobPersistence.fetchWorkChunksWithoutData(eq(INSTANCE_ID), any(), eq(0))).thenReturn(Lists.newArrayList(
+		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(createInstance()));
+		when(myJobPersistence.fetchWorkChunksWithoutData(eq(INSTANCE_ID), anyInt(), eq(0))).thenReturn(Lists.newArrayList(
 			createWorkChunk().setTargetStepId(STEP_1).setStatus(StatusEnum.COMPLETED)
 		));
 
@@ -58,8 +61,8 @@ public class JobCleanerServiceImplTest {
 
 	@Test
 	public void testInProgress_CalculateProgress_FirstStepComplete() {
-		when(myJobPersistence.fetchInstances(any(), eq(0))).thenReturn(Lists.newArrayList(createInstance()));
-		when(myJobPersistence.fetchWorkChunksWithoutData(eq(INSTANCE_ID), any(), eq(0))).thenReturn(Lists.newArrayList(
+		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(createInstance()));
+		when(myJobPersistence.fetchWorkChunksWithoutData(eq(INSTANCE_ID), anyInt(), eq(0))).thenReturn(Lists.newArrayList(
 			createWorkChunk().setTargetStepId(STEP_1).setStatus(StatusEnum.COMPLETED).setStartTime(parseTime("2022-02-12T14:00:00-04:00")),
 			createWorkChunk().setTargetStepId(STEP_2).setStatus(StatusEnum.IN_PROGRESS).setStartTime(parseTime("2022-02-12T14:00:01-04:00")),
 			createWorkChunk().setTargetStepId(STEP_2).setStatus(StatusEnum.IN_PROGRESS).setStartTime(parseTime("2022-02-12T14:00:02-04:00")),
@@ -73,9 +76,9 @@ public class JobCleanerServiceImplTest {
 		verify(myJobPersistence, times(1)).updateInstance(myInstanceCaptor.capture());
 		JobInstance instance = myInstanceCaptor.getValue();
 
-		assertEquals(-0.1, instance.getProgress());
-		assertEquals(1, instance.getCombinedRecordsProcessed());
-		assertEquals(1, instance.getCombinedRecordsProcessedPerSecond());
+		assertEquals(0.5, instance.getProgress());
+		assertEquals(50, instance.getCombinedRecordsProcessed());
+		assertEquals(0.08333333333333333, instance.getCombinedRecordsProcessedPerSecond());
 	}
 
 	private Date parseTime(String theDate) {

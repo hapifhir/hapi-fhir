@@ -50,7 +50,7 @@ public class Batch2JobInstanceEntity implements Serializable {
 	private Integer myCombinedRecordsProcessed;
 
 	@Column(name = "CMB_RECS_PER_SEC", nullable = true)
-	private Integer myCombinedRecordsProcessedPerSecond;
+	private Double myCombinedRecordsProcessedPerSecond;
 
 	@Column(name = "TOT_ELAPSED_MILLIS", nullable = true)
 	private Integer myTotalElapsedMillis;
@@ -81,11 +81,11 @@ public class Batch2JobInstanceEntity implements Serializable {
 		myCombinedRecordsProcessed = theCombinedRecordsProcessed;
 	}
 
-	public Integer getCombinedRecordsProcessedPerSecond() {
+	public Double getCombinedRecordsProcessedPerSecond() {
 		return myCombinedRecordsProcessedPerSecond;
 	}
 
-	public void setCombinedRecordsProcessedPerSecond(Integer theCombinedRecordsProcessedPerSecond) {
+	public void setCombinedRecordsProcessedPerSecond(Double theCombinedRecordsProcessedPerSecond) {
 		myCombinedRecordsProcessedPerSecond = theCombinedRecordsProcessedPerSecond;
 	}
 

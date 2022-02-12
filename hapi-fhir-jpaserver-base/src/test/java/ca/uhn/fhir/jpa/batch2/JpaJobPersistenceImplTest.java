@@ -332,7 +332,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		sleepUntilTimeChanges();
 		instance.setEndTime(new Date());
 		instance.setCombinedRecordsProcessed(100);
-		instance.setCombinedRecordsProcessedPerSecond(22);
+		instance.setCombinedRecordsProcessedPerSecond(22.0);
 		instance.setWorkChunksPurged(true);
 		instance.setProgress(0.5d);
 

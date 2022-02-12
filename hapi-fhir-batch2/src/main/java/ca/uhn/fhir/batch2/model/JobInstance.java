@@ -39,7 +39,7 @@ public class JobInstance implements IModelJson {
 	private Integer myCombinedRecordsProcessed;
 
 	@JsonProperty(value = "combinedRecordsProcessedPerSecond")
-	private Integer myCombinedRecordsProcessedPerSecond;
+	private Double myCombinedRecordsProcessedPerSecond;
 
 	@JsonProperty(value = "totalElapsedMillis")
 	private Integer myTotalElapsedMillis;
@@ -126,11 +126,11 @@ public class JobInstance implements IModelJson {
 		myCombinedRecordsProcessed = theCombinedRecordsProcessed;
 	}
 
-	public Integer getCombinedRecordsProcessedPerSecond() {
+	public Double getCombinedRecordsProcessedPerSecond() {
 		return myCombinedRecordsProcessedPerSecond;
 	}
 
-	public void setCombinedRecordsProcessedPerSecond(Integer theCombinedRecordsProcessedPerSecond) {
+	public void setCombinedRecordsProcessedPerSecond(Double theCombinedRecordsProcessedPerSecond) {
 		myCombinedRecordsProcessedPerSecond = theCombinedRecordsProcessedPerSecond;
 	}
 

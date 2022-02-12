@@ -55,14 +55,15 @@ public class JobCleanerServiceImpl implements IJobCleanerService {
 		Set<String> processedInstanceIds = new HashSet<>();
 		for (int page = 0; ; page++) {
 			List<JobInstance> instances = myJobPersistence.fetchInstances(INSTANCES_PER_PASS, page);
-			if (instances.size() < INSTANCES_PER_PASS) {
-				break;
-			}
 
 			for (JobInstance instance : instances) {
-				if (!processedInstanceIds.add(instance.getInstanceId())) {
+				if (processedInstanceIds.add(instance.getInstanceId())) {
 					cleanupInstance(instance);
 				}
+			}
+
+			if (instances.size() < INSTANCES_PER_PASS) {
+				break;
 			}
 		}
 	}
@@ -77,9 +78,6 @@ public class JobCleanerServiceImpl implements IJobCleanerService {
 			Long latestStartTime = null;
 			for (int page = 0; ; page++) {
 				List<WorkChunk> chunks = myJobPersistence.fetchWorkChunksWithoutData(theInstance.getInstanceId(), INSTANCES_PER_PASS, page);
-				if (chunks.size() < INSTANCES_PER_PASS) {
-					break;
-				}
 
 				for (WorkChunk chunk : chunks) {
 					if (chunk.getRecordsProcessed() != null) {
@@ -107,10 +105,14 @@ public class JobCleanerServiceImpl implements IJobCleanerService {
 							break;
 					}
 				}
+
+				if (chunks.size() < INSTANCES_PER_PASS) {
+					break;
+				}
 			}
 
 			theInstance.setCombinedRecordsProcessed(resourcesProcessed);
-			if (completeChunkCount > 2) {
+			if (completeChunkCount >= 2) {
 
 				double percentComplete = (double) (incompleteChunkCount) / (double) (incompleteChunkCount + completeChunkCount);
 				theInstance.setProgress(percentComplete);
@@ -119,13 +121,15 @@ public class JobCleanerServiceImpl implements IJobCleanerService {
 					long elapsedTime = latestStartTime - earliestStartTime;
 					if (elapsedTime > 0) {
 						double throughput = StopWatch.getThroughput(resourcesProcessed, elapsedTime, TimeUnit.SECONDS);
-						theInstance.setCombinedRecordsProcessedPerSecond((int) throughput);
+						theInstance.setCombinedRecordsProcessedPerSecond(throughput);
 					}
 				}
 
 			}
 
-			myJobPersistence.updateInstance(theInstance);
+			if ((incompleteChunkCount + completeChunkCount) >= 2) {
+				myJobPersistence.updateInstance(theInstance);
+			}
 		}
 
 //		if (!theInstance.isWorkChunksPurged())
