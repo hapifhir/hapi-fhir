@@ -36,6 +36,7 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -58,16 +59,12 @@ import static org.apache.commons.lang3.StringUtils.trim;
 	 * IDX_SP_TOKEN_UNQUAL
 	 */
 
-	// TODO PERF Recommend to drop this index (added by JA - I don't actually think we even need the identity hash for this type, we could potentially drop the column too):
-	@Index(name = "IDX_SP_TOKEN_HASH", columnList = "HASH_IDENTITY"),
-	@Index(name = "IDX_SP_TOKEN_HASH_S", columnList = "HASH_SYS"),
-	@Index(name = "IDX_SP_TOKEN_HASH_SV", columnList = "HASH_SYS_AND_VALUE"),
-	// TODO PERF change this to:
-	//	@Index(name = "IDX_SP_TOKEN_HASH_V", columnList = "HASH_VALUE,RES_ID"),
-	@Index(name = "IDX_SP_TOKEN_HASH_V", columnList = "HASH_VALUE"),
+	@Index(name = "IDX_SP_TOKEN_HASH_V2", columnList = "HASH_IDENTITY,RES_ID,PARTITION_ID"),
+	@Index(name = "IDX_SP_TOKEN_HASH_S_V2", columnList = "HASH_SYS,RES_ID,PARTITION_ID"),
+	@Index(name = "IDX_SP_TOKEN_HASH_SV_V2", columnList = "HASH_SYS_AND_VALUE,RES_ID,PARTITION_ID"),
+	@Index(name = "IDX_SP_TOKEN_HASH_V_V2", columnList = "HASH_VALUE,RES_ID,PARTITION_ID"),
 
-	@Index(name = "IDX_SP_TOKEN_UPDATED", columnList = "SP_UPDATED"),
-	@Index(name = "IDX_SP_TOKEN_RESID", columnList = "RES_ID")
+	@Index(name = "IDX_SP_TOKEN_RESID_V2", columnList = "RES_ID,HASH_SYS_AND_VALUE,HASH_VALUE,HASH_SYS,HASH_IDENTITY,PARTITION_ID")
 })
 public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchParam {
 
@@ -111,7 +108,8 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	private Long myHashValue;
 
 	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = {})
-	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false)
+	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false,
+		foreignKey = @ForeignKey(name="FK_SP_TOKEN_RES"))
 	private ResourceTable myResource;
 
 
