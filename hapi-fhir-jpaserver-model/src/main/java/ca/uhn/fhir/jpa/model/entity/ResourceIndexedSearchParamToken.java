@@ -108,10 +108,9 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	private Long myHashValue;
 
 	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = {})
-	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false,
-		foreignKey = @ForeignKey(name="FK_SP_TOKEN_RES"))
+	@JoinColumn(foreignKey = @ForeignKey(name="FK_SP_TOKEN_RES"),
+		name = "RES_ID", referencedColumnName = "RES_ID", nullable = false)
 	private ResourceTable myResource;
-
 
 	/**
 	 * Constructor

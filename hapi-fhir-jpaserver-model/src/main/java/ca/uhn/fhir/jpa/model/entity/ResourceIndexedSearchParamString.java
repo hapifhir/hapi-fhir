@@ -82,7 +82,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", insertable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_SPIDXSTR_RESOURCE"))
-	private ResourceTable myResourceTable;
+	private ResourceTable myResource;
 
 	@Column(name = "SP_VALUE_EXACT", length = MAX_LENGTH, nullable = true)
 	private String myValueExact;
@@ -104,10 +104,6 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	 */
 	@Column(name = "HASH_EXACT", nullable = true)
 	private Long myHashExact;
-
-	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = {})
-	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false)
-	private ResourceTable myResource;
 
 	public ResourceIndexedSearchParamString() {
 		super();

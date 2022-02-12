@@ -31,6 +31,7 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -70,7 +71,8 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 	private Long myHashIdentity;
 
 	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = {})
-	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false)
+	@JoinColumn(foreignKey = @ForeignKey(name = "FKC97MPK37OKWU8QVTCEG2NH9VN"),
+		name = "RES_ID", referencedColumnName = "RES_ID", nullable = false)
 	private ResourceTable myResource;
 
 	public ResourceIndexedSearchParamCoords() {
