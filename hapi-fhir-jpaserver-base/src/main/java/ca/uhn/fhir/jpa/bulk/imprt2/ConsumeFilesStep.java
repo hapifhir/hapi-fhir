@@ -43,7 +43,7 @@ public class ConsumeFilesStep implements IJobStepWorker {
 	private PartitionSettings myPartitionSettings;
 
 	@Override
-	public void run(StepExecutionDetails theStepExecutionDetails, IJobDataSink theDataSink) {
+	public RunOutcome run(StepExecutionDetails theStepExecutionDetails, IJobDataSink theDataSink) {
 
 		String ndjson = (String) theStepExecutionDetails.getData().get(FetchFilesStep.KEY_NDJSON);
 		String sourceName = (String) theStepExecutionDetails.getData().get(FetchFilesStep.KEY_SOURCE_NAME);
@@ -59,6 +59,7 @@ public class ConsumeFilesStep implements IJobStepWorker {
 
 		storeResources(resources);
 
+		return new RunOutcome(resources.size());
 	}
 
 	public void storeResources(List<IBaseResource> resources) {

@@ -9,6 +9,21 @@ public interface IJobStepWorker {
 	 * @param theDataSink             A data sink for data produced during this step. This may never
 	 *                                be used during the final step of a job.
 	 */
-	void run(StepExecutionDetails theStepExecutionDetails, IJobDataSink theDataSink);
+	RunOutcome run(StepExecutionDetails theStepExecutionDetails, IJobDataSink theDataSink);
+
+
+	class RunOutcome {
+
+		private final int myRecordsProcessed;
+
+		public RunOutcome(int theRecordsProcessed) {
+			myRecordsProcessed = theRecordsProcessed;
+		}
+
+		public int getRecordsProcessed() {
+			return myRecordsProcessed;
+		}
+	}
+
 
 }

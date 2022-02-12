@@ -6,4 +6,5 @@ public interface IJobDataSink {
 
 	void accept(Map<String, Object> theData);
 
+	int getWorkChunkCount();
 }

@@ -28,8 +28,10 @@ public class FetchFilesStep implements IJobStepWorker {
 	public static final String KEY_SOURCE_NAME = "sourceName";
 
 	@Override
-	public void run(StepExecutionDetails theStepExecutionDetails, IJobDataSink theDataSink) {
+	public RunOutcome run(StepExecutionDetails theStepExecutionDetails, IJobDataSink theDataSink) {
 		try (CloseableHttpClient httpClient = newHttpClient()) {
+
+			int fileCount = 0;
 
 			List<String> urls = theStepExecutionDetails.getParameterValues(BulkImport2AppCtx.PARAM_NDJSON_URL);
 			for (String nextUrl : urls) {
@@ -53,7 +55,10 @@ public class FetchFilesStep implements IJobStepWorker {
 				data.put(KEY_SOURCE_NAME, nextUrl);
 				theDataSink.accept(data);
 
+				fileCount++;
 			}
+
+			return new RunOutcome(fileCount);
 
 		} catch (IOException e) {
 			throw new InternalErrorException(e);

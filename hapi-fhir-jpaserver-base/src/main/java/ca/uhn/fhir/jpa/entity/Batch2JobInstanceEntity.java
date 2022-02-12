@@ -8,13 +8,15 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Table;
-import javax.persistence.Version;
 import java.io.Serializable;
 import java.util.Date;
 
 @Entity
-@Table(name = "BT2_JOB_INSTANCE")
+@Table(name = "BT2_JOB_INSTANCE", indexes = {
+	@Index(name = "IDX_BT2JI_CT", columnList = "CREATE_TIME")
+})
 public class Batch2JobInstanceEntity implements Serializable {
 
 	public static final int STATUS_MAX_LENGTH = 20;
@@ -22,9 +24,14 @@ public class Batch2JobInstanceEntity implements Serializable {
 	@Column(name = "ID", length = JobDefinition.ID_MAX_LENGTH, nullable = false)
 	private String myId;
 
-	@Version
-	@Column(name = "UPDATED", nullable = false)
-	private Date myUpdated;
+	@Column(name = "CREATE_TIME", nullable = false)
+	private Date myCreateTime;
+
+	@Column(name = "START_TIME", nullable = true)
+	private Date myStartTime;
+
+	@Column(name = "END_TIME", nullable = true)
+	private Date myEndTime;
 
 	@Column(name = "DEFINITION_ID", length = JobDefinition.ID_MAX_LENGTH, nullable = false)
 	private String myDefinitionId;
@@ -39,8 +46,71 @@ public class Batch2JobInstanceEntity implements Serializable {
 	@Column(name = "PARAMS_JSON", length = 2000, nullable = false)
 	private String myParamsJson;
 
-	public void setParams(String theParams) {
-		myParamsJson = theParams;
+	@Column(name = "CMB_RECS_PROCESSED", nullable = true)
+	private Integer myCombinedRecordsProcessed;
+
+	@Column(name = "CMB_RECS_PER_SEC", nullable = true)
+	private Integer myCombinedRecordsProcessedPerSecond;
+
+	@Column(name = "TOT_ELAPSED_MILLIS", nullable = true)
+	private Integer myTotalElapsedMillis;
+
+	@Column(name = "WORK_CHUNKS_PURGED", nullable = true)
+	private boolean myWorkChunksPurged;
+
+	@Column(name="PROGRESS_PCT")
+	private double myProgress;
+
+	public boolean isWorkChunksPurged() {
+		return myWorkChunksPurged;
+	}
+
+	public Integer getTotalElapsedMillis() {
+		return myTotalElapsedMillis;
+	}
+
+	public void setTotalElapsedMillis(Integer theTotalElapsedMillis) {
+		myTotalElapsedMillis = theTotalElapsedMillis;
+	}
+
+	public Integer getCombinedRecordsProcessed() {
+		return myCombinedRecordsProcessed;
+	}
+
+	public void setCombinedRecordsProcessed(Integer theCombinedRecordsProcessed) {
+		myCombinedRecordsProcessed = theCombinedRecordsProcessed;
+	}
+
+	public Integer getCombinedRecordsProcessedPerSecond() {
+		return myCombinedRecordsProcessedPerSecond;
+	}
+
+	public void setCombinedRecordsProcessedPerSecond(Integer theCombinedRecordsProcessedPerSecond) {
+		myCombinedRecordsProcessedPerSecond = theCombinedRecordsProcessedPerSecond;
+	}
+
+	public Date getCreateTime() {
+		return myCreateTime;
+	}
+
+	public void setCreateTime(Date theCreateTime) {
+		myCreateTime = theCreateTime;
+	}
+
+	public Date getStartTime() {
+		return myStartTime;
+	}
+
+	public void setStartTime(Date theStartTime) {
+		myStartTime = theStartTime;
+	}
+
+	public Date getEndTime() {
+		return myEndTime;
+	}
+
+	public void setEndTime(Date theEndTime) {
+		myEndTime = theEndTime;
 	}
 
 	public String getId() {
@@ -77,5 +147,25 @@ public class Batch2JobInstanceEntity implements Serializable {
 
 	public String getParams() {
 		return myParamsJson;
+	}
+
+	public void setParams(String theParams) {
+		myParamsJson = theParams;
+	}
+
+	public boolean getWorkChunksPurged() {
+		return myWorkChunksPurged;
+	}
+
+	public void setWorkChunksPurged(boolean theWorkChunksPurged) {
+		myWorkChunksPurged = theWorkChunksPurged;
+	}
+
+	public double getProgress() {
+		return myProgress;
+	}
+
+	public void setProgress(double theProgress) {
+		myProgress = theProgress;
 	}
 }

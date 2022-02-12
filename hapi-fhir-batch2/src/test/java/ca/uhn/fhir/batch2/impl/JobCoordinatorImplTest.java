@@ -32,24 +32,18 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.MessageDeliveryException;
 
 import javax.annotation.Nonnull;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.Collections.singletonMap;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -105,6 +99,7 @@ public class JobCoordinatorImplTest {
 		// Setup
 
 		when(myJobDefinitionRegistry.getLatestJobDefinition(eq(JOB_DEFINITION_ID))).thenReturn(Optional.of(createJobDefinition()));
+		when(myJobInstancePersister.storeNewInstance(any())).thenReturn(INSTANCE_ID).thenReturn(INSTANCE_ID);
 
 		// Execute
 
@@ -116,8 +111,7 @@ public class JobCoordinatorImplTest {
 		// Verify
 
 		verify(myJobInstancePersister, times(1)).storeNewInstance(myJobInstanceCaptor.capture());
-		String instanceId = myJobInstanceCaptor.getValue().getInstanceId();
-		assertThat(instanceId, matchesPattern("[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"));
+		assertNull(myJobInstanceCaptor.getValue().getInstanceId());
 		assertEquals(JOB_DEFINITION_ID, myJobInstanceCaptor.getValue().getJobDefinitionId());
 		assertEquals(1, myJobInstanceCaptor.getValue().getJobDefinitionVersion());
 		assertEquals(1, myJobInstanceCaptor.getValue().getParameters().size());
@@ -131,23 +125,12 @@ public class JobCoordinatorImplTest {
 		assertEquals(1, myMessageCaptor.getAllValues().get(0).getPayload().getJobDefinitionVersion());
 		assertEquals(STEP_1, myMessageCaptor.getAllValues().get(0).getPayload().getTargetStepId());
 
+		verify(myJobInstancePersister, times(1)).storeWorkChunk(eq(JOB_DEFINITION_ID), eq(1), eq(STEP_1), eq(INSTANCE_ID), eq(0), isNull());
+
 		verifyNoMoreInteractions(myJobInstancePersister);
 		verifyNoMoreInteractions(myStep1Worker);
 		verifyNoMoreInteractions(myStep2Worker);
 		verifyNoMoreInteractions(myStep3Worker);
-	}
-
-	private JobDefinition createJobDefinition() {
-		return JobDefinition
-			.newBuilder()
-			.setJobDefinitionId(JOB_DEFINITION_ID)
-			.setJobDescription("This is a job description")
-			.setJobDefinitionVersion(1)
-			.addParameter(PARAM_1_NAME, "Param 1", JobDefinitionParameter.ParamTypeEnum.STRING, true, false)
-			.addStep(STEP_1, "Step 1", myStep1Worker)
-			.addStep(STEP_2, "Step 2", myStep2Worker)
-			.addStep(STEP_2, "Step 3", myStep3Worker)
-			.build();
 	}
 
 	@Test
@@ -157,11 +140,17 @@ public class JobCoordinatorImplTest {
 
 		when(myJobDefinitionRegistry.getJobDefinition(eq(JOB_DEFINITION_ID), eq(1))).thenReturn(Optional.of(createJobDefinition()));
 		when(myJobInstancePersister.fetchInstanceAndMarkInProgress(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
+		when(myJobInstancePersister.fetchWorkChunkAndMarkInProgress(eq(CHUNK_ID))).thenReturn(Optional.of(createWorkChunk().setTargetStepId(STEP_1)));
+		when(myStep1Worker.run(any(), any())).thenAnswer(t -> {
+			IJobDataSink sink = t.getArgument(1, IJobDataSink.class);
+			sink.accept(Collections.singletonMap("key", "value"));
+			return new IJobStepWorker.RunOutcome(50);
+		});
 		mySvc.start();
 
 		// Execute
 
-		myWorkChannelReceiver.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_1, null)));
+		myWorkChannelReceiver.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_1, CHUNK_ID)));
 
 		// Verify
 
@@ -171,9 +160,38 @@ public class JobCoordinatorImplTest {
 		assertEquals(1, params.get(PARAM_1_NAME).size());
 		assertEquals(PARAM_1_VALUE, params.get(PARAM_1_NAME).get(0).getValue());
 
-		verify(myJobInstancePersister, never()).markWorkChunkAsCompleted(any());
+		verify(myJobInstancePersister, times(99)).markWorkChunkAsCompletedAndClearData(any(), eq(50));
 	}
 
+	/**
+	 * If the first step doesn't produce any work chunks, then
+	 * the instance should be marked as complete right away.
+	 */
+	@Test
+	public void testPerformStep_FirstStep_NoWorkChunksProduced() {
+
+		// Setup
+
+		when(myJobDefinitionRegistry.getJobDefinition(eq(JOB_DEFINITION_ID), eq(1))).thenReturn(Optional.of(createJobDefinition()));
+		when(myJobInstancePersister.fetchInstanceAndMarkInProgress(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
+		when(myJobInstancePersister.fetchWorkChunkAndMarkInProgress(eq(CHUNK_ID))).thenReturn(Optional.of(createWorkChunk().setTargetStepId(STEP_1)));
+		when(myStep1Worker.run(any(), any())).thenReturn(new IJobStepWorker.RunOutcome(50));
+		mySvc.start();
+
+		// Execute
+
+		myWorkChannelReceiver.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_1, CHUNK_ID)));
+
+		// Verify
+
+		verify(myStep1Worker, times(1)).run(myStepExecutionDetailsCaptor.capture(), any());
+		ListMultimap<String, JobInstanceParameter> params = myStepExecutionDetailsCaptor.getValue().getParameters();
+		assertEquals(1, params.size());
+		assertEquals(1, params.get(PARAM_1_NAME).size());
+		assertEquals(PARAM_1_VALUE, params.get(PARAM_1_NAME).get(0).getValue());
+
+		verify(myJobInstancePersister, times(1)).markInstanceAsCompleted(eq(INSTANCE_ID));
+	}
 
 	@Test
 	public void testPerformStep_SecondStep() {
@@ -182,7 +200,8 @@ public class JobCoordinatorImplTest {
 
 		when(myJobInstancePersister.fetchWorkChunkAndMarkInProgress(eq(CHUNK_ID))).thenReturn(Optional.of(createWorkChunk()));
 		when(myJobDefinitionRegistry.getJobDefinition(eq(JOB_DEFINITION_ID), eq(1))).thenReturn(Optional.of(createJobDefinition()));
-		when(myJobInstancePersister.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
+		when(myJobInstancePersister.fetchInstanceAndMarkInProgress(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
+		when(myStep2Worker.run(any(), any())).thenReturn(new IJobStepWorker.RunOutcome(50));
 		mySvc.start();
 
 		// Execute
@@ -197,7 +216,7 @@ public class JobCoordinatorImplTest {
 		assertEquals(1, params.get(PARAM_1_NAME).size());
 		assertEquals(PARAM_1_VALUE, params.get(PARAM_1_NAME).get(0).getValue());
 
-		verify(myJobInstancePersister, times(1)).markWorkChunkAsCompleted(eq(CHUNK_ID));
+		verify(myJobInstancePersister, times(1)).markWorkChunkAsCompletedAndClearData(eq(CHUNK_ID), eq(50));
 	}
 
 	@Test
@@ -207,10 +226,9 @@ public class JobCoordinatorImplTest {
 
 		when(myJobDefinitionRegistry.getJobDefinition(eq(JOB_DEFINITION_ID), eq(1))).thenReturn(Optional.of(createJobDefinition()));
 		when(myJobInstancePersister.fetchWorkChunkAndMarkInProgress(eq(CHUNK_ID))).thenReturn(Optional.of(createWorkChunk()));
-		when(myJobInstancePersister.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
+		when(myJobInstancePersister.fetchInstanceAndMarkInProgress(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
+		when(myStep2Worker.run(any(), any())).thenThrow(new NullPointerException("This is an error message"));
 		mySvc.start();
-
-		doThrow(new NullPointerException("This is an error message")).when(myStep2Worker).run(any(), any());
 
 		// Execute
 
@@ -279,6 +297,19 @@ public class JobCoordinatorImplTest {
 
 	}
 
+	private JobDefinition createJobDefinition() {
+		return JobDefinition
+			.newBuilder()
+			.setJobDefinitionId(JOB_DEFINITION_ID)
+			.setJobDescription("This is a job description")
+			.setJobDefinitionVersion(1)
+			.addParameter(PARAM_1_NAME, "Param 1", JobDefinitionParameter.ParamTypeEnum.STRING, true, false)
+			.addStep(STEP_1, "Step 1", myStep1Worker)
+			.addStep(STEP_2, "Step 2", myStep2Worker)
+			.addStep(STEP_2, "Step 3", myStep3Worker)
+			.build();
+	}
+
 	@Nonnull
 	private JobWorkNotification createWorkNotification(String theStepId, String theChunkId) {
 		JobWorkNotification payload = new JobWorkNotification();
@@ -289,31 +320,6 @@ public class JobCoordinatorImplTest {
 		payload.setTargetStepId(theStepId);
 		return payload;
 	}
-
-	@Nonnull
-	private JobInstance createInstance() {
-		JobInstance instance = new JobInstance();
-		instance.setInstanceId(INSTANCE_ID);
-		instance.setStatus(StatusEnum.IN_PROGRESS);
-		instance.setJobDefinitionId(JOB_DEFINITION_ID);
-		instance.setJobDefinitionVersion(1);
-		instance.addParameter(new JobInstanceParameter().setName(PARAM_1_NAME).setValue(PARAM_1_VALUE));
-		return instance;
-	}
-
-	@Nonnull
-	private WorkChunk createWorkChunk() {
-		return new WorkChunk(
-			CHUNK_ID,
-			JOB_DEFINITION_ID,
-			1,
-			STEP_2,
-			singletonMap("DATA_1_KEY", "DATA_1_VALUE"),
-			StatusEnum.IN_PROGRESS,
-			INSTANCE_ID
-		);
-	}
-
 
 	@Test
 	public void testValidateParameters_RequiredParamNotPresent() {
@@ -399,6 +405,29 @@ public class JobCoordinatorImplTest {
 		} catch (InvalidRequestException e) {
 			assertEquals("Unexpected parameter: foo", e.getMessage());
 		}
+	}
+
+	@Nonnull
+	static JobInstance createInstance() {
+		JobInstance instance = new JobInstance();
+		instance.setInstanceId(INSTANCE_ID);
+		instance.setStatus(StatusEnum.IN_PROGRESS);
+		instance.setJobDefinitionId(JOB_DEFINITION_ID);
+		instance.setJobDefinitionVersion(1);
+		instance.addParameter(new JobInstanceParameter().setName(PARAM_1_NAME).setValue(PARAM_1_VALUE));
+		return instance;
+	}
+
+	@Nonnull
+	static WorkChunk createWorkChunk() {
+		return new WorkChunk()
+			.setId(CHUNK_ID)
+			.setJobDefinitionId(JOB_DEFINITION_ID)
+			.setJobDefinitionVersion(1)
+			.setTargetStepId(STEP_2)
+			.setData(singletonMap("DATA_1_KEY", "DATA_1_VALUE"))
+			.setStatus(StatusEnum.IN_PROGRESS)
+			.setInstanceId(INSTANCE_ID);
 	}
 
 	//	public static class MyConfig extends BaseBatch2AppCtx {

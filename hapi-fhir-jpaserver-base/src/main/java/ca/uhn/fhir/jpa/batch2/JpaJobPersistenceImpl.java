@@ -11,17 +11,26 @@ import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.JsonUtil;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 
+import javax.annotation.Nonnull;
 import javax.transaction.Transactional;
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
+import java.util.stream.Collectors;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Transactional
 public class JpaJobPersistenceImpl implements IJobPersistence {
+
+	public static final int ID_LENGTH = 10;
 
 	@Autowired
 	private IBatch2JobInstanceRepository myJobInstanceRepository;
@@ -29,14 +38,16 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	private IBatch2WorkChunkRepository myWorkChunkRepository;
 
 	@Override
-	public String storeWorkChunk(String theJobDefinitionId, int theJobDefinitionVersion, String theTargetStepId, String theInstanceId,Map<String, Object> theData) {
+	public String storeWorkChunk(String theJobDefinitionId, int theJobDefinitionVersion, String theTargetStepId, String theInstanceId, int theSequence, Map<String, Object> theData) {
 		Batch2WorkChunkEntity entity = new Batch2WorkChunkEntity();
-		entity.setId(UUID.randomUUID().toString());
+		entity.setId(RandomStringUtils.randomAlphanumeric(ID_LENGTH));
+		entity.setSequence(theSequence);
 		entity.setJobDefinitionId(theJobDefinitionId);
 		entity.setJobDefinitionVersion(theJobDefinitionVersion);
 		entity.setTargetStepId(theTargetStepId);
 		entity.setInstanceId(theInstanceId);
 		entity.setSerializedData(JsonUtil.serialize(theData, false));
+		entity.setCreateTime(new Date());
 		entity.setStatus(StatusEnum.QUEUED);
 		myWorkChunkRepository.save(entity);
 		return entity.getId();
@@ -44,26 +55,25 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	public Optional<WorkChunk> fetchWorkChunkAndMarkInProgress(String theChunkId) {
-		myWorkChunkRepository.updateChunkStatus(theChunkId, StatusEnum.IN_PROGRESS);
+		myWorkChunkRepository.updateChunkStatusForStart(theChunkId, new Date(), StatusEnum.IN_PROGRESS);
 		Optional<Batch2WorkChunkEntity> chunk = myWorkChunkRepository.findById(theChunkId);
-		return chunk.map(t -> toChunk(t));
+		return chunk.map(t -> toChunk(t, true));
 	}
 
 	@Override
-	public void storeNewInstance(JobInstance theInstance) {
+	public String storeNewInstance(JobInstance theInstance) {
+		Validate.isTrue(isBlank(theInstance.getInstanceId()));
+
 		Batch2JobInstanceEntity entity = new Batch2JobInstanceEntity();
-		entity.setId(theInstance.getInstanceId());
+		entity.setId(RandomStringUtils.randomAlphanumeric(ID_LENGTH));
 		entity.setDefinitionId(theInstance.getJobDefinitionId());
 		entity.setDefinitionVersion(theInstance.getJobDefinitionVersion());
 		entity.setStatus(theInstance.getStatus());
 		entity.setParams(JsonUtil.serialize(theInstance.getParameters(), false));
+		entity.setCreateTime(new Date());
 
-		myJobInstanceRepository.save(entity);
-	}
-
-	@Override
-	public Optional<JobInstance> fetchInstance(String theInstanceId) {
-		return myJobInstanceRepository.findById(theInstanceId).map(t -> toInstance(t));
+		entity = myJobInstanceRepository.save(entity);
+		return entity.getId();
 	}
 
 	@Override
@@ -72,14 +82,40 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		return fetchInstance(theInstanceId);
 	}
 
-	private WorkChunk toChunk(Batch2WorkChunkEntity theEntity) {
+	@Override
+	@Nonnull
+	public Optional<JobInstance> fetchInstance(String theInstanceId) {
+		return myJobInstanceRepository.findById(theInstanceId).map(t -> toInstance(t));
+	}
+
+	@Override
+	public List<JobInstance> fetchInstances(int thePageSize, int thePageIndex) {
+		return myJobInstanceRepository
+			.fetchAll(PageRequest.of(thePageIndex, thePageSize))
+			.stream()
+			.map(t->toInstance(t))
+			.collect(Collectors.toList());
+	}
+
+	private WorkChunk toChunk(Batch2WorkChunkEntity theEntity, boolean theIncludeData) {
 		WorkChunk retVal = new WorkChunk();
+		retVal.setId(theEntity.getId());
+		retVal.setSequence(theEntity.getSequence());
 		retVal.setJobDefinitionId(theEntity.getJobDefinitionId());
 		retVal.setJobDefinitionVersion(theEntity.getJobDefinitionVersion());
 		retVal.setInstanceId(theEntity.getInstanceId());
 		retVal.setTargetStepId(theEntity.getTargetStepId());
 		retVal.setStatus(theEntity.getStatus());
-		retVal.setData(JsonUtil.deserialize(theEntity.getSerializedData(), Map.class));
+		retVal.setCreateTime(theEntity.getCreateTime());
+		retVal.setStartTime(theEntity.getStartTime());
+		retVal.setEndTime(theEntity.getEndTime());
+		retVal.setErrorMessage(theEntity.getErrorMessage());
+		retVal.setRecordsProcessed(theEntity.getRecordsProcessed());
+		if (theIncludeData) {
+			if (theEntity.getSerializedData() != null) {
+				retVal.setData(JsonUtil.deserialize(theEntity.getSerializedData(), Map.class));
+			}
+		}
 		return retVal;
 	}
 
@@ -89,6 +125,14 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		retVal.setJobDefinitionId(theEntity.getDefinitionId());
 		retVal.setJobDefinitionVersion(theEntity.getDefinitionVersion());
 		retVal.setStatus(theEntity.getStatus());
+		retVal.setStartTime(theEntity.getStartTime());
+		retVal.setCreateTime(theEntity.getCreateTime());
+		retVal.setEndTime(theEntity.getEndTime());
+		retVal.setCombinedRecordsProcessed(theEntity.getCombinedRecordsProcessed());
+		retVal.setCombinedRecordsProcessedPerSecond(theEntity.getCombinedRecordsProcessedPerSecond());
+		retVal.setTotalElapsedMillis(theEntity.getTotalElapsedMillis());
+		retVal.setWorkChunksPurged(theEntity.getWorkChunksPurged());
+		retVal.setProgress(theEntity.getProgress());
 
 		String params = theEntity.getParams();
 		try {
@@ -102,11 +146,57 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	public void markWorkChunkAsErrored(String theChunkId, String theErrorMessage) {
-
+		myWorkChunkRepository.updateChunkStatusForEndError(theChunkId, new Date(), theErrorMessage, StatusEnum.ERRORED);
 	}
 
 	@Override
-	public void markWorkChunkAsCompleted(String theChunkId) {
+	public void markWorkChunkAsFailed(String theChunkId, String theErrorMessage) {
+		myWorkChunkRepository.updateChunkStatusForEndError(theChunkId, new Date(), theErrorMessage, StatusEnum.FAILED);
+	}
 
+	@Override
+	public void markWorkChunkAsCompletedAndClearData(String theChunkId, int theRecordsProcessed) {
+		myWorkChunkRepository.updateChunkStatusAndClearDataForEndSuccess(theChunkId, new Date(), theRecordsProcessed, StatusEnum.COMPLETED);
+	}
+
+	@Override
+	public List<WorkChunk> fetchWorkChunksWithoutData(String theInstanceId, int thePageSize, int thePageIndex) {
+		List<Batch2WorkChunkEntity> chunks = myWorkChunkRepository.fetchChunks(PageRequest.of(thePageIndex, thePageSize), theInstanceId);
+		return chunks
+			.stream()
+			.map(t->toChunk(t, false))
+			.collect(Collectors.toList());
+	}
+
+	@Override
+	public void updateInstance(JobInstance theInstance) {
+		Optional<Batch2JobInstanceEntity> instanceOpt = myJobInstanceRepository.findById(theInstance.getInstanceId());
+		Batch2JobInstanceEntity instance = instanceOpt.orElseThrow(() -> new IllegalArgumentException("Unknown instance ID: " + theInstance.getInstanceId()));
+
+		instance.setStartTime(theInstance.getStartTime());
+		instance.setEndTime(theInstance.getEndTime());
+		instance.setStatus(theInstance.getStatus());
+		instance.setCombinedRecordsProcessed(theInstance.getCombinedRecordsProcessed());
+		instance.setCombinedRecordsProcessedPerSecond(theInstance.getCombinedRecordsProcessedPerSecond());
+		instance.setTotalElapsedMillis(theInstance.getTotalElapsedMillis());
+		instance.setWorkChunksPurged(theInstance.isWorkChunksPurged());
+		instance.setProgress(theInstance.getProgress());
+		myJobInstanceRepository.save(instance);
+	}
+
+	@Override
+	public void deleteInstanceAndChunks(String theInstanceId) {
+		myWorkChunkRepository.deleteAllForInstance(theInstanceId);
+		myJobInstanceRepository.deleteById(theInstanceId);
+	}
+
+	@Override
+	public void deleteChunks(String theInstanceId) {
+		myWorkChunkRepository.deleteAllForInstance(theInstanceId);
+	}
+
+	@Override
+	public void markInstanceAsCompleted(String theInstanceId) {
+		myJobInstanceRepository.updateInstanceStatus(theInstanceId, StatusEnum.COMPLETED);
 	}
 }

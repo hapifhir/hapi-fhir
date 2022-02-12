@@ -179,7 +179,7 @@ public class StopWatch {
 	 */
 	public String formatThroughput(long theNumOperations, TimeUnit theUnit) {
 		double throughput = getThroughput(theNumOperations, theUnit);
-		return new DecimalFormat("0.0").format(throughput);
+		return formatThroughput(throughput);
 	}
 
 	/**
@@ -234,21 +234,8 @@ public class StopWatch {
 	 * @see #formatThroughput(long, TimeUnit)
 	 */
 	public double getThroughput(long theNumOperations, TimeUnit theUnit) {
-		if (theNumOperations <= 0) {
-			return 0.0f;
-		}
-
-		long millisElapsed = Math.max(1, getMillis());
-		long periodMillis = theUnit.toMillis(1);
-
-		double denominator = ((double) millisElapsed) / ((double) periodMillis);
-
-		double throughput = (double) theNumOperations / denominator;
-		if (throughput > theNumOperations) {
-			throughput = theNumOperations;
-		}
-
-		return throughput;
+		long millis = getMillis();
+		return getThroughput(theNumOperations, millis, theUnit);
 	}
 
 	public void restart() {
@@ -284,44 +271,35 @@ public class StopWatch {
 		return formatMillis(getMillis());
 	}
 
-	private static class TaskTiming {
-		private long myStart;
-		private long myEnd;
-		private String myTaskName;
+	/**
+	 * Format a throughput number (output does not include units)
+	 */
+	public static String formatThroughput(double throughput) {
+		return new DecimalFormat("0.0").format(throughput);
+	}
 
-		public long getEnd() {
-			if (myEnd == 0) {
-				return now();
-			}
-			return myEnd;
+	/**
+	 * Calculate throughput
+	 *
+	 * @param theNumOperations The number of operations completed
+	 * @param theMillisElapsed The time elapsed
+	 * @param theUnit          The unit for the throughput
+	 */
+	public static double getThroughput(long theNumOperations, long theMillisElapsed, TimeUnit theUnit) {
+		if (theNumOperations <= 0) {
+			return 0.0f;
+		}
+		long millisElapsed = Math.max(1, theMillisElapsed);
+		long periodMillis = theUnit.toMillis(1);
+
+		double denominator = ((double) millisElapsed) / ((double) periodMillis);
+
+		double throughput = (double) theNumOperations / denominator;
+		if (throughput > theNumOperations) {
+			throughput = theNumOperations;
 		}
 
-		public TaskTiming setEnd(long theEnd) {
-			myEnd = theEnd;
-			return this;
-		}
-
-		public long getMillis() {
-			return getEnd() - getStart();
-		}
-
-		public long getStart() {
-			return myStart;
-		}
-
-		public TaskTiming setStart(long theStart) {
-			myStart = theStart;
-			return this;
-		}
-
-		public String getTaskName() {
-			return myTaskName;
-		}
-
-		public TaskTiming setTaskName(String theTaskName) {
-			myTaskName = theTaskName;
-			return this;
-		}
+		return throughput;
 	}
 
 	private static NumberFormat getDayFormat() {
@@ -427,6 +405,46 @@ public class StopWatch {
 	@VisibleForTesting
 	static void setNowForUnitTestForUnitTest(Long theNowForUnitTest) {
 		ourNowForUnitTest = theNowForUnitTest;
+	}
+
+	private static class TaskTiming {
+		private long myStart;
+		private long myEnd;
+		private String myTaskName;
+
+		public long getEnd() {
+			if (myEnd == 0) {
+				return now();
+			}
+			return myEnd;
+		}
+
+		public TaskTiming setEnd(long theEnd) {
+			myEnd = theEnd;
+			return this;
+		}
+
+		public long getMillis() {
+			return getEnd() - getStart();
+		}
+
+		public long getStart() {
+			return myStart;
+		}
+
+		public TaskTiming setStart(long theStart) {
+			myStart = theStart;
+			return this;
+		}
+
+		public String getTaskName() {
+			return myTaskName;
+		}
+
+		public TaskTiming setTaskName(String theTaskName) {
+			myTaskName = theTaskName;
+			return this;
+		}
 	}
 
 }
