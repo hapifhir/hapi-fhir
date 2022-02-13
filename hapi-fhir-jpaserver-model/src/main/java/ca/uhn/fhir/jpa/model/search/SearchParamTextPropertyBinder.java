@@ -26,7 +26,9 @@ import org.hibernate.search.engine.backend.document.model.dsl.IndexSchemaObjectF
 import org.hibernate.search.engine.backend.types.Aggregable;
 import org.hibernate.search.engine.backend.types.ObjectStructure;
 import org.hibernate.search.engine.backend.types.Projectable;
+import org.hibernate.search.engine.backend.types.Sortable;
 import org.hibernate.search.engine.backend.types.dsl.IndexFieldTypeFactory;
+import org.hibernate.search.engine.backend.types.dsl.StandardIndexFieldTypeOptionsStep;
 import org.hibernate.search.engine.backend.types.dsl.StringIndexFieldTypeOptionsStep;
 import org.hibernate.search.mapper.pojo.bridge.PropertyBridge;
 import org.hibernate.search.mapper.pojo.bridge.binding.PropertyBindingContext;
@@ -34,6 +36,9 @@ import org.hibernate.search.mapper.pojo.bridge.mapping.programmatic.PropertyBind
 import org.hibernate.search.mapper.pojo.bridge.runtime.PropertyBridgeWriteContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
 
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_EXACT;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_NORMALIZED;
@@ -88,6 +93,13 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 			.projectable(Projectable.NO)
 			.aggregable(Aggregable.YES);
 
+		StandardIndexFieldTypeOptionsStep<?, Instant> dateTimeFieldType = indexFieldTypeFactory.asInstant()
+			.projectable(Projectable.NO)
+			.sortable(Sortable.YES);
+
+		StandardIndexFieldTypeOptionsStep<?, Integer> dateTimeOrdinalFieldType = indexFieldTypeFactory.asInteger()
+			.projectable(Projectable.NO)
+			.sortable(Sortable.YES);
 
 		// the old style for _text and _contains
 		indexSchemaElement
@@ -128,7 +140,17 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 			spfield.fieldTemplate("token-system", keywordFieldType).matchingPathGlob(tokenPathGlob + ".system").multiValued();
 
 			// reference
+
+			// reference
 			spfield.fieldTemplate("reference-value", keywordFieldType).matchingPathGlob("*.reference.value").multiValued();
+
+			// date
+			String dateTimePathGlob = "*.dt";
+			spfield.objectFieldTemplate("datetimeIndex", ObjectStructure.FLATTENED).matchingPathGlob(dateTimePathGlob);
+			spfield.fieldTemplate("datetime-lower-ordinal", dateTimeOrdinalFieldType).matchingPathGlob(dateTimePathGlob + ".lower-ord");
+			spfield.fieldTemplate("datetime-lower-value", dateTimeFieldType).matchingPathGlob(dateTimePathGlob + ".lower");
+			spfield.fieldTemplate("datetime-upper-ordinal", dateTimeOrdinalFieldType).matchingPathGlob(dateTimePathGlob + ".upper-ord");
+			spfield.fieldTemplate("datetime-upper-value", dateTimeFieldType).matchingPathGlob(dateTimePathGlob + ".upper");
 
 			// last, since the globs are matched in declaration order, and * matches even nested nodes.
 			spfield.objectFieldTemplate("spObject", ObjectStructure.FLATTENED).matchingPathGlob("*");

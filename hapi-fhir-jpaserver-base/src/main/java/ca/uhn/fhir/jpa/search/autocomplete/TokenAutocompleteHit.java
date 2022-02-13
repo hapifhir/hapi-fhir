@@ -20,11 +20,7 @@ package ca.uhn.fhir.jpa.search.autocomplete;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.util.TerserUtil;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBaseCoding;
 
 import javax.annotation.Nonnull;
 
