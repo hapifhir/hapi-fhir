@@ -191,7 +191,18 @@ public class StopWatch {
 	 */
 	public String getEstimatedTimeRemaining(double theCompleteToDate, double theTotal) {
 		double millis = getMillis();
-		long millisRemaining = (long) (((theTotal / theCompleteToDate) * millis) - (millis));
+		return formatEstimatedTimeRemaining(theCompleteToDate, theTotal, millis);
+	}
+
+	/**
+	 * Given an amount of something completed so far, and a total amount, calculates how long it will take for something to complete
+	 *
+	 * @param theCompleteToDate The amount so far
+	 * @param theTotal          The total (must be higher than theCompleteToDate
+	 * @return A formatted amount of time
+	 */
+	public static String formatEstimatedTimeRemaining(double theCompleteToDate, double theTotal, double millis) {
+		long millisRemaining = (long) (((theTotal / theCompleteToDate) * millis) - millis);
 		return formatMillis(millisRemaining);
 	}
 

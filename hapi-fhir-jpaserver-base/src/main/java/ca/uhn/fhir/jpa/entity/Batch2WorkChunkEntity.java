@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.batch2.model.StatusEnum;
 
+import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -14,6 +15,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -27,19 +30,21 @@ import static org.apache.commons.lang3.StringUtils.left;
 })
 public class Batch2WorkChunkEntity implements Serializable {
 
+	public static final int ERROR_MSG_MAX_LENGTH = 500;
 	private static final long serialVersionUID = -6202771941965780558L;
-	private static final int ERROR_MSG_MAX_LENGTH = 500;
-
 	@Id
 	@Column(name = "ID", length = ID_MAX_LENGTH)
 	private String myId;
 	@Column(name = "SEQ", nullable = false)
 	private int mySequence;
 	@Column(name = "CREATE_TIME", nullable = false)
+	@Temporal(TemporalType.TIMESTAMP)
 	private Date myCreateTime;
 	@Column(name = "START_TIME", nullable = true)
+	@Temporal(TemporalType.TIMESTAMP)
 	private Date myStartTime;
 	@Column(name = "END_TIME", nullable = true)
+	@Temporal(TemporalType.TIMESTAMP)
 	private Date myEndTime;
 	@Column(name = "RECORDS_PROCESSED", nullable = true)
 	private Integer myRecordsProcessed;
@@ -50,6 +55,7 @@ public class Batch2WorkChunkEntity implements Serializable {
 	@Column(name = "TGT_STEP_ID", length = ID_MAX_LENGTH, nullable = false)
 	private String myTargetStepId;
 	@Lob
+	@Basic(fetch = FetchType.LAZY)
 	@Column(name = "DATA", nullable = true, length = Integer.MAX_VALUE - 1)
 	private String mySerializedData;
 	@Column(name = "STAT", length = STATUS_MAX_LENGTH, nullable = false)
@@ -62,6 +68,16 @@ public class Batch2WorkChunkEntity implements Serializable {
 	private String myInstanceId;
 	@Column(name = "ERROR_MSG", length = ERROR_MSG_MAX_LENGTH, nullable = true)
 	private String myErrorMessage;
+	@Column(name = "ERROR_COUNT", nullable = false)
+	private int myErrorCount;
+
+	public int getErrorCount() {
+		return myErrorCount;
+	}
+
+	public void setErrorCount(int theErrorCount) {
+		myErrorCount = theErrorCount;
+	}
 
 	public String getErrorMessage() {
 		return myErrorMessage;

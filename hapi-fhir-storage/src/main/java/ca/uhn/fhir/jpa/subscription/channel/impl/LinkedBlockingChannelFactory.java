@@ -95,12 +95,12 @@ public class LinkedBlockingChannelFactory implements IChannelFactory {
 				} catch (InterruptedException e) {
 					Thread.currentThread().interrupt();
 					throw new RejectedExecutionException(Msg.code(568) + "Task " + theRunnable.toString() +
-						" rejected from " + e.toString());
+						" rejected from " + e);
 				}
 				ourLog.info("Slot become available after {}ms", sw.getMillis());
 			};
 			ThreadPoolExecutor executor = new ThreadPoolExecutor(
-				1,
+				theConcurrentConsumers,
 				theConcurrentConsumers,
 				0L,
 				TimeUnit.MILLISECONDS,

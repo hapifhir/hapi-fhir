@@ -58,11 +58,23 @@ public class WorkChunk implements IModelJson {
 	@JsonProperty(value = "errorMessage", access = JsonProperty.Access.READ_ONLY)
 	private String myErrorMessage;
 
+	@JsonProperty(value = "errorCount", access = JsonProperty.Access.READ_ONLY)
+	private int myErrorCount;
+
 	/**
 	 * Constructor
 	 */
 	public WorkChunk() {
 		super();
+	}
+
+	public int getErrorCount() {
+		return myErrorCount;
+	}
+
+	public WorkChunk setErrorCount(int theErrorCount) {
+		myErrorCount = theErrorCount;
+		return this;
 	}
 
 	public Date getStartTime() {
@@ -175,11 +187,12 @@ public class WorkChunk implements IModelJson {
 		myCreateTime = theCreateTime;
 	}
 
-	public void setErrorMessage(String theErrorMessage) {
-		myErrorMessage = theErrorMessage;
-	}
-
 	public String getErrorMessage() {
 		return myErrorMessage;
+	}
+
+	public WorkChunk setErrorMessage(String theErrorMessage) {
+		myErrorMessage = theErrorMessage;
+		return this;
 	}
 }

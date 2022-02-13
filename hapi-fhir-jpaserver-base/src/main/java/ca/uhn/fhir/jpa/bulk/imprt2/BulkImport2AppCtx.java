@@ -10,12 +10,13 @@ import org.springframework.context.annotation.Configuration;
 public class BulkImport2AppCtx {
 
 	public static final String PARAM_NDJSON_URL = "ndjson-url";
+	public static final String JOB_BULK_IMPORT_PULL = "BULK_IMPORT_PULL";
 
 	@Bean
 	public JobDefinition bulkImport2JobDefinition() {
 		return JobDefinition
 			.newBuilder()
-			.setJobDefinitionId("BULK_IMPORT_PULL")
+			.setJobDefinitionId(JOB_BULK_IMPORT_PULL)
 			.setJobDescription("FHIR Bulk Import using pull-based data source")
 			.setJobDefinitionVersion(1)
 			.addParameter(

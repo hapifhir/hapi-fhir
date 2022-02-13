@@ -28,9 +28,6 @@ public abstract class BaseBatch2Config {
 	}
 
 	@Bean
-	public abstract IJobPersistence batch2JobInstancePersister();
-
-	@Bean
 	public IJobCoordinator batch2JobCoordinator(@Autowired IChannelFactory theChannelFactory, IJobPersistence theJobInstancePersister, JobDefinitionRegistry theJobDefinitionRegistry) {
 		return new JobCoordinatorImpl(
 			batch2ProcessingChannelProducer(theChannelFactory),
@@ -48,14 +45,14 @@ public abstract class BaseBatch2Config {
 	@Bean
 	public IChannelProducer batch2ProcessingChannelProducer(@Autowired IChannelFactory theChannelFactory) {
 		ChannelProducerSettings settings = new ChannelProducerSettings()
-			.setConcurrentConsumers(1);
+			.setConcurrentConsumers(10);
 		return theChannelFactory.getOrCreateProducer(CHANNEL_NAME, JobWorkNotificationJsonMessage.class, settings);
 	}
 
 	@Bean
 	public IChannelReceiver batch2ProcessingChannelReceiver(@Autowired IChannelFactory theChannelFactory) {
 		ChannelConsumerSettings settings = new ChannelConsumerSettings()
-			.setConcurrentConsumers(1);
+			.setConcurrentConsumers(10);
 		return theChannelFactory.getOrCreateReceiver(CHANNEL_NAME, JobWorkNotificationJsonMessage.class, settings);
 	}
 

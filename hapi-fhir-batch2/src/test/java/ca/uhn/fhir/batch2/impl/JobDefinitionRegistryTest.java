@@ -2,6 +2,7 @@ package ca.uhn.fhir.batch2.impl;
 
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.model.JobDefinition;
+import ca.uhn.fhir.context.ConfigurationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -43,4 +44,34 @@ class JobDefinitionRegistryTest {
 		assertEquals(1, mySvc.getJobDefinition("A", 1).orElseThrow(()->new IllegalArgumentException()).getJobDefinitionVersion());
 		assertEquals(2, mySvc.getJobDefinition("A", 2).orElseThrow(()->new IllegalArgumentException()).getJobDefinitionVersion());
 	}
+
+	@Test
+	void testEnsureStepsHaveUniqueIds() {
+
+		try {
+			mySvc.addJobDefinition(JobDefinition
+				.newBuilder()
+				.setJobDefinitionId("A")
+				.setJobDefinitionVersion(2)
+				.addStep("S1", "S1", mock(IJobStepWorker.class))
+				.addStep("S1", "S2", mock(IJobStepWorker.class))
+				.build());
+		} catch (ConfigurationException e) {
+			assertEquals("A", e.getMessage());
+		}
+
+		try {
+			mySvc.addJobDefinition(JobDefinition
+				.newBuilder()
+				.setJobDefinitionId("A")
+				.setJobDefinitionVersion(2)
+				.addStep("S1", "S1", mock(IJobStepWorker.class))
+				.addStep("", "S2", mock(IJobStepWorker.class))
+				.build());
+		} catch (ConfigurationException e) {
+			assertEquals("A", e.getMessage());
+		}
+
+	}
+
 }

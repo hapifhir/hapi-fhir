@@ -121,7 +121,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		String instanceId = mySvc.storeNewInstance(instance);
 
 		JobInstance foundInstance = mySvc.fetchInstanceAndMarkInProgress(instanceId).orElseThrow(() -> new IllegalStateException());
-		assertEquals(JpaJobPersistenceImpl.ID_LENGTH, foundInstance.getInstanceId().length());
+		assertEquals(32, foundInstance.getInstanceId().length());
 		assertEquals("definition-id", foundInstance.getJobDefinitionId());
 		assertEquals(1, foundInstance.getJobDefinitionVersion());
 		assertEquals(StatusEnum.IN_PROGRESS, foundInstance.getStatus());
@@ -178,7 +178,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 		String id = mySvc.storeWorkChunk("definition-id", 1, "step-id", instanceId, 0, null);
 
-		WorkChunk chunk = mySvc.fetchWorkChunkAndMarkInProgress(id).orElseThrow(() -> new IllegalArgumentException());
+		WorkChunk chunk = mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(id).orElseThrow(() -> new IllegalArgumentException());
 		assertEquals(null, chunk.getData());
 	}
 
@@ -196,8 +196,8 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		assertNotNull(id);
 		runInTransaction(() -> assertEquals(StatusEnum.QUEUED, myWorkChunkRepository.findById(id).orElseThrow(() -> new IllegalArgumentException()).getStatus()));
 
-		WorkChunk chunk = mySvc.fetchWorkChunkAndMarkInProgress(id).orElseThrow(() -> new IllegalArgumentException());
-		assertEquals(JpaJobPersistenceImpl.ID_LENGTH, chunk.getInstanceId().length());
+		WorkChunk chunk = mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(id).orElseThrow(() -> new IllegalArgumentException());
+		assertEquals(32, chunk.getInstanceId().length());
 		assertEquals("definition-id", chunk.getJobDefinitionId());
 		assertEquals(1, chunk.getJobDefinitionVersion());
 		assertEquals(StatusEnum.IN_PROGRESS, chunk.getStatus());
@@ -216,7 +216,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 		sleepUntilTimeChanges();
 
-		WorkChunk chunk = mySvc.fetchWorkChunkAndMarkInProgress(chunkId).orElseThrow(() -> new IllegalArgumentException());
+		WorkChunk chunk = mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(chunkId).orElseThrow(() -> new IllegalArgumentException());
 		assertEquals(1, chunk.getSequence());
 		assertEquals(StatusEnum.IN_PROGRESS, chunk.getStatus());
 		assertNotNull(chunk.getCreateTime());
@@ -255,13 +255,13 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 		sleepUntilTimeChanges();
 
-		WorkChunk chunk = mySvc.fetchWorkChunkAndMarkInProgress(chunkId).orElseThrow(() -> new IllegalArgumentException());
+		WorkChunk chunk = mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(chunkId).orElseThrow(() -> new IllegalArgumentException());
 		assertEquals(1, chunk.getSequence());
 		assertEquals(StatusEnum.IN_PROGRESS, chunk.getStatus());
 
 		sleepUntilTimeChanges();
 
-		mySvc.markWorkChunkAsErrored(chunkId, "This is an error message");
+		mySvc.markWorkChunkAsErroredAndIncrementErrorCount(chunkId, "This is an error message");
 		runInTransaction(() -> {
 			Batch2WorkChunkEntity entity = myWorkChunkRepository.findById(chunkId).orElseThrow(() -> new IllegalArgumentException());
 			assertEquals(StatusEnum.ERRORED, entity.getStatus());
@@ -269,11 +269,29 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			assertNotNull(entity.getCreateTime());
 			assertNotNull(entity.getStartTime());
 			assertNotNull(entity.getEndTime());
+			assertEquals(1, entity.getErrorCount());
 			assertTrue(entity.getCreateTime().getTime() < entity.getStartTime().getTime());
 			assertTrue(entity.getStartTime().getTime() < entity.getEndTime().getTime());
 		});
 
+		// Mark errored again
 
+		mySvc.markWorkChunkAsErroredAndIncrementErrorCount(chunkId, "This is an error message 2");
+		runInTransaction(() -> {
+			Batch2WorkChunkEntity entity = myWorkChunkRepository.findById(chunkId).orElseThrow(() -> new IllegalArgumentException());
+			assertEquals(StatusEnum.ERRORED, entity.getStatus());
+			assertEquals("This is an error message 2", entity.getErrorMessage());
+			assertNotNull(entity.getCreateTime());
+			assertNotNull(entity.getStartTime());
+			assertNotNull(entity.getEndTime());
+			assertEquals(2, entity.getErrorCount());
+			assertTrue(entity.getCreateTime().getTime() < entity.getStartTime().getTime());
+			assertTrue(entity.getStartTime().getTime() < entity.getEndTime().getTime());
+		});
+
+		List<WorkChunk> chunks = mySvc.fetchWorkChunksWithoutData(instanceId, 100, 0);
+		assertEquals(1, chunks.size());
+		assertEquals(2, chunks.get(0).getErrorCount());
 	}
 
 	@Test
@@ -287,7 +305,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 		sleepUntilTimeChanges();
 
-		WorkChunk chunk = mySvc.fetchWorkChunkAndMarkInProgress(chunkId).orElseThrow(() -> new IllegalArgumentException());
+		WorkChunk chunk = mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(chunkId).orElseThrow(() -> new IllegalArgumentException());
 		assertEquals(1, chunk.getSequence());
 		assertEquals(StatusEnum.IN_PROGRESS, chunk.getStatus());
 
@@ -335,6 +353,8 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		instance.setCombinedRecordsProcessedPerSecond(22.0);
 		instance.setWorkChunksPurged(true);
 		instance.setProgress(0.5d);
+		instance.setErrorCount(3);
+		instance.setEstimatedTimeRemaining("32d");
 
 		mySvc.updateInstance(instance);
 
@@ -348,6 +368,8 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		assertEquals(instanceId, finalInstance.getInstanceId());
 		assertEquals(0.5d, finalInstance.getProgress());
 		assertTrue(finalInstance.isWorkChunksPurged());
+		assertEquals(3, finalInstance.getErrorCount());
+		assertEquals(instance.getEstimatedTimeRemaining(), finalInstance.getEstimatedTimeRemaining());
 	}
 
 	@Nonnull

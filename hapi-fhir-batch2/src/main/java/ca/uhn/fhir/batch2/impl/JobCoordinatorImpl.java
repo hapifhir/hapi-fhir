@@ -4,6 +4,7 @@ import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
+import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobDefinitionParameter;
@@ -19,6 +20,8 @@ import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import org.apache.commons.lang3.Validate;
@@ -41,12 +44,11 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class JobCoordinatorImpl implements IJobCoordinator {
+public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinator {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(JobCoordinatorImpl.class);
 	private final IChannelProducer myWorkChannelProducer;
 	private final IChannelReceiver myWorkChannelReceiver;
-	private final IJobPersistence myJobInstancePersister;
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final MessageHandler myReceiverHandler = new WorkChannelMessageHandler();
 
@@ -56,16 +58,16 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 	public JobCoordinatorImpl(
 		@Nonnull IChannelProducer theWorkChannelProducer,
 		@Nonnull IChannelReceiver theWorkChannelReceiver,
-		@Nonnull IJobPersistence theJobInstancePersister,
+		@Nonnull IJobPersistence theJobPersistence,
 		@Nonnull JobDefinitionRegistry theJobDefinitionRegistry) {
+		super(theJobPersistence);
 		myWorkChannelProducer = theWorkChannelProducer;
 		myWorkChannelReceiver = theWorkChannelReceiver;
-		myJobInstancePersister = theJobInstancePersister;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 	}
 
 	@Override
-	public void startJob(JobInstanceStartRequest theStartRequest) {
+	public String startJob(JobInstanceStartRequest theStartRequest) {
 		JobDefinition jobDefinition = myJobDefinitionRegistry
 			.getLatestJobDefinition(theStartRequest.getJobDefinitionId())
 			.orElseThrow(() -> new IllegalArgumentException("Unknown job definition ID: " + theStartRequest.getJobDefinitionId()));
@@ -83,10 +85,19 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 		instance.setStatus(StatusEnum.QUEUED);
 		instance.getParameters().addAll(theStartRequest.getParameters());
 
-		String instanceId = myJobInstancePersister.storeNewInstance(instance);
-		String chunkId = myJobInstancePersister.storeWorkChunk(jobDefinitionId, jobDefinitionVersion, firstStepId, instanceId, 0, null);
+		String instanceId = myJobPersistence.storeNewInstance(instance);
+		String chunkId = myJobPersistence.storeWorkChunk(jobDefinitionId, jobDefinitionVersion, firstStepId, instanceId, 0, null);
 
 		sendWorkChannelMessage(jobDefinitionId, jobDefinitionVersion, instanceId, firstStepId, chunkId);
+
+		return instanceId;
+	}
+
+	@Override
+	public JobInstance getInstance(String theInstanceId) {
+		return myJobPersistence
+			.fetchInstance(theInstanceId)
+			.orElseThrow(()->new ResourceNotFoundException("Unknown instance ID: " + UrlUtil.escapeUrlParam(theInstanceId)));
 	}
 
 	private void executeStep(@Nonnull WorkChunk theWorkChunk, String jobDefinitionId, String targetStepId, ListMultimap<String, JobInstanceParameter> parameters, IJobStepWorker worker, IJobDataSink dataSink) {
@@ -96,14 +107,19 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 		IJobStepWorker.RunOutcome outcome;
 		try {
 			outcome = worker.run(stepExecutionDetails, dataSink);
+			Validate.notNull(outcome, "Step worker returned null: %s", worker.getClass());
+		} catch (JobExecutionFailedException e) {
+			ourLog.error("Unrecoverable failure executing job {} step {}", jobDefinitionId, targetStepId, e);
+			myJobPersistence.markWorkChunkAsFailed(theWorkChunk.getId(), e.toString());
+			return;
 		} catch (Exception e) {
 			ourLog.error("Failure executing job {} step {}", jobDefinitionId, targetStepId, e);
-			myJobInstancePersister.markWorkChunkAsErrored(theWorkChunk.getId(), e.toString());
+			myJobPersistence.markWorkChunkAsErroredAndIncrementErrorCount(theWorkChunk.getId(), e.toString());
 			throw new InternalErrorException(e);
 		}
 
 		int recordsProcessed = outcome.getRecordsProcessed();
-		myJobInstancePersister.markWorkChunkAsCompletedAndClearData(theWorkChunk.getId(), recordsProcessed);
+		myJobPersistence.markWorkChunkAsCompletedAndClearData(theWorkChunk.getId(), recordsProcessed);
 
 	}
 
@@ -137,7 +153,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 
 		String chunkId = payload.getChunkId();
 		Validate.notNull(chunkId);
-		Optional<WorkChunk> chunkOpt = myJobInstancePersister.fetchWorkChunkAndMarkInProgress(chunkId);
+		Optional<WorkChunk> chunkOpt = myJobPersistence.fetchWorkChunkSetStartTimeAndMarkInProgress(chunkId);
 		if (!chunkOpt.isPresent()) {
 			ourLog.error("Unable to find chunk with ID {} - Aborting", chunkId);
 			return;
@@ -165,7 +181,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 				if (i == 0) {
 					firstStep = true;
 				}
-				if (i < definition.getSteps().size()) {
+				if (i < (definition.getSteps().size() - 1)) {
 					nextStep = definition.getSteps().get(i + 1);
 				}
 				break;
@@ -180,7 +196,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 
 		Validate.isTrue(chunk.getTargetStepId().equals(targetStep.getStepId()), "Chunk %s has target step %s but expected %s", chunkId, chunk.getTargetStepId(), targetStep.getStepId());
 
-		Optional<JobInstance> instanceOpt = myJobInstancePersister.fetchInstanceAndMarkInProgress(payload.getInstanceId());
+		Optional<JobInstance> instanceOpt = myJobPersistence.fetchInstanceAndMarkInProgress(payload.getInstanceId());
 		JobInstance instance = instanceOpt.orElseThrow(() -> new InternalErrorException("Unknown instance: " + payload.getInstanceId()));
 		String instanceId = instance.getInstanceId();
 
@@ -199,7 +215,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 		int workChunkCount = dataSink.getWorkChunkCount();
 		if (firstStep && workChunkCount == 0) {
 			ourLog.info("First step of job instance {} produced no work chunks, marking as completed", instanceId);
-			myJobInstancePersister.markInstanceAsCompleted(instanceId);
+			myJobPersistence.markInstanceAsCompleted(instanceId);
 		}
 	}
 
@@ -263,7 +279,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 			String instanceId = myInstanceId;
 			String targetStepId = mySecondStep.getStepId();
 			int sequence = myChunkCounter.getAndIncrement();
-			String chunkId = myJobInstancePersister.storeWorkChunk(jobDefinitionId, jobDefinitionVersion, targetStepId, instanceId, sequence, theData);
+			String chunkId = myJobPersistence.storeWorkChunk(jobDefinitionId, jobDefinitionVersion, targetStepId, instanceId, sequence, theData);
 
 			sendWorkChannelMessage(jobDefinitionId, jobDefinitionVersion, instanceId, targetStepId, chunkId);
 		}
@@ -287,8 +303,9 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 
 		@Override
 		public void accept(Map<String, Object> theData) {
-			ourLog.error("Illegal attempt to store data during final step of job " + myJobDefinitionId);
-			throw new UnsupportedOperationException();
+			String msg = "Illegal attempt to store data during final step of job " + myJobDefinitionId;
+			ourLog.error(msg);
+			throw new JobExecutionFailedException(msg);
 		}
 
 		@Override

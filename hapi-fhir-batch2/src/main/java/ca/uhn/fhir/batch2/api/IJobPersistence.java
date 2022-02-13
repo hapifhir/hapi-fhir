@@ -31,7 +31,7 @@ public interface IJobPersistence {
 	 * @param theChunkId The ID, as returned by {@link #storeWorkChunk(String, int, String, String, int, Map)}
 	 * @return The chunk of work
 	 */
-	Optional<WorkChunk> fetchWorkChunkAndMarkInProgress(String theChunkId);
+	Optional<WorkChunk> fetchWorkChunkSetStartTimeAndMarkInProgress(String theChunkId);
 
 	/**
 	 * Store a new job instance. This will be called when a new job instance is being kicked off.
@@ -65,7 +65,7 @@ public interface IJobPersistence {
 	 *
 	 * @param theChunkId The chunk ID
 	 */
-	void markWorkChunkAsErrored(String theChunkId, String theErrorMessage);
+	void markWorkChunkAsErroredAndIncrementErrorCount(String theChunkId, String theErrorMessage);
 
 	/**
 	 * Marks a given chunk as having failed (i.e. probably not recoverable)

@@ -140,7 +140,7 @@ public class JobCoordinatorImplTest {
 
 		when(myJobDefinitionRegistry.getJobDefinition(eq(JOB_DEFINITION_ID), eq(1))).thenReturn(Optional.of(createJobDefinition()));
 		when(myJobInstancePersister.fetchInstanceAndMarkInProgress(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
-		when(myJobInstancePersister.fetchWorkChunkAndMarkInProgress(eq(CHUNK_ID))).thenReturn(Optional.of(createWorkChunk().setTargetStepId(STEP_1)));
+		when(myJobInstancePersister.fetchWorkChunkSetStartTimeAndMarkInProgress(eq(CHUNK_ID))).thenReturn(Optional.of(createWorkChunk().setTargetStepId(STEP_1)));
 		when(myStep1Worker.run(any(), any())).thenAnswer(t -> {
 			IJobDataSink sink = t.getArgument(1, IJobDataSink.class);
 			sink.accept(Collections.singletonMap("key", "value"));
@@ -160,7 +160,7 @@ public class JobCoordinatorImplTest {
 		assertEquals(1, params.get(PARAM_1_NAME).size());
 		assertEquals(PARAM_1_VALUE, params.get(PARAM_1_NAME).get(0).getValue());
 
-		verify(myJobInstancePersister, times(99)).markWorkChunkAsCompletedAndClearData(any(), eq(50));
+		verify(myJobInstancePersister, times(1)).markWorkChunkAsCompletedAndClearData(any(), eq(50));
 	}
 
 	/**
@@ -174,7 +174,7 @@ public class JobCoordinatorImplTest {
 
 		when(myJobDefinitionRegistry.getJobDefinition(eq(JOB_DEFINITION_ID), eq(1))).thenReturn(Optional.of(createJobDefinition()));
 		when(myJobInstancePersister.fetchInstanceAndMarkInProgress(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
-		when(myJobInstancePersister.fetchWorkChunkAndMarkInProgress(eq(CHUNK_ID))).thenReturn(Optional.of(createWorkChunk().setTargetStepId(STEP_1)));
+		when(myJobInstancePersister.fetchWorkChunkSetStartTimeAndMarkInProgress(eq(CHUNK_ID))).thenReturn(Optional.of(createWorkChunk().setTargetStepId(STEP_1)));
 		when(myStep1Worker.run(any(), any())).thenReturn(new IJobStepWorker.RunOutcome(50));
 		mySvc.start();
 
@@ -198,7 +198,7 @@ public class JobCoordinatorImplTest {
 
 		// Setup
 
-		when(myJobInstancePersister.fetchWorkChunkAndMarkInProgress(eq(CHUNK_ID))).thenReturn(Optional.of(createWorkChunk()));
+		when(myJobInstancePersister.fetchWorkChunkSetStartTimeAndMarkInProgress(eq(CHUNK_ID))).thenReturn(Optional.of(createWorkChunk()));
 		when(myJobDefinitionRegistry.getJobDefinition(eq(JOB_DEFINITION_ID), eq(1))).thenReturn(Optional.of(createJobDefinition()));
 		when(myJobInstancePersister.fetchInstanceAndMarkInProgress(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
 		when(myStep2Worker.run(any(), any())).thenReturn(new IJobStepWorker.RunOutcome(50));
@@ -225,7 +225,7 @@ public class JobCoordinatorImplTest {
 		// Setup
 
 		when(myJobDefinitionRegistry.getJobDefinition(eq(JOB_DEFINITION_ID), eq(1))).thenReturn(Optional.of(createJobDefinition()));
-		when(myJobInstancePersister.fetchWorkChunkAndMarkInProgress(eq(CHUNK_ID))).thenReturn(Optional.of(createWorkChunk()));
+		when(myJobInstancePersister.fetchWorkChunkSetStartTimeAndMarkInProgress(eq(CHUNK_ID))).thenReturn(Optional.of(createWorkChunk()));
 		when(myJobInstancePersister.fetchInstanceAndMarkInProgress(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
 		when(myStep2Worker.run(any(), any())).thenThrow(new NullPointerException("This is an error message"));
 		mySvc.start();
@@ -247,8 +247,64 @@ public class JobCoordinatorImplTest {
 		assertEquals(1, params.get(PARAM_1_NAME).size());
 		assertEquals(PARAM_1_VALUE, params.get(PARAM_1_NAME).get(0).getValue());
 
-		verify(myJobInstancePersister, times(1)).markWorkChunkAsErrored(eq(CHUNK_ID), myErrorMessageCaptor.capture());
+		verify(myJobInstancePersister, times(1)).markWorkChunkAsErroredAndIncrementErrorCount(eq(CHUNK_ID), myErrorMessageCaptor.capture());
 		assertEquals("java.lang.NullPointerException: This is an error message", myErrorMessageCaptor.getValue());
+	}
+
+	@Test
+	public void testPerformStep_FinalStep() {
+
+		// Setup
+
+		when(myJobInstancePersister.fetchWorkChunkSetStartTimeAndMarkInProgress(eq(CHUNK_ID))).thenReturn(Optional.of(createWorkChunk().setTargetStepId(STEP_3)));
+		when(myJobDefinitionRegistry.getJobDefinition(eq(JOB_DEFINITION_ID), eq(1))).thenReturn(Optional.of(createJobDefinition()));
+		when(myJobInstancePersister.fetchInstanceAndMarkInProgress(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
+		when(myStep3Worker.run(any(), any())).thenReturn(new IJobStepWorker.RunOutcome(50));
+		mySvc.start();
+
+		// Execute
+
+		myWorkChannelReceiver.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_3, CHUNK_ID)));
+
+		// Verify
+
+		verify(myStep3Worker, times(1)).run(myStepExecutionDetailsCaptor.capture(), any());
+		ListMultimap<String, JobInstanceParameter> params = myStepExecutionDetailsCaptor.getValue().getParameters();
+		assertEquals(1, params.size());
+		assertEquals(1, params.get(PARAM_1_NAME).size());
+		assertEquals(PARAM_1_VALUE, params.get(PARAM_1_NAME).get(0).getValue());
+
+		verify(myJobInstancePersister, times(1)).markWorkChunkAsCompletedAndClearData(eq(CHUNK_ID), eq(50));
+	}
+
+	@Test
+	public void testPerformStep_FinalStep_PreventChunkWriting() {
+
+		// Setup
+
+		when(myJobInstancePersister.fetchWorkChunkSetStartTimeAndMarkInProgress(eq(CHUNK_ID))).thenReturn(Optional.of(createWorkChunk().setTargetStepId(STEP_3)));
+		when(myJobDefinitionRegistry.getJobDefinition(eq(JOB_DEFINITION_ID), eq(1))).thenReturn(Optional.of(createJobDefinition()));
+		when(myJobInstancePersister.fetchInstanceAndMarkInProgress(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
+		when(myStep3Worker.run(any(), any())).thenAnswer(t->{
+			IJobDataSink sink = t.getArgument(1, IJobDataSink.class);
+			sink.accept(Collections.singletonMap("key", "value"));
+			return new IJobStepWorker.RunOutcome(50);
+		});
+		mySvc.start();
+
+		// Execute
+
+		myWorkChannelReceiver.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_3, CHUNK_ID)));
+
+		// Verify
+
+		verify(myStep3Worker, times(1)).run(myStepExecutionDetailsCaptor.capture(), any());
+		ListMultimap<String, JobInstanceParameter> params = myStepExecutionDetailsCaptor.getValue().getParameters();
+		assertEquals(1, params.size());
+		assertEquals(1, params.get(PARAM_1_NAME).size());
+		assertEquals(PARAM_1_VALUE, params.get(PARAM_1_NAME).get(0).getValue());
+
+		verify(myJobInstancePersister, times(1)).markWorkChunkAsFailed(eq(CHUNK_ID), any());
 	}
 
 	@Test
@@ -257,7 +313,7 @@ public class JobCoordinatorImplTest {
 		// Setup
 
 		when(myJobDefinitionRegistry.getJobDefinition(eq(JOB_DEFINITION_ID), eq(1))).thenReturn(Optional.empty());
-		when(myJobInstancePersister.fetchWorkChunkAndMarkInProgress(eq(CHUNK_ID))).thenReturn(Optional.of(createWorkChunk()));
+		when(myJobInstancePersister.fetchWorkChunkSetStartTimeAndMarkInProgress(eq(CHUNK_ID))).thenReturn(Optional.of(createWorkChunk()));
 		mySvc.start();
 
 		// Execute
@@ -283,7 +339,7 @@ public class JobCoordinatorImplTest {
 
 		// Setup
 
-		when(myJobInstancePersister.fetchWorkChunkAndMarkInProgress(eq(CHUNK_ID))).thenReturn(Optional.empty());
+		when(myJobInstancePersister.fetchWorkChunkSetStartTimeAndMarkInProgress(eq(CHUNK_ID))).thenReturn(Optional.empty());
 		mySvc.start();
 
 		// Execute
@@ -306,7 +362,7 @@ public class JobCoordinatorImplTest {
 			.addParameter(PARAM_1_NAME, "Param 1", JobDefinitionParameter.ParamTypeEnum.STRING, true, false)
 			.addStep(STEP_1, "Step 1", myStep1Worker)
 			.addStep(STEP_2, "Step 2", myStep2Worker)
-			.addStep(STEP_2, "Step 3", myStep3Worker)
+			.addStep(STEP_3, "Step 3", myStep3Worker)
 			.build();
 	}
 

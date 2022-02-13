@@ -28,6 +28,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 public class ConsumeFilesStep implements IJobStepWorker {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ConsumeFilesStep.class);
@@ -52,7 +54,10 @@ public class ConsumeFilesStep implements IJobStepWorker {
 		LineIterator lineIter = new LineIterator(new StringReader(ndjson));
 		List<IBaseResource> resources = new ArrayList<>();
 		while (lineIter.hasNext()) {
-			resources.add(jsonParser.parseResource(lineIter.next()));
+			String next = lineIter.next();
+			if (isNotBlank(next)) {
+				resources.add(jsonParser.parseResource(next));
+			}
 		}
 
 		ourLog.info("Bulk loading {} resources from source {}", resources.size(), sourceName);

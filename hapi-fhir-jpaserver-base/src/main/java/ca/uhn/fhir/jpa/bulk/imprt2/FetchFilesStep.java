@@ -17,21 +17,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class FetchFilesStep implements IJobStepWorker {
 	public static final String KEY_NDJSON = "ndjson";
-	private static final Logger ourLog = LoggerFactory.getLogger(FetchFilesStep.class);
 	public static final String KEY_SOURCE_NAME = "sourceName";
+	private static final Logger ourLog = LoggerFactory.getLogger(FetchFilesStep.class);
 
 	@Override
 	public RunOutcome run(StepExecutionDetails theStepExecutionDetails, IJobDataSink theDataSink) {
 		try (CloseableHttpClient httpClient = newHttpClient()) {
-
-			int fileCount = 0;
 
 			List<String> urls = theStepExecutionDetails.getParameterValues(BulkImport2AppCtx.PARAM_NDJSON_URL);
 			for (String nextUrl : urls) {
@@ -55,10 +52,9 @@ public class FetchFilesStep implements IJobStepWorker {
 				data.put(KEY_SOURCE_NAME, nextUrl);
 				theDataSink.accept(data);
 
-				fileCount++;
 			}
 
-			return new RunOutcome(fileCount);
+			return new RunOutcome(0);
 
 		} catch (IOException e) {
 			throw new InternalErrorException(e);

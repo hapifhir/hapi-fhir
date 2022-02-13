@@ -12,6 +12,21 @@ public class JobInstanceParameter implements IModelJson {
 	@JsonProperty("value")
 	private String myValue;
 
+	/**
+	 * Constructor
+	 */
+	public JobInstanceParameter() {
+		super();
+	}
+
+	/**
+	 * Constructor
+	 */
+	public JobInstanceParameter(String theName, String theValue) {
+		myName = theName;
+		myValue = theValue;
+	}
+
 	public String getName() {
 		return myName;
 	}

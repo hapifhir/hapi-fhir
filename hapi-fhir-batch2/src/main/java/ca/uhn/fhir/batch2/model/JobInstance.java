@@ -1,7 +1,11 @@
 package ca.uhn.fhir.batch2.model;
 
+import ca.uhn.fhir.jpa.util.JsonDateDeserializer;
+import ca.uhn.fhir.jpa.util.JsonDateSerializer;
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.apache.commons.lang3.Validate;
 
 import javax.annotation.Nonnull;
@@ -27,12 +31,18 @@ public class JobInstance implements IModelJson {
 	private List<JobInstanceParameter> myParameters;
 
 	@JsonProperty(value = "createTime")
+	@JsonSerialize(using = JsonDateSerializer.class)
+	@JsonDeserialize(using = JsonDateDeserializer.class)
 	private Date myCreateTime;
 
 	@JsonProperty(value = "startTime")
+	@JsonSerialize(using = JsonDateSerializer.class)
+	@JsonDeserialize(using = JsonDateDeserializer.class)
 	private Date myStartTime;
 
 	@JsonProperty(value = "endTime")
+	@JsonSerialize(using = JsonDateSerializer.class)
+	@JsonDeserialize(using = JsonDateDeserializer.class)
 	private Date myEndTime;
 
 	@JsonProperty(value = "combinedRecordsProcessed")
@@ -49,6 +59,31 @@ public class JobInstance implements IModelJson {
 
 	@JsonProperty(value = "progress", access = JsonProperty.Access.READ_ONLY)
 	private double myProgress;
+
+	@JsonProperty(value = "errorMessage", access = JsonProperty.Access.READ_ONLY)
+	private String myErrorMessage;
+
+	@JsonProperty(value = "errorCount", access = JsonProperty.Access.READ_ONLY)
+	private int myErrorCount;
+
+	@JsonProperty(value = "estimatedCompletion", access = JsonProperty.Access.READ_ONLY)
+	private String myEstimatedTimeRemaining;
+
+	public int getErrorCount() {
+		return myErrorCount;
+	}
+
+	public void setErrorCount(int theErrorCount) {
+		myErrorCount = theErrorCount;
+	}
+
+	public String getEstimatedTimeRemaining() {
+		return myEstimatedTimeRemaining;
+	}
+
+	public void setEstimatedTimeRemaining(String theEstimatedTimeRemaining) {
+		myEstimatedTimeRemaining = theEstimatedTimeRemaining;
+	}
 
 	public boolean isWorkChunksPurged() {
 		return myWorkChunksPurged;
@@ -150,11 +185,19 @@ public class JobInstance implements IModelJson {
 		myTotalElapsedMillis = theTotalElapsedMillis;
 	}
 
+	public double getProgress() {
+		return myProgress;
+	}
+
 	public void setProgress(double theProgress) {
 		myProgress = theProgress;
 	}
 
-	public double getProgress() {
-		return myProgress;
+	public String getErrorMessage() {
+		return myErrorMessage;
+	}
+
+	public void setErrorMessage(String theErrorMessage) {
+		myErrorMessage = theErrorMessage;
 	}
 }

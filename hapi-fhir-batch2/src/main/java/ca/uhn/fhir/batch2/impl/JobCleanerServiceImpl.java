@@ -12,9 +12,12 @@ import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.quartz.JobExecutionContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -22,26 +25,33 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * This class performs regular polls of the stored jobs in order to
- * calculate statistics and delete expired tasks
+ * calculate statistics and delete expired tasks. This class does
+ * the following things:
+ * <ul>
+ *    <li>For instances that are IN_PROGRESS, calculates throughput and percent complete</li>
+ *    <li>For instances that are IN_PROGRESS where all chunks are COMPLETE, marks instance as COMPLETE</li>
+ *    <li>For instances that are COMPLETE, purges chunk data</li>
+ *    <li>For instances that are IN_PROGRESS where at least one chunk is FAILED, marks instance as FAILED and propagates the error message to the instance, and purges chunk data</li>
+ *    <li>For instances that are IN_PROGRESS with an error message set where no chunks are ERRORED or FAILED, clears the error message in the instance (meaning presumably there was an error but it cleared)</li>
+ * </ul>
  */
-public class JobCleanerServiceImpl implements IJobCleanerService {
+public class JobCleanerServiceImpl extends BaseJobService implements IJobCleanerService {
 
 	public static final int INSTANCES_PER_PASS = 100;
+	public static final long PURGE_THRESHOLD = 7L * DateUtils.MILLIS_PER_DAY;
+	private static final Logger ourLog = LoggerFactory.getLogger(JobCleanerServiceImpl.class);
+	private final ISchedulerService mySchedulerService;
 
-	private ISchedulerService mySchedulerService;
-	private IJobPersistence myJobPersistence;
 
 	/**
 	 * Constructor
 	 */
 	public JobCleanerServiceImpl(ISchedulerService theSchedulerService, IJobPersistence theJobPersistence) {
+		super(theJobPersistence);
 		Validate.notNull(theSchedulerService);
-		Validate.notNull(theJobPersistence);
 
 		mySchedulerService = theSchedulerService;
-		myJobPersistence = theJobPersistence;
 	}
-
 
 	@PostConstruct
 	public void start() {
@@ -52,6 +62,9 @@ public class JobCleanerServiceImpl implements IJobCleanerService {
 
 	@Override
 	public void runCleanupPass() {
+
+		// NB: If you add any new logic, update the class javadoc
+
 		Set<String> processedInstanceIds = new HashSet<>();
 		for (int page = 0; ; page++) {
 			List<JobInstance> instances = myJobPersistence.fetchInstances(INSTANCES_PER_PASS, page);
@@ -69,70 +82,136 @@ public class JobCleanerServiceImpl implements IJobCleanerService {
 	}
 
 	private void cleanupInstance(JobInstance theInstance) {
+		switch (theInstance.getStatus()) {
+			case QUEUED:
+			case IN_PROGRESS:
+			case ERRORED:
+				break;
+			case COMPLETED:
+			case FAILED:
+				if (theInstance.getEndTime() != null) {
+					long cutoff = System.currentTimeMillis() - PURGE_THRESHOLD;
+					if (theInstance.getEndTime().getTime() < cutoff) {
+						ourLog.info("Deleting old job instance {}", theInstance.getInstanceId());
+						myJobPersistence.deleteInstanceAndChunks(theInstance.getInstanceId());
+						return;
+					}
+				}
+				break;
+		}
+
 		if (theInstance.getStatus() == StatusEnum.IN_PROGRESS) {
+			calculateInstanceProgress(theInstance);
+		}
 
-			int resourcesProcessed = 0;
-			int incompleteChunkCount = 0;
-			int completeChunkCount = 0;
-			Long earliestStartTime = null;
-			Long latestStartTime = null;
-			for (int page = 0; ; page++) {
-				List<WorkChunk> chunks = myJobPersistence.fetchWorkChunksWithoutData(theInstance.getInstanceId(), INSTANCES_PER_PASS, page);
+		if ((theInstance.getStatus() == StatusEnum.COMPLETED || theInstance.getStatus() == StatusEnum.FAILED) && !theInstance.isWorkChunksPurged()) {
+			theInstance.setWorkChunksPurged(true);
+			myJobPersistence.deleteChunks(theInstance.getInstanceId());
+			myJobPersistence.updateInstance(theInstance);
+		}
 
-				for (WorkChunk chunk : chunks) {
-					if (chunk.getRecordsProcessed() != null) {
-						resourcesProcessed += chunk.getRecordsProcessed();
-					}
-					if (chunk.getStartTime() != null) {
-						if (earliestStartTime == null || earliestStartTime > chunk.getStartTime().getTime()) {
-							earliestStartTime = chunk.getStartTime().getTime();
-						}
-					}
-					if (chunk.getEndTime() != null) {
-						if (latestStartTime == null || latestStartTime < chunk.getEndTime().getTime()) {
-							latestStartTime = chunk.getEndTime().getTime();
-						}
-					}
-					switch (chunk.getStatus()) {
-						case QUEUED:
-						case IN_PROGRESS:
-							incompleteChunkCount++;
-							break;
-						case COMPLETED:
-						case ERRORED:
-						case FAILED:
-							completeChunkCount++;
-							break;
+	}
+
+	private void calculateInstanceProgress(JobInstance theInstance) {
+		int resourcesProcessed = 0;
+		int incompleteChunkCount = 0;
+		int completeChunkCount = 0;
+		int erroredChunkCount = 0;
+		int failedChunkCount = 0;
+		int errorCountForAllStatuses = 0;
+		Long earliestStartTime = null;
+		Long latestEndTime = null;
+		String errorMessage = null;
+		for (int page = 0; ; page++) {
+			List<WorkChunk> chunks = myJobPersistence.fetchWorkChunksWithoutData(theInstance.getInstanceId(), INSTANCES_PER_PASS, page);
+
+			for (WorkChunk chunk : chunks) {
+				errorCountForAllStatuses += chunk.getErrorCount();
+
+				if (chunk.getRecordsProcessed() != null) {
+					resourcesProcessed += chunk.getRecordsProcessed();
+				}
+				if (chunk.getStartTime() != null) {
+					if (earliestStartTime == null || earliestStartTime > chunk.getStartTime().getTime()) {
+						earliestStartTime = chunk.getStartTime().getTime();
 					}
 				}
-
-				if (chunks.size() < INSTANCES_PER_PASS) {
-					break;
+				if (chunk.getEndTime() != null) {
+					if (latestEndTime == null || latestEndTime < chunk.getEndTime().getTime()) {
+						latestEndTime = chunk.getEndTime().getTime();
+					}
+				}
+				switch (chunk.getStatus()) {
+					case QUEUED:
+					case IN_PROGRESS:
+						incompleteChunkCount++;
+						break;
+					case COMPLETED:
+						completeChunkCount++;
+						break;
+					case ERRORED:
+						erroredChunkCount++;
+						if (errorMessage == null) {
+							errorMessage = chunk.getErrorMessage();
+						}
+						break;
+					case FAILED:
+						failedChunkCount++;
+						errorMessage = chunk.getErrorMessage();
+						break;
 				}
 			}
 
-			theInstance.setCombinedRecordsProcessed(resourcesProcessed);
-			if (completeChunkCount >= 2) {
-
-				double percentComplete = (double) (incompleteChunkCount) / (double) (incompleteChunkCount + completeChunkCount);
-				theInstance.setProgress(percentComplete);
-
-				if (earliestStartTime != null && latestStartTime != null) {
-					long elapsedTime = latestStartTime - earliestStartTime;
-					if (elapsedTime > 0) {
-						double throughput = StopWatch.getThroughput(resourcesProcessed, elapsedTime, TimeUnit.SECONDS);
-						theInstance.setCombinedRecordsProcessedPerSecond(throughput);
-					}
-				}
-
-			}
-
-			if ((incompleteChunkCount + completeChunkCount) >= 2) {
-				myJobPersistence.updateInstance(theInstance);
+			if (chunks.size() < INSTANCES_PER_PASS) {
+				break;
 			}
 		}
 
-//		if (!theInstance.isWorkChunksPurged())
+		if (earliestStartTime != null) {
+			theInstance.setStartTime(new Date(earliestStartTime));
+		}
+		theInstance.setErrorCount(errorCountForAllStatuses);
+		theInstance.setCombinedRecordsProcessed(resourcesProcessed);
+
+		if (completeChunkCount >= 2) {
+
+			double percentComplete = (double) (completeChunkCount) / (double) (incompleteChunkCount + completeChunkCount + failedChunkCount);
+			theInstance.setProgress(percentComplete);
+
+			if (incompleteChunkCount == 0) {
+				theInstance.setStatus(StatusEnum.COMPLETED);
+			}
+
+			if (earliestStartTime != null && latestEndTime != null) {
+				long elapsedTime = latestEndTime - earliestStartTime;
+				if (elapsedTime > 0) {
+					double throughput = StopWatch.getThroughput(resourcesProcessed, elapsedTime, TimeUnit.SECONDS);
+					theInstance.setCombinedRecordsProcessedPerSecond(throughput);
+
+					String estimatedTimeRemaining = StopWatch.formatEstimatedTimeRemaining(completeChunkCount, (completeChunkCount + incompleteChunkCount), elapsedTime);
+					theInstance.setEstimatedTimeRemaining(estimatedTimeRemaining);
+				}
+			}
+
+		}
+
+		if (completeChunkCount > 0 || erroredChunkCount > 0 || failedChunkCount > 0) {
+			if (incompleteChunkCount == 0 && latestEndTime != null) {
+				theInstance.setEndTime(new Date(latestEndTime));
+			}
+		}
+
+		theInstance.setErrorMessage(errorMessage);
+
+		if (failedChunkCount > 0) {
+			theInstance.setStatus(StatusEnum.FAILED);
+			myJobPersistence.updateInstance(theInstance);
+			return;
+		}
+
+		if ((incompleteChunkCount + completeChunkCount) >= 2 || errorCountForAllStatuses > 0) {
+			myJobPersistence.updateInstance(theInstance);
+		}
 
 	}
 
