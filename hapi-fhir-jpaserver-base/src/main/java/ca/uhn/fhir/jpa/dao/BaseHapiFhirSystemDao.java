@@ -155,21 +155,37 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 			if (ids.size() >= 2) {
 				List<ResourceTable> loadedResourceTableEntries = preFetchIndexes(ids, "forcedId", "myForcedId");
 
-				if (loadedResourceTableEntries.stream().anyMatch(t -> t.isParamsStringPopulated())) {
-					preFetchIndexes(ids, "string", "myParamsString");
+				List<Long> entityIds;
+
+				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isParamsStringPopulated()).map(t->t.getId()).collect(Collectors.toList());
+				if (entityIds.size() > 0) {
+					preFetchIndexes(entityIds, "string", "myParamsString");
 				}
-				if (loadedResourceTableEntries.stream().anyMatch(t -> t.isParamsTokenPopulated())) {
-					preFetchIndexes(ids, "token", "myParamsToken");
+
+				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isParamsTokenPopulated()).map(t->t.getId()).collect(Collectors.toList());
+				if (entityIds.size() > 0) {
+					preFetchIndexes(entityIds, "token", "myParamsToken");
 				}
-				if (loadedResourceTableEntries.stream().anyMatch(t -> t.isParamsDatePopulated())) {
-					preFetchIndexes(ids, "date", "myParamsDate");
+
+				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isParamsDatePopulated()).map(t->t.getId()).collect(Collectors.toList());
+				if (entityIds.size() > 0) {
+					preFetchIndexes(entityIds, "date", "myParamsDate");
 				}
-				if (loadedResourceTableEntries.stream().anyMatch(t -> t.isParamsDatePopulated())) {
-					preFetchIndexes(ids, "quantity", "myParamsQuantity");
+
+				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isParamsQuantityPopulated()).map(t->t.getId()).collect(Collectors.toList());
+				if (entityIds.size() > 0) {
+					preFetchIndexes(entityIds, "quantity", "myParamsQuantity");
 				}
-				if (loadedResourceTableEntries.stream().anyMatch(t -> t.isHasLinks())) {
-					preFetchIndexes(ids, "resourceLinks", "myResourceLinks");
+
+				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isHasLinks()).map(t->t.getId()).collect(Collectors.toList());
+				if (entityIds.size() > 0) {
+					preFetchIndexes(entityIds, "resourceLinks", "myResourceLinks");
 				}
+
+//				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isHasTags()).map(t->t.getId()).collect(Collectors.toList());
+//				if (entityIds.size() > 0) {
+//					preFetchIndexes(entityIds, "tags", "myTags");
+//				}
 
 				new QueryChunker<ResourceTable>().chunk(loadedResourceTableEntries, SearchBuilder.getMaximumPageSize() / 2, entries -> {
 
