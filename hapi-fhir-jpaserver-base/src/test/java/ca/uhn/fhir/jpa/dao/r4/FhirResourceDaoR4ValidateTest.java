@@ -197,14 +197,14 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		oo = validateAndReturnOutcome(obs);
 		encoded = encode(oo);
 		ourLog.info(encoded);
-		assertTrue(oo.getIssueFirstRep().getDiagnostics().contains("No issues detected during validation"));
+		assertTrue(oo.getIssueFirstRep().getDiagnostics().contains("The code provided (http://cs#code1) is not in the value set http://vs, and a code from this value set is required"));
 
 		// Invalid code
 		obs.setValue(new Quantity().setSystem("http://cs").setCode("code99").setValue(123));
 		oo = validateAndReturnOutcome(obs);
 		encoded = encode(oo);
 		ourLog.info(encoded);
-		assertTrue(oo.getIssueFirstRep().getDiagnostics().contains("No issues detected during validation"));
+		assertTrue(oo.getIssueFirstRep().getDiagnostics().contains("The code provided (http://cs#code99) is not in the value set http://vs, and a code from this value set is required"));
 	}
 
 	@Test
