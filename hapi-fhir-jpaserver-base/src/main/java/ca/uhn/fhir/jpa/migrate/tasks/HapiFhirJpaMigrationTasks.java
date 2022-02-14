@@ -108,6 +108,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.addIndex("20211210.4", "FK_FORCEDID_RESOURCE")
 			.unique(true)
 			.withColumns("RESOURCE_PID")
+			.doNothing()//This migration was added in error, as this table already has a unique constraint on RESOURCE_PID and every database creates an index on anything that is unique.
 			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
 	}
 
