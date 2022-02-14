@@ -97,7 +97,26 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 	public JobInstance getInstance(String theInstanceId) {
 		return myJobPersistence
 			.fetchInstance(theInstanceId)
+			.map(t->massageInstanceForUserAccess(t))
 			.orElseThrow(()->new ResourceNotFoundException("Unknown instance ID: " + UrlUtil.escapeUrlParam(theInstanceId)));
+	}
+
+	private JobInstance massageInstanceForUserAccess(JobInstance theInstance) {
+		JobInstance retVal = new JobInstance(theInstance);
+
+		JobDefinition definition = getDefinitionOrThrowException(theInstance.getJobDefinitionId(), theInstance.getJobDefinitionVersion());
+
+		List<JobInstanceParameter> parameters = retVal.getParameters();
+		for (int i = 0; i < parameters.size(); i++) {
+			JobInstanceParameter next = parameters.get(i);
+			JobDefinitionParameter parameter = definition.getParameter(next.getName());
+			if (parameter.getType() == JobDefinitionParameter.ParamTypeEnum.PASSWORD) {
+				JobInstanceParameter newParameter = new JobInstanceParameter(next.getName(), "(***)");
+				parameters.set(i, newParameter);
+			}
+		}
+
+		return retVal;
 	}
 
 	private void executeStep(@Nonnull WorkChunk theWorkChunk, String jobDefinitionId, String targetStepId, ListMultimap<String, JobInstanceParameter> parameters, IJobStepWorker worker, IJobDataSink dataSink) {
@@ -162,13 +181,7 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 
 		String jobDefinitionId = payload.getJobDefinitionId();
 		int jobDefinitionVersion = payload.getJobDefinitionVersion();
-		Optional<JobDefinition> opt = myJobDefinitionRegistry.getJobDefinition(jobDefinitionId, jobDefinitionVersion);
-		if (!opt.isPresent()) {
-			String msg = "Unknown job definition ID[" + jobDefinitionId + "] version[" + jobDefinitionVersion + "]";
-			ourLog.warn(msg);
-			throw new InternalErrorException(msg);
-		}
-		JobDefinition definition = opt.get();
+		JobDefinition definition = getDefinitionOrThrowException(jobDefinitionId, jobDefinitionVersion);
 
 		JobDefinitionStep targetStep = null;
 		JobDefinitionStep nextStep = null;
@@ -217,6 +230,17 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 			ourLog.info("First step of job instance {} produced no work chunks, marking as completed", instanceId);
 			myJobPersistence.markInstanceAsCompleted(instanceId);
 		}
+	}
+
+	private JobDefinition getDefinitionOrThrowException(String jobDefinitionId, int jobDefinitionVersion) {
+		Optional<JobDefinition> opt = myJobDefinitionRegistry.getJobDefinition(jobDefinitionId, jobDefinitionVersion);
+		if (!opt.isPresent()) {
+			String msg = "Unknown job definition ID[" + jobDefinitionId + "] version[" + jobDefinitionVersion + "]";
+			ourLog.warn(msg);
+			throw new InternalErrorException(msg);
+		}
+		JobDefinition definition = opt.get();
+		return definition;
 	}
 
 	static ListMultimap<String, JobInstanceParameter> validateParameters(List<JobDefinitionParameter> theDefinitionParameters, List<JobInstanceParameter> theInstanceParameters) {

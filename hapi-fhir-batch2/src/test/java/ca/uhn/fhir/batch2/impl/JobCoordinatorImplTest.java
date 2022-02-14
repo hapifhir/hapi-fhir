@@ -29,6 +29,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.messaging.MessageDeliveryException;
 
 import javax.annotation.Nonnull;
@@ -36,8 +38,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import static java.util.Collections.singletonMap;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -63,6 +68,7 @@ public class JobCoordinatorImplTest {
 	public static final String STEP_3 = "STEP_3";
 	public static final String INSTANCE_ID = "INSTANCE-ID";
 	public static final String CHUNK_ID = "CHUNK-ID";
+	private static final Logger ourLog = LoggerFactory.getLogger(JobCoordinatorImplTest.class);
 	private final IChannelReceiver myWorkChannelReceiver = LinkedBlockingChannel.newSynchronous("receiver");
 	private JobCoordinatorImpl mySvc;
 	@Mock
@@ -91,6 +97,31 @@ public class JobCoordinatorImplTest {
 	@BeforeEach
 	public void beforeEach() {
 		mySvc = new JobCoordinatorImpl(myWorkChannelProducer, myWorkChannelReceiver, myJobInstancePersister, myJobDefinitionRegistry);
+	}
+
+	@Test
+	public void testFetchJob_PasswordsRedacted() {
+
+		// Setup
+
+		JobDefinition definition = createJobDefinition(
+			t -> t.addParameter("p2", "Second parameter", JobDefinitionParameter.ParamTypeEnum.PASSWORD, true, true)
+		);
+		JobInstance instance = createInstance()
+			.addParameter(new JobInstanceParameter("p2", "mypassword"));
+
+		when(myJobDefinitionRegistry.getJobDefinition(eq(JOB_DEFINITION_ID), eq(1))).thenReturn(Optional.of(definition));
+		when(myJobInstancePersister.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(instance));
+
+		// Execute
+
+		JobInstance outcome = mySvc.getInstance(INSTANCE_ID);
+		ourLog.info("Parameters: {}", outcome.getParameters());
+		assertThat(outcome.getParameters(), containsInAnyOrder(
+			new JobInstanceParameter("PARAM_1_NAME", "PARAM 1 VALUE"),
+			new JobInstanceParameter("p2", "(***)")
+		));
+
 	}
 
 	@Test
@@ -285,7 +316,7 @@ public class JobCoordinatorImplTest {
 		when(myJobInstancePersister.fetchWorkChunkSetStartTimeAndMarkInProgress(eq(CHUNK_ID))).thenReturn(Optional.of(createWorkChunk().setTargetStepId(STEP_3)));
 		when(myJobDefinitionRegistry.getJobDefinition(eq(JOB_DEFINITION_ID), eq(1))).thenReturn(Optional.of(createJobDefinition()));
 		when(myJobInstancePersister.fetchInstanceAndMarkInProgress(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
-		when(myStep3Worker.run(any(), any())).thenAnswer(t->{
+		when(myStep3Worker.run(any(), any())).thenAnswer(t -> {
 			IJobDataSink sink = t.getArgument(1, IJobDataSink.class);
 			sink.accept(Collections.singletonMap("key", "value"));
 			return new IJobStepWorker.RunOutcome(50);
@@ -353,8 +384,8 @@ public class JobCoordinatorImplTest {
 
 	}
 
-	private JobDefinition createJobDefinition() {
-		return JobDefinition
+	private JobDefinition createJobDefinition(Consumer<JobDefinition.Builder>... theModifiers) {
+		JobDefinition.Builder builder = JobDefinition
 			.newBuilder()
 			.setJobDefinitionId(JOB_DEFINITION_ID)
 			.setJobDescription("This is a job description")
@@ -362,8 +393,13 @@ public class JobCoordinatorImplTest {
 			.addParameter(PARAM_1_NAME, "Param 1", JobDefinitionParameter.ParamTypeEnum.STRING, true, false)
 			.addStep(STEP_1, "Step 1", myStep1Worker)
 			.addStep(STEP_2, "Step 2", myStep2Worker)
-			.addStep(STEP_3, "Step 3", myStep3Worker)
-			.build();
+			.addStep(STEP_3, "Step 3", myStep3Worker);
+
+		for (Consumer<JobDefinition.Builder> next : theModifiers) {
+			next.accept(builder);
+		}
+
+		return builder.build();
 	}
 
 	@Nonnull

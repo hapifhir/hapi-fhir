@@ -14,7 +14,7 @@ public class JobDefinitionStep {
 	private final IJobStepWorker myJobStepWorker;
 
 	public JobDefinitionStep(@Nonnull String theStepId, @Nonnull String theStepDescription, @Nonnull IJobStepWorker theJobStepWorker) {
-		Validate.notBlank(theStepId);
+		Validate.notBlank(theStepId, "No step ID specified");
 		Validate.isTrue(theStepId.length() <= ID_MAX_LENGTH, "Maximum ID length is %d", ID_MAX_LENGTH);
 		Validate.notBlank(theStepDescription);
 		myStepId = theStepId;

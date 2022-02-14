@@ -33,6 +33,7 @@ import java.util.concurrent.TimeUnit;
  *    <li>For instances that are COMPLETE, purges chunk data</li>
  *    <li>For instances that are IN_PROGRESS where at least one chunk is FAILED, marks instance as FAILED and propagates the error message to the instance, and purges chunk data</li>
  *    <li>For instances that are IN_PROGRESS with an error message set where no chunks are ERRORED or FAILED, clears the error message in the instance (meaning presumably there was an error but it cleared)</li>
+ *    <li>For instances that are COMPLETE or FAILED and are old, delete them entirely</li>
  * </ul>
  */
 public class JobCleanerServiceImpl extends BaseJobService implements IJobCleanerService {
@@ -173,13 +174,16 @@ public class JobCleanerServiceImpl extends BaseJobService implements IJobCleaner
 		theInstance.setErrorCount(errorCountForAllStatuses);
 		theInstance.setCombinedRecordsProcessed(resourcesProcessed);
 
-		if (completeChunkCount >= 2) {
+		if (completeChunkCount > 1 || erroredChunkCount > 1) {
 
-			double percentComplete = (double) (completeChunkCount) / (double) (incompleteChunkCount + completeChunkCount + failedChunkCount);
+			double percentComplete = (double) (completeChunkCount) / (double) (incompleteChunkCount + completeChunkCount + failedChunkCount + erroredChunkCount);
 			theInstance.setProgress(percentComplete);
 
-			if (incompleteChunkCount == 0) {
+			if (incompleteChunkCount == 0 && erroredChunkCount == 0 && failedChunkCount == 0) {
 				theInstance.setStatus(StatusEnum.COMPLETED);
+			}
+			if (erroredChunkCount > 0) {
+				theInstance.setStatus(StatusEnum.ERRORED);
 			}
 
 			if (earliestStartTime != null && latestEndTime != null) {
@@ -195,8 +199,10 @@ public class JobCleanerServiceImpl extends BaseJobService implements IJobCleaner
 
 		}
 
-		if (completeChunkCount > 0 || erroredChunkCount > 0 || failedChunkCount > 0) {
-			if (incompleteChunkCount == 0 && latestEndTime != null) {
+		if (latestEndTime != null) {
+			if (failedChunkCount > 0) {
+				theInstance.setEndTime(new Date(latestEndTime));
+			} else if (completeChunkCount > 0 && incompleteChunkCount == 0 && erroredChunkCount == 0) {
 				theInstance.setEndTime(new Date(latestEndTime));
 			}
 		}
@@ -209,7 +215,7 @@ public class JobCleanerServiceImpl extends BaseJobService implements IJobCleaner
 			return;
 		}
 
-		if ((incompleteChunkCount + completeChunkCount) >= 2 || errorCountForAllStatuses > 0) {
+		if ((incompleteChunkCount + completeChunkCount + erroredChunkCount) >= 2 || errorCountForAllStatuses > 0) {
 			myJobPersistence.updateInstance(theInstance);
 		}
 

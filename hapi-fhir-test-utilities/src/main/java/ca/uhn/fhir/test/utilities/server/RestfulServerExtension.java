@@ -22,10 +22,6 @@ package ca.uhn.fhir.test.utilities.server;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.interceptor.api.Hook;
-import ca.uhn.fhir.interceptor.api.Interceptor;
-import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -36,19 +32,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServerExtension> {
-	private static final Logger ourLog = LoggerFactory.getLogger(RestfulServerExtension.class);
-	private final List<List<String>> myRequestHeaders = new ArrayList<>();
-	private final List<String> myRequestContentTypes = new ArrayList<>();
 	private FhirContext myFhirContext;
 	private List<Object> myProviders = new ArrayList<>();
 	private FhirVersionEnum myFhirVersion;
@@ -90,7 +79,6 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 		if (myServlet == null) {
 			myServlet = new RestfulServer(myFhirContext);
 			myServlet.setDefaultPrettyPrint(true);
-			myServlet.registerInterceptor(new RestfulServerExtension.ListenerExtension());
 			if (myProviders != null) {
 				myServlet.registerProviders(myProviders);
 			}
@@ -130,20 +118,9 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 		return myServlet;
 	}
 
-	public List<String> getRequestContentTypes() {
-		return myRequestContentTypes;
-	}
-
-	public List<List<String>> getRequestHeaders() {
-		return myRequestHeaders;
-	}
-
 	@Override
 	public void beforeEach(ExtensionContext theContext) throws Exception {
 		createContextIfNeeded();
-		myRequestContentTypes.clear();
-		myRequestHeaders.clear();
-
 		super.beforeEach(theContext);
 	}
 
@@ -176,35 +153,6 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 
 	public void unregisterAllInterceptors() {
 		myServlet.getInterceptorService().unregisterAllInterceptors();
-	}
-
-	@Interceptor
-	private class ListenerExtension {
-
-
-		@Hook(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED)
-		public void postProcessed(HttpServletRequest theRequest) {
-			String header = theRequest.getHeader(Constants.HEADER_CONTENT_TYPE);
-			if (isNotBlank(header)) {
-				myRequestContentTypes.add(header.replaceAll(";.*", ""));
-			} else {
-				myRequestContentTypes.add(null);
-			}
-
-			java.util.Enumeration<String> headerNamesEnum = theRequest.getHeaderNames();
-			List<String> requestHeaders = new ArrayList<>();
-			myRequestHeaders.add(requestHeaders);
-			while (headerNamesEnum.hasMoreElements()) {
-				String nextName = headerNamesEnum.nextElement();
-				Enumeration<String> valueEnum = theRequest.getHeaders(nextName);
-				while (valueEnum.hasMoreElements()) {
-					String nextValue = valueEnum.nextElement();
-					requestHeaders.add(nextName + ": " + nextValue);
-				}
-			}
-
-		}
-
 	}
 
 }

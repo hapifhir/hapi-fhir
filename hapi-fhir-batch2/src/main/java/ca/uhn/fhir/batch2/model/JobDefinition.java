@@ -6,6 +6,8 @@ import org.apache.commons.lang3.Validate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class JobDefinition {
 
@@ -16,6 +18,7 @@ public class JobDefinition {
 	private final List<JobDefinitionParameter> myParameters;
 	private final List<JobDefinitionStep> mySteps;
 	private final String myJobDescription;
+	private final Map<String, JobDefinitionParameter> myNameToParameter;
 
 	/**
 	 * Constructor
@@ -29,8 +32,11 @@ public class JobDefinition {
 		myJobDefinitionId = theJobDefinitionId;
 		myJobDefinitionVersion = theJobDefinitionVersion;
 		myJobDescription = theJobDescription;
-		myParameters = theParameters;
 		mySteps = theSteps;
+		myParameters = theParameters;
+		myNameToParameter = theParameters
+			.stream()
+			.collect(Collectors.toMap(t -> t.getName(), t -> t));
 	}
 
 	public String getJobDescription() {
@@ -63,6 +69,13 @@ public class JobDefinition {
 	 */
 	public List<JobDefinitionStep> getSteps() {
 		return mySteps;
+	}
+
+	/**
+	 * Fetch a parameter by name
+	 */
+	public JobDefinitionParameter getParameter(String theName) {
+		return myNameToParameter.get(theName);
 	}
 
 	public static Builder newBuilder() {
@@ -105,11 +118,11 @@ public class JobDefinition {
 		/**
 		 * Adds a processing steps for this job.
 		 *
-		 * @param theStepId A unique identifier for this step. This only needs to be unique within the scope
-		 *                  of the individual job definition (i.e. diuplicates are fine for different jobs, or
-		 *                  even different versions of the same job)
+		 * @param theStepId          A unique identifier for this step. This only needs to be unique within the scope
+		 *                           of the individual job definition (i.e. diuplicates are fine for different jobs, or
+		 *                           even different versions of the same job)
 		 * @param theStepDescription A description of this step
-		 * @param theStepWorker The worker that will actually perform this step
+		 * @param theStepWorker      The worker that will actually perform this step
 		 */
 		public Builder addStep(String theStepId, String theStepDescription, IJobStepWorker theStepWorker) {
 			mySteps.add(new JobDefinitionStep(theStepId, theStepDescription, theStepWorker));

@@ -9,7 +9,10 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class StepExecutionDetails {
 
@@ -50,7 +53,34 @@ public class StepExecutionDetails {
 		return myParameters
 			.get(theParamName)
 			.stream()
-			.map(t->t.getValue())
+			.map(t -> t.getValue())
+			.filter(t -> isNotBlank(t))
 			.collect(Collectors.toList());
+	}
+
+	public Optional<String> getParameterValue(@Nonnull String theParamName) {
+		return myParameters
+			.get(theParamName)
+			.stream()
+			.map(t -> t.getValue())
+			.filter(theValue -> isNotBlank(theValue))
+			.findFirst();
+	}
+
+	public Optional<Integer> getParameterValueInteger(@Nonnull String theParamName) {
+		return myParameters.get(theParamName)
+			.stream()
+			.filter(t -> isNotBlank(t.getValue()))
+			.map(t -> parseIntegerParam(t))
+			.findFirst();
+	}
+
+	private Integer parseIntegerParam(JobInstanceParameter theParameter) {
+		String value = theParameter.getValue();
+		try {
+			return Integer.parseInt(value);
+		} catch (NumberFormatException e) {
+			throw new JobExecutionFailedException("Invalid parameter value for parameter " + theParameter.getName() + ". Expected integer.");
+		}
 	}
 }

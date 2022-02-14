@@ -4,6 +4,8 @@ import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 public class JobInstanceParameter implements IModelJson {
 
@@ -25,6 +27,14 @@ public class JobInstanceParameter implements IModelJson {
 	public JobInstanceParameter(String theName, String theValue) {
 		myName = theName;
 		myValue = theValue;
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+			.append("name", myName)
+			.append("value", myValue)
+			.toString();
 	}
 
 	public String getName() {

@@ -69,6 +69,35 @@ public class JobInstance implements IModelJson {
 	@JsonProperty(value = "estimatedCompletion", access = JsonProperty.Access.READ_ONLY)
 	private String myEstimatedTimeRemaining;
 
+	/**
+	 * Constructor
+	 */
+	public JobInstance() {
+		super();
+	}
+
+	/**
+	 * Copy constructor
+	 */
+	public JobInstance(JobInstance theJobInstance) {
+		setJobDefinitionId(theJobInstance.getJobDefinitionId());
+		setJobDefinitionVersion(theJobInstance.getJobDefinitionVersion());
+		setInstanceId(theJobInstance.getInstanceId());
+		setEstimatedTimeRemaining(theJobInstance.getEstimatedTimeRemaining());
+		setTotalElapsedMillis(theJobInstance.getTotalElapsedMillis());
+		setCreateTime(theJobInstance.getCreateTime());
+		setStartTime(theJobInstance.getStartTime());
+		setEndTime(theJobInstance.getEndTime());
+		setErrorCount(theJobInstance.getErrorCount());
+		setStatus(theJobInstance.getStatus());
+		setErrorMessage(theJobInstance.getErrorMessage());
+		setWorkChunksPurged(theJobInstance.isWorkChunksPurged());
+		setProgress(theJobInstance.getProgress());
+		setCombinedRecordsProcessed(theJobInstance.getCombinedRecordsProcessed());
+		setCombinedRecordsProcessedPerSecond(theJobInstance.getCombinedRecordsProcessedPerSecond());
+		getParameters().addAll(theJobInstance.getParameters());
+	}
+
 	public int getErrorCount() {
 		return myErrorCount;
 	}
@@ -132,9 +161,10 @@ public class JobInstance implements IModelJson {
 		myInstanceId = theInstanceId;
 	}
 
-	public void addParameter(@Nonnull JobInstanceParameter theParameter) {
+	public JobInstance addParameter(@Nonnull JobInstanceParameter theParameter) {
 		Validate.notNull(theParameter);
 		getParameters().add(theParameter);
+		return this;
 	}
 
 	public Date getStartTime() {

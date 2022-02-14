@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.config.HapiFhirHibernateJpaDialect;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
@@ -49,6 +50,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 
 import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
@@ -80,6 +82,8 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 	public static final Pattern SINGLE_PARAMETER_MATCH_URL_PATTERN = Pattern.compile("^[^?]+[?][a-z0-9-]+=[^&,]+$");
 	private static final Logger ourLog = LoggerFactory.getLogger(TransactionProcessor.class);
+	@Autowired
+	private ApplicationContext myApplicationContext;
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	private EntityManager myEntityManager;
 	@Autowired(required = false)
@@ -271,38 +275,8 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				}
 			}
 
-
-			/*
-			 * Pre-fetch the resources we're touching in this transaction in mass - this reduced the
-			 * number of database round trips.
-			 *
-			 * The thresholds below are kind of arbitrary. It's not
-			 * actually guaranteed that this pre-fetching will help (e.g. if a Bundle contains
-			 * a bundle of NOP conditional creates for example, the pre-fetching is actually loading
-			 * more data than would otherwise be loaded).
-			 *
-			 * However, for realistic average workloads, this should reduce the number of round trips.
-			 */
-			if (idsToPreFetch.size() > 2) {
-				List<ResourceTable> loadedResourceTableEntries = preFetchIndexes(idsToPreFetch, "forcedId", "myForcedId");
-
-				if (loadedResourceTableEntries.stream().filter(t -> t.isParamsStringPopulated()).count() > 1) {
-					preFetchIndexes(idsToPreFetch, "string", "myParamsString");
-				}
-				if (loadedResourceTableEntries.stream().filter(t -> t.isParamsTokenPopulated()).count() > 1) {
-					preFetchIndexes(idsToPreFetch, "token", "myParamsToken");
-				}
-				if (loadedResourceTableEntries.stream().filter(t -> t.isParamsDatePopulated()).count() > 1) {
-					preFetchIndexes(idsToPreFetch, "date", "myParamsDate");
-				}
-				if (loadedResourceTableEntries.stream().filter(t -> t.isParamsDatePopulated()).count() > 1) {
-					preFetchIndexes(idsToPreFetch, "quantity", "myParamsQuantity");
-				}
-				if (loadedResourceTableEntries.stream().filter(t -> t.isHasLinks()).count() > 1) {
-					preFetchIndexes(idsToPreFetch, "resourceLinks", "myResourceLinks");
-				}
-
-			}
+			IFhirSystemDao<?,?> systemDao = myApplicationContext.getBean(IFhirSystemDao.class);
+			systemDao.preFetchResources(ResourcePersistentId.fromLongList(idsToPreFetch));
 
 		}
 
@@ -350,14 +324,6 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, nextSearchParameterMap.myResourceDefinition.getName(), nextSearchParameterMap.myRequestUrl, new ResourcePersistentId(nextResult.getResourcePid()));
 		theTransactionDetails.addResolvedMatchUrl(nextSearchParameterMap.myRequestUrl, new ResourcePersistentId(nextResult.getResourcePid()));
 		nextSearchParameterMap.setResolved(true);
-	}
-
-	private List<ResourceTable> preFetchIndexes(List<Long> ids, String typeDesc, String fieldName) {
-		TypedQuery<ResourceTable> query = myEntityManager.createQuery("FROM ResourceTable r LEFT JOIN FETCH r." + fieldName + " WHERE r.myId IN ( :IDS )", ResourceTable.class);
-		query.setParameter("IDS", ids);
-		List<ResourceTable> indexFetchOutcome = query.getResultList();
-		ourLog.debug("Pre-fetched {} {}} indexes", indexFetchOutcome.size(), typeDesc);
-		return indexFetchOutcome;
 	}
 
 	@Override

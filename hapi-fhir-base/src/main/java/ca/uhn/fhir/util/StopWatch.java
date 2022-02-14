@@ -356,7 +356,7 @@ public class StopWatch {
 	 * <li>64 days</li>
 	 * </ul>
 	 */
-	public static String formatMillis(long theMillis) {
+	public static String urlSwformatMillis(long theMillis) {
 		return formatMillis((double) theMillis);
 	}
 

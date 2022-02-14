@@ -3,11 +3,15 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
+import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
@@ -20,10 +24,18 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /*
  * #%L
@@ -48,6 +60,7 @@ import java.util.Map;
 public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends BaseHapiFhirDao<IBaseResource> implements IFhirSystemDao<T, MT> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiFhirSystemDao.class);
+	public static final Predicate[] EMPTY_PREDICATE_ARRAY = new Predicate[0];
 	@Autowired
 	@Qualifier("myResourceCountsCache")
 	public ResourceCountCache myResourceCountsCache;
@@ -116,6 +129,92 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 	@Transactional(propagation = Propagation.MANDATORY)
 	public T transactionNested(RequestDetails theRequestDetails, T theRequest) {
 		return myTransactionProcessor.transaction(theRequestDetails, theRequest, true);
+	}
+
+	@Override
+	@Transactional(propagation = Propagation.MANDATORY)
+	public void preFetchResources(List<ResourcePersistentId> theResolvedIds) {
+		List<Long> pids = theResolvedIds
+			.stream()
+			.map(t -> t.getIdAsLong())
+			.collect(Collectors.toList());
+
+		new QueryChunker<Long>().chunk(pids, ids->{
+
+			/*
+			 * Pre-fetch the resources we're touching in this transaction in mass - this reduced the
+			 * number of database round trips.
+			 *
+			 * The thresholds below are kind of arbitrary. It's not
+			 * actually guaranteed that this pre-fetching will help (e.g. if a Bundle contains
+			 * a bundle of NOP conditional creates for example, the pre-fetching is actually loading
+			 * more data than would otherwise be loaded).
+			 *
+			 * However, for realistic average workloads, this should reduce the number of round trips.
+			 */
+			if (ids.size() >= 2) {
+				List<ResourceTable> loadedResourceTableEntries = preFetchIndexes(ids, "forcedId", "myForcedId");
+
+				if (loadedResourceTableEntries.stream().anyMatch(t -> t.isParamsStringPopulated())) {
+					preFetchIndexes(ids, "string", "myParamsString");
+				}
+				if (loadedResourceTableEntries.stream().anyMatch(t -> t.isParamsTokenPopulated())) {
+					preFetchIndexes(ids, "token", "myParamsToken");
+				}
+				if (loadedResourceTableEntries.stream().anyMatch(t -> t.isParamsDatePopulated())) {
+					preFetchIndexes(ids, "date", "myParamsDate");
+				}
+				if (loadedResourceTableEntries.stream().anyMatch(t -> t.isParamsDatePopulated())) {
+					preFetchIndexes(ids, "quantity", "myParamsQuantity");
+				}
+				if (loadedResourceTableEntries.stream().anyMatch(t -> t.isHasLinks())) {
+					preFetchIndexes(ids, "resourceLinks", "myResourceLinks");
+				}
+
+				new QueryChunker<ResourceTable>().chunk(loadedResourceTableEntries, SearchBuilder.getMaximumPageSize() / 2, entries -> {
+
+					Map<Long, ResourceTable> entities = entries
+						.stream()
+						.collect(Collectors.toMap(t -> t.getId(), t -> t));
+
+					CriteriaBuilder b = myEntityManager.getCriteriaBuilder();
+					CriteriaQuery<ResourceHistoryTable> q = b.createQuery(ResourceHistoryTable.class);
+					Root<ResourceHistoryTable> from = q.from(ResourceHistoryTable.class);
+
+					from.fetch("myProvenance", JoinType.LEFT);
+
+					List<Predicate> orPredicates = new ArrayList<>();
+					for (ResourceTable next : entries) {
+						Predicate resId = b.equal(from.get("myResourceId"), next.getId());
+						Predicate resVer = b.equal(from.get("myResourceVersion"), next.getVersion());
+						orPredicates.add(b.and(resId, resVer));
+					}
+					q.where(b.or(orPredicates.toArray(EMPTY_PREDICATE_ARRAY)));
+					List<ResourceHistoryTable> resultList = myEntityManager.createQuery(q).getResultList();
+					for (ResourceHistoryTable next : resultList) {
+						ResourceTable nextEntity = entities.get(next.getResourceId());
+						if (nextEntity != null) {
+							nextEntity.setCurrentVersionEntity(next);
+						}
+					}
+
+				});
+
+
+
+
+			}
+
+
+		});
+	}
+
+	private List<ResourceTable> preFetchIndexes(List<Long> ids, String typeDesc, String fieldName) {
+		TypedQuery<ResourceTable> query = myEntityManager.createQuery("FROM ResourceTable r LEFT JOIN FETCH r." + fieldName + " WHERE r.myId IN ( :IDS )", ResourceTable.class);
+		query.setParameter("IDS", ids);
+		List<ResourceTable> indexFetchOutcome = query.getResultList();
+		ourLog.debug("Pre-fetched {} {}} indexes", indexFetchOutcome.size(), typeDesc);
+		return indexFetchOutcome;
 	}
 
 

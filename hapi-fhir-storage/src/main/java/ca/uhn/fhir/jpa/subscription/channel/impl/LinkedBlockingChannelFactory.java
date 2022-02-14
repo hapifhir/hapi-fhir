@@ -82,6 +82,7 @@ public class LinkedBlockingChannelFactory implements IChannelFactory {
 
 			ThreadFactory threadFactory = new BasicThreadFactory.Builder()
 				.namingPattern(threadNamingPattern)
+				.uncaughtExceptionHandler(uncaughtExceptionHandler(channelName))
 				.daemon(false)
 				.priority(Thread.NORM_PRIORITY)
 				.build();
@@ -110,6 +111,15 @@ public class LinkedBlockingChannelFactory implements IChannelFactory {
 			return new LinkedBlockingChannel(channelName, executor, queue);
 
 		});
+	}
+
+	private Thread.UncaughtExceptionHandler uncaughtExceptionHandler(String theChannelName) {
+		return new Thread.UncaughtExceptionHandler() {
+			@Override
+			public void uncaughtException(Thread t, Throwable e) {
+				ourLog.error("Failure handling message in channel {}", theChannelName, e);
+			}
+		};
 	}
 
 

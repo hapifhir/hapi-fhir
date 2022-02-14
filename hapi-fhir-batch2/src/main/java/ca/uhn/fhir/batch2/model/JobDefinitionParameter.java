@@ -52,7 +52,9 @@ public class JobDefinitionParameter {
 
 	public enum ParamTypeEnum {
 
-		STRING
+		STRING,
+		POSITIVE_INTEGER,
+		PASSWORD
 
 	}
 }

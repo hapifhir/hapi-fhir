@@ -10,4 +10,11 @@ public class JobExecutionFailedException extends RuntimeException {
 	public JobExecutionFailedException(String theMessage) {
 		super(theMessage);
 	}
+
+	/**
+	 * Constructor
+	 */
+	public JobExecutionFailedException(String theMessage, Throwable theCause) {
+		super(theMessage, theCause);
+	}
 }

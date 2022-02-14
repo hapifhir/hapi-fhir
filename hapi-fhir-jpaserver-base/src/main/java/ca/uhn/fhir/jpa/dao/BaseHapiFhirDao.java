@@ -1040,18 +1040,24 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			}
 		} else if (theEntity instanceof ResourceTable) {
 			ResourceTable resource = (ResourceTable) theEntity;
-			version = theEntity.getVersion();
-			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(theEntity.getId(), version);
-			((ResourceTable) theEntity).setCurrentVersionEntity(history);
+			ResourceHistoryTable history;
+			if (resource.getCurrentVersionEntity() != null) {
+				history = resource.getCurrentVersionEntity();
+			} else {
+				version = theEntity.getVersion();
+				history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(theEntity.getId(), version);
+				((ResourceTable) theEntity).setCurrentVersionEntity(history);
 
-			while (history == null) {
-				if (version > 1L) {
-					version--;
-					history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(theEntity.getId(), version);
-				} else {
-					return null;
+				while (history == null) {
+					if (version > 1L) {
+						version--;
+						history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(theEntity.getId(), version);
+					} else {
+						return null;
+					}
 				}
 			}
+
 			resourceBytes = history.getResource();
 			resourceEncoding = history.getEncoding();
 			resourceText = history.getResourceTextVc();

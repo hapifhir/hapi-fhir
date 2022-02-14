@@ -10,7 +10,10 @@ import org.springframework.context.annotation.Configuration;
 public class BulkImport2AppCtx {
 
 	public static final String PARAM_NDJSON_URL = "ndjson-url";
+	public static final String PARAM_HTTP_BASIC_CREDENTIALS = "http-basic-credentials";
 	public static final String JOB_BULK_IMPORT_PULL = "BULK_IMPORT_PULL";
+	public static final String PARAM_MAXIMUM_BATCH_SIZE = "maximum-batch-size";
+	public static final int PARAM_MAXIMUM_BATCH_SIZE_DEFAULT = 1000;
 
 	@Bean
 	public JobDefinition bulkImport2JobDefinition() {
@@ -25,6 +28,18 @@ public class BulkImport2AppCtx {
 				JobDefinitionParameter.ParamTypeEnum.STRING,
 				false,
 				true)
+			.addParameter(
+				PARAM_HTTP_BASIC_CREDENTIALS,
+				"A set of HTTP Basic credentials to include on fetch requests in the format \"username:password\"",
+				JobDefinitionParameter.ParamTypeEnum.PASSWORD,
+				false,
+				false)
+			.addParameter(
+				PARAM_MAXIMUM_BATCH_SIZE,
+				"Specifies the maximum number of resources that will be ingested in a single database transaction. Default is " + PARAM_MAXIMUM_BATCH_SIZE_DEFAULT + ".",
+				JobDefinitionParameter.ParamTypeEnum.POSITIVE_INTEGER,
+				false,
+				false)
 			.addStep(
 				"fetch-files",
 				"Fetch files for import",

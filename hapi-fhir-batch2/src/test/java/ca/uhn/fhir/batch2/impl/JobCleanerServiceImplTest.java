@@ -82,7 +82,7 @@ public class JobCleanerServiceImplTest {
 		assertEquals(0.5, instance.getProgress());
 		assertEquals(50, instance.getCombinedRecordsProcessed());
 		assertEquals(0.08333333333333333, instance.getCombinedRecordsProcessedPerSecond());
-		assertNotNull(instance.getCreateTime());
+		assertNotNull(instance.getStartTime());
 		assertEquals(parseTime("2022-02-12T14:00:00-04:00"), instance.getStartTime());
 		assertEquals(null, instance.getEndTime());
 		assertEquals("00:10:00", instance.getEstimatedTimeRemaining());
