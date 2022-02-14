@@ -752,7 +752,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 	}
 
-	/*@Nested
+	@Nested
 	public class DateSearchTests extends BaseDateSearchDaoTests {
 
 		@Override
@@ -760,6 +760,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			DaoTestDataBuilder testDataBuilder = new DaoTestDataBuilder(myFhirCtx, myDaoRegistry, new SystemRequestDetails());
 			return new TestDataBuilderFixture<>(testDataBuilder, myObservationDao);
 		}
-	}*/
+	}
 
 }

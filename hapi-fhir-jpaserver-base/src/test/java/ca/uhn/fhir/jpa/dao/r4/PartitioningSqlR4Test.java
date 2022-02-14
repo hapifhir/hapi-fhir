@@ -8,7 +8,6 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
-import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
@@ -67,7 +66,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.test.context.TestPropertySource;
 
 import java.util.Date;
 import java.util.List;
@@ -623,8 +621,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	public void testCreateInTransaction_ServerId_WithPartition() {
 		createUniqueCompositeSp();
 		createRequestId();
-		ourLog.info("Starting testCreateInTransaction_ServerId_WithPartition");
-		ourLog.info("Setting up partitionId {} with date {}", myPartitionId, myPartitionDate);
+
 		addCreatePartition(myPartitionId, myPartitionDate);
 		addCreatePartition(myPartitionId, myPartitionDate);
 		addCreatePartition(myPartitionId, myPartitionDate);
@@ -658,9 +655,6 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		runInTransaction(() -> {
 			// HFJ_RESOURCE
 			ResourceTable resourceTable = myResourceTableDao.findById(patientId).orElseThrow(IllegalArgumentException::new);
-			ourLog.info("Found resourceTable {}, which contains partition id {} with date {}", resourceTable.getId(), resourceTable.getPartitionId(), resourceTable.getPartitionId().getPartitionDate());
-			ourLog.info("in test: myPartitionDate = {}", myPartitionDate);
-			ourLog.info("in test: resourceTablePartDate = {}", resourceTable.getPartitionId().getPartitionDate());
 			assertEquals(myPartitionId, resourceTable.getPartitionId().getPartitionId().intValue());
 			assertEquals(myPartitionDate, resourceTable.getPartitionId().getPartitionDate());
 		});

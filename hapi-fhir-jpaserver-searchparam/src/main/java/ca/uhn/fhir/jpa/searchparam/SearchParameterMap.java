@@ -124,6 +124,8 @@ public class SearchParameterMap implements Serializable {
 			map.put(entry.getKey(), newAndParams);
 		}
 
+
+
 		return map;
 	}
 
