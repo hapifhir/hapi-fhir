@@ -2,23 +2,20 @@ package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
+import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
-import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.batch.config.BatchConstants;
-import ca.uhn.fhir.jpa.batch.config.NonPersistedBatchConfigurer;
 import ca.uhn.fhir.jpa.batch.job.PartitionedUrlValidator;
 import ca.uhn.fhir.jpa.batch.mdm.MdmClearJobSubmitterImpl;
 import ca.uhn.fhir.jpa.batch.reader.BatchResourceSearcher;
-import ca.uhn.fhir.jpa.batch.svc.BatchJobSubmitterImpl;
 import ca.uhn.fhir.jpa.binstore.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.binstore.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
@@ -80,6 +77,7 @@ import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.partition.PartitionLookupSvcImpl;
 import ca.uhn.fhir.jpa.partition.PartitionManagementProvider;
 import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.provider.DaoRegistryResourceSupportedSvc;
 import ca.uhn.fhir.jpa.provider.DiffProvider;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
@@ -139,6 +137,7 @@ import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.validation.JpaResourceLoader;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.mdm.api.IMdmClearJobSubmitter;
+import ca.uhn.fhir.rest.api.IResourceSupportedSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.api.server.storage.IReindexJobSubmitter;
@@ -148,20 +147,15 @@ import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInter
 import ca.uhn.fhir.rest.server.provider.DeleteExpungeProvider;
 import ca.uhn.fhir.rest.server.provider.ReindexProvider;
 import ca.uhn.fhir.util.ThreadPoolUtil;
-import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.hl7.fhir.utilities.npm.PackageClient;
 import org.springframework.batch.core.configuration.JobRegistry;
-import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.support.SimpleJobOperator;
 import org.springframework.batch.core.repository.JobRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -169,18 +163,14 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
-import org.springframework.core.env.Environment;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean;
 
 import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
 import java.util.Date;
 
 /*
@@ -203,15 +193,14 @@ import java.util.Date;
  * #L%
  */
 
-
 @Configuration
-@EnableJpaRepositories(basePackages = "ca.uhn.fhir.jpa.dao.data", enableDefaultTransactions=true)
+@EnableJpaRepositories(basePackages = "ca.uhn.fhir.jpa.dao.data")
 @Import({
-		  SearchParamConfig.class, BatchJobsConfig.class
+	BeanPostProcessorConfig.class,
+	BatchJobsConfig.class,
+	SearchParamConfig.class
 })
-@EnableBatchProcessing
-public abstract class BaseConfig {
-
+public class JpaConfig {
 	public static final String JPA_VALIDATION_SUPPORT_CHAIN = "myJpaValidationSupportChain";
 	public static final String JPA_VALIDATION_SUPPORT = "myJpaValidationSupport";
 	public static final String TASK_EXECUTOR_NAME = "hapiJpaTaskExecutor";
@@ -222,41 +211,6 @@ public abstract class BaseConfig {
 	public static final String SEARCH_BUILDER = "SearchBuilder";
 	public static final String HISTORY_BUILDER = "HistoryBuilder";
 	private static final String HAPI_DEFAULT_SCHEDULER_GROUP = "HAPI";
-	@Autowired
-	protected Environment myEnv;
-
-	@Autowired
-	private DaoRegistry myDaoRegistry;
-	private Integer searchCoordCorePoolSize = 20;
-	private Integer searchCoordMaxPoolSize = 100;
-	private Integer searchCoordQueueCapacity = 200;
-
-	@Autowired
-	private JobLauncher myJobLauncher;
-
-	/**
-	 * Subclasses may override this method to provide settings such as search coordinator pool sizes.
-	 */
-	@PostConstruct
-	public void initSettings() {
-	}
-
-	public void setSearchCoordCorePoolSize(Integer searchCoordCorePoolSize) {
-		this.searchCoordCorePoolSize = searchCoordCorePoolSize;
-	}
-
-	public void setSearchCoordMaxPoolSize(Integer searchCoordMaxPoolSize) {
-		this.searchCoordMaxPoolSize = searchCoordMaxPoolSize;
-	}
-
-	public void setSearchCoordQueueCapacity(Integer searchCoordQueueCapacity) {
-		this.searchCoordQueueCapacity = searchCoordQueueCapacity;
-	}
-
-	@Bean
-	public BatchConfigurer batchConfigurer() {
-		return new NonPersistedBatchConfigurer();
-	}
 
 	@Bean("myDaoRegistry")
 	public DaoRegistry daoRegistry() {
@@ -268,16 +222,6 @@ public abstract class BaseConfig {
 		return new DatabaseBackedPagingProvider();
 	}
 
-	@Bean
-	public IBatchJobSubmitter batchJobSubmitter() {
-		return new BatchJobSubmitterImpl();
-	}
-
-	@Bean
-	public BatchJobRegisterer batchJobRegisterer() {
-		return new BatchJobRegisterer();
-	}
-
 	@Lazy
 	@Bean
 	public CascadingDeleteInterceptor cascadingDeleteInterceptor(FhirContext theFhirContext, DaoRegistry theDaoRegistry, IInterceptorBroadcaster theInterceptorBroadcaster) {
@@ -285,13 +229,13 @@ public abstract class BaseConfig {
 	}
 
 	@Bean
-	public SimpleJobOperator jobOperator(JobExplorer jobExplorer, JobRepository jobRepository, JobRegistry jobRegistry) {
+	public SimpleJobOperator jobOperator(JobExplorer theJobExplorer, JobRepository theJobRepository, JobRegistry theJobRegistry, JobLauncher theJobLauncher) {
 		SimpleJobOperator jobOperator = new SimpleJobOperator();
 
-		jobOperator.setJobExplorer(jobExplorer);
-		jobOperator.setJobRepository(jobRepository);
-		jobOperator.setJobRegistry(jobRegistry);
-		jobOperator.setJobLauncher(myJobLauncher);
+		jobOperator.setJobExplorer(theJobExplorer);
+		jobOperator.setJobRepository(theJobRepository);
+		jobOperator.setJobRegistry(theJobRegistry);
+		jobOperator.setJobLauncher(theJobLauncher);
 
 		return jobOperator;
 	}
@@ -302,19 +246,6 @@ public abstract class BaseConfig {
 	public ResponseTerminologyTranslationInterceptor responseTerminologyTranslationInterceptor(IValidationSupport theValidationSupport) {
 		return new ResponseTerminologyTranslationInterceptor(theValidationSupport);
 	}
-
-	/**
-	 * This method should be overridden to provide an actual completed
-	 * bean, but it provides a partially completed entity manager
-	 * factory with HAPI FHIR customizations
-	 */
-	protected LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory myConfigurableListableBeanFactory) {
-		LocalContainerEntityManagerFactoryBean retVal = new HapiFhirLocalContainerEntityManagerFactoryBean(myConfigurableListableBeanFactory);
-		configureEntityManagerFactory(retVal, fhirContext());
-		return retVal;
-	}
-
-	public abstract FhirContext fhirContext();
 
 	@Bean
 	@Lazy
@@ -420,7 +351,7 @@ public abstract class BaseConfig {
 		return retVal;
 	}
 
-	@Bean(name= BatchConstants.JOB_LAUNCHING_TASK_EXECUTOR)
+	@Bean(name = BatchConstants.JOB_LAUNCHING_TASK_EXECUTOR)
 	public TaskExecutor jobLaunchingTaskExecutor() {
 		return ThreadPoolUtil.newThreadPool(0, 10, "job-launcher-");
 	}
@@ -440,14 +371,15 @@ public abstract class BaseConfig {
 		return new BatchResourceSearcher();
 	}
 
+
 	@Bean
 	public IStaleSearchDeletingSvc staleSearchDeletingSvc() {
 		return new StaleSearchDeletingSvcImpl();
 	}
 
 	@Bean
-	public HapiFhirHibernateJpaDialect hibernateJpaDialect() {
-		return new HapiFhirHibernateJpaDialect(fhirContext().getLocalizer());
+	public HapiFhirHibernateJpaDialect hibernateJpaDialect(FhirContext theFhirContext) {
+		return new HapiFhirHibernateJpaDialect(theFhirContext.getLocalizer());
 	}
 
 	@Bean
@@ -462,11 +394,6 @@ public abstract class BaseConfig {
 	}
 
 	@Bean
-	public PersistenceExceptionTranslationPostProcessor persistenceExceptionTranslationPostProcessor() {
-		return new PersistenceExceptionTranslationPostProcessor();
-	}
-
-	@Bean
 	public HapiTransactionService hapiTransactionService() {
 		return new HapiTransactionService();
 	}
@@ -476,13 +403,10 @@ public abstract class BaseConfig {
 		return new InterceptorService("JPA");
 	}
 
-	/**
-	 * Subclasses may override
-	 */
-	protected boolean isSupported(String theResourceType) {
-		return myDaoRegistry.getResourceDaoOrNull(theResourceType) != null;
+	@Bean
+	public IResourceSupportedSvc resourceSupportedSvc(IDaoRegistry theDaoRegistry) {
+		return new DaoRegistryResourceSupportedSvc(theDaoRegistry);
 	}
-
 	@Bean
 	public IPackageInstallerSvc npmInstallerSvc() {
 		return new PackageInstallerSvcImpl();
@@ -593,6 +517,7 @@ public abstract class BaseConfig {
 		return new BulkDataImportSvcImpl();
 	}
 
+
 	@Bean
 	public PersistedJpaBundleProviderFactory persistedJpaBundleProviderFactory() {
 		return new PersistedJpaBundleProviderFactory();
@@ -622,6 +547,7 @@ public abstract class BaseConfig {
 	public IResourceVersionSvc resourceVersionSvc() {
 		return new ResourceVersionSvcDaoImpl();
 	}
+
 
 	/* **************************************************************** *
 	 * Prototype Beans Below                                            *
@@ -927,25 +853,13 @@ public abstract class BaseConfig {
 	}
 
 	@Bean
-	public UnknownCodeSystemWarningValidationSupport unknownCodeSystemWarningValidationSupport() {
-		return new UnknownCodeSystemWarningValidationSupport(fhirContext());
+	public UnknownCodeSystemWarningValidationSupport unknownCodeSystemWarningValidationSupport(FhirContext theFhirContext) {
+		return new UnknownCodeSystemWarningValidationSupport(theFhirContext);
 	}
 
 	@Lazy
 	@Bean
 	public MemberMatcherR4Helper memberMatcherR4Helper(FhirContext theFhirContext) {
 		return new MemberMatcherR4Helper(theFhirContext);
-	}
-
-
-
-	public static void configureEntityManagerFactory(LocalContainerEntityManagerFactoryBean theFactory, FhirContext theCtx) {
-		theFactory.setJpaDialect(hibernateJpaDialect(theCtx.getLocalizer()));
-		theFactory.setPackagesToScan("ca.uhn.fhir.jpa.model.entity", "ca.uhn.fhir.jpa.entity");
-		theFactory.setPersistenceProvider(new HibernatePersistenceProvider());
-	}
-
-	private static HapiFhirHibernateJpaDialect hibernateJpaDialect(HapiLocalizer theLocalizer) {
-		return new HapiFhirHibernateJpaDialect(theLocalizer);
 	}
 }

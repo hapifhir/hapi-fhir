@@ -25,7 +25,6 @@ import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorR4;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
-import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -87,13 +86,13 @@ public class FhirServerConfigR4 extends BaseJavaConfigR4 {
 	 * This interceptor adds some pretty syntax highlighting in responses when a browser is detected
 	 * @return
 	 */
-	@Bean(autowire = Autowire.BY_TYPE)
+	@Bean
 	public ResponseHighlighterInterceptor responseHighlighterInterceptor() {
 		ResponseHighlighterInterceptor retVal = new ResponseHighlighterInterceptor();
 		return retVal;
 	}
 
-	@Bean(autowire = Autowire.BY_TYPE)
+	@Bean
 	public IServerInterceptor subscriptionSecurityInterceptor() {
 		SubscriptionsRequireManualActivationInterceptorR4 retVal = new SubscriptionsRequireManualActivationInterceptorR4();
 		return retVal;

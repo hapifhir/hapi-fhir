@@ -23,9 +23,9 @@ import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.common.hapi.validation.validator.HapiToHl7OrgDstu2ValidatingSupportWrapper;
 import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
-import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -52,30 +52,14 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableTransactionManagement
-public class BaseDstu2Config extends BaseConfig {
+@Import({
+	FhirContextDstu2Config.class,
+	ResourceProviderConfigDstu2.class,
+	JpaConfig.class
+})
+public class JpaDstu2Config {
 
-	private static FhirContext ourFhirContextDstu2;
 	private static FhirContext ourFhirContextDstu2Hl7Org;
-
-	@Bean
-	@Primary
-	public FhirContext defaultFhirContext() {
-		return fhirContextDstu2();
-	}
-
-	@Override
-	public FhirContext fhirContext() {
-		return fhirContextDstu2();
-	}
-
-	@Bean(name = "myFhirContextDstu2")
-	@Lazy
-	public FhirContext fhirContextDstu2() {
-		if (ourFhirContextDstu2 == null) {
-			ourFhirContextDstu2 = FhirContext.forDstu2();
-		}
-		return ourFhirContextDstu2;
-	}
 
 	@Bean(name = "myFhirContextDstu2Hl7Org")
 	@Lazy
@@ -102,22 +86,22 @@ public class BaseDstu2Config extends BaseConfig {
 
 
 	@Bean(name = "myDefaultProfileValidationSupport")
-	public DefaultProfileValidationSupport defaultProfileValidationSupport() {
-		return new DefaultProfileValidationSupport(fhirContext());
+	public DefaultProfileValidationSupport defaultProfileValidationSupport(FhirContext theFhirContext) {
+		return new DefaultProfileValidationSupport(theFhirContext);
 	}
 
-	@Bean(name = JPA_VALIDATION_SUPPORT_CHAIN)
-	public ValidationSupportChain validationSupportChain(DefaultProfileValidationSupport theDefaultProfileValidationSupport) {
-		InMemoryTerminologyServerValidationSupport inMemoryTerminologyServer = new InMemoryTerminologyServerValidationSupport(fhirContextDstu2());
-		IValidationSupport jpaValidationSupport = jpaValidationSupportDstu2();
-		CommonCodeSystemsTerminologyService commonCodeSystemsTermSvc = new CommonCodeSystemsTerminologyService(fhirContext());
+	@Bean(name = JpaConfig.JPA_VALIDATION_SUPPORT_CHAIN)
+	public ValidationSupportChain validationSupportChain(DefaultProfileValidationSupport theDefaultProfileValidationSupport, FhirContext theFhirContext) {
+		InMemoryTerminologyServerValidationSupport inMemoryTerminologyServer = new InMemoryTerminologyServerValidationSupport(theFhirContext);
+		IValidationSupport jpaValidationSupport = jpaValidationSupportDstu2(theFhirContext);
+		CommonCodeSystemsTerminologyService commonCodeSystemsTermSvc = new CommonCodeSystemsTerminologyService(theFhirContext);
 		return new ValidationSupportChain(theDefaultProfileValidationSupport, jpaValidationSupport, inMemoryTerminologyServer, commonCodeSystemsTermSvc);
 	}
 
 	@Primary
-	@Bean(name = JPA_VALIDATION_SUPPORT)
-	public IValidationSupport jpaValidationSupportDstu2() {
-		return new JpaPersistedResourceValidationSupport(fhirContextDstu2());
+	@Bean(name = JpaConfig.JPA_VALIDATION_SUPPORT)
+	public IValidationSupport jpaValidationSupportDstu2(FhirContext theFhirContext) {
+		return new JpaPersistedResourceValidationSupport(theFhirContext);
 	}
 
 	@Bean(name = "myResourceCountsCache")
@@ -127,27 +111,27 @@ public class BaseDstu2Config extends BaseConfig {
 		return retVal;
 	}
 
-	@Bean(autowire = Autowire.BY_TYPE)
+	@Bean
 	public IFulltextSearchSvc searchDao() {
 		FulltextSearchSvcImpl searchDao = new FulltextSearchSvcImpl();
 		return searchDao;
 	}
 
-	@Bean(name = "mySystemDaoDstu2", autowire = Autowire.BY_NAME)
+	@Bean(name = "mySystemDaoDstu2")
 	public IFhirSystemDao<Bundle, MetaDt> systemDaoDstu2() {
 		ca.uhn.fhir.jpa.dao.FhirSystemDaoDstu2 retVal = new ca.uhn.fhir.jpa.dao.FhirSystemDaoDstu2();
 		return retVal;
 	}
 
 	@Bean(name = "mySystemProviderDstu2")
-	public ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2 systemProviderDstu2() {
+	public ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2 systemProviderDstu2(FhirContext theFhirContext) {
 		ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2 retVal = new ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2();
 		retVal.setDao(systemDaoDstu2());
-		retVal.setContext(fhirContextDstu2());
+		retVal.setContext(theFhirContext);
 		return retVal;
 	}
 
-	@Bean(autowire = Autowire.BY_TYPE)
+	@Bean
 	public ITermReadSvc terminologyService() {
 		return new TermReadSvcDstu2();
 	}

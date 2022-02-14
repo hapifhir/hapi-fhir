@@ -20,9 +20,9 @@ package ca.uhn.fhir.jpa.config;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.JpaPersistedResourceValidationSupport;
 import ca.uhn.fhir.jpa.dao.ObservationLastNIndexPersistSvc;
 import ca.uhn.fhir.jpa.term.TermCodeSystemStorageSvcImpl;
@@ -30,9 +30,7 @@ import ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl;
 import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
-import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReindexingSvc;
-import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
 import ca.uhn.fhir.jpa.validation.ValidatorPolicyAdvisor;
 import ca.uhn.fhir.jpa.validation.ValidatorResourceFetcher;
@@ -46,7 +44,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 
 @Configuration
-public abstract class BaseConfigDstu3Plus extends BaseConfig {
+public class SharedConfigDstu3Plus {
 
 	@Bean
 	public ITermCodeSystemStorageSvc termCodeSystemStorageSvc() {
@@ -63,42 +61,39 @@ public abstract class BaseConfigDstu3Plus extends BaseConfig {
 		return new TermReindexingSvcImpl();
 	}
 
-	@Bean
-	public abstract ITermVersionAdapterSvc terminologyVersionAdapterSvc();
-
 	@Bean(name = "myDefaultProfileValidationSupport")
-	public DefaultProfileValidationSupport defaultProfileValidationSupport(DaoConfig theDaoConfig) {
-		return new DefaultProfileValidationSupport(fhirContext());
+	public DefaultProfileValidationSupport defaultProfileValidationSupport(FhirContext theFhirContext) {
+		return new DefaultProfileValidationSupport(theFhirContext);
 	}
 
-	@Bean(name = JPA_VALIDATION_SUPPORT_CHAIN)
-	public JpaValidationSupportChain jpaValidationSupportChain() {
-		return new JpaValidationSupportChain(fhirContext());
+	@Bean(name = JpaConfig.JPA_VALIDATION_SUPPORT_CHAIN)
+	public JpaValidationSupportChain jpaValidationSupportChain(FhirContext theFhirContext) {
+		return new JpaValidationSupportChain(theFhirContext);
 	}
 
-	@Bean(name = JPA_VALIDATION_SUPPORT)
-	public IValidationSupport jpaValidationSupport() {
-		return new JpaPersistedResourceValidationSupport(fhirContext());
+	@Bean(name = JpaConfig.JPA_VALIDATION_SUPPORT)
+	public IValidationSupport jpaValidationSupport(FhirContext theFhirContext) {
+		return new JpaPersistedResourceValidationSupport(theFhirContext);
 	}
 
 	@Primary
 	@Bean
-	public IValidationSupport validationSupportChain() {
+	public IValidationSupport validationSupportChain(FhirContext theFhirContext) {
 		// Short timeout for code translation because TermConceptMappingSvcImpl has its own caching
 		CachingValidationSupport.CacheTimeouts cacheTimeouts = CachingValidationSupport.CacheTimeouts.defaultValues()
 			.setTranslateCodeMillis(1000);
 
-		return new CachingValidationSupport(jpaValidationSupportChain(), cacheTimeouts);
+		return new CachingValidationSupport(jpaValidationSupportChain(theFhirContext), cacheTimeouts);
 	}
 
 	@Bean(name = "myInstanceValidator")
 	@Lazy
-	public IInstanceValidatorModule instanceValidator() {
-		FhirInstanceValidator val = new FhirInstanceValidator(validationSupportChain());
+	public IInstanceValidatorModule instanceValidator(FhirContext theFhirContext) {
+		FhirInstanceValidator val = new FhirInstanceValidator(validationSupportChain(theFhirContext));
 		val.setValidatorResourceFetcher(jpaValidatorResourceFetcher());
 		val.setValidatorPolicyAdvisor(jpaValidatorPolicyAdvisor());
 		val.setBestPracticeWarningLevel(BestPracticeWarningLevel.Warning);
-		val.setValidationSupport(validationSupportChain());
+		val.setValidationSupport(validationSupportChain(theFhirContext));
 		return val;
 	}
 
@@ -113,9 +108,6 @@ public abstract class BaseConfigDstu3Plus extends BaseConfig {
 	public ValidatorPolicyAdvisor jpaValidatorPolicyAdvisor() {
 		return new ValidatorPolicyAdvisor();
 	}
-
-	@Bean
-	public abstract ITermReadSvc terminologyService();
 
 	@Bean
 	public ObservationLastNIndexPersistSvc baseObservationLastNIndexpersistSvc() {

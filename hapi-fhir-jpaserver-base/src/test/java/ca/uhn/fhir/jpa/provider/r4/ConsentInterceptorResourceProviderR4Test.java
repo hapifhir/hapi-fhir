@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.config.BaseConfig;
+import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
@@ -92,7 +92,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 	private List<String> myObservationIdsEvenOnlyBackwards;
 	private ConsentInterceptor myConsentInterceptor;
 	@Autowired
-	@Qualifier(BaseConfig.GRAPHQL_PROVIDER_NAME)
+	@Qualifier(JpaConfig.GRAPHQL_PROVIDER_NAME)
 	private Object myGraphQlProvider;
 
 	@Override

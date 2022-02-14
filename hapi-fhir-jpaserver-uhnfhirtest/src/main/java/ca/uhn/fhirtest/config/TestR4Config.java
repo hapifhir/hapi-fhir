@@ -19,7 +19,6 @@ import org.hibernate.search.backend.lucene.cfg.LuceneIndexSettings;
 import org.hibernate.search.engine.cfg.BackendSettings;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
-import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.annotation.Bean;
@@ -121,7 +120,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 	}
 
 	@Override
-	@Bean(autowire = Autowire.BY_TYPE)
+	@Bean
 	public DatabaseBackedPagingProvider databaseBackedPagingProvider() {
 		DatabaseBackedPagingProvider retVal = super.databaseBackedPagingProvider();
 		retVal.setDefaultPageSize(20);

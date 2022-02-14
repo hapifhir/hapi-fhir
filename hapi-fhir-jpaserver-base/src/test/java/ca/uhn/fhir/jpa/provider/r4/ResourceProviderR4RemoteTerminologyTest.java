@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.config.BaseConfig;
+import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -61,7 +61,7 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 	private RemoteTerminologyServiceValidationSupport mySvc;
 
 	@Autowired
-	@Qualifier(BaseConfig.JPA_VALIDATION_SUPPORT_CHAIN)
+	@Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT_CHAIN)
 	private ValidationSupportChain myValidationSupportChain;
 
 	@BeforeEach

@@ -234,19 +234,19 @@ public class FhirAutoConfiguration {
 		}
 
 		@Configuration
-		@ConditionalOnMissingBean(type = "ca.uhn.fhir.jpa.config.BaseConfig")
+		@ConditionalOnMissingBean(type = "ca.uhn.fhir.jpa.config.JpaConfig")
 		@ConditionalOnProperty(name = "hapi.fhir.version", havingValue = "DSTU3")
 		static class Dstu3 extends BaseJavaConfigDstu3 {
 		}
 
 		@Configuration
-		@ConditionalOnMissingBean(type = "ca.uhn.fhir.jpa.config.BaseConfig")
+		@ConditionalOnMissingBean(type = "ca.uhn.fhir.jpa.config.JpaConfig")
 		@ConditionalOnProperty(name = "hapi.fhir.version", havingValue = "DSTU2")
 		static class Dstu2 extends BaseJavaConfigDstu2 {
 		}
 
 		@Configuration
-		@ConditionalOnMissingBean(type = "ca.uhn.fhir.jpa.config.BaseConfig")
+		@ConditionalOnMissingBean(type = "ca.uhn.fhir.jpa.config.JpaConfig")
 		@ConditionalOnProperty(name = "hapi.fhir.version", havingValue = "R4")
 		static class R4 extends BaseJavaConfigR4 {
 		}
