@@ -1,0 +1,4 @@
+---
+type: add
+issue: 3384
+title: "Added logs that identify the resource that failed the validation check during package installation, and describe the reason for the failure."
