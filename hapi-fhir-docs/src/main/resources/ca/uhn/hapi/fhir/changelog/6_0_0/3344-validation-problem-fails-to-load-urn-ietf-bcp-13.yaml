@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3344
+jira: SMILE-3563
+title: "Fixed the way validation is implemented so that it can properly load urn:ietf:bcp:13."
