@@ -151,11 +151,6 @@ import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValid
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.hl7.fhir.utilities.npm.PackageClient;
-import org.springframework.batch.core.configuration.JobRegistry;
-import org.springframework.batch.core.explore.JobExplorer;
-import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.batch.core.launch.support.SimpleJobOperator;
-import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -227,19 +222,6 @@ public class JpaConfig {
 	public CascadingDeleteInterceptor cascadingDeleteInterceptor(FhirContext theFhirContext, DaoRegistry theDaoRegistry, IInterceptorBroadcaster theInterceptorBroadcaster) {
 		return new CascadingDeleteInterceptor(theFhirContext, theDaoRegistry, theInterceptorBroadcaster);
 	}
-
-	@Bean
-	public SimpleJobOperator jobOperator(JobExplorer theJobExplorer, JobRepository theJobRepository, JobRegistry theJobRegistry, JobLauncher theJobLauncher) {
-		SimpleJobOperator jobOperator = new SimpleJobOperator();
-
-		jobOperator.setJobExplorer(theJobExplorer);
-		jobOperator.setJobRepository(theJobRepository);
-		jobOperator.setJobRegistry(theJobRegistry);
-		jobOperator.setJobLauncher(theJobLauncher);
-
-		return jobOperator;
-	}
-
 
 	@Lazy
 	@Bean

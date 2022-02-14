@@ -32,13 +32,19 @@ import ca.uhn.fhir.jpa.reindex.job.ReindexEverythingJobConfig;
 import ca.uhn.fhir.jpa.reindex.job.ReindexJobConfig;
 import ca.uhn.fhir.jpa.term.job.TermCodeSystemDeleteJobConfig;
 import ca.uhn.fhir.jpa.term.job.TermCodeSystemVersionDeleteJobConfig;
+import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
+import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
+import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.launch.support.SimpleJobOperator;
+import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-//When you define a new batch job, add it here.
+@EnableBatchProcessing
 @Import({
 	CommonBatchJobConfig.class,
 	BulkExportJobConfig.class,
@@ -49,6 +55,7 @@ import org.springframework.context.annotation.Import;
 	MdmClearJobConfig.class,
 	TermCodeSystemDeleteJobConfig.class,
 	TermCodeSystemVersionDeleteJobConfig.class
+  // When you define a new batch job, add it here.
 })
 public class BatchJobsConfig {
 	@Bean
@@ -64,5 +71,17 @@ public class BatchJobsConfig {
 	@Bean
 	public BatchJobRegisterer batchJobRegisterer() {
 		return new BatchJobRegisterer();
+	}
+
+	@Bean
+	public SimpleJobOperator jobOperator(JobExplorer theJobExplorer, JobRepository theJobRepository, JobRegistry theJobRegistry, JobLauncher theJobLauncher) {
+		SimpleJobOperator jobOperator = new SimpleJobOperator();
+
+		jobOperator.setJobExplorer(theJobExplorer);
+		jobOperator.setJobRepository(theJobRepository);
+		jobOperator.setJobRegistry(theJobRegistry);
+		jobOperator.setJobLauncher(theJobLauncher);
+
+		return jobOperator;
 	}
 }
