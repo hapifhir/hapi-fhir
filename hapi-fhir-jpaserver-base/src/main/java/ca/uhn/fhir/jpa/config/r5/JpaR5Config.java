@@ -6,8 +6,6 @@ import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.config.ResourceProviderConfigR5;
 import ca.uhn.fhir.jpa.config.SharedConfigDstu3Plus;
-import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
-import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
 import ca.uhn.fhir.jpa.dao.r5.TransactionProcessorVersionAdapterR5;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
@@ -19,8 +17,6 @@ import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR5;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
-import ca.uhn.fhir.jpa.util.ResourceCountCache;
-import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Meta;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
@@ -54,8 +50,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 @Import({
 	FhirContextR5Config.class,
-	SharedConfigDstu3Plus.class,
 	ResourceProviderConfigR5.class,
+	SharedConfigDstu3Plus.class,
 	JpaConfig.class
 })
 public class JpaR5Config {
@@ -74,19 +70,6 @@ public class JpaR5Config {
 	@Lazy
 	public GraphQLProvider graphQLProvider(FhirContext theFhirContext, IGraphQLStorageServices theGraphqlStorageServices, IValidationSupport theValidationSupport) {
 		return new GraphQLProvider(theFhirContext, theValidationSupport, theGraphqlStorageServices);
-	}
-
-	@Bean(name = "myResourceCountsCache")
-	public ResourceCountCache resourceCountsCache() {
-		ResourceCountCache retVal = new ResourceCountCache(() -> systemDaoR5().getResourceCounts());
-		retVal.setCacheMillis(4 * DateUtils.MILLIS_PER_HOUR);
-		return retVal;
-	}
-
-	@Bean
-	public IFulltextSearchSvc searchDaoR5() {
-		FulltextSearchSvcImpl searchDao = new FulltextSearchSvcImpl();
-		return searchDao;
 	}
 
 	@Bean(name = "mySystemDaoR5")

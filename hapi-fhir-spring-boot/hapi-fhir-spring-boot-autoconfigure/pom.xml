@@ -25,38 +25,38 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
-			<!-- FIXME KHS restore to project version -->
-			<version>6.0.0-PRE1-SNAPSHOT</version>
+			<!-- WIP KHS restore to project version -->
+			<version>6.0.0-PRE2-SNAPSHOT</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-server</artifactId>
-			<version>6.0.0-PRE1-SNAPSHOT</version>
+			<version>6.0.0-PRE2-SNAPSHOT</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-jpaserver-base</artifactId>
-			<version>6.0.0-PRE1-SNAPSHOT</version>
+			<version>6.0.0-PRE2-SNAPSHOT</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-jaxrsserver-base</artifactId>
-			<version>6.0.0-PRE1-SNAPSHOT</version>
+			<version>6.0.0-PRE2-SNAPSHOT</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-client</artifactId>
-			<version>6.0.0-PRE1-SNAPSHOT</version>
+			<version>6.0.0-PRE2-SNAPSHOT</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-client-okhttp</artifactId>
-			<version>6.0.0-PRE1-SNAPSHOT</version>
+			<version>6.0.0-PRE2-SNAPSHOT</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
@@ -103,13 +103,13 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation-resources-dstu2</artifactId>
-			<version>6.0.0-PRE1-SNAPSHOT</version>
+			<version>6.0.0-PRE2-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
-			<version>6.0.0-PRE1-SNAPSHOT</version>
+			<version>6.0.0-PRE2-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

@@ -5,8 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 
 public class FhirContextDstu2Config {
-
-	@Bean(name = "myFhirContextDstu2")
+	@Bean(name = {"primaryFhirContext", "myFhirContextDstu2"})
 	@Primary
 	public FhirContext fhirContextDstu2() {
 		return FhirContext.forDstu2();

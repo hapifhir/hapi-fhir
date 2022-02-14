@@ -3,7 +3,8 @@ package ca.uhn.fhir.jpa.config;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.binstore.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
-import ca.uhn.fhir.jpa.config.r4.JpaR4Config;
+import ca.uhn.fhir.jpa.config.r4.HapiJpaR4Config;
+import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
@@ -31,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 @Configuration
 @Import({
-	JpaR4Config.class,
+	HapiJpaR4Config.class,
 	TestJPAConfig.class,
 	TestHibernateSearchAddInConfig.DefaultLuceneHeap.class
 })

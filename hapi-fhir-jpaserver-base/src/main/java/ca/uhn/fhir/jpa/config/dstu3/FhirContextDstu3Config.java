@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 
 public class FhirContextDstu3Config {
-	@Bean
+	@Bean(name = "primaryFhirContext")
 	@Primary
 	public FhirContext fhirContextDstu3() {
 		FhirContext retVal = FhirContext.forDstu3();

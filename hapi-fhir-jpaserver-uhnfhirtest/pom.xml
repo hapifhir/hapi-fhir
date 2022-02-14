@@ -22,36 +22,36 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-jpaserver-base</artifactId>
-			<!-- FIXME KHS restore this to current version -->
-			<version>6.0.0-PRE1-SNAPSHOT</version>
+			<!-- WIP KHS restore this to current version -->
+			<version>6.0.0-PRE2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu2</artifactId>
-			<version>6.0.0-PRE1-SNAPSHOT</version>
+			<version>6.0.0-PRE2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-hl7org-dstu2</artifactId>
-			<version>6.0.0-PRE1-SNAPSHOT</version>
+			<version>6.0.0-PRE2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-testpage-overlay</artifactId>
-			<version>6.0.0-PRE1-SNAPSHOT</version>
+			<version>6.0.0-PRE2-SNAPSHOT</version>
 			<type>war</type>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-testpage-overlay</artifactId>
-			<version>6.0.0-PRE1-SNAPSHOT</version>
+			<version>6.0.0-PRE2-SNAPSHOT</version>
 			<classifier>classes</classifier>
 		</dependency>
         <dependency>
             <groupId>ca.uhn.hapi.fhir</groupId>
             <artifactId>hapi-fhir-server-openapi</artifactId>
-            <version>6.0.0-PRE1-SNAPSHOT</version>
+            <version>6.0.0-PRE2-SNAPSHOT</version>
         </dependency>
 
 		<dependency>
@@ -170,7 +170,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-converter</artifactId>
-			<version>6.0.0-PRE1-SNAPSHOT</version>
+			<version>6.0.0-PRE2-SNAPSHOT</version>
 		</dependency>
 
 	</dependencies>

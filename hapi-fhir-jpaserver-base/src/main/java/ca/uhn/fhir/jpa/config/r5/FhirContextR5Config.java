@@ -6,8 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 
 public class FhirContextR5Config {
-
-	@Bean
+	@Bean(name = "primaryFhirContext")
 	@Primary
 	public FhirContext fhirContextR5() {
 		FhirContext retVal = FhirContext.forR5();

@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.batch;
  */
 
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
-import ca.uhn.fhir.jpa.batch.config.NonPersistedBatchConfigurer;
 import ca.uhn.fhir.jpa.batch.mdm.job.MdmClearJobConfig;
 import ca.uhn.fhir.jpa.batch.svc.BatchJobSubmitterImpl;
 import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
@@ -33,7 +32,6 @@ import ca.uhn.fhir.jpa.reindex.job.ReindexJobConfig;
 import ca.uhn.fhir.jpa.term.job.TermCodeSystemDeleteJobConfig;
 import ca.uhn.fhir.jpa.term.job.TermCodeSystemVersionDeleteJobConfig;
 import org.springframework.batch.core.configuration.JobRegistry;
-import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
@@ -58,11 +56,6 @@ import org.springframework.context.annotation.Import;
   // When you define a new batch job, add it here.
 })
 public class BatchJobsConfig {
-	@Bean
-	public BatchConfigurer batchConfigurer() {
-		return new NonPersistedBatchConfigurer();
-	}
-
 	@Bean
 	public IBatchJobSubmitter batchJobSubmitter() {
 		return new BatchJobSubmitterImpl();

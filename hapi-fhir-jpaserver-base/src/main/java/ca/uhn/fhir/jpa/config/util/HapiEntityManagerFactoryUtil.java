@@ -1,11 +1,14 @@
-package ca.uhn.fhir.jpa.config;
+package ca.uhn.fhir.jpa.config.util;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.config.HapiFhirHibernateJpaDialect;
+import ca.uhn.fhir.jpa.config.HapiFhirLocalContainerEntityManagerFactoryBean;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 
-public class HapiEntityManagerFactoryUtil {
+public final class HapiEntityManagerFactoryUtil {
+	private HapiEntityManagerFactoryUtil() {}
 	/**
 	 * This method provides a partially completed entity manager
 	 * factory with HAPI FHIR customizations

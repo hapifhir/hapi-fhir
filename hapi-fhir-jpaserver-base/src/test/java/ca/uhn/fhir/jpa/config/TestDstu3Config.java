@@ -1,7 +1,8 @@
 package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.config.dstu3.JpaDstu3Config;
+import ca.uhn.fhir.jpa.config.dstu3.HapiJpaDstu3Config;
+import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.EmailSenderImpl;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
@@ -34,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 @Configuration
 @Import({
-	JpaDstu3Config.class,
+	HapiJpaDstu3Config.class,
 	TestJPAConfig.class,
 	TestHibernateSearchAddInConfig.DefaultLuceneHeap.class
 })
