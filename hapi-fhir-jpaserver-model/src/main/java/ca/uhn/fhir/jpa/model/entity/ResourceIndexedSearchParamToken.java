@@ -59,7 +59,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
 	 * IDX_SP_TOKEN_UNQUAL
 	 */
 
-	@Index(name = "IDX_SP_TOKEN_HASH_V2", columnList = "HASH_IDENTITY,RES_ID,PARTITION_ID"),
+	@Index(name = "IDX_SP_TOKEN_HASH_V2", columnList = "HASH_IDENTITY,SP_SYSTEM,SP_VALUE,RES_ID,PARTITION_ID"),
 	@Index(name = "IDX_SP_TOKEN_HASH_S_V2", columnList = "HASH_SYS,RES_ID,PARTITION_ID"),
 	@Index(name = "IDX_SP_TOKEN_HASH_SV_V2", columnList = "HASH_SYS_AND_VALUE,RES_ID,PARTITION_ID"),
 	@Index(name = "IDX_SP_TOKEN_HASH_V_V2", columnList = "HASH_VALUE,RES_ID,PARTITION_ID"),

@@ -173,15 +173,13 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			Builder.BuilderWithTableName tokenTable = version.onTable("HFJ_SPIDX_TOKEN");
 
 			// replace and drop IDX_SP_DATE_HASH for sorting
+			// fixme Design question: how much do we care about sorting by token?
+			// Should we leave this as an option for deployment folks?
+			// We need this to support queries like `/Observation?_sort=status,-date,category`
 			tokenTable
 				.addIndex("20220208.1", "IDX_SP_TOKEN_HASH_V2")
 				.unique(false).online(true)
-				.withColumns("HASH_IDENTITY", "RES_ID", "PARTITION_ID");
-			// fixme Design question: how much do we care about sorting by token?
-			// Should we leave this as an option for deployment folks?
-			// Or do we start full, and offer ways to trim?
-			//.withColumns("HASH_IDENTITY", "SP_SYSTEM", "SP_VALUE", "RES_ID", "PARTITION_ID");
-
+				.withColumns("HASH_IDENTITY", "SP_SYSTEM", "SP_VALUE", "RES_ID", "PARTITION_ID");
 			tokenTable.dropIndexOnline("20220208.2", "IDX_SP_TOKEN_HASH");
 
 
