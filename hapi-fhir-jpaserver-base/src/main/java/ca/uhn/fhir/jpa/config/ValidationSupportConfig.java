@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.dao.JpaPersistedResourceValidationSupport;
@@ -9,7 +10,9 @@ import ca.uhn.fhir.jpa.validation.ValidatorPolicyAdvisor;
 import ca.uhn.fhir.jpa.validation.ValidatorResourceFetcher;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
+import org.hl7.fhir.common.hapi.validation.validator.HapiToHl7OrgDstu2ValidatingSupportWrapper;
 import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,13 +36,20 @@ public class ValidationSupportConfig {
 	}
 
 	@Bean(name = "myInstanceValidator")
-	public IInstanceValidatorModule instanceValidator(FhirContext theFhirContext, CachingValidationSupport theCachingValidationSupport) {
-		FhirInstanceValidator val = new FhirInstanceValidator(theCachingValidationSupport);
-		val.setValidatorResourceFetcher(jpaValidatorResourceFetcher());
-		val.setValidatorPolicyAdvisor(jpaValidatorPolicyAdvisor());
-		val.setBestPracticeWarningLevel(BestPracticeWarningLevel.Warning);
-		val.setValidationSupport(theCachingValidationSupport);
-		return val;
+	public IInstanceValidatorModule instanceValidator(FhirContext theFhirContext, CachingValidationSupport theCachingValidationSupport, ValidationSupportChain theValidationSupportChain) {
+		if (theFhirContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
+			FhirInstanceValidator val = new FhirInstanceValidator(theCachingValidationSupport);
+			val.setValidatorResourceFetcher(jpaValidatorResourceFetcher());
+			val.setValidatorPolicyAdvisor(jpaValidatorPolicyAdvisor());
+			val.setBestPracticeWarningLevel(BestPracticeWarningLevel.Warning);
+			val.setValidationSupport(theCachingValidationSupport);
+			return val;
+		} else {
+			CachingValidationSupport cachingValidationSupport = new CachingValidationSupport(new HapiToHl7OrgDstu2ValidatingSupportWrapper(theValidationSupportChain));
+			FhirInstanceValidator retVal = new FhirInstanceValidator(cachingValidationSupport);
+			retVal.setBestPracticeWarningLevel(BestPracticeWarningLevel.Warning);
+			return retVal;
+		}
 	}
 
 	@Bean
