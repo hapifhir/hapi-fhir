@@ -4,6 +4,7 @@ import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.batch2.model.WorkChunkData;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.impl.HttpBasicAuthInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -23,9 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public class FetchFilesStep implements IJobStepWorker {
@@ -36,14 +35,15 @@ public class FetchFilesStep implements IJobStepWorker {
 	@Override
 	public RunOutcome run(StepExecutionDetails theStepExecutionDetails, IJobDataSink theDataSink) {
 
-		int batchSizeLines = theStepExecutionDetails
-			.getParameterValueInteger(BulkImport2AppCtx.PARAM_MAXIMUM_BATCH_SIZE)
+		int maxBatchResourceCount = theStepExecutionDetails
+			.getParameters()
+			.getValueInteger(BulkImport2AppCtx.PARAM_MAXIMUM_BATCH_RESOURCE_COUNT)
 			.orElse(BulkImport2AppCtx.PARAM_MAXIMUM_BATCH_SIZE_DEFAULT);
 
 		try (CloseableHttpClient httpClient = newHttpClient(theStepExecutionDetails)) {
 
 			StopWatch outerSw = new StopWatch();
-			List<String> urls = theStepExecutionDetails.getParameterValues(BulkImport2AppCtx.PARAM_NDJSON_URL);
+			List<String> urls = theStepExecutionDetails.getParameters().getValues(BulkImport2AppCtx.PARAM_NDJSON_URL);
 
 			for (String nextUrl : urls) {
 
@@ -72,10 +72,10 @@ public class FetchFilesStep implements IJobStepWorker {
 							lineCount++;
 							int charCount = builder.length();
 							int batchSizeChars = (int) (20 * FileUtils.ONE_MB);
-							if (lineCount >= batchSizeLines || charCount >= batchSizeChars || !lineIterator.hasNext()) {
+							if (lineCount >= maxBatchResourceCount || charCount >= batchSizeChars || !lineIterator.hasNext()) {
 
 								ourLog.info("Loaded chunk {} of {} NDJSON file with {} resources from URL: {}", chunkCount, FileUtil.formatFileSize(charCount), lineCount, nextUrl);
-								Map<String, Object> data = new HashMap<>();
+								WorkChunkData data = new WorkChunkData();
 								data.put(KEY_NDJSON, builder.toString());
 								data.put(KEY_SOURCE_NAME, nextUrl);
 								theDataSink.accept(data);
@@ -107,7 +107,7 @@ public class FetchFilesStep implements IJobStepWorker {
 	private CloseableHttpClient newHttpClient(StepExecutionDetails theStepExecutionDetails) {
 		HttpClientBuilder builder = HttpClientBuilder.create();
 
-		Optional<String> httpBasicCredentials = theStepExecutionDetails.getParameterValue(BulkImport2AppCtx.PARAM_HTTP_BASIC_CREDENTIALS);
+		Optional<String> httpBasicCredentials = theStepExecutionDetails.getParameters().getValue(BulkImport2AppCtx.PARAM_HTTP_BASIC_CREDENTIALS);
 		if (httpBasicCredentials.isPresent()) {
 			String credentials = httpBasicCredentials.get();
 			int colonIdx = credentials.indexOf(':');

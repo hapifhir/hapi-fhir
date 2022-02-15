@@ -88,4 +88,9 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	public synchronized void markInstanceAsCompleted(String theInstanceId) {
 		myWrap.markInstanceAsCompleted(theInstanceId);
 	}
+
+	@Override
+	public void cancelInstance(String theInstanceId) {
+		myWrap.cancelInstance(theInstanceId);
+	}
 }

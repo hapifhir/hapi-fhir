@@ -11,11 +11,13 @@ import ca.uhn.fhir.batch2.model.JobDefinitionParameter;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceParameter;
+import ca.uhn.fhir.batch2.model.JobInstanceParameters;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.batch2.model.WorkChunkData;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -23,7 +25,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ListMultimap;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +68,7 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 	}
 
 	@Override
-	public String startJob(JobInstanceStartRequest theStartRequest) {
+	public String startInstance(JobInstanceStartRequest theStartRequest) {
 		JobDefinition jobDefinition = myJobDefinitionRegistry
 			.getLatestJobDefinition(theStartRequest.getJobDefinitionId())
 			.orElseThrow(() -> new IllegalArgumentException("Unknown job definition ID: " + theStartRequest.getJobDefinitionId()));
@@ -97,8 +98,13 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 	public JobInstance getInstance(String theInstanceId) {
 		return myJobPersistence
 			.fetchInstance(theInstanceId)
-			.map(t->massageInstanceForUserAccess(t))
-			.orElseThrow(()->new ResourceNotFoundException("Unknown instance ID: " + UrlUtil.escapeUrlParam(theInstanceId)));
+			.map(t -> massageInstanceForUserAccess(t))
+			.orElseThrow(() -> new ResourceNotFoundException("Unknown instance ID: " + UrlUtil.escapeUrlParam(theInstanceId)));
+	}
+
+	@Override
+	public void cancelInstance(String theInstanceId) throws ResourceNotFoundException {
+		myJobPersistence.cancelInstance(theInstanceId);
 	}
 
 	private JobInstance massageInstanceForUserAccess(JobInstance theInstance) {
@@ -119,7 +125,7 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 		return retVal;
 	}
 
-	private void executeStep(@Nonnull WorkChunk theWorkChunk, String jobDefinitionId, String targetStepId, ListMultimap<String, JobInstanceParameter> parameters, IJobStepWorker worker, IJobDataSink dataSink) {
+	private void executeStep(@Nonnull WorkChunk theWorkChunk, String jobDefinitionId, String targetStepId, JobInstanceParameters parameters, IJobStepWorker worker, IJobDataSink dataSink) {
 		Map<String, Object> data = theWorkChunk.getData();
 
 		StepExecutionDetails stepExecutionDetails = new StepExecutionDetails(parameters, data);
@@ -213,7 +219,13 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 		JobInstance instance = instanceOpt.orElseThrow(() -> new InternalErrorException("Unknown instance: " + payload.getInstanceId()));
 		String instanceId = instance.getInstanceId();
 
-		ListMultimap<String, JobInstanceParameter> parameters = validateParameters(definition.getParameters(), instance.getParameters());
+		if (instance.isCancelled()) {
+			ourLog.info("Skipping chunk {} because job instance is cancelled", chunkId);
+			myJobPersistence.markInstanceAsCompleted(instanceId);
+			return;
+		}
+
+		JobInstanceParameters parameters = validateParameters(definition.getParameters(), instance.getParameters());
 		IJobStepWorker worker = targetStep.getJobStepWorker();
 
 		IJobDataSink dataSink;
@@ -239,20 +251,20 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 			ourLog.warn(msg);
 			throw new InternalErrorException(msg);
 		}
-		JobDefinition definition = opt.get();
-		return definition;
+		return opt.get();
 	}
 
-	static ListMultimap<String, JobInstanceParameter> validateParameters(List<JobDefinitionParameter> theDefinitionParameters, List<JobInstanceParameter> theInstanceParameters) {
-		ListMultimap<String, JobInstanceParameter> retVal = ArrayListMultimap.create();
+	static JobInstanceParameters validateParameters(List<JobDefinitionParameter> theDefinitionParameters, List<JobInstanceParameter> theInstanceParameters) {
+		ArrayListMultimap<String, String> retVal = ArrayListMultimap.create();
 		Set<String> paramNames = new HashSet<>();
 		for (JobDefinitionParameter nextDefinition : theDefinitionParameters) {
 			paramNames.add(nextDefinition.getName());
 
-			List<JobInstanceParameter> instances = theInstanceParameters
+			List<String> instances = theInstanceParameters
 				.stream()
 				.filter(t -> nextDefinition.getName().equals(t.getName()))
-				.filter(t -> isNotBlank(t.getValue()))
+				.map(t -> t.getValue())
+				.filter(t -> isNotBlank(t))
 				.collect(Collectors.toList());
 
 			if (nextDefinition.isRequired() && instances.size() < 1) {
@@ -272,12 +284,12 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 			}
 		}
 
-		return retVal;
+		return new JobInstanceParameters(retVal);
 	}
 
 	private class WorkChannelMessageHandler implements MessageHandler {
 		@Override
-		public void handleMessage(Message<?> theMessage) throws MessagingException {
+		public void handleMessage(@Nonnull Message<?> theMessage) throws MessagingException {
 			handleWorkChannelMessage((JobWorkNotificationJsonMessage) theMessage);
 		}
 	}
@@ -297,13 +309,14 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 		}
 
 		@Override
-		public void accept(Map<String, Object> theData) {
+		public void accept(WorkChunkData theData) {
 			String jobDefinitionId = myJobDefinitionId;
 			int jobDefinitionVersion = myJobDefinitionVersion;
 			String instanceId = myInstanceId;
 			String targetStepId = mySecondStep.getStepId();
 			int sequence = myChunkCounter.getAndIncrement();
-			String chunkId = myJobPersistence.storeWorkChunk(jobDefinitionId, jobDefinitionVersion, targetStepId, instanceId, sequence, theData);
+			Map<String, Object> dataMap = theData.asMap();
+			String chunkId = myJobPersistence.storeWorkChunk(jobDefinitionId, jobDefinitionVersion, targetStepId, instanceId, sequence, dataMap);
 
 			sendWorkChannelMessage(jobDefinitionId, jobDefinitionVersion, instanceId, targetStepId, chunkId);
 		}
@@ -326,7 +339,7 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 		}
 
 		@Override
-		public void accept(Map<String, Object> theData) {
+		public void accept(WorkChunkData theData) {
 			String msg = "Illegal attempt to store data during final step of job " + myJobDefinitionId;
 			ourLog.error(msg);
 			throw new JobExecutionFailedException(msg);

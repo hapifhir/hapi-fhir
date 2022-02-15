@@ -9,11 +9,11 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class BulkImport2AppCtx {
 
+	public static final String JOB_BULK_IMPORT_PULL = "BULK_IMPORT_PULL";
 	public static final String PARAM_NDJSON_URL = "ndjson-url";
 	public static final String PARAM_HTTP_BASIC_CREDENTIALS = "http-basic-credentials";
-	public static final String JOB_BULK_IMPORT_PULL = "BULK_IMPORT_PULL";
-	public static final String PARAM_MAXIMUM_BATCH_SIZE = "maximum-batch-size";
-	public static final int PARAM_MAXIMUM_BATCH_SIZE_DEFAULT = 1000;
+	public static final String PARAM_MAXIMUM_BATCH_RESOURCE_COUNT = "maximum-batch-resource-count";
+	public static final int PARAM_MAXIMUM_BATCH_SIZE_DEFAULT = 800; // Avoid the 1000 SQL param limit
 
 	@Bean
 	public JobDefinition bulkImport2JobDefinition() {
@@ -35,7 +35,7 @@ public class BulkImport2AppCtx {
 				false,
 				false)
 			.addParameter(
-				PARAM_MAXIMUM_BATCH_SIZE,
+				PARAM_MAXIMUM_BATCH_RESOURCE_COUNT,
 				"Specifies the maximum number of resources that will be ingested in a single database transaction. Default is " + PARAM_MAXIMUM_BATCH_SIZE_DEFAULT + ".",
 				JobDefinitionParameter.ParamTypeEnum.POSITIVE_INTEGER,
 				false,
@@ -61,4 +61,8 @@ public class BulkImport2AppCtx {
 		return new ConsumeFilesStep();
 	}
 
+	@Bean
+	public BulkImportProvider bulkImportProvider() {
+		return new BulkImportProvider();
+	}
 }

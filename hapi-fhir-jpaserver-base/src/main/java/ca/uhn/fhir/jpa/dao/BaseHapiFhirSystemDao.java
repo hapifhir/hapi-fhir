@@ -153,39 +153,41 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 			 * However, for realistic average workloads, this should reduce the number of round trips.
 			 */
 			if (ids.size() >= 2) {
-				List<ResourceTable> loadedResourceTableEntries = preFetchIndexes(ids, "forcedId", "myForcedId");
+				List<ResourceTable> loadedResourceTableEntries = new ArrayList<>();
+				preFetchIndexes(ids, "forcedId", "myForcedId", loadedResourceTableEntries);
 
 				List<Long> entityIds;
 
 				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isParamsStringPopulated()).map(t->t.getId()).collect(Collectors.toList());
 				if (entityIds.size() > 0) {
-					preFetchIndexes(entityIds, "string", "myParamsString");
+					preFetchIndexes(entityIds, "string", "myParamsString", null);
 				}
 
 				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isParamsTokenPopulated()).map(t->t.getId()).collect(Collectors.toList());
 				if (entityIds.size() > 0) {
-					preFetchIndexes(entityIds, "token", "myParamsToken");
+					preFetchIndexes(entityIds, "token", "myParamsToken", null);
 				}
 
 				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isParamsDatePopulated()).map(t->t.getId()).collect(Collectors.toList());
 				if (entityIds.size() > 0) {
-					preFetchIndexes(entityIds, "date", "myParamsDate");
+					preFetchIndexes(entityIds, "date", "myParamsDate", null);
 				}
 
 				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isParamsQuantityPopulated()).map(t->t.getId()).collect(Collectors.toList());
 				if (entityIds.size() > 0) {
-					preFetchIndexes(entityIds, "quantity", "myParamsQuantity");
+					preFetchIndexes(entityIds, "quantity", "myParamsQuantity", null);
 				}
 
 				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isHasLinks()).map(t->t.getId()).collect(Collectors.toList());
 				if (entityIds.size() > 0) {
-					preFetchIndexes(entityIds, "resourceLinks", "myResourceLinks");
+					preFetchIndexes(entityIds, "resourceLinks", "myResourceLinks", null);
 				}
 
-//				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isHasTags()).map(t->t.getId()).collect(Collectors.toList());
-//				if (entityIds.size() > 0) {
-//					preFetchIndexes(entityIds, "tags", "myTags");
-//				}
+				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isHasTags()).map(t->t.getId()).collect(Collectors.toList());
+				if (entityIds.size() > 0) {
+					myResourceTagDao.findByResourceIds(entityIds);
+					preFetchIndexes(entityIds, "tags", "myTags", null);
+				}
 
 				new QueryChunker<ResourceTable>().chunk(loadedResourceTableEntries, SearchBuilder.getMaximumPageSize() / 2, entries -> {
 
@@ -225,12 +227,16 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 		});
 	}
 
-	private List<ResourceTable> preFetchIndexes(List<Long> ids, String typeDesc, String fieldName) {
-		TypedQuery<ResourceTable> query = myEntityManager.createQuery("FROM ResourceTable r LEFT JOIN FETCH r." + fieldName + " WHERE r.myId IN ( :IDS )", ResourceTable.class);
-		query.setParameter("IDS", ids);
-		List<ResourceTable> indexFetchOutcome = query.getResultList();
-		ourLog.debug("Pre-fetched {} {}} indexes", indexFetchOutcome.size(), typeDesc);
-		return indexFetchOutcome;
+	private void preFetchIndexes(List<Long> theIds, String typeDesc, String fieldName, @Nullable List<ResourceTable> theEntityListToPopulate) {
+		new QueryChunker<Long>().chunk(theIds, ids->{
+			TypedQuery<ResourceTable> query = myEntityManager.createQuery("FROM ResourceTable r LEFT JOIN FETCH r." + fieldName + " WHERE r.myId IN ( :IDS )", ResourceTable.class);
+			query.setParameter("IDS", ids);
+			List<ResourceTable> indexFetchOutcome = query.getResultList();
+			ourLog.debug("Pre-fetched {} {}} indexes", indexFetchOutcome.size(), typeDesc);
+			if (theEntityListToPopulate != null) {
+				theEntityListToPopulate.addAll(indexFetchOutcome);
+			}
+		});
 	}
 
 

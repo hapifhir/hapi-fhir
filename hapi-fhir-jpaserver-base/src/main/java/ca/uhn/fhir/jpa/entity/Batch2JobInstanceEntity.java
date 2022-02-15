@@ -53,37 +53,37 @@ public class Batch2JobInstanceEntity implements Serializable {
 	@Column(name = "STAT", length = STATUS_MAX_LENGTH, nullable = false)
 	@Enumerated(EnumType.STRING)
 	private StatusEnum myStatus;
-
+	@Column(name = "JOB_CANCELLED", nullable = false)
+	private boolean myCancelled;
 	@Column(name = "PARAMS_JSON", length = PARAMS_JSON_MAX_LENGTH, nullable = true)
 	private String myParamsJson;
-
 	@Lob
 	@Column(name = "PARAMS_JSON_LOB", nullable = true)
 	private String myParamsJsonLob;
-
 	@Column(name = "CMB_RECS_PROCESSED", nullable = true)
 	private Integer myCombinedRecordsProcessed;
-
 	@Column(name = "CMB_RECS_PER_SEC", nullable = true)
 	private Double myCombinedRecordsProcessedPerSecond;
-
 	@Column(name = "TOT_ELAPSED_MILLIS", nullable = true)
 	private Integer myTotalElapsedMillis;
-
 	@Column(name = "WORK_CHUNKS_PURGED", nullable = true)
 	private boolean myWorkChunksPurged;
-
 	@Column(name = "PROGRESS_PCT")
 	private double myProgress;
-
 	@Column(name = "ERROR_MSG", length = ERROR_MSG_MAX_LENGTH, nullable = true)
 	private String myErrorMessage;
-
 	@Column(name = "ERROR_COUNT")
 	private int myErrorCount;
-
 	@Column(name = "EST_REMAINING", length = TIME_REMAINING_LENGTH, nullable = true)
 	private String myEstimatedTimeRemaining;
+
+	public boolean isCancelled() {
+		return myCancelled;
+	}
+
+	public void setCancelled(boolean theCancelled) {
+		myCancelled = theCancelled;
+	}
 
 	public int getErrorCount() {
 		return myErrorCount;

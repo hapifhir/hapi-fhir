@@ -38,4 +38,8 @@ public interface IBatch2JobInstanceRepository extends JpaRepository<Batch2JobIns
 
 	@Query("SELECT e FROM Batch2JobInstanceEntity e ORDER BY e.myCreateTime ASC")
 	List<Batch2JobInstanceEntity> fetchAll(Pageable thePageRequest);
+
+	@Modifying
+	@Query("UPDATE Batch2JobInstanceEntity e SET e.myCancelled = :cancelled WHERE e.myId = :id")
+	void updateInstanceCancelled(@Param("id") String theInstanceId, @Param("cancelled") boolean theCancelled);
 }

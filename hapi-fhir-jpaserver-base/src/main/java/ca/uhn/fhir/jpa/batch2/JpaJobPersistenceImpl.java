@@ -127,6 +127,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		retVal.setJobDefinitionId(theEntity.getDefinitionId());
 		retVal.setJobDefinitionVersion(theEntity.getDefinitionVersion());
 		retVal.setStatus(theEntity.getStatus());
+		retVal.setCancelled(theEntity.isCancelled());
 		retVal.setStartTime(theEntity.getStartTime());
 		retVal.setCreateTime(theEntity.getCreateTime());
 		retVal.setEndTime(theEntity.getEndTime());
@@ -178,6 +179,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		instance.setStartTime(theInstance.getStartTime());
 		instance.setEndTime(theInstance.getEndTime());
 		instance.setStatus(theInstance.getStatus());
+		instance.setCancelled(theInstance.isCancelled());
 		instance.setCombinedRecordsProcessed(theInstance.getCombinedRecordsProcessed());
 		instance.setCombinedRecordsProcessedPerSecond(theInstance.getCombinedRecordsProcessedPerSecond());
 		instance.setTotalElapsedMillis(theInstance.getTotalElapsedMillis());
@@ -204,5 +206,10 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	public void markInstanceAsCompleted(String theInstanceId) {
 		myJobInstanceRepository.updateInstanceStatus(theInstanceId, StatusEnum.COMPLETED);
+	}
+
+	@Override
+	public void cancelInstance(String theInstanceId) {
+		myJobInstanceRepository.updateInstanceCancelled(theInstanceId, true);
 	}
 }

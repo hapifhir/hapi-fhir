@@ -1,10 +1,11 @@
 package ca.uhn.fhir.batch2.api;
 
-import java.util.Map;
+import ca.uhn.fhir.batch2.model.WorkChunkData;
 
 public interface IJobDataSink {
 
-	void accept(Map<String, Object> theData);
+	void accept(WorkChunkData theData);
 
 	int getWorkChunkCount();
+
 }

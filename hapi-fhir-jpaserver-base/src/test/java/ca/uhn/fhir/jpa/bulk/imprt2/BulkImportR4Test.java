@@ -67,7 +67,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 
 		// Execute
 
-		String instanceId = myJobCoordinator.startJob(request);
+		String instanceId = myJobCoordinator.startInstance(request);
 		assertThat(instanceId, not(blankOrNullString()));
 		ourLog.info("Execution got ID: {}", instanceId);
 
@@ -113,7 +113,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 
 			// Execute
 
-			String instanceId = myJobCoordinator.startJob(request);
+			String instanceId = myJobCoordinator.startInstance(request);
 			assertThat(instanceId, not(blankOrNullString()));
 			ourLog.info("Execution got ID: {}", instanceId);
 
@@ -160,7 +160,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 
 		// Execute
 
-		String instanceId = myJobCoordinator.startJob(request);
+		String instanceId = myJobCoordinator.startInstance(request);
 		assertThat(instanceId, not(blankOrNullString()));
 		ourLog.info("Execution got ID: {}", instanceId);
 

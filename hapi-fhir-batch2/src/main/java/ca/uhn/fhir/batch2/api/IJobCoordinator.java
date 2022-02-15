@@ -12,7 +12,7 @@ public interface IJobCoordinator {
 	 * @param theStartRequest The request, containing the job type and parameters
 	 * @return Returns a unique ID for this job execution
 	 */
-	String startJob(JobInstanceStartRequest theStartRequest);
+	String startInstance(JobInstanceStartRequest theStartRequest);
 
 	/**
 	 * Fetch details about a job instance
@@ -22,4 +22,9 @@ public interface IJobCoordinator {
 	 * @throws ResourceNotFoundException If the instance ID can not be found
 	 */
 	JobInstance getInstance(String theInstanceId) throws ResourceNotFoundException;
+
+
+	void cancelInstance(String theInstanceId) throws ResourceNotFoundException;
+
+
 }

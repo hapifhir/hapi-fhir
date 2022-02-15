@@ -89,7 +89,7 @@ public class BulkDataExportProvider {
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_FILTER, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theTypeFilter,
 		ServletRequestDetails theRequestDetails
 	) {
-		validatePreferAsyncHeader(theRequestDetails);
+		validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_EXPORT);
 		BulkDataExportOptions bulkDataExportOptions = buildSystemBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter);
 		Boolean useCache = shouldUseCache(theRequestDetails);
 		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(bulkDataExportOptions, useCache, theRequestDetails);
@@ -125,7 +125,7 @@ public class BulkDataExportProvider {
 		ourLog.debug("_mdm=", theMdm);
 
 
-		validatePreferAsyncHeader(theRequestDetails);
+		validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_EXPORT);
 		BulkDataExportOptions bulkDataExportOptions = buildGroupBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter, theIdParam, theMdm);
 		validateResourceTypesAllContainPatientSearchParams(bulkDataExportOptions.getResourceTypes());
 		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(bulkDataExportOptions, shouldUseCache(theRequestDetails), null);
@@ -155,7 +155,7 @@ public class BulkDataExportProvider {
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_FILTER, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theTypeFilter,
 		ServletRequestDetails theRequestDetails
 	) {
-		validatePreferAsyncHeader(theRequestDetails);
+		validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_EXPORT);
 		BulkDataExportOptions bulkDataExportOptions = buildPatientBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter);
 		validateResourceTypesAllContainPatientSearchParams(bulkDataExportOptions.getResourceTypes());
 		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(bulkDataExportOptions, shouldUseCache(theRequestDetails), null);
@@ -278,11 +278,11 @@ public class BulkDataExportProvider {
 		response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
 	}
 
-	private void validatePreferAsyncHeader(ServletRequestDetails theRequestDetails) {
+	public static void validatePreferAsyncHeader(ServletRequestDetails theRequestDetails, String theOperationName) {
 		String preferHeader = theRequestDetails.getHeader(Constants.HEADER_PREFER);
 		PreferHeader prefer = RestfulServerUtils.parsePreferHeader(null, preferHeader);
 		if (prefer.getRespondAsync() == false) {
-			throw new InvalidRequestException(Msg.code(513) + "Must request async processing for $export");
+			throw new InvalidRequestException(Msg.code(513) + "Must request async processing for " + theOperationName);
 		}
 	}
 

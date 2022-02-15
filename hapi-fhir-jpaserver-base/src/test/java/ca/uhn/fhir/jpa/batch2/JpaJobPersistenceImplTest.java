@@ -116,12 +116,39 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testCancelInstance() {
+		JobInstance instance = createInstance();
+		String instanceId = mySvc.storeNewInstance(instance);
+
+		runInTransaction(() -> {
+			Batch2JobInstanceEntity instanceEntity = myJobInstanceRepository.findById(instanceId).orElseThrow(() -> new IllegalStateException());
+			assertEquals(StatusEnum.QUEUED, instanceEntity.getStatus());
+			instanceEntity.setCancelled(true);
+			myJobInstanceRepository.save(instanceEntity);
+		});
+
+		mySvc.cancelInstance(instanceId);
+
+		JobInstance foundInstance = mySvc.fetchInstanceAndMarkInProgress(instanceId).orElseThrow(() -> new IllegalStateException());
+		assertEquals(instanceId, foundInstance.getInstanceId());
+		assertEquals("definition-id", foundInstance.getJobDefinitionId());
+		assertEquals(1, foundInstance.getJobDefinitionVersion());
+		assertEquals(StatusEnum.IN_PROGRESS, foundInstance.getStatus());
+		assertTrue( foundInstance.isCancelled());
+		assertThat(foundInstance.getParameters(), contains(
+			new JobInstanceParameter().setName("foo").setValue("bar"),
+			new JobInstanceParameter().setName("foo").setValue("baz")
+		));
+
+	}
+
+	@Test
 	public void testFetchInstanceAndMarkInProgress() {
 		JobInstance instance = createInstance();
 		String instanceId = mySvc.storeNewInstance(instance);
 
 		JobInstance foundInstance = mySvc.fetchInstanceAndMarkInProgress(instanceId).orElseThrow(() -> new IllegalStateException());
-		assertEquals(32, foundInstance.getInstanceId().length());
+		assertEquals(36, foundInstance.getInstanceId().length());
 		assertEquals("definition-id", foundInstance.getJobDefinitionId());
 		assertEquals(1, foundInstance.getJobDefinitionVersion());
 		assertEquals(StatusEnum.IN_PROGRESS, foundInstance.getStatus());
@@ -197,7 +224,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		runInTransaction(() -> assertEquals(StatusEnum.QUEUED, myWorkChunkRepository.findById(id).orElseThrow(() -> new IllegalArgumentException()).getStatus()));
 
 		WorkChunk chunk = mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(id).orElseThrow(() -> new IllegalArgumentException());
-		assertEquals(32, chunk.getInstanceId().length());
+		assertEquals(36, chunk.getInstanceId().length());
 		assertEquals("definition-id", chunk.getJobDefinitionId());
 		assertEquals(1, chunk.getJobDefinitionVersion());
 		assertEquals(StatusEnum.IN_PROGRESS, chunk.getStatus());

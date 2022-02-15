@@ -8,16 +8,17 @@ import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobDefinitionParameter;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceParameter;
+import ca.uhn.fhir.batch2.model.JobInstanceParameters;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.batch2.model.WorkChunkData;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,9 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.messaging.MessageDeliveryException;
 
 import javax.annotation.Nonnull;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -54,8 +53,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-//@ExtendWith(SpringExtension.class)
-//@ContextConfiguration(classes = JobInstanceCoordinatorImplTest.MyConfig.class)
 @ExtendWith(MockitoExtension.class)
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public class JobCoordinatorImplTest {
@@ -85,8 +82,6 @@ public class JobCoordinatorImplTest {
 	private IJobStepWorker myStep3Worker;
 	@Captor
 	private ArgumentCaptor<StepExecutionDetails> myStepExecutionDetailsCaptor;
-	@Captor
-	private ArgumentCaptor<Map<String, Object>> myDataCaptor;
 	@Captor
 	private ArgumentCaptor<JobWorkNotificationJsonMessage> myMessageCaptor;
 	@Captor
@@ -125,6 +120,18 @@ public class JobCoordinatorImplTest {
 	}
 
 	@Test
+	public void testCancelJob() {
+
+		// Execute
+
+		mySvc.cancelInstance(INSTANCE_ID);
+
+		// Verify
+
+		verify(myJobInstancePersister, times(1)).cancelInstance(eq(INSTANCE_ID));
+	}
+
+	@Test
 	public void testInitializeJob() {
 
 		// Setup
@@ -137,7 +144,7 @@ public class JobCoordinatorImplTest {
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setJobDefinitionId(JOB_DEFINITION_ID);
 		startRequest.addParameter(new JobInstanceParameter().setName(PARAM_1_NAME).setValue(PARAM_1_VALUE));
-		mySvc.startJob(startRequest);
+		mySvc.startInstance(startRequest);
 
 		// Verify
 
@@ -174,22 +181,22 @@ public class JobCoordinatorImplTest {
 		when(myJobInstancePersister.fetchWorkChunkSetStartTimeAndMarkInProgress(eq(CHUNK_ID))).thenReturn(Optional.of(createWorkChunk().setTargetStepId(STEP_1)));
 		when(myStep1Worker.run(any(), any())).thenAnswer(t -> {
 			IJobDataSink sink = t.getArgument(1, IJobDataSink.class);
-			sink.accept(Collections.singletonMap("key", "value"));
+			sink.accept(WorkChunkData.withData("key", "value"));
 			return new IJobStepWorker.RunOutcome(50);
 		});
 		mySvc.start();
 
 		// Execute
 
-		myWorkChannelReceiver.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_1, CHUNK_ID)));
+		myWorkChannelReceiver.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_1)));
 
 		// Verify
 
 		verify(myStep1Worker, times(1)).run(myStepExecutionDetailsCaptor.capture(), any());
-		ListMultimap<String, JobInstanceParameter> params = myStepExecutionDetailsCaptor.getValue().getParameters();
+		JobInstanceParameters params = myStepExecutionDetailsCaptor.getValue().getParameters();
 		assertEquals(1, params.size());
-		assertEquals(1, params.get(PARAM_1_NAME).size());
-		assertEquals(PARAM_1_VALUE, params.get(PARAM_1_NAME).get(0).getValue());
+		assertEquals(1, params.getValues(PARAM_1_NAME).size());
+		assertEquals(PARAM_1_VALUE, params.getValue(PARAM_1_NAME).orElseThrow(() -> new IllegalArgumentException()));
 
 		verify(myJobInstancePersister, times(1)).markWorkChunkAsCompletedAndClearData(any(), eq(50));
 	}
@@ -211,15 +218,15 @@ public class JobCoordinatorImplTest {
 
 		// Execute
 
-		myWorkChannelReceiver.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_1, CHUNK_ID)));
+		myWorkChannelReceiver.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_1)));
 
 		// Verify
 
 		verify(myStep1Worker, times(1)).run(myStepExecutionDetailsCaptor.capture(), any());
-		ListMultimap<String, JobInstanceParameter> params = myStepExecutionDetailsCaptor.getValue().getParameters();
+		JobInstanceParameters params = myStepExecutionDetailsCaptor.getValue().getParameters();
 		assertEquals(1, params.size());
-		assertEquals(1, params.get(PARAM_1_NAME).size());
-		assertEquals(PARAM_1_VALUE, params.get(PARAM_1_NAME).get(0).getValue());
+		assertEquals(1, params.getValues(PARAM_1_NAME).size());
+		assertEquals(PARAM_1_VALUE, params.getValue(PARAM_1_NAME).orElseThrow(() -> new IllegalArgumentException()));
 
 		verify(myJobInstancePersister, times(1)).markInstanceAsCompleted(eq(INSTANCE_ID));
 	}
@@ -237,15 +244,15 @@ public class JobCoordinatorImplTest {
 
 		// Execute
 
-		myWorkChannelReceiver.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_2, CHUNK_ID)));
+		myWorkChannelReceiver.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_2)));
 
 		// Verify
 
 		verify(myStep2Worker, times(1)).run(myStepExecutionDetailsCaptor.capture(), any());
-		ListMultimap<String, JobInstanceParameter> params = myStepExecutionDetailsCaptor.getValue().getParameters();
+		JobInstanceParameters params = myStepExecutionDetailsCaptor.getValue().getParameters();
 		assertEquals(1, params.size());
-		assertEquals(1, params.get(PARAM_1_NAME).size());
-		assertEquals(PARAM_1_VALUE, params.get(PARAM_1_NAME).get(0).getValue());
+		assertEquals(1, params.getValues(PARAM_1_NAME).size());
+		assertEquals(PARAM_1_VALUE, params.getValue(PARAM_1_NAME).orElseThrow(() -> new IllegalArgumentException()));
 
 		verify(myJobInstancePersister, times(1)).markWorkChunkAsCompletedAndClearData(eq(CHUNK_ID), eq(50));
 	}
@@ -264,7 +271,7 @@ public class JobCoordinatorImplTest {
 		// Execute
 
 		try {
-			myWorkChannelReceiver.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_2, CHUNK_ID)));
+			myWorkChannelReceiver.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_2)));
 			fail();
 		} catch (MessageDeliveryException e) {
 			assertEquals("This is an error message", e.getMostSpecificCause().getMessage());
@@ -273,10 +280,10 @@ public class JobCoordinatorImplTest {
 		// Verify
 
 		verify(myStep2Worker, times(1)).run(myStepExecutionDetailsCaptor.capture(), any());
-		ListMultimap<String, JobInstanceParameter> params = myStepExecutionDetailsCaptor.getValue().getParameters();
+		JobInstanceParameters params = myStepExecutionDetailsCaptor.getValue().getParameters();
 		assertEquals(1, params.size());
-		assertEquals(1, params.get(PARAM_1_NAME).size());
-		assertEquals(PARAM_1_VALUE, params.get(PARAM_1_NAME).get(0).getValue());
+		assertEquals(1, params.getValues(PARAM_1_NAME).size());
+		assertEquals(PARAM_1_VALUE, params.getValue(PARAM_1_NAME).orElseThrow(() -> new IllegalArgumentException()));
 
 		verify(myJobInstancePersister, times(1)).markWorkChunkAsErroredAndIncrementErrorCount(eq(CHUNK_ID), myErrorMessageCaptor.capture());
 		assertEquals("java.lang.NullPointerException: This is an error message", myErrorMessageCaptor.getValue());
@@ -295,15 +302,15 @@ public class JobCoordinatorImplTest {
 
 		// Execute
 
-		myWorkChannelReceiver.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_3, CHUNK_ID)));
+		myWorkChannelReceiver.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_3)));
 
 		// Verify
 
 		verify(myStep3Worker, times(1)).run(myStepExecutionDetailsCaptor.capture(), any());
-		ListMultimap<String, JobInstanceParameter> params = myStepExecutionDetailsCaptor.getValue().getParameters();
+		JobInstanceParameters params = myStepExecutionDetailsCaptor.getValue().getParameters();
 		assertEquals(1, params.size());
-		assertEquals(1, params.get(PARAM_1_NAME).size());
-		assertEquals(PARAM_1_VALUE, params.get(PARAM_1_NAME).get(0).getValue());
+		assertEquals(1, params.getValues(PARAM_1_NAME).size());
+		assertEquals(PARAM_1_VALUE, params.getValue(PARAM_1_NAME).orElseThrow(() -> new IllegalArgumentException()));
 
 		verify(myJobInstancePersister, times(1)).markWorkChunkAsCompletedAndClearData(eq(CHUNK_ID), eq(50));
 	}
@@ -318,22 +325,22 @@ public class JobCoordinatorImplTest {
 		when(myJobInstancePersister.fetchInstanceAndMarkInProgress(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
 		when(myStep3Worker.run(any(), any())).thenAnswer(t -> {
 			IJobDataSink sink = t.getArgument(1, IJobDataSink.class);
-			sink.accept(Collections.singletonMap("key", "value"));
+			sink.accept(WorkChunkData.withData("key", "value"));
 			return new IJobStepWorker.RunOutcome(50);
 		});
 		mySvc.start();
 
 		// Execute
 
-		myWorkChannelReceiver.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_3, CHUNK_ID)));
+		myWorkChannelReceiver.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_3)));
 
 		// Verify
 
 		verify(myStep3Worker, times(1)).run(myStepExecutionDetailsCaptor.capture(), any());
-		ListMultimap<String, JobInstanceParameter> params = myStepExecutionDetailsCaptor.getValue().getParameters();
+		JobInstanceParameters params = myStepExecutionDetailsCaptor.getValue().getParameters();
 		assertEquals(1, params.size());
-		assertEquals(1, params.get(PARAM_1_NAME).size());
-		assertEquals(PARAM_1_VALUE, params.get(PARAM_1_NAME).get(0).getValue());
+		assertEquals(1, params.getValues(PARAM_1_NAME).size());
+		assertEquals(PARAM_1_VALUE, params.getValue(PARAM_1_NAME).orElseThrow(() -> new IllegalArgumentException()));
 
 		verify(myJobInstancePersister, times(1)).markWorkChunkAsFailed(eq(CHUNK_ID), any());
 	}
@@ -350,7 +357,7 @@ public class JobCoordinatorImplTest {
 		// Execute
 
 		try {
-			myWorkChannelReceiver.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_2, CHUNK_ID)));
+			myWorkChannelReceiver.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_2)));
 			fail();
 		} catch (MessageDeliveryException e) {
 
@@ -375,7 +382,7 @@ public class JobCoordinatorImplTest {
 
 		// Execute
 
-		myWorkChannelReceiver.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_2, CHUNK_ID)));
+		myWorkChannelReceiver.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_2)));
 
 		// Verify
 		verifyNoMoreInteractions(myStep1Worker);
@@ -384,7 +391,8 @@ public class JobCoordinatorImplTest {
 
 	}
 
-	private JobDefinition createJobDefinition(Consumer<JobDefinition.Builder>... theModifiers) {
+	@SafeVarargs
+	private final JobDefinition createJobDefinition(Consumer<JobDefinition.Builder>... theModifiers) {
 		JobDefinition.Builder builder = JobDefinition
 			.newBuilder()
 			.setJobDefinitionId(JOB_DEFINITION_ID)
@@ -403,12 +411,12 @@ public class JobCoordinatorImplTest {
 	}
 
 	@Nonnull
-	private JobWorkNotification createWorkNotification(String theStepId, String theChunkId) {
+	private JobWorkNotification createWorkNotification(String theStepId) {
 		JobWorkNotification payload = new JobWorkNotification();
 		payload.setJobDefinitionId(JOB_DEFINITION_ID);
 		payload.setJobDefinitionVersion(1);
 		payload.setInstanceId(INSTANCE_ID);
-		payload.setChunkId(theChunkId);
+		payload.setChunkId(JobCoordinatorImplTest.CHUNK_ID);
 		payload.setTargetStepId(theStepId);
 		return payload;
 	}
@@ -522,14 +530,4 @@ public class JobCoordinatorImplTest {
 			.setInstanceId(INSTANCE_ID);
 	}
 
-	//	public static class MyConfig extends BaseBatch2AppCtx {
-//
-//
-//
-//		@Override
-//		public IChannelProducer batchProcessingChannelProducer() {
-//			return new LinkedBlockingChannel("batch2", Executors.newSingleThreadExecutor(), new BlockingLin);
-//		}
-//
-//	}
 }

@@ -118,4 +118,11 @@ public interface IJobPersistence {
 	 * @param theInstanceId The instance ID
 	 */
 	void markInstanceAsCompleted(String theInstanceId);
+
+	/**
+	 * Marks an instance as cancelled
+	 *
+	 * @param theInstanceId The instance ID
+	 */
+	void cancelInstance(String theInstanceId);
 }

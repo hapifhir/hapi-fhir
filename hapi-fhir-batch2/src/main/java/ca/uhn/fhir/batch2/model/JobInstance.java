@@ -27,6 +27,9 @@ public class JobInstance implements IModelJson {
 	@JsonProperty(value = "status")
 	private StatusEnum myStatus;
 
+	@JsonProperty(value = "cancelled")
+	private boolean myCancelled;
+
 	@JsonProperty(value = "parameters")
 	private List<JobInstanceParameter> myParameters;
 
@@ -229,5 +232,13 @@ public class JobInstance implements IModelJson {
 
 	public void setErrorMessage(String theErrorMessage) {
 		myErrorMessage = theErrorMessage;
+	}
+
+	public void setCancelled(boolean theCancelled) {
+		myCancelled = theCancelled;
+	}
+
+	public boolean isCancelled() {
+		return myCancelled;
 	}
 }
