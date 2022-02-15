@@ -67,7 +67,6 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -340,7 +339,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	 */
 	@Test
 	public void testConditionalCreateFailsIfMatchUrlDoesntMatch_InTransaction() {
-		BundleBuilder bb = new BundleBuilder(myFhirCtx);
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
 
 		Patient patient = new Patient();
 		patient.setId(IdType.newRandomUuid());
@@ -363,7 +362,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	@Test
 	public void testCreateResourceWithKoreanText() throws IOException {
 		String input = loadClasspath("/r4/bug832-korean-text.xml");
-		Patient p = myFhirCtx.newXmlParser().parseResource(Patient.class, input);
+		Patient p = myFhirContext.newXmlParser().parseResource(Patient.class, input);
 		String id = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
 
 		SearchParameterMap map = new SearchParameterMap();
@@ -619,11 +618,11 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			.getRequest()
 			.setMethod(Bundle.HTTPVerb.POST);
 
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(input));
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		Bundle output = mySystemDao.transaction(mySrd, input);
 
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		assertThat(output.getEntry().get(0).getResponse().getLocation(), matchesPattern("Organization/[a-z0-9]{8}-.*"));
 		assertThat(output.getEntry().get(1).getResponse().getLocation(), matchesPattern("Patient/[a-z0-9]{8}-.*"));
@@ -640,7 +639,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		o.getMeta().addTag("http://foo", "bar", "FOOBAR");
 		p.getManagingOrganization().setResource(o);
 
-		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
+		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info("Input: {}", encoded);
 		assertThat(encoded, containsString("#1"));
 
@@ -648,7 +647,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		p = myPatientDao.read(id);
 
-		encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
+		encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info("Output: {}", encoded);
 		assertThat(encoded, containsString("#1"));
 
@@ -691,7 +690,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		q.setCode("cm");
 		obs.setValue(q);
 
-		ourLog.info("Observation1: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		ourLog.info("Observation1: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
 		assertTrue(myObservationDao.create(obs).getCreated());
 
@@ -731,7 +730,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		q.setCode("mm");
 		obs.setValue(q);
 
-		ourLog.info("Observation1: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		ourLog.info("Observation1: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
 		myCaptureQueriesListener.clear();
 		assertTrue(myObservationDao.create(obs).getCreated());
@@ -808,7 +807,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		q.setCode("mm");
 		obs.setValue(q);
 
-		ourLog.info("Observation1: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		ourLog.info("Observation1: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
 		assertTrue(myObservationDao.create(obs).getCreated());
 
@@ -843,7 +842,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		assertEquals(1, ids.size());
 
-		ourLog.info("Observation2: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resources.get(0)));
+		ourLog.info("Observation2: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resources.get(0)));
 
 	}
 
@@ -860,7 +859,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		q.setCode("kg/dL");
 		obs.setValue(q);
 
-		ourLog.info("Observation1: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		ourLog.info("Observation1: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
 		assertTrue(myObservationDao.create(obs).getCreated());
 
@@ -900,7 +899,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		q.setCode("kg/dL");
 		obs.setValue(q);
 
-		ourLog.info("Observation1: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		ourLog.info("Observation1: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
 		assertTrue(myObservationDao.create(obs).getCreated());
 
@@ -947,7 +946,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		q.setCode("mm");
 		obs.setValue(q);
 
-		ourLog.info("Observation1: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		ourLog.info("Observation1: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
 		myCaptureQueriesListener.clear();
 		assertTrue(myObservationDao.create(obs).getCreated());
@@ -1080,7 +1079,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		q.setCode("mm");
 		obs.setValue(q);
 
-		ourLog.info("Observation1: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		ourLog.info("Observation1: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
 		myCaptureQueriesListener.clear();
 		assertTrue(myObservationDao.create(obs).getCreated());

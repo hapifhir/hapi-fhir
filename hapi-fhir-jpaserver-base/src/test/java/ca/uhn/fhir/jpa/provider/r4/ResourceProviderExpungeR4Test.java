@@ -146,7 +146,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 			.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS)
 			.setValue(new BooleanType(true));
 
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		Parameters output = myClient
 			.operation()
@@ -219,7 +219,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 			.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_EVERYTHING)
 			.setValue(new BooleanType(true));
 
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		Parameters output = myClient
 			.operation()
@@ -258,7 +258,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 			.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS)
 			.setValue(new BooleanType(true));
 
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		Parameters output = myClient
 			.operation()
@@ -304,7 +304,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 			.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS)
 			.setValue(new BooleanType(true));
 
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		Parameters output = myClient
 			.operation()

@@ -13,7 +13,7 @@ public final class HapiEntityManagerFactoryUtil {
 	 * This method provides a partially completed entity manager
 	 * factory with HAPI FHIR customizations
 	 */
-	public static LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory myConfigurableListableBeanFactory, FhirContext theFhirContext) {
+	public static LocalContainerEntityManagerFactoryBean newEntityManagerFactory(ConfigurableListableBeanFactory myConfigurableListableBeanFactory, FhirContext theFhirContext) {
 		LocalContainerEntityManagerFactoryBean retVal = new HapiFhirLocalContainerEntityManagerFactoryBean(myConfigurableListableBeanFactory);
 		configureEntityManagerFactory(retVal, theFhirContext);
 		return retVal;

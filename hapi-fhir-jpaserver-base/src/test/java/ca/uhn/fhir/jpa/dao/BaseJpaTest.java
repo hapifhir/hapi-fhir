@@ -305,7 +305,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		});
 	}
 
-	protected abstract FhirContext getContext();
+	protected abstract FhirContext getFhirContext();
 
 	protected abstract PlatformTransactionManager getTxManager();
 
@@ -458,7 +458,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected List<String> toUnqualifiedIdValues(IBaseBundle theFound) {
 		List<String> retVal = new ArrayList<>();
 
-		List<IBaseResource> res = BundleUtil.toListOfResources(getContext(), theFound);
+		List<IBaseResource> res = BundleUtil.toListOfResources(getFhirContext(), theFound);
 		int size = res.size();
 		ourLog.info("Found {} results", size);
 		for (IBaseResource next : res) {
@@ -481,7 +481,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected List<String> toUnqualifiedVersionlessIdValues(IBaseBundle theFound) {
 		List<String> retVal = new ArrayList<>();
 
-		List<IBaseResource> res = BundleUtil.toListOfResources(getContext(), theFound);
+		List<IBaseResource> res = BundleUtil.toListOfResources(getFhirContext(), theFound);
 		int size = res.size();
 		ourLog.info("Found {} results", size);
 		for (IBaseResource next : res) {

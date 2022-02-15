@@ -1,13 +1,11 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
-import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
@@ -213,7 +211,7 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.INLINE);
 
 		SearchParameter searchParameter = createResourceTagSearchParameter();
-		ourLog.info("SearchParam:\n{}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
+		ourLog.info("SearchParam:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
 		mySearchParameterDao.update(searchParameter, mySrd);
 		mySearchParamRegistry.forceRefresh();
 
@@ -233,7 +231,7 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.INLINE);
 
 		SearchParameter searchParameter = createSearchParamForInlineResourceProfile();
-		ourLog.info("SearchParam:\n{}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
+		ourLog.info("SearchParam:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
 		mySearchParameterDao.update(searchParameter, mySrd);
 		mySearchParamRegistry.forceRefresh();
 
@@ -253,7 +251,7 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 
 		SearchParameter searchParameter = new SearchParameter();
 		searchParameter.setId("SearchParameter/resource-security");
-		for (String next : myFhirCtx.getResourceTypes().stream().sorted().collect(Collectors.toList())) {
+		for (String next : myFhirContext.getResourceTypes().stream().sorted().collect(Collectors.toList())) {
 			searchParameter.addBase(next);
 		}
 		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -261,7 +259,7 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		searchParameter.setCode("_security");
 		searchParameter.setName("Security");
 		searchParameter.setExpression("meta.security");
-		ourLog.info("SearchParam:\n{}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
+		ourLog.info("SearchParam:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
 		mySearchParameterDao.update(searchParameter, mySrd);
 		mySearchParamRegistry.forceRefresh();
 

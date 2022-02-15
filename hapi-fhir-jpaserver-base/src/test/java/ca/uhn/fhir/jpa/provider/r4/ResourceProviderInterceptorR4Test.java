@@ -168,7 +168,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
-		String resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
+		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
 		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
 		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, interceptor);
@@ -236,7 +236,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 				.returnBundle(Bundle.class)
 				.execute();
 			assertEquals(1, observations.getEntry().size());
-			ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(observations));
+			ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(observations));
 
 		} finally {
 			ourRestServer.unregisterInterceptor(interceptor);
@@ -257,7 +257,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		pt.addName().setFamily(methodName);
 		pt.setManagingOrganization(new Reference(orgId));
 
-		IParser parser = myFhirCtx.newXmlParser();
+		IParser parser = myFhirContext.newXmlParser();
 		parser.setDontStripVersionsFromReferencesAtPaths("Patient.managingOrganization");
 		parser.setPrettyPrint(true);
 		String resource = parser.encodeResourceToString(pt);
@@ -323,7 +323,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 
 
 	private void transaction(Bundle theBundle) throws IOException {
-		String resource = myFhirCtx.newXmlParser().encodeResourceToString(theBundle);
+		String resource = myFhirContext.newXmlParser().encodeResourceToString(theBundle);
 		HttpPost post = new HttpPost(ourServerBase + "/");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {

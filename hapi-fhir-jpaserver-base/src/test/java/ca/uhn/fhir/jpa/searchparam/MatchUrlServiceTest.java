@@ -98,7 +98,7 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 	}
 
 	@Override
-	protected FhirContext getContext() {
+	protected FhirContext getFhirContext() {
 		return ourCtx;
 	}
 

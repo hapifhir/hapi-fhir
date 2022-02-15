@@ -80,7 +80,7 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 		IIdType id = myBundleDao.create(bundle).getId();
 
 		bundle = myBundleDao.read(id);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		patient = (Patient) bundle.getEntryFirstRep().getResource();
 		assertTrue(patient.getActive());
 		assertEquals(1, patient.getMeta().getExtensionsByUrl("http://foo").size());

@@ -132,7 +132,7 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Autowired
 	protected EntityManager myEntityManager;
 	@Autowired
-	protected FhirContext myFhirCtx;
+	protected FhirContext myFhirContext;
 	@Autowired
 	@Qualifier("myImmunizationDaoDstu2")
 	protected IFhirResourceDao<Immunization> myImmunizationDao;
@@ -246,8 +246,8 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	}
 
 	@Override
-	protected FhirContext getContext() {
-		return myFhirCtx;
+	public FhirContext getFhirContext() {
+		return myFhirContext;
 	}
 
 	@Override
@@ -261,7 +261,7 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 			fail("Unable to load resource: " + resourceName);
 		}
 		String string = IOUtils.toString(stream, StandardCharsets.UTF_8);
-		IParser newJsonParser = EncodingEnum.detectEncodingNoDefault(string).newParser(myFhirCtx);
+		IParser newJsonParser = EncodingEnum.detectEncodingNoDefault(string).newParser(myFhirContext);
 		return newJsonParser.parseResource(type, string);
 	}
 

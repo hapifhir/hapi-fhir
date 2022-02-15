@@ -42,7 +42,7 @@ public class FhirResourceDaoR4LuceneDisabledStandardQueries extends BaseJpaTest 
 	}
 
 	@Override
-	protected FhirContext getContext() {
+	protected FhirContext getFhirContext() {
 		return myFhirCtx;
 	}
 

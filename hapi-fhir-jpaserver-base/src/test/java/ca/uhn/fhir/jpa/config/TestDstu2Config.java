@@ -136,7 +136,7 @@ public class TestDstu2Config {
 
 	@Bean
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext) {
-		LocalContainerEntityManagerFactoryBean retVal = HapiEntityManagerFactoryUtil.entityManagerFactory(theConfigurableListableBeanFactory, theFhirContext);
+		LocalContainerEntityManagerFactoryBean retVal = HapiEntityManagerFactoryUtil.newEntityManagerFactory(theConfigurableListableBeanFactory, theFhirContext);
 		retVal.setPersistenceUnitName("PU_HapiFhirJpaDstu2");
 		retVal.setDataSource(dataSource());
 		retVal.setJpaProperties(jpaProperties());

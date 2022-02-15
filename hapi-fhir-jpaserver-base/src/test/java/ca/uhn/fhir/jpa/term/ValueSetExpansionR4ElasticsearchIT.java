@@ -213,7 +213,7 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 
 
 	@Override
-	protected FhirContext getContext() {
+	protected FhirContext getFhirContext() {
 		return myFhirContext;
 	}
 

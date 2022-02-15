@@ -77,9 +77,9 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 			qr.addItem().setLinkId("A").addAnswer().setValue(new StringType("AAA"));
 
 			MethodOutcome results = myQuestionnaireResponseDao.validate(qr, null, null, null, null, null, null);
-			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(results.getOperationOutcome()));
+			ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(results.getOperationOutcome()));
 		} catch (PreconditionFailedException e) {
-			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+			ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 			fail(e.toString());
 		}
 
@@ -95,7 +95,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 		qr.addItem().setLinkId("A").addAnswer().setValue(new StringType("AAA"));
 
 		MethodOutcome results = myQuestionnaireResponseDao.validate(qr, null, null, null, null, null, null);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(results.getOperationOutcome()));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(results.getOperationOutcome()));
 
 		ourLog.info("Clearing cache");
 		myValidationSupport.invalidateCaches();
@@ -106,7 +106,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 			myQuestionnaireResponseDao.validate(qr, null, null, null, null, null, null);
 			fail();
 		} catch (PreconditionFailedException e) {
-			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+			ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 			// good
 		}
 
@@ -122,7 +122,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 		myValueSetDao.create(vs);
 
 		ValueSet expansion = myValueSetDao.expandByIdentifier("http://ccim.on.ca/fhir/iar/ValueSet/iar-citizenship-status", null);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 
 		assertThat(expansion.getExpansion().getContains().stream().map(t->t.getCode()).collect(Collectors.toList()), containsInAnyOrder(
 			"CDN", "PR", "TR", "REF", "UNK", "ASKU"
@@ -175,25 +175,25 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 		try {
 			MethodOutcome outcome = myQuestionnaireResponseDao.validate(qr, null, null, null, ValidationModeEnum.CREATE, null, mySrd);
 			OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
-			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+			ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 			fail();
 		} catch (PreconditionFailedException e) {
 			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
-			String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
+			String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
 			ourLog.info(encoded);
 			assertThat(encoded, containsString("is not in the options value set"));
 		}
 
 		// Validate as string
 		try {
-			String raw = myFhirCtx.newJsonParser().encodeResourceToString(qr);
+			String raw = myFhirContext.newJsonParser().encodeResourceToString(qr);
 			MethodOutcome outcome = myQuestionnaireResponseDao.validate(qr, null, raw, EncodingEnum.JSON, ValidationModeEnum.CREATE, null, mySrd);
 			OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
-			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+			ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 			fail();
 		} catch (PreconditionFailedException e) {
 			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
-			String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
+			String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
 			ourLog.info(encoded);
 			assertThat(encoded, containsString("is not in the options value set"));
 		}
@@ -204,14 +204,14 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 	@Test
 	public void testValidateStructureDefinition() throws Exception {
 		String input = IOUtils.toString(getClass().getResourceAsStream("/sd-david-dhtest7.json"), StandardCharsets.UTF_8);
-		StructureDefinition sd = myFhirCtx.newJsonParser().parseResource(StructureDefinition.class, input);
+		StructureDefinition sd = myFhirContext.newJsonParser().parseResource(StructureDefinition.class, input);
 
 
 		ourLog.info("Starting validation");
 		try {
 			myStructureDefinitionDao.validate(sd, null, null, null, ValidationModeEnum.UPDATE, null, mySrd);
 		} catch (PreconditionFailedException e) {
-			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+			ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 		}
 		ourLog.info("Done validation");
 
@@ -229,14 +229,14 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 	@Test
 	public void testValidateDocument() throws Exception {
 		String input = IOUtils.toString(getClass().getResourceAsStream("/document-bundle-dstu3.json"), StandardCharsets.UTF_8);
-		Bundle document = myFhirCtx.newJsonParser().parseResource(Bundle.class, input);
+		Bundle document = myFhirContext.newJsonParser().parseResource(Bundle.class, input);
 
 
 		ourLog.info("Starting validation");
 		try {
 			MethodOutcome outcome = myBundleDao.validate(document, null, null, null, ValidationModeEnum.CREATE, null, mySrd);
 		} catch (PreconditionFailedException e) {
-			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+			ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 		}
 		ourLog.info("Done validation");
 
@@ -249,7 +249,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 		String methodName = "testValidateResourceContainingProfileDeclarationJson";
 		OperationOutcome outcome = doTestValidateResourceContainingProfileDeclaration(methodName, EncodingEnum.JSON);
 
-		String ooString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+		String ooString = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(ooString);
 		assertThat(ooString, containsString("Element '.subject': minimum required = 1, but only found 0"));
 		assertThat(ooString, containsString("Element encounter @ : max allowed = 0, but found 1"));
@@ -262,7 +262,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 		String methodName = "testValidateResourceContainingProfileDeclarationXml";
 		OperationOutcome outcome = doTestValidateResourceContainingProfileDeclaration(methodName, EncodingEnum.XML);
 
-		String ooString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+		String ooString = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(ooString);
 		assertThat(ooString, containsString("Element '/f:Observation.subject': minimum required = 1, but only found 0"));
 		assertThat(ooString, containsString("Element encounter @ /f:Observation: max allowed = 0, but found 1"));
@@ -299,7 +299,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 		ValidationModeEnum mode = ValidationModeEnum.CREATE;
 		switch (enc) {
 			case JSON:
-				encoded = myFhirCtx.newJsonParser().encodeResourceToString(input);
+				encoded = myFhirContext.newJsonParser().encodeResourceToString(input);
 				try {
 					myObservationDao.validate(input, null, encoded, EncodingEnum.JSON, mode, null, mySrd);
 					fail();
@@ -308,7 +308,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 				}
 				break;
 			case XML:
-				encoded = myFhirCtx.newXmlParser().encodeResourceToString(input);
+				encoded = myFhirContext.newXmlParser().encodeResourceToString(input);
 				try {
 					myObservationDao.validate(input, null, encoded, EncodingEnum.XML, mode, null, mySrd);
 					fail();
@@ -335,15 +335,15 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
 
 		ValidationModeEnum mode = ValidationModeEnum.CREATE;
-		String encoded = myFhirCtx.newJsonParser().encodeResourceToString(input);
+		String encoded = myFhirContext.newJsonParser().encodeResourceToString(input);
 		try {
 			// Expected to throw exception
 			MethodOutcome output = myObservationDao.validate(input, null, encoded, EncodingEnum.JSON, mode, null, mySrd);
-			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output.getOperationOutcome()));
+			ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output.getOperationOutcome()));
 			fail();
 		} catch (PreconditionFailedException e) {
 			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
-			String outputString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
+			String outputString = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
 			ourLog.info(outputString);
 			assertThat(outputString, containsString("Profile reference 'http://example.com/StructureDefinition/testValidateResourceContainingProfileDeclarationInvalid' has not been checked because it is unknown"));
 		}
@@ -433,7 +433,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 			outcome = (OperationOutcome) e.getOperationOutcome();
 		}
 
-		String ooString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+		String ooString = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(ooString);
 		assertThat(ooString, containsString("Unable to delete Organization"));
 
@@ -442,7 +442,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 		myPatientDao.update(pat, mySrd);
 
 		outcome = (OperationOutcome) myOrganizationDao.validate(null, orgId, null, null, ValidationModeEnum.DELETE, null, mySrd).getOperationOutcome();
-		ooString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+		ooString = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(ooString);
 		assertThat(ooString, containsString("Ok to delete"));
 
@@ -472,10 +472,10 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 		try {
 			MethodOutcome results = myQuestionnaireDao.validate(null, null, input, EncodingEnum.XML, ValidationModeEnum.UPDATE, null, mySrd);
 			OperationOutcome oo = (OperationOutcome) results.getOperationOutcome();
-			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+			ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		} catch (PreconditionFailedException e) {
 			// this is a failure of the test
-			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+			ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 			throw e;
 		}
 	}
@@ -491,16 +491,16 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 		p.getMeta().addProfile("http://hl7.org/fhir/StructureDefinition/MyPatient421");
 		p.setActive(true);
 
-		String raw = myFhirCtx.newJsonParser().encodeResourceToString(p);
+		String raw = myFhirContext.newJsonParser().encodeResourceToString(p);
 		try {
 			MethodOutcome outcome = myPatientDao.validate(p, null, raw, EncodingEnum.JSON, null, null, mySrd);
 
-			String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
+			String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
 			ourLog.info("OO: {}", encoded);
 			assertThat(encoded, containsString("No issues detected"));
 		} catch (PreconditionFailedException e) {
 			// not expected, but let's log the error
-			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+			ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 			fail(e.toString());
 		}
 	}

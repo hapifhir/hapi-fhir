@@ -455,7 +455,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 
 		// _ current CS is present and has no version
 		CodeSystem codeSystem = myCodeSystemDao.read(new IdType(LOINC_LOW));
-		String csString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem);
+		String csString = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem);
 		ourLog.info("CodeSystem:\n" + csString);
 
 		HashSet<String> shouldNotBePresentVersions = new HashSet<>(possibleVersions);
