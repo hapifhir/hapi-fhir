@@ -55,17 +55,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 })
 public class JpaDstu2Config {
 
-	private static FhirContext ourFhirContextDstu2Hl7Org;
-
-	@Bean(name = "myFhirContextDstu2Hl7Org")
-	@Lazy
-	public FhirContext fhirContextDstu2Hl7Org() {
-		if (ourFhirContextDstu2Hl7Org == null) {
-			ourFhirContextDstu2Hl7Org = FhirContext.forDstu2Hl7Org();
-		}
-		return ourFhirContextDstu2Hl7Org;
-	}
-
 	@Bean(name = "myInstanceValidator")
 	@Lazy
 	public IInstanceValidatorModule instanceValidator(ValidationSupportChain theValidationSupportChain) {
