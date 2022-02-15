@@ -31,7 +31,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 @Configuration
 @Import({
-	HapiJpaDstu2Config.class,
+	JpaDstu2Config.class,
+	HapiJpaConfig.class,
 	TestJPAConfig.class,
 	TestHibernateSearchAddInConfig.DefaultLuceneHeap.class
 })

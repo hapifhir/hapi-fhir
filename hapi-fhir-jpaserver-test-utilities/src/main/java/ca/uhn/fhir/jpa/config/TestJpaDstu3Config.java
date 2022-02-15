@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
-import ca.uhn.fhir.jpa.config.dstu3.HapiJpaDstu3Config;
+import ca.uhn.fhir.jpa.config.dstu3.JpaDstu3Config;
 import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer;
@@ -54,7 +54,11 @@ import java.util.concurrent.TimeUnit;
 
 // TODO KBD Can we remove this Class entirely and just use a Generic one (same for TestJpaR4Config)?
 // WIP KHS Now that we're publishing test artifacts, we can probably use those shared test configs
-@Import({TestJpaConfig.class, HapiJpaDstu3Config.class})
+@Import({
+	TestJpaConfig.class,
+	JpaDstu3Config.class,
+	HapiJpaConfig.class
+})
 public class TestJpaDstu3Config {
 	private static final Logger ourLog = LoggerFactory.getLogger(TestJpaDstu3Config.class);
 	@Autowired

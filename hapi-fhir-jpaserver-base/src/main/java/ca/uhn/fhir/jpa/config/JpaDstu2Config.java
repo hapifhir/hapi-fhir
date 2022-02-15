@@ -1,29 +1,16 @@
 package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
-import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
-import ca.uhn.fhir.jpa.dao.JpaPersistedResourceValidationSupport;
 import ca.uhn.fhir.jpa.dao.TransactionProcessorVersionAdapterDstu2;
 import ca.uhn.fhir.jpa.term.TermReadSvcDstu2;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
-import ca.uhn.fhir.validation.IInstanceValidatorModule;
-import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
-import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
-import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
-import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
-import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
-import org.hl7.fhir.common.hapi.validation.validator.HapiToHl7OrgDstu2ValidatingSupportWrapper;
-import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Primary;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /*
@@ -54,39 +41,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 	JpaConfig.class
 })
 public class JpaDstu2Config {
-
-	@Bean(name = "myInstanceValidator")
-	@Lazy
-	public IInstanceValidatorModule instanceValidator(ValidationSupportChain theValidationSupportChain) {
-		CachingValidationSupport cachingValidationSupport = new CachingValidationSupport(new HapiToHl7OrgDstu2ValidatingSupportWrapper(theValidationSupportChain));
-		FhirInstanceValidator retVal = new FhirInstanceValidator(cachingValidationSupport);
-		retVal.setBestPracticeWarningLevel(BestPracticeWarningLevel.Warning);
-		return retVal;
-	}
-
 	@Bean
 	public ITransactionProcessorVersionAdapter transactionProcessorVersionFacade() {
 		return new TransactionProcessorVersionAdapterDstu2();
-	}
-
-
-	@Bean(name = "myDefaultProfileValidationSupport")
-	public DefaultProfileValidationSupport defaultProfileValidationSupport(FhirContext theFhirContext) {
-		return new DefaultProfileValidationSupport(theFhirContext);
-	}
-
-	@Bean(name = JpaConfig.JPA_VALIDATION_SUPPORT_CHAIN)
-	public ValidationSupportChain validationSupportChain(DefaultProfileValidationSupport theDefaultProfileValidationSupport, FhirContext theFhirContext) {
-		InMemoryTerminologyServerValidationSupport inMemoryTerminologyServer = new InMemoryTerminologyServerValidationSupport(theFhirContext);
-		IValidationSupport jpaValidationSupport = jpaValidationSupportDstu2(theFhirContext);
-		CommonCodeSystemsTerminologyService commonCodeSystemsTermSvc = new CommonCodeSystemsTerminologyService(theFhirContext);
-		return new ValidationSupportChain(theDefaultProfileValidationSupport, jpaValidationSupport, inMemoryTerminologyServer, commonCodeSystemsTermSvc);
-	}
-
-	@Primary
-	@Bean(name = JpaConfig.JPA_VALIDATION_SUPPORT)
-	public IValidationSupport jpaValidationSupportDstu2(FhirContext theFhirContext) {
-		return new JpaPersistedResourceValidationSupport(theFhirContext);
 	}
 
 	@Bean(name = "mySystemDaoDstu2")
@@ -107,5 +64,4 @@ public class JpaDstu2Config {
 	public ITermReadSvc terminologyService() {
 		return new TermReadSvcDstu2();
 	}
-
 }

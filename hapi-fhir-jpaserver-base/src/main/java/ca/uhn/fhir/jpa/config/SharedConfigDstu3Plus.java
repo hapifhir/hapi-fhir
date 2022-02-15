@@ -29,10 +29,8 @@ import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReindexingSvc;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import({ValidationSupportConfig.class})
 public class SharedConfigDstu3Plus {
 
 	@Bean

@@ -187,7 +187,8 @@ import java.util.Date;
 @Import({
 	BeanPostProcessorConfig.class,
 	BatchJobsConfig.class,
-	SearchParamConfig.class
+	SearchParamConfig.class,
+	ValidationSupportConfig.class
 })
 public class JpaConfig {
 	public static final String JPA_VALIDATION_SUPPORT_CHAIN = "myJpaValidationSupportChain";
