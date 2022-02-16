@@ -20,9 +20,9 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
+import ca.uhn.fhir.batch2.jobs.imprt.BulkImportFileServlet;
+import ca.uhn.fhir.batch2.jobs.imprt.BulkImportProvider;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.bulk.imprt2.BulkImportFileServlet;
-import ca.uhn.fhir.jpa.bulk.imprt2.BulkImportProvider;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -59,8 +59,8 @@ public class BulkImportCommand extends BaseCommand {
 	public static final String SOURCE_BASE = "source-base";
 	public static final String SOURCE_DIRECTORY = "source-directory";
 	public static final String TARGET_BASE = "target-base";
-	private static final Logger ourLog = LoggerFactory.getLogger(BulkImportCommand.class);
 	public static final String PORT = "port";
+	private static final Logger ourLog = LoggerFactory.getLogger(BulkImportCommand.class);
 	private static volatile boolean ourEndNow;
 	private BulkImportFileServlet myServlet;
 	private Server myServer;

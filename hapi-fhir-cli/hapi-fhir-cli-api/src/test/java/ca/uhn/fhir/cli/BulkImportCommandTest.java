@@ -1,9 +1,9 @@
 package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.jobs.imprt.BulkImportProvider;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.bulk.imprt2.BulkImportProvider;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
@@ -52,8 +52,8 @@ public class BulkImportCommandTest {
 	public HttpClientExtension myHttpClientExtension = new HttpClientExtension();
 	@Mock
 	private IJobCoordinator myJobCoordinator;
-	private BulkImportProvider myProvider = new BulkImportProvider();
-	private FhirContext myCtx = FhirContext.forR4Cached();
+	private final BulkImportProvider myProvider = new BulkImportProvider();
+	private final FhirContext myCtx = FhirContext.forR4Cached();
 	@RegisterExtension
 	public RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(myCtx, myProvider)
 		.registerInterceptor(new LoggingInterceptor());
@@ -87,18 +87,13 @@ public class BulkImportCommandTest {
 		when(myJobCoordinator.startInstance(any())).thenReturn("THE-JOB-ID");
 
 		// Start the command in a separate thread
-		new Thread() {
-			@Override
-			public void run() {
-				App.main(new String[]{
-					BulkImportCommand.BULK_IMPORT,
-					"--" + BaseCommand.FHIR_VERSION_PARAM_LONGOPT, "r4",
-					"--" + BulkImportCommand.PORT, "0",
-					"--" + BulkImportCommand.SOURCE_DIRECTORY, myTempDir.toAbsolutePath().toString(),
-					"--" + BulkImportCommand.TARGET_BASE, myRestfulServerExtension.getBaseUrl()
-				});
-			}
-		}.start();
+		new Thread(() -> App.main(new String[]{
+			BulkImportCommand.BULK_IMPORT,
+			"--" + BaseCommand.FHIR_VERSION_PARAM_LONGOPT, "r4",
+			"--" + BulkImportCommand.PORT, "0",
+			"--" + BulkImportCommand.SOURCE_DIRECTORY, myTempDir.toAbsolutePath().toString(),
+			"--" + BulkImportCommand.TARGET_BASE, myRestfulServerExtension.getBaseUrl()
+		})).start();
 
 		ourLog.info("Waiting for initiation requests");
 		await().until(() -> myRestfulServerExtension.getRequestContentTypes().size(), equalTo(2));
@@ -116,7 +111,7 @@ public class BulkImportCommandTest {
 	}
 
 	private String fetchFile(String url) throws IOException {
-		String outcome = null;
+		String outcome;
 		try (CloseableHttpResponse response = myHttpClientExtension.getClient().execute(new HttpGet(url))) {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			outcome = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
