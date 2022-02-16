@@ -52,7 +52,7 @@ public class DropIndexTask extends BaseTableTask {
 	}
 
 	List<String> generateSql() throws SQLException {
-		Validate.notBlank(myIndexName, "theIndexName must not be blank");
+		Validate.notBlank(myIndexName, "indexName must not be blank");
 		Validate.notBlank(getTableName(), "tableName must not be blank");
 
 		if (!JdbcUtils.getIndexNames(getConnectionProperties(), getTableName()).contains(myIndexName)) {
