@@ -7,6 +7,9 @@
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
 	<version>6.0.0-PRE3-SNAPSHOT</version>
+	<modules>
+		<module>hapi-fhir-storage-batch2-jobs</module>
+	</modules>
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
 	<url>https://hapifhir.io</url>
@@ -2376,8 +2379,8 @@
 								<copy todir="target/site/apidocs-jpaserver-batch">
 									<fileset dir="hapi-fhir-batch/target/site/apidocs"/>
 								</copy>
-								<copy todir="target/site/apidocs-jpaserver-batch2">
-									<fileset dir="hapi-fhir-batch2/target/site/apidocs"/>
+								<copy todir="target/site/apidocs-storage-batch2">
+									<fileset dir="hapi-fhir-storage-batch2/target/site/apidocs"/>
 								</copy>
 								<copy todir="target/site/apidocs-client">
 									<fileset dir="hapi-fhir-client/target/site/apidocs"/>
@@ -2815,13 +2818,14 @@
 				<module>hapi-fhir-validation-resources-r5</module>
 				<module>hapi-fhir-jpa</module>
 				<module>hapi-fhir-storage</module>
+				<module>hapi-fhir-storage-batch2</module>
+				<module>hapi-fhir-storage-batch2-jobs</module>
 				<module>hapi-fhir-jpaserver-cql</module>
 				<module>hapi-fhir-jpaserver-model</module>
 				<module>hapi-fhir-jpaserver-searchparam</module>
 				<module>hapi-fhir-jpaserver-subscription</module>
 				<module>hapi-fhir-jaxrsserver-base</module>
 				<module>hapi-fhir-batch</module>
-				<module>hapi-fhir-batch2</module>
 				<module>hapi-fhir-jpaserver-base</module>
 				<module>hapi-fhir-sql-migrate</module>
 				<module>hapi-fhir-jpaserver-mdm</module>

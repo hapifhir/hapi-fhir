@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.dao.mdm;
  */
 
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -36,16 +36,17 @@ public class MdmLinkDeleteSvc {
 	@Autowired
 	private IMdmLinkDao myMdmLinkDao;
 	@Autowired
-	private IdHelperService myIdHelperService;
+	private IJpaIdHelperService myIdHelperService;
 
 	/**
 	 * Delete all {@link ca.uhn.fhir.jpa.entity.MdmLink} records with any reference to this resource.  (Used by Expunge.)
+	 *
 	 * @param theResource
 	 * @return the number of records deleted
 	 */
 	public int deleteWithAnyReferenceTo(IBaseResource theResource) {
 		Long pid = myIdHelperService.getPidOrThrowException(theResource.getIdElement());
-		int removed =  myMdmLinkDao.deleteWithAnyReferenceToPid(pid);
+		int removed = myMdmLinkDao.deleteWithAnyReferenceToPid(pid);
 		if (removed > 0) {
 			ourLog.info("Removed {} MDM links with references to {}", removed, theResource.getIdElement().toVersionless());
 		}
@@ -54,7 +55,7 @@ public class MdmLinkDeleteSvc {
 
 	public int deleteNonRedirectWithAnyReferenceTo(IBaseResource theResource) {
 		Long pid = myIdHelperService.getPidOrThrowException(theResource.getIdElement());
-		int removed =  myMdmLinkDao.deleteWithAnyReferenceToPidAndMatchResultNot(pid, MdmMatchResultEnum.REDIRECT);
+		int removed = myMdmLinkDao.deleteWithAnyReferenceToPidAndMatchResultNot(pid, MdmMatchResultEnum.REDIRECT);
 		if (removed > 0) {
 			ourLog.info("Removed {} non-redirect MDM links with references to {}", removed, theResource.getIdElement().toVersionless());
 		}

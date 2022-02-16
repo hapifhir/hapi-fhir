@@ -44,7 +44,8 @@ import ca.uhn.fhir.jpa.dao.expunge.ResourceExpungeService;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;
 import ca.uhn.fhir.jpa.dao.index.DaoResourceLinkResolver;
 import ca.uhn.fhir.jpa.dao.index.DaoSearchParamSynchronizer;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
+import ca.uhn.fhir.jpa.dao.index.JpaIdHelperService;
 import ca.uhn.fhir.jpa.dao.index.SearchParamWithInlineReferencesExtractor;
 import ca.uhn.fhir.jpa.dao.mdm.MdmLinkExpandSvc;
 import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilder;
@@ -205,9 +206,9 @@ import java.util.Date;
 
 
 @Configuration
-@EnableJpaRepositories(basePackages = "ca.uhn.fhir.jpa.dao.data", enableDefaultTransactions=true)
+@EnableJpaRepositories(basePackages = "ca.uhn.fhir.jpa.dao.data", enableDefaultTransactions = true)
 @Import({
-		  SearchParamConfig.class, BatchJobsConfig.class
+	SearchParamConfig.class, BatchJobsConfig.class
 })
 @EnableBatchProcessing
 public abstract class BaseConfig {
@@ -420,7 +421,7 @@ public abstract class BaseConfig {
 		return retVal;
 	}
 
-	@Bean(name= BatchConstants.JOB_LAUNCHING_TASK_EXECUTOR)
+	@Bean(name = BatchConstants.JOB_LAUNCHING_TASK_EXECUTOR)
 	public TaskExecutor jobLaunchingTaskExecutor() {
 		return ThreadPoolUtil.newThreadPool(0, 10, "job-launcher-");
 	}
@@ -841,8 +842,8 @@ public abstract class BaseConfig {
 	}
 
 	@Bean
-	public IdHelperService idHelperService() {
-		return new IdHelperService();
+	public IJpaIdHelperService jpaIdHelperService() {
+		return new JpaIdHelperService();
 	}
 
 	@Bean
@@ -936,7 +937,6 @@ public abstract class BaseConfig {
 	public MemberMatcherR4Helper memberMatcherR4Helper(FhirContext theFhirContext) {
 		return new MemberMatcherR4Helper(theFhirContext);
 	}
-
 
 
 	public static void configureEntityManagerFactory(LocalContainerEntityManagerFactoryBean theFactory, FhirContext theCtx) {

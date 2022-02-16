@@ -20,11 +20,12 @@ package ca.uhn.fhir.jpa.term;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
@@ -34,7 +35,6 @@ import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDesignationDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptParentChildLinkDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptPropertyDao;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -110,7 +110,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	@Autowired
 	protected ITermConceptDesignationDao myConceptDesignationDao;
 	@Autowired
-	protected IdHelperService myIdHelperService;
+	protected IIdHelperService myIdHelperService;
 	@Autowired
 	private ITermConceptParentChildLinkDao myConceptParentChildLinkDao;
 	@Autowired
@@ -129,7 +129,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	@Autowired
 	private IBatchJobSubmitter myJobSubmitter;
 
-	@Autowired @Qualifier(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME)
+	@Autowired
+	@Qualifier(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME)
 	private Job myTermCodeSystemVersionDeleteJob;
 
 
@@ -356,7 +357,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	@Override
 	@Transactional
 	public IIdType storeNewCodeSystemVersion(CodeSystem theCodeSystemResource, TermCodeSystemVersion theCodeSystemVersion,
-			RequestDetails theRequest, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps) {
+														  RequestDetails theRequest, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps) {
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		Validate.notBlank(theCodeSystemResource.getUrl(), "theCodeSystemResource must have a URL");
@@ -383,8 +384,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	@Override
 	@Transactional
 	public void storeNewCodeSystemVersion(ResourcePersistentId theCodeSystemResourcePid, String theSystemUri,
-			String theSystemName, String theCodeSystemVersionId, TermCodeSystemVersion theCodeSystemVersion,
-			ResourceTable theCodeSystemResourceTable, RequestDetails theRequestDetails) {
+													  String theSystemName, String theCodeSystemVersionId, TermCodeSystemVersion theCodeSystemVersion,
+													  ResourceTable theCodeSystemResourceTable, RequestDetails theRequestDetails) {
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		ourLog.debug("Storing code system");
@@ -466,7 +467,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		}
 
 		ourLog.debug("Done saving concepts, flushing to database");
-		if (! myDeferredStorageSvc.isStorageQueueEmpty()) {
+		if (!myDeferredStorageSvc.isStorageQueueEmpty()) {
 			ourLog.info("Note that some concept saving has been deferred");
 		}
 	}
@@ -536,7 +537,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		conceptToAdd.setParentPids(null);
 		conceptToAdd.setCodeSystemVersion(theCsv);
 
-		if (conceptToAdd.getProperties() !=null)
+		if (conceptToAdd.getProperties() != null)
 			conceptToAdd.getProperties().forEach(termConceptProperty -> {
 				termConceptProperty.setConcept(theConceptToAdd);
 				termConceptProperty.setCodeSystemVersion(theCsv);
@@ -645,8 +646,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		for (TermConceptParentChildLink next : theNext.getChildren()) {
 			populateVersion(next.getChild(), theCodeSystemVersion);
 		}
-		theNext.getProperties().forEach(t->t.setCodeSystemVersion(theCodeSystemVersion));
-		theNext.getDesignations().forEach(t->t.setCodeSystemVersion(theCodeSystemVersion));
+		theNext.getProperties().forEach(t -> t.setCodeSystemVersion(theCodeSystemVersion));
+		theNext.getDesignations().forEach(t -> t.setCodeSystemVersion(theCodeSystemVersion));
 	}
 
 	private void saveConceptLink(TermConceptParentChildLink next) {

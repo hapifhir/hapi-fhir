@@ -6,7 +6,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.config.MdmConsumerConfig;
 import ca.uhn.fhir.jpa.mdm.config.MdmSubmitterConfig;
@@ -106,7 +106,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 	@Autowired
 	protected MdmLinkDaoSvc myMdmLinkDaoSvc;
 	@Autowired
-	protected IdHelperService myIdHelperService;
+	protected IJpaIdHelperService myIdHelperService;
 	@Autowired
 	protected IMdmSettings myMdmSettings;
 	@Autowired

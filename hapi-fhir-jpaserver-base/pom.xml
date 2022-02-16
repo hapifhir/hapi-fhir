@@ -152,7 +152,12 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-batch2</artifactId>
+			<artifactId>hapi-fhir-storage-batch2</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-storage-batch2-jobs</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

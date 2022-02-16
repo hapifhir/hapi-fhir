@@ -7,6 +7,7 @@ import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCache;
@@ -19,7 +20,6 @@ import ca.uhn.fhir.jpa.dao.JpaResourceDao;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.index.DaoSearchParamSynchronizer;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.index.SearchParamWithInlineReferencesExtractor;
 import ca.uhn.fhir.jpa.dao.r4.FhirSystemDaoR4;
 import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
@@ -140,7 +140,7 @@ public class GiantTransactionPerfTest {
 	private SearchParamPresenceSvcImpl mySearchParamPresenceSvc;
 	private DaoSearchParamSynchronizer myDaoSearchParamSynchronizer;
 	@Mock
-	private IdHelperService myIdHelperService;
+	private IIdHelperService myIdHelperService;
 
 	@AfterEach
 	public void afterEach() {
