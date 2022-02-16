@@ -2,7 +2,7 @@ package ca.uhn.fhir.batch2.config;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%

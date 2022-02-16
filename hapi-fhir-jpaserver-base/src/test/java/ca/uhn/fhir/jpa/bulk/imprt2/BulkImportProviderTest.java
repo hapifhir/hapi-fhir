@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -69,7 +70,8 @@ public class BulkImportProviderTest {
 		Parameters input = createRequest();
 		ourLog.info("Input: {}", myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
-		when(myJobCoordinator.startInstance(any())).thenReturn("ABCDE");
+		String abcde = UUID.randomUUID().toString();
+		when(myJobCoordinator.startInstance(any())).thenReturn(abcde);
 
 		String url = myRestfulServerExtension.getBaseUrl() + "/" + JpaConstants.OPERATION_IMPORT;
 		HttpPost post = new HttpPost(url);
@@ -86,7 +88,7 @@ public class BulkImportProviderTest {
 			// Verify
 
 			assertEquals(202, response.getStatusLine().getStatusCode());
-			assertThat(resp, containsString("Bulk import job has been submitted with ID: ABCDE"));
+			assertThat(resp, containsString("Bulk import job has been submitted with ID: " + abcde));
 		}
 
 		verify(myJobCoordinator, times(1)).startInstance(myStartRequestCaptor.capture());
