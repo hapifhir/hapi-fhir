@@ -7,8 +7,8 @@ import com.puppycrawl.tools.checkstyle.api.TokenTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * mvn -P CI,ALLMODULES checkstyle:check
@@ -17,7 +17,7 @@ import java.util.Set;
 public final class HapiErrorCodeCheck extends AbstractCheck {
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiErrorCodeCheck.class);
 
-	private static final Set<Integer> ourCodesUsed = new HashSet<>();
+	private static final Map<Integer, String> ourCodesUsed = new HashMap<>();
 
 	@Override
 	public int[] getDefaultTokens() {
@@ -68,10 +68,14 @@ public final class HapiErrorCodeCheck extends AbstractCheck {
 			DetailAST numberNode = msgNode.getParent().getNextSibling().getFirstChild().getFirstChild();
 			if (TokenTypes.NUM_INT == numberNode.getType()) {
 				Integer code = Integer.valueOf(numberNode.getText());
-				if (!ourCodesUsed.add(code)) {
+				if (ourCodesUsed.containsKey(code)) {
 					log(theAst.getLineNo(), "Two different exception messages call Msg.code(" +
 						code +
-						").  Each thrown exception throw call Msg.code() with a different code.");
+						").  Each thrown exception throw call Msg.code() with a different code. " +
+						"Previously found at: " + ourCodesUsed.get(code));
+				} else {
+					String location = getFileContents().getFileName() + ":" + instantiation.getLineNo() + ":" + instantiation.getColumnNo() + "(" + code + ")";
+					ourCodesUsed.put(code, location);
 				}
 			} else {
 				log(theAst.getLineNo(), "Called Msg.code() with a non-integer argument");

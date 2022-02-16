@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -60,7 +61,10 @@ import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -1009,8 +1013,10 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 	@Test
 	public void testResourceWithTagCreationNoFailures() throws ExecutionException, InterruptedException {
-		// this was 5, but our random connection pool runs as small as 3, and this solution needs a spare connection to be safe.
-		ExecutorService pool = Executors.newFixedThreadPool(2);
+		// we need to leave at least one free thread
+		// due to a REQUIRED_NEW transaction internally
+		int maxThreadsUsed = TestR4Config.ourMaxThreads - 1;
+		ExecutorService pool = Executors.newFixedThreadPool(Math.min(maxThreadsUsed, 5));
 		try {
 			Coding tag = new Coding();
 			tag.setCode("code123");
@@ -1035,7 +1041,9 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 						try {
 							myPatientDao.update(updatePatient);
 						} catch (ResourceVersionConflictException e) {
-							assertThat(e.getMessage(), startsWith(Msg.code(550) + Msg.code(823)));
+							assertTrue(e.getMessage().contains(
+								"The operation has failed with a version constraint failure. This generally means that two clients/threads were trying to update the same resource at the same time, and this request was chosen as the failing request."
+							));
 						}
 					} catch (Exception e) {
 						ourLog.error("Failure", e);

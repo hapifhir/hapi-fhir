@@ -56,6 +56,9 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 	@Autowired
 	private UnknownCodeSystemWarningValidationSupport myUnknownCodeSystemWarningValidationSupport;
 
+	/**
+	 * Constructor
+	 */
 	public JpaValidationSupportChain(FhirContext theFhirContext) {
 		myFhirContext = theFhirContext;
 	}
