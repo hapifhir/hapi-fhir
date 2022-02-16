@@ -201,7 +201,7 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 			 */
 			templateIs = ResourceGeneratorUsingSpreadsheet.class.getResourceAsStream("/vm/jpa_spring_beans_java.vm");
 			templateReader = new InputStreamReader(templateIs);
-			f = new File(configPackageDirectoryBase, "ResourceProviderConfig" + capitalize + ".java");
+			f = new File(configPackageDirectoryBase, "GeneratedDaoAndResourceProviderConfig" + capitalize + ".java");
 			w = new OutputStreamWriter(new FileOutputStream(f, false), "UTF-8");
 			v.evaluate(ctx, w, "", templateReader);
 			w.close();

@@ -27,7 +27,7 @@ import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 
 @Configuration
-public class ResourceProviderConfig${versionCapitalized} {
+public class GeneratedDaoAndResourceProviderConfig${versionCapitalized} {
 @Autowired
 FhirContext myFhirContext;
 

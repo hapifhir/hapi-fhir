@@ -3,8 +3,8 @@ package ca.uhn.fhir.jpa.config.dstu3;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.config.GeneratedDaoAndResourceProviderConfigDstu3;
 import ca.uhn.fhir.jpa.config.JpaConfig;
-import ca.uhn.fhir.jpa.config.ResourceProviderConfigDstu3;
 import ca.uhn.fhir.jpa.config.SharedConfigDstu3Plus;
 import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
 import ca.uhn.fhir.jpa.dao.dstu3.TransactionProcessorVersionAdapterDstu3;
@@ -50,8 +50,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 @Import({
 	FhirContextDstu3Config.class,
-	// WIP KHS rename this class it has daos and providers
-	ResourceProviderConfigDstu3.class,
+	GeneratedDaoAndResourceProviderConfigDstu3.class,
 	SharedConfigDstu3Plus.class,
 	JpaConfig.class
 })

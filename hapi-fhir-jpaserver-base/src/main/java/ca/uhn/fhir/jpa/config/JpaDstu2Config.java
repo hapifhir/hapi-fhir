@@ -37,7 +37,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 @Import({
 	FhirContextDstu2Config.class,
-	ResourceProviderConfigDstu2.class,
+	GeneratedDaoAndResourceProviderConfigDstu2.class,
 	JpaConfig.class
 })
 public class JpaDstu2Config {
