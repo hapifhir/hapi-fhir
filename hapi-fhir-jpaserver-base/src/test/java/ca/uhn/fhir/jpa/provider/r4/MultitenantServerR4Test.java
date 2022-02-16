@@ -246,7 +246,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			myPatientDao.update((Patient) patientA, requestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Resource " + ((Patient) patientA).getResourceType() + "/" + ((Patient) patientA).getIdElement().getIdPart() + " is not known", e.getMessage());
+			assertEquals(Msg.code(2035) + "Resource " + ((Patient) patientA).getResourceType() + "/" + ((Patient) patientA).getIdElement().getIdPart() + " is not known", e.getMessage());
 		}
 	}
 

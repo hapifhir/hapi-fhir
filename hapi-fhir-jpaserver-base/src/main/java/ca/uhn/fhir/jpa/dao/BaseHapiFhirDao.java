@@ -163,6 +163,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.trim;
 
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.ALL_PARTITIONS_NAME;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -1308,9 +1310,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					requestPartitionId = RequestPartitionId.defaultPartition();
 				}
 
-				if (theRequest != null && theRequest.getTenantId() != null && entity.getPartitionId() != null &&
-					myPartitionLookupSvc.getPartitionByName(theRequest.getTenantId()).getId() != entity.getPartitionId().getPartitionId()) {
-					throw new InvalidRequestException(Msg.code(2035) + "Resource " + entity.getResourceType() + "/" + entity.getId() + " is not known");
+				if (myPartitionSettings.isPartitioningEnabled() && theRequest != null && theRequest.getTenantId() != null && entity.getPartitionId() != null &&
+						theRequest.getTenantId() != ALL_PARTITIONS_NAME) {
+					PartitionEntity partitionEntity = myPartitionLookupSvc.getPartitionByName(theRequest.getTenantId());
+					//partitionEntity should never be null
+					if (partitionEntity != null && partitionEntity.getId() != entity.getPartitionId().getPartitionId()) {
+						throw new InvalidRequestException(Msg.code(2035) + "Resource " + entity.getResourceType() + "/" + entity.getId() + " is not known");
+					}
 				}
 				mySearchParamWithInlineReferencesExtractor.populateFromResource(requestPartitionId, newParams, theTransactionDetails, entity, theResource, existingParams, theRequest, thePerformIndexing);
 
