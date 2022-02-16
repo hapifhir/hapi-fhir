@@ -147,7 +147,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 					}
 
 					if (isNotBlank(theResourceType)) {
-						b.must(f.match().field("myResourceType").matching(theResourceType));
+						builder.addResourceTypeClause(theResourceType);
 					}
 
 					/*
