@@ -4,6 +4,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
+import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TerminologyTest;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
@@ -61,6 +62,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -68,6 +70,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Test {
@@ -671,6 +674,34 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		// Read a non-allowed observation
 		try {
 			myClient.read().resource(Observation.class).withId(observationId2).execute();
+			fail();
+		} catch (ForbiddenOperationException e) {
+			// good
+		}
+
+	}
+
+	@Test
+	public void testSearchCodeIn() {
+		createLocalCsAndVs();
+
+		createObservation(withId("allowed"), withObservationCode(FhirResourceDaoR4TerminologyTest.URL_MY_CODE_SYSTEM, "A"));
+		createObservation(withId("disallowed"), withObservationCode(FhirResourceDaoR4TerminologyTest.URL_MY_CODE_SYSTEM, "foo"));
+
+		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow().read().resourcesOfType("Observation").withCodeInValueSet("code", FhirResourceDaoR4TerminologyTest.URL_MY_VALUE_SET).andThen()
+					.build();
+			}
+		}.setValidationSupport(myValidationSupport));
+
+		// Should be ok
+		myClient.read().resource(Observation.class).withId("Observation/allowed").execute();
+
+		try {
+			myClient.read().resource(Observation.class).withId("Observation/disallowed").execute();
 			fail();
 		} catch (ForbiddenOperationException e) {
 			// good

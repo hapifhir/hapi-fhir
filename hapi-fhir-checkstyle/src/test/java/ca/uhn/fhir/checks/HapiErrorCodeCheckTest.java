@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -47,7 +48,8 @@ class HapiErrorCodeCheckTest {
 		assertThat(errorLines[0], startsWith("[ERROR] "));
 		assertThat(errorLines[0], endsWith("BadClass.java:7: Exception thrown that does not call Msg.code() [HapiErrorCode]"));
 		assertThat(errorLines[1], startsWith("[ERROR] "));
-		assertThat(errorLines[1], endsWith("BadClass.java:11: Two different exception messages call Msg.code(2).  Each thrown exception throw call Msg.code() with a different code. [HapiErrorCode]"));
+		assertThat(errorLines[1], containsString("BadClass.java:11: Two different exception messages call Msg.code(2).  Each thrown exception throw call Msg.code() with a different code."));
+		assertThat(errorLines[1], containsString("BadClass.java:9:9"));
 	}
 
 	private Checker buildChecker() throws CheckstyleException {

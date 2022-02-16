@@ -28,6 +28,10 @@ import org.hibernate.search.engine.backend.document.DocumentElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.function.BiConsumer;
+
+import java.util.Date;
+
 /**
  * Collects our lucene extended indexing data.
  *
@@ -39,18 +43,30 @@ public class ExtendedLuceneIndexData {
 	final SetMultimap<String, String> mySearchParamStrings = HashMultimap.create();
 	final SetMultimap<String, TokenParam> mySearchParamTokens = HashMultimap.create();
 	final SetMultimap<String, String> mySearchParamLinks = HashMultimap.create();
+	final SetMultimap<String, DateSearchIndexData> mySearchParamDates = HashMultimap.create();
 
 	public ExtendedLuceneIndexData(FhirContext theFhirContext) {
 		this.myFhirContext = theFhirContext;
 	}
 
+	private <V> BiConsumer<String, V> ifNotContained(BiConsumer<String, V> theIndexWriter) {
+		return (s,v) -> {
+			// Ignore contained resources for now.
+			if (!s.contains(".")) {
+				theIndexWriter.accept(s,v);
+			}
+		};
+	}
 	public void writeIndexElements(DocumentElement theDocument) {
 		HibernateSearchIndexWriter indexWriter = HibernateSearchIndexWriter.forRoot(myFhirContext, theDocument);
 
+		ourLog.debug("Writing JPA index to Hibernate Search");
+
+		mySearchParamStrings.forEach(ifNotContained(indexWriter::writeStringIndex));
+		mySearchParamTokens.forEach(ifNotContained(indexWriter::writeTokenIndex));
+		mySearchParamLinks.forEach(ifNotContained(indexWriter::writeReferenceIndex));
 		// TODO MB Use RestSearchParameterTypeEnum to define templates.
-		mySearchParamStrings.forEach(indexWriter::writeStringIndex);
-		mySearchParamTokens.forEach(indexWriter::writeTokenIndex);
-		mySearchParamLinks.forEach(indexWriter::writeReferenceIndex);
+		mySearchParamDates.forEach(ifNotContained(indexWriter::writeDateIndex));
 	}
 
 	public void addStringIndexData(String theSpName, String theText) {
@@ -61,7 +77,11 @@ public class ExtendedLuceneIndexData {
 		mySearchParamTokens.put(theSpName, new TokenParam(theSystem, theValue));
 	}
 
-	public void addResourceLinkIndexData(String theSpName, String theTargetResourceId){
+	public void addResourceLinkIndexData(String theSpName, String theTargetResourceId) {
 		mySearchParamLinks.put(theSpName, theTargetResourceId);
+	}
+
+	public void addDateIndexData(String theSpName, Date theLowerBound, int theLowerBoundOrdinal, Date theUpperBound, int theUpperBoundOrdinal) {
+		mySearchParamDates.put(theSpName, new DateSearchIndexData(theLowerBound, theLowerBoundOrdinal, theUpperBound, theUpperBoundOrdinal));
 	}
 }
