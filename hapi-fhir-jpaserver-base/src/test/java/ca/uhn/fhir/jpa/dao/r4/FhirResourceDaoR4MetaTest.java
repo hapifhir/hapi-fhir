@@ -33,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4MetaTest.class);
 
-	// WIP KHS is it okay to add this?  Compare with master
+	// TODO testConcurrentAddTag() can deadlock if we don't increase this
 	@BeforeAll
 	public static void beforeAll() {
 		System.setProperty("unlimited_db_connection", "true");
