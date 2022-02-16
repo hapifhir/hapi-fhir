@@ -25,6 +25,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
@@ -78,9 +79,10 @@ public class MdmLinkDaoSvc {
 		} else {
 			mdmLink.setScore(theMatchOutcome.score);
 		}
+		// Add partition for the mdm link if it's available in the source resource
 		RequestPartitionId partitionId = (RequestPartitionId) theSourceResource.getUserData(Constants.RESOURCE_PARTITION_ID);
 		if (partitionId != null && partitionId.hasPartitionIds() && partitionId.getFirstPartitionIdOrNull() != null) {
-			mdmLink.setPartitionId(partitionId.getFirstPartitionIdOrNull());
+			mdmLink.setPartitionId(new PartitionablePartitionId(partitionId.getFirstPartitionIdOrNull(), partitionId.getPartitionDate()));
 		}
 
 		String message = String.format("Creating MdmLink from %s to %s -> %s", theGoldenResource.getIdElement().toUnqualifiedVersionless(), theSourceResource.getIdElement().toUnqualifiedVersionless(), theMatchOutcome);

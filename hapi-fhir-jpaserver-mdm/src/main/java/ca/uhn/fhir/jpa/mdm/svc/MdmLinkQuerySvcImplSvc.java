@@ -20,15 +20,16 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
+import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
-import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
-import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
-import ca.uhn.fhir.jpa.entity.MdmLink;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,7 +89,7 @@ public class MdmLinkQuerySvcImplSvc implements IMdmLinkQuerySvc {
 			mdmLink.setLinkSource(theLinkSource);
 		}
 		if (thePartitionId != null) {
-			mdmLink.setPartitionId(thePartitionId);
+			mdmLink.setPartitionId(new PartitionablePartitionId(thePartitionId, null));
 		}
 
 		return Example.of(mdmLink);

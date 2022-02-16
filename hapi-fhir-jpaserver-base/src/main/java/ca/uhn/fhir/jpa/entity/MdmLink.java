@@ -20,10 +20,11 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.persistence.Column;
@@ -52,7 +53,7 @@ import java.util.Date;
 	//TODO GGG revisit adding this: @UniqueConstraint(name = "IDX_EMPI_GR_TGT", columnNames = {"GOLDEN_RESOURCE_PID", "TARGET_PID"}),
 	//TODO GGG Should i make individual indices for PERSON/TARGET?
 })
-public class MdmLink implements IMdmLink {
+public class MdmLink extends BasePartitionable implements IMdmLink {
 	public static final int VERSION_LENGTH = 16;
 	private static final int MATCH_RESULT_LENGTH = 16;
 	private static final int LINK_SOURCE_LENGTH = 16;
@@ -123,9 +124,6 @@ public class MdmLink implements IMdmLink {
 	//TODO GGG GL-1340
 	@Column(name = "RULE_COUNT")
 	private Long myRuleCount;
-
-	@Column(name = "PARTITION_ID")
-	private Integer myPartitionId;
 
 	public MdmLink() {}
 
@@ -334,7 +332,7 @@ public class MdmLink implements IMdmLink {
 			.append("myHadToCreateNewResource", myHadToCreateNewGoldenResource)
 			.append("myScore", myScore)
 			.append("myRuleCount", myRuleCount)
-			.append("myPartitionId", myPartitionId)
+			.append("myPartitionId", getPartitionId())
 			.toString();
 	}
 
@@ -348,14 +346,6 @@ public class MdmLink implements IMdmLink {
 
 	public void setRuleCount(Long theRuleCount) {
 		myRuleCount = theRuleCount;
-	}
-
-	public Integer getPartitionId() {
-		return myPartitionId;
-	}
-
-	public void setPartitionId(Integer thePartitionId) {
-		myPartitionId = thePartitionId;
 	}
 
 }
