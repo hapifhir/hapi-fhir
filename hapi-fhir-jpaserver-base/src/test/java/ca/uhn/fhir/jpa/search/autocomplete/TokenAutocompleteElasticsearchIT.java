@@ -35,11 +35,14 @@ import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 
 @ExtendWith(SpringExtension.class)
 @RequiresDocker
@@ -90,8 +93,10 @@ public class TokenAutocompleteElasticsearchIT extends BaseJpaTest {
 
 		// a few different codes
 		Coding mean_blood_pressure = new Coding("http://loinc.org", "8478-0", "Mean blood pressure");
+		Coding gram_positive_culture = new Coding("http://loinc.org", "88262-1", "Gram positive blood culture panel by Probe in Positive blood culture");
 
 		createObservationWithCode(new Coding("http://loinc.org", "789-8", "Erythrocytes [#/volume] in Blood by Automated count"));
+		createObservationWithCode(mean_blood_pressure);
 		createObservationWithCode(mean_blood_pressure);
 		createObservationWithCode(new Coding("http://loinc.org", "788-0", "Erythrocyte distribution width [Ratio] by Automated count"));
 		createObservationWithCode(new Coding("http://loinc.org", "787-2", "MCV [Entitic volume] by Automated count"));
@@ -106,25 +111,45 @@ public class TokenAutocompleteElasticsearchIT extends BaseJpaTest {
 		createObservationWithCode(new Coding("http://loinc.org", "4544-3", "Hematocrit [Volume Fraction] of Blood by Automated count"));
 
 		// some repeats to make sure we only return singles
-		createObservationWithCode(new Coding("http://loinc.org", "88262-1", "Gram positive blood culture panel by Probe in Positive blood culture"));
-		createObservationWithCode(new Coding("http://loinc.org", "88262-1", "Gram positive blood culture panel by Probe in Positive blood culture"));
-		createObservationWithCode(new Coding("http://loinc.org", "88262-1", "Gram positive blood culture panel by Probe in Positive blood culture"));
+		createObservationWithCode(gram_positive_culture);
+		createObservationWithCode(gram_positive_culture);
+		createObservationWithCode(gram_positive_culture);
 
 		List<TokenAutocompleteHit> codes;
-		codes = autocompleteSearch("Observation", "code", "blo");
+		codes = autocompleteSearch("Observation", "code", "text", "blo");
 		assertThat("finds blood pressure", codes, hasItem(matchingSystemAndCode(mean_blood_pressure)));
 
-		codes = autocompleteSearch("Observation", "code", "pressure");
+		codes = autocompleteSearch("Observation", "code", "text", "pressure");
 		assertThat("finds blood pressure", codes, hasItem(matchingSystemAndCode(mean_blood_pressure)));
 
-		codes = autocompleteSearch("Observation", "code", "nuclear");
+		long hits = codes.stream()
+			.filter(c -> matchingSystemAndCode(mean_blood_pressure).matches(c))
+			.count();
+		assertThat("multiple matches returns single hit", hits, is(1L));
+
+		codes = autocompleteSearch("Observation", "code", "text", "nuclear");
 		assertThat("doesn't find nuclear", codes, is(empty()));
+
+		codes = autocompleteSearch("Observation", "code", "text", null);
+		assertThat("empty filter finds some", codes, is(not(empty())));
+		assertThat("empty finds most common first", codes.get(0), matchingSystemAndCode(gram_positive_culture));
+		assertThat("empty finds most common first", codes.get(1), matchingSystemAndCode(mean_blood_pressure));
+
+		codes = autocompleteSearch("Observation", "code", null, "88262-1");
+		assertThat("matches by code value", codes, hasItem(matchingSystemAndCode(gram_positive_culture)));
+
+		codes = autocompleteSearch("Observation", "code", null, "8826");
+		assertThat("matches by code prefix", codes, hasItem(matchingSystemAndCode(gram_positive_culture)));
+
+		codes = autocompleteSearch("Observation", "code", null, null);
+		assertThat("null finds everything", codes, hasSize(13));
+
 	}
 
-	List<TokenAutocompleteHit> autocompleteSearch(String theResourceType, String theSPName, String theSearchText) {
+	List<TokenAutocompleteHit> autocompleteSearch(String theResourceType, String theSPName, String theModifier, String theSearchText) {
 		return new TransactionTemplate(myTxManager).execute(s -> {
 			TokenAutocompleteSearch tokenAutocompleteSearch = new TokenAutocompleteSearch(myFhirCtx, Search.session(myEntityManager));
-			return  tokenAutocompleteSearch.search(theResourceType, theSPName, theSearchText, "text",30);
+			return  tokenAutocompleteSearch.search(theResourceType, theSPName, theSearchText, theModifier,30);
 		});
 	}
 
