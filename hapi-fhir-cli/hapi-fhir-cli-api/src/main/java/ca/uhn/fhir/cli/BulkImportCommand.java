@@ -1,0 +1,206 @@
+package ca.uhn.fhir.cli;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.bulk.imprt2.BulkImportFileServlet;
+import ca.uhn.fhir.jpa.bulk.imprt2.BulkImportProvider;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.util.ParametersUtil;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.LineIterator;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nonnull;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+
+public class BulkImportCommand extends BaseCommand {
+
+	public static final String BULK_IMPORT = "bulk-import";
+	public static final String SOURCE_BASE = "source-base";
+	public static final String SOURCE_DIRECTORY = "source-directory";
+	public static final String TARGET_BASE = "target-base";
+	private static final Logger ourLog = LoggerFactory.getLogger(BulkImportCommand.class);
+	public static final String PORT = "port";
+	private static volatile boolean ourEndNow;
+	private BulkImportFileServlet myServlet;
+	private Server myServer;
+	private Integer myPort;
+
+	@Override
+	public String getCommandDescription() {
+		return "Initiates a bulk import against a FHIR server using the $import " +
+			"operation, and creates a local HTTP server to serve the contents. " +
+			"This command does not currently support HTTPS so it is only intended " +
+			"for testing scenarios.";
+	}
+
+	@Override
+	public String getCommandName() {
+		return BULK_IMPORT;
+	}
+
+	@Override
+	public Options getOptions() {
+		Options options = new Options();
+		addFhirVersionOption(options);
+		addRequiredOption(options, null, PORT, PORT, "The port to listen on. If set to 0, an available free port will be selected.");
+		addOptionalOption(options, null, SOURCE_BASE, "base url", "The URL to advertise as the base URL for accessing the files (i.e. this is the address that this command will declare that it is listening on). If not present, the server will default to \"http://localhost:[port]\" which will only work if the server is on the same host.");
+		addRequiredOption(options, null, SOURCE_DIRECTORY, "directory", "The source directory. This directory will be scanned for files with an extension of .json or .ndjson and any files in this directory will be assumed to be NDJSON and uploaded. This command will read the first resource from each file to verify its resource type, and will assume that all resources in the file are of the same type.");
+		addRequiredOption(options, null, TARGET_BASE, "base url", "The base URL of the target FHIR server.");
+		addBasicAuthOption(options);
+		return options;
+	}
+
+	@Override
+	public void run(CommandLine theCommandLine) throws ParseException, ExecutionException {
+		ourEndNow = false;
+
+		parseFhirContext(theCommandLine);
+
+		String baseDirectory = theCommandLine.getOptionValue(SOURCE_DIRECTORY);
+		myPort = getAndParseNonNegativeIntegerParam(theCommandLine, PORT);
+
+		ourLog.info("Scanning directory for NDJSON files: {}", baseDirectory);
+		List<String> resourceTypes = new ArrayList<>();
+		List<File> files = new ArrayList<>();
+		scanDirectoryForJsonFiles(baseDirectory, resourceTypes, files);
+		ourLog.info("Found {} files", files.size());
+
+		ourLog.info("Starting server on port: {}", myPort);
+		List<String> indexes = startServer(myPort, files);
+		String sourceBaseUrl = "http://localhost:" + myPort;
+		if (theCommandLine.hasOption(SOURCE_BASE)) {
+			sourceBaseUrl = theCommandLine.getOptionValue(SOURCE_BASE);
+		}
+		ourLog.info("Server has been started in port: {}", myPort);
+
+		String targetBaseUrl = theCommandLine.getOptionValue(TARGET_BASE);
+		ourLog.info("Initiating bulk import against server: {}", targetBaseUrl);
+		IGenericClient client = newClient(theCommandLine, TARGET_BASE, BASIC_AUTH_PARAM, BEARER_TOKEN_PARAM_LONGOPT);
+		client.registerInterceptor(new LoggingInterceptor(false));
+
+		IBaseParameters request = createRequest(sourceBaseUrl, indexes, resourceTypes);
+		IBaseResource outcome = client
+			.operation()
+			.onServer()
+			.named(JpaConstants.OPERATION_IMPORT)
+			.withParameters(request)
+			.returnResourceType(myFhirCtx.getResourceDefinition("OperationOutcome").getImplementingClass())
+			.withAdditionalHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.execute();
+
+		ourLog.info("Got response: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.info("Bulk import is now running. Do not terminate this command until all files have been downloaded.");
+
+		while (true) {
+			if (ourEndNow) {
+				break;
+			}
+		}
+
+	}
+
+	@Nonnull
+	private IBaseParameters createRequest(String theBaseUrl, List<String> theIndexes, List<String> theResourceTypes) {
+
+		FhirContext ctx = getFhirContext();
+		IBaseParameters retVal = ParametersUtil.newInstance(ctx);
+
+		ParametersUtil.addParameterToParameters(ctx, retVal, BulkImportProvider.PARAM_INPUT_FORMAT, "code", Constants.CT_FHIR_NDJSON);
+		ParametersUtil.addParameterToParameters(ctx, retVal, BulkImportProvider.PARAM_INPUT_SOURCE, "code", theBaseUrl);
+
+		IBase storageDetail = ParametersUtil.addParameterToParameters(ctx, retVal, BulkImportProvider.PARAM_STORAGE_DETAIL);
+		ParametersUtil.addPartString(ctx, storageDetail, BulkImportProvider.PARAM_STORAGE_DETAIL_TYPE, BulkImportProvider.PARAM_STORAGE_DETAIL_TYPE_VAL_HTTPS);
+
+		for (int i = 0; i < theIndexes.size(); i++) {
+			IBase input = ParametersUtil.addParameterToParameters(ctx, retVal, BulkImportProvider.PARAM_INPUT);
+			ParametersUtil.addPartCode(ctx, input, BulkImportProvider.PARAM_INPUT_TYPE, theResourceTypes.get(i));
+			String nextUrl = theBaseUrl + "/download?index=" + theIndexes.get(i);
+			ParametersUtil.addPartUrl(ctx, input, BulkImportProvider.PARAM_INPUT_URL, nextUrl);
+		}
+
+		return retVal;
+	}
+
+	private List<String> startServer(int thePort, List<File> files) {
+		List<String> indexes = new ArrayList<>();
+		myServer = new Server(thePort);
+
+		myServlet = new BulkImportFileServlet();
+		for (File t : files) {
+			BulkImportFileServlet.IFileSupplier fileSupplier = () -> new FileReader(t);
+			indexes.add(myServlet.registerFile(fileSupplier));
+		}
+
+		ServletHolder servletHolder = new ServletHolder(myServlet);
+
+		ServletContextHandler contextHandler = new ServletContextHandler();
+		contextHandler.setContextPath("/");
+		contextHandler.addServlet(servletHolder, "/*");
+
+		myServer.setHandler(contextHandler);
+		try {
+			myServer.start();
+		} catch (Exception e) {
+			throw new CommandFailureException(e);
+		}
+
+		Connector[] connectors = myServer.getConnectors();
+		myPort = ((ServerConnector) (connectors[0])).getLocalPort();
+
+		return indexes;
+	}
+
+	private void scanDirectoryForJsonFiles(String baseDirectory, List<String> types, List<File> files) {
+		try {
+			File directory = new File(baseDirectory);
+			FileUtils
+				.streamFiles(directory, false, "json", "ndjson", "JSON", "NDJSON")
+				.filter(t -> t.isFile())
+				.filter(t -> t.exists())
+				.forEach(t -> files.add(t));
+			if (files.isEmpty()) {
+				throw new CommandFailureException("No .json/.ndjson files found in directory: " + directory.getAbsolutePath());
+			}
+
+			FhirContext ctx = getFhirContext();
+			for (File next : files) {
+				try (Reader reader = new FileReader(next)) {
+					LineIterator lineIterator = new LineIterator(reader);
+					String firstLine = lineIterator.next();
+					IBaseResource resource = ctx.newJsonParser().parseResource(firstLine);
+					types.add(myFhirCtx.getResourceType(resource));
+				}
+			}
+
+		} catch (IOException e) {
+			throw new CommandFailureException(e);
+		}
+	}
+
+	public static void setEndNowForUnitTest(boolean theEndNow) {
+		ourEndNow = theEndNow;
+	}
+
+}
+

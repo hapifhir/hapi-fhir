@@ -15,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.in;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BulkImportFileServletTest {
@@ -36,11 +37,11 @@ public class BulkImportFileServletTest {
 	public void testDownloadFile() throws IOException {
 		String input = "{\"resourceType\":\"Patient\", \"id\": \"A\", \"active\": true}\n" +
 			"{\"resourceType\":\"Patient\", \"id\": \"B\", \"active\": false}";
-		mySvc.registerFile(() -> new StringReader(input));
+		String index = mySvc.registerFile(() -> new StringReader(input));
 
 		CloseableHttpClient client = myServletExtension.getHttpClient();
 
-		String url = myServletExtension.getBaseUrl() + "/download?index=0";
+		String url = myServletExtension.getBaseUrl() + "/download?index=" + index;
 		try (CloseableHttpResponse response = client.execute(new HttpGet(url))) {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 
@@ -94,7 +95,7 @@ public class BulkImportFileServletTest {
 		try (CloseableHttpResponse response = client.execute(new HttpGet(url))) {
 			assertEquals(404, response.getStatusLine().getStatusCode());
 			String responseBody = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseBody, containsString("Missing or invalid index parameter"));
+			assertThat(responseBody, containsString("Invalid index: A"));
 		}
 
 		url = myServletExtension.getBaseUrl() + "/download?index=22";

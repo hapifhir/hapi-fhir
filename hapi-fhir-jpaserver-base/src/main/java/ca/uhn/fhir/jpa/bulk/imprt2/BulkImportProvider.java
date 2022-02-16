@@ -42,7 +42,7 @@ public class BulkImportProvider {
 	public static final String PARAM_STORAGE_DETAIL_CREDENTIAL_HTTP_BASIC = "credentialHttpBasic";
 	public static final String PARAM_STORAGE_DETAIL_MAX_BATCH_RESOURCE_COUNT = "maxBatchResourceCount";
 
-	static final String PARAM_INPUT_TYPE = "type";
+	public static final String PARAM_INPUT_TYPE = "type";
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkImportProvider.class);
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
@@ -148,6 +148,7 @@ public class BulkImportProvider {
 		);
 
 		theResponse.setStatus(202);
+		theResponse.setContentType(Constants.CT_FHIR_JSON + Constants.CHARSET_UTF8_CTSUFFIX);
 		myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToWriter(response, theResponse.getWriter());
 		theResponse.getWriter().close();
 	}

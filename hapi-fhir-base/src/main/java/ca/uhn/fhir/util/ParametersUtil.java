@@ -320,6 +320,13 @@ public class ParametersUtil {
 		addPart(theContext, theParameter, theName, value);
 	}
 
+	public static void addPartUrl(FhirContext theContext, IBase theParameter, String theName, String theCode) {
+		IPrimitiveType<String> value = (IPrimitiveType<String>) theContext.getElementDefinition("url").newInstance();
+		value.setValue(theCode);
+
+		addPart(theContext, theParameter, theName, value);
+	}
+
 	public static void addPartBoolean(FhirContext theContext, IBase theParameter, String theName, Boolean theValue) {
 		addPart(theContext, theParameter, theName, theContext.getPrimitiveBoolean(theValue));
 	}
