@@ -94,22 +94,6 @@
 				</dependency>
 				<dependency>
 					<groupId>ca.uhn.hapi.fhir</groupId>
-					<artifactId>hapi-fhir-checkstyle</artifactId>
-					<version>${project.version}</version>
-					<classifier>sources</classifier>
-					<scope>provided</scope>
-				</dependency>
-				<dependency>
-					<groupId>ca.uhn.hapi.fhir</groupId>
-					<artifactId>hapi-fhir-checkstyle</artifactId>
-					<version>${project.version}</version>
-					<classifier>javadoc</classifier>
-					<scope>provided</scope>
-				</dependency>
-
-
-				<dependency>
-					<groupId>ca.uhn.hapi.fhir</groupId>
 					<artifactId>hapi-fhir-structures-dstu2</artifactId>
 					<version>${project.version}</version>
 				</dependency>

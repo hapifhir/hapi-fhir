@@ -6,7 +6,7 @@
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
 		<version>5.7.0</version>
-		<relativePath>../pom.xml</relativePath>
+		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
 	<artifactId>hapi-fhir-checkstyle</artifactId>
