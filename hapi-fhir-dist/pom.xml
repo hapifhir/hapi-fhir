@@ -91,7 +91,7 @@
 					<version>${project.version}</version>
 					<classifier>javadoc</classifier>
 					<scope>provided</scope>
-
+				</dependency>
 				<dependency>
 					<groupId>ca.uhn.hapi.fhir</groupId>
 					<artifactId>hapi-fhir-checkstyle</artifactId>
