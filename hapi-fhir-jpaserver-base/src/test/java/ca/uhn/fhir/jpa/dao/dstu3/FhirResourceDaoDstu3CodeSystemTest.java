@@ -34,7 +34,7 @@ public class FhirResourceDaoDstu3CodeSystemTest extends BaseJpaDstu3Test {
 		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(true);
 		
 		String input = IOUtils.toString(getClass().getResource("/dstu3_codesystem_complete.json"), StandardCharsets.UTF_8);
-		CodeSystem cs = myFhirCtx.newJsonParser().parseResource(CodeSystem.class, input);
+		CodeSystem cs = myFhirContext.newJsonParser().parseResource(CodeSystem.class, input);
 		myCodeSystemDao.create(cs, mySrd);
 
 

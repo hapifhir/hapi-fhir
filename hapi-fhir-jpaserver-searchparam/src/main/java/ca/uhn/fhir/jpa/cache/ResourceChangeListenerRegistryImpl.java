@@ -20,9 +20,9 @@ package ca.uhn.fhir.jpa.cache;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
@@ -30,7 +30,6 @@ import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
@@ -49,25 +48,13 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class ResourceChangeListenerRegistryImpl implements IResourceChangeListenerRegistry {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceChangeListenerRegistryImpl.class);
 	private final Queue<ResourceChangeListenerCache> myListenerEntries = new ConcurrentLinkedQueue<>();
-	@Autowired
-	ResourceChangeListenerCacheFactory myResourceChangeListenerCacheFactory;
-	@Autowired
-	private FhirContext myFhirContext;
-	@Autowired
+	private final FhirContext myFhirContext;
+	private final ResourceChangeListenerCacheFactory myResourceChangeListenerCacheFactory;
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 
-	@VisibleForTesting
-	public void setResourceChangeListenerCacheFactory(ResourceChangeListenerCacheFactory theResourceChangeListenerCacheFactory) {
-		myResourceChangeListenerCacheFactory = theResourceChangeListenerCacheFactory;
-	}
-
-	@VisibleForTesting
-	public void setFhirContext(FhirContext theFhirContext) {
+	public ResourceChangeListenerRegistryImpl(FhirContext theFhirContext, ResourceChangeListenerCacheFactory theResourceChangeListenerCacheFactory, InMemoryResourceMatcher theInMemoryResourceMatcher) {
 		myFhirContext = theFhirContext;
-	}
-
-	@VisibleForTesting
-	public void setInMemoryResourceMatcher(InMemoryResourceMatcher theInMemoryResourceMatcher) {
+		myResourceChangeListenerCacheFactory = theResourceChangeListenerCacheFactory;
 		myInMemoryResourceMatcher = theInMemoryResourceMatcher;
 	}
 
@@ -112,7 +99,7 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 	}
 
 	private IResourceChangeListenerCache add(String theResourceName, IResourceChangeListener theResourceChangeListener, SearchParameterMap theMap, long theRemoteRefreshIntervalMs) {
-		ResourceChangeListenerCache retval = myResourceChangeListenerCacheFactory.create(theResourceName, theMap, theResourceChangeListener, theRemoteRefreshIntervalMs);
+		ResourceChangeListenerCache retval = myResourceChangeListenerCacheFactory.newResourceChangeListenerCache(theResourceName, theMap, theResourceChangeListener, theRemoteRefreshIntervalMs);
 		myListenerEntries.add(retval);
 		return retval;
 	}

@@ -21,7 +21,7 @@ public abstract class BaseJpaR4SystemTest extends BaseJpaR4Test {
 		super.beforeInitMocks();
 
 		if (myServer == null) {
-			myServer = new RestfulServer(myFhirCtx, mySrdInterceptorService);
+			myServer = new RestfulServer(myFhirContext, mySrdInterceptorService);
 
 			PatientResourceProvider patientRp = new PatientResourceProvider();
 			patientRp.setDao(myPatientDao);

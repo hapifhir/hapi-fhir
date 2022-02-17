@@ -24,7 +24,7 @@ public class ResourceProviderR4StructureDefinitionTest extends BaseResourceProvi
 
 	@Test
 	public void testSearchAllStructureDefinitions() throws IOException {
-		StructureDefinition sd = loadResource(myFhirCtx, StructureDefinition.class, "/r4/sd-david-dhtest7.json");
+		StructureDefinition sd = loadResource(myFhirContext, StructureDefinition.class, "/r4/sd-david-dhtest7.json");
 		myStructureDefinitionDao.update(sd);
 
 		Bundle response = myClient
@@ -33,7 +33,7 @@ public class ResourceProviderR4StructureDefinitionTest extends BaseResourceProvi
 			.returnBundle(Bundle.class)
 			.execute();
 
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		assertEquals(1, response.getEntry().size());
 		assertEquals("dhtest7", response.getEntry().get(0).getResource().getIdElement().getIdPart());
 	}

@@ -32,7 +32,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -100,6 +99,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
@@ -114,7 +114,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -464,11 +463,11 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		String vsContents;
 		vsContents = IOUtils.toString(FhirResourceDaoDstu3Test.class.getResourceAsStream("/org/hl7/fhir/dstu3/model/profile/" + name + ".xml"), StandardCharsets.UTF_8);
 
-		bundle = myFhirCtx.newXmlParser().parseResource(org.hl7.fhir.dstu3.model.Bundle.class, vsContents);
+		bundle = myFhirContext.newXmlParser().parseResource(org.hl7.fhir.dstu3.model.Bundle.class, vsContents);
 		for (BundleEntryComponent i : bundle.getEntry()) {
 			org.hl7.fhir.dstu3.model.Resource next = i.getResource();
 
-			ourLog.debug(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(next));
+			ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(next));
 			if (next instanceof StructureDefinition) {
 				myStructureDefinitionDao.update((StructureDefinition) next, mySrd);
 			} else if (next instanceof CompartmentDefinition) {
@@ -617,7 +616,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			"      </NamingSystem>";
 		//@formatter:on
 
-		NamingSystem res = myFhirCtx.newXmlParser().parseResource(NamingSystem.class, input);
+		NamingSystem res = myFhirContext.newXmlParser().parseResource(NamingSystem.class, input);
 		IIdType id = myNamingSystemDao.create(res, mySrd).getId().toUnqualifiedVersionless();
 
 		assertThat(toUnqualifiedVersionlessIdValues(myNamingSystemDao.search(new SearchParameterMap(NamingSystem.SP_NAME, new StringParam("NDF")).setLoadSynchronous(true))), org.hamcrest.Matchers.contains(id.getValue()));
@@ -1918,7 +1917,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		Set<ResourcePersistentId> val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
 		int initial = val.size();
 
-		Organization org = myFhirCtx.newJsonParser().parseResource(Organization.class, inputStr);
+		Organization org = myFhirContext.newJsonParser().parseResource(Organization.class, inputStr);
 		myOrganizationDao.create(org, mySrd);
 
 		val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
@@ -2555,7 +2554,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 			
-			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		
 		{
@@ -2567,7 +2566,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			
 			oid2 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 			
-			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		
 		{
@@ -2579,7 +2578,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			
 			oid3 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 			
-			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		
 		{
@@ -2591,7 +2590,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			
 			oid4 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 			
-			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 
@@ -3150,7 +3149,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		IIdType orgId = myOrganizationDao.create(org, mySrd).getId();
 
 		Organization returned = myOrganizationDao.read(orgId, mySrd);
-		String val = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(returned);
+		String val = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(returned);
 
 		ourLog.info(val);
 		assertThat(val, containsString("<name value=\"測試醫院\"/>"));

@@ -80,7 +80,7 @@ public class TokenAutocompleteElasticsearchIT extends BaseJpaTest {
 	}
 
 	@Override
-	protected FhirContext getContext() {
+	protected FhirContext getFhirContext() {
 		return myFhirCtx;
 	}
 

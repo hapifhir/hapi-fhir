@@ -8,7 +8,6 @@ import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -18,7 +17,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.test.utilities.BatchJobHelper;
-import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
@@ -30,7 +28,6 @@ import org.hamcrest.Matchers;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.hapi.rest.server.helper.BatchHelperR4;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
@@ -46,10 +43,10 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
@@ -72,8 +69,6 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -119,7 +114,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		super.before();
 
 		myRequestValidatingInterceptor = new RequestValidatingInterceptor();
-		FhirInstanceValidator module = new FhirInstanceValidator(myFhirCtx);
+		FhirInstanceValidator module = new FhirInstanceValidator(myFhirContext);
 		module.setValidationSupport(myValidationSupport);
 		myRequestValidatingInterceptor.addValidatorModule(module);
 
@@ -603,7 +598,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 			.withParameters(input)
 			.execute();
 
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		myBatchJobHelper.awaitAllBulkJobCompletions(BatchConstants.DELETE_EXPUNGE_JOB_NAME);
 		int deleteCount = myCaptureQueriesListener.countDeleteQueries();
 
@@ -657,7 +652,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 					try {
 						String respBundleString = IOUtils.toString(getResp.getEntity().getContent(), Charsets.UTF_8);
 						assertEquals(200, getResp.getStatusLine().getStatusCode(), respBundleString);
-						respBundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, respBundleString);
+						respBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, respBundleString);
 						myTaskCount++;
 					} finally {
 						IOUtils.closeQuietly(getResp);
@@ -670,7 +665,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 					try {
 						assertEquals(200, getResp.getStatusLine().getStatusCode());
 						String respBundleString = IOUtils.toString(getResp.getEntity().getContent(), Charsets.UTF_8);
-						respBundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, respBundleString);
+						respBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, respBundleString);
 						myTaskCount++;
 					} finally {
 						IOUtils.closeQuietly(getResp);
