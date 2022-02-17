@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 2797
+title: "User was permitted to bulk export all groups and/or patients when they were unauthorized. This issue has been fixed."
