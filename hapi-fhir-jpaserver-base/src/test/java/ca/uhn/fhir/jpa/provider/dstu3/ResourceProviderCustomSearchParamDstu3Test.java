@@ -11,7 +11,6 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -31,7 +30,6 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.SearchParameter;
 import org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -264,7 +262,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		eyeColourSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
 		eyeColourSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
 
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(eyeColourSp));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(eyeColourSp));
 
 		ourClient
 				.create()
@@ -278,7 +276,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		p1.addExtension().setUrl("http://acme.org/eyecolour").setValue(new CodeType("blue"));
 		IIdType p1id = myPatientDao.create(p1).getId().toUnqualifiedVersionless();
 
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p1));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(p1));
 
 		Patient p2 = new Patient();
 		p2.setActive(true);
@@ -292,7 +290,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 				.returnBundle(Bundle.class)
 				.execute();
 
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		List<String> foundResources = toUnqualifiedVersionlessIdValues(bundle);
 		assertThat(foundResources, contains(p1id.getValue()));

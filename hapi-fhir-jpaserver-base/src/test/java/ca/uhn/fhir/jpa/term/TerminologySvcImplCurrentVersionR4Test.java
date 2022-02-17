@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.config.BaseConfig;
+import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
@@ -134,7 +134,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 	@Autowired
 	private ITermReadSvc myITermReadSvc;
 
-	@Autowired @Qualifier(BaseConfig.JPA_VALIDATION_SUPPORT)
+	@Autowired @Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT)
 	private IValidationSupport myJpaPersistedResourceValidationSupport;
 
 	@Autowired private BatchJobHelper myBatchJobHelper;
@@ -455,7 +455,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 
 		// _ current CS is present and has no version
 		CodeSystem codeSystem = myCodeSystemDao.read(new IdType(LOINC_LOW));
-		String csString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem);
+		String csString = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem);
 		ourLog.info("CodeSystem:\n" + csString);
 
 		HashSet<String> shouldNotBePresentVersions = new HashSet<>(possibleVersions);

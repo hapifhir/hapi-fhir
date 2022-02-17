@@ -1,11 +1,11 @@
 package ca.uhn.fhir.jpa.config;
 
-import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
-import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
-import ca.uhn.fhir.jpa.batch.svc.BatchJobSubmitterImpl;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.binstore.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
-import ca.uhn.fhir.jpa.dao.BaseJpaTest;
+import ca.uhn.fhir.jpa.config.r4.JpaR4Config;
+import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
+import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
@@ -14,28 +14,30 @@ import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
 import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
-import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
-import org.hibernate.jpa.HibernatePersistenceProvider;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
-import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
 @Configuration
-@Import({TestJPAConfig.class, BatchJobsConfig.class})
-@EnableTransactionManagement()
-public class TestR4Config extends BaseJavaConfigR4 {
+@Import({
+	JpaR4Config.class,
+	HapiJpaConfig.class,
+	TestJPAConfig.class,
+	TestHibernateSearchAddInConfig.DefaultLuceneHeap.class
+})
+public class TestR4Config {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestR4Config.class);
 	public static Integer ourMaxThreads;
@@ -60,12 +62,6 @@ public class TestR4Config extends BaseJavaConfigR4 {
 
 
 	private Exception myLastStackTrace;
-
-	@Override
-	@Bean
-	public IBatchJobSubmitter batchJobSubmitter() {
-		return new BatchJobSubmitterImpl();
-	}
 
 	@Bean
 	public CircularQueueCaptureQueriesListener captureQueriesListener() {
@@ -145,31 +141,28 @@ public class TestR4Config extends BaseJavaConfigR4 {
 	}
 
 
-	@Override
 	@Bean
-	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory) {
-		LocalContainerEntityManagerFactoryBean retVal = new HapiFhirLocalContainerEntityManagerFactoryBean(theConfigurableListableBeanFactory);
-		configureEntityManagerFactory(retVal, fhirContext());
-		retVal.setJpaDialect(new HapiFhirHibernateJpaDialect(fhirContext().getLocalizer()));
-		retVal.setPackagesToScan("ca.uhn.fhir.jpa.model.entity", "ca.uhn.fhir.jpa.entity");
-		retVal.setPersistenceProvider(new HibernatePersistenceProvider());
+	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext) {
+		LocalContainerEntityManagerFactoryBean retVal = HapiEntityManagerFactoryUtil.newEntityManagerFactory(theConfigurableListableBeanFactory, theFhirContext);
 		retVal.setPersistenceUnitName("PU_HapiFhirJpaR4");
 		retVal.setDataSource(dataSource());
 		retVal.setJpaProperties(jpaProperties());
 		return retVal;
 	}
 
-	@Bean
-	public Properties jpaProperties() {
+	@Autowired
+	TestHibernateSearchAddInConfig.IHibernateSearchConfigurer hibernateSearchConfigurer;
+
+	private Properties jpaProperties() {
 		Properties extraProperties = new Properties();
 		extraProperties.put("hibernate.format_sql", "false");
 		extraProperties.put("hibernate.show_sql", "false");
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
 		extraProperties.put("hibernate.dialect", HapiFhirH2Dialect.class.getName());
 
-		boolean enableLucene = myEnv.getProperty(BaseJpaTest.CONFIG_ENABLE_LUCENE, Boolean.TYPE, BaseJpaTest.CONFIG_ENABLE_LUCENE_DEFAULT_VALUE);
-		Map<String, String> hibernateSearchProperties = BaseJpaTest.buildHibernateSearchProperties(enableLucene);
-		extraProperties.putAll(hibernateSearchProperties);
+		hibernateSearchConfigurer.apply(extraProperties);
+
+		ourLog.info("jpaProperties: {}", extraProperties);
 
 		return extraProperties;
 	}
@@ -179,12 +172,12 @@ public class TestR4Config extends BaseJavaConfigR4 {
 	 */
 	@Bean
 	@Lazy
-	public RequestValidatingInterceptor requestValidatingInterceptor() {
+	public RequestValidatingInterceptor requestValidatingInterceptor(FhirInstanceValidator theFhirInstanceValidator) {
 		RequestValidatingInterceptor requestValidator = new RequestValidatingInterceptor();
 		requestValidator.setFailOnSeverity(ResultSeverityEnum.ERROR);
 		requestValidator.setAddResponseHeaderOnSeverity(null);
 		requestValidator.setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
-		requestValidator.addValidatorModule(instanceValidator());
+		requestValidator.addValidatorModule(theFhirInstanceValidator);
 
 		return requestValidator;
 	}

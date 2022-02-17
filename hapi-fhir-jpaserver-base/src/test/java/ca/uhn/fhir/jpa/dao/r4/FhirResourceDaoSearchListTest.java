@@ -52,7 +52,7 @@ public class FhirResourceDaoSearchListTest extends BaseJpaR4Test {
 
 
 	private void testQuery(String theQueryString, IIdType... theExpectedPatientIds) {
-		SearchParameterMap map = myMatchUrlService.translateMatchUrl(theQueryString, myFhirCtx.getResourceDefinition("List"));
+		SearchParameterMap map = myMatchUrlService.translateMatchUrl(theQueryString, myFhirContext.getResourceDefinition("List"));
 		IBundleProvider bundle = myPatientDao.search(map);
 		List<IBaseResource> resources = bundle.getResources(0, theExpectedPatientIds.length);
 		assertThat(resources, hasSize(theExpectedPatientIds.length));

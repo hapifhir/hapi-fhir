@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.provider.dstu3;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.ClientProtocolException;
@@ -20,10 +19,9 @@ import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Reference;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -65,7 +63,7 @@ public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test 
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
-		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
+		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
 
 		myDaoConfig.setAllowMultipleDelete(true);
 
@@ -146,7 +144,7 @@ public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test 
 
 		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
 			String resourceString = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
-			bundle = theEncoding.newParser(myFhirCtx).parseResource(Bundle.class, resourceString);
+			bundle = theEncoding.newParser(myFhirContext).parseResource(Bundle.class, resourceString);
 		} 
 		return bundle;
 	}

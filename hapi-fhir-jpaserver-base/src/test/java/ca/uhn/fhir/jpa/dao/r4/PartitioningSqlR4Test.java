@@ -8,7 +8,6 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
-import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
@@ -67,7 +66,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.test.context.TestPropertySource;
 
 import java.util.Date;
 import java.util.List;
@@ -651,7 +649,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			.setResource(p)
 			.getRequest().setUrl("Patient").setMethod(Bundle.HTTPVerb.POST);
 		Bundle output = mySystemDao.transaction(mySrd, input);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		Long patientId = new IdType(output.getEntry().get(1).getResponse().getLocation()).getIdPartAsLong();
 
 		runInTransaction(() -> {
@@ -1319,12 +1317,11 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testSearch_IdParamSecond_ForcedId_SpecificPartition() {
-		// FIXME: move down
 		IIdType patientId1 = createPatient(withPartition(1), withId("PT-1"), withActiveTrue());
-		logAllTokenIndexes();
-
 		IIdType patientIdNull = createPatient(withPartition(null), withId("PT-NULL"), withActiveTrue());
 		IIdType patientId2 = createPatient(withPartition(2), withId("PT-2"), withActiveTrue());
+
+		logAllTokenIndexes();
 
 		/* *******************************
 		 * _id param is second parameter
@@ -2688,7 +2685,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		AtomicInteger counter = new AtomicInteger(0);
 		Supplier<Bundle> input = () -> {
-			BundleBuilder bb = new BundleBuilder(myFhirCtx);
+			BundleBuilder bb = new BundleBuilder(myFhirContext);
 
 			Patient pt = new Patient();
 			pt.setId(IdType.newRandomUuid());
@@ -2741,7 +2738,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		myCaptureQueriesListener.clear();
 		Bundle outcome = mySystemDao.transaction(mySrd, input.get());
-		ourLog.info("Resp: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.info("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false), containsString("resourcein0_.HASH_SYS_AND_VALUE='-4132452001562191669' and (resourcein0_.PARTITION_ID in ('1'))"));
@@ -2757,7 +2754,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		myCaptureQueriesListener.clear();
 		outcome = mySystemDao.transaction(mySrd, input.get());
-		ourLog.info("Resp: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.info("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(11, myCaptureQueriesListener.countSelectQueries());
 		myCaptureQueriesListener.logInsertQueries();
@@ -2774,7 +2771,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		myCaptureQueriesListener.clear();
 		outcome = mySystemDao.transaction(mySrd, input.get());
-		ourLog.info("Resp: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.info("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(6, myCaptureQueriesListener.countSelectQueries());
 		myCaptureQueriesListener.logInsertQueries();
@@ -2789,7 +2786,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		myCaptureQueriesListener.clear();
 		outcome = mySystemDao.transaction(mySrd, input.get());
-		ourLog.info("Resp: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.info("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(5, myCaptureQueriesListener.countSelectQueries());
 		myCaptureQueriesListener.logInsertQueries();

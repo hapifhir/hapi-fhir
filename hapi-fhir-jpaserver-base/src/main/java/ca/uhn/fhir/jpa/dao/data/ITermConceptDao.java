@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,6 +34,16 @@ import java.util.Optional;
  */
 
 public interface ITermConceptDao extends JpaRepository<TermConcept, Long>, IHapiFhirJpaRepository {
+
+	@Query("SELECT t FROM TermConcept t " +
+		"LEFT JOIN FETCH t.myDesignations d " +
+		"WHERE t.myId IN :pids")
+	List<TermConcept> fetchConceptsAndDesignationsByPid(@Param("pids") List<Long> thePids);
+
+	@Query("SELECT t FROM TermConcept t " +
+		"LEFT JOIN FETCH t.myDesignations d " +
+		"WHERE t.myCodeSystemVersionPid = :pid")
+	List<TermConcept> fetchConceptsAndDesignationsByVersionPid(@Param("pid") Long theCodeSystemVersionPid);
 
 	@Query("SELECT COUNT(t) FROM TermConcept t WHERE t.myCodeSystem.myId = :cs_pid")
 	Integer countByCodeSystemVersion(@Param("cs_pid") Long thePid);

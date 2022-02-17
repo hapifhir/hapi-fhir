@@ -94,7 +94,7 @@ public class MdmClearJobConfig {
 
 	@Bean
 	@StepScope
-	public ItemProcessor<List<Long>, List<String>> deleteThenExpungeCompositeProcessor() {
+	public CompositeItemProcessor<List<Long>, List<String>> deleteThenExpungeCompositeProcessor() {
 		CompositeItemProcessor<List<Long>, List<String>> compositeProcessor = new CompositeItemProcessor<>();
 		List itemProcessors = new ArrayList<>();
 		itemProcessors.add(mdmLinkDeleter());

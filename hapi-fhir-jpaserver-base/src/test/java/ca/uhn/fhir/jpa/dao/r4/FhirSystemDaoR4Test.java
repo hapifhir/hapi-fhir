@@ -136,7 +136,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		myDaoConfig.setBundleBatchMaxPoolSize(new DaoConfig().getBundleBatchMaxPoolSize());
 		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(new DaoConfig().isAutoCreatePlaceholderReferenceTargets());
 		myModelConfig.setAutoVersionReferenceAtPaths(new ModelConfig().getAutoVersionReferenceAtPaths());
-		myFhirCtx.getParserOptions().setAutoContainReferenceTargetsWithNoId(true);
+		myFhirContext.getParserOptions().setAutoContainReferenceTargetsWithNoId(true);
 	}
 
 	@BeforeEach
@@ -365,7 +365,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals("404 Not Found", response.getEntry().get(1).getResponse().getStatus());
 
 		OperationOutcome oo = (OperationOutcome) response.getEntry().get(1).getResponse().getOutcome();
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(oo));
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertEquals(IssueSeverity.ERROR, oo.getIssue().get(0).getSeverity());
 		assertEquals(Msg.code(2001) + "Resource Patient/BABABABA is not known", oo.getIssue().get(0).getDiagnostics());
 	}
@@ -399,7 +399,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals("400 Bad Request", response.getEntry().get(1).getResponse().getStatus());
 
 		OperationOutcome oo = (OperationOutcome) response.getEntry().get(1).getResponse().getOutcome();
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(oo));
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertEquals(IssueSeverity.ERROR, oo.getIssue().get(0).getSeverity());
 		assertThat(oo.getIssue().get(0).getDiagnostics(), containsString("Unknown search parameter"));
 	}
@@ -438,7 +438,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			.getRequest().setMethod(HTTPVerb.POST);
 
 		Bundle resp = mySystemDao.transaction(mySrd, inputBundle);
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 
 		IdType epId = new IdType(resp.getEntry().get(0).getResponse().getLocation());
 		IdType condId = new IdType(resp.getEntry().get(1).getResponse().getLocation());
@@ -470,9 +470,9 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			.getRequest().setMethod(HTTPVerb.DELETE)
 			.setUrl(condId.toUnqualifiedVersionless().getValue());
 
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(inputBundle));
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(inputBundle));
 		resp = mySystemDao.transaction(mySrd, inputBundle);
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 
 		// They should now be deleted
 		try {
@@ -490,14 +490,14 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	@Test
 	public void testContainedArePreservedForBug410() throws IOException {
 		String input = ClasspathUtil.loadResource("/r4/bug-410-bundle.xml");
-		Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, input);
+		Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, input);
 
 		Bundle output = mySystemDao.transaction(mySrd, bundle);
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		IdType id = new IdType(output.getEntry().get(1).getResponse().getLocation());
 		MedicationRequest mo = myMedicationRequestDao.read(id);
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(mo));
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(mo));
 	}
 
 	@Test
@@ -829,10 +829,10 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	@Test
 	public void testTransaction1() throws IOException {
 		String inputBundleString = loadClasspath("/david-bundle-error.json");
-		Bundle bundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, inputBundleString);
+		Bundle bundle = myFhirContext.newJsonParser().parseResource(Bundle.class, inputBundleString);
 		Bundle resp = mySystemDao.transaction(mySrd, bundle);
 
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 
 		assertEquals("201 Created", resp.getEntry().get(0).getResponse().getStatus());
 	}
@@ -877,7 +877,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals(2, resp.getEntry().size());
 		assertEquals(BundleType.BATCHRESPONSE, resp.getTypeElement().getValue());
 
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 		BundleEntryResponseComponent respEntry;
 
 		// Bundle.entry[0] is create response
@@ -906,7 +906,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testTransactionWithConditionalCreates_IdenticalMatchUrlsDifferentTypes_Unqualified() {
-		BundleBuilder bb = new BundleBuilder(myFhirCtx);
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
 		Patient pt = new Patient();
 		pt.addIdentifier().setSystem("foo").setValue("bar");
 		bb.addTransactionCreateEntry(pt).conditional("identifier=foo|bar");
@@ -922,7 +922,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		// Take 2
 
-		bb = new BundleBuilder(myFhirCtx);
+		bb = new BundleBuilder(myFhirContext);
 		pt = new Patient();
 		pt.addIdentifier().setSystem("foo").setValue("bar");
 		bb.addTransactionCreateEntry(pt).conditional("identifier=foo|bar");
@@ -941,7 +941,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testTransactionWithConditionalCreates_IdenticalMatchUrlsDifferentTypes_Qualified() {
-		BundleBuilder bb = new BundleBuilder(myFhirCtx);
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
 		Patient pt = new Patient();
 		pt.addIdentifier().setSystem("foo").setValue("bar");
 		bb.addTransactionCreateEntry(pt).conditional("Patient?identifier=foo|bar");
@@ -957,7 +957,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		// Take 2
 
-		bb = new BundleBuilder(myFhirCtx);
+		bb = new BundleBuilder(myFhirContext);
 		pt = new Patient();
 		pt.addIdentifier().setSystem("foo").setValue("bar");
 		bb.addTransactionCreateEntry(pt).conditional("Patient?identifier=foo|bar");
@@ -976,7 +976,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testTransactionWithConditionalCreate_NoResourceTypeInUrl() {
-		BundleBuilder bb = new BundleBuilder(myFhirCtx);
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
 		Patient pt = new Patient();
 		pt.setActive(true);
 		bb.addTransactionCreateEntry(pt).conditional("active=true");
@@ -990,7 +990,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		// Take 2
 
-		bb = new BundleBuilder(myFhirCtx);
+		bb = new BundleBuilder(myFhirContext);
 		pt = new Patient();
 		pt.setActive(true);
 		bb.addTransactionCreateEntry(pt).conditional("active=true");
@@ -1009,7 +1009,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		// Take 3
 
-		bb = new BundleBuilder(myFhirCtx);
+		bb = new BundleBuilder(myFhirContext);
 		pt = new Patient();
 		pt.setActive(true);
 		bb.addTransactionCreateEntry(pt).conditional("?active=true");
@@ -1045,7 +1045,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testTransactionNoContainedRedux_ContainedProcessingDisabled() throws IOException {
-		myFhirCtx.getParserOptions().setAutoContainReferenceTargetsWithNoId(false);
+		myFhirContext.getParserOptions().setAutoContainReferenceTargetsWithNoId(false);
 
 		//Pre-create the patient, which will cause the ifNoneExist to prevent a new creation during bundle transaction
 		Patient patient = loadResourceFromClasspath(Patient.class, "/r4/preexisting-patient.json");
@@ -1073,13 +1073,13 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		request = loadResourceFromClasspath(Bundle.class, "/r4/transaction-no-contained.json");
 		Bundle outcome = mySystemDao.transaction(mySrd, request);
 
-		ourLog.info("Outcome: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.info("Outcome: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		IdType communicationId = new IdType(outcome.getEntry().get(1).getResponse().getLocation());
 		Communication communication = myCommunicationDao.read(communicationId, mySrd);
 		assertThat(communication.getSubject().getReference(), matchesPattern("Patient/[0-9]+"));
 
-		ourLog.info("Outcome: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(communication));
+		ourLog.info("Outcome: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(communication));
 
 	}
 
@@ -1153,7 +1153,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			.setUrl("Patient/");
 
 		Bundle outcome = mySystemDao.transaction(mySrd, request);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		assertEquals("400 Bad Request", outcome.getEntry().get(0).getResponse().getStatus());
 		assertEquals(IssueSeverity.ERROR, ((OperationOutcome) outcome.getEntry().get(0).getResponse().getOutcome()).getIssueFirstRep().getSeverity());
 		assertEquals(Msg.code(543) + "Missing required resource in Bundle.entry[0].resource for operation POST", ((OperationOutcome) outcome.getEntry().get(0).getResponse().getOutcome()).getIssueFirstRep().getDiagnostics());
@@ -1172,7 +1172,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			.setUrl("Patient/123");
 
 		Bundle outcome = mySystemDao.transaction(mySrd, request);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		assertEquals("400 Bad Request", outcome.getEntry().get(0).getResponse().getStatus());
 		assertEquals(IssueSeverity.ERROR, ((OperationOutcome) outcome.getEntry().get(0).getResponse().getOutcome()).getIssueFirstRep().getSeverity());
 		assertEquals(Msg.code(543) + "Missing required resource in Bundle.entry[0].resource for operation PUT", ((OperationOutcome) outcome.getEntry().get(0).getResponse().getOutcome()).getIssueFirstRep().getDiagnostics());
@@ -1190,7 +1190,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			.setMethod(HTTPVerb.POST);
 
 		Bundle outcome = mySystemDao.transaction(mySrd, request);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		assertEquals("201 Created", outcome.getEntry().get(0).getResponse().getStatus());
 		validate(outcome);
 	}
@@ -1229,7 +1229,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			.setUrl("/Observation?subject=" + patient.getIdElement().toUnqualifiedVersionless().toString());
 
 		ourLog.info("Patient TEMP UUID: {}", patient.getId());
-		String s = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(transactionBundle);
+		String s = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(transactionBundle);
 		System.out.println(s);
 		Bundle outcome = mySystemDao.transaction(null, transactionBundle);
 		String patientLocation = outcome.getEntry().get(0).getResponse().getLocation();
@@ -1610,7 +1610,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		Bundle response = mySystemDao.transaction(null, request);
 
-		ourLog.info("Response:\n{}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.info("Response:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 
 		List<String> responseTypes = response
 			.getEntry()
@@ -1670,7 +1670,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		Bundle response = mySystemDao.transaction(null, request);
 
-		ourLog.info("Response:\n{}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.info("Response:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 
 		List<String> responseTypes = response
 			.getEntry()
@@ -1727,7 +1727,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		Bundle response = mySystemDao.transaction(null, request);
 
-		ourLog.info("Response:\n{}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.info("Response:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 
 		List<String> responseTypes = response
 			.getEntry()
@@ -1962,7 +1962,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals("404 Not Found", response.getEntry().get(1).getResponse().getStatus());
 
 		OperationOutcome oo = (OperationOutcome) response.getEntry().get(1).getResponse().getOutcome();
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(oo));
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertEquals(IssueSeverity.ERROR, oo.getIssue().get(0).getSeverity());
 		assertEquals(Msg.code(2001) + "Resource Patient/BABABABA is not known", oo.getIssue().get(0).getDiagnostics());
 	}
@@ -1996,7 +1996,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals("400 Bad Request", response.getEntry().get(1).getResponse().getStatus());
 
 		OperationOutcome oo = (OperationOutcome) response.getEntry().get(1).getResponse().getOutcome();
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(oo));
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertEquals(IssueSeverity.ERROR, oo.getIssue().get(0).getSeverity());
 		assertThat(oo.getIssue().get(0).getDiagnostics(), containsString("Unknown search parameter"));
 	}
@@ -2162,7 +2162,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	@Test
 	public void testTransactionCreateWithPutUsingUrl2() throws Exception {
 		String req = IOUtils.toString(FhirSystemDaoR4Test.class.getResourceAsStream("/r4/bundle.xml"), StandardCharsets.UTF_8);
-		Bundle request = myFhirCtx.newXmlParser().parseResource(Bundle.class, req);
+		Bundle request = myFhirContext.newXmlParser().parseResource(Bundle.class, req);
 		mySystemDao.transaction(mySrd, request);
 	}
 
@@ -2455,12 +2455,12 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			fail(e.toString());
 			return;
 		}
-		Bundle bundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, input);
+		Bundle bundle = myFhirContext.newJsonParser().parseResource(Bundle.class, input);
 		mySystemDao.transaction(mySrd, bundle);
 
 		IBundleProvider history = mySystemDao.history(null, null, null, null);
 		Bundle list = toBundleR4(history);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(list));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(list));
 
 		assertEquals(6, list.getEntry().size());
 
@@ -2730,11 +2730,11 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		InputStream bundleRes = SystemProviderDstu2Test.class.getResourceAsStream("/transaction_link_patient_eve.xml");
 		String bundleStr = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
-		Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, bundleStr);
+		Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, bundleStr);
 
 		Bundle resp = mySystemDao.transaction(mySrd, bundle);
 
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
 
 		assertThat(resp.getEntry().get(0).getResponse().getLocation(), startsWith("Patient/a555-44-4444/_history/"));
 		assertThat(resp.getEntry().get(1).getResponse().getLocation(), startsWith("Patient/temp6789/_history/"));
@@ -2747,10 +2747,10 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	@Test
 	public void testTransactionFromBundle2() throws Exception {
 		String input = IOUtils.toString(getClass().getResourceAsStream("/transaction-bundle.xml"), StandardCharsets.UTF_8);
-		Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, input);
+		Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, input);
 		Bundle response = mySystemDao.transaction(mySrd, bundle);
 
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
 		assertEquals("201 Created", response.getEntry().get(0).getResponse().getStatus());
 		assertThat(response.getEntry().get(0).getResponse().getLocation(), matchesPattern("Practitioner/[0-9]+/_history/1"));
 
@@ -2758,10 +2758,10 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		 * Now a second time
 		 */
 
-		bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, input);
+		bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, input);
 		response = mySystemDao.transaction(mySrd, bundle);
 
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
 		assertEquals("200 OK", response.getEntry().get(0).getResponse().getStatus());
 		assertThat(response.getEntry().get(0).getResponse().getLocation(), matchesPattern("Practitioner/[0-9]+/_history/1"));
 
@@ -2771,8 +2771,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	public void testTransactionFromBundle6() throws Exception {
 		InputStream bundleRes = SystemProviderDstu2Test.class.getResourceAsStream("/simone_bundle3.xml");
 		String bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
-		Bundle output = mySystemDao.transaction(mySrd, myFhirCtx.newXmlParser().parseResource(Bundle.class, bundle));
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
+		Bundle output = mySystemDao.transaction(mySrd, myFhirContext.newXmlParser().parseResource(Bundle.class, bundle));
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 	}
 
 	@Test
@@ -2780,11 +2780,11 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		InputStream bundleRes = SystemProviderDstu2Test.class.getResourceAsStream("/josh-bundle.json");
 		String bundleStr = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
-		Bundle bundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, bundleStr);
+		Bundle bundle = myFhirContext.newJsonParser().parseResource(Bundle.class, bundleStr);
 
 		Bundle resp = mySystemDao.transaction(mySrd, bundle);
 
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
 
 		assertEquals("201 Created", resp.getEntry().get(0).getResponse().getStatus());
 		assertEquals("201 Created", resp.getEntry().get(1).getResponse().getStatus());
@@ -2845,7 +2845,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	private void testTransactionOrderingValidateResponse(int pass, Bundle resp) {
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 		assertEquals(4, resp.getEntry().size());
 		assertEquals("200 OK", resp.getEntry().get(0).getResponse().getStatus());
 		if (pass == 0) {
@@ -2880,13 +2880,13 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		Bundle inputBundle;
 		Bundle outputBundle;
-		inputBundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, input);
+		inputBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, input);
 		outputBundle = mySystemDao.transaction(mySrd, inputBundle);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outputBundle));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outputBundle));
 
-		inputBundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, input);
+		inputBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, input);
 		outputBundle = mySystemDao.transaction(mySrd, inputBundle);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outputBundle));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outputBundle));
 
 		IBundleProvider allPatients = myPatientDao.search(new SearchParameterMap());
 		assertEquals(1, allPatients.size().intValue());
@@ -3035,7 +3035,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		Patient patient = new Patient();
 		patient.getManagingOrganization().setResource(organization);
 
-		BundleBuilder bundleBuilder = new BundleBuilder(myFhirCtx);
+		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
 		bundleBuilder.addTransactionCreateEntry(patient);
 		Bundle outcome = mySystemDao.transaction(null, (Bundle) bundleBuilder.getBundle());
 
@@ -3470,14 +3470,14 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		InputStream bundleRes = SystemProviderDstu2Test.class.getResourceAsStream("/questionnaire-sdc-profile-example-ussg-fht.xml");
 		String bundleStr = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
-		Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, bundleStr);
+		Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, bundleStr);
 
 		Bundle resp = mySystemDao.transaction(mySrd, bundle);
 
-		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp);
+		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp);
 		ourLog.info(encoded);
 
-		encoded = myFhirCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(resp);
+		encoded = myFhirContext.newJsonParser().setPrettyPrint(false).encodeResourceToString(resp);
 		//@formatter:off
 		assertThat(encoded, containsString("\"response\":{" +
 			"\"status\":\"201 Created\"," +
@@ -3490,10 +3490,10 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		resp = mySystemDao.transaction(mySrd, bundle);
 
-		encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp);
+		encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp);
 		ourLog.info(encoded);
 
-		encoded = myFhirCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(resp);
+		encoded = myFhirContext.newJsonParser().setPrettyPrint(false).encodeResourceToString(resp);
 		//@formatter:off
 		assertThat(encoded, containsString("\"response\":{" +
 			"\"status\":\"200 OK\"," +
@@ -3813,10 +3813,10 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		myPatientDao.create(patient, mySrd);
 
 		String input = IOUtils.toString(getClass().getResourceAsStream("/simone-conditional-url.xml"), StandardCharsets.UTF_8);
-		Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, input);
+		Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, input);
 
 		Bundle response = mySystemDao.transaction(mySrd, bundle);
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
 
 	}
 
@@ -3833,7 +3833,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		myPatientDao.create(patient, mySrd);
 
 		String input = IOUtils.toString(getClass().getResourceAsStream("/simone-conditional-url.xml"), StandardCharsets.UTF_8);
-		Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, input);
+		Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, input);
 
 		try {
 			mySystemDao.transaction(mySrd, bundle);
@@ -3849,7 +3849,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		myDaoConfig.setAllowInlineMatchUrlReferences(true);
 
 		String input = IOUtils.toString(getClass().getResourceAsStream("/simone-conditional-url.xml"), StandardCharsets.UTF_8);
-		Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, input);
+		Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, input);
 
 		try {
 			mySystemDao.transaction(mySrd, bundle);
@@ -3883,7 +3883,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	@Disabled
 	public void testTransactionWithMatchUrlToReferenceInSameBundle() throws IOException {
 		String input = IOUtils.toString(getClass().getResourceAsStream("/r4/bug801.json"), StandardCharsets.UTF_8);
-		Bundle bundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, input);
+		Bundle bundle = myFhirContext.newJsonParser().parseResource(Bundle.class, input);
 
 		try {
 			mySystemDao.transaction(mySrd, bundle);
@@ -3896,10 +3896,10 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	@Test
 	public void testTransactionWithMultiBundle() throws IOException {
 		String inputBundleString = loadClasspath("/r4/batch-error.xml");
-		Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, inputBundleString);
+		Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, inputBundleString);
 		Bundle resp = mySystemDao.transaction(mySrd, bundle);
 
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 
 		assertEquals("201 Created", resp.getEntry().get(0).getResponse().getStatus());
 
@@ -3963,7 +3963,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		//@formatter:on
 
 		Bundle outputBundle = mySystemDao.transaction(mySrd, inputBundle);
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(outputBundle));
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(outputBundle));
 
 		assertEquals(3, outputBundle.getEntry().size());
 		IdDt id0 = new IdDt(outputBundle.getEntry().get(0).getResponse().getLocation());
@@ -3998,7 +3998,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		Bundle input2 = createInputTransactionWithPlaceholderIdInMatchUrl(HTTPVerb.POST);
 		Bundle output2 = mySystemDao.transaction(null, input2);
 
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(output2));
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output2));
 
 		assertEquals("200 OK", output2.getEntry().get(0).getResponse().getStatus());
 		assertEquals("200 OK", output2.getEntry().get(1).getResponse().getStatus());
@@ -4028,7 +4028,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		Bundle input2 = createInputTransactionWithPlaceholderIdInMatchUrl(HTTPVerb.PUT);
 		Bundle output2 = mySystemDao.transaction(null, input2);
 
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(output2));
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output2));
 
 		assertEquals("200 OK", output2.getEntry().get(0).getResponse().getStatus());
 		assertEquals("200 OK", output2.getEntry().get(1).getResponse().getStatus());
@@ -4045,9 +4045,9 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		// First bundle (name is Joshua)
 
 		String input = IOUtils.toString(getClass().getResource("/r4/post1.xml"), StandardCharsets.UTF_8);
-		Bundle request = myFhirCtx.newXmlParser().parseResource(Bundle.class, input);
+		Bundle request = myFhirContext.newXmlParser().parseResource(Bundle.class, input);
 		Bundle response = mySystemDao.transaction(mySrd, request);
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
 
 		assertEquals(1, response.getEntry().size());
 		assertEquals("201 Created", response.getEntry().get(0).getResponse().getStatus());
@@ -4057,9 +4057,9 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		// Now the second (name is Adam, shouldn't get used)
 
 		input = IOUtils.toString(getClass().getResource("/r4/post2.xml"), StandardCharsets.UTF_8);
-		request = myFhirCtx.newXmlParser().parseResource(Bundle.class, input);
+		request = myFhirContext.newXmlParser().parseResource(Bundle.class, input);
 		response = mySystemDao.transaction(mySrd, request);
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
 
 		assertEquals(1, response.getEntry().size());
 		assertEquals("200 OK", response.getEntry().get(0).getResponse().getStatus());
@@ -4068,7 +4068,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals(id, id2);
 
 		Patient patient = myPatientDao.read(new IdType(id), mySrd);
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient));
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient));
 		assertEquals("Joshua", patient.getNameFirstRep().getGivenAsSingleString());
 	}
 
@@ -4087,7 +4087,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		request.addEntry().setResource(o).getRequest().setMethod(HTTPVerb.POST);
 
 		Bundle resp = mySystemDao.transaction(mySrd, request);
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 
 		String patientId = new IdType(resp.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless().getValue();
 		assertThat(patientId, startsWith("Patient/"));
@@ -4114,10 +4114,10 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		mo.setMedication(new Reference(medId));
 		bundle.addEntry().setResource(mo).setFullUrl(mo.getIdElement().getValue()).getRequest().setMethod(HTTPVerb.POST);
 
-		ourLog.info("Request:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.info("Request:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		Bundle outcome = mySystemDao.transaction(mySrd, bundle);
-		ourLog.info("Response:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.info("Response:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		IdType medId1 = new IdType(outcome.getEntry().get(0).getResponse().getLocation());
 		IdType medOrderId1 = new IdType(outcome.getEntry().get(1).getResponse().getLocation());
@@ -4167,7 +4167,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		request.addEntry().setResource(o).getRequest().setMethod(HTTPVerb.POST);
 
 		Bundle resp = mySystemDao.transaction(mySrd, request);
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 
 		String patientId = new IdType(resp.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless().getValue();
 		assertThat(patientId, startsWith("Patient/"));
@@ -4201,7 +4201,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		Bundle resp = mySystemDao.transaction(mySrd, res);
 
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 
 		assertEquals(BundleType.TRANSACTIONRESPONSE, resp.getTypeElement().getValue());
 		assertEquals(3, resp.getEntry().size());
@@ -4344,7 +4344,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		Bundle resp = mySystemDao.transaction(mySrd, res);
 
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 
 		assertEquals(BundleType.TRANSACTIONRESPONSE, resp.getTypeElement().getValue());
 		assertEquals(3, resp.getEntry().size());

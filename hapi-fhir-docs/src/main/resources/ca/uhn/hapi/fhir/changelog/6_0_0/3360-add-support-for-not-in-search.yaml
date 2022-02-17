@@ -1,0 +1,6 @@
+---
+type: add
+issue: 3360
+title: "Support has been added to the JPA server for token `:not-in` queries. Similar to `:not` queries, resources will
+  currently be considered to match if any codes in the relevant resource field are not found in the given ValueSet (as
+  opposed to matching if *all* codes are not in the given ValueSet)."
