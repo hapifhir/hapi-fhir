@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 1466
+title: "The XML and JSON Parsers are now encoding narratives of contained resources. 
+  Narratives were skipped before for contained resources. This was a rule which was only valid in STU1 (https://www.hl7.org/fhir/DSTU1/narrative.html), and was removed in DSTU2+ "
