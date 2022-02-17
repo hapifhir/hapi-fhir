@@ -315,7 +315,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	protected EntityManager myEntityManager;
 	@Autowired
-	protected FhirContext myFhirCtx;
+	protected FhirContext myFhirContext;
 	@Autowired
 	@Qualifier("myGroupDaoR4")
 	protected IFhirResourceDao<Group> myGroupDao;
@@ -565,7 +565,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 	@BeforeEach
 	public void beforeResetConfig() {
-		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
+		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
 		myValidationSettings.setLocalReferenceValidationDefaultPolicy(new ValidationSettings().getLocalReferenceValidationDefaultPolicy());
 	}
 
@@ -582,17 +582,12 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	}
 
 	protected String encode(IBaseResource theResource) {
-		return myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(theResource);
+		return myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(theResource);
 	}
 
 	@Override
 	public FhirContext getFhirContext() {
-		return myFhirCtx;
-	}
-
-	@Override
-	protected FhirContext getContext() {
-		return myFhirCtx;
+		return myFhirContext;
 	}
 
 	@Override
@@ -601,25 +596,25 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	}
 
 	protected <T extends IBaseResource> T loadResourceFromClasspath(Class<T> type, String resourceName) throws IOException {
-		return ClasspathUtil.loadResource(myFhirCtx, type, resourceName);
+		return ClasspathUtil.loadResource(myFhirContext, type, resourceName);
 	}
 
 	protected void validate(IBaseResource theResource) {
-		FhirValidator validatorModule = myFhirCtx.newValidator();
+		FhirValidator validatorModule = myFhirContext.newValidator();
 		FhirInstanceValidator instanceValidator = new FhirInstanceValidator(myValidationSupport);
 		instanceValidator.setBestPracticeWarningLevel(BestPracticeWarningLevel.Ignore);
 		instanceValidator.setValidatorPolicyAdvisor(new ValidationPolicyAdvisor());
 		validatorModule.registerValidatorModule(instanceValidator);
 		ValidationResult result = validatorModule.validateWithResult(theResource);
 		if (!result.isSuccessful()) {
-			fail(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
+			fail(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
 		}
 	}
 
 	@SuppressWarnings("unchecked")
 	protected void upload(String theClasspath) throws IOException {
 		String resource = loadResource(theClasspath);
-		IParser parser = EncodingEnum.detectEncoding(resource).newParser(myFhirCtx);
+		IParser parser = EncodingEnum.detectEncoding(resource).newParser(myFhirContext);
 		IBaseResource resourceParsed = parser.parseResource(resource);
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceParsed.getIdElement().getResourceType());
 		dao.update(resourceParsed);
@@ -689,7 +684,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 		Optional<ValueSet.ValueSetExpansionContainsComponent> first = stream.findFirst();
 		if (!first.isPresent()) {
-			String expandedValueSetString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(theValueSet);
+			String expandedValueSetString = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(theValueSet);
 			String failureMessage = String.format("Expanded ValueSet %s did not contain concept [%s|%s|%s] with [%d] designations. Outcome:\n%s", theValueSet.getId(), theSystem, theCode, theDisplay, theDesignationCount, expandedValueSetString);
 			fail(failureMessage);
 			return null;

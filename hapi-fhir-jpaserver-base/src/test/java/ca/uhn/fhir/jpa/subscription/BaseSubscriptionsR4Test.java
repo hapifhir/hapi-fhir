@@ -92,7 +92,7 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 		// Delete all Subscriptions
 		if (myClient != null) {
 			Bundle allSubscriptions = myClient.search().forResource(Subscription.class).returnBundle(Bundle.class).execute();
-			for (IBaseResource next : BundleUtil.toListOfResources(myFhirCtx, allSubscriptions)) {
+			for (IBaseResource next : BundleUtil.toListOfResources(myFhirContext, allSubscriptions)) {
 				myClient.delete().resource(next).execute();
 			}
 			waitForActivatedSubscriptionCount(0);

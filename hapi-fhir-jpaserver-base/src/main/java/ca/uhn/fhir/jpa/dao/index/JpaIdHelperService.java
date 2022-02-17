@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.jpa.dao.index.IdHelperService.RESOURCE_PID;
 
 /**
- * This class is an analog to {@IIdHelperService} but wirth
+ * See {@link IJpaIdHelperService} for an explanation of this class.
  */
 public class JpaIdHelperService extends IdHelperService implements IJpaIdHelperService, IIdHelperService {
 	@Autowired

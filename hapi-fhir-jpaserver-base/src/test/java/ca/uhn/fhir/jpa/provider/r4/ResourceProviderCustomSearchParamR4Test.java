@@ -303,7 +303,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		eyeColourSp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
 		eyeColourSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
 
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(eyeColourSp));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(eyeColourSp));
 
 		myClient
 			.create()
@@ -317,7 +317,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		p1.addExtension().setUrl("http://acme.org/eyecolour").setValue(new CodeType("blue"));
 		IIdType p1id = myPatientDao.create(p1).getId().toUnqualifiedVersionless();
 
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p1));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(p1));
 
 		Patient p2 = new Patient();
 		p2.setActive(true);
@@ -331,7 +331,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 			.returnBundle(Bundle.class)
 			.execute();
 
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		List<String> foundResources = toUnqualifiedVersionlessIdValues(bundle);
 		assertThat(foundResources, contains(p1id.getValue()));
@@ -533,7 +533,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 						.next(bundle)
 						.execute();
 				}
-				List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirCtx, bundle);
+				List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirContext, bundle);
 				resources.forEach(t -> actualIds.add(t.getIdElement().getIdPartAsLong()));
 				foundCount += resources.size();
 

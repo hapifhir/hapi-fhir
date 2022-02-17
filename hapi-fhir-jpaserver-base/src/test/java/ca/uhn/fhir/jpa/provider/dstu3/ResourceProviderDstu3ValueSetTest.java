@@ -8,11 +8,10 @@ import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TerminologyTest;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
-import ca.uhn.fhir.jpa.util.BaseCaptureQueriesListener;
-import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -56,7 +55,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3Test {
 
@@ -289,7 +291,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, Matchers.containsString("<ValueSet xmlns=\"http://hl7.org/fhir\">"));
 		assertThat(resp, Matchers.containsString("<expansion>"));
@@ -322,7 +324,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, Matchers.containsString("<ValueSet xmlns=\"http://hl7.org/fhir\">"));
 		assertThat(resp, Matchers.containsString("<expansion>"));
@@ -352,7 +354,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, Matchers.containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
 		assertThat(resp, not(containsString("\"Foo Code\"")));
@@ -378,7 +380,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, Matchers.stringContainsInOrder(
 			"<code value=\"11378-7\"/>",
@@ -398,7 +400,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, Matchers.stringContainsInOrder(
 			"<code value=\"11378-7\"/>",
@@ -420,7 +422,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, Matchers.stringContainsInOrder(
 			"<code value=\"11378-7\"/>",
@@ -460,7 +462,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, Matchers.stringContainsInOrder(
 			"<code value=\"11378-7\"/>",
@@ -502,7 +504,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, Matchers.stringContainsInOrder(
 			"<code value=\"11378-7\"/>",
@@ -523,7 +525,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 
 		assertThat(resp, Matchers.containsStringIgnoringCase("<code value=\"M\"/>"));
@@ -543,7 +545,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 
 		assertThat(resp, Matchers.containsStringIgnoringCase("<code value=\"childAAA\"/>"));
@@ -634,7 +636,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 
 		assertThat(resp, Matchers.containsStringIgnoringCase("<code value=\"M\"/>"));
@@ -653,7 +655,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 
 		assertThat(resp, Matchers.containsStringIgnoringCase("<code value=\"childAAA\"/>"));
@@ -675,7 +677,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 
 		assertThat(resp, Matchers.containsStringIgnoringCase("<code value=\"childAAA\"/>"));
@@ -735,7 +737,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			.andParameter("system", new UriType("http://acme.org"))
 			.execute();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
@@ -761,7 +763,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			String respString = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info(respString);
 
-			Parameters respParam = myFhirCtx.newJsonParser().parseResource(Parameters.class, respString);
+			Parameters respParam = myFhirContext.newJsonParser().parseResource(Parameters.class, respString);
 			assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 		}
 	}
@@ -779,7 +781,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
 			.execute();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
@@ -802,7 +804,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			.useHttpGet()
 			.execute();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals("result", respParam.getParameter().get(0).getName());
@@ -832,7 +834,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			.useHttpGet()
 			.execute();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals("result", respParam.getParameter().get(0).getName());
@@ -860,7 +862,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, stringContainsInOrder(
 			"<code value=\"11378-7\"/>",
@@ -883,7 +885,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, stringContainsInOrder("<code value=\"11378-7\"/>", "<display value=\"Systolic blood pressure at First encounter\"/>"));
 	}
@@ -903,7 +905,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		
 		assertThat(resp, not(stringContainsInOrder("<code value=\"11378-7\"/>","<display value=\"Systolic blood pressure at First encounter\"/>")));
@@ -924,7 +926,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		
 		assertThat(resp, not(stringContainsInOrder("<code value=\"11378-7\"/>","<display value=\"Systolic blood pressure at First encounter\"/>")));
@@ -943,7 +945,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, stringContainsInOrder(
 			"<code value=\"11378-7\"/>",

@@ -25,7 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -33,7 +32,6 @@ import static org.hamcrest.Matchers.blankOrNullString;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -84,7 +82,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 			return instance.getStatus();
 		}, equalTo(StatusEnum.COMPLETED));
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			assertEquals(200, myResourceTableDao.count());
 		});
 
@@ -134,7 +132,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 				return instance.getStatus();
 			}, equalTo(StatusEnum.ERRORED));
 
-			runInTransaction(()->{
+			runInTransaction(() -> {
 				assertEquals(0, myResourceTableDao.count());
 			});
 
@@ -185,7 +183,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 			return instance.getStatus();
 		}, equalTo(StatusEnum.FAILED));
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			assertEquals(0, myResourceTableDao.count());
 		});
 
@@ -254,13 +252,13 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 			Patient patient = new Patient();
 			patient.setId("Patient/P" + i);
 			patient.setActive(true);
-			builder.append(myFhirCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(patient));
+			builder.append(myFhirContext.newJsonParser().setPrettyPrint(false).encodeResourceToString(patient));
 			builder.append("\n");
 
 			Observation observation = new Observation();
 			observation.setId("Observation/O" + i);
 			observation.getSubject().setReference("Patient/P" + i);
-			builder.append(myFhirCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(observation));
+			builder.append(myFhirContext.newJsonParser().setPrettyPrint(false).encodeResourceToString(observation));
 			builder.append("\n");
 			builder.append("\n");
 

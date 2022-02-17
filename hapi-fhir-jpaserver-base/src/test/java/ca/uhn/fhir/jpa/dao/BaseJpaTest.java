@@ -11,7 +11,7 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
-import ca.uhn.fhir.jpa.config.BaseConfig;
+import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboTokensNonUniqueDao;
@@ -195,7 +195,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	private IIdHelperService myIdHelperService;
 	@Autowired
 	private MemoryCacheService myMemoryCacheService;
-	@Qualifier(BaseConfig.JPA_VALIDATION_SUPPORT)
+	@Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT)
 	@Autowired
 	private IValidationSupport myJpaPersistedValidationSupport;
 	@Autowired
@@ -306,7 +306,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		});
 	}
 
-	protected abstract FhirContext getContext();
+	protected abstract FhirContext getFhirContext();
 
 	protected abstract PlatformTransactionManager getTxManager();
 
@@ -459,7 +459,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected List<String> toUnqualifiedIdValues(IBaseBundle theFound) {
 		List<String> retVal = new ArrayList<>();
 
-		List<IBaseResource> res = BundleUtil.toListOfResources(getContext(), theFound);
+		List<IBaseResource> res = BundleUtil.toListOfResources(getFhirContext(), theFound);
 		int size = res.size();
 		ourLog.info("Found {} results", size);
 		for (IBaseResource next : res) {
@@ -482,7 +482,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected List<String> toUnqualifiedVersionlessIdValues(IBaseBundle theFound) {
 		List<String> retVal = new ArrayList<>();
 
-		List<IBaseResource> res = BundleUtil.toListOfResources(getContext(), theFound);
+		List<IBaseResource> res = BundleUtil.toListOfResources(getFhirContext(), theFound);
 		int size = res.size();
 		ourLog.info("Found {} results", size);
 		for (IBaseResource next : res) {

@@ -94,7 +94,7 @@ abstract public class BaseR4SearchLastN extends BaseJpaTest {
 	protected ElasticsearchSvcImpl myElasticsearchSvc;
 
 	@Override
-	protected FhirContext getContext() {
+	protected FhirContext getFhirContext() {
 		return myFhirCtx;
 	}
 
@@ -116,6 +116,8 @@ abstract public class BaseR4SearchLastN extends BaseJpaTest {
 		// Creating this data and the index is time consuming and as such want to avoid having to repeat for each test.
 		// Normally would use a static @BeforeClass method for this purpose, but Autowired objects cannot be accessed in static methods.
 		if (!dataLoaded || patient0Id == null) {
+			// enabled to also create extended lucene index during creation of test data
+			myDaoConfig.setAdvancedLuceneIndexing(true);
 			Patient pt = new Patient();
 			pt.addName().setFamily("Lastn").addGiven("Arthur");
 			patient0Id = myPatientDao.create(pt, mockSrd()).getId().toUnqualifiedVersionless();
@@ -132,7 +134,8 @@ abstract public class BaseR4SearchLastN extends BaseJpaTest {
 
 			myElasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
 			myElasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
-
+			// turn off the setting enabled earlier
+			myDaoConfig.setAdvancedLuceneIndexing(false);
 		}
 
 	}

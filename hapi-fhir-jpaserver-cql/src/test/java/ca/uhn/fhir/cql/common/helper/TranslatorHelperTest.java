@@ -17,7 +17,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
@@ -204,7 +203,7 @@ public class TranslatorHelperTest implements CqlProviderTestBase {
 	}
 
 	@Override
-	public FhirContext getFhirContext() {
+	public FhirContext getTestFhirContext() {
 		return null;
 	}
 

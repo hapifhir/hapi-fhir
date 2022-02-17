@@ -19,8 +19,6 @@
 	</description>
 
 	<dependencies>
-
-		<!-- Old Batch Framework -->
 		<dependency>
 			<groupId>org.springframework.batch</groupId>
 			<artifactId>spring-batch-core</artifactId>

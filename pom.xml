@@ -7,9 +7,6 @@
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
 	<version>6.0.0-PRE4-SNAPSHOT</version>
-	<modules>
-		<module>hapi-fhir-storage-batch2-jobs</module>
-	</modules>
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
 	<url>https://hapifhir.io</url>
@@ -813,7 +810,7 @@
         <jsr305_version>3.0.2</jsr305_version>
         <junit_version>5.8.2</junit_version>
         <flexmark_version>0.50.40</flexmark_version>
-        <flyway_version>8.4.1</flyway_version>
+        <flyway_version>8.4.4</flyway_version>
         <hibernate_version>5.6.2.Final</hibernate_version>
         <hibernate_search_version>6.0.3.Final</hibernate_search_version>
         <!-- Update lucene version when you update hibernate-search version -->
@@ -2789,7 +2786,7 @@
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<modules>
-                <module>hapi-fhir-checkstyle</module>
+				<module>hapi-fhir-checkstyle</module>
 				<module>hapi-fhir-bom</module>
 				<module>hapi-deployable-pom</module>
 				<module>hapi-fhir-base</module>
@@ -2804,7 +2801,6 @@
 				<module>hapi-fhir-server-openapi</module>
 				<module>hapi-fhir-converter</module>
 				<module>hapi-fhir-validation</module>
-				<!--<module>hapi-fhir-narrativegenerator</module>-->
 				<module>hapi-fhir-structures-dstu2</module>
 				<module>hapi-fhir-structures-hl7org-dstu2</module>
 				<module>hapi-fhir-validation-resources-dstu2</module>

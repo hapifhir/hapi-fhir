@@ -1,17 +1,8 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -28,9 +19,17 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 
@@ -68,7 +67,7 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 
 		Bundle retBundle = myClient.read().resource(Bundle.class).withId(id).execute();
 
-    ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(retBundle));
+    ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(retBundle));
 
 		assertEquals("http://foo/", bundle.getEntry().get(0).getFullUrl());
 	}
@@ -121,7 +120,7 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 	public void testHighConcurrencyWorks() throws IOException, InterruptedException {
 		List<Bundle> bundles = new ArrayList<>();
 		for (int i =0 ; i < 10; i ++) {
-			bundles.add(myFhirCtx.newJsonParser().parseResource(Bundle.class, IOUtils.toString(getClass().getResourceAsStream("/r4/identical-tags-batch.json"), Charsets.UTF_8)));
+			bundles.add(myFhirContext.newJsonParser().parseResource(Bundle.class, IOUtils.toString(getClass().getResourceAsStream("/r4/identical-tags-batch.json"), Charsets.UTF_8)));
 		}
 
 		ExecutorService tpe = Executors.newFixedThreadPool(4);

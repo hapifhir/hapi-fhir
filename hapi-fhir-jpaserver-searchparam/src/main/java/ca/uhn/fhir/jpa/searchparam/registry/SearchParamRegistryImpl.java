@@ -20,10 +20,10 @@ package ca.uhn.fhir.jpa.searchparam.registry;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.cache.IResourceChangeEvent;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
@@ -71,6 +71,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamRegistryImpl.class);
 	private static final int MAX_MANAGED_PARAM_COUNT = 10000;
 	private static final long REFRESH_INTERVAL = DateUtils.MILLIS_PER_HOUR;
+
 	private final JpaSearchParamCache myJpaSearchParamCache = new JpaSearchParamCache();
 	@Autowired
 	private ModelConfig myModelConfig;
@@ -81,13 +82,14 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 	@Autowired
 	private SearchParameterCanonicalizer mySearchParameterCanonicalizer;
 	@Autowired
+	private IInterceptorService myInterceptorBroadcaster;
+	@Autowired
 	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
+
+	private IResourceChangeListenerCache myResourceChangeListenerCache;
 	private volatile ReadOnlySearchParamCache myBuiltInSearchParams;
 	private volatile IPhoneticEncoder myPhoneticEncoder;
 	private volatile RuntimeSearchParamCache myActiveSearchParams;
-	@Autowired
-	private IInterceptorService myInterceptorBroadcaster;
-	private IResourceChangeListenerCache myResourceChangeListenerCache;
 
 	/**
 	 * Constructor

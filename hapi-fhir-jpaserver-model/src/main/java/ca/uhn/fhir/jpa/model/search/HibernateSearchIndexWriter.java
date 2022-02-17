@@ -67,9 +67,20 @@ public class HibernateSearchIndexWriter {
 		ourLog.debug("Adding Search Param Token: {} -- {}", theSearchParam, theValue);
 	}
 
-    public void writeReferenceIndex(String theSearchParam, String theValue) {
-		 DocumentElement referenceIndexNode = getSearchParamIndexNode(theSearchParam, "reference");
-		 referenceIndexNode.addValue("value", theValue);
-		 ourLog.trace("Adding Search Param Reference: {} -- {}", theSearchParam, theValue);
-    }
+	public void writeReferenceIndex(String theSearchParam, String theValue) {
+		DocumentElement referenceIndexNode = getSearchParamIndexNode(theSearchParam, "reference");
+		referenceIndexNode.addValue("value", theValue);
+		ourLog.trace("Adding Search Param Reference: {} -- {}", theSearchParam, theValue);
+	}
+
+	public void writeDateIndex(String theSearchParam, DateSearchIndexData theValue) {
+		DocumentElement dateIndexNode = getSearchParamIndexNode(theSearchParam, "dt");
+		// Lower bound
+		dateIndexNode.addValue("lower-ord", theValue.getLowerBoundOrdinal());
+		dateIndexNode.addValue("lower", theValue.getLowerBoundDate().toInstant());
+		// Upper bound
+		dateIndexNode.addValue("upper-ord", theValue.getUpperBoundOrdinal());
+		dateIndexNode.addValue("upper", theValue.getUpperBoundDate().toInstant());
+		ourLog.trace("Adding Search Param Reference: {} -- {}", theSearchParam, theValue);
+	}
 }

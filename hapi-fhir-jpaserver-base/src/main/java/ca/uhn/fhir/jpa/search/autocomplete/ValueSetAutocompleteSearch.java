@@ -21,17 +21,12 @@ package ca.uhn.fhir.jpa.search.autocomplete;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.util.TerserUtil;
 import org.hibernate.search.mapper.orm.session.SearchSession;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.ValueSet;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Adapt the autocomplete result into a ValueSet suitable for our $expand extension.

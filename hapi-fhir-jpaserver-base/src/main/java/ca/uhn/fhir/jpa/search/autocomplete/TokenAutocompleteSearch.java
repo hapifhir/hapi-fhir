@@ -28,22 +28,21 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.StringParam;
 import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
 import org.hibernate.search.backend.elasticsearch.ElasticsearchExtension;
 import org.hibernate.search.engine.search.aggregation.AggregationKey;
 import org.hibernate.search.engine.search.aggregation.SearchAggregation;
+import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
+import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
 import org.hibernate.search.engine.search.query.SearchResult;
 import org.hibernate.search.engine.search.query.dsl.SearchQueryOptionsStep;
 import org.hibernate.search.mapper.orm.search.loading.dsl.SearchLoadingOptionsStep;
 import org.hibernate.search.mapper.orm.session.SearchSession;
-import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -73,40 +72,15 @@ class TokenAutocompleteSearch {
 	@Nonnull
 	public List<TokenAutocompleteHit> search(String theResourceType, String theSPName, String theSearchText, String theSearchModifier, int theCount) {
 
-		TokenAutocompleteAggregation tokenAutocompleteAggregation = new TokenAutocompleteAggregation(theSPName, theCount);
+		ourLog.trace("search: {}?{}:{}={}", theResourceType,theSPName, theSearchModifier, theSearchText);
 
-		if (theSearchText.equals(StringUtils.stripEnd(theSearchText,null))) {
-			// no trailing whitespace.  Add a wildcard to act like match_bool_prefix
-			//  https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-match-bool-prefix-query.html
-			theSearchText = theSearchText + "*";
-		}
-		String queryText = theSearchText;
+		TokenAutocompleteAggregation tokenAutocompleteAggregation = new TokenAutocompleteAggregation(theSPName, theCount);
 
 		// compose the query json
 		SearchQueryOptionsStep<?, ?, SearchLoadingOptionsStep, ?, ?> query = mySession.search(ResourceTable.class)
-			.where(
-				f -> f.bool(b -> {
-					ExtendedLuceneClauseBuilder clauseBuilder = new ExtendedLuceneClauseBuilder(myFhirContext, b, f);
-
-					if (isNotBlank(theResourceType)) {
-						b.must(f.match().field("myResourceType").matching(theResourceType));
-					}
-					
-					switch(theSearchModifier) {
-						case "text":
-							StringParam stringParam = new StringParam(queryText);
-							List<List<IQueryParameterType>> andOrTerms = Collections.singletonList(Collections.singletonList(stringParam));
-							clauseBuilder.addStringTextSearch(theSPName, andOrTerms);
-							break;
-						case "":
-						default:
-							throw new IllegalArgumentException(Msg.code(2027) + "Autocomplete only accepts text search for now.");
-
-					}
-
-
-				}))
-			.aggregation(AGGREGATION_KEY, buildESAggregation(tokenAutocompleteAggregation));
+			.where(f -> f.bool(b ->
+				buildQueryPredicate(b, f, theResourceType, theSPName, theSearchModifier, theSearchText)))
+			.aggregation(AGGREGATION_KEY, buildAggregation(tokenAutocompleteAggregation));
 
 		// run the query, but with 0 results.  We only care about the aggregations.
 		SearchResult<?> result = query.fetch(0);
@@ -118,10 +92,43 @@ class TokenAutocompleteSearch {
 		return aggEntries;
 	}
 
+	void buildQueryPredicate(BooleanPredicateClausesStep<?> b, SearchPredicateFactory f, String theResourceType, String theSPName, String theSearchModifier, String theSearchText) {
+		ExtendedLuceneClauseBuilder clauseBuilder = new ExtendedLuceneClauseBuilder(myFhirContext, b, f);
+
+		if (isNotBlank(theResourceType)) {
+			clauseBuilder.addResourceTypeClause(theResourceType);
+		}
+
+		String queryText = StringUtils.defaultString(theSearchText, "");
+		if (StringUtils.isNotEmpty(queryText)) {
+			switch (StringUtils.defaultString(theSearchModifier)) {
+				case "text":
+					// Add a wildcard to act like match_bool_prefix
+					//  https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-match-bool-prefix-query.html
+					queryText = queryText + "*";
+					StringParam stringParam = new StringParam(queryText);
+					List<List<IQueryParameterType>> andOrTerms = Collections.singletonList(Collections.singletonList(stringParam));
+					clauseBuilder.addStringTextSearch(theSPName, andOrTerms);
+					break;
+				case "":
+					b.must(
+						// use wildcard to allow matching prefix of keyword indexed field.
+						f.wildcard()
+							.field(ExtendedLuceneClauseBuilder.getTokenCodeFieldPath(theSPName))
+							.matching(queryText + "*")
+							.toPredicate());
+			break;
+			default:
+				throw new IllegalArgumentException(Msg.code(2034) + "Autocomplete only accepts text search for now.");
+			}
+
+		}
+	}
+
 	/**
 	 * Hibernate-search doesn't support nested aggregations, so we use an extension to build what we need from raw JSON.
 	 */
-	SearchAggregation<JsonObject> buildESAggregation(TokenAutocompleteAggregation tokenAutocompleteAggregation) {
+	SearchAggregation<JsonObject> buildAggregation(TokenAutocompleteAggregation tokenAutocompleteAggregation) {
 		JsonObject jsonAggregation = tokenAutocompleteAggregation.toJsonAggregation();
 
 		SearchAggregation<JsonObject> aggregation = mySession

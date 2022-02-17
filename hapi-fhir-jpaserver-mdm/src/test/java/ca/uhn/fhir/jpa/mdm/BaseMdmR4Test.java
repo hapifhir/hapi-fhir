@@ -1,12 +1,13 @@
 package ca.uhn.fhir.jpa.mdm;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
 import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.config.MdmConsumerConfig;
 import ca.uhn.fhir.jpa.mdm.config.MdmSubmitterConfig;
@@ -22,7 +23,6 @@ import ca.uhn.fhir.jpa.mdm.svc.MdmMatchLinkSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
-import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
@@ -88,8 +88,6 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		.setValue("555-555-5555");
 	private static final String NAME_GIVEN_FRANK = "Frank";
 	@Autowired
-	protected FhirContext myFhirContext;
-	@Autowired
 	protected IFhirResourceDao<Patient> myPatientDao;
 	@Autowired
 	protected IFhirResourceDao<Organization> myOrganizationDao;
@@ -126,12 +124,10 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		myRequestDetails = new ServletRequestDetails(myInterceptorBroadcaster);
 	}
 
-	@Override
 	@AfterEach
 	public void after() throws IOException {
 		myMdmLinkDao.deleteAll();
 		assertEquals(0, myMdmLinkDao.count());
-		super.after();
 	}
 
 	protected void saveLink(MdmLink theMdmLink) {

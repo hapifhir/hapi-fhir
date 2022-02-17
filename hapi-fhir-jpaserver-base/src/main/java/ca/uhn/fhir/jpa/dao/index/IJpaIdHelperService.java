@@ -31,7 +31,21 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * This class is an analog to {@link IIdHelperService} but wirth
+ * This class is an analog to {@link IIdHelperService} but with additional JPA server methods
+ * added.
+ *
+ * JA 2022-02-17 - I moved these methods out of IdHelperService because I want to reuse
+ * IdHelperService in storage-engine-neutral batch tasks such as bulk import. These methods
+ * are all just being used by MDM, so they're JPA specific. I believe it should be possible
+ * though to just replace all of these calls with equivalents from IdHelperService,
+ * at which point this interface and its implementation could just go away.
+ *
+ * All of the methods here aren't partition aware, so it's not great to use them
+ * anyhow. The equivalents in {@link IIdHelperService} are probably a bit more
+ * clunky because you have to convert between {@link Long} and
+ * {@link ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId} to use them,
+ * but they also have caching and partition awareness so the tradeoff for that
+ * extra effort is that they are better.
  */
 public interface IJpaIdHelperService extends IIdHelperService {
 

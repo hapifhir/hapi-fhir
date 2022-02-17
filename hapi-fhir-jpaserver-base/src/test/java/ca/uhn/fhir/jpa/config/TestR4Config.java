@@ -1,12 +1,12 @@
 package ca.uhn.fhir.jpa.config;
 
-import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
-import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
-import ca.uhn.fhir.jpa.batch.svc.BatchJobSubmitterImpl;
 import ca.uhn.fhir.batch2.jobs.config.Batch2JobsConfig;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.batch2.JpaBatch2Config;
 import ca.uhn.fhir.jpa.binstore.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
+import ca.uhn.fhir.jpa.config.r4.JpaR4Config;
+import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
@@ -16,7 +16,7 @@ import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
 import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.hibernate.jpa.HibernatePersistenceProvider;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.annotation.Bean;
@@ -24,7 +24,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -34,9 +33,15 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @Configuration
-@Import({TestJPAConfig.class, JpaBatch2Config.class, Batch2JobsConfig.class, BatchJobsConfig.class, TestHibernateSearchAddInConfig.DefaultLuceneHeap.class})
-@EnableTransactionManagement()
-public class TestR4Config extends BaseJavaConfigR4 {
+@Import({
+	JpaR4Config.class,
+	HapiJpaConfig.class,
+	TestJPAConfig.class,
+	TestHibernateSearchAddInConfig.DefaultLuceneHeap.class,
+	JpaBatch2Config.class,
+	Batch2JobsConfig.class
+})
+public class TestR4Config {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestR4Config.class);
 	public static Integer ourMaxThreads;
@@ -59,14 +64,9 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		}
 	}
 
-
+	@Autowired
+	TestHibernateSearchAddInConfig.IHibernateSearchConfigurer hibernateSearchConfigurer;
 	private Exception myLastStackTrace;
-
-	@Override
-	@Bean
-	public IBatchJobSubmitter batchJobSubmitter() {
-		return new BatchJobSubmitterImpl();
-	}
 
 	@Bean
 	public CircularQueueCaptureQueriesListener captureQueriesListener() {
@@ -145,23 +145,14 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		return new SingleQueryCountHolder();
 	}
 
-
-	@Override
 	@Bean
-	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory) {
-		LocalContainerEntityManagerFactoryBean retVal = new HapiFhirLocalContainerEntityManagerFactoryBean(theConfigurableListableBeanFactory);
-		configureEntityManagerFactory(retVal, fhirContext());
-		retVal.setJpaDialect(new HapiFhirHibernateJpaDialect(fhirContext().getLocalizer()));
-		retVal.setPackagesToScan("ca.uhn.fhir.jpa.model.entity", "ca.uhn.fhir.jpa.entity");
-		retVal.setPersistenceProvider(new HibernatePersistenceProvider());
+	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext) {
+		LocalContainerEntityManagerFactoryBean retVal = HapiEntityManagerFactoryUtil.newEntityManagerFactory(theConfigurableListableBeanFactory, theFhirContext);
 		retVal.setPersistenceUnitName("PU_HapiFhirJpaR4");
 		retVal.setDataSource(dataSource());
 		retVal.setJpaProperties(jpaProperties());
 		return retVal;
 	}
-
-	@Autowired
-	TestHibernateSearchAddInConfig.IHibernateSearchConfigurer hibernateSearchConfigurer;
 
 	private Properties jpaProperties() {
 		Properties extraProperties = new Properties();
@@ -182,12 +173,12 @@ public class TestR4Config extends BaseJavaConfigR4 {
 	 */
 	@Bean
 	@Lazy
-	public RequestValidatingInterceptor requestValidatingInterceptor() {
+	public RequestValidatingInterceptor requestValidatingInterceptor(FhirInstanceValidator theFhirInstanceValidator) {
 		RequestValidatingInterceptor requestValidator = new RequestValidatingInterceptor();
 		requestValidator.setFailOnSeverity(ResultSeverityEnum.ERROR);
 		requestValidator.setAddResponseHeaderOnSeverity(null);
 		requestValidator.setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
-		requestValidator.addValidatorModule(instanceValidator());
+		requestValidator.addValidatorModule(theFhirInstanceValidator);
 
 		return requestValidator;
 	}

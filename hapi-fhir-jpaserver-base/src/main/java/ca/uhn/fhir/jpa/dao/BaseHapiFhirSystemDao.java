@@ -18,7 +18,7 @@ import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationContext;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -61,11 +61,11 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiFhirSystemDao.class);
 	public static final Predicate[] EMPTY_PREDICATE_ARRAY = new Predicate[0];
-	@Autowired
-	@Qualifier("myResourceCountsCache")
 	public ResourceCountCache myResourceCountsCache;
 	@Autowired
 	private TransactionProcessor myTransactionProcessor;
+	@Autowired
+	private ApplicationContext myApplicationContext;
 
 	@VisibleForTesting
 	public void setTransactionProcessorForUnitTest(TransactionProcessor theTransactionProcessor) {
@@ -102,6 +102,10 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 	@Nullable
 	@Override
 	public Map<String, Long> getResourceCountsFromCache() {
+		if (myResourceCountsCache == null) {
+			// Lazy load this to avoid a circular dependency
+			myResourceCountsCache = myApplicationContext.getBean("myResourceCountsCache", ResourceCountCache.class);
+		}
 		return myResourceCountsCache.get();
 	}
 

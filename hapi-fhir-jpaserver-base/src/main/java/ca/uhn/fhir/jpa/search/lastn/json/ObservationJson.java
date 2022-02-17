@@ -136,6 +136,7 @@ public class ObservationJson {
 	}
 
 	public void setCode(CodeJson theCode) {
+		myCode_concept_id = theCode.getCodeableConceptId();
 		myCode_concept_text = theCode.getCodeableConceptText();
 		// Currently can only support one Coding for Observation Code
 		myCode_coding_code_system_hash = theCode.getCoding_code_system_hash().get(0);
@@ -143,6 +144,17 @@ public class ObservationJson {
 		myCode_coding_display = theCode.getCoding_display().get(0);
 		myCode_coding_system = theCode.getCoding_system().get(0);
 
+	}
+
+	public CodeJson getCode() {
+		CodeJson code = new CodeJson();
+		code.setCodeableConceptId(myCode_concept_id);
+		code.setCodeableConceptText(myCode_concept_text);
+		code.getCoding_code_system_hash().add(myCode_coding_code_system_hash);
+		code.getCoding_code().add(myCode_coding_code);
+		code.getCoding_display().add(myCode_coding_display);
+		code.getCoding_system().add(myCode_coding_system);
+		return code;
 	}
 
 	public String getCode_concept_text() {
@@ -163,10 +175,6 @@ public class ObservationJson {
 
 	public String getCode_coding_system() {
 		return myCode_coding_system;
-	}
-
-	public void setCode_concept_id(String theCodeId) {
-		myCode_concept_id = theCodeId;
 	}
 
 	public String getCode_concept_id() {
