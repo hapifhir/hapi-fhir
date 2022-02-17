@@ -199,8 +199,6 @@ public abstract class BaseParser implements IParser {
 				} else if (myNext.getDef() instanceof RuntimeChildNarrativeDefinition) {
 					if (isSuppressNarratives() || isSummaryMode()) {
 						continue;
-					} else if (theContainedResource) {
-						continue;
 					}
 				} else if (myNext.getDef() instanceof RuntimeChildContainedResources) {
 					if (theContainedResource) {
