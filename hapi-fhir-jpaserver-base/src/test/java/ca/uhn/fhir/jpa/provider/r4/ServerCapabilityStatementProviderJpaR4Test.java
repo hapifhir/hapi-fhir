@@ -6,9 +6,8 @@ import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.provider.ServerCapabilityStatementProvider;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.r4.model.Bundle;
 import org.hamcrest.Matchers;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.SearchParameter;
@@ -80,7 +79,7 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 	@Test
 	public void testNoDuplicateResourceOperationNames() {
 		CapabilityStatement cs = myClient.capabilities().ofType(CapabilityStatement.class).execute();
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(cs));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(cs));
 		for (CapabilityStatement.CapabilityStatementRestResourceComponent next : cs.getRestFirstRep().getResource()) {
 			List<String> opNames = next
 				.getOperation()
@@ -96,7 +95,7 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 	@Test
 	public void testNoDuplicateSystemOperationNames() {
 		CapabilityStatement cs = myClient.capabilities().ofType(CapabilityStatement.class).execute();
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(cs));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(cs));
 		List<String> systemOpNames = cs
 			.getRestFirstRep()
 			.getOperation()

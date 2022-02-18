@@ -20,15 +20,15 @@ package ca.uhn.fhir.jpa.provider;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
-import ca.uhn.fhir.jpa.config.BaseConfig;
+import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteOptions;
@@ -37,9 +37,13 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.ParametersUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -65,10 +69,16 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 	@Autowired
 	private ITermReadSvc myTermReadSvc;
 	@Autowired
-	@Qualifier(BaseConfig.JPA_VALIDATION_SUPPORT_CHAIN)
+	@Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT_CHAIN)
 	private ValidationSupportChain myValidationSupportChain;
 	@Autowired
+	private IValidationSupport myValidationSupport;
+	@Autowired
 	private IFulltextSearchSvc myFulltextSearch;
+
+	public void setValidationSupport(IValidationSupport theValidationSupport) {
+		myValidationSupport = theValidationSupport;
+	}
 
 	public void setDaoConfig(DaoConfig theDaoConfig) {
 		myDaoConfig = theDaoConfig;
@@ -136,17 +146,34 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		try {
 
 			IFhirResourceDaoValueSet<IBaseResource, ICompositeType, ICompositeType> dao = getDao();
+
+			IBaseResource valueSet = theValueSet;
 			if (haveId) {
-				return dao.expand(theId, options, theRequestDetails);
+				valueSet = dao.read(theId, theRequestDetails);
 			} else if (haveIdentifier) {
+				String url;
 				if (haveValueSetVersion) {
-					return dao.expandByIdentifier(theUrl.getValue() + "|" + theValueSetVersion.getValue(), options);
+					url = theUrl.getValue() + "|" + theValueSetVersion.getValue();
+					valueSet = myValidationSupport.fetchValueSet(url);
 				} else {
-					return dao.expandByIdentifier(theUrl.getValue(), options);
+					url = theUrl.getValue();
+					valueSet = myValidationSupport.fetchValueSet(url);
 				}
-			} else {
-				return dao.expand(theValueSet, options);
+				if (valueSet == null) {
+					throw new ResourceNotFoundException(Msg.code(2030) + "Can not find ValueSet with URL: " + UrlUtil.escapeUrlParam(url));
+				}
 			}
+
+			IValidationSupport.ValueSetExpansionOutcome outcome = myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), options, valueSet);
+			if (outcome == null) {
+				throw new InternalErrorException(Msg.code(2028) + outcome.getError());
+			}
+			if (outcome.getError() != null) {
+				throw new PreconditionFailedException(Msg.code(2029) + outcome.getError());
+			}
+
+			return outcome.getValueSet();
+
 		} finally {
 			endRequest(theServletRequest);
 		}

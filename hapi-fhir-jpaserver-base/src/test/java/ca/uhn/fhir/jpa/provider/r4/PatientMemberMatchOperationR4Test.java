@@ -73,7 +73,7 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
-		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
+		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
 	}
 
 
@@ -255,7 +255,7 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 	 * Validates that second resource from the response is same as the received coverage
 	 */
 	private void validateNewCoverage(Parameters theResponse, Coverage theOriginalCoverage) {
-		List<IBase> patientList = ParametersUtil.getNamedParameters(getContext(), theResponse, PARAM_NEW_COVERAGE);
+		List<IBase> patientList = ParametersUtil.getNamedParameters(this.getFhirContext(), theResponse, PARAM_NEW_COVERAGE);
 		assertEquals(1, patientList.size());
 		Coverage respCoverage = (Coverage) theResponse.getParameter().get(1).getResource();
 
@@ -283,7 +283,7 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 //			"system": COVERAGE_PATIENT_IDENT_SYSTEM,
 //			"value": COVERAGE_PATIENT_IDENT_VALUE
 //		}
-		List<IBase> patientList = ParametersUtil.getNamedParameters(getContext(), response, PARAM_MEMBER_PATIENT);
+		List<IBase> patientList = ParametersUtil.getNamedParameters(this.getFhirContext(), response, PARAM_MEMBER_PATIENT);
 		assertEquals(1, patientList.size());
 		Patient resultPatient = (Patient) response.getParameter().get(0).getResource();
 
@@ -327,9 +327,9 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 
 	private Parameters buildInputParameters(Patient thePatient, Coverage theOldCoverage, Coverage theNewCoverage) {
 		Parameters p = new Parameters();
-		ParametersUtil.addParameterToParameters(getContext(), p, PARAM_MEMBER_PATIENT, thePatient);
-		ParametersUtil.addParameterToParameters(getContext(), p, PARAM_OLD_COVERAGE, theOldCoverage);
-		ParametersUtil.addParameterToParameters(getContext(), p, PARAM_NEW_COVERAGE, theNewCoverage);
+		ParametersUtil.addParameterToParameters(this.getFhirContext(), p, PARAM_MEMBER_PATIENT, thePatient);
+		ParametersUtil.addParameterToParameters(this.getFhirContext(), p, PARAM_OLD_COVERAGE, theOldCoverage);
+		ParametersUtil.addParameterToParameters(this.getFhirContext(), p, PARAM_NEW_COVERAGE, theNewCoverage);
 		return p;
 	}
 
@@ -339,12 +339,12 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 
 		HttpPost post = new HttpPost(theUrl);
 		post.addHeader(Constants.HEADER_ACCEPT_ENCODING, theEncoding.toString());
-		post.setEntity(new ResourceEntity(getContext(), theInputParameters));
+		post.setEntity(new ResourceEntity(this.getFhirContext(), theInputParameters));
 		ourLog.info("Request: {}", post);
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 
-			return theEncoding.newParser(myFhirCtx).parseResource(Parameters.class,
+			return theEncoding.newParser(myFhirContext).parseResource(Parameters.class,
 				IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8));
 		}
 	}
@@ -355,7 +355,7 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 
 		HttpPost post = new HttpPost(theUrl);
 		post.addHeader(Constants.HEADER_ACCEPT_ENCODING, theEncoding.toString());
-		post.setEntity(new ResourceEntity(getContext(), theInputParameters));
+		post.setEntity(new ResourceEntity(this.getFhirContext(), theInputParameters));
 		ourLog.info("Request: {}", post);
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);

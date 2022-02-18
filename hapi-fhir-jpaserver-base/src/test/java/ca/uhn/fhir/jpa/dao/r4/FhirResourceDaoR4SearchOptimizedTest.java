@@ -802,7 +802,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 	public void testChainedSearchUsesJoinNotSubselect() {
 		myCaptureQueriesListener.clear();
 
-		RuntimeResourceDefinition resourceDef = myFhirCtx.getResourceDefinition("Observation");
+		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition("Observation");
 		SearchParameterMap params = myMatchUrlService.translateMatchUrl("/Observation?subject:patient.identifier=urn:oid:ZOOP.MRN.OID|1234", resourceDef, null);
 		params.setLoadSynchronous(true);
 		myObservationDao.search(params);

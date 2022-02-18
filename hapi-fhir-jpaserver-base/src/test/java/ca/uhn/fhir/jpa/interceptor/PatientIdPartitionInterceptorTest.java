@@ -8,7 +8,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
-import ca.uhn.fhir.util.MultimapCollector;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -16,6 +15,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.util.MultimapCollector;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
 import org.hl7.fhir.r4.model.Bundle;
@@ -57,7 +57,7 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 
 	@BeforeEach
 	public void before() {
-		mySvc = new PatientIdPartitionInterceptor(myFhirCtx, mySearchParamExtractor);
+		mySvc = new PatientIdPartitionInterceptor(myFhirContext, mySearchParamExtractor);
 		myForceOffsetSearchModeInterceptor = new ForceOffsetSearchModeInterceptor();
 
 		myInterceptorRegistry.registerInterceptor(mySvc);
@@ -246,7 +246,7 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		// Typed
 		myCaptureQueriesListener.clear();
 		ReferenceParam referenceParam = new ReferenceParam();
-		referenceParam.setValueAsQueryToken(myFhirCtx, "subject", ":Patient", "A");
+		referenceParam.setValueAsQueryToken(myFhirContext, "subject", ":Patient", "A");
 		outcome = myObservationDao.search(SearchParameterMap.newSynchronous("subject", referenceParam), mySrd);
 		assertEquals(1, outcome.size());
 		myCaptureQueriesListener.logSelectQueries();

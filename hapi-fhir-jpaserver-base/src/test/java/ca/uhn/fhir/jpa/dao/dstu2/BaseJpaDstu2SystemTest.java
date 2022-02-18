@@ -4,8 +4,6 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.rp.dstu2.PatientResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.util.TestUtil;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 
 import javax.servlet.ServletConfig;
@@ -26,7 +24,7 @@ public abstract class BaseJpaDstu2SystemTest extends BaseJpaDstu2Test {
 		when(mySrd.getInterceptorBroadcaster()).thenReturn(mock(IInterceptorBroadcaster.class));
 
 		if (myServer == null) {
-			myServer = new RestfulServer(myFhirCtx);
+			myServer = new RestfulServer(myFhirContext);
 
 			PatientResourceProvider patientRp = new PatientResourceProvider();
 			patientRp.setDao(myPatientDao);

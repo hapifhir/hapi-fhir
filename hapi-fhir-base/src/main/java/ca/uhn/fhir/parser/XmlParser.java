@@ -446,8 +446,6 @@ public class XmlParser extends BaseParser {
 							}
 						}
 						encodeChildElementToStreamWriter(theResource, theEventWriter, nextChild, nextValue, childName, childDef, getExtensionUrl(extension.getUrl()), theContainedResource, nextChildElem, theEncodeContext);
-					} else if (nextChild instanceof RuntimeChildNarrativeDefinition && theContainedResource) {
-						// suppress narratives from contained resources
 					} else {
 						encodeChildElementToStreamWriter(theResource, theEventWriter, nextChild, nextValue, childName, childDef, extensionUrl, theContainedResource, nextChildElem, theEncodeContext);
 					}

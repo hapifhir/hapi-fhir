@@ -131,7 +131,6 @@ import org.hl7.fhir.r5.model.Task;
 import org.hl7.fhir.r5.model.UriType;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -490,11 +489,6 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	}
 
 	@Override
-	protected FhirContext getContext() {
-		return myFhirCtx;
-	}
-
-	@Override
 	protected PlatformTransactionManager getTxManager() {
 		return myTxManager;
 	}
@@ -566,10 +560,10 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 		});
 	}
 
-	@AfterAll
-	public static void afterClassClearContextBaseJpaR5Test() {
-		ourValueSetDao.purgeCaches();
-		ourJpaValidationSupportChainR5.invalidateCaches();
+	@AfterEach
+	public void afterEachClearCaches() {
+		myValueSetDao.purgeCaches();
+		myJpaValidationSupportChain.invalidateCaches();
 	}
 
 	/**

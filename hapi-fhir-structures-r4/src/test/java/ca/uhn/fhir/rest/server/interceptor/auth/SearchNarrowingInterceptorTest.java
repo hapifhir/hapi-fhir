@@ -11,16 +11,22 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.rest.gclient.ICriterion;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.param.BaseAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -40,9 +46,14 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URLEncoder;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.util.UrlUtil.escapeUrlParam;
+import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -97,6 +108,28 @@ public class SearchNarrowingInterceptorTest {
 		assertNull(ourLastIdParam);
 	}
 
+	@Test
+	public void testNarrowCode_NotInSelected_ClientRequestedNoParams() {
+		ourNextAuthorizedList = new AuthorizedList()
+			.addCodeNotInValueSet("Observation", "code", "http://myvs");
+
+		ourClient
+			.search()
+			.forResource("Observation")
+			.execute();
+
+		assertEquals("Observation.search", ourLastHitMethod);
+		assertEquals(1, ourLastCodeParam.size());
+		assertEquals(1, ourLastCodeParam.getValuesAsQueryTokens().get(0).size());
+		assertEquals(TokenParamModifier.NOT_IN, ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getModifier());
+		assertEquals("http://myvs", ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
+		assertEquals(null, ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem());
+		assertNull(ourLastSubjectParam);
+		assertNull(ourLastPerformerParam);
+		assertNull(ourLastPatientParam);
+		assertNull(ourLastIdParam);
+	}
+
 
 	@Test
 	public void testNarrowCode_InSelected_ClientRequestedNoParams() {
@@ -108,15 +141,85 @@ public class SearchNarrowingInterceptorTest {
 			.forResource("Observation")
 			.execute();
 
-		assertEquals("Patient.search", ourLastHitMethod);
-		assertNull(ourLastCodeParam);
+		assertEquals("Observation.search", ourLastHitMethod);
+		assertEquals(1, ourLastCodeParam.size());
+		assertEquals(1, ourLastCodeParam.getValuesAsQueryTokens().get(0).size());
+		assertEquals(TokenParamModifier.IN, ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getModifier());
+		assertEquals("http://myvs", ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
+		assertEquals(null, ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem());
 		assertNull(ourLastSubjectParam);
 		assertNull(ourLastPerformerParam);
 		assertNull(ourLastPatientParam);
 		assertNull(ourLastIdParam);
+	}
+
+	@Test
+	public void testNarrowCode_InSelected_ClientRequestedBundleWithNoParams() {
+		ourNextAuthorizedList = new AuthorizedList()
+			.addCodeInValueSet("Observation", "code", "http://myvs");
+
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.TRANSACTION);
+		bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl("Observation?subject=Patient/123");
+		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+
+		ourClient
+			.transaction()
+			.withBundle(bundle)
+			.execute();
+
+		assertEquals("transaction", ourLastHitMethod);
+		String expectedUrl = "Observation?" +
+			escapeUrlParam("code:in") +
+			"=" +
+			escapeUrlParam("http://myvs") +
+			"&subject=" +
+			escapeUrlParam("Patient/123");
+		assertEquals(expectedUrl, ourLastBundleRequest.getUrl());
 
 	}
 
+	@Test
+	public void testNarrowCode_InSelected_ClientRequestedOtherInParam() {
+		ourNextAuthorizedList = new AuthorizedList()
+			.addCodeInValueSet("Observation", "code", "http://myvs");
+
+		ourClient.registerInterceptor(new LoggingInterceptor(false));
+		ourClient
+			.search()
+			.forResource("Observation")
+			.where(singletonMap("code", singletonList(new TokenParam("http://othervs").setModifier(TokenParamModifier.IN))))
+			.execute();
+
+		assertEquals("Observation.search", ourLastHitMethod);
+		assertEquals(2, ourLastCodeParam.size());
+		assertEquals(1, ourLastCodeParam.getValuesAsQueryTokens().get(0).size());
+		assertEquals(TokenParamModifier.IN, ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getModifier());
+		assertEquals("http://othervs", ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
+		assertEquals(null, ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem());
+		assertEquals(1, ourLastCodeParam.getValuesAsQueryTokens().get(1).size());
+		assertEquals(TokenParamModifier.IN, ourLastCodeParam.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens().get(0).getModifier());
+		assertEquals("http://myvs", ourLastCodeParam.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens().get(0).getValue());
+		assertEquals(null, ourLastCodeParam.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens().get(0).getSystem());
+		assertNull(ourLastSubjectParam);
+		assertNull(ourLastPerformerParam);
+		assertNull(ourLastPatientParam);
+		assertNull(ourLastIdParam);
+	}
+
+	@Test
+	public void testNarrowCode_InSelected_DifferentResource() {
+		ourNextAuthorizedList = new AuthorizedList()
+			.addCodeInValueSet("Procedure", "code", "http://myvs");
+
+		ourClient
+			.search()
+			.forResource("Observation")
+			.execute();
+
+		assertEquals("Observation.search", ourLastHitMethod);
+		assertEquals(null, ourLastCodeParam);
+	}
 
 	@Test
 	public void testNarrowCompartment_ObservationsByPatientContext_ClientRequestedNoParams() {

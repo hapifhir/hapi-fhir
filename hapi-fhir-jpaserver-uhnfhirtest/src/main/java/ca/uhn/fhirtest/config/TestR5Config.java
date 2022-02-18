@@ -1,16 +1,19 @@
 package ca.uhn.fhirtest.config;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.config.BaseJavaConfigR5;
+import ca.uhn.fhir.jpa.config.HapiJpaConfig;
+import ca.uhn.fhir.jpa.config.r5.JpaR5Config;
+import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
-import ca.uhn.fhir.jpa.util.DerbyTenSevenHapiFhirDialect;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
+import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhirtest.interceptor.PublicSecurityInterceptor;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
@@ -22,8 +25,6 @@ import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowire;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,12 +42,12 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 @Configuration
-@Import(CommonConfig.class)
+@Import({CommonConfig.class, JpaR5Config.class, HapiJpaConfig.class})
 @EnableTransactionManagement()
-public class TestR5Config extends BaseJavaConfigR5 {
-	public static final String FHIR_DB_USERNAME = "fhir.db.username";
-	public static final String FHIR_DB_PASSWORD = "fhir.db.password";
-	public static final String FHIR_LUCENE_LOCATION_R5 = "fhir.lucene.location.r5";
+public class TestR5Config {
+	public static final String FHIR_DB_USERNAME = "${fhir.db.username}";
+	public static final String FHIR_DB_PASSWORD = "${fhir.db.password}";
+	public static final String FHIR_LUCENE_LOCATION_R5 = "${fhir.lucene.location.r5}";
 	public static final Integer COUNT_SEARCH_RESULTS_UP_TO = 50000;
 	private static final Logger ourLog = LoggerFactory.getLogger(TestR5Config.class);
 	private String myDbUsername = System.getProperty(TestR5Config.FHIR_DB_USERNAME);
@@ -85,15 +86,14 @@ public class TestR5Config extends BaseJavaConfigR5 {
 		return retVal;
 	}
 
-	@Override
 	@Bean
 	public ValidationSettings validationSettings() {
-		ValidationSettings retVal = super.validationSettings();
+		ValidationSettings retVal = new ValidationSettings();
 		retVal.setLocalReferenceValidationDefaultPolicy(ReferenceValidationPolicy.CHECK_VALID);
 		return retVal;
 	}
 
-	@Bean(name = "myPersistenceDataSourceR5", destroyMethod = "close")
+	@Bean(name = "myPersistenceDataSourceR5")
 	public DataSource dataSource() {
 		ourLog.info("Starting R5 database with DB username: {}", myDbUsername);
 		ourLog.info("Have system property username: {}", System.getProperty(FHIR_DB_USERNAME));
@@ -121,19 +121,18 @@ public class TestR5Config extends BaseJavaConfigR5 {
 		return dataSource;
 	}
 
-	@Override
-	@Bean(autowire = Autowire.BY_TYPE)
+	// TODO KHS there is code duplication between this and the other Test*Config classes in this directory
+	@Bean
 	public DatabaseBackedPagingProvider databaseBackedPagingProvider() {
-		DatabaseBackedPagingProvider retVal = super.databaseBackedPagingProvider();
+		DatabaseBackedPagingProvider retVal = new DatabaseBackedPagingProvider();
 		retVal.setDefaultPageSize(20);
 		retVal.setMaximumPageSize(500);
 		return retVal;
 	}
 
-	@Override
 	@Bean
-	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory) {
-		LocalContainerEntityManagerFactoryBean retVal = super.entityManagerFactory(theConfigurableListableBeanFactory);
+	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext) {
+		LocalContainerEntityManagerFactoryBean retVal = HapiEntityManagerFactoryUtil.newEntityManagerFactory(theConfigurableListableBeanFactory, theFhirContext);
 		retVal.setPersistenceUnitName("PU_HapiFhirJpaR5");
 		retVal.setDataSource(dataSource());
 		retVal.setJpaProperties(jpaProperties());
@@ -167,15 +166,17 @@ public class TestR5Config extends BaseJavaConfigR5 {
 
 	/**
 	 * Bean which validates incoming requests
+	 *
+	 * @param theFhirInstanceValidator
 	 */
 	@Bean
 	@Lazy
-	public RequestValidatingInterceptor requestValidatingInterceptor() {
+	public RequestValidatingInterceptor requestValidatingInterceptor(IInstanceValidatorModule theFhirInstanceValidator) {
 		RequestValidatingInterceptor requestValidator = new RequestValidatingInterceptor();
 		requestValidator.setFailOnSeverity(null);
 		requestValidator.setAddResponseHeaderOnSeverity(null);
 		requestValidator.setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
-		requestValidator.addValidatorModule(instanceValidator());
+		requestValidator.addValidatorModule(theFhirInstanceValidator);
 		requestValidator.setIgnoreValidatorExceptions(true);
 
 		return requestValidator;

@@ -36,7 +36,7 @@ public class RepositoryValidatingInterceptorHttpR4Test extends BaseJpaR4Test {
 	@BeforeEach
 	public void before() {
 		myValInterceptor = new RepositoryValidatingInterceptor();
-		myValInterceptor.setFhirContext(myFhirCtx);
+		myValInterceptor.setFhirContext(myFhirContext);
 		myInterceptorRegistry.registerInterceptor(myValInterceptor);
 
 		myRestfulServerExtension.getRestfulServer().registerProvider(myObservationResourceProvider);
@@ -68,7 +68,7 @@ public class RepositoryValidatingInterceptorHttpR4Test extends BaseJpaR4Test {
 			.prefer(PreferReturnEnum.OPERATION_OUTCOME)
 			.execute();
 
-		String operationOutcomeEncoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
+		String operationOutcomeEncoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
 		ourLog.info("Outcome: {}", operationOutcomeEncoded);
 		assertThat(operationOutcomeEncoded, containsString("All observations should have a subject"));
 

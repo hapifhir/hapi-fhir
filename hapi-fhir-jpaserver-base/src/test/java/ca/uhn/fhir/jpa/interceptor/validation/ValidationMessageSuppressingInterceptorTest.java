@@ -52,7 +52,7 @@ public class ValidationMessageSuppressingInterceptorTest extends BaseResourcePro
 		upload("/r4/uscore/StructureDefinition-us-core-pulse-oximetry.json");
 
 		String input = loadResource("/r4/uscore/observation-pulseox.json");
-		Observation inputObs = loadResource(myFhirCtx, Observation.class, "/r4/uscore/observation-pulseox.json");
+		Observation inputObs = loadResource(myFhirContext, Observation.class, "/r4/uscore/observation-pulseox.json");
 
 		try {
 			myObservationDao.validate(inputObs, null, input, null, null, null, null);
@@ -78,7 +78,7 @@ public class ValidationMessageSuppressingInterceptorTest extends BaseResourcePro
 		upload("/r4/uscore/CodeSystem-dummy-loinc.json");
 		upload("/r4/uscore/StructureDefinition-us-core-pulse-oximetry.json");
 
-		FhirValidator validator = myFhirCtx.newValidator();
+		FhirValidator validator = myFhirContext.newValidator();
 		validator.setInterceptorBroadcaster(myInterceptorRegistry);
 		validator.registerValidatorModule(new FhirInstanceValidator(myValidationSupport));
 
@@ -90,7 +90,7 @@ public class ValidationMessageSuppressingInterceptorTest extends BaseResourcePro
 
 		// Without suppression
 		{
-			Observation inputObs = loadResource(myFhirCtx, Observation.class, "/r4/uscore/observation-pulseox.json");
+			Observation inputObs = loadResource(myFhirContext, Observation.class, "/r4/uscore/observation-pulseox.json");
 			try {
 				myClient.create().resource(inputObs).execute().getId().toUnqualifiedVersionless().getValue();
 				fail();
@@ -106,7 +106,7 @@ public class ValidationMessageSuppressingInterceptorTest extends BaseResourcePro
 		interceptor.addMessageSuppressionPatterns("Unknown code 'http://loinc.org#59408-5'");
 		myInterceptorRegistry.registerInterceptor(interceptor);
 		{
-			Observation inputObs = loadResource(myFhirCtx, Observation.class, "/r4/uscore/observation-pulseox.json");
+			Observation inputObs = loadResource(myFhirContext, Observation.class, "/r4/uscore/observation-pulseox.json");
 			String id = myClient.create().resource(inputObs).execute().getId().toUnqualifiedVersionless().getValue();
 			assertThat(id, matchesPattern("Observation/[0-9]+"));
 		}
@@ -122,7 +122,7 @@ public class ValidationMessageSuppressingInterceptorTest extends BaseResourcePro
 			.build();
 
 		RepositoryValidatingInterceptor repositoryValidatingInterceptor = new RepositoryValidatingInterceptor();
-		repositoryValidatingInterceptor.setFhirContext(myFhirCtx);
+		repositoryValidatingInterceptor.setFhirContext(myFhirContext);
 		repositoryValidatingInterceptor.setRules(rules);
 		myInterceptorRegistry.registerInterceptor(repositoryValidatingInterceptor);
 
