@@ -31,6 +31,7 @@ public class RuleBulkExportImplTest {
 	public void testDenyBulkRequestWithInvalidGroupId() {
 		RuleBulkExportImpl myRule = new RuleBulkExportImpl("a");
 		myRule.setAppliesToGroupExportOnGroup("invalid group");
+		myRule.setMode(PolicyEnum.ALLOW);
 
 		BulkDataExportOptions options = new BulkDataExportOptions();
 		options.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
@@ -40,6 +41,22 @@ public class RuleBulkExportImplTest {
 
 		AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
 		assertEquals(PolicyEnum.DENY, verdict.getDecision());
+	}
+
+	@Test
+	public void testAllowBulkRequestWithValidGroupId() {
+		RuleBulkExportImpl myRule = new RuleBulkExportImpl("a");
+		myRule.setAppliesToGroupExportOnGroup("Group/1");
+		myRule.setMode(PolicyEnum.ALLOW);
+
+		BulkDataExportOptions options = new BulkDataExportOptions();
+		options.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
+		options.setGroupId(new IdDt("Group/1"));
+
+		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+
+		AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+		assertEquals(PolicyEnum.ALLOW, verdict.getDecision());
 	}
 
 }
