@@ -24,6 +24,8 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
+import java.util.List;
+
 public interface IJobCoordinator {
 
 	/**
@@ -43,6 +45,10 @@ public interface IJobCoordinator {
 	 */
 	JobInstance getInstance(String theInstanceId) throws ResourceNotFoundException;
 
+	/**
+	 * Fetch all job instances
+	 */
+	List<JobInstance> getInstances(int thePageSize, int thePageIndex);
 
 	void cancelInstance(String theInstanceId) throws ResourceNotFoundException;
 

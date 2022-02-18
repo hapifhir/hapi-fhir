@@ -27,6 +27,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -260,5 +262,25 @@ public class JobInstance implements IModelJson {
 
 	public boolean isCancelled() {
 		return myCancelled;
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+			.append("jobDefinitionId", myJobDefinitionId + "/" + myJobDefinitionVersion)
+			.append("instanceId", myInstanceId)
+			.append("status", myStatus)
+			.append("createTime", myCreateTime)
+			.append("startTime", myStartTime)
+			.append("endTime", myEndTime)
+			.append("combinedRecordsProcessed", myCombinedRecordsProcessed)
+			.append("combinedRecordsProcessedPerSecond", myCombinedRecordsProcessedPerSecond)
+			.append("totalElapsedMillis", myTotalElapsedMillis)
+			.append("workChunksPurged", myWorkChunksPurged)
+			.append("progress", myProgress)
+			.append("errorMessage", myErrorMessage)
+			.append("errorCount", myErrorCount)
+			.append("estimatedTimeRemaining", myEstimatedTimeRemaining)
+			.toString();
 	}
 }

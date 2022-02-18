@@ -123,6 +123,15 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 	}
 
 	@Override
+	public List<JobInstance> getInstances(int thePageSize, int thePageIndex) {
+		return myJobPersistence
+			.fetchInstances(thePageSize, thePageIndex)
+			.stream()
+			.map(t -> massageInstanceForUserAccess(t))
+			.collect(Collectors.toList());
+	}
+
+	@Override
 	public void cancelInstance(String theInstanceId) throws ResourceNotFoundException {
 		myJobPersistence.cancelInstance(theInstanceId);
 	}
@@ -156,11 +165,11 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 		} catch (JobExecutionFailedException e) {
 			ourLog.error("Unrecoverable failure executing job {} step {}", jobDefinitionId, targetStepId, e);
 			myJobPersistence.markWorkChunkAsFailed(theWorkChunk.getId(), e.toString());
-			throw new JobExecutionFailedException(e.getMessage(), e);
+			return false;
 		} catch (Exception e) {
 			ourLog.error("Failure executing job {} step {}", jobDefinitionId, targetStepId, e);
 			myJobPersistence.markWorkChunkAsErroredAndIncrementErrorCount(theWorkChunk.getId(), e.toString());
-			return false;
+			throw new JobExecutionFailedException(e.getMessage(), e);
 		}
 
 		int recordsProcessed = outcome.getRecordsProcessed();

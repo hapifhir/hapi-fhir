@@ -77,6 +77,7 @@ public class JobCleanerServiceImpl extends BaseJobService implements IJobCleaner
 	@PostConstruct
 	public void start() {
 		ScheduledJobDefinition jobDefinition = new ScheduledJobDefinition();
+		jobDefinition.setId(JobCleanerScheduledJob.class.getName());
 		jobDefinition.setJobClass(JobCleanerScheduledJob.class);
 		mySchedulerService.scheduleClusteredJob(DateUtils.MILLIS_PER_MINUTE, jobDefinition);
 	}
@@ -194,16 +195,18 @@ public class JobCleanerServiceImpl extends BaseJobService implements IJobCleaner
 		theInstance.setErrorCount(errorCountForAllStatuses);
 		theInstance.setCombinedRecordsProcessed(resourcesProcessed);
 
+		boolean changedStatus = false;
 		if (completeChunkCount > 1 || erroredChunkCount > 1) {
 
 			double percentComplete = (double) (completeChunkCount) / (double) (incompleteChunkCount + completeChunkCount + failedChunkCount + erroredChunkCount);
 			theInstance.setProgress(percentComplete);
 
+			changedStatus = false;
 			if (incompleteChunkCount == 0 && erroredChunkCount == 0 && failedChunkCount == 0) {
-				theInstance.setStatus(StatusEnum.COMPLETED);
+				changedStatus |= updateInstanceStatus(theInstance, StatusEnum.COMPLETED);
 			}
 			if (erroredChunkCount > 0) {
-				theInstance.setStatus(StatusEnum.ERRORED);
+				changedStatus |= updateInstanceStatus(theInstance, StatusEnum.ERRORED);
 			}
 
 			if (earliestStartTime != null && latestEndTime != null) {
@@ -229,8 +232,12 @@ public class JobCleanerServiceImpl extends BaseJobService implements IJobCleaner
 
 		theInstance.setErrorMessage(errorMessage);
 
+		if (changedStatus || theInstance.getStatus() == StatusEnum.IN_PROGRESS) {
+			ourLog.info("Job {} of type {} has status {} - {} records processed ({}/sec) - ETA: {}", theInstance.getInstanceId(), theInstance.getJobDefinitionId(), theInstance.getStatus(), theInstance.getCombinedRecordsProcessed(), theInstance.getCombinedRecordsProcessedPerSecond(), theInstance.getEstimatedTimeRemaining());
+		}
+
 		if (failedChunkCount > 0) {
-			theInstance.setStatus(StatusEnum.FAILED);
+			updateInstanceStatus(theInstance, StatusEnum.FAILED);
 			myJobPersistence.updateInstance(theInstance);
 			return;
 		}
@@ -239,6 +246,15 @@ public class JobCleanerServiceImpl extends BaseJobService implements IJobCleaner
 			myJobPersistence.updateInstance(theInstance);
 		}
 
+	}
+
+	private boolean updateInstanceStatus(JobInstance theInstance, StatusEnum newStatus) {
+		if (theInstance.getStatus() != newStatus) {
+			ourLog.info("Marking job instance {} of type {} as {}", theInstance.getInstanceId(), theInstance.getJobDefinitionId(), newStatus);
+			theInstance.setStatus(newStatus);
+			return true;
+		}
+		return false;
 	}
 
 

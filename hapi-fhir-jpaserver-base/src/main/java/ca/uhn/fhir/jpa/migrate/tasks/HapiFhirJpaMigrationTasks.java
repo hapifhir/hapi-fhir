@@ -49,11 +49,10 @@ import java.util.stream.Collectors;
 @SuppressWarnings({"SqlNoDataSourceInspection", "SpellCheckingInspection"})
 public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
-	private final Set<FlagEnum> myFlags;
-
 	// H2, Derby, MariaDB, and MySql automatically add indexes to foreign keys
-	public static final DriverTypeEnum[] NON_AUTOMATIC_FK_INDEX_PLATFORMS = new DriverTypeEnum[] {
-		DriverTypeEnum.POSTGRES_9_4, DriverTypeEnum.ORACLE_12C, DriverTypeEnum.MSSQL_2012 };
+	public static final DriverTypeEnum[] NON_AUTOMATIC_FK_INDEX_PLATFORMS = new DriverTypeEnum[]{
+		DriverTypeEnum.POSTGRES_9_4, DriverTypeEnum.ORACLE_12C, DriverTypeEnum.MSSQL_2012};
+	private final Set<FlagEnum> myFlags;
 
 
 	/**
@@ -98,7 +97,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		// replace and drop IDX_SP_DATE_HASH
 		dateTable
-			.addIndex("20220207.1", "IDX_SP_DATE_HASH_V2" )
+			.addIndex("20220207.1", "IDX_SP_DATE_HASH_V2")
 			.unique(false)
 			.online(true)
 			.withColumns("HASH_IDENTITY", "SP_VALUE_LOW", "SP_VALUE_HIGH", "RES_ID", "PARTITION_ID");
@@ -109,7 +108,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		// replace and drop IDX_SP_DATE_HASH_HIGH
 		dateTable
-			.addIndex("20220207.4", "IDX_SP_DATE_HASH_HIGH_V2" )
+			.addIndex("20220207.4", "IDX_SP_DATE_HASH_HIGH_V2")
 			.unique(false)
 			.online(true)
 			.withColumns("HASH_IDENTITY", "SP_VALUE_HIGH", "RES_ID", "PARTITION_ID");
@@ -117,7 +116,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		// replace and drop IDX_SP_DATE_ORD_HASH
 		dateTable
-			.addIndex("20220207.6", "IDX_SP_DATE_ORD_HASH_V2" )
+			.addIndex("20220207.6", "IDX_SP_DATE_ORD_HASH_V2")
 			.unique(false)
 			.online(true)
 			.withColumns("HASH_IDENTITY", "SP_VALUE_LOW_DATE_ORDINAL", "SP_VALUE_HIGH_DATE_ORDINAL", "RES_ID", "PARTITION_ID");
@@ -125,7 +124,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		// replace and drop IDX_SP_DATE_ORD_HASH_HIGH
 		dateTable
-			.addIndex("20220207.8", "IDX_SP_DATE_ORD_HASH_HIGH_V2" )
+			.addIndex("20220207.8", "IDX_SP_DATE_ORD_HASH_HIGH_V2")
 			.unique(false)
 			.online(true)
 			.withColumns("HASH_IDENTITY", "SP_VALUE_HIGH_DATE_ORDINAL", "RES_ID", "PARTITION_ID");
@@ -136,7 +135,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		// replace and drop IDX_SP_DATE_RESID
 		dateTable
-			.addIndex("20220207.11", "IDX_SP_DATE_RESID_V2" )
+			.addIndex("20220207.11", "IDX_SP_DATE_RESID_V2")
 			.unique(false)
 			.online(true)
 			.withColumns("RES_ID", "HASH_IDENTITY", "SP_VALUE_LOW", "SP_VALUE_HIGH", "SP_VALUE_LOW_DATE_ORDINAL", "SP_VALUE_HIGH_DATE_ORDINAL", "PARTITION_ID");
@@ -153,6 +152,45 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// drop obsolete
 		dateTable.dropIndexOnline("20220207.16", "IDX_SP_DATE_UPDATED");
 
+		// Batch2 Framework
+
+		Builder.BuilderAddTableByColumns batchInstance = version.addTableByColumns("20220217.1", "BT2_JOB_INSTANCE", "ID");
+		batchInstance.addColumn("ID").nonNullable().type(ColumnTypeEnum.STRING, 100);
+		batchInstance.addColumn("CREATE_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		batchInstance.addColumn("START_TIME").nullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		batchInstance.addColumn("END_TIME").nullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		batchInstance.addColumn("DEFINITION_ID").nonNullable().type(ColumnTypeEnum.STRING, 100);
+		batchInstance.addColumn("DEFINITION_VER").nonNullable().type(ColumnTypeEnum.INT);
+		batchInstance.addColumn("STAT").nonNullable().type(ColumnTypeEnum.STRING, 20);
+		batchInstance.addColumn("JOB_CANCELLED").nonNullable().type(ColumnTypeEnum.BOOLEAN);
+		batchInstance.addColumn("PARAMS_JSON").nullable().type(ColumnTypeEnum.STRING, 2000);
+		batchInstance.addColumn("PARAMS_JSON_LOB").nullable().type(ColumnTypeEnum.CLOB);
+		batchInstance.addColumn("CMB_RECS_PROCESSED").nullable().type(ColumnTypeEnum.INT);
+		batchInstance.addColumn("CMB_RECS_PER_SEC").nullable().type(ColumnTypeEnum.DOUBLE);
+		batchInstance.addColumn("TOT_ELAPSED_MILLIS").nullable().type(ColumnTypeEnum.INT);
+		batchInstance.addColumn("WORK_CHUNKS_PURGED").nonNullable().type(ColumnTypeEnum.BOOLEAN);
+		batchInstance.addColumn("PROGRESS_PCT").nonNullable().type(ColumnTypeEnum.DOUBLE);
+		batchInstance.addColumn("ERROR_MSG").nullable().type(ColumnTypeEnum.STRING, 500);
+		batchInstance.addColumn("ERROR_COUNT").nullable().type(ColumnTypeEnum.INT);
+		batchInstance.addColumn("EST_REMAINING").nullable().type(ColumnTypeEnum.STRING, 100);
+		batchInstance.addIndex("20220217.4", "IDX_BT2JI_CT").unique(false).withColumns("CREATE_TIME");
+
+		Builder.BuilderAddTableByColumns batchChunk = version.addTableByColumns("20220217.2", "BT2_WORK_CHUNK", "ID");
+		batchChunk.addColumn("ID").nonNullable().type(ColumnTypeEnum.STRING, 100);
+		batchChunk.addColumn("SEQ").nonNullable().type(ColumnTypeEnum.INT);
+		batchChunk.addColumn("CREATE_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		batchChunk.addColumn("START_TIME").nullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		batchChunk.addColumn("END_TIME").nullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		batchChunk.addColumn("DEFINITION_ID").nonNullable().type(ColumnTypeEnum.STRING, 100);
+		batchChunk.addColumn("DEFINITION_VER").nonNullable().type(ColumnTypeEnum.INT);
+		batchChunk.addColumn("STAT").nonNullable().type(ColumnTypeEnum.STRING, 20);
+		batchChunk.addColumn("RECORDS_PROCESSED").nullable().type(ColumnTypeEnum.INT);
+		batchChunk.addColumn("TGT_STEP_ID").nonNullable().type(ColumnTypeEnum.STRING, 100);
+		batchChunk.addColumn("DATA").nullable().type(ColumnTypeEnum.CLOB);
+		batchChunk.addColumn("INSTANCE_ID").nonNullable().type(ColumnTypeEnum.STRING, 100);
+		batchChunk.addColumn("ERROR_MSG").nullable().type(ColumnTypeEnum.STRING, 500);
+		batchChunk.addColumn("ERROR_COUNT").nullable().type(ColumnTypeEnum.INT);
+		batchChunk.addIndex("20220217.4", "IDX_BT2WC_II_SEQ").unique(false).withColumns("ID", "SEQ");
 	}
 
 	/**
@@ -161,14 +199,14 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	 */
 	private void addIndexesForDeleteExpunge(Builder theVersion) {
 
-		theVersion.onTable( "HFJ_HISTORY_TAG")
-			.addIndex("20211210.2", "IDX_RESHISTTAG_RESID" )
+		theVersion.onTable("HFJ_HISTORY_TAG")
+			.addIndex("20211210.2", "IDX_RESHISTTAG_RESID")
 			.unique(false)
 			.withColumns("RES_ID");
 
 
-		theVersion.onTable( "HFJ_RES_VER_PROV")
-			.addIndex("20211210.3", "FK_RESVERPROV_RES_PID" )
+		theVersion.onTable("HFJ_RES_VER_PROV")
+			.addIndex("20211210.3", "FK_RESVERPROV_RES_PID")
 			.unique(false)
 			.withColumns("RES_PID")
 			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
@@ -249,15 +287,15 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		// Bump ConceptMap display lengths
 		version.onTable("TRM_CONCEPT_MAP_GRP_ELM_TGT")
-			.modifyColumn("20210617.1","TARGET_DISPLAY").nullable().withType(ColumnTypeEnum.STRING, 500);
+			.modifyColumn("20210617.1", "TARGET_DISPLAY").nullable().withType(ColumnTypeEnum.STRING, 500);
 		version.onTable("TRM_CONCEPT_MAP_GRP_ELEMENT")
 			.modifyColumn("20210617.2", "SOURCE_DISPLAY").nullable().withType(ColumnTypeEnum.STRING, 500);
 
 		version.onTable("HFJ_BLK_EXPORT_JOB")
-			.modifyColumn("20210624.1","REQUEST").nonNullable().withType(ColumnTypeEnum.STRING, 1024);
+			.modifyColumn("20210624.1", "REQUEST").nonNullable().withType(ColumnTypeEnum.STRING, 1024);
 
 		version.onTable("HFJ_IDX_CMP_STRING_UNIQ")
-			.modifyColumn("20210713.1","IDX_STRING").nonNullable().withType(ColumnTypeEnum.STRING, 500);
+			.modifyColumn("20210713.1", "IDX_STRING").nonNullable().withType(ColumnTypeEnum.STRING, 500);
 
 		version.onTable("HFJ_RESOURCE")
 			.addColumn("20210720.1", "SP_CMPTOKS_PRESENT").nullable().type(ColumnTypeEnum.BOOLEAN);
@@ -289,7 +327,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.addColumn("20210915.1", "EXPANDED_AT")
 			.nullable()
 			.type(ColumnTypeEnum.DATE_TIMESTAMP);
-        
+
 		/*
 		 * Replace CLOB columns with BLOB columns
 		 */
@@ -305,9 +343,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// HFJ_SEARCH.SEARCH_QUERY_STRING
 		version.onTable("HFJ_SEARCH")
 			.migratePostgresTextClobToBinaryClob("20211003.3", "SEARCH_QUERY_STRING");
-		
 
-		
+
 	}
 
 	private void init540() {

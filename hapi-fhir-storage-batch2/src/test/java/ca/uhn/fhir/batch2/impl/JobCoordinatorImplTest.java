@@ -95,7 +95,19 @@ public class JobCoordinatorImplTest {
 	}
 
 	@Test
-	public void testFetchJob_PasswordsRedacted() {
+	public void testCancelInstance() {
+
+		// Execute
+
+		mySvc.cancelInstance(INSTANCE_ID);
+
+		// Verify
+
+		verify(myJobInstancePersister, times(1)).cancelInstance(eq(INSTANCE_ID));
+	}
+
+	@Test
+	public void testFetchInstance_PasswordsRedacted() {
 
 		// Setup
 
@@ -111,6 +123,7 @@ public class JobCoordinatorImplTest {
 		// Execute
 
 		JobInstance outcome = mySvc.getInstance(INSTANCE_ID);
+		ourLog.info("Job instance: {}", outcome);
 		ourLog.info("Parameters: {}", outcome.getParameters());
 		assertThat(outcome.getParameters(), containsInAnyOrder(
 			new JobInstanceParameter("PARAM_1_NAME", "PARAM 1 VALUE"),
@@ -120,55 +133,21 @@ public class JobCoordinatorImplTest {
 	}
 
 	@Test
-	public void testCancelJob() {
-
-		// Execute
-
-		mySvc.cancelInstance(INSTANCE_ID);
-
-		// Verify
-
-		verify(myJobInstancePersister, times(1)).cancelInstance(eq(INSTANCE_ID));
-	}
-
-	@Test
-	public void testInitializeJob() {
+	public void testFetchInstances() {
 
 		// Setup
 
-		when(myJobDefinitionRegistry.getLatestJobDefinition(eq(JOB_DEFINITION_ID))).thenReturn(Optional.of(createJobDefinition()));
-		when(myJobInstancePersister.storeNewInstance(any())).thenReturn(INSTANCE_ID).thenReturn(INSTANCE_ID);
+		when(myJobDefinitionRegistry.getJobDefinition(eq(JOB_DEFINITION_ID), eq(1))).thenReturn(Optional.of(createJobDefinition()));
+		when(myJobInstancePersister.fetchInstances(eq(100), eq(0))).thenReturn(Lists.newArrayList(createInstance()));
 
 		// Execute
 
-		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
-		startRequest.setJobDefinitionId(JOB_DEFINITION_ID);
-		startRequest.addParameter(new JobInstanceParameter().setName(PARAM_1_NAME).setValue(PARAM_1_VALUE));
-		mySvc.startInstance(startRequest);
+		List<JobInstance> outcome = mySvc.getInstances(100, 0);
 
 		// Verify
 
-		verify(myJobInstancePersister, times(1)).storeNewInstance(myJobInstanceCaptor.capture());
-		assertNull(myJobInstanceCaptor.getValue().getInstanceId());
-		assertEquals(JOB_DEFINITION_ID, myJobInstanceCaptor.getValue().getJobDefinitionId());
-		assertEquals(1, myJobInstanceCaptor.getValue().getJobDefinitionVersion());
-		assertEquals(1, myJobInstanceCaptor.getValue().getParameters().size());
-		assertEquals(PARAM_1_NAME, myJobInstanceCaptor.getValue().getParameters().get(0).getName());
-		assertEquals(PARAM_1_VALUE, myJobInstanceCaptor.getValue().getParameters().get(0).getValue());
-		assertEquals(StatusEnum.QUEUED, myJobInstanceCaptor.getValue().getStatus());
+		assertEquals(1, outcome.size());
 
-		verify(myWorkChannelProducer, times(1)).send(myMessageCaptor.capture());
-		assertNull(myMessageCaptor.getAllValues().get(0).getPayload().getChunkId());
-		assertEquals(JOB_DEFINITION_ID, myMessageCaptor.getAllValues().get(0).getPayload().getJobDefinitionId());
-		assertEquals(1, myMessageCaptor.getAllValues().get(0).getPayload().getJobDefinitionVersion());
-		assertEquals(STEP_1, myMessageCaptor.getAllValues().get(0).getPayload().getTargetStepId());
-
-		verify(myJobInstancePersister, times(1)).storeWorkChunk(eq(JOB_DEFINITION_ID), eq(1), eq(STEP_1), eq(INSTANCE_ID), eq(0), isNull());
-
-		verifyNoMoreInteractions(myJobInstancePersister);
-		verifyNoMoreInteractions(myStep1Worker);
-		verifyNoMoreInteractions(myStep2Worker);
-		verifyNoMoreInteractions(myStep3Worker);
 	}
 
 	@Test
@@ -391,34 +370,44 @@ public class JobCoordinatorImplTest {
 
 	}
 
-	@SafeVarargs
-	private final JobDefinition createJobDefinition(Consumer<JobDefinition.Builder>... theModifiers) {
-		JobDefinition.Builder builder = JobDefinition
-			.newBuilder()
-			.setJobDefinitionId(JOB_DEFINITION_ID)
-			.setJobDescription("This is a job description")
-			.setJobDefinitionVersion(1)
-			.addParameter(PARAM_1_NAME, "Param 1", JobDefinitionParameter.ParamTypeEnum.STRING, true, false)
-			.addStep(STEP_1, "Step 1", myStep1Worker)
-			.addStep(STEP_2, "Step 2", myStep2Worker)
-			.addStep(STEP_3, "Step 3", myStep3Worker);
+	@Test
+	public void testStartInstance() {
 
-		for (Consumer<JobDefinition.Builder> next : theModifiers) {
-			next.accept(builder);
-		}
+		// Setup
 
-		return builder.build();
-	}
+		when(myJobDefinitionRegistry.getLatestJobDefinition(eq(JOB_DEFINITION_ID))).thenReturn(Optional.of(createJobDefinition()));
+		when(myJobInstancePersister.storeNewInstance(any())).thenReturn(INSTANCE_ID).thenReturn(INSTANCE_ID);
 
-	@Nonnull
-	private JobWorkNotification createWorkNotification(String theStepId) {
-		JobWorkNotification payload = new JobWorkNotification();
-		payload.setJobDefinitionId(JOB_DEFINITION_ID);
-		payload.setJobDefinitionVersion(1);
-		payload.setInstanceId(INSTANCE_ID);
-		payload.setChunkId(JobCoordinatorImplTest.CHUNK_ID);
-		payload.setTargetStepId(theStepId);
-		return payload;
+		// Execute
+
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setJobDefinitionId(JOB_DEFINITION_ID);
+		startRequest.addParameter(new JobInstanceParameter().setName(PARAM_1_NAME).setValue(PARAM_1_VALUE));
+		mySvc.startInstance(startRequest);
+
+		// Verify
+
+		verify(myJobInstancePersister, times(1)).storeNewInstance(myJobInstanceCaptor.capture());
+		assertNull(myJobInstanceCaptor.getValue().getInstanceId());
+		assertEquals(JOB_DEFINITION_ID, myJobInstanceCaptor.getValue().getJobDefinitionId());
+		assertEquals(1, myJobInstanceCaptor.getValue().getJobDefinitionVersion());
+		assertEquals(1, myJobInstanceCaptor.getValue().getParameters().size());
+		assertEquals(PARAM_1_NAME, myJobInstanceCaptor.getValue().getParameters().get(0).getName());
+		assertEquals(PARAM_1_VALUE, myJobInstanceCaptor.getValue().getParameters().get(0).getValue());
+		assertEquals(StatusEnum.QUEUED, myJobInstanceCaptor.getValue().getStatus());
+
+		verify(myWorkChannelProducer, times(1)).send(myMessageCaptor.capture());
+		assertNull(myMessageCaptor.getAllValues().get(0).getPayload().getChunkId());
+		assertEquals(JOB_DEFINITION_ID, myMessageCaptor.getAllValues().get(0).getPayload().getJobDefinitionId());
+		assertEquals(1, myMessageCaptor.getAllValues().get(0).getPayload().getJobDefinitionVersion());
+		assertEquals(STEP_1, myMessageCaptor.getAllValues().get(0).getPayload().getTargetStepId());
+
+		verify(myJobInstancePersister, times(1)).storeWorkChunk(eq(JOB_DEFINITION_ID), eq(1), eq(STEP_1), eq(INSTANCE_ID), eq(0), isNull());
+
+		verifyNoMoreInteractions(myJobInstancePersister);
+		verifyNoMoreInteractions(myStep1Worker);
+		verifyNoMoreInteractions(myStep2Worker);
+		verifyNoMoreInteractions(myStep3Worker);
 	}
 
 	@Test
@@ -507,6 +496,25 @@ public class JobCoordinatorImplTest {
 		}
 	}
 
+	@SafeVarargs
+	private final JobDefinition createJobDefinition(Consumer<JobDefinition.Builder>... theModifiers) {
+		JobDefinition.Builder builder = JobDefinition
+			.newBuilder()
+			.setJobDefinitionId(JOB_DEFINITION_ID)
+			.setJobDescription("This is a job description")
+			.setJobDefinitionVersion(1)
+			.addParameter(PARAM_1_NAME, "Param 1", JobDefinitionParameter.ParamTypeEnum.STRING, true, false)
+			.addStep(STEP_1, "Step 1", myStep1Worker)
+			.addStep(STEP_2, "Step 2", myStep2Worker)
+			.addStep(STEP_3, "Step 3", myStep3Worker);
+
+		for (Consumer<JobDefinition.Builder> next : theModifiers) {
+			next.accept(builder);
+		}
+
+		return builder.build();
+	}
+
 	@Nonnull
 	static JobInstance createInstance() {
 		JobInstance instance = new JobInstance();
@@ -528,6 +536,17 @@ public class JobCoordinatorImplTest {
 			.setData(singletonMap("DATA_1_KEY", "DATA_1_VALUE"))
 			.setStatus(StatusEnum.IN_PROGRESS)
 			.setInstanceId(INSTANCE_ID);
+	}
+
+	@Nonnull
+	private JobWorkNotification createWorkNotification(String theStepId) {
+		JobWorkNotification payload = new JobWorkNotification();
+		payload.setJobDefinitionId(JOB_DEFINITION_ID);
+		payload.setJobDefinitionVersion(1);
+		payload.setInstanceId(INSTANCE_ID);
+		payload.setChunkId(JobCoordinatorImplTest.CHUNK_ID);
+		payload.setTargetStepId(theStepId);
+		return payload;
 	}
 
 }

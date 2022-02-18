@@ -86,7 +86,7 @@ public class Batch2JobInstanceEntity implements Serializable {
 	private Double myCombinedRecordsProcessedPerSecond;
 	@Column(name = "TOT_ELAPSED_MILLIS", nullable = true)
 	private Integer myTotalElapsedMillis;
-	@Column(name = "WORK_CHUNKS_PURGED", nullable = true)
+	@Column(name = "WORK_CHUNKS_PURGED", nullable = false)
 	private boolean myWorkChunksPurged;
 	@Column(name = "PROGRESS_PCT")
 	private double myProgress;
