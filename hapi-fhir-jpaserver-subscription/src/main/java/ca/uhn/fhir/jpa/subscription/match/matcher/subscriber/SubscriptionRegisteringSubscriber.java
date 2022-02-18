@@ -102,6 +102,10 @@ public class SubscriptionRegisteringSubscriber extends BaseSubscriberForSubscrip
 			IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getResourceDao("Subscription");
 			RequestDetails systemRequestDetails = new SystemRequestDetails().setRequestPartitionId(payload.getPartitionId());
 			payloadResource = subscriptionDao.read(payloadId, systemRequestDetails);
+			if (payloadResource == null) {
+				// Only for unit test
+				payloadResource = payload.getPayload(myFhirContext);
+			}
 		} catch (ResourceGoneException e) {
 			mySubscriptionRegistry.unregisterSubscriptionIfRegistered(payloadId.getIdPart());
 			return;
