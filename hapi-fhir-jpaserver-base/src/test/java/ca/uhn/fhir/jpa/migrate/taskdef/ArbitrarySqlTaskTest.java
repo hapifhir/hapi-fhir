@@ -7,6 +7,8 @@ import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
 import ca.uhn.fhir.util.VersionEnum;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -16,6 +18,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ArbitrarySqlTaskTest extends BaseTest {
 
+
+	private static final Logger ourLog = LoggerFactory.getLogger(ArbitrarySqlTaskTest.class);
 
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
@@ -59,7 +63,6 @@ public class ArbitrarySqlTaskTest extends BaseTest {
 		assertEquals(-756348509333838170L, rows.get(1).get("HASH_PRESENT"));
 
 	}
-
 
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
@@ -110,6 +113,7 @@ public class ArbitrarySqlTaskTest extends BaseTest {
 	@MethodSource("data")
 	public void testArbitrarySql(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
 		before(theTestDatabaseDetails);
+		ourLog.info("Starting testArbitrarySql for {}", theTestDatabaseDetails.get().getDriverType());
 
 		executeSql("create table TEST_UPDATE_TASK (PID bigint not null, RES_TYPE varchar(255), PARAM_NAME varchar(255))");
 		executeSql("insert into TEST_UPDATE_TASK (PID, RES_TYPE, PARAM_NAME) values (1, 'Patient', 'identifier')");
