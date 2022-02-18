@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
@@ -386,9 +385,14 @@ public class QuestionnaireResponseValidatorR5Test {
 		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 		qa.setStatus(QuestionnaireResponseStatus.INPROGRESS);
 		qa.setQuestionnaire(questionnaireRef);
-		qa.addItem().setLinkId("link1")
+		qa.addItem()
+			.setLinkId("link1")
 			.addAnswer()
-			.addItem().setLinkId("link11");
+			.setValue(new Coding(codeSystemUrl, codeValue, null))
+			.addItem()
+			.setLinkId("link11")
+			.addAnswer()
+			.setValue(new StringType("foo"));
 
 		String rXml = xmlParser.encodeResourceToString(qa);
 		ourLog.info(rXml);
@@ -442,9 +446,14 @@ public class QuestionnaireResponseValidatorR5Test {
 		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 		qa.setStatus(QuestionnaireResponseStatus.INPROGRESS);
 		qa.setQuestionnaire(questionnaireRef);
-		qa.addItem().setLinkId("link1")
+		qa.addItem()
+			.setLinkId("link1")
 			.addAnswer()
-			.addItem().setLinkId("link11");
+			.setValue(new Coding(codeSystemUrl, codeValue, null))
+			.addItem()
+			.setLinkId("link11")
+			.addAnswer()
+			.setValue(new StringType("foo"));
 
 		String rXml = xmlParser.encodeResourceToString(qa);
 		ourLog.info(rXml);
@@ -483,7 +492,11 @@ public class QuestionnaireResponseValidatorR5Test {
 		qa.setQuestionnaire(questionnaireRef);
 		qa.addItem().setLinkId("link1")
 			.addAnswer()
-			.addItem().setLinkId("link11");
+			.setValue(new StringType("FOO"))
+			.addItem()
+			.setLinkId("link11")
+			.addAnswer()
+			.setValue(new StringType("BAR"));
 
 		String rXml = xmlParser.encodeResourceToString(qa);
 		ourLog.info(rXml);

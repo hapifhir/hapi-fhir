@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.util.HapiExtensions;
+import ca.uhn.fhir.validation.FhirValidator;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
@@ -29,7 +30,7 @@ import java.util.TreeSet;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -268,6 +269,34 @@ public class DaoConfig {
 	private Integer myBundleBatchPoolSize = DEFAULT_BUNDLE_BATCH_POOL_SIZE;
 	private Integer myBundleBatchMaxPoolSize = DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE;
 
+	/**
+	 * Activates the new Lucene/Elasticsearch indexing of search parameters.
+	 * When active, string, token, and reference parameters will be indexed and
+	 * queried within Hibernate Search.
+	 *
+	 * @since 5.6.0
+	 * TODO mb test more with this true
+	 */
+	private boolean myAdvancedLuceneIndexing = false;
+	/**
+	 * If set to a positive number, any resources with a character length at or below the given number
+	 * of characters will be stored inline in the <code>HFJ_RES_VER</code> table instead of using a
+	 * separate LOB column.
+	 *
+	 * @since 5.7.0
+	 */
+	private int myInlineResourceTextBelowSize = 0;
+
+	/**
+	 * @since 5.7.0
+	 */
+	private boolean myStoreResourceInLuceneIndex;
+
+	/**
+	 * @see FhirValidator#isConcurrentBundleValidation()
+	 * @since 5.7.0
+	 */
+	private boolean myConcurrentBundleValidation;
 
 	/**
 	 * Constructor
@@ -289,6 +318,28 @@ public class DaoConfig {
 			ourLog.info("Status based reindexing is DISABLED");
 			setStatusBasedReindexingDisabled(true);
 		}
+	}
+
+	/**
+	 * If set to a positive number, any resources with a character length at or below the given number
+	 * of characters will be stored inline in the <code>HFJ_RES_VER</code> table instead of using a
+	 * separate LOB column.
+	 *
+	 * @since 5.7.0
+	 */
+	public int getInlineResourceTextBelowSize() {
+		return myInlineResourceTextBelowSize;
+	}
+
+	/**
+	 * If set to a positive number, any resources with a character length at or below the given number
+	 * of characters will be stored inline in the <code>HFJ_RES_VER</code> table instead of using a
+	 * separate LOB column.
+	 *
+	 * @since 5.7.0
+	 */
+	public void setInlineResourceTextBelowSize(int theInlineResourceTextBelowSize) {
+		myInlineResourceTextBelowSize = theInlineResourceTextBelowSize;
 	}
 
 	/**
@@ -2663,6 +2714,91 @@ public class DaoConfig {
 		myElasicSearchIndexPrefix = thePrefix;
 	}
 
+	/**
+	 * Is lucene/hibernate indexing enabled beyond _contains or _text?
+	 *
+	 * @since 5.6.0
+	 */
+	public boolean isAdvancedLuceneIndexing() {
+		return myAdvancedLuceneIndexing;
+	}
+
+	/**
+	 * Enable/disable lucene/hibernate indexing enabled beyond _contains or _text.
+	 * <p>
+	 * String, token, and reference parameters can be indexed in Lucene.
+	 * This extends token search to support :text searches, as well as supporting
+	 * :contains and :text on string parameters.
+	 *
+	 * @since 5.6.0
+	 */
+	public void setAdvancedLuceneIndexing(boolean theAdvancedLuceneIndexing) {
+		this.myAdvancedLuceneIndexing = theAdvancedLuceneIndexing;
+	}
+
+	/**
+	 * Is storing of Resource in Lucene index enabled?
+	 *
+	 * @since 5.7.0
+	 */
+	public boolean isStoreResourceInLuceneIndex() {
+		return myStoreResourceInLuceneIndex;
+	}
+
+	/**
+	 * <p>
+	 * Enable Resource to be stored inline with Lucene index mappings.
+	 * This is useful in cases where after performing a search operation the resulting resource identifiers don't have to be
+	 * looked up in the persistent storage, but rather the inline stored resource can be used instead.
+	 * </p>
+	 * <p>
+	 * For e.g - Storing Observation resource in lucene index would be useful when performing
+	 * <a href="https://www.hl7.org/fhir/observation-operation-lastn.html">$lastn</a> operation.
+	 * </p>
+	 *
+	 * @since 5.7.0
+	 */
+	public void setStoreResourceInLuceneIndex(boolean theStoreResourceInLuceneIndex) {
+		myStoreResourceInLuceneIndex = theStoreResourceInLuceneIndex;
+	}
+
+	/**
+	 * @see FhirValidator#isConcurrentBundleValidation()
+	 * @since 5.7.0
+	 */
+	public boolean isConcurrentBundleValidation() {
+		return myConcurrentBundleValidation;
+	}
+
+	/**
+	 * @see FhirValidator#isConcurrentBundleValidation()
+	 * @since 5.7.0
+	 */
+	public DaoConfig setConcurrentBundleValidation(boolean theConcurrentBundleValidation) {
+		myConcurrentBundleValidation = theConcurrentBundleValidation;
+		return this;
+	}
+
+	/**
+	 * This setting indicates if a cross-partition subscription can be made.
+	 *
+	 * @see ModelConfig#setCrossPartitionSubscription(boolean)
+	 * @since 7.5.0
+	 */
+	public boolean isCrossPartitionSubscription() {
+		return this.myModelConfig.isCrossPartitionSubscription();
+	}
+
+	/**
+	 * This setting indicates if a cross-partition subscription can be made.
+	 *
+	 * @see ModelConfig#setCrossPartitionSubscription(boolean)
+	 * @since 7.5.0
+	 */
+	public void setCrossPartitionSubscription(boolean theAllowCrossPartitionSubscription) {
+		this.myModelConfig.setCrossPartitionSubscription(theAllowCrossPartitionSubscription);
+	}
+
 	public enum StoreMetaSourceInformationEnum {
 		NONE(false, false),
 		SOURCE_URI(true, false),
@@ -2685,6 +2821,7 @@ public class DaoConfig {
 			return myStoreRequestId;
 		}
 	}
+
 
 	public enum IndexEnabledEnum {
 		ENABLED,

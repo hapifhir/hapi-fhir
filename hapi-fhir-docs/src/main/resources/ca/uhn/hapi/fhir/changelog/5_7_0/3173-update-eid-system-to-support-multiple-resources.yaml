@@ -1,0 +1,6 @@
+---
+type: change
+issue: 3158
+title: "Previously in configuring MDM, you were only allowed to set a single `eidSystem` which was global regardless of how many resource types you were performing
+MDM on. This has been changed. That field is now deprecated, and a new field called `eidSystems` (a json object) should be used instead. This will allow you to have granular
+control over which resource types use which EIDs. See the [documentation](/hapi-fhir/docs/server_jpa_mdm/mdm_rules.html) of `eidSystems` for more information."

@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,12 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
-import java.lang.reflect.Field;
-
-import org.hl7.fhir.instance.model.api.IBase;
-
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.instance.model.api.IBase;
+
+import java.lang.reflect.Field;
 
 public class RuntimeChildPrimitiveEnumerationDatatypeDefinition extends RuntimeChildPrimitiveDatatypeDefinition {
 
@@ -61,7 +61,7 @@ public class RuntimeChildPrimitiveEnumerationDatatypeDefinition extends RuntimeC
 			clazz = Class.forName(className);
 			retVal = clazz.newInstance();
 		} catch (Exception e) {
-			throw new ConfigurationException("Failed to instantiate " + className, e);
+			throw new ConfigurationException(Msg.code(1694) + "Failed to instantiate " + className, e);
 		}
 		return retVal;
 	}

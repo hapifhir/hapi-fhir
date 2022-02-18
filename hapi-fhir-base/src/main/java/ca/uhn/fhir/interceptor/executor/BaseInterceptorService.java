@@ -4,7 +4,7 @@ package ca.uhn.fhir.interceptor.executor;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.interceptor.executor;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IBaseInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IBaseInterceptorService;
@@ -291,7 +292,8 @@ public abstract class BaseInterceptorService<POINTCUT extends IPointcut> impleme
 	}
 
 	private Object doCallHooks(POINTCUT thePointcut, HookParams theParams, Object theRetVal) {
-		List<BaseInvoker> invokers = getInvokersForPointcut(thePointcut);
+		// use new list for loop to avoid ConcurrentModificationException in case invoker gets added while looping
+		List<BaseInvoker> invokers = new ArrayList<>(getInvokersForPointcut(thePointcut));
 
 		/*
 		 * Call each hook in order
@@ -403,7 +405,7 @@ public abstract class BaseInterceptorService<POINTCUT extends IPointcut> impleme
 	 */
 	boolean haveAppropriateParams(POINTCUT thePointcut, HookParams theParams) {
 		if (theParams.getParamsForType().values().size() != thePointcut.getParameterTypes().size()) {
-			throw new IllegalArgumentException(String.format("Wrong number of params for pointcut %s - Wanted %s but found %s", thePointcut.name(), toErrorString(thePointcut.getParameterTypes()), theParams.getParamsForType().values().stream().map(t -> t != null ? t.getClass().getSimpleName() : "null").sorted().collect(Collectors.toList())));
+			throw new IllegalArgumentException(Msg.code(1909) + String.format("Wrong number of params for pointcut %s - Wanted %s but found %s", thePointcut.name(), toErrorString(thePointcut.getParameterTypes()), theParams.getParamsForType().values().stream().map(t -> t != null ? t.getClass().getSimpleName() : "null").sorted().collect(Collectors.toList())));
 		}
 
 		List<String> wantedTypes = new ArrayList<>(thePointcut.getParameterTypes());
@@ -573,10 +575,10 @@ public abstract class BaseInterceptorService<POINTCUT extends IPointcut> impleme
 				if (targetException instanceof RuntimeException) {
 					throw ((RuntimeException) targetException);
 				} else {
-					throw new InternalErrorException("Failure invoking interceptor for pointcut(s) " + getPointcut(), targetException);
+					throw new InternalErrorException(Msg.code(1910) + "Failure invoking interceptor for pointcut(s) " + getPointcut(), targetException);
 				}
 			} catch (Exception e) {
-				throw new InternalErrorException(e);
+				throw new InternalErrorException(Msg.code(1911) + e);
 			}
 
 		}

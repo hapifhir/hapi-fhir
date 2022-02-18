@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.sched;
  * #%L
  * hapi-fhir-jpa
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.sched;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.jpa.model.sched.IHapiScheduler;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
@@ -89,7 +90,7 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 			Validate.notBlank(myInstanceName, "No instance name supplied");
 			myFactory.afterPropertiesSet();
 		} catch (Exception e) {
-			throw new SchedulerException(e);
+			throw new SchedulerException(Msg.code(1633) + e);
 		}
 
 		myScheduler = myFactory.getScheduler();
@@ -118,14 +119,14 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 	@Override
 	public void start() {
 		if (myScheduler == null) {
-			throw new ConfigurationException("Attempt to start uninitialized scheduler");
+			throw new ConfigurationException(Msg.code(1634) + "Attempt to start uninitialized scheduler");
 		}
 		try {
 			ourLog.info("Starting scheduler {}", getThreadPrefix());
 			myScheduler.start();
 		} catch (SchedulerException e) {
 			ourLog.error("Failed to start up scheduler", e);
-			throw new ConfigurationException("Failed to start up scheduler", e);
+			throw new ConfigurationException(Msg.code(1635) + "Failed to start up scheduler", e);
 		}
 	}
 
@@ -138,7 +139,7 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 			myScheduler.shutdown(true);
 		} catch (SchedulerException e) {
 			ourLog.error("Failed to shut down scheduler", e);
-			throw new ConfigurationException("Failed to shut down scheduler", e);
+			throw new ConfigurationException(Msg.code(1636) + "Failed to shut down scheduler", e);
 		}
 	}
 
@@ -165,7 +166,7 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 			ourLog.info("Local scheduler has jobs: {}", keysString);
 		} catch (SchedulerException e) {
 			ourLog.error("Failed to get log status for scheduler", e);
-			throw new InternalErrorException("Failed to get log status for scheduler", e);
+			throw new InternalErrorException(Msg.code(1637) + "Failed to get log status for scheduler", e);
 		}
 	}
 
@@ -202,7 +203,7 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 			myScheduler.scheduleJob(jobDetail, triggers, true);
 		} catch (SchedulerException e) {
 			ourLog.error("Failed to schedule job", e);
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(1638) + e);
 		}
 
 	}

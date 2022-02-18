@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.binstore;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.binstore;
  * #L%
  */
 
+import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.annotation.Nonnull;
@@ -101,4 +102,13 @@ public interface IBinaryStorageSvc {
 	 * @return The payload as a byte array
 	 */
 	byte[] fetchBlob(IIdType theResourceId, String theBlobId) throws IOException;
+
+	/**
+	 * Fetch the byte[] contents of a given Binary resource's `data` element. If the data is a standard base64encoded string that is embedded, return it.
+	 * Otherwise, attempt to load the externalized binary blob via the the externalized binary storage service.
+	 *
+	 * @param theResourceId The resource ID The ID of the Binary resource you want to extract data bytes from
+	 * @return The binary data blob as a byte array
+	 */
+	byte[] fetchDataBlobFromBinary(IBaseBinary theResource) throws IOException;
 }

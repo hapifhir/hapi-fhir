@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.expunge;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.batch.listener.PidReaderCounterListener;
@@ -17,11 +18,9 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r5.model.StructureDefinition;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.stubbing.Answer;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +31,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.when;
 
 class DeleteExpungeDaoTest extends BaseJpaR4Test {
@@ -77,7 +75,7 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 
 		// Get not implemented HTTP 400 error
 		assertEquals(Constants.STATUS_HTTP_400_BAD_REQUEST, e.getStatusCode());
-		assertEquals("_expunge cannot be used with _cascade", e.getMessage());
+		assertEquals(Msg.code(964) + "_expunge cannot be used with _cascade", e.getMessage());
 
 
 		// Try to delete with header 'X-Cascade' = delete
@@ -89,7 +87,7 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 
 		// Get not implemented HTTP 400 error
 		assertEquals(Constants.STATUS_HTTP_400_BAD_REQUEST, e.getStatusCode());
-		assertEquals("_expunge cannot be used with _cascade", e.getMessage());
+		assertEquals(Msg.code(964) + "_expunge cannot be used with _cascade", e.getMessage());
 	}
 
 
@@ -126,7 +124,7 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 		//See https://github.com/hapifhir/hapi-fhir/issues/2661
 
 		// setup
-		BundleBuilder builder = new BundleBuilder(myFhirCtx);
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
 		for (int i = 0; i < 20; i++) {
 			Organization o = new Organization();
 			o.setId("Organization/O-" + i);

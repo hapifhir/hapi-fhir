@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor.s13n;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.interceptor.s13n;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.FhirPathExecutionException;
 import ca.uhn.fhir.fhirpath.IFhirPath;
@@ -166,7 +167,7 @@ public class StandardizingInterceptor {
 		try {
 			standardizer = (IStandardizer) Class.forName(standardizerName).getDeclaredConstructor().newInstance();
 		} catch (Exception e) {
-			throw new RuntimeException(String.format("Unable to create standardizer %s", standardizerName), e);
+			throw new RuntimeException(Msg.code(349) + String.format("Unable to create standardizer %s", standardizerName), e);
 		}
 
 		myStandardizers.put(standardizerName, standardizer);

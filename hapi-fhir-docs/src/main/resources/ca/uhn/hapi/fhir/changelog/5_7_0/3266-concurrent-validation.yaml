@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 3266
+title: "Concurrent validation failed with StringIndexOutOfBoundsException when the validation location did not contain a '.'. This has been corrected."

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.index;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.index;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
@@ -94,7 +95,7 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 
 				RuntimeResourceDefinition missingResourceDef = myContext.getResourceDefinition(theType);
 				String resName = missingResourceDef.getName();
-				throw new InvalidRequestException("Resource " + resName + "/" + idPart + " not found, specified in path: " + theSourcePath);
+				throw new InvalidRequestException(Msg.code(1094) + "Resource " + resName + "/" + idPart + " not found, specified in path: " + theSourcePath);
 
 			}
 			resolvedResource = createdTableOpt.get();
@@ -103,12 +104,12 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 		ourLog.trace("Resolved resource of type {} as PID: {}", resolvedResource.getResourceType(), resolvedResource.getResourceId());
 		if (!theResourceType.equals(resolvedResource.getResourceType())) {
 			ourLog.error("Resource with PID {} was of type {} and wanted {}", resolvedResource.getResourceId(), theResourceType, resolvedResource.getResourceType());
-			throw new UnprocessableEntityException("Resource contains reference to unknown resource ID " + theSourceResourceId.getValue());
+			throw new UnprocessableEntityException(Msg.code(1095) + "Resource contains reference to unknown resource ID " + theSourceResourceId.getValue());
 		}
 
 		if (resolvedResource.getDeleted() != null) {
 			String resName = resolvedResource.getResourceType();
-			throw new InvalidRequestException("Resource " + resName + "/" + idPart + " is deleted, specified in path: " + theSourcePath);
+			throw new InvalidRequestException(Msg.code(1096) + "Resource " + resName + "/" + idPart + " is deleted, specified in path: " + theSourcePath);
 		}
 
 		if (!theSearchParam.hasTargets() && theSearchParam.getTargets().contains(theResourceType)) {
@@ -255,7 +256,7 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 		String identifierString = id.getValue();
 		String[] split = identifierString.split("\\|");
 		if (split.length != 2) {
-			throw new IllegalArgumentException("Can't create a placeholder reference with identifier " + theValue + ". It is not a valid identifier");
+			throw new IllegalArgumentException(Msg.code(1097) + "Can't create a placeholder reference with identifier " + theValue + ". It is not a valid identifier");
 		}
 
 		CanonicalIdentifier identifier = new CanonicalIdentifier();

@@ -5,13 +5,14 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.dstu2.resource.Composition;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,16 +34,15 @@ public class BaseJpaResourceProviderCompositionDstu2 extends JpaResourceProvider
 	 * Composition/123/$document
 	 */
 	//@formatter:off
-	@Operation(name = JpaConstants.OPERATION_DOCUMENT, idempotent = true, bundleType=BundleTypeEnum.SEARCHSET)
-	public IBaseBundle getDocumentForComposition(
+	@Operation(name = JpaConstants.OPERATION_DOCUMENT, idempotent = true, bundleType=BundleTypeEnum.DOCUMENT)
+	public IBundleProvider getDocumentForComposition(
 
 			javax.servlet.http.HttpServletRequest theServletRequest) {
 		//@formatter:on
 
 		startRequest(theServletRequest);
 		try {
-			((IFhirResourceDaoComposition<Composition>)getDao()).getDocumentForComposition(theServletRequest, null, null, null, null, null, null);
-			return null;
+			return ((IFhirResourceDaoComposition<Composition>)getDao()).getDocumentForComposition(theServletRequest, null, null, null, null, null, null);
 		} finally {
 			endRequest(theServletRequest);
 		}

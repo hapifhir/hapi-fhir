@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.r5;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.r5;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -79,7 +80,7 @@ public class TransactionProcessorVersionAdapterR5 implements ITransactionProcess
 		try {
 			resp.setType(Bundle.BundleType.fromCode(theBundleType));
 		} catch (FHIRException theE) {
-			throw new InternalErrorException("Unknown bundle type: " + theBundleType);
+			throw new InternalErrorException(Msg.code(1125) + "Unknown bundle type: " + theBundleType);
 		}
 		return resp;
 	}
@@ -112,6 +113,12 @@ public class TransactionProcessorVersionAdapterR5 implements ITransactionProcess
 	@Override
 	public String getFullUrl(Bundle.BundleEntryComponent theEntry) {
 		return theEntry.getFullUrl();
+	}
+
+
+	@Override
+	public void setFullUrl(Bundle.BundleEntryComponent theEntry, String theFullUrl) {
+		theEntry.setFullUrl(theFullUrl);
 	}
 
 	@Override

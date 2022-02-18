@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 3283
+title: "Calling delete on a non-existent resource should not return a 404 (not found)."

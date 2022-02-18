@@ -3,6 +3,11 @@ package org.hl7.fhir.r5.model;
 import ca.uhn.fhir.context.FhirContext;
 import org.junit.jupiter.api.Test;
 
+import java.util.Set;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -27,6 +32,20 @@ public class ModelR5Test {
 		} catch (IllegalArgumentException e) {
 			// good
 		}
+	}
+
+
+	@Test
+	public void testCompartmentsPopulated() {
+		Set<String> compartments = ourCtx
+			.getResourceDefinition("Observation")
+			.getSearchParam("performer")
+			.getProvidesMembershipInCompartments();
+		assertThat(compartments.toString(), compartments, containsInAnyOrder(
+			"Practitioner",
+			"Patient",
+			"RelatedPerson"
+		));
 	}
 
 

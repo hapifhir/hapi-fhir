@@ -4,7 +4,7 @@ package ca.uhn.fhir.cql.r4.helper;
  * #%L
  * HAPI FHIR JPA Server - Clinical Quality Language
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.cql.r4.helper;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.cql.common.provider.LibraryContentProvider;
 import ca.uhn.fhir.cql.common.provider.LibraryResolutionProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -138,8 +139,7 @@ public class LibraryHelper {
 		}
 
 		if (libraries.isEmpty()) {
-			throw new IllegalArgumentException(
-					String.format("Could not load library source for libraries referenced in %s.", measure.getId()));
+			throw new IllegalArgumentException(Msg.code(1677) + String.format("Could not load library source for libraries referenced in %s.", measure.getId()));
 		}
 
 		for (RelatedArtifact artifact : primaryLibrary.getRelatedArtifact()) {
@@ -213,8 +213,7 @@ public class LibraryHelper {
 		Library library = resolveLibraryById(id, libraryLoader, libraryResourceProvider, theRequestDetails);
 
 		if (library == null) {
-			throw new IllegalArgumentException(
-				String.format("Could not resolve primary library for Measure/%s.", measure.getIdElement().getIdPart()));
+			throw new IllegalArgumentException(Msg.code(1678) + String.format("Could not resolve primary library for Measure/%s.", measure.getIdElement().getIdPart()));
 		}
 
 		return library;
@@ -228,7 +227,7 @@ public class LibraryHelper {
 		Library library = resolveLibraryById(id, libraryLoader, libraryResourceProvider, theRequestDetails);
 
 		if (library == null) {
-			throw new IllegalArgumentException(String.format("Could not resolve primary library for PlanDefinition/%s",
+			throw new IllegalArgumentException(Msg.code(1679) + String.format("Could not resolve primary library for PlanDefinition/%s",
 				planDefinition.getIdElement().getIdPart()));
 		}
 

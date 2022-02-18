@@ -1,0 +1,20 @@
+{
+	"version": "1",
+	"mdmTypes": ["Organization"],
+	"candidateSearchParams": [],
+	"candidateFilterSearchParams": [],
+	"matchFields": [
+		{
+			"name": "name-prefix",
+			"resourceType": "Organization",
+			"resourcePath": "name",
+			"matcher": {
+				"algorithm": "STRING"
+			}
+		}
+	],
+	"matchResultMap": {},
+	"eidSystems": {
+		"Patient": "http://hello.com/uri"
+	}
+}

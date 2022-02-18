@@ -1,0 +1,9 @@
+---
+type: add
+issue: 3100
+backport: 5.5.3
+jira: SMILE-3151
+title: "Previously, only contained resources that are referenced directly by the containing resource were being indexed.
+This enhancement indexes the fields of contained resources that are referenced by other contained resources and
+uses these new indices in chained searches. Note: in order to make use of this new capability, it must be enabled via
+a configuration parameter and the repository must be re-indexed."

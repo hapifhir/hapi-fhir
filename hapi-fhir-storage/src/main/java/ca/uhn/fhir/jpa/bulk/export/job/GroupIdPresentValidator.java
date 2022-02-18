@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.bulk.export.job;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.bulk.export.job;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import org.slf4j.Logger;
 import org.springframework.batch.core.JobParameters;
@@ -35,7 +36,7 @@ public class GroupIdPresentValidator implements JobParametersValidator {
 	public void validate(JobParameters theJobParameters) throws JobParametersInvalidException {
 
 		if (theJobParameters == null || theJobParameters.getString(BatchConstants.BULK_EXPORT_GROUP_ID_PARAMETER) == null) {
-			throw new JobParametersInvalidException("Group Bulk Export jobs must have a " + BatchConstants.BULK_EXPORT_GROUP_ID_PARAMETER + " attribute");
+			throw new JobParametersInvalidException(Msg.code(514) + "Group Bulk Export jobs must have a " + BatchConstants.BULK_EXPORT_GROUP_ID_PARAMETER + " attribute");
 		} else {
 			ourLog.debug("detected we are running in group mode with group id [{}]", theJobParameters.getString(BatchConstants.BULK_EXPORT_GROUP_ID_PARAMETER));
 		}

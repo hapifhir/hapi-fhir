@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.term.custom;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.term.custom;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
@@ -116,7 +117,7 @@ public class CustomTerminologySet {
 
 	private void validateNoCycleOrThrowInvalidRequest(Set<String> theCodes, TermConcept next) {
 		if (!theCodes.add(next.getCode())) {
-			throw new InvalidRequestException("Cycle detected around code " + next.getCode());
+			throw new InvalidRequestException(Msg.code(926) + "Cycle detected around code " + next.getCode());
 		}
 		validateNoCycleOrThrowInvalidRequest(theCodes, next.getChildCodes());
 	}

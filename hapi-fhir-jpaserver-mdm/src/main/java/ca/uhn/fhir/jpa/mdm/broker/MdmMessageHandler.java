@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.mdm.broker;
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.mdm.broker;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -92,7 +93,7 @@ public class MdmMessageHandler implements MessageHandler {
 	}
 
 	private void matchMdmAndUpdateLinks(ResourceModifiedMessage theMsg) {
-		String resourceType = theMsg.getId(myFhirContext).getResourceType();
+		String resourceType = theMsg.getPayloadId(myFhirContext).getResourceType();
 		validateResourceType(resourceType);
 		MdmTransactionContext mdmContext = createMdmContext(theMsg, resourceType);
 		try {
@@ -149,14 +150,14 @@ public class MdmMessageHandler implements MessageHandler {
 			case DELETE:
 			default:
 				ourLog.trace("Not creating an MdmTransactionContext for {}", theMsg.getOperationType());
-				throw new InvalidRequestException("We can't handle non-update/create operations in MDM");
+				throw new InvalidRequestException(Msg.code(734) + "We can't handle non-update/create operations in MDM");
 		}
 		return new MdmTransactionContext(transactionLogMessages, mdmOperation, theResourceType);
 	}
 
 	private void validateResourceType(String theResourceType) {
 		if (!myMdmSettings.isSupportedMdmType(theResourceType)) {
-			throw new IllegalStateException("Unsupported resource type submitted to MDM matching queue: " + theResourceType);
+			throw new IllegalStateException(Msg.code(735) + "Unsupported resource type submitted to MDM matching queue: " + theResourceType);
 		}
 	}
 

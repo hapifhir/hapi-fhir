@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.packages;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
@@ -75,12 +76,12 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 
 		byte[] bytes = loadResourceAsByteArray("/packages/erroneous-ig.tar.gz");
 
-		// Unknown base of StructureDefinitions
+		// That patient profile in this NPM package has an invalid base
 		try {
 			igInstaller.install(new PackageInstallationSpec().setName("erroneous-ig").setVersion("1.0.2").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL).setPackageContents(bytes));
 			fail();
 		} catch (ImplementationGuideInstallationException e) {
-			assertThat(e.getMessage(), containsString("Failure when generating snapshot of StructureDefinition"));
+			assertThat(e.getMessage(), containsString("Could not load NPM package erroneous-ig#1.0.2"));
 		}
 	}
 
@@ -185,7 +186,7 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 			);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Package ID nictiz.fhir.nl.stu3.questionnaires doesn't match expected: blah", e.getMessage());
+			assertEquals(Msg.code(1297) + "Package ID nictiz.fhir.nl.stu3.questionnaires doesn't match expected: blah", e.getMessage());
 		}
 
 	}
@@ -200,7 +201,7 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 			);
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertEquals("Received HTTP 404 from URL: http://localhost:" + myPort + "/foo.tgz", e.getMessage());
+			assertEquals(Msg.code(1303) + "Received HTTP 404 from URL: http://localhost:" + myPort + "/foo.tgz", e.getMessage());
 		}
 
 	}

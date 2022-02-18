@@ -1,10 +1,12 @@
 package ca.uhn.fhir.jpa.migrate;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddTableRawSqlTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTest;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import org.flywaydb.core.api.FlywayException;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -38,7 +40,7 @@ public class SchemaMigratorTest extends BaseTest {
 			schemaMigrator.validate();
 			fail();
 		} catch (ConfigurationException e) {
-			assertThat(e.getMessage(), startsWith("The database schema for "));
+			assertThat(e.getMessage(), startsWith(Msg.code(27) + "The database schema for "));
 			assertThat(e.getMessage(), endsWith(" is out of date.  Current database schema version is unknown.  Schema version required by application is 1.1.  Please run the database migrator."));
 		}
 
@@ -72,7 +74,9 @@ public class SchemaMigratorTest extends BaseTest {
 		SchemaMigrator schemaMigrator = createSchemaMigrator("SOMETABLE", "create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))", "2");
 		schemaMigrator.migrate();
 
-		schemaMigrator = createSchemaMigrator("SOMETABLE", "create table SOMEOTHERTABLE (PID bigint not null, TEXTCOL varchar(255))", "1");
+		AddTableRawSqlTask task1 = createAddTableTask("SOMEOTHERTABLE", "create table SOMEOTHERTABLE (PID bigint not null, TEXTCOL varchar(255))", "1");
+		AddTableRawSqlTask task2 = createAddTableTask("SOMETABLE", "create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))", "2");
+		schemaMigrator = createSchemaMigrator(task1, task2);
 		schemaMigrator.setStrictOrder(true);
 
 		try {
@@ -147,11 +151,22 @@ public class SchemaMigratorTest extends BaseTest {
 
 	@Nonnull
 	private SchemaMigrator createSchemaMigrator(String theTableName, String theSql, String theSchemaVersion) {
+		AddTableRawSqlTask task = createAddTableTask(theTableName, theSql, theSchemaVersion);
+		return createSchemaMigrator(task);
+	}
+
+	@Nonnull
+	private SchemaMigrator createSchemaMigrator(BaseTask... tasks) {
+		SchemaMigrator retVal = new SchemaMigrator(getUrl(), SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, getDataSource(), new Properties(), Lists.newArrayList(tasks));
+		retVal.setDriverType(getDriverType());
+		return retVal;
+	}
+
+	@Nonnull
+	private AddTableRawSqlTask createAddTableTask(String theTableName, String theSql, String theSchemaVersion) {
 		AddTableRawSqlTask task = new AddTableRawSqlTask("1", theSchemaVersion);
 		task.setTableName(theTableName);
 		task.addSql(getDriverType(), theSql);
-		SchemaMigrator retval = new SchemaMigrator(getUrl(), SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, getDataSource(), new Properties(), ImmutableList.of(task));
-		retval.setDriverType(getDriverType());
-		return retval;
+		return task;
 	}
 }

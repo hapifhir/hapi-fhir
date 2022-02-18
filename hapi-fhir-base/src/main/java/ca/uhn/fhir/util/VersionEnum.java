@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,8 +77,14 @@ public enum VersionEnum {
 	V5_5_0,
 	V5_5_1,
 	V5_5_2,
-	V5_6_0
-
+	V5_5_3,
+	V5_5_4,
+	V5_5_5,
+	V5_6_0,
+	V5_6_1,
+	V5_6_2,
+	V5_7_0,
+	V6_0_0
 	;
 
 	public static VersionEnum latestVersion() {

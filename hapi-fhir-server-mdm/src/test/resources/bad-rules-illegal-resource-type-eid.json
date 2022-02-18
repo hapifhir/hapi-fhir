@@ -1,0 +1,20 @@
+{
+	"version": "1",
+	"mdmTypes": ["Organization"],
+	"candidateSearchParams": [],
+	"candidateFilterSearchParams": [],
+	"matchFields": [
+		{
+			"name": "name-prefix",
+			"resourceType": "Organization",
+			"resourcePath": "name",
+			"matcher": {
+				"algorithm": "STRING"
+			}
+		}
+	],
+	"matchResultMap": {},
+	"eidSystems": {
+		"not-a-resource": "http://hello.com/uri"
+	}
+}

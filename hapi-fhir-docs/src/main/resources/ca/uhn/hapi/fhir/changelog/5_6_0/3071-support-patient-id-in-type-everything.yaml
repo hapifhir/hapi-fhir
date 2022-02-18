@@ -1,0 +1,6 @@
+---
+type: add
+jira: SMILE-3097
+issue: 3071
+title: "A new parameter, `_id` has been added to the `Patient/$everything` type-level operation. This allows you to pass in multiple patients as arguments, e.g. `[base]/Patient/$everything?_id=1,2,3`.
+This call would retrieve everything for patients with IDs 1,2, and 3."

@@ -4,7 +4,7 @@ package ca.uhn.hapi.converters.server;
  * #%L
  * HAPI FHIR - Converter
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.hapi.converters.server;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IResource;
@@ -115,7 +116,7 @@ public class VersionedApiConverterInterceptor extends InterceptorAdapter {
 				converted = VersionConvertorFactory_10_30.convertResource(toDstu2(responseResource), advisor30);
 			}
 		} catch (FHIRException e) {
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(73) + e);
 		}
 
 		if (converted != null) {

@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor.s13n.standardizers;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.interceptor.s13n.standardizers;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.interceptor.ConfigLoader;
 
 import java.util.HashSet;
@@ -77,12 +78,12 @@ public class NoiseCharacters {
 
 	public NoiseCharacters addRange(String theRange) {
 		if (!theRange.contains("-")) {
-			throw new IllegalArgumentException(String.format("Invalid range %s", theRange));
+			throw new IllegalArgumentException(Msg.code(350) + String.format("Invalid range %s", theRange));
 		}
 
 		String[] range = theRange.split("-");
 		if (range.length < 2) {
-			throw new IllegalArgumentException(String.format("Invalid range %s", theRange));
+			throw new IllegalArgumentException(Msg.code(351) + String.format("Invalid range %s", theRange));
 		}
 
 		addRange(range[0].trim(), range[1].trim());
@@ -94,7 +95,7 @@ public class NoiseCharacters {
 		int upper = toInt(theUpperBound);
 
 		if (lower > upper) {
-			throw new IllegalArgumentException(String.format("Invalid character range %s-%s", theLowerBound, theUpperBound));
+			throw new IllegalArgumentException(Msg.code(352) + String.format("Invalid character range %s-%s", theLowerBound, theUpperBound));
 		}
 
 		if (upper - lower >= RANGE_THRESHOLD) {
@@ -110,7 +111,7 @@ public class NoiseCharacters {
 
 	private int toInt(String theLiteral) {
 		if (!theLiteral.startsWith("#x")) {
-			throw new IllegalArgumentException("Unable to parse " + theLiteral);
+			throw new IllegalArgumentException(Msg.code(353) + "Unable to parse " + theLiteral);
 		}
 
 		return Integer.parseInt(theLiteral.substring(2), 16);

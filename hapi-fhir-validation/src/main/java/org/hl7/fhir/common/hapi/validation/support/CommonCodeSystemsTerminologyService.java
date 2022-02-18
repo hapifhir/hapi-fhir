@@ -1,5 +1,6 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
@@ -212,7 +213,6 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 
 	@Override
 	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode, String theDisplayLanguage) {
-
 		Map<String, String> map;
 		switch (theSystem) {
 			case LANGUAGES_CODESYSTEM_URL:
@@ -254,9 +254,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	}
 
 	private LookupCodeResult lookupLanguageCode(String theCode) {
-		Map<String, String> languagesMap = myLanguagesLanugageMap;
-		Map<String, String> regionsMap = myLanguagesRegionMap;
-		if (languagesMap == null || regionsMap == null) {
+		if (myLanguagesLanugageMap == null || myLanguagesRegionMap == null) {
 			initializeBcp47LanguageMap();
 		}
 
@@ -266,8 +264,10 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		String region;
 
 		if (hasRegionAndCodeSegments) {
-			language = myLanguagesLanugageMap.get(theCode.substring(0, langRegionSeparatorIndex));
-			region = myLanguagesRegionMap.get(theCode.substring(langRegionSeparatorIndex + 1));
+			// we look for languages in lowercase only
+			// this will allow case insensitivity for language portion of code
+			language = myLanguagesLanugageMap.get(theCode.substring(0, langRegionSeparatorIndex).toLowerCase());
+			region = myLanguagesRegionMap.get(theCode.substring(langRegionSeparatorIndex + 1).toUpperCase());
 
 			if (language == null || region == null) {
 				//In case the user provides both a language and a region, they must both be valid for the lookup to succeed.
@@ -278,7 +278,8 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 			}
 		} else {
 			//In case user has only provided a language, we build the lookup from only that.
-			language = myLanguagesLanugageMap.get(theCode);
+			//NB: we only use the lowercase version of the language
+			language = myLanguagesLanugageMap.get(theCode.toLowerCase());
 			if (language == null) {
 				ourLog.warn("Couldn't find a valid bcp47 language from code: {}", theCode);
 				return buildNotFoundLookupCodeResult(theCode);
@@ -318,7 +319,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		try {
 			map = (ArrayNode) new ObjectMapper().readTree(input);
 		} catch (JsonProcessingException e) {
-			throw new ConfigurationException(e);
+			throw new ConfigurationException(Msg.code(694) + e);
 		}
 
 		languagesMap = new HashMap<>();
@@ -490,7 +491,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 			}
 			case DSTU2_1:
 			default:
-				throw new IllegalArgumentException("Can not handle version: " + theValueSet.getStructureFhirVersionEnum());
+				throw new IllegalArgumentException(Msg.code(695) + "Can not handle version: " + theValueSet.getStructureFhirVersionEnum());
 		}
 		return url;
 	}
@@ -508,7 +509,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 			}
 			case DSTU3:
 			default:
-				throw new IllegalArgumentException("Can not handle version: " + theCodeSystem.getStructureFhirVersionEnum());
+				throw new IllegalArgumentException(Msg.code(696) + "Can not handle version: " + theCodeSystem.getStructureFhirVersionEnum());
 		}
 		return url;
 	}

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.validation;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.validation;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -35,7 +36,8 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r5.elementmodel.Element;
 import org.hl7.fhir.r5.elementmodel.JsonParser;
 import org.hl7.fhir.r5.model.CanonicalResource;
-import org.hl7.fhir.r5.utils.IResourceValidator;
+import org.hl7.fhir.r5.utils.validation.IResourceValidator;
+import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,23 +48,21 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.Locale;
 
-public class ValidatorResourceFetcher implements IResourceValidator.IValidatorResourceFetcher {
+public class ValidatorResourceFetcher implements IValidatorResourceFetcher {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ValidatorResourceFetcher.class);
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
-	private ValidationSettings myValidationSettings;
-	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
 	private IValidationSupport myValidationSupport;
-	private VersionSpecificWorkerContextWrapper myVersionSpecificCOntextWrapper;
+	private VersionSpecificWorkerContextWrapper myVersionSpecificContextWrapper;
 
 	@PostConstruct
 	public void start() {
-		myVersionSpecificCOntextWrapper = VersionSpecificWorkerContextWrapper.newVersionSpecificWorkerContextWrapper(myValidationSupport);
+		myVersionSpecificContextWrapper = VersionSpecificWorkerContextWrapper.newVersionSpecificWorkerContextWrapper(myValidationSupport);
 	}
 
 	@Override
@@ -79,21 +79,10 @@ public class ValidatorResourceFetcher implements IResourceValidator.IValidatorRe
 		}
 
 		try {
-			return new JsonParser(myVersionSpecificCOntextWrapper).parse(myFhirContext.newJsonParser().encodeResourceToString(target), resourceType);
+			return new JsonParser(myVersionSpecificContextWrapper).parse(myFhirContext.newJsonParser().encodeResourceToString(target), resourceType);
 		} catch (Exception e) {
-			throw new FHIRException(e);
+			throw new FHIRException(Msg.code(576) + e);
 		}
-	}
-
-	@Override
-	public IResourceValidator.ReferenceValidationPolicy validationPolicy(IResourceValidator iResourceValidator,
-																								Object appContext, String path, String url) {
-		int slashIdx = url.indexOf("/");
-		if (slashIdx > 0 && myFhirContext.getResourceTypes().contains(url.substring(0, slashIdx))) {
-			return myValidationSettings.getLocalReferenceValidationDefaultPolicy();
-		}
-
-		return IResourceValidator.ReferenceValidationPolicy.IGNORE;
 	}
 
 	@Override
@@ -103,11 +92,11 @@ public class ValidatorResourceFetcher implements IResourceValidator.IValidatorRe
 
 	@Override
 	public byte[] fetchRaw(IResourceValidator iResourceValidator, String s) throws MalformedURLException, IOException {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(577));
 	}
 
 	@Override
-	public IResourceValidator.IValidatorResourceFetcher setLocale(Locale locale) {
+	public IValidatorResourceFetcher setLocale(Locale locale) {
 		// ignore
 		return this;
 	}

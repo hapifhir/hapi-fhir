@@ -200,7 +200,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 			.returnBundle(Bundle.class)
 			.count(3)
 			.execute();
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).setEncodeElements(Sets.newHashSet("Bundle.link")).encodeResourceToString(bundle));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).setEncodeElements(Sets.newHashSet("Bundle.link")).encodeResourceToString(bundle));
 		assertThat(toUnqualifiedVersionlessIds(bundle).toString(), toUnqualifiedVersionlessIds(bundle), contains(observationIds.get(0), observationIds.get(1), observationIds.get(2), patientIdA));
 
 		// Fetch the next 3
@@ -208,7 +208,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 			.loadPage()
 			.next(bundle)
 			.execute();
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).setEncodeElements(Sets.newHashSet("Bundle.link")).encodeResourceToString(bundle));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).setEncodeElements(Sets.newHashSet("Bundle.link")).encodeResourceToString(bundle));
 		assertThat(toUnqualifiedVersionlessIds(bundle).toString(), toUnqualifiedVersionlessIds(bundle), contains(observationIds.get(3), observationIds.get(4), observationIds.get(5), patientIdA));
 
 		// Fetch the next 3 - This should fail as the last observation has a cross-partition reference

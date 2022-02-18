@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
@@ -29,6 +30,8 @@ import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.DateUtils;
+
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
@@ -86,7 +89,7 @@ public class DatePredicateBuilder extends BaseSearchParamPredicateBuilder {
 				range,
 				theOperation);
 		} else {
-			throw new IllegalArgumentException("Invalid token type: " + theParam.getClass());
+			throw new IllegalArgumentException(Msg.code(1251) + "Invalid token type: " + theParam.getClass());
 		}
 
 		return p;
@@ -111,7 +114,7 @@ public class DatePredicateBuilder extends BaseSearchParamPredicateBuilder {
 		 * If all present search parameters are of DAY precision, and {@link ca.uhn.fhir.jpa.model.entity.ModelConfig#getUseOrdinalDatesForDayPrecisionSearches()} is true,
 		 * then we attempt to use the ordinal field for date comparisons instead of the date field.
 		 */
-		boolean isOrdinalComparison = isNullOrDayPrecision(lowerBound) && isNullOrDayPrecision(upperBound) && myDaoConfig.getModelConfig().getUseOrdinalDatesForDayPrecisionSearches();
+		boolean isOrdinalComparison = isNullOrDatePrecision(lowerBound) && isNullOrDatePrecision(upperBound) && myDaoConfig.getModelConfig().getUseOrdinalDatesForDayPrecisionSearches();
 
 		Condition lt;
 		Condition gt;
@@ -125,11 +128,19 @@ public class DatePredicateBuilder extends BaseSearchParamPredicateBuilder {
 			highValueField = DatePredicateBuilder.ColumnEnum.HIGH_DATE_ORDINAL;
 			genericLowerBound = lowerBoundAsOrdinal;
 			genericUpperBound = upperBoundAsOrdinal;
+			if (upperBound != null && upperBound.getPrecision().ordinal() <= TemporalPrecisionEnum.MONTH.ordinal()) {
+				genericUpperBound = DateUtils.getCompletedDate(upperBound.getValueAsString()).getRight().replace("-", "");
+				
+			}
 		} else {
 			lowValueField = DatePredicateBuilder.ColumnEnum.LOW;
 			highValueField = DatePredicateBuilder.ColumnEnum.HIGH;
 			genericLowerBound = lowerBoundInstant;
 			genericUpperBound = upperBoundInstant;
+			if (upperBound != null && upperBound.getPrecision().ordinal() <= TemporalPrecisionEnum.MONTH.ordinal()) {
+				String theCompleteDateStr =  DateUtils.getCompletedDate(upperBound.getValueAsString()).getRight().replace("-", "");
+				genericUpperBound = DateUtils.parseDate(theCompleteDateStr);
+			}
 		}
 
 		if (theOperation == SearchFilterParser.CompareOperation.lt || theOperation == SearchFilterParser.CompareOperation.le) {
@@ -145,7 +156,7 @@ public class DatePredicateBuilder extends BaseSearchParamPredicateBuilder {
 					ub = ComboCondition.or(ub, theFrom.createPredicate(highValueField, ParamPrefixEnum.LESSTHAN_OR_EQUALS, genericUpperBound));
 				}
 			} else {
-				throw new InvalidRequestException("lowerBound and upperBound value not correctly specified for comparing " + theOperation);
+				throw new InvalidRequestException(Msg.code(1252) + "lowerBound and upperBound value not correctly specified for comparing " + theOperation);
 			}
 		} else if (theOperation == SearchFilterParser.CompareOperation.gt || theOperation == SearchFilterParser.CompareOperation.ge) {
 			// use upper bound first, e.g value between 6 and 10
@@ -160,12 +171,12 @@ public class DatePredicateBuilder extends BaseSearchParamPredicateBuilder {
 					lb = ComboCondition.or(lb, theFrom.createPredicate(lowValueField, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, genericLowerBound));
 				}
 			} else {
-				throw new InvalidRequestException("upperBound and lowerBound value not correctly specified for compare theOperation");
+				throw new InvalidRequestException(Msg.code(1253) + "upperBound and lowerBound value not correctly specified for compare theOperation");
 			}
 		} else if (theOperation == SearchFilterParser.CompareOperation.ne) {
 			if ((lowerBoundInstant == null) ||
 				(upperBoundInstant == null)) {
-				throw new InvalidRequestException("lowerBound and/or upperBound value not correctly specified for compare theOperation");
+				throw new InvalidRequestException(Msg.code(1254) + "lowerBound and/or upperBound value not correctly specified for compare theOperation");
 			}
 			lt = theFrom.createPredicate(lowValueField, ParamPrefixEnum.LESSTHAN, genericLowerBound);
 			gt = theFrom.createPredicate(highValueField, ParamPrefixEnum.GREATERTHAN, genericUpperBound);
@@ -197,7 +208,7 @@ public class DatePredicateBuilder extends BaseSearchParamPredicateBuilder {
 				}
 			}
 		} else {
-			throw new InvalidRequestException(String.format("Unsupported operator specified, operator=%s",
+			throw new InvalidRequestException(Msg.code(1255) + String.format("Unsupported operator specified, operator=%s",
 				theOperation.name()));
 		}
 		if (isOrdinalComparison) {
@@ -219,8 +230,8 @@ public class DatePredicateBuilder extends BaseSearchParamPredicateBuilder {
 		return myColumnValueLow;
 	}
 
-	private boolean isNullOrDayPrecision(DateParam theDateParam) {
-		return theDateParam == null || theDateParam.getPrecision().ordinal() == TemporalPrecisionEnum.DAY.ordinal();
+	private boolean isNullOrDatePrecision(DateParam theDateParam) {
+		return theDateParam == null || theDateParam.getPrecision().ordinal() <= TemporalPrecisionEnum.DAY.ordinal();
 	}
 
 	private Condition createPredicate(ColumnEnum theColumn, ParamPrefixEnum theComparator, Object theValue) {
@@ -240,7 +251,7 @@ public class DatePredicateBuilder extends BaseSearchParamPredicateBuilder {
 				column = myColumnValueHighDateOrdinal;
 				break;
 			default:
-				throw new IllegalArgumentException();
+				throw new IllegalArgumentException(Msg.code(1256));
 		}
 
 		return createConditionForValueWithComparator(theComparator, column, theValue);

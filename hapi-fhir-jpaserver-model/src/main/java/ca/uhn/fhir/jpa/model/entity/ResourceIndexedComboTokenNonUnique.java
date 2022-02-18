@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import org.apache.commons.lang3.builder.CompareToBuilder;
@@ -82,6 +83,7 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex implem
 		myPartitionSettings = thePartitionSettings;
 		myResource = theEntity;
 		myIndexString = theQueryString;
+		calculateHashes();
 	}
 
 	public String getIndexString() {
@@ -112,7 +114,7 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex implem
 
 	@Override
 	public <T extends BaseResourceIndex> void copyMutableValuesFrom(T theSource) {
-		throw new IllegalStateException();
+		throw new IllegalStateException(Msg.code(1528));
 	}
 
 	@Override
@@ -126,7 +128,16 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex implem
 	}
 
 	@Override
+	public void clearHashes() {
+		myHashComplete = null;
+	}
+
+	@Override
 	public void calculateHashes() {
+		if (myHashComplete != null) {
+			return;
+		}
+
 		PartitionSettings partitionSettings = getPartitionSettings();
 		PartitionablePartitionId partitionId = getPartitionId();
 		String queryString = myIndexString;

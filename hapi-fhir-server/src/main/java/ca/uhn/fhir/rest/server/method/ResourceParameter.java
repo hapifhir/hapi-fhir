@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.method;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.method;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -99,7 +100,7 @@ public class ResourceParameter implements IParameter {
 					return IOUtils.toString(createRequestReader(theRequest));
 				} catch (IOException e) {
 					// Shouldn't happen since we're reading from a byte array
-					throw new InternalErrorException("Failed to load request", e);
+					throw new InternalErrorException(Msg.code(445) + "Failed to load request", e);
 				}
 			case BODY_BYTE_ARRAY:
 				return theRequest.loadRequestContents();
@@ -154,7 +155,7 @@ public class ResourceParameter implements IParameter {
 			if (ctValue != null) {
 				if (ctValue.startsWith("application/x-www-form-urlencoded")) {
 					String msg = theRequest.getServer().getFhirContext().getLocalizer().getMessage(ResourceParameter.class, "invalidContentTypeInRequest", ctValue, theMethodBinding.getRestOperationType());
-					throw new InvalidRequestException(msg);
+					throw new InvalidRequestException(Msg.code(446) + msg);
 				}
 			}
 			if (isBlank(ctValue)) {
@@ -163,17 +164,17 @@ public class ResourceParameter implements IParameter {
 					body = IOUtils.toString(requestReader);
 				} catch (IOException e) {
 					// This shouldn't happen since we're reading from a byte array..
-					throw new InternalErrorException(e);
+					throw new InternalErrorException(Msg.code(447) + e);
 				}
 				if (isBlank(body)) {
 					return null;
 				}
 
 				String msg = ctx.getLocalizer().getMessage(ResourceParameter.class, "noContentTypeInRequest", restOperationType);
-				throw new InvalidRequestException(msg);
+				throw new InvalidRequestException(Msg.code(448) + msg);
 			} else {
 				String msg = ctx.getLocalizer().getMessage(ResourceParameter.class, "invalidContentTypeInRequest", ctValue, restOperationType);
-				throw new InvalidRequestException(msg);
+				throw new InvalidRequestException(Msg.code(449) + msg);
 			}
 		}
 
@@ -188,7 +189,7 @@ public class ResourceParameter implements IParameter {
 			}
 		} catch (DataFormatException e) {
 			String msg = ctx.getLocalizer().getMessage(ResourceParameter.class, "failedToParseRequest", encoding.name(), e.getMessage());
-			throw new InvalidRequestException(msg);
+			throw new InvalidRequestException(Msg.code(450) + msg);
 		}
 
 		return retVal;

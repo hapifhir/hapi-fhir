@@ -1,0 +1,126 @@
+@startuml styling
+
+'These are Alphora colors, they need
+' to be updated to reflect the HAPI style guide
+!$white = "#fff"
+
+!$greylt000 = "#F4F6F5" 
+!$greylt100 = "#DDE3E0"
+!$greylt200 = "#C7D1CC" 
+!$greylt300 = "#B0BFB8" 
+!$grey = $greylt000
+
+!$greydk000 = "#404F47"
+!$greydk100 = "#2E3833"
+!$greydk200 = "#1C221F" 
+!$greydk250 = "#121614"
+!$greydk300 = "#090B0A"
+!$black = $greydk300
+
+!$blue000 = "#4B7DD2"
+!$blue100 = "#3064BF"
+!$blue200 = "#2956A3"
+!$blue300 = "#214583"
+!$blue = $blue100
+
+!$purple000 = "#645FAB"
+!$purple100 = "#524D93"
+!$purple200 = "#433F78"
+!$purple300 = "#34315E"
+!$purple = $purple100
+
+!$green000 = "#568A67"
+!$green100 = "#477154"
+!$green200 = "#375841"
+!$green300 = "#273F2F"
+!$green = $green100
+
+!$yellow000 = "#FBB337"
+!$yellow100 = "#FAA40F"
+!$yellow200 = "#DC8D04"
+!$yellow300 = "#B47304"
+!$yellow = $yellow100
+
+!$red000 = "#FF6633"
+!$red100 = "#FF4000"
+!$red200 = "#E03800"
+!$red300 = "#B82E00"
+!$red = $red100
+
+skinparam {
+  defaultFontName Source Sans Pro
+
+  TitleFontStyle bold
+
+  BackgroundColor $white
+  Shadowing false
+
+	ArrowColor $greydk000
+  ArrowFontColor $black
+  ArrowFontSize 12
+  ArrowFont Open Sans
+
+  DelayFontColor $black
+  DelayFontSize 12
+
+  ActorBorderColor $black
+  ActorBackgroundColor $white
+  ActorFontColor $black
+  ActorFontSize 14
+  ActorFontStyle bold
+
+	ParticipantBorderColor $black
+  ParticipantBackgroundColor $yellow
+  ParticipantFontColor $black
+  ParticipantFontSize 14
+  ParticipantFontStyle bold
+
+  DatabaseBorderColor $black
+  DatabaseBackgroundColor $yellow
+  DatabaseFontColor $black
+  DatabaseFontSize 14
+  DatabaseFontStyle bold
+
+}
+
+
+skinparam Sequence {
+  MessageAlign center
+
+  LifeLineBorderColor $black
+    ' loop, alt, ref
+  GroupBodyBackgroundColor $white
+  GroupBackgroundColor $blue
+  GroupHeaderFontColor $white
+  GroupHeaderFontSize 12
+  GroupFontSize 12
+
+  BoxBackgroundColor $greylt000
+  BoxBorderColor $black
+  BoxFontColor $black
+  BoxFontSize 12
+
+
+  ReferenceBorderColor $black
+  ReferenceFontColor $black
+  ReferenceFontSize 12
+  ReferenceHeaderBackgroundColor $blue
+
+  DividerBackgroundColor $blue
+  DividerBorderColor $black
+  DividerFontColor $white
+  DividerFontSize 12
+}
+
+skinparam Note {
+  BackgroundColor $green
+  BorderColor $black
+  FontColor $white
+  FontStyle bold
+  FontSize 12
+  Font Open Sans
+}
+
+hide footbox
+
+@enduml

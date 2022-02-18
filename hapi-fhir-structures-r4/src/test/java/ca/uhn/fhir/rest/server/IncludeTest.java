@@ -507,22 +507,5 @@ public class IncludeTest {
 		ourClient = builder.build();
 
 	}
-
-	public static void main(String[] args) {
-
-		Organization org = new Organization();
-		org.setId("Organization/65546");
-		org.getNameElement().setValue("Contained Test Organization");
-
-		Patient patient = new Patient();
-		patient.setId("Patient/1333");
-		patient.addIdentifier().setSystem("urn:mrns").setValue("253345");
-		patient.getManagingOrganization().setResource(patient);
-
-		System.out.println(FhirContext.forR4().newXmlParser().setPrettyPrint(true).encodeResourceToString(patient));
-
-		patient.getManagingOrganization().getReference();
-
-	}
-
+	
 }

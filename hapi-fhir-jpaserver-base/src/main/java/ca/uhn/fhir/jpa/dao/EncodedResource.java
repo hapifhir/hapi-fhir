@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ class EncodedResource {
 	private boolean myChanged;
 	private byte[] myResource;
 	private ResourceEncodingEnum myEncoding;
+	private String myResourceText;
 
 	public ResourceEncodingEnum getEncoding() {
 		return myEncoding;
@@ -36,11 +37,11 @@ class EncodedResource {
 		myEncoding = theEncoding;
 	}
 
-	public byte[] getResource() {
+	public byte[] getResourceBinary() {
 		return myResource;
 	}
 
-	public void setResource(byte[] theResource) {
+	public void setResourceBinary(byte[] theResource) {
 		myResource = theResource;
 	}
 
@@ -52,4 +53,11 @@ class EncodedResource {
 		myChanged = theChanged;
 	}
 
+	public String getResourceText() {
+		return myResourceText;
+	}
+
+	public void setResourceText(String theResourceText) {
+		myResourceText = theResourceText;
+	}
 }

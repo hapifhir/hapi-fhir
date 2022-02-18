@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.tenant;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.tenant;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -59,7 +60,7 @@ public class UrlBaseTenantIdentificationStrategy implements ITenantIdentificatio
 
 		if (tenantId == null) {
 			HapiLocalizer localizer = theRequestDetails.getServer().getFhirContext().getLocalizer();
-			throw new InvalidRequestException(localizer.getMessage(RestfulServer.class, "rootRequest.multitenant"));
+			throw new InvalidRequestException(Msg.code(307) + localizer.getMessage(RestfulServer.class, "rootRequest.multitenant"));
 		}
 	}
 

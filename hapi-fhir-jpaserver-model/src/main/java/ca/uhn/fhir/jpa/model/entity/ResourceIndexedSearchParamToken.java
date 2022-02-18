@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -34,10 +35,14 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextFi
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -54,7 +59,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
 	 * IDX_SP_TOKEN_UNQUAL
 	 */
 
-	// TODO PERF Recommend to drop this index:
+	// TODO PERF Recommend to drop this index (added by JA - I don't actually think we even need the identity hash for this type, we could potentially drop the column too):
 	@Index(name = "IDX_SP_TOKEN_HASH", columnList = "HASH_IDENTITY"),
 	@Index(name = "IDX_SP_TOKEN_HASH_S", columnList = "HASH_SYS"),
 	@Index(name = "IDX_SP_TOKEN_HASH_SV", columnList = "HASH_SYS_AND_VALUE"),
@@ -106,6 +111,11 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	@Column(name = "HASH_VALUE", nullable = true)
 	private Long myHashValue;
 
+	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = {})
+	@JoinColumn(foreignKey = @ForeignKey(name = "FK7ULX3J1GG3V7MAQREJGC7YBC4"),
+		name = "RES_ID", referencedColumnName = "RES_ID", nullable = false)
+	private ResourceTable myResource;
+
 
 	/**
 	 * Constructor
@@ -140,17 +150,35 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		myHashIdentity = source.myHashIdentity;
 	}
 
+	@Override
+	public void clearHashes() {
+		myHashIdentity = null;
+		myHashSystem = null;
+		myHashSystemAndValue = null;
+		myHashValue = null;
+	}
+
 
 	@Override
 	public void calculateHashes() {
+		if (myHashIdentity != null || myHashSystem != null || myHashValue != null || myHashSystemAndValue != null) {
+			return;
+		}
+
 		String resourceType = getResourceType();
 		String paramName = getParamName();
 		String system = getSystem();
 		String value = getValue();
 		setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
-		setHashSystem(calculateHashSystem(getPartitionSettings(), getPartitionId(), resourceType, paramName, system));
 		setHashSystemAndValue(calculateHashSystemAndValue(getPartitionSettings(), getPartitionId(), resourceType, paramName, system, value));
-		setHashValue(calculateHashValue(getPartitionSettings(), getPartitionId(), resourceType, paramName, value));
+
+		// Searches using the :of-type modifier can never be partial (system-only or value-only) so don't
+		// bother saving these
+		boolean calculatePartialHashes = !StringUtils.endsWith(paramName, Constants.PARAMQUALIFIER_TOKEN_OF_TYPE);
+		if (calculatePartialHashes) {
+			setHashSystem(calculateHashSystem(getPartitionSettings(), getPartitionId(), resourceType, paramName, system));
+			setHashValue(calculateHashValue(getPartitionSettings(), getPartitionId(), resourceType, paramName, value));
+		}
 	}
 
 	@Override
@@ -172,7 +200,7 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		return b.isEquals();
 	}
 
-	Long getHashSystem() {
+	public Long getHashSystem() {
 		return myHashSystem;
 	}
 
@@ -216,6 +244,7 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 
 	public void setSystem(String theSystem) {
 		mySystem = StringUtils.defaultIfBlank(theSystem, null);
+		myHashSystemAndValue = null;
 	}
 
 	public String getValue() {
@@ -224,6 +253,7 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 
 	public ResourceIndexedSearchParamToken setValue(String theValue) {
 		myValue = StringUtils.defaultIfBlank(theValue, null);
+		myHashSystemAndValue = null;
 		return this;
 	}
 
@@ -261,6 +291,7 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		b.append("hashSystem", myHashSystem);
 		b.append("hashValue", myHashValue);
 		b.append("hashSysAndValue", myHashSystemAndValue);
+		b.append("partition", getPartitionId());
 		return b.build();
 	}
 
@@ -292,6 +323,7 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		return retVal;
 	}
 
+
 	public static long calculateHashSystem(PartitionSettings thePartitionSettings, PartitionablePartitionId theRequestPartitionId, String theResourceType, String theParamName, String theSystem) {
 		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
 		return calculateHashSystem(thePartitionSettings, requestPartitionId, theResourceType, theParamName, theSystem);
@@ -321,4 +353,15 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	}
 
 
+	@Override
+	public ResourceTable getResource() {
+		return myResource;
+	}
+
+	@Override
+	public BaseResourceIndexedSearchParam setResource(ResourceTable theResource) {
+		myResource = theResource;
+		setResourceType(theResource.getResourceType());
+		return this;
+	}
 }

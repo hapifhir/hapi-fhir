@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.bulk.export.job;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,16 @@ package ca.uhn.fhir.jpa.bulk.export.job;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.batch.config.BatchConstants;
+
 public class GroupBulkExportJobParametersBuilder extends BulkExportJobParametersBuilder {
 	public GroupBulkExportJobParametersBuilder setGroupId(String theGroupId) {
-		this.addString(BulkExportJobConfig.GROUP_ID_PARAMETER, theGroupId);
+		this.addString(BatchConstants.GROUP_ID_PARAMETER, theGroupId);
 		return this;
 	}
 
 	public GroupBulkExportJobParametersBuilder setMdm(boolean theMdm) {
-		this.addString(BulkExportJobConfig.EXPAND_MDM_PARAMETER, String.valueOf(theMdm));
+		this.addString(BatchConstants.EXPAND_MDM_PARAMETER, String.valueOf(theMdm));
 		return this;
 	}
 }

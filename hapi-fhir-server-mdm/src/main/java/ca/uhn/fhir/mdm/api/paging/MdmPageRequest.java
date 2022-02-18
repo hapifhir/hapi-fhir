@@ -4,7 +4,7 @@ package ca.uhn.fhir.mdm.api.paging;
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.mdm.api.paging;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.apache.commons.lang3.StringUtils;
@@ -71,7 +72,7 @@ public class MdmPageRequest {
 			errorMessage += PARAM_COUNT + " must be greater than 0.";
 		}
 		if (StringUtils.isNotEmpty(errorMessage)) {
-			throw new InvalidRequestException(errorMessage);
+			throw new InvalidRequestException(Msg.code(1524) + errorMessage);
 		}
 	}
 

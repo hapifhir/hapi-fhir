@@ -1,17 +1,22 @@
 package ca.uhn.fhir.rest.server.exceptions;
 
+import ca.uhn.fhir.i18n.Msg;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -304,17 +309,17 @@ public abstract class BaseServerResponseException extends RuntimeException {
 			try {
 				return ourStatusCodeToExceptionType.get(theStatusCode).getConstructor(new Class[]{String.class}).newInstance(theMessage);
 			} catch (InstantiationException e) {
-				throw new InternalErrorException(e);
+				throw new InternalErrorException(Msg.code(1912) + e);
 			} catch (IllegalAccessException e) {
-				throw new InternalErrorException(e);
+				throw new InternalErrorException(Msg.code(1913) + e);
 			} catch (IllegalArgumentException e) {
-				throw new InternalErrorException(e);
+				throw new InternalErrorException(Msg.code(1914) + e);
 			} catch (InvocationTargetException e) {
-				throw new InternalErrorException(e);
+				throw new InternalErrorException(Msg.code(1915) + e);
 			} catch (NoSuchMethodException e) {
-				throw new InternalErrorException(e);
+				throw new InternalErrorException(Msg.code(1916) + e);
 			} catch (SecurityException e) {
-				throw new InternalErrorException(e);
+				throw new InternalErrorException(Msg.code(1917) + e);
 			}
 		}
 		return new UnclassifiedServerFailureException(theStatusCode, theMessage);
@@ -322,7 +327,7 @@ public abstract class BaseServerResponseException extends RuntimeException {
 
 	static void registerExceptionType(int theStatusCode, Class<? extends BaseServerResponseException> theType) {
 		if (ourStatusCodeToExceptionType.containsKey(theStatusCode)) {
-			throw new Error("Can not register " + theType + " to status code " + theStatusCode + " because " + ourStatusCodeToExceptionType.get(theStatusCode) + " already registers that code");
+			throw new Error(Msg.code(1918) + "Can not register " + theType + " to status code " + theStatusCode + " because " + ourStatusCodeToExceptionType.get(theStatusCode) + " already registers that code");
 		}
 		ourStatusCodeToExceptionType.put(theStatusCode, theType);
 	}

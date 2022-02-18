@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.mdm.config;
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,8 @@ package ca.uhn.fhir.jpa.mdm.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.batch.mdm.MdmBatchJobSubmitterFactoryImpl;
-import ca.uhn.fhir.jpa.dao.mdm.MdmLinkDeleteSvc;
-import ca.uhn.fhir.jpa.interceptor.MdmSearchExpandingInterceptor;
 import ca.uhn.fhir.jpa.mdm.broker.MdmMessageHandler;
+import ca.uhn.fhir.jpa.mdm.broker.MdmMessageKeySvc;
 import ca.uhn.fhir.jpa.mdm.broker.MdmQueueConsumerLoader;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkFactory;
@@ -54,7 +52,6 @@ import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmCandidateSearchCriteriaBuilderSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmCandidateSearchSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmGoldenResourceFindingSvc;
 import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
-import ca.uhn.fhir.mdm.api.IMdmBatchJobSubmitterFactory;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkCreateSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
@@ -66,29 +63,24 @@ import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.provider.MdmControllerHelper;
 import ca.uhn.fhir.mdm.provider.MdmProviderLoader;
-import ca.uhn.fhir.mdm.rules.config.MdmRuleValidator;
 import ca.uhn.fhir.mdm.rules.svc.MdmResourceMatcherSvc;
 import ca.uhn.fhir.mdm.util.EIDHelper;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
 import ca.uhn.fhir.mdm.util.MessageHelper;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.validation.IResourceLoader;
 import org.slf4j.Logger;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 @Configuration
+@Import(MdmCommonConfig.class)
 public class MdmConsumerConfig {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	@Bean
 	IMdmStorageInterceptor mdmStorageInterceptor() {
 		return new MdmStorageInterceptor();
-	}
-
-	@Bean
-    MdmSearchExpandingInterceptor myMdmSearchExpandingInterceptorInterceptor() {
-		return new MdmSearchExpandingInterceptor();
 	}
 
 	@Bean
@@ -104,6 +96,10 @@ public class MdmConsumerConfig {
 		return new MdmMessageHandler();
 	}
 
+	@Bean
+	MdmMessageKeySvc mdmMessageKeySvc() {
+		return new MdmMessageKeySvc();
+	}
 	@Bean
 	MdmMatchLinkSvc mdmMatchLinkSvc() {
 		return new MdmMatchLinkSvc();
@@ -164,10 +160,6 @@ public class MdmConsumerConfig {
 		return new MdmProviderLoader();
 	}
 
-	@Bean
-	MdmRuleValidator mdmRuleValidator(FhirContext theFhirContext, ISearchParamRegistry theSearchParamRetriever) {
-		return new MdmRuleValidator(theFhirContext, theSearchParamRetriever);
-	}
 
 	@Bean
 	IMdmMatchFinderSvc mdmMatchFinderSvc() {
@@ -190,10 +182,6 @@ public class MdmConsumerConfig {
 		return new MdmModelConverterSvcImpl();
 	}
 
-	@Bean
-	IMdmBatchJobSubmitterFactory mdmBatchJobSubmitterFactory() {
-		return new MdmBatchJobSubmitterFactoryImpl();
-	}
 
 	@Bean
 	MdmCandidateSearchSvc mdmCandidateSearchSvc() {
@@ -247,18 +235,21 @@ public class MdmConsumerConfig {
 	}
 
 	@Bean
-	MdmLinkDeleteSvc mdmLinkDeleteSvc() {
-		return new MdmLinkDeleteSvc();
-	}
-
-	@Bean
 	MdmResourceFilteringSvc mdmResourceFilteringSvc() {
 		return new MdmResourceFilteringSvc();
 	}
 
 	@Bean
-	MdmControllerHelper mdmProviderHelper(FhirContext theFhirContext, IResourceLoader theResourceLoader, IMdmSettings theMdmSettings, MessageHelper messageHelper) {
-		return new MdmControllerHelper(theFhirContext, theResourceLoader, theMdmSettings, messageHelper);
+	MdmControllerHelper mdmProviderHelper(FhirContext theFhirContext,
+													  IResourceLoader theResourceLoader,
+													  IMdmSettings theMdmSettings,
+													  IMdmMatchFinderSvc theMdmMatchFinderSvc,
+													  MessageHelper messageHelper) {
+		return new MdmControllerHelper(theFhirContext,
+			theResourceLoader,
+			theMdmMatchFinderSvc,
+			theMdmSettings,
+			messageHelper);
 	}
 
 	@Bean

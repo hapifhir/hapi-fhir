@@ -1,0 +1,4 @@
+---
+type: add
+issue: 3131
+title: "Provided a Remote Terminology Service implementation for the $lookup Operation."

@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 3103
+title: "Fixes a regression caused by an earlier release, which would cause the `$everything` operation to throw an SQL error when run under Postgresql."

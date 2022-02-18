@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jaxrs.client;
 
+import ca.uhn.fhir.i18n.Msg;
 import java.util.List;
 import java.util.Map;
 
@@ -10,7 +11,7 @@ import javax.ws.rs.client.ClientBuilder;
  * #%L
  * HAPI FHIR JAX-RS Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,7 +90,7 @@ public class JaxRsRestfulClientFactory extends RestfulClientFactory {
   */
 	@Override
 	public void setProxy(String theHost, Integer thePort) {
-		throw new UnsupportedOperationException("Proxies are not supported yet in JAX-RS client");
+		throw new UnsupportedOperationException(Msg.code(605) + "Proxies are not supported yet in JAX-RS client");
 	}
   
   /**

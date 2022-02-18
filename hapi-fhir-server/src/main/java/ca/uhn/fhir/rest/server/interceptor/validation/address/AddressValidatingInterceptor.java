@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor.validation.address;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.interceptor.validation.address;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
@@ -97,7 +98,7 @@ public class AddressValidatingInterceptor {
 			}
 			setAddressValidator(addressValidator);
 		} catch (Exception e) {
-			throw new RuntimeException("Unable to create validator", e);
+			throw new RuntimeException(Msg.code(344) + "Unable to create validator", e);
 		}
 	}
 

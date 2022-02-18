@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.tasks;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 	private final Set<FlagEnum> myFlags;
 
+	// H2, Derby, MariaDB, and MySql automatically add indexes to foreign keys
+	public static final DriverTypeEnum[] NON_AUTOMATIC_FK_INDEX_PLATFORMS = new DriverTypeEnum[] {
+		DriverTypeEnum.POSTGRES_9_4, DriverTypeEnum.ORACLE_12C, DriverTypeEnum.MSSQL_2012 };
+
+
 	/**
 	 * Constructor
 	 */
@@ -75,6 +80,158 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init530();
 		init540(); // 20210218 - 20210520
 		init550(); // 20210520 -
+		init560(); // 20211027 -
+		init570(); // 20211102 -
+		init600(); // 20211102 -
+	}
+
+	private void init600() {
+		Builder version = forVersion(VersionEnum.V6_0_0);
+
+		/*
+		 * New indexing for the core SPIDX tables.
+		 * Ensure all queries can be satisfied by the index directly,
+		 * either as left or right table in a hash or sort join.
+		 */
+		// new date search indexes
+		Builder.BuilderWithTableName dateTable = version.onTable("HFJ_SPIDX_DATE");
+
+		// replace and drop IDX_SP_DATE_HASH
+		dateTable
+			.addIndex("20220207.1", "IDX_SP_DATE_HASH_V2" )
+			.unique(false)
+			.online(true)
+			.withColumns("HASH_IDENTITY", "SP_VALUE_LOW", "SP_VALUE_HIGH", "RES_ID", "PARTITION_ID");
+		dateTable.dropIndexOnline("20220207.2", "IDX_SP_DATE_HASH");
+
+		// drop redundant
+		dateTable.dropIndexOnline("20220207.3", "IDX_SP_DATE_HASH_LOW");
+
+		// replace and drop IDX_SP_DATE_HASH_HIGH
+		dateTable
+			.addIndex("20220207.4", "IDX_SP_DATE_HASH_HIGH_V2" )
+			.unique(false)
+			.online(true)
+			.withColumns("HASH_IDENTITY", "SP_VALUE_HIGH", "RES_ID", "PARTITION_ID");
+		dateTable.dropIndexOnline("20220207.5", "IDX_SP_DATE_HASH_HIGH");
+
+		// replace and drop IDX_SP_DATE_ORD_HASH
+		dateTable
+			.addIndex("20220207.6", "IDX_SP_DATE_ORD_HASH_V2" )
+			.unique(false)
+			.online(true)
+			.withColumns("HASH_IDENTITY", "SP_VALUE_LOW_DATE_ORDINAL", "SP_VALUE_HIGH_DATE_ORDINAL", "RES_ID", "PARTITION_ID");
+		dateTable.dropIndexOnline("20220207.7", "IDX_SP_DATE_ORD_HASH");
+
+		// replace and drop IDX_SP_DATE_ORD_HASH_HIGH
+		dateTable
+			.addIndex("20220207.8", "IDX_SP_DATE_ORD_HASH_HIGH_V2" )
+			.unique(false)
+			.online(true)
+			.withColumns("HASH_IDENTITY", "SP_VALUE_HIGH_DATE_ORDINAL", "RES_ID", "PARTITION_ID");
+		dateTable.dropIndexOnline("20220207.9", "IDX_SP_DATE_ORD_HASH_HIGH");
+
+		// drop redundant
+		dateTable.dropIndexOnline("20220207.10", "IDX_SP_DATE_ORD_HASH_LOW");
+
+		// replace and drop IDX_SP_DATE_RESID
+		dateTable
+			.addIndex("20220207.11", "IDX_SP_DATE_RESID_V2" )
+			.unique(false)
+			.online(true)
+			.withColumns("RES_ID", "HASH_IDENTITY", "SP_VALUE_LOW", "SP_VALUE_HIGH", "SP_VALUE_LOW_DATE_ORDINAL", "SP_VALUE_HIGH_DATE_ORDINAL", "PARTITION_ID");
+		// some engines tie the FK constraint to a particular index.
+		// So we need to drop and recreate the constraint to drop the old RES_ID index.
+		// Rename it while we're at it.  FK17s70oa59rm9n61k9thjqrsqm was not a pretty name.
+		dateTable.dropForeignKey("20220207.12", "FK17S70OA59RM9N61K9THJQRSQM", "HFJ_RESOURCE");
+		dateTable.dropIndexOnline("20220207.13", "IDX_SP_DATE_RESID");
+		dateTable.dropIndexOnline("20220207.14", "FK17S70OA59RM9N61K9THJQRSQM");
+
+		dateTable.addForeignKey("20220207.15", "FK_SP_DATE_RES")
+			.toColumn("RES_ID").references("HFJ_RESOURCE", "RES_ID");
+
+		// drop obsolete
+		dateTable.dropIndexOnline("20220207.16", "IDX_SP_DATE_UPDATED");
+
+	}
+
+	/**
+	 * See https://github.com/hapifhir/hapi-fhir/issues/3237 for reasoning for these indexes.
+	 * This adds indexes to various tables to enhance delete-expunge performance, which deletes by PID.
+	 */
+	private void addIndexesForDeleteExpunge(Builder theVersion) {
+
+		theVersion.onTable( "HFJ_HISTORY_TAG")
+			.addIndex("20211210.2", "IDX_RESHISTTAG_RESID" )
+			.unique(false)
+			.withColumns("RES_ID");
+
+
+		theVersion.onTable( "HFJ_RES_VER_PROV")
+			.addIndex("20211210.3", "FK_RESVERPROV_RES_PID" )
+			.unique(false)
+			.withColumns("RES_PID")
+			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
+
+		theVersion.onTable("HFJ_FORCED_ID")
+			.addIndex("20211210.4", "FK_FORCEDID_RESOURCE")
+			.unique(true)
+			.withColumns("RESOURCE_PID")
+			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
+	}
+
+	private void init570() {
+		Builder version = forVersion(VersionEnum.V5_7_0);
+
+		// both indexes must have same name that indexed FK or SchemaMigrationTest complains because H2 sets this index automatically
+
+		version.onTable("TRM_CONCEPT_PROPERTY")
+			.addIndex("20211102.1", "FK_CONCEPTPROP_CONCEPT")
+			.unique(false)
+			.withColumns("CONCEPT_PID")
+			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
+
+		version.onTable("TRM_CONCEPT_DESIG")
+			.addIndex("20211102.2", "FK_CONCEPTDESIG_CONCEPT")
+			.unique(false)
+			.withColumns("CONCEPT_PID")
+			// H2, Derby, MariaDB, and MySql automatically add indexes to foreign keys
+			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
+
+		version.onTable("TRM_CONCEPT_PC_LINK")
+			.addIndex("20211102.3", "FK_TERM_CONCEPTPC_CHILD")
+			.unique(false)
+			.withColumns("CHILD_PID")
+			// H2, Derby, MariaDB, and MySql automatically add indexes to foreign keys
+			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
+
+		version.onTable("TRM_CONCEPT_PC_LINK")
+			.addIndex("20211102.4", "FK_TERM_CONCEPTPC_PARENT")
+			.unique(false)
+			.withColumns("PARENT_PID")
+			// H2, Derby, MariaDB, and MySql automatically add indexes to foreign keys
+			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
+
+		addIndexesForDeleteExpunge(version);
+
+		// Add inline resource text column
+		version.onTable("HFJ_RES_VER")
+			.addColumn("20220102.1", "RES_TEXT_VC")
+			.nullable()
+			.type(ColumnTypeEnum.STRING, 4000);
+
+	}
+
+
+	private void init560() {
+		init560_20211027();
+	}
+
+	/**
+	 * Mirgation for the batch job parameter size change. Overriding purposes only.
+	 */
+	protected void init560_20211027() {
+		// nothing
 	}
 
 	private void init550() {
@@ -148,6 +305,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// HFJ_SEARCH.SEARCH_QUERY_STRING
 		version.onTable("HFJ_SEARCH")
 			.migratePostgresTextClobToBinaryClob("20211003.3", "SEARCH_QUERY_STRING");
+		
+
+		
 	}
 
 	private void init540() {
@@ -156,7 +316,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		//-- add index on HFJ_SPIDX_DATE
 		version.onTable("HFJ_SPIDX_DATE").addIndex("20210309.1", "IDX_SP_DATE_HASH_HIGH")
-			.unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_HIGH");
+			.unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_HIGH")
+			.doNothing();
 
 		//-- add index on HFJ_FORCED_ID
 		version.onTable("HFJ_FORCED_ID").addIndex("20210309.2", "IDX_FORCEID_FID")
@@ -372,9 +533,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder version = forVersion(VersionEnum.V5_0_1);
 
 		Builder.BuilderWithTableName spidxDate = version.onTable("HFJ_SPIDX_DATE");
-		spidxDate.addIndex("20200514.1", "IDX_SP_DATE_HASH_LOW").unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_LOW");
-		spidxDate.addIndex("20200514.2", "IDX_SP_DATE_ORD_HASH").unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_LOW_DATE_ORDINAL", "SP_VALUE_HIGH_DATE_ORDINAL");
-		spidxDate.addIndex("20200514.3", "IDX_SP_DATE_ORD_HASH_LOW").unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_LOW_DATE_ORDINAL");
+		spidxDate.addIndex("20200514.1", "IDX_SP_DATE_HASH_LOW").unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_LOW")
+			.doNothing();
+		spidxDate.addIndex("20200514.2", "IDX_SP_DATE_ORD_HASH").unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_LOW_DATE_ORDINAL", "SP_VALUE_HIGH_DATE_ORDINAL")
+			.doNothing();
+		spidxDate.addIndex("20200514.3", "IDX_SP_DATE_ORD_HASH_LOW").unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_LOW_DATE_ORDINAL")
+			.doNothing();
 
 		// MPI_LINK
 		version.addIdGenerator("20200517.1", "SEQ_EMPI_LINK_ID");
@@ -958,7 +1122,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			spidxDate
 				.addIndex("20180903.8", "IDX_SP_DATE_HASH")
 				.unique(false)
-				.withColumns("HASH_IDENTITY", "SP_VALUE_LOW", "SP_VALUE_HIGH");
+				.withColumns("HASH_IDENTITY", "SP_VALUE_LOW", "SP_VALUE_HIGH")
+				.doNothing();
 			spidxDate
 				.dropIndex("20180903.9", "IDX_SP_DATE");
 			spidxDate

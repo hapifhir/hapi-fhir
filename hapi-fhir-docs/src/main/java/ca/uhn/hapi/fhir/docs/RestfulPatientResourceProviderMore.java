@@ -4,7 +4,7 @@ package ca.uhn.hapi.fhir.docs;
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.hapi.fhir.docs;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -81,7 +82,7 @@ public MethodOutcome update(@IdParam IdType theId, @ResourceParam Patient thePat
    String currentVersion = "1"; // populate this with the current version
    
    if (!versionId.equals(currentVersion)) {
-      throw new ResourceVersionConflictException("Expected version " + currentVersion);
+      throw new ResourceVersionConflictException(Msg.code(632) + "Expected version " + currentVersion);
    }
    
    // ... perform the update ...
@@ -210,7 +211,7 @@ public List<DiagnosticReport> findDiagnosticReportsWithSubjet(
    if (theSubject.hasResourceType()) {
       String resourceType = theSubject.getResourceType();
       if ("Patient".equals(resourceType) == false) {
-         throw new InvalidRequestException("Invalid resource type for parameter 'subject': " + resourceType);
+         throw new InvalidRequestException(Msg.code(633) + "Invalid resource type for parameter 'subject': " + resourceType);
       }
    }
    
@@ -353,10 +354,10 @@ public Patient getResourceById(@IdParam IdType theId) {
 public void deletePatient(@IdParam IdType theId) {
 	// .. Delete the patient ..
 	if (couldntFindThisId) {
-		throw new ResourceNotFoundException("Unknown version");
+		throw new ResourceNotFoundException(Msg.code(634) + "Unknown version");
 	}
 	if (conflictHappened) {
-		throw new ResourceVersionConflictException("Couldn't delete because [foo]");
+		throw new ResourceVersionConflictException(Msg.code(635) + "Couldn't delete because [foo]");
 	}
 	// otherwise, delete was successful
 	return; // can also return MethodOutcome
@@ -730,7 +731,7 @@ public MethodOutcome createPatient(@ResourceParam Patient thePatient) {
      * a custom populated OperationOutcome. Otherwise, a simple one
      * is created using the string supplied below. 
      */
-    throw new UnprocessableEntityException("No identifier supplied");
+    throw new UnprocessableEntityException(Msg.code(636) + "No identifier supplied");
   }
 	
   // Save this patient to the database...
@@ -854,7 +855,7 @@ public MethodOutcome updatePatient(@IdParam IdType theId, @ResourceParam Patient
      * a custom populated OperationOutcome. Otherwise, a simple one
      * is created using the string supplied below. 
      */
-    throw new UnprocessableEntityException("No identifier supplied");
+    throw new UnprocessableEntityException(Msg.code(637) + "No identifier supplied");
   }
 
   String versionId = theId.getVersionIdPart();
@@ -865,7 +866,7 @@ public MethodOutcome updatePatient(@IdParam IdType theId, @ResourceParam Patient
     // ETags and If-Match to handle version aware updates, so PreconditionFailedException (HTTP 412)
     // is used instead of ResourceVersionConflictException (HTTP 409)
     if (detectedVersionConflict) {
-      throw new PreconditionFailedException("Unexpected version");
+      throw new PreconditionFailedException(Msg.code(638) + "Unexpected version");
     }
   }
   
@@ -912,7 +913,7 @@ public MethodOutcome validatePatient(@ResourceParam Patient thePatient,
      * a custom populated OperationOutcome. Otherwise, a simple one
      * is created using the string supplied below. 
      */
-    throw new UnprocessableEntityException("No identifier supplied");
+    throw new UnprocessableEntityException(Msg.code(639) + "No identifier supplied");
   }
 	
   // This method returns a MethodOutcome object

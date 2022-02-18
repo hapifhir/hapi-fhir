@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.batch.mdm.job;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,7 +94,7 @@ public class MdmClearJobConfig {
 
 	@Bean
 	@StepScope
-	public ItemProcessor<List<Long>, List<String>> deleteThenExpungeCompositeProcessor() {
+	public CompositeItemProcessor<List<Long>, List<String>> deleteThenExpungeCompositeProcessor() {
 		CompositeItemProcessor<List<Long>, List<String>> compositeProcessor = new CompositeItemProcessor<>();
 		List itemProcessors = new ArrayList<>();
 		itemProcessors.add(mdmLinkDeleter());

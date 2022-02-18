@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.i18n.HapiLocalizer;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.api.IResource;
@@ -15,6 +16,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.IParserErrorHandler;
 import ca.uhn.fhir.parser.JsonParser;
 import ca.uhn.fhir.parser.LenientErrorHandler;
+import ca.uhn.fhir.parser.NDJsonParser;
 import ca.uhn.fhir.parser.RDFParser;
 import ca.uhn.fhir.parser.XmlParser;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
@@ -58,7 +60,7 @@ import java.util.Set;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,7 +126,9 @@ public class FhirContext {
 	private volatile Set<String> myResourceNames;
 	private volatile Boolean myFormatXmlSupported;
 	private volatile Boolean myFormatJsonSupported;
+	private volatile Boolean myFormatNDJsonSupported;
 	private volatile Boolean myFormatRdfSupported;
+	private IFhirValidatorFactory myFhirValidatorFactory = fhirContext -> new FhirValidator(fhirContext);
 
 	/**
 	 * @deprecated It is recommended that you use one of the static initializer methods instead
@@ -176,7 +180,7 @@ public class FhirContext {
 
 		if (theVersion != null) {
 			if (!theVersion.isPresentOnClasspath()) {
-				throw new IllegalStateException(getLocalizer().getMessage(FhirContext.class, "noStructuresForSpecifiedVersion", theVersion.name()));
+				throw new IllegalStateException(Msg.code(1680) + getLocalizer().getMessage(FhirContext.class, "noStructuresForSpecifiedVersion", theVersion.name()));
 			}
 			myVersion = theVersion.getVersionImplementation();
 		} else if (FhirVersionEnum.DSTU2.isPresentOnClasspath()) {
@@ -190,7 +194,7 @@ public class FhirContext {
 		} else if (FhirVersionEnum.R4.isPresentOnClasspath()) {
 			myVersion = FhirVersionEnum.R4.getVersionImplementation();
 		} else {
-			throw new IllegalStateException(getLocalizer().getMessage(FhirContext.class, "noStructures"));
+			throw new IllegalStateException(Msg.code(1681) + getLocalizer().getMessage(FhirContext.class, "noStructures"));
 		}
 
 		if (theVersion == null) {
@@ -453,13 +457,14 @@ public class FhirContext {
 		Validate.notNull(theResourceType, "theResourceType can not be null");
 
 		if (Modifier.isAbstract(theResourceType.getModifiers())) {
-			throw new IllegalArgumentException("Can not scan abstract or interface class (resource definitions must be concrete classes): " + theResourceType.getName());
+			throw new IllegalArgumentException(Msg.code(1682) + "Can not scan abstract or interface class (resource definitions must be concrete classes): " + theResourceType.getName());
 		}
 
 		RuntimeResourceDefinition retVal = (RuntimeResourceDefinition) myClassToElementDefinition.get(theResourceType);
 		if (retVal == null) {
 			retVal = scanResourceType(theResourceType);
 		}
+
 		return retVal;
 	}
 
@@ -485,7 +490,7 @@ public class FhirContext {
 
 		Class<? extends IBaseResource> resourceType = nameToType.get(theResourceName.toLowerCase());
 		if (resourceType == null) {
-			throw new DataFormatException(createUnknownResourceNameError(theResourceName, theVersion));
+			throw new DataFormatException(Msg.code(1683) + createUnknownResourceNameError(theResourceName, theVersion));
 		}
 
 		return getResourceDefinition(resourceType);
@@ -552,7 +557,7 @@ public class FhirContext {
 				// Multiple spots in HAPI FHIR and Smile CDR depend on DataFormatException
 				// being thrown by this method, don't change that.
 				// ***********************************************************************
-				throw new DataFormatException(createUnknownResourceNameError(theResourceName, myVersion.getVersion()));
+				throw new DataFormatException(Msg.code(1684) + createUnknownResourceNameError(theResourceName, myVersion.getVersion()));
 			}
 			if (IBaseResource.class.isAssignableFrom(clazz)) {
 				retVal = scanResourceType(clazz);
@@ -601,7 +606,7 @@ public class FhirContext {
 		try (InputStream propFile = myVersion.getFhirVersionPropertiesFile()) {
 			props.load(propFile);
 		} catch (IOException e) {
-			throw new ConfigurationException("Failed to load version properties file", e);
+			throw new ConfigurationException(Msg.code(1685) + "Failed to load version properties file", e);
 		}
 		Enumeration<?> propNames = props.propertyNames();
 		while (propNames.hasMoreElements()) {
@@ -624,7 +629,7 @@ public class FhirContext {
 			try {
 				myRestfulClientFactory = (IRestfulClientFactory) ReflectionUtil.newInstance(Class.forName("ca.uhn.fhir.rest.client.apache.ApacheRestfulClientFactory"), FhirContext.class, this);
 			} catch (ClassNotFoundException e) {
-				throw new ConfigurationException("hapi-fhir-client does not appear to be on the classpath");
+				throw new ConfigurationException(Msg.code(1686) + "hapi-fhir-client does not appear to be on the classpath");
 			}
 		}
 		return myRestfulClientFactory;
@@ -735,6 +740,21 @@ public class FhirContext {
 		return retVal;
 	}
 
+        /**
+         * @return Returns <code>true</code> if the NDJSON serialization format is supported, based on the
+         * available libraries on the classpath.
+         *
+         * @since 5.6.0
+         */
+        public boolean isFormatNDJsonSupported() {
+                Boolean retVal = myFormatNDJsonSupported;
+                if (retVal == null) {
+                        retVal = tryToInitParser(() -> newNDJsonParser());
+                        myFormatNDJsonSupported = retVal;
+                }
+                return retVal;
+        }
+
 	/**
 	 * @return Returns <code>true</code> if the RDF serialization format is supported, based on the
 	 * available libraries on the classpath.
@@ -800,6 +820,29 @@ public class FhirContext {
 	public IParser newJsonParser() {
 		return new JsonParser(this, myParserErrorHandler);
 	}
+
+        /**
+         * Create and return a new NDJSON parser.
+         *
+         * <p>
+         * Thread safety: <b>Parsers are not guaranteed to be thread safe</b>. Create a new parser instance for every thread
+         * or every message being parsed/encoded.
+         * </p>
+         * <p>
+         * Performance Note: <b>This method is cheap</b> to call, and may be called once for every message being processed
+         * without incurring any performance penalty
+         * </p>
+         * <p>
+         * The NDJsonParser provided here is expected to translate between legal NDJson and FHIR Bundles.
+         * In particular, it is able to encode the resources in a FHIR Bundle to NDJson, as well as decode
+         * NDJson into a FHIR "collection"-type Bundle populated with the resources described in the NDJson.
+         * It will throw an exception in the event where it is asked to encode to anything other than a FHIR Bundle
+         * or where it is asked to decode into anything other than a FHIR Bundle.
+         * </p>
+         */
+        public IParser newNDJsonParser() {
+                return new NDJsonParser(this, myParserErrorHandler);
+        }
 
 	/**
 	 * Create and return a new RDF parser.
@@ -867,7 +910,7 @@ public class FhirContext {
 	 * </p>
 	 */
 	public FhirValidator newValidator() {
-		return new FhirValidator(this);
+		return myFhirValidatorFactory.newFhirValidator(this);
 	}
 
 	public ViewGenerator newViewGenerator() {
@@ -982,7 +1025,7 @@ public class FhirContext {
 			if (next instanceof RuntimeResourceDefinition) {
 				if ("Bundle".equals(next.getName())) {
 					if (!IBaseBundle.class.isAssignableFrom(next.getImplementingClass())) {
-						throw new ConfigurationException("Resource type declares resource name Bundle but does not implement IBaseBundle");
+						throw new ConfigurationException(Msg.code(1687) + "Resource type declares resource name Bundle but does not implement IBaseBundle");
 					}
 				}
 			}
@@ -1031,9 +1074,22 @@ public class FhirContext {
 	 *
 	 * @param theParserErrorHandler The error handler
 	 */
-	public void setParserErrorHandler(final IParserErrorHandler theParserErrorHandler) {
+	public FhirContext setParserErrorHandler(final IParserErrorHandler theParserErrorHandler) {
 		Validate.notNull(theParserErrorHandler, "theParserErrorHandler must not be null");
 		myParserErrorHandler = theParserErrorHandler;
+		return this;
+	}
+
+	/**
+	 * Set the factory method used to create FhirValidator instances
+	 *
+	 * @param theFhirValidatorFactory
+	 * @return this
+	 * @since 5.6.0
+	 */
+	public FhirContext setFhirValidatorFactory(IFhirValidatorFactory theFhirValidatorFactory) {
+		myFhirValidatorFactory = theFhirValidatorFactory;
+		return this;
 	}
 
 	@SuppressWarnings({"cast"})
@@ -1077,7 +1133,7 @@ public class FhirContext {
 		try {
 			run.run();
 			retVal = true;
-		} catch (Exception | NoClassDefFoundError e) {
+		} catch (UnsupportedClassVersionError | Exception | NoClassDefFoundError e) {
 			retVal = false;
 		}
 		return retVal;
@@ -1154,7 +1210,7 @@ public class FhirContext {
 		ArrayList<Class<? extends IBaseResource>> retVal = new ArrayList<Class<? extends IBaseResource>>(1);
 		for (Class<?> clazz : theResourceTypes) {
 			if (!IResource.class.isAssignableFrom(clazz)) {
-				throw new IllegalArgumentException(clazz.getCanonicalName() + " is not an instance of " + IResource.class.getSimpleName());
+				throw new IllegalArgumentException(Msg.code(1688) + clazz.getCanonicalName() + " is not an instance of " + IResource.class.getSimpleName());
 			}
 			retVal.add((Class<? extends IResource>) clazz);
 		}

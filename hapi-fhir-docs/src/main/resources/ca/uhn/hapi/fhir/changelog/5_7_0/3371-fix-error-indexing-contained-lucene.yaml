@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3371
+title: "Enhanced Lucene Indexing failed when indexing contained resources.
+   Contained resources are not indexed in Lucene/Elasticsearch, but this no longer causes an exception."

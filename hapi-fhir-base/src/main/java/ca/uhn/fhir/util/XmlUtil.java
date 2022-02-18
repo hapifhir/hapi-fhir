@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -1684,9 +1685,9 @@ public class XmlUtil {
 			ew.close();
 			return w.toString();
 		} catch (XMLStreamException e) {
-			throw new DataFormatException("Problem with the contained XML events", e);
+			throw new DataFormatException(Msg.code(1751) + "Problem with the contained XML events", e);
 		} catch (FactoryConfigurationError e) {
-			throw new ConfigurationException(e);
+			throw new ConfigurationException(Msg.code(1752) + e);
 		}
 	}
 
@@ -1788,7 +1789,7 @@ public class XmlUtil {
 			}
 			throwUnitTestExceptionIfConfiguredToDoSo();
 		} catch (Throwable e) {
-			throw new ConfigurationException("Unable to initialize StAX - XML processing is disabled", e);
+			throw new ConfigurationException(Msg.code(1753) + "Unable to initialize StAX - XML processing is disabled", e);
 		}
 		return inputFactory;
 	}
@@ -1799,7 +1800,7 @@ public class XmlUtil {
 			outputFactory = XMLOutputFactory.newInstance();
 			throwUnitTestExceptionIfConfiguredToDoSo();
 		} catch (Throwable e) {
-			throw new ConfigurationException("Unable to initialize StAX - XML processing is disabled", e);
+			throw new ConfigurationException(Msg.code(1754) + "Unable to initialize StAX - XML processing is disabled", e);
 		}
 		return outputFactory;
 	}
@@ -1841,9 +1842,9 @@ public class XmlUtil {
 			return value;
 
 		} catch (XMLStreamException e) {
-			throw new DataFormatException("String does not appear to be valid XML/XHTML (error is \"" + e.getMessage() + "\"): " + theValue, e);
+			throw new DataFormatException(Msg.code(1755) + "String does not appear to be valid XML/XHTML (error is \"" + e.getMessage() + "\"): " + theValue, e);
 		} catch (FactoryConfigurationError e) {
-			throw new ConfigurationException(e);
+			throw new ConfigurationException(Msg.code(1756) + e);
 		}
 	}
 
@@ -1892,7 +1893,7 @@ public class XmlUtil {
 
 			builder = docBuilderFactory.newDocumentBuilder();
 		} catch (ParserConfigurationException e) {
-			throw new ConfigurationException(e);
+			throw new ConfigurationException(Msg.code(1757) + e);
 		}
 
 		InputSource src = new InputSource(theReader);

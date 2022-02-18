@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoObservation;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
@@ -32,6 +33,7 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,16 +114,18 @@ public abstract class BaseHapiFhirResourceDaoObservation<T extends IBaseResource
 						ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(requestPartitionId, ref.getResourceType(), ref.getIdPart());
 						orderedSubjectReferenceMap.put(pid.getIdAsLong(), nextOr);
 					} else {
-						throw new IllegalArgumentException("Invalid token type (expecting ReferenceParam): " + nextOr.getClass());
+						throw new IllegalArgumentException(Msg.code(942) + "Invalid token type (expecting ReferenceParam): " + nextOr.getClass());
 					}
 				}
 			}
 
 			theSearchParameterMap.remove(getSubjectParamName());
 			theSearchParameterMap.remove(getPatientParamName());
-			for (Long subjectPid : orderedSubjectReferenceMap.keySet()) {
-				theSearchParameterMap.add(getSubjectParamName(), orderedSubjectReferenceMap.get(subjectPid));
-			}
+
+			// Subject PIDs ordered - so create 'OR' list of subjects for lastN operation
+			ReferenceOrListParam orList = new ReferenceOrListParam();
+			orderedSubjectReferenceMap.keySet().forEach(key -> orList.addOr((ReferenceParam) orderedSubjectReferenceMap.get(key)));
+			theSearchParameterMap.add(getSubjectParamName(), orList);
 		}
 
 	}

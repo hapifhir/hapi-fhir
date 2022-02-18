@@ -4,7 +4,7 @@ package ca.uhn.fhir.cli;
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -101,21 +102,21 @@ public abstract class AbstractImportExportCsvConceptMapCommand extends BaseReque
 
 		String targetServer = theCommandLine.getOptionValue(BASE_URL_PARAM);
 		if (isBlank(targetServer)) {
-			throw new ParseException("No target server (-" + BASE_URL_PARAM + ") specified.");
+			throw new ParseException(Msg.code(1583) + "No target server (-" + BASE_URL_PARAM + ") specified.");
 		} else if (!targetServer.startsWith("http") && !targetServer.startsWith("file")) {
-			throw new ParseException("Invalid target server specified, must begin with 'http' or 'file'.");
+			throw new ParseException(Msg.code(1584) + "Invalid target server specified, must begin with 'http' or 'file'.");
 		}
 
 		conceptMapUrl = theCommandLine.getOptionValue(CONCEPTMAP_URL_PARAM);
 		if (isBlank(conceptMapUrl)) {
-			throw new ParseException("No ConceptMap URL (" + CONCEPTMAP_URL_PARAM + ") specified.");
+			throw new ParseException(Msg.code(1585) + "No ConceptMap URL (" + CONCEPTMAP_URL_PARAM + ") specified.");
 		} else {
 			ourLog.info("Specified ConceptMap URL (ConceptMap.url): {}", conceptMapUrl);
 		}
 
 		file = theCommandLine.getOptionValue(FILE_PARAM);
 		if (isBlank(file)) {
-			throw new ParseException("No file (" + FILE_PARAM + ") specified.");
+			throw new ParseException(Msg.code(1586) + "No file (" + FILE_PARAM + ") specified.");
 		}
 		if (!file.endsWith(".csv")) {
 			file = file.concat(".csv");
@@ -127,7 +128,7 @@ public abstract class AbstractImportExportCsvConceptMapCommand extends BaseReque
 		fhirVersion = ctx.getVersion().getVersion();
 		if (fhirVersion != FhirVersionEnum.DSTU3
 			&& fhirVersion != FhirVersionEnum.R4) {
-			throw new ParseException("This command does not support FHIR version " + fhirVersion + ".");
+			throw new ParseException(Msg.code(1587) + "This command does not support FHIR version " + fhirVersion + ".");
 		}
 
 		if (theCommandLine.hasOption(VERBOSE_LOGGING_PARAM)) {

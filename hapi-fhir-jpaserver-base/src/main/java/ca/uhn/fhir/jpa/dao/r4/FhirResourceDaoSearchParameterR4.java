@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -28,7 +29,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,7 +97,7 @@ public class FhirResourceDaoSearchParameterR4 extends BaseHapiFhirResourceDao<Se
 					boolean isBuiltIn = existingSearchParam.getId() == null;
 					isBuiltIn |= existingSearchParam.getUri().startsWith("http://hl7.org/fhir/SearchParameter/");
 					if (isBuiltIn) {
-						throw new UnprocessableEntityException("Can not override built-in search parameter " + nextBase + ":" + theResource.getCode() + " because overriding is disabled on this server");
+						throw new UnprocessableEntityException(Msg.code(1111) + "Can not override built-in search parameter " + nextBase + ":" + theResource.getCode() + " because overriding is disabled on this server");
 					}
 				}
 			}
@@ -107,14 +108,14 @@ public class FhirResourceDaoSearchParameterR4 extends BaseHapiFhirResourceDao<Se
 		 * SPO is active, so that we don't block people from uploading works-in-progress
 		 */
 		if (theResource.getStatus() == null) {
-			throw new UnprocessableEntityException("SearchParameter.status is missing or invalid");
+			throw new UnprocessableEntityException(Msg.code(1112) + "SearchParameter.status is missing or invalid");
 		}
 		if (!theResource.getStatus().name().equals("ACTIVE")) {
 			return;
 		}
 
 		if (ElementUtil.isEmpty(theResource.getBase()) && (theResource.getType() == null || !Enumerations.SearchParamType.COMPOSITE.name().equals(theResource.getType().name()))) {
-			throw new UnprocessableEntityException("SearchParameter.base is missing");
+			throw new UnprocessableEntityException(Msg.code(1113) + "SearchParameter.base is missing");
 		}
 
 		boolean isUnique = theResource.getExtensionsByUrl(HapiExtensions.EXT_SP_UNIQUE).stream().anyMatch(t-> "true".equals(t.getValueAsPrimitive().getValueAsString()));
@@ -125,7 +126,7 @@ public class FhirResourceDaoSearchParameterR4 extends BaseHapiFhirResourceDao<Se
 
 		} else if (isBlank(theResource.getExpression())) {
 
-			throw new UnprocessableEntityException("SearchParameter.expression is missing");
+			throw new UnprocessableEntityException(Msg.code(1114) + "SearchParameter.expression is missing");
 
 		} else {
 
@@ -133,11 +134,11 @@ public class FhirResourceDaoSearchParameterR4 extends BaseHapiFhirResourceDao<Se
 
 			if (isUnique) {
 				if (theResource.getComponent().size() == 0) {
-					throw new UnprocessableEntityException("SearchParameter is marked as unique but has no components");
+					throw new UnprocessableEntityException(Msg.code(1115) + "SearchParameter is marked as unique but has no components");
 				}
 				for (SearchParameter.SearchParameterComponentComponent next : theResource.getComponent()) {
 					if (isBlank(next.getDefinition())) {
-						throw new UnprocessableEntityException("SearchParameter is marked as unique but is missing component.definition");
+						throw new UnprocessableEntityException(Msg.code(1116) + "SearchParameter is marked as unique but is missing component.definition");
 					}
 				}
 			}
@@ -151,14 +152,14 @@ public class FhirResourceDaoSearchParameterR4 extends BaseHapiFhirResourceDao<Se
 
 					int dotIdx = nextPath.indexOf('.');
 					if (dotIdx == -1) {
-						throw new UnprocessableEntityException("Invalid SearchParameter.expression value \"" + nextPath + "\". Must start with a resource name.");
+						throw new UnprocessableEntityException(Msg.code(1117) + "Invalid SearchParameter.expression value \"" + nextPath + "\". Must start with a resource name.");
 					}
 
 					String resourceName = nextPath.substring(0, dotIdx);
 					try {
 						theContext.getResourceDefinition(resourceName);
 					} catch (DataFormatException e) {
-						throw new UnprocessableEntityException("Invalid SearchParameter.expression value \"" + nextPath + "\": " + e.getMessage());
+						throw new UnprocessableEntityException(Msg.code(1118) + "Invalid SearchParameter.expression value \"" + nextPath + "\": " + e.getMessage());
 					}
 
 					if (theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
@@ -168,7 +169,7 @@ public class FhirResourceDaoSearchParameterR4 extends BaseHapiFhirResourceDao<Se
 								theContext.newFluentPath().evaluate(temporaryInstance, nextPath, IBase.class);
 							} catch (Exception e) {
 								String msg = theContext.getLocalizer().getMessageSanitized(FhirResourceDaoSearchParameterR4.class, "invalidSearchParamExpression", nextPath, e.getMessage());
-								throw new UnprocessableEntityException(msg, e);
+								throw new UnprocessableEntityException(Msg.code(1119) + msg, e);
 							}
 						}
 					}
@@ -177,14 +178,14 @@ public class FhirResourceDaoSearchParameterR4 extends BaseHapiFhirResourceDao<Se
 			} else {
 
 				if (!isUnique && theResource.getType() != Enumerations.SearchParamType.COMPOSITE && theResource.getType() != Enumerations.SearchParamType.SPECIAL && !REGEX_SP_EXPRESSION_HAS_PATH.matcher(expression).matches()) {
-					throw new UnprocessableEntityException("SearchParameter.expression value \"" + expression + "\" is invalid");
+					throw new UnprocessableEntityException(Msg.code(1120) + "SearchParameter.expression value \"" + expression + "\" is invalid");
 				}
 
 				// R4 and above
 				try {
 					theContext.newFluentPath().parse(expression);
 				} catch (Exception e) {
-					throw new UnprocessableEntityException("Invalid SearchParameter.expression value \"" + expression + "\": " + e.getMessage());
+					throw new UnprocessableEntityException(Msg.code(1121) + "Invalid SearchParameter.expression value \"" + expression + "\": " + e.getMessage());
 				}
 
 			}

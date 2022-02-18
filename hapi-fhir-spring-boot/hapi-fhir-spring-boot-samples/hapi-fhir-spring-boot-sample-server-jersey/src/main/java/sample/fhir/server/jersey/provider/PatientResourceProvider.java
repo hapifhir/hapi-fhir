@@ -20,6 +20,7 @@ package sample.fhir.server.jersey.provider;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import java.util.concurrent.ConcurrentHashMap;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -60,7 +61,7 @@ public class PatientResourceProvider extends AbstractJaxRsResourceProvider<Patie
         if (patients.containsKey(theId.getIdPart())) {
             return patients.get(theId.getIdPart());
         } else {
-            throw new ResourceNotFoundException(theId);
+            throw new ResourceNotFoundException(Msg.code(2005) + theId);
         }
     }
 

@@ -1,7 +1,10 @@
 package ca.uhn.fhirtest.config;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.config.BaseJavaConfigR4;
+import ca.uhn.fhir.jpa.config.HapiJpaConfig;
+import ca.uhn.fhir.jpa.config.r4.JpaR4Config;
+import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
@@ -10,6 +13,7 @@ import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.DerbyTenSevenHapiFhirDialect;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
+import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhirtest.interceptor.PublicSecurityInterceptor;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
@@ -18,8 +22,7 @@ import org.hibernate.search.backend.lucene.cfg.LuceneBackendSettings;
 import org.hibernate.search.backend.lucene.cfg.LuceneIndexSettings;
 import org.hibernate.search.engine.cfg.BackendSettings;
 import org.hl7.fhir.dstu2.model.Subscription;
-import org.hl7.fhir.r5.utils.IResourceValidator;
-import org.springframework.beans.factory.annotation.Autowire;
+import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.annotation.Bean;
@@ -38,9 +41,9 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 @Configuration
-@Import(CommonConfig.class)
+@Import({CommonConfig.class, JpaR4Config.class, HapiJpaConfig.class})
 @EnableTransactionManagement()
-public class TestR4Config extends BaseJavaConfigR4 {
+public class TestR4Config {
 	public static final String FHIR_DB_USERNAME = "${fhir.db.username}";
 	public static final String FHIR_DB_PASSWORD = "${fhir.db.password}";
 	public static final String FHIR_LUCENE_LOCATION_R4 = "${fhir.lucene.location.r4}";
@@ -86,16 +89,15 @@ public class TestR4Config extends BaseJavaConfigR4 {
 	}
 
 
-	@Override
 	@Bean
 	public ValidationSettings validationSettings() {
-		ValidationSettings retVal = super.validationSettings();
-		retVal.setLocalReferenceValidationDefaultPolicy(IResourceValidator.ReferenceValidationPolicy.CHECK_VALID);
+		ValidationSettings retVal = new ValidationSettings();
+		retVal.setLocalReferenceValidationDefaultPolicy(ReferenceValidationPolicy.CHECK_VALID);
 		return retVal;
 	}
 
 
-	@Bean(name = "myPersistenceDataSourceR4", destroyMethod = "close")
+	@Bean(name = "myPersistenceDataSourceR4")
 	public DataSource dataSource() {
 		BasicDataSource retVal = new BasicDataSource();
 		if (CommonConfig.isLocalTestMode()) {
@@ -120,19 +122,17 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		return dataSource;
 	}
 
-	@Override
-	@Bean(autowire = Autowire.BY_TYPE)
+	@Bean
 	public DatabaseBackedPagingProvider databaseBackedPagingProvider() {
-		DatabaseBackedPagingProvider retVal = super.databaseBackedPagingProvider();
+		DatabaseBackedPagingProvider retVal = new DatabaseBackedPagingProvider();
 		retVal.setDefaultPageSize(20);
 		retVal.setMaximumPageSize(500);
 		return retVal;
 	}
 
-	@Override
 	@Bean
-	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory) {
-		LocalContainerEntityManagerFactoryBean retVal = super.entityManagerFactory(theConfigurableListableBeanFactory);
+	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext) {
+		LocalContainerEntityManagerFactoryBean retVal = HapiEntityManagerFactoryUtil.newEntityManagerFactory(theConfigurableListableBeanFactory, theFhirContext);
 		retVal.setPersistenceUnitName("PU_HapiFhirJpaR4");
 		retVal.setDataSource(dataSource());
 		retVal.setJpaProperties(jpaProperties());
@@ -165,15 +165,16 @@ public class TestR4Config extends BaseJavaConfigR4 {
 
 	/**
 	 * Bean which validates incoming requests
+	 * @param theFhirInstanceValidator
 	 */
 	@Bean
 	@Lazy
-	public RequestValidatingInterceptor requestValidatingInterceptor() {
+	public RequestValidatingInterceptor requestValidatingInterceptor(IInstanceValidatorModule theFhirInstanceValidator) {
 		RequestValidatingInterceptor requestValidator = new RequestValidatingInterceptor();
 		requestValidator.setFailOnSeverity(null);
 		requestValidator.setAddResponseHeaderOnSeverity(null);
 		requestValidator.setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
-		requestValidator.addValidatorModule(instanceValidator());
+		requestValidator.addValidatorModule(theFhirInstanceValidator);
 		requestValidator.setIgnoreValidatorExceptions(true);
 
 		return requestValidator;

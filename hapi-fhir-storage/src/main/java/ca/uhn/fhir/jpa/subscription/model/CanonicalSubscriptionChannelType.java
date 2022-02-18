@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription.model;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.subscription.model;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.exceptions.FHIRException;
 
@@ -79,7 +80,7 @@ public enum CanonicalSubscriptionChannelType {
 			}
 		}
 
-		throw new FHIRException("Unknown SubscriptionChannelType code '" + codeString + "'");
+		throw new FHIRException(Msg.code(569) + "Unknown SubscriptionChannelType code '" + codeString + "'");
 	}
 
 	public String toCode() {

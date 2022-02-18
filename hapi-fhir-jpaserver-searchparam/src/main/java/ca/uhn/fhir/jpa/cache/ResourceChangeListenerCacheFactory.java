@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.cache;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ public class ResourceChangeListenerCacheFactory {
 	@Autowired
 	ApplicationContext myApplicationContext;
 
-	public ResourceChangeListenerCache create(String theResourceName, SearchParameterMap theMap, IResourceChangeListener theResourceChangeListener, long theRemoteRefreshIntervalMs) {
+	public ResourceChangeListenerCache newResourceChangeListenerCache(String theResourceName, SearchParameterMap theMap, IResourceChangeListener theResourceChangeListener, long theRemoteRefreshIntervalMs) {
 		return myApplicationContext.getBean(ResourceChangeListenerCache.class, theResourceName, theResourceChangeListener, theMap, theRemoteRefreshIntervalMs);
 	}
 }

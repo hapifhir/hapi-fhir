@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.matching;
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.matching;
 
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
+import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionCriteriaParser;
+import ca.uhn.fhir.rest.api.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class SubscriptionStrategyEvaluator {
@@ -37,9 +39,16 @@ public class SubscriptionStrategyEvaluator {
 	}
 
 	public SubscriptionMatchingStrategy determineStrategy(String theCriteria) {
-		InMemoryMatchResult result = myInMemoryResourceMatcher.canBeEvaluatedInMemory(theCriteria);
-		if (result.supported()) {
-			return SubscriptionMatchingStrategy.IN_MEMORY;
+		SubscriptionCriteriaParser.SubscriptionCriteria criteria = SubscriptionCriteriaParser.parse(theCriteria);
+		if (criteria != null) {
+			if (criteria.getCriteria() != null) {
+				InMemoryMatchResult result = myInMemoryResourceMatcher.canBeEvaluatedInMemory(theCriteria);
+				if (result.supported()) {
+					return SubscriptionMatchingStrategy.IN_MEMORY;
+				}
+			} else {
+				return SubscriptionMatchingStrategy.IN_MEMORY;
+			}
 		}
 		return SubscriptionMatchingStrategy.DATABASE;
 	}

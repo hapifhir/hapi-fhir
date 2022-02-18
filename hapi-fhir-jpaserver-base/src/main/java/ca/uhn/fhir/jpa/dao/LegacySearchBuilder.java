@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -52,6 +53,7 @@ import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.lastn.IElasticsearchSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.util.Dstu3DistanceHelper;
 import ca.uhn.fhir.jpa.searchparam.util.LastNParameterHelper;
@@ -278,9 +280,9 @@ public class LegacySearchBuilder implements ISearchBuilder {
 			if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT)) {
 				if (myFulltextSearchSvc == null || myFulltextSearchSvc.isDisabled()) {
 					if (myParams.containsKey(Constants.PARAM_TEXT)) {
-						throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
+						throw new InvalidRequestException(Msg.code(937) + "Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
 					} else if (myParams.containsKey(Constants.PARAM_CONTENT)) {
-						throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
+						throw new InvalidRequestException(Msg.code(938) + "Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
 					}
 				}
 
@@ -292,7 +294,7 @@ public class LegacySearchBuilder implements ISearchBuilder {
 			} else if (myParams.isLastN()) {
 				if (myIElasticsearchSvc == null) {
 					if (myParams.isLastN()) {
-						throw new InvalidRequestException("LastN operation is not enabled on this service, can not process this request");
+						throw new InvalidRequestException(Msg.code(939) + "LastN operation is not enabled on this service, can not process this request");
 					}
 				}
 				List<String> lastnResourceIds = myIElasticsearchSvc.executeLastN(myParams, myContext, theMaximumResults);
@@ -369,8 +371,14 @@ public class LegacySearchBuilder implements ISearchBuilder {
 			From<?, ResourceLink> join = myQueryStack.createJoin(SearchBuilderJoinEnum.REFERENCE, null);
 
 			if (myParams.get(IAnyResource.SP_RES_ID) != null) {
-				StringParam idParam = (StringParam) myParams.get(IAnyResource.SP_RES_ID).get(0).get(0);
-				ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, idParam.getValue());
+				ResourcePersistentId pid = null;
+				if (myParams.get(IAnyResource.SP_RES_ID) instanceof StringParam) {
+					StringParam idParam = (StringParam) myParams.get(IAnyResource.SP_RES_ID).get(0).get(0);
+					pid = myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, idParam.getValue());
+				} else {
+					TokenParam tokenParam = (TokenParam) myParams.get(IAnyResource.SP_RES_ID).get(0).get(0);
+					pid = myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, tokenParam.getValue());
+				}
 				if (myAlsoIncludePids == null) {
 					myAlsoIncludePids = new ArrayList<>(1);
 				}
@@ -484,7 +492,7 @@ public class LegacySearchBuilder implements ISearchBuilder {
 
 		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(myResourceName, theSort.getParamName());
 		if (param == null) {
-			throw new InvalidRequestException("Unknown sort parameter '" + theSort.getParamName() + "'");
+			throw new InvalidRequestException(Msg.code(940) + "Unknown sort parameter '" + theSort.getParamName() + "'");
 		}
 
 		String[] sortAttrName;
@@ -523,7 +531,7 @@ public class LegacySearchBuilder implements ISearchBuilder {
 			case COMPOSITE:
 			case HAS:
 			default:
-				throw new InvalidRequestException("This server does not support _sort specifications of type " + param.getParamType() + " - Can't serve _sort=" + theSort.getParamName());
+				throw new InvalidRequestException(Msg.code(941) + "This server does not support _sort specifications of type " + param.getParamType() + " - Can't serve _sort=" + theSort.getParamName());
 		}
 
 		/*
@@ -1075,7 +1083,6 @@ public class LegacySearchBuilder implements ISearchBuilder {
 		private boolean myFirst = true;
 		private IncludesIterator myIncludesIterator;
 		private ResourcePersistentId myNext;
-		private Iterator<ResourcePersistentId> myPreResultsIterator;
 		private ScrollableResultsIterator<Long> myResultsIterator;
 		private Integer myOffset;
 		private final SortSpec mySort;
@@ -1129,16 +1136,14 @@ public class LegacySearchBuilder implements ISearchBuilder {
 
 					initializeIteratorQuery(myOffset, myMaxResultsToFetch);
 
-					// If the query resulted in extra results being requested
-					if (myAlsoIncludePids != null) {
-						myPreResultsIterator = myAlsoIncludePids.iterator();
+					if (myAlsoIncludePids == null) {
+						myAlsoIncludePids = new ArrayList<>();
 					}
 				}
 
 				if (myNext == null) {
 
-					if (myPreResultsIterator != null && myPreResultsIterator.hasNext()) {
-						while (myPreResultsIterator.hasNext()) {
+					for (Iterator<ResourcePersistentId> myPreResultsIterator = myAlsoIncludePids.iterator(); myPreResultsIterator.hasNext();) {
 							ResourcePersistentId next = myPreResultsIterator.next();
 							if (next != null)
 								if (myPidSet.add(next)) {
@@ -1146,7 +1151,6 @@ public class LegacySearchBuilder implements ISearchBuilder {
 									break;
 								}
 						}
-					}
 
 					if (myNext == null) {
 						while (myResultsIterator.hasNext() || !myQueryList.isEmpty()) {

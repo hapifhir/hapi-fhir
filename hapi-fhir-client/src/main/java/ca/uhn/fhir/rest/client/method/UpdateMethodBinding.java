@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.method;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.client.method;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.lang.reflect.Method;
@@ -53,7 +54,7 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	protected BaseHttpClientInvocation createClientInvocation(Object[] theArgs, IBaseResource theResource) {
 		IIdType idDt = (IIdType) theArgs[myIdParameterIndex];
 		if (idDt == null) {
-			throw new NullPointerException("ID can not be null");
+			throw new NullPointerException(Msg.code(1447) + "ID can not be null");
 		}
 
 		FhirContext context = getContext();
@@ -95,15 +96,15 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 		if (isBlank(theMatchUrl)) {
 			if (isBlank(theUrlId)) {
 				String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "noIdInUrlForUpdate");
-				throw new InvalidRequestException(msg);
+				throw new InvalidRequestException(Msg.code(1448) + msg);
 			}
 			if (isBlank(theResourceId)) {
 				String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "noIdInBodyForUpdate");
-				throw new InvalidRequestException(msg);
+				throw new InvalidRequestException(Msg.code(1449) + msg);
 			}
 			if (!theResourceId.equals(theUrlId)) {
 				String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "incorrectIdForUpdate", theResourceId, theUrlId);
-				throw new InvalidRequestException(msg);
+				throw new InvalidRequestException(Msg.code(1450) + msg);
 			}
 		} else {
 			theResource.setId((IIdType)null);
