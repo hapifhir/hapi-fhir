@@ -26,6 +26,9 @@ public interface IJobDataSink {
 
 	void accept(WorkChunkData theData);
 
+	/**
+	 * TODO JA: what is this?
+	 */
 	int getWorkChunkCount();
 
 }

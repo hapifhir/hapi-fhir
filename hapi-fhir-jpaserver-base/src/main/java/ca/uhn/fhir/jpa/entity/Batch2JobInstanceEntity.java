@@ -73,6 +73,7 @@ public class Batch2JobInstanceEntity implements Serializable {
 	@Column(name = "STAT", length = STATUS_MAX_LENGTH, nullable = false)
 	@Enumerated(EnumType.STRING)
 	private StatusEnum myStatus;
+
 	@Column(name = "JOB_CANCELLED", nullable = false)
 	private boolean myCancelled;
 	@Column(name = "PARAMS_JSON", length = PARAMS_JSON_MAX_LENGTH, nullable = true)

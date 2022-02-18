@@ -46,7 +46,7 @@ public class BulkImport2AppCtx {
 				PARAM_NDJSON_URL,
 				"A URL that can be used to pull an NDJSON file for consumption",
 				JobDefinitionParameter.ParamTypeEnum.STRING,
-				false,
+				true,
 				true)
 			.addParameter(
 				PARAM_HTTP_BASIC_CREDENTIALS,
