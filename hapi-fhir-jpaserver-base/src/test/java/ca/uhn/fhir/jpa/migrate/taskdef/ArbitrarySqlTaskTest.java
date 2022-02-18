@@ -129,7 +129,9 @@ public class ArbitrarySqlTaskTest extends BaseTest {
 			.executeRawSql("1", getDriverType(), "delete from TEST_UPDATE_TASK where RES_TYPE = 'Patient'")
 			.executeRawSql("2", getDriverType(), "delete from TEST_UPDATE_TASK where RES_TYPE = 'Encounter'");
 
-		getMigrator().addTasks(migrator.getTasks(VersionEnum.V3_3_0, VersionEnum.V3_6_0));
+		List<BaseTask> tasks = migrator.getTasks(VersionEnum.V3_3_0, VersionEnum.V3_6_0);
+		ourLog.info("Have tasks: {}", tasks);
+		getMigrator().addTasks(tasks);
 		getMigrator().migrate();
 
 		rows = executeQuery("select * from TEST_UPDATE_TASK");
