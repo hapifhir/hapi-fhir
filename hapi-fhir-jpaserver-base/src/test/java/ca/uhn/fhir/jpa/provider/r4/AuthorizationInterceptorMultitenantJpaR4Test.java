@@ -262,7 +262,6 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 
 		try {
 			Bundle resp2 = myClient.search().byUrl(nextLink).returnBundle(Bundle.class).execute();
-			ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp2));
 			fail();
 		} catch (ForbiddenOperationException e) {
 			Assertions.assertEquals("HTTP 403 Forbidden: HAPI-0334: Access denied by default policy (no applicable rules)", e.getMessage());
