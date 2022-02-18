@@ -24,8 +24,8 @@ import ca.uhn.fhir.batch2.api.IJobCleanerService;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.impl.JobCleanerServiceImpl;
-import ca.uhn.fhir.batch2.impl.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.impl.JobCoordinatorImpl;
+import ca.uhn.fhir.batch2.impl.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
@@ -65,14 +65,14 @@ public abstract class BaseBatch2Config {
 	@Bean
 	public IChannelProducer batch2ProcessingChannelProducer(@Autowired IChannelFactory theChannelFactory) {
 		ChannelProducerSettings settings = new ChannelProducerSettings()
-			.setConcurrentConsumers(10);
+			.setConcurrentConsumers(getConcurrentConsumers());
 		return theChannelFactory.getOrCreateProducer(CHANNEL_NAME, JobWorkNotificationJsonMessage.class, settings);
 	}
 
 	@Bean
 	public IChannelReceiver batch2ProcessingChannelReceiver(@Autowired IChannelFactory theChannelFactory) {
 		ChannelConsumerSettings settings = new ChannelConsumerSettings()
-			.setConcurrentConsumers(10);
+			.setConcurrentConsumers(getConcurrentConsumers());
 		return theChannelFactory.getOrCreateReceiver(CHANNEL_NAME, JobWorkNotificationJsonMessage.class, settings);
 	}
 
@@ -81,5 +81,11 @@ public abstract class BaseBatch2Config {
 		return new Batch2JobRegisterer();
 	}
 
+	/**
+	 * Can be overridden
+	 */
+	protected int getConcurrentConsumers() {
+		return 4;
+	}
 
 }
