@@ -58,7 +58,7 @@ public class JsonUtil {
 			return ourMapperPrettyPrint.readerFor(theType).readValue(theInput);
 		} catch (IOException e) {
 			// Should not happen
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(2035) + e);
 		}
 	}
 
@@ -90,7 +90,7 @@ public class JsonUtil {
 			return sw.toString();
 		} catch (IOException e) {
 			// Should not happen
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(2036) + e);
 		}
 	}
 
