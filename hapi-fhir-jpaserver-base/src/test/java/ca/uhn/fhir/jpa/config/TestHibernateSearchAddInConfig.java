@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.search.elastic.ElasticsearchHibernatePropertiesBuilder;
 import ca.uhn.fhir.jpa.search.elastic.TestElasticsearchContainerHelper;
 import ca.uhn.fhir.jpa.search.lastn.ElasticsearchSvcImpl;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
+import com.google.common.io.Files;
 import org.hibernate.search.backend.elasticsearch.index.IndexStatus;
 import org.hibernate.search.backend.lucene.cfg.LuceneBackendSettings;
 import org.hibernate.search.backend.lucene.cfg.LuceneIndexSettings;
@@ -22,6 +23,7 @@ import org.springframework.context.annotation.Primary;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 
 import javax.annotation.PreDestroy;
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +31,7 @@ import java.util.Properties;
 
 /**
  * Configurations for Hibernate Search: off, lucene, or elastic.
- * 
+ *
  * We use {@link DefaultLuceneHeap} by default in our JPA test configs.
  * Turn off by adding {@link NoFT} to the test Contexts.
  * Use Elasticsearch instead via docker by adding {@link Elasticsearch} to the test Contexts;
@@ -46,8 +48,47 @@ public class TestHibernateSearchAddInConfig {
 
 	/**
 	 * Our default config - Lucene in-memory.
-	 *
-	 * Override by adding {@link NoFT} or {@link Elasticsearch} to your test class contexts.
+	 */
+	@Configuration
+	public static class LuceneFilesystem {
+
+		@Bean
+		@Primary
+		IHibernateSearchConfigurer hibernateSearchConfigurer() {
+			ourLog.warn("Hibernate Search: using lucene - filesystem");
+
+			// replace by existing directory for debugging purposes
+//			fixme: remove deprecated
+			File tempDir = Files.createTempDir();
+			String dirPath = tempDir.getAbsolutePath();
+//			String dirPath = "/Users/juan.marchionattosmilecdr.com/temp/lucene-dir";
+
+			Map<String, String> luceneProperties = new HashMap<>();
+			luceneProperties.put(BackendSettings.backendKey(BackendSettings.TYPE), "lucene");
+			luceneProperties.put(BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER), HapiLuceneAnalysisConfigurer.class.getName());
+			luceneProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_TYPE), "local-filesystem");
+			luceneProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_ROOT), dirPath);
+			ourLog.info("Using lucene root dir: {}", dirPath);
+			luceneProperties.put(BackendSettings.backendKey(LuceneBackendSettings.LUCENE_VERSION), "LUCENE_CURRENT");
+			// for lucene trace logging
+			luceneProperties.put(BackendSettings.backendKey(LuceneIndexSettings.IO_WRITER_INFOSTREAM), "true");
+			luceneProperties.put(HibernateOrmMapperSettings.ENABLED, "true");
+
+			return (theProperties) ->
+				theProperties.putAll(luceneProperties);
+		}
+
+
+		@Bean(name={"searchDao", "searchDaoDstu2", "searchDaoDstu3", "searchDaoR4", "searchDaoR5"})
+		public IFulltextSearchSvc searchDao() {
+			ourLog.info("Hibernate Search: FulltextSearchSvcImpl present");
+			return new FulltextSearchSvcImpl();
+		}
+	}
+
+
+	/**
+	 * Our default config - Lucene in-memory.
 	 */
 	@Configuration
 	public static class DefaultLuceneHeap {
@@ -62,7 +103,7 @@ public class TestHibernateSearchAddInConfig {
 			luceneHeapProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_TYPE), "local-heap");
 			luceneHeapProperties.put(BackendSettings.backendKey(LuceneBackendSettings.LUCENE_VERSION), "LUCENE_CURRENT");
 			luceneHeapProperties.put(HibernateOrmMapperSettings.ENABLED, "true");
-			
+
 			return (theProperties) ->
 				theProperties.putAll(luceneHeapProperties);
 		}

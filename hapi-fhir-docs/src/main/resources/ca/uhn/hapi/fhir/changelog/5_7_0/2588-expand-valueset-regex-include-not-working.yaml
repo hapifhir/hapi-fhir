@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 2588
+title: "Include property regex operation was not working when expanding ValueSet. This is now fixed"

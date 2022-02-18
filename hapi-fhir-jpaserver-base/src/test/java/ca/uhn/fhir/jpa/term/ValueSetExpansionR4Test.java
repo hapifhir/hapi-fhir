@@ -61,12 +61,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.anyCollection;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 public class ValueSetExpansionR4Test extends BaseTermR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(ValueSetExpansionR4Test.class);
@@ -978,53 +972,6 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		assertThat(ValueSetTestUtil.toCodes(expandedValueSet), is(equalTo(expandedConceptCodes.subList(1, 23))));
 	}
 
-	@Test
-	public void testExpandValueSetInMemoryRespectsMaxSize() {
-		createCodeSystem();
-
-		// Add lots more codes
-		CustomTerminologySet additions = new CustomTerminologySet();
-		for (int i = 0; i < 100; i++) {
-			additions.addRootConcept("CODE" + i, "Display " + i);
-		}
-		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd(CS_URL, additions);
-
-
-		// Codes available exceeds the max
-		myDaoConfig.setMaximumExpansionSize(50);
-		ValueSet vs = new ValueSet();
-		ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
-		include.setSystem(CS_URL);
-		try {
-			ValueSet expansion = myTermSvc.expandValueSet(null, vs);
-			fail("Expanded to " + expansion.getExpansion().getContains().size() + " but max was " + myDaoConfig.getMaximumExpansionSize());
-		} catch (InternalErrorException e) {
-			assertEquals(Msg.code(832) + "Expansion of ValueSet produced too many codes (maximum 50) - Operation aborted!", e.getMessage());
-		}
-
-		// Increase the max so it won't exceed
-		myDaoConfig.setMaximumExpansionSize(150);
-		vs = new ValueSet();
-		include = vs.getCompose().addInclude();
-		include.setSystem(CS_URL);
-		ValueSet outcome = myTermSvc.expandValueSet(null, vs);
-		assertEquals(109, outcome.getExpansion().getContains().size());
-
-	}
-
-	@Test
-	public void testExpandValueSetWithValueSetCodeAccumulator() {
-		createCodeSystem();
-
-		when(myValueSetCodeAccumulator.getCapacityRemaining()).thenReturn(100);
-
-		ValueSet vs = new ValueSet();
-		ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
-		include.setSystem(CS_URL);
-
-		myTermSvc.expandValueSet(null, vs, myValueSetCodeAccumulator);
-		verify(myValueSetCodeAccumulator, times(9)).includeConceptWithDesignations(anyString(), anyString(), nullable(String.class), anyCollection(), nullable(Long.class), nullable(String.class), nullable(String.class));
-	}
 
 	@Test
 	public void testExpandValueSetPreservesExplicitOrder() {
