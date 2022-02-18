@@ -1233,7 +1233,7 @@ public class Dstu3XmlParserTest {
 	}
 
 	@Test
-	public void testEncodeContainedWithNarrativeIsSuppresed() throws Exception {
+	public void testEncodeContainedWithNarrative() throws Exception {
 		IParser parser = ourCtx.newXmlParser().setPrettyPrint(true);
 
 		// Create an organization, note that the organization does not have an ID
@@ -1252,9 +1252,9 @@ public class Dstu3XmlParserTest {
 		ourLog.info(encoded);
 
 		assertThat(encoded, stringContainsInOrder("<Patient", "<text>", "<div xmlns=\"http://www.w3.org/1999/xhtml\">BARFOO</div>", "<contained>", "<Organization", "</Organization"));
-		assertThat(encoded, not(stringContainsInOrder("<Patient", "<text>", "<contained>", "<Organization", "<text", "</Organization")));
+		assertThat(encoded, stringContainsInOrder("<Patient", "<text>", "<contained>", "<Organization", "<text", "</Organization"));
 
-		assertThat(encoded, not(containsString("FOOBAR")));
+		assertThat(encoded, (containsString("FOOBAR")));
 		assertThat(encoded, (containsString("BARFOO")));
 
 	}
