@@ -17,6 +17,7 @@ import java.nio.charset.StandardCharsets;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.in;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -40,11 +41,11 @@ public class FetchFilesStepTest {
 
 		// Setup
 
-		myBulkImportFileServlet.registerFile(() -> new StringReader("{\"resourceType\":\"Patient\"}"));
+		String index = myBulkImportFileServlet.registerFile(() -> new StringReader("{\"resourceType\":\"Patient\"}"));
 
 		JobInstanceParameters parameters = JobInstanceParameters
 			.newBuilder()
-			.withEntry(BulkImport2AppCtx.PARAM_NDJSON_URL, myHttpServletExtension.getBaseUrl() + "/download?index=0")
+			.withEntry(BulkImport2AppCtx.PARAM_NDJSON_URL, myHttpServletExtension.getBaseUrl() + "/download?index=" + index)
 			.withEntry(BulkImport2AppCtx.PARAM_HTTP_BASIC_CREDENTIALS, "admin:password")
 			.build();
 		StepExecutionDetails details = new StepExecutionDetails(parameters, null);
@@ -71,11 +72,11 @@ public class FetchFilesStepTest {
 			b.append("{\"resourceType\":\"Patient\"}").append("\n");
 		}
 		String resource = b.toString();
-		myBulkImportFileServlet.registerFile(() -> new StringReader(resource));
+		String index = myBulkImportFileServlet.registerFile(() -> new StringReader(resource));
 
 		JobInstanceParameters parameters = JobInstanceParameters
 			.newBuilder()
-			.withEntry(BulkImport2AppCtx.PARAM_NDJSON_URL, myHttpServletExtension.getBaseUrl() + "/download?index=0")
+			.withEntry(BulkImport2AppCtx.PARAM_NDJSON_URL, myHttpServletExtension.getBaseUrl() + "/download?index=" + index)
 			.withEntry(BulkImport2AppCtx.PARAM_MAXIMUM_BATCH_RESOURCE_COUNT, "3")
 			.build();
 		StepExecutionDetails details = new StepExecutionDetails(parameters, null);
