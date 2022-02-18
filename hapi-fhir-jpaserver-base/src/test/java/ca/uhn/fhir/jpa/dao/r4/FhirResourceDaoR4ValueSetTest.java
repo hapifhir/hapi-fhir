@@ -60,6 +60,21 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testValidateCodeInValueSet_ValueSetUrlUsedInsteadOfCodeSystem() throws IOException {
+		myCodeSystemDao.update(loadResourceFromClasspath(CodeSystem.class, "r4/adi-cs.json"));
+		myValueSetDao.update(loadResourceFromClasspath(ValueSet.class, "r4/adi-vs.json"));
+
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		ValidationSupportContext context = new ValidationSupportContext(myValidationSupport);
+		ConceptValidationOptions options = new ConceptValidationOptions();
+		IValidationSupport.CodeValidationResult outcome = myValidationSupport.validateCode(context, options, "http://payer-to-payer-exchange/fhir/ValueSet/mental-health/ndc", "378397893", null, "http://payer-to-payer-exchange/fhir/ValueSet/mental-health/ndc");
+		assertFalse(outcome.isOk());
+		assertEquals("", outcome.getMessage());
+	}
+
+
+	@Test
 	public void testValidateCodeOperationNoValueSet() {
 		UriType valueSetIdentifier = null;
 		IdType id = null;

@@ -281,11 +281,9 @@ public class ValidationSupportChain implements IValidationSupport {
 	public CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		for (IValidationSupport next : myChain) {
 			if (isBlank(theValueSetUrl) || next.isValueSetSupported(theValidationSupportContext, theValueSetUrl)) {
-				if (theOptions.isInferSystem() || (theCodeSystem != null && next.isCodeSystemSupported(theValidationSupportContext, theCodeSystem))) {
-					CodeValidationResult retVal = next.validateCode(theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, theValueSetUrl);
-					if (retVal != null) {
-						return retVal;
-					}
+				CodeValidationResult retVal = next.validateCode(theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, theValueSetUrl);
+				if (retVal != null) {
+					return retVal;
 				}
 			}
 		}

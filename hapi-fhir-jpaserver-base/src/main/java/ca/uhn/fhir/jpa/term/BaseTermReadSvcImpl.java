@@ -2135,24 +2135,39 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	IValidationSupport.CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theValidationOptions, String theValueSetUrl, String theCodeSystem, String theCode, String theDisplay) {
 		IBaseResource valueSet = theValidationSupportContext.getRootValidationSupport().fetchValueSet(theValueSetUrl);
+		CodeValidationResult retVal = null;
 
 		// If we don't have a PID, this came from some source other than the JPA
 		// database, so we don't need to check if it's pre-expanded or not
 		if (valueSet instanceof IAnyResource) {
 			Long pid = IDao.RESOURCE_PID.get((IAnyResource) valueSet);
 			if (pid != null) {
-				if (isValueSetPreExpandedForCodeValidation(valueSet)) {
-					return validateCodeIsInPreExpandedValueSet(theValidationOptions, valueSet, theCodeSystem, theCode, theDisplay, null, null);
-				}
+				TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
+				retVal = txTemplate.execute(tx -> {
+					if (isValueSetPreExpandedForCodeValidation(valueSet)) {
+						return validateCodeIsInPreExpandedValueSet(theValidationOptions, valueSet, theCodeSystem, theCode, theDisplay, null, null);
+					} else {
+						return null;
+					}
+				});
 			}
 		}
 
-		CodeValidationResult retVal;
-		if (valueSet != null) {
-			retVal = new InMemoryTerminologyServerValidationSupport(myContext).validateCodeInValueSet(theValidationSupportContext, theValidationOptions, theCodeSystem, theCode, theDisplay, valueSet);
-		} else {
-			String append = " - Unable to locate ValueSet[" + theValueSetUrl + "]";
-			retVal = createFailureCodeValidationResult(theCodeSystem, theCode, null, append);
+		if (retVal == null) {
+			if (valueSet != null) {
+				retVal = new InMemoryTerminologyServerValidationSupport(myContext).validateCodeInValueSet(theValidationSupportContext, theValidationOptions, theCodeSystem, theCode, theDisplay, valueSet);
+			} else {
+				String append = " - Unable to locate ValueSet[" + theValueSetUrl + "]";
+				retVal = createFailureCodeValidationResult(theCodeSystem, theCode, null, append);
+			}
+		}
+
+		// Check if someone is accidentally using a VS url where it should be a CS URL
+		if (retVal != null && retVal.getCode() == null) {
+			if (isValueSetSupported(theValidationSupportContext, theCodeSystem)) {
+				String newMessage = retVal.getMessage() + " - Supplied system URL is a ValueSet URL and not a CodeSystem URL, check if it is correct: " + theCodeSystem;
+				retVal.setMessage(newMessage);
+			}
 		}
 
 		return retVal;
