@@ -25,7 +25,7 @@ public abstract class BaseJpaDstu3SystemTest extends BaseJpaDstu3Test {
 		when(mySrd.getInterceptorBroadcaster()).thenReturn(mock(IInterceptorBroadcaster.class));
 
 		if (myServer == null) {
-			myServer = new RestfulServer(myFhirCtx);
+			myServer = new RestfulServer(myFhirContext);
 
 			PatientResourceProvider patientRp = new PatientResourceProvider();
 			patientRp.setDao(myPatientDao);

@@ -5,8 +5,8 @@ import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer;
 import ca.uhn.fhir.jpa.search.elastic.ElasticsearchHibernatePropertiesBuilder;
+import ca.uhn.fhir.jpa.search.elastic.TestElasticsearchContainerHelper;
 import ca.uhn.fhir.jpa.search.lastn.ElasticsearchSvcImpl;
-import ca.uhn.fhir.jpa.search.lastn.config.TestElasticsearchContainerHelper;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import org.hibernate.search.backend.elasticsearch.index.IndexStatus;
 import org.hibernate.search.backend.lucene.cfg.LuceneBackendSettings;
@@ -68,8 +68,8 @@ public class TestHibernateSearchAddInConfig {
 		}
 
 
-		@Bean(name={"searchDao", "searchDaoDstu2", "searchDaoDstu3", "searchDaoR4", "searchDaoR5"})
-		public IFulltextSearchSvc searchDao() {
+		@Bean
+		public IFulltextSearchSvc fullTextSearchSvc() {
 			ourLog.info("Hibernate Search: FulltextSearchSvcImpl present");
 			return new FulltextSearchSvcImpl();
 		}
@@ -88,9 +88,9 @@ public class TestHibernateSearchAddInConfig {
 			};
 		}
 
-		@Primary // force override of default bean which might have a variety of names
-		@Bean(name={"searchDao", "searchDaoDstu2", "searchDaoDstu3", "searchDaoR4", "searchDaoR5"})
-		public IFulltextSearchSvc searchDao() {
+		@Primary
+		@Bean
+		public IFulltextSearchSvc fullTextSearchSvc() {
 			ourLog.info("Hibernate Search: FulltextSearchSvcImpl not available");
 			return null;
 		}

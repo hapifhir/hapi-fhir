@@ -140,7 +140,7 @@ public class ResourceProviderR4ValueSetLuceneDisabledTest  extends BaseJpaTest {
 	}
 
 	@Override
-	protected FhirContext getContext() {
+	protected FhirContext getFhirContext() {
 		return myFhirCtx;
 	}
 

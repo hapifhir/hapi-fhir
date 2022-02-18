@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.config.BaseConfig;
+import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -61,7 +61,7 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 	private RemoteTerminologyServiceValidationSupport mySvc;
 
 	@Autowired
-	@Qualifier(BaseConfig.JPA_VALIDATION_SUPPORT_CHAIN)
+	@Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT_CHAIN)
 	private ValidationSupportChain myValidationSupportChain;
 
 	@BeforeEach
@@ -104,7 +104,7 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 			.andParameter("url", new UriType("http://terminology.hl7.org/CodeSystem/v2-0247"))
 			.execute();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals(true, ((BooleanType)respParam.getParameter("result")).booleanValue());
@@ -129,7 +129,7 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 			.useHttpGet()
 			.execute();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals(true, ((BooleanType)respParam.getParameter("result")).booleanValue());
@@ -153,7 +153,7 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 			.andParameter("system", new UriType("http://loinc.org"))
 			.execute();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals(true, ((BooleanType)respParam.getParameter("result")).booleanValue());

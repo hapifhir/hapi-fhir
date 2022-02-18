@@ -1,8 +1,10 @@
 package ca.uhn.fhirtest.config;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
-import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu2;
+import ca.uhn.fhir.jpa.config.HapiJpaConfig;
+import ca.uhn.fhir.jpa.config.JpaDstu2Config;
+import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer;
@@ -15,12 +17,9 @@ import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhirtest.interceptor.PublicSecurityInterceptor;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.apache.commons.lang3.time.DateUtils;
-import org.hibernate.dialect.PostgreSQL94Dialect;
 import org.hibernate.search.backend.lucene.cfg.LuceneBackendSettings;
 import org.hibernate.search.backend.lucene.cfg.LuceneIndexSettings;
 import org.hibernate.search.engine.cfg.BackendSettings;
-import org.hibernate.search.mapper.orm.cfg.HibernateOrmMapperSettings;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,9 +40,9 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 @Configuration
-@Import(CommonConfig.class)
+@Import({CommonConfig.class, JpaDstu2Config.class, HapiJpaConfig.class})
 @EnableTransactionManagement()
-public class TestDstu2Config extends BaseJavaConfigDstu2 {
+public class TestDstu2Config {
 
 	public static final String FHIR_LUCENE_LOCATION_DSTU2 = "${fhir.lucene.location.dstu2}";
 
@@ -92,16 +91,15 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 		return daoConfig().getModelConfig();
 	}
 
-	@Override
 	@Bean
 	public ValidationSettings validationSettings() {
-		ValidationSettings retVal = super.validationSettings();
+		ValidationSettings retVal = new ValidationSettings();
 		retVal.setLocalReferenceValidationDefaultPolicy(ReferenceValidationPolicy.CHECK_VALID);
 		return retVal;
 	}
 
 
-	@Bean(name = "myPersistenceDataSourceDstu1", destroyMethod = "close")
+	@Bean(name = "myPersistenceDataSourceDstu1")
 	public DataSource dataSource() {
 		BasicDataSource retVal = new BasicDataSource();
 		if (CommonConfig.isLocalTestMode()) {
@@ -134,10 +132,9 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 		return retVal;
 	}
 
-	@Override
 	@Bean
-	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory) {
-		LocalContainerEntityManagerFactoryBean retVal = super.entityManagerFactory(theConfigurableListableBeanFactory);
+	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext) {
+		LocalContainerEntityManagerFactoryBean retVal = HapiEntityManagerFactoryUtil.newEntityManagerFactory(theConfigurableListableBeanFactory, theFhirContext);
 		retVal.setPersistenceUnitName("PU_HapiFhirJpaDstu2");
 		retVal.setDataSource(dataSource());
 		retVal.setJpaProperties(jpaProperties());
@@ -194,7 +191,7 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 		return new PropertySourcesPlaceholderConfigurer();
 	}
 
-//	@Bean(autowire = Autowire.BY_TYPE)
+//	@Bean
 //	public IServerInterceptor subscriptionSecurityInterceptor() {
 //		return new SubscriptionsRequireManualActivationInterceptorDstu2();
 //	}

@@ -206,7 +206,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		String resp;
 
 		ValueSet expanded = myValueSetDao.expand(myExtensionalVsId, null, mySrd);
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, containsString("<ValueSet xmlns=\"http://hl7.org/fhir\">"));
 		assertThat(resp, containsString("<expansion>"));
@@ -227,7 +227,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		 */
 
 		expanded = myValueSetDao.expand(myExtensionalVsId, new ValueSetExpansionOptions().setFilter("systolic"), mySrd);
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		//@formatter:off
 		assertThat(resp, stringContainsInOrder(
@@ -312,7 +312,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		assertTrue(outcome.isOk());
 
 		ValueSet expansion = myValueSetDao.expand(new IdType("ValueSet/vaccinecode"), new ValueSetExpansionOptions(), mySrd);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 
 	}
 

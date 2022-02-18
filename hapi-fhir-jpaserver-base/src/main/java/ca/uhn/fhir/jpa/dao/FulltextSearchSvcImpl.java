@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneClauseBuilder;
 import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneIndexExtractor;
 import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneSearchBuilder;
+import ca.uhn.fhir.jpa.dao.search.LastNOperation;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
 import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteOptions;
@@ -97,9 +98,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		// keep this in sync with the guts of doSearch
 		boolean requiresHibernateSearchAccess = myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT) || myParams.isLastN();
 
-		requiresHibernateSearchAccess |=
-			myDaoConfig.isAdvancedLuceneIndexing() &&
-				myAdvancedIndexQueryBuilder.isSupportsSomeOf(myParams);
+		requiresHibernateSearchAccess |= myDaoConfig.isAdvancedLuceneIndexing() && myAdvancedIndexQueryBuilder.isSupportsSomeOf(myParams);
 
 		return requiresHibernateSearchAccess;
 	}
@@ -148,7 +147,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 					}
 
 					if (isNotBlank(theResourceType)) {
-						b.must(f.match().field("myResourceType").matching(theResourceType));
+						builder.addResourceTypeClause(theResourceType);
 					}
 
 					/*
@@ -236,8 +235,13 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 		ValueSetAutocompleteSearch autocomplete = new ValueSetAutocompleteSearch(myFhirContext, getSearchSession());
 
-		IBaseResource result = autocomplete.search(theOptions);
-
-		return result;
+		return autocomplete.search(theOptions);
 	}
+	@Override
+	public List<ResourcePersistentId> lastN(SearchParameterMap theParams, Integer theMaximumResults) {
+		List<Long> pidList = new LastNOperation(getSearchSession(), myFhirContext, mySearchParamRegistry)
+			.executeLastN(theParams, theMaximumResults);
+		return convertLongsToResourcePersistentIds(pidList);
+	}
+
 }

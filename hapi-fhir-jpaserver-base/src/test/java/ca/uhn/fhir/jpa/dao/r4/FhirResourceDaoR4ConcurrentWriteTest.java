@@ -72,7 +72,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		myRetryInterceptor = new UserRequestRetryVersionConflictsInterceptor();
 		myConcurrencySemaphoreInterceptor = new TransactionConcurrencySemaphoreInterceptor(myMemoryCacheService);
 
-		RestfulServer server = new RestfulServer(myFhirCtx);
+		RestfulServer server = new RestfulServer(myFhirContext);
 		when(mySrd.getServer()).thenReturn(server);
 
 	}
@@ -215,7 +215,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		myConcurrencySemaphoreInterceptor.setLogWaits(true);
 
 		Runnable creator = ()->{
-			BundleBuilder bb = new BundleBuilder(myFhirCtx);
+			BundleBuilder bb = new BundleBuilder(myFhirContext);
 
 			Patient patient1 = new Patient();
 			patient1.addIdentifier().setSystem("http://foo").setValue("1");
@@ -276,7 +276,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 	@Nonnull
 	private Runnable newTransactionTaskWithUpdatesAndConditionalUpdates(AtomicInteger theSetCounter, AtomicInteger theFuzzCounter) {
 		Runnable creator = () -> {
-			BundleBuilder bb = new BundleBuilder(myFhirCtx);
+			BundleBuilder bb = new BundleBuilder(myFhirContext);
 			String patientId = "Patient/PT" + theSetCounter.get();
 			IdType practitionerId = IdType.newRandomUuid();
 			IdType practitionerId2 = IdType.newRandomUuid();
@@ -358,7 +358,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 
 		// Make sure we saved the object
 		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 		assertEquals(true, patient.getActive());
 
 	}
@@ -391,7 +391,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 
 		// Make sure we saved the object
 		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 		assertEquals(true, patient.getActive());
 
 	}
@@ -424,7 +424,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 
 		// Make sure we saved the object
 		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 		assertEquals(true, patient.getActive());
 
 	}
@@ -578,7 +578,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 
 		// Make sure we saved the object
 		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 		assertEquals(true, patient.getActive());
 
 	}
@@ -614,7 +614,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 
 		// Make sure we saved the object
 		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 		assertEquals(true, patient.getActive());
 
 	}
@@ -654,7 +654,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 
 		// Make sure we saved the object
 		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 		assertEquals(true, patient.getActive());
 
 	}
@@ -707,7 +707,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 
 		// Make sure we saved the object
 		Patient patient = myPatientDao.read(pId);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 		assertEquals("6", patient.getMeta().getVersionId());
 
 	}
@@ -721,7 +721,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		String value = UserRequestRetryVersionConflictsInterceptor.RETRY + "; " + UserRequestRetryVersionConflictsInterceptor.MAX_RETRIES + "=10";
 		when(srd.getHeaders(eq(UserRequestRetryVersionConflictsInterceptor.HEADER_NAME))).thenReturn(Collections.singletonList(value));
 		when(srd.getUserData()).thenReturn(new HashMap<>());
-		when(srd.getServer()).thenReturn(new RestfulServer(myFhirCtx));
+		when(srd.getServer()).thenReturn(new RestfulServer(myFhirContext));
 		when(srd.getInterceptorBroadcaster()).thenReturn(new InterceptorService());
 
 		List<Future<?>> futures = new ArrayList<>();
@@ -759,7 +759,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 
 		// Make sure we saved the object
 		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 		assertEquals(true, patient.getActive());
 
 	}
@@ -774,7 +774,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		String value = UserRequestRetryVersionConflictsInterceptor.RETRY + "; " + UserRequestRetryVersionConflictsInterceptor.MAX_RETRIES + "=10";
 		when(srd.getHeaders(eq(UserRequestRetryVersionConflictsInterceptor.HEADER_NAME))).thenReturn(Collections.singletonList(value));
 		when(srd.getUserData()).thenReturn(new HashMap<>());
-		when(srd.getServer()).thenReturn(new RestfulServer(myFhirCtx));
+		when(srd.getServer()).thenReturn(new RestfulServer(myFhirContext));
 		when(srd.getInterceptorBroadcaster()).thenReturn(new InterceptorService());
 
 		List<Future<?>> futures = new ArrayList<>();
@@ -783,7 +783,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 			String patientId = "PATIENT" + i;
 
 			Runnable task = () -> {
-				BundleBuilder bb = new BundleBuilder(myFhirCtx);
+				BundleBuilder bb = new BundleBuilder(myFhirContext);
 
 				Patient p = new Patient();
 				p.setId(patientId);
