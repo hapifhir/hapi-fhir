@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.mdm;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
@@ -19,6 +20,9 @@ import ca.uhn.fhir.jpa.mdm.matcher.IsPossibleLinkedTo;
 import ca.uhn.fhir.jpa.mdm.matcher.IsPossibleMatchWith;
 import ca.uhn.fhir.jpa.mdm.matcher.IsSameGoldenResourceAs;
 import ca.uhn.fhir.jpa.mdm.svc.MdmMatchLinkSvc;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
@@ -74,7 +78,8 @@ import static org.slf4j.LoggerFactory.getLogger;
 @ContextConfiguration(classes = {MdmSubmitterConfig.class, MdmConsumerConfig.class, TestMdmConfigR4.class, SubscriptionProcessorConfig.class})
 abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 
-
+	protected static final String PARTITION_1 = "PART-1";
+	protected static final String PARTITION_2 = "PART-2";
 	public static final String NAME_GIVEN_JANE = "Jane";
 	public static final String NAME_GIVEN_PAUL = "Paul";
 	public static final String TEST_NAME_FAMILY = "Doe";
@@ -121,6 +126,10 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+	@Autowired
+	protected PartitionSettings myPartitionSettings;
+	@Autowired
+	protected IPartitionLookupSvc myPartitionConfigSvc;
 
 	@BeforeEach
 	public void beforeSetRequestDetails() {
@@ -182,6 +191,38 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		thePatient.setActive(true);
 
 		DaoMethodOutcome outcome = myPatientDao.create(thePatient);
+		Patient patient = (Patient) outcome.getResource();
+		patient.setId(outcome.getId());
+		return patient;
+	}
+
+	@Nonnull
+	protected Patient createPatientOnPartition(Patient thePatient, boolean theMdmManaged, boolean isRedirect, RequestPartitionId theRequestPartitionId) {
+		if (theMdmManaged) {
+			MdmResourceUtil.setMdmManaged(thePatient);
+			if (isRedirect) {
+				MdmResourceUtil.setGoldenResourceRedirected(thePatient);
+			} else {
+				MdmResourceUtil.setGoldenResource(thePatient);
+			}
+		}
+
+		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
+		systemRequestDetails.setRequestPartitionId(theRequestPartitionId);
+		DaoMethodOutcome outcome = myPatientDao.create(thePatient, systemRequestDetails);
+		Patient patient = (Patient) outcome.getResource();
+		patient.setId(outcome.getId());
+		return patient;
+	}
+
+	@Nonnull
+	protected Patient createPatientOnPartition(Patient thePatient, RequestPartitionId theRequestPartitionId) {
+		//Note that since our mdm-rules block on active=true, all patients must be active.
+		thePatient.setActive(true);
+
+		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
+		systemRequestDetails.setRequestPartitionId(theRequestPartitionId);
+		DaoMethodOutcome outcome = myPatientDao.create(thePatient, systemRequestDetails);
 		Patient patient = (Patient) outcome.getResource();
 		patient.setId(outcome.getId());
 		return patient;
@@ -312,7 +353,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		String resourceType = theBaseResource.getIdElement().getResourceType();
 		IFhirResourceDao relevantDao = myDaoRegistry.getResourceDao(resourceType);
 
-		Optional<MdmLink> matchedLinkForTargetPid = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(runInTransaction(()->myIdHelperService.getPidOrNull(theBaseResource)));
+		Optional<MdmLink> matchedLinkForTargetPid = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(runInTransaction(() -> myIdHelperService.getPidOrNull(theBaseResource)));
 		if (matchedLinkForTargetPid.isPresent()) {
 			Long goldenResourcePid = matchedLinkForTargetPid.get().getGoldenResourcePid();
 			return (T) relevantDao.readByPid(new ResourcePersistentId(goldenResourcePid));
@@ -395,12 +436,12 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		return new Matcher<IAnyResource>() {
 			@Override
 			public boolean matches(Object actual) {
-				return runInTransaction(()->theFunction.get().matches(actual));
+				return runInTransaction(() -> theFunction.get().matches(actual));
 			}
 
 			@Override
 			public void describeMismatch(Object actual, Description mismatchDescription) {
-				runInTransaction(()->theFunction.get().describeMismatch(actual, mismatchDescription));
+				runInTransaction(() -> theFunction.get().describeMismatch(actual, mismatchDescription));
 			}
 
 			@Override
@@ -410,33 +451,33 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 
 			@Override
 			public void describeTo(Description description) {
-				runInTransaction(()->theFunction.get().describeTo(description));
+				runInTransaction(() -> theFunction.get().describeTo(description));
 			}
 		};
 	}
 
 	protected Matcher<IAnyResource> sameGoldenResourceAs(IAnyResource... theBaseResource) {
-		return wrapMatcherInTransaction(()->IsSameGoldenResourceAs.sameGoldenResourceAs(myIdHelperService, myMdmLinkDaoSvc, theBaseResource));
+		return wrapMatcherInTransaction(() -> IsSameGoldenResourceAs.sameGoldenResourceAs(myIdHelperService, myMdmLinkDaoSvc, theBaseResource));
 	}
 
 	protected Matcher<IAnyResource> linkedTo(IAnyResource... theBaseResource) {
-		return wrapMatcherInTransaction(()->IsLinkedTo.linkedTo(myIdHelperService, myMdmLinkDaoSvc, theBaseResource));
+		return wrapMatcherInTransaction(() -> IsLinkedTo.linkedTo(myIdHelperService, myMdmLinkDaoSvc, theBaseResource));
 	}
 
 	protected Matcher<IAnyResource> possibleLinkedTo(IAnyResource... theBaseResource) {
-		return wrapMatcherInTransaction(()->IsPossibleLinkedTo.possibleLinkedTo(myIdHelperService, myMdmLinkDaoSvc, theBaseResource));
+		return wrapMatcherInTransaction(() -> IsPossibleLinkedTo.possibleLinkedTo(myIdHelperService, myMdmLinkDaoSvc, theBaseResource));
 	}
 
 	protected Matcher<IAnyResource> possibleMatchWith(IAnyResource... theBaseResource) {
-		return wrapMatcherInTransaction(()->IsPossibleMatchWith.possibleMatchWith(myIdHelperService, myMdmLinkDaoSvc, theBaseResource));
+		return wrapMatcherInTransaction(() -> IsPossibleMatchWith.possibleMatchWith(myIdHelperService, myMdmLinkDaoSvc, theBaseResource));
 	}
 
 	protected Matcher<IAnyResource> possibleDuplicateOf(IAnyResource... theBaseResource) {
-		return wrapMatcherInTransaction(()->IsPossibleDuplicateOf.possibleDuplicateOf(myIdHelperService, myMdmLinkDaoSvc, theBaseResource));
+		return wrapMatcherInTransaction(() -> IsPossibleDuplicateOf.possibleDuplicateOf(myIdHelperService, myMdmLinkDaoSvc, theBaseResource));
 	}
 
 	protected Matcher<IAnyResource> matchedToAGoldenResource() {
-		return wrapMatcherInTransaction(()->IsMatchedToAGoldenResource.matchedToAGoldenResource(myIdHelperService, myMdmLinkDaoSvc));
+		return wrapMatcherInTransaction(() -> IsMatchedToAGoldenResource.matchedToAGoldenResource(myIdHelperService, myMdmLinkDaoSvc));
 	}
 
 	protected Patient getOnlyGoldenPatient() {

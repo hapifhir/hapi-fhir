@@ -144,7 +144,7 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 		myIMdmLinkUpdaterSvc.notDuplicateGoldenResource(goldenResource, target, theMdmTransactionContext);
 	}
 
-	private Integer extractPartitionIdOrNull(String thePartitionName){
+	private Integer extractPartitionIdOrNull(String thePartitionName) {
 		if (StringUtils.isNotBlank(thePartitionName)) {
 			return myPartitionLookupSvc.getPartitionByName(thePartitionName).getId();
 		}
