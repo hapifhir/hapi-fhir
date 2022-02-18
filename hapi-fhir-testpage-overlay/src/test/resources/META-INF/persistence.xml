@@ -43,10 +43,7 @@
 			<!-- 
 			<property name="hibernate.ejb.naming_strategy" value="ca.uhn.fhir.jpa.util.CustomNamingStrategy" />
 			 -->
-			<!-- 
-			<property name="hibernate.cache.region.factory_class" value="org.hibernate.cache.ehcache.SingletonEhCacheRegionFactory" />
-			 -->
-		</properties>                                                    
+		</properties>
 	</persistence-unit>
 
 </persistence>

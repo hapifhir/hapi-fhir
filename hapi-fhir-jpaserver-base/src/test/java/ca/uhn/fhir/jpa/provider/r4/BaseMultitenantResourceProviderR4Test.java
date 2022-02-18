@@ -108,7 +108,10 @@ public abstract class BaseMultitenantResourceProviderR4Test extends BaseResource
 			.execute();
 	}
 
-	public void enableAuthorizationInterceptor(Supplier<List<IAuthRule>> theRuleSupplier) {
+	public void setupAuthorizationInterceptorWithRules(Supplier<List<IAuthRule>> theRuleSupplier) {
+		if(myAuthorizationInterceptor != null) {
+			ourRestServer.unregisterInterceptor(myAuthorizationInterceptor);
+		}
 		myAuthorizationInterceptor = new AuthorizationInterceptor() {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
