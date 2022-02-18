@@ -7,6 +7,7 @@ import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
@@ -185,6 +186,7 @@ public class GiantTransactionPerfTest {
 		myTransactionProcessor.setPartitionSettingsForUnitTest(this.myPartitionSettings);
 		myTransactionProcessor.setIdHelperServiceForUnitTest(myIdHelperService);
 		myTransactionProcessor.setFhirContextForUnitTest(ourFhirContext);
+		myTransactionProcessor.setApplicationContextForUnitTest(myAppCtx);
 		myTransactionProcessor.start();
 
 		mySystemDao = new FhirSystemDaoR4();
@@ -194,6 +196,7 @@ public class GiantTransactionPerfTest {
 		mySystemDao.start();
 
 		when(myAppCtx.getBean(eq(IInstanceValidatorModule.class))).thenReturn(myInstanceValidatorSvc);
+		when(myAppCtx.getBean(eq(IFhirSystemDao.class))).thenReturn(mySystemDao);
 
 		myInMemoryResourceMatcher = new InMemoryResourceMatcher();
 

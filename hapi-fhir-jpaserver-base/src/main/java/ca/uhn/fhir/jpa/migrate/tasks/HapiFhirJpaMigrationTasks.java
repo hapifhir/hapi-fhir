@@ -173,9 +173,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		batchInstance.addColumn("ERROR_MSG").nullable().type(ColumnTypeEnum.STRING, 500);
 		batchInstance.addColumn("ERROR_COUNT").nullable().type(ColumnTypeEnum.INT);
 		batchInstance.addColumn("EST_REMAINING").nullable().type(ColumnTypeEnum.STRING, 100);
-		batchInstance.addIndex("20220217.4", "IDX_BT2JI_CT").unique(false).withColumns("CREATE_TIME");
+		batchInstance.addIndex("20220217.2", "IDX_BT2JI_CT").unique(false).withColumns("CREATE_TIME");
 
-		Builder.BuilderAddTableByColumns batchChunk = version.addTableByColumns("20220217.2", "BT2_WORK_CHUNK", "ID");
+		Builder.BuilderAddTableByColumns batchChunk = version.addTableByColumns("20220217.3", "BT2_WORK_CHUNK", "ID");
 		batchChunk.addColumn("ID").nonNullable().type(ColumnTypeEnum.STRING, 100);
 		batchChunk.addColumn("SEQ").nonNullable().type(ColumnTypeEnum.INT);
 		batchChunk.addColumn("CREATE_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
@@ -186,7 +186,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		batchChunk.addColumn("STAT").nonNullable().type(ColumnTypeEnum.STRING, 20);
 		batchChunk.addColumn("RECORDS_PROCESSED").nullable().type(ColumnTypeEnum.INT);
 		batchChunk.addColumn("TGT_STEP_ID").nonNullable().type(ColumnTypeEnum.STRING, 100);
-		batchChunk.addColumn("DATA").nullable().type(ColumnTypeEnum.CLOB);
+		batchChunk.addColumn("CHUNK_DATA").nullable().type(ColumnTypeEnum.CLOB);
 		batchChunk.addColumn("INSTANCE_ID").nonNullable().type(ColumnTypeEnum.STRING, 100);
 		batchChunk.addColumn("ERROR_MSG").nullable().type(ColumnTypeEnum.STRING, 500);
 		batchChunk.addColumn("ERROR_COUNT").nullable().type(ColumnTypeEnum.INT);

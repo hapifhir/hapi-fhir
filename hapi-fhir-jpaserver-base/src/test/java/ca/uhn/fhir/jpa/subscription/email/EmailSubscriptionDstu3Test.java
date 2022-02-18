@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import static ca.uhn.fhir.jpa.subscription.resthook.RestHookTestDstu3Test.logAllInterceptors;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -102,11 +103,15 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 			}
 		}
 
+		int initialCount = mySubscriptionRegistry.getAll().size();
+
 		MethodOutcome methodOutcome = ourClient.create().resource(subscription).execute();
 		subscription.setId(methodOutcome.getId().getIdPart());
 		mySubscriptionIds.add(methodOutcome.getId());
 
 		waitForQueueToDrain();
+
+		await().until(()-> mySubscriptionRegistry.getAll().size() == initialCount + 1);
 
 		return subscription;
 	}

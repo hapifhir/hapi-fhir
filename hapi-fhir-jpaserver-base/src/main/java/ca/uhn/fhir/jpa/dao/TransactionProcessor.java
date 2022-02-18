@@ -364,6 +364,11 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		myIdHelperService = theIdHelperService;
 	}
 
+	@VisibleForTesting
+	public void setApplicationContextForUnitTest(ApplicationContext theAppCtx) {
+		myApplicationContext = theAppCtx;
+	}
+
 	private static class MatchUrlToResolve {
 
 		private final String myRequestUrl;

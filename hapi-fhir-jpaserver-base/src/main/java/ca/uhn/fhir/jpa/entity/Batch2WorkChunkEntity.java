@@ -76,7 +76,7 @@ public class Batch2WorkChunkEntity implements Serializable {
 	private String myTargetStepId;
 	@Lob
 	@Basic(fetch = FetchType.LAZY)
-	@Column(name = "DATA", nullable = true, length = Integer.MAX_VALUE - 1)
+	@Column(name = "CHUNK_DATA", nullable = true, length = Integer.MAX_VALUE - 1)
 	private String mySerializedData;
 	@Column(name = "STAT", length = STATUS_MAX_LENGTH, nullable = false)
 	@Enumerated(EnumType.STRING)
