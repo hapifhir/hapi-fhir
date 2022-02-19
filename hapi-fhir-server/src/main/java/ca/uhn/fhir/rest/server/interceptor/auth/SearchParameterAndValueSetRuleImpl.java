@@ -140,18 +140,30 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 									.getTroubleshootingLog()
 									.debug("Code {}:{} was not found in VS", system, code);
 							}
+						} else {
+							theRuleApplier
+								.getTroubleshootingLog()
+								.warn("ValueSet {} could not be validated by terminology service - Assuming DENY", myValueSetUrl);
+							return new AuthorizationInterceptor.Verdict(PolicyEnum.DENY, this);
 						}
 					}
 				}
 			}
 
 			if (!myWantCode) {
-				if ((getMode() == PolicyEnum.ALLOW && matchCount == 0) ||
-					(getMode() == PolicyEnum.DENY && matchCount < codeCount)) {
+				boolean notFound = getMode() == PolicyEnum.ALLOW && matchCount == 0;
+				boolean othersFound = getMode() == PolicyEnum.DENY && matchCount < codeCount;
+				if (notFound || othersFound) {
 					AuthorizationInterceptor.Verdict verdict = newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
-					theRuleApplier
-						.getTroubleshootingLog()
-						.debug("Code was found in VS - Verdict: {}", verdict);
+					if (notFound) {
+						theRuleApplier
+							.getTroubleshootingLog()
+							.debug("Code was not found in VS - Verdict: {}", verdict);
+					} else {
+						theRuleApplier
+							.getTroubleshootingLog()
+							.debug("Code(s) found that are not in VS - Verdict: {}", verdict);
+					}
 					return verdict;
 				}
 			}
