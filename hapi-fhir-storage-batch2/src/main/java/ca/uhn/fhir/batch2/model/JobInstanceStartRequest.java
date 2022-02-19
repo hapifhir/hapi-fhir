@@ -21,18 +21,32 @@ package ca.uhn.fhir.batch2.model;
  */
 
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.util.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class JobInstanceStartRequest implements IModelJson {
 
-	@JsonProperty("jobDefinitionId")
+	@JsonProperty(value = "jobDefinitionId")
 	private String myJobDefinitionId;
 
-	@JsonProperty("parameters")
-	private List<JobInstanceParameter> myParameters;
+	@JsonProperty(value = "parameters")
+	private String myParameters;
+
+	/**
+	 * Constructor
+	 */
+	public JobInstanceStartRequest() {
+		super();
+	}
+
+	/**
+	 * Coopy constructor
+	 */
+	public JobInstanceStartRequest(JobInstanceStartRequest theJobInstance) {
+		super();
+		setJobDefinitionId(theJobInstance.getJobDefinitionId());
+		setParameters(theJobInstance.getParameters());
+	}
 
 	public String getJobDefinitionId() {
 		return myJobDefinitionId;
@@ -42,14 +56,22 @@ public class JobInstanceStartRequest implements IModelJson {
 		myJobDefinitionId = theJobDefinitionId;
 	}
 
-	public List<JobInstanceParameter> getParameters() {
-		if (myParameters == null) {
-			myParameters = new ArrayList<>();
-		}
+	public String getParameters() {
 		return myParameters;
 	}
 
-	public void addParameter(JobInstanceParameter theJobInstanceParameter) {
-		getParameters().add(theJobInstanceParameter);
+	public void setParameters(String theParameters) {
+		myParameters = theParameters;
 	}
+
+	public JobInstanceStartRequest setParameters(IModelJson theParameters) {
+		myParameters = JsonUtil.serializeOrInvalidRequest(theParameters);
+		return this;
+	}
+
+	public <T extends IModelJson> T getParameters(Class<T> theType) {
+		return JsonUtil.deserialize(myParameters, theType);
+	}
+
+
 }

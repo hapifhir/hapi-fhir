@@ -21,10 +21,15 @@ package ca.uhn.fhir.batch2.api;
  */
 
 import ca.uhn.fhir.batch2.model.WorkChunkData;
+import ca.uhn.fhir.model.api.IModelJson;
 
-public interface IJobDataSink {
+public interface IJobDataSink<OT extends IModelJson> {
 
-	void accept(WorkChunkData theData);
+	default void accept(OT theData) {
+		accept(new WorkChunkData<>(theData));
+	}
+
+	void accept(WorkChunkData<OT> theData);
 
 	/**
 	 * TODO JA: what is this?

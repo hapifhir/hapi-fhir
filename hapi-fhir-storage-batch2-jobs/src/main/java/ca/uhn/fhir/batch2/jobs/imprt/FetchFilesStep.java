@@ -20,11 +20,12 @@ package ca.uhn.fhir.batch2.jobs.imprt;
  * #L%
  */
 
+import ca.uhn.fhir.batch2.api.IFirstJobStepWorker;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.model.WorkChunkData;
+import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.impl.HttpBasicAuthInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -45,25 +46,26 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Optional;
 
-public class FetchFilesStep implements IJobStepWorker {
-	public static final String KEY_NDJSON = "ndjson";
-	public static final String KEY_SOURCE_NAME = "sourceName";
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
+public class FetchFilesStep implements IFirstJobStepWorker<BulkImportJobParameters, NdJsonFileJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(FetchFilesStep.class);
 
 	@Override
-	public RunOutcome run(StepExecutionDetails theStepExecutionDetails, IJobDataSink theDataSink) {
+	public RunOutcome run(StepExecutionDetails<BulkImportJobParameters, VoidModel> theStepExecutionDetails, IJobDataSink<NdJsonFileJson> theDataSink) {
 
-		int maxBatchResourceCount = theStepExecutionDetails
+		Integer maxBatchResourceCount = theStepExecutionDetails
 			.getParameters()
-			.getValueInteger(BulkImport2AppCtx.PARAM_MAXIMUM_BATCH_RESOURCE_COUNT)
-			.orElse(BulkImport2AppCtx.PARAM_MAXIMUM_BATCH_SIZE_DEFAULT);
+			.getMaxBatchResourceCount();
+		if (maxBatchResourceCount == null || maxBatchResourceCount <= 0) {
+			maxBatchResourceCount = BulkImport2AppCtx.PARAM_MAXIMUM_BATCH_SIZE_DEFAULT;
+		}
 
 		try (CloseableHttpClient httpClient = newHttpClient(theStepExecutionDetails)) {
 
 			StopWatch outerSw = new StopWatch();
-			List<String> urls = theStepExecutionDetails.getParameters().getValues(BulkImport2AppCtx.PARAM_NDJSON_URL);
+			List<String> urls = theStepExecutionDetails.getParameters().getNdJsonUrls();
 
 			for (String nextUrl : urls) {
 
@@ -98,9 +100,10 @@ public class FetchFilesStep implements IJobStepWorker {
 							if (lineCount >= maxBatchResourceCount || charCount >= batchSizeChars || !lineIterator.hasNext()) {
 
 								ourLog.info("Loaded chunk {} of {} NDJSON file with {} resources from URL: {}", chunkCount, FileUtil.formatFileSize(charCount), lineCount, nextUrl);
-								WorkChunkData data = new WorkChunkData();
-								data.put(KEY_NDJSON, builder.toString());
-								data.put(KEY_SOURCE_NAME, nextUrl);
+
+								NdJsonFileJson data = new NdJsonFileJson();
+								data.setNdJsonText(builder.toString());
+								data.setSourceName(nextUrl);
 								theDataSink.accept(data);
 
 								builder.setLength(0);
@@ -127,18 +130,17 @@ public class FetchFilesStep implements IJobStepWorker {
 		}
 	}
 
-	private CloseableHttpClient newHttpClient(StepExecutionDetails theStepExecutionDetails) {
+	private CloseableHttpClient newHttpClient(StepExecutionDetails<BulkImportJobParameters, ?> theStepExecutionDetails) {
 		HttpClientBuilder builder = HttpClientBuilder.create();
 
-		Optional<String> httpBasicCredentials = theStepExecutionDetails.getParameters().getValue(BulkImport2AppCtx.PARAM_HTTP_BASIC_CREDENTIALS);
-		if (httpBasicCredentials.isPresent()) {
-			String credentials = httpBasicCredentials.get();
-			int colonIdx = credentials.indexOf(':');
+		String httpBasicCredentials = theStepExecutionDetails.getParameters().getHttpBasicCredentials();
+		if (isNotBlank(httpBasicCredentials)) {
+			int colonIdx = httpBasicCredentials.indexOf(':');
 			if (colonIdx == -1) {
 				throw new JobExecutionFailedException("Invalid credential parameter provided. Must be in the form \"username:password\".");
 			}
-			String username = credentials.substring(0, colonIdx);
-			String password = credentials.substring(colonIdx + 1);
+			String username = httpBasicCredentials.substring(0, colonIdx);
+			String password = httpBasicCredentials.substring(colonIdx + 1);
 			builder.addInterceptorFirst(new HttpBasicAuthInterceptor(username, password));
 		}
 

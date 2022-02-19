@@ -23,13 +23,13 @@ package ca.uhn.fhir.batch2.model;
 import ca.uhn.fhir.jpa.util.JsonDateDeserializer;
 import ca.uhn.fhir.jpa.util.JsonDateSerializer;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.util.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.apache.commons.lang3.Validate;
 
 import java.util.Date;
-import java.util.Map;
 
 public class WorkChunk implements IModelJson {
 
@@ -55,7 +55,7 @@ public class WorkChunk implements IModelJson {
 	private String myInstanceId;
 
 	@JsonProperty("data")
-	private Map<String, Object> myData;
+	private String myData;
 
 	@JsonProperty("createTime")
 	@JsonSerialize(using = JsonDateSerializer.class)
@@ -163,13 +163,22 @@ public class WorkChunk implements IModelJson {
 		return this;
 	}
 
-	public Map<String, Object> getData() {
+	public String getData() {
 		return myData;
 	}
 
-	public WorkChunk setData(Map<String, Object> theData) {
+	public WorkChunk setData(String theData) {
 		myData = theData;
 		return this;
+	}
+
+	public WorkChunk setData(IModelJson theData) {
+		setData(JsonUtil.serializeOrInvalidRequest(theData));
+		return this;
+	}
+
+	public <T extends IModelJson> T getData(Class<T> theType) {
+		return JsonUtil.deserialize(getData(), theType);
 	}
 
 	public String getInstanceId() {

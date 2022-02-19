@@ -3,7 +3,7 @@ package ca.uhn.fhir.batch2.jobs.imprt;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.model.JobInstanceParameters;
+import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.test.utilities.server.HttpServletExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,7 +17,6 @@ import java.nio.charset.StandardCharsets;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.in;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -34,7 +33,7 @@ public class FetchFilesStepTest {
 	private final FetchFilesStep mySvc = new FetchFilesStep();
 
 	@Mock
-	private IJobDataSink myJobDataSink;
+	private IJobDataSink<NdJsonFileJson> myJobDataSink;
 
 	@Test
 	public void testFetchWithBasicAuth() {
@@ -43,12 +42,10 @@ public class FetchFilesStepTest {
 
 		String index = myBulkImportFileServlet.registerFile(() -> new StringReader("{\"resourceType\":\"Patient\"}"));
 
-		JobInstanceParameters parameters = JobInstanceParameters
-			.newBuilder()
-			.withEntry(BulkImport2AppCtx.PARAM_NDJSON_URL, myHttpServletExtension.getBaseUrl() + "/download?index=" + index)
-			.withEntry(BulkImport2AppCtx.PARAM_HTTP_BASIC_CREDENTIALS, "admin:password")
-			.build();
-		StepExecutionDetails details = new StepExecutionDetails(parameters, null);
+		BulkImportJobParameters parameters = new BulkImportJobParameters()
+			.addNdJsonUrl(myHttpServletExtension.getBaseUrl() + "/download?index=" + index)
+			.setHttpBasicCredentials("admin:password");
+		StepExecutionDetails<BulkImportJobParameters, VoidModel> details = new StepExecutionDetails<>(parameters, null);
 
 		// Test
 
@@ -74,12 +71,10 @@ public class FetchFilesStepTest {
 		String resource = b.toString();
 		String index = myBulkImportFileServlet.registerFile(() -> new StringReader(resource));
 
-		JobInstanceParameters parameters = JobInstanceParameters
-			.newBuilder()
-			.withEntry(BulkImport2AppCtx.PARAM_NDJSON_URL, myHttpServletExtension.getBaseUrl() + "/download?index=" + index)
-			.withEntry(BulkImport2AppCtx.PARAM_MAXIMUM_BATCH_RESOURCE_COUNT, "3")
-			.build();
-		StepExecutionDetails details = new StepExecutionDetails(parameters, null);
+		BulkImportJobParameters parameters = new BulkImportJobParameters()
+			.addNdJsonUrl(myHttpServletExtension.getBaseUrl() + "/download?index=" + index)
+			.setMaxBatchResourceCount(3);
+		StepExecutionDetails<BulkImportJobParameters, VoidModel> details = new StepExecutionDetails<>(parameters, null);
 
 		// Test
 
@@ -87,7 +82,7 @@ public class FetchFilesStepTest {
 
 		// Verify
 
-		verify(myJobDataSink, times(4)).accept(any());
+		verify(myJobDataSink, times(4)).accept(any(NdJsonFileJson.class));
 
 	}
 
@@ -96,14 +91,12 @@ public class FetchFilesStepTest {
 
 		// Setup
 
-		myBulkImportFileServlet.registerFile(() -> new StringReader("{\"resourceType\":\"Patient\"}"));
+		String index = myBulkImportFileServlet.registerFile(() -> new StringReader("{\"resourceType\":\"Patient\"}"));
 
-		JobInstanceParameters parameters = JobInstanceParameters
-			.newBuilder()
-			.withEntry(BulkImport2AppCtx.PARAM_NDJSON_URL, myHttpServletExtension.getBaseUrl() + "/download?index=0")
-			.withEntry(BulkImport2AppCtx.PARAM_HTTP_BASIC_CREDENTIALS, "admin")
-			.build();
-		StepExecutionDetails details = new StepExecutionDetails(parameters, null);
+		BulkImportJobParameters parameters = new BulkImportJobParameters()
+			.addNdJsonUrl(myHttpServletExtension.getBaseUrl() + "/download?index=" + index)
+			.setHttpBasicCredentials("admin");
+		StepExecutionDetails<BulkImportJobParameters, VoidModel> details = new StepExecutionDetails<>(parameters, null);
 
 		// Test & Verify
 

@@ -21,13 +21,13 @@ package ca.uhn.fhir.batch2.model;
  */
 
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
+import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.model.api.IModelJson;
 import org.apache.commons.lang3.Validate;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class JobDefinition {
 
@@ -35,15 +35,14 @@ public class JobDefinition {
 
 	private final String myJobDefinitionId;
 	private final int myJobDefinitionVersion;
-	private final List<JobDefinitionParameter> myParameters;
-	private final List<JobDefinitionStep> mySteps;
+	private final Class<? extends IModelJson> myParametersType;
+	private final List<JobDefinitionStep<?, ?, ?>> mySteps;
 	private final String myJobDescription;
-	private final Map<String, JobDefinitionParameter> myNameToParameter;
 
 	/**
 	 * Constructor
 	 */
-	private JobDefinition(String theJobDefinitionId, int theJobDefinitionVersion, String theJobDescription, List<JobDefinitionParameter> theParameters, List<JobDefinitionStep> theSteps) {
+	private JobDefinition(String theJobDefinitionId, int theJobDefinitionVersion, String theJobDescription, Class<? extends IModelJson> theParametersType, List<JobDefinitionStep<?, ?, ?>> theSteps) {
 		Validate.isTrue(theJobDefinitionId.length() <= ID_MAX_LENGTH, "Maximum ID length is %d", ID_MAX_LENGTH);
 		Validate.notBlank(theJobDefinitionId, "No job definition ID supplied");
 		Validate.notBlank(theJobDescription, "No job description supplied");
@@ -53,10 +52,7 @@ public class JobDefinition {
 		myJobDefinitionVersion = theJobDefinitionVersion;
 		myJobDescription = theJobDescription;
 		mySteps = theSteps;
-		myParameters = theParameters;
-		myNameToParameter = theParameters
-			.stream()
-			.collect(Collectors.toMap(t -> t.getName(), t -> t));
+		myParametersType = theParametersType;
 	}
 
 	public String getJobDescription() {
@@ -80,40 +76,33 @@ public class JobDefinition {
 	/**
 	 * @return Returns the parameters that this job can accept as input to create a new instance
 	 */
-	public List<JobDefinitionParameter> getParameters() {
-		return myParameters;
+	public Class<? extends IModelJson> getParametersType() {
+		return myParametersType;
 	}
 
 	/**
 	 * @return Returns the processing steps for this job
 	 */
-	public List<JobDefinitionStep> getSteps() {
+	public List<JobDefinitionStep<?, ?, ?>> getSteps() {
 		return mySteps;
 	}
 
-	/**
-	 * Fetch a parameter by name
-	 */
-	public JobDefinitionParameter getParameter(String theName) {
-		return myNameToParameter.get(theName);
+	public static Builder<IModelJson> newBuilder() {
+		return new Builder<>();
 	}
 
-	public static Builder newBuilder() {
-		return new Builder();
-	}
+	public static class Builder<PT extends IModelJson> {
 
-	public static class Builder {
-
-		private final List<JobDefinitionParameter> myParameters = new ArrayList<>();
-		private final List<JobDefinitionStep> mySteps = new ArrayList<>();
+		private final List<JobDefinitionStep<?,?,?>> mySteps = new ArrayList<>();
 		private String myJobDefinitionId;
 		private int myJobDefinitionVersion;
 		private String myJobDescription;
+		private Class<PT> myJobParametersType;
 
 		/**
 		 * @param theJobDefinitionId A unique identifier for the job definition (i.e. for the "kind" of job)
 		 */
-		public Builder setJobDefinitionId(String theJobDefinitionId) {
+		public Builder<PT> setJobDefinitionId(String theJobDefinitionId) {
 			myJobDefinitionId = theJobDefinitionId;
 			return this;
 		}
@@ -121,22 +110,14 @@ public class JobDefinition {
 		/**
 		 * @param theJobDefinitionVersion A unique identifier for the version of the job definition. Higher means newer but numbers have no other meaning. Must be greater than 0.
 		 */
-		public Builder setJobDefinitionVersion(int theJobDefinitionVersion) {
+		public Builder<PT> setJobDefinitionVersion(int theJobDefinitionVersion) {
 			Validate.isTrue(theJobDefinitionVersion > 0, "theJobDefinitionVersion must be > 0");
 			myJobDefinitionVersion = theJobDefinitionVersion;
 			return this;
 		}
 
 		/**
-		 * Adds a parameter that this job can accept as input to create a new instance
-		 */
-		public Builder addParameter(String theName, String theDescription, JobDefinitionParameter.ParamTypeEnum theType, boolean theRequired, boolean theRepeating) {
-			myParameters.add(new JobDefinitionParameter(theName, theDescription, theType, theRequired, theRepeating));
-			return this;
-		}
-
-		/**
-		 * Adds a processing steps for this job.
+		 * Adds a processing step for this job.
 		 *
 		 * @param theStepId          A unique identifier for this step. This only needs to be unique within the scope
 		 *                           of the individual job definition (i.e. diuplicates are fine for different jobs, or
@@ -144,19 +125,69 @@ public class JobDefinition {
 		 * @param theStepDescription A description of this step
 		 * @param theStepWorker      The worker that will actually perform this step
 		 */
-		public Builder addStep(String theStepId, String theStepDescription, IJobStepWorker theStepWorker) {
-			mySteps.add(new JobDefinitionStep(theStepId, theStepDescription, theStepWorker));
+		public <OT extends IModelJson> Builder<PT> addFirstStep(String theStepId, String theStepDescription, Class<OT> theOutputType, IJobStepWorker<PT, VoidModel, OT> theStepWorker) {
+			mySteps.add(new JobDefinitionStep<>(theStepId, theStepDescription, theStepWorker, VoidModel.class, theOutputType));
+			return this;
+		}
+
+		/**
+		 * Adds a processing step for this job.
+		 *
+		 * @param theStepId          A unique identifier for this step. This only needs to be unique within the scope
+		 *                           of the individual job definition (i.e. diuplicates are fine for different jobs, or
+		 *                           even different versions of the same job)
+		 * @param theStepDescription A description of this step
+		 * @param theStepWorker      The worker that will actually perform this step
+		 */
+		public <IT extends IModelJson, OT extends IModelJson> Builder<PT> addIntermediateStep(String theStepId, String theStepDescription, Class<IT> theInputType, Class<OT> theOutputType, IJobStepWorker<PT, IT, OT> theStepWorker) {
+			mySteps.add(new JobDefinitionStep<>(theStepId, theStepDescription, theStepWorker, theInputType, theOutputType));
+			return this;
+		}
+
+		/**
+		 * Adds a processing step for this job.
+		 *
+		 * @param theStepId          A unique identifier for this step. This only needs to be unique within the scope
+		 *                           of the individual job definition (i.e. diuplicates are fine for different jobs, or
+		 *                           even different versions of the same job)
+		 * @param theStepDescription A description of this step
+		 * @param theStepWorker      The worker that will actually perform this step
+		 */
+		public <IT extends IModelJson> Builder<PT> addLastStep(String theStepId, String theStepDescription, Class<IT> theInputType, IJobStepWorker<PT, IT, VoidModel> theStepWorker) {
+			mySteps.add(new JobDefinitionStep<>(theStepId, theStepDescription, theStepWorker, theInputType, VoidModel.class));
 			return this;
 		}
 
 		public JobDefinition build() {
-			return new JobDefinition(myJobDefinitionId, myJobDefinitionVersion, myJobDescription, Collections.unmodifiableList(myParameters), Collections.unmodifiableList(mySteps));
+			Validate.notNull(myJobParametersType, "No job parameters type was supplied");
+			return new JobDefinition(myJobDefinitionId, myJobDefinitionVersion, myJobDescription, myJobParametersType, Collections.unmodifiableList(mySteps));
 		}
 
-		public Builder setJobDescription(String theJobDescription) {
+		public Builder<PT> setJobDescription(String theJobDescription) {
 			myJobDescription = theJobDescription;
 			return this;
 		}
+
+		/**
+		 * Sets the datatype for the parameters used by this job. This model is a
+		 * {@link IModelJson} JSON serializable object. Fields should be annotated with
+		 * any appropriate <code>javax.validation</code> annotations (e.g.
+		 * {@link javax.validation.constraints.Min} or {@link javax.validation.constraints.Pattern}).
+		 *
+		 * Any fields that contain sensitive data (e.g. passwords) that should not be
+		 * provided back to the end user must be marked with {@link ca.uhn.fhir.batch2.api.PasswordField}
+		 * as well.
+		 *
+		 * @see ca.uhn.fhir.batch2.api.PasswordField
+		 * @see javax.validation.constraints
+		 */
+		@SuppressWarnings("unchecked")
+		public <NPT extends IModelJson> Builder<NPT> setParametersType(Class<NPT> theJobParametersType) {
+			Validate.notNull(theJobParametersType, "theJobParametersType must not be null");
+			myJobParametersType = (Class<PT>) theJobParametersType;
+			return (Builder<NPT>) this;
+		}
+
 	}
 
 }

@@ -20,7 +20,14 @@ package ca.uhn.fhir.batch2.api;
  * #L%
  */
 
-public interface IJobStepWorker {
+import ca.uhn.fhir.model.api.IModelJson;
+
+/**
+ * @param <PT> The job parameterrs type datatype
+ * @param <IT> The step input datatype
+ * @param <OT> The step output datatype
+ */
+public interface IJobStepWorker<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> {
 
 	/**
 	 * Executes a step
@@ -32,7 +39,7 @@ public interface IJobStepWorker {
 	 *                                     step worker throws this exception, processing for the
 	 *                                     job will be aborted.
 	 */
-	RunOutcome run(StepExecutionDetails theStepExecutionDetails, IJobDataSink theDataSink) throws JobExecutionFailedException;
+	RunOutcome run(StepExecutionDetails<PT, IT> theStepExecutionDetails, IJobDataSink<OT> theDataSink) throws JobExecutionFailedException;
 
 	/**
 	 * Return type for {@link #run(StepExecutionDetails, IJobDataSink)}

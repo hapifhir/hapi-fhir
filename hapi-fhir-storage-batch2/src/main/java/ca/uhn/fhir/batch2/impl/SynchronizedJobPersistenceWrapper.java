@@ -40,8 +40,8 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	}
 	
 	@Override
-	public synchronized String storeWorkChunk(String theJobDefinitionId, int theJobDefinitionVersion, String theTargetStepId, String theInstanceId, int theSequence, Map<String, Object> theData) {
-		return myWrap.storeWorkChunk(theJobDefinitionId,theJobDefinitionVersion, theTargetStepId, theInstanceId, theSequence, theData);
+	public synchronized String storeWorkChunk(String theJobDefinitionId, int theJobDefinitionVersion, String theTargetStepId, String theInstanceId, int theSequence, String theDataSerialized) {
+		return myWrap.storeWorkChunk(theJobDefinitionId,theJobDefinitionVersion, theTargetStepId, theInstanceId, theSequence, theDataSerialized);
 	}
 
 	@Override

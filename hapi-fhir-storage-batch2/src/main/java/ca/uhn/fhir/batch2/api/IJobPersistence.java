@@ -24,7 +24,6 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public interface IJobPersistence {
@@ -39,16 +38,16 @@ public interface IJobPersistence {
 	 * @param theJobDefinitionVersion The job definition version
 	 * @param theTargetStepId         The step ID that will be responsible for consuming this chunk
 	 * @param theInstanceId           The instance ID associated with this chunk
-	 * @param theData                 The data. This will be in the form of a map where the values may be strings, lists, and other maps (i.e. JSON)
+	 * @param theDataSerialized       The data. This will be in the form of a map where the values may be strings, lists, and other maps (i.e. JSON)
 	 * @return Returns a globally unique identifier for this chunk. This should be a sequentially generated ID, a UUID, or something like that which is guaranteed to never overlap across jobs or instances.
 	 */
-	String storeWorkChunk(String theJobDefinitionId, int theJobDefinitionVersion, String theTargetStepId, String theInstanceId, int theSequence, Map<String, Object> theData);
+	String storeWorkChunk(String theJobDefinitionId, int theJobDefinitionVersion, String theTargetStepId, String theInstanceId, int theSequence, String theDataSerialized);
 
 	/**
 	 * Fetches a chunk of work from storage, and update the stored status
 	 * to {@link ca.uhn.fhir.batch2.model.StatusEnum#IN_PROGRESS}
 	 *
-	 * @param theChunkId The ID, as returned by {@link #storeWorkChunk(String, int, String, String, int, Map)}
+	 * @param theChunkId The ID, as returned by {@link #storeWorkChunk(String, int, String, String, int, String)}
 	 * @return The chunk of work
 	 */
 	Optional<WorkChunk> fetchWorkChunkSetStartTimeAndMarkInProgress(String theChunkId);

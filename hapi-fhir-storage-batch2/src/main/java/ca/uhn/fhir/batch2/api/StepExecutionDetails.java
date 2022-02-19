@@ -20,19 +20,18 @@ package ca.uhn.fhir.batch2.api;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.model.JobInstanceParameters;
+import ca.uhn.fhir.model.api.IModelJson;
 import org.apache.commons.lang3.Validate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Map;
 
-public class StepExecutionDetails {
+public class StepExecutionDetails<PT extends IModelJson, IT extends IModelJson> {
 
-	private final JobInstanceParameters myParameters;
-	private final Map<String, Object> myData;
+	private final PT myParameters;
+	private final IT myData;
 
-	public StepExecutionDetails(@Nonnull JobInstanceParameters theParameters, @Nullable Map<String, Object> theData) {
+	public StepExecutionDetails(@Nonnull PT theParameters, @Nullable IT theData) {
 		Validate.notNull(theParameters);
 		myParameters = theParameters;
 		myData = theData;
@@ -46,7 +45,7 @@ public class StepExecutionDetails {
 	 * @throws NullPointerException If this method is called during the first step of a job
 	 */
 	@Nonnull
-	public Map<String, Object> getData() {
+	public IT getData() {
 		Validate.notNull(myData);
 		return myData;
 	}
@@ -54,11 +53,9 @@ public class StepExecutionDetails {
 	/**
 	 * Returns the parameters associated with this job instance. Note that parameters
 	 * are set when the job instance is created and can not be modified after that.
-	 *
-	 * @return
 	 */
 	@Nonnull
-	public JobInstanceParameters getParameters() {
+	public PT getParameters() {
 		return myParameters;
 	}
 

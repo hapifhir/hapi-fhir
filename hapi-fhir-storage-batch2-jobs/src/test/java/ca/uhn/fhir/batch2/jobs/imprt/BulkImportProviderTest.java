@@ -1,7 +1,6 @@
 package ca.uhn.fhir.batch2.jobs.imprt;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
-import ca.uhn.fhir.batch2.model.JobInstanceParameter;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -94,12 +93,7 @@ public class BulkImportProviderTest {
 
 		JobInstanceStartRequest startRequest = myStartRequestCaptor.getValue();
 		ourLog.info("Parameters: {}", startRequest.getParameters());
-		assertThat(startRequest.getParameters(), contains(
-			new JobInstanceParameter(BulkImport2AppCtx.PARAM_HTTP_BASIC_CREDENTIALS, "admin:password"),
-			new JobInstanceParameter(BulkImport2AppCtx.PARAM_MAXIMUM_BATCH_RESOURCE_COUNT, "500"),
-		new JobInstanceParameter(BulkImport2AppCtx.PARAM_NDJSON_URL, "http://example.com/Patient"),
-		new JobInstanceParameter(BulkImport2AppCtx.PARAM_NDJSON_URL, "http://example.com/Observation")
-		));
+		assertEquals("{\"ndJsonUrls\":[\"http://example.com/Patient\",\"http://example.com/Observation\"],\"maxBatchResourceCount\":500}", startRequest.getParameters());
 	}
 
 	@Test

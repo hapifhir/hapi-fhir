@@ -21,9 +21,10 @@ package ca.uhn.fhir.batch2.jobs.imprt;
  */
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
-import ca.uhn.fhir.batch2.api.IJobStepWorker;
+import ca.uhn.fhir.batch2.api.ILastJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -54,7 +55,7 @@ import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class ConsumeFilesStep implements IJobStepWorker {
+public class ConsumeFilesStep implements ILastJobStepWorker<BulkImportJobParameters, NdJsonFileJson> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ConsumeFilesStep.class);
 	@Autowired
@@ -69,10 +70,10 @@ public class ConsumeFilesStep implements IJobStepWorker {
 	private IFhirSystemDao<?, ?> mySystemDao;
 
 	@Override
-	public RunOutcome run(StepExecutionDetails theStepExecutionDetails, IJobDataSink theDataSink) {
+	public RunOutcome run(StepExecutionDetails<BulkImportJobParameters, NdJsonFileJson> theStepExecutionDetails, IJobDataSink<VoidModel> theDataSink) {
 
-		String ndjson = (String) theStepExecutionDetails.getData().get(FetchFilesStep.KEY_NDJSON);
-		String sourceName = (String) theStepExecutionDetails.getData().get(FetchFilesStep.KEY_SOURCE_NAME);
+		String ndjson = theStepExecutionDetails.getData().getNdJsonText();
+		String sourceName = theStepExecutionDetails.getData().getSourceName();
 
 		IParser jsonParser = myCtx.newJsonParser();
 		LineIterator lineIter = new LineIterator(new StringReader(ndjson));

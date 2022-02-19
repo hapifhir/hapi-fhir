@@ -23,8 +23,9 @@ class JobDefinitionRegistryTest {
 			.setJobDefinitionId("A")
 			.setJobDefinitionVersion(1)
 			.setJobDescription("the description")
-			.addStep("S1", "S1", mock(IJobStepWorker.class))
-			.addStep("S2", "S2", mock(IJobStepWorker.class))
+			.setParametersType(TestJobParameters.class)
+			.addFirstStep("S1", "S1", TestJobStep2InputType.class, mock(IJobStepWorker.class))
+			.addLastStep("S2", "S2", TestJobStep2InputType.class, mock(IJobStepWorker.class))
 			.build());
 
 		mySvc.addJobDefinition(JobDefinition
@@ -32,8 +33,9 @@ class JobDefinitionRegistryTest {
 			.setJobDefinitionId("A")
 			.setJobDefinitionVersion(2)
 			.setJobDescription("the description")
-			.addStep("S1", "S1", mock(IJobStepWorker.class))
-			.addStep("S2", "S2", mock(IJobStepWorker.class))
+			.setParametersType(TestJobParameters.class)
+			.addFirstStep("S1", "S1", TestJobStep2InputType.class, mock(IJobStepWorker.class))
+			.addLastStep("S2", "S2", TestJobStep2InputType.class, mock(IJobStepWorker.class))
 			.build());
 	}
 
@@ -57,8 +59,9 @@ class JobDefinitionRegistryTest {
 				.setJobDefinitionId("A")
 				.setJobDefinitionVersion(2)
 				.setJobDescription("The description")
-				.addStep("S1", "S1", mock(IJobStepWorker.class))
-				.addStep("S2", "S2", mock(IJobStepWorker.class))
+				.setParametersType(TestJobParameters.class)
+				.addFirstStep("S1", "S1", TestJobStep2InputType.class, mock(IJobStepWorker.class))
+				.addLastStep("S2", "S2", TestJobStep2InputType.class, mock(IJobStepWorker.class))
 				.build());
 			fail();
 		} catch (ConfigurationException e) {
@@ -71,8 +74,9 @@ class JobDefinitionRegistryTest {
 				.setJobDefinitionId("A")
 				.setJobDefinitionVersion(3)
 				.setJobDescription("The description")
-				.addStep("S1", "S1", mock(IJobStepWorker.class))
-				.addStep("S1", "S2", mock(IJobStepWorker.class))
+				.setParametersType(TestJobParameters.class)
+				.addFirstStep("S1", "S1", TestJobStep2InputType.class, mock(IJobStepWorker.class))
+				.addLastStep("S1", "S2", TestJobStep2InputType.class, mock(IJobStepWorker.class))
 				.build());
 			fail();
 		} catch (ConfigurationException e) {
@@ -84,8 +88,9 @@ class JobDefinitionRegistryTest {
 				.newBuilder()
 				.setJobDefinitionId("A")
 				.setJobDefinitionVersion(2)
-				.addStep("S1", "S1", mock(IJobStepWorker.class))
-				.addStep("", "S2", mock(IJobStepWorker.class))
+				.setParametersType(TestJobParameters.class)
+				.addFirstStep("S1", "S1", TestJobStep2InputType.class, mock(IJobStepWorker.class))
+				.addLastStep("", "S2", TestJobStep2InputType.class, mock(IJobStepWorker.class))
 				.build());
 			fail();
 		} catch (IllegalArgumentException e) {

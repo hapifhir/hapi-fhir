@@ -23,22 +23,16 @@ package ca.uhn.fhir.batch2.model;
 import ca.uhn.fhir.jpa.util.JsonDateDeserializer;
 import ca.uhn.fhir.jpa.util.JsonDateSerializer;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.util.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import javax.annotation.Nonnull;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
-public class JobInstance implements IModelJson {
-
-	@JsonProperty(value = "jobDefinitionId")
-	private String myJobDefinitionId;
+public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 
 	@JsonProperty(value = "jobDefinitionVersion")
 	private int myJobDefinitionVersion;
@@ -51,9 +45,6 @@ public class JobInstance implements IModelJson {
 
 	@JsonProperty(value = "cancelled")
 	private boolean myCancelled;
-
-	@JsonProperty(value = "parameters")
-	private List<JobInstanceParameter> myParameters;
 
 	@JsonProperty(value = "createTime")
 	@JsonSerialize(using = JsonDateSerializer.class)
@@ -105,22 +96,22 @@ public class JobInstance implements IModelJson {
 	 * Copy constructor
 	 */
 	public JobInstance(JobInstance theJobInstance) {
-		setJobDefinitionId(theJobInstance.getJobDefinitionId());
-		setJobDefinitionVersion(theJobInstance.getJobDefinitionVersion());
-		setInstanceId(theJobInstance.getInstanceId());
-		setEstimatedTimeRemaining(theJobInstance.getEstimatedTimeRemaining());
-		setTotalElapsedMillis(theJobInstance.getTotalElapsedMillis());
-		setCreateTime(theJobInstance.getCreateTime());
-		setStartTime(theJobInstance.getStartTime());
-		setEndTime(theJobInstance.getEndTime());
-		setErrorCount(theJobInstance.getErrorCount());
-		setStatus(theJobInstance.getStatus());
-		setErrorMessage(theJobInstance.getErrorMessage());
-		setWorkChunksPurged(theJobInstance.isWorkChunksPurged());
-		setProgress(theJobInstance.getProgress());
+		super(theJobInstance);
+		setCancelled(theJobInstance.isCancelled());
 		setCombinedRecordsProcessed(theJobInstance.getCombinedRecordsProcessed());
 		setCombinedRecordsProcessedPerSecond(theJobInstance.getCombinedRecordsProcessedPerSecond());
-		getParameters().addAll(theJobInstance.getParameters());
+		setCreateTime(theJobInstance.getCreateTime());
+		setEndTime(theJobInstance.getEndTime());
+		setErrorCount(theJobInstance.getErrorCount());
+		setErrorMessage(theJobInstance.getErrorMessage());
+		setEstimatedTimeRemaining(theJobInstance.getEstimatedTimeRemaining());
+		setInstanceId(theJobInstance.getInstanceId());
+		setJobDefinitionVersion(theJobInstance.getJobDefinitionVersion());
+		setProgress(theJobInstance.getProgress());
+		setStartTime(theJobInstance.getStartTime());
+		setStatus(theJobInstance.getStatus());
+		setTotalElapsedMillis(theJobInstance.getTotalElapsedMillis());
+		setWorkChunksPurged(theJobInstance.isWorkChunksPurged());
 	}
 
 	public int getErrorCount() {
@@ -147,27 +138,12 @@ public class JobInstance implements IModelJson {
 		myWorkChunksPurged = theWorkChunksPurged;
 	}
 
-	public List<JobInstanceParameter> getParameters() {
-		if (myParameters == null) {
-			myParameters = new ArrayList<>();
-		}
-		return myParameters;
-	}
-
 	public StatusEnum getStatus() {
 		return myStatus;
 	}
 
 	public void setStatus(StatusEnum theStatus) {
 		myStatus = theStatus;
-	}
-
-	public String getJobDefinitionId() {
-		return myJobDefinitionId;
-	}
-
-	public void setJobDefinitionId(String theJobDefinitionId) {
-		myJobDefinitionId = theJobDefinitionId;
 	}
 
 	public int getJobDefinitionVersion() {
@@ -184,12 +160,6 @@ public class JobInstance implements IModelJson {
 
 	public void setInstanceId(String theInstanceId) {
 		myInstanceId = theInstanceId;
-	}
-
-	public JobInstance addParameter(@Nonnull JobInstanceParameter theParameter) {
-		Validate.notNull(theParameter);
-		getParameters().add(theParameter);
-		return this;
 	}
 
 	public Date getStartTime() {
@@ -256,18 +226,18 @@ public class JobInstance implements IModelJson {
 		myErrorMessage = theErrorMessage;
 	}
 
-	public void setCancelled(boolean theCancelled) {
-		myCancelled = theCancelled;
-	}
-
 	public boolean isCancelled() {
 		return myCancelled;
+	}
+
+	public void setCancelled(boolean theCancelled) {
+		myCancelled = theCancelled;
 	}
 
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("jobDefinitionId", myJobDefinitionId + "/" + myJobDefinitionVersion)
+			.append("jobDefinitionId", getJobDefinitionId() + "/" + myJobDefinitionVersion)
 			.append("instanceId", myInstanceId)
 			.append("status", myStatus)
 			.append("createTime", myCreateTime)

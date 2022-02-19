@@ -48,6 +48,8 @@ public class Batch2JobInstanceEntity implements Serializable {
 	public static final int STATUS_MAX_LENGTH = 20;
 	public static final int TIME_REMAINING_LENGTH = 100;
 	public static final int PARAMS_JSON_MAX_LENGTH = 2000;
+	private static final long serialVersionUID = 8187134261799095422L;
+
 	@Id
 	@Column(name = "ID", length = JobDefinition.ID_MAX_LENGTH, nullable = false)
 	private String myId;
@@ -112,10 +114,6 @@ public class Batch2JobInstanceEntity implements Serializable {
 
 	public void setErrorCount(int theErrorCount) {
 		myErrorCount = theErrorCount;
-	}
-
-	public boolean isWorkChunksPurged() {
-		return myWorkChunksPurged;
 	}
 
 	public Integer getTotalElapsedMillis() {

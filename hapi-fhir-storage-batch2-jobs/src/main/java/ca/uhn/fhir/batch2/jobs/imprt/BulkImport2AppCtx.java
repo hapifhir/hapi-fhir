@@ -21,8 +21,8 @@ package ca.uhn.fhir.batch2.jobs.imprt;
  */
 
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
+import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.model.JobDefinition;
-import ca.uhn.fhir.batch2.model.JobDefinitionParameter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -30,9 +30,6 @@ import org.springframework.context.annotation.Configuration;
 public class BulkImport2AppCtx {
 
 	public static final String JOB_BULK_IMPORT_PULL = "BULK_IMPORT_PULL";
-	public static final String PARAM_NDJSON_URL = "ndjson-url";
-	public static final String PARAM_HTTP_BASIC_CREDENTIALS = "http-basic-credentials";
-	public static final String PARAM_MAXIMUM_BATCH_RESOURCE_COUNT = "maximum-batch-resource-count";
 	public static final int PARAM_MAXIMUM_BATCH_SIZE_DEFAULT = 800; // Avoid the 1000 SQL param limit
 
 	@Bean
@@ -42,42 +39,27 @@ public class BulkImport2AppCtx {
 			.setJobDefinitionId(JOB_BULK_IMPORT_PULL)
 			.setJobDescription("FHIR Bulk Import using pull-based data source")
 			.setJobDefinitionVersion(1)
-			.addParameter(
-				PARAM_NDJSON_URL,
-				"A URL that can be used to pull an NDJSON file for consumption",
-				JobDefinitionParameter.ParamTypeEnum.STRING,
-				true,
-				true)
-			.addParameter(
-				PARAM_HTTP_BASIC_CREDENTIALS,
-				"A set of HTTP Basic credentials to include on fetch requests in the format \"username:password\"",
-				JobDefinitionParameter.ParamTypeEnum.PASSWORD,
-				false,
-				false)
-			.addParameter(
-				PARAM_MAXIMUM_BATCH_RESOURCE_COUNT,
-				"Specifies the maximum number of resources that will be ingested in a single database transaction. Default is " + PARAM_MAXIMUM_BATCH_SIZE_DEFAULT + ".",
-				JobDefinitionParameter.ParamTypeEnum.POSITIVE_INTEGER,
-				false,
-				false)
-			.addStep(
+			.setParametersType(BulkImportJobParameters.class)
+			.addFirstStep(
 				"fetch-files",
 				"Fetch files for import",
+				NdJsonFileJson.class,
 				bulkImport2FetchFiles())
-			.addStep(
+			.addLastStep(
 				"process-files",
 				"Process files",
+				NdJsonFileJson.class,
 				bulkImport2ConsumeFiles())
 			.build();
 	}
 
 	@Bean
-	public IJobStepWorker bulkImport2FetchFiles() {
+	public IJobStepWorker<BulkImportJobParameters, VoidModel, NdJsonFileJson> bulkImport2FetchFiles() {
 		return new FetchFilesStep();
 	}
 
 	@Bean
-	public IJobStepWorker bulkImport2ConsumeFiles() {
+	public IJobStepWorker<BulkImportJobParameters, NdJsonFileJson, VoidModel> bulkImport2ConsumeFiles() {
 		return new ConsumeFilesStep();
 	}
 

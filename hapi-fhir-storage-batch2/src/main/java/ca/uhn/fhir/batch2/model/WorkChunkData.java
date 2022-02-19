@@ -20,40 +20,28 @@ package ca.uhn.fhir.batch2.model;
  * #L%
  */
 
-import org.apache.commons.lang3.Validate;
+import ca.uhn.fhir.model.api.IModelJson;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+public class WorkChunkData<OT extends IModelJson> {
 
-public class WorkChunkData {
-
-	private Map<String, Object> myData;
+	private OT myData;
 
 	/**
 	 * Constructor
 	 */
 	public WorkChunkData() {
-		this(new HashMap<>());
+		this(null);
 	}
 
 	/**
 	 * Constructor
 	 */
-	public WorkChunkData(Map<String, Object> theData) {
+	public WorkChunkData(OT theData) {
 		myData = theData;
 	}
 
-	public Map<String, Object> asMap() {
+	public OT getData() {
 		return myData;
 	}
 
-	public void put(String theKey, String theValue) {
-		Validate.notNull(theKey);
-		myData.put(theKey, theValue);
-	}
-
-	public static WorkChunkData withData(String theKey, Object theValue) {
-		return new WorkChunkData(Collections.singletonMap(theKey, theValue));
-	}
 }

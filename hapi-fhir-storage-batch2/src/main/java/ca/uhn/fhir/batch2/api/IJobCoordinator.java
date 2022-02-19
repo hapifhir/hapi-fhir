@@ -22,6 +22,7 @@ package ca.uhn.fhir.batch2.api;
 
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 import java.util.List;
@@ -33,8 +34,9 @@ public interface IJobCoordinator {
 	 *
 	 * @param theStartRequest The request, containing the job type and parameters
 	 * @return Returns a unique ID for this job execution
+	 * @throws InvalidRequestException If the request is invalid (incorrect/missing parameters, etc)
 	 */
-	String startInstance(JobInstanceStartRequest theStartRequest);
+	String startInstance(JobInstanceStartRequest theStartRequest) throws InvalidRequestException;
 
 	/**
 	 * Fetch details about a job instance

@@ -4,13 +4,14 @@ import ca.uhn.fhir.batch2.api.IJobCleanerService;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.imprt.BulkImport2AppCtx;
 import ca.uhn.fhir.batch2.jobs.imprt.BulkImportFileServlet;
+import ca.uhn.fhir.batch2.jobs.imprt.BulkImportJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
-import ca.uhn.fhir.batch2.model.JobInstanceParameter;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.test.utilities.server.HttpServletExtension;
 import ca.uhn.fhir.util.JsonUtil;
 import org.hl7.fhir.r4.model.Observation;
@@ -36,6 +37,7 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class BulkImportR4Test extends BaseJpaR4Test {
 
@@ -61,12 +63,15 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		int fileCount = 100;
 		List<String> indexes = addFiles(fileCount);
 
-		JobInstanceStartRequest request = new JobInstanceStartRequest();
-		request.setJobDefinitionId(BulkImport2AppCtx.JOB_BULK_IMPORT_PULL);
+		BulkImportJobParameters parameters = new BulkImportJobParameters();
 		for (String next : indexes) {
 			String url = myHttpServletExtension.getBaseUrl() + "/download?index=" + next;
-			request.addParameter(new JobInstanceParameter(BulkImport2AppCtx.PARAM_NDJSON_URL, url));
+			parameters.addNdJsonUrl(url);
 		}
+
+		JobInstanceStartRequest request = new JobInstanceStartRequest();
+		request.setJobDefinitionId(BulkImport2AppCtx.JOB_BULK_IMPORT_PULL);
+		request.setParameters(parameters);
 
 		// Execute
 
@@ -105,12 +110,15 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		int fileCount = 3;
 		List<String> indexes = addFiles(fileCount);
 
-		JobInstanceStartRequest request = new JobInstanceStartRequest();
-		request.setJobDefinitionId(BulkImport2AppCtx.JOB_BULK_IMPORT_PULL);
+		BulkImportJobParameters parameters = new BulkImportJobParameters();
 		for (String next : indexes) {
 			String url = myHttpServletExtension.getBaseUrl() + "/download?index=" + next;
-			request.addParameter(new JobInstanceParameter(BulkImport2AppCtx.PARAM_NDJSON_URL, url));
+			parameters.addNdJsonUrl(url);
 		}
+
+		JobInstanceStartRequest request = new JobInstanceStartRequest();
+		request.setJobDefinitionId(BulkImport2AppCtx.JOB_BULK_IMPORT_PULL);
+		request.setParameters(parameters);
 
 		IAnonymousInterceptor anonymousInterceptor = (thePointcut, theArgs) -> {
 			throw new NullPointerException("This is an exception");
@@ -162,12 +170,15 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		List<String> indexes = addFiles(fileCount - 1);
 		indexes.add(myBulkImportFileServlet.registerFile(() -> new StringReader("{\"resourceType\":\"Foo\"}")));
 
-		JobInstanceStartRequest request = new JobInstanceStartRequest();
-		request.setJobDefinitionId(BulkImport2AppCtx.JOB_BULK_IMPORT_PULL);
+		BulkImportJobParameters parameters = new BulkImportJobParameters();
 		for (String next : indexes) {
 			String url = myHttpServletExtension.getBaseUrl() + "/download?index=" + next;
-			request.addParameter(new JobInstanceParameter(BulkImport2AppCtx.PARAM_NDJSON_URL, url));
+			parameters.addNdJsonUrl(url);
 		}
+
+		JobInstanceStartRequest request = new JobInstanceStartRequest();
+		request.setJobDefinitionId(BulkImport2AppCtx.JOB_BULK_IMPORT_PULL);
+		request.setParameters(parameters);
 
 		// Execute
 
@@ -202,10 +213,13 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 	public void testRunBulkImport_UnknownTargetFile() {
 		// Setup
 
+		BulkImportJobParameters parameters = new BulkImportJobParameters();
+		String url = myHttpServletExtension.getBaseUrl() + "/download?index=FOO";
+		parameters.addNdJsonUrl(url);
+
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
 		request.setJobDefinitionId(BulkImport2AppCtx.JOB_BULK_IMPORT_PULL);
-		String url = myHttpServletExtension.getBaseUrl() + "/download?index=FOO";
-		request.addParameter(new JobInstanceParameter(BulkImport2AppCtx.PARAM_NDJSON_URL, url));
+		request.setParameters(parameters);
 
 		IAnonymousInterceptor anonymousInterceptor = (thePointcut, theArgs) -> {
 			throw new NullPointerException("This is an exception");
@@ -240,6 +254,71 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		} finally {
 
 			myInterceptorRegistry.unregisterInterceptor(anonymousInterceptor);
+
+		}
+	}
+
+	@Test
+	public void testStartInvalidJob_NoParameters() {
+		// Setup
+
+		JobInstanceStartRequest request = new JobInstanceStartRequest();
+		request.setJobDefinitionId(BulkImport2AppCtx.JOB_BULK_IMPORT_PULL);
+
+		// Execute
+
+		try {
+			myJobCoordinator.startInstance(request);
+			fail();
+		} catch (InvalidRequestException e) {
+
+			// Verify
+			assertEquals("No parameters supplied", e.getMessage());
+
+		}
+	}
+
+	@Test
+	public void testStartInvalidJob_NoUrls() {
+		// Setup
+
+		JobInstanceStartRequest request = new JobInstanceStartRequest();
+		request.setJobDefinitionId(BulkImport2AppCtx.JOB_BULK_IMPORT_PULL);
+		request.setParameters(new BulkImportJobParameters());
+
+		// Execute
+
+		try {
+			myJobCoordinator.startInstance(request);
+			fail();
+		} catch (InvalidRequestException e) {
+
+			// Verify
+			assertEquals("Failed to validate parameters for job of type BULK_IMPORT_PULL: [myNdJsonUrls At least one NDJSON URL must be provided]", e.getMessage());
+
+		}
+	}
+
+	@Test
+	public void testStartInvalidJob_InvalidUrls() {
+		// Setup
+
+		BulkImportJobParameters parameters = new BulkImportJobParameters();
+		parameters.addNdJsonUrl("foo");
+
+		JobInstanceStartRequest request = new JobInstanceStartRequest();
+		request.setJobDefinitionId(BulkImport2AppCtx.JOB_BULK_IMPORT_PULL);
+		request.setParameters(parameters);
+
+		// Execute
+
+		try {
+			myJobCoordinator.startInstance(request);
+			fail();
+		} catch (InvalidRequestException e) {
+
+			// Verify
+			assertEquals("Failed to validate parameters for job of type BULK_IMPORT_PULL: [myNdJsonUrls[0].<list element> Must be a valid URL]", e.getMessage());
 
 		}
 	}

@@ -22,24 +22,20 @@ package ca.uhn.fhir.jpa.batch2;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.model.JobInstance;
-import ca.uhn.fhir.batch2.model.JobInstanceParameter;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.JsonUtil;
 import org.apache.commons.lang3.Validate;
 import org.springframework.data.domain.PageRequest;
 
 import javax.annotation.Nonnull;
 import javax.transaction.Transactional;
-import java.io.IOException;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -63,7 +59,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	public String storeWorkChunk(String theJobDefinitionId, int theJobDefinitionVersion, String theTargetStepId, String theInstanceId, int theSequence, Map<String, Object> theData) {
+	public String storeWorkChunk(String theJobDefinitionId, int theJobDefinitionVersion, String theTargetStepId, String theInstanceId, int theSequence, String theDataSerialized) {
 		Batch2WorkChunkEntity entity = new Batch2WorkChunkEntity();
 		entity.setId(UUID.randomUUID().toString());
 		entity.setSequence(theSequence);
@@ -71,7 +67,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		entity.setJobDefinitionVersion(theJobDefinitionVersion);
 		entity.setTargetStepId(theTargetStepId);
 		entity.setInstanceId(theInstanceId);
-		entity.setSerializedData(JsonUtil.serialize(theData, false));
+		entity.setSerializedData(theDataSerialized);
 		entity.setCreateTime(new Date());
 		entity.setStatus(StatusEnum.QUEUED);
 		myWorkChunkRepository.save(entity);
@@ -94,7 +90,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		entity.setDefinitionId(theInstance.getJobDefinitionId());
 		entity.setDefinitionVersion(theInstance.getJobDefinitionVersion());
 		entity.setStatus(theInstance.getStatus());
-		entity.setParams(JsonUtil.serialize(theInstance.getParameters(), false));
+		entity.setParams(theInstance.getParameters());
 		entity.setCreateTime(new Date());
 
 		entity = myJobInstanceRepository.save(entity);
@@ -135,7 +131,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		retVal.setRecordsProcessed(theEntity.getRecordsProcessed());
 		if (theIncludeData) {
 			if (theEntity.getSerializedData() != null) {
-				retVal.setData(JsonUtil.deserialize(theEntity.getSerializedData(), Map.class));
+				retVal.setData(theEntity.getSerializedData());
 			}
 		}
 		return retVal;
@@ -159,14 +155,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		retVal.setErrorMessage(theEntity.getErrorMessage());
 		retVal.setErrorCount(theEntity.getErrorCount());
 		retVal.setEstimatedTimeRemaining(theEntity.getEstimatedTimeRemaining());
-
-		String params = theEntity.getParams();
-		try {
-			List<JobInstanceParameter> paramsList = JsonUtil.deserializeList(params, JobInstanceParameter.class);
-			retVal.getParameters().addAll(paramsList);
-		} catch (IOException e) {
-			throw new InternalErrorException(e);
-		}
+		retVal.setParameters(theEntity.getParams());
 		return retVal;
 	}
 

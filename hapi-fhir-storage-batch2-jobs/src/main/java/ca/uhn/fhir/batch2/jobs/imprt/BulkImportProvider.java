@@ -21,7 +21,6 @@ package ca.uhn.fhir.batch2.jobs.imprt;
  */
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
-import ca.uhn.fhir.batch2.model.JobInstanceParameter;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -108,8 +107,7 @@ public class BulkImportProvider {
 
 		validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_IMPORT);
 
-		JobInstanceStartRequest request = new JobInstanceStartRequest();
-		request.setJobDefinitionId(BulkImport2AppCtx.JOB_BULK_IMPORT_PULL);
+		BulkImportJobParameters jobParameters = new BulkImportJobParameters();
 
 		String inputFormat = ParametersUtil.getNamedParameterValueAsString(myCtx, theRequest, PARAM_INPUT_FORMAT).orElse("");
 		if (!Constants.CT_FHIR_NDJSON.equals(inputFormat)) {
@@ -122,12 +120,12 @@ public class BulkImportProvider {
 
 			String httpBasicCredential = ParametersUtil.getParameterPartValueAsString(myCtx, storageDetail, PARAM_STORAGE_DETAIL_CREDENTIAL_HTTP_BASIC);
 			if (isNotBlank(httpBasicCredential)) {
-				request.addParameter(new JobInstanceParameter(BulkImport2AppCtx.PARAM_HTTP_BASIC_CREDENTIALS, httpBasicCredential));
+				jobParameters.setHttpBasicCredentials(httpBasicCredential);
 			}
 
 			String maximumBatchResourceCount = ParametersUtil.getParameterPartValueAsString(myCtx, storageDetail, PARAM_STORAGE_DETAIL_MAX_BATCH_RESOURCE_COUNT);
 			if (isNotBlank(maximumBatchResourceCount)) {
-				request.addParameter(new JobInstanceParameter(BulkImport2AppCtx.PARAM_MAXIMUM_BATCH_RESOURCE_COUNT, maximumBatchResourceCount));
+				jobParameters.setMaxBatchResourceCount(Integer.parseInt(maximumBatchResourceCount));
 			}
 		}
 
@@ -148,9 +146,12 @@ public class BulkImportProvider {
 		typeAndUrls.sort(Comparator.comparing(t -> resourceTypeOrder.indexOf(t.getKey())));
 
 		for (Pair<String, String> next : typeAndUrls) {
-			request.addParameter(new JobInstanceParameter(BulkImport2AppCtx.PARAM_NDJSON_URL, next.getValue()));
+			jobParameters.addNdJsonUrl(next.getValue());
 		}
 
+		JobInstanceStartRequest request = new JobInstanceStartRequest();
+		request.setJobDefinitionId(BulkImport2AppCtx.JOB_BULK_IMPORT_PULL);
+		request.setParameters(jobParameters);
 
 		ourLog.info("Requesting Bulk Import Job ($import by Manifest) with {} urls", typeAndUrls.size());
 
