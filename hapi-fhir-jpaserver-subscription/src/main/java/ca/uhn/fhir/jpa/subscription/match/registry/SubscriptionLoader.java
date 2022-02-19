@@ -74,6 +74,8 @@ public class SubscriptionLoader implements IResourceChangeListener {
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
+	@Autowired
+	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
 
 	private SearchParameterMap mySearchParameterMap;
 	private SystemRequestDetails mySystemRequestDetails;
@@ -148,7 +150,7 @@ public class SubscriptionLoader implements IResourceChangeListener {
 		synchronized (mySyncSubscriptionsLock) {
 			ourLog.debug("Starting sync subscriptions");
 
-			IBundleProvider subscriptionBundleList =  getSubscriptionDao().search(mySearchParameterMap, mySystemRequestDetails);
+			IBundleProvider subscriptionBundleList = getSubscriptionDao().search(mySearchParameterMap, mySystemRequestDetails);
 
 			Integer subscriptionCount = subscriptionBundleList.size();
 			assert subscriptionCount != null;
@@ -188,14 +190,9 @@ public class SubscriptionLoader implements IResourceChangeListener {
 			String nextId = resource.getIdElement().getIdPart();
 			allIds.add(nextId);
 
-			// internally, subscriptions that cannot activate
-			// will be set to error
-			boolean activated = mySubscriptionActivatingInterceptor.activateSubscriptionIfRequired(resource);
+			boolean activated = activateSubscriptionIfRequested(resource);
 			if (activated) {
-				activatedCount++;
-			}
-			else {
-				logSubscriptionNotActivatedPlusErrorIfPossible(resource);
+				++activatedCount;
 			}
 
 			boolean registered = mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(resource);
@@ -210,21 +207,38 @@ public class SubscriptionLoader implements IResourceChangeListener {
 	}
 
 	/**
+	 * @param theSubscription
+	 * @return true if activated
+	 */
+	private boolean activateSubscriptionIfRequested(IBaseResource theSubscription) {
+		String statusString = mySubscriptionCanonicalizer.getSubscriptionStatus(theSubscription);
+		if (!SubscriptionConstants.REQUESTED_STATUS.equals(statusString)) {
+			return false;
+		}
+		// internally, subscriptions that cannot activate
+		// will be set to error
+		boolean activated = mySubscriptionActivatingInterceptor.activateSubscriptionIfRequired(theSubscription);
+		if (activated) {
+			return true;
+		}
+		logSubscriptionNotActivatedPlusErrorIfPossible(theSubscription);
+		return false;
+	}
+
+	/**
 	 * Logs
+	 *
 	 * @param theSubscription
 	 */
 	private void logSubscriptionNotActivatedPlusErrorIfPossible(IBaseResource theSubscription) {
 		String error;
 		if (theSubscription instanceof Subscription) {
 			error = ((Subscription) theSubscription).getError();
-		}
-		else if (theSubscription instanceof org.hl7.fhir.dstu3.model.Subscription) {
+		} else if (theSubscription instanceof org.hl7.fhir.dstu3.model.Subscription) {
 			error = ((org.hl7.fhir.dstu3.model.Subscription) theSubscription).getError();
-		}
-		else if (theSubscription instanceof org.hl7.fhir.dstu2.model.Subscription) {
+		} else if (theSubscription instanceof org.hl7.fhir.dstu2.model.Subscription) {
 			error = ((org.hl7.fhir.dstu2.model.Subscription) theSubscription).getError();
-		}
-		else {
+		} else {
 			error = "";
 		}
 		ourLog.error("Subscription "
