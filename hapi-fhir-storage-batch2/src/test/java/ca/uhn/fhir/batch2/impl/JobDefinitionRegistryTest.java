@@ -65,7 +65,7 @@ class JobDefinitionRegistryTest {
 				.build());
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals("Multiple definitions for job[A] version: 2", e.getMessage());
+			assertEquals("HAPI-2047: Multiple definitions for job[A] version: 2", e.getMessage());
 		}
 
 		try {
@@ -80,7 +80,7 @@ class JobDefinitionRegistryTest {
 				.build());
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals("Duplicate step[S1] in definition[A] version: 3", e.getMessage());
+			assertEquals("HAPI-2046: Duplicate step[S1] in definition[A] version: 3", e.getMessage());
 		}
 
 		try {

@@ -337,7 +337,7 @@ public class JobCoordinatorImplTest {
 		} catch (MessageDeliveryException e) {
 
 			// Verify
-			assertEquals("Unknown job definition ID[JOB_DEFINITION_ID] version[1]", e.getMostSpecificCause().getMessage());
+			assertEquals("HAPI-2043: Unknown job definition ID[JOB_DEFINITION_ID] version[1]", e.getMostSpecificCause().getMessage());
 		}
 
 	}
@@ -425,7 +425,7 @@ public class JobCoordinatorImplTest {
 		} catch (InvalidRequestException e) {
 
 			// Verify
-			assertEquals("Failed to validate parameters for job of type JOB_DEFINITION_ID: [myParam1 must not be blank], [myParam2 length must be between 5 and 100]", e.getMessage());
+			assertEquals("HAPI-2039: Failed to validate parameters for job of type JOB_DEFINITION_ID: [myParam1 must not be blank], [myParam2 length must be between 5 and 100]", e.getMessage());
 
 		}
 	}
