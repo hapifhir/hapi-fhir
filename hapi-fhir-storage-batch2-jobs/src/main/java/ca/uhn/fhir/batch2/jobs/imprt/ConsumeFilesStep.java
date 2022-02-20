@@ -26,6 +26,7 @@ import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -85,7 +86,7 @@ public class ConsumeFilesStep implements ILastJobStepWorker<BulkImportJobParamet
 				try {
 					parsed = jsonParser.parseResource(next);
 				} catch (DataFormatException e) {
-					throw new JobExecutionFailedException("Failed to parse resource: " + e, e);
+					throw new JobExecutionFailedException(Msg.code(2052) + "Failed to parse resource: " + e, e);
 				}
 				resources.add(parsed);
 			}
@@ -145,7 +146,7 @@ public class ConsumeFilesStep implements ILastJobStepWorker<BulkImportJobParamet
 		} catch (InvalidRequestException | PreconditionFailedException e) {
 			String msg = "Failure during bulk import: " + e;
 			ourLog.error(msg);
-			throw new JobExecutionFailedException(msg, e);
+			throw new JobExecutionFailedException(Msg.code(2053) + msg, e);
 		}
 	}
 }

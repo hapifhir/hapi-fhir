@@ -26,6 +26,7 @@ import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.impl.HttpBasicAuthInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -75,7 +76,7 @@ public class FetchFilesStep implements IFirstJobStepWorker<BulkImportJobParamete
 				try (CloseableHttpResponse response = httpClient.execute(new HttpGet(nextUrl))) {
 					int statusCode = response.getStatusLine().getStatusCode();
 					if (statusCode >= 400) {
-						throw new JobExecutionFailedException("Received HTTP " + statusCode + " from URL: " + nextUrl);
+						throw new JobExecutionFailedException(Msg.code(2056) + "Received HTTP " + statusCode + " from URL: " + nextUrl);
 					}
 
 					String contentType = response.getEntity().getContentType().getValue();
@@ -126,7 +127,7 @@ public class FetchFilesStep implements IFirstJobStepWorker<BulkImportJobParamete
 			return new RunOutcome(0);
 
 		} catch (IOException e) {
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(2054) + e.getMessage(), e);
 		}
 	}
 
@@ -137,7 +138,7 @@ public class FetchFilesStep implements IFirstJobStepWorker<BulkImportJobParamete
 		if (isNotBlank(httpBasicCredentials)) {
 			int colonIdx = httpBasicCredentials.indexOf(':');
 			if (colonIdx == -1) {
-				throw new JobExecutionFailedException("Invalid credential parameter provided. Must be in the form \"username:password\".");
+				throw new JobExecutionFailedException(Msg.code(2055) + "Invalid credential parameter provided. Must be in the form \"username:password\".");
 			}
 			String username = httpBasicCredentials.substring(0, colonIdx);
 			String password = httpBasicCredentials.substring(colonIdx + 1);

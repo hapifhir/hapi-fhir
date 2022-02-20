@@ -20,6 +20,7 @@ package ca.uhn.fhir.batch2.jobs.imprt;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -63,7 +64,7 @@ public class BulkImportFileServlet extends HttpServlet {
 				return;
 			}
 
-			throw new ResourceNotFoundException("Invalid request path: " + requestPath);
+			throw new ResourceNotFoundException(Msg.code(2049) + "Invalid request path: " + requestPath);
 		} catch (Exception e) {
 			ourLog.warn("Failure serving file", e);
 			int responseCode = 500;
@@ -81,10 +82,10 @@ public class BulkImportFileServlet extends HttpServlet {
 	private void handleDownload(HttpServletRequest theRequest, HttpServletResponse theResponse) throws ServletException, IOException {
 		String indexParam = defaultString(theRequest.getParameter(INDEX_PARAM));
 		if (isBlank(indexParam)) {
-			throw new ResourceNotFoundException("Missing or invalid index parameter");
+			throw new ResourceNotFoundException(Msg.code(2050) + "Missing or invalid index parameter");
 		}
 		if (!myFileIds.containsKey(indexParam)) {
-			throw new ResourceNotFoundException("Invalid index: " + UrlUtil.sanitizeUrlPart(indexParam));
+			throw new ResourceNotFoundException(Msg.code(2051) + "Invalid index: " + UrlUtil.sanitizeUrlPart(indexParam));
 		}
 
 		ourLog.info("Serving Bulk Import NDJSON file index: {}", indexParam);

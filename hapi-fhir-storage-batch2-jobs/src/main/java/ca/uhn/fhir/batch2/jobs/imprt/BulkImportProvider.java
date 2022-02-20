@@ -23,6 +23,7 @@ package ca.uhn.fhir.batch2.jobs.imprt;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -111,7 +112,7 @@ public class BulkImportProvider {
 
 		String inputFormat = ParametersUtil.getNamedParameterValueAsString(myCtx, theRequest, PARAM_INPUT_FORMAT).orElse("");
 		if (!Constants.CT_FHIR_NDJSON.equals(inputFormat)) {
-			throw new InvalidRequestException("Input format must be \"" + Constants.CT_FHIR_NDJSON + "\"");
+			throw new InvalidRequestException(Msg.code(2048) + "Input format must be \"" + Constants.CT_FHIR_NDJSON + "\"");
 		}
 
 		Optional<IBase> storageDetailOpt = ParametersUtil.getNamedParameter(myCtx, theRequest, PARAM_STORAGE_DETAIL);
