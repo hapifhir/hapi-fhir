@@ -176,7 +176,7 @@ public class SearchNarrowingInterceptorTest {
 		myInterceptor.setPostFilterLargeValueSetThreshold(50);
 		myInterceptor.setValidationSupport(myValidationSupport);
 		when(myValidationSupport.expandValueSet(any(), any(), eq("http://large-vs")))
-			.thenReturn(createValueSetWithCodeCount());
+			.thenReturn(createValueSetWithCodeCount(100));
 
 		ourNextAuthorizedList = new AuthorizedList()
 			.addCodeInValueSet("Observation", "code", "http://large-vs");
