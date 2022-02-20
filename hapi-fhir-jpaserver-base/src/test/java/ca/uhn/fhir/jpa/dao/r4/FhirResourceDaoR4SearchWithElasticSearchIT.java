@@ -503,7 +503,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	}
 
 	@Nested
-	public class WithContainedIndexing {
+	public class WithContainedIndexingIT {
 		@BeforeEach
 		public void enableContains() {
 			// we don't support chained or contained yet, but turn it on to test we don't blow up.
@@ -542,7 +542,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		}
 	}
 
-	
+
 
 	@Test
 	public void testExpandWithIsAInExternalValueSet() {
@@ -567,14 +567,14 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		ValueSet vs = new ValueSet();
 		ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
 		include.setSystem(URL_MY_CODE_SYSTEM);
-	
+
 		ValueSet result = myValueSetDao.expand(vs, new ValueSetExpansionOptions().setFilter("child"));
-				
+
 		logAndValidateValueSet(result);
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
 		ourLog.info(resp);
-		
+
 		assertThat(resp, stringContainsInOrder("<code value=\"childCA\"/>","<display value=\"Child CA\"/>"));
 	}
 
@@ -585,14 +585,14 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		ValueSet vs = new ValueSet();
 		ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
 		include.setSystem(URL_MY_CODE_SYSTEM);
-	
+
 		ValueSet result = myValueSetDao.expand(vs, new ValueSetExpansionOptions().setFilter("chi"));
-				
+
 		logAndValidateValueSet(result);
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
 		ourLog.info(resp);
-		
+
 		assertThat(resp, stringContainsInOrder("<code value=\"childCA\"/>","<display value=\"Child CA\"/>"));
 	}
 
@@ -603,17 +603,17 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		ValueSet vs = new ValueSet();
 		ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
 		include.setSystem(URL_MY_CODE_SYSTEM);
-	
+
 		ValueSet result = myValueSetDao.expand(vs, new ValueSetExpansionOptions().setFilter("hil"));
-				
+
 		logAndValidateValueSet(result);
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
 		ourLog.info(resp);
-		
+
 		assertThat(resp, not(stringContainsInOrder("<code value=\"childCA\"/>","<display value=\"Child CA\"/>")));
 	}
-	
+
 	@Test
 	public void testExpandVsWithMultiInclude_All() throws IOException {
 		CodeSystem cs = loadResource(myFhirCtx, CodeSystem.class, "/r4/expand-multi-cs.json");
@@ -737,6 +737,16 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 		assertEquals(0, result.getMessages().size());
 
+	}
+
+	@Nested
+	public class DateSearchIT extends BaseDateSearchDaoTests {
+
+		@Override
+		protected Fixture getFixture() {
+			DaoTestDataBuilder testDataBuilder = new DaoTestDataBuilder(myFhirCtx, myDaoRegistry, new SystemRequestDetails());
+			return new TestDataBuilderFixture<>(testDataBuilder, myObservationDao);
+		}
 	}
 
 }
