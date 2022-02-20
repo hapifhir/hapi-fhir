@@ -13,7 +13,10 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
+import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
+import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.test.utilities.server.HttpServletExtension;
 import ca.uhn.fhir.util.JsonUtil;
 import org.hl7.fhir.r4.model.Observation;
@@ -24,6 +27,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -57,10 +61,16 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 	private IBatch2JobInstanceRepository myJobInstanceRepository;
 	@Autowired
 	private IBatch2WorkChunkRepository myWorkChunkRepository;
+	@Qualifier("batch2ProcessingChannelReceiver")
+	@Autowired
+	private IChannelReceiver myChannelReceiver;
 
 	@AfterEach
 	public void afterEach() {
 		myBulkImportFileServlet.clearFiles();
+
+		LinkedBlockingChannel channel = ProxyUtil.getSingletonTarget(myChannelReceiver, LinkedBlockingChannel.class);
+		await().until(()->channel.getQueueSizeForUnitTest() == 0);
 	}
 
 	@Test
