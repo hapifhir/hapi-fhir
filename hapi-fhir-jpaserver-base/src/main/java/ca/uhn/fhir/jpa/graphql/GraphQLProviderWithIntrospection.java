@@ -173,7 +173,7 @@ public class GraphQLProviderWithIntrospection extends GraphQLProvider {
 
 			writer.flush();
 		} catch (IOException e) {
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(2036) + e.getMessage(), e);
 		}
 
 		String schema = schemaBuilder.toString().replace("\r", "");
