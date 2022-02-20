@@ -15,6 +15,7 @@ import ca.uhn.fhir.validation.ResultSeverityEnum;
 import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
 import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
+import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,9 +65,9 @@ public class TestR4Config {
 		}
 	}
 
+	private final CircularFifoQueue<Exception> myLastStackTrace = new CircularFifoQueue<>(ourMaxThreads);
 	@Autowired
 	TestHibernateSearchAddInConfig.IHibernateSearchConfigurer hibernateSearchConfigurer;
-	private Exception myLastStackTrace;
 
 	@Bean
 	public CircularQueueCaptureQueriesListener captureQueriesListener() {
@@ -92,7 +93,7 @@ public class TestR4Config {
 				try {
 					throw new Exception();
 				} catch (Exception e) {
-					myLastStackTrace = e;
+					myLastStackTrace.add(e);
 				}
 
 				return retVal;
@@ -100,17 +101,22 @@ public class TestR4Config {
 
 			private void logGetConnectionStackTrace() {
 				StringBuilder b = new StringBuilder();
-				b.append("Last connection request stack trace:");
-				for (StackTraceElement next : myLastStackTrace.getStackTrace()) {
-					b.append("\n   ");
-					b.append(next.getClassName());
-					b.append(".");
-					b.append(next.getMethodName());
-					b.append("(");
-					b.append(next.getFileName());
+				int i = 0;
+				for (Exception nextStack : myLastStackTrace) {
+					b.append("Previous request stack trace ");
+					b.append(i);
 					b.append(":");
-					b.append(next.getLineNumber());
-					b.append(")");
+					for (StackTraceElement next : nextStack.getStackTrace()) {
+						b.append("\n   ");
+						b.append(next.getClassName());
+						b.append(".");
+						b.append(next.getMethodName());
+						b.append("(");
+						b.append(next.getFileName());
+						b.append(":");
+						b.append(next.getLineNumber());
+						b.append(")");
+					}
 				}
 				ourLog.info(b.toString());
 			}
