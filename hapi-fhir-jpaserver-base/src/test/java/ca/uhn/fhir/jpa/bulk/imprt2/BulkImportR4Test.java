@@ -10,6 +10,8 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
+import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.test.utilities.server.HttpServletExtension;
@@ -26,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -50,6 +53,10 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 	private IJobCoordinator myJobCoordinator;
 	@Autowired
 	private IJobCleanerService myJobCleanerService;
+	@Autowired
+	private IBatch2JobInstanceRepository myJobInstanceRepository;
+	@Autowired
+	private IBatch2WorkChunkRepository myWorkChunkRepository;
 
 	@AfterEach
 	public void afterEach() {
@@ -140,14 +147,26 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 				return instance.getStatus();
 			}, equalTo(StatusEnum.ERRORED));
 
-			runInTransaction(() -> {
+			String storageDescription = runInTransaction(() -> {
 				assertEquals(0, myResourceTableDao.count());
+				String storage = myJobInstanceRepository
+					.findAll()
+					.stream()
+					.map(t->"\n * " + t.toString())
+					.collect(Collectors.joining(""));
+				storage += myWorkChunkRepository
+					.findAll()
+					.stream()
+					.map(t->"\n * " + t.toString())
+					.collect(Collectors.joining(""));
+				ourLog.info("Stored entities:{}", storage);
+				return storage;
 			});
 
 			runInTransaction(() -> {
 				JobInstance instance = myJobCoordinator.getInstance(instanceId);
 				ourLog.info("Instance details:\n{}", JsonUtil.serialize(instance, true));
-				assertEquals(3, instance.getErrorCount());
+				assertEquals(3, instance.getErrorCount(), storageDescription);
 				assertNotNull(instance.getCreateTime());
 				assertNotNull(instance.getStartTime());
 				assertNull(instance.getEndTime());
