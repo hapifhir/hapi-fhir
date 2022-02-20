@@ -23,6 +23,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -85,6 +86,38 @@ import java.util.stream.Collectors;
  */
 public class SearchNarrowingInterceptor {
 
+	private IValidationSupport myValidationSupport;
+	private int myPostFilterLargeValueSetThreshold = 500;
+
+	/**
+	 * Supplies a threshold over which any ValueSet-based rules will be applied by
+	 *
+	 *
+	 * <p>
+	 * Note that this setting will have no effect if {@link #setValidationSupport(IValidationSupport)}
+	 * has not also been called in order to supply a validsation support module for
+	 * testing ValueSet membership.
+	 * </p>
+	 *
+	 * @param thePostFilterLargeValueSetThreshold The threshold
+	 * @see #setValidationSupport(IValidationSupport)
+	 */
+	public void setPostFilterLargeValueSetThreshold(int thePostFilterLargeValueSetThreshold) {
+		Validate.isTrue(thePostFilterLargeValueSetThreshold > 0, "thePostFilterLargeValueSetThreshold must be a positive integer");
+		myPostFilterLargeValueSetThreshold = thePostFilterLargeValueSetThreshold;
+	}
+
+	/**
+	 * Supplies a validation support module that will be used to apply the
+	 *
+	 * @see #setPostFilterLargeValueSetThreshold(int)
+	 * @since 6.0.0
+	 */
+	public SearchNarrowingInterceptor setValidationSupport(IValidationSupport theValidationSupport) {
+		myValidationSupport = theValidationSupport;
+		return this;
+	}
+
 	/**
 	 * Subclasses should override this method to supply the set of compartments that
 	 * the user making the request should actually have access to.
@@ -124,7 +157,7 @@ public class SearchNarrowingInterceptor {
 		 */
 		Collection<String> compartments = authorizedList.getAllowedCompartments();
 		if (compartments != null) {
-			Map<String, List<String>> parameterToOrValues =	processResourcesOrCompartments(theRequestDetails, resDef, compartments, true);
+			Map<String, List<String>> parameterToOrValues = processResourcesOrCompartments(theRequestDetails, resDef, compartments, true);
 			applyParametersToRequestDetails(theRequestDetails, parameterToOrValues, true);
 		}
 		Collection<String> resources = authorizedList.getAllowedInstances();
@@ -290,12 +323,11 @@ public class SearchNarrowingInterceptor {
 			if (retVal == null) {
 				retVal = new HashMap<>();
 			}
-			retVal.computeIfAbsent(paramName, k->new ArrayList<>()).add(next.getValueSetUrl());
+			retVal.computeIfAbsent(paramName, k -> new ArrayList<>()).add(next.getValueSetUrl());
 		}
 
 		return retVal;
 	}
-
 
 
 	private String selectBestSearchParameterForCompartment(RequestDetails theRequestDetails, RuntimeResourceDefinition theResDef, String compartmentName) {

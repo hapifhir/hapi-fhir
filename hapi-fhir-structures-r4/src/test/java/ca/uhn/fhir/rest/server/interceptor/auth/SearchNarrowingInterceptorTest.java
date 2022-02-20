@@ -154,6 +154,28 @@ public class SearchNarrowingInterceptorTest {
 	}
 
 	@Test
+	public void testNarrowCode_InSelected_ClientRequestedNoParams_LargeValueSet() {
+		ourNextAuthorizedList = new AuthorizedList()
+			.addCodeInValueSet("Observation", "code", "http://large-vs");
+
+		ourClient
+			.search()
+			.forResource("Observation")
+			.execute();
+
+		assertEquals("Observation.search", ourLastHitMethod);
+		assertEquals(1, ourLastCodeParam.size());
+		assertEquals(1, ourLastCodeParam.getValuesAsQueryTokens().get(0).size());
+		assertEquals(TokenParamModifier.IN, ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getModifier());
+		assertEquals("http://myvs", ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
+		assertEquals(null, ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem());
+		assertNull(ourLastSubjectParam);
+		assertNull(ourLastPerformerParam);
+		assertNull(ourLastPatientParam);
+		assertNull(ourLastIdParam);
+	}
+
+	@Test
 	public void testNarrowCode_InSelected_ClientRequestedBundleWithNoParams() {
 		ourNextAuthorizedList = new AuthorizedList()
 			.addCodeInValueSet("Observation", "code", "http://myvs");
