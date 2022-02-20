@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.graphql;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -73,7 +74,6 @@ public class GraphQLProviderWithIntrospection extends GraphQLProvider {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(GraphQLProviderWithIntrospection.class);
 	private final GraphQLSchemaGenerator myGenerator;
-	private final IValidationSupport myValidationSupport;
 	private final ISearchParamRegistry mySearchParamRegistry;
 	private final VersionSpecificWorkerContextWrapper myContext;
 	private final IDaoRegistry myDaoRegistry;
@@ -84,7 +84,6 @@ public class GraphQLProviderWithIntrospection extends GraphQLProvider {
 	public GraphQLProviderWithIntrospection(FhirContext theFhirContext, IValidationSupport theValidationSupport, IGraphQLStorageServices theIGraphQLStorageServices, ISearchParamRegistry theSearchParamRegistry, IDaoRegistry theDaoRegistry) {
 		super(theFhirContext, theValidationSupport, theIGraphQLStorageServices);
 
-		myValidationSupport = theValidationSupport;
 		mySearchParamRegistry = theSearchParamRegistry;
 		myDaoRegistry = theDaoRegistry;
 
@@ -102,7 +101,7 @@ public class GraphQLProviderWithIntrospection extends GraphQLProvider {
 		if (theQueryBody.contains("__schema")) {
 			EnumSet<GraphQLSchemaGenerator.FHIROperationType> operations;
 			if (theId != null) {
-				throw new InvalidRequestException("GraphQL introspection not supported at instance level. Please try at server- or instance- level.");
+				throw new InvalidRequestException(Msg.code(2035) + "GraphQL introspection not supported at instance level. Please try at server- or instance- level.");
 			}
 
 			operations = EnumSet.of(GraphQLSchemaGenerator.FHIROperationType.READ, GraphQLSchemaGenerator.FHIROperationType.SEARCH);
