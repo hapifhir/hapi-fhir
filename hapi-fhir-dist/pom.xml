@@ -92,8 +92,6 @@
 					<classifier>javadoc</classifier>
 					<scope>provided</scope>
 				</dependency>
-
-
 				<dependency>
 					<groupId>ca.uhn.hapi.fhir</groupId>
 					<artifactId>hapi-fhir-structures-dstu2</artifactId>

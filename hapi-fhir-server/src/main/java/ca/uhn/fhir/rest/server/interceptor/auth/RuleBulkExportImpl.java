@@ -66,7 +66,7 @@ public class RuleBulkExportImpl extends BaseRule {
 			}
 			for (String next : options.getResourceTypes()) {
 				if (!myResourceTypes.contains(next)) {
-					return null;
+					return new AuthorizationInterceptor.Verdict(PolicyEnum.DENY,this);
 				}
 			}
 		}

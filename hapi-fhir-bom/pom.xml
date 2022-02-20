@@ -21,8 +21,13 @@
                 <artifactId>hapi-fhir-base</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
+			  <dependency>
+				  <groupId>${project.groupId}</groupId>
+				  <artifactId>hapi-fhir-checkstyle</artifactId>
+				  <version>${project.version}</version>
+			  </dependency>
+			  <dependency>
+				  <groupId>${project.groupId}</groupId>
                 <artifactId>hapi-fhir-utilities</artifactId>
                 <version>${project.version}</version>
             </dependency>
