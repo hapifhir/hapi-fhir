@@ -22,6 +22,8 @@ package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -243,5 +245,27 @@ public class Batch2JobInstanceEntity implements Serializable {
 
 	public void setEstimatedTimeRemaining(String theEstimatedTimeRemaining) {
 		myEstimatedTimeRemaining = left(theEstimatedTimeRemaining, TIME_REMAINING_LENGTH);
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+			.append("id", myId)
+			.append("definitionId", myDefinitionId)
+			.append("definitionVersion", myDefinitionVersion)
+			.append("errorCount", myErrorCount)
+			.append("createTime", myCreateTime)
+			.append("startTime", myStartTime)
+			.append("endTime", myEndTime)
+			.append("status", myStatus)
+			.append("cancelled", myCancelled)
+			.append("combinedRecordsProcessed", myCombinedRecordsProcessed)
+			.append("combinedRecordsProcessedPerSecond", myCombinedRecordsProcessedPerSecond)
+			.append("totalElapsedMillis", myTotalElapsedMillis)
+			.append("workChunksPurged", myWorkChunksPurged)
+			.append("progress", myProgress)
+			.append("errorMessage", myErrorMessage)
+			.append("estimatedTimeRemaining", myEstimatedTimeRemaining)
+			.toString();
 	}
 }

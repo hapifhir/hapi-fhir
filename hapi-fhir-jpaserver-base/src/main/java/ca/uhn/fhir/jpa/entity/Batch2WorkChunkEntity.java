@@ -21,6 +21,8 @@ package ca.uhn.fhir.jpa.entity;
  */
 
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -209,5 +211,25 @@ public class Batch2WorkChunkEntity implements Serializable {
 
 	public void setInstanceId(String theInstanceId) {
 		myInstanceId = theInstanceId;
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+			.append("id", myId)
+			.append("instanceId", myInstanceId)
+			.append("sequence", mySequence)
+			.append("errorCount", myErrorCount)
+			.append("jobDefinitionId", myJobDefinitionId)
+			.append("jobDefinitionVersion", myJobDefinitionVersion)
+			.append("createTime", myCreateTime)
+			.append("startTime", myStartTime)
+			.append("endTime", myEndTime)
+			.append("recordsProcessed", myRecordsProcessed)
+			.append("targetStepId", myTargetStepId)
+			.append("serializedData", mySerializedData)
+			.append("status", myStatus)
+			.append("errorMessage", myErrorMessage)
+			.toString();
 	}
 }
