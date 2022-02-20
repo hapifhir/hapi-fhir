@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3346
+title: "When searching for date search parameters on Postgres, ordinals could sometimes be
+  represented as strings, causing a search failure. This has been corrected."

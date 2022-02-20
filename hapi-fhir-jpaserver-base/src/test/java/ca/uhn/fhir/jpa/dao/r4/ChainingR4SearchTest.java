@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
@@ -11,12 +12,17 @@ import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.AuditEvent;
 import org.hl7.fhir.r4.model.Device;
+import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -128,6 +134,144 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		// validate
 		assertEquals(1L, oids.size());
 		assertThat(oids, contains(oid1.getIdPart()));
+	}
+
+	@Test
+	public void testShouldResolveATwoLinkChainWithStandAloneResources_CommonReference() throws Exception {
+
+		// setup
+		myModelConfig.setIndexOnContainedResources(true);
+
+		IIdType oid1;
+
+		{
+			Patient p = new Patient();
+			p.setId(IdType.newRandomUuid());
+			p.addName().setFamily("Smith").addGiven("John");
+			myPatientDao.create(p, mySrd);
+
+			Encounter encounter = new Encounter();
+			encounter.setId(IdType.newRandomUuid());
+			encounter.addIdentifier().setSystem("foo").setValue("bar");
+			myEncounterDao.create(encounter, mySrd);
+
+			Observation obs = new Observation();
+			obs.getCode().setText("Body Weight");
+			obs.getCode().addCoding().setCode("obs2").setSystem("Some System").setDisplay("Body weight as measured by me");
+			obs.setStatus(Observation.ObservationStatus.FINAL);
+			obs.setValue(new Quantity(81));
+			obs.setSubject(new Reference(p.getId()));
+			obs.setEncounter(new Reference(encounter.getId()));
+			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			myObservationDao.create(new Observation(), mySrd);
+		}
+
+		String url = "/Observation?encounter.identifier=foo|bar";
+
+		// execute
+		myCaptureQueriesListener.clear();
+		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+		myCaptureQueriesListener.logSelectQueries();
+
+		// validate
+		assertEquals(1L, oids.size());
+		assertThat(oids, contains(oid1.getIdPart()));
+	}
+
+	@Test
+	public void testShouldResolveATwoLinkChainWithStandAloneResources_CompoundReference() throws Exception {
+
+		// setup
+		myModelConfig.setIndexOnContainedResources(true);
+
+		IIdType oid1;
+		IIdType oid2;
+
+		// AuditEvent should match both AuditEvent.agent.who and AuditEvent.entity.what
+		{
+			Patient p = new Patient();
+			p.setId(IdType.newRandomUuid());
+			p.addName().setFamily("Smith").addGiven("John");
+			myPatientDao.create(p, mySrd);
+
+			AuditEvent auditEvent = new AuditEvent();
+			auditEvent.addAgent().setWho(new Reference(p.getId()));
+			oid1 = myAuditEventDao.create(auditEvent, mySrd).getId().toUnqualifiedVersionless();
+		}
+		{
+			Patient p = new Patient();
+			p.setId(IdType.newRandomUuid());
+			p.addName().setFamily("Smith").addGiven("John");
+			myPatientDao.create(p, mySrd);
+
+			AuditEvent auditEvent = new AuditEvent();
+			auditEvent.addEntity().setWhat(new Reference(p.getId()));
+			oid2 = myAuditEventDao.create(auditEvent, mySrd).getId().toUnqualifiedVersionless();
+		}
+		{
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning all the records
+			myAuditEventDao.create(new AuditEvent(), mySrd);
+		}
+
+		String url = "/AuditEvent?patient.name=Smith";
+
+		// execute
+		myCaptureQueriesListener.clear();
+		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url, myAuditEventDao);
+		myCaptureQueriesListener.logSelectQueries();
+
+		// validate
+		assertEquals(2L, oids.size());
+		assertThat(oids, contains(oid1.getIdPart(), oid2.getIdPart()));
+	}
+
+	@Test
+	public void testShouldResolveATwoLinkChainWithContainedResources_CompoundReference() throws Exception {
+
+		// setup
+		myModelConfig.setIndexOnContainedResources(true);
+
+		IIdType oid1;
+		IIdType oid2;
+
+		// AuditEvent should match both AuditEvent.agent.who and AuditEvent.entity.what
+		{
+			Patient p = new Patient();
+			p.setId("p1");
+			p.addName().setFamily("Smith").addGiven("John");
+
+			AuditEvent auditEvent = new AuditEvent();
+			auditEvent.addContained(p);
+			auditEvent.addAgent().setWho(new Reference("#p1"));
+			oid1 = myAuditEventDao.create(auditEvent, mySrd).getId().toUnqualifiedVersionless();
+		}
+		{
+			Patient p = new Patient();
+			p.setId("p2");
+			p.addName().setFamily("Smith").addGiven("John");
+
+			AuditEvent auditEvent = new AuditEvent();
+			auditEvent.addContained(p);
+			auditEvent.addEntity().setWhat(new Reference("#p2"));
+			oid2 = myAuditEventDao.create(auditEvent, mySrd).getId().toUnqualifiedVersionless();
+		}
+		{
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning all the records
+			myAuditEventDao.create(new AuditEvent(), mySrd);
+		}
+
+		String url = "/AuditEvent?patient.name=Smith";
+
+		// execute
+		myCaptureQueriesListener.clear();
+		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url, myAuditEventDao);
+		myCaptureQueriesListener.logSelectQueries();
+
+		// validate
+		assertEquals(2L, oids.size());
+		assertThat(oids, contains(oid1.getIdPart(), oid2.getIdPart()));
 	}
 
 	@Test
@@ -331,6 +475,46 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testShouldResolveATwoLinkChainWithAContainedResource_CommonReference() throws Exception {
+
+		// setup
+		myModelConfig.setIndexOnContainedResources(true);
+
+		IIdType oid1;
+
+		{
+			Encounter encounter = new Encounter();
+			encounter.setId("enc");
+			encounter.addIdentifier().setSystem("foo").setValue("bar");
+
+			Observation obs = new Observation();
+			obs.getCode().setText("Body Weight");
+			obs.getCode().addCoding().setCode("obs2").setSystem("Some System").setDisplay("Body weight as measured by me");
+			obs.setStatus(Observation.ObservationStatus.FINAL);
+			obs.setValue(new Quantity(81));
+
+			obs.addContained(encounter);
+			obs.setEncounter(new Reference("#enc"));
+
+			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			myObservationDao.create(new Observation(), mySrd);
+		}
+
+		String url = "/Observation?encounter.identifier=foo|bar";
+
+		// execute
+		myCaptureQueriesListener.clear();
+		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+		myCaptureQueriesListener.logSelectQueries();
+
+		// validate
+		assertEquals(1L, oids.size());
+		assertThat(oids, contains(oid1.getIdPart()));
+	}
+
+	@Test
 	public void testShouldResolveAThreeLinkChainWhereAllResourcesStandAloneWithoutContainedResourceIndexing() throws Exception {
 
 		// setup
@@ -478,6 +662,51 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testShouldResolveAThreeLinkChainWithAContainedResourceAtTheEndOfTheChain_CommonReference() throws Exception {
+
+		// setup
+		myModelConfig.setIndexOnContainedResources(true);
+
+		IIdType oid1;
+
+		{
+			Patient p = new Patient();
+			p.setId("pat");
+			p.addName().setFamily("Smith").addGiven("John");
+
+			Encounter encounter = new Encounter();
+			encounter.addContained(p);
+			encounter.setId(IdType.newRandomUuid());
+			encounter.addIdentifier().setSystem("foo").setValue("bar");
+			encounter.setSubject(new Reference("#pat"));
+			myEncounterDao.create(encounter, mySrd);
+
+			Observation obs = new Observation();
+			obs.getCode().setText("Body Weight");
+			obs.getCode().addCoding().setCode("obs2").setSystem("Some System").setDisplay("Body weight as measured by me");
+			obs.setStatus(Observation.ObservationStatus.FINAL);
+			obs.setValue(new Quantity(81));
+			obs.setSubject(new Reference(p.getId()));
+			obs.setEncounter(new Reference(encounter.getId()));
+			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			myObservationDao.create(new Observation(), mySrd);
+		}
+
+		String url = "/Observation?encounter.patient.name=Smith";
+
+		// execute
+		myCaptureQueriesListener.clear();
+		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+		myCaptureQueriesListener.logSelectQueries();
+
+		// validate
+		assertEquals(1L, oids.size());
+		assertThat(oids, contains(oid1.getIdPart()));
+	}
+
+	@Test
 	public void testShouldResolveAThreeLinkChainWithAContainedResourceAtTheBeginningOfTheChain() throws Exception {
 		// Adding support for this case in SMILE-3151
 
@@ -512,6 +741,50 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// execute
 		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+
+		// validate
+		assertEquals(1L, oids.size());
+		assertThat(oids, contains(oid1.getIdPart()));
+	}
+
+	@Test
+	public void testShouldResolveAThreeLinkChainWithAContainedResourceAtTheBeginningOfTheChain_CommonReference() throws Exception {
+
+		// setup
+		myModelConfig.setIndexOnContainedResources(true);
+
+		IIdType oid1;
+
+		{
+			Patient p = new Patient();
+			p.setId(IdType.newRandomUuid());
+			p.addName().setFamily("Smith").addGiven("John");
+			myPatientDao.create(p, mySrd);
+
+			Encounter encounter = new Encounter();
+			encounter.setId("enc");
+			encounter.addIdentifier().setSystem("foo").setValue("bar");
+			encounter.setSubject(new Reference(p.getId()));
+
+			Observation obs = new Observation();
+			obs.addContained(encounter);
+			obs.getCode().setText("Body Weight");
+			obs.getCode().addCoding().setCode("obs2").setSystem("Some System").setDisplay("Body weight as measured by me");
+			obs.setStatus(Observation.ObservationStatus.FINAL);
+			obs.setValue(new Quantity(81));
+			obs.setEncounter(new Reference("#enc"));
+			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+
+			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+			myObservationDao.create(new Observation(), mySrd);
+		}
+
+		String url = "/Observation?encounter.identifier=foo|bar";
+
+		// execute
+		myCaptureQueriesListener.clear();
+		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+		myCaptureQueriesListener.logSelectQueries();
 
 		// validate
 		assertEquals(1L, oids.size());
@@ -1265,12 +1538,16 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	private List<String> searchAndReturnUnqualifiedVersionlessIdValues(String theUrl) throws IOException {
+		return searchAndReturnUnqualifiedVersionlessIdValues(theUrl, myObservationDao);
+	}
+
+	private List<String> searchAndReturnUnqualifiedVersionlessIdValues(String theUrl, IFhirResourceDao<? extends DomainResource> theObservationDao) {
 		List<String> ids = new ArrayList<>();
 
 		ResourceSearch search = myMatchUrlService.getResourceSearch(theUrl);
 		SearchParameterMap map = search.getSearchParameterMap();
 		map.setLoadSynchronous(true);
-		IBundleProvider result = myObservationDao.search(map);
+		IBundleProvider result = theObservationDao.search(map);
 		return result.getAllResourceIds();
 	}
 
