@@ -6,6 +6,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.subscription.match.deliver.resthook.SubscriptionDeliveringRestHookSubscriber;
+import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryJsonMessage;
@@ -40,6 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -62,7 +64,7 @@ public class BaseSubscriptionDeliverySubscriberTest {
 
 	@BeforeEach
 	public void before() {
-		mySubscriber = new SubscriptionDeliveringRestHookSubscriber();
+		mySubscriber = new SubscriptionDeliveringRestHookSubscriber(mock(ActiveSubscription.class));
 		mySubscriber.setFhirContextForUnitTest(myCtx);
 		mySubscriber.setInterceptorBroadcasterForUnitTest(myInterceptorBroadcaster);
 		mySubscriber.setSubscriptionRegistryForUnitTest(mySubscriptionRegistry);

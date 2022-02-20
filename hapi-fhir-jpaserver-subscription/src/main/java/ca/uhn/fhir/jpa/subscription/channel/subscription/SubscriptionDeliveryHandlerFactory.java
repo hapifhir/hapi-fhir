@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.SubscriptionDeliveringEmailSubscriber;
 import ca.uhn.fhir.jpa.subscription.match.deliver.message.SubscriptionDeliveringMessageSubscriber;
 import ca.uhn.fhir.jpa.subscription.match.deliver.resthook.SubscriptionDeliveringRestHookSubscriber;
+import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -41,20 +42,21 @@ public class SubscriptionDeliveryHandlerFactory {
 		return myApplicationContext.getBean(SubscriptionDeliveringEmailSubscriber.class, theEmailSender);
 	}
 
-	protected SubscriptionDeliveringRestHookSubscriber newSubscriptionDeliveringRestHookSubscriber() {
-		return myApplicationContext.getBean(SubscriptionDeliveringRestHookSubscriber.class);
+	protected SubscriptionDeliveringRestHookSubscriber newSubscriptionDeliveringRestHookSubscriber(ActiveSubscription theActiveSubscription) {
+		return myApplicationContext.getBean(SubscriptionDeliveringRestHookSubscriber.class, theActiveSubscription);
 	}
 
 	protected SubscriptionDeliveringMessageSubscriber newSubscriptionDeliveringMessageSubscriber() {
 		return myApplicationContext.getBean(SubscriptionDeliveringMessageSubscriber.class);
 	}
 
-	public Optional<MessageHandler> createDeliveryHandler(CanonicalSubscriptionChannelType theChannelType) {
-		if (theChannelType == CanonicalSubscriptionChannelType.EMAIL) {
+	public Optional<MessageHandler> createDeliveryHandler(ActiveSubscription theActiveSubscription) {
+		CanonicalSubscriptionChannelType channelType = theActiveSubscription.getChannelType();
+		if (channelType == CanonicalSubscriptionChannelType.EMAIL) {
 			return Optional.of(newSubscriptionDeliveringEmailSubscriber(myEmailSender));
-		} else if (theChannelType == CanonicalSubscriptionChannelType.RESTHOOK) {
-			return Optional.of(newSubscriptionDeliveringRestHookSubscriber());
-		} else if (theChannelType == CanonicalSubscriptionChannelType.MESSAGE) {
+		} else if (channelType == CanonicalSubscriptionChannelType.RESTHOOK) {
+			return Optional.of(newSubscriptionDeliveringRestHookSubscriber(theActiveSubscription));
+		} else if (channelType == CanonicalSubscriptionChannelType.MESSAGE) {
 			return Optional.of(newSubscriptionDeliveringMessageSubscriber());
 		} else {
 			return Optional.empty();

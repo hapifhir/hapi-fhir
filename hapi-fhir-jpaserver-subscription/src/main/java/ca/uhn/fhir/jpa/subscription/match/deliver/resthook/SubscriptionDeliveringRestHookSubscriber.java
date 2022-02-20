@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.match.deliver.BaseSubscriptionDeliverySubscriber;
+import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -78,11 +79,14 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 	@Autowired
 	private MatchUrlService myMatchUrlService;
 
+	private final ActiveSubscription myActiveSubscription;
+
 	/**
 	 * Constructor
 	 */
-	public SubscriptionDeliveringRestHookSubscriber() {
+	public SubscriptionDeliveringRestHookSubscriber(ActiveSubscription theActiveSubscription) {
 		super();
+		myActiveSubscription = theActiveSubscription;
 	}
 
 	protected void deliverPayload(ResourceDeliveryMessage theMsg, CanonicalSubscription theSubscription, EncodingEnum thePayloadType, IGenericClient theClient) {
@@ -300,4 +304,7 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 		return headers;
 	}
 
+	public ActiveSubscription getActiveSubscription() {
+		return myActiveSubscription;
+	}
 }

@@ -35,6 +35,7 @@ import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.MatchingQueueSubscr
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionActivatingSubscriber;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingSubscriber;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionRegisteringSubscriber;
+import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionModelConfig;
@@ -97,8 +98,8 @@ public class SubscriptionProcessorConfig {
 
 	@Bean
 	@Scope("prototype")
-	public SubscriptionDeliveringRestHookSubscriber subscriptionDeliveringRestHookSubscriber() {
-		return new SubscriptionDeliveringRestHookSubscriber();
+	public SubscriptionDeliveringRestHookSubscriber subscriptionDeliveringRestHookSubscriber(ActiveSubscription theActiveSubscription) {
+		return new SubscriptionDeliveringRestHookSubscriber(theActiveSubscription);
 	}
 
 	@Bean

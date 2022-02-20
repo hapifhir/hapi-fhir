@@ -22,6 +22,9 @@ import org.springframework.messaging.MessageHandler;
 
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
 @ExtendWith(MockitoExtension.class)
 public class SubscriptionChannelRegistryTest {
 
@@ -56,15 +59,15 @@ public class SubscriptionChannelRegistryTest {
 		IChannelProducer producer = Mockito.mock(IChannelProducer.class);
 
 		// when
-		Mockito.when(mySubscriptionChannelFactory.newDeliveryReceivingChannel(
+		when(mySubscriptionChannelFactory.newDeliveryReceivingChannel(
 			Mockito.anyString(),
-			Mockito.any(ChannelConsumerSettings.class)
+			any(ChannelConsumerSettings.class)
 		)).thenReturn(receiver);
-		Mockito.when(mySubscriptionChannelFactory.newDeliverySendingChannel(
+		when(mySubscriptionChannelFactory.newDeliverySendingChannel(
 			Mockito.anyString(),
-			Mockito.any(ChannelProducerSettings.class)
+			any(ChannelProducerSettings.class)
 		)).thenReturn(producer);
-		Mockito.when(mySubscriptionDeliveryHandlerFactory.createDeliveryHandler(Mockito.any(CanonicalSubscriptionChannelType.class)))
+		when(mySubscriptionDeliveryHandlerFactory.createDeliveryHandler(any(ActiveSubscription.class)))
 			.thenReturn(Optional.of(messageHandler));
 
 		// test
