@@ -170,7 +170,7 @@ public class BaseJpaResourceProviderPatientR4 extends JpaResourceProviderR4<Pati
 	 * Beneficiary (Patient) demographics in this version
 	 */
 	@Operation(name = ProviderConstants.OPERATION_MEMBER_MATCH, idempotent = false, returnParameters = {
-		@OperationParam(name = "MemberIdentifier", type = StringDt.class)
+		@OperationParam(name = "MemberIdentifier", typeName = "string")
 	})
 	public Parameters patientMemberMatch(
 		javax.servlet.http.HttpServletRequest theServletRequest,
