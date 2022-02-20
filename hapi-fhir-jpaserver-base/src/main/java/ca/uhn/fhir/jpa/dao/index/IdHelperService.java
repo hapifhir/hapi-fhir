@@ -259,45 +259,42 @@ public class IdHelperService implements IIdHelperService {
 	public List<ResourcePersistentId> resolveResourcePersistentIdsWithCache(RequestPartitionId theRequestPartitionId, List<IIdType> theIds, boolean theOnlyForcedIds) {
 		assert myDontCheckActiveTransactionForUnitTest || TransactionSynchronizationManager.isSynchronizationActive();
 
+		List<ResourcePersistentId> retVal = new ArrayList<>(theIds.size());
+
 		for (IIdType id : theIds) {
 			if (!id.hasIdPart()) {
 				throw new InvalidRequestException(Msg.code(1101) + "Parameter value missing in request");
 			}
 		}
 
-		if (theIds.isEmpty()) {
-			return Collections.emptyList();
-		}
-
-		List<ResourcePersistentId> retVal = new ArrayList<>(theIds.size());
-
-		Set<IIdType> idsToCheck = new HashSet<>(theIds.size());
-		for (IIdType nextId : theIds) {
-			if (myDaoConfig.getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ANY) {
-				if (nextId.isIdPartValidLong()) {
-					if (!theOnlyForcedIds) {
-						retVal.add(new ResourcePersistentId(nextId.getIdPartAsLong()).setAssociatedResourceId(nextId));
+		if (!theIds.isEmpty()) {
+			Set<IIdType> idsToCheck = new HashSet<>(theIds.size());
+			for (IIdType nextId : theIds) {
+				if (myDaoConfig.getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ANY) {
+					if (nextId.isIdPartValidLong()) {
+						if (!theOnlyForcedIds) {
+							retVal.add(new ResourcePersistentId(nextId.getIdPartAsLong()).setAssociatedResourceId(nextId));
+						}
+						continue;
 					}
+				}
+
+				String key = toForcedIdToPidKey(theRequestPartitionId, nextId.getResourceType(), nextId.getIdPart());
+				ResourcePersistentId cachedId = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key);
+				if (cachedId != null) {
+					retVal.add(cachedId);
 					continue;
 				}
-			}
 
-			String key = toForcedIdToPidKey(theRequestPartitionId, nextId.getResourceType(), nextId.getIdPart());
-			ResourcePersistentId cachedId = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key);
-			if (cachedId != null) {
-				retVal.add(cachedId);
-				continue;
+				idsToCheck.add(nextId);
 			}
-
-			idsToCheck.add(nextId);
+			new QueryChunker<IIdType>().chunk(idsToCheck, SearchBuilder.getMaximumPageSize() / 2, ids -> doResolvePersistentIds(theRequestPartitionId, ids, retVal));
 		}
-
-		new QueryChunker<IIdType>().chunk(idsToCheck, SearchBuilder.getMaximumPageSize() / 2, ids -> doResolvePersistentIds(theRequestPartitionId, ids, retVal));
 
 		return retVal;
 	}
 
-	private void doResolvePersistentIds(RequestPartitionId theRequestPartitionId, List<IIdType> theIds, List<ResourcePersistentId> theListToPopulate) {
+	private void doResolvePersistentIds(RequestPartitionId theRequestPartitionId, List<IIdType> theIds, List<ResourcePersistentId> theOutputListToPopulate) {
 		CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<ForcedId> criteriaQuery = cb.createQuery(ForcedId.class);
 		Root<ForcedId> from = criteriaQuery.from(ForcedId.class);
@@ -343,13 +340,15 @@ public class IdHelperService implements IIdHelperService {
 			if (nextId.getResourceId() != null) {
 				ResourcePersistentId persistentId = new ResourcePersistentId(nextId.getResourceId());
 				populateAssociatedResourceId(nextId.getResourceType(), nextId.getForcedId(), persistentId);
-				theListToPopulate.add(persistentId);
+				theOutputListToPopulate.add(persistentId);
 
 				String key = toForcedIdToPidKey(theRequestPartitionId, nextId.getResourceType(), nextId.getForcedId());
 				myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, persistentId);
 			}
 		}
+
 	}
+
 
 	private void populateAssociatedResourceId(String nextResourceType, String forcedId, ResourcePersistentId persistentId) {
 		IIdType resourceId = myFhirCtx.getVersion().newIdType();
