@@ -10,9 +10,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -26,6 +28,49 @@ public class RuleBulkExportImplTest {
 	private IRuleApplier myRuleApplier;
 	@Mock
 	private Set<AuthorizationFlagsEnum> myFlags;
+
+	@Test
+	public void testDenyBulkRequestWithInvalidResourcesTypes() {
+		RuleBulkExportImpl myRule = new RuleBulkExportImpl("a");
+
+		Set<String> myTypes = new HashSet<>();
+		myTypes.add("Patient");
+		myTypes.add("Practitioner");
+		myRule.setResourceTypes(myTypes);
+
+		Set<String> myWantTypes = new HashSet<>();
+		myWantTypes.add("Questionnaire");
+
+		BulkDataExportOptions options = new BulkDataExportOptions();
+		options.setResourceTypes(myWantTypes);
+		
+		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+
+		AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+		assertEquals(PolicyEnum.DENY, verdict.getDecision());
+	}
+
+	@Test
+	public void testBulkRequestWithValidResourcesTypes() {
+		RuleBulkExportImpl myRule = new RuleBulkExportImpl("a");
+
+		Set<String> myTypes = new HashSet<>();
+		myTypes.add("Patient");
+		myTypes.add("Practitioner");
+		myRule.setResourceTypes(myTypes);
+
+		Set<String> myWantTypes = new HashSet<>();
+		myWantTypes.add("Patient");
+		myWantTypes.add("Practitioner");
+
+		BulkDataExportOptions options = new BulkDataExportOptions();
+		options.setResourceTypes(myWantTypes);
+		
+		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+
+		AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+		assertNull(verdict);
+	}
 
 	@Test
 	public void testDenyBulkRequestWithInvalidGroupId() {

@@ -534,8 +534,6 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 						beginArray(theEventWriter, nextChildSpecificName);
 						inArray = true;
 						encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, nextValue, childDef, null, theContainedResource, nextChildElem, force, theEncodeContext);
-					} else if (nextChild instanceof RuntimeChildNarrativeDefinition && theContainedResource) {
-						// suppress narratives from contained resources
 					} else {
 						encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, nextValue, childDef, nextChildSpecificName, theContainedResource, nextChildElem, false, theEncodeContext);
 					}
