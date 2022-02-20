@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3065
+title: "A regression in HAPI FHIR 5.5.0 meant that very large transactions where the bundle contained over 1000 distinct client-assigned
+  resource IDs could fail on MSSQL and Oracle due to SQL parameter count limitations."
