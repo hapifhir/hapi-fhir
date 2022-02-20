@@ -924,6 +924,11 @@
 				<artifactId>caffeine</artifactId>
 				<version>${caffeine_version}</version>
 			</dependency>
+			<dependency>
+				<groupId>com.graphql-java</groupId>
+				<artifactId>graphql-java</artifactId>
+				<version>17.3</version>
+			</dependency>
 			<!-- mail start -->
 			<dependency>
 				<groupId>org.simplejavamail</groupId>
