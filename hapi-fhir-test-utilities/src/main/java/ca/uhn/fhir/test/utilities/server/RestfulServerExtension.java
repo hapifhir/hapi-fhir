@@ -28,6 +28,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
+import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import org.apache.commons.lang3.Validate;
@@ -67,10 +68,11 @@ public class RestfulServerExtension implements BeforeEachCallback, AfterEachCall
 	private int myPort = 0;
 	private CloseableHttpClient myHttpClient;
 	private IGenericClient myFhirClient;
-	private List<Consumer<RestfulServer>> myConsumers = new ArrayList<>();
+	private final List<Consumer<RestfulServer>> myConsumers = new ArrayList<>();
 	private String myServletPath = "/*";
 	private boolean myKeepAliveBetweenTests;
 	private ServerValidationModeEnum myServerValidationMode = ServerValidationModeEnum.NEVER;
+	private IPagingProvider myPagingProvider;
 
 	/**
 	 * Constructor
@@ -121,6 +123,9 @@ public class RestfulServerExtension implements BeforeEachCallback, AfterEachCall
 		myServlet.registerInterceptor(new ListenerExtension());
 		if (myProviders != null) {
 			myServlet.registerProviders(myProviders);
+		}
+		if (myPagingProvider != null) {
+			myServlet.setPagingProvider(myPagingProvider);
 		}
 		ServletHolder servletHolder = new ServletHolder(myServlet);
 
@@ -242,6 +247,19 @@ public class RestfulServerExtension implements BeforeEachCallback, AfterEachCall
 
 	public void unregisterAllInterceptors() {
 		myServlet.getInterceptorService().unregisterAllInterceptors();
+	}
+
+	public RestfulServerExtension withPagingProvider(IPagingProvider thePagingProvider) {
+		if (myServlet != null) {
+			myServlet.setPagingProvider(thePagingProvider);
+		} else {
+			myPagingProvider = thePagingProvider;
+		}
+		return this;
+	}
+
+	public void unregisterInterceptor(Object theInterceptor) {
+		myServlet.unregisterInterceptor(theInterceptor);
 	}
 
 	@Interceptor

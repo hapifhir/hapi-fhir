@@ -11,7 +11,6 @@ import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.param.BaseAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
@@ -21,13 +20,9 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -35,16 +30,19 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.List;
@@ -57,15 +55,17 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class SearchNarrowingInterceptorTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchNarrowingInterceptorTest.class);
-
+	private static final FhirContext ourCtx = FhirContext.forR4Cached();
+	public static final String FOO_CS_URL = "http://foo";
+	public static final String CODE_PREFIX = "CODE";
 	private static String ourLastHitMethod;
-	private static FhirContext ourCtx;
 	private static TokenAndListParam ourLastIdParam;
 	private static TokenAndListParam ourLastCodeParam;
 	private static ReferenceAndListParam ourLastSubjectParam;
@@ -73,12 +73,18 @@ public class SearchNarrowingInterceptorTest {
 	private static ReferenceAndListParam ourLastPerformerParam;
 	private static StringAndListParam ourLastNameParam;
 	private static List<Resource> ourReturn;
-	private static Server ourServer;
-	private static IGenericClient ourClient;
 	private static AuthorizedList ourNextAuthorizedList;
 	private static Bundle.BundleEntryRequestComponent ourLastBundleRequest;
+	private IGenericClient myClient;
 	@Mock
 	private IValidationSupport myValidationSupport;
+	private MySearchNarrowingInterceptor myInterceptor;
+	@RegisterExtension
+	private RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(ourCtx)
+		.registerProvider(new DummyObservationResourceProvider())
+		.registerProvider(new DummyPatientResourceProvider())
+		.registerProvider(new DummySystemProvider())
+		.withPagingProvider(new FifoMemoryPagingProvider(100));
 
 	@BeforeEach
 	public void before() {
@@ -91,6 +97,16 @@ public class SearchNarrowingInterceptorTest {
 		ourLastPerformerParam = null;
 		ourLastCodeParam = null;
 		ourNextAuthorizedList = null;
+
+		myInterceptor = new MySearchNarrowingInterceptor();
+		myRestfulServerExtension.registerInterceptor(myInterceptor);
+
+		myClient = myRestfulServerExtension.getFhirClient();
+	}
+
+	@AfterEach
+	public void afterEach() {
+		myRestfulServerExtension.unregisterInterceptor(myInterceptor);
 	}
 
 	@Test
@@ -98,7 +114,7 @@ public class SearchNarrowingInterceptorTest {
 
 		ourNextAuthorizedList = null;
 
-		ourClient
+		myClient
 			.search()
 			.forResource("Patient")
 			.execute();
@@ -116,7 +132,7 @@ public class SearchNarrowingInterceptorTest {
 		ourNextAuthorizedList = new AuthorizedList()
 			.addCodeNotInValueSet("Observation", "code", "http://myvs");
 
-		ourClient
+		myClient
 			.search()
 			.forResource("Observation")
 			.execute();
@@ -138,7 +154,7 @@ public class SearchNarrowingInterceptorTest {
 		ourNextAuthorizedList = new AuthorizedList()
 			.addCodeInValueSet("Observation", "code", "http://myvs");
 
-		ourClient
+		myClient
 			.search()
 			.forResource("Observation")
 			.execute();
@@ -157,12 +173,15 @@ public class SearchNarrowingInterceptorTest {
 
 	@Test
 	public void testNarrowCode_InSelected_ClientRequestedNoParams_LargeValueSet() {
-//		when(myValidationSupport.expandValueSet(eq("http://large-vs")));
+		myInterceptor.setPostFilterLargeValueSetThreshold(50);
+		myInterceptor.setValidationSupport(myValidationSupport);
+		when(myValidationSupport.expandValueSet(any(), any(), eq("http://large-vs")))
+			.thenReturn(createValueSetWithCodeCount());
 
 		ourNextAuthorizedList = new AuthorizedList()
 			.addCodeInValueSet("Observation", "code", "http://large-vs");
 
-		ourClient
+		myClient
 			.search()
 			.forResource("Observation")
 			.execute();
@@ -189,7 +208,7 @@ public class SearchNarrowingInterceptorTest {
 		bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl("Observation?subject=Patient/123");
 		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
-		ourClient
+		myClient
 			.transaction()
 			.withBundle(bundle)
 			.execute();
@@ -210,8 +229,8 @@ public class SearchNarrowingInterceptorTest {
 		ourNextAuthorizedList = new AuthorizedList()
 			.addCodeInValueSet("Observation", "code", "http://myvs");
 
-		ourClient.registerInterceptor(new LoggingInterceptor(false));
-		ourClient
+		myClient.registerInterceptor(new LoggingInterceptor(false));
+		myClient
 			.search()
 			.forResource("Observation")
 			.where(singletonMap("code", singletonList(new TokenParam("http://othervs").setModifier(TokenParamModifier.IN))))
@@ -238,7 +257,7 @@ public class SearchNarrowingInterceptorTest {
 		ourNextAuthorizedList = new AuthorizedList()
 			.addCodeInValueSet("Procedure", "code", "http://myvs");
 
-		ourClient
+		myClient
 			.search()
 			.forResource("Observation")
 			.execute();
@@ -252,7 +271,7 @@ public class SearchNarrowingInterceptorTest {
 		ourNextAuthorizedList = new AuthorizedList()
 			.addCompartments("Patient/123", "Patient/456");
 
-		ourClient
+		myClient
 			.search()
 			.forResource("Observation")
 			.execute();
@@ -275,7 +294,7 @@ public class SearchNarrowingInterceptorTest {
 		bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl("Patient");
 		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
-		ourClient
+		myClient
 			.transaction()
 			.withBundle(bundle)
 			.execute();
@@ -289,7 +308,7 @@ public class SearchNarrowingInterceptorTest {
 
 		ourNextAuthorizedList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
 
-		ourClient
+		myClient
 			.search()
 			.forResource("Patient")
 			.execute();
@@ -304,7 +323,7 @@ public class SearchNarrowingInterceptorTest {
 
 		ourNextAuthorizedList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
 
-		ourClient
+		myClient
 			.search()
 			.forResource("Patient")
 			.where(IAnyResource.RES_ID.exactly().codes("Patient/123", "Patient/999"))
@@ -320,7 +339,7 @@ public class SearchNarrowingInterceptorTest {
 
 		ourNextAuthorizedList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
 
-		ourClient
+		myClient
 			.search()
 			.forResource("Observation")
 			.where(Observation.PATIENT.hasAnyOfIds("Patient/456", "Patient/777"))
@@ -340,7 +359,7 @@ public class SearchNarrowingInterceptorTest {
 
 		ourNextAuthorizedList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
 
-		ourClient
+		myClient
 			.search()
 			.forResource("Observation")
 			.where(Observation.PATIENT.hasAnyOfIds("456", "777"))
@@ -360,7 +379,7 @@ public class SearchNarrowingInterceptorTest {
 
 		ourNextAuthorizedList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
 
-		ourClient
+		myClient
 			.search()
 			.forResource("Observation")
 			.where(Observation.SUBJECT.hasAnyOfIds("Patient/456", "Patient/777"))
@@ -381,7 +400,7 @@ public class SearchNarrowingInterceptorTest {
 		ourNextAuthorizedList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
 
 		try {
-			ourClient
+			myClient
 				.search()
 				.forResource("Observation")
 				.where(Observation.PATIENT.hasAnyOfIds("Patient/111", "Patient/777"))
@@ -402,7 +421,7 @@ public class SearchNarrowingInterceptorTest {
 		ourNextAuthorizedList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
 
 		try {
-			ourClient
+			myClient
 				.search()
 				.forResource("Observation")
 				.where(Observation.SUBJECT.hasAnyOfIds("Patient/111", "Patient/777"))
@@ -423,7 +442,7 @@ public class SearchNarrowingInterceptorTest {
 		ourNextAuthorizedList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
 
 		try {
-			ourClient
+			myClient
 				.search()
 				.forResource("Observation")
 				.where(Observation.PATIENT.hasAnyOfIds("Patient/"))
@@ -443,7 +462,7 @@ public class SearchNarrowingInterceptorTest {
 		ourNextAuthorizedList = new AuthorizedList().addCompartments("Patient/");
 
 		try {
-			ourClient
+			myClient
 				.search()
 				.forResource("Observation")
 				.where(Observation.PATIENT.hasAnyOfIds("Patient/111", "Patient/777"))
@@ -465,7 +484,7 @@ public class SearchNarrowingInterceptorTest {
 		ourNextAuthorizedList = new AuthorizedList()
 			.addResources("Patient/123", "Patient/456");
 
-		ourClient
+		myClient
 			.search()
 			.forResource("Observation")
 			.execute();
@@ -483,7 +502,7 @@ public class SearchNarrowingInterceptorTest {
 		ourNextAuthorizedList = new AuthorizedList()
 			.addResources("Patient/123", "Patient/456");
 
-		ourClient
+		myClient
 			.search()
 			.forResource("Patient")
 			.execute();
@@ -509,38 +528,24 @@ public class SearchNarrowingInterceptorTest {
 			.collect(Collectors.toList());
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
-		TestUtil.randomizeLocaleAndTimezone();
+	@Nonnull
+	private static IValidationSupport.ValueSetExpansionOutcome createValueSetWithCodeCount(int theCount) {
+		ValueSet valueSet = new ValueSet();
+		valueSet.getExpansion().setTotal(theCount);
+		for (int i = 0; i < theCount; i++) {
+			valueSet
+				.getExpansion()
+				.addContains()
+				.setSystem(FOO_CS_URL)
+				.setCode(CODE_PREFIX + i);
+		}
+
+		return new IValidationSupport.ValueSetExpansionOutcome(valueSet);
 	}
 
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourCtx = FhirContext.forR4();
-
-		ourServer = new Server(0);
-
-		DummyPatientResourceProvider patProvider = new DummyPatientResourceProvider();
-		DummyObservationResourceProvider obsProv = new DummyObservationResourceProvider();
-		DummySystemProvider systemProv = new DummySystemProvider();
-
-		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer ourServlet = new RestfulServer(ourCtx);
-		ourServlet.setFhirContext(ourCtx);
-		ourServlet.registerProviders(systemProv);
-		ourServlet.setResourceProviders(patProvider, obsProv);
-		ourServlet.setPagingProvider(new FifoMemoryPagingProvider(100));
-		ourServlet.registerInterceptor(new MySearchNarrowingInterceptor());
-		ServletHolder servletHolder = new ServletHolder(ourServlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-		int ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-		ourCtx.getRestfulClientFactory().setSocketTimeout(1000000);
-		ourClient = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort);
+	@AfterAll
+	public static void afterClassClearContext() throws Exception {
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {

@@ -43,7 +43,7 @@ public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSup
 	}
 
 	@Override
-	public CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public CodeValidationResult validateCode(@Nonnull ValidationSupportContext theValidationSupportContext, @Nonnull ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		// filters out error/fatal
 		// NB: this is a secondary check. isCodeSystemSupported
 		// should prevent this from ever calling validate code here

@@ -162,7 +162,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 	@Override
 	@Nullable
-	public CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public CodeValidationResult validateCode(@Nonnull ValidationSupportContext theValidationSupportContext, @Nonnull ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		IBaseResource vs;
 		if (isNotBlank(theValueSetUrl)) {
 			vs = theValidationSupportContext.getRootValidationSupport().fetchValueSet(theValueSetUrl);
