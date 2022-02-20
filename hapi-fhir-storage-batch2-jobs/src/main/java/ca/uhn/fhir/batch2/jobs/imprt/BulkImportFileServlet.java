@@ -73,7 +73,7 @@ public class BulkImportFileServlet extends HttpServlet {
 
 			theResponse.setStatus(responseCode);
 			theResponse.addHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_TEXT);
-			theResponse.getWriter().print(e.getMessage());
+			theResponse.getWriter().print("Failed to handle response. See server logs for details.");
 			theResponse.getWriter().close();
 		}
 	}

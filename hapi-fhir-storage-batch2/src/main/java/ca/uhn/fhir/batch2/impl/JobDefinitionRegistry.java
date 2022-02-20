@@ -23,6 +23,7 @@ package ca.uhn.fhir.batch2.impl;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import org.apache.commons.lang3.Validate;
 
 import javax.annotation.Nonnull;
@@ -46,13 +47,13 @@ public class JobDefinitionRegistry {
 		Set<String> stepIds = new HashSet<>();
 		for (JobDefinitionStep next : theDefinition.getSteps()) {
 			if (!stepIds.add(next.getStepId())) {
-				throw new ConfigurationException("Duplicate step[" + next.getStepId() + "] in definition[" + theDefinition.getJobDefinitionId() + "] version: " + theDefinition.getJobDefinitionVersion());
+				throw new ConfigurationException(Msg.code(2046) + "Duplicate step[" + next.getStepId() + "] in definition[" + theDefinition.getJobDefinitionId() + "] version: " + theDefinition.getJobDefinitionVersion());
 			}
 		}
 
 		TreeMap<Integer, JobDefinition> versionMap = myJobs.computeIfAbsent(theDefinition.getJobDefinitionId(), t -> new TreeMap<>());
 		if (versionMap.containsKey(theDefinition.getJobDefinitionVersion())) {
-			throw new ConfigurationException("Multiple definitions for job[" + theDefinition.getJobDefinitionId() + "] version: " + theDefinition.getJobDefinitionVersion());
+			throw new ConfigurationException(Msg.code(2047) + "Multiple definitions for job[" + theDefinition.getJobDefinitionId() + "] version: " + theDefinition.getJobDefinitionVersion());
 		}
 		versionMap.put(theDefinition.getJobDefinitionVersion(), theDefinition);
 	}

@@ -1372,13 +1372,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private ResourceTable readEntityLatestVersion(IIdType theId, @Nonnull RequestPartitionId theRequestPartitionId, TransactionDetails theTransactionDetails) {
 		validateResourceTypeAndThrowInvalidRequestException(theId);
 
-		if (theTransactionDetails.isResolvedResourceIdEmpty(theId.toUnqualifiedVersionless())) {
-			throw new ResourceNotFoundException(Msg.code(1997) + theId);
-		}
-
 		ResourcePersistentId persistentId = null;
-		if (theTransactionDetails != null && theTransactionDetails.hasResolvedResourceIds()) {
-			persistentId = theTransactionDetails.getResolvedResourceId(theId);
+		if (theTransactionDetails != null) {
+			if (theTransactionDetails.isResolvedResourceIdEmpty(theId.toUnqualifiedVersionless())) {
+				throw new ResourceNotFoundException(Msg.code(1997) + theId);
+			}
+			if (theTransactionDetails.hasResolvedResourceIds()) {
+				persistentId = theTransactionDetails.getResolvedResourceId(theId);
+			}
 		}
 
 		if (persistentId == null) {

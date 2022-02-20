@@ -37,6 +37,7 @@ import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkData;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.model.api.IModelJson;
@@ -96,10 +97,10 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 	public String startInstance(JobInstanceStartRequest theStartRequest) {
 		JobDefinition jobDefinition = myJobDefinitionRegistry
 			.getLatestJobDefinition(theStartRequest.getJobDefinitionId())
-			.orElseThrow(() -> new IllegalArgumentException("Unknown job definition ID: " + theStartRequest.getJobDefinitionId()));
+			.orElseThrow(() -> new IllegalArgumentException(Msg.code(2037) + "Unknown job definition ID: " + theStartRequest.getJobDefinitionId()));
 
 		if (isBlank(theStartRequest.getParameters())) {
-			throw new InvalidRequestException("No parameters supplied");
+			throw new InvalidRequestException(Msg.code(2038) + "No parameters supplied");
 		}
 
 		String firstStepId = jobDefinition.getSteps().get(0).getStepId();
@@ -113,7 +114,7 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 				": " +
 				constraintErrors.stream().map(t -> "[" + t.getPropertyPath() + " " + t.getMessage() + "]").sorted().collect(Collectors.joining(", "))
 				;
-			throw new InvalidRequestException(message);
+			throw new InvalidRequestException(Msg.code(2039) + message);
 		}
 
 		String jobDefinitionId = jobDefinition.getJobDefinitionId();
@@ -138,7 +139,7 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 		return myJobPersistence
 			.fetchInstance(theInstanceId)
 			.map(t -> massageInstanceForUserAccess(t))
-			.orElseThrow(() -> new ResourceNotFoundException("Unknown instance ID: " + UrlUtil.escapeUrlParam(theInstanceId)));
+			.orElseThrow(() -> new ResourceNotFoundException(Msg.code(2040) + "Unknown instance ID: " + UrlUtil.escapeUrlParam(theInstanceId)));
 	}
 
 	@Override
@@ -187,7 +188,7 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 		} catch (Exception e) {
 			ourLog.error("Failure executing job {} step {}", jobDefinitionId, targetStepId, e);
 			myJobPersistence.markWorkChunkAsErroredAndIncrementErrorCount(theWorkChunk.getId(), e.toString());
-			throw new JobExecutionFailedException(e.getMessage(), e);
+			throw new JobExecutionFailedException(Msg.code(2041) + e.getMessage(), e);
 		}
 
 		int recordsProcessed = outcome.getRecordsProcessed();
@@ -257,7 +258,7 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 		if (targetStep == null) {
 			String msg = "Unknown step[" + targetStepId + "] for job definition ID[" + jobDefinitionId + "] version[" + jobDefinitionVersion + "]";
 			ourLog.warn(msg);
-			throw new InternalErrorException(msg);
+			throw new InternalErrorException(Msg.code(2042) + msg);
 		}
 
 		Validate.isTrue(chunk.getTargetStepId().equals(targetStep.getStepId()), "Chunk %s has target step %s but expected %s", chunkId, chunk.getTargetStepId(), targetStep.getStepId());
@@ -304,7 +305,7 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 		if (!opt.isPresent()) {
 			String msg = "Unknown job definition ID[" + jobDefinitionId + "] version[" + jobDefinitionVersion + "]";
 			ourLog.warn(msg);
-			throw new InternalErrorException(msg);
+			throw new InternalErrorException(Msg.code(2043) + msg);
 		}
 		return opt.get();
 	}
@@ -331,7 +332,7 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 					stripPasswordFields(nextValue);
 				}
 			} catch (IllegalAccessException e) {
-				throw new InternalErrorException(e);
+				throw new InternalErrorException(Msg.code(2044) + e.getMessage(), e);
 			}
 		}
 	}
@@ -392,7 +393,7 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 		public void accept(WorkChunkData theData) {
 			String msg = "Illegal attempt to store data during final step of job " + myJobDefinitionId;
 			ourLog.error(msg);
-			throw new JobExecutionFailedException(msg);
+			throw new JobExecutionFailedException(Msg.code(2045) + msg);
 		}
 
 		@Override

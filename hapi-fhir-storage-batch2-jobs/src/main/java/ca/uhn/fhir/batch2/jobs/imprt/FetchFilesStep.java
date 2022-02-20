@@ -83,37 +83,37 @@ public class FetchFilesStep implements IFirstJobStepWorker<BulkImportJobParamete
 					Validate.isTrue(encoding == EncodingEnum.NDJSON, "Received non-NDJSON content type \"%s\" from URL: %s", contentType, nextUrl);
 
 					try (InputStream inputStream = response.getEntity().getContent()) {
-						LineIterator lineIterator = new LineIterator(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+						try (LineIterator lineIterator = new LineIterator(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 
-						int chunkCount = 0;
-						int lineCount = 0;
-						StringBuilder builder = new StringBuilder();
+							int chunkCount = 0;
+							int lineCount = 0;
+							StringBuilder builder = new StringBuilder();
 
-						while (lineIterator.hasNext()) {
+							while (lineIterator.hasNext()) {
 
-							String nextLine = lineIterator.nextLine();
-							builder.append(nextLine).append('\n');
+								String nextLine = lineIterator.nextLine();
+								builder.append(nextLine).append('\n');
 
-							lineCount++;
-							int charCount = builder.length();
-							int batchSizeChars = (int) (20 * FileUtils.ONE_MB);
-							if (lineCount >= maxBatchResourceCount || charCount >= batchSizeChars || !lineIterator.hasNext()) {
+								lineCount++;
+								int charCount = builder.length();
+								int batchSizeChars = (int) (20 * FileUtils.ONE_MB);
+								if (lineCount >= maxBatchResourceCount || charCount >= batchSizeChars || !lineIterator.hasNext()) {
 
-								ourLog.info("Loaded chunk {} of {} NDJSON file with {} resources from URL: {}", chunkCount, FileUtil.formatFileSize(charCount), lineCount, nextUrl);
+									ourLog.info("Loaded chunk {} of {} NDJSON file with {} resources from URL: {}", chunkCount, FileUtil.formatFileSize(charCount), lineCount, nextUrl);
 
-								NdJsonFileJson data = new NdJsonFileJson();
-								data.setNdJsonText(builder.toString());
-								data.setSourceName(nextUrl);
-								theDataSink.accept(data);
+									NdJsonFileJson data = new NdJsonFileJson();
+									data.setNdJsonText(builder.toString());
+									data.setSourceName(nextUrl);
+									theDataSink.accept(data);
 
-								builder.setLength(0);
-								lineCount = 0;
-								chunkCount++;
+									builder.setLength(0);
+									lineCount = 0;
+									chunkCount++;
+								}
+
 							}
 
 						}
-
-
 					}
 				}
 
