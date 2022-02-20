@@ -70,7 +70,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		myBulkImportFileServlet.clearFiles();
 
 		LinkedBlockingChannel channel = ProxyUtil.getSingletonTarget(myChannelReceiver, LinkedBlockingChannel.class);
-		await().until(()->channel.getQueueSizeForUnitTest() == 0);
+		await().until(() -> channel.getQueueSizeForUnitTest() == 0);
 	}
 
 	@Test
@@ -162,12 +162,12 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 				String storage = myJobInstanceRepository
 					.findAll()
 					.stream()
-					.map(t->"\n * " + t.toString())
+					.map(t -> "\n * " + t.toString())
 					.collect(Collectors.joining(""));
 				storage += myWorkChunkRepository
 					.findAll()
 					.stream()
-					.map(t->"\n * " + t.toString())
+					.map(t -> "\n * " + t.toString())
 					.collect(Collectors.joining(""));
 				ourLog.info("Stored entities:{}", storage);
 				return storage;
@@ -222,10 +222,6 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 			JobInstance instance = myJobCoordinator.getInstance(instanceId);
 			return instance.getStatus();
 		}, equalTo(StatusEnum.FAILED));
-
-		runInTransaction(() -> {
-			assertEquals(0, myResourceTableDao.count());
-		});
 
 		JobInstance instance = myJobCoordinator.getInstance(instanceId);
 		ourLog.info("Instance details:\n{}", JsonUtil.serialize(instance, true));
