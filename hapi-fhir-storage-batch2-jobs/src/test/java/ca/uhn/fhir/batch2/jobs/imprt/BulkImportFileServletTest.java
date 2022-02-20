@@ -59,49 +59,49 @@ public class BulkImportFileServletTest {
 		try (CloseableHttpResponse response = client.execute(new HttpGet(url))) {
 			assertEquals(404, response.getStatusLine().getStatusCode());
 			String responseBody = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseBody, containsString("Invalid request path: /blah"));
+			assertEquals("Failed to handle response. See server logs for details.", responseBody);
 		}
 
 		url = "http://localhost:" + myServletExtension.getPort() + "/context/base/path/foo";
 		try (CloseableHttpResponse response = client.execute(new HttpGet(url))) {
 			assertEquals(404, response.getStatusLine().getStatusCode());
 			String responseBody = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseBody, containsString("Invalid request path: /foo"));
+			assertEquals("Failed to handle response. See server logs for details.", responseBody);
 		}
 
 		url = myServletExtension.getBaseUrl() + "/download";
 		try (CloseableHttpResponse response = client.execute(new HttpGet(url))) {
 			assertEquals(404, response.getStatusLine().getStatusCode());
 			String responseBody = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseBody, containsString("Missing or invalid index parameter"));
+			assertEquals("Failed to handle response. See server logs for details.", responseBody);
 		}
 
 		url = myServletExtension.getBaseUrl() + "/download?";
 		try (CloseableHttpResponse response = client.execute(new HttpGet(url))) {
 			assertEquals(404, response.getStatusLine().getStatusCode());
 			String responseBody = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseBody, containsString("Missing or invalid index parameter"));
+			assertEquals("Failed to handle response. See server logs for details.", responseBody);
 		}
 
 		url = myServletExtension.getBaseUrl() + "/download?index=";
 		try (CloseableHttpResponse response = client.execute(new HttpGet(url))) {
 			assertEquals(404, response.getStatusLine().getStatusCode());
 			String responseBody = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseBody, containsString("Missing or invalid index parameter"));
+			assertEquals("Failed to handle response. See server logs for details.", responseBody);
 		}
 
 		url = myServletExtension.getBaseUrl() + "/download?index=A";
 		try (CloseableHttpResponse response = client.execute(new HttpGet(url))) {
 			assertEquals(404, response.getStatusLine().getStatusCode());
 			String responseBody = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseBody, containsString("Invalid index: A"));
+			assertEquals("Failed to handle response. See server logs for details.", responseBody);
 		}
 
 		url = myServletExtension.getBaseUrl() + "/download?index=22";
 		try (CloseableHttpResponse response = client.execute(new HttpGet(url))) {
 			assertEquals(404, response.getStatusLine().getStatusCode());
 			String responseBody = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseBody, containsString("Invalid index: 22"));
+			assertEquals("Failed to handle response. See server logs for details.", responseBody);
 		}
 
 	}
