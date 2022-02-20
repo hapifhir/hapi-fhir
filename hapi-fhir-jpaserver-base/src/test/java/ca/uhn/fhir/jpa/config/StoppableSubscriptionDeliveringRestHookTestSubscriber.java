@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.jpa.subscription.match.deliver.resthook.SubscriptionDeliveringRestHookSubscriber;
+import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
@@ -8,11 +9,15 @@ import org.springframework.messaging.MessagingException;
 
 import java.util.concurrent.CountDownLatch;
 
-public class StoppableSubscriptionDeliveringRestHookSubscriber extends SubscriptionDeliveringRestHookSubscriber {
-	private static final Logger ourLog = LoggerFactory.getLogger(StoppableSubscriptionDeliveringRestHookSubscriber.class);
+public class StoppableSubscriptionDeliveringRestHookTestSubscriber extends SubscriptionDeliveringRestHookSubscriber {
+	private static final Logger ourLog = LoggerFactory.getLogger(StoppableSubscriptionDeliveringRestHookTestSubscriber.class);
 
 	private boolean myPauseEveryMessage = false;
 	private CountDownLatch myCountDownLatch;
+
+	public StoppableSubscriptionDeliveringRestHookTestSubscriber() {
+		super(null);
+	}
 
 	@Override
 	public void handleMessage(Message theMessage) throws MessagingException {
