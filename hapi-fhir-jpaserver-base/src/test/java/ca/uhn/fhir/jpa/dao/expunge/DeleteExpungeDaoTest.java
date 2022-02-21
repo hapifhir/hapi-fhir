@@ -124,7 +124,7 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 		//See https://github.com/hapifhir/hapi-fhir/issues/2661
 
 		// setup
-		BundleBuilder builder = new BundleBuilder(myFhirCtx);
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
 		for (int i = 0; i < 20; i++) {
 			Organization o = new Organization();
 			o.setId("Organization/O-" + i);

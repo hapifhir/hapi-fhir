@@ -63,8 +63,8 @@ public class ExtendedLuceneClauseBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(ExtendedLuceneClauseBuilder.class);
 
 	final FhirContext myFhirContext;
-	final SearchPredicateFactory myPredicateFactory;
-	final BooleanPredicateClausesStep<?> myRootClause;
+	public final SearchPredicateFactory myPredicateFactory;
+	public final BooleanPredicateClausesStep<?> myRootClause;
 
 	final List<TemporalPrecisionEnum> ordinalSearchPrecisions = Arrays.asList(TemporalPrecisionEnum.YEAR, TemporalPrecisionEnum.MONTH, TemporalPrecisionEnum.DAY);
 
@@ -72,6 +72,14 @@ public class ExtendedLuceneClauseBuilder {
 		this.myFhirContext = myFhirContext;
 		this.myRootClause = myRootClause;
 		this.myPredicateFactory = myPredicateFactory;
+	}
+
+	/**
+	 * Restrict search to resources of a type
+	 * @param theResourceType the type to match.  e.g. "Observation"
+	 */
+	public void addResourceTypeClause(String theResourceType) {
+		myRootClause.must(myPredicateFactory.match().field("myResourceType").matching(theResourceType));
 	}
 
 	@Nonnull
@@ -133,7 +141,7 @@ public class ExtendedLuceneClauseBuilder {
 					TokenParam token = (TokenParam) orTerm;
 					if (StringUtils.isBlank(token.getSystem())) {
 						// bare value
-						return myPredicateFactory.match().field("sp." + theSearchParamName + ".token" + ".code").matching(token.getValue());
+						return myPredicateFactory.match().field(getTokenCodeFieldPath(theSearchParamName)).matching(token.getValue());
 					} else if (StringUtils.isBlank(token.getValue())) {
 						// system without value
 						return myPredicateFactory.match().field("sp." + theSearchParamName + ".token" + ".system").matching(token.getSystem());
@@ -145,7 +153,7 @@ public class ExtendedLuceneClauseBuilder {
 					// MB I don't quite understand why FhirResourceDaoR4SearchNoFtTest.testSearchByIdParamWrongType() uses String but here we are
 					StringParam string = (StringParam) orTerm;
 					// treat a string as a code with no system (like _id)
-					return myPredicateFactory.match().field("sp." + theSearchParamName + ".token" + ".code").matching(string.getValue());
+					return myPredicateFactory.match().field(getTokenCodeFieldPath(theSearchParamName)).matching(string.getValue());
 				} else {
 					throw new IllegalArgumentException(Msg.code(1089) + "Unexpected param type for token search-param: " + orTerm.getClass().getName());
 				}
@@ -155,6 +163,11 @@ public class ExtendedLuceneClauseBuilder {
 			myRootClause.must(finalClause);
 		}
 
+	}
+
+	@Nonnull
+	public static String getTokenCodeFieldPath(String theSearchParamName) {
+		return "sp." + theSearchParamName + ".token" + ".code";
 	}
 
 	@Nonnull

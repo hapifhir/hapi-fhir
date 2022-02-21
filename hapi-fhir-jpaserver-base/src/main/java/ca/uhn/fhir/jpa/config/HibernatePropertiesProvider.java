@@ -21,8 +21,8 @@ package ca.uhn.fhir.jpa.config;
  */
 
 import ca.uhn.fhir.util.ReflectionUtil;
-import org.apache.commons.lang3.StringUtils;
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.search.engine.cfg.BackendSettings;

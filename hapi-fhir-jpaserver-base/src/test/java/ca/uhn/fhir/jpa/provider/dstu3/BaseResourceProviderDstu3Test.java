@@ -30,8 +30,8 @@ import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
@@ -70,7 +70,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 
 	@AfterEach
 	public void after() throws Exception {
-		myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
+		myFhirContext.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
 		myResourceCountsCache.clear();
 		ourRestServer.getInterceptorService().unregisterAllInterceptors();
 	}
@@ -79,12 +79,12 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 	@BeforeEach
 	public void before() throws Exception {
 		myResourceCountsCache.clear();
-		myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-		myFhirCtx.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
-		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
+		myFhirContext.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+		myFhirContext.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
+		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
 
 		if (ourServer == null) {
-			ourRestServer = new RestfulServer(myFhirCtx);
+			ourRestServer = new RestfulServer(myFhirContext);
 			ourRestServer.registerProviders(myResourceProviders.createProviders());
 			ourRestServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 			ourRestServer.setDefaultResponseEncoding(EncodingEnum.XML);
@@ -159,8 +159,8 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 
 			confProvider.setSearchParamRegistry(ourSearchParamRegistry);
 
-			myFhirCtx.getRestfulClientFactory().setSocketTimeout(5000000);
-			ourClient = myFhirCtx.newRestfulGenericClient(ourServerBase);
+			myFhirContext.getRestfulClientFactory().setSocketTimeout(5000000);
+			ourClient = myFhirContext.newRestfulGenericClient(ourServerBase);
 			if (shouldLogClient()) {
 				ourClient.registerInterceptor(new LoggingInterceptor());
 			}

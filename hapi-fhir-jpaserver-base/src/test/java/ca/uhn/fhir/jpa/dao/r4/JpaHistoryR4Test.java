@@ -272,7 +272,7 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 	}
 
 	private void create20Patients() {
-		BundleBuilder bb = new BundleBuilder(myFhirCtx);
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
 		int count = 20;
 		for (int i = 0; i < count; i++) {
 			Patient p = new Patient();

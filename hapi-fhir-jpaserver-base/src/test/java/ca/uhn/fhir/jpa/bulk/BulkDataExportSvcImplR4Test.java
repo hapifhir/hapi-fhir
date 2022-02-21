@@ -774,7 +774,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	}
 
 	private <T extends IBaseResource> List<T> readBulkExportContentsIntoResources(String theContents, Class<T> theClass) {
-		IParser iParser = myFhirCtx.newJsonParser();
+		IParser iParser = myFhirContext.newJsonParser();
 		return Arrays.stream(theContents.split("\n"))
 			.map(iParser::parseResource)
 			.map(theClass::cast)

@@ -1802,7 +1802,7 @@ public abstract class AbstractValeSetFreeTextExpansionR4Test extends BaseJpaTest
 
 
 	@Override
-	protected FhirContext getContext() {
+	protected FhirContext getFhirContext() {
 		return myFhirContext;
 	}
 

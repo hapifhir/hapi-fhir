@@ -94,7 +94,7 @@ abstract public class BaseR4SearchLastN extends BaseJpaTest {
 	protected ElasticsearchSvcImpl myElasticsearchSvc;
 
 	@Override
-	protected FhirContext getContext() {
+	protected FhirContext getFhirContext() {
 		return myFhirCtx;
 	}
 

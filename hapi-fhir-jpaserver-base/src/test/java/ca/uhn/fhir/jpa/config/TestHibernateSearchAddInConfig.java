@@ -108,8 +108,8 @@ public class TestHibernateSearchAddInConfig {
 		}
 
 
-		@Bean(name={"searchDao", "searchDaoDstu2", "searchDaoDstu3", "searchDaoR4", "searchDaoR5"})
-		public IFulltextSearchSvc searchDao() {
+		@Bean
+		public IFulltextSearchSvc fullTextSearchSvc() {
 			ourLog.info("Hibernate Search: FulltextSearchSvcImpl present");
 			return new FulltextSearchSvcImpl();
 		}
@@ -128,9 +128,9 @@ public class TestHibernateSearchAddInConfig {
 			};
 		}
 
-		@Primary // force override of default bean which might have a variety of names
-		@Bean(name={"searchDao", "searchDaoDstu2", "searchDaoDstu3", "searchDaoR4", "searchDaoR5"})
-		public IFulltextSearchSvc searchDao() {
+		@Primary
+		@Bean
+		public IFulltextSearchSvc fullTextSearchSvc() {
 			ourLog.info("Hibernate Search: FulltextSearchSvcImpl not available");
 			return null;
 		}

@@ -30,8 +30,9 @@ import java.util.List;
 import java.util.Objects;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -76,7 +77,7 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 			// then
 			assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatusLine().getStatusCode());
 			String text = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ValueSet valueSet = myFhirCtx.newXmlParser().parseResource(ValueSet.class, text);
+			ValueSet valueSet = myFhirContext.newXmlParser().parseResource(ValueSet.class, text);
 			ourLog.info("testAutocompleteDirectionExisting {}", text);
 			assertThat(valueSet, is(not(nullValue())));
 			List<ValueSet.ValueSetExpansionContainsComponent> expansions = valueSet.getExpansion().getContains();

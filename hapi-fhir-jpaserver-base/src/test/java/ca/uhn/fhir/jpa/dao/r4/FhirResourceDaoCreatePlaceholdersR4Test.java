@@ -34,7 +34,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.startsWith;
@@ -211,7 +210,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 		// Read the Observation
 		Observation createdObs = myObservationDao.read(id);
-		ourLog.info("\nObservation created:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
+		ourLog.info("\nObservation created:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
 
 		/*
 		 * Read the placeholder Patient referenced by the Observation
@@ -219,7 +218,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		 */
 		Patient placeholderPat = myPatientDao.read(new IdType(createdObs.getSubject().getReference()));
 		IIdType placeholderPatId = placeholderPat.getIdElement();
-		ourLog.info("\nPlaceholder Patient created:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(placeholderPat));
+		ourLog.info("\nPlaceholder Patient created:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(placeholderPat));
 		assertEquals(0, placeholderPat.getIdentifier().size());
 		Extension extension = placeholderPat.getExtensionByUrl(HapiExtensions.EXT_RESOURCE_PLACEHOLDER);
 		assertNotNull(extension);
@@ -237,7 +236,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		 * Placeholder extension should not exist
 		 */
 		Patient updatedPat = myPatientDao.read(updatedPatId);
-		ourLog.info("\nUpdated Patient:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedPat));
+		ourLog.info("\nUpdated Patient:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedPat));
 		assertEquals(1, updatedPat.getIdentifier().size());
 		extension = updatedPat.getExtensionByUrl(HapiExtensions.EXT_RESOURCE_PLACEHOLDER);
 		assertNull(extension);
@@ -256,10 +255,10 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		IIdType id = myObservationDao.create(obsToCreate, mySrd).getId();
 
 		Observation createdObs = myObservationDao.read(id);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
 
 		Patient patient = myPatientDao.read(new IdType(createdObs.getSubject().getReference()));
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 		assertEquals(0, patient.getIdentifier().size());
 	}
 
@@ -290,7 +289,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 		//Read the Placeholder Patient
 		Patient placeholderPat = myPatientDao.read(new IdType(createdObs.getSubject().getReference()));
-		ourLog.info("\nObservation created:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
+		ourLog.info("\nObservation created:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
 
 		//Ensure the Obs has the right placeholder ID.
 		IIdType placeholderPatId = placeholderPat.getIdElement();
@@ -299,7 +298,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		/*
 		 * Should have a single identifier populated.
 		 */
-		ourLog.info("\nPlaceholder Patient created:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(placeholderPat));
+		ourLog.info("\nPlaceholder Patient created:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(placeholderPat));
 		assertEquals(1, placeholderPat.getIdentifier().size());
 		List<Identifier> identifiers = placeholderPat.getIdentifier();
 		Identifier identifier = identifiers.get(0);
@@ -335,7 +334,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 		//Read the Placeholder Patient
 		Patient placeholderPat = myPatientDao.read(new IdType(createdObs.getSubject().getReference()));
-		ourLog.info("\nObservation created:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
+		ourLog.info("\nObservation created:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
 
 		//Ensure the Obs has the right placeholder ID.
 		IIdType placeholderPatId = placeholderPat.getIdElement();
@@ -344,7 +343,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		/*
 		 * Should have a single identifier populated.
 		 */
-		ourLog.info("\nPlaceholder Patient created:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(placeholderPat));
+		ourLog.info("\nPlaceholder Patient created:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(placeholderPat));
 		assertEquals(1, placeholderPat.getIdentifier().size());
 		List<Identifier> identifiers = placeholderPat.getIdentifier();
 		Identifier identifier = identifiers.get(0);
@@ -381,7 +380,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 		//Read the Placeholder Patient
 		Patient placeholderPat = myPatientDao.read(new IdType(createdObs.getSubject().getReference()));
-		ourLog.info("\nObservation created:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
+		ourLog.info("\nObservation created:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
 
 		//Ensure the Obs has the right placeholder ID.
 		IIdType placeholderPatId = placeholderPat.getIdElement();
@@ -390,7 +389,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		/*
 		 * Should have a single identifier populated.
 		 */
-		ourLog.info("\nPlaceholder Patient created:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(placeholderPat));
+		ourLog.info("\nPlaceholder Patient created:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(placeholderPat));
 		assertEquals(1, placeholderPat.getIdentifier().size());
 		List<Identifier> identifiers = placeholderPat.getIdentifier();
 		Identifier identifier = identifiers.get(0);
@@ -428,7 +427,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 		//Read the Placeholder Patient
 		Patient placeholderPat = myPatientDao.read(new IdType(createdObs.getSubject().getReference()));
-		ourLog.info("\nObservation created:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
+		ourLog.info("\nObservation created:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
 
 		//Ensure the Obs has the right placeholder ID.
 		IIdType placeholderPatId = placeholderPat.getIdElement();
@@ -437,7 +436,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		/*
 		 * Placeholder Identifiers should both be populated since they were both provided, and did not match
 		 */
-		ourLog.info("\nPlaceholder Patient created:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(placeholderPat));
+		ourLog.info("\nPlaceholder Patient created:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(placeholderPat));
 		assertEquals(2, placeholderPat.getIdentifier().size());
 		List<Identifier> identifiers = placeholderPat.getIdentifier();
 
@@ -458,7 +457,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 		// Read the conditionally updated Patient
 		Patient conditionalUpdatePat = myPatientDao.read(conditionalUpdatePatId);
-		ourLog.info("\nConditionally updated Patient:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conditionalUpdatePat));
+		ourLog.info("\nConditionally updated Patient:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conditionalUpdatePat));
 		assertEquals(1, conditionalUpdatePat.getIdentifier().size());
 
 		/*
@@ -466,7 +465,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		 * ID of placeholder Patient should match ID of conditionally updated Patient
 		 */
 		createdObs = myObservationDao.read(obsId);
-		ourLog.info("\nObservation read after Patient update:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
+		ourLog.info("\nObservation read after Patient update:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
 		assertEquals(createdObs.getSubject().getReference(), conditionalUpdatePatId.toUnqualifiedVersionless().getValueAsString());
 		assertEquals(placeholderPatId.toUnqualifiedVersionless().getValueAsString(), conditionalUpdatePatId.toUnqualifiedVersionless().getValueAsString());
 	}
@@ -488,7 +487,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 		// Read the Observation
 		Observation createdObs = myObservationDao.read(obsId);
-		ourLog.info("\nObservation created:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
+		ourLog.info("\nObservation created:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
 
 		/*
 		 * Read the placeholder Patient referenced by the Observation
@@ -496,7 +495,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		 */
 		Patient placeholderPat = myPatientDao.read(new IdType(createdObs.getSubject().getReference()));
 		IIdType placeholderPatId = placeholderPat.getIdElement();
-		ourLog.info("\nPlaceholder Patient created:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(placeholderPat));
+		ourLog.info("\nPlaceholder Patient created:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(placeholderPat));
 		assertEquals(1, placeholderPat.getIdentifier().size());
 		assertEquals(createdObs.getSubject().getReference(), placeholderPatId.toUnqualifiedVersionless().getValueAsString());
 
@@ -508,7 +507,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 		// Read the conditionally updated Patient
 		Patient conditionalUpdatePat = myPatientDao.read(conditionalUpdatePatId);
-		ourLog.info("\nConditionally updated Patient:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conditionalUpdatePat));
+		ourLog.info("\nConditionally updated Patient:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conditionalUpdatePat));
 		assertEquals(1, conditionalUpdatePat.getIdentifier().size());
 
 		/*
@@ -516,7 +515,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		 * ID of placeholder Patient should match ID of conditionally updated Patient
 		 */
 		createdObs = myObservationDao.read(obsId);
-		ourLog.info("\nObservation read after Patient update:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
+		ourLog.info("\nObservation read after Patient update:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
 		assertEquals(createdObs.getSubject().getReference(), conditionalUpdatePatId.toUnqualifiedVersionless().getValueAsString());
 		assertEquals(placeholderPatId.toUnqualifiedVersionless().getValueAsString(), conditionalUpdatePatId.toUnqualifiedVersionless().getValueAsString());
 	}
@@ -533,10 +532,10 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		IIdType id = myObservationDao.create(obsToCreate, mySrd).getId();
 
 		Observation createdObs = myObservationDao.read(id);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
 
 		Patient patient = myPatientDao.read(new IdType(createdObs.getSubject().getReference()));
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 		assertEquals(1, patient.getIdentifier().size());
 		assertEquals("http://foo", patient.getIdentifier().get(0).getSystem());
 		assertEquals("123", patient.getIdentifier().get(0).getValue());
@@ -556,7 +555,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		IIdType id = myAuditEventDao.create(eventToCreate, mySrd).getId();
 
 		AuditEvent createdEvent = myAuditEventDao.read(id);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdEvent));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdEvent));
 	}
 
 	@Test
@@ -587,7 +586,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		obs.setId("Observation/DEF");
 		Reference patientRef = new Reference("Patient/RED");
 		obs.setSubject(patientRef);
-		BundleBuilder builder = new BundleBuilder(myFhirCtx);
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
 		builder.addTransactionUpdateEntry(obs);
 
 		mySystemDao.transaction(new SystemRequestDetails(), (Bundle) builder.getBundle());
@@ -619,7 +618,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		obs.setId("Observation/DEF");
 		Reference patientRef = new Reference(patientId);
 		obs.setSubject(patientRef);
-		BundleBuilder builder = new BundleBuilder(myFhirCtx);
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
 		builder.addTransactionUpdateEntry(obs);
 
 		Bundle transaction = mySystemDao.transaction(new SystemRequestDetails(), (Bundle) builder.getBundle());
@@ -655,7 +654,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		obs.setId("Observation/DEF");
 		Reference patientRef = new Reference("Patient/" + ret.getId().getIdPart());
 		obs.setSubject(patientRef);
-		BundleBuilder builder = new BundleBuilder(myFhirCtx);
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
 		builder.addTransactionUpdateEntry(obs);
 
 		Bundle transaction = mySystemDao.transaction(new SystemRequestDetails(), (Bundle) builder.getBundle());
@@ -680,7 +679,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		obs1.setId("Observation/DEF1");
 		Reference patientRef = new Reference("Patient/RED");
 		obs1.setSubject(patientRef);
-		BundleBuilder builder = new BundleBuilder(myFhirCtx);
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
 		Observation obs2 = new Observation();
 		obs2.setId("Observation/DEF2");
 		obs2.setSubject(patientRef);
@@ -702,7 +701,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		obs1.setId("Observation/DEF1");
 		Reference patientRef = new Reference("Patient/RED");
 		obs1.setSubject(patientRef);
-		BundleBuilder builder = new BundleBuilder(myFhirCtx);
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
 		Observation obs2 = new Observation();
 		obs2.setId("Observation/DEF2");
 		obs2.setSubject(patientRef);

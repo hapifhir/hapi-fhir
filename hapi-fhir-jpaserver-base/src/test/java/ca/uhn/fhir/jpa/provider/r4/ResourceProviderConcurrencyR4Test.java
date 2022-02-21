@@ -95,7 +95,7 @@ public class ResourceProviderConcurrencyR4Test extends BaseResourceProviderR4Tes
 				try (CloseableHttpResponse outcome = ourHttpClient.execute(get)) {
 					assertEquals(200, outcome.getStatusLine().getStatusCode());
 					String outcomeString = IOUtils.toString(outcome.getEntity().getContent(), StandardCharsets.UTF_8);
-					Bundle bundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, outcomeString);
+					Bundle bundle = myFhirContext.newJsonParser().parseResource(Bundle.class, outcomeString);
 					assertEquals(1, bundle.getEntry().size());
 					Patient pt = (Patient) bundle.getEntry().get(0).getResource();
 					String family = pt.getNameFirstRep().getFamily();
@@ -119,7 +119,7 @@ public class ResourceProviderConcurrencyR4Test extends BaseResourceProviderR4Tes
 				try (CloseableHttpResponse outcome = ourHttpClient.execute(get)) {
 					assertEquals(200, outcome.getStatusLine().getStatusCode());
 					String outcomeString = IOUtils.toString(outcome.getEntity().getContent(), StandardCharsets.UTF_8);
-					Bundle bundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, outcomeString);
+					Bundle bundle = myFhirContext.newJsonParser().parseResource(Bundle.class, outcomeString);
 					assertEquals(1, bundle.getEntry().size());
 					Patient pt = (Patient) bundle.getEntry().get(0).getResource();
 					String family = pt.getNameFirstRep().getFamily();
@@ -141,7 +141,7 @@ public class ResourceProviderConcurrencyR4Test extends BaseResourceProviderR4Tes
 				try (CloseableHttpResponse outcome = ourHttpClient.execute(get)) {
 					assertEquals(200, outcome.getStatusLine().getStatusCode());
 					String outcomeString = IOUtils.toString(outcome.getEntity().getContent(), StandardCharsets.UTF_8);
-					Bundle bundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, outcomeString);
+					Bundle bundle = myFhirContext.newJsonParser().parseResource(Bundle.class, outcomeString);
 					assertEquals(1, bundle.getEntry().size());
 					Patient pt = (Patient) bundle.getEntry().get(0).getResource();
 					String family = pt.getNameFirstRep().getFamily();

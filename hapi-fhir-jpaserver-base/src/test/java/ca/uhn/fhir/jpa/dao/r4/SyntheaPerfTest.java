@@ -65,7 +65,7 @@ public class SyntheaPerfTest extends BaseJpaTest {
 
 	@AfterEach
 	public void afterEach() {
-		myCtx.getParserOptions().setAutoContainReferenceTargetsWithNoId(true);
+		myFhirContext.getParserOptions().setAutoContainReferenceTargetsWithNoId(true);
 	}
 
 	private static final Logger ourLog = LoggerFactory.getLogger(SyntheaPerfTest.class);
@@ -73,7 +73,7 @@ public class SyntheaPerfTest extends BaseJpaTest {
 	public static final String PATH_TO_SYNTHEA_OUTPUT = "../../synthea/output/fhir/";
 	public static final int CONCURRENCY = 4;
 	@Autowired
-	private FhirContext myCtx;
+	private FhirContext myFhirContext;
 	@Autowired
 	private PlatformTransactionManager myTxManager;
 	@Autowired
@@ -88,7 +88,7 @@ public class SyntheaPerfTest extends BaseJpaTest {
 		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.INLINE);
 		myDaoConfig.setMatchUrlCacheEnabled(true);
 		myDaoConfig.setDeleteEnabled(false);
-		myCtx.getParserOptions().setAutoContainReferenceTargetsWithNoId(false);
+		myFhirContext.getParserOptions().setAutoContainReferenceTargetsWithNoId(false);
 		myDaoConfig.setInlineResourceTextBelowSize(4000);
 
 		assertTrue(myDaoConfig.isMassIngestionMode());
@@ -112,8 +112,8 @@ public class SyntheaPerfTest extends BaseJpaTest {
 	}
 
 	@Override
-	protected FhirContext getContext() {
-		return myCtx;
+	public FhirContext getFhirContext() {
+		return myFhirContext;
 	}
 
 	@Override
