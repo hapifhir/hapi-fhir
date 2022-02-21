@@ -1040,7 +1040,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		} else if (theEntity instanceof ResourceTable) {
 			ResourceTable resource = (ResourceTable) theEntity;
 			ResourceHistoryTable history;
-			if (resource.getCurrentVersionEntity() != null) {
+			// FIXME: remove?
+			if (resource.getCurrentVersionEntity() != null /*&& resource.getCurrentVersionEntity().getVersion() == theEntity.getVersion()*/) {
 				history = resource.getCurrentVersionEntity();
 			} else {
 				version = theEntity.getVersion();
@@ -1481,6 +1482,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		ourLog.debug("Saving history entry {}", historyEntry.getIdDt());
 		myResourceHistoryTableDao.save(historyEntry);
+		theEntity.setCurrentVersionEntity(historyEntry);
 
 		// Save resource source
 		String source = null;

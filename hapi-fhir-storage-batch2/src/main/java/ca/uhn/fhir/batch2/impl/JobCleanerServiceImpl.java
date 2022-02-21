@@ -106,8 +106,10 @@ public class JobCleanerServiceImpl extends BaseJobService implements IJobCleaner
 	private void cleanupInstance(JobInstance theInstance) {
 		switch (theInstance.getStatus()) {
 			case QUEUED:
+				break;
 			case IN_PROGRESS:
 			case ERRORED:
+				calculateInstanceProgress(theInstance);
 				break;
 			case COMPLETED:
 			case FAILED:
@@ -120,10 +122,6 @@ public class JobCleanerServiceImpl extends BaseJobService implements IJobCleaner
 					}
 				}
 				break;
-		}
-
-		if (theInstance.getStatus() == StatusEnum.IN_PROGRESS) {
-			calculateInstanceProgress(theInstance);
 		}
 
 		if ((theInstance.getStatus() == StatusEnum.COMPLETED || theInstance.getStatus() == StatusEnum.FAILED) && !theInstance.isWorkChunksPurged()) {
