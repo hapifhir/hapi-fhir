@@ -184,7 +184,9 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.LOINC_URI;
+import static java.lang.String.join;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -208,6 +210,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	private static final String IDX_PROPERTIES = "myProperties";
 	private static final String IDX_PROP_KEY = IDX_PROPERTIES + ".myKey";
 	private static final String IDX_PROP_VALUE_STRING = IDX_PROPERTIES + ".myValueString";
+	private static final String IDX_PROP_DISPLAY_STRING = IDX_PROPERTIES + ".myDisplayString";
 
 	private final Cache<String, TermCodeSystemVersion> myCodeSystemCurrentVersionCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build();
 	@Autowired
@@ -1291,7 +1294,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		return f.nested().objectField(IDX_PROPERTIES).nest(
 			f.bool()
 				.must(f.match().field(IDX_PROP_KEY).matching(theProperty))
-				.must(f.match().field(IDX_PROP_VALUE_STRING).matching(theValue))
+				.must(f.match().field(IDX_PROP_VALUE_STRING).field(IDX_PROP_DISPLAY_STRING).matching(theValue))
 		);
 	}
 
@@ -1396,6 +1399,10 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			BooleanPredicateClausesStep<?> b, ValueSet.ConceptSetFilterComponent theFilter) {
 
 		String[] values = theFilter.getValue().split(",");
+		if (values.length == 0) {
+			throw new InvalidRequestException("Invalid filter criteria - no codes specified");
+		}
+
 		List<Long> descendantCodePidList = getMultipleCodeParentPids(theSystem, theFilter.getProperty(), values);
 
 		b.must(f.bool(innerB -> descendantCodePidList.forEach(
@@ -1426,20 +1433,12 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	 * Returns the list of parentId(s) of the TermConcept representing theValue as a code
 	 */
 	private List<Long> getMultipleCodeParentPids(String theSystem, String theProperty, String[] theValues) {
-		if (theValues.length == 0) return Collections.emptyList();
-
 		List<String> valuesList = Arrays.asList(theValues);
 		List<TermConcept> termConcepts = findCodes(theSystem, valuesList);
 		if (valuesList.size() != termConcepts.size()) {
-			// errors?
-			if (termConcepts.isEmpty() || valuesList.size() < termConcepts.size()) {
-				String exMsg = getTermConceptsFetchExceptionMsg(termConcepts, valuesList);
-				throw new InvalidRequestException("Invalid filter criteria - code does not exist: {" +
-					Constants.codeSystemWithDefaultDescription(theSystem) + "}: " + exMsg);
-			}
-
-			// warnings (more TermConcepts than requested codes)
-			ourLog.warn( getTermConceptsFetchWarningMsg(termConcepts, valuesList) );
+			String exMsg = getTermConceptsFetchExceptionMsg(termConcepts, valuesList);
+			throw new InvalidRequestException("Invalid filter criteria - {" +
+				Constants.codeSystemWithDefaultDescription(theSystem) + "}: " + exMsg);
 		}
 
 		List<Long> retVal = termConcepts.stream()
@@ -1453,32 +1452,25 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		return retVal;
 	}
 
-	private String getTermConceptsFetchWarningMsg(List<TermConcept> theTermConcepts, List<String> theValues) {
-		Set<String> valuesSet = new HashSet<>(theValues);
-		Set<String> termConceptCodesFound = theTermConcepts.stream().map(TermConcept::getCode).collect(toSet());
-		String missingTermConceptsCodes = theValues.stream()
-			.filter(v -> ! termConceptCodesFound.contains(v))
-
-			.collect(joining(", "));
-
-		return "TermConcepts were not found for the following requested codes: [" + missingTermConceptsCodes + "]";
-	}
-
-
 	/**
 	 * Generate message indicating for which of theValues a TermConcept was not found
 	 */
 	private String getTermConceptsFetchExceptionMsg(List<TermConcept> theTermConcepts, List<String> theValues) {
-		if (theTermConcepts.isEmpty()) {
-			return "Invalid filter criteria - No TermConcept(s) were found for requested codes: [" +
-				String.join(", ",theValues) + "]";
+		// case: more TermConcept(s) retrieved than codes queried
+		if (theTermConcepts.size() > theValues.size()) {
+			return "Invalid filter criteria - More TermConcepts were found than indicated codes. Queried codes: [" +
+				join(",", theValues + "]; Obtained TermConcept IDs, codes: [" +
+					theTermConcepts.stream().map(tc -> tc.getId() + ", " + tc.getCode())
+						.collect(joining("; "))+ "]");
 		}
 
-		// case: theValues.size() < theTermConcepts.size()
-		return "Invalid filter criteria - More than one TermConcept was found for some of the indicated codes. Queried codes: [" +
-			String.join(",", theValues + "]; Obtained TermConcept IDs, codes: [" + "]" +
-			theTermConcepts.stream().map(tc -> tc.getId() + ", " + tc.getCode())
-				.collect(joining(";")));
+		// case: less TermConcept(s) retrieved than codes queried
+		Set<String> matchedCodes = theTermConcepts.stream().map(TermConcept::getCode).collect(toSet());
+		List<String> notMatchedValues = theValues.stream()
+			.filter(v -> ! matchedCodes.contains (v)) .collect(toList());
+
+		return "Invalid filter criteria - No TermConcept(s) were found for the requested codes: [" +
+			join(",", notMatchedValues + "]");
 	}
 
 

@@ -8,7 +8,6 @@ import ca.uhn.fhir.jpa.search.elastic.ElasticsearchHibernatePropertiesBuilder;
 import ca.uhn.fhir.jpa.search.elastic.TestElasticsearchContainerHelper;
 import ca.uhn.fhir.jpa.search.lastn.ElasticsearchSvcImpl;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
-import com.google.common.io.Files;
 import org.hibernate.search.backend.elasticsearch.index.IndexStatus;
 import org.hibernate.search.backend.lucene.cfg.LuceneBackendSettings;
 import org.hibernate.search.backend.lucene.cfg.LuceneIndexSettings;
@@ -23,14 +22,15 @@ import org.springframework.context.annotation.Primary;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 
 import javax.annotation.PreDestroy;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
 /**
- * Configurations for Hibernate Search: off, lucene, or elastic.
+ * Configurations for Hibernate Search: off, lucene in-memory, lucene on file system or elastic.
  *
  * We use {@link DefaultLuceneHeap} by default in our JPA test configs.
  * Turn off by adding {@link NoFT} to the test Contexts.
@@ -47,21 +47,20 @@ public class TestHibernateSearchAddInConfig {
 	}
 
 	/**
-	 * Our default config - Lucene in-memory.
+	 * Lucene on file system. Useful for debugging
+	 * Uses temporary directory by default. Replace by permanent directory for debugging
 	 */
 	@Configuration
 	public static class LuceneFilesystem {
 
 		@Bean
 		@Primary
-		IHibernateSearchConfigurer hibernateSearchConfigurer() {
+		IHibernateSearchConfigurer hibernateSearchConfigurer() throws IOException {
 			ourLog.warn("Hibernate Search: using lucene - filesystem");
 
 			// replace by existing directory for debugging purposes
-//			fixme: remove deprecated
-			File tempDir = Files.createTempDir();
-			String dirPath = tempDir.getAbsolutePath();
-//			String dirPath = "/Users/juan.marchionattosmilecdr.com/temp/lucene-dir";
+			Path tempDirPath = Files.createTempDirectory(null);
+			String dirPath = tempDirPath.toString();
 
 			Map<String, String> luceneProperties = new HashMap<>();
 			luceneProperties.put(BackendSettings.backendKey(BackendSettings.TYPE), "lucene");

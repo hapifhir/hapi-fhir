@@ -108,6 +108,7 @@ public class TermConceptProperty implements Serializable {
 	 * Relevant only for properties of type {@link TermConceptPropertyTypeEnum#CODING}
 	 */
 	@Column(name = "PROP_DISPLAY", length = MAX_LENGTH, nullable = true)
+	@GenericField(name = "myDisplayString", searchable = Searchable.YES)
 	private String myDisplay;
 
 	/**
