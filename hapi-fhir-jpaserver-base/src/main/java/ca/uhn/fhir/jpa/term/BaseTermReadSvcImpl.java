@@ -1401,7 +1401,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		String[] values = theFilter.getValue().split(",");
 		if (values.length == 0) {
-			throw new InvalidRequestException("Invalid filter criteria - no codes specified");
+			throw new InvalidRequestException(Msg.code(2035) + "Invalid filter criteria - no codes specified");
 		}
 
 		List<Long> descendantCodePidList = getMultipleCodeParentPids(theSystem, theFilter.getProperty(), values);
@@ -1438,7 +1438,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		List<TermConcept> termConcepts = findCodes(theSystem, valuesList);
 		if (valuesList.size() != termConcepts.size()) {
 			String exMsg = getTermConceptsFetchExceptionMsg(termConcepts, valuesList);
-			throw new InvalidRequestException("Invalid filter criteria - {" +
+			throw new InvalidRequestException(Msg.code(2036) + "Invalid filter criteria - {" +
 				Constants.codeSystemWithDefaultDescription(theSystem) + "}: " + exMsg);
 		}
 
