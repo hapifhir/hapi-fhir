@@ -71,7 +71,7 @@ public class TestJPAConfig {
 	@Bean
 	@Primary
 	public SubscriptionDeliveringRestHookSubscriber stoppableSubscriptionDeliveringRestHookSubscriber() {
-		return new StoppableSubscriptionDeliveringRestHookTestSubscriber();
+		return new StoppableSubscriptionDeliveringRestHookSubscriber();
 	}
 
 	@Bean

@@ -42,8 +42,8 @@ public class SubscriptionDeliveryHandlerFactory {
 		return myApplicationContext.getBean(SubscriptionDeliveringEmailSubscriber.class, theEmailSender);
 	}
 
-	protected SubscriptionDeliveringRestHookSubscriber newSubscriptionDeliveringRestHookSubscriber(ActiveSubscription theActiveSubscription) {
-		return myApplicationContext.getBean(SubscriptionDeliveringRestHookSubscriber.class, theActiveSubscription);
+	protected SubscriptionDeliveringRestHookSubscriber newSubscriptionDeliveringRestHookSubscriber() {
+		return myApplicationContext.getBean(SubscriptionDeliveringRestHookSubscriber.class);
 	}
 
 	protected SubscriptionDeliveringMessageSubscriber newSubscriptionDeliveringMessageSubscriber() {
@@ -55,7 +55,7 @@ public class SubscriptionDeliveryHandlerFactory {
 		if (channelType == CanonicalSubscriptionChannelType.EMAIL) {
 			return Optional.of(newSubscriptionDeliveringEmailSubscriber(myEmailSender));
 		} else if (channelType == CanonicalSubscriptionChannelType.RESTHOOK) {
-			return Optional.of(newSubscriptionDeliveringRestHookSubscriber(theActiveSubscription));
+			return Optional.of(newSubscriptionDeliveringRestHookSubscriber());
 		} else if (channelType == CanonicalSubscriptionChannelType.MESSAGE) {
 			return Optional.of(newSubscriptionDeliveringMessageSubscriber());
 		} else {
