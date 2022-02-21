@@ -374,6 +374,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 
 	protected Patient updatePatientAndUpdateLinks(Patient thePatient) {
 		thePatient = (Patient) myPatientDao.update(thePatient).getResource();
+		ourLog.info("About to update links...");
 		myMdmMatchLinkSvc.updateMdmLinksForMdmSource(thePatient, createContextForUpdate(thePatient.getIdElement().getResourceType()));
 		return thePatient;
 	}

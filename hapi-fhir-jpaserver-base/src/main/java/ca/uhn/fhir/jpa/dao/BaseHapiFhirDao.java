@@ -1362,7 +1362,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 
 		if (theUpdateVersion) {
-			entity.setVersion(entity.getVersion() + 1);
+			long newVersion = entity.getVersion() + 1;
+			entity.setVersion(newVersion);
 		}
 
 		/*

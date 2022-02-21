@@ -173,6 +173,12 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 				return storage;
 			});
 
+			await().until(() -> {
+				myJobCleanerService.runCleanupPass();
+				JobInstance instance = myJobCoordinator.getInstance(instanceId);
+				return instance.getErrorCount();
+			}, equalTo(3));
+
 			runInTransaction(() -> {
 				JobInstance instance = myJobCoordinator.getInstance(instanceId);
 				ourLog.info("Instance details:\n{}", JsonUtil.serialize(instance, true));

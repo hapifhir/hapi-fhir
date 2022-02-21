@@ -511,8 +511,8 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		assertEquals(0, ourObservationProvider.getCountCreate());
 		ourObservationProvider.waitForUpdateCount(2);
 
-		Observation observation1 = ourObservationProvider.getResourceUpdates().get(0);
-		Observation observation2 = ourObservationProvider.getResourceUpdates().get(1);
+		Observation observation1 = ourObservationProvider.getResourceUpdates().stream().filter(t->t.getIdElement().getVersionIdPart().equals("1")).findFirst().orElseThrow(()->new IllegalArgumentException());
+		Observation observation2 = ourObservationProvider.getResourceUpdates().stream().filter(t->t.getIdElement().getVersionIdPart().equals("2")).findFirst().orElseThrow(()->new IllegalArgumentException());
 
 		assertEquals("1", observation1.getIdElement().getVersionIdPart());
 		assertNull(observation1.getNoteFirstRep().getText());
