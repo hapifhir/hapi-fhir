@@ -1040,8 +1040,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		} else if (theEntity instanceof ResourceTable) {
 			ResourceTable resource = (ResourceTable) theEntity;
 			ResourceHistoryTable history;
-			// FIXME: remove?
-			if (resource.getCurrentVersionEntity() != null /*&& resource.getCurrentVersionEntity().getVersion() == theEntity.getVersion()*/) {
+			if (resource.getCurrentVersionEntity() != null) {
 				history = resource.getCurrentVersionEntity();
 			} else {
 				version = theEntity.getVersion();
