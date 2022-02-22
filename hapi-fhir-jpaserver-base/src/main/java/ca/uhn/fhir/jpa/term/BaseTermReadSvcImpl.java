@@ -1377,10 +1377,9 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		List<Long> parentPids = getCodeParentPids(theSystem, theFilter.getProperty(), theFilter.getValue());
 		if (parentPids.isEmpty()) {
-			// At this point we know that we want this search to return nothing, but I couldn't
-			// find any "fail-fast" predicate so have to search for something that won't be found.
 			// Can't return empty must, because it wil match according to other predicates.
-			b.must(f.match().field("myId").matching(-1L));
+			// Some day there will be a 'matchNone' predicate (https://discourse.hibernate.org/t/fail-fast-predicate/6062)
+			b.mustNot( f.matchAll() );
 			return;
 		}
 
