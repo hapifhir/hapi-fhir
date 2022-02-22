@@ -14,8 +14,8 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import static ca.uhn.fhir.jpa.provider.JpaGraphQLR4ProviderTest.DATA_PREFIX;
-import static ca.uhn.fhir.jpa.provider.JpaGraphQLR4ProviderTest.DATA_SUFFIX;
+import static ca.uhn.fhir.jpa.provider.GraphQLR4ProviderTest.DATA_PREFIX;
+import static ca.uhn.fhir.jpa.provider.GraphQLR4ProviderTest.DATA_SUFFIX;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class GraphQLProviderDstu3Test extends BaseResourceProviderDstu3Test {

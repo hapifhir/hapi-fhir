@@ -24,6 +24,8 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,5 +64,13 @@ public class PackageInstallOutcomeJson {
 		} else {
 			getResourcesInstalled().put(theResourceType, existing + 1);
 		}
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+			.append("message", myMessage)
+			.append("resourcesInstalled", myResourcesInstalled)
+			.toString();
 	}
 }
