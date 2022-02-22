@@ -49,7 +49,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Objects;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 @Interceptor
@@ -110,16 +109,7 @@ public class SubscriptionValidatingInterceptor {
 				break;
 		}
 
-		// If the subscription has the cross partition tag &&
-		if (SubscriptionUtil.isCrossPartition(theSubscription) && !(theRequestDetails instanceof SystemRequestDetails)) {
-			if (!myDaoConfig.isCrossPartitionSubscription()){
-				throw new UnprocessableEntityException(Msg.code(2009) + "Cross partition subscription is not enabled on this server");
-			}
-
-			if (!determinePartition(theRequestDetails, theSubscription).isDefaultPartition()) {
-				throw new UnprocessableEntityException(Msg.code(2010) + "Cross partition subscription must be created on the default partition");
-			}
-		}
+		validatePermissions(theSubscription, subscription, theRequestDetails);
 
 		mySubscriptionCanonicalizer.setMatchingStrategyTag(theSubscription, null);
 
@@ -147,6 +137,19 @@ public class SubscriptionValidatingInterceptor {
 			}
 
 
+		}
+	}
+
+	protected void validatePermissions(IBaseResource theSubscription, CanonicalSubscription theCanonicalSubscription, RequestDetails theRequestDetails) {
+		// If the subscription has the cross partition tag &&
+		if (SubscriptionUtil.isCrossPartition(theSubscription) && !(theRequestDetails instanceof SystemRequestDetails)) {
+			if (!myDaoConfig.isCrossPartitionSubscription()){
+				throw new UnprocessableEntityException(Msg.code(2009) + "Cross partition subscription is not enabled on this server");
+			}
+
+			if (!determinePartition(theRequestDetails, theSubscription).isDefaultPartition()) {
+				throw new UnprocessableEntityException(Msg.code(2010) + "Cross partition subscription must be created on the default partition");
+			}
 		}
 	}
 
