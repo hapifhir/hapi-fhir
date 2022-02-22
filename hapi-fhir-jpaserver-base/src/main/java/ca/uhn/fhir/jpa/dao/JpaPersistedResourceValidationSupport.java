@@ -161,6 +161,9 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 	@Nullable
 	@Override
 	public <T extends IBaseResource> List<T> fetchAllStructureDefinitions() {
+		if (!myDaoRegistry.isResourceTypeSupported("StructureDefinition")) {
+			return null;
+		}
 		IBundleProvider search = myDaoRegistry.getResourceDao("StructureDefinition").search(new SearchParameterMap().setLoadSynchronousUpTo(1000));
 		return (List<T>) search.getResources(0, 1000);
 	}
