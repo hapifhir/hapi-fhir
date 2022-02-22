@@ -1510,7 +1510,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		Set<ResourcePersistentId> val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
 		int initial = val.size();
 
-		Organization org = myFhirCtx.newJsonParser().parseResource(Organization.class, inputStr);
+		Organization org = myFhirContext.newJsonParser().parseResource(Organization.class, inputStr);
 		myOrganizationDao.create(org, mySrd);
 
 		val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
@@ -2084,7 +2084,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -2096,7 +2096,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 			oid2 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -2108,7 +2108,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 			oid3 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -2120,7 +2120,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 			oid4 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 
@@ -2681,7 +2681,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		IIdType orgId = myOrganizationDao.create(org, mySrd).getId();
 
 		Organization returned = myOrganizationDao.read(orgId, mySrd);
-		String val = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(returned);
+		String val = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(returned);
 
 		ourLog.info(val);
 		assertThat(val, containsString("<name value=\"測試醫院\"/>"));
@@ -2842,16 +2842,16 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		String stream = IOUtils.toString(getClass().getResourceAsStream("/binu_testpatient_structuredefinition_dstu2.xml"), StandardCharsets.UTF_8);
 
-		StructureDefinition sd = myFhirCtx.newXmlParser().parseResource(StructureDefinition.class, stream);
+		StructureDefinition sd = myFhirContext.newXmlParser().parseResource(StructureDefinition.class, stream);
 		myStructureDefinitionDao.create(sd, mySrd);
 
 		String rawResource = IOUtils.toString(getClass().getResourceAsStream("/binu_testpatient_resource.json"), StandardCharsets.UTF_8);
-		IBaseResource parsedResource = myFhirCtx.newJsonParser().parseResource(rawResource);
+		IBaseResource parsedResource = myFhirContext.newJsonParser().parseResource(rawResource);
 		try {
 			myPatientDao.validate((Patient) parsedResource, null, rawResource, EncodingEnum.JSON, ValidationModeEnum.UPDATE, null, mySrd);
 			fail();
 		} catch (PreconditionFailedException e) {
-			ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+			ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 		}
 	}
 

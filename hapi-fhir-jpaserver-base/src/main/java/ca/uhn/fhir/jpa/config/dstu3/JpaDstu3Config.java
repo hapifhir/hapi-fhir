@@ -1,14 +1,16 @@
 package ca.uhn.fhir.jpa.config.dstu3;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.ParserOptions;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.config.BaseConfigDstu3Plus;
-import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
-import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+import ca.uhn.fhir.jpa.config.GeneratedDaoAndResourceProviderConfigDstu3;
+import ca.uhn.fhir.jpa.config.JpaConfig;
+import ca.uhn.fhir.jpa.config.SharedConfigDstu3Plus;
 import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
 import ca.uhn.fhir.jpa.dao.dstu3.TransactionProcessorVersionAdapterDstu3;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
+import ca.uhn.fhir.jpa.graphql.GraphQLProviderWithIntrospection;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import ca.uhn.fhir.jpa.term.TermReadSvcDstu3;
 import ca.uhn.fhir.jpa.term.TermVersionAdapterSvcDstu3;
@@ -17,14 +19,14 @@ import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcDstu3;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
-import ca.uhn.fhir.jpa.util.ResourceCountCache;
-import org.apache.commons.lang3.time.DateUtils;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Meta;
+import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Primary;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /*
@@ -49,54 +51,27 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableTransactionManagement
-public class BaseDstu3Config extends BaseConfigDstu3Plus {
-
-	public static FhirContext ourFhirContext = FhirContext.forDstu3();
-
-	@Override
-	public FhirContext fhirContext() {
-		return fhirContextDstu3();
-	}
-
+@Import({
+	FhirContextDstu3Config.class,
+	GeneratedDaoAndResourceProviderConfigDstu3.class,
+	SharedConfigDstu3Plus.class,
+	JpaConfig.class
+})
+public class JpaDstu3Config {
 	@Bean
-	@Override
 	public ITermVersionAdapterSvc terminologyVersionAdapterSvc() {
 		return new TermVersionAdapterSvcDstu3();
 	}
 
-	@Bean
-	@Primary
-	public FhirContext fhirContextDstu3() {
-		FhirContext retVal = ourFhirContext;
-
-		// Don't strip versions in some places
-		ParserOptions parserOptions = retVal.getParserOptions();
-		parserOptions.setDontStripVersionsFromReferencesAtPaths("AuditEvent.entity.reference");
-
-		return retVal;
-	}
-
-	@Bean(name = GRAPHQL_PROVIDER_NAME)
+	@Bean(name = JpaConfig.GRAPHQL_PROVIDER_NAME)
 	@Lazy
-	public GraphQLProvider graphQLProvider() {
-		return new GraphQLProvider(fhirContextDstu3(), validationSupportChain(), graphqlStorageServices());
+	public GraphQLProvider graphQLProvider(FhirContext theFhirContext, IGraphQLStorageServices theGraphqlStorageServices, IValidationSupport theValidationSupport, ISearchParamRegistry theSearchParamRegistry, IDaoRegistry theDaoRegistry) {
+		return new GraphQLProviderWithIntrospection(theFhirContext, theValidationSupport, theGraphqlStorageServices, theSearchParamRegistry, theDaoRegistry);
 	}
 
 	@Bean
 	public ITransactionProcessorVersionAdapter transactionProcessorVersionFacade() {
 		return new TransactionProcessorVersionAdapterDstu3();
-	}
-
-	@Bean(name = "myResourceCountsCache")
-	public ResourceCountCache resourceCountsCache() {
-		ResourceCountCache retVal = new ResourceCountCache(() -> systemDaoDstu3().getResourceCounts());
-		retVal.setCacheMillis(4 * DateUtils.MILLIS_PER_HOUR);
-		return retVal;
-	}
-
-	@Bean
-	public IFulltextSearchSvc searchDaoDstu3() {
-		return new FulltextSearchSvcImpl();
 	}
 
 	@Bean(name = "mySystemDaoDstu3")
@@ -105,9 +80,9 @@ public class BaseDstu3Config extends BaseConfigDstu3Plus {
 	}
 
 	@Bean(name = "mySystemProviderDstu3")
-	public ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3 systemProviderDstu3() {
+	public ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3 systemProviderDstu3(FhirContext theFhirContext) {
 		ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3 retVal = new ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3();
-		retVal.setContext(fhirContextDstu3());
+		retVal.setContext(theFhirContext);
 		retVal.setDao(systemDaoDstu3());
 		return retVal;
 	}
@@ -117,8 +92,7 @@ public class BaseDstu3Config extends BaseConfigDstu3Plus {
 		return new TermLoaderSvcImpl(theDeferredStorageSvc, theCodeSystemStorageSvc);
 	}
 
-	@Override
-	@Bean
+   @Bean
 	public ITermReadSvcDstu3 terminologyService() {
 		return new TermReadSvcDstu3();
 	}

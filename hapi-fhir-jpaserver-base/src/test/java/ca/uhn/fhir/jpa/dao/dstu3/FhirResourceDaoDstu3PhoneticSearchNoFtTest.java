@@ -96,7 +96,7 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 		patient.addName().addGiven(GALE);
 		patient.addAddress().addLine(ADDRESS);
 		patient.addTelecom().setValue(PHONE);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 
 		IIdType pId = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
@@ -150,7 +150,7 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 		searchParameter.addExtension()
 			.setUrl(HapiExtensions.EXT_SEARCHPARAM_PHONETIC_ENCODER)
 			.setValue(new StringType(theEncoder.name()));
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
 		mySearchParameterDao.create(searchParameter, mySrd).getId().toUnqualifiedVersionless();
 	}
 

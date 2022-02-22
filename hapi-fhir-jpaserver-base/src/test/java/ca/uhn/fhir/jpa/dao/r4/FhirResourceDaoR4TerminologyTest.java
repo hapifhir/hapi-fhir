@@ -195,11 +195,11 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	}
 
 	private void logAndValidateValueSet(ValueSet theResult) {
-		IParser parser = myFhirCtx.newXmlParser().setPrettyPrint(true);
+		IParser parser = myFhirContext.newXmlParser().setPrettyPrint(true);
 		String encoded = parser.encodeResourceToString(theResult);
 		ourLog.info(encoded);
 
-		FhirValidator validator = myFhirCtx.newValidator();
+		FhirValidator validator = myFhirContext.newValidator();
 		validator.setValidateAgainstStandardSchema(true);
 		validator.setValidateAgainstStandardSchematron(true);
 		ValidationResult result = validator.validateWithResult(theResult);
@@ -637,7 +637,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 
 		ValueSet result = myValueSetDao.expandByIdentifier("http://hl7.org/fhir/ValueSet/doc-typecodes", new ValueSetExpansionOptions().setFilter(""));
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result));
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(result));
 	}
 
 	@Test
@@ -817,7 +817,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		assertEquals(4, result.getExpansion().getContains().size());
 
-		String encoded = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
+		String encoded = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
 		assertThat(encoded, containsStringIgnoringCase("<code value=\"childAAB\"/>"));
 	}
 

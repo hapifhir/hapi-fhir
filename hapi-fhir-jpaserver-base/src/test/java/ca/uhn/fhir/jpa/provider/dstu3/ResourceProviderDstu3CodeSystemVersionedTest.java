@@ -101,7 +101,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 			.andParameter("system", new UriType(FhirResourceDaoDstu3TerminologyTest.URL_MY_CODE_SYSTEM))
 			.execute();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
@@ -123,7 +123,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 			.useHttpGet()
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
@@ -145,7 +145,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 			.andParameter("version", new StringType("1"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
@@ -168,7 +168,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 			.useHttpGet()
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
@@ -190,7 +190,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 			.andParameter("version", new StringType("2"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
@@ -213,7 +213,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 			.useHttpGet()
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
@@ -237,7 +237,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 			.andParameter("system", new UriType("http://acme.org"))
 			.execute();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
@@ -259,7 +259,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 			.andParameter("version", new StringType("1"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
@@ -281,7 +281,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 			.andParameter("version", new StringType("2"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
@@ -321,7 +321,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 			.withParameter(Parameters.class, "coding", new Coding().setSystem("http://acme.org").setCode("8450-9"))
 			.execute();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
@@ -341,7 +341,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 			.withParameter(Parameters.class, "coding", new Coding().setSystem("http://acme.org").setCode("8450-9").setVersion("1"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
@@ -361,7 +361,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 			.withParameter(Parameters.class, "coding", new Coding().setSystem("http://acme.org").setCode("8450-9").setVersion("2"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
@@ -386,7 +386,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 			.andParameter("system", new UriType("http://hl7.org/fhir/v2/0243"))
 			.execute();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
@@ -406,7 +406,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 			.andParameter("version", new StringType("2.8.2"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
@@ -429,7 +429,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 			.andParameter("system", new UriType(SYSTEM_PARENTCHILD))
 			.execute();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals(1, respParam.getParameter().size());
@@ -447,7 +447,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 			.andParameter("version", new StringType("1"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals(1, respParam.getParameter().size());
@@ -465,7 +465,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 			.andParameter("version", new StringType("2"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals(1, respParam.getParameter().size());
@@ -486,7 +486,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 			.andParameter("system", new UriType(SYSTEM_PARENTCHILD))
 			.execute();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals(1, respParam.getParameter().size());
@@ -504,7 +504,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 			.andParameter("version", new StringType("1"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals(1, respParam.getParameter().size());
@@ -522,7 +522,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 			.andParameter("version", new StringType("2"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals(1, respParam.getParameter().size());
@@ -542,7 +542,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 			.andParameter("system", new UriType(SYSTEM_PARENTCHILD))
 			.execute();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals(1, respParam.getParameter().size());
@@ -560,7 +560,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 			.andParameter("version", new StringType("1"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals(1, respParam.getParameter().size());
@@ -578,7 +578,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 			.andParameter("version", new StringType("2"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals(1, respParam.getParameter().size());
@@ -615,7 +615,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 			.andParameter("codingB", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentB"))
 			.execute();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals(1, respParam.getParameter().size());
@@ -631,7 +631,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 			.andParameter("codingB", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentC").setVersion("1"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals(1, respParam.getParameter().size());
@@ -647,7 +647,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 			.andParameter("codingB", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentB").setVersion("2"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals(1, respParam.getParameter().size());
@@ -668,7 +668,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 			.andParameter("codingB", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentA"))
 			.execute();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals(1, respParam.getParameter().size());
@@ -684,7 +684,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 			.andParameter("codingB", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentA").setVersion("1"))
 			.execute();
 
-		 resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		 resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals(1, respParam.getParameter().size());
@@ -700,7 +700,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 			.andParameter("codingB", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentA").setVersion("2"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals(1, respParam.getParameter().size());
@@ -720,7 +720,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 			.andParameter("codingB", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentC"))
 			.execute();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals(1, respParam.getParameter().size());
@@ -736,7 +736,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 			.andParameter("codingB", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentB").setVersion("1"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals(1, respParam.getParameter().size());
@@ -752,7 +752,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 			.andParameter("codingB", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentC").setVersion("2"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals(1, respParam.getParameter().size());
@@ -767,7 +767,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		CodeSystem initialCodeSystem = ourClient.read().resource(CodeSystem.class).withId(parentChildCs1Id).execute();
 		assertEquals("Parent Child CodeSystem 1", initialCodeSystem.getName());
 		initialCodeSystem.setName("Updated Parent Child CodeSystem 1");
-		String encoded = myFhirCtx.newJsonParser().encodeResourceToString(initialCodeSystem);
+		String encoded = myFhirContext.newJsonParser().encodeResourceToString(initialCodeSystem);
 		HttpPut putRequest = new HttpPut(ourServerBase + "/CodeSystem/" + parentChildCs1Id);
 		putRequest.setEntity(new StringEntity(encoded, ContentType.parse("application/json+fhir")));
 		CloseableHttpResponse resp = ourHttpClient.execute(putRequest);
@@ -783,7 +783,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		initialCodeSystem = ourClient.read().resource(CodeSystem.class).withId(parentChildCs2Id).execute();
 		assertEquals("Parent Child CodeSystem 2", initialCodeSystem.getName());
 		initialCodeSystem.setName("Updated Parent Child CodeSystem 2");
-		encoded = myFhirCtx.newJsonParser().encodeResourceToString(initialCodeSystem);
+		encoded = myFhirContext.newJsonParser().encodeResourceToString(initialCodeSystem);
 		putRequest = new HttpPut(ourServerBase + "/CodeSystem/" + parentChildCs2Id);
 		putRequest.setEntity(new StringEntity(encoded, ContentType.parse("application/json+fhir")));
 		resp = ourHttpClient.execute(putRequest);

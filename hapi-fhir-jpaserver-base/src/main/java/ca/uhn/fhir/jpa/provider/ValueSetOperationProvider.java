@@ -28,7 +28,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
-import ca.uhn.fhir.jpa.config.BaseConfig;
+import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteOptions;
@@ -69,7 +69,7 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 	@Autowired
 	private ITermReadSvc myTermReadSvc;
 	@Autowired
-	@Qualifier(BaseConfig.JPA_VALIDATION_SUPPORT_CHAIN)
+	@Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT_CHAIN)
 	private ValidationSupportChain myValidationSupportChain;
 	@Autowired
 	private IValidationSupport myValidationSupport;

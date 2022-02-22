@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
+import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheFactory;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheRefresherImpl;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerRegistryImpl;
 import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
@@ -126,8 +127,8 @@ public class SearchParamRegistryImplTest {
 		}
 
 		@Bean
-		IResourceChangeListenerRegistry resourceChangeListenerRegistry() {
-			return new ResourceChangeListenerRegistryImpl();
+		IResourceChangeListenerRegistry resourceChangeListenerRegistry(FhirContext theFhirContext, ResourceChangeListenerCacheFactory theResourceChangeListenerCacheFactory, InMemoryResourceMatcher theInMemoryResourceMatcher) {
+			return new ResourceChangeListenerRegistryImpl(theFhirContext, theResourceChangeListenerCacheFactory, theInMemoryResourceMatcher);
 		}
 
 		@Bean

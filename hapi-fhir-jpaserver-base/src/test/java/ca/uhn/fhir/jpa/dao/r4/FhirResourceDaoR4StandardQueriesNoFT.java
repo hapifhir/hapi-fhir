@@ -71,7 +71,7 @@ public class FhirResourceDaoR4StandardQueriesNoFT extends BaseJpaTest {
 	}
 
 	@Override
-	protected FhirContext getContext() {
+	protected FhirContext getFhirContext() {
 		return myFhirCtx;
 	}
 

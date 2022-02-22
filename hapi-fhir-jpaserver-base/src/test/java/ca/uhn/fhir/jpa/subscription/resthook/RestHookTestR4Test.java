@@ -934,7 +934,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		assertEquals(Constants.CT_FHIR_XML_NEW, ourRestfulServer.getRequestContentTypes().get(0));
 
 		Observation obs = ourObservationProvider.getStoredResources().get(0);
-		ourLog.info("Observation content: {}", myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(obs));
+		ourLog.info("Observation content: {}", myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(obs));
 	}
 
 	@Test
@@ -1228,7 +1228,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		{
 			Subscription subscription = newSubscription("Observation?", "application/json");
 			subscription.addExtension(HapiExtensions.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA, new StringType("Observation?_id=${matched_resource_id}&_include=*"));
-			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(subscription));
+			ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(subscription));
 			MethodOutcome methodOutcome = myClient.create().resource(subscription).execute();
 			mySubscriptionIds.add(methodOutcome.getId());
 			waitForActivatedSubscriptionCount(1);

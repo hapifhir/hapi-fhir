@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.test;
+package ca.uhn.fhir.jpa.config.r4;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server Test Utilities
+ * HAPI FHIR JPA Server
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
@@ -20,9 +20,21 @@ package ca.uhn.fhir.jpa.test;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.config.TestJpaR4Config;
-import org.springframework.test.context.ContextConfiguration;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.ParserOptions;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 
-@ContextConfiguration(classes = {TestJpaR4Config.class})
-public abstract class BaseJpaR4Test extends BaseJpaTest {
+public class FhirContextR4Config {
+	@Bean(name = "primaryFhirContext")
+	@Primary
+	public FhirContext fhirContextR4() {
+		FhirContext retVal = FhirContext.forR4();
+
+		// Don't strip versions in some places
+		ParserOptions parserOptions = retVal.getParserOptions();
+		parserOptions.setDontStripVersionsFromReferencesAtPaths("AuditEvent.entity.what");
+
+		return retVal;
+	}
 }

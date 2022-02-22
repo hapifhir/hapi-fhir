@@ -112,7 +112,7 @@ public class DropIndexTask extends BaseTableTask {
 					sql.add("drop index " + myIndexName + (myOnline?" ONLINE":""));
 					break;
 				case MSSQL_2012:
-					sql.add("drop index " + getTableName() + "." + myIndexName + (myOnline?" WITH (ONLINE = ON)":""));
+					sql.add("drop index " + getTableName() + "." + myIndexName );
 					break;
 			}
 		}

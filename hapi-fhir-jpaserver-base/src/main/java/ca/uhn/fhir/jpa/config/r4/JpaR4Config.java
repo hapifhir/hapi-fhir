@@ -1,14 +1,16 @@
 package ca.uhn.fhir.jpa.config.r4;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.ParserOptions;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.config.BaseConfigDstu3Plus;
-import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
-import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+import ca.uhn.fhir.jpa.config.GeneratedDaoAndResourceProviderConfigR4;
+import ca.uhn.fhir.jpa.config.JpaConfig;
+import ca.uhn.fhir.jpa.config.SharedConfigDstu3Plus;
 import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
 import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
+import ca.uhn.fhir.jpa.graphql.GraphQLProviderWithIntrospection;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import ca.uhn.fhir.jpa.term.TermReadSvcR4;
 import ca.uhn.fhir.jpa.term.TermVersionAdapterSvcR4;
@@ -17,15 +19,14 @@ import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
-import ca.uhn.fhir.jpa.util.ResourceCountCache;
-import org.apache.commons.lang3.time.DateUtils;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Meta;
-import org.springframework.beans.factory.annotation.Autowire;
+import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Primary;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /*
@@ -50,29 +51,17 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableTransactionManagement
-public class BaseR4Config extends BaseConfigDstu3Plus {
-
-	@Override
-	public FhirContext fhirContext() {
-		return fhirContextR4();
-	}
+@Import({
+	FhirContextR4Config.class,
+	GeneratedDaoAndResourceProviderConfigR4.class,
+	SharedConfigDstu3Plus.class,
+	JpaConfig.class
+})
+public class JpaR4Config {
 
 	@Bean
-	@Override
 	public ITermVersionAdapterSvc terminologyVersionAdapterSvc() {
 		return new TermVersionAdapterSvcR4();
-	}
-
-	@Bean
-	@Primary
-	public FhirContext fhirContextR4() {
-		FhirContext retVal = FhirContext.forR4();
-
-		// Don't strip versions in some places
-		ParserOptions parserOptions = retVal.getParserOptions();
-		parserOptions.setDontStripVersionsFromReferencesAtPaths("AuditEvent.entity.what");
-
-		return retVal;
 	}
 
 	@Bean
@@ -80,35 +69,22 @@ public class BaseR4Config extends BaseConfigDstu3Plus {
 		return new TransactionProcessorVersionAdapterR4();
 	}
 
-	@Bean(name = GRAPHQL_PROVIDER_NAME)
+	@Bean(name = JpaConfig.GRAPHQL_PROVIDER_NAME)
 	@Lazy
-	public GraphQLProvider graphQLProvider() {
-		return new GraphQLProvider(fhirContextR4(), validationSupportChain(), graphqlStorageServices());
+	public GraphQLProvider graphQLProvider(FhirContext theFhirContext, IGraphQLStorageServices theGraphqlStorageServices, IValidationSupport theValidationSupport, ISearchParamRegistry theSearchParamRegistry, IDaoRegistry theDaoRegistry) {
+        return new GraphQLProviderWithIntrospection(theFhirContext, theValidationSupport, theGraphqlStorageServices, theSearchParamRegistry, theDaoRegistry);
 	}
 
-	@Bean(name = "myResourceCountsCache")
-	public ResourceCountCache resourceCountsCache() {
-		ResourceCountCache retVal = new ResourceCountCache(() -> systemDaoR4().getResourceCounts());
-		retVal.setCacheMillis(4 * DateUtils.MILLIS_PER_HOUR);
-		return retVal;
-	}
-
-	@Bean(autowire = Autowire.BY_TYPE)
-	public IFulltextSearchSvc searchDaoR4() {
-		FulltextSearchSvcImpl searchDao = new FulltextSearchSvcImpl();
-		return searchDao;
-	}
-
-	@Bean(name = "mySystemDaoR4", autowire = Autowire.BY_NAME)
+	@Bean(name = "mySystemDaoR4")
 	public IFhirSystemDao<Bundle, Meta> systemDaoR4() {
 		ca.uhn.fhir.jpa.dao.r4.FhirSystemDaoR4 retVal = new ca.uhn.fhir.jpa.dao.r4.FhirSystemDaoR4();
 		return retVal;
 	}
 
 	@Bean(name = "mySystemProviderR4")
-	public ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4 systemProviderR4() {
+	public ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4 systemProviderR4(FhirContext theFhirContext) {
 		ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4 retVal = new ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4();
-		retVal.setContext(fhirContextR4());
+		retVal.setContext(theFhirContext);
 		retVal.setDao(systemDaoR4());
 		return retVal;
 	}
@@ -118,8 +94,7 @@ public class BaseR4Config extends BaseConfigDstu3Plus {
 		return new TermLoaderSvcImpl(theDeferredStorageSvc, theCodeSystemStorageSvc);
 	}
 
-	@Override
-	@Bean(autowire = Autowire.BY_TYPE)
+	@Bean
 	public ITermReadSvcR4 terminologyService() {
 		return new TermReadSvcR4();
 	}

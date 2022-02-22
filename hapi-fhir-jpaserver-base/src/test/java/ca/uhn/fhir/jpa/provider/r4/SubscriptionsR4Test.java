@@ -21,7 +21,8 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 
@@ -211,7 +212,7 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 				myPingCount++;
 			} else if (myGotBound && theMsg.startsWith("add " + mySubsId + "\n")) {
 				String text = theMsg.substring(("add " + mySubsId + "\n").length());
-				IBaseResource res = myEncoding.newParser(myFhirCtx).parseResource(text);
+				IBaseResource res = myEncoding.newParser(myFhirContext).parseResource(text);
 				myReceived.add(res);
 				myPingCount++;
 			} else {

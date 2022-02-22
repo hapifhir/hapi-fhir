@@ -137,7 +137,7 @@ public class AddIndexTask extends BaseTableTask {
 					postgresOnline = "CONCURRENTLY ";
 					break;
 				case ORACLE_12C:
-					oracleOnlineDeferred = " ONLINE DEFERRED";
+					oracleOnlineDeferred = " ONLINE DEFERRED INVALIDATION";
 					break;
 				case MSSQL_2012:
 					oracleOnlineDeferred = " WITH (ONLINE = ON)";

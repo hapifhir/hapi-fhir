@@ -1,0 +1,5 @@
+---
+type: add
+issue: 3348
+title: "The HAPI FHIR server GraphQL endpoints now support GraphQL introspection, making them
+  much easier to use with GraphQL-capable IDEs."

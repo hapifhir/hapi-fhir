@@ -35,7 +35,6 @@ import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
@@ -80,7 +79,7 @@ public class TokenAutocompleteElasticsearchIT extends BaseJpaTest {
 	}
 
 	@Override
-	protected FhirContext getContext() {
+	protected FhirContext getFhirContext() {
 		return myFhirCtx;
 	}
 

@@ -217,7 +217,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		for (int i = 0; i < 10; i++) {
 			ourLog.info("** Beginning pass {}", i);
 
-			Bundle input = myFhirCtx.newJsonParser().parseResource(Bundle.class, IOUtils.toString(getClass().getResourceAsStream("/dstu2/createdeletebundle.json"), Charsets.UTF_8));
+			Bundle input = myFhirContext.newJsonParser().parseResource(Bundle.class, IOUtils.toString(getClass().getResourceAsStream("/dstu2/createdeletebundle.json"), Charsets.UTF_8));
 			ourClient.transaction().withBundle(input).execute();
 
 			myPatientDao.read(new IdType("Patient/Patient1063259"));
@@ -243,7 +243,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 	}
 
 	private void deleteAllOfType(String theType) {
-		BundleUtil.toListOfResources(myFhirCtx, ourClient.search().forResource(theType).execute())
+		BundleUtil.toListOfResources(myFhirContext, ourClient.search().forResource(theType).execute())
 			.forEach(t -> {
 				ourClient.delete().resourceById(t.getIdElement()).execute();
 			});
