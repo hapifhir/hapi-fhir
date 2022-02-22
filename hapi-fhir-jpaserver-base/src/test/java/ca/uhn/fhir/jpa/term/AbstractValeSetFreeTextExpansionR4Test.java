@@ -66,7 +66,8 @@ import static org.mockito.Mockito.when;
 
 /**
  * These tests are executed from child classes with different configurations
- * In case you need to run a specific test, uncomment one of the following configurations and remove the abstract qualifier
+ * In case you need to run a specific test, uncomment the @ExtendWith and one of the following configurations
+ * and remove the abstract qualifier
  */
 //@ExtendWith(SpringExtension.class)
 //@ContextConfiguration(classes = {TestR4Config.class, TestHibernateSearchAddInConfig.DefaultLuceneHeap.class})
@@ -76,6 +77,7 @@ public abstract class AbstractValeSetFreeTextExpansionR4Test extends BaseJpaTest
 
 	private static final String CS_URL = "http://example.com/my_code_system";
 	private static final String CS_URL_2 = "http://example.com/my_code_system2";
+	private static final String CS_URL_3 = "http://example.com/my_code_system3";
 
 	@Autowired FhirContext myFhirContext;
 	@Autowired PlatformTransactionManager myTxManager;
@@ -1638,6 +1640,32 @@ public abstract class AbstractValeSetFreeTextExpansionR4Test extends BaseJpaTest
 
 		}
 
+		/**
+		 * Test for fix to issue-2588
+		 */
+		@Test
+		public void testRegexMatchesPropertyNameAndValue() {
+			createCodeSystem3();
+
+			List<String> codes;
+			ValueSet vs;
+			ValueSet outcome;
+			ValueSet.ConceptSetComponent include;
+
+			vs = new ValueSet();
+			include = vs.getCompose().addInclude();
+			include.setSystem(CS_URL);
+			include
+				.addFilter()
+				.setProperty("propB")
+				.setOp(ValueSet.FilterOperator.REGEX)
+				.setValue("^[No ]*IG exists$");
+			outcome = myTermSvc.expandValueSet(null, vs);
+			codes = toCodesContains(outcome.getExpansion().getContains());
+			assertThat(codes, containsInAnyOrder("childAAC", "childAAD"));
+
+		}
+
 	}
 
 
@@ -1718,6 +1746,78 @@ public abstract class AbstractValeSetFreeTextExpansionR4Test extends BaseJpaTest
 		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), CS_URL_2, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 
 	}
+
+	private IIdType createCodeSystem3() {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl(CS_URL_3);
+		codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		codeSystem.setName("SYSTEM NAME 3");
+		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
+
+		ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
+
+		TermCodeSystemVersion cs = new TermCodeSystemVersion();
+		cs.setResource(table);
+
+		TermConcept parent;
+		parent = new TermConcept(cs, "ParentWithNoChildrenA");
+		cs.getConcepts().add(parent);
+		parent = new TermConcept(cs, "ParentWithNoChildrenB");
+		cs.getConcepts().add(parent);
+		parent = new TermConcept(cs, "ParentWithNoChildrenC");
+		cs.getConcepts().add(parent);
+
+		TermConcept parentA = new TermConcept(cs, "ParentA");
+		cs.getConcepts().add(parentA);
+
+		TermConcept childAA = new TermConcept(cs, "childAA");
+		parentA.addChild(childAA, RelationshipTypeEnum.ISA);
+
+		TermConcept childAAA = new TermConcept(cs, "childAAA");
+		childAAA.addPropertyString("propA", "valueAAA");
+		childAAA.addPropertyString("propB", "foo");
+		childAA.addChild(childAAA, RelationshipTypeEnum.ISA);
+
+		TermConcept childAAB = new TermConcept(cs, "childAAB");
+		childAAB.addPropertyString("propA", "valueAAB");
+		childAAB.addPropertyString("propB", "foo");
+		childAAB.addDesignation()
+			.setLanguage("D1L")
+			.setUseSystem("D1S")
+			.setUseCode("D1C")
+			.setUseDisplay("D1D")
+			.setValue("D1V");
+		childAA.addChild(childAAB, RelationshipTypeEnum.ISA);
+
+		TermConcept childAAC = new TermConcept(cs, "childAAC");
+		childAAC.addPropertyString("propA", "valueAAC");
+		childAAC.addPropertyString("propB", "No IG exists");
+		childAA.addChild(childAAC, RelationshipTypeEnum.ISA);
+
+		TermConcept childAAD = new TermConcept(cs, "childAAD");
+		childAAD.addPropertyString("propA", "valueAAD");
+		childAAD.addPropertyString("propB", "IG exists");
+		childAA.addChild(childAAD, RelationshipTypeEnum.ISA);
+
+		// this one shouldn't come up in search result because searched argument is not in searched property (propB) but in propA
+		TermConcept childAAE = new TermConcept(cs, "childAAE");
+		childAAE.addPropertyString("propA", "IG exists");
+		childAAE.addPropertyString("propB", "valueAAE");
+		childAA.addChild(childAAE, RelationshipTypeEnum.ISA);
+
+		TermConcept childAB = new TermConcept(cs, "childAB");
+		parentA.addChild(childAB, RelationshipTypeEnum.ISA);
+
+		TermConcept parentB = new TermConcept(cs, "ParentB");
+		cs.getConcepts().add(parentB);
+
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), CS_URL, "SYSTEM NAME", null, cs, table);
+
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+
+		return id;
+	}
+
 
 	public void createLoincSystemWithSomeCodes() {
 		runInTransaction(() -> {
