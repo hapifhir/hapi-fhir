@@ -1,6 +1,7 @@
 package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.jobs.imprt.BulkImportJobParameters;
 import ca.uhn.fhir.batch2.jobs.imprt.BulkImportProvider;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
@@ -102,12 +103,12 @@ public class BulkImportCommandTest {
 		verify(myJobCoordinator, timeout(10000).times(1)).startInstance(myStartCaptor.capture());
 
 		JobInstanceStartRequest startRequest = myStartCaptor.getValue();
-		assertEquals("ndjson-url", startRequest.getParameters().get(0).getName());
-		assertEquals("ndjson-url", startRequest.getParameters().get(1).getName());
+		BulkImportJobParameters jobParameters = startRequest.getParameters(BulkImportJobParameters.class);
 
 		// Reverse order because Patient should be first
-		assertEquals(fileContents2, fetchFile(startRequest.getParameters().get(0).getValue()));
-		assertEquals(fileContents1, fetchFile(startRequest.getParameters().get(1).getValue()));
+		assertEquals(2, jobParameters.getNdJsonUrls().size());
+		assertEquals(fileContents2, fetchFile(jobParameters.getNdJsonUrls().get(0)));
+		assertEquals(fileContents1, fetchFile(jobParameters.getNdJsonUrls().get(1)));
 	}
 
 	private String fetchFile(String url) throws IOException {
