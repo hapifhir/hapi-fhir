@@ -23,6 +23,7 @@ package ca.uhn.fhir.rest.server.messaging;
 
 
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.Validate;
 
@@ -176,6 +177,24 @@ public abstract class BaseResourceMessage implements IResourceMessage, IModelJso
 		UPDATE,
 		DELETE,
 		MANUALLY_TRIGGERED,
-		TRANSACTION
+		TRANSACTION;
+
+		public RestOperationTypeEnum asRestOperationType() {
+			RestOperationTypeEnum operationType;
+			switch (this) {
+				case CREATE:
+					operationType = RestOperationTypeEnum.CREATE;
+					break;
+				case MANUALLY_TRIGGERED:
+				default:
+				case UPDATE:
+					operationType = RestOperationTypeEnum.UPDATE;
+					break;
+				case DELETE:
+					operationType = RestOperationTypeEnum.DELETE;
+					break;
+			}
+			return operationType;
+		}
 	}
 }
