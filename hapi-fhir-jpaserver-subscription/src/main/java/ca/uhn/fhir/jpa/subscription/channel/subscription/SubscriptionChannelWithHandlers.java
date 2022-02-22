@@ -50,9 +50,16 @@ public class SubscriptionChannelWithHandlers implements Closeable {
 		myDeliveryHandlerSet.add(theHandler);
 	}
 
-	public void removeHandler(MessageHandler theMessageHandler) {
+	public void unsubscribeAndDestroyHandler(MessageHandler theMessageHandler) {
 		if (mySubscribableChannel != null) {
 			mySubscribableChannel.unsubscribe(theMessageHandler);
+		}
+		if (theMessageHandler instanceof DisposableBean) {
+			try {
+				((DisposableBean) theMessageHandler).destroy();
+			} catch (Exception e) {
+				ourLog.warn("Could not destroy {} handler for {}", theMessageHandler.getClass().getSimpleName(), myChannelName, e);
+			}
 		}
 	}
 
@@ -64,7 +71,7 @@ public class SubscriptionChannelWithHandlers implements Closeable {
 	@Override
 	public void close() {
 		for (MessageHandler messageHandler : myDeliveryHandlerSet) {
-			removeHandler(messageHandler);
+			unsubscribeAndDestroyHandler(messageHandler);
 		}
 		if (mySubscribableChannel instanceof DisposableBean) {
 			tryDestroyChannel((DisposableBean) mySubscribableChannel);
