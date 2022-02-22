@@ -23,6 +23,7 @@ package ca.uhn.fhir.cli;
 import ca.uhn.fhir.batch2.jobs.imprt.BulkImportFileServlet;
 import ca.uhn.fhir.batch2.jobs.imprt.BulkImportProvider;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -182,7 +183,7 @@ public class BulkImportCommand extends BaseCommand {
 		try {
 			myServer.start();
 		} catch (Exception e) {
-			throw new CommandFailureException(e);
+			throw new CommandFailureException(Msg.code(2057) + e.getMessage(), e);
 		}
 
 		Connector[] connectors = myServer.getConnectors();
@@ -200,7 +201,7 @@ public class BulkImportCommand extends BaseCommand {
 				.filter(t -> t.exists())
 				.forEach(t -> files.add(t));
 			if (files.isEmpty()) {
-				throw new CommandFailureException("No .json/.ndjson files found in directory: " + directory.getAbsolutePath());
+				throw new CommandFailureException(Msg.code(2058) + "No .json/.ndjson files found in directory: " + directory.getAbsolutePath());
 			}
 
 			FhirContext ctx = getFhirContext();
@@ -214,7 +215,7 @@ public class BulkImportCommand extends BaseCommand {
 			}
 
 		} catch (IOException e) {
-			throw new CommandFailureException(e);
+			throw new CommandFailureException(Msg.code(2059) + e.getMessage(), e);
 		}
 	}
 
