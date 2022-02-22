@@ -177,7 +177,7 @@ public class AddIndexTest extends BaseTest {
 						assertEquals("create index CONCURRENTLY IDX_ANINDEX on SOMETABLE(PID, TEXTCOL)", mySql);
 						break;
 					case ORACLE_12C:
-						assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL) ONLINE DEFERRED", mySql);
+						assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL) ONLINE DEFERRED INVALIDATION", mySql);
 						break;
 					case MSSQL_2012:
 						assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL) WITH (ONLINE = ON)", mySql);
