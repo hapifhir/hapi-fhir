@@ -5,12 +5,9 @@ import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.IOUtils;
@@ -19,9 +16,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -35,6 +29,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -47,15 +42,19 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class JpaGraphQLR4ProviderTest {
+public class GraphQLR4ProviderTest {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JpaGraphQLR4ProviderTest.class);
 	public static final String DATA_PREFIX = "{\"data\": ";
 	public static final String DATA_SUFFIX = "}";
-	private static CloseableHttpClient ourClient;
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(GraphQLR4ProviderTest.class);
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
-	private static int ourPort;
-	private static Server ourServer;
+	private static CloseableHttpClient ourClient;
+	private MyStorageServices myGraphQLStorageServices = new MyStorageServices();
+
+	@RegisterExtension
+	private RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(ourCtx)
+		.registerProvider(new DummyPatientResourceProvider())
+		.registerProvider(new GraphQLProvider(myGraphQLStorageServices));
 
 	@BeforeEach
 	public void before() {
@@ -65,9 +64,8 @@ public class JpaGraphQLR4ProviderTest {
 	@Test
 	public void testGraphInstance() throws Exception {
 		String query = "{name{family,given}}";
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123/$graphql?query=" + UrlUtil.escapeUrlParam(query));
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		try {
+		HttpGet httpGet = new HttpGet("http://localhost:" + myRestfulServerExtension.getPort() + "/Patient/123/$graphql?query=" + UrlUtil.escapeUrlParam(query));
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
 			assertEquals(200, status.getStatusLine().getStatusCode());
@@ -81,9 +79,6 @@ public class JpaGraphQLR4ProviderTest {
 				"  }]\n" +
 				"}" + DATA_SUFFIX), TestUtil.stripWhitespace(responseContent));
 			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), startsWith("application/json"));
-
-		} finally {
-			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
 
 	}
@@ -91,9 +86,8 @@ public class JpaGraphQLR4ProviderTest {
 	@Test
 	public void testGraphInstanceWithFhirpath() throws Exception {
 		String query = "{name(fhirpath:\"family.exists()\"){text,given,family}}";
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123/$graphql?query=" + UrlUtil.escapeUrlParam(query));
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		try {
+		HttpGet httpGet = new HttpGet("http://localhost:" + myRestfulServerExtension.getPort() + "/Patient/123/$graphql?query=" + UrlUtil.escapeUrlParam(query));
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
 			assertEquals(200, status.getStatusLine().getStatusCode());
@@ -105,9 +99,6 @@ public class JpaGraphQLR4ProviderTest {
 				"  }]\n" +
 				"}" + DATA_SUFFIX), TestUtil.stripWhitespace(responseContent));
 			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), startsWith("application/json"));
-
-		} finally {
-			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
 
 	}
@@ -115,9 +106,8 @@ public class JpaGraphQLR4ProviderTest {
 	@Test
 	public void testGraphSystemInstance() throws Exception {
 		String query = "{Patient(id:123){id,name{given,family}}}";
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		try {
+		HttpGet httpGet = new HttpGet("http://localhost:" + myRestfulServerExtension.getPort() + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
 			assertEquals(200, status.getStatusLine().getStatusCode());
@@ -133,9 +123,6 @@ public class JpaGraphQLR4ProviderTest {
 				"  }\n" +
 				"}" + DATA_SUFFIX), TestUtil.stripWhitespace(responseContent));
 			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), startsWith("application/json"));
-
-		} finally {
-			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
 
 	}
@@ -143,9 +130,9 @@ public class JpaGraphQLR4ProviderTest {
 	@Test
 	public void testGraphSystemList() throws Exception {
 		String query = "{PatientList(name:\"pet\"){name{family,given}}}";
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		try {
+		HttpGet httpGet = new HttpGet("http://localhost:" + myRestfulServerExtension.getPort() + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
+
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
 			assertEquals(200, status.getStatusLine().getStatusCode());
@@ -166,8 +153,6 @@ public class JpaGraphQLR4ProviderTest {
 				"}" + DATA_SUFFIX), TestUtil.stripWhitespace(responseContent));
 			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), startsWith("application/json"));
 
-		} finally {
-			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
 
 	}
@@ -175,9 +160,8 @@ public class JpaGraphQLR4ProviderTest {
 	@Test
 	public void testGraphSystemArrayArgumentList() throws Exception {
 		String query = "{PatientList(id:[\"hapi-123\",\"hapi-124\"]){id,name{family}}}";
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		try {
+		HttpGet httpGet = new HttpGet("http://localhost:" + myRestfulServerExtension.getPort() + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
 			assertEquals(200, status.getStatusLine().getStatusCode());
@@ -196,41 +180,21 @@ public class JpaGraphQLR4ProviderTest {
 				"  }]\n" +
 				"}" + DATA_SUFFIX), TestUtil.stripWhitespace(responseContent));
 			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), startsWith("application/json"));
-
-		} finally {
-			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
 
 	}
 
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
+		ourClient.close();
 	}
 
 	@BeforeAll
 	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
-
-		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(ourCtx);
-		servlet.setDefaultResponseEncoding(EncodingEnum.JSON);
-		servlet.setPagingProvider(new FifoMemoryPagingProvider(10));
-
-		servlet.registerProvider(new DummyPatientResourceProvider());
-		MyStorageServices storageServices = new MyStorageServices();
-		servlet.registerProvider(new GraphQLProvider(storageServices));
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
-
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {

@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR5Test;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -28,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -373,8 +375,8 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(2, ourUpdatedObservations);
 
-		Observation observation1 = ourUpdatedObservations.get(0);
-		Observation observation2 = ourUpdatedObservations.get(1);
+		Observation observation1 = ourUpdatedObservations.stream().filter(t->t.getIdElement().getVersionIdPart().equals("1")).findFirst().orElseThrow(()->new IllegalStateException());
+		Observation observation2 = ourUpdatedObservations.stream().filter(t->t.getIdElement().getVersionIdPart().equals("2")).findFirst().orElseThrow(()->new IllegalStateException());
 
 		assertEquals("1", observation1.getIdElement().getVersionIdPart());
 		assertNull(observation1.getNoteFirstRep().getText());
