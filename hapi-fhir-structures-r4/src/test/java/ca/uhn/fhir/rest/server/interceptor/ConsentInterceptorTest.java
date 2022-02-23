@@ -199,7 +199,7 @@ public class ConsentInterceptorTest {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
-			assertThat(responseContent, not(containsString("total")));
+			assertThat(responseContent, not(containsString("\"total\"")));
 		}
 
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.AUTHORIZED);
@@ -208,7 +208,7 @@ public class ConsentInterceptorTest {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
-			assertThat(responseContent, containsString("total"));
+			assertThat(responseContent, containsString("\"total\""));
 		}
 
 	}
