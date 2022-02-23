@@ -62,6 +62,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -83,7 +84,8 @@ public class TestUtil {
 		"FK_CONCEPTPROP_CONCEPT",
 		"FK_CONCEPTDESIG_CONCEPT",
 		"FK_TERM_CONCEPTPC_CHILD",
-		"FK_TERM_CONCEPTPC_PARENT"
+		"FK_TERM_CONCEPTPC_PARENT",
+		"FK_TRM_VALUESET_CONCEPT_PID"
 	);
 
 
@@ -282,7 +284,14 @@ public class TestUtil {
 			} else {
 				Validate.notNull(fk);
 				Validate.isTrue(isNotBlank(fk.name()), "Foreign key on " + theAnnotatedElement + " has no name()");
-				Validate.isTrue(fk.name().startsWith("FK_"));
+				List<String> legacySPHibernateFKNames = Arrays.asList(
+					"FK7ULX3J1GG3V7MAQREJGC7YBC4", "FKC97MPK37OKWU8QVTCEG2NH9VN", "FKCLTIHNC5TGPRJ9BHPT7XI5OTB", "FKGXSREUTYMMFJUWDSWV3Y887DO");
+				if (legacySPHibernateFKNames.contains(fk.name())) {
+					// wipmb temporarily allow the hibernate legacy sp fk names
+				} else {
+					Validate.isTrue(fk.name().startsWith("FK_"),
+						"Foreign key " + fk.name() + " on " + theAnnotatedElement + " must start with FK");
+				}
 				if ( ! duplicateNameValidationExceptionList.contains(fk.name())) {
 					assertNotADuplicateName(fk.name(), theNames);
 				}

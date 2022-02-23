@@ -79,7 +79,7 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 	public void testSaveAndDeletePackagePartitionsEnabled() throws IOException {
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setDefaultPartitionId(1);
-		myInterceptorService.registerInterceptor(new PatientIdPartitionInterceptor(myFhirCtx, mySearchParamExtractor));
+		myInterceptorService.registerInterceptor(new PatientIdPartitionInterceptor(myFhirContext, mySearchParamExtractor));
 		myInterceptorService.registerInterceptor(myRequestTenantPartitionInterceptor);
 
 		try (InputStream stream = ClasspathUtil.loadResourceAsStream("/packages/basisprofil.de.tar.gz")) {
@@ -113,7 +113,7 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setDefaultPartitionId(0);
 		myPartitionSettings.setUnnamedPartitionMode(true);
-		myInterceptorService.registerInterceptor(new PatientIdPartitionInterceptor(myFhirCtx, mySearchParamExtractor));
+		myInterceptorService.registerInterceptor(new PatientIdPartitionInterceptor(myFhirContext, mySearchParamExtractor));
 		myInterceptorService.registerInterceptor(myRequestTenantPartitionInterceptor);
 
 		try (InputStream stream = ClasspathUtil.loadResourceAsStream("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz")) {

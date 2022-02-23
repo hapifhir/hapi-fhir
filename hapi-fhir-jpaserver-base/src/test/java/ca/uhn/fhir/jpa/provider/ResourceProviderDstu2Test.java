@@ -1,66 +1,6 @@
 package ca.uhn.fhir.jpa.provider;
 
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsInRelativeOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.emptyString;
-import static org.hamcrest.Matchers.endsWith;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.startsWith;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.SocketTimeoutException;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.model.dstu2.resource.SearchParameter;
-import ca.uhn.fhir.model.dstu2.valueset.XPathUsageTypeEnum;
-import ca.uhn.fhir.model.primitive.IntegerDt;
-import ca.uhn.fhir.rest.gclient.NumberClientParam;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.springframework.test.util.AopTestUtils;
-
-import com.google.common.base.Charsets;
-
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
@@ -95,6 +35,7 @@ import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.resource.Practitioner;
+import ca.uhn.fhir.model.dstu2.resource.SearchParameter;
 import ca.uhn.fhir.model.dstu2.resource.Subscription;
 import ca.uhn.fhir.model.dstu2.resource.ValueSet;
 import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
@@ -104,10 +45,12 @@ import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SearchEntryModeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SubscriptionChannelTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
+import ca.uhn.fhir.model.dstu2.valueset.XPathUsageTypeEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UnsignedIntDt;
 import ca.uhn.fhir.model.primitive.UriDt;
@@ -116,6 +59,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.NumberClientParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
@@ -129,6 +73,60 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
+import com.google.common.base.Charsets;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.springframework.test.util.AopTestUtils;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketTimeoutException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsInRelativeOrder;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.emptyString;
+import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.startsWith;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
@@ -226,7 +224,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		String respString = ourClient.transaction().withBundle(input).prettyPrint().execute();
 		ourLog.info(respString);
-		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = myFhirCtx.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, respString);
+		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = myFhirContext.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, respString);
 		IdDt id = new IdDt(bundle.getEntry().get(0).getResponse().getLocation());
 
 		Basic basic = ourClient.read().resource(Basic.class).withId(id).execute();
@@ -245,7 +243,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = client.read().resource(ca.uhn.fhir.model.dstu2.resource.Bundle.class).withId(id).execute();
 
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 	}
 
 	@Test
@@ -374,7 +372,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		arr[0] = 3;
 		fromDB.setContent(arr);
-		String encoded = myFhirCtx.newJsonParser().encodeResourceToString(fromDB);
+		String encoded = myFhirContext.newJsonParser().encodeResourceToString(fromDB);
 		putRequest = new HttpPut(ourServerBase + "/Binary/" + resource.getIdPart());
 		putRequest.setEntity(new StringEntity(encoded, ContentType.parse("application/json+fhir")));
 		resp = ourHttpClient.execute(putRequest);
@@ -393,7 +391,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		arr[0] = 4;
 		binary.setContent(arr);
 		binary.setId("");
-		encoded = myFhirCtx.newJsonParser().encodeResourceToString(binary);
+		encoded = myFhirContext.newJsonParser().encodeResourceToString(binary);
 		putRequest = new HttpPut(ourServerBase + "/Binary/" + resource.getIdPart());
 		putRequest.setEntity(new StringEntity(encoded, ContentType.parse("application/json+fhir")));
 		resp = ourHttpClient.execute(putRequest);
@@ -414,7 +412,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		Patient pt = new Patient();
 		pt.addName().addFamily(methodName);
-		String resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
+		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient");
 		post.addHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?name=" + methodName);
@@ -448,7 +446,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	public void testCreateResourceConditionalComplex() throws IOException {
 		Patient pt = new Patient();
 		pt.addIdentifier().setSystem("http://general-hospital.co.uk/Identifiers").setValue("09832345234543876876");
-		String resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
+		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient");
 		post.addHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?identifier=http://general-hospital.co.uk/Identifiers|09832345234543876876");
@@ -542,7 +540,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseString);
 			assertEquals(400, response.getStatusLine().getStatusCode());
-			OperationOutcome oo = myFhirCtx.newXmlParser().parseResource(OperationOutcome.class, responseString);
+			OperationOutcome oo = myFhirContext.newXmlParser().parseResource(OperationOutcome.class, responseString);
 			assertEquals(Msg.code(365) + "Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)",
 				oo.getIssue().get(0).getDiagnostics());
 		} finally {
@@ -617,11 +615,11 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(res));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(res));
 
 		assertEquals(3, res.getEntry().size());
-		assertEquals(1, BundleUtil.toListOfResourcesOfType(myFhirCtx, res, Encounter.class).size());
-		assertEquals(e1id.toUnqualifiedVersionless(), BundleUtil.toListOfResourcesOfType(myFhirCtx, res, Encounter.class).get(0).getIdElement().toUnqualifiedVersionless());
+		assertEquals(1, BundleUtil.toListOfResourcesOfType(myFhirContext, res, Encounter.class).size());
+		assertEquals(e1id.toUnqualifiedVersionless(), BundleUtil.toListOfResourcesOfType(myFhirContext, res, Encounter.class).get(0).getIdElement().toUnqualifiedVersionless());
 
 	}
 
@@ -703,7 +701,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		Patient pt = new Patient();
 		pt.addName().addFamily(methodName);
-		String resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
+		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
@@ -747,7 +745,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		Patient pt = new Patient();
 		pt.addName().addFamily(methodName);
 		pt.addIdentifier().setSystem("http://ghh.org/patient").setValue(methodName);
-		String resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
+		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
@@ -841,8 +839,8 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	 */
 	@Test
 	public void testDocumentManifestResources() throws Exception {
-		myFhirCtx.getResourceDefinition(Practitioner.class);
-		myFhirCtx.getResourceDefinition(DocumentManifest.class);
+		myFhirContext.getResourceDefinition(Practitioner.class);
+		myFhirContext.getResourceDefinition(DocumentManifest.class);
 
 		IGenericClient client = ourClient;
 
@@ -1088,7 +1086,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	@Test
 	public void testEverythingPatientDoesntRepeatPatient() {
 		ca.uhn.fhir.model.dstu2.resource.Bundle b;
-		b = myFhirCtx.newJsonParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, new InputStreamReader(ResourceProviderDstu2Test.class.getResourceAsStream("/bug147-bundle.json")));
+		b = myFhirContext.newJsonParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, new InputStreamReader(ResourceProviderDstu2Test.class.getResourceAsStream("/bug147-bundle.json")));
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle resp = ourClient.transaction().withBundle(b).execute();
 		List<IdDt> ids = new ArrayList<IdDt>();
@@ -1184,7 +1182,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle resp = ourClient.transaction().withBundle(b).execute();
 
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
 
 		IdDt patientId = new IdDt(resp.getEntry().get(0).getResponse().getLocation());
 		assertEquals("Patient", patientId.getResourceType());
@@ -1324,7 +1322,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			ourLog.info(output);
-			List<IdDt> ids = toIdListUnqualifiedVersionless(myFhirCtx.newXmlParser().parseResource(Bundle.class, output));
+			List<IdDt> ids = toIdListUnqualifiedVersionless(myFhirContext.newXmlParser().parseResource(Bundle.class, output));
 			ourLog.info(ids.toString());
 			assertThat(ids, containsInAnyOrder(pId, cId, oId));
 		} finally {
@@ -1339,7 +1337,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			ourLog.info(output);
-			List<IdDt> ids = toIdListUnqualifiedVersionless(myFhirCtx.newXmlParser().parseResource(Bundle.class, output));
+			List<IdDt> ids = toIdListUnqualifiedVersionless(myFhirContext.newXmlParser().parseResource(Bundle.class, output));
 			ourLog.info(ids.toString());
 			assertThat(ids, containsInAnyOrder(pId, cId, oId));
 		} finally {
@@ -2100,7 +2098,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(response.getEntity().getContent());
 		ourLog.info(resp);
-		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = myFhirCtx.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, resp);
+		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = myFhirContext.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, resp);
 		matches = bundle.getEntry().size();
 
 		assertThat(matches, greaterThan(0));
@@ -2214,7 +2212,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 			
-			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		
 		{
@@ -2226,7 +2224,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			
 			oid2 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 			
-			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		
 		{
@@ -2238,7 +2236,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			
 			oid3 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 			
-			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		
 		{
@@ -2250,7 +2248,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			
 			oid4 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 			
-			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		
 		String uri = ourServerBase + "/Observation?_sort=code-value-quantity";
@@ -2259,10 +2257,10 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		HttpGet get = new HttpGet(uri);
 		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
 			String output = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
-			found = myFhirCtx.newXmlParser().parseResource(Bundle.class, output);
+			found = myFhirContext.newXmlParser().parseResource(Bundle.class, output);
 		}
 		
-		ourLog.info("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
+		ourLog.info("Bundle: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
 		
 		List<IIdType> list = toUnqualifiedVersionlessIds(found);
 		assertEquals(4, found.getEntry().size());
@@ -2526,14 +2524,14 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		// Read back directly from the DAO
 		{
 			Organization returned = myOrganizationDao.read(orgId, mySrd);
-			String val = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(returned);
+			String val = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(returned);
 			ourLog.info(val);
 			assertThat(val, containsString("<name value=\"測試醫院\"/>"));
 		}
 		// Read back through the HTTP API
 		{
 			Organization returned = ourClient.read(Organization.class, orgId);
-			String val = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(returned);
+			String val = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(returned);
 			ourLog.info(val);
 			assertThat(val, containsString("<name value=\"測試醫院\"/>"));
 		}
@@ -2576,7 +2574,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		Patient pt = new Patient();
 		pt.addName().addFamily(methodName);
-		String resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
+		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
 		HttpPut post = new HttpPut(ourServerBase + "/Patient");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
@@ -2585,7 +2583,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseString);
 			assertEquals(400, response.getStatusLine().getStatusCode());
-			OperationOutcome oo = myFhirCtx.newXmlParser().parseResource(OperationOutcome.class, responseString);
+			OperationOutcome oo = myFhirContext.newXmlParser().parseResource(OperationOutcome.class, responseString);
 			assertThat(oo.getIssue().get(0).getDiagnostics(), containsString("Can not update resource, request URL must contain an ID element for update (PUT) operation (it must be of the form [base]/[resource type]/[id])"));
 		} finally {
 			response.close();
@@ -2624,7 +2622,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		Patient pt = new Patient();
 		pt.addName().addFamily(methodName);
-		String resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
+		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient?name=" + methodName);
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
@@ -2640,7 +2638,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		}
 
 		pt.addName().addFamily(methodName + "2");
-		resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
+		resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 		HttpPut put = new HttpPut(ourServerBase + "/Patient?name=" + methodName);
 		put.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		response = ourHttpClient.execute(put);
@@ -2659,7 +2657,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	public void testUpdateResourceConditionalComplex() throws IOException {
 		Patient pt = new Patient();
 		pt.addIdentifier().setSystem("http://general-hospital.co.uk/Identifiers").setValue("09832345234543876876");
-		String resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
+		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient");
 		post.addHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?identifier=http://general-hospital.co.uk/Identifiers|09832345234543876876");
@@ -2677,7 +2675,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		}
 
 		pt.addName().addFamily("FOO");
-		resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
+		resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 		HttpPut put = new HttpPut(ourServerBase + "/Patient?identifier=" + ("http://general-hospital.co.uk/Identifiers|09832345234543876876".replace("|", UrlUtil.escapeUrlParam("|"))));
 		put.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
@@ -2703,7 +2701,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		Patient pt = new Patient();
 		pt.addName().addFamily(methodName);
-		String resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
+		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
@@ -2723,7 +2721,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		pt.setId(id);
 		pt.addAddress().addLine("AAAAAAAAAAAAAAAAAAAAAA");
-		resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
+		resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
 		HttpPut put = new HttpPut(ourServerBase + "/Patient/" + id.getIdPart());
 		put.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
@@ -2734,7 +2732,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(response.getEntity().getContent());
 
-			Patient respPt = myFhirCtx.newXmlParser().parseResource(Patient.class, responseString);
+			Patient respPt = myFhirContext.newXmlParser().parseResource(Patient.class, responseString);
 			assertEquals("2", respPt.getId().getVersionIdPart());
 
 			InstantDt updateTime = ResourceMetadataKeyEnum.UPDATED.get(respPt);
@@ -2839,7 +2837,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		String input = "{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"mode\",\"valueString\":\"create\"},{\"name\":\"resource\",\"resource\":{\"resourceType\":\"QuestionnaireResponse\",\"questionnaire\":{\"reference\":\"http://fhirtest.uhn.ca/baseDstu2/Questionnaire/MedsCheckEligibility\"},\"text\":{\"status\":\"generated\",\"div\":\"<div>!-- populated from the rendered HTML below --></div>\"},\"status\":\"completed\",\"authored\":\"2017-02-10T00:02:58.098Z\",\"group\":{\"question\":[{\"linkId\":\"d94b4f57-1ca0-4d65-acba-8bd9a3926c8c\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient has a valid Medicare or DVA entitlement card\"},{\"linkId\":\"0cbe66db-ff12-473a-940e-4672fb82de44\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient has received a MedsCheck, Diabetes MedsCheck, Home Medicines Review (HMR) otr Restidential Medication Management Review (RMMR) in the past 12 months\"},{\"linkId\":\"35790cfd-2d98-4721-963e-9663e1897a17\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient is living at home in a community setting\"},{\"linkId\":\"3ccc8304-76cd-41ff-9360-2c8755590bae\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient has been recently diagnosed with type 3 diabetes (in the last 12 months) AND is unable to gain timely access to existing diabetes education or health services in the community OR \"},{\"linkId\":\"b05f6f09-49ec-40f9-a889-9a3fdff9e0da\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient has type 2 diabetes , is less than ideally controlled AND is unable to gain timely access to existing diabetes education or health services in their community \"},{\"linkId\":\"4a777f56-800d-4e0b-a9c3-e929832adb5b\",\"answer\":[{\"valueBoolean\":false,\"group\":[{\"linkId\":\"95bbc904-149e-427f-88a4-7f6c8ab186fa\",\"question\":[{\"linkId\":\"f0acea9e-716c-4fce-b7a2-aad59de9d136\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Patient has had an Acute or Adverse Event\"},{\"linkId\":\"e1629159-6dea-4295-a93e-e7c2829ce180\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Exacerbation of a Chronic Disease or Condition\"},{\"linkId\":\"2ce526fa-edaa-44b3-8d5a-6e97f6379ce8\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"New Diagnosis\"},{\"linkId\":\"9d6ffa9f-0110-418c-9ed0-f04910fda2ed\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Recent hospital admission (<3 months)\"},{\"linkId\":\"d2803ff7-25f7-4c7b-ab92-356c49910478\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Major change to regular medication regime\"},{\"linkId\":\"b34af32d-c69d-4d44-889f-5b6d420a7d08\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Suspected non-adherence to the patient's medication regime \"},{\"linkId\":\"74bad553-c273-41e6-8647-22b860430bc2\",\"answer\":[],\"text\":\"Other\"}]}]}],\"text\":\"The patient has experienced one or more of the following recent significant medical events\"},{\"linkId\":\"ecbf4e5a-d4d1-43eb-9f43-0c0e35fc09c7\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The Pharmacist has obtained patient consent to take part in the MedsCheck Service or Diabetes MedsCheck Service&nbsp; and share information obtained during the services with other nominated members of the patients healthcare team (such as their GP, diabetes educator) if required\"},{\"linkId\":\"8ef66774-43b0-4190-873f-cfbb6e980aa9\",\"answer\":[],\"text\":\"Question\"}]}}}]}";
 
-		IParser p = myFhirCtx.newJsonParser().setPrettyPrint(true);
+		IParser p = myFhirContext.newJsonParser().setPrettyPrint(true);
 		ourLog.info(p.encodeResourceToString(p.parseResource(input)));
 
 
@@ -2887,7 +2885,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		Parameters input = new Parameters();
 		input.addParameter().setName("resource").setResource(patient);
 
-		String inputStr = myFhirCtx.newXmlParser().encodeResourceToString(input);
+		String inputStr = myFhirContext.newXmlParser().encodeResourceToString(input);
 		ourLog.info(inputStr);
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient/$validate?_pretty=true");
@@ -2915,7 +2913,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		Parameters input = new Parameters();
 		input.addParameter().setName("resource").setResource(patient);
 
-		String inputStr = myFhirCtx.newXmlParser().encodeResourceToString(input);
+		String inputStr = myFhirContext.newXmlParser().encodeResourceToString(input);
 //		ourLog.info(inputStr);
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient/$validate");
@@ -2942,7 +2940,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		Parameters input = new Parameters();
 		input.addParameter().setName("resource").setResource(patient);
 
-		String inputStr = myFhirCtx.newXmlParser().encodeResourceToString(input);
+		String inputStr = myFhirContext.newXmlParser().encodeResourceToString(input);
 		ourLog.info(inputStr);
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient/$validate");
@@ -2962,7 +2960,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	@Test
 	public void testValueSetExpandOperation() throws IOException {
 
-		ValueSet upload = myFhirCtx.newXmlParser().parseResource(ValueSet.class, new InputStreamReader(ResourceProviderDstu2Test.class.getResourceAsStream("/extensional-case-2.xml")));
+		ValueSet upload = myFhirContext.newXmlParser().parseResource(ValueSet.class, new InputStreamReader(ResourceProviderDstu2Test.class.getResourceAsStream("/extensional-case-2.xml")));
 		IIdType vsid = ourClient.create().resource(upload).execute().getId().toUnqualifiedVersionless();
 
 		HttpGet get = new HttpGet(ourServerBase + "/ValueSet/" + vsid.getIdPart() + "/$expand");

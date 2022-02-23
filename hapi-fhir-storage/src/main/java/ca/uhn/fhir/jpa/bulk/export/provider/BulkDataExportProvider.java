@@ -128,7 +128,7 @@ public class BulkDataExportProvider {
 		validatePreferAsyncHeader(theRequestDetails);
 		BulkDataExportOptions bulkDataExportOptions = buildGroupBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter, theIdParam, theMdm);
 		validateResourceTypesAllContainPatientSearchParams(bulkDataExportOptions.getResourceTypes());
-		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(bulkDataExportOptions, shouldUseCache(theRequestDetails), null);
+		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(bulkDataExportOptions, shouldUseCache(theRequestDetails), theRequestDetails);
 		writePollingLocationToResponseHeaders(theRequestDetails, outcome);
 	}
 
@@ -158,7 +158,7 @@ public class BulkDataExportProvider {
 		validatePreferAsyncHeader(theRequestDetails);
 		BulkDataExportOptions bulkDataExportOptions = buildPatientBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter);
 		validateResourceTypesAllContainPatientSearchParams(bulkDataExportOptions.getResourceTypes());
-		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(bulkDataExportOptions, shouldUseCache(theRequestDetails), null);
+		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(bulkDataExportOptions, shouldUseCache(theRequestDetails), theRequestDetails);
 		writePollingLocationToResponseHeaders(theRequestDetails, outcome);
 	}
 

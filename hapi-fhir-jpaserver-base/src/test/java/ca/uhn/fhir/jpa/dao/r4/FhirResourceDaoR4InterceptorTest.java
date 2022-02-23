@@ -26,11 +26,11 @@ import org.mockito.stubbing.Answer;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.inOrder;
@@ -249,7 +249,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		}).when(interceptor).resourceDeleted(any(), any());
 
 		DeleteMethodOutcome outcome = myPatientDao.deleteByUrl("Patient?name=PATIENT", mySrd);
-		String oo = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
+		String oo = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
 		ourLog.info(oo);
 		assertThat(oo, containsString("deleted 2 resource(s)"));
 
@@ -368,7 +368,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 			.setMethod(HTTPVerb.DELETE);
 		Bundle resp = mySystemDao.transaction(mySrd, xactBundle);
 
-		String oo = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp);
+		String oo = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp);
 		ourLog.info(oo);
 		assertThat(oo, containsString("deleted 2 resource(s)"));
 

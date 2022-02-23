@@ -20,7 +20,6 @@ package ca.uhn.fhir.test.utilities;
  * #L%
  */
 
-import ca.uhn.fhir.util.StopWatch;
 import org.awaitility.core.ConditionTimeoutException;
 import org.hamcrest.Matchers;
 import org.slf4j.Logger;
@@ -40,11 +39,7 @@ import java.util.stream.Collectors;
 
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.oneOf;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class BatchJobHelper {
@@ -139,10 +134,12 @@ public class BatchJobHelper {
 				// JM: Adding ABANDONED status because given the description, it s similar to FAILURE, and we need to avoid tests failing because
 				// of wait timeouts caused by unmatched statuses. Also adding STOPPED because tests were found where this wait timed out
 				// with jobs keeping that status during the whole wait
+				// KHS: Adding UNKNOWN
 				BatchStatus.COMPLETED,
 				BatchStatus.FAILED,
 				BatchStatus.ABANDONED,
-				BatchStatus.STOPPED
+				BatchStatus.STOPPED,
+				BatchStatus.UNKNOWN
 			));
 	}
 

@@ -2,8 +2,11 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.sql.SQLException;
@@ -109,25 +112,82 @@ public class AddIndexTest extends BaseTest {
 		assertThat(JdbcUtils.getIndexNames(getConnectionProperties(), "SOMETABLE"), containsInAnyOrder("IDX_DIFINDEX", "IDX_ANINDEX"));
 	}
 
-	@Test
-	public void testIncludeColumns() {
+	@Nested
+	public class SqlFeatures {
+		private AddIndexTask myTask;
+		private String mySql;
 
-		AddIndexTask task = new AddIndexTask("1", "1");
-		task.setIndexName("IDX_ANINDEX");
-		task.setTableName("SOMETABLE");
-		task.setColumns("PID", "TEXTCOL");
-		task.setIncludeColumns("FOO1", "FOO2");
-		task.setUnique(false);
 
-		// MSSQL supports include clause
-		task.setDriverType(DriverTypeEnum.MSSQL_2012);
-		String sql = task.generateSql();
-		assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL) INCLUDE (FOO1, FOO2)", sql);
+		@Nested
+		public class IncludeColumns {
+			@BeforeEach
+			public void beforeEach() {
+				myTask = new AddIndexTask("1", "1");
+				myTask.setIndexName("IDX_ANINDEX");
+				myTask.setTableName("SOMETABLE");
+				myTask.setColumns("PID", "TEXTCOL");
+				myTask.setIncludeColumns("FOO1", "FOO2");
+				myTask.setUnique(false);
+			}
 
-		// Oracle does not support include clause
-		task.setDriverType(DriverTypeEnum.ORACLE_12C);
-		sql = task.generateSql();
-		assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL)", sql);
+			@Test
+			public void testIncludeColumns() {
+
+				// MSSQL supports include clause
+				myTask.setDriverType(DriverTypeEnum.MSSQL_2012);
+				mySql = myTask.generateSql();
+				assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL) INCLUDE (FOO1, FOO2)", mySql);
+
+				// Oracle does not support include clause
+				myTask.setDriverType(DriverTypeEnum.ORACLE_12C);
+				mySql = myTask.generateSql();
+				assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL)", mySql);
+			}
+
+		}
+
+		@Nested
+		public class OnlineNoLocks {
+
+			@BeforeEach
+			public void beforeEach() {
+				myTask = new AddIndexTask("1", "1");
+				myTask.setIndexName("IDX_ANINDEX");
+				myTask.setTableName("SOMETABLE");
+				myTask.setColumns("PID", "TEXTCOL");
+				myTask.setUnique(false);
+			}
+
+			@ParameterizedTest(name = "{index}: {0}")
+			@EnumSource()
+			public void noAffectOff(DriverTypeEnum theDriver) {
+				myTask.setDriverType(theDriver);
+				mySql = myTask.generateSql();
+				assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL)", mySql);
+			}
+
+			@ParameterizedTest(name = "{index}: {0}")
+			@EnumSource()
+			public void platformSyntaxWhenOn(DriverTypeEnum theDriver) {
+				myTask.setDriverType(theDriver);
+				myTask.setOnline(true);
+				mySql = myTask.generateSql();
+				switch (theDriver) {
+					case POSTGRES_9_4:
+						assertEquals("create index CONCURRENTLY IDX_ANINDEX on SOMETABLE(PID, TEXTCOL)", mySql);
+						break;
+					case ORACLE_12C:
+						assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL) ONLINE DEFERRED INVALIDATION", mySql);
+						break;
+					case MSSQL_2012:
+						assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL) WITH (ONLINE = ON)", mySql);
+						break;
+					default:
+						// unsupported is ok.  But it means we lock the table for a bit.
+						assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL)", mySql);
+						break;
+				}
+			}
+		}
 	}
-
 }

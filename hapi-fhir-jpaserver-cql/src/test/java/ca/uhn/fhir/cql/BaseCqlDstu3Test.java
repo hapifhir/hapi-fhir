@@ -7,8 +7,8 @@ import ca.uhn.fhir.cql.config.CqlDstu3Config;
 import ca.uhn.fhir.cql.config.TestCqlConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
-import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.test.utilities.RequestDetailsHelper;
 import org.apache.commons.io.FileUtils;
@@ -37,9 +37,6 @@ public class BaseCqlDstu3Test extends BaseJpaDstu3Test implements CqlProviderTes
 	@Autowired
 	protected
 	DaoRegistry myDaoRegistry;
-	@Autowired
-	protected
-	FhirContext myFhirContext;
 	@Autowired
 	IFhirSystemDao mySystemDao;
 	@Autowired
@@ -73,11 +70,6 @@ public class BaseCqlDstu3Test extends BaseJpaDstu3Test implements CqlProviderTes
 	}
 
 	@Override
-	public FhirContext getFhirContext() {
-		return myFhirContext;
-	}
-
-	@Override
 	public DaoRegistry getDaoRegistry() {
 		return myDaoRegistry;
 	}
@@ -105,5 +97,8 @@ public class BaseCqlDstu3Test extends BaseJpaDstu3Test implements CqlProviderTes
 		return loadBundle(bundle);
 	}
 
-
+	@Override
+	public FhirContext getTestFhirContext() {
+		return myFhirContext;
+	}
 }

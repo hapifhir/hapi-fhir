@@ -147,7 +147,7 @@ public class FhirResourceDaoR4TerminologyElasticsearchIT extends BaseJpaTest {
 
 
 	@Override
-	protected FhirContext getContext() {
+	protected FhirContext getFhirContext() {
 		return myFhirContext;
 	}
 

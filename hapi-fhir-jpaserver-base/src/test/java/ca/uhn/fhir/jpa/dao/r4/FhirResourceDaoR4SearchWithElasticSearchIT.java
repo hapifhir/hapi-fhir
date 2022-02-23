@@ -139,7 +139,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	}
 
 	@Override
-	protected FhirContext getContext() {
+	protected FhirContext getFhirContext() {
 		return myFhirCtx;
 	}
 
@@ -516,7 +516,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	}
 
 	@Nested
-	public class WithContainedIndexing {
+	public class WithContainedIndexingIT {
 		@BeforeEach
 		public void enableContains() {
 			// we don't support chained or contained yet, but turn it on to test we don't blow up.
@@ -753,7 +753,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	}
 
 	@Nested
-	public class DateSearchTests extends BaseDateSearchDaoTests {
+	public class DateSearchIT extends BaseDateSearchDaoTests {
 
 		@Override
 		protected Fixture getFixture() {

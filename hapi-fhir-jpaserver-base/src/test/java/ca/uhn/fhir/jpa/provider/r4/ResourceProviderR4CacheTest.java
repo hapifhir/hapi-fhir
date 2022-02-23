@@ -29,7 +29,6 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -55,7 +54,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 	@Override
 	public void before() throws Exception {
 		super.before();
-		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
+		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
 
 		myCapturingInterceptor = new CapturingInterceptor();
 		myClient.registerInterceptor(myCapturingInterceptor);
@@ -228,7 +227,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 
 		assertEquals(resp1.getId(), resp2.getId());
 
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp2));
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp2));
 		assertEquals(1, resp2.getEntry().size());
 	}
 

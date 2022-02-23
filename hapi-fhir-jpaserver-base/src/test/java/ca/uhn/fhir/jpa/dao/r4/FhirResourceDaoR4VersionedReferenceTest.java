@@ -53,8 +53,8 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 	@AfterEach
 	public void afterEach() {
-		myFhirCtx.getParserOptions().setStripVersionsFromReferences(true);
-		myFhirCtx.getParserOptions().getDontStripVersionsFromReferencesAtPaths().clear();
+		myFhirContext.getParserOptions().setStripVersionsFromReferences(true);
+		myFhirContext.getParserOptions().getDontStripVersionsFromReferencesAtPaths().clear();
 		myDaoConfig.setDeleteEnabled(new DaoConfig().isDeleteEnabled());
 		myModelConfig.setRespectVersionsForSearchIncludes(new ModelConfig().isRespectVersionsForSearchIncludes());
 		myModelConfig.setAutoVersionReferenceAtPaths(new ModelConfig().getAutoVersionReferenceAtPaths());
@@ -62,14 +62,14 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 	@Test
 	public void testCreateAndUpdateVersionedReferencesInTransaction_VersionedReferenceToUpsertWithNop() {
-		myFhirCtx.getParserOptions().setStripVersionsFromReferences(false);
+		myFhirContext.getParserOptions().setStripVersionsFromReferences(false);
 		myModelConfig.setAutoVersionReferenceAtPaths("ExplanationOfBenefit.patient");
 
 		// We'll submit the same bundle twice. It has an UPSERT (with no changes
 		// the second time) on a Patient, and a CREATE on an ExplanationOfBenefit
 		// referencing that Patient.
 		Supplier<Bundle> supplier = () -> {
-			BundleBuilder bb = new BundleBuilder(myFhirCtx);
+			BundleBuilder bb = new BundleBuilder(myFhirContext);
 
 			Patient patient = new Patient();
 			patient.setId("Patient/A");
@@ -105,7 +105,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 	@Test
 	public void testCreateAndUpdateVersionedReferencesInTransaction_VersionedReferenceToVersionedReferenceToUpsertWithNop() {
-		myFhirCtx.getParserOptions().setStripVersionsFromReferences(false);
+		myFhirContext.getParserOptions().setStripVersionsFromReferences(false);
 		myModelConfig.setAutoVersionReferenceAtPaths(
 			"Patient.managingOrganization",
 			"ExplanationOfBenefit.patient"
@@ -115,7 +115,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		// the second time) on a Patient, and a CREATE on an ExplanationOfBenefit
 		// referencing that Patient.
 		Supplier<Bundle> supplier = () -> {
-			BundleBuilder bb = new BundleBuilder(myFhirCtx);
+			BundleBuilder bb = new BundleBuilder(myFhirContext);
 
 			Organization organization = new Organization();
 			organization.setId("Organization/O");
@@ -165,7 +165,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 	@Test
 	public void testCreateAndUpdateVersionedReferencesInTransaction_VersionedReferenceToVersionedReferenceToUpsertWithChange() {
-		myFhirCtx.getParserOptions().setStripVersionsFromReferences(false);
+		myFhirContext.getParserOptions().setStripVersionsFromReferences(false);
 		myModelConfig.setAutoVersionReferenceAtPaths(
 			"Patient.managingOrganization",
 			"ExplanationOfBenefit.patient"
@@ -173,7 +173,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 		AtomicInteger counter = new AtomicInteger();
 		Supplier<Bundle> supplier = () -> {
-			BundleBuilder bb = new BundleBuilder(myFhirCtx);
+			BundleBuilder bb = new BundleBuilder(myFhirContext);
 
 			Organization organization = new Organization();
 			organization.setId("Organization/O");
@@ -222,7 +222,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 	@Test
 	public void testStoreAndRetrieveVersionedReference() {
-		myFhirCtx.getParserOptions().setStripVersionsFromReferences(false);
+		myFhirContext.getParserOptions().setStripVersionsFromReferences(false);
 
 		Patient p = new Patient();
 		p.setActive(true);
@@ -242,7 +242,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 	@Test
 	public void testDontOverwriteExistingVersion() {
-		myFhirCtx.getParserOptions().setStripVersionsFromReferences(false);
+		myFhirContext.getParserOptions().setStripVersionsFromReferences(false);
 
 		Patient p = new Patient();
 		p.setActive(true);
@@ -266,7 +266,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 	@Test
 	public void testInsertVersionedReferenceAtPath() {
-		myFhirCtx.getParserOptions().setStripVersionsFromReferences(false);
+		myFhirContext.getParserOptions().setStripVersionsFromReferences(false);
 		myModelConfig.setAutoVersionReferenceAtPaths("Observation.subject");
 
 		Patient p = new Patient();
@@ -304,10 +304,10 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 	@Test
 	public void testInsertVersionedReferenceAtPath_InTransaction_SourceAndTargetBothCreated() {
-		myFhirCtx.getParserOptions().setStripVersionsFromReferences(false);
+		myFhirContext.getParserOptions().setStripVersionsFromReferences(false);
 		myModelConfig.setAutoVersionReferenceAtPaths("Observation.subject");
 
-		BundleBuilder builder = new BundleBuilder(myFhirCtx);
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
 
 		Patient patient = new Patient();
 		patient.setId(IdType.newRandomUuid());
@@ -325,7 +325,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		builder.addTransactionCreateEntry(observation);
 
 		Bundle outcome = mySystemDao.transaction(mySrd, (Bundle) builder.getBundle());
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		IdType patientId = new IdType(outcome.getEntry().get(0).getResponse().getLocation());
 		IdType encounterId = new IdType(outcome.getEntry().get(1).getResponse().getLocation());
 		IdType observationId = new IdType(outcome.getEntry().get(2).getResponse().getLocation());
@@ -341,7 +341,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 	@Test
 	public void testInsertVersionedReferenceAtPath_InTransaction_TargetConditionalCreatedNop() {
-		myFhirCtx.getParserOptions().setStripVersionsFromReferences(false);
+		myFhirContext.getParserOptions().setStripVersionsFromReferences(false);
 		myModelConfig.setAutoVersionReferenceAtPaths("Observation.subject");
 
 		{
@@ -365,7 +365,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		// Verify Patient Version
 		assertEquals("2", myPatientDao.search(SearchParameterMap.newSynchronous("active", new TokenParam("false"))).getResources(0, 1).get(0).getIdElement().getVersionIdPart());
 
-		BundleBuilder builder = new BundleBuilder(myFhirCtx);
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
 
 		Patient patient = new Patient();
 		patient.setId(IdType.newRandomUuid());
@@ -383,7 +383,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		builder.addTransactionCreateEntry(observation);
 
 		Bundle outcome = mySystemDao.transaction(mySrd, (Bundle) builder.getBundle());
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		assertEquals("200 OK", outcome.getEntry().get(0).getResponse().getStatus());
 		assertEquals("200 OK", outcome.getEntry().get(1).getResponse().getStatus());
 		assertEquals("201 Created", outcome.getEntry().get(2).getResponse().getStatus());
@@ -404,7 +404,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 	@Test
 	public void testInsertVersionedReferenceAtPath_InTransaction_TargetUpdate() {
-		myFhirCtx.getParserOptions().setStripVersionsFromReferences(false);
+		myFhirContext.getParserOptions().setStripVersionsFromReferences(false);
 		myDaoConfig.setDeleteEnabled(false);
 		myModelConfig.setAutoVersionReferenceAtPaths("Observation.subject");
 
@@ -420,7 +420,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			myPatientDao.update(patient);
 		}
 
-		BundleBuilder builder = new BundleBuilder(myFhirCtx);
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
 
 		Patient patient = new Patient();
 		patient.setId("Patient/PATIENT");
@@ -433,7 +433,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 		myCaptureQueriesListener.clear();
 		Bundle outcome = mySystemDao.transaction(mySrd, (Bundle) builder.getBundle());
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		assertEquals("200 OK", outcome.getEntry().get(0).getResponse().getStatus());
 		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
 		IdType patientId = new IdType(outcome.getEntry().get(0).getResponse().getLocation());
@@ -453,7 +453,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 	@Test
 	public void testInsertVersionedReferenceAtPath_InTransaction_TargetUpdateConditional() {
-		myFhirCtx.getParserOptions().setStripVersionsFromReferences(false);
+		myFhirContext.getParserOptions().setStripVersionsFromReferences(false);
 		myModelConfig.setAutoVersionReferenceAtPaths("Observation.subject");
 
 		{
@@ -468,7 +468,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			myPatientDao.update(patient);
 		}
 
-		BundleBuilder builder = new BundleBuilder(myFhirCtx);
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
 
 		Patient patient = new Patient();
 		patient.setId(IdType.newRandomUuid());
@@ -485,7 +485,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.clear();
 
 		Bundle outcome = mySystemDao.transaction(mySrd, (Bundle) builder.getBundle());
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		assertEquals("200 OK", outcome.getEntry().get(0).getResponse().getStatus());
 		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
 		IdType patientId = new IdType(outcome.getEntry().get(0).getResponse().getLocation());
@@ -503,7 +503,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchAndIncludeVersionedReference_Asynchronous() {
-		myFhirCtx.getParserOptions().setStripVersionsFromReferences(false);
+		myFhirContext.getParserOptions().setStripVersionsFromReferences(false);
 		myModelConfig.setRespectVersionsForSearchIncludes(true);
 
 		// Create the patient
@@ -544,7 +544,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchAndIncludeVersionedReference_Synchronous() {
-		myFhirCtx.getParserOptions().setStripVersionsFromReferences(false);
+		myFhirContext.getParserOptions().setStripVersionsFromReferences(false);
 		myModelConfig.setRespectVersionsForSearchIncludes(true);
 
 		// Create the patient
@@ -587,9 +587,9 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 	public void testSearchAndIncludeVersionedReference_WhenOnlyOneVersionExists() {
 		HashSet<String> refPaths = new HashSet<String>();
 		refPaths.add("Task.basedOn");
-		myFhirCtx.getParserOptions().setDontStripVersionsFromReferencesAtPaths(refPaths);
+		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths(refPaths);
 		myModelConfig.setRespectVersionsForSearchIncludes(true);
-		myFhirCtx.getParserOptions().setStripVersionsFromReferences(false);
+		myFhirContext.getParserOptions().setStripVersionsFromReferences(false);
 
 		// Create a Condition
 		Condition condition = new Condition();
@@ -627,9 +627,9 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 	public void testSearchAndIncludeVersionedReference_WhenMultipleVersionsExist() {
 		HashSet<String> refPaths = new HashSet<String>();
 		refPaths.add("Task.basedOn");
-		myFhirCtx.getParserOptions().setDontStripVersionsFromReferencesAtPaths(refPaths);
+		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths(refPaths);
 		myModelConfig.setRespectVersionsForSearchIncludes(true);
-		myFhirCtx.getParserOptions().setStripVersionsFromReferences(false);
+		myFhirContext.getParserOptions().setStripVersionsFromReferences(false);
 
 		// Create a Condition
 		Condition condition = new Condition();
@@ -662,9 +662,9 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 	public void testSearchAndIncludeVersionedReference_WhenPreviouslyReferencedVersionOne() {
 		HashSet<String> refPaths = new HashSet<String>();
 		refPaths.add("Task.basedOn");
-		myFhirCtx.getParserOptions().setDontStripVersionsFromReferencesAtPaths(refPaths);
+		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths(refPaths);
 		myModelConfig.setRespectVersionsForSearchIncludes(true);
-		myFhirCtx.getParserOptions().setStripVersionsFromReferences(false);
+		myFhirContext.getParserOptions().setStripVersionsFromReferences(false);
 
 		// Create a Condition
 		Condition condition = new Condition();
@@ -704,7 +704,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchAndIncludeUnersionedReference_Asynchronous() {
-		myFhirCtx.getParserOptions().setStripVersionsFromReferences(true);
+		myFhirContext.getParserOptions().setStripVersionsFromReferences(true);
 		myModelConfig.setRespectVersionsForSearchIncludes(true);
 
 		// Create the patient
@@ -745,7 +745,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchAndIncludeUnversionedReference_Synchronous() {
-		myFhirCtx.getParserOptions().setStripVersionsFromReferences(true);
+		myFhirContext.getParserOptions().setStripVersionsFromReferences(true);
 		myModelConfig.setRespectVersionsForSearchIncludes(true);
 
 		// Create the patient
@@ -800,7 +800,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		);
 		myModelConfig.setAutoVersionReferenceAtPaths(new HashSet<>(strings));
 
-		Bundle bundle = myFhirCtx.newJsonParser().parseResource(Bundle.class,
+		Bundle bundle = myFhirContext.newJsonParser().parseResource(Bundle.class,
 			new InputStreamReader(
 				FhirResourceDaoR4VersionedReferenceTest.class.getResourceAsStream("/npe-causing-bundle.json")));
 
@@ -893,7 +893,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		obs.setId("Observation/DEF");
 		Reference patientRef = new Reference(patientId);
 		obs.setSubject(patientRef);
-		BundleBuilder builder = new BundleBuilder(myFhirCtx);
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
 		builder.addTransactionUpdateEntry(obs);
 
 		Bundle submitted = (Bundle)builder.getBundle();
@@ -917,7 +917,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		obs.setId("Observation/DEF");
 		Reference patientRef = new Reference("Patient/RED");
 		obs.setSubject(patientRef);
-		BundleBuilder builder = new BundleBuilder(myFhirCtx);
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
 		builder.addTransactionUpdateEntry(obs);
 
 		Bundle submitted = (Bundle)builder.getBundle();
