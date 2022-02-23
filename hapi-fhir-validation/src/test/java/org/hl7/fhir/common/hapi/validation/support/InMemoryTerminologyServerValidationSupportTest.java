@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -423,8 +424,28 @@ public class InMemoryTerminologyServerValidationSupportTest {
 		assertEquals("MODERNA COVID-19 mRNA-1273", valueSet.getExpansion().getContains().get(0).getDisplay());
 	}
 
+    @Test
+    void testExpandValuevalidateCodeInValueSet() {
+		 ValueSet vs = new ValueSet();
+		 vs.setUrl("http://vs");
+		 vs
+			 .getCompose()
+			 .addInclude()
+			 .setSystem("http://terminology.hl7.org/CodeSystem/v2-0360|2.7");
 
-	private static class PrePopulatedValidationSupportDstu2 extends PrePopulatedValidationSupport {
+		 ConceptValidationOptions options = new ConceptValidationOptions().setInferSystem(true);
+		 ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		 String codeSystemUrlAndVersion = "http://terminology.hl7.org/CodeSystem/v2-0360|2.7";
+		 String code = "MD";
+		 String display = "dontCare";
+		 IValidationSupport.CodeValidationResult codeValidationResult = mySvc.validateCodeInValueSet(valCtx, options, codeSystemUrlAndVersion, code, display, vs);
+
+		 assertTrue(codeValidationResult.isOk());
+	 }
+
+
+    private static class PrePopulatedValidationSupportDstu2 extends PrePopulatedValidationSupport {
 		private final Map<String, IBaseResource> myDstu2ValueSets;
 
 		PrePopulatedValidationSupportDstu2(FhirContext theFhirContext) {
