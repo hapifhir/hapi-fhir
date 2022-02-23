@@ -5,12 +5,12 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.config.HapiJpaConfig;
 import ca.uhn.fhir.jpa.config.r5.JpaR5Config;
 import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
+import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
-import ca.uhn.fhir.jpa.util.DerbyTenSevenHapiFhirDialect;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
@@ -23,7 +23,8 @@ import org.hibernate.search.backend.lucene.cfg.LuceneIndexSettings;
 import org.hibernate.search.engine.cfg.BackendSettings;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
-import org.springframework.beans.factory.annotation.Value;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -48,15 +49,10 @@ public class TestR5Config {
 	public static final String FHIR_DB_PASSWORD = "${fhir.db.password}";
 	public static final String FHIR_LUCENE_LOCATION_R5 = "${fhir.lucene.location.r5}";
 	public static final Integer COUNT_SEARCH_RESULTS_UP_TO = 50000;
-
-	@Value(TestR5Config.FHIR_DB_USERNAME)
-	private String myDbUsername;
-
-	@Value(TestR5Config.FHIR_DB_PASSWORD)
-	private String myDbPassword;
-
-	@Value(FHIR_LUCENE_LOCATION_R5)
-	private String myFhirLuceneLocation;
+	private static final Logger ourLog = LoggerFactory.getLogger(TestR5Config.class);
+	private String myDbUsername = System.getProperty(TestR5Config.FHIR_DB_USERNAME);
+	private String myDbPassword = System.getProperty(TestR5Config.FHIR_DB_PASSWORD);
+	private String myFhirLuceneLocation = System.getProperty(FHIR_LUCENE_LOCATION_R5);
 
 	@Bean
 	public DaoConfig daoConfig() {
@@ -85,7 +81,9 @@ public class TestR5Config {
 
 	@Bean
 	public ModelConfig modelConfig() {
-		return daoConfig().getModelConfig();
+		ModelConfig retVal = daoConfig().getModelConfig();
+		retVal.setIndexIdentifierOfType(true);
+		return retVal;
 	}
 
 	@Bean
@@ -97,9 +95,12 @@ public class TestR5Config {
 
 	@Bean(name = "myPersistenceDataSourceR5")
 	public DataSource dataSource() {
+		ourLog.info("Starting R5 database with DB username: {}", myDbUsername);
+		ourLog.info("Have system property username: {}", System.getProperty(FHIR_DB_USERNAME));
+
 		BasicDataSource retVal = new BasicDataSource();
 		if (CommonConfig.isLocalTestMode()) {
-			retVal.setUrl("jdbc:derby:memory:fhirtest_r5;create=true");
+			retVal.setUrl("jdbc:h2:mem:fhirtest_r5");
 		} else {
 			retVal.setDriver(new org.postgresql.Driver());
 			retVal.setUrl("jdbc:postgresql://localhost/fhirtest_r5");
@@ -141,7 +142,7 @@ public class TestR5Config {
 	private Properties jpaProperties() {
 		Properties extraProperties = new Properties();
 		if (CommonConfig.isLocalTestMode()) {
-			extraProperties.put("hibernate.dialect", DerbyTenSevenHapiFhirDialect.class.getName());
+			extraProperties.put("hibernate.dialect", HapiFhirH2Dialect.class.getName());
 		} else {
 			extraProperties.put("hibernate.dialect", HapiFhirPostgres94Dialect.class.getName());
 		}
@@ -165,6 +166,7 @@ public class TestR5Config {
 
 	/**
 	 * Bean which validates incoming requests
+	 *
 	 * @param theFhirInstanceValidator
 	 */
 	@Bean
@@ -200,7 +202,6 @@ public class TestR5Config {
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
 		return new PropertySourcesPlaceholderConfigurer();
 	}
-
 
 
 }

@@ -1,16 +1,16 @@
-package ca.uhn.fhir.util;
+package org.hl7.fhir.r5.utils;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
-import org.hl7.fhir.r4.model.DateTimeType;
-import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Period;
-import org.hl7.fhir.r4.model.Quantity;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.utils.GraphQLEngine;
+import org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext;
+import org.hl7.fhir.r5.model.DateTimeType;
+import org.hl7.fhir.r5.model.Observation;
+import org.hl7.fhir.r5.model.Patient;
+import org.hl7.fhir.r5.model.Period;
+import org.hl7.fhir.r5.model.Quantity;
+import org.hl7.fhir.r5.model.Reference;
+import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.utilities.graphql.EGraphEngine;
 import org.hl7.fhir.utilities.graphql.EGraphQLException;
 import org.hl7.fhir.utilities.graphql.GraphQLResponse;
@@ -177,7 +177,7 @@ public class GraphQLEngineTest {
 
 	@BeforeAll
 	public static void beforeClass() {
-		ourCtx = FhirContext.forR4Cached();
+		ourCtx = FhirContext.forR5Cached();
 		ourWorkerCtx = new HapiWorkerContext(ourCtx, ourCtx.getValidationSupport());
 	}
 

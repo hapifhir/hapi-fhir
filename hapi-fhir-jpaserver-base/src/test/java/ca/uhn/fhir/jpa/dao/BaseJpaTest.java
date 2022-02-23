@@ -722,16 +722,6 @@ public abstract class BaseJpaTest extends BaseTest {
 		doRandomizeLocaleAndTimezone();
 	}
 
-	@AfterAll
-	public static void afterClassShutdownDerby() {
-		// DriverManager.getConnection("jdbc:derby:;shutdown=true");
-		// try {
-		// DriverManager.getConnection("jdbc:derby:memory:myUnitTestDB;drop=true");
-		// } catch (SQLNonTransientConnectionException e) {
-		// // expected.. for some reason....
-		// }
-	}
-
 	public static String loadClasspath(String resource) throws IOException {
 		return new String(loadClasspathBytes(resource), Constants.CHARSET_UTF8);
 	}
