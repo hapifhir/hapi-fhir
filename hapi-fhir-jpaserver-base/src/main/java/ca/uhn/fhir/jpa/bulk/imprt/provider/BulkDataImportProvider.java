@@ -19,6 +19,8 @@ package ca.uhn.fhir.jpa.bulk.imprt.provider;
  * limitations under the License.
  * #L%
  */
+import ca.uhn.fhir.i18n.Msg;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobFileJson;
@@ -88,7 +90,7 @@ public class BulkDataImportProvider {
 
                 // Import requests are expected to be in NDJson format.
                 if (RestfulServerUtils.determineRequestEncodingNoDefault(theRequestDetails) != EncodingEnum.NDJSON) {
-                        throw new InvalidRequestException("An NDJson content type, like " + Constants.CT_FHIR_NDJSON.toString() + " must be provided for $import.");
+                        throw new InvalidRequestException(Msg.code(9001) + " An NDJson content type, like " + Constants.CT_FHIR_NDJSON.toString() + " must be provided for $import.");
                 }
   
                 BulkImportJobJson theImportJobJson = new BulkImportJobJson();
@@ -102,7 +104,7 @@ public class BulkDataImportProvider {
                 // In the future, the arguments to $import can be changed to allow additional files to be attached to an existing, known job.
                 // Then, when the correct number of files have been attached, the job would be started automatically.
                 if (theImportJobJson.getFileCount() != 1) {
-                        throw new InvalidRequestException("$import requires " + JpaConstants.PARAM_IMPORT_FILE_COUNT.toString() + " to be exactly 1.");
+                        throw new InvalidRequestException(Msg.code(9002) + " $import requires " + JpaConstants.PARAM_IMPORT_FILE_COUNT.toString() + " to be exactly 1.");
                 }
 
                 List<BulkImportJobFileJson> theInitialFiles = new ArrayList<BulkImportJobFileJson>();
@@ -188,7 +190,7 @@ public class BulkDataImportProvider {
 		String preferHeader = theRequestDetails.getHeader(Constants.HEADER_PREFER);
 		PreferHeader prefer = RestfulServerUtils.parsePreferHeader(null, preferHeader);
 		if (prefer.getRespondAsync() == false) {
-			throw new InvalidRequestException("Must request async processing for $import");
+			throw new InvalidRequestException(Msg.code(513) + " Must request async processing for $import");
 		}
 	}
 }
