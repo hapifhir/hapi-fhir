@@ -190,7 +190,7 @@ public class BulkDataImportProvider {
 		String preferHeader = theRequestDetails.getHeader(Constants.HEADER_PREFER);
 		PreferHeader prefer = RestfulServerUtils.parsePreferHeader(null, preferHeader);
 		if (prefer.getRespondAsync() == false) {
-			throw new InvalidRequestException(Msg.code(513) + " Must request async processing for $import");
+			throw new InvalidRequestException(Msg.code(9003) + " Must request async processing for $import");
 		}
 	}
 }
