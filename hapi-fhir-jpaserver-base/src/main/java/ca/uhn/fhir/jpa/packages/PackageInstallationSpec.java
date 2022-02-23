@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.packages;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,15 +27,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-@ApiModel(
-	value = "PackageInstallationSpec",
+@Schema(
+	name = "PackageInstallationSpec",
 	description =
 		"Defines a set of instructions for package installation"
 )
@@ -47,25 +46,25 @@ import java.util.function.Supplier;
 @JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class PackageInstallationSpec {
 
-	@ApiModelProperty("The direct package URL")
+	@Schema(description = "The direct package URL")
 	@JsonProperty("packageUrl")
 	private String myPackageUrl;
-	@ApiModelProperty("The NPM package Name")
+	@Schema(description = "The NPM package Name")
 	@JsonProperty("name")
 	private String myName;
-	@ApiModelProperty("The direct package version")
+	@Schema(description = "The direct package version")
 	@JsonProperty("version")
 	private String myVersion;
-	@ApiModelProperty("Should resources from this package be extracted from the package and installed into the repository individually")
+	@Schema(description = "Should resources from this package be extracted from the package and installed into the repository individually")
 	@JsonProperty("installMode")
 	private InstallModeEnum myInstallMode;
-	@ApiModelProperty("If resources are being installed individually, this is list provides the resource types to install. By default, all conformance resources will be installed.")
+	@Schema(description = "If resources are being installed individually, this is list provides the resource types to install. By default, all conformance resources will be installed.")
 	@JsonProperty("installResourceTypes")
 	private List<String> myInstallResourceTypes;
-	@ApiModelProperty("Should dependencies be automatically resolved, fetched and installed with the same settings")
+	@Schema(description = "Should dependencies be automatically resolved, fetched and installed with the same settings")
 	@JsonProperty("fetchDependencies")
 	private boolean myFetchDependencies;
-	@ApiModelProperty("Any values provided here will be interpreted as a regex. Dependencies with an ID matching any regex will be skipped.")
+	@Schema(description = "Any values provided here will be interpreted as a regex. Dependencies with an ID matching any regex will be skipped.")
 	private List<String> myDependencyExcludes;
 	@JsonIgnore
 	private byte[] myPackageContents;

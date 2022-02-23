@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,15 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.Map.Entry;
-
+import ca.uhn.fhir.i18n.Msg;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Set;
 
 public abstract class BaseRuntimeChildDefinition {
 
@@ -98,7 +99,7 @@ public abstract class BaseRuntimeChildDefinition {
 		}
 		
 		// Shouldn't happen
-		throw new IllegalStateException("Unable to find reference type");
+		throw new IllegalStateException(Msg.code(1692) + "Unable to find reference type");
 	}
 
 	// public String getExtensionUrl() {

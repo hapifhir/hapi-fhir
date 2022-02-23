@@ -16,6 +16,7 @@
 
 package ca.uhn.fhir.model.dstu2.composite;
 
+import ca.uhn.fhir.i18n.Msg;
 import java.util.List;
 
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
@@ -630,7 +631,7 @@ public class ElementDefinitionDt
 	 */
 	public ElementDefinitionDt addCode(CodingDt theValue) {
 		if (theValue == null) {
-			throw new NullPointerException("theValue must not be null");
+			throw new NullPointerException(Msg.code(77) + "theValue must not be null");
 		}
 		getCode().add(theValue);
 		return this;
@@ -947,7 +948,7 @@ public class ElementDefinitionDt
 	 */
 	public ElementDefinitionDt addAlias(StringDt theValue) {
 		if (theValue == null) {
-			throw new NullPointerException("theValue must not be null");
+			throw new NullPointerException(Msg.code(78) + "theValue must not be null");
 		}
 		getAlias().add(theValue);
 		return this;
@@ -1199,7 +1200,7 @@ public class ElementDefinitionDt
 	 */
 	public ElementDefinitionDt addType(Type theValue) {
 		if (theValue == null) {
-			throw new NullPointerException("theValue must not be null");
+			throw new NullPointerException(Msg.code(79) + "theValue must not be null");
 		}
 		getType().add(theValue);
 		return this;
@@ -1628,7 +1629,7 @@ public class ElementDefinitionDt
 	 */
 	public ElementDefinitionDt addCondition(IdDt theValue) {
 		if (theValue == null) {
-			throw new NullPointerException("theValue must not be null");
+			throw new NullPointerException(Msg.code(80) + "theValue must not be null");
 		}
 		getCondition().add(theValue);
 		return this;
@@ -1725,7 +1726,7 @@ public class ElementDefinitionDt
 	 */
 	public ElementDefinitionDt addConstraint(Constraint theValue) {
 		if (theValue == null) {
-			throw new NullPointerException("theValue must not be null");
+			throw new NullPointerException(Msg.code(81) + "theValue must not be null");
 		}
 		getConstraint().add(theValue);
 		return this;
@@ -2020,7 +2021,7 @@ public class ElementDefinitionDt
 	 */
 	public ElementDefinitionDt addMapping(Mapping theValue) {
 		if (theValue == null) {
-			throw new NullPointerException("theValue must not be null");
+			throw new NullPointerException(Msg.code(82) + "theValue must not be null");
 		}
 		getMapping().add(theValue);
 		return this;
@@ -2150,7 +2151,7 @@ public class ElementDefinitionDt
 	 */
 	public Slicing addDiscriminator(StringDt theValue) {
 		if (theValue == null) {
-			throw new NullPointerException("theValue must not be null");
+			throw new NullPointerException(Msg.code(83) + "theValue must not be null");
 		}
 		getDiscriminator().add(theValue);
 		return this;
@@ -2772,7 +2773,7 @@ public class ElementDefinitionDt
 	 */
 	public Type addProfile(UriDt theValue) {
 		if (theValue == null) {
-			throw new NullPointerException("theValue must not be null");
+			throw new NullPointerException(Msg.code(84) + "theValue must not be null");
 		}
 		getProfile().add(theValue);
 		return this;

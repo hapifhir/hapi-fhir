@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.batch.job.model;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.batch.job.model;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -56,7 +57,7 @@ public class RequestListJson implements IModelJson {
 		try {
 			return ourObjectMapper.readValue(theJson, RequestListJson.class);
 		} catch (JsonProcessingException e) {
-			throw new InternalErrorException("Failed to decode " + RequestListJson.class);
+			throw new InternalErrorException(Msg.code(1283) + "Failed to decode " + RequestListJson.class);
 		}
 	}
 

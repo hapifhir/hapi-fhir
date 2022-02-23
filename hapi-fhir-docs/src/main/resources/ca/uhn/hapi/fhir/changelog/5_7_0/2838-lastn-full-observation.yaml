@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2838
+title: "The resource contents are optionally added to the lucene index so $lastn queries can be satisfied without
+database access.  This is activated by the DaoConfig 'StoreResourceInLuceneIndex' property."

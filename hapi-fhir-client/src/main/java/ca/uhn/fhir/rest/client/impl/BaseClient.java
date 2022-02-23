@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.impl;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,15 +20,29 @@ package ca.uhn.fhir.rest.client.impl;
  * #L%
  */
 
-import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.client.api.*;
+import ca.uhn.fhir.rest.api.CacheControlDirective;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.RequestFormatParamStyleEnum;
+import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.client.api.IHttpClient;
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
+import ca.uhn.fhir.rest.client.api.IRestfulClient;
+import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
+import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
@@ -46,14 +60,25 @@ import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBinary;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import javax.annotation.Nonnull;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -391,17 +416,17 @@ public abstract class BaseClient implements IRestfulClient {
 			} else {
 				msg = getFhirContext().getLocalizer().getMessage(BaseClient.class, "failedToParseResponse", "UNKNOWN", "UNKNOWN", e.toString());
 			}
-			throw new FhirClientConnectionException(msg, e);
+			throw new FhirClientConnectionException(Msg.code(1359) + msg, e);
 		} catch (IllegalStateException e) {
-			throw new FhirClientConnectionException(e);
+			throw new FhirClientConnectionException(Msg.code(1360) + e);
 		} catch (IOException e) {
 			String msg;
 			msg = getFhirContext().getLocalizer().getMessage(BaseClient.class, "failedToParseResponse", httpRequest.getHttpVerbName(), httpRequest.getUri(), e.toString());
-			throw new FhirClientConnectionException(msg, e);
+			throw new FhirClientConnectionException(Msg.code(1361) + msg, e);
 		} catch (RuntimeException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new FhirClientConnectionException(e);
+			throw new FhirClientConnectionException(Msg.code(1362) + e);
 		} finally {
 			if (response != null) {
 				response.close();
@@ -523,7 +548,7 @@ public abstract class BaseClient implements IRestfulClient {
 			try {
 				responseBinary.setContent(IOUtils.toByteArray(theResponseInputStream));
 			} catch (IOException e) {
-				throw new InternalErrorException("IO failure parsing response", e);
+				throw new InternalErrorException(Msg.code(1363) + "IO failure parsing response", e);
 			}
 
 			return responseBinary;
@@ -605,7 +630,7 @@ public abstract class BaseClient implements IRestfulClient {
 			try {
 				divInstance.setValueAsString(IOUtils.toString(theResponseInputStream, Charsets.UTF_8));
 			} catch (Exception e) {
-				throw new InvalidResponseException(400, "Failed to process HTML response from server: " + e.getMessage(), e);
+				throw new InvalidResponseException(Msg.code(1364) + "Failed to process HTML response from server: " + e.getMessage(), 400, e);
 			}
 			divChild.getMutator().addValue(textInstance, divInstance);
 			return (T) instance;

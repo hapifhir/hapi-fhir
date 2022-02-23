@@ -44,7 +44,7 @@ public class ServerDstu3Test extends BaseResourceProviderDstu3Test {
 			String respString = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(respString);
 
-			CapabilityStatement cs = myFhirCtx.newXmlParser().parseResource(CapabilityStatement.class, respString);
+			CapabilityStatement cs = myFhirContext.newXmlParser().parseResource(CapabilityStatement.class, respString);
 
 			for (CapabilityStatementRestResourceComponent nextResource : cs.getRest().get(0).getResource()) {
 				ourLog.info("Testing resource: " + nextResource.getType());

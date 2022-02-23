@@ -49,7 +49,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 
 	@PostConstruct
 	public void postConstruct() {
-		myReindexTestHelper = new ReindexTestHelper(myFhirCtx, myDaoRegistry, mySearchParamRegistry);
+		myReindexTestHelper = new ReindexTestHelper(myFhirContext, myDaoRegistry, mySearchParamRegistry);
 	}
 
 	@Test

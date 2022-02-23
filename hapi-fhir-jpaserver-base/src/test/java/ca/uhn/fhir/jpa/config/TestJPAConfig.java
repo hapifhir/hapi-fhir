@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.binstore.IBinaryStorageSvc;
+import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
@@ -28,7 +30,13 @@ import javax.persistence.EntityManagerFactory;
 public class TestJPAConfig {
 	@Bean
 	public DaoConfig daoConfig() {
-		return new DaoConfig();
+		DaoConfig retVal = new DaoConfig();
+
+		if ("true".equals(System.getProperty("mass_ingestion_mode"))) {
+			retVal.setMassIngestionMode(true);
+		}
+
+		return retVal;
 	}
 
 	@Bean
@@ -69,5 +77,11 @@ public class TestJPAConfig {
 	@Bean
 	public BatchJobHelper batchJobHelper(JobExplorer theJobExplorer) {
 		return new BatchJobHelper(theJobExplorer);
+	}
+
+	@Bean
+	@Lazy
+	public IBinaryStorageSvc binaryStorage() {
+		return new MemoryBinaryStorageSvcImpl();
 	}
 }

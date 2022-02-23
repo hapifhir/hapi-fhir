@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.bulk.export.job;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,14 +38,13 @@ import java.util.Set;
  * Basic Bulk Export implementation which simply reads all type filters and applies them, along with the _since param
  * on a given resource type.
  */
-public class BulkItemReader extends BaseBulkItemReader {
+public class BulkItemReader extends BaseJpaBulkItemReader {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	@Override
 	protected Iterator<ResourcePersistentId> getResourcePidIterator() {
 		ourLog.info("Bulk export assembling export of type {} for job {}", myResourceType, myJobUUID);
 		Set<ResourcePersistentId> myReadPids = new HashSet<>();
-
 
 		List<SearchParameterMap> map = createSearchParameterMapsForResourceType();
 		ISearchBuilder sb = getSearchBuilderForLocalResourceType();

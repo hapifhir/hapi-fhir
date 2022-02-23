@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search.helper;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.search.helper;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -68,12 +69,12 @@ public class SearchParamHelper {
 		return searchParams;
 //		if (searchParams == null || searchParams.size() == 0) {
 //			String errorMessage = String.format("Resource type [%s] is not eligible for this type of export, as it contains no Patient compartment, and no `patient` or `subject` search parameter", myResourceType);
-//			throw new IllegalArgumentException(errorMessage);
+//			throw new IllegalArgumentException(Msg.code(1264) + errorMessage);
 //		} else if (searchParams.size() == 1) {
 //			patientSearchParam = searchParams.get(0);
 //		} else {
 //			String errorMessage = String.format("Resource type [%s] is not eligible for Group Bulk export, as we are unable to disambiguate which patient search parameter we should be searching by.", myResourceType);
-//			throw new IllegalArgumentException(errorMessage);
+//			throw new IllegalArgumentException(Msg.code(1265) + errorMessage);
 //		}
 //		return patientSearchParam;
 	}

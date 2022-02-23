@@ -1,5 +1,6 @@
 package ca.uhn.fhir.okhttp.client;
 
+import ca.uhn.fhir.i18n.Msg;
 import java.io.*;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +15,7 @@ import ca.uhn.fhir.rest.api.Constants;
  * #%L
  * HAPI FHIR OkHttp Client
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +63,7 @@ public class OkHttpRestfulResponse extends BaseHttpResponse implements IHttpResp
 				try {
 					myEntityBytes = IOUtils.toByteArray(responseEntity);
 				} catch (IllegalStateException e) {
-					throw new InternalErrorException(e);
+					throw new InternalErrorException(Msg.code(465) + e);
 				}
 			}
 		}

@@ -1,6 +1,7 @@
 package ca.uhn.fhir.mdm.rules.json;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.rules.similarity.MdmSimilarityEnum;
 import ca.uhn.fhir.mdm.rules.svc.BaseMdmRulesR4Test;
@@ -11,9 +12,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -69,7 +74,35 @@ public class MdmRulesJsonR4Test extends BaseMdmRulesR4Test {
 			vectorMatchResultMap.getVector("bad");
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals("There is no matchField with name bad", e.getMessage());
+			assertEquals(Msg.code(1523) + "There is no matchField with name bad", e.getMessage());
 		}
 	}
+
+	@Test
+	public void testInvalidResourceTypeDoesntDeserialize() throws IOException {
+		myRules = buildOldStyleEidRules();
+
+		String eidSystem = myRules.getEnterpriseEIDSystemForResourceType("Patient");
+		assertThat(eidSystem, is(equalTo(PATIENT_EID_FOR_TEST)));
+
+		eidSystem = myRules.getEnterpriseEIDSystemForResourceType("Practitioner");
+		assertThat(eidSystem, is(equalTo(PATIENT_EID_FOR_TEST)));
+
+		eidSystem = myRules.getEnterpriseEIDSystemForResourceType("Medication");
+		assertThat(eidSystem, is(equalTo(PATIENT_EID_FOR_TEST)));
+	}
+
+	@Override
+	protected MdmRulesJson buildActiveBirthdateIdRules() {
+		return super.buildActiveBirthdateIdRules();
+	}
+
+	private MdmRulesJson buildOldStyleEidRules() {
+		MdmRulesJson mdmRulesJson = super.buildActiveBirthdateIdRules();
+		mdmRulesJson.setEnterpriseEIDSystems(Collections.emptyMap());
+		//This sets the new-style eid resource type to `*`
+		mdmRulesJson.setEnterpriseEIDSystem(PATIENT_EID_FOR_TEST);
+		return mdmRulesJson;
+	}
+
 }

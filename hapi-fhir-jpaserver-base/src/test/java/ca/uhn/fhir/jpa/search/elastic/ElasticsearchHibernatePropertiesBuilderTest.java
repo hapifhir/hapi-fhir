@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.search.elastic;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import org.hibernate.search.backend.elasticsearch.cfg.ElasticsearchBackendSettings;
 import org.hibernate.search.engine.cfg.BackendSettings;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,7 +41,7 @@ class ElasticsearchHibernatePropertiesBuilderTest {
 				.apply(new Properties());
 			fail();
 		} catch (ConfigurationException e ) {
-			assertThat(e.getMessage(), is(equalTo(failureMessage)));
+			assertThat(e.getMessage(), is(equalTo(Msg.code(1173) + failureMessage)));
 		}
 
 		doNothing().when(myPropertiesBuilder).injectStartupTemplate(any(), any(), any(), any());
@@ -70,7 +71,7 @@ class ElasticsearchHibernatePropertiesBuilderTest {
 				.apply(new Properties());
 			fail();
 		} catch (ConfigurationException e ) {
-			assertThat(e.getMessage(), is(equalTo(failureMessage)));
+			assertThat(e.getMessage(), is(equalTo(Msg.code(1174) + failureMessage)));
 		}
 	}
 

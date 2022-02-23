@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.mdm.dao;
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -146,6 +147,15 @@ public class MdmLinkDaoSvc {
 	 * @return the {@link MdmLink} that contains the Match information for the source.
 	 */
 	public Optional<MdmLink> getMatchedLinkForSource(IBaseResource theSourceResource) {
+		return getMdmLinkWithMatchResult(theSourceResource, MdmMatchResultEnum.MATCH);
+	}
+
+	public Optional<MdmLink> getPossibleMatchedLinkForSource(IBaseResource theSourceResource) {
+		return getMdmLinkWithMatchResult(theSourceResource, MdmMatchResultEnum.POSSIBLE_MATCH);
+	}
+
+	@Nonnull
+	private Optional<MdmLink> getMdmLinkWithMatchResult(IBaseResource theSourceResource, MdmMatchResultEnum theMatchResult) {
 		Long pid = myIdHelperService.getPidOrNull(theSourceResource);
 		if (pid == null) {
 			return Optional.empty();
@@ -153,7 +163,7 @@ public class MdmLinkDaoSvc {
 
 		MdmLink exampleLink = myMdmLinkFactory.newMdmLink();
 		exampleLink.setSourcePid(pid);
-		exampleLink.setMatchResult(MdmMatchResultEnum.MATCH);
+		exampleLink.setMatchResult(theMatchResult);
 		Example<MdmLink> example = Example.of(exampleLink);
 		return myMdmLinkDao.findOne(example);
 	}
@@ -298,4 +308,12 @@ public class MdmLinkDaoSvc {
 		return myMdmLinkFactory.newMdmLink();
 	}
 
+	public Optional<MdmLink> getMatchedOrPossibleMatchedLinkForSource(IAnyResource theResource) {
+		// TODO KHS instead of two queries, just do one query with an OR
+		Optional<MdmLink> retval = getMatchedLinkForSource(theResource);
+		if (!retval.isPresent()) {
+			retval = getPossibleMatchedLinkForSource(theResource);
+		}
+		return retval;
+	}
 }

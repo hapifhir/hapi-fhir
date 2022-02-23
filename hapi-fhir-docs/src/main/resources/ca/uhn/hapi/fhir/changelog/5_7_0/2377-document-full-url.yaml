@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2377
+jira: SMILE-807
+title: "Calling the `$document` operation previously omitted the fullUrl of the bundle entries. This has been corrected."

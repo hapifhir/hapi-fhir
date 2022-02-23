@@ -4,7 +4,7 @@ package ca.uhn.fhir.cql.common.evaluation;
  * #%L
  * HAPI FHIR JPA Server - Clinical Quality Language
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.cql.common.evaluation;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import org.apache.commons.lang3.Validate;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.CqlTranslatorException;
@@ -98,19 +99,19 @@ public class LibraryLoader implements org.opencds.cqf.cql.engine.execution.Libra
 		org.hl7.elm.r1.Library translatedLibrary = libraryManager.resolveLibrary(identifier, CqlTranslatorOptions.defaultOptions(), errors).getLibrary();
 
 		if (CqlTranslatorException.HasErrors(errors)) {
-			throw new IllegalArgumentException(errorsToString(errors));
+			throw new IllegalArgumentException(Msg.code(1657) + errorsToString(errors));
 		}
 		try {
 			CqlTranslator translator = getTranslator("", libraryManager, modelManager);
 
 			if (translator.getErrors().size() > 0) {
-				throw new IllegalArgumentException(errorsToString(translator.getErrors()));
+				throw new IllegalArgumentException(Msg.code(1658) + errorsToString(translator.getErrors()));
 			}
 
 			return readLibrary(new ByteArrayInputStream(
 				translator.convertToXml(translatedLibrary).getBytes(StandardCharsets.UTF_8)));
 		} catch (JAXBException e) {
-			throw new IllegalArgumentException(String.format("Errors occurred translating library %s%s.",
+			throw new IllegalArgumentException(Msg.code(1659) + String.format("Errors occurred translating library %s%s.",
 				identifier.getId(), identifier.getVersion() != null ? ("-" + identifier.getVersion()) : ""));
 		}
 	}

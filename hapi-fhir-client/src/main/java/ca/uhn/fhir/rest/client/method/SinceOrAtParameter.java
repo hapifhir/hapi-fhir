@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.method;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ class SinceOrAtParameter extends SearchParameter {
 //					try {
 //						return ParameterUtil.fromInstant(myType, sinceParams);
 //					} catch (DataFormatException e) {
-//						throw new InvalidRequestException("Invalid " + Constants.PARAM_SINCE + " value: " + sinceParams[0]);
+//						throw new InvalidRequestException(Msg.code(1465) + "Invalid " + Constants.PARAM_SINCE + " value: " + sinceParams[0]);
 //					}
 //				}
 //			}
@@ -62,12 +62,12 @@ class SinceOrAtParameter extends SearchParameter {
 //	@Override
 //	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
 //		if (theOuterCollectionType != null) {
-//			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type '" + "' is annotated with @" + myAnnotationType.getName() + " but can not be of collection type");
+//			throw new ConfigurationException(Msg.code(1466) + "Method '" + theMethod.getName() + "' in type '" + "' is annotated with @" + myAnnotationType.getName() + " but can not be of collection type");
 //		}
 //		if (ParameterUtil.getBindableInstantTypes().contains(theParameterType)) {
 //			myType = theParameterType;
 //		} else { 
-//			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type '" + "' is annotated with @" + myAnnotationType.getName() + " but is an invalid type, must be one of: " + ParameterUtil.getBindableInstantTypes());
+//			throw new ConfigurationException(Msg.code(1467) + "Method '" + theMethod.getName() + "' in type '" + "' is annotated with @" + myAnnotationType.getName() + " but is an invalid type, must be one of: " + ParameterUtil.getBindableInstantTypes());
 //		}
 //	}
 

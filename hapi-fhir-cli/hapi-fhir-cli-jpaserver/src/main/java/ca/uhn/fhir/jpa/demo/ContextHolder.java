@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.demo;
  * #%L
  * HAPI FHIR - Command Line Client - Server WAR
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.demo;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import org.apache.commons.cli.ParseException;
@@ -58,7 +59,7 @@ public class ContextHolder {
 				break;
 			case DSTU2_HL7ORG:
 			default:
-				throw new ParseException("FHIR version not supported by this command: " + theCtx.getVersion().getVersion());
+				throw new ParseException(Msg.code(1531) + "FHIR version not supported by this command: " + theCtx.getVersion().getVersion());
 		}
 
 		ourCtx = theCtx;

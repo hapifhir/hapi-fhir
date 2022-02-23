@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
@@ -92,7 +93,7 @@ public class PredicateBuilderNumber extends BasePredicateBuilder implements IPre
 				} else if (operation == SearchFilterParser.CompareOperation.eq) {
 					prefix = ParamPrefixEnum.EQUAL;
 				} else if (operation != null) {
-					throw new IllegalArgumentException("Invalid operator specified for number type");
+					throw new IllegalArgumentException(Msg.code(999) + "Invalid operator specified for number type");
 				}
 
 
@@ -103,7 +104,7 @@ public class PredicateBuilderNumber extends BasePredicateBuilder implements IPre
 				codePredicates.add(predicateOuter);
 
 			} else {
-				throw new IllegalArgumentException("Invalid token type: " + nextOr.getClass());
+				throw new IllegalArgumentException(Msg.code(1000) + "Invalid token type: " + nextOr.getClass());
 			}
 
 		}

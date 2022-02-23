@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3322
+jira: SMILE-3424
+title: "GraphQL searches cannot be executed when number of matching results exceeds default page size. This has been corrected."

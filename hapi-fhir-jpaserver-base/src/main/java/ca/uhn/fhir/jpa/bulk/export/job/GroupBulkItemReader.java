@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.bulk.export.job;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,10 @@ package ca.uhn.fhir.jpa.bulk.export.job;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
@@ -64,13 +66,13 @@ import java.util.stream.Collectors;
  * 3. Optionally further expand that into all MDM-matched Patients (including golden resources)
  * 4. Then perform normal bulk export, filtered so that only results that refer to members are returned.
  */
-public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReader<List<ResourcePersistentId>> {
+public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemReader<List<ResourcePersistentId>> {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	public static final int QUERY_CHUNK_SIZE = 100;
 
-	@Value("#{jobParameters['" + BulkExportJobConfig.GROUP_ID_PARAMETER + "']}")
+	@Value("#{jobParameters['" + BatchConstants.GROUP_ID_PARAMETER + "']}")
 	private String myGroupId;
-	@Value("#{jobParameters['" + BulkExportJobConfig.EXPAND_MDM_PARAMETER+ "'] ?: false}")
+	@Value("#{jobParameters['" + BatchConstants.EXPAND_MDM_PARAMETER+ "'] ?: false}")
 	private boolean myMdmEnabled;
 
 	@Autowired
@@ -269,7 +271,7 @@ public class GroupBulkItemReader extends BaseBulkItemReader implements ItemReade
 	private RuntimeSearchParam validateSearchParameters(SearchParameterMap expandedSpMap) {
 		RuntimeSearchParam runtimeSearchParam = getPatientSearchParamForCurrentResourceType();
 		if (expandedSpMap.get(runtimeSearchParam.getName()) != null) {
-			throw new IllegalArgumentException(String.format("Group Bulk Export manually modifies the Search Parameter called [%s], so you may not include this search parameter in your _typeFilter!", runtimeSearchParam.getName()));
+			throw new IllegalArgumentException(Msg.code(792) + String.format("Group Bulk Export manually modifies the Search Parameter called [%s], so you may not include this search parameter in your _typeFilter!", runtimeSearchParam.getName()));
 		}
 		return runtimeSearchParam;
 	}

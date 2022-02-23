@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.config.BaseConfig;
+import ca.uhn.fhir.jpa.config.JpaConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
@@ -33,7 +33,7 @@ public class HistoryBuilderFactory {
 	private ApplicationContext myApplicationContext;
 
 	public HistoryBuilder newHistoryBuilder(@Nullable String theResourceType, @Nullable Long theResourceId, @Nullable Date theRangeStartInclusive, @Nullable Date theRangeEndInclusive) {
-		return (HistoryBuilder) myApplicationContext.getBean(BaseConfig.HISTORY_BUILDER, theResourceType, theResourceId, theRangeStartInclusive, theRangeEndInclusive);
+		return (HistoryBuilder) myApplicationContext.getBean(JpaConfig.HISTORY_BUILDER, theResourceType, theResourceId, theRangeStartInclusive, theRangeEndInclusive);
 	}
 
 }

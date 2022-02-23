@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2720
+title: "Using the delivery option: Payload Search Result Mode for rest-rook subscriptions on a partition enabled 
+   server would cause a NPE. This issue has been fixed."

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.util;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -20,7 +21,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +76,7 @@ public class SubscriptionsRequireManualActivationInterceptorDstu3 extends Server
 
 		if (newStatus == null) {
 			String actualCode = subscription.getStatusElement().getValueAsString();
-			throw new UnprocessableEntityException("Can not " + theOperation.getCode() + " resource: Subscription.status must be populated on this server" + ((isNotBlank(actualCode)) ? " (invalid value " + actualCode + ")" : ""));
+			throw new UnprocessableEntityException(Msg.code(812) + "Can not " + theOperation.getCode() + " resource: Subscription.status must be populated on this server" + ((isNotBlank(actualCode)) ? " (invalid value " + actualCode + ")" : ""));
 		}
 
 		if (theOldResourceOrNull != null) {
@@ -97,7 +98,7 @@ public class SubscriptionsRequireManualActivationInterceptorDstu3 extends Server
 		SubscriptionChannelType channelType = theSubscription.getChannel().getTypeElement().getValue();
 
 		if (channelType == null) {
-			throw new UnprocessableEntityException("Subscription.channel.type must be populated");
+			throw new UnprocessableEntityException(Msg.code(813) + "Subscription.channel.type must be populated");
 		}
 
 		if (channelType == SubscriptionChannelType.WEBSOCKET) {
@@ -105,14 +106,14 @@ public class SubscriptionsRequireManualActivationInterceptorDstu3 extends Server
 		}
 
 		if (theExistingStatus != null) {
-			throw new UnprocessableEntityException("Subscription.status can not be changed from " + describeStatus(theExistingStatus) + " to " + describeStatus(newStatus));
+			throw new UnprocessableEntityException(Msg.code(814) + "Subscription.status can not be changed from " + describeStatus(theExistingStatus) + " to " + describeStatus(newStatus));
 		}
 
 		if (theSubscription.getStatus() == null) {
-			throw new UnprocessableEntityException("Can not " + theOperation.getCode().toLowerCase() + " resource: Subscription.status must be populated on this server");
+			throw new UnprocessableEntityException(Msg.code(815) + "Can not " + theOperation.getCode().toLowerCase() + " resource: Subscription.status must be populated on this server");
 		}
 
-		throw new UnprocessableEntityException("Subscription.status must be '" + SubscriptionStatus.OFF.toCode() + "' or '" + SubscriptionStatus.REQUESTED.toCode() + "' on a newly created subscription");
+		throw new UnprocessableEntityException(Msg.code(816) + "Subscription.status must be '" + SubscriptionStatus.OFF.toCode() + "' or '" + SubscriptionStatus.REQUESTED.toCode() + "' on a newly created subscription");
 	}
 
 	private String describeStatus(SubscriptionStatus existingStatus) {

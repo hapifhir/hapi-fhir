@@ -17,12 +17,10 @@ import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
@@ -60,9 +58,9 @@ import ca.uhn.fhir.model.dstu2.resource.ValueSet;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.apache.commons.io.IOUtils;
-import org.hibernate.search.mapper.orm.Search;
-import org.hibernate.search.mapper.orm.session.SearchSession;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -114,8 +112,6 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Qualifier("myConceptMapDaoDstu2")
 	protected IFhirResourceDao<ConceptMap> myConceptMapDao;
 	@Autowired
-	protected DaoConfig myDaoConfig;
-	@Autowired
 	protected ModelConfig myModelConfig;
 	@Autowired
 	@Qualifier("myDeviceDaoDstu2")
@@ -136,8 +132,7 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Autowired
 	protected EntityManager myEntityManager;
 	@Autowired
-	@Qualifier("myFhirContextDstu2")
-	protected FhirContext myFhirCtx;
+	protected FhirContext myFhirContext;
 	@Autowired
 	@Qualifier("myImmunizationDaoDstu2")
 	protected IFhirResourceDao<Immunization> myImmunizationDao;
@@ -223,6 +218,8 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	protected SubscriptionLoader mySubscriptionLoader;
 	@Autowired
 	private IBulkDataExportSvc myBulkDataExportSvc;
+	@Autowired
+	private ValidationSupportChain myJpaValidationSupportChain;
 
 	@BeforeEach
 	public void beforeFlushFT() {
@@ -249,8 +246,8 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	}
 
 	@Override
-	protected FhirContext getContext() {
-		return myFhirCtx;
+	public FhirContext getFhirContext() {
+		return myFhirContext;
 	}
 
 	@Override
@@ -264,7 +261,7 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 			fail("Unable to load resource: " + resourceName);
 		}
 		String string = IOUtils.toString(stream, StandardCharsets.UTF_8);
-		IParser newJsonParser = EncodingEnum.detectEncodingNoDefault(string).newParser(myFhirCtx);
+		IParser newJsonParser = EncodingEnum.detectEncodingNoDefault(string).newParser(myFhirContext);
 		return newJsonParser.parseResource(type, string);
 	}
 
@@ -274,6 +271,12 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 		retVal.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		retVal.afterPropertiesSet();
 		return retVal;
+	}
+
+	@AfterEach
+	public void afterEachClearCaches() {
+		myValueSetDao.purgeCaches();
+		myJpaValidationSupportChain.invalidateCaches();
 	}
 
 

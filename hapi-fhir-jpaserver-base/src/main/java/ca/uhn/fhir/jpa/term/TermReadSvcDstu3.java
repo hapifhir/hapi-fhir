@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.term;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -29,7 +30,7 @@ import javax.annotation.Nullable;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +68,7 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 			org.hl7.fhir.r4.model.ValueSet expandedR4 = super.expandValueSet(theExpansionOptions, valueSetToExpandR4);
 			return new ValueSetExpansionOutcome(VersionConvertorFactory_30_40.convertResource(expandedR4, new BaseAdvisor_30_40(false)));
 		} catch (FHIRException e) {
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(833) + e);
 		}
 	}
 
@@ -81,7 +82,7 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 			org.hl7.fhir.r4.model.ValueSet expandedR4 = super.expandValueSet(theExpansionOptions, valueSetToExpandR4);
 			return VersionConvertorFactory_30_40.convertResource(expandedR4, new BaseAdvisor_30_40(false));
 		} catch (FHIRException e) {
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(834) + e);
 		}
 	}
 
@@ -126,7 +127,7 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 			valueSetToExpandR4 = toCanonicalValueSet(valueSetToExpand);
 			super.expandValueSet(theExpansionOptions, valueSetToExpandR4, theValueSetCodeAccumulator);
 		} catch (FHIRException e) {
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(835) + e);
 		}
 	}
 
@@ -138,7 +139,7 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 		try {
 			valueSetR4 = toCanonicalValueSet(valueSet);
 		} catch (FHIRException e) {
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(836) + e);
 		}
 
 		return valueSetR4;

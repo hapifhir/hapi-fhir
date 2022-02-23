@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -94,7 +95,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 			myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Cycle detected around code Root", e.getMessage());
+			assertEquals(Msg.code(926) + "Cycle detected around code Root", e.getMessage());
 		}
 	}
 
@@ -488,8 +489,8 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		assertEquals("lunch", result.getSearchedForCode());
 		assertEquals("http://foo/cs", result.getSearchedForSystem());
 
-		Parameters output = (Parameters) result.toParameters(myFhirCtx, null);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		Parameters output = (Parameters) result.toParameters(myFhirContext, null);
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		assertEquals("Description of my life", ((StringType) output.getParameter("name")).getValue());
 		assertEquals("1.2.3", ((StringType) output.getParameter("version")).getValue());
@@ -602,7 +603,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		vs.setUrl("http://foo/vs");
 		vs.getCompose().addInclude().setSystem("http://foo/cs");
 		vs = myValueSetDao.expand(vs, null);
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(vs));
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(vs));
 		return vs;
 	}
 

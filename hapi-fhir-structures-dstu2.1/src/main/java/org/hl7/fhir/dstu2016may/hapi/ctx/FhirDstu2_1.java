@@ -20,6 +20,7 @@ package org.hl7.fhir.dstu2016may.hapi.ctx;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
@@ -42,7 +43,7 @@ public class FhirDstu2_1 implements IFhirVersion {
 
 	@Override
 	public IFhirPath createFhirPathExecutor(FhirContext theFhirContext) {
-		throw new UnsupportedOperationException("FluentPath is not supported in DSTU2 contexts");
+		throw new UnsupportedOperationException(Msg.code(466) + "FluentPath is not supported in DSTU2 contexts");
 	}
 
 	@Override
@@ -73,7 +74,7 @@ public class FhirDstu2_1 implements IFhirVersion {
 			str = FhirDstu2_1.class.getResourceAsStream("/org/hl7/fhir/dstu2016may/model/fhirversion.properties");
 		}
 		if (str == null) {
-			throw new ConfigurationException("Can not find model property file on classpath: " + "/ca/uhn/fhir/model/dstu2016may/fhirversion.properties");
+			throw new ConfigurationException(Msg.code(467) + "Can not find model property file on classpath: " + "/ca/uhn/fhir/model/dstu2016may/fhirversion.properties");
 		}
 		return str;
 	}

@@ -64,4 +64,9 @@ public class StringUtilTest {
 		assertEquals("a/a", StringUtil.chompCharacter("a/a////", '/'));
 	}
 
+	@Test
+	public void testPrependLineNumbers() {
+		assertEquals("0: A\n1: B\n", StringUtil.prependLineNumbers("A\nB"));
+	}
+
 }

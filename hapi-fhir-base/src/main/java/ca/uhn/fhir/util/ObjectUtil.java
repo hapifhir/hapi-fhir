@@ -1,12 +1,13 @@
 package ca.uhn.fhir.util;
 
+import ca.uhn.fhir.i18n.Msg;
 import org.apache.commons.lang3.StringUtils;
 
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,13 +37,13 @@ public class ObjectUtil {
 	
 	public static <T> T requireNonNull(T obj, String message) {
         if (obj == null)
-            throw new NullPointerException(message);
+            throw new NullPointerException(Msg.code(1776) + message);
         return obj;
     }
 
 	public static void requireNotEmpty(String str, String message) {
 		if (StringUtils.isBlank(str)) {
-			throw new IllegalArgumentException(message);
+			throw new IllegalArgumentException(Msg.code(1777) + message);
 		}
 	}
 	

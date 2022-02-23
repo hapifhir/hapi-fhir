@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.provider;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -185,6 +185,11 @@ public class ProviderConstants {
 	 * The Spring Batch job id of the delete expunge job created by a $delete-expunge operation
 	 */
 	public static final String OPERATION_REINDEX_RESPONSE_JOB_ID = "jobId";
+
+	/**
+	 * Operation name for the $member-match operation
+	 */
+	public static final String OPERATION_MEMBER_MATCH = "$member-match";
 
 	@Deprecated
 	public static final String MARK_ALL_RESOURCES_FOR_REINDEXING = "$mark-all-resources-for-reindexing";

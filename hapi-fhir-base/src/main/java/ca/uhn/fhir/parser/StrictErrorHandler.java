@@ -1,6 +1,7 @@
 package ca.uhn.fhir.parser;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.parser.json.JsonLikeValue.ScalarType;
 import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
 import ca.uhn.fhir.util.UrlUtil;
@@ -9,7 +10,7 @@ import ca.uhn.fhir.util.UrlUtil;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,18 +37,18 @@ public class StrictErrorHandler extends BaseErrorHandler implements IParserError
 
 	@Override
 	public void containedResourceWithNoId(IParseLocation theLocation) {
-		throw new DataFormatException("Resource has contained child resource with no ID");
+		throw new DataFormatException(Msg.code(1819) + "Resource has contained child resource with no ID");
 	}
 
 	@Override
 	public void incorrectJsonType(IParseLocation theLocation, String theElementName, ValueType theExpected, ScalarType theExpectedScalarType, ValueType theFound, ScalarType theFoundScalarType) {
 		String message = LenientErrorHandler.createIncorrectJsonTypeMessage(theElementName, theExpected, theExpectedScalarType, theFound, theFoundScalarType);
-		throw new DataFormatException(message);
+		throw new DataFormatException(Msg.code(1820) + message);
 	}
 
 	@Override
 	public void invalidValue(IParseLocation theLocation, String theValue, String theError) {
-		throw new DataFormatException(describeLocation(theLocation) + "Invalid attribute value \"" + UrlUtil.sanitizeUrlPart(theValue) + "\": " + theError);
+		throw new DataFormatException(Msg.code(1821) + describeLocation(theLocation) + "Invalid attribute value \"" + UrlUtil.sanitizeUrlPart(theValue) + "\": " + theError);
 	}
 
 	@Override
@@ -61,32 +62,32 @@ public class StrictErrorHandler extends BaseErrorHandler implements IParserError
 			b.append(theLocation.getParentElementName());
 			b.append("'");
 		}
-		throw new DataFormatException(b.toString());
+		throw new DataFormatException(Msg.code(1822) + b.toString());
 	}
 
 	@Override
 	public void unexpectedRepeatingElement(IParseLocation theLocation, String theElementName) {
-		throw new DataFormatException(describeLocation(theLocation) + "Multiple repetitions of non-repeatable element '" + theElementName + "' found during parse");
+		throw new DataFormatException(Msg.code(1823) + describeLocation(theLocation) + "Multiple repetitions of non-repeatable element '" + theElementName + "' found during parse");
 	}
 
 	@Override
 	public void unknownAttribute(IParseLocation theLocation, String theAttributeName) {
-		throw new DataFormatException(describeLocation(theLocation) + "Unknown attribute '" + theAttributeName + "' found during parse");
+		throw new DataFormatException(Msg.code(1824) + describeLocation(theLocation) + "Unknown attribute '" + theAttributeName + "' found during parse");
 	}
 
 	@Override
 	public void unknownElement(IParseLocation theLocation, String theElementName) {
-		throw new DataFormatException(describeLocation(theLocation) + "Unknown element '" + theElementName + "' found during parse");
+		throw new DataFormatException(Msg.code(1825) + describeLocation(theLocation) + "Unknown element '" + theElementName + "' found during parse");
 	}
 
 	@Override
 	public void unknownReference(IParseLocation theLocation, String theReference) {
-		throw new DataFormatException(describeLocation(theLocation) + "Resource has invalid reference: " + theReference);
+		throw new DataFormatException(Msg.code(1826) + describeLocation(theLocation) + "Resource has invalid reference: " + theReference);
 	}
 
 	@Override
 	public void extensionContainsValueAndNestedExtensions(IParseLocation theLocation) {
-		throw new DataFormatException(describeLocation(theLocation) + "Extension contains both a value and nested extensions");
+		throw new DataFormatException(Msg.code(1827) + describeLocation(theLocation) + "Extension contains both a value and nested extensions");
 	}
 
 }

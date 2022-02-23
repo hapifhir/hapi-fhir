@@ -1,0 +1,5 @@
+---
+type: remove
+issue: 3116
+title: "The BaseResourceModifiedJson class had a redundant field called myId containing the
+  payload ID. This has been removed."

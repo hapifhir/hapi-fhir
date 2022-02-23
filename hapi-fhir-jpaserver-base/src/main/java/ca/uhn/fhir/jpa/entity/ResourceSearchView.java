@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.entity;
  */
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
@@ -57,6 +56,7 @@ import java.util.Date;
 	"               h.res_published     as res_published,  " +
 	"               h.res_updated       as res_updated,    " +
 	"               h.res_text          as res_text,       " +
+	"               h.res_text_vc       as res_text_vc,    " +
 	"               h.res_encoding      as res_encoding,   " +
 	"               h.PARTITION_ID      as PARTITION_ID,   " +
 	"               p.SOURCE_URI        as PROV_SOURCE_URI," +
@@ -100,6 +100,8 @@ public class ResourceSearchView implements IBaseResourceEntity, Serializable {
 	@Column(name = "RES_TEXT")
 	@Lob()
 	private byte[] myResource;
+	@Column(name = "RES_TEXT_VC")
+	private String myResourceTextVc;
 	@Column(name = "RES_ENCODING")
 	@Enumerated(EnumType.STRING)
 	private ResourceEncodingEnum myEncoding;
@@ -109,6 +111,10 @@ public class ResourceSearchView implements IBaseResourceEntity, Serializable {
 	private Integer myPartitionId;
 
 	public ResourceSearchView() {
+	}
+
+	public String getResourceTextVc() {
+		return myResourceTextVc;
 	}
 
 	public String getProvenanceRequestId() {

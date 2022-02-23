@@ -4,7 +4,7 @@ package ca.uhn.fhir.jaxrs.server.util;
  * #%L
  * HAPI FHIR JAX-RS Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jaxrs.server.util;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -127,13 +128,13 @@ public class JaxRsRequest extends RequestDetails {
 	@Override
 	public InputStream getInputStream() {
 		// not yet implemented
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(599));
 	}
 
 	@Override
 	public Reader getReader() throws IOException {
 		// not yet implemented
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(600));
 	}
 
 	@Override
@@ -203,7 +204,7 @@ public class JaxRsRequest extends RequestDetails {
 			JaxRsRequest result = new JaxRsRequest(myServer, myResource, myRequestType, myRestOperation);
 			if ((StringUtils.isNotBlank(myVersion) || StringUtils.isNotBlank(myCompartment))
 				&& StringUtils.isBlank(myId)) {
-				throw new InvalidRequestException("Don't know how to handle request path: "
+				throw new InvalidRequestException(Msg.code(601) + "Don't know how to handle request path: "
 					+ myServer.getUriInfo().getRequestUri().toASCIIString());
 			}
 
@@ -227,7 +228,7 @@ public class JaxRsRequest extends RequestDetails {
 						result.setId(new ca.uhn.fhir.model.primitive.IdDt(myServer.getBaseForRequest(), UrlUtil.unescape(myId), UrlUtil.unescape(myVersion)));
 						break;
 					default:
-						throw new ConfigurationException("Unsupported Fhir version: " + fhirContextVersion);
+						throw new ConfigurationException(Msg.code(602) + "Unsupported Fhir version: " + fhirContextVersion);
 				}
 			} else if (StringUtils.isNotBlank(myId)) {
 				switch (fhirContextVersion) {
@@ -247,7 +248,7 @@ public class JaxRsRequest extends RequestDetails {
 						result.setId(new ca.uhn.fhir.model.primitive.IdDt(myServer.getBaseForRequest(), UrlUtil.unescape(myId)));
 						break;
 					default:
-						throw new ConfigurationException("Unsupported Fhir version: " + fhirContextVersion);
+						throw new ConfigurationException(Msg.code(603) + "Unsupported Fhir version: " + fhirContextVersion);
 				}
 			}
 
@@ -271,7 +272,7 @@ public class JaxRsRequest extends RequestDetails {
 							result.setId(new ca.uhn.fhir.model.primitive.IdDt(contentLocation));
 							break;
 						default:
-							throw new ConfigurationException("Unsupported Fhir version: " + fhirContextVersion);
+							throw new ConfigurationException(Msg.code(604) + "Unsupported Fhir version: " + fhirContextVersion);
 					}
 				}
 			}

@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,13 @@ package ca.uhn.fhir.context;
  * limitations under the License.
  * #L%
  */
-import static org.apache.commons.lang3.StringUtils.isBlank;
+
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -28,13 +34,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class RuntimePrimitiveDatatypeDefinition extends BaseRuntimeElementDefinition<IPrimitiveType<?>> implements IRuntimeDatatypeDefinition {
 
@@ -50,7 +50,7 @@ public class RuntimePrimitiveDatatypeDefinition extends BaseRuntimeElementDefini
 
 		String resourceName = theDef.name();
 		if (isBlank(resourceName)) {
-			throw new ConfigurationException("Resource type @" + ResourceDef.class.getSimpleName() + " annotation contains no resource name: " + theImplementingClass.getCanonicalName());
+			throw new ConfigurationException(Msg.code(1689) + "Resource type @" + ResourceDef.class.getSimpleName() + " annotation contains no resource name: " + theImplementingClass.getCanonicalName());
 		}
 
 		mySpecialization = theDef.isSpecialization();
@@ -142,7 +142,7 @@ public class RuntimePrimitiveDatatypeDefinition extends BaseRuntimeElementDefini
 				b.append(getImplementingClass().getName());
 				b.append(" - Valid types: ");
 				b.append(theClassToElementDefinitions.keySet());
-				throw new ConfigurationException(b.toString());
+				throw new ConfigurationException(Msg.code(1690) + b.toString());
 			}
 		}
 

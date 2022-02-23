@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -233,6 +233,11 @@ public class ResourceLink extends BaseResourceIndex {
 	@Override
 	public void setId(Long theId) {
 		myId = theId;
+	}
+
+	@Override
+	public void clearHashes() {
+		// nothing right now
 	}
 
 	@Override

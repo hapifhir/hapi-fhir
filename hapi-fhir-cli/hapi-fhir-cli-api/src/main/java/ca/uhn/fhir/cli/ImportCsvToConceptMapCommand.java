@@ -4,7 +4,7 @@ package ca.uhn.fhir.cli;
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -154,7 +155,7 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 		try {
 			return (org.hl7.fhir.dstu3.model.ConceptMap) VersionConvertorFactory_30_40.convertResource(convertCsvToConceptMapR4());
 		} catch (FHIRException fe) {
-			throw new ExecutionException(fe);
+			throw new ExecutionException(Msg.code(1604), fe);
 		}
 	}
 
@@ -247,7 +248,7 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 							try {
 								targetElementComponent.setEquivalence(Enumerations.ConceptMapEquivalence.fromCode(temporaryConceptMapGroupElementTarget.getEquivalence()));
 							} catch (FHIRException fe) {
-								throw new ExecutionException(fe);
+								throw new ExecutionException(Msg.code(1605), fe);
 							}
 						}
 
@@ -272,7 +273,7 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 				}
 			}
 		} catch (IOException e) {
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(1606) + e);
 		}
 
 		ourLog.info("Finished converting CSV to ConceptMap.");

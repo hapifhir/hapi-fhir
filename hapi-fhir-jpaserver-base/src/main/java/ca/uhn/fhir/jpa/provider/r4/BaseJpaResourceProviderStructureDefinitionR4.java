@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoStructureDefinition;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -19,7 +20,7 @@ import org.hl7.fhir.r4.model.StructureDefinition;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +66,7 @@ public class BaseJpaResourceProviderStructureDefinitionR4 extends JpaResourcePro
 			Integer numResults = outcome.size();
 			assert numResults != null;
 			if (numResults == 0) {
-				throw new ResourceNotFoundException("No StructureDefiniton found with url = '" + theUrl.getValue() + "'");
+				throw new ResourceNotFoundException(Msg.code(1159) + "No StructureDefiniton found with url = '" + theUrl.getValue() + "'");
 			}
 			sd = (StructureDefinition) outcome.getResources(0, 1).get(0);
 		}

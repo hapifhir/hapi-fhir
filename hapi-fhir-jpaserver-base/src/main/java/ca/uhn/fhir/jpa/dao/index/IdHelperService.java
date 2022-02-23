@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.index;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.dao.index;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
@@ -40,7 +41,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.MultimapBuilder;
-import org.apache.commons.lang3.Functions;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -132,6 +132,7 @@ public class IdHelperService {
 	@Nonnull
 	public IResourceLookup resolveResourceIdentity(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theResourceId) throws ResourceNotFoundException {
 		assert myDontCheckActiveTransactionForUnitTest || TransactionSynchronizationManager.isSynchronizationActive();
+		assert theRequestPartitionId != null;
 
 		IdDt id = new IdDt(theResourceType, theResourceId);
 		Map<String, List<IResourceLookup>> matches = translateForcedIdToPids(theRequestPartitionId,
@@ -139,7 +140,7 @@ public class IdHelperService {
 
 		// We only pass 1 input in so only 0..1 will come back
 		if (matches.isEmpty() || !matches.containsKey(theResourceId)) {
-			throw new ResourceNotFoundException(id);
+			throw new ResourceNotFoundException(Msg.code(2001) + "Resource " + id + " is not known");
 		}
 
 		if (matches.size() > 1 || matches.get(theResourceId).size() > 1) {
@@ -149,7 +150,7 @@ public class IdHelperService {
 			 *  2. The unique constraint on this column-pair has been dropped
 			 */
 			String msg = myFhirCtx.getLocalizer().getMessage(IdHelperService.class, "nonUniqueForcedId");
-			throw new PreconditionFailedException(msg);
+			throw new PreconditionFailedException(Msg.code(1099) + msg);
 		}
 
 		return matches.get(theResourceId).get(0);
@@ -190,7 +191,7 @@ public class IdHelperService {
 						// fetches from cache using a function that checks cache first...
 						List<ResourcePersistentId> resolvedIds = resolveResourcePersistentIdsWithCache(theRequestPartitionId, ids);
 						if (resolvedIds.isEmpty()) {
-							throw new ResourceNotFoundException(ids.get(0));
+							throw new ResourceNotFoundException(Msg.code(1100) + ids.get(0));
 						}
 						return resolvedIds.get(0);
 					});
@@ -243,23 +244,29 @@ public class IdHelperService {
 	public List<ResourcePersistentId> resolveResourcePersistentIdsWithCache(RequestPartitionId theRequestPartitionId, List<IIdType> theIds) {
 		assert myDontCheckActiveTransactionForUnitTest || TransactionSynchronizationManager.isSynchronizationActive();
 
-		for (IIdType id : theIds) {
+		List<ResourcePersistentId> retVal = new ArrayList<>(theIds.size());
+
+		new QueryChunker<IIdType>().chunk(theIds, ids -> doResolveResourcePersistentIdsWithCache(theRequestPartitionId, ids, retVal));
+
+		return retVal;
+	}
+
+	private void doResolveResourcePersistentIdsWithCache(RequestPartitionId theRequestPartitionId, List<IIdType> theInputIds, List<ResourcePersistentId> theOutputListToPopulate) {
+		for (IIdType id : theInputIds) {
 			if (!id.hasIdPart()) {
-				throw new InvalidRequestException("Parameter value missing in request");
+				throw new InvalidRequestException(Msg.code(1101) + "Parameter value missing in request");
 			}
 		}
 
-		if (theIds.isEmpty()) {
-			return Collections.emptyList();
+		if (theInputIds.isEmpty()) {
+			return;
 		}
 
-		List<ResourcePersistentId> retVal = new ArrayList<>(theIds.size());
-
-		Set<IIdType> idsToCheck = new HashSet<>(theIds.size());
-		for (IIdType nextId : theIds) {
+		Set<IIdType> idsToCheck = new HashSet<>(theInputIds.size());
+		for (IIdType nextId : theInputIds) {
 			if (myDaoConfig.getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ANY) {
 				if (nextId.isIdPartValidLong()) {
-					retVal.add(new ResourcePersistentId(nextId.getIdPartAsLong()).setAssociatedResourceId(nextId));
+					theOutputListToPopulate.add(new ResourcePersistentId(nextId.getIdPartAsLong()).setAssociatedResourceId(nextId));
 					continue;
 				}
 			}
@@ -267,7 +274,7 @@ public class IdHelperService {
 			String key = toForcedIdToPidKey(theRequestPartitionId, nextId.getResourceType(), nextId.getIdPart());
 			ResourcePersistentId cachedId = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key);
 			if (cachedId != null) {
-				retVal.add(cachedId);
+				theOutputListToPopulate.add(cachedId);
 				continue;
 			}
 
@@ -316,17 +323,19 @@ public class IdHelperService {
 			TypedQuery<ForcedId> query = myEntityManager.createQuery(criteriaQuery);
 			List<ForcedId> results = query.getResultList();
 			for (ForcedId nextId : results) {
-				ResourcePersistentId persistentId = new ResourcePersistentId(nextId.getResourceId());
-				populateAssociatedResourceId(nextId.getResourceType(), nextId.getForcedId(), persistentId);
-				retVal.add(persistentId);
+				// Check if the nextId has a resource ID. It may have a null resource ID if a commit is still pending.
+				if (nextId.getResourceId() != null) {
+					ResourcePersistentId persistentId = new ResourcePersistentId(nextId.getResourceId());
+					populateAssociatedResourceId(nextId.getResourceType(), nextId.getForcedId(), persistentId);
+				theOutputListToPopulate.add(persistentId);
 
-				String key = toForcedIdToPidKey(theRequestPartitionId, nextId.getResourceType(), nextId.getForcedId());
-				myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, persistentId);
+					String key = toForcedIdToPidKey(theRequestPartitionId, nextId.getResourceType(), nextId.getForcedId());
+					myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, persistentId);
+				}
 			}
 
 		}
 
-		return retVal;
 	}
 
 	private void populateAssociatedResourceId(String nextResourceType, String forcedId, ResourcePersistentId persistentId) {
@@ -375,6 +384,8 @@ public class IdHelperService {
 	}
 
 	private Map<String, List<IResourceLookup>> translateForcedIdToPids(@Nonnull RequestPartitionId theRequestPartitionId, Collection<IIdType> theId) {
+		assert theRequestPartitionId != null;
+
 		theId.forEach(id -> Validate.isTrue(id.hasIdPart()));
 
 		if (theId.isEmpty()) {
@@ -624,11 +635,10 @@ public class IdHelperService {
 	}
 
 	@Nonnull
-	public Long getPidOrThrowException(IAnyResource theResource) {
+	public Long getPidOrThrowException(@Nonnull IAnyResource theResource) {
 		Long retVal = (Long) theResource.getUserData(RESOURCE_PID);
 		if (retVal == null) {
-			throw new IllegalStateException(
-				String.format("Unable to find %s in the user data for %s with ID %s", RESOURCE_PID, theResource, theResource.getId())
+			throw new IllegalStateException(Msg.code(1102) + String.format("Unable to find %s in the user data for %s with ID %s", RESOURCE_PID, theResource, theResource.getId())
 			);
 		}
 		return retVal;
@@ -637,7 +647,7 @@ public class IdHelperService {
 	public IIdType resourceIdFromPidOrThrowException(Long thePid) {
 		Optional<ResourceTable> optionalResource = myResourceTableDao.findById(thePid);
 		if (!optionalResource.isPresent()) {
-			throw new ResourceNotFoundException("Requested resource not found");
+			throw new ResourceNotFoundException(Msg.code(1103) + "Requested resource not found");
 		}
 		return optionalResource.get().getIdDt().toVersionless();
 	}

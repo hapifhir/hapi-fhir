@@ -4,7 +4,7 @@ package ca.uhn.fhir.cql.dstu3.evaluation;
  * #%L
  * HAPI FHIR JPA Server - Clinical Quality Language
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.cql.dstu3.evaluation;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.cql.common.evaluation.MeasurePopulationType;
 import ca.uhn.fhir.cql.common.evaluation.MeasureScoring;
 import ca.uhn.fhir.cql.dstu3.builder.MeasureReportBuilder;
@@ -162,7 +163,7 @@ public class MeasureEvaluation {
         String observationName = pop.getCriteria();
         ExpressionDef ed = context.resolveExpressionRef(observationName);
         if (!(ed instanceof FunctionDef)) {
-            throw new IllegalArgumentException(String.format("Measure observation %s does not reference a function definition", observationName));
+            throw new IllegalArgumentException(Msg.code(1648) + String.format("Measure observation %s does not reference a function definition", observationName));
         }
 
         Object result = null;
@@ -305,7 +306,7 @@ public class MeasureEvaluation {
 
         MeasureScoring measureScoring = MeasureScoring.fromCode(measure.getScoring().getCodingFirstRep().getCode());
         if (measureScoring == null) {
-            throw new RuntimeException("Measure scoring is required in order to calculate.");
+            throw new RuntimeException(Msg.code(1649) + "Measure scoring is required in order to calculate.");
         }
 
         List<Measure.MeasureSupplementalDataComponent> sde = new ArrayList<>();

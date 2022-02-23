@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.bulk.export.job;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.bulk.export.job;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
@@ -45,7 +46,7 @@ import java.util.List;
  * 1. Determine the resourcetype
  * 2. Search for anything that has `patient-compartment-search-param:missing=false`
  */
-public class PatientBulkItemReader extends BaseBulkItemReader implements ItemReader<List<ResourcePersistentId>> {
+public class PatientBulkItemReader extends BaseJpaBulkItemReader implements ItemReader<List<ResourcePersistentId>> {
 	@Autowired
 	private DaoConfig myDaoConfig;
 
@@ -55,7 +56,7 @@ public class PatientBulkItemReader extends BaseBulkItemReader implements ItemRea
 	private RuntimeSearchParam validateSearchParameters(SearchParameterMap expandedSpMap) {
 		RuntimeSearchParam runtimeSearchParam = getPatientSearchParamForCurrentResourceType();
 		if (expandedSpMap.get(runtimeSearchParam.getName()) != null) {
-			throw new IllegalArgumentException(String.format("Patient Bulk Export manually modifies the Search Parameter called [%s], so you may not include this search parameter in your _typeFilter!", runtimeSearchParam.getName()));
+			throw new IllegalArgumentException(Msg.code(796) + String.format("Patient Bulk Export manually modifies the Search Parameter called [%s], so you may not include this search parameter in your _typeFilter!", runtimeSearchParam.getName()));
 		}
 		return runtimeSearchParam;
 	}
@@ -65,7 +66,7 @@ public class PatientBulkItemReader extends BaseBulkItemReader implements ItemRea
 		if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.DISABLED) {
 			String errorMessage = "You attempted to start a Patient Bulk Export, but the system has `Index Missing Fields` disabled. It must be enabled for Patient Bulk Export";
 			ourLog.error(errorMessage);
-			throw new IllegalStateException(errorMessage);
+			throw new IllegalStateException(Msg.code(797) + errorMessage);
 		}
 
 		List<ResourcePersistentId> myReadPids = new ArrayList<>();

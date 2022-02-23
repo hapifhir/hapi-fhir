@@ -4,7 +4,7 @@ package ca.uhn.fhir.cql.dstu3.provider;
  * #%L
  * HAPI FHIR JPA Server - Clinical Quality Language
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.cql.dstu3.provider;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.cql.common.provider.LibraryResolutionProvider;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
@@ -54,7 +55,7 @@ public class LibraryResolutionProviderImpl implements LibraryResolutionProvider<
 		try {
 			return myLibraryDao.read(new IdType(libraryId), theRequestDetails);
 		} catch (Exception e) {
-			throw new IllegalArgumentException(String.format("Could not resolve library id %s", libraryId));
+			throw new IllegalArgumentException(Msg.code(1641) + String.format("Could not resolve library id %s", libraryId));
 		}
 	}
 
@@ -91,7 +92,7 @@ public class LibraryResolutionProviderImpl implements LibraryResolutionProvider<
 			x -> x.getVersion());
 
 		if (library == null) {
-			throw new IllegalArgumentException(String.format("Could not resolve library name %s", libraryName));
+			throw new IllegalArgumentException(Msg.code(1642) + String.format("Could not resolve library name %s", libraryName));
 		}
 
 		return library;

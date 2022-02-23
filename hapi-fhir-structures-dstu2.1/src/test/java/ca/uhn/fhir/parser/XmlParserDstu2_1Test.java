@@ -1,6 +1,7 @@
 package ca.uhn.fhir.parser;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
@@ -176,7 +177,7 @@ public class XmlParserDstu2_1Test {
 			parser.parseResource(input);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Resource is missing required element 'url' in parent element 'extension'", e.getCause().getMessage());
+			assertEquals(Msg.code(1822) + "Resource is missing required element 'url' in parent element 'extension'", e.getCause().getMessage());
 		}
 		
 	}
@@ -208,7 +209,7 @@ public class XmlParserDstu2_1Test {
 			parser.parseResource(input);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Resource is missing required element 'url' in parent element 'modifierExtension'", e.getCause().getMessage());
+			assertEquals(Msg.code(1822) + "Resource is missing required element 'url' in parent element 'modifierExtension'", e.getCause().getMessage());
 		}
 		
 	}
@@ -970,7 +971,7 @@ public class XmlParserDstu2_1Test {
 	}
 
 	@Test
-	public void testEncodeContainedWithNarrativeIsSuppresed() throws Exception {
+	public void testEncodeContainedWithNarrative() throws Exception {
 		IParser parser = ourCtx.newXmlParser().setPrettyPrint(true);
 
 		// Create an organization, note that the organization does not have an ID
@@ -989,9 +990,9 @@ public class XmlParserDstu2_1Test {
 		ourLog.info(encoded);
 		
 		assertThat(encoded, stringContainsInOrder("<Patient", "<text>", "<div xmlns=\"http://www.w3.org/1999/xhtml\">BARFOO</div>", "<contained>", "<Organization", "</Organization"));
-		assertThat(encoded, not(stringContainsInOrder("<Patient", "<text>", "<contained>", "<Organization", "<text", "</Organization")));
+		assertThat(encoded, stringContainsInOrder("<Patient", "<text>", "<contained>", "<Organization", "<text", "</Organization"));
 		
-		assertThat(encoded, not(containsString("FOOBAR")));
+		assertThat(encoded, (containsString("FOOBAR")));
 		assertThat(encoded, (containsString("BARFOO")));
 
 	}
@@ -2317,7 +2318,7 @@ public class XmlParserDstu2_1Test {
 			p.parseResource(resource);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("DataFormatException at [[row,col {unknown-source}]: [2,4]]: [element=\"active\"] Invalid attribute value \"1\": Invalid boolean string: '1'", e.getMessage());
+			assertEquals(Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [2,4]]: " + Msg.code(1821) + "[element=\"active\"] Invalid attribute value \"1\": Invalid boolean string: '1'", e.getMessage());
 		}
 		
 		LenientErrorHandler errorHandler = new LenientErrorHandler();
@@ -2540,7 +2541,7 @@ public class XmlParserDstu2_1Test {
 			p.parseResource(encoded.replace("Observation", "observation"));
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("DataFormatException at [[row,col {unknown-source}]: [1,1]]: Unknown resource type 'observation': Resource names are case sensitive, found similar name: 'Observation'",
+			assertEquals(Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [1,1]]: " + Msg.code(1815) + "Unknown resource type 'observation': Resource names are case sensitive, found similar name: 'Observation'",
 					e.getMessage());
 		}
 
@@ -2548,7 +2549,7 @@ public class XmlParserDstu2_1Test {
 			p.parseResource(encoded.replace("valueSampledData", "valueSampleddata"));
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("DataFormatException at [[row,col {unknown-source}]: [2,4]]: Unknown element 'valueSampleddata' found during parse", e.getMessage());
+			assertEquals(Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [2,4]]: " + Msg.code(1825) + "Unknown element 'valueSampleddata' found during parse", e.getMessage());
 		}
 	}
 

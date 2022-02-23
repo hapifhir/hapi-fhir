@@ -1,11 +1,12 @@
 package ca.uhn.fhir.rest.server.method;
 
+import ca.uhn.fhir.i18n.Msg;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 /*
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,15 +99,15 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 		if (isBlank(theMatchUrl)) {
 			if (isBlank(theUrlId)) {
 				String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "noIdInUrlForUpdate");
-				throw new InvalidRequestException(msg);
+				throw new InvalidRequestException(Msg.code(418) + msg);
 			}
 			if (isBlank(theResourceId)) {
 				String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "noIdInBodyForUpdate");
-				throw new InvalidRequestException(msg);
+				throw new InvalidRequestException(Msg.code(419) + msg);
 			}
 			if (!theResourceId.equals(theUrlId)) {
 				String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBindingWithResourceParam.class, "incorrectIdForUpdate", theResourceId, theUrlId);
-				throw new InvalidRequestException(msg);
+				throw new InvalidRequestException(Msg.code(420) + msg);
 			}
 		} else {
 			theResource.setId((IIdType) null);

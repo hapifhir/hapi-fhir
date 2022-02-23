@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client.method;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
@@ -19,7 +20,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +55,7 @@ public abstract class BaseQueryParameter implements IParameter {
 	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, IBaseResource theTargetResource) throws InternalErrorException {
 		if (theSourceClientArgument == null) {
 			if (isRequired()) {
-				throw new NullPointerException("SearchParameter '" + getName() + "' is required and may not be null");
+				throw new NullPointerException(Msg.code(1451) + "SearchParameter '" + getName() + "' is required and may not be null");
 			}
 		} else {
 			List<QualifiedParamList> value = encode(theContext, theSourceClientArgument);

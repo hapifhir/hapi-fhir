@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.config;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ package ca.uhn.fhir.jpa.config;
  */
 
 import ca.uhn.fhir.util.ReflectionUtil;
-import org.apache.commons.lang3.StringUtils;
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.search.engine.cfg.BackendSettings;

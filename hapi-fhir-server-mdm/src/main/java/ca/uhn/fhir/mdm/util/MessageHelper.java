@@ -4,7 +4,7 @@ package ca.uhn.fhir.mdm.util;
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,5 +106,9 @@ public class MessageHelper {
 
 	public String getMessageForMultipleGoldenRecords(String theSourceResource) {
 		return theSourceResource + " already has matched golden resource. Use $mdm-query-links to see more details.";
+	}
+
+	public String getMessageForFailedGoldenResourceLoad(String theParamName, String theGoldenResourceId) {
+		return theGoldenResourceId + " used as parameter [" + theParamName + "] could not be loaded as a golden resource, as it appears to be lacking the golden resource meta tags.";
 	}
 }

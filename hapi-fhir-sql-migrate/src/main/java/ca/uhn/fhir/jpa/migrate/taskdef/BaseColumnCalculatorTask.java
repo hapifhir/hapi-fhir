@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.VersionEnum;
 import com.google.common.collect.ForwardingMap;
@@ -113,7 +114,7 @@ public abstract class BaseColumnCalculatorTask extends BaseTableColumnTask {
 					try {
 						next.get();
 					} catch (Exception e) {
-						throw new SQLException(e);
+						throw new SQLException(Msg.code(69) + e);
 					}
 				}
 
@@ -145,7 +146,7 @@ public abstract class BaseColumnCalculatorTask extends BaseTableColumnTask {
 				try {
 					executorQueue.put(theRunnable);
 				} catch (InterruptedException theE) {
-					throw new RejectedExecutionException("Task " + theRunnable.toString() +
+					throw new RejectedExecutionException(Msg.code(70) + "Task " + theRunnable.toString() +
 						" rejected from " + theE.toString());
 				}
 				logInfo(ourLog, "Slot become available after {}ms", sw.getMillis());
@@ -222,7 +223,7 @@ public abstract class BaseColumnCalculatorTask extends BaseTableColumnTask {
 		@Override
 		public V get(Object theKey) {
 			if (!containsKey(theKey)) {
-				throw new IllegalArgumentException("No key: " + theKey);
+				throw new IllegalArgumentException(Msg.code(71) + "No key: " + theKey);
 			}
 			return super.get(theKey);
 		}

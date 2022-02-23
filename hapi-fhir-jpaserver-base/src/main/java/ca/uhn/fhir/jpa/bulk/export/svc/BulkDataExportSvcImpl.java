@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.bulk.export.svc;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.bulk.export.svc;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -33,7 +34,6 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
-import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionFileDao;
@@ -244,7 +244,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		String theJobUuid = theBulkExportJobEntity.getJobId();
 		JobParametersBuilder parameters = new JobParametersBuilder()
 			.addString(BatchConstants.JOB_UUID_PARAMETER, theJobUuid)
-			.addLong(BulkExportJobConfig.READ_CHUNK_PARAMETER, READ_CHUNK_SIZE);
+			.addLong(BatchConstants.READ_CHUNK_PARAMETER, READ_CHUNK_SIZE);
 
 		ourLog.info("Submitting bulk export job {} to job scheduler", theJobUuid);
 
@@ -273,8 +273,8 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	private void enhanceBulkParametersWithGroupParameters(BulkExportJobEntity theBulkExportJobEntity, JobParametersBuilder theParameters) {
 		String theGroupId = getQueryParameterIfPresent(theBulkExportJobEntity.getRequest(), JpaConstants.PARAM_EXPORT_GROUP_ID);
 		String expandMdm  = getQueryParameterIfPresent(theBulkExportJobEntity.getRequest(), JpaConstants.PARAM_EXPORT_MDM);
-		theParameters.addString(BulkExportJobConfig.GROUP_ID_PARAMETER, theGroupId);
-		theParameters.addString(BulkExportJobConfig.EXPAND_MDM_PARAMETER, expandMdm);
+		theParameters.addString(BatchConstants.GROUP_ID_PARAMETER, theGroupId);
+		theParameters.addString(BatchConstants.EXPAND_MDM_PARAMETER, expandMdm);
 	}
 
 
@@ -316,7 +316,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			outputFormat = theBulkDataExportOptions.getOutputFormat();
 		}
 		if (!Constants.CTS_NDJSON.contains(outputFormat)) {
-			throw new InvalidRequestException("Invalid output format: " + theBulkDataExportOptions.getOutputFormat());
+			throw new InvalidRequestException(Msg.code(786) + "Invalid output format: " + theBulkDataExportOptions.getOutputFormat());
 		}
 
 		// Interceptor call: STORAGE_INITIATE_BULK_EXPORT
@@ -372,7 +372,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 		if (resourceTypes != null && resourceTypes.contains("Binary")) {
 			String msg = myContext.getLocalizer().getMessage(BulkDataExportSvcImpl.class, "onlyBinarySelected");
-			throw new InvalidRequestException(msg);
+			throw new InvalidRequestException(Msg.code(787) + msg);
 		}
 
 		if (resourceTypes == null || resourceTypes.isEmpty()) {
@@ -423,7 +423,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		for (String nextType : theResourceTypes) {
 			if (!myDaoRegistry.isResourceTypeSupported(nextType)) {
 				String msg = myContext.getLocalizer().getMessage(BulkDataExportSvcImpl.class, "unknownResourceType", nextType);
-				throw new InvalidRequestException(msg);
+				throw new InvalidRequestException(Msg.code(788) + msg);
 			}
 		}
 	}
@@ -432,11 +432,11 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		if (theTheFilters != null) {
 			for (String next : theTheFilters) {
 				if (!next.contains("?")) {
-					throw new InvalidRequestException("Invalid " + JpaConstants.PARAM_EXPORT_TYPE_FILTER + " value \"" + next + "\". Must be in the form [ResourceType]?[params]");
+					throw new InvalidRequestException(Msg.code(789) + "Invalid " + JpaConstants.PARAM_EXPORT_TYPE_FILTER + " value \"" + next + "\". Must be in the form [ResourceType]?[params]");
 				}
 				String resourceType = next.substring(0, next.indexOf("?"));
 				if (!theResourceTypes.contains(resourceType)) {
-					throw new InvalidRequestException("Invalid " + JpaConstants.PARAM_EXPORT_TYPE_FILTER + " value \"" + next + "\". Resource type does not appear in " + JpaConstants.PARAM_EXPORT_TYPE+ " list");
+					throw new InvalidRequestException(Msg.code(790) + "Invalid " + JpaConstants.PARAM_EXPORT_TYPE_FILTER + " value \"" + next + "\". Resource type does not appear in " + JpaConstants.PARAM_EXPORT_TYPE+ " list");
 				}
 			}
 		}
@@ -505,7 +505,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		} else if (theExportStyle.equals(GROUP) || theExportStyle.equals(PATIENT)) {
 			return getPatientCompartmentResources();
 		} else {
-			throw new IllegalArgumentException(String.format("HAPI FHIR does not recognize a Bulk Export request of type: %s", theExportStyle));
+			throw new IllegalArgumentException(Msg.code(791) + String.format("HAPI FHIR does not recognize a Bulk Export request of type: %s", theExportStyle));
 		}
 	}
 

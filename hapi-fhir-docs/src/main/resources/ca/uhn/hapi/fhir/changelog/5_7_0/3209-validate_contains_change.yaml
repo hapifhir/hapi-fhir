@@ -1,0 +1,16 @@
+---
+type: change
+issue: 3205
+title: "These changes are related to bumping the dependency on org.hl7.fhir.core to version 5.3.0.
+The main updates that resulted in the majority of the changes in this PR were the addition of the interface IValidationPolicyAdvisor,
+and the refactoring of some of the main validation classes (for cleaning purposes). Also, many of the error messages were
+updated, so the resulting tests in HAPI had to be modified to reflect these message changes.
+
+In regard to the new interface IValidationPolicyAdvisor, by implementing this interface and passing it through the
+validation context in HAPI to the InstanceValidator in the core libraries, users can now control the behavior of the
+validator when validating references, contained resources, and coded content. Previously, only references were controlled
+in this way, and users controlled this by overriding the validation fetcher.
+
+Test cases were added in the validation test cases repository to demonstrate it's functionality. In particular, the two
+test cases contained-resource-bad-id, and contained-resource-bad-id-ignore. The definitions and expected outcomes of
+these test cases are in the manifest.json in that repository."

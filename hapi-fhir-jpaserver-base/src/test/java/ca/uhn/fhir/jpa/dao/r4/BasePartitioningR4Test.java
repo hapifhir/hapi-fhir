@@ -200,7 +200,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		}
 
 		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
-		public RequestPartitionId PartitionIdentifyRead(ServletRequestDetails theRequestDetails) {
+		public RequestPartitionId partitionIdentifyRead(ServletRequestDetails theRequestDetails) {
 			RequestPartitionId retVal = myReadRequestPartitionIds.remove(0);
 			ourLog.info("Returning partition for read: {}", retVal);
 			return retVal;
@@ -229,7 +229,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 			assertNotNull(theResource);
 			assertTrue(!myCreateRequestPartitionIds.isEmpty(), "No create partitions left in interceptor");
 			RequestPartitionId retVal = myCreateRequestPartitionIds.remove(0);
-			ourLog.info("Returning partition for create: {}", retVal);
+			ourLog.debug("Returning partition [{}] for create of resource {} with date {}", retVal, theResource, retVal.getPartitionDate());
 			return retVal;
 		}
 

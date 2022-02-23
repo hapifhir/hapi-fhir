@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.param.binder;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,18 +20,18 @@ package ca.uhn.fhir.rest.param.binder;
  * #L%
  */
 
-import java.util.Collections;
-import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
-
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.Collections;
+import java.util.List;
 
 public final class QueryParameterTypeBinder extends BaseBinder<IQueryParameterType> implements IParamBinder<IQueryParameterType> {
 
@@ -60,7 +60,7 @@ public final class QueryParameterTypeBinder extends BaseBinder<IQueryParameterTy
 			return dt;
 		}
 		if (theParams.size() > 1 || theParams.get(0).size() > 1) {
-			throw new InvalidRequestException("Multiple values detected for non-repeatable parameter '" + theParamName + "'. This server is not configured to allow multiple (AND/OR) values for this param.");
+			throw new InvalidRequestException(Msg.code(1962) + "Multiple values detected for non-repeatable parameter '" + theParamName + "'. This server is not configured to allow multiple (AND/OR) values for this param.");
 		}
 
 		dt.setValueAsQueryToken(theContext, theParamName, theParams.get(0).getQualifier(), value);

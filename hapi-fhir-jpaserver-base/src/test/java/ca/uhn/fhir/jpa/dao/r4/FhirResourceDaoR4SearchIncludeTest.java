@@ -106,11 +106,10 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 		SearchParameterMap map = SearchParameterMap.newSynchronous()
 			.addInclude(new Include("CarePlan.patient"));
 		try {
-			IBundleProvider results = myCarePlanDao.search(map);
-			List<String> ids = toUnqualifiedVersionlessIdValues(results);
-			assertThat(ids.toString(), ids, containsInAnyOrder("CarePlan/CP-1"));
-		} catch (Exception e) {
+			myCarePlanDao.search(map);
 			fail();
+		} catch (Exception e) {
+			// good
 		}
 
 		// Next verify it with the ":" syntax

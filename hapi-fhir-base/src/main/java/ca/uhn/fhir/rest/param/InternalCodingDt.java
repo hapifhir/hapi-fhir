@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.param;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,7 @@ package ca.uhn.fhir.rest.param;
  * #L%
  */
 
-import java.util.List;
-
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -34,6 +33,8 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.util.CoverageIgnore;
+
+import java.util.List;
 
 @CoverageIgnore
 public class InternalCodingDt extends BaseCodingDt implements ICompositeDatatype {
@@ -292,7 +293,7 @@ public class InternalCodingDt extends BaseCodingDt implements ICompositeDatatype
 	 * </p>
 	 */
 	public BaseResourceReferenceDt getValueSet() {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(1949));
 	}
 
 	@Override
@@ -303,13 +304,13 @@ public class InternalCodingDt extends BaseCodingDt implements ICompositeDatatype
 	@Deprecated //override deprecated method
 	@Override
 	public Boolean getMissing() {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(1950));
 	}
 
 	@Deprecated //override deprecated method
 	@Override
 	public IQueryParameterType setMissing(Boolean theMissing) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(1951));
 	}
 
 }

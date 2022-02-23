@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -12,6 +13,7 @@ import ca.uhn.fhir.util.bundle.BundleEntryMutator;
 import ca.uhn.fhir.util.bundle.BundleEntryParts;
 import ca.uhn.fhir.util.bundle.EntryListAccumulator;
 import ca.uhn.fhir.util.bundle.ModifiableBundleEntry;
+import ca.uhn.fhir.util.bundle.SearchBundleEntryParts;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
@@ -34,7 +36,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -228,13 +230,13 @@ public class BundleUtil {
 		retVal.addAll(partsToIBaseMap.values());
 
 		//Blow away the entries and reset them in the right order.
-		TerserUtil.clearField(theContext, "entry", theBundle);
+		TerserUtil.clearField(theContext, theBundle, "entry");
 		TerserUtil.setField(theContext, "entry", theBundle, retVal.toArray(new IBase[0]));
 	}
 
 	private static void validatePartsNotNull(LinkedHashSet<IBase> theDeleteParts) {
 		if (theDeleteParts == null) {
-			throw new IllegalStateException("This transaction contains a cycle, so it cannot be sorted.");
+			throw new IllegalStateException(Msg.code(1745) + "This transaction contains a cycle, so it cannot be sorted.");
 		}
 	}
 
@@ -363,6 +365,52 @@ public class BundleUtil {
 			map.put(parts, nextEntry);
 		}
 		return map;
+	}
+
+
+	public static List<SearchBundleEntryParts> getSearchBundleEntryParts(FhirContext theContext, IBaseBundle theBundle) {
+		RuntimeResourceDefinition bundleDef = theContext.getResourceDefinition(theBundle);
+		BaseRuntimeChildDefinition entryChildDef = bundleDef.getChildByName("entry");
+		List<IBase> entries = entryChildDef.getAccessor().getValues(theBundle);
+
+		BaseRuntimeElementCompositeDefinition<?> entryChildContentsDef = (BaseRuntimeElementCompositeDefinition<?>) entryChildDef.getChildByName("entry");
+		BaseRuntimeChildDefinition fullUrlChildDef = entryChildContentsDef.getChildByName("fullUrl");
+		BaseRuntimeChildDefinition resourceChildDef = entryChildContentsDef.getChildByName("resource");
+		BaseRuntimeChildDefinition searchChildDef = entryChildContentsDef.getChildByName("search");
+		BaseRuntimeElementCompositeDefinition<?> searchChildContentsDef = (BaseRuntimeElementCompositeDefinition<?>) searchChildDef.getChildByName("search");
+		BaseRuntimeChildDefinition searchModeChildDef = searchChildContentsDef.getChildByName("mode");
+
+		List<SearchBundleEntryParts> retVal = new ArrayList<>();
+		for (IBase nextEntry : entries) {
+			SearchBundleEntryParts parts = getSearchBundleEntryParts(fullUrlChildDef, resourceChildDef, searchChildDef, searchModeChildDef, nextEntry);
+			retVal.add(parts);
+		}
+		return retVal;
+
+	}
+
+	private static SearchBundleEntryParts getSearchBundleEntryParts( BaseRuntimeChildDefinition fullUrlChildDef, BaseRuntimeChildDefinition resourceChildDef, BaseRuntimeChildDefinition searchChildDef, BaseRuntimeChildDefinition searchModeChildDef, IBase entry) {
+		IBaseResource resource = null;
+		String matchMode = null;
+
+		String fullUrl = fullUrlChildDef
+			.getAccessor()
+			.getFirstValueOrNull(entry)
+			.map(t->((IPrimitiveType<?>)t).getValueAsString())
+			.orElse(null);
+
+		for (IBase nextResource : resourceChildDef.getAccessor().getValues(entry)) {
+			resource = (IBaseResource) nextResource;
+		}
+
+		for (IBase nextSearch : searchChildDef.getAccessor().getValues(entry)) {
+			for (IBase nextUrl : searchModeChildDef.getAccessor().getValues(nextSearch)) {
+				matchMode = ((IPrimitiveType<?>) nextUrl).getValueAsString();
+			}
+		}
+
+		SearchBundleEntryParts parts = new SearchBundleEntryParts(fullUrl, resource, matchMode);
+		return parts;
 	}
 
 	/**

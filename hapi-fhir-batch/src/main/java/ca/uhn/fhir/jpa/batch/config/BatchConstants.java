@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.batch.config;
  * #%L
  * HAPI FHIR JPA Server - Batch Task Processor
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,8 +54,50 @@ public final class BatchConstants {
 	 * MDM Clear
 	 */
 	public static final String MDM_CLEAR_JOB_NAME = "mdmClearJob";
+
+	/**
+	 * TermCodeSystem delete
+	 */
+	public static final String TERM_CODE_SYSTEM_DELETE_JOB_NAME 			= "termCodeSystemDeleteJob";
+	public static final String TERM_CONCEPT_RELATIONS_DELETE_STEP_NAME	= "termConceptRelationsDeleteStep";
+	public static final String TERM_CONCEPTS_DELETE_STEP_NAME 				= "termConceptsDeleteStep";
+	public static final String TERM_CODE_SYSTEM_VERSION_DELETE_STEP_NAME = "termCodeSystemVersionDeleteStep";
+	public static final String TERM_CODE_SYSTEM_DELETE_STEP_NAME 			= "termCodeSystemDeleteStep";
+	public static final String JOB_PARAM_CODE_SYSTEM_ID 						= "termCodeSystemPid";
+
+	/**
+	 * TermCodeSystemVersion delete
+	 */
+	public static final String TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME 						= "termCodeSystemVersionDeleteJob";
+	public static final String TERM_CONCEPT_RELATIONS_UNIQUE_VERSION_DELETE_STEP_NAME 	= "termConceptRelationsUniqueVersionDeleteStep";
+	public static final String TERM_CONCEPTS_UNIQUE_VERSION_DELETE_STEP_NAME 				= "termConceptsUniqueVersionDeleteStep";
+	public static final String TERM_CODE_SYSTEM_UNIQUE_VERSION_DELETE_STEP_NAME 			= "termCodeSystemUniqueVersionDeleteStep";
+
+	/**
+	 * Both: TermCodeSystem delete and TermCodeSystemVersion delete
+	 */
+	public static final String JOB_PARAM_CODE_SYSTEM_VERSION_ID 			= "termCodeSystemVersionPid";
+
+
 	public static final String BULK_EXPORT_READ_CHUNK_PARAMETER = "readChunkSize";
 	public static final String BULK_EXPORT_GROUP_ID_PARAMETER = "groupId";
+	/**
+	 * Job Parameters
+	 */
+	public static final String READ_CHUNK_PARAMETER = "readChunkSize";
+	public static final String EXPAND_MDM_PARAMETER = "expandMdm";
+	public static final String GROUP_ID_PARAMETER = "groupId";
+	public static final String JOB_RESOURCE_TYPES_PARAMETER = "resourceTypes";
+	public static final String JOB_DESCRIPTION = "jobDescription";
+	public static final String JOB_SINCE_PARAMETER = "since";
+	public static final String JOB_TYPE_FILTERS = "filters";
+	public static final String JOB_COLLECTION_ENTITY_ID = "bulkExportCollectionEntityId";
+
+	/**
+	 * Job Execution Context
+	 */
+	public static final String JOB_EXECUTION_RESOURCE_TYPE = "resourceType";
+
 	/**
 	 * This Set contains the step names across all job types that are appropriate for
 	 * someone to look at the write count for that given step in order to determine the

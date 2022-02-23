@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.batch.processor;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,12 @@ package ca.uhn.fhir.jpa.batch.processor;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.fhirpath.IFhirPath;
+import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.batch.log.Logs;
-import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
 import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
 import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.HapiExtensions;
@@ -57,7 +58,7 @@ public class GoldenResourceAnnotatingProcessor implements ItemProcessor<List<IBa
 	@Autowired
 	private MdmExpansionCacheSvc myMdmExpansionCacheSvc;
 
-	@Value("#{jobParameters['" + BulkExportJobConfig.EXPAND_MDM_PARAMETER+ "'] ?: false}")
+	@Value("#{jobParameters['" + BatchConstants.EXPAND_MDM_PARAMETER + "'] ?: false}")
 	private boolean myMdmEnabled;
 
 
@@ -71,7 +72,7 @@ public class GoldenResourceAnnotatingProcessor implements ItemProcessor<List<IBa
 		Optional<RuntimeSearchParam> oPatientSearchParam= SearchParameterUtil.getOnlyPatientSearchParamForResourceType(myContext, myResourceType);
 		if (!oPatientSearchParam.isPresent()) {
 			String errorMessage = String.format("[%s] has  no search parameters that are for patients, so it is invalid for Group Bulk Export!", myResourceType);
-			throw new IllegalArgumentException(errorMessage);
+			throw new IllegalArgumentException(Msg.code(1279) + errorMessage);
 		} else {
 			myRuntimeSearchParam = oPatientSearchParam.get();
 		}

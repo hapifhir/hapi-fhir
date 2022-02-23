@@ -4,7 +4,7 @@ package ca.uhn.hapi.fhir.docs;
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.hapi.fhir.docs;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.valueset.IssueSeverityEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -39,7 +40,7 @@ public Patient read(@IdParam IdType theId) {
    if (databaseIsDown) {
       OperationOutcome oo = new OperationOutcome();
       oo.addIssue().setSeverity(IssueSeverityEnum.FATAL).setDetails("Database is down");
-      throw new InternalErrorException("Database is down", oo);
+      throw new InternalErrorException(Msg.code(641) + "Database is down", oo);
    }
    
    Patient patient = new Patient(); // populate this

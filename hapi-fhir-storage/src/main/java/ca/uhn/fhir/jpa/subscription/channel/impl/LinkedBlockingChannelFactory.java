@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription.channel.impl;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.subscription.channel.impl;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
@@ -48,7 +49,7 @@ public class LinkedBlockingChannelFactory implements IChannelFactory {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(LinkedBlockingChannelFactory.class);
 	private final IChannelNamer myChannelNamer;
-	private Map<String, LinkedBlockingChannel> myChannels = Collections.synchronizedMap(new HashMap<>());
+	private final Map<String, LinkedBlockingChannel> myChannels = Collections.synchronizedMap(new HashMap<>());
 
 	public LinkedBlockingChannelFactory(IChannelNamer theChannelNamer) {
 		myChannelNamer = theChannelNamer;
@@ -69,7 +70,10 @@ public class LinkedBlockingChannelFactory implements IChannelFactory {
 		return myChannelNamer;
 	}
 
-	private LinkedBlockingChannel getOrCreateChannel(String theChannelName, int theConcurrentConsumers, IChannelSettings theChannelSettings) {
+	private LinkedBlockingChannel getOrCreateChannel(String theChannelName,
+																	 int theConcurrentConsumers,
+																	 IChannelSettings theChannelSettings) {
+		// TODO - does this need retry settings?
 		final String channelName = myChannelNamer.getChannelName(theChannelName, theChannelSettings);
 
 		return myChannels.computeIfAbsent(channelName, t -> {
@@ -90,7 +94,7 @@ public class LinkedBlockingChannelFactory implements IChannelFactory {
 					queue.put(theRunnable);
 				} catch (InterruptedException e) {
 					Thread.currentThread().interrupt();
-					throw new RejectedExecutionException("Task " + theRunnable.toString() +
+					throw new RejectedExecutionException(Msg.code(568) + "Task " + theRunnable.toString() +
 						" rejected from " + e.toString());
 				}
 				ourLog.info("Slot become available after {}ms", sw.getMillis());

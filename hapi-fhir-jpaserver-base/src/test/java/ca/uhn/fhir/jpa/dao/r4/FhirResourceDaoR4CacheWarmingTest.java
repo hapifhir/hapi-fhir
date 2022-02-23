@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.WarmCacheEntry;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
@@ -49,7 +50,7 @@ public class FhirResourceDaoR4CacheWarmingTest extends BaseJpaR4Test {
 			cacheWarmingSvc.initCacheMap();
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Unknown resource name \"BadResource\" (this name is not known in FHIR version \"R4\")", e.getMessage());
+			assertEquals(Msg.code(1684) + "Unknown resource name \"BadResource\" (this name is not known in FHIR version \"R4\")", e.getMessage());
 		}
 
 		myDaoConfig.setWarmCacheEntries(new ArrayList<>());
@@ -62,7 +63,7 @@ public class FhirResourceDaoR4CacheWarmingTest extends BaseJpaR4Test {
 			cacheWarmingSvc.initCacheMap();
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals("Invalid warm cache URL (must have ? character)", e.getMessage());
+			assertEquals(Msg.code(1172) + "Invalid warm cache URL (must have ? character)", e.getMessage());
 		}
 
 

@@ -4,7 +4,7 @@ import ca.uhn.fhir.context.phonetic.ApacheEncoder;
 import ca.uhn.fhir.context.phonetic.NumericEncoder;
 import ca.uhn.fhir.context.phonetic.PhoneticEncoderEnum;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.dao.BaseJpaTest;
+import ca.uhn.fhir.jpa.config.TestHibernateSearchAddInConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -20,7 +20,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,9 +32,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-@TestPropertySource(properties = {
-	BaseJpaTest.CONFIG_ENABLE_LUCENE_FALSE
-})
+@ContextConfiguration(classes = TestHibernateSearchAddInConfig.NoFT.class)
 public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu3PhoneticSearchNoFtTest.class);
 	public static final String GALE = "Gale";
@@ -98,7 +96,7 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 		patient.addName().addGiven(GALE);
 		patient.addAddress().addLine(ADDRESS);
 		patient.addTelecom().setValue(PHONE);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 
 		IIdType pId = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
@@ -152,7 +150,7 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 		searchParameter.addExtension()
 			.setUrl(HapiExtensions.EXT_SEARCHPARAM_PHONETIC_ENCODER)
 			.setValue(new StringType(theEncoder.name()));
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
 		mySearchParameterDao.create(searchParameter, mySrd).getId().toUnqualifiedVersionless();
 	}
 

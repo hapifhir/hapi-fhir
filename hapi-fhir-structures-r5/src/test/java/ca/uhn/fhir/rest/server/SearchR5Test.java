@@ -91,7 +91,7 @@ public class SearchR5Test {
 		@SuppressWarnings("rawtypes")
 		@Search()
 		public List search(
-			@RequiredParam(name = Patient.SP_IDENTIFIER) TokenAndListParam theIdentifiers) {
+			@RequiredParam(name = "identifier") TokenAndListParam theIdentifiers) {
 			ourLastMethod = "search";
 			ourIdentifiers = theIdentifiers;
 			ArrayList<Patient> retVal = new ArrayList<>();

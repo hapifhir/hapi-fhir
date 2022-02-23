@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,18 +20,18 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.base.composite.BaseContainedDt;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 
 public class RuntimeChildContainedResources extends BaseRuntimeDeclaredChildDefinition {
 
@@ -82,7 +82,7 @@ public class RuntimeChildContainedResources extends BaseRuntimeDeclaredChildDefi
 		} else if (List.class.isAssignableFrom(actualType)) {
 			myElem = new RuntimeElemContainedResourceList(IBaseResource.class, false);
 		} else {
-			throw new ConfigurationException("Fhir Version definition returned invalid contained type: " + actualType);
+			throw new ConfigurationException(Msg.code(1735) + "Fhir Version definition returned invalid contained type: " + actualType);
 		}
 	}
 

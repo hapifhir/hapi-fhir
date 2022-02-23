@@ -225,57 +225,6 @@ public class SearchParamExtractorR4Test {
 
 
 	@Test
-	public void testTokenText_Enabled_Identifier() {
-		Observation obs = new Observation();
-		obs.addIdentifier().setSystem("sys").setValue("val").getType().setText("Help Im a Bug");
-
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), myPartitionSettings, ourCtx, mySearchParamRegistry);
-
-		List<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(obs)
-			.stream()
-			.filter(t -> t.getParamName().equals("identifier"))
-			.sorted(comparing(o -> o.getClass().getName()).reversed())
-			.collect(Collectors.toList());
-		assertEquals(2, tokens.size());
-
-		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.get(0);
-		assertEquals("identifier", token.getParamName());
-		assertEquals("sys", token.getSystem());
-		assertEquals("val", token.getValue());
-
-		ResourceIndexedSearchParamString string = (ResourceIndexedSearchParamString) tokens.get(1);
-		assertEquals("identifier", string.getParamName());
-		assertEquals("Help Im a Bug", string.getValueExact());
-	}
-
-	@Test
-	public void testTokenText_DisabledInSearchParam_Identifier() {
-		RuntimeSearchParam existingCodeSp = mySearchParamRegistry.getActiveSearchParams("Observation").get("identifier");
-		RuntimeSearchParam codeSearchParam = new RuntimeSearchParam(existingCodeSp);
-		codeSearchParam.addExtension(HapiExtensions.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING, new Extension(HapiExtensions.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING, new BooleanType(true)));
-
-		mySearchParamRegistry.addSearchParam(codeSearchParam);
-
-		Observation obs = new Observation();
-		obs.addIdentifier().setSystem("sys").setValue("val").getType().setText("Help Im a Bug");
-
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), myPartitionSettings, ourCtx, mySearchParamRegistry);
-
-		List<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(obs)
-			.stream()
-			.filter(t -> t.getParamName().equals("identifier"))
-			.sorted(comparing(o -> o.getClass().getName()).reversed())
-			.collect(Collectors.toList());
-		assertEquals(1, tokens.size());
-
-		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.get(0);
-		assertEquals("identifier", token.getParamName());
-		assertEquals("sys", token.getSystem());
-		assertEquals("val", token.getValue());
-
-	}
-
-	@Test
 	public void testReferenceWithResolve() {
 		Encounter enc = new Encounter();
 		enc.addLocation().setLocation(new Reference("Location/123"));
@@ -392,6 +341,49 @@ public class SearchParamExtractorR4Test {
 		List<String> list = extractor.extractParamValuesAsStrings(existingCodeSp, o1);
 
 		assertEquals(2, list.size());
+	}
+
+	@Test
+	public void testExtractIdentifierOfType() {
+
+		ModelConfig modelConfig = new ModelConfig();
+		modelConfig.setIndexIdentifierOfType(true);
+
+		Patient patient = new Patient();
+		patient
+			.addIdentifier()
+			.setSystem("http://foo1")
+			.setValue("bar1")
+			.getType()
+			.addCoding()
+			.setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
+			.setCode("MR");
+		patient
+			.addIdentifier()
+			.setSystem("http://foo2")
+			.setValue("bar2")
+			.getType()
+			.addCoding()
+			.setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
+			.setCode("MR");
+
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(modelConfig, new PartitionSettings(), ourCtx, mySearchParamRegistry);
+		List<ResourceIndexedSearchParamToken> list = extractor
+			.extractSearchParamTokens(patient)
+			.stream()
+			.map(t->(ResourceIndexedSearchParamToken)t)
+			.collect(Collectors.toList());
+		list.forEach(t->t.calculateHashes());
+		ourLog.info("Found tokens:\n * {}", list.stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+
+		assertThat(list, containsInAnyOrder(
+			new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "deceased", null, "false"),
+			new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "identifier", "http://foo1", "bar1"),
+			new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "identifier", "http://foo2", "bar2"),
+			new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "identifier:of-type", "http://terminology.hl7.org/CodeSystem/v2-0203", "MR|bar1"),
+			new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "identifier:of-type", "http://terminology.hl7.org/CodeSystem/v2-0203", "MR|bar2")
+		));
+
 	}
 
 	private static class MySearchParamRegistry implements ISearchParamRegistry, ISearchParamRegistryController {

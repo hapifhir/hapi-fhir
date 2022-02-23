@@ -1,17 +1,30 @@
 package ca.uhn.fhir.jpa.subscription.resthook;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.config.StoppableSubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.HapiExtensions;
-import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Meta;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.SearchParameter;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Subscription;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -22,6 +35,7 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import static ca.uhn.fhir.util.HapiExtensions.EX_SEND_DELETE_MESSAGES;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -68,9 +82,10 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		// Should see 1 subscription notification
 		waitForQueueToDrain();
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(1, ourUpdatedObservations);
-		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
+		assertEquals(0, ourObservationProvider.getCountCreate());
+		ourObservationProvider.waitForUpdateCount(1);
+
+		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
 	}
 
 	@Test
@@ -92,15 +107,14 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		// Should see 1 subscription notification
 		waitForQueueToDrain();
-		int idx = 0;
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(1, ourUpdatedObservations);
-		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(idx));
-		assertEquals("1", ourUpdatedObservations.get(idx).getIdElement().getVersionIdPart());
-		assertEquals("1", ourUpdatedObservations.get(idx).getMeta().getVersionId());
-		assertEquals(obs.getMeta().getLastUpdatedElement().getValueAsString(), ourUpdatedObservations.get(idx).getMeta().getLastUpdatedElement().getValueAsString());
-		assertEquals(obs.getMeta().getLastUpdatedElement().getValueAsString(), ourUpdatedObservations.get(idx).getMeta().getLastUpdatedElement().getValueAsString());
-		assertEquals("1", ourUpdatedObservations.get(idx).getIdentifierFirstRep().getValue());
+		assertEquals(0, ourObservationProvider.getCountCreate());
+		ourObservationProvider.waitForUpdateCount(1);
+		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
+		assertEquals("1", ourObservationProvider.getStoredResources().get(0).getIdElement().getVersionIdPart());
+		assertEquals("1", ourObservationProvider.getStoredResources().get(0).getMeta().getVersionId());
+		assertEquals(obs.getMeta().getLastUpdatedElement().getValueAsString(), ourObservationProvider.getStoredResources().get(0).getMeta().getLastUpdatedElement().getValueAsString());
+		assertEquals(obs.getMeta().getLastUpdatedElement().getValueAsString(), ourObservationProvider.getStoredResources().get(0).getMeta().getLastUpdatedElement().getValueAsString());
+		assertEquals("1", ourObservationProvider.getStoredResources().get(0).getIdentifierFirstRep().getValue());
 
 		/*
 		 * Send version 2
@@ -112,15 +126,14 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		// Should see 1 subscription notification
 		waitForQueueToDrain();
-		idx++;
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(2, ourUpdatedObservations);
-		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(idx));
-		assertEquals("2", ourUpdatedObservations.get(idx).getIdElement().getVersionIdPart());
-		assertEquals("2", ourUpdatedObservations.get(idx).getMeta().getVersionId());
-		assertEquals(obs.getMeta().getLastUpdatedElement().getValueAsString(), ourUpdatedObservations.get(idx).getMeta().getLastUpdatedElement().getValueAsString());
-		assertEquals(obs.getMeta().getLastUpdatedElement().getValueAsString(), ourUpdatedObservations.get(idx).getMeta().getLastUpdatedElement().getValueAsString());
-		assertEquals("2", ourUpdatedObservations.get(idx).getIdentifierFirstRep().getValue());
+		assertEquals(0, ourObservationProvider.getCountCreate());
+		ourObservationProvider.waitForUpdateCount(2);
+		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
+		assertEquals("2", ourObservationProvider.getStoredResources().get(0).getIdElement().getVersionIdPart());
+		assertEquals("2", ourObservationProvider.getStoredResources().get(0).getMeta().getVersionId());
+		assertEquals(obs.getMeta().getLastUpdatedElement().getValueAsString(), ourObservationProvider.getStoredResources().get(0).getMeta().getLastUpdatedElement().getValueAsString());
+		assertEquals(obs.getMeta().getLastUpdatedElement().getValueAsString(), ourObservationProvider.getStoredResources().get(0).getMeta().getLastUpdatedElement().getValueAsString());
+		assertEquals("2", ourObservationProvider.getStoredResources().get(0).getIdentifierFirstRep().getValue());
 	}
 
 	@Test
@@ -151,9 +164,9 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		// Send the transaction
 		mySystemDao.transaction(null, bundle);
 
-		waitForSize(1, ourUpdatedObservations);
+		ourObservationProvider.waitForUpdateCount(1);
 
-		assertThat(ourUpdatedObservations.get(0).getSubject().getReference(), matchesPattern("Patient/[0-9]+"));
+		assertThat(ourObservationProvider.getStoredResources().get(0).getSubject().getReference(), matchesPattern("Patient/[0-9]+"));
 	}
 
 	@Test
@@ -183,14 +196,13 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		// Should see 1 subscription notification
 		waitForQueueToDrain();
-		int idx = 0;
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(1, ourUpdatedObservations);
-		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(idx));
-		assertEquals("1", ourUpdatedObservations.get(idx).getIdElement().getVersionIdPart());
-		assertEquals("1", ourUpdatedObservations.get(idx).getMeta().getVersionId());
-		assertEquals(obs.getMeta().getLastUpdatedElement().getValueAsString(), ourUpdatedObservations.get(idx).getMeta().getLastUpdatedElement().getValueAsString());
-		assertEquals("1", ourUpdatedObservations.get(idx).getIdentifierFirstRep().getValue());
+		assertEquals(0, ourObservationProvider.getCountCreate());
+		ourObservationProvider.waitForUpdateCount(1);
+		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
+		assertEquals("1", ourObservationProvider.getStoredResources().get(0).getIdElement().getVersionIdPart());
+		assertEquals("1", ourObservationProvider.getStoredResources().get(0).getMeta().getVersionId());
+		assertEquals(obs.getMeta().getLastUpdatedElement().getValueAsString(), ourObservationProvider.getStoredResources().get(0).getMeta().getLastUpdatedElement().getValueAsString());
+		assertEquals("1", ourObservationProvider.getStoredResources().get(0).getIdentifierFirstRep().getValue());
 
 		/*
 		 * Send version 2
@@ -209,14 +221,13 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		// Should see 1 subscription notification
 		waitForQueueToDrain();
-		idx++;
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(2, ourUpdatedObservations);
-		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(idx));
-		assertEquals("2", ourUpdatedObservations.get(idx).getIdElement().getVersionIdPart());
-		assertEquals("2", ourUpdatedObservations.get(idx).getMeta().getVersionId());
-		assertEquals(obs.getMeta().getLastUpdatedElement().getValueAsString(), ourUpdatedObservations.get(idx).getMeta().getLastUpdatedElement().getValueAsString());
-		assertEquals("2", ourUpdatedObservations.get(idx).getIdentifierFirstRep().getValue());
+		assertEquals(0, ourObservationProvider.getCountCreate());
+		ourObservationProvider.waitForUpdateCount(2);
+		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
+		assertEquals("2", ourObservationProvider.getStoredResources().get(0).getIdElement().getVersionIdPart());
+		assertEquals("2", ourObservationProvider.getStoredResources().get(0).getMeta().getVersionId());
+		assertEquals(obs.getMeta().getLastUpdatedElement().getValueAsString(), ourObservationProvider.getStoredResources().get(0).getMeta().getLastUpdatedElement().getValueAsString());
+		assertEquals("2", ourObservationProvider.getStoredResources().get(0).getIdentifierFirstRep().getValue());
 	}
 
 	@Test
@@ -237,7 +248,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 			myObservationDao.create(observation);
 		}
 
-		waitForSize(100, ourUpdatedObservations);
+		ourObservationProvider.waitForUpdateCount(100);
 	}
 
 
@@ -265,7 +276,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		observation.setStatus(Observation.ObservationStatus.FINAL);
 		myObservationDao.create(observation);
 
-		waitForSize(1, ourUpdatedObservations);
+		ourObservationProvider.waitForUpdateCount(1);
 	}
 
 	@Test
@@ -297,9 +308,9 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		// Should see 1 subscription notification
 		waitForQueueToDrain();
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(1, ourUpdatedObservations);
-		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
+		assertEquals(0, ourObservationProvider.getCountCreate());
+		ourObservationProvider.waitForUpdateCount(1);
+		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
 
 		// Send a meta-add
 		obs.setId(obs.getIdElement().toUnqualifiedVersionless());
@@ -312,8 +323,8 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		// Should be no further deliveries
 		Thread.sleep(1000);
 		waitForQueueToDrain();
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(1, ourUpdatedObservations);
+		assertEquals(0, ourObservationProvider.getCountCreate());
+		ourObservationProvider.waitForUpdateCount(1);
 
 		// Send a meta-delete
 		obs.setId(obs.getIdElement().toUnqualifiedVersionless());
@@ -326,8 +337,8 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		// Should be no further deliveries
 		Thread.sleep(1000);
 		waitForQueueToDrain();
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(1, ourUpdatedObservations);
+		assertEquals(0, ourObservationProvider.getCountCreate());
+		ourObservationProvider.waitForUpdateCount(1);
 
 	}
 
@@ -349,9 +360,9 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		// Should see 1 subscription notification
 		waitForQueueToDrain();
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(1, ourUpdatedObservations);
-		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
+		assertEquals(0, ourObservationProvider.getCountCreate());
+		ourObservationProvider.waitForUpdateCount(1);
+		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
 
 		// Send a meta-add
 		obs.setId(obs.getIdElement().toUnqualifiedVersionless());
@@ -364,8 +375,8 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		// Should be no further deliveries
 		Thread.sleep(1000);
 		waitForQueueToDrain();
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(3, ourUpdatedObservations);
+		assertEquals(0, ourObservationProvider.getCountCreate());
+		ourObservationProvider.waitForUpdateCount(3);
 
 		// Send a meta-delete
 		obs.setId(obs.getIdElement().toUnqualifiedVersionless());
@@ -378,8 +389,8 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		// Should be no further deliveries
 		Thread.sleep(1000);
 		waitForQueueToDrain();
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(5, ourUpdatedObservations);
+		assertEquals(0, ourObservationProvider.getCountCreate());
+		ourObservationProvider.waitForUpdateCount(5);
 
 	}
 
@@ -399,9 +410,9 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		// Should see 1 subscription notification
 		waitForQueueToDrain();
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(1, ourUpdatedObservations);
-		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
+		assertEquals(0, ourObservationProvider.getCountCreate());
+		ourObservationProvider.waitForUpdateCount(1);
+		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
 
 		// Send an update with no changes
 		obs.setId(obs.getIdElement().toUnqualifiedVersionless());
@@ -410,8 +421,8 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		// Should be no further deliveries
 		Thread.sleep(1000);
 		waitForQueueToDrain();
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(1, ourUpdatedObservations);
+		assertEquals(0, ourObservationProvider.getCountCreate());
+		ourObservationProvider.waitForUpdateCount(1);
 
 
 	}
@@ -432,11 +443,11 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		Observation observation1 = sendObservation(code, "SNOMED-CT");
 
 		waitForQueueToDrain();
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(1, ourUpdatedObservations);
-		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
+		assertEquals(0, ourObservationProvider.getCountCreate());
+		ourObservationProvider.waitForUpdateCount(1);
+		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
 
-		IdType idElement = ourUpdatedObservations.get(0).getIdElement();
+		IdType idElement = ourObservationProvider.getStoredResources().get(0).getIdElement();
 		assertEquals(observation1.getIdElement().getIdPart(), idElement.getIdPart());
 		// VersionId is present
 		assertEquals(observation1.getIdElement().getVersionIdPart(), idElement.getVersionIdPart());
@@ -454,11 +465,11 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		Observation observation2 = sendObservation(code, "SNOMED-CT");
 
 		waitForQueueToDrain();
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(2, ourUpdatedObservations);
-		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(1));
+		assertEquals(0, ourObservationProvider.getCountCreate());
+		ourObservationProvider.waitForUpdateCount(2);
+		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(1));
 
-		idElement = ourUpdatedObservations.get(1).getIdElement();
+		idElement = ourObservationProvider.getResourceUpdates().get(1).getIdElement();
 		assertEquals(observation2.getIdElement().getIdPart(), idElement.getIdPart());
 		// Now VersionId is stripped
 		assertEquals(null, idElement.getVersionIdPart());
@@ -495,17 +506,50 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
 
 
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(2, ourUpdatedObservations);
+		assertEquals(0, ourObservationProvider.getCountCreate());
+		ourObservationProvider.waitForUpdateCount(2);
 
-		Observation observation1 = ourUpdatedObservations.get(0);
-		Observation observation2 = ourUpdatedObservations.get(1);
+		Observation observation1 = ourObservationProvider.getResourceUpdates().get(0);
+		Observation observation2 = ourObservationProvider.getResourceUpdates().get(1);
 
 		assertEquals("1", observation1.getIdElement().getVersionIdPart());
 		assertNull(observation1.getNoteFirstRep().getText());
 		assertEquals("2", observation2.getIdElement().getVersionIdPart());
 		assertEquals("changed", observation2.getNoteFirstRep().getText());
 	}
+
+
+	@Test
+	public void RestHookSubscriptionWithPayloadSendsDeleteRequest() throws Exception {
+		String payload = "application/json";
+		String criteria1 = "[*]";
+
+		Extension sendDeleteMessagesExtension = new Extension()
+			.setUrl(EX_SEND_DELETE_MESSAGES)
+			.setValue(new BooleanType(true));
+
+		waitForActivatedSubscriptionCount(0);
+		createSubscription(criteria1, payload, sendDeleteMessagesExtension);
+		waitForActivatedSubscriptionCount(1);
+
+		myStoppableSubscriptionDeliveringRestHookSubscriber.pause();
+		final CountDownLatch countDownLatch = new CountDownLatch(1);
+		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(countDownLatch);
+
+		ourLog.info("** About to send observation");
+		Observation observation = sendObservation("OB-01", "SNOMED-CT");
+		assertEquals("1", observation.getIdElement().getVersionIdPart());
+
+		// Wait for our delivery channel thread to be paused
+		assertTrue(countDownLatch.await(5L, TimeUnit.SECONDS));
+		// Open the floodgates!
+		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
+
+		ourLog.info("** About to delete observation");
+		myObservationDao.delete(IdDt.of(observation).toUnqualifiedVersionless());
+		ourObservationProvider.waitForDeleteCount(1);
+	}
+
 
 	@Test
 	public void testRestHookSubscriptionGetsLatestVersionWithFlag() throws Exception {
@@ -544,11 +588,11 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
 
 
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(2, ourUpdatedObservations);
+		assertEquals(0, ourObservationProvider.getCountCreate());
+		ourObservationProvider.waitForUpdateCount(2);
 
-		Observation observation1 = ourUpdatedObservations.get(0);
-		Observation observation2 = ourUpdatedObservations.get(1);
+		Observation observation1 = ourObservationProvider.getResourceUpdates().get(0);
+		Observation observation2 = ourObservationProvider.getResourceUpdates().get(1);
 
 		assertEquals("2", observation1.getIdElement().getVersionIdPart());
 		assertEquals("changed", observation1.getNoteFirstRep().getText());
@@ -572,11 +616,11 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		// Should see 1 subscription notification
 		waitForQueueToDrain();
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(1, ourUpdatedObservations);
-		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
+		assertEquals(0, ourObservationProvider.getCountCreate());
+		ourObservationProvider.waitForUpdateCount(1);
+		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
 
-		assertEquals("1", ourUpdatedObservations.get(0).getIdElement().getVersionIdPart());
+		assertEquals("1", ourObservationProvider.getStoredResources().get(0).getIdElement().getVersionIdPart());
 
 		Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
 		assertNotNull(subscriptionTemp);
@@ -589,8 +633,8 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		waitForQueueToDrain();
 
 		// Should see two subscription notifications
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(3, ourUpdatedObservations);
+		assertEquals(0, ourObservationProvider.getCountCreate());
+		ourObservationProvider.waitForUpdateCount(3);
 
 		myClient.delete().resourceById(new IdType("Subscription/" + subscription2.getId())).execute();
 		waitForActivatedSubscriptionCount(1);
@@ -599,8 +643,8 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		waitForQueueToDrain();
 
 		// Should see only one subscription notification
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(4, ourUpdatedObservations);
+		assertEquals(0, ourObservationProvider.getCountCreate());
+		ourObservationProvider.waitForUpdateCount(4);
 
 		Observation observation3 = myClient.read(Observation.class, observationTemp3.getId());
 		CodeableConcept codeableConcept = new CodeableConcept();
@@ -612,8 +656,8 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		// Should see no subscription notification
 		waitForQueueToDrain();
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(4, ourUpdatedObservations);
+		assertEquals(0, ourObservationProvider.getCountCreate());
+		ourObservationProvider.waitForUpdateCount(4);
 
 		Observation observation3a = myClient.read(Observation.class, observationTemp3.getId());
 
@@ -626,8 +670,8 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		// Should see only one subscription notification
 		waitForQueueToDrain();
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(5, ourUpdatedObservations);
+		assertEquals(0, ourObservationProvider.getCountCreate());
+		ourObservationProvider.waitForUpdateCount(5);
 
 		assertFalse(subscription1.getId().equals(subscription2.getId()));
 		assertFalse(observation1.getId().isEmpty());
@@ -652,11 +696,11 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		// Should see 1 subscription notification
 		waitForQueueToDrain();
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(1, ourUpdatedObservations);
-		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
+		assertEquals(0, ourObservationProvider.getCountCreate());
+		ourObservationProvider.waitForUpdateCount(1);
+		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
 
-		assertEquals("1", ourUpdatedObservations.get(0).getIdElement().getVersionIdPart());
+		assertEquals("1", ourObservationProvider.getStoredResources().get(0).getIdElement().getVersionIdPart());
 
 		Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
 		assertNotNull(subscriptionTemp);
@@ -669,8 +713,8 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		waitForQueueToDrain();
 
 		// Should see two subscription notifications
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(3, ourUpdatedObservations);
+		assertEquals(0, ourObservationProvider.getCountCreate());
+		ourObservationProvider.waitForUpdateCount(3);
 
 		myClient.delete().resourceById(new IdType("Subscription/" + subscription2.getId())).execute();
 		waitForQueueToDrain();
@@ -679,8 +723,8 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		waitForQueueToDrain();
 
 		// Should see only one subscription notification
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(4, ourUpdatedObservations);
+		assertEquals(0, ourObservationProvider.getCountCreate());
+		ourObservationProvider.waitForUpdateCount(4);
 
 		Observation observation3 = myClient.read(Observation.class, observationTemp3.getId());
 		CodeableConcept codeableConcept = new CodeableConcept();
@@ -692,8 +736,8 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		// Should see no subscription notification
 		waitForQueueToDrain();
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(4, ourUpdatedObservations);
+		assertEquals(0, ourObservationProvider.getCountCreate());
+		ourObservationProvider.waitForUpdateCount(4);
 
 		Observation observation3a = myClient.read(Observation.class, observationTemp3.getId());
 
@@ -706,8 +750,8 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		// Should see only one subscription notification
 		waitForQueueToDrain();
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(5, ourUpdatedObservations);
+		assertEquals(0, ourObservationProvider.getCountCreate());
+		ourObservationProvider.waitForUpdateCount(5);
 
 		assertFalse(subscription1.getId().equals(subscription2.getId()));
 		assertFalse(observation1.getId().isEmpty());
@@ -730,9 +774,9 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		Observation observation1 = sendObservation(code, "SNOMED-CT");
 
 		// Should see 1 subscription notification
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(1, ourUpdatedObservations);
-		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
+		assertEquals(0, ourObservationProvider.getCountCreate());
+		ourObservationProvider.waitForUpdateCount(1);
+		assertEquals(Constants.CT_FHIR_XML_NEW, ourRestfulServer.getRequestContentTypes().get(0));
 
 		Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
 		assertNotNull(subscriptionTemp);
@@ -744,8 +788,8 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		waitForQueueToDrain();
 
 		// Should see two subscription notifications
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(3, ourUpdatedObservations);
+		assertEquals(0, ourObservationProvider.getCountCreate());
+		ourObservationProvider.waitForUpdateCount(3);
 
 		myClient.delete().resourceById(new IdType("Subscription/" + subscription2.getId())).execute();
 
@@ -753,8 +797,8 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		// Should see only one subscription notification
 		waitForQueueToDrain();
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(4, ourUpdatedObservations);
+		assertEquals(0, ourObservationProvider.getCountCreate());
+		ourObservationProvider.waitForUpdateCount(4);
 
 		Observation observation3 = myClient.read(Observation.class, observationTemp3.getId());
 		CodeableConcept codeableConcept = new CodeableConcept();
@@ -766,8 +810,8 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		// Should see no subscription notification
 		waitForQueueToDrain();
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(4, ourUpdatedObservations);
+		assertEquals(0, ourObservationProvider.getCountCreate());
+		ourObservationProvider.waitForUpdateCount(4);
 
 		Observation observation3a = myClient.read(Observation.class, observationTemp3.getId());
 
@@ -780,12 +824,66 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		// Should see only one subscription notification
 		waitForQueueToDrain();
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(5, ourUpdatedObservations);
+		assertEquals(0, ourObservationProvider.getCountCreate());
+		ourObservationProvider.waitForUpdateCount(5);
 
 		assertFalse(subscription1.getId().equals(subscription2.getId()));
 		assertFalse(observation1.getId().isEmpty());
 		assertFalse(observation2.getId().isEmpty());
+	}
+
+	@Test
+	public void testRestHookSubscriptionStarCriteria() throws Exception {
+		String payload = "application/json";
+
+		String code = "1000000050";
+		String criteria1 = "[*]";
+
+		createSubscription(criteria1, payload);
+		waitForActivatedSubscriptionCount(1);
+
+		sendObservation(code, "SNOMED-CT");
+		sendPatient();
+
+		waitForQueueToDrain();
+
+		// Should see 1 subscription notification for each type
+		ourObservationProvider.waitForCreateCount(0);
+		ourObservationProvider.waitForUpdateCount(1);
+		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
+		ourPatientProvider.waitForCreateCount(0);
+		ourPatientProvider.waitForUpdateCount(1);
+		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(1));
+
+	}
+
+
+	@Test
+	public void testRestHookSubscriptionMultiTypeCriteria() throws Exception {
+		String payload = "application/json";
+
+		String code = "1000000050";
+		String criteria1 = "[Observation,Patient]";
+
+		createSubscription(criteria1, payload);
+		waitForActivatedSubscriptionCount(1);
+
+		sendOrganization();
+		sendObservation(code, "SNOMED-CT");
+		sendPatient();
+
+		waitForQueueToDrain();
+
+		// Should see 1 subscription notification for each type
+		ourObservationProvider.waitForCreateCount(0);
+		ourObservationProvider.waitForUpdateCount(1);
+		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
+		ourPatientProvider.waitForCreateCount(0);
+		ourPatientProvider.waitForUpdateCount(1);
+		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(1));
+		ourOrganizationProvider.waitForCreateCount(0);
+		ourOrganizationProvider.waitForUpdateCount(0);
+
 	}
 
 	@Test
@@ -831,12 +929,12 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		myClient.transaction().withBundle(requestBundle).execute();
 
 		// Should see 1 subscription notification
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(1, ourUpdatedObservations);
-		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
+		assertEquals(0, ourObservationProvider.getCountCreate());
+		ourObservationProvider.waitForUpdateCount(1);
+		assertEquals(Constants.CT_FHIR_XML_NEW, ourRestfulServer.getRequestContentTypes().get(0));
 
-		Observation obs = ourUpdatedObservations.get(0);
-		ourLog.info("Observation content: {}", myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(obs));
+		Observation obs = ourObservationProvider.getStoredResources().get(0);
+		ourLog.info("Observation content: {}", myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(obs));
 	}
 
 	@Test
@@ -857,7 +955,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		// Criteria didn't match, shouldn't see any updates
 		waitForQueueToDrain();
 		Thread.sleep(1000);
-		assertEquals(0, ourUpdatedObservations.size());
+		assertEquals(0, ourObservationProvider.getCountUpdate());
 
 		Subscription subscriptionTemp = myClient.read().resource(Subscription.class).withId(subscription2.getId()).execute();
 		assertNotNull(subscriptionTemp);
@@ -872,8 +970,8 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		waitForQueueToDrain();
 
 		// Should see a subscription notification this time
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(1, ourUpdatedObservations);
+		assertEquals(0, ourObservationProvider.getCountCreate());
+		ourObservationProvider.waitForUpdateCount(1);
 
 		myClient.delete().resourceById(new IdType("Subscription/" + subscription2.getId())).execute();
 
@@ -881,7 +979,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		// No more matches
 		Thread.sleep(1000);
-		assertEquals(1, ourUpdatedObservations.size());
+		assertEquals(1, ourObservationProvider.getCountUpdate());
 	}
 
 	@Test
@@ -900,9 +998,9 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		// Should see 1 subscription notification
 		waitForQueueToDrain();
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(1, ourUpdatedObservations);
-		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
+		assertEquals(0, ourObservationProvider.getCountCreate());
+		ourObservationProvider.waitForUpdateCount(1);
+		assertEquals(Constants.CT_FHIR_XML_NEW, ourRestfulServer.getRequestContentTypes().get(0));
 	}
 
 	@Test
@@ -915,7 +1013,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 			createSubscription(criteria1, payload);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: Invalid subscription criteria submitted: Observation?codeeeee=SNOMED-CT Failed to parse match URL[Observation?codeeeee=SNOMED-CT] - Resource type Observation does not have a parameter with name: codeeeee", e.getMessage());
+			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(9) + "Invalid subscription criteria submitted: Observation?codeeeee=SNOMED-CT " + Msg.code(488) + "Failed to parse match URL[Observation?codeeeee=SNOMED-CT] - Resource type Observation does not have a parameter with name: codeeeee", e.getMessage());
 		}
 	}
 
@@ -940,11 +1038,11 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		// Should see 1 subscription notification
 		waitForQueueToDrain();
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(1, ourUpdatedObservations);
-		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
-		assertThat(ourHeaders, hasItem("X-Foo: FOO"));
-		assertThat(ourHeaders, hasItem("X-Bar: BAR"));
+		assertEquals(0, ourObservationProvider.getCountCreate());
+		ourObservationProvider.waitForUpdateCount(1);
+		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
+		assertThat(ourRestfulServer.getRequestHeaders().get(0), hasItem("X-Foo: FOO"));
+		assertThat(ourRestfulServer.getRequestHeaders().get(0), hasItem("X-Bar: BAR"));
 	}
 
 	@Test
@@ -961,8 +1059,8 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		// Should see 1 subscription notification
 		waitForQueueToDrain();
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(1, ourUpdatedObservations);
+		assertEquals(0, ourObservationProvider.getCountCreate());
+		ourObservationProvider.waitForUpdateCount(1);
 
 		// Disable
 		subscription.setStatus(Subscription.SubscriptionStatus.OFF);
@@ -974,8 +1072,8 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		// Should see 1 subscription notification
 		waitForQueueToDrain();
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(1, ourUpdatedObservations);
+		assertEquals(0, ourObservationProvider.getCountCreate());
+		ourObservationProvider.waitForUpdateCount(1);
 
 	}
 
@@ -1096,7 +1194,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 			MethodOutcome methodOutcome = myClient.create().resource(bodySite).execute();
 			assertEquals(true, methodOutcome.getCreated());
 			waitForQueueToDrain();
-			waitForSize(1, ourUpdatedObservations);
+			ourObservationProvider.waitForUpdateCount(1);
 		}
 		{
 			Observation observation = new Observation();
@@ -1104,14 +1202,14 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 			MethodOutcome methodOutcome = myClient.create().resource(observation).execute();
 			assertEquals(true, methodOutcome.getCreated());
 			waitForQueueToDrain();
-			waitForSize(2, ourUpdatedObservations);
+			ourObservationProvider.waitForUpdateCount(2);
 		}
 		{
 			Observation observation = new Observation();
 			MethodOutcome methodOutcome = myClient.create().resource(observation).execute();
 			assertEquals(true, methodOutcome.getCreated());
 			waitForQueueToDrain();
-			waitForSize(2, ourUpdatedObservations);
+			ourObservationProvider.waitForUpdateCount(2);
 		}
 		{
 			Observation observation = new Observation();
@@ -1119,7 +1217,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 			MethodOutcome methodOutcome = myClient.create().resource(observation).execute();
 			assertEquals(true, methodOutcome.getCreated());
 			waitForQueueToDrain();
-			waitForSize(2, ourUpdatedObservations);
+			ourObservationProvider.waitForUpdateCount(2);
 		}
 
 	}
@@ -1130,7 +1228,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		{
 			Subscription subscription = newSubscription("Observation?", "application/json");
 			subscription.addExtension(HapiExtensions.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA, new StringType("Observation?_id=${matched_resource_id}&_include=*"));
-			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(subscription));
+			ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(subscription));
 			MethodOutcome methodOutcome = myClient.create().resource(subscription).execute();
 			mySubscriptionIds.add(methodOutcome.getId());
 			waitForActivatedSubscriptionCount(1);
@@ -1148,14 +1246,11 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 			assertEquals(true, methodOutcome.getCreated());
 
 			waitForQueueToDrain();
-			waitForSize(1, ourTransactions);
 
-			ourLog.info("Received transaction: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(ourTransactions.get(0)));
+			ourTransactionProvider.waitForTransactionCount(1);
 
-			Bundle xact = ourTransactions.get(0);
+			Bundle xact = ourTransactionProvider.getTransactions().get(0);
 			assertEquals(2, xact.getEntry().size());
-
-			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(ourTransactions.get(0)));
 		}
 
 	}

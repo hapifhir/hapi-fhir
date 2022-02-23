@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.demo;
  * #%L
  * HAPI FHIR - Command Line Client - Server WAR
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,15 @@ package ca.uhn.fhir.jpa.demo;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu2;
+import ca.uhn.fhir.jpa.config.HapiJpaConfig;
+import ca.uhn.fhir.jpa.config.JpaDstu2Config;
+import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
 import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorDstu2;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
-import org.apache.commons.lang3.time.DateUtils;
-import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -45,8 +46,8 @@ import java.util.Properties;
 
 @Configuration
 @EnableTransactionManagement()
-@Import(CommonConfig.class)
-public class FhirServerConfig extends BaseJavaConfigDstu2 {
+@Import({CommonConfig.class, 	JpaDstu2Config.class, HapiJpaConfig.class})
+public class FhirServerConfig {
 
 	@Autowired
 	private DataSource myDataSource;
@@ -64,10 +65,9 @@ public class FhirServerConfig extends BaseJavaConfigDstu2 {
 		return retVal;
 	}
 
-	@Override
 	@Bean
-	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory) {
-		LocalContainerEntityManagerFactoryBean retVal = super.entityManagerFactory(theConfigurableListableBeanFactory);
+	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext) {
+		LocalContainerEntityManagerFactoryBean retVal = HapiEntityManagerFactoryUtil.newEntityManagerFactory(theConfigurableListableBeanFactory, theFhirContext);
 		retVal.setPersistenceUnitName("HAPI_PU");
 		retVal.setDataSource(myDataSource);
 		retVal.setJpaProperties(myJpaProperties);
@@ -92,13 +92,13 @@ public class FhirServerConfig extends BaseJavaConfigDstu2 {
 	 * This interceptor adds some pretty syntax highlighting in responses when a browser is detected
 	 * @return
 	 */
-	@Bean(autowire = Autowire.BY_TYPE)
+	@Bean
 	public ResponseHighlighterInterceptor responseHighlighterInterceptor() {
 		ResponseHighlighterInterceptor retVal = new ResponseHighlighterInterceptor();
 		return retVal;
 	}
 
-	@Bean(autowire = Autowire.BY_TYPE)
+	@Bean
 	public IServerInterceptor subscriptionSecurityInterceptor() {
 		SubscriptionsRequireManualActivationInterceptorDstu2 retVal = new SubscriptionsRequireManualActivationInterceptorDstu2();
 		return retVal;

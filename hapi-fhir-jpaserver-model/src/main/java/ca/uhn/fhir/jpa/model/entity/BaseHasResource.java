@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,10 +112,14 @@ public abstract class BaseHasResource extends BasePartitionable implements IBase
 	@Override
 	public InstantDt getPublished() {
 		if (myPublished != null) {
-			return new InstantDt(cloneDate(myPublished));
+			return new InstantDt(getPublishedDate());
 		} else {
 			return null;
 		}
+	}
+
+	public Date getPublishedDate() {
+		return cloneDate(myPublished);
 	}
 
 	public void setPublished(Date thePublished) {
@@ -136,7 +140,12 @@ public abstract class BaseHasResource extends BasePartitionable implements IBase
 
 	@Override
 	public InstantDt getUpdated() {
-		return new InstantDt(cloneDate(myUpdated));
+		return new InstantDt(getUpdatedDate());
+	}
+
+	@Override
+	public Date getUpdatedDate() {
+		return cloneDate(myUpdated);
 	}
 
 	public void setUpdated(Date theUpdated) {
@@ -145,11 +154,6 @@ public abstract class BaseHasResource extends BasePartitionable implements IBase
 
 	public void setUpdated(InstantDt theUpdated) {
 		myUpdated = theUpdated.getValue();
-	}
-
-	@Override
-	public Date getUpdatedDate() {
-		return cloneDate(myUpdated);
 	}
 
 	@Override

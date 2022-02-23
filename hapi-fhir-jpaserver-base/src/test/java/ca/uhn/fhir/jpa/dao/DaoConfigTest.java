@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import org.junit.jupiter.api.Test;
 
@@ -23,13 +24,13 @@ public class DaoConfigTest {
 			new DaoConfig().setTreatBaseUrlsAsLocal(new HashSet<String>(Arrays.asList("http://*foo")));
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("Base URL wildcard character (*) can only appear at the end of the string: http://*foo", e.getMessage());
+			assertEquals(Msg.code(1525) + "Base URL wildcard character (*) can only appear at the end of the string: http://*foo", e.getMessage());
 		}
 		try {
 			new DaoConfig().setTreatBaseUrlsAsLocal(new HashSet<String>(Arrays.asList("http://foo**")));
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("Base URL wildcard character (*) can only appear at the end of the string: http://foo**", e.getMessage());
+			assertEquals(Msg.code(1525) + "Base URL wildcard character (*) can only appear at the end of the string: http://foo**", e.getMessage());
 		}
 	}
 

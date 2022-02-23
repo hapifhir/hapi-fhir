@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.binstore;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,20 +20,32 @@ package ca.uhn.fhir.jpa.binstore;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PayloadTooLargeException;
+import ca.uhn.fhir.util.BinaryUtil;
+import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import com.google.common.hash.HashingInputStream;
 import com.google.common.io.ByteStreams;
 import org.apache.commons.io.input.CountingInputStream;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseBinary;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
+import java.io.IOException;
 import java.io.InputStream;
 import java.security.SecureRandom;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	private final SecureRandom myRandom;
@@ -41,6 +53,8 @@ abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	private final int ID_LENGTH = 100;
 	private int myMaximumBinarySize = Integer.MAX_VALUE;
 	private int myMinimumBinarySize;
+	@Autowired
+	private FhirContext myFhirContext;
 
 	BaseBinaryStorageSvcImpl() {
 		myRandom = new SecureRandom();
@@ -97,13 +111,12 @@ abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 			public int getCount() {
 				int retVal = super.getCount();
 				if (retVal > getMaximumBinarySize()) {
-					throw new PayloadTooLargeException("Binary size exceeds maximum: " + getMaximumBinarySize());
+					throw new PayloadTooLargeException(Msg.code(1343) + "Binary size exceeds maximum: " + getMaximumBinarySize());
 				}
 				return retVal;
 			}
 		};
 	}
-
 
 	String provideIdForNewBlob(String theBlobIdOrNull) {
 		String id = theBlobIdOrNull;
@@ -111,5 +124,33 @@ abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 			id = newBlobId();
 		}
 		return id;
+	}
+
+	@Override
+	public byte[] fetchDataBlobFromBinary(IBaseBinary theBaseBinary) throws IOException {
+		IPrimitiveType<byte[]> dataElement = BinaryUtil.getOrCreateData(myFhirContext, theBaseBinary);
+		byte[] value = dataElement.getValue();
+		if (value == null) {
+			Optional<String> attachmentId = getAttachmentId((IBaseHasExtensions) dataElement);
+			if (attachmentId.isPresent()) {
+				value = fetchBlob(theBaseBinary.getIdElement(), attachmentId.get());
+			} else {
+				throw new InternalErrorException(Msg.code(1344) + "Unable to load binary blob data for " + theBaseBinary.getIdElement());
+			}
+		}
+		return value;
+	}
+
+	@SuppressWarnings("unchecked")
+	private Optional<String> getAttachmentId(IBaseHasExtensions theBaseBinary) {
+		return theBaseBinary
+			.getExtension()
+			.stream()
+			.filter(t -> HapiExtensions.EXT_EXTERNALIZED_BINARY_ID.equals(t.getUrl()))
+			.filter(t -> t.getValue() instanceof IPrimitiveType)
+			.map(t -> (IPrimitiveType<String>) t.getValue())
+			.map(t -> t.getValue())
+			.filter(t -> isNotBlank(t))
+			.findFirst();
 	}
 }
