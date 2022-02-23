@@ -23,6 +23,7 @@ package ca.uhn.fhir.rest.server.interceptor.consent;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -104,13 +105,13 @@ public class ConsentInterceptor {
 
 		Map<String, String[]> parameterMap = theRequestDetails.getParameters();
 		if (parameterMap != null && parameterMap.containsKey("_total")) {
-			throw new InvalidRequestException("Unknown parameter: _total");
+			throw new InvalidRequestException(Msg.code(2037) + "Unknown parameter: _total");
 		}
 
 		//Only take the 0th entry here cause there should be only one value.
 		//If there are multiple we just take the first value.
 		if (parameterMap != null && parameterMap.containsKey("_summary") && parameterMap.get("_summary")[0].equals("count")) {
-			throw new InvalidRequestException("Unknown parameter: _summary");
+			throw new InvalidRequestException(Msg.code(2037) + "Unknown parameter: _summary");
 		}
 
 		ConsentOutcome outcome = myConsentService.startOperation(theRequestDetails, myContextConsentServices);

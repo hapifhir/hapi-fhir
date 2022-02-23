@@ -153,7 +153,7 @@ public class ConsentInterceptorTest {
 			assertEquals(400, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
-			assertThat(responseContent, containsString("Unknown parameter: _total"));
+			assertThat(responseContent, containsString(Msg.code(2037) + "Unknown parameter: _total"));
 		}
 
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_total=estimated");
@@ -161,7 +161,7 @@ public class ConsentInterceptorTest {
 			assertEquals(400, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
-			assertThat(responseContent, containsString("Unknown parameter: _total"));
+			assertThat(responseContent, containsString(Msg.code(2037) + "Unknown parameter: _total"));
 		}
 	}
 
@@ -188,7 +188,7 @@ public class ConsentInterceptorTest {
 			assertEquals(400, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
-			assertThat(responseContent, containsString("Unknown parameter: _summary"));
+			assertThat(responseContent, containsString(Msg.code(2037) + "Unknown parameter: _summary"));
 		}
 
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
