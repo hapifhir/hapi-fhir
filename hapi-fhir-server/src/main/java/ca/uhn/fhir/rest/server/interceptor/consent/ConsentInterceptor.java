@@ -33,6 +33,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.IModelVisitor2;
@@ -100,6 +101,18 @@ public class ConsentInterceptor {
 		if (isAllowListedRequest(theRequestDetails)) {
 			return;
 		}
+
+		Map<String, String[]> parameterMap = theRequestDetails.getParameters();
+		if (parameterMap != null && parameterMap.containsKey("_total")) {
+			throw new InvalidRequestException("Unknown parameter: _total");
+		}
+
+		//Only take the 0th entry here cause there should be only one value.
+		//If there are multiple we just take the first value.
+		if (parameterMap != null && parameterMap.containsKey("_summary") && parameterMap.get("_summary")[0].equals("count")) {
+			throw new InvalidRequestException("Unknown parameter: _summary");
+		}
+
 		ConsentOutcome outcome = myConsentService.startOperation(theRequestDetails, myContextConsentServices);
 		Validate.notNull(outcome, "Consent service returned null outcome");
 

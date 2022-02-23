@@ -148,25 +148,67 @@ public class ConsentInterceptorTest {
 
 		HttpGet httpGet;
 
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_total=accurate");
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+			assertEquals(400, status.getStatusLine().getStatusCode());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response: {}", responseContent);
+			assertThat(responseContent, containsString("Unknown parameter: _total"));
+		}
+
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_total=estimated");
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+			assertEquals(400, status.getStatusLine().getStatusCode());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response: {}", responseContent);
+			assertThat(responseContent, containsString("Unknown parameter: _total"));
+		}
+	}
+
+	@Test
+	public void testSummaryModeIgnoredTotalForConsentQueries() throws IOException {
+		Patient patientA = new Patient();
+		patientA.setId("Patient/A");
+		patientA.setActive(true);
+		patientA.addName().setFamily("FAMILY").addGiven("GIVEN");
+		patientA.addIdentifier().setSystem("SYSTEM").setValue("VALUEA");
+		ourPatientProvider.store(patientA);
+
+		Patient patientB = new Patient();
+		patientB.setId("Patient/B");
+		patientB.setActive(true);
+		patientB.addName().setFamily("FAMILY").addGiven("GIVEN");
+		patientB.addIdentifier().setSystem("SYSTEM").setValue("VALUEB");
+		ourPatientProvider.store(patientB);
+
+		HttpGet httpGet;
+
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_summary=count");
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+			assertEquals(400, status.getStatusLine().getStatusCode());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response: {}", responseContent);
+			assertThat(responseContent, containsString("Unknown parameter: _summary"));
+		}
+
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(myConsentSvc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(myConsentSvc.willSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
-
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_total=accurate");
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_summary=data");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
-			assertThat(responseContent, not(containsString("\"total\"")));
+			assertThat(responseContent, not(containsString("total")));
 		}
 
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.AUTHORIZED);
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_total=accurate");
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_summary=data");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
-			assertThat(responseContent, containsString("\"total\""));
+			assertThat(responseContent, containsString("total"));
 		}
 
 	}

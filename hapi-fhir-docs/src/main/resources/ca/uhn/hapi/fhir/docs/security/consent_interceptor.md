@@ -17,7 +17,7 @@ The consent interceptor has several primary purposes:
 
 * It can apply consent directives (e.g. by reading relevant Consent resources)
 
-* The consent service suppresses search the total being returned in Bundle.total for search results.
+* The consent service suppresses search the total being returned in Bundle.total for search results even use the `_total` parameter or `_summary=count`.
 
 The ConsentInterceptor requires a user-supplied instance of the [IConsentService](/hapi-fhir/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/consent/IConsentService.html) interface. The following shows a simple example of an IConsentService implementation:
 
