@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.provider;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.provider;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -113,7 +114,7 @@ public class DiffProvider {
 
 		if (!Objects.equal(theFromVersion.getResourceType(), theToVersion.getResourceType())) {
 			String msg = myContext.getLocalizer().getMessage(DiffProvider.class, "cantDiffDifferentTypes");
-			throw new InvalidRequestException(msg);
+			throw new InvalidRequestException(Msg.code(1129) + msg);
 		}
 
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theFromVersion.getResourceType());

@@ -43,7 +43,6 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Matchers;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -169,7 +168,7 @@ public class AbstractJaxRsResourceProviderTest {
 		toCreate.getIdentifierFirstRep().setValue("myIdentifier");
 		outcome.setResource(toCreate);
 
-		when(mock.create(patientCaptor.capture(), isNull(String.class))).thenReturn(outcome);
+		when(mock.create(patientCaptor.capture(), isNull())).thenReturn(outcome);
 		client.setEncoding(EncodingEnum.JSON);
 		final MethodOutcome response = client.create().resource(toCreate).prefer(PreferReturnEnum.REPRESENTATION)
 				.execute();
@@ -269,11 +268,11 @@ public class AbstractJaxRsResourceProviderTest {
 	@Test
 	public void testSearchUsingGenericClientBySearch() {
 		// Perform a search
-		when(mock.search(any(StringParam.class), Matchers.isNull(StringAndListParam.class)))
+		when(mock.search(any(StringParam.class), isNull()))
 				.thenReturn(Arrays.asList(createPatient(1)));
 		Bundle results = client.search().forResource(Patient.class)
 				.where(Patient.NAME.matchesExactly().value(PATIENT_NAME)).returnBundle(Bundle.class).execute();
-		verify(mock).search(any(StringParam.class), Matchers.isNull(StringAndListParam.class));
+		verify(mock).search(any(StringParam.class), isNull());
 		IResource resource = results.getEntry().get(0).getResource();
 
 		compareResultId(1, resource);
@@ -440,7 +439,7 @@ public class AbstractJaxRsResourceProviderTest {
 		context.setContextPath("/");
 		jettyServer = new Server(0);
 		jettyServer.setHandler(context);
-		ServletHolder jerseyServlet = context.addServlet(org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher.class, "/*");
+		ServletHolder jerseyServlet = context.addServlet(org.jboss.resteasy.plugins.server.servlet.HttpServlet30Dispatcher.class, "/*");
 		jerseyServlet.setInitOrder(0);
 
 		//@formatter:off

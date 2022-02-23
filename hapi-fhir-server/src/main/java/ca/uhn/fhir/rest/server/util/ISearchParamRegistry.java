@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.util;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 // TODO: JA remove default methods
 public interface ISearchParamRegistry {
@@ -51,8 +52,6 @@ public interface ISearchParamRegistry {
 	 */
 	default void forceRefresh() {
 	}
-
-	;
 
 	/**
 	 * Request that the cache be refreshed at the next convenient time (in a different thread)
@@ -103,4 +102,5 @@ public interface ISearchParamRegistry {
 	 */
 	@Nullable
 	RuntimeSearchParam getActiveSearchParamByUrl(String theUrl);
+
 }

@@ -1,0 +1,5 @@
+---
+type: fix
+title: "When a subscription fails to activate (either on the first attempt or on start up),
+   hapi-fhir will log the exception, set the subscription to ERROR state, and continue on.
+   This is to prevent hanging on startup for errors that cannot be resolved by infinite retries."

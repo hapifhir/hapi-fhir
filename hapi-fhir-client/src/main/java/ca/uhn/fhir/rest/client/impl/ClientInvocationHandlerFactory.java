@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.impl;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.client.impl;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -62,9 +63,9 @@ public class ClientInvocationHandlerFactory {
 			myMethodToLambda.put(theClientType.getMethod("fetchResourceFromUrl", Class.class, String.class), new FetchResourceFromUrlLambda());
 
 		} catch (NoSuchMethodException e) {
-			throw new ConfigurationException("Failed to find methods on client. This is a HAPI bug!", e);
+			throw new ConfigurationException(Msg.code(1352) + "Failed to find methods on client. This is a HAPI bug!", e);
 		} catch (SecurityException e) {
-			throw new ConfigurationException("Failed to find methods on client. This is a HAPI bug!", e);
+			throw new ConfigurationException(Msg.code(1353) + "Failed to find methods on client. This is a HAPI bug!", e);
 		}
 	}
 

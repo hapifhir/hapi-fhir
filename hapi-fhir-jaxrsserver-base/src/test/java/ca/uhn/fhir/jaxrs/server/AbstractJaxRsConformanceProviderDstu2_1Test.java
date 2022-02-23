@@ -5,6 +5,7 @@ import ca.uhn.fhir.jaxrs.server.test.TestJaxRsDummyPatientProviderDstu2_1;
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsMockPatientRestProviderDstu2_1;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import javax.ws.rs.core.MultivaluedMap;
 import org.jboss.resteasy.specimpl.ResteasyHttpHeaders;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,7 +17,8 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -27,7 +29,7 @@ public class AbstractJaxRsConformanceProviderDstu2_1Test {
 	AbstractJaxRsConformanceProvider provider;
 	private ConcurrentHashMap<Class<? extends IResourceProvider>, IResourceProvider> providers;
 	private ResteasyHttpHeaders headers;
-	private MultivaluedHashMap<String, String> queryParameters;
+	private MultivaluedMap<String, String> queryParameters;
 
 	@BeforeEach
 	public void setUp() throws Exception {
@@ -85,7 +87,7 @@ public class AbstractJaxRsConformanceProviderDstu2_1Test {
 	}
 
 	private AbstractJaxRsConformanceProvider createConformanceProvider(final ConcurrentHashMap<Class<? extends IResourceProvider>, IResourceProvider> providers)
-			throws Exception {
+		throws Exception {
 		AbstractJaxRsConformanceProvider result = new AbstractJaxRsConformanceProvider(FhirContext.forDstu2_1(), null, null, null) {
 			@Override
 			protected ConcurrentHashMap<Class<? extends IResourceProvider>, IResourceProvider> getProviders() {

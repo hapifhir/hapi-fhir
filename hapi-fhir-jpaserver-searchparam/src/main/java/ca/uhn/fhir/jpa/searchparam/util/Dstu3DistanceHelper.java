@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.searchparam.util;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.searchparam.util;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.QuantityParam;
@@ -67,7 +68,7 @@ public class Dstu3DistanceHelper {
 					ReferenceParam referenceParam = (ReferenceParam) param;
 					if (Location.SP_NEAR_DISTANCE.equals(referenceParam.getChain())) {
 						if (retval != null) {
-							throw new IllegalArgumentException("Only one " + Location.SP_NEAR_DISTANCE + " parameter may be present");
+							throw new IllegalArgumentException(Msg.code(494) + "Only one " + Location.SP_NEAR_DISTANCE + " parameter may be present");
 						} else {
 							retval = referenceParam;
 							orParamToRemove = param;
@@ -99,7 +100,7 @@ public class Dstu3DistanceHelper {
 			return (QuantityParam) theParamAndList.get(0).get(0);
 		// Too many near-distance params
 		} else {
-			throw new IllegalArgumentException("Only one " + Location.SP_NEAR_DISTANCE + " parameter may be present");
+			throw new IllegalArgumentException(Msg.code(495) + "Only one " + Location.SP_NEAR_DISTANCE + " parameter may be present");
 		}
 	}
 }

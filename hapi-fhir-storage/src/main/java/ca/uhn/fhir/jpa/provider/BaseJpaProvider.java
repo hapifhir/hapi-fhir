@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
@@ -25,7 +26,7 @@ import java.util.TreeSet;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,7 +110,7 @@ public class BaseJpaProvider {
 		boolean haveAt = theAt != null && (theAt.getLowerBoundAsInstant() != null || theAt.getUpperBoundAsInstant() != null);
 		if (haveAt && theSince != null) {
 			String msg = getContext().getLocalizer().getMessage(BaseJpaProvider.class, "cantCombintAtAndSince");
-			throw new InvalidRequestException(msg);
+			throw new InvalidRequestException(Msg.code(553) + msg);
 		}
 
 		if (haveAt) {

@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3331
+title: "The JPA server will now validate `_include` and `_revinclude` statements before beginning
+  search processing. This prevents an ugly JPA error when some invalid params are used."

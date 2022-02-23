@@ -4,7 +4,7 @@ package ca.uhn.fhir.mdm.rules.svc;
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.mdm.rules.svc;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.api.MdmConstants;
@@ -64,7 +65,7 @@ public class MdmResourceMatcherSvc {
 	public void init() {
 		myMdmRulesJson = myMdmSettings.getMdmRules();
 		if (myMdmRulesJson == null) {
-			throw new ConfigurationException("Failed to load MDM Rules.  If MDM is enabled, then MDM rules must be available in context.");
+			throw new ConfigurationException(Msg.code(1521) + "Failed to load MDM Rules.  If MDM is enabled, then MDM rules must be available in context.");
 		}
 		myFieldMatchers.clear();
 		for (MdmFieldMatchJson matchFieldJson : myMdmRulesJson.getMatchFields()) {

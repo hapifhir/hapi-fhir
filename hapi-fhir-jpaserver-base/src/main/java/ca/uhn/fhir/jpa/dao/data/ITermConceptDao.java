@@ -4,11 +4,12 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,7 +17,7 @@ import java.util.Optional;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,14 +35,25 @@ import java.util.Optional;
 
 public interface ITermConceptDao extends JpaRepository<TermConcept, Long>, IHapiFhirJpaRepository {
 
+	@Query("SELECT t FROM TermConcept t " +
+		"LEFT JOIN FETCH t.myDesignations d " +
+		"WHERE t.myId IN :pids")
+	List<TermConcept> fetchConceptsAndDesignationsByPid(@Param("pids") List<Long> thePids);
+
+	@Query("SELECT t FROM TermConcept t " +
+		"LEFT JOIN FETCH t.myDesignations d " +
+		"WHERE t.myCodeSystemVersionPid = :pid")
+	List<TermConcept> fetchConceptsAndDesignationsByVersionPid(@Param("pid") Long theCodeSystemVersionPid);
+
 	@Query("SELECT COUNT(t) FROM TermConcept t WHERE t.myCodeSystem.myId = :cs_pid")
 	Integer countByCodeSystemVersion(@Param("cs_pid") Long thePid);
 
 	@Query("SELECT c FROM TermConcept c WHERE c.myCodeSystem = :code_system AND c.myCode = :code")
 	Optional<TermConcept> findByCodeSystemAndCode(@Param("code_system") TermCodeSystemVersion theCodeSystem, @Param("code") String theCode);
 
-	@Query("SELECT t.myId FROM TermConcept t WHERE t.myCodeSystem.myId = :cs_pid")
-	Slice<Long> findIdsByCodeSystemVersion(Pageable thePage, @Param("cs_pid") Long thePid);
+	@Modifying
+	@Query("DELETE FROM TermConcept WHERE myCodeSystem.myId = :cs_pid")
+	int deleteByCodeSystemVersion(@Param("cs_pid") Long thePid);
 
 	@Query("SELECT c FROM TermConcept c WHERE c.myCodeSystem = :code_system")
 	List<TermConcept> findByCodeSystemVersion(@Param("code_system") TermCodeSystemVersion theCodeSystem);

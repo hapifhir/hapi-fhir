@@ -7,6 +7,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.awaitility.Awaitility.await;
 
 public class AsyncUtilTest {
@@ -24,6 +25,7 @@ public class AsyncUtilTest {
 			outcomeHolder.set(outcome);
 		});
 		thread.start();
+		sleepAtLeast(1000);
 		thread.interrupt();
 		await().until(()-> outcomeHolder.get() == false);
 	}

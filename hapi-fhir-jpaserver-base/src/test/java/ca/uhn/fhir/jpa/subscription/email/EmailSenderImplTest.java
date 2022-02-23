@@ -2,7 +2,9 @@ package ca.uhn.fhir.jpa.subscription.email;
 
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.EmailDetails;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.EmailSenderImpl;
+import ca.uhn.fhir.rest.server.mail.IMailSvc;
 import ca.uhn.fhir.rest.server.mail.MailConfig;
+import ca.uhn.fhir.rest.server.mail.MailSvc;
 import com.icegreen.greenmail.junit5.GreenMailExtension;
 import com.icegreen.greenmail.util.GreenMailUtil;
 import com.icegreen.greenmail.util.ServerSetupTest;
@@ -31,7 +33,7 @@ public class EmailSenderImplTest {
 
 	@BeforeEach
 	public void setUp() {
-		fixture = new EmailSenderImpl(withMailConfig());
+		fixture = new EmailSenderImpl(withMailService());
 	}
 
 	@Test
@@ -62,10 +64,11 @@ public class EmailSenderImplTest {
 		assertEquals("foo", foundBody);
 	}
 
-	private MailConfig withMailConfig() {
-		return new MailConfig()
+	private IMailSvc withMailService() {
+		final MailConfig mailConfig = new MailConfig()
 			.setSmtpHostname(ServerSetupTest.SMTP.getBindAddress())
-			.setSmtpPort(ServerSetupTest.SMTP.getPort());
+			.setSmtpPort(ourGreenMail.getSmtp().getPort());
+		return new MailSvc(mailConfig);
 	}
 
 }

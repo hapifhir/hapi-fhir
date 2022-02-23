@@ -189,7 +189,6 @@ public class InterceptorDstu3Test {
 		doAnswer(t->{
 			RestOperationTypeEnum type = (RestOperationTypeEnum) t.getArguments()[0];
 			ActionRequestDetails det = (ActionRequestDetails) t.getArguments()[1];
-			type.toString();
 			return null;
 		}).when(myInterceptor1).incomingRequestPreHandled(any(), any());
 

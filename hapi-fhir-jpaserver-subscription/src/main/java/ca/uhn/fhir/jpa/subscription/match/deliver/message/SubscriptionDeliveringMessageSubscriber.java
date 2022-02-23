@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription.match.deliver.message;
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.subscription.match.deliver.message;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
@@ -64,6 +65,7 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 
 	protected void doDelivery(ResourceDeliveryMessage theMsg, CanonicalSubscription theSubscription, IChannelProducer theChannelProducer, IBaseResource thePayloadResource) {
 		ResourceModifiedMessage payload = new ResourceModifiedMessage(myFhirContext, thePayloadResource, theMsg.getOperationType());
+		payload.setMessageKey(theMsg.getMessageKeyOrNull());
 		payload.setTransactionId(theMsg.getTransactionId());
 		ResourceModifiedJsonMessage message = new ResourceModifiedJsonMessage(payload);
 		theChannelProducer.send(message);
@@ -99,7 +101,7 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 		}
 
 		if (payloadType != EncodingEnum.JSON) {
-			throw new UnsupportedOperationException("Only JSON payload type is currently supported for Message Subscriptions");
+			throw new UnsupportedOperationException(Msg.code(4) + "Only JSON payload type is currently supported for Message Subscriptions");
 		}
 
 		deliverPayload(theMessage, subscription, channelProducer);

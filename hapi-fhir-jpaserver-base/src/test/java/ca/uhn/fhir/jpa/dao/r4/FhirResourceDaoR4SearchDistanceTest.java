@@ -11,8 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 
 public class FhirResourceDaoR4SearchDistanceTest extends BaseJpaR4Test {
 	@BeforeEach
@@ -35,7 +35,7 @@ public class FhirResourceDaoR4SearchDistanceTest extends BaseJpaR4Test {
 		SearchParameterMap map = myMatchUrlService.translateMatchUrl(
 			"Location?" +
 				Location.SP_NEAR + "=" + latitude + "|" + longitude,
-			myFhirCtx.getResourceDefinition("Location"));
+			myFhirContext.getResourceDefinition("Location"));
 
 		List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
 		assertThat(ids, contains(locId));
@@ -53,7 +53,7 @@ public class FhirResourceDaoR4SearchDistanceTest extends BaseJpaR4Test {
 			SearchParameterMap map = myMatchUrlService.translateMatchUrl(
 				"Location?" +
 					Location.SP_NEAR + "=" + latitude + "|" + longitude + "|0",
-				myFhirCtx.getResourceDefinition("Location"));
+				myFhirContext.getResourceDefinition("Location"));
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
 			assertThat(ids, contains(locId));
@@ -62,7 +62,7 @@ public class FhirResourceDaoR4SearchDistanceTest extends BaseJpaR4Test {
 			SearchParameterMap map = myMatchUrlService.translateMatchUrl(
 				"Location?" +
 					Location.SP_NEAR + "=" + latitude + "|" + longitude + "|0.0",
-				myFhirCtx.getResourceDefinition("Location"));
+				myFhirContext.getResourceDefinition("Location"));
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
 			assertThat(ids, contains(locId));
@@ -84,7 +84,7 @@ public class FhirResourceDaoR4SearchDistanceTest extends BaseJpaR4Test {
 				"Location?" +
 					Location.SP_NEAR + "=" + CoordCalculatorTest.LATITUDE_CHIN + "|"
 					+ CoordCalculatorTest.LONGITUDE_CHIN + "|" +
-					bigEnoughDistance, myFhirCtx.getResourceDefinition("Location"));
+					bigEnoughDistance, myFhirContext.getResourceDefinition("Location"));
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
 			assertThat(ids, contains(locId));
@@ -96,7 +96,7 @@ public class FhirResourceDaoR4SearchDistanceTest extends BaseJpaR4Test {
 				"Location?" +
 					Location.SP_NEAR + "=" + CoordCalculatorTest.LATITUDE_CHIN + "|"
 					+ CoordCalculatorTest.LONGITUDE_CHIN + "|" +
-					tooSmallDistance, myFhirCtx.getResourceDefinition("Location"));
+					tooSmallDistance, myFhirContext.getResourceDefinition("Location"));
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
 			assertThat(ids.size(), is(0));
@@ -119,7 +119,7 @@ public class FhirResourceDaoR4SearchDistanceTest extends BaseJpaR4Test {
 				"Location?" +
 					Location.SP_NEAR + "=" + CoordCalculatorTest.LATITUDE_TAVEUNI + "|"
 					+ CoordCalculatorTest.LONGITIDE_TAVEUNI + "|" +
-					bigEnoughDistance, myFhirCtx.getResourceDefinition("Location"));
+					bigEnoughDistance, myFhirContext.getResourceDefinition("Location"));
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
 			assertThat(ids, contains(locId));
@@ -130,7 +130,7 @@ public class FhirResourceDaoR4SearchDistanceTest extends BaseJpaR4Test {
 				"Location?" +
 					Location.SP_NEAR + "=" + CoordCalculatorTest.LATITUDE_CHIN + "|"
 					+ CoordCalculatorTest.LONGITUDE_CHIN + "|" +
-					tooSmallDistance, myFhirCtx.getResourceDefinition("Location"));
+					tooSmallDistance, myFhirContext.getResourceDefinition("Location"));
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
 			assertThat(ids.size(), is(0));

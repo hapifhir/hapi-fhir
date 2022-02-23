@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
@@ -180,7 +181,7 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 					// CodeType should win. If we aren't in a situation like that, there is a problem with the
 					// model so we should bail.
 					if (!existing.isStandardType()) {
-						throw new ConfigurationException("More than one child of " + getElementName() + " matches attribute name " + attrName + ". Found [" + existing.getImplementingClass().getName() + "] and [" + next.getImplementingClass().getName() + "]");
+						throw new ConfigurationException(Msg.code(1734) + "More than one child of " + getElementName() + " matches attribute name " + attrName + ". Found [" + existing.getImplementingClass().getName() + "] and [" + next.getImplementingClass().getName() + "]");
 					}
 				}
 

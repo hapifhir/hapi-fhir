@@ -3,8 +3,10 @@ package ca.uhn.fhir.util;
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
+import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
@@ -88,6 +90,53 @@ public class GraphQLEngineTest {
 
 	}
 
+
+	@Test
+	public void testChoiceType_SelectDifferentType() throws EGraphEngine, EGraphQLException, IOException {
+		Observation obs = new Observation();
+		obs.setId("http://foo.com/Patient/PATA");
+		obs.setEffective(new Period().setStartElement(new DateTimeType("2022-01-01T00:00:00Z")).setEndElement(new DateTimeType("2022-01-01T05:00:00Z")));
+
+		GraphQLEngine engine = new GraphQLEngine(ourWorkerCtx);
+		engine.setFocus(obs);
+		engine.setGraphQL(Parser.parse("{id, effectiveDateTime}"));
+		engine.execute();
+
+		GraphQLResponse output = engine.getOutput();
+		output.setWriteWrapper(false);
+		StringBuilder outputBuilder = new StringBuilder();
+		output.write(outputBuilder, 0, "\n");
+
+		String expected = "{\n" +
+			"  \"id\":\"http://foo.com/Patient/PATA\"\n" +
+			"}";
+		assertEquals(TestUtil.stripReturns(expected), TestUtil.stripReturns(outputBuilder.toString()));
+	}
+
+	@Test
+	public void testChoiceType_SelectSameType() throws EGraphEngine, EGraphQLException, IOException {
+		Observation obs = new Observation();
+		obs.setId("http://foo.com/Patient/PATA");
+		obs.setEffective(new DateTimeType("2022-01-01T12:12:12Z"));
+
+		GraphQLEngine engine = new GraphQLEngine(ourWorkerCtx);
+		engine.setFocus(obs);
+		engine.setGraphQL(Parser.parse("{id, effectiveDateTime}"));
+		engine.execute();
+
+		GraphQLResponse output = engine.getOutput();
+		output.setWriteWrapper(false);
+		StringBuilder outputBuilder = new StringBuilder();
+		output.write(outputBuilder, 0, "\n");
+
+		String expected = "{\n" +
+			"  \"id\":\"http://foo.com/Patient/PATA\",\n" +
+			"  \"effectiveDateTime\":\"2022-01-01T12:12:12Z\"\n" +
+			"}";
+		assertEquals(TestUtil.stripReturns(expected), TestUtil.stripReturns(outputBuilder.toString()));
+	}
+
+
 	@Test
 	public void testReferences() throws EGraphQLException, EGraphEngine, IOException, FHIRException {
 
@@ -128,7 +177,7 @@ public class GraphQLEngineTest {
 
 	@BeforeAll
 	public static void beforeClass() {
-		ourCtx = FhirContext.forR4();
+		ourCtx = FhirContext.forR4Cached();
 		ourWorkerCtx = new HapiWorkerContext(ourCtx, ourCtx.getValidationSupport());
 	}
 

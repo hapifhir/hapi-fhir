@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.util;
  * #%L
  * hapi-fhir-jpa
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,12 @@ package ca.uhn.fhir.jpa.util;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
 import org.apache.commons.io.IOUtils;
@@ -60,6 +62,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -69,10 +72,21 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TestUtil {
-	public static final int MAX_COL_LENGTH = 2000;
+	public static final int MAX_COL_LENGTH = 4000;
 	private static final int MAX_LENGTH = 30;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestUtil.class);
 	private static Set<String> ourReservedWords;
+
+
+	// Exceptions set because H2 sets indexes for FKs automatically so this index had to be called as the target FK field
+	// it is indexing to avoid SchemaMigrationTest to complain about the extra index (which doesn't exist in H2)
+	private static final Set<String> duplicateNameValidationExceptionList = Sets.newHashSet(
+		"FK_CONCEPTPROP_CONCEPT",
+		"FK_CONCEPTDESIG_CONCEPT",
+		"FK_TERM_CONCEPTPC_CHILD",
+		"FK_TERM_CONCEPTPC_PARENT"
+	);
+
 
 	/**
 	 * non instantiable
@@ -100,7 +114,7 @@ public class TestUtil {
 		Set<String> names = new HashSet<String>();
 
 		if (classes.size() <= 1) {
-			throw new InternalErrorException("Found no classes");
+			throw new InternalErrorException(Msg.code(1623) + "Found no classes");
 		}
 
 		for (ClassInfo classInfo : classes) {
@@ -131,7 +145,7 @@ public class TestUtil {
 			for (UniqueConstraint nextIndex : table.uniqueConstraints()) {
 				int indexLength = calculateIndexLength(nextIndex.columnNames(), columnNameToLength, theClazz, nextIndex.name());
 				if (indexLength > maxIndexLength) {
-					throw new IllegalStateException("Index '" + nextIndex.name() + "' is too long. Length is " + indexLength + " and must not exceed " + maxIndexLength + " which is the maximum MySQL length");
+					throw new IllegalStateException(Msg.code(1624) + "Index '" + nextIndex.name() + "' is too long. Length is " + indexLength + " and must not exceed " + maxIndexLength + " which is the maximum MySQL length");
 				}
 			}
 
@@ -144,7 +158,7 @@ public class TestUtil {
 		for (String nextName : theColumnNames) {
 			Integer nextLength = theColumnNameToLength.get(nextName);
 			if (nextLength == null) {
-				throw new IllegalStateException("Index '" + theIndexName + "' references unknown column: " + nextName);
+				throw new IllegalStateException(Msg.code(1625) + "Index '" + theIndexName + "' references unknown column: " + nextName);
 			}
 			retVal += nextLength;
 		}
@@ -252,7 +266,8 @@ public class TestUtil {
 			}
 			for (Index nextConstraint : table.indexes()) {
 				assertNotADuplicateName(nextConstraint.name(), theNames);
-				Validate.isTrue(nextConstraint.name().startsWith("IDX_"), nextConstraint.name() + " must start with IDX_");
+				Validate.isTrue(nextConstraint.name().startsWith("IDX_") || nextConstraint.name().startsWith("FK_"),
+					nextConstraint.name() + " must start with IDX_ or FK_ (last one when indexing a FK column)");
 			}
 		}
 
@@ -268,8 +283,17 @@ public class TestUtil {
 			} else {
 				Validate.notNull(fk);
 				Validate.isTrue(isNotBlank(fk.name()), "Foreign key on " + theAnnotatedElement + " has no name()");
-				Validate.isTrue(fk.name().startsWith("FK_"));
-				assertNotADuplicateName(fk.name(), theNames);
+				List<String> legacySPHibernateFKNames = Arrays.asList(
+					"FK7ULX3J1GG3V7MAQREJGC7YBC4", "FKC97MPK37OKWU8QVTCEG2NH9VN", "FKCLTIHNC5TGPRJ9BHPT7XI5OTB", "FKGXSREUTYMMFJUWDSWV3Y887DO");
+				if (legacySPHibernateFKNames.contains(fk.name())) {
+					// wipmb temporarily allow the hibernate legacy sp fk names
+				} else {
+					Validate.isTrue(fk.name().startsWith("FK_"),
+						"Foreign key " + fk.name() + " on " + theAnnotatedElement + " must start with FK");
+				}
+				if ( ! duplicateNameValidationExceptionList.contains(fk.name())) {
+					assertNotADuplicateName(fk.name(), theNames);
+				}
 			}
 		}
 
@@ -294,24 +318,24 @@ public class TestUtil {
 			if (field.getType().equals(String.class)) {
 				if (!hasLob) {
 					if (!theIsView && column.length() == 255) {
-						throw new IllegalStateException("Field does not have an explicit maximum length specified: " + field);
+						throw new IllegalStateException(Msg.code(1626) + "Field does not have an explicit maximum length specified: " + field);
 					}
 					if (column.length() > MAX_COL_LENGTH) {
-						throw new IllegalStateException("Field is too long: " + field);
+						throw new IllegalStateException(Msg.code(1627) + "Field is too long: " + field);
 					}
 				}
 
 				Size size = theAnnotatedElement.getAnnotation(Size.class);
 				if (size != null) {
 					if (size.max() > MAX_COL_LENGTH) {
-						throw new IllegalStateException("Field is too long: " + field);
+						throw new IllegalStateException(Msg.code(1628) + "Field is too long: " + field);
 					}
 				}
 
 				Length length = theAnnotatedElement.getAnnotation(Length.class);
 				if (length != null) {
 					if (length.max() > MAX_COL_LENGTH) {
-						throw new IllegalStateException("Field is too long: " + field);
+						throw new IllegalStateException(Msg.code(1629) + "Field is too long: " + field);
 					}
 				}
 			}
@@ -333,10 +357,10 @@ public class TestUtil {
 
 	private static void validateColumnName(String theColumnName, AnnotatedElement theElement) {
 		if (!theColumnName.equals(theColumnName.toUpperCase())) {
-			throw new IllegalArgumentException("Column name must be all upper case: " + theColumnName + " found on " + theElement);
+			throw new IllegalArgumentException(Msg.code(1630) + "Column name must be all upper case: " + theColumnName + " found on " + theElement);
 		}
 		if (ourReservedWords.contains(theColumnName)) {
-			throw new IllegalArgumentException("Column name is a reserved word: " + theColumnName + " found on " + theElement);
+			throw new IllegalArgumentException(Msg.code(1631) + "Column name is a reserved word: " + theColumnName + " found on " + theElement);
 		}
 	}
 

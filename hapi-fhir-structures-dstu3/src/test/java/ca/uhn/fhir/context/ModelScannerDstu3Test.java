@@ -1,5 +1,6 @@
 package ca.uhn.fhir.context;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Compartment;
@@ -55,7 +56,7 @@ public class ModelScannerDstu3Test {
 			ctx.getResourceDefinition(MyBundle.class);
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals("Resource type declares resource name Bundle but does not implement IBaseBundle", e.getMessage());
+			assertEquals(Msg.code(1687) + "Resource type declares resource name Bundle but does not implement IBaseBundle", e.getMessage());
 		}
 	}
 
@@ -86,7 +87,7 @@ public class ModelScannerDstu3Test {
 			FhirContext.forDstu3().getResourceDefinition(NoResourceDef.class);
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals("Resource class[ca.uhn.fhir.context.ModelScannerDstu3Test$NoResourceDef] does not contain any valid HAPI-FHIR annotations", e.getMessage());
+			assertEquals(Msg.code(1716) + "Resource class[ca.uhn.fhir.context.ModelScannerDstu3Test$NoResourceDef] does not contain any valid HAPI-FHIR annotations", e.getMessage());
 		}
 	}
 
@@ -139,7 +140,7 @@ public class ModelScannerDstu3Test {
 			ctx.getResourceDefinition(CustomDstu3ClassWithDstu2Base.class);
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals("@Block class for version DSTU3 should not extend BaseIdentifiableElement: ca.uhn.fhir.context.CustomDstu3ClassWithDstu2Base$Bar1", e.getMessage());
+			assertEquals(Msg.code(1717) + "@Block class for version DSTU3 should not extend BaseIdentifiableElement: ca.uhn.fhir.context.CustomDstu3ClassWithDstu2Base$Bar1", e.getMessage());
 		}
 	}
 
@@ -163,7 +164,7 @@ public class ModelScannerDstu3Test {
 			FhirContext.forDstu3().getResourceDefinition(InvalidParamType.class);
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals("Search param foo has an invalid type: bar", e.getMessage());
+			assertEquals(Msg.code(1721) + "Search param foo has an invalid type: bar", e.getMessage());
 		}
 	}
 
@@ -177,7 +178,7 @@ public class ModelScannerDstu3Test {
 			ctx.getResourceDefinition(LetterTemplate.class);
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals("Class \"class ca.uhn.fhir.context.ModelScannerDstu3Test$LetterTemplate\" is invalid. This resource type is not a DomainResource, it must not have extensions", e.getMessage());
+			assertEquals(Msg.code(1733) + "Class \"class ca.uhn.fhir.context.ModelScannerDstu3Test$LetterTemplate\" is invalid. This resource type is not a DomainResource, it must not have extensions", e.getMessage());
 		}
 	}
 
@@ -209,7 +210,7 @@ public class ModelScannerDstu3Test {
 			scanner.scan(BadPatient.class);
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals("Resource type contains a @ResourceDef annotation but does not implement ca.uhn.fhir.model.api.IResource: ca.uhn.fhir.context.ModelScannerDstu3Test.BadPatient", e.getMessage());
+			assertEquals(Msg.code(1714) + "Resource type contains a @ResourceDef annotation but does not implement ca.uhn.fhir.model.api.IResource: ca.uhn.fhir.context.ModelScannerDstu3Test.BadPatient", e.getMessage());
 		}
 	}
 
@@ -226,7 +227,7 @@ public class ModelScannerDstu3Test {
 			scanner.scan(clazz);
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals("Resource class[java.lang.String] does not contain any valid HAPI-FHIR annotations", e.getMessage());
+			assertEquals(Msg.code(1716) + "Resource class[java.lang.String] does not contain any valid HAPI-FHIR annotations", e.getMessage());
 		}
 	}
 
@@ -244,7 +245,7 @@ public class ModelScannerDstu3Test {
 			scanner.scan(BadPatient.BadBlock.class);
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals("Type contains a @Block annotation but does not implement ca.uhn.fhir.model.api.IResourceBlock: ca.uhn.fhir.context.ModelScannerDstu3Test.BadPatient.BadBlock", e.getMessage());
+			assertEquals(Msg.code(1715) + "Type contains a @Block annotation but does not implement ca.uhn.fhir.model.api.IResourceBlock: ca.uhn.fhir.context.ModelScannerDstu3Test.BadPatient.BadBlock", e.getMessage());
 		}
 	}
 

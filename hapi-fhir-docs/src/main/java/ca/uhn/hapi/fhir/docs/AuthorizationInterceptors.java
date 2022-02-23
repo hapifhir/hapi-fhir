@@ -4,7 +4,7 @@ package ca.uhn.hapi.fhir.docs;
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.hapi.fhir.docs;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -87,7 +88,7 @@ public class AuthorizationInterceptors {
             userIsAdmin = true;
          } else {
             // Throw an HTTP 401
-            throw new AuthenticationException("Missing or invalid Authorization header value");
+            throw new AuthenticationException(Msg.code(644) + "Missing or invalid Authorization header value");
          }
 
          // If the user is a specific patient, we create the following rule chain:
@@ -263,5 +264,39 @@ public class AuthorizationInterceptors {
 	}
 	//END SNIPPET: narrowing
 
+
+	//START SNIPPET: narrowingByCode
+	public class MyCodeSearchNarrowingInterceptor extends SearchNarrowingInterceptor {
+
+		/**
+		 * This method must be overridden to provide the list of compartments
+		 * and/or resources that the current user should have access to
+		 */
+		@Override
+		protected AuthorizedList buildAuthorizedList(RequestDetails theRequestDetails) {
+			// Process authorization header - The following is a fake
+			// implementation. Obviously we'd want something more real
+			// for a production scenario.
+			String authHeader = theRequestDetails.getHeader("Authorization");
+			if ("Bearer dfw98h38r".equals(authHeader)) {
+
+				return new AuthorizedList()
+					// When searching for Observations, narrow the search to only include Observations
+					// with a code indicating that it is a Vital Signs Observation
+					.addCodeInValueSet("Observation", "code", "http://hl7.org/fhir/ValueSet/observation-vitalsignresult")
+					// When searching for Encounters, narrow the search to exclude Encounters where
+					// the Encounter class is in a ValueSet containing forbidden class codes
+					.addCodeNotInValueSet("Encounter", "class", "http://my-forbidden-encounter-classes");
+
+			} else {
+
+				throw new AuthenticationException("Unknown bearer token");
+
+			}
+
+		}
+
+	}
+	//END SNIPPET: narrowingByCode
 
 }

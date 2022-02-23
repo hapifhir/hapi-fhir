@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.binstore;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.binstore;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -166,7 +167,7 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 
 		}
 
-		throw new ResourceNotFoundException("Unknown blob ID: " + theBlobId + " for resource ID " + theResourceId);
+		throw new ResourceNotFoundException(Msg.code(1327) + "Unknown blob ID: " + theBlobId + " for resource ID " + theResourceId);
 	}
 
 	private void delete(File theStorageFile, String theBlobId) {
@@ -210,7 +211,7 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 		try {
 			FileUtils.forceMkdir(theBasePath);
 		} catch (IOException e) {
-			throw new ConfigurationException("Unable to create path " + myBasePath + ": " + e.toString());
+			throw new ConfigurationException(Msg.code(1328) + "Unable to create path " + myBasePath + ": " + e.toString());
 		}
 	}
 }

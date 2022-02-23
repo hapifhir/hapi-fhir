@@ -4,7 +4,7 @@ package ca.uhn.fhir.cli;
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.VersionUtil;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
@@ -241,7 +242,7 @@ public abstract class BaseApp {
 			String[] args = Arrays.copyOfRange(theArgs, 1, theArgs.length);
 			parsedOptions = parser.parse(options, args, true);
 			if (!parsedOptions.getArgList().isEmpty()) {
-				throw new ParseException("Unrecognized argument: " + parsedOptions.getArgList().get(0));
+				throw new ParseException(Msg.code(1555) + "Unrecognized argument: " + parsedOptions.getArgList().get(0));
 			}
 
 			if (parsedOptions.hasOption("debug")) {
@@ -316,7 +317,7 @@ public abstract class BaseApp {
 
 	private void exitDueToProblem(String theDescription) {
 		if ("true".equals(System.getProperty("test"))) {
-			throw new Error(theDescription);
+			throw new Error(Msg.code(1556) + theDescription);
 		} else {
 			System.exit(1);
 		}
@@ -327,7 +328,7 @@ public abstract class BaseApp {
 			if (e instanceof CommandFailureException) {
 				throw (CommandFailureException) e;
 			}
-			throw new Error(e);
+			throw new Error(Msg.code(1557) + e);
 		} else {
 			System.exit(1);
 		}

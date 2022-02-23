@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,10 +32,14 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.ScaledNumb
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import java.math.BigDecimal;
@@ -67,6 +71,11 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 	@Column(name = "HASH_IDENTITY", nullable = true)
 	private Long myHashIdentity;
 
+	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = {})
+	@JoinColumn(foreignKey = @ForeignKey(name = "FKCLTIHNC5TGPRJ9BHPT7XI5OTB"),
+		name = "RES_ID", referencedColumnName = "RES_ID", nullable = false)
+	private ResourceTable myResource;
+
 	public ResourceIndexedSearchParamNumber() {
 	}
 
@@ -86,9 +95,16 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 		myHashIdentity = source.myHashIdentity;
 	}
 
+	@Override
+	public void clearHashes() {
+		myHashIdentity = null;
+	}
 
 	@Override
 	public void calculateHashes() {
+		if (myHashIdentity != null) {
+			return;
+		}
 		String resourceType = getResourceType();
 		String paramName = getParamName();
 		setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
@@ -173,4 +189,15 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 		return Objects.equals(getValue(), number.getValue());
 	}
 
+	@Override
+	public ResourceTable getResource() {
+		return myResource;
+	}
+
+	@Override
+	public BaseResourceIndexedSearchParam setResource(ResourceTable theResource) {
+		myResource = theResource;
+		setResourceType(theResource.getResourceType());
+		return this;
+	}
 }

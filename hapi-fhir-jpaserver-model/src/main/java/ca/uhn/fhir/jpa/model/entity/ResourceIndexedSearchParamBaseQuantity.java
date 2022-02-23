@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,9 @@ package ca.uhn.fhir.jpa.model.entity;
  */
 
 import javax.persistence.Column;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -60,12 +63,30 @@ public abstract class ResourceIndexedSearchParamBaseQuantity extends BaseResourc
 	@Column(name = "HASH_IDENTITY", nullable = true)
 	private Long myHashIdentity;
 
+	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = {})
+	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false)
+	private ResourceTable myResource;
+
+	/**
+	 * Constructor
+	 */
 	public ResourceIndexedSearchParamBaseQuantity() {
 		super();
 	}
 
 	@Override
+	public void clearHashes() {
+		myHashIdentity = null;
+		myHashIdentityAndUnits = null;
+		myHashIdentitySystemAndUnits = null;
+	}
+
+	@Override
 	public void calculateHashes() {
+		if (myHashIdentity != null || myHashIdentityAndUnits != null || myHashIdentitySystemAndUnits != null) {
+			return;
+		}
+
 		String resourceType = getResourceType();
 		String paramName = getParamName();
 		String units = getUnits();
@@ -143,5 +164,17 @@ public abstract class ResourceIndexedSearchParamBaseQuantity extends BaseResourc
 
 	public static long calculateHashUnits(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName, String theUnits) {
 		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, theUnits);
+	}
+
+	@Override
+	public ResourceTable getResource() {
+		return myResource;
+	}
+
+	@Override
+	public BaseResourceIndexedSearchParam setResource(ResourceTable theResource) {
+		myResource = theResource;
+		setResourceType(theResource.getResourceType());
+		return this;
 	}
 }

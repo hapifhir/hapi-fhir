@@ -2,7 +2,7 @@
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
@@ -102,7 +103,7 @@ public class ChangelogMigrator {
 						itemMap.put("type", "add");
 						break;
 					default:
-						throw new Error("Unknown type: " + type);
+						throw new Error(Msg.code(630) + "Unknown type: " + type);
 				}
 
 				String issue = nextAction.getAttribute("issue") != null ? nextAction.getAttribute("issue").getValue() : null;
@@ -116,7 +117,7 @@ public class ChangelogMigrator {
 						String text = ((Text) nextContents).getTextNormalize();
 						contentBuilder.append(" ").append(text);
 					} else {
-						throw new IllegalStateException("Unknown type: " + nextContents.getClass());
+						throw new IllegalStateException(Msg.code(631) + "Unknown type: " + nextContents.getClass());
 					}
 				}
 

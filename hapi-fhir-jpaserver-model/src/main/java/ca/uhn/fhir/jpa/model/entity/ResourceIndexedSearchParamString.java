@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -29,14 +30,11 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hibernate.search.engine.backend.types.Projectable;
-import org.hibernate.search.engine.backend.types.Searchable;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -83,14 +81,11 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	private Long myId;
 
 	@ManyToOne(optional = false)
-	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", insertable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_SPIDXSTR_RESOURCE"))
-	private ResourceTable myResourceTable;
+	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false,
+		foreignKey = @ForeignKey(name = "FK_SPIDXSTR_RESOURCE"))
+	private ResourceTable myResource;
 
 	@Column(name = "SP_VALUE_EXACT", length = MAX_LENGTH, nullable = true)
-//	@FullTextField(name = "myValueText", searchable=Searchable.YES, projectable = Projectable.YES, analyzer = "standardAnalyzer")
-//	@FullTextField(name = "myValueTextEdgeNGram", searchable=Searchable.YES, projectable = Projectable.NO, analyzer = "autocompleteEdgeAnalyzer")
-//	@FullTextField(name = "myValueTextNGram", searchable=Searchable.YES, projectable = Projectable.NO, analyzer = "autocompleteNGramAnalyzer")
-//	@FullTextField(name = "myValueTextPhonetic", searchable=Searchable.YES, projectable = Projectable.NO, analyzer = "autocompletePhoneticAnalyzer")
 	private String myValueExact;
 
 	@Column(name = "SP_VALUE_NORMALIZED", length = MAX_LENGTH, nullable = true)
@@ -137,7 +132,19 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	}
 
 	@Override
+	public void clearHashes() {
+		myHashIdentity = null;
+		myHashNormalizedPrefix = null;
+		myHashExact = null;
+	}
+
+
+	@Override
 	public void calculateHashes() {
+		if (myHashIdentity != null || myHashExact != null || myHashNormalizedPrefix != null) {
+			return;
+		}
+
 		String resourceType = getResourceType();
 		String paramName = getParamName();
 		String valueNormalized = getValueNormalized();
@@ -210,7 +217,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 
 	public ResourceIndexedSearchParamString setValueExact(String theValueExact) {
 		if (defaultString(theValueExact).length() > MAX_LENGTH) {
-			throw new IllegalArgumentException("Value is too long: " + theValueExact.length());
+			throw new IllegalArgumentException(Msg.code(1529) + "Value is too long: " + theValueExact.length());
 		}
 		myValueExact = theValueExact;
 		return this;
@@ -222,7 +229,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 
 	public ResourceIndexedSearchParamString setValueNormalized(String theValueNormalized) {
 		if (defaultString(theValueNormalized).length() > MAX_LENGTH) {
-			throw new IllegalArgumentException("Value is too long: " + theValueNormalized.length());
+			throw new IllegalArgumentException(Msg.code(1530) + "Value is too long: " + theValueNormalized.length());
 		}
 		myValueNormalized = theValueNormalized;
 		return this;
@@ -249,6 +256,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		b.append("resourceId", getResourcePid());
 		b.append("hashNormalizedPrefix", getHashNormalizedPrefix());
 		b.append("valueNormalized", getValueNormalized());
+		b.append("partitionId", getPartitionId());
 		return b.build();
 	}
 
@@ -288,7 +296,19 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 			hashPrefixLength = 0;
 		}
 
-		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, StringUtil.left(theValueNormalized, hashPrefixLength));
+		String value = StringUtil.left(theValueNormalized, hashPrefixLength);
+		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, value);
 	}
 
+	@Override
+	public ResourceTable getResource() {
+		return myResource;
+	}
+
+	@Override
+	public BaseResourceIndexedSearchParam setResource(ResourceTable theResource) {
+		myResource = theResource;
+		setResourceType(theResource.getResourceType());
+		return this;
+	}
 }

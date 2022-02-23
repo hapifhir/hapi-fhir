@@ -166,6 +166,7 @@ public class SearchCoordinatorSvcImplTest {
 	@Test
 	public void testAsyncSearchFailDuringSearchSameCoordinator() {
 		initSearches();
+		initAsyncSearches();
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringParam("ANAME"));
@@ -186,6 +187,7 @@ public class SearchCoordinatorSvcImplTest {
 	@Test
 	public void testAsyncSearchLargeResultSetBigCountSameCoordinator() {
 		initSearches();
+		initAsyncSearches();
 
 		List<ResourcePersistentId> allResults = new ArrayList<>();
 		doAnswer(t -> {
@@ -281,6 +283,7 @@ public class SearchCoordinatorSvcImplTest {
 	@Test
 	public void testAsyncSearchLargeResultSetSameCoordinator() {
 		initSearches();
+		initAsyncSearches();
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringParam("ANAME"));
@@ -308,7 +311,9 @@ public class SearchCoordinatorSvcImplTest {
 		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
 
 		when(myTxManager.getTransaction(any())).thenReturn(mock(TransactionStatus.class));
+	}
 
+	private void initAsyncSearches() {
 		when(myPersistedJpaBundleProviderFactory.newInstanceFirstPage(nullable(RequestDetails.class), nullable(Search.class), nullable(SearchCoordinatorSvcImpl.SearchTask.class), nullable(ISearchBuilder.class))).thenAnswer(t->{
 			RequestDetails requestDetails = t.getArgument(0, RequestDetails.class);
 			Search search = t.getArgument(1, Search.class);
@@ -374,6 +379,7 @@ public class SearchCoordinatorSvcImplTest {
 	@Test
 	public void testAsyncSearchLargeResultSetSecondRequestSameCoordinator() {
 		initSearches();
+		initAsyncSearches();
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringParam("ANAME"));
@@ -412,6 +418,7 @@ public class SearchCoordinatorSvcImplTest {
 	@Test
 	public void testAsyncSearchSmallResultSetSameCoordinator() {
 		initSearches();
+		initAsyncSearches();
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringParam("ANAME"));
@@ -621,7 +628,6 @@ public class SearchCoordinatorSvcImplTest {
 	 */
 	@Test
 	public void testFetchAllResultsReturnsNull() {
-
 		when(myDaoRegistry.getResourceDao(anyString())).thenReturn(myCallingDao);
 		when(myCallingDao.getContext()).thenReturn(ourCtx);
 

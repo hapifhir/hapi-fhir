@@ -93,6 +93,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		mySearchCoordinatorSvcImpl.setLoadingThrottleForUnitTests(null);
 		mySearchCoordinatorSvcImpl.setSyncSizeForUnitTests(SearchCoordinatorSvcImpl.DEFAULT_SYNC_SIZE);
 		myCaptureQueriesListener.setCaptureQueryStackTrace(true);
+		myDaoConfig.setAdvancedLuceneIndexing(false);
 	}
 
 	@AfterEach
@@ -801,7 +802,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 	public void testChainedSearchUsesJoinNotSubselect() {
 		myCaptureQueriesListener.clear();
 
-		RuntimeResourceDefinition resourceDef = myFhirCtx.getResourceDefinition("Observation");
+		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition("Observation");
 		SearchParameterMap params = myMatchUrlService.translateMatchUrl("/Observation?subject:patient.identifier=urn:oid:ZOOP.MRN.OID|1234", resourceDef, null);
 		params.setLoadSynchronous(true);
 		myObservationDao.search(params);
@@ -1422,7 +1423,6 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		assertEquals(1, myPatientDao.search(m2).size().intValue());
 	}
 
-
 	@Test
 	public void testReferenceOrLinksUseInList_ForcedIds() {
 
@@ -1516,7 +1516,8 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 		// Ensure that the search actually worked
 		assertEquals(5, search.size().intValue());
-
 	}
+
+
 
 }

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.bulk.export.job;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,6 +82,7 @@ public class CreateBulkExportEntityTasklet implements Tasklet {
 			bulkDataExportOptions.setResourceTypes(resourceTypeSet);
 			bulkDataExportOptions.setSince(since);
 			bulkDataExportOptions.setFilters(filterSet);
+
 			//Set export style
 			String exportStyle = (String)jobParameters.get("exportStyle");
 			bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.valueOf(exportStyle));

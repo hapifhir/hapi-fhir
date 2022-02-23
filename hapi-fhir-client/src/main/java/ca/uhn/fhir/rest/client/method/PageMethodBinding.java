@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.method;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.client.method;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import java.lang.reflect.Method;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -55,7 +56,7 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 	@CoverageIgnore
 	@Override
 	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(1446));
 	}
 
 	public IBaseResource provider() {

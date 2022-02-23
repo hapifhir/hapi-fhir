@@ -4,7 +4,7 @@ package ca.uhn.fhir.mdm.util;
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.mdm.util;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -43,7 +44,7 @@ public final class NameUtil {
 				org.hl7.fhir.dstu3.model.HumanName humanNameDSTU3 = (org.hl7.fhir.dstu3.model.HumanName) theBase;
 				return humanNameDSTU3.getGiven().stream().map(given -> given.toString()).filter(s -> !StringUtils.isEmpty(s)).collect(Collectors.toList());
 			default:
-				throw new UnsupportedOperationException("Version not supported: " + theFhirContext.getVersion().getVersion());
+				throw new UnsupportedOperationException(Msg.code(1491) + "Version not supported: " + theFhirContext.getVersion().getVersion());
 
 		}
 	}
@@ -57,7 +58,7 @@ public final class NameUtil {
 				org.hl7.fhir.dstu3.model.HumanName humanNameDSTU3 = (org.hl7.fhir.dstu3.model.HumanName)theBase;
 				return humanNameDSTU3.getFamily();
 			default:
-				throw new UnsupportedOperationException("Version not supported: " + theFhirContext.getVersion().getVersion());
+				throw new UnsupportedOperationException(Msg.code(1492) + "Version not supported: " + theFhirContext.getVersion().getVersion());
 
 		}
 	}

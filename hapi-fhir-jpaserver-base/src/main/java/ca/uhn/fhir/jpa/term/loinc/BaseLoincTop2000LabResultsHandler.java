@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.term.loinc;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,8 +40,10 @@ public class BaseLoincTop2000LabResultsHandler extends BaseLoincHandler implemen
 	private String myValueSetUri;
 	private String myValueSetName;
 
-	public BaseLoincTop2000LabResultsHandler(Map<String, TermConcept> theCode2concept, List<ValueSet> theValueSets, String theValueSetId, String theValueSetUri, String theValueSetName, List<ConceptMap> theConceptMaps, Properties theUploadProperties) {
-		super(theCode2concept, theValueSets, theConceptMaps, theUploadProperties);
+	public BaseLoincTop2000LabResultsHandler(Map<String, TermConcept> theCode2concept, List<ValueSet> theValueSets,
+			String theValueSetId, String theValueSetUri, String theValueSetName, List<ConceptMap> theConceptMaps,
+			Properties theUploadProperties, String theCopyrightStatement) {
+		super(theCode2concept, theValueSets, theConceptMaps, theUploadProperties, theCopyrightStatement);
 		String versionId = myUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
 		if (versionId != null) {
 			myValueSetId = theValueSetId + "-" + versionId;

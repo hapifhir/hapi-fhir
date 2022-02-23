@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search.elastic;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.search.elastic;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import org.apache.commons.lang3.StringUtils;
@@ -93,7 +94,7 @@ public class IndexNamePrefixLayoutStrategy implements IndexLayoutStrategy {
 	}
 	private void validateDaoConfigIsPresent() {
 		if (myDaoConfig == null) {
-			throw new ConfigurationException("While attempting to boot HAPI FHIR, the Hibernate Search bootstrapper failed to find the DaoConfig. This probably means Hibernate Search has been recently upgraded, or somebody modified HapiFhirLocalContainerEntityManagerFactoryBean.");
+			throw new ConfigurationException(Msg.code(1168) + "While attempting to boot HAPI FHIR, the Hibernate Search bootstrapper failed to find the DaoConfig. This probably means Hibernate Search has been recently upgraded, or somebody modified HapiFhirLocalContainerEntityManagerFactoryBean.");
 		}
 	}
 }

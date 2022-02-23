@@ -1,12 +1,12 @@
 package ca.uhn.fhir.parser.json;
 
-import java.util.Set;
+import java.util.Iterator;
 
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ public abstract class JsonLikeObject extends JsonLikeValue {
 	public ValueType getJsonType() {
 		return ValueType.OBJECT;
 	}
-	
+
 	@Override
 	public ScalarType getDataType() {
 		return null;
@@ -49,8 +49,8 @@ public abstract class JsonLikeObject extends JsonLikeValue {
 		return null;
 	}
 
-	public abstract Set<String> keySet ();
-	
-	public abstract JsonLikeValue get (String key);
-	
+	public abstract Iterator<String> keyIterator();
+
+	public abstract JsonLikeValue get(String key);
+
 }

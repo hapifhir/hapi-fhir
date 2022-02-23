@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client.method;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -51,7 +52,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -256,7 +257,7 @@ public class MethodUtil {
 					parameterType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(theMethod, paramIndex);
 				}
 				if (Collection.class.isAssignableFrom(parameterType)) {
-					throw new ConfigurationException("Argument #" + paramIndex + " of Method '" + theMethod.getName()
+					throw new ConfigurationException(Msg.code(1433) + "Argument #" + paramIndex + " of Method '" + theMethod.getName()
 							+ "' in type '" + theMethod.getDeclaringClass().getCanonicalName()
 							+ "' is of an invalid generic type (can not be a collection of a collection of a collection)");
 				}
@@ -299,7 +300,7 @@ public class MethodUtil {
 							specType = String.class;
 						} else if ((parameterType != Include.class) || innerCollectionType == null
 								|| outerCollectionType != null) {
-							throw new ConfigurationException("Method '" + theMethod.getName() + "' is annotated with @"
+							throw new ConfigurationException(Msg.code(1434) + "Method '" + theMethod.getName() + "' is annotated with @"
 									+ IncludeParam.class.getSimpleName() + " but has a type other than Collection<"
 									+ Include.class.getSimpleName() + ">");
 						} else {
@@ -323,7 +324,7 @@ public class MethodUtil {
 							b.append(ResourceParam.class.getSimpleName());
 							b.append(" but has a type that is not an implementation of ");
 							b.append(IBaseResource.class.getCanonicalName());
-							throw new ConfigurationException(b.toString());
+							throw new ConfigurationException(Msg.code(1435) + b.toString());
 						}
 						param = new ResourceParameter(parameterType);
 					} else if (nextAnnotation instanceof IdParam) {
@@ -354,7 +355,7 @@ public class MethodUtil {
 						param = new OperationParameter(theContext, op.name(), ((OperationParam) nextAnnotation));
 					} else if (nextAnnotation instanceof Validate.Mode) {
 						if (parameterType.equals(ValidationModeEnum.class) == false) {
-							throw new ConfigurationException("Parameter annotated with @"
+							throw new ConfigurationException(Msg.code(1436) + "Parameter annotated with @"
 									+ Validate.class.getSimpleName() + "." + Validate.Mode.class.getSimpleName()
 									+ " must be of type " + ValidationModeEnum.class.getName());
 						}
@@ -368,7 +369,7 @@ public class MethodUtil {
 								});
 					} else if (nextAnnotation instanceof Validate.Profile) {
 						if (parameterType.equals(String.class) == false) {
-							throw new ConfigurationException("Parameter annotated with @"
+							throw new ConfigurationException(Msg.code(1437) + "Parameter annotated with @"
 									+ Validate.class.getSimpleName() + "." + Validate.Profile.class.getSimpleName()
 									+ " must be of type " + String.class.getName());
 						}
@@ -389,7 +390,7 @@ public class MethodUtil {
 			}
 
 			if (param == null) {
-				throw new ConfigurationException("Parameter #" + ((paramIndex + 1)) + "/" + (parameterTypes.length)
+				throw new ConfigurationException(Msg.code(1438) + "Parameter #" + ((paramIndex + 1)) + "/" + (parameterTypes.length)
 						+ " of method '" + theMethod.getName() + "' on type '"
 						+ theMethod.getDeclaringClass().getCanonicalName()
 						+ "' has no recognized FHIR interface parameter annotations. Don't know how to handle this parameter");

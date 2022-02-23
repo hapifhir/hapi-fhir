@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoComposition;
 import ca.uhn.fhir.model.dstu2.resource.Composition;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -36,6 +37,6 @@ public class FhirResourceDaoCompositionDstu2 extends BaseHapiFhirResourceDao<Com
 
 	@Override
 	public IBundleProvider getDocumentForComposition(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType<Integer> theCount, IPrimitiveType<Integer> theOffset, DateRangeParam theLastUpdate, SortSpec theSort, RequestDetails theRequestDetails) {
-		throw new NotImplementedOperationException("$document not implemented in DSTU2");
+		throw new NotImplementedOperationException(Msg.code(955) + "$document not implemented in DSTU2");
 	}
 }

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.delete;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.delete;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -134,7 +135,7 @@ public class DeleteConflictService {
 		if (retryCount >= MAX_RETRY_ATTEMPTS && !theDeleteConflicts.isEmpty()) {
 			IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(myFhirContext);
 			OperationOutcomeUtil.addIssue(myFhirContext, oo, BaseStorageDao.OO_SEVERITY_ERROR, MAX_RETRY_ATTEMPTS_EXCEEDED_MSG, null, "processing");
-			throw new ResourceVersionConflictException(MAX_RETRY_ATTEMPTS_EXCEEDED_MSG, oo);
+			throw new ResourceVersionConflictException(Msg.code(821) + MAX_RETRY_ATTEMPTS_EXCEEDED_MSG, oo);
 		}
 		return retryCount;
 	}

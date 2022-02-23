@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.method;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.client.method;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
@@ -57,13 +58,13 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 		myIdIndex = idIndex;
 
 		if (myIdIndex == null) {
-			throw new ConfigurationException("@" + Read.class.getSimpleName() + " method " + theMethod.getName() + " on type \"" + theMethod.getDeclaringClass().getName()
+			throw new ConfigurationException(Msg.code(1423) + "@" + Read.class.getSimpleName() + " method " + theMethod.getName() + " on type \"" + theMethod.getDeclaringClass().getName()
 					+ "\" does not have a parameter annotated with @" + IdParam.class.getSimpleName());
 		}
 		myIdParameterType = (Class<? extends IIdType>) parameterTypes[myIdIndex];
 
 		if (!IIdType.class.isAssignableFrom(myIdParameterType)) {
-			throw new ConfigurationException("ID parameter must be of type IdDt or IdType - Found: " + myIdParameterType);
+			throw new ConfigurationException(Msg.code(1424) + "ID parameter must be of type IdDt or IdType - Found: " + myIdParameterType);
 		}
 
 	}
@@ -124,7 +125,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 			break;
 		}
 
-		throw new IllegalStateException("" + getMethodReturnType()); // should not happen
+		throw new IllegalStateException(Msg.code(1425) + "" + getMethodReturnType()); // should not happen
 	}
 
 	@Override

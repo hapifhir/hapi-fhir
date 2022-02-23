@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
@@ -119,7 +120,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 			myClient.create().resource(sp).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: SearchParameter.status is missing or invalid", e.getMessage());
+			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(1112) + "SearchParameter.status is missing or invalid", e.getMessage());
 		}
 	}
 
@@ -136,7 +137,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 			myClient.create().resource(sp).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: SearchParameter.expression value \"Patient\" is invalid", e.getMessage());
+			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(1120) + "SearchParameter.expression value \"Patient\" is invalid", e.getMessage());
 		}
 	}
 
@@ -302,7 +303,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		eyeColourSp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
 		eyeColourSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
 
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(eyeColourSp));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(eyeColourSp));
 
 		myClient
 			.create()
@@ -316,7 +317,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		p1.addExtension().setUrl("http://acme.org/eyecolour").setValue(new CodeType("blue"));
 		IIdType p1id = myPatientDao.create(p1).getId().toUnqualifiedVersionless();
 
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p1));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(p1));
 
 		Patient p2 = new Patient();
 		p2.setActive(true);
@@ -330,7 +331,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 			.returnBundle(Bundle.class)
 			.execute();
 
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		List<String> foundResources = toUnqualifiedVersionlessIdValues(bundle);
 		assertThat(foundResources, contains(p1id.getValue()));
@@ -460,7 +461,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 				.execute();
 
 		} catch (Exception e) {
-			assertThat(e.getMessage(), is(equalTo("HTTP 400 Bad Request: Invalid date/time format: \"01-01-2020\"")));
+			assertThat(e.getMessage(), is(equalTo("HTTP 400 Bad Request: " + Msg.code(1882) + "Invalid date/time format: \"01-01-2020\"")));
 		}
 
 		//Now with custom SP
@@ -473,7 +474,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 				.execute();
 
 		} catch (Exception e) {
-			assertThat(e.getMessage(), is(equalTo("HTTP 400 Bad Request: Invalid date/time format: \"01-01-2020\"")));
+			assertThat(e.getMessage(), is(equalTo("HTTP 400 Bad Request: " + Msg.code(1882) + "Invalid date/time format: \"01-01-2020\"")));
 		}
 	}
 
@@ -532,7 +533,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 						.next(bundle)
 						.execute();
 				}
-				List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirCtx, bundle);
+				List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirContext, bundle);
 				resources.forEach(t -> actualIds.add(t.getIdElement().getIdPartAsLong()));
 				foundCount += resources.size();
 

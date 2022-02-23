@@ -1,5 +1,6 @@
 package ca.uhn.fhir.tinder;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.ValueSet;
@@ -89,7 +90,7 @@ public class ValueSetGenerator {
 		InputStream is = ValueSetGenerator.class.getResourceAsStream(name);
 		if (null == is) {
 			ourLog.error("Failed loading valuesets from: " + name);
-			throw new FileNotFoundException(name);
+			throw new FileNotFoundException(Msg.code(88) + name);
 		}
 		String vs = IOUtils.toString(is, Charset.defaultCharset());
 		if ("dstu2".equals(myVersion)) {
@@ -99,7 +100,7 @@ public class ValueSetGenerator {
 				parseValueSet(nextVs);
 			}
 		} else {
-			throw new IllegalStateException("Fhir version not supported");
+			throw new IllegalStateException(Msg.code(89) + "Fhir version not supported");
 		}
 
 		if (myResourceValueSetFiles != null) {
@@ -265,7 +266,7 @@ public class ValueSetGenerator {
 			theOutputDirectory.mkdirs();
 		}
 		if (!theOutputDirectory.isDirectory()) {
-			throw new IOException(theOutputDirectory + " is not a directory");
+			throw new IOException(Msg.code(90) + theOutputDirectory + " is not a directory");
 		}
 
 		String valueSetName = theValueSetTm.getClassName();
@@ -313,7 +314,7 @@ public class ValueSetGenerator {
 		try {
 			write(theTarget, myMarkedValueSets, theOutputDirectory, thePackageBase);
 		} catch (IOException e) {
-			throw new MojoFailureException("Failed to write valueset", e);
+			throw new MojoFailureException(Msg.code(91) + "Failed to write valueset", e);
 		}
 	}
 

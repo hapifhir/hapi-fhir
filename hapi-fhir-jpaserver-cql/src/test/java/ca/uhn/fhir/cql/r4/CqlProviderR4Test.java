@@ -22,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CqlProviderR4Test extends BaseCqlR4Test implements CqlProviderTestBase {
 	private static final Logger ourLog = LoggerFactory.getLogger(CqlProviderR4Test.class);
-	private static final IdType libraryId = new IdType("Library", "library-mrp-logic");
 	private static final IdType measureId = new IdType("Measure", "measure-asf");
 	private static final String measure = "Measure/measure-asf";
 	private static final String patient = "Patient/Patient-6529";

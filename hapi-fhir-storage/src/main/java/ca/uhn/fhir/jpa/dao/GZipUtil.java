@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.parser.DataFormatException;
 import org.apache.commons.io.IOUtils;
 
@@ -37,7 +38,7 @@ public class GZipUtil {
 			is = new GZIPInputStream(new ByteArrayInputStream(theResource));
 			return IOUtils.toString(is, "UTF-8");
 		} catch (IOException e) {
-			throw new DataFormatException("Failed to decompress contents", e);
+			throw new DataFormatException(Msg.code(516) + "Failed to decompress contents", e);
 		}
 	}
 
@@ -51,7 +52,7 @@ public class GZipUtil {
 			byte[] retVal = os.toByteArray();
 			return retVal;
 		} catch (IOException e) {
-			throw new DataFormatException("Compress contents", e);
+			throw new DataFormatException(Msg.code(517) + "Compress contents", e);
 		}
 	}
 

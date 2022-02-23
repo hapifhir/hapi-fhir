@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.util.ParametersUtil;
@@ -210,7 +211,7 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 		try {
 			theField.set(theTarget, theValue);
 		} catch (IllegalAccessException e) {
-			throw new ConfigurationException("Failed to set value", e);
+			throw new ConfigurationException(Msg.code(1736) + "Failed to set value", e);
 		}
 	}
 
@@ -218,7 +219,7 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 		try {
 			return theField.get(theTarget);
 		} catch (IllegalAccessException e) {
-			throw new ConfigurationException("Failed to get value", e);
+			throw new ConfigurationException(Msg.code(1737) + "Failed to get value", e);
 		}
 	}
 

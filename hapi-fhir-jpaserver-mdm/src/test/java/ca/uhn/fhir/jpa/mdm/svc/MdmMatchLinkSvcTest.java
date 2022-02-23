@@ -157,7 +157,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		Patient patient = getTargetResourceFromMdmLink(mdmLink.get(), "Patient");
 		List<CanonicalEID> externalEid = myEidHelper.getExternalEid(patient);
 
-		assertThat(externalEid.get(0).getSystem(), is(equalTo(myMdmSettings.getMdmRules().getEnterpriseEIDSystem())));
+		assertThat(externalEid.get(0).getSystem(), is(equalTo(myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType("Patient"))));
 		assertThat(externalEid.get(0).getValue(), is(equalTo(sampleEID)));
 	}
 
@@ -222,7 +222,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 
 		//The collision should have added a new identifier with the external system.
 		Identifier secondIdentifier = identifier.get(1);
-		assertThat(secondIdentifier.getSystem(), is(equalTo(myMdmSettings.getMdmRules().getEnterpriseEIDSystem())));
+		assertThat(secondIdentifier.getSystem(), is(equalTo(myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType("Patient"))));
 		assertThat(secondIdentifier.getValue(), is(equalTo("12345")));
 	}
 
@@ -433,6 +433,33 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		assertThat(patient2, is(not(sameGoldenResourceAs(patient))));
 		assertThat(patient2, is(possibleMatchWith(patient)));
 		assertThat(patient3, is(sameGoldenResourceAs(patient)));
+	}
+
+
+	@Test
+	public void testPossibleMatchUpdatedToMatch() {
+		// setup
+		Patient patient = buildJanePatient();
+		patient.getNameFirstRep().setFamily("familyone");
+		patient = createPatientAndUpdateLinks(patient);
+		assertThat(patient, is(sameGoldenResourceAs(patient)));
+
+		Patient patient2 = buildJanePatient();
+		patient2.getNameFirstRep().setFamily("pleasedonotmatchatall");
+		patient2 = createPatientAndUpdateLinks(patient2);
+
+		assertThat(patient2, is(not(sameGoldenResourceAs(patient))));
+		assertThat(patient2, is(not(linkedTo(patient))));
+		assertThat(patient2, is(possibleMatchWith(patient)));
+
+		patient2.getNameFirstRep().setFamily(patient.getNameFirstRep().getFamily());
+
+		// execute
+		updatePatientAndUpdateLinks(patient2);
+
+		// validate
+		assertThat(patient2, is(linkedTo(patient)));
+		assertThat(patient2, is(sameGoldenResourceAs(patient)));
 	}
 
 	@Test

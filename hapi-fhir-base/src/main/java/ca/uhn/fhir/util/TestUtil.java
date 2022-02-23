@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ package ca.uhn.fhir.util;
  */
 
 import ca.uhn.fhir.i18n.HapiLocalizer;
+import ca.uhn.fhir.i18n.Msg;
 
 import java.util.Locale;
 import java.util.TimeZone;
@@ -91,11 +92,11 @@ public class TestUtil {
 			try {
 				Thread.sleep(50);
 			} catch (InterruptedException theE) {
-				throw new Error(theE);
+				throw new Error(Msg.code(1778) + theE);
 			}
 		}
 		if ((System.currentTimeMillis() - start) >= 15000) {
-			throw new IllegalStateException("Size " + theInteger.get() + " is != target " + theTarget);
+			throw new IllegalStateException(Msg.code(1779) + "Size " + theInteger.get() + " is != target " + theTarget);
 		}
 	}
 
@@ -110,11 +111,11 @@ public class TestUtil {
 			try {
 				Thread.sleep(50);
 			} catch (InterruptedException theE) {
-				throw new Error(theE);
+				throw new Error(Msg.code(1780) + theE);
 			}
 		}
 		if ((System.currentTimeMillis() - start) >= 15000) {
-			throw new IllegalStateException("Size " + theSource.call() + " is != target " + theTarget);
+			throw new IllegalStateException(Msg.code(1781) + "Size " + theSource.call() + " is != target " + theTarget);
 		}
 	}
 

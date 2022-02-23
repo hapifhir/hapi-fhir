@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.provider.dstu2;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -41,7 +42,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -410,14 +411,14 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
 	@Read(type = OperationDefinition.class)
 	public OperationDefinition readOperationDefinition(@IdParam IdDt theId, RequestDetails theRequestDetails) {
 		if (theId == null || theId.hasIdPart() == false) {
-			throw new ResourceNotFoundException(theId);
+			throw new ResourceNotFoundException(Msg.code(1988) + theId);
 		}
 		RestfulServerConfiguration serverConfiguration = getServerConfiguration(theRequestDetails);
 		Bindings bindings = serverConfiguration.provideBindings();
 
 		List<OperationMethodBinding> sharedDescriptions = bindings.getOperationIdToBindings().get(theId.getIdPart());
 		if (sharedDescriptions == null || sharedDescriptions.isEmpty()) {
-			throw new ResourceNotFoundException(theId);
+			throw new ResourceNotFoundException(Msg.code(1989) + theId);
 		}
 
 		OperationDefinition op = new OperationDefinition();

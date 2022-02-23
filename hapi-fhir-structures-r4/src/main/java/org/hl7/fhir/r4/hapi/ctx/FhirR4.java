@@ -20,6 +20,7 @@ package org.hl7.fhir.r4.hapi.ctx;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
@@ -75,7 +76,7 @@ public class FhirR4 implements IFhirVersion {
 			str = FhirR4.class.getResourceAsStream(path);
 		}
 		if (str == null) {
-			throw new ConfigurationException("Can not find model property file on classpath: " + path);
+			throw new ConfigurationException(Msg.code(257) + "Can not find model property file on classpath: " + path);
 		}
 		return str;
 	}

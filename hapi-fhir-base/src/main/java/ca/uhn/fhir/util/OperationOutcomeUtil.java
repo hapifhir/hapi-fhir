@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,12 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
-import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -114,9 +119,9 @@ public class OperationOutcomeUtil {
 		try {
 			return (IBaseOperationOutcome) ooDef.getImplementingClass().newInstance();
 		} catch (InstantiationException e) {
-			throw new InternalErrorException("Unable to instantiate OperationOutcome", e);
+			throw new InternalErrorException(Msg.code(1803) + "Unable to instantiate OperationOutcome", e);
 		} catch (IllegalAccessException e) {
-			throw new InternalErrorException("Unable to instantiate OperationOutcome", e);
+			throw new InternalErrorException(Msg.code(1804) + "Unable to instantiate OperationOutcome", e);
 		}
 	}
 

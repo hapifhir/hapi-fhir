@@ -4,7 +4,7 @@ package ca.uhn.fhir.parser;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import ca.uhn.fhir.context.RuntimePrimitiveDatatypeNarrativeDefinition;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeXhtmlHl7OrgDefinition;
 import ca.uhn.fhir.context.RuntimeResourceBlockDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IIdentifiableElement;
@@ -593,7 +594,7 @@ class ParserState<T> {
 			BaseRuntimeElementDefinition<?> target = child.getChildByName(theChildName);
 			if (target == null) {
 				// This is a bug with the structures and shouldn't happen..
-				throw new DataFormatException("Found unexpected element '" + theChildName + "' in parent element '" + myDefinition.getName() + "'. Valid names are: " + child.getValidChildNames());
+				throw new DataFormatException(Msg.code(1809) + "Found unexpected element '" + theChildName + "' in parent element '" + myDefinition.getName() + "'. Valid names are: " + child.getValidChildNames());
 			}
 
 			switch (target.getChildType()) {
@@ -671,7 +672,7 @@ class ParserState<T> {
 				}
 			}
 
-			throw new DataFormatException("Illegal resource position: " + target.getChildType());
+			throw new DataFormatException(Msg.code(1810) + "Illegal resource position: " + target.getChildType());
 		}
 
 		@Override
@@ -744,7 +745,7 @@ class ParserState<T> {
 		@Override
 		public void endingElement() throws DataFormatException {
 			if (myExtension.getValue() != null && myExtension.getExtension().size() > 0) {
-				throw new DataFormatException("Extension (URL='" + myExtension.getUrl() + "') must not have both a value and other contained extensions");
+				throw new DataFormatException(Msg.code(1811) + "Extension (URL='" + myExtension.getUrl() + "') must not have both a value and other contained extensions");
 			}
 			pop();
 		}
@@ -904,7 +905,7 @@ class ParserState<T> {
 			} else if (metadataValue instanceof ExtensionDt) {
 				newExtension = (ExtensionDt) metadataValue;
 			} else {
-				throw new IllegalStateException("Expected ExtensionDt as custom resource metadata type, got: " + metadataValue.getClass().getSimpleName());
+				throw new IllegalStateException(Msg.code(1812) + "Expected ExtensionDt as custom resource metadata type, got: " + metadataValue.getClass().getSimpleName());
 			}
 			newExtension.setUrl(theUrlAttr);
 			myMap.put(resourceMetadataKeyEnum, newExtension);
@@ -994,18 +995,18 @@ class ParserState<T> {
 					definition = myContext.getResourceDefinition(myParentVersion, theLocalPart);
 				}
 				if ((definition == null)) {
-					throw new DataFormatException("Element '" + theLocalPart + "' is not a known resource type, expected a resource at this position");
+					throw new DataFormatException(Msg.code(1813) + "Element '" + theLocalPart + "' is not a known resource type, expected a resource at this position");
 				}
 			} else {
 				definition = myContext.getResourceDefinition(myResourceType);
 				if (!StringUtils.equals(theLocalPart, definition.getName())) {
-					throw new DataFormatException(myContext.getLocalizer().getMessage(ParserState.class, "wrongResourceTypeFound", definition.getName(), theLocalPart));
+					throw new DataFormatException(Msg.code(1814) + myContext.getLocalizer().getMessage(ParserState.class, "wrongResourceTypeFound", definition.getName(), theLocalPart));
 				}
 			}
 
 			RuntimeResourceDefinition def = definition;
 			if (!definition.getName().equals(theLocalPart) && definition.getName().equalsIgnoreCase(theLocalPart)) {
-				throw new DataFormatException("Unknown resource type '" + theLocalPart + "': Resource names are case sensitive, found similar name: '" + definition.getName() + "'");
+				throw new DataFormatException(Msg.code(1815) + "Unknown resource type '" + theLocalPart + "': Resource names are case sensitive, found similar name: '" + definition.getName() + "'");
 			}
 			myInstance = newInstance(def);
 
@@ -1283,7 +1284,7 @@ class ParserState<T> {
 		@Override
 		public void enteringNewElement(String theNamespaceUri, String theLocalPart) throws DataFormatException {
 			if (!TagList.ELEMENT_NAME_LC.equals(theLocalPart.toLowerCase())) {
-				throw new DataFormatException("resourceType does not appear to be 'TagList', found: " + theLocalPart);
+				throw new DataFormatException(Msg.code(1816) + "resourceType does not appear to be 'TagList', found: " + theLocalPart);
 			}
 
 			push(new TagListState(myTagList));
@@ -1474,7 +1475,7 @@ class ParserState<T> {
 			if (TagList.ATTR_CATEGORY.equals(theLocalPart)) {
 				push(new TagState(myTagList));
 			} else {
-				throw new DataFormatException("Unexpected element: " + theLocalPart);
+				throw new DataFormatException(Msg.code(1817) + "Unexpected element: " + theLocalPart);
 			}
 		}
 
@@ -1550,7 +1551,7 @@ class ParserState<T> {
 			} else if (Tag.ATTR_LABEL.equals(theLocalPart) || "display".equals(theLocalPart)) {
 				mySubState = LABEL;
 			} else {
-				throw new DataFormatException("Unexpected element: " + theLocalPart);
+				throw new DataFormatException(Msg.code(1818) + "Unexpected element: " + theLocalPart);
 			}
 		}
 

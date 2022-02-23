@@ -1,8 +1,10 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
+import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TerminologyTest;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
@@ -462,7 +464,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			myClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|101").execute();
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertEquals("HTTP 403 Forbidden: Access denied by default policy (no applicable rules)", e.getMessage());
+			assertEquals("HTTP 403 Forbidden: " + Msg.code(334) + "Access denied by default policy (no applicable rules)", e.getMessage());
 		}
 
 		patient = new Patient();
@@ -473,7 +475,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			myClient.update().resource(patient).execute();
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertEquals("HTTP 403 Forbidden: Access denied by default policy (no applicable rules)", e.getMessage());
+			assertEquals("HTTP 403 Forbidden: " + Msg.code(334) + "Access denied by default policy (no applicable rules)", e.getMessage());
 		}
 
 	}
@@ -518,7 +520,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 				.setMethod(Bundle.HTTPVerb.POST)
 				.setIfNoneExist("Patient?identifier=http://uhn.ca/mrns|100");
 			Bundle response = myClient.transaction().withBundle(request).execute();
-			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+			ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 
 			// Subsequent calls also shouldn't fail
 			myClient.transaction().withBundle(request).execute();
@@ -543,7 +545,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 				myClient.transaction().withBundle(request).execute();
 				fail();
 			} catch (ForbiddenOperationException e) {
-				assertEquals("HTTP 403 Forbidden: Access denied by default policy (no applicable rules)", e.getMessage());
+				assertEquals("HTTP 403 Forbidden: " + Msg.code(334) + "Access denied by default policy (no applicable rules)", e.getMessage());
 			}
 		}
 
@@ -564,7 +566,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 				myClient.transaction().withBundle(request).execute();
 				fail();
 			} catch (ForbiddenOperationException e) {
-				assertEquals("HTTP 403 Forbidden: Access denied by default policy (no applicable rules)", e.getMessage());
+				assertEquals("HTTP 403 Forbidden: " + Msg.code(334) + "Access denied by default policy (no applicable rules)", e.getMessage());
 			}
 		}
 
@@ -670,6 +672,34 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		// Read a non-allowed observation
 		try {
 			myClient.read().resource(Observation.class).withId(observationId2).execute();
+			fail();
+		} catch (ForbiddenOperationException e) {
+			// good
+		}
+
+	}
+
+	@Test
+	public void testSearchCodeIn() {
+		createLocalCsAndVs();
+
+		createObservation(withId("allowed"), withObservationCode(FhirResourceDaoR4TerminologyTest.URL_MY_CODE_SYSTEM, "A"));
+		createObservation(withId("disallowed"), withObservationCode(FhirResourceDaoR4TerminologyTest.URL_MY_CODE_SYSTEM, "foo"));
+
+		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow().read().resourcesOfType("Observation").withCodeInValueSet("code", FhirResourceDaoR4TerminologyTest.URL_MY_VALUE_SET).andThen()
+					.build();
+			}
+		}.setValidationSupport(myValidationSupport));
+
+		// Should be ok
+		myClient.read().resource(Observation.class).withId("Observation/allowed").execute();
+
+		try {
+			myClient.read().resource(Observation.class).withId("Observation/disallowed").execute();
 			fail();
 		} catch (ForbiddenOperationException e) {
 			// good
@@ -848,7 +878,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 	@Test
 	public void testDeleteCascadeBlocked() {
-		CascadingDeleteInterceptor cascadingDeleteInterceptor = new CascadingDeleteInterceptor(myFhirCtx, myDaoRegistry, myInterceptorRegistry);
+		CascadingDeleteInterceptor cascadingDeleteInterceptor = new CascadingDeleteInterceptor(myFhirContext, myDaoRegistry, myInterceptorRegistry);
 		ourRestServer.getInterceptorService().registerInterceptor(cascadingDeleteInterceptor);
 		try {
 
@@ -892,7 +922,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 	@Test
 	public void testDeleteCascadeAllowed() {
-		CascadingDeleteInterceptor cascadingDeleteInterceptor = new CascadingDeleteInterceptor(myFhirCtx, myDaoRegistry, myInterceptorRegistry);
+		CascadingDeleteInterceptor cascadingDeleteInterceptor = new CascadingDeleteInterceptor(myFhirContext, myDaoRegistry, myInterceptorRegistry);
 		ourRestServer.getInterceptorService().registerInterceptor(cascadingDeleteInterceptor);
 		try {
 
@@ -931,7 +961,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 	@Test
 	public void testDeleteCascadeAllowed_ButNotOnTargetType() {
-		CascadingDeleteInterceptor cascadingDeleteInterceptor = new CascadingDeleteInterceptor(myFhirCtx, myDaoRegistry, myInterceptorRegistry);
+		CascadingDeleteInterceptor cascadingDeleteInterceptor = new CascadingDeleteInterceptor(myFhirContext, myDaoRegistry, myInterceptorRegistry);
 		ourRestServer.getInterceptorService().registerInterceptor(cascadingDeleteInterceptor);
 		try {
 
@@ -980,7 +1010,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
-		String resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
+		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
@@ -997,7 +1027,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 		pt = new Patient();
 		pt.addName().setFamily("FOOFOOFOO");
-		resource = myFhirCtx.newXmlParser().encodeResourceToString(pt);
+		resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
 		post = new HttpPost(ourServerBase + "/Patient");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
@@ -1163,7 +1193,6 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	 */
 	@Test
 	public void testInstanceRuleOkForResourceWithNoId() {
-
 		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -1183,8 +1212,11 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 		Patient p = new Patient();
 		p.setActive(true);
-		p.setId(IdType.newRandomUuid());
-		request.addEntry().setResource(p).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl(p.getId());
+		p.setId("123");
+		request.addEntry().setResource(p).getRequest().setMethod(Bundle.HTTPVerb.POST)
+			.setUrl(
+				"Patient/"+
+					p.getId());
 
 		Observation o = new Observation();
 		o.getCode().setText("Some Observation");
@@ -1233,7 +1265,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			.withBundle(bundle)
 			.withAdditionalHeader(Constants.HEADER_PREFER, "return=" + Constants.HEADER_PREFER_RETURN_MINIMAL)
 			.execute();
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
 		assertNull(resp.getEntry().get(0).getResource());
 
 		// return=OperationOutcome - should succeed
@@ -1242,7 +1274,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			.withBundle(bundle)
 			.withAdditionalHeader(Constants.HEADER_PREFER, "return=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
 			.execute();
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
 		assertNull(resp.getEntry().get(0).getResource());
 
 		// return=Representation - should fail
@@ -1346,7 +1378,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			.withAdditionalHeader(Constants.HEADER_PREFER, "return=" + Constants.HEADER_PREFER_RETURN_MINIMAL)
 			.execute();
 		assertEquals(3, resp.getEntry().size());
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
 	}
 
 	@Test
@@ -1571,7 +1603,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 				Bundle result = myClient.search().byUrl(url).returnBundle(Bundle.class).execute();
 				fail();
 			} catch (ForbiddenOperationException e) {
-				assertThat(e.getMessage(), startsWith("HTTP 403 Forbidden: Access denied by rule"));
+				assertThat(e.getMessage(), startsWith("HTTP 403 Forbidden: " + Msg.code(333) + "Access denied by rule"));
 			}
 		}
 

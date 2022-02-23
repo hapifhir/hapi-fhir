@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.apache;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package ca.uhn.fhir.rest.client.apache;
  * limitations under the License.
  * #L%
  */
+import ca.uhn.fhir.i18n.Msg;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -65,7 +66,7 @@ public class ApacheHttpResponse extends BaseHttpResponse implements IHttpRespons
 				try {
 					this.myEntityBytes = IOUtils.toByteArray(respEntity);
 				} catch (IllegalStateException e) {
-					throw new InternalErrorException(e);
+					throw new InternalErrorException(Msg.code(1478) + e);
 				}
 			}
 		}

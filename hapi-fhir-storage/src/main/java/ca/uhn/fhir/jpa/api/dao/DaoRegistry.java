@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.api.dao;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.api.dao;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.api.IDaoRegistry;
@@ -102,7 +103,7 @@ public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 				.stream()
 				.sorted()
 				.collect(Collectors.toList());
-			throw new InvalidRequestException("Unable to process request, this server does not know how to handle resources of type " + theResourceName + " - Can handle: " + supportedResourceTypes);
+			throw new InvalidRequestException(Msg.code(572) + "Unable to process request, this server does not know how to handle resources of type " + theResourceName + " - Can handle: " + supportedResourceTypes);
 		}
 		return retVal;
 	}
@@ -192,7 +193,7 @@ public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 				.map(t -> myContext.getResourceType(t))
 				.sorted()
 				.collect(Collectors.toList());
-			throw new InvalidRequestException("Unable to process request, this server does not know how to handle resources of type " + myContext.getResourceType(theClass) + " - Can handle: " + supportedResourceNames);
+			throw new InvalidRequestException(Msg.code(573) + "Unable to process request, this server does not know how to handle resources of type " + myContext.getResourceType(theClass) + " - Can handle: " + supportedResourceNames);
 		}
 		return retVal;
 	}

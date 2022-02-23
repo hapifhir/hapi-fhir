@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.method;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.method;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Include;
@@ -62,7 +63,7 @@ class IncludeParameter extends BaseQueryParameter {
 
 		mySpecType = theSpecType;
 		if (mySpecType != Include.class && mySpecType != String.class) {
-			throw new ConfigurationException("Invalid @" + IncludeParam.class.getSimpleName() + " parameter type: " + mySpecType);
+			throw new ConfigurationException(Msg.code(439) + "Invalid @" + IncludeParam.class.getSimpleName() + " parameter type: " + mySpecType);
 		}
 
 	}
@@ -134,7 +135,7 @@ class IncludeParameter extends BaseQueryParameter {
 			try {
 				retValCollection = myInstantiableCollectionType.newInstance();
 			} catch (Exception e) {
-				throw new InternalErrorException("Failed to instantiate " + myInstantiableCollectionType.getName(), e);
+				throw new InternalErrorException(Msg.code(440) + "Failed to instantiate " + myInstantiableCollectionType.getName(), e);
 			}
 		}
 
@@ -143,7 +144,7 @@ class IncludeParameter extends BaseQueryParameter {
 				continue;
 			}
 			if (nextParamList.size() > 1) {
-				throw new InvalidRequestException(theContext.getLocalizer().getMessage(IncludeParameter.class, "orIncludeInRequest"));
+				throw new InvalidRequestException(Msg.code(441) + theContext.getLocalizer().getMessage(IncludeParameter.class, "orIncludeInRequest"));
 			}
 
 			String qualifier = nextParamList.getQualifier();
@@ -154,7 +155,7 @@ class IncludeParameter extends BaseQueryParameter {
 				if (!myAllow.contains(value)) {
 					if (!myAllow.contains("*")) {
 						String msg = theContext.getLocalizer().getMessage(IncludeParameter.class, "invalidIncludeNameInRequest", value, new TreeSet<String>(myAllow).toString(), getName());
-						throw new InvalidRequestException(msg);
+						throw new InvalidRequestException(Msg.code(442) + msg);
 					}
 				}
 			}

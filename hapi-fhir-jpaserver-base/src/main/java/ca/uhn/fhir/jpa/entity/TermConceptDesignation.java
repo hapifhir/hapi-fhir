@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,17 +21,31 @@ package ca.uhn.fhir.jpa.entity;
  */
 
 import ca.uhn.fhir.util.ValidateUtil;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.annotation.Nonnull;
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
 import java.io.Serializable;
 
 import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.length;
 
 @Entity
-@Table(name = "TRM_CONCEPT_DESIG", uniqueConstraints = {
-}, indexes = {
+@Table(name = "TRM_CONCEPT_DESIG", uniqueConstraints = { }, indexes = {
+	// must have same name that indexed FK or SchemaMigrationTest complains because H2 sets this index automatically
+	@Index(name = "FK_CONCEPTDESIG_CONCEPT",  columnList = "CONCEPT_PID", unique = false)
 })
 public class TermConceptDesignation implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -133,5 +147,18 @@ public class TermConceptDesignation implements Serializable {
 
 	public Long getPid() {
 		return myId;
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+			.append("conceptPid", myConcept.getId())
+			.append("pid", myId)
+			.append("language", myLanguage)
+			.append("useSystem", myUseSystem)
+			.append("useCode", myUseCode)
+			.append("useDisplay", myUseDisplay)
+			.append("value", myValue)
+			.toString();
 	}
 }

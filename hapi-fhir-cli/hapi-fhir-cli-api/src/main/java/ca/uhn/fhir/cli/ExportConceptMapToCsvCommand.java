@@ -4,7 +4,7 @@ package ca.uhn.fhir.cli;
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.cli.Options;
@@ -112,7 +113,7 @@ public class ExportConceptMapToCsvCommand extends AbstractImportExportCsvConcept
 		try {
 			convertConceptMapToCsv((ConceptMap) VersionConvertorFactory_30_40.convertResource(theConceptMap));
 		} catch (FHIRException fe) {
-			throw new ExecutionException(fe);
+			throw new ExecutionException(Msg.code(1563), fe);
 		}
 	}
 
@@ -149,7 +150,7 @@ public class ExportConceptMapToCsvCommand extends AbstractImportExportCsvConcept
 				csvPrinter.flush();
 			}
 		} catch (IOException ioe) {
-			throw new InternalErrorException(ioe);
+			throw new InternalErrorException(Msg.code(1564) + ioe);
 		}
 
 		ourLog.info("Finished exporting to {}", file);

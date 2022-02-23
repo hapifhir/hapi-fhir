@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.cache;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.cache;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
@@ -99,7 +100,7 @@ public class ResourceChangeListenerCache implements IResourceChangeListenerCache
 		InMemoryMatchResult result = mySearchParamMatcher.match(mySearchParameterMap, theResource);
 		if (!result.supported()) {
 			// This should never happen since we enforce only in-memory SearchParamMaps at registration time
-			throw new IllegalStateException("Search Parameter Map " + mySearchParameterMap + " cannot be processed in-memory: " + result.getUnsupportedReason());
+			throw new IllegalStateException(Msg.code(483) + "Search Parameter Map " + mySearchParameterMap + " cannot be processed in-memory: " + result.getUnsupportedReason());
 		}
 		return result.matched();
 	}

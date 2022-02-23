@@ -1,5 +1,6 @@
 package ca.uhn.fhir.tinder;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingModel;
 import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;
 import org.apache.commons.text.StringEscapeUtils;
@@ -69,7 +70,7 @@ public class TinderResourceGeneratorMojo extends AbstractGeneratorMojo {
 			myProject.addResource(resource);
 
 		} catch (Exception e) {
-			throw new MojoFailureException("Failed to generate resources", e);
+			throw new MojoFailureException(Msg.code(100) + "Failed to generate resources", e);
 		}
 	}
 

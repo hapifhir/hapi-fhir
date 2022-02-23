@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription.model;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,8 +68,16 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 	private RestHookDetails myRestHookDetails;
 	@JsonProperty("extensions")
 	private Map<String, List<String>> myChannelExtensions;
+	@JsonProperty("tags")
+	private Map<String, String> myTags;
 	@JsonProperty("payloadSearchCriteria")
 	private String myPayloadSearchCriteria;
+	@JsonProperty("partitionId")
+	private Integer myPartitionId;
+	@JsonProperty("crossPartitionEnabled")
+	private boolean myCrossPartitionEnabled;
+	@JsonProperty("sendDeleteMessages")
+	private boolean mySendDeleteMessages;
 
 	/**
 	 * Constructor
@@ -139,6 +147,15 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 		}
 	}
 
+	public Map<String, String> getTags() {
+		return myTags;
+	}
+
+	public void setTags(Map<String, String> theTags) {
+		this.myTags = theTags;
+	}
+
+
 	public void setHeaders(String theHeaders) {
 		myHeaders = new ArrayList<>();
 		if (isNotBlank(theHeaders)) {
@@ -148,9 +165,9 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 
 	public String getChannelExtension(String theUrl) {
 		String retVal = null;
-		List<String> strings = myChannelExtensions.get(theUrl);
-		if (strings != null && strings.isEmpty() == false) {
-			retVal = strings.get(0);
+		List<String> channelExtensions = myChannelExtensions.get(theUrl);
+		if (channelExtensions != null && !channelExtensions.isEmpty()) {
+			retVal = channelExtensions.get(0);
 		}
 		return retVal;
 	}
@@ -216,12 +233,36 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 		myStatus = theStatus;
 	}
 
+	public Integer getRequestPartitionId() {
+		return myPartitionId;
+	}
+
+	public void setPartitionId(Integer thePartitionId) {
+		myPartitionId = thePartitionId;
+	}
+
+	public boolean getCrossPartitionEnabled() {
+		return myCrossPartitionEnabled;
+	}
+
+	public void setCrossPartitionEnabled(boolean myCrossPartitionEnabled) {
+		this.myCrossPartitionEnabled = myCrossPartitionEnabled;
+	}
+
 	/**
 	 * For now we're using the R4 triggerdefinition, but this
 	 * may change in the future when things stabilize
 	 */
 	public CanonicalEventDefinition getTrigger() {
 		return myTrigger;
+	}
+
+	public boolean getSendDeleteMessages() {
+		return mySendDeleteMessages;
+	}
+
+	public void setSendDeleteMessages(boolean theSendDeleteMessages) {
+		mySendDeleteMessages = theSendDeleteMessages;
 	}
 
 	@Override
@@ -314,7 +355,7 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 		private String mySubjectTemplate;
 
 		/**
-		 * Construcor
+		 * Constructor
 		 */
 		public EmailDetails() {
 			super();

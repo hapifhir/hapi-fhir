@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.term.loinc;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.term.loinc;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
@@ -53,7 +54,7 @@ public class LoincRsnaPlaybookHandler extends BaseLoincHandler implements IZipCo
 	 * -ja
 	 */
 	public static final String RPID_CS_URI = RID_CS_URI;
-	private static final String CM_COPYRIGHT = "This content from LOINC® is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at https://loinc.org/license/. The LOINC/RSNA Radiology Playbook and the LOINC Part File contain content from RadLex® (http://rsna.org/RadLex.aspx), copyright © 2005-2017, The Radiological Society of North America, Inc., available at no cost under the license at http://www.rsna.org/uploadedFiles/RSNA/Content/Informatics/RadLex_License_Agreement_and_Terms_of_Use_V2_Final.pdf.";
+	private static final String CM_COPYRIGHT = "The LOINC/RSNA Radiology Playbook and the LOINC Part File contain content from RadLex® (http://rsna.org/RadLex.aspx), copyright © 2005-2017, The Radiological Society of North America, Inc., available at no cost under the license at http://www.rsna.org/uploadedFiles/RSNA/Content/Informatics/RadLex_License_Agreement_and_Terms_of_Use_V2_Final.pdf.";
 	private final Map<String, TermConcept> myCode2Concept;
 	private final List<ValueSet> myValueSets;
 	private final Map<String, ValueSet> myIdToValueSet = new HashMap<>();
@@ -62,8 +63,9 @@ public class LoincRsnaPlaybookHandler extends BaseLoincHandler implements IZipCo
 	/**
 	 * Constructor
 	 */
-	public LoincRsnaPlaybookHandler(Map<String, TermConcept> theCode2concept, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps, Properties theUploadProperties) {
-		super(theCode2concept, theValueSets, theConceptMaps, theUploadProperties);
+	public LoincRsnaPlaybookHandler(Map<String, TermConcept> theCode2concept, List<ValueSet> theValueSets,
+			List<ConceptMap> theConceptMaps, Properties theUploadProperties, String theCopyrightStatement) {
+		super(theCode2concept, theValueSets, theConceptMaps, theUploadProperties, theCopyrightStatement);
 		myCode2Concept = theCode2concept;
 		myValueSets = theValueSets;
 	}
@@ -184,7 +186,7 @@ public class LoincRsnaPlaybookHandler extends BaseLoincHandler implements IZipCo
 				loincCodePropName = "rad-view-view-type";
 				break;
 			default:
-				throw new InternalErrorException("Unknown PartTypeName: " + partTypeName);
+				throw new InternalErrorException(Msg.code(912) + "Unknown PartTypeName: " + partTypeName);
 		}
 
 		TermConcept code = myCode2Concept.get(loincNumber);
@@ -217,8 +219,8 @@ public class LoincRsnaPlaybookHandler extends BaseLoincHandler implements IZipCo
 					.setTargetCodeSystem(RID_CS_URI)
 					.setTargetCode(rid)
 					.setTargetDisplay(preferredName)
-					.setEquivalence(Enumerations.ConceptMapEquivalence.EQUAL),
-				CM_COPYRIGHT);
+					.setEquivalence(Enumerations.ConceptMapEquivalence.EQUAL)
+			,myLoincCopyrightStatement + " " + CM_COPYRIGHT);
 		}
 
 		// LOINC Term -> Radlex RPID code mappings
@@ -237,7 +239,7 @@ public class LoincRsnaPlaybookHandler extends BaseLoincHandler implements IZipCo
 					.setTargetCode(rpid)
 					.setTargetDisplay(longName)
 					.setEquivalence(Enumerations.ConceptMapEquivalence.EQUAL),
-				CM_COPYRIGHT);
+				myLoincCopyrightStatement + " " + CM_COPYRIGHT);
 		}
 
 	}

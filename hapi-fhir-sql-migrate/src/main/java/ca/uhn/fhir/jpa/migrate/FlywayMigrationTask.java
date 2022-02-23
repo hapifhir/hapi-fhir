@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate;
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.migrate;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.flywaydb.core.api.MigrationVersion;
@@ -65,6 +66,11 @@ public class FlywayMigrationTask implements JavaMigration {
 	}
 
 	@Override
+	public boolean isBaselineMigration() {
+		return false;
+	}
+
+	@Override
 	public boolean canExecuteInTransaction() {
 		return false;
 	}
@@ -83,7 +89,7 @@ public class FlywayMigrationTask implements JavaMigration {
 				description = myTask.getClass().getSimpleName();
 			}
 			String prefix = "Failure executing task \"" + description + "\", aborting! Cause: ";
-			throw new InternalErrorException(prefix + e.toString(), e);
+			throw new InternalErrorException(Msg.code(47) + prefix + e.toString(), e);
 		}
 	}
 

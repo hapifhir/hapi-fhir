@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 3109
+title: "`$binary-access-write` operation returns a DocumentReference with no content. This has been corrected."

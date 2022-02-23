@@ -1,13 +1,11 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.context.support.ValidationSupportContext;
-import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -31,8 +29,8 @@ public class FhirResourceDaoR4StructureDefinitionTest extends BaseJpaR4Test {
 
 		// Create a validation chain that includes default validation support and a
 		// snapshot generator
-		DefaultProfileValidationSupport defaultSupport = new DefaultProfileValidationSupport(myFhirCtx);
-		SnapshotGeneratingValidationSupport snapshotGenerator = new SnapshotGeneratingValidationSupport(myFhirCtx);
+		DefaultProfileValidationSupport defaultSupport = new DefaultProfileValidationSupport(myFhirContext);
+		SnapshotGeneratingValidationSupport snapshotGenerator = new SnapshotGeneratingValidationSupport(myFhirContext);
 		ValidationSupportChain chain = new ValidationSupportChain(defaultSupport, snapshotGenerator);
 
 		// Generate the snapshot
@@ -42,7 +40,7 @@ public class FhirResourceDaoR4StructureDefinitionTest extends BaseJpaR4Test {
 		String webUrl = null;
 		String name = "Foo Profile";
 		StructureDefinition output = myStructureDefinitionDao.generateSnapshot(differential, url, webUrl, name);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		assertEquals(54, output.getSnapshot().getElement().size());
 	}
@@ -61,7 +59,7 @@ public class FhirResourceDaoR4StructureDefinitionTest extends BaseJpaR4Test {
 		myStructureDefinitionDao.update(sd2);
 
 		StructureDefinition snapshotted = myStructureDefinitionDao.generateSnapshot(sd2, null, null, null);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(snapshotted));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(snapshotted));
 
 		assertTrue(snapshotted.getSnapshot().getElement().size() > 0);
 	}

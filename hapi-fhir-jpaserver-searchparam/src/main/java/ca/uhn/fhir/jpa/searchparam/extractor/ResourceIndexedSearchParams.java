@@ -5,7 +5,7 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -147,17 +147,32 @@ public final class ResourceIndexedSearchParams {
 		theEntity.setResourceLinks(myLinks);
 	}
 
-	public void updateSpnamePrefixForIndexedOnContainedResource(String theSpnamePrefix) {
-		updateSpnamePrefixForIndexedOnContainedResource(myNumberParams, theSpnamePrefix);
-		updateSpnamePrefixForIndexedOnContainedResource(myQuantityParams, theSpnamePrefix);
-		updateSpnamePrefixForIndexedOnContainedResource(myQuantityNormalizedParams, theSpnamePrefix);
-		updateSpnamePrefixForIndexedOnContainedResource(myDateParams, theSpnamePrefix);
-		updateSpnamePrefixForIndexedOnContainedResource(myUriParams, theSpnamePrefix);
-		updateSpnamePrefixForIndexedOnContainedResource(myTokenParams, theSpnamePrefix);
-		updateSpnamePrefixForIndexedOnContainedResource(myStringParams, theSpnamePrefix);
-		updateSpnamePrefixForIndexedOnContainedResource(myCoordsParams, theSpnamePrefix);
+	public void updateSpnamePrefixForIndexedOnContainedResource(String theContainingType, String theSpnamePrefix) {
+		updateSpnamePrefixForIndexedOnContainedResource(theContainingType, myNumberParams, theSpnamePrefix);
+		updateSpnamePrefixForIndexedOnContainedResource(theContainingType, myQuantityParams, theSpnamePrefix);
+		updateSpnamePrefixForIndexedOnContainedResource(theContainingType, myQuantityNormalizedParams, theSpnamePrefix);
+		updateSpnamePrefixForIndexedOnContainedResource(theContainingType, myDateParams, theSpnamePrefix);
+		updateSpnamePrefixForIndexedOnContainedResource(theContainingType, myUriParams, theSpnamePrefix);
+		updateSpnamePrefixForIndexedOnContainedResource(theContainingType, myTokenParams, theSpnamePrefix);
+		updateSpnamePrefixForIndexedOnContainedResource(theContainingType, myStringParams, theSpnamePrefix);
+		updateSpnamePrefixForIndexedOnContainedResource(theContainingType, myCoordsParams, theSpnamePrefix);
 	}
 	
+	public void updateSpnamePrefixForLinksOnContainedResource(String theSpNamePrefix) {
+		for (ResourceLink param : myLinks) {
+			// The resource link already has the resource type of the contained resource at the head of the path.
+			// We need to replace this with the name of the containing type, and extend the search path.
+			int index = param.getSourcePath().indexOf('.');
+			if (index > -1) {
+				param.setSourcePath(theSpNamePrefix + param.getSourcePath().substring(index));
+			} else {
+				// Can this ever happen?
+				param.setSourcePath(theSpNamePrefix + "." + param.getSourcePath());
+			}
+			param.calculateHashes(); // re-calculateHashes
+		}
+	}
+
 	void setUpdatedTime(Date theUpdateTime) {
 		setUpdatedTime(myStringParams, theUpdateTime);
 		setUpdatedTime(myNumberParams, theUpdateTime);
@@ -175,11 +190,14 @@ public final class ResourceIndexedSearchParams {
 		}
 	}
 
-	private void updateSpnamePrefixForIndexedOnContainedResource(Collection<? extends BaseResourceIndexedSearchParam> theParams, @Nonnull String theSpnamePrefix) {
+	private void updateSpnamePrefixForIndexedOnContainedResource(String theContainingType, Collection<? extends BaseResourceIndexedSearchParam> theParams, @Nonnull String theSpnamePrefix) {
 		
 		for (BaseResourceIndexedSearchParam param : theParams) {
+			param.setResourceType(theContainingType);
 			param.setParamName(theSpnamePrefix + "." + param.getParamName());
-			param.calculateHashes(); // re-calculuteHashes
+
+			// re-calculate hashes
+			param.calculateHashes();
 		}
 	}
 	

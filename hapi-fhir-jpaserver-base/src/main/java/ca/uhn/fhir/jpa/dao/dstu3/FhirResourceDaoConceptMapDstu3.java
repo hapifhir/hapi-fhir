@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
 import ca.uhn.fhir.jpa.api.model.TranslationRequest;
@@ -65,7 +66,7 @@ public class FhirResourceDaoConceptMapDstu3 extends BaseHapiFhirResourceDao<Conc
 					org.hl7.fhir.r4.model.ConceptMap converted = (org.hl7.fhir.r4.model.ConceptMap) VersionConvertorFactory_30_40.convertResource(conceptMap, new BaseAdvisor_30_40(false));
 					myTermConceptMappingSvc.storeTermConceptMapAndChildren(retVal, converted);
 				} catch (FHIRException fe) {
-					throw new InternalErrorException(fe);
+					throw new InternalErrorException(Msg.code(1083) + fe);
 				}
 			} else {
 				myTermConceptMappingSvc.deleteConceptMapAndChildren(retVal);

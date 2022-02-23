@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.interceptor;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.client.interceptor;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -151,7 +152,7 @@ public class LoggingInterceptor implements IClientInterceptor {
 					try {
 						bytes = IOUtils.toByteArray(respEntity);
 					} catch (IllegalStateException e) {
-						throw new InternalErrorException(e);
+						throw new InternalErrorException(Msg.code(1405) + e);
 					}
 					myLog.info("Client response body:\n{}", new String(bytes, StandardCharsets.UTF_8));
 				} else {

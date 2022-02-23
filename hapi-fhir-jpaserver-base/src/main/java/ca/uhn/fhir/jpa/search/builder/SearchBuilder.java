@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search.builder;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.search.builder;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -39,7 +40,6 @@ import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
-import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
@@ -122,6 +122,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -179,6 +180,7 @@ public class SearchBuilder implements ISearchBuilder {
 	private int myFetchSize;
 	private Integer myMaxResultsToFetch;
 	private Set<ResourcePersistentId> myPidSet;
+	private boolean myHasNextIteratorQuery = false;
 	private RequestPartitionId myRequestPartitionId;
 	@Autowired
 	private PartitionSettings myPartitionSettings;
@@ -191,7 +193,6 @@ public class SearchBuilder implements ISearchBuilder {
 	@Autowired
 	private ModelConfig myModelConfig;
 
-	private boolean hasNextIteratorQuery = false;
 
 	/**
 	 * Constructor
@@ -311,35 +312,13 @@ public class SearchBuilder implements ISearchBuilder {
 
 		List<ResourcePersistentId> pids = new ArrayList<>();
 
-		/*
-		 * Fulltext or lastn search
-		 */
-		if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT) || myParams.isLastN()) {
-			if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT)) {
-				if (myFulltextSearchSvc == null || myFulltextSearchSvc.isDisabled()) {
-					if (myParams.containsKey(Constants.PARAM_TEXT)) {
-						throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
-					} else if (myParams.containsKey(Constants.PARAM_CONTENT)) {
-						throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
-					}
-				}
-
-				if (myParams.getEverythingMode() != null) {
-					pids = myFulltextSearchSvc.everything(myResourceName, myParams, theRequest);
-				} else {
-					pids = myFulltextSearchSvc.search(myResourceName, myParams);
-				}
-			} else if (myParams.isLastN()) {
-				if (myIElasticsearchSvc == null) {
-					if (myParams.isLastN()) {
-						throw new InvalidRequestException("LastN operation is not enabled on this service, can not process this request");
-					}
-				}
-				List<String> lastnResourceIds = myIElasticsearchSvc.executeLastN(myParams, myContext, theMaximumResults);
-				for (String lastnResourceId : lastnResourceIds) {
-					pids.add(myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, lastnResourceId));
-				}
+		if (checkUseHibernateSearch()) {
+			if (myParams.isLastN()) {
+				pids = executeLastNAgainstIndex(theMaximumResults);
+			} else {
+				pids = queryLuceneForPIDs(theRequest);
 			}
+
 			if (theSearchRuntimeDetails != null) {
 				theSearchRuntimeDetails.setFoundIndexMatchesCount(pids.size());
 				HookParams params = new HookParams()
@@ -368,6 +347,62 @@ public class SearchBuilder implements ISearchBuilder {
 		return queries;
 	}
 
+	/**
+	 * Check to see if query should use Hibernate Search, and error if the query can't continue.
+	 *
+	 * @return true if the query should first be processed by Hibernate Search
+	 * @throws InvalidRequestException if fulltext search is not enabled but the query requires it - _content or _text
+	 */
+	private boolean checkUseHibernateSearch() {
+		boolean fulltextEnabled = (myFulltextSearchSvc != null) && !myFulltextSearchSvc.isDisabled();
+
+		if (!fulltextEnabled) {
+			failIfUsed(Constants.PARAM_TEXT);
+			failIfUsed(Constants.PARAM_CONTENT);
+		}
+
+		// TODO MB someday we'll want a query planner to figure out if we _should_ use the ft index, not just if we can.
+		return fulltextEnabled && myFulltextSearchSvc.supportsSomeOf(myParams);
+	}
+
+	private void failIfUsed(String theParamName) {
+		if (myParams.containsKey(theParamName)) {
+			throw new InvalidRequestException(Msg.code(1192) + "Fulltext search is not enabled on this service, can not process parameter: " + theParamName);
+		}
+	}
+
+	private List<ResourcePersistentId> executeLastNAgainstIndex(Integer theMaximumResults) {
+		// Can we use our hibernate search generated index on resource to support lastN?:
+		if (myDaoConfig.isAdvancedLuceneIndexing()) {
+			if (myFulltextSearchSvc == null) {
+				throw new InvalidRequestException(Msg.code(2027) + "LastN operation is not enabled on this service, can not process this request");
+			}
+			return myFulltextSearchSvc.lastN(myParams, theMaximumResults)
+				.stream().map(lastNResourceId -> myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, String.valueOf(lastNResourceId)))
+				.collect(Collectors.toList());
+		} else {
+			if (myIElasticsearchSvc == null) {
+				throw new InvalidRequestException(Msg.code(2033) + "LastN operation is not enabled on this service, can not process this request");
+			}
+			// use the dedicated observation ES/Lucene index to support lastN query
+			return myIElasticsearchSvc.executeLastN(myParams, myContext, theMaximumResults).stream()
+				.map(lastnResourceId -> myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, lastnResourceId))
+				.collect(Collectors.toList());
+		}
+	}
+
+	private List<ResourcePersistentId> queryLuceneForPIDs(RequestDetails theRequest) {
+		validateFullTextSearchIsEnabled();
+
+		List<ResourcePersistentId> pids;
+		if (myParams.getEverythingMode() != null) {
+			pids = myFulltextSearchSvc.everything(myResourceName, myParams, theRequest);
+		} else {
+			pids = myFulltextSearchSvc.search(myResourceName, myParams);
+		}
+		return pids;
+	}
+
 	private void doCreateChunkedQueries(SearchParameterMap theParams, List<Long> thePids, Integer theOffset, SortSpec sort, boolean theCount, RequestDetails theRequest, ArrayList<SearchQueryExecutor> theQueries) {
 		if (thePids.size() < getMaximumPageSize()) {
 			normalizeIdListForLastNInClause(thePids);
@@ -378,6 +413,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 	/**
 	 * Combs through the params for any _id parameters and extracts the PIDs for them
+	 *
 	 * @param theTargetPids
 	 */
 	private void extractTargetPidsFromIdParams(HashSet<Long> theTargetPids) {
@@ -391,10 +427,10 @@ public class SearchBuilder implements ISearchBuilder {
 					// we expect all _id values to be StringParams
 					ids.add(((StringParam) param).getValue());
 				} else if (param instanceof TokenParam) {
-					ids.add(((TokenParam)param).getValue());
+					ids.add(((TokenParam) param).getValue());
 				} else {
 					// we do not expect the _id parameter to be a non-string value
-					throw new IllegalArgumentException("_id parameter must be a StringParam or TokenParam");
+					throw new IllegalArgumentException(Msg.code(1193) + "_id parameter must be a StringParam or TokenParam");
 				}
 			}
 		}
@@ -493,9 +529,26 @@ public class SearchBuilder implements ISearchBuilder {
 			sqlBuilder.addPredicate(lastUpdatedPredicates);
 		}
 
-		//-- exclude the pids already in the previous iterator
-		if (hasNextIteratorQuery) {
-			sqlBuilder.excludeResourceIdsPredicate(myPidSet);
+		/*
+		 * Exclude the pids already in the previous iterator. This is an optimization, as opposed
+		 * to something needed to guarantee correct results.
+		 *
+		 * Why do we need it? Suppose for example, a query like:
+		 *    Observation?category=foo,bar,baz
+		 * And suppose you have many resources that have all 3 of these category codes. In this case
+		 * the SQL query will probably return the same PIDs multiple times, and if this happens enough
+		 * we may exhaust the query results without getting enough distinct results back. When that
+		 * happens we re-run the query with a larger limit. Excluding results we already know about
+		 * tries to ensure that we get new unique results.
+		 *
+		 * The challenge with that though is that lots of DBs have an issue with too many
+		 * parameters in one query. So we only do this optimization if there aren't too
+		 * many results.
+		 */
+		if (myHasNextIteratorQuery) {
+			if (myPidSet.size() + sqlBuilder.countBindVariables() < 900) {
+				sqlBuilder.excludeResourceIdsPredicate(myPidSet);
+			}
 		}
 
 		/*
@@ -583,7 +636,7 @@ public class SearchBuilder implements ISearchBuilder {
 			RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(myResourceName, theSort.getParamName());
 			if (param == null) {
 				String msg = myContext.getLocalizer().getMessageSanitized(BaseStorageDao.class, "invalidSortParameter", theSort.getParamName(), getResourceName(), mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(getResourceName()));
-				throw new InvalidRequestException(msg);
+				throw new InvalidRequestException(Msg.code(1194) + msg);
 			}
 
 			switch (param.getParamType()) {
@@ -611,10 +664,10 @@ public class SearchBuilder implements ISearchBuilder {
 				case COMPOSITE:
 					List<RuntimeSearchParam> compositeList = JpaParamUtil.resolveComponentParameters(mySearchParamRegistry, param);
 					if (compositeList == null) {
-						throw new InvalidRequestException("The composite _sort parameter " + theSort.getParamName() + " is not defined by the resource " + myResourceName);
+						throw new InvalidRequestException(Msg.code(1195) + "The composite _sort parameter " + theSort.getParamName() + " is not defined by the resource " + myResourceName);
 					}
 					if (compositeList.size() != 2) {
-						throw new InvalidRequestException("The composite _sort parameter " + theSort.getParamName()
+						throw new InvalidRequestException(Msg.code(1196) + "The composite _sort parameter " + theSort.getParamName()
 							+ " must have 2 composite types declared in parameter annotation, found "
 							+ compositeList.size());
 					}
@@ -628,7 +681,7 @@ public class SearchBuilder implements ISearchBuilder {
 				case SPECIAL:
 				case HAS:
 				default:
-					throw new InvalidRequestException("This server does not support _sort specifications of type " + param.getParamType() + " - Can't serve _sort=" + theSort.getParamName());
+					throw new InvalidRequestException(Msg.code(1197) + "This server does not support _sort specifications of type " + param.getParamType() + " - Can't serve _sort=" + theSort.getParamName());
 			}
 
 		}
@@ -660,7 +713,7 @@ public class SearchBuilder implements ISearchBuilder {
 			case HAS:
 			case SPECIAL:
 			default:
-				throw new InvalidRequestException("Don't know how to handle composite parameter with type of " + theParamType + " on _sort=" + theParamName);
+				throw new InvalidRequestException(Msg.code(1198) + "Don't know how to handle composite parameter with type of " + theParamType + " on _sort=" + theParamName);
 		}
 
 	}
@@ -803,8 +856,22 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		List<ResourcePersistentId> pids = new ArrayList<>(thePids);
-		new QueryChunker<ResourcePersistentId>().chunk(pids, t -> doLoadPids(t, theIncludedPids, theResourceListToPopulate, theForHistoryOperation, position));
+		// Can we fast track this loading by checking elastic search?
+		if (isLoadingFromElasticSearchSupported(theIncludedPids.isEmpty())) {
+			theResourceListToPopulate.addAll(loadObservationResourcesFromElasticSearch(thePids));
+		} else {
+			// We only chunk because some jdbc drivers can't handle long param lists.
+			new QueryChunker<ResourcePersistentId>().chunk(pids, t -> doLoadPids(t, theIncludedPids, theResourceListToPopulate, theForHistoryOperation, position));
+		}
+	}
 
+	private boolean isLoadingFromElasticSearchSupported(boolean noIncludePids) {
+		return noIncludePids && !Objects.isNull(myParams) && myParams.isLastN() && myDaoConfig.isStoreResourceInLuceneIndex()
+			&& myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3);
+	}
+
+	private List<IBaseResource> loadObservationResourcesFromElasticSearch(Collection<ResourcePersistentId> thePids) {
+		return myIElasticsearchSvc.getObservationResources(thePids);
 	}
 
 	/**
@@ -939,7 +1006,7 @@ public class SearchBuilder implements ISearchBuilder {
 						continue;
 					}
 
-					paths = param.getPathsSplit();
+					paths = param.getPathsSplitForResourceType(resType);
 
 					String targetResourceType = defaultString(nextInclude.getParamTargetType(), null);
 					for (String nextPath : paths) {
@@ -1275,7 +1342,6 @@ public class SearchBuilder implements ISearchBuilder {
 		private boolean myFirst = true;
 		private IncludesIterator myIncludesIterator;
 		private ResourcePersistentId myNext;
-		private Iterator<ResourcePersistentId> myPreResultsIterator;
 		private SearchQueryExecutor myResultsIterator;
 		private boolean myStillNeedToFetchIncludes;
 		private int mySkipCount = 0;
@@ -1319,23 +1385,21 @@ public class SearchBuilder implements ISearchBuilder {
 
 					initializeIteratorQuery(myOffset, myMaxResultsToFetch);
 
-					// If the query resulted in extra results being requested
-					if (myAlsoIncludePids != null) {
-						myPreResultsIterator = myAlsoIncludePids.iterator();
+					if (myAlsoIncludePids == null) {
+						myAlsoIncludePids = new ArrayList<>();
 					}
 				}
 
 				if (myNext == null) {
 
-					if (myPreResultsIterator != null && myPreResultsIterator.hasNext()) {
-						while (myPreResultsIterator.hasNext()) {
-							ResourcePersistentId next = myPreResultsIterator.next();
-							if (next != null)
-								if (myPidSet.add(next)) {
-									myNext = next;
-									break;
-								}
-						}
+
+					for (Iterator<ResourcePersistentId> myPreResultsIterator = myAlsoIncludePids.iterator(); myPreResultsIterator.hasNext(); ) {
+						ResourcePersistentId next = myPreResultsIterator.next();
+						if (next != null)
+							if (myPidSet.add(next)) {
+								myNext = next;
+								break;
+							}
 					}
 
 					if (myNext == null) {
@@ -1367,10 +1431,9 @@ public class SearchBuilder implements ISearchBuilder {
 							if (!myResultsIterator.hasNext()) {
 								if (myMaxResultsToFetch != null && (mySkipCount + myNonSkipCount == myMaxResultsToFetch)) {
 									if (mySkipCount > 0 && myNonSkipCount == 0) {
-										myMaxResultsToFetch += 1000;
 
 										StorageProcessingMessage message = new StorageProcessingMessage();
-										String msg = "Pass completed with no matching results. This indicates an inefficient query! Retrying with new max count of " + myMaxResultsToFetch;
+										String msg = "Pass completed with no matching results seeking rows " + myPidSet.size() + "-" + mySkipCount + ". This indicates an inefficient query! Retrying with new max count of " + myMaxResultsToFetch;
 										ourLog.warn(msg);
 										message.setMessage(msg);
 										HookParams params = new HookParams()
@@ -1379,6 +1442,7 @@ public class SearchBuilder implements ISearchBuilder {
 											.add(StorageProcessingMessage.class, message);
 										CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_WARNING, params);
 
+										myMaxResultsToFetch += 1000;
 										initializeIteratorQuery(myOffset, myMaxResultsToFetch);
 									}
 								}
@@ -1461,10 +1525,10 @@ public class SearchBuilder implements ISearchBuilder {
 			close();
 			if (myQueryList != null && myQueryList.size() > 0) {
 				myResultsIterator = myQueryList.remove(0);
-				hasNextIteratorQuery = true;
+				myHasNextIteratorQuery = true;
 			} else {
 				myResultsIterator = SearchQueryExecutor.emptyExecutor();
-				hasNextIteratorQuery = false;
+				myHasNextIteratorQuery = false;
 			}
 
 		}
@@ -1565,4 +1629,15 @@ public class SearchBuilder implements ISearchBuilder {
 		return thePredicates.toArray(new Predicate[0]);
 	}
 
+	private void validateFullTextSearchIsEnabled() {
+		if (myFulltextSearchSvc == null) {
+			if (myParams.containsKey(Constants.PARAM_TEXT)) {
+				throw new InvalidRequestException(Msg.code(1200) + "Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
+			} else if (myParams.containsKey(Constants.PARAM_CONTENT)) {
+				throw new InvalidRequestException(Msg.code(1201) + "Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
+			} else {
+				throw new InvalidRequestException(Msg.code(1202) + "Fulltext search is not enabled on this service, can not process qualifier :text");
+			}
+		}
+	}
 }

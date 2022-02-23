@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.sched;
  * #%L
  * hapi-fhir-jpa
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.sched;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.jpa.model.sched.IHapiScheduler;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
@@ -156,7 +157,7 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService, Sma
 			}
 		} catch (Exception e) {
 			ourLog.error("Failed to start scheduler", e);
-			throw new ConfigurationException("Failed to start scheduler", e);
+			throw new ConfigurationException(Msg.code(1632) + "Failed to start scheduler", e);
 		}
 	}
 

@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3170
+backport: 5.6.2
+title: "Fixed language code validation so that it is case insensitive (eg, en-US, en-us, EN-US, EN-us should all work)"

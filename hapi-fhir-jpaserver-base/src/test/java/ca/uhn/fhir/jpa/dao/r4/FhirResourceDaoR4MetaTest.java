@@ -1,24 +1,19 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
-import ca.uhn.fhir.jpa.model.entity.TagDefinition;
-import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.util.MemoryCacheService;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
-import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,8 +32,17 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4MetaTest.class);
-	@Autowired
-	private MemoryCacheService myMemoryCacheService;
+
+	// TODO testConcurrentAddTag() can deadlock if we don't increase this
+	@BeforeAll
+	public static void beforeAll() {
+		System.setProperty("unlimited_db_connection", "true");
+	}
+
+	@AfterAll
+	public static void afterAll() {
+		System.clearProperty("unlimited_db_connection");
+	}
 
 	/**
 	 * See #1731
@@ -76,7 +80,7 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 		IIdType id = myBundleDao.create(bundle).getId();
 
 		bundle = myBundleDao.read(id);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		patient = (Patient) bundle.getEntryFirstRep().getResource();
 		assertTrue(patient.getActive());
 		assertEquals(1, patient.getMeta().getExtensionsByUrl("http://foo").size());
@@ -143,18 +147,25 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 
 		List<Future<?>> futures = new ArrayList<>();
 		for (int i = 0; i < 10; i++) {
+			final int index = i;
 			Runnable task = () -> {
 				Patient patient = new Patient();
 				patient.getMeta().addTag().setSystem("http://foo").setCode("bar");
 				patient.setActive(true);
+				ourLog.info("creating patient {}", index);
 				myPatientDao.create(patient);
 			};
-			futures.add(pool.submit(task));
+			ourLog.info("Submitting task {}...", index);
+			Future<?> future = pool.submit(task);
+			ourLog.info("...done submitting task {}", index);
+			futures.add(future);
 		}
 
 		// Wait for the tasks to complete, should not throw any exception
+		int count = 0;
 		for (Future<?> next : futures) {
 			try {
+				ourLog.info("Getting future {}", count);
 				next.get();
 			} catch (Exception e) {
 				ourLog.error("Failure", e);
@@ -166,8 +177,10 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 			ourLog.info("Tag definitions:\n * {}", myTagDefinitionDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 		});
 
-		assertEquals(10, myPatientDao.search(SearchParameterMap.newSynchronous()).sizeOrThrowNpe());
-		assertEquals(10, myPatientDao.search(SearchParameterMap.newSynchronous(PARAM_TAG, new TokenParam("http://foo", "bar"))).sizeOrThrowNpe());
+		IBundleProvider bundle = myPatientDao.search(SearchParameterMap.newSynchronous());
+		assertEquals(10, bundle.sizeOrThrowNpe());
+		IBundleProvider tagBundle = myPatientDao.search(SearchParameterMap.newSynchronous(PARAM_TAG, new TokenParam("http://foo", "bar")));
+		assertEquals(10, tagBundle.sizeOrThrowNpe());
 
 	}
 }

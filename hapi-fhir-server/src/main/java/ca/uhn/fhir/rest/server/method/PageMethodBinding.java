@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.method;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.method;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -86,7 +87,7 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 	private IBaseResource handlePagingRequest(IRestfulServer<?> theServer, RequestDetails theRequest, String thePagingAction) {
 		IPagingProvider pagingProvider = theServer.getPagingProvider();
 		if (pagingProvider == null) {
-			throw new InvalidRequestException("This server does not support paging");
+			throw new InvalidRequestException(Msg.code(416) + "This server does not support paging");
 		}
 
 		// Interceptor invoke: SERVER_INCOMING_REQUEST_PRE_HANDLED
@@ -182,7 +183,7 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 		if (theBundleProvider == null) {
 			ourLog.info("Client requested unknown paging ID[{}]", thePagingAction);
 			String msg = getContext().getLocalizer().getMessage(PageMethodBinding.class, "unknownSearchId", thePagingAction);
-			throw new ResourceGoneException(msg);
+			throw new ResourceGoneException(Msg.code(417) + msg);
 		}
 	}
 

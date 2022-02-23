@@ -11,12 +11,13 @@ import java.util.List;
 
 public class CountingInterceptor implements ChannelInterceptor {
 
+	private static final Logger ourLog = LoggerFactory.getLogger(CountingInterceptor.class);
 	private List<String> mySent = new ArrayList<>();
 
 	public int getSentCount(String theContainingKeyword) {
-		return (int)mySent.stream().filter(t -> t.contains(theContainingKeyword)).count();
+		return (int) mySent.stream().filter(t -> t.contains(theContainingKeyword)).count();
 	}
-private static final Logger ourLog = LoggerFactory.getLogger(CountingInterceptor.class);
+
 	@Override
 	public void afterSendCompletion(Message<?> theMessage, MessageChannel theChannel, boolean theSent, Exception theException) {
 		ourLog.info("Counting another instance: {}", theMessage);

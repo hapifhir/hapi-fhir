@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.searchparam;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.config.TestDstu3Config;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.searchparam.util.Dstu3DistanceHelper;
@@ -75,7 +76,7 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("Only one " + Location.SP_NEAR_DISTANCE + " parameter may be present", e.getMessage());
+			assertEquals(Msg.code(495) + "Only one " + Location.SP_NEAR_DISTANCE + " parameter may be present", e.getMessage());
 		}
 	}
 
@@ -92,12 +93,12 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("Only one " + Location.SP_NEAR_DISTANCE + " parameter may be present", e.getMessage());
+			assertEquals(Msg.code(495) + "Only one " + Location.SP_NEAR_DISTANCE + " parameter may be present", e.getMessage());
 		}
 	}
 
 	@Override
-	protected FhirContext getContext() {
+	protected FhirContext getFhirContext() {
 		return ourCtx;
 	}
 

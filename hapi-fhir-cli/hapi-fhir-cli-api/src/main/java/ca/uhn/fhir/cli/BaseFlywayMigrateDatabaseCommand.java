@@ -4,7 +4,7 @@ package ca.uhn.fhir.cli;
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.BaseMigrator;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.FlywayMigrator;
@@ -106,7 +107,7 @@ public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends B
 		try {
 			driverType = DriverTypeEnum.valueOf(driverTypeString);
 		} catch (Exception e) {
-			throw new ParseException("Invalid driver type \"" + driverTypeString + "\". Valid values are: " + driverOptions());
+			throw new ParseException(Msg.code(1535) + "Invalid driver type \"" + driverTypeString + "\". Valid values are: " + driverOptions());
 		}
 
 		boolean dryRun = theCommandLine.hasOption("r");

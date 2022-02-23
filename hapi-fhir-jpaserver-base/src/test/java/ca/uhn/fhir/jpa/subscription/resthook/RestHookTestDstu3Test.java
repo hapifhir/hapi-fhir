@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
@@ -41,8 +42,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -136,7 +137,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		return (Subscription) methodOutcome.getResource();
 	}
 
-	@NotNull
+	@Nonnull
 	private Subscription newSubscription(String theCriteria, String thePayload, String theEndpoint, List<StringType> headers) {
 		Subscription subscription = new Subscription();
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
@@ -185,7 +186,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testMemoryStrategyMeta() throws InterruptedException {
 		String inMemoryCriteria = "Observation?code=17861-6";
 		Subscription subscription = createSubscription(inMemoryCriteria, null, ourNotificationListenerServer);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(subscription));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(subscription));
 		List<Coding> tag = subscription.getMeta().getTag();
 		assertEquals(HapiExtensions.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.get(0).getSystem());
 		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY.toString(), tag.get(0).getCode());
@@ -279,7 +280,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		waitForQueueToDrain();
 
 		Observation observation = new Observation();
-		MetaUtil.setSource(myFhirCtx, observation, source);
+		MetaUtil.setSource(myFhirContext, observation, source);
 		ourClient.create().resource(observation).execute();
 
 		// Should see 1 subscription notification
@@ -494,7 +495,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 			createSubscription(criteria1, payload, ourListenerServerBase);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: Invalid subscription criteria submitted: Observation?codeeeee=SNOMED-CT Failed to parse match URL[Observation?codeeeee=SNOMED-CT] - Resource type Observation does not have a parameter with name: codeeeee", e.getMessage());
+			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(9) + "Invalid subscription criteria submitted: Observation?codeeeee=SNOMED-CT " + Msg.code(488) + "Failed to parse match URL[Observation?codeeeee=SNOMED-CT] - Resource type Observation does not have a parameter with name: codeeeee", e.getMessage());
 		}
 	}
 
