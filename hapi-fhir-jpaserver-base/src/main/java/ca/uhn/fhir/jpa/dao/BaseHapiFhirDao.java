@@ -1315,7 +1315,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					PartitionEntity partitionEntity = myPartitionLookupSvc.getPartitionByName(theRequest.getTenantId());
 					//partitionEntity should never be null
 					if (partitionEntity != null && !partitionEntity.getId().equals(entity.getPartitionId().getPartitionId())) {
-						throw new InvalidRequestException(Msg.code(2035) + "Resource " + entity.getResourceType() + "/" + entity.getId() + " is not known");
+						throw new InvalidRequestException(Msg.code(2037) + "Resource " + entity.getResourceType() + "/" + entity.getId() + " is not known");
 					}
 				}
 				mySearchParamWithInlineReferencesExtractor.populateFromResource(requestPartitionId, newParams, theTransactionDetails, entity, theResource, existingParams, theRequest, thePerformIndexing);
