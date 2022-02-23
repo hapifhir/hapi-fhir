@@ -153,6 +153,15 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// drop obsolete
 		dateTable.dropIndexOnline("20220207.16", "IDX_SP_DATE_UPDATED");
 
+		// fix for https://github.com/hapifhir/hapi-fhir/issues/3316
+		// index must have same name that indexed FK or SchemaMigrationTest complains because H2 sets this index automatically
+
+		version.onTable("TRM_VALUESET_C_DESIGNATION")
+			.addIndex("20220223.1", "FK_TRM_VALUESET_CONCEPT_PID")
+			.unique(false)
+			.withColumns("VALUESET_CONCEPT_PID")
+			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
+
 	}
 
 	/**
