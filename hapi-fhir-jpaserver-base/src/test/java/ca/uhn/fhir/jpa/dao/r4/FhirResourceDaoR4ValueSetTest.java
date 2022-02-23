@@ -75,6 +75,23 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 
 
 	@Test
+	public void testValidateCodeInValueSet_SystemThatAppearsNowhereInValueSet() throws IOException {
+		myCodeSystemDao.update(loadResourceFromClasspath(CodeSystem.class, "r4/adi-cs.json"));
+		myValueSetDao.update(loadResourceFromClasspath(ValueSet.class, "r4/adi-vs.json"));
+
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		logAllValueSetConcepts();
+
+		ValidationSupportContext context = new ValidationSupportContext(myValidationSupport);
+		ConceptValidationOptions options = new ConceptValidationOptions();
+		IValidationSupport.CodeValidationResult outcome = myValidationSupport.validateCode(context, options, "http://payer-to-payer-exchange/fhir/CodeSystem/ndc", "378397893", null, "http://payer-to-payer-exchange/fhir/ValueSet/mental-health/ndc");
+		assertFalse(outcome.isOk());
+		assertEquals("Unable to validate code http://payer-to-payer-exchange/fhir/ValueSet/mental-health/ndc#378397893 - Supplied system URL is a ValueSet URL and not a CodeSystem URL, check if it is correct: http://payer-to-payer-exchange/fhir/ValueSet/mental-health/ndc", outcome.getMessage());
+	}
+
+
+	@Test
 	public void testValidateCodeOperationNoValueSet() {
 		UriType valueSetIdentifier = null;
 		IdType id = null;
