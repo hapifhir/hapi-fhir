@@ -67,7 +67,7 @@ public class SubscriptionChannelRegistryTest {
 			Mockito.anyString(),
 			any(ChannelProducerSettings.class)
 		)).thenReturn(producer);
-		when(mySubscriptionDeliveryHandlerFactory.createDeliveryHandler(any(ActiveSubscription.class)))
+		when(mySubscriptionDeliveryHandlerFactory.createDeliveryHandler(any(CanonicalSubscriptionChannelType.class)))
 			.thenReturn(Optional.of(messageHandler));
 
 		// test
