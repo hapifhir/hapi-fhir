@@ -38,6 +38,9 @@ import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import java.util.List;
+
 public class MdmLinkQuerySvcImplSvc implements IMdmLinkQuerySvc {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmLinkQuerySvcImplSvc.class);
@@ -51,6 +54,9 @@ public class MdmLinkQuerySvcImplSvc implements IMdmLinkQuerySvc {
 	@Autowired
 	IMdmModelConverterSvc myMdmModelConverterSvc;
 
+	@Autowired
+	protected EntityManager myEntityManager;
+
 	@Override
 	@Transactional
 	public Page<MdmLinkJson> queryLinks(IIdType theGoldenResourceId, IIdType theSourceResourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest) {
@@ -58,17 +64,23 @@ public class MdmLinkQuerySvcImplSvc implements IMdmLinkQuerySvc {
 	}
 
 	@Override
-	public Page<MdmLinkJson> queryLinks(IIdType theGoldenResourceId, IIdType theSourceResourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest, Integer thePartitionId) {
-		Example<MdmLink> exampleLink = exampleLinkFromParameters(theGoldenResourceId, theSourceResourceId, theMatchResult, theLinkSource, thePartitionId);
-		Page<MdmLink> mdmLinkByExample = myMdmLinkDaoSvc.findMdmLinkByExample(exampleLink, thePageRequest);
-		Page<MdmLinkJson> map = mdmLinkByExample.map(myMdmModelConverterSvc::toJson);
+	@Transactional
+	public Page<MdmLinkJson> queryLinks(IIdType theGoldenResourceId, IIdType theSourceResourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest, List<Integer> thePartitionId) {
+		Page<MdmLink> mdmLinks = myMdmLinkDaoSvc.executeTypedQuery(theGoldenResourceId, theSourceResourceId, theMatchResult, theLinkSource, thePartitionId);
+		Page<MdmLinkJson> map = mdmLinks.map(myMdmModelConverterSvc::toJson);
 		return map;
 	}
 
 	@Override
 	@Transactional
 	public Page<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest) {
-		Example<MdmLink> exampleLink = exampleLinkFromParameters(null, null, MdmMatchResultEnum.POSSIBLE_DUPLICATE, null, null);
+		return getDuplicateGoldenResources(theMdmContext, thePageRequest, null);
+	}
+
+	@Override
+	@Transactional
+	public Page<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest, Integer thePartitionId) {
+		Example<MdmLink> exampleLink = exampleLinkFromParameters(null, null, MdmMatchResultEnum.POSSIBLE_DUPLICATE, null, thePartitionId);
 		Page<MdmLink> mdmLinkPage = myMdmLinkDaoSvc.findMdmLinkByExample(exampleLink, thePageRequest);
 		Page<MdmLinkJson> map = mdmLinkPage.map(myMdmModelConverterSvc::toJson);
 		return map;

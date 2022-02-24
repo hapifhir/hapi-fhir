@@ -284,7 +284,7 @@ public class Constants {
 	 * key will be of type {@link ca.uhn.fhir.interceptor.model.RequestPartitionId}.
 	 */
 	public static final String RESOURCE_PARTITION_ID = Constants.class.getName() + "_RESOURCE_PARTITION_ID";
-	public static final String PARTITION_NAME = "partitionName";
+	public static final String PARTITION_IDS = "partitionIds";
 	public static final String CT_APPLICATION_GZIP = "application/gzip";
 	public static final String[] EMPTY_STRING_ARRAY = new String[0];
 	public static final String SUBSCRIPTION_MULTITYPE_PREFIX = "[";

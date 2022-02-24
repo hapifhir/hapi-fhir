@@ -260,7 +260,12 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 		// Note: It's still possible that the partition only has a date but no name/id
 
 		if (myInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_PARTITION_SELECTED)) {
-			RuntimeResourceDefinition runtimeResourceDefinition = myFhirContext.getResourceDefinition(theResourceType);
+			RuntimeResourceDefinition runtimeResourceDefinition;
+			try {
+				runtimeResourceDefinition = myFhirContext.getResourceDefinition(theResourceType);
+			} catch (Exception e){
+				runtimeResourceDefinition = null;
+			}
 			HookParams params = new HookParams()
 				.add(RequestPartitionId.class, retVal)
 				.add(RequestDetails.class, theRequest)

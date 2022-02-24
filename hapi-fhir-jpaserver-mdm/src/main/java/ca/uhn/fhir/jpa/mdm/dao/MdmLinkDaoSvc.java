@@ -32,18 +32,35 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.mdm.provider.MdmProviderDstu3Plus;
 import ca.uhn.fhir.rest.api.Constants;
+import org.elasticsearch.index.query.TypeQueryBuilder;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceContextType;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -61,6 +78,10 @@ public class MdmLinkDaoSvc {
 	private IdHelperService myIdHelperService;
 	@Autowired
 	private FhirContext myFhirContext;
+	@Autowired
+	protected EntityManager myEntityManager;
+
+	public static final Predicate[] EMPTY_PREDICATE_ARRAY = new Predicate[0];
 
 	@Transactional
 	public MdmLink createOrUpdateLinkEntity(IBaseResource theGoldenResource, IBaseResource theSourceResource, MdmMatchOutcome theMatchOutcome, MdmLinkSourceEnum theLinkSource, @Nullable MdmTransactionContext theMdmTransactionContext) {
@@ -268,6 +289,42 @@ public class MdmLinkDaoSvc {
 	 */
 	public Page<MdmLink> findMdmLinkByExample(Example<MdmLink> theExampleLink, MdmPageRequest thePageRequest) {
 		return myMdmLinkDao.findAll(theExampleLink, thePageRequest.toPageRequest());
+	}
+
+
+	public PageImpl<MdmLink> executeTypedQuery(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, List<Integer> thePartitionId) {
+		CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<MdmLink> criteriaQuery = cb.createQuery(MdmLink.class);
+		Root<MdmLink> from = criteriaQuery.from(MdmLink.class);
+
+		List<Predicate> andPredicates = new ArrayList<>();
+
+		if (theGoldenResourceId != null) {
+			Predicate goldenResourcePredicate = cb.equal(from.get("myGoldenResourcePid").as(Long.class), theGoldenResourceId);
+			andPredicates.add(goldenResourcePredicate);
+		}
+		if (theSourceId != null) {
+			Predicate sourceIdPredicate = cb.equal(from.get("mySourcePid").as(Long.class), theSourceId);
+			andPredicates.add(sourceIdPredicate);
+		}
+		if (theMatchResult != null) {
+			Predicate matchResultPredicate = cb.equal(from.get("myMatchResult").as(MdmMatchResultEnum.class), theMatchResult);
+			andPredicates.add(matchResultPredicate);
+		}
+		if (theLinkSource != null) {
+			Predicate linkSourcePredicate = cb.equal(from.get("myMatchResult").as(MdmLinkSourceEnum.class), theLinkSource);
+			andPredicates.add(linkSourcePredicate);
+		}
+		if (thePartitionId != null) {
+			Expression<Integer> exp = from.get("myPartitionId").as(Integer.class);
+			Predicate linkSourcePredicate = exp.in(thePartitionId);
+			andPredicates.add(linkSourcePredicate);
+		}
+
+		Predicate finalQuery = cb.and(andPredicates.toArray(EMPTY_PREDICATE_ARRAY));
+		TypedQuery typedQuery = myEntityManager.createQuery(criteriaQuery.where(finalQuery));
+
+		return new PageImpl<MdmLink>(typedQuery.getResultList());
 	}
 
 	/**
