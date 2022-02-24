@@ -41,6 +41,7 @@ import ca.uhn.fhir.util.IModelVisitor2;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.*;
 
+import java.util.Arrays;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
@@ -103,16 +104,7 @@ public class ConsentInterceptor {
 			return;
 		}
 
-		Map<String, String[]> parameterMap = theRequestDetails.getParameters();
-		if (parameterMap != null && parameterMap.containsKey("_total") && parameterMap.get("_total")[0].equals("accurate")) {
-			throw new InvalidRequestException(Msg.code(2037) + "_total=accurate is not permitted on this server");
-		}
-
-		//Only take the 0th entry here cause there should be only one value.
-		//If there are multiple we just take the first value.
-		if (parameterMap != null && parameterMap.containsKey("_summary") && parameterMap.get("_summary")[0].equals("count")) {
-			throw new InvalidRequestException(Msg.code(2038) + "_summary=count is not permitted on this server");
-		}
+		validateParameter(theRequestDetails.getParameters());
 
 		ConsentOutcome outcome = myConsentService.startOperation(theRequestDetails, myContextConsentServices);
 		Validate.notNull(outcome, "Consent service returned null outcome");
@@ -370,5 +362,15 @@ public class ConsentInterceptor {
 
 	private boolean isMetadataPath(RequestDetails theRequestDetails) {
 		return URL_TOKEN_METADATA.equals(theRequestDetails.getRequestPath());
+	}
+
+	private void validateParameter(Map<String, String[]> theParameterMap) {
+		if (theParameterMap != null && theParameterMap.containsKey("_total") && Arrays.stream(theParameterMap.get("_total")).anyMatch("accurate"::equals)) {
+			throw new InvalidRequestException(Msg.code(2037) + "_total=accurate is not permitted on this server");
+		}
+
+		if (theParameterMap != null && theParameterMap.containsKey("_summary") && Arrays.stream(theParameterMap.get("_summary")).anyMatch("count"::equals)) {
+			throw new InvalidRequestException(Msg.code(2038) + "_summary=count is not permitted on this server");
+		}
 	}
 }
