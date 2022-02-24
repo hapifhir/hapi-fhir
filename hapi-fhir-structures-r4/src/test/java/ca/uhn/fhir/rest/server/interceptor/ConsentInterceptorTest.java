@@ -153,15 +153,26 @@ public class ConsentInterceptorTest {
 			assertEquals(400, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
-			assertThat(responseContent, containsString(Msg.code(2037) + "Unknown parameter: _total"));
+			assertThat(responseContent, containsString(Msg.code(2037) + "_total=accurate is not permitted on this server"));
 		}
 
+		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc.willSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_total=estimated");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			assertEquals(400, status.getStatusLine().getStatusCode());
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
-			assertThat(responseContent, containsString(Msg.code(2037) + "Unknown parameter: _total"));
+			assertThat(responseContent, not(containsString("\"total\"")));
+		}
+
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_total=none");
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response: {}", responseContent);
+			assertThat(responseContent, not(containsString("\"total\"")));
 		}
 	}
 
@@ -188,7 +199,7 @@ public class ConsentInterceptorTest {
 			assertEquals(400, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
-			assertThat(responseContent, containsString(Msg.code(2038) + "Unknown parameter: _summary"));
+			assertThat(responseContent, containsString(Msg.code(2038) + "_summary=count is not permitted on this server"));
 		}
 
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);

@@ -104,14 +104,14 @@ public class ConsentInterceptor {
 		}
 
 		Map<String, String[]> parameterMap = theRequestDetails.getParameters();
-		if (parameterMap != null && parameterMap.containsKey("_total")) {
-			throw new InvalidRequestException(Msg.code(2037) + "Unknown parameter: _total");
+		if (parameterMap != null && parameterMap.containsKey("_total") && parameterMap.get("_total")[0].equals("accurate")) {
+			throw new InvalidRequestException(Msg.code(2037) + "_total=accurate is not permitted on this server");
 		}
 
 		//Only take the 0th entry here cause there should be only one value.
 		//If there are multiple we just take the first value.
 		if (parameterMap != null && parameterMap.containsKey("_summary") && parameterMap.get("_summary")[0].equals("count")) {
-			throw new InvalidRequestException(Msg.code(2038) + "Unknown parameter: _summary");
+			throw new InvalidRequestException(Msg.code(2038) + "_summary=count is not permitted on this server");
 		}
 
 		ConsentOutcome outcome = myConsentService.startOperation(theRequestDetails, myContextConsentServices);
