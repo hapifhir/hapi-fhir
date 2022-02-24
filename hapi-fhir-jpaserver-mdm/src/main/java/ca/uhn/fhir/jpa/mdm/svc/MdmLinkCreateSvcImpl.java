@@ -25,6 +25,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.mdm.api.IMdmLinkCreateSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
@@ -68,6 +69,7 @@ public class MdmLinkCreateSvcImpl implements IMdmLinkCreateSvc  {
 		Long goldenResourceId = myIdHelperService.getPidOrThrowException(theGoldenResource);
 		Long targetId = myIdHelperService.getPidOrThrowException(theSourceResource);
 
+		// check if the golden resource and the source resource are in the same partition, throw error if not
 		RequestPartitionId goldenResourcePartitionId = (RequestPartitionId) theGoldenResource.getUserData(Constants.RESOURCE_PARTITION_ID);
 		RequestPartitionId sourceResourcePartitionId = (RequestPartitionId) theSourceResource.getUserData(Constants.RESOURCE_PARTITION_ID);
 		if (goldenResourcePartitionId != null && sourceResourcePartitionId != null && goldenResourcePartitionId.hasPartitionIds() && sourceResourcePartitionId.hasPartitionIds() &&
@@ -91,6 +93,11 @@ public class MdmLinkCreateSvcImpl implements IMdmLinkCreateSvc  {
 			mdmLink.setMatchResult(MdmMatchResultEnum.MATCH);
 		} else {
 			mdmLink.setMatchResult(theMatchResult);
+		}
+		// Add partition for the mdm link if it doesn't exist
+		if (goldenResourcePartitionId != null && goldenResourcePartitionId.hasPartitionIds() && goldenResourcePartitionId.getFirstPartitionIdOrNull() != null &&
+			(mdmLink.getPartitionId() == null || mdmLink.getPartitionId().getPartitionId() == null)) {
+			mdmLink.setPartitionId(new PartitionablePartitionId(goldenResourcePartitionId.getFirstPartitionIdOrNull(), goldenResourcePartitionId.getPartitionDate()));
 		}
 		ourLog.info("Manually creating a " + theGoldenResource.getIdElement().toVersionless() + " to " + theSourceResource.getIdElement().toVersionless() + " mdm link.");
 		myMdmLinkDaoSvc.save(mdmLink);

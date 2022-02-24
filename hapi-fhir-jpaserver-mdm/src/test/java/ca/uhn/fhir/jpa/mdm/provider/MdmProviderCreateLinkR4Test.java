@@ -19,6 +19,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
@@ -63,10 +64,12 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 		List<MdmLink> links = myMdmLinkDaoSvc.findMdmLinksBySourceResource(patient);
 		assertEquals(MdmLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
 		assertEquals(MdmMatchResultEnum.MATCH, links.get(0).getMatchResult());
+		assertNotNull(links.get(0).getPartitionId());
+		assertEquals(1, links.get(0).getPartitionId().getPartitionId());
 	}
 
 	@Test
-	public void testCreateLinkWithMatchResultOnDiffPartition() {
+	public void testCreateLinkWithMatchResultOnDifferentPartition() {
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
 		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2));

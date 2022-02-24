@@ -36,6 +36,7 @@ import ca.uhn.fhir.mdm.rules.svc.MdmResourceMatcherSvc;
 import ca.uhn.fhir.mdm.util.EIDHelper;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -379,6 +380,13 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 
 	protected Patient createPatientAndUpdateLinks(Patient thePatient) {
 		thePatient = createPatient(thePatient);
+		myMdmMatchLinkSvc.updateMdmLinksForMdmSource(thePatient, createContextForCreate("Patient"));
+		return thePatient;
+	}
+
+	protected Patient createPatientAndUpdateLinksOnPartition(Patient thePatient, RequestPartitionId theRequestPartitionId) {
+		thePatient = createPatientOnPartition(thePatient, theRequestPartitionId);
+		thePatient.setUserData(Constants.RESOURCE_PARTITION_ID, theRequestPartitionId);
 		myMdmMatchLinkSvc.updateMdmLinksForMdmSource(thePatient, createContextForCreate("Patient"));
 		return thePatient;
 	}
