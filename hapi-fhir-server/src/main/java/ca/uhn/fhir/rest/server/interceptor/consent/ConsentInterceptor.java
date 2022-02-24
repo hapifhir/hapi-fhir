@@ -365,12 +365,13 @@ public class ConsentInterceptor {
 	}
 
 	private void validateParameter(Map<String, String[]> theParameterMap) {
-		if (theParameterMap != null && theParameterMap.containsKey("_total") && Arrays.stream(theParameterMap.get("_total")).anyMatch("accurate"::equals)) {
-			throw new InvalidRequestException(Msg.code(2037) + "_total=accurate is not permitted on this server");
-		}
-
-		if (theParameterMap != null && theParameterMap.containsKey("_summary") && Arrays.stream(theParameterMap.get("_summary")).anyMatch("count"::equals)) {
-			throw new InvalidRequestException(Msg.code(2038) + "_summary=count is not permitted on this server");
+		if (theParameterMap != null) {
+			if (theParameterMap.containsKey("_total") && Arrays.stream(theParameterMap.get("_total")).anyMatch("accurate"::equals)) {
+				throw new InvalidRequestException(Msg.code(2037) + "_total=accurate is not permitted on this server");
+			}
+			if (theParameterMap.containsKey("_summary") && Arrays.stream(theParameterMap.get("_summary")).anyMatch("count"::equals)) {
+				throw new InvalidRequestException(Msg.code(2038) + "_summary=count is not permitted on this server");
+			}
 		}
 	}
 }
