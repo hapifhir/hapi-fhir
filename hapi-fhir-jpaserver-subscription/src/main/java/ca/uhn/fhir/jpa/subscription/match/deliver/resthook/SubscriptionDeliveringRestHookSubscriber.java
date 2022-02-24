@@ -299,4 +299,5 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 		}
 		return headers;
 	}
+
 }

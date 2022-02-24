@@ -141,7 +141,7 @@ public class SubscriptionValidatingInterceptor {
 	}
 
 	protected void validatePermissions(IBaseResource theSubscription, CanonicalSubscription theCanonicalSubscription, RequestDetails theRequestDetails) {
-		// If the subscription has the cross partition tag &&
+		// If the subscription has the cross partition tag
 		if (SubscriptionUtil.isCrossPartition(theSubscription) && !(theRequestDetails instanceof SystemRequestDetails)) {
 			if (!myDaoConfig.isCrossPartitionSubscription()){
 				throw new UnprocessableEntityException(Msg.code(2009) + "Cross partition subscription is not enabled on this server");

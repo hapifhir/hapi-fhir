@@ -126,7 +126,7 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 		@Override
 		public void closing() {
 			SubscriptionChannelWithHandlers subscriptionChannelWithHandlers = mySubscriptionChannelRegistry.getDeliveryReceiverChannel(myActiveSubscription.getChannelName());
-			subscriptionChannelWithHandlers.unsubscribeAndDestroyHandler(this);
+			subscriptionChannelWithHandlers.removeHandler(this);
 		}
 
 		private void deliver() {

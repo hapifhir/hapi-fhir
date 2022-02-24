@@ -87,7 +87,7 @@ public class SubscriptionChannelRegistry {
 		receivingParameters.setRetryConfiguration(retryConfigParameters);
 
 		IChannelReceiver channelReceiver = newReceivingChannel(receivingParameters);
-		Optional<MessageHandler> deliveryHandler = mySubscriptionDeliveryHandlerFactory.createDeliveryHandler(theActiveSubscription);
+		Optional<MessageHandler> deliveryHandler = mySubscriptionDeliveryHandlerFactory.createDeliveryHandler(theActiveSubscription.getChannelType());
 
 		SubscriptionChannelWithHandlers subscriptionChannelWithHandlers = new SubscriptionChannelWithHandlers(channelName, channelReceiver);
 		deliveryHandler.ifPresent(subscriptionChannelWithHandlers::addHandler);
