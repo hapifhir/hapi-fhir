@@ -92,6 +92,7 @@ public class DropIndexTask extends BaseTableTask {
 				case POSTGRES_9_4:
 					sql.add("alter table " + getTableName() + " drop constraint if exists " + myIndexName + " cascade");
 					sql.add("drop index " + (myOnline?"CONCURRENTLY ":"") + "if exists " + myIndexName + " cascade");
+					setTransactional(!myOnline);
 					break;
 			}
 		} else {
@@ -103,6 +104,7 @@ public class DropIndexTask extends BaseTableTask {
 					break;
 				case POSTGRES_9_4:
 					sql.add("drop index " + (myOnline?"CONCURRENTLY ":"") + myIndexName);
+					setTransactional(!myOnline);
 					break;
 				case DERBY_EMBEDDED:
 				case H2_EMBEDDED:
@@ -112,7 +114,7 @@ public class DropIndexTask extends BaseTableTask {
 					sql.add("drop index " + myIndexName + (myOnline?" ONLINE":""));
 					break;
 				case MSSQL_2012:
-					sql.add("drop index " + getTableName() + "." + myIndexName + (myOnline?" WITH (ONLINE = ON)":""));
+					sql.add("drop index " + getTableName() + "." + myIndexName );
 					break;
 			}
 		}

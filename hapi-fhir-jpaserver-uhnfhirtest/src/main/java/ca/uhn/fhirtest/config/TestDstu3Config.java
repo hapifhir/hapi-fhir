@@ -5,12 +5,12 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.config.HapiJpaConfig;
 import ca.uhn.fhir.jpa.config.dstu3.JpaDstu3Config;
 import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
+import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
-import ca.uhn.fhir.jpa.util.DerbyTenSevenHapiFhirDialect;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
@@ -23,7 +23,6 @@ import org.hibernate.search.backend.lucene.cfg.LuceneIndexSettings;
 import org.hibernate.search.engine.cfg.BackendSettings;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -45,17 +44,12 @@ import java.util.concurrent.TimeUnit;
 @EnableTransactionManagement()
 public class TestDstu3Config {
 	public static final String FHIR_DB_USERNAME = "${fhir.db.username}";
-	public  static final String FHIR_DB_PASSWORD = "${fhir.db.password}";
+	public static final String FHIR_DB_PASSWORD = "${fhir.db.password}";
 	public static final String FHIR_LUCENE_LOCATION_DSTU3 = "${fhir.lucene.location.dstu3}";
 
-	@Value(TestDstu3Config.FHIR_DB_USERNAME)
-	private String myDbUsername;
-
-	@Value(TestDstu3Config.FHIR_DB_PASSWORD)
-	private String myDbPassword;
-
-	@Value(FHIR_LUCENE_LOCATION_DSTU3)
-	private String myFhirLuceneLocation;
+	private String myDbUsername = System.getProperty(TestR5Config.FHIR_DB_USERNAME);
+	private String myDbPassword = System.getProperty(TestR5Config.FHIR_DB_PASSWORD);
+	private String myFhirLuceneLocation = System.getProperty(FHIR_LUCENE_LOCATION_DSTU3);
 
 	@Bean
 	public DaoConfig daoConfig() {
@@ -85,7 +79,9 @@ public class TestDstu3Config {
 
 	@Bean
 	public ModelConfig modelConfig() {
-		return daoConfig().getModelConfig();
+		ModelConfig retVal = daoConfig().getModelConfig();
+		retVal.setIndexIdentifierOfType(true);
+		return retVal;
 	}
 
 
@@ -104,8 +100,8 @@ public class TestDstu3Config {
 		return retVal;
 	}
 
-	
-	@Bean 
+
+	@Bean
 	public PublicSecurityInterceptor securityInterceptor() {
 		return new PublicSecurityInterceptor();
 	}
@@ -114,7 +110,7 @@ public class TestDstu3Config {
 	public DataSource dataSource() {
 		BasicDataSource retVal = new BasicDataSource();
 		if (CommonConfig.isLocalTestMode()) {
-			retVal.setUrl("jdbc:derby:memory:fhirtest_dstu3;create=true");
+			retVal.setUrl("jdbc:h2:mem:fhirtest_dstu3");
 		} else {
 			retVal.setDriver(new org.postgresql.Driver());
 			retVal.setUrl("jdbc:postgresql://localhost/fhirtest_dstu3");
@@ -147,7 +143,7 @@ public class TestDstu3Config {
 	private Properties jpaProperties() {
 		Properties extraProperties = new Properties();
 		if (CommonConfig.isLocalTestMode()) {
-			extraProperties.put("hibernate.dialect", DerbyTenSevenHapiFhirDialect.class.getName());
+			extraProperties.put("hibernate.dialect", HapiFhirH2Dialect.class.getName());
 		} else {
 			extraProperties.put("hibernate.dialect", HapiFhirPostgres94Dialect.class.getName());
 		}
@@ -171,6 +167,7 @@ public class TestDstu3Config {
 
 	/**
 	 * Bean which validates incoming requests
+	 *
 	 * @param theFhirInstanceValidator
 	 */
 	@Bean

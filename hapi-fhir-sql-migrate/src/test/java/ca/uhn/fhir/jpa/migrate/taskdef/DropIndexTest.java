@@ -9,7 +9,6 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -18,9 +17,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DropIndexTest extends BaseTest {
 
@@ -245,7 +242,7 @@ public class DropIndexTest extends BaseTest {
 					assertThat(mySql, equalTo(asList("drop index IDX_ANINDEX ONLINE")));
 					break;
 				case MSSQL_2012:
-					assertThat(mySql, equalTo(asList("drop index SOMETABLE.IDX_ANINDEX WITH (ONLINE = ON)")));
+					assertThat(mySql, equalTo(asList("drop index SOMETABLE.IDX_ANINDEX")));
 					break;
 				case POSTGRES_9_4:
 					assertThat(mySql, equalTo(asList("drop index CONCURRENTLY IDX_ANINDEX")));
