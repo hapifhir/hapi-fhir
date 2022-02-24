@@ -211,17 +211,13 @@ public class SubscriptionLoader implements IResourceChangeListener {
 	 * @return true if activated
 	 */
 	private boolean activateSubscriptionIfRequested(IBaseResource theSubscription) {
-		String statusString = mySubscriptionCanonicalizer.getSubscriptionStatus(theSubscription);
-		if (!SubscriptionConstants.REQUESTED_STATUS.equals(statusString)) {
-			return false;
+		if (SubscriptionConstants.REQUESTED_STATUS.equals(mySubscriptionCanonicalizer.getSubscriptionStatus(theSubscription))) {
+			// internally, subscriptions that cannot activate will be set to error
+			if (mySubscriptionActivatingInterceptor.activateSubscriptionIfRequired(theSubscription)) {
+				return true;
+			}
+			logSubscriptionNotActivatedPlusErrorIfPossible(theSubscription);
 		}
-		// internally, subscriptions that cannot activate
-		// will be set to error
-		boolean activated = mySubscriptionActivatingInterceptor.activateSubscriptionIfRequired(theSubscription);
-		if (activated) {
-			return true;
-		}
-		logSubscriptionNotActivatedPlusErrorIfPossible(theSubscription);
 		return false;
 	}
 

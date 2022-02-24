@@ -15,7 +15,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
@@ -23,6 +22,9 @@ import org.springframework.messaging.MessageHandler;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -54,17 +56,17 @@ public class SubscriptionChannelRegistryTest {
 		ActiveSubscription activeSubscription = createActiveSubscription(channelName, retryCount);
 
 		// mocks
-		MessageHandler messageHandler = Mockito.mock(MessageHandler.class);
-		IChannelReceiver receiver = Mockito.mock(IChannelReceiver.class);
-		IChannelProducer producer = Mockito.mock(IChannelProducer.class);
+		MessageHandler messageHandler = mock(MessageHandler.class);
+		IChannelReceiver receiver = mock(IChannelReceiver.class);
+		IChannelProducer producer = mock(IChannelProducer.class);
 
 		// when
 		when(mySubscriptionChannelFactory.newDeliveryReceivingChannel(
-			Mockito.anyString(),
+			anyString(),
 			any(ChannelConsumerSettings.class)
 		)).thenReturn(receiver);
 		when(mySubscriptionChannelFactory.newDeliverySendingChannel(
-			Mockito.anyString(),
+			anyString(),
 			any(ChannelProducerSettings.class)
 		)).thenReturn(producer);
 		when(mySubscriptionDeliveryHandlerFactory.createDeliveryHandler(any(CanonicalSubscriptionChannelType.class)))
@@ -84,15 +86,15 @@ public class SubscriptionChannelRegistryTest {
 		// verify the creation of the sender/receiver
 		// both have retry values provided
 		ArgumentCaptor<ChannelConsumerSettings> consumerCaptor = ArgumentCaptor.forClass(ChannelConsumerSettings.class);
-		Mockito.verify(mySubscriptionChannelFactory)
-			.newDeliveryReceivingChannel(Mockito.anyString(),
+		verify(mySubscriptionChannelFactory)
+			.newDeliveryReceivingChannel(anyString(),
 				consumerCaptor.capture());
 		ChannelConsumerSettings consumerSettings = consumerCaptor.getValue();
 		verifySettingsHaveRetryConfig(consumerSettings, retryCount);
 
 		ArgumentCaptor<ChannelProducerSettings> producerCaptor = ArgumentCaptor.forClass(ChannelProducerSettings.class);
-		Mockito.verify(mySubscriptionChannelFactory)
-			.newDeliverySendingChannel(Mockito.anyString(),
+		verify(mySubscriptionChannelFactory)
+			.newDeliverySendingChannel(anyString(),
 				producerCaptor.capture());
 		verifySettingsHaveRetryConfig(producerCaptor.getValue(), retryCount);
 	}
