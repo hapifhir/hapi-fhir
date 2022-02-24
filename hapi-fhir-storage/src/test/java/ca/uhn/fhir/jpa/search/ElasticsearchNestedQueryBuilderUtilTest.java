@@ -73,7 +73,7 @@ class ElasticsearchNestedQueryBuilderUtilTest {
 		String nestedQuery =
 			"{'nested': { 'path': 'myProperties', 'query': { 'bool': { 'must': [" +
 				"{'match': {'myProperties.myKey': 'propAAA' }}," +
-				"{'regexp': {'myProperties.myValueString': " + GSON_FAILING_REGEX + "'}}" +
+				"{'regexp': {'myProperties.myValueString': '" + GSON_FAILING_REGEX + "'}}" +
 				"]}}}}";
 
 //		MalformedJsonException thrown = assertThrows(
