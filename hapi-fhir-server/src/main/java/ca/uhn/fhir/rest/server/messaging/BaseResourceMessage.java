@@ -173,28 +173,20 @@ public abstract class BaseResourceMessage implements IResourceMessage, IModelJso
 	}
 
 	public enum OperationTypeEnum {
-		CREATE,
-		UPDATE,
-		DELETE,
-		MANUALLY_TRIGGERED,
-		TRANSACTION;
+		CREATE(RestOperationTypeEnum.CREATE),
+		UPDATE(RestOperationTypeEnum.UPDATE),
+		DELETE(RestOperationTypeEnum.DELETE),
+		MANUALLY_TRIGGERED(RestOperationTypeEnum.UPDATE),
+		TRANSACTION(RestOperationTypeEnum.UPDATE);
+
+		private final RestOperationTypeEnum myRestOperationTypeEnum;
+
+		OperationTypeEnum(RestOperationTypeEnum theRestOperationTypeEnum) {
+			myRestOperationTypeEnum = theRestOperationTypeEnum;
+		}
 
 		public RestOperationTypeEnum asRestOperationType() {
-			RestOperationTypeEnum operationType;
-			switch (this) {
-				case CREATE:
-					operationType = RestOperationTypeEnum.CREATE;
-					break;
-				case MANUALLY_TRIGGERED:
-				default:
-				case UPDATE:
-					operationType = RestOperationTypeEnum.UPDATE;
-					break;
-				case DELETE:
-					operationType = RestOperationTypeEnum.DELETE;
-					break;
-			}
-			return operationType;
+			return myRestOperationTypeEnum;
 		}
 	}
 }
