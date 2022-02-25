@@ -20,7 +20,7 @@ public class FhirContextSearchParamRegistry implements ISearchParamRegistry {
 
 	private final List<RuntimeSearchParam> myExtraSearchParams = new ArrayList<>();
 	private final FhirContext myCtx;
-	private final ConcurrentHashMap<String, Map<String, RuntimeSearchParam>>
+//	private final ConcurrentHashMap<String, Map<String, RuntimeSearchParam>>
 
 	/**
 	 * Constructor
