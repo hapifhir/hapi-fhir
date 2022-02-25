@@ -24,6 +24,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -39,12 +41,15 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletSubRequestDetails;
 import ca.uhn.fhir.rest.server.util.ServletRequestUtil;
 import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.UrlUtil;
+import ca.uhn.fhir.util.ValidateUtil;
 import ca.uhn.fhir.util.bundle.ModifiableBundleEntry;
 import com.google.common.collect.ArrayListMultimap;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 
 import javax.annotation.Nullable;
@@ -86,6 +91,7 @@ import java.util.stream.Collectors;
  */
 public class SearchNarrowingInterceptor {
 
+	public static final String POST_FILTERING_LIST_ATTRIBUTE_NAME = SearchNarrowingInterceptor.class.getName() + "_POST_FILTERING_LIST";
 	private IValidationSupport myValidationSupport;
 	private int myPostFilterLargeValueSetThreshold = 500;
 
@@ -95,7 +101,7 @@ public class SearchNarrowingInterceptor {
 	 *
 	 * <p>
 	 * Note that this setting will have no effect if {@link #setValidationSupport(IValidationSupport)}
-	 * has not also been called in order to supply a validsation support module for
+	 * has not also been called in order to supply a validation support module for
 	 * testing ValueSet membership.
 	 * </p>
 	 *
@@ -136,7 +142,7 @@ public class SearchNarrowingInterceptor {
 	}
 
 	@Hook(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED)
-	public boolean incomingRequestPostProcessed(RequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse) throws AuthenticationException {
+	public boolean hookIncomingRequestPostProcessed(RequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse) throws AuthenticationException {
 		// We don't support this operation type yet
 		Validate.isTrue(theRequestDetails.getRestOperationType() != RestOperationTypeEnum.SEARCH_SYSTEM);
 
@@ -167,11 +173,23 @@ public class SearchNarrowingInterceptor {
 		}
 		List<AllowedCodeInValueSet> allowedCodeInValueSet = authorizedList.getAllowedCodeInValueSets();
 		if (allowedCodeInValueSet != null) {
-			Map<String, List<String>> parameterToOrValues = processAllowedCodes(resDef, allowedCodeInValueSet);
+			Map<String, List<String>> parameterToOrValues = processAllowedCodes(theRequestDetails, resDef, allowedCodeInValueSet);
 			applyParametersToRequestDetails(theRequestDetails, parameterToOrValues, false);
 		}
 
 		return true;
+	}
+
+	@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)
+	public void hookIncomingRequestPreHandled(ServletRequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse) throws AuthenticationException {
+		if (theRequestDetails.getRestOperationType() != RestOperationTypeEnum.TRANSACTION) {
+			return;
+		}
+
+		IBaseBundle bundle = (IBaseBundle) theRequestDetails.getResource();
+		FhirContext ctx = theRequestDetails.getFhirContext();
+		BundleEntryUrlProcessor processor = new BundleEntryUrlProcessor(ctx, theRequestDetails, theRequest, theResponse);
+		BundleUtil.processEntries(ctx, bundle, processor);
 	}
 
 	private void applyParametersToRequestDetails(RequestDetails theRequestDetails, @Nullable Map<String, List<String>> theParameterToOrValues, boolean thePatientIdMode) {
@@ -248,18 +266,6 @@ public class SearchNarrowingInterceptor {
 		}
 	}
 
-	@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)
-	public void incomingRequestPreHandled(ServletRequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse) throws AuthenticationException {
-		if (theRequestDetails.getRestOperationType() != RestOperationTypeEnum.TRANSACTION) {
-			return;
-		}
-
-		IBaseBundle bundle = (IBaseBundle) theRequestDetails.getResource();
-		FhirContext ctx = theRequestDetails.getFhirContext();
-		BundleEntryUrlProcessor processor = new BundleEntryUrlProcessor(ctx, theRequestDetails, theRequest, theResponse);
-		BundleUtil.processEntries(ctx, bundle, processor);
-	}
-
 	@Nullable
 	private Map<String, List<String>> processResourcesOrCompartments(RequestDetails theRequestDetails, RuntimeResourceDefinition theResDef, Collection<String> theResourcesOrCompartments, boolean theAreCompartments) {
 		Map<String, List<String>> retVal = null;
@@ -305,11 +311,23 @@ public class SearchNarrowingInterceptor {
 	}
 
 	@Nullable
-	private Map<String, List<String>> processAllowedCodes(RuntimeResourceDefinition theResDef, List<AllowedCodeInValueSet> theAllowedCodeInValueSet) {
+	private Map<String, List<String>> processAllowedCodes(RequestDetails theRequestDetails, RuntimeResourceDefinition theResDef, List<AllowedCodeInValueSet> theAllowedCodeInValueSet) {
 		Map<String, List<String>> retVal = null;
 
 		for (AllowedCodeInValueSet next : theAllowedCodeInValueSet) {
-			if (!next.getResourceName().equals(theResDef.getName())) {
+			String resourceName = next.getResourceName();
+			String valueSetUrl = next.getValueSetUrl();
+
+			ValidateUtil.isNotBlankOrThrowIllegalArgument(resourceName, "Resource name supplied by SearchNarrowingInterceptor must not be null");
+			ValidateUtil.isNotBlankOrThrowIllegalArgument(valueSetUrl, "ValueSet URL supplied by SearchNarrowingInterceptor must not be null");
+
+			if (!resourceName.equals(theResDef.getName())) {
+				continue;
+			}
+
+			if (shouldHandleThroughConsentService(valueSetUrl)) {
+				List<AllowedCodeInValueSet> postFilteringList = getPostFilteringList(theRequestDetails);
+				postFilteringList.add(next);
 				continue;
 			}
 
@@ -323,10 +341,31 @@ public class SearchNarrowingInterceptor {
 			if (retVal == null) {
 				retVal = new HashMap<>();
 			}
-			retVal.computeIfAbsent(paramName, k -> new ArrayList<>()).add(next.getValueSetUrl());
+			retVal.computeIfAbsent(paramName, k -> new ArrayList<>()).add(valueSetUrl);
 		}
 
 		return retVal;
+	}
+
+	/**
+	 * For a given ValueSet URL, expand the valueset and check if the number of
+	 * codes present is larger than the post filter threshold.
+	 */
+	private boolean shouldHandleThroughConsentService(String theValueSetUrl) {
+		if (myValidationSupport != null && myPostFilterLargeValueSetThreshold != -1) {
+			ValidationSupportContext ctx = new ValidationSupportContext(myValidationSupport);
+			ValueSetExpansionOptions options = new ValueSetExpansionOptions();
+			options.setCount(myPostFilterLargeValueSetThreshold);
+			options.setIncludeHierarchy(false);
+			IValidationSupport.ValueSetExpansionOutcome outcome = myValidationSupport.expandValueSet(ctx, options, theValueSetUrl);
+			if (outcome != null && outcome.getValueSet() != null) {
+				FhirTerser terser = myValidationSupport.getFhirContext().newTerser();
+				List<IBase> contains = terser.getValues(outcome.getValueSet(), "ValueSet.expansion.contains");
+				int codeCount = contains.size();
+				return codeCount >= myPostFilterLargeValueSetThreshold;
+			}
+		}
+		return false;
 	}
 
 
@@ -419,10 +458,22 @@ public class SearchNarrowingInterceptor {
 			RestOperationTypeEnum restOperationType = method.getRestOperationType();
 			subServletRequestDetails.setRestOperationType(restOperationType);
 
-			incomingRequestPostProcessed(subServletRequestDetails, myRequest, myResponse);
+			hookIncomingRequestPostProcessed(subServletRequestDetails, myRequest, myResponse);
 
 			theModifiableBundleEntry.setRequestUrl(myFhirContext, ServletRequestUtil.extractUrl(subServletRequestDetails));
 		}
 	}
+
+
+	@SuppressWarnings("unchecked")
+	public static List<AllowedCodeInValueSet> getPostFilteringList(RequestDetails theRequestDetails) {
+		List<AllowedCodeInValueSet> retVal = (List<AllowedCodeInValueSet>) theRequestDetails.getAttribute(POST_FILTERING_LIST_ATTRIBUTE_NAME);
+		if (retVal == null) {
+			retVal = new ArrayList<>();
+			theRequestDetails.setAttribute(POST_FILTERING_LIST_ATTRIBUTE_NAME, retVal);
+		}
+		return retVal;
+	}
+
 
 }

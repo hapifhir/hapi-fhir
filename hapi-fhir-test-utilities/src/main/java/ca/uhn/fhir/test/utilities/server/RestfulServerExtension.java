@@ -196,6 +196,7 @@ public class RestfulServerExtension implements BeforeEachCallback, AfterEachCall
 	}
 
 	public RestfulServerExtension registerProvider(Object theProvider) {
+		Validate.notNull(theProvider);
 		if (myServlet != null) {
 			myServlet.registerProvider(theProvider);
 		} else {

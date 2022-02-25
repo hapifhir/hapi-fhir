@@ -51,6 +51,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -698,13 +699,29 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		// Should be ok
 		myClient.read().resource(Observation.class).withId("Observation/allowed").execute();
 
-		try {
-			myClient.read().resource(Observation.class).withId("Observation/disallowed").execute();
-			fail();
-		} catch (ForbiddenOperationException e) {
-			// good
-		}
+	}
 
+	@Test
+	public void testReadCodeIn_AllowedInCompartment() throws IOException {
+		myValueSetDao.update(loadResourceFromClasspath(ValueSet.class, "r4/adi-vs2.json"));
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		logAllValueSetConcepts();
+
+		mySystemDao.transaction(mySrd, loadResourceFromClasspath(Bundle.class, "r4/adi-ptbundle.json"));
+
+		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.deny().read().resourcesOfType("Observation").withCodeNotInValueSet("code", "http://payer-to-payer-exchange/fhir/ValueSet/mental-health/ndc-canonical-valueset").andThen()
+					.allow().read().allResources().inCompartment("Patient", new IdType("Patient/P")).andThen()
+					.build();
+			}
+		}.setValidationSupport(myValidationSupport));
+
+		// Should be ok
+		myClient.read().resource(Patient.class).withId("Patient/P").execute();
+		myClient.read().resource(Observation.class).withId("Observation/O").execute();
 	}
 
 	/**

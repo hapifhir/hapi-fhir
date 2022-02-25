@@ -1526,7 +1526,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		}
 
 		TermValueSet valueSetEntity = myTermValueSetDao.findByResourcePid(valueSetResourcePid.getIdAsLong()).orElseThrow(() -> new IllegalStateException());
-		Object timingDescription = toHumanReadableExpansionTimestamp(valueSetEntity);
+		String timingDescription = toHumanReadableExpansionTimestamp(valueSetEntity);
 		String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "validationPerformedAgainstPreExpansion", timingDescription);
 
 		if (theValidationOptions.isValidateDisplay() && concepts.size() > 0) {
@@ -1553,7 +1553,16 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				.setMessage(msg);
 		}
 
-		return createFailureCodeValidationResult(theSystem, theCode, null, " - Unknown code " + theSystem + "#" + theCode + ". " + msg);
+		// Ok, we failed
+		List<TermValueSetConcept> outcome = myValueSetConceptDao.findByTermValueSetIdSystemOnly(Pageable.ofSize(1), valueSetResourcePid.getIdAsLong(), theSystem);
+		String append;
+		if (outcome.size() == 0) {
+			append = " - No codes in ValueSet belong to CodeSystem with URL " + theSystem;
+		} else {
+			append = " - Unknown code " + theSystem + "#" + theCode + ". " + msg;
+		}
+
+		return createFailureCodeValidationResult(theSystem, theCode, null, append);
 	}
 
 	private CodeValidationResult createFailureCodeValidationResult(String theSystem, String theCode, String theCodeSystemVersion, String theAppend) {

@@ -25,7 +25,15 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /**
+ * This interface is intended to be implemented as the user-defined contract for
+ * the {@link ConsentInterceptor}.
+ * <p>
  * Note: Since HAPI FHIR 5.1.0, methods in this interface have default methods that return {@link ConsentOutcome#PROCEED}
+ *	</p>
+ *	<p>
+ * See <a href="https://hapifhir.io/hapi-fhir/docs/security/consent_interceptor.html">Consent Interceptor</a> for
+ * more information on this interceptor.
+ *	</p>
  */
 public interface IConsentService {
 
@@ -60,6 +68,15 @@ public interface IConsentService {
 	 * method to actually make changes. This method is intended to only
 	 * to make decisions.
 	 * </p>
+	 * <p>
+	 * In addition, the {@link ConsentOutcome} must return one of the following
+	 * statuses:
+	 * </p>
+	 * <ul>
+	 * <li>{@link ConsentOperationStatusEnum#AUTHORIZED}: The resource will be returned to the client. If multiple consent service implementation are present, no further implementations will be invoked for this resource. {@link #willSeeResource(RequestDetails, IBaseResource, IConsentContextServices)} will not be invoked for this resource.</li>
+	 * <li>{@link ConsentOperationStatusEnum#PROCEED}: The resource will be returned to the client.</li>
+	 * <li>{@link ConsentOperationStatusEnum#REJECT}: The resource will be stripped from the response. If multiple consent service implementation are present, no further implementations will be invoked for this resource. {@link #willSeeResource(RequestDetails, IBaseResource, IConsentContextServices)} will not be invoked for this resource.</li>
+	 * </ul>
 	 * <b>Performance note:</b> Note that this method should be efficient, since it will be called once
 	 * for every resource potentially returned (e.g. by searches). If this method
 	 * takes a significant amount of time to execute, performance on the server
@@ -76,7 +93,9 @@ public interface IConsentService {
 	 * @param theContextServices An object passed in by the consent framework that
 	 *                           provides utility functions relevant to acting on
 	 *                           consent directives.
-	 * @return An outcome object. See {@link ConsentOutcome}
+	 * @return An outcome object. See {@link ConsentOutcome}. Note that this method is not allowed
+	 * to modify the response object, so an error will be thrown if {@link ConsentOutcome#getResource()}
+	 * returns a non-null response.
 	 */
 	default ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
 		return ConsentOutcome.PROCEED;
@@ -98,9 +117,9 @@ public interface IConsentService {
 	 * statuses:
 	 * </p>
 	 * <ul>
-	 * <li>{@link ConsentOperationStatusEnum#AUTHORIZED}: The resource will be returned to the client.</li>
-	 * <li>{@link ConsentOperationStatusEnum#PROCEED}: The resource will be returned to the client. Any embedded resources contained within the resource will also be checked by {@link #willSeeResource(RequestDetails, IBaseResource, IConsentContextServices)}.</li>
-	 * <li>{@link ConsentOperationStatusEnum#REJECT}: The resource will not be returned to the client. If the resource supplied to the </li>
+	 * <li>{@link ConsentOperationStatusEnum#AUTHORIZED}: The resource will be returned to the client. If multiple consent service implementation are present, no further implementations will be invoked for this resource.</li>
+	 * <li>{@link ConsentOperationStatusEnum#PROCEED}: The resource will be returned to the client.</li>
+	 * <li>{@link ConsentOperationStatusEnum#REJECT}: The resource will not be returned to the client. If multiple consent service implementation are present, no further implementations will be invoked for this resource.</li>
 	 * </ul>
 	 *
 	 * @param theRequestDetails  Contains details about the operation that is
