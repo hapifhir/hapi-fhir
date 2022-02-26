@@ -23,6 +23,7 @@ package ca.uhn.fhir.rest.server.interceptor.consent;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -33,6 +34,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.IModelVisitor2;
@@ -44,6 +46,7 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -155,6 +158,8 @@ public class ConsentInterceptor {
 			return;
 		}
 
+		validateParameter(theRequestDetails.getParameters());
+
 		for (IConsentService nextService : myConsentService) {
 			ConsentOutcome outcome = nextService.startOperation(theRequestDetails, myContextConsentServices);
 			Validate.notNull(outcome, "Consent service returned null outcome");
@@ -234,6 +239,9 @@ public class ConsentInterceptor {
 		if (isRequestAuthorized(theRequestDetails)) {
 			return;
 		}
+		if (isAllowListedRequest(theRequestDetails)) {
+			return;
+		}
 		if (isSkipServiceForRequest(theRequestDetails)) {
 			return;
 		}
@@ -287,6 +295,9 @@ public class ConsentInterceptor {
 			return;
 		}
 		if (isRequestAuthorized(theRequestDetails)) {
+			return;
+		}
+		if (isAllowListedRequest(theRequestDetails)) {
 			return;
 		}
 		if (isSkipServiceForRequest(theRequestDetails)) {
@@ -432,12 +443,27 @@ public class ConsentInterceptor {
 		return isMetadataPath(theRequestDetails) || isMetaOperation(theRequestDetails);
 	}
 
+	private boolean isAllowListedRequest(RequestDetails theRequestDetails) {
+		return isMetadataPath(theRequestDetails) || isMetaOperation(theRequestDetails);
+	}
+
 	private boolean isMetaOperation(RequestDetails theRequestDetails) {
 		return OPERATION_META.equals(theRequestDetails.getOperation());
 	}
 
 	private boolean isMetadataPath(RequestDetails theRequestDetails) {
 		return URL_TOKEN_METADATA.equals(theRequestDetails.getRequestPath());
+	}
+
+	private void validateParameter(Map<String, String[]> theParameterMap) {
+		if (theParameterMap != null) {
+			if (theParameterMap.containsKey(Constants.PARAM_SEARCH_TOTAL_MODE) && Arrays.stream(theParameterMap.get("_total")).anyMatch("accurate"::equals)) {
+				throw new InvalidRequestException(Msg.code(2037) + Constants.PARAM_SEARCH_TOTAL_MODE + "=accurate is not permitted on this server");
+			}
+			if (theParameterMap.containsKey(Constants.PARAM_SUMMARY) && Arrays.stream(theParameterMap.get("_summary")).anyMatch("count"::equals)) {
+				throw new InvalidRequestException(Msg.code(2038) + Constants.PARAM_SUMMARY + "=count is not permitted on this server");
+			}
+		}
 	}
 
 	@SuppressWarnings("unchecked")

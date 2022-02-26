@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -135,9 +134,11 @@ public class AddIndexTask extends BaseTableTask {
 			switch (getDriverType()) {
 				case POSTGRES_9_4:
 					postgresOnline = "CONCURRENTLY ";
+					// This runs without a lock, and can't be done transactionally.
+					setTransactional(false);
 					break;
 				case ORACLE_12C:
-					oracleOnlineDeferred = " ONLINE DEFERRED";
+					oracleOnlineDeferred = " ONLINE DEFERRED INVALIDATION";
 					break;
 				case MSSQL_2012:
 					oracleOnlineDeferred = " WITH (ONLINE = ON)";
