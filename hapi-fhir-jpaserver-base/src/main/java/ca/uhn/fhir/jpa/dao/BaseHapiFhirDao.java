@@ -194,7 +194,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	public static final long INDEX_STATUS_INDEXING_FAILED = 2L;
 	public static final String NS_JPA_PROFILE = "https://github.com/hapifhir/hapi-fhir/ns/jpa/profile";
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseHapiFhirDao.class);
-	private static final Map<FhirVersionEnum, FhirContext> ourRetrievalContexts = new HashMap<>();
 	private static boolean ourValidationDisabledForUnitTest;
 	private static boolean ourDisableIncrementOnUpdateForUnitTest = false;
 
@@ -391,14 +390,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	public FhirContext getContext(FhirVersionEnum theVersion) {
 		Validate.notNull(theVersion, "theVersion must not be null");
-		synchronized (ourRetrievalContexts) {
-			FhirContext retVal = ourRetrievalContexts.get(theVersion);
-			if (retVal == null) {
-				retVal = new FhirContext(theVersion);
-				ourRetrievalContexts.put(theVersion, retVal);
-			}
-			return retVal;
+		if (theVersion == myFhirContext.getVersion().getVersion()) {
+			return myFhirContext;
 		}
+		return FhirContext.forCached(theVersion);
 	}
 
 	/**
@@ -434,7 +429,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	/**
 	 * Gets the tag defined by the fed in values, or saves it if it does not
 	 * exist.
-	 *
+	 * <p>
 	 * Can also throw an InternalErrorException if something bad happens.
 	 */
 	private TagDefinition getOrCreateTag(TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel) {
