@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.server.interceptor;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR - Server Framework
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
