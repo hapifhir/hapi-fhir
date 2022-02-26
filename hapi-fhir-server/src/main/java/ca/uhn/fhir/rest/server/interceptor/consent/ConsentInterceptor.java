@@ -35,6 +35,7 @@ import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationConstants;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.IModelVisitor2;
@@ -65,7 +66,7 @@ import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_META;
  * more information on this interceptor.
  * </p>
  */
-@Interceptor
+@Interceptor(order = AuthorizationConstants.ORDER_CONSENT_INTERCEPTOR)
 public class ConsentInterceptor {
 	private static final AtomicInteger ourInstanceCount = new AtomicInteger(0);
 	private final int myInstanceIndex = ourInstanceCount.incrementAndGet();
@@ -204,11 +205,32 @@ public class ConsentInterceptor {
 			return;
 		}
 
-		IdentityHashMap<IBaseResource, Boolean> authorizedResources = getAuthorizedResourcesMap(theRequestDetails);
+		// First check if we should be calling canSeeResource for the individual
+		// consent services
+		boolean[] processConsentSvcs = new boolean[myConsentService.size()];
+		boolean processAnyConsentSvcs = false;
+		for (int consentSvcIdx = 0; consentSvcIdx < myConsentService.size(); consentSvcIdx++) {
+			IConsentService nextService = myConsentService.get(consentSvcIdx);
 
-		for (int i = 0; i < thePreResourceAccessDetails.size(); i++) {
-			IBaseResource nextResource = thePreResourceAccessDetails.getResource(i);
-			for (IConsentService nextService : myConsentService) {
+			boolean shouldCallCanSeeResource = nextService.shouldProcessCanSeeResource(theRequestDetails, myContextConsentServices);
+			processAnyConsentSvcs |= shouldCallCanSeeResource;
+			processConsentSvcs[consentSvcIdx] = shouldCallCanSeeResource;
+		}
+
+		if (!processAnyConsentSvcs) {
+			return;
+		}
+
+		IdentityHashMap<IBaseResource, Boolean> authorizedResources = getAuthorizedResourcesMap(theRequestDetails);
+		for (int resourceIdx = 0; resourceIdx < thePreResourceAccessDetails.size(); resourceIdx++) {
+			IBaseResource nextResource = thePreResourceAccessDetails.getResource(resourceIdx);
+			for (int consentSvcIdx = 0; consentSvcIdx < myConsentService.size(); consentSvcIdx++) {
+				IConsentService nextService = myConsentService.get(consentSvcIdx);
+
+				if (!processConsentSvcs[consentSvcIdx]) {
+					continue;
+				}
+
 				ConsentOutcome outcome = nextService.canSeeResource(theRequestDetails, nextResource, myContextConsentServices);
 				Validate.notNull(outcome, "Consent service returned null outcome");
 				Validate.isTrue(outcome.getResource() == null, "Consent service returned a resource in its outcome. This is not permitted in canSeeResource(..)");
@@ -222,7 +244,7 @@ public class ConsentInterceptor {
 						skipSubsequentServices = true;
 						break;
 					case REJECT:
-						thePreResourceAccessDetails.setDontReturnResourceAtIndex(i);
+						thePreResourceAccessDetails.setDontReturnResourceAtIndex(resourceIdx);
 						skipSubsequentServices = true;
 						break;
 				}

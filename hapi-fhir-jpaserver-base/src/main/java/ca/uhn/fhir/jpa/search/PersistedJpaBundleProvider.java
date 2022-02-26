@@ -40,8 +40,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
-import ca.uhn.fhir.jpa.util.InterceptorUtil;
-import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.rest.server.interceptor.ServerInterceptorUtil;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -55,7 +54,6 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,14 +68,12 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
-public class PersistedJpaBundleProvider implements IBundleProvider {
+public class PersistedJpaBundleProvider extends BundleProviderWith implements IBundleProvider {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(PersistedJpaBundleProvider.class);
 
@@ -435,7 +431,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		List<IBaseResource> resources = new ArrayList<>();
 		theSearchBuilder.loadResourcesByPid(thePids, includedPidList, resources, false, myRequest);
 
-		resources = InterceptorUtil.fireStoragePreshowResource(resources, myRequest, myInterceptorBroadcaster);
+		resources = ServerInterceptorUtil.fireStoragePreshowResource(resources, myRequest, myInterceptorBroadcaster);
 
 		return resources;
 	}

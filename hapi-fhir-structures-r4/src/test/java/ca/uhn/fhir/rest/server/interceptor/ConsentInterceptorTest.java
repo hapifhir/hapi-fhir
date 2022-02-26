@@ -1,7 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.api.BundleInclusionRule;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -12,7 +11,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentOperationStatusEnum;
@@ -21,17 +19,11 @@ import ca.uhn.fhir.rest.server.interceptor.consent.IConsentService;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
@@ -39,13 +31,12 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -53,7 +44,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -67,6 +57,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 @ExtendWith(MockitoExtension.class)
 public class ConsentInterceptorTest {
@@ -85,9 +76,9 @@ public class ConsentInterceptorTest {
 		.registerProvider(ourSystemProvider)
 		.withPagingProvider(new FifoMemoryPagingProvider(10));
 
-	@Mock
+	@Mock(answer = Answers.CALLS_REAL_METHODS)
 	private IConsentService myConsentSvc;
-	@Mock
+	@Mock(answer = Answers.CALLS_REAL_METHODS)
 	private IConsentService myConsentSvc2;
 	private ConsentInterceptor myInterceptor;
 	@Captor
@@ -258,6 +249,35 @@ public class ConsentInterceptorTest {
 		verify(myConsentSvc, times(2)).completeOperationSuccess(any(), any());
 	}
 
+
+	@Test
+	public void testSearch_ShouldProcessCanSeeResourcesReturnsFalse() throws IOException {
+		ourPatientProvider.store((Patient) new Patient().setActive(true).setId("PTA"));
+		ourPatientProvider.store((Patient) new Patient().setActive(false).setId("PTB"));
+
+		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc.shouldProcessCanSeeResource(any(),any())).thenReturn(false);
+		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t-> ConsentOutcome.AUTHORIZED);
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient");
+
+		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response: {}", responseContent);
+			assertThat(responseContent, containsString("PTA"));
+		}
+
+		verify(myConsentSvc, times(1)).startOperation(any(), any());
+		verify(myConsentSvc, times(1)).shouldProcessCanSeeResource(any(), any());
+		verify(myConsentSvc, times(0)).canSeeResource(any(), any(), any());
+		verify(myConsentSvc, times(3)).willSeeResource(any(), any(), any());
+		verify(myConsentSvc, times(1)).completeOperationSuccess(any(), any());
+		verify(myConsentSvc, times(0)).completeOperationFailure(any(), any(), any());
+		verifyNoMoreInteractions(myConsentSvc);
+	}
+
+
 	@Test
 	public void testSearch_SeeResourceAuthorizesOuterBundle() throws IOException {
 		ourPatientProvider.store((Patient) new Patient().setActive(true).setId("PTA"));
@@ -277,6 +297,7 @@ public class ConsentInterceptorTest {
 		}
 
 		verify(myConsentSvc, times(1)).startOperation(any(), any());
+		verify(myConsentSvc, times(1)).shouldProcessCanSeeResource(any(), any());
 		verify(myConsentSvc, times(2)).canSeeResource(any(), any(), any());
 		verify(myConsentSvc, times(3)).willSeeResource(any(), any(), any());
 		verify(myConsentSvc, times(1)).completeOperationSuccess(any(), any());
@@ -308,6 +329,7 @@ public class ConsentInterceptorTest {
 		}
 
 		verify(myConsentSvc, timeout(10000).times(1)).startOperation(any(), any());
+		verify(myConsentSvc, times(1)).shouldProcessCanSeeResource(any(), any());
 		verify(myConsentSvc, timeout(10000).times(2)).canSeeResource(any(), any(), any());
 		verify(myConsentSvc, timeout(10000).times(3)).willSeeResource(any(), any(), any());
 		verify(myConsentSvc, timeout(10000).times(1)).completeOperationSuccess(any(), any());
@@ -336,6 +358,7 @@ public class ConsentInterceptorTest {
 		}
 
 		verify(myConsentSvc, times(1)).startOperation(any(), any());
+		verify(myConsentSvc, times(1)).shouldProcessCanSeeResource(any(), any());
 		verify(myConsentSvc, times(2)).canSeeResource(any(), any(), any());
 		verify(myConsentSvc, times(3)).willSeeResource(any(), any(), any()); // the two patients + the bundle
 		verify(myConsentSvc, times(1)).completeOperationSuccess(any(), any());
@@ -375,6 +398,7 @@ public class ConsentInterceptorTest {
 		}
 
 		verify(myConsentSvc, timeout(1000).times(1)).startOperation(any(), any());
+		verify(myConsentSvc, times(1)).shouldProcessCanSeeResource(any(), any());
 		verify(myConsentSvc, timeout(1000).times(2)).canSeeResource(any(), any(), any());
 		verify(myConsentSvc, timeout(1000).times(3)).willSeeResource(any(), any(), any());
 		verify(myConsentSvc, timeout(1000).times(1)).completeOperationSuccess(any(), any());
@@ -415,6 +439,7 @@ public class ConsentInterceptorTest {
 		}
 
 		verify(myConsentSvc, times(1)).startOperation(any(), any());
+		verify(myConsentSvc, times(1)).shouldProcessCanSeeResource(any(), any());
 		verify(myConsentSvc, times(2)).canSeeResource(any(), any(), any());
 		verify(myConsentSvc, times(4)).willSeeResource(any(), any(), any());
 		verify(myConsentSvc, times(1)).completeOperationSuccess(any(), any());
@@ -452,6 +477,7 @@ public class ConsentInterceptorTest {
 		}
 
 		verify(myConsentSvc, times(1)).startOperation(any(), any());
+		verify(myConsentSvc, times(1)).shouldProcessCanSeeResource(any(), any());
 		verify(myConsentSvc, times(2)).canSeeResource(any(), any(), any());
 		verify(myConsentSvc, times(3)).willSeeResource(any(), any(), any());
 		verify(myConsentSvc, times(1)).completeOperationSuccess(any(), any());
@@ -530,6 +556,8 @@ public class ConsentInterceptorTest {
 
 		verify(myConsentSvc, times(1)).startOperation(any(), any());
 		verify(myConsentSvc2, times(1)).startOperation(any(), any());
+		verify(myConsentSvc, times(1)).shouldProcessCanSeeResource(any(), any());
+		verify(myConsentSvc2, times(1)).shouldProcessCanSeeResource(any(), any());
 		verify(myConsentSvc, times(1)).canSeeResource(any(), any(), any());
 		verify(myConsentSvc2, times(0)).canSeeResource(any(), any(), any());
 		verify(myConsentSvc, times(1)).willSeeResource(any(), any(), any()); // On bundle
@@ -540,6 +568,53 @@ public class ConsentInterceptorTest {
 		verify(myConsentSvc2, times(0)).completeOperationFailure(any(), any(), any());
 		verifyNoMoreInteractions(myConsentSvc);
 		verifyNoMoreInteractions(myConsentSvc2);
+	}
+
+	@Test
+	public void testTwoServices_ShouldProcessCanSeeResourcesReturnsFalse_FirstSvcOnly() throws IOException {
+
+		// Setup
+
+		myInterceptor.registerConsentService(myConsentSvc2);
+
+		ourPatientProvider.store((Patient) new Patient().setActive(true).setId("PTA"));
+		ourPatientProvider.store((Patient) new Patient().setActive(false).setId("PTB"));
+
+		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc2.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc.shouldProcessCanSeeResource(any(),any())).thenReturn(false);
+		when(myConsentSvc2.shouldProcessCanSeeResource(any(),any())).thenReturn(true);
+		when(myConsentSvc2.canSeeResource(any(),any(),any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t-> ConsentOutcome.AUTHORIZED);
+		when(myConsentSvc2.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t-> ConsentOutcome.REJECT);
+
+		// Execute
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient");
+
+		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
+
+			// Verify
+
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response: {}", responseContent);
+			assertThat(responseContent, not(containsString("\"entry\"")));
+		}
+
+		verify(myConsentSvc, times(1)).startOperation(any(), any());
+		verify(myConsentSvc2, times(1)).startOperation(any(), any());
+		verify(myConsentSvc, times(1)).shouldProcessCanSeeResource(any(), any());
+		verify(myConsentSvc2, times(1)).shouldProcessCanSeeResource(any(), any());
+		verify(myConsentSvc, times(0)).canSeeResource(any(), any(), any());
+		verify(myConsentSvc2, times(2)).canSeeResource(any(), any(), any());
+		verify(myConsentSvc, times(3)).willSeeResource(any(), any(), any());
+		verify(myConsentSvc2, times(2)).willSeeResource(any(), any(), any());
+		verify(myConsentSvc, times(1)).completeOperationSuccess(any(), any());
+		verify(myConsentSvc2, times(1)).completeOperationSuccess(any(), any());
+		verify(myConsentSvc, times(0)).completeOperationFailure(any(), any(), any());
+		verify(myConsentSvc2, times(0)).completeOperationFailure(any(), any(), any());
+		verifyNoMoreInteractions(myConsentSvc);
 	}
 
 	@Test
@@ -565,6 +640,8 @@ public class ConsentInterceptorTest {
 
 		verify(myConsentSvc, times(1)).startOperation(any(), any());
 		verify(myConsentSvc2, times(1)).startOperation(any(), any());
+		verify(myConsentSvc, times(1)).shouldProcessCanSeeResource(any(), any());
+		verify(myConsentSvc2, times(1)).shouldProcessCanSeeResource(any(), any());
 		verify(myConsentSvc, times(1)).canSeeResource(any(), any(), any());
 		verify(myConsentSvc2, times(0)).canSeeResource(any(), any(), any());
 		verify(myConsentSvc, times(1)).willSeeResource(any(), any(), any()); // On bundle
@@ -601,6 +678,8 @@ public class ConsentInterceptorTest {
 
 		verify(myConsentSvc, times(1)).startOperation(any(), any());
 		verify(myConsentSvc2, times(1)).startOperation(any(), any());
+		verify(myConsentSvc, times(1)).shouldProcessCanSeeResource(any(), any());
+		verify(myConsentSvc2, times(1)).shouldProcessCanSeeResource(any(), any());
 		verify(myConsentSvc, times(1)).canSeeResource(any(), any(), any());
 		verify(myConsentSvc2, times(1)).canSeeResource(any(), any(), any());
 		verify(myConsentSvc, times(1)).willSeeResource(any(), any(), any()); // On bundle
@@ -642,6 +721,8 @@ public class ConsentInterceptorTest {
 
 		verify(myConsentSvc, times(1)).startOperation(any(), any());
 		verify(myConsentSvc2, times(1)).startOperation(any(), any());
+		verify(myConsentSvc, times(1)).shouldProcessCanSeeResource(any(), any());
+		verify(myConsentSvc2, times(1)).shouldProcessCanSeeResource(any(), any());
 		verify(myConsentSvc, times(1)).canSeeResource(any(), any(), any());
 		verify(myConsentSvc2, times(1)).canSeeResource(any(), any(), any());
 		verify(myConsentSvc, times(2)).willSeeResource(any(), any(), any()); // On bundle

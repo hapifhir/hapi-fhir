@@ -146,17 +146,23 @@ public class SearchNarrowingInterceptor {
 		// We don't support this operation type yet
 		Validate.isTrue(theRequestDetails.getRestOperationType() != RestOperationTypeEnum.SEARCH_SYSTEM);
 
+		AuthorizedList authorizedList = buildAuthorizedList(theRequestDetails);
+		if (authorizedList == null) {
+			return true;
+		}
+
+		// Add rules to request so that the SearchNarrowingConsentService can pick them up
+		List<AllowedCodeInValueSet> postFilteringList = getPostFilteringList(theRequestDetails);
+		if (authorizedList.getAllowedCodeInValueSets() != null) {
+			postFilteringList.addAll(authorizedList.getAllowedCodeInValueSets());
+		}
+
 		if (theRequestDetails.getRestOperationType() != RestOperationTypeEnum.SEARCH_TYPE) {
 			return true;
 		}
 
 		FhirContext ctx = theRequestDetails.getServer().getFhirContext();
 		RuntimeResourceDefinition resDef = ctx.getResourceDefinition(theRequestDetails.getResourceName());
-		AuthorizedList authorizedList = buildAuthorizedList(theRequestDetails);
-		if (authorizedList == null) {
-			return true;
-		}
-
 		/*
 		 * Create a map of search parameter values that need to be added to the
 		 * given request
@@ -173,7 +179,7 @@ public class SearchNarrowingInterceptor {
 		}
 		List<AllowedCodeInValueSet> allowedCodeInValueSet = authorizedList.getAllowedCodeInValueSets();
 		if (allowedCodeInValueSet != null) {
-			Map<String, List<String>> parameterToOrValues = processAllowedCodes(theRequestDetails, resDef, allowedCodeInValueSet);
+			Map<String, List<String>> parameterToOrValues = processAllowedCodes(resDef, allowedCodeInValueSet);
 			applyParametersToRequestDetails(theRequestDetails, parameterToOrValues, false);
 		}
 
@@ -311,7 +317,7 @@ public class SearchNarrowingInterceptor {
 	}
 
 	@Nullable
-	private Map<String, List<String>> processAllowedCodes(RequestDetails theRequestDetails, RuntimeResourceDefinition theResDef, List<AllowedCodeInValueSet> theAllowedCodeInValueSet) {
+	private Map<String, List<String>> processAllowedCodes(RuntimeResourceDefinition theResDef, List<AllowedCodeInValueSet> theAllowedCodeInValueSet) {
 		Map<String, List<String>> retVal = null;
 
 		for (AllowedCodeInValueSet next : theAllowedCodeInValueSet) {
@@ -326,8 +332,6 @@ public class SearchNarrowingInterceptor {
 			}
 
 			if (shouldHandleThroughConsentService(valueSetUrl)) {
-				List<AllowedCodeInValueSet> postFilteringList = getPostFilteringList(theRequestDetails);
-				postFilteringList.add(next);
 				continue;
 			}
 
@@ -465,14 +469,18 @@ public class SearchNarrowingInterceptor {
 	}
 
 
-	@SuppressWarnings("unchecked")
-	public static List<AllowedCodeInValueSet> getPostFilteringList(RequestDetails theRequestDetails) {
-		List<AllowedCodeInValueSet> retVal = (List<AllowedCodeInValueSet>) theRequestDetails.getAttribute(POST_FILTERING_LIST_ATTRIBUTE_NAME);
+	static List<AllowedCodeInValueSet> getPostFilteringList(RequestDetails theRequestDetails) {
+		List<AllowedCodeInValueSet> retVal = getPostFilteringListOrNull(theRequestDetails);
 		if (retVal == null) {
 			retVal = new ArrayList<>();
 			theRequestDetails.setAttribute(POST_FILTERING_LIST_ATTRIBUTE_NAME, retVal);
 		}
 		return retVal;
+	}
+
+	@SuppressWarnings("unchecked")
+	static List<AllowedCodeInValueSet> getPostFilteringListOrNull(RequestDetails theRequestDetails) {
+		return (List<AllowedCodeInValueSet>) theRequestDetails.getAttribute(POST_FILTERING_LIST_ATTRIBUTE_NAME);
 	}
 
 
