@@ -175,6 +175,7 @@ public class SearchNarrowingInterceptorTest {
 	public void testNarrowCode_InSelected_ClientRequestedNoParams_LargeValueSet() {
 		myInterceptor.setPostFilterLargeValueSetThreshold(50);
 		myInterceptor.setValidationSupport(myValidationSupport);
+		when(myValidationSupport.getFhirContext()).thenReturn(ourCtx);
 		when(myValidationSupport.expandValueSet(any(), any(), eq("http://large-vs")))
 			.thenReturn(createValueSetWithCodeCount(100));
 
@@ -187,11 +188,7 @@ public class SearchNarrowingInterceptorTest {
 			.execute();
 
 		assertEquals("Observation.search", ourLastHitMethod);
-		assertEquals(1, ourLastCodeParam.size());
-		assertEquals(1, ourLastCodeParam.getValuesAsQueryTokens().get(0).size());
-		assertEquals(TokenParamModifier.IN, ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getModifier());
-		assertEquals("http://myvs", ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
-		assertEquals(null, ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem());
+		assertNull(ourLastCodeParam);
 		assertNull(ourLastSubjectParam);
 		assertNull(ourLastPerformerParam);
 		assertNull(ourLastPatientParam);
