@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
+import ca.uhn.fhir.i18n.Msg;
 import org.apache.commons.lang3.Validate;
 
 import javax.annotation.Nonnull;
@@ -40,7 +41,6 @@ public class FhirContextSearchParamRegistry implements ISearchParamRegistry {
 
 	private final List<RuntimeSearchParam> myExtraSearchParams = new ArrayList<>();
 	private final FhirContext myCtx;
-//	private final ConcurrentHashMap<String, Map<String, RuntimeSearchParam>>
 
 	/**
 	 * Constructor
@@ -79,20 +79,21 @@ public class FhirContextSearchParamRegistry implements ISearchParamRegistry {
 		myExtraSearchParams.add(theSearchParam);
 	}
 
+	// FIXME: adjust these numbers
 	@Override
 	public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, Set<String> theParamNames) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(2039));
 	}
 
 	@Nullable
 	@Override
 	public RuntimeSearchParam getActiveSearchParamByUrl(String theUrl) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(2041));
 	}
 
 	@Override
 	public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(2040));
 	}
 
 	@Override

@@ -1365,8 +1365,8 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		output = myFhirValidator.validateWithResult(input);
 		all = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(2, all.size());
-		assertThat(all.get(0).getMessage(), containsString("Validation failed for 'http://unitsofmeasure.org#Heck'"));
-		assertThat(all.get(1).getMessage(), containsString("The value provided ('Heck') is not in the value set 'Body Temperature Units' (http://hl7.org/fhir/ValueSet/ucum-bodytemp|4.0.1), and a code is required from this value set) (error message = Failed to expand ValueSet 'http://hl7.org/fhir/ValueSet/ucum-bodytemp' (in-memory). Could not validate code null#Heck. Error was: " + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://unitsofmeasure.org)"));
+		assertThat(all.get(0).getMessage(), containsString("Unknown code 'http://unitsofmeasure.org#Heck'"));
+		assertThat(all.get(1).getMessage(), containsString("The value provided ('Heck') is not in the value set 'Body Temperature Units'"));
 
 	}
 
