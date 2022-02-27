@@ -29,8 +29,6 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServlet;
 import java.util.ArrayList;
@@ -170,4 +168,7 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
         return this;
     }
 
+	public RestfulServerExtension unregisterInterceptor(Object theInterceptor) {
+		return withServer(t -> t.getInterceptorService().unregisterInterceptor(theInterceptor));
+	}
 }
