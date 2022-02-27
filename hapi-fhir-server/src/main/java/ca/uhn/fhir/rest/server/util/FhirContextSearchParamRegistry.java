@@ -81,18 +81,18 @@ public class FhirContextSearchParamRegistry implements ISearchParamRegistry {
 
 	@Override
 	public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, Set<String> theParamNames) {
-		throw new UnsupportedOperationException(Msg.code(2039));
+		throw new UnsupportedOperationException(Msg.code(2066));
 	}
 
 	@Nullable
 	@Override
 	public RuntimeSearchParam getActiveSearchParamByUrl(String theUrl) {
-		throw new UnsupportedOperationException(Msg.code(2041));
+		throw new UnsupportedOperationException(Msg.code(2067));
 	}
 
 	@Override
 	public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName) {
-		throw new UnsupportedOperationException(Msg.code(2040));
+		throw new UnsupportedOperationException(Msg.code(2068));
 	}
 
 	@Override
