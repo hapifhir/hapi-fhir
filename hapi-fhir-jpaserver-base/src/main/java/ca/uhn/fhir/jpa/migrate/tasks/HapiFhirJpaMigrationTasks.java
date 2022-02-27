@@ -163,7 +163,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		// Batch2 Framework
 
-		Builder.BuilderAddTableByColumns batchInstance = version.addTableByColumns("20220217.1", "BT2_JOB_INSTANCE", "ID");
+		Builder.BuilderAddTableByColumns batchInstance = version.addTableByColumns("20220227.1", "BT2_JOB_INSTANCE", "ID");
 		batchInstance.addColumn("ID").nonNullable().type(ColumnTypeEnum.STRING, 100);
 		batchInstance.addColumn("CREATE_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
 		batchInstance.addColumn("START_TIME").nullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
@@ -182,9 +182,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		batchInstance.addColumn("ERROR_MSG").nullable().type(ColumnTypeEnum.STRING, 500);
 		batchInstance.addColumn("ERROR_COUNT").nullable().type(ColumnTypeEnum.INT);
 		batchInstance.addColumn("EST_REMAINING").nullable().type(ColumnTypeEnum.STRING, 100);
-		batchInstance.addIndex("20220217.2", "IDX_BT2JI_CT").unique(false).withColumns("CREATE_TIME");
+		batchInstance.addIndex("20220227.2", "IDX_BT2JI_CT").unique(false).withColumns("CREATE_TIME");
 
-		Builder.BuilderAddTableByColumns batchChunk = version.addTableByColumns("20220217.3", "BT2_WORK_CHUNK", "ID");
+		Builder.BuilderAddTableByColumns batchChunk = version.addTableByColumns("20220227.3", "BT2_WORK_CHUNK", "ID");
 		batchChunk.addColumn("ID").nonNullable().type(ColumnTypeEnum.STRING, 100);
 		batchChunk.addColumn("SEQ").nonNullable().type(ColumnTypeEnum.INT);
 		batchChunk.addColumn("CREATE_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
@@ -199,7 +199,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		batchChunk.addColumn("INSTANCE_ID").nonNullable().type(ColumnTypeEnum.STRING, 100);
 		batchChunk.addColumn("ERROR_MSG").nullable().type(ColumnTypeEnum.STRING, 500);
 		batchChunk.addColumn("ERROR_COUNT").nullable().type(ColumnTypeEnum.INT);
-		batchChunk.addIndex("20220217.4", "IDX_BT2WC_II_SEQ").unique(false).withColumns("ID", "SEQ");
+		batchChunk.addIndex("20220227.4", "IDX_BT2WC_II_SEQ").unique(false).withColumns("ID", "SEQ");
 	}
 
 	/**

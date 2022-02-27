@@ -304,7 +304,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		} catch (InvalidRequestException e) {
 
 			// Verify
-			assertEquals("HAPI-2038: No parameters supplied", e.getMessage());
+			assertEquals("HAPI-2065: No parameters supplied", e.getMessage());
 
 		}
 	}
