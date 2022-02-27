@@ -20,11 +20,17 @@ package ca.uhn.fhir.test.utilities;
  * #L%
  */
 
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
+
+import java.io.IOException;
 
 // TODO KHS merge with HttpClientHelper
 public class HttpClientExtension implements BeforeEachCallback, AfterEachCallback {
@@ -44,5 +50,9 @@ public class HttpClientExtension implements BeforeEachCallback, AfterEachCallbac
 		myClient = HttpClientBuilder
 			.create()
 			.build();
+	}
+
+	public CloseableHttpResponse execute(HttpUriRequest theRequest) throws IOException {
+		return myClient.execute(theRequest);
 	}
 }

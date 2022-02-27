@@ -64,7 +64,7 @@ public class BulkImport2AppCtx {
 	}
 
 	@Bean
-	public BulkImportProvider bulkImportProvider() {
-		return new BulkImportProvider();
+	public BulkDataImportProvider bulkImportProvider() {
+		return new BulkDataImportProvider();
 	}
 }

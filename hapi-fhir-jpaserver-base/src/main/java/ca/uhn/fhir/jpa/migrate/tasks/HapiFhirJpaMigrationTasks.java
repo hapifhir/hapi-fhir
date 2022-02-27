@@ -50,8 +50,8 @@ import java.util.stream.Collectors;
 public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 	// H2, Derby, MariaDB, and MySql automatically add indexes to foreign keys
-	public static final DriverTypeEnum[] NON_AUTOMATIC_FK_INDEX_PLATFORMS = new DriverTypeEnum[]{
-		DriverTypeEnum.POSTGRES_9_4, DriverTypeEnum.ORACLE_12C, DriverTypeEnum.MSSQL_2012};
+	public static final DriverTypeEnum[] NON_AUTOMATIC_FK_INDEX_PLATFORMS = new DriverTypeEnum[] {
+		DriverTypeEnum.POSTGRES_9_4, DriverTypeEnum.ORACLE_12C, DriverTypeEnum.MSSQL_2012 };
 	private final Set<FlagEnum> myFlags;
 
 
@@ -97,7 +97,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		// replace and drop IDX_SP_DATE_HASH
 		dateTable
-			.addIndex("20220207.1", "IDX_SP_DATE_HASH_V2")
+			.addIndex("20220207.1", "IDX_SP_DATE_HASH_V2" )
 			.unique(false)
 			.online(true)
 			.withColumns("HASH_IDENTITY", "SP_VALUE_LOW", "SP_VALUE_HIGH", "RES_ID", "PARTITION_ID");
@@ -108,7 +108,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		// replace and drop IDX_SP_DATE_HASH_HIGH
 		dateTable
-			.addIndex("20220207.4", "IDX_SP_DATE_HASH_HIGH_V2")
+			.addIndex("20220207.4", "IDX_SP_DATE_HASH_HIGH_V2" )
 			.unique(false)
 			.online(true)
 			.withColumns("HASH_IDENTITY", "SP_VALUE_HIGH", "RES_ID", "PARTITION_ID");
@@ -116,7 +116,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		// replace and drop IDX_SP_DATE_ORD_HASH
 		dateTable
-			.addIndex("20220207.6", "IDX_SP_DATE_ORD_HASH_V2")
+			.addIndex("20220207.6", "IDX_SP_DATE_ORD_HASH_V2" )
 			.unique(false)
 			.online(true)
 			.withColumns("HASH_IDENTITY", "SP_VALUE_LOW_DATE_ORDINAL", "SP_VALUE_HIGH_DATE_ORDINAL", "RES_ID", "PARTITION_ID");
@@ -124,7 +124,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		// replace and drop IDX_SP_DATE_ORD_HASH_HIGH
 		dateTable
-			.addIndex("20220207.8", "IDX_SP_DATE_ORD_HASH_HIGH_V2")
+			.addIndex("20220207.8", "IDX_SP_DATE_ORD_HASH_HIGH_V2" )
 			.unique(false)
 			.online(true)
 			.withColumns("HASH_IDENTITY", "SP_VALUE_HIGH_DATE_ORDINAL", "RES_ID", "PARTITION_ID");
@@ -135,7 +135,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		// replace and drop IDX_SP_DATE_RESID
 		dateTable
-			.addIndex("20220207.11", "IDX_SP_DATE_RESID_V2")
+			.addIndex("20220207.11", "IDX_SP_DATE_RESID_V2" )
 			.unique(false)
 			.online(true)
 			.withColumns("RES_ID", "HASH_IDENTITY", "SP_VALUE_LOW", "SP_VALUE_HIGH", "SP_VALUE_LOW_DATE_ORDINAL", "SP_VALUE_HIGH_DATE_ORDINAL", "PARTITION_ID");
@@ -151,6 +151,15 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		// drop obsolete
 		dateTable.dropIndexOnline("20220207.16", "IDX_SP_DATE_UPDATED");
+
+		// fix for https://github.com/hapifhir/hapi-fhir/issues/3316
+		// index must have same name that indexed FK or SchemaMigrationTest complains because H2 sets this index automatically
+
+		version.onTable("TRM_VALUESET_C_DESIGNATION")
+			.addIndex("20220223.1", "FK_TRM_VALUESET_CONCEPT_PID")
+			.unique(false)
+			.withColumns("VALUESET_CONCEPT_PID")
+			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
 
 		// Batch2 Framework
 
@@ -199,14 +208,14 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	 */
 	private void addIndexesForDeleteExpunge(Builder theVersion) {
 
-		theVersion.onTable("HFJ_HISTORY_TAG")
-			.addIndex("20211210.2", "IDX_RESHISTTAG_RESID")
+		theVersion.onTable( "HFJ_HISTORY_TAG")
+			.addIndex("20211210.2", "IDX_RESHISTTAG_RESID" )
 			.unique(false)
 			.withColumns("RES_ID");
 
 
-		theVersion.onTable("HFJ_RES_VER_PROV")
-			.addIndex("20211210.3", "FK_RESVERPROV_RES_PID")
+		theVersion.onTable( "HFJ_RES_VER_PROV")
+			.addIndex("20211210.3", "FK_RESVERPROV_RES_PID" )
 			.unique(false)
 			.withColumns("RES_PID")
 			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
@@ -288,15 +297,15 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		// Bump ConceptMap display lengths
 		version.onTable("TRM_CONCEPT_MAP_GRP_ELM_TGT")
-			.modifyColumn("20210617.1", "TARGET_DISPLAY").nullable().withType(ColumnTypeEnum.STRING, 500);
+			.modifyColumn("20210617.1","TARGET_DISPLAY").nullable().withType(ColumnTypeEnum.STRING, 500);
 		version.onTable("TRM_CONCEPT_MAP_GRP_ELEMENT")
 			.modifyColumn("20210617.2", "SOURCE_DISPLAY").nullable().withType(ColumnTypeEnum.STRING, 500);
 
 		version.onTable("HFJ_BLK_EXPORT_JOB")
-			.modifyColumn("20210624.1", "REQUEST").nonNullable().withType(ColumnTypeEnum.STRING, 1024);
+			.modifyColumn("20210624.1","REQUEST").nonNullable().withType(ColumnTypeEnum.STRING, 1024);
 
 		version.onTable("HFJ_IDX_CMP_STRING_UNIQ")
-			.modifyColumn("20210713.1", "IDX_STRING").nonNullable().withType(ColumnTypeEnum.STRING, 500);
+			.modifyColumn("20210713.1","IDX_STRING").nonNullable().withType(ColumnTypeEnum.STRING, 500);
 
 		version.onTable("HFJ_RESOURCE")
 			.addColumn("20210720.1", "SP_CMPTOKS_PRESENT").nullable().type(ColumnTypeEnum.BOOLEAN);
@@ -328,7 +337,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.addColumn("20210915.1", "EXPANDED_AT")
 			.nullable()
 			.type(ColumnTypeEnum.DATE_TIMESTAMP);
-
+        
 		/*
 		 * Replace CLOB columns with BLOB columns
 		 */
@@ -344,7 +353,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// HFJ_SEARCH.SEARCH_QUERY_STRING
 		version.onTable("HFJ_SEARCH")
 			.migratePostgresTextClobToBinaryClob("20211003.3", "SEARCH_QUERY_STRING");
-
+		
 
 	}
 

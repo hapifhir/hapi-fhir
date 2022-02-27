@@ -23,6 +23,7 @@ package ca.uhn.fhir.rest.server.interceptor.consent;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -33,12 +34,14 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.IModelVisitor2;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.*;
 
+import java.util.Arrays;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
@@ -100,6 +103,9 @@ public class ConsentInterceptor {
 		if (isAllowListedRequest(theRequestDetails)) {
 			return;
 		}
+
+		validateParameter(theRequestDetails.getParameters());
+
 		ConsentOutcome outcome = myConsentService.startOperation(theRequestDetails, myContextConsentServices);
 		Validate.notNull(outcome, "Consent service returned null outcome");
 
@@ -356,5 +362,16 @@ public class ConsentInterceptor {
 
 	private boolean isMetadataPath(RequestDetails theRequestDetails) {
 		return URL_TOKEN_METADATA.equals(theRequestDetails.getRequestPath());
+	}
+
+	private void validateParameter(Map<String, String[]> theParameterMap) {
+		if (theParameterMap != null) {
+			if (theParameterMap.containsKey("_total") && Arrays.stream(theParameterMap.get("_total")).anyMatch("accurate"::equals)) {
+				throw new InvalidRequestException(Msg.code(2037) + "_total=accurate is not permitted on this server");
+			}
+			if (theParameterMap.containsKey("_summary") && Arrays.stream(theParameterMap.get("_summary")).anyMatch("count"::equals)) {
+				throw new InvalidRequestException(Msg.code(2038) + "_summary=count is not permitted on this server");
+			}
+		}
 	}
 }

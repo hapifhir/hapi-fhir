@@ -21,7 +21,7 @@ package ca.uhn.fhir.cli;
  */
 
 import ca.uhn.fhir.batch2.jobs.imprt.BulkImportFileServlet;
-import ca.uhn.fhir.batch2.jobs.imprt.BulkImportProvider;
+import ca.uhn.fhir.batch2.jobs.imprt.BulkDataImportProvider;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -147,17 +147,17 @@ public class BulkImportCommand extends BaseCommand {
 		FhirContext ctx = getFhirContext();
 		IBaseParameters retVal = ParametersUtil.newInstance(ctx);
 
-		ParametersUtil.addParameterToParameters(ctx, retVal, BulkImportProvider.PARAM_INPUT_FORMAT, "code", Constants.CT_FHIR_NDJSON);
-		ParametersUtil.addParameterToParameters(ctx, retVal, BulkImportProvider.PARAM_INPUT_SOURCE, "code", theBaseUrl);
+		ParametersUtil.addParameterToParameters(ctx, retVal, BulkDataImportProvider.PARAM_INPUT_FORMAT, "code", Constants.CT_FHIR_NDJSON);
+		ParametersUtil.addParameterToParameters(ctx, retVal, BulkDataImportProvider.PARAM_INPUT_SOURCE, "code", theBaseUrl);
 
-		IBase storageDetail = ParametersUtil.addParameterToParameters(ctx, retVal, BulkImportProvider.PARAM_STORAGE_DETAIL);
-		ParametersUtil.addPartString(ctx, storageDetail, BulkImportProvider.PARAM_STORAGE_DETAIL_TYPE, BulkImportProvider.PARAM_STORAGE_DETAIL_TYPE_VAL_HTTPS);
+		IBase storageDetail = ParametersUtil.addParameterToParameters(ctx, retVal, BulkDataImportProvider.PARAM_STORAGE_DETAIL);
+		ParametersUtil.addPartString(ctx, storageDetail, BulkDataImportProvider.PARAM_STORAGE_DETAIL_TYPE, BulkDataImportProvider.PARAM_STORAGE_DETAIL_TYPE_VAL_HTTPS);
 
 		for (int i = 0; i < theIndexes.size(); i++) {
-			IBase input = ParametersUtil.addParameterToParameters(ctx, retVal, BulkImportProvider.PARAM_INPUT);
-			ParametersUtil.addPartCode(ctx, input, BulkImportProvider.PARAM_INPUT_TYPE, theResourceTypes.get(i));
+			IBase input = ParametersUtil.addParameterToParameters(ctx, retVal, BulkDataImportProvider.PARAM_INPUT);
+			ParametersUtil.addPartCode(ctx, input, BulkDataImportProvider.PARAM_INPUT_TYPE, theResourceTypes.get(i));
 			String nextUrl = theBaseUrl + "/download?index=" + theIndexes.get(i);
-			ParametersUtil.addPartUrl(ctx, input, BulkImportProvider.PARAM_INPUT_URL, nextUrl);
+			ParametersUtil.addPartUrl(ctx, input, BulkDataImportProvider.PARAM_INPUT_URL, nextUrl);
 		}
 
 		return retVal;

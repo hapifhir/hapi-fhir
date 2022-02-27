@@ -23,7 +23,6 @@ package ca.uhn.fhir.batch2.model;
 import ca.uhn.fhir.jpa.util.JsonDateDeserializer;
 import ca.uhn.fhir.jpa.util.JsonDateSerializer;
 import ca.uhn.fhir.model.api.IModelJson;
-import ca.uhn.fhir.util.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -118,8 +117,9 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		return myErrorCount;
 	}
 
-	public void setErrorCount(int theErrorCount) {
+	public JobInstance setErrorCount(int theErrorCount) {
 		myErrorCount = theErrorCount;
+		return this;
 	}
 
 	public String getEstimatedTimeRemaining() {
@@ -142,8 +142,9 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		return myStatus;
 	}
 
-	public void setStatus(StatusEnum theStatus) {
+	public JobInstance setStatus(StatusEnum theStatus) {
 		myStatus = theStatus;
+		return this;
 	}
 
 	public int getJobDefinitionVersion() {
@@ -166,16 +167,18 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		return myStartTime;
 	}
 
-	public void setStartTime(Date theStartTime) {
+	public JobInstance setStartTime(Date theStartTime) {
 		myStartTime = theStartTime;
+		return this;
 	}
 
 	public Date getEndTime() {
 		return myEndTime;
 	}
 
-	public void setEndTime(Date theEndTime) {
+	public JobInstance setEndTime(Date theEndTime) {
 		myEndTime = theEndTime;
+		return this;
 	}
 
 	public Integer getCombinedRecordsProcessed() {
@@ -198,8 +201,9 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		return myCreateTime;
 	}
 
-	public void setCreateTime(Date theCreateTime) {
+	public JobInstance setCreateTime(Date theCreateTime) {
 		myCreateTime = theCreateTime;
+		return this;
 	}
 
 	public Integer getTotalElapsedMillis() {
@@ -222,8 +226,9 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		return myErrorMessage;
 	}
 
-	public void setErrorMessage(String theErrorMessage) {
+	public JobInstance setErrorMessage(String theErrorMessage) {
 		myErrorMessage = theErrorMessage;
+		return this;
 	}
 
 	public boolean isCancelled() {

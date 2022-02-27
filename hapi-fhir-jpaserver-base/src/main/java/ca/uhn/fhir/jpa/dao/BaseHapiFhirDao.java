@@ -193,7 +193,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	// total attempts to do a tag transaction
 	private static final int TOTAL_TAG_READ_ATTEMPTS = 10;
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseHapiFhirDao.class);
-	private static final Map<FhirVersionEnum, FhirContext> ourRetrievalContexts = new HashMap<>();
 	private static boolean ourValidationDisabledForUnitTest;
 	private static boolean ourDisableIncrementOnUpdateForUnitTest = false;
 
@@ -390,14 +389,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	public FhirContext getContext(FhirVersionEnum theVersion) {
 		Validate.notNull(theVersion, "theVersion must not be null");
-		synchronized (ourRetrievalContexts) {
-			FhirContext retVal = ourRetrievalContexts.get(theVersion);
-			if (retVal == null) {
-				retVal = new FhirContext(theVersion);
-				ourRetrievalContexts.put(theVersion, retVal);
-			}
-			return retVal;
+		if (theVersion == myFhirContext.getVersion().getVersion()) {
+			return myFhirContext;
 		}
+		return FhirContext.forCached(theVersion);
 	}
 
 	/**

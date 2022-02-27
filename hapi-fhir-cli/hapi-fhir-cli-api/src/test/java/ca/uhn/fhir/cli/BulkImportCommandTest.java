@@ -2,7 +2,7 @@ package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.imprt.BulkImportJobParameters;
-import ca.uhn.fhir.batch2.jobs.imprt.BulkImportProvider;
+import ca.uhn.fhir.batch2.jobs.imprt.BulkDataImportProvider;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
@@ -53,7 +53,7 @@ public class BulkImportCommandTest {
 	public HttpClientExtension myHttpClientExtension = new HttpClientExtension();
 	@Mock
 	private IJobCoordinator myJobCoordinator;
-	private final BulkImportProvider myProvider = new BulkImportProvider();
+	private final BulkDataImportProvider myProvider = new BulkDataImportProvider();
 	private final FhirContext myCtx = FhirContext.forR4Cached();
 	@RegisterExtension
 	public RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(myCtx, myProvider)
