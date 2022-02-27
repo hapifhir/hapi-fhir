@@ -2,7 +2,7 @@ package ca.uhn.fhir.batch2.jobs.config;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * hapi-fhir-storage-batch2-jobs
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
