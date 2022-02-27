@@ -97,10 +97,10 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 	public String startInstance(JobInstanceStartRequest theStartRequest) {
 		JobDefinition jobDefinition = myJobDefinitionRegistry
 			.getLatestJobDefinition(theStartRequest.getJobDefinitionId())
-			.orElseThrow(() -> new IllegalArgumentException(Msg.code(2037) + "Unknown job definition ID: " + theStartRequest.getJobDefinitionId()));
+			.orElseThrow(() -> new IllegalArgumentException(Msg.code(2063) + "Unknown job definition ID: " + theStartRequest.getJobDefinitionId()));
 
 		if (isBlank(theStartRequest.getParameters())) {
-			throw new InvalidRequestException(Msg.code(2038) + "No parameters supplied");
+			throw new InvalidRequestException(Msg.code(2065) + "No parameters supplied");
 		}
 
 		String firstStepId = jobDefinition.getSteps().get(0).getStepId();
