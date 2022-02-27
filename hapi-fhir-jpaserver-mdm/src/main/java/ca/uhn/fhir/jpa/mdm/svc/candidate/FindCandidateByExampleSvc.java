@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
@@ -43,11 +43,10 @@ import java.util.stream.Collectors;
 @Service
 public class FindCandidateByExampleSvc extends BaseCandidateFinder {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
-
+	@Autowired
+	IJpaIdHelperService myIdHelperService;
 	@Autowired
 	private FhirContext myFhirContext;
-	@Autowired
-	IdHelperService myIdHelperService;
 	@Autowired
 	private MdmLinkDaoSvc myMdmLinkDaoSvc;
 	@Autowired

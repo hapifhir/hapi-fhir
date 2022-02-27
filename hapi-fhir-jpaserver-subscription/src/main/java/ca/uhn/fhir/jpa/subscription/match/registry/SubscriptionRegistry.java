@@ -67,11 +67,11 @@ public class SubscriptionRegistry {
 		super();
 	}
 
-	public ActiveSubscription get(String theIdPart) {
+	public synchronized ActiveSubscription get(String theIdPart) {
 		return myActiveSubscriptionCache.get(theIdPart);
 	}
 
-	public Collection<ActiveSubscription> getAll() {
+	public synchronized Collection<ActiveSubscription> getAll() {
 		return myActiveSubscriptionCache.getAll();
 	}
 
@@ -87,9 +87,6 @@ public class SubscriptionRegistry {
 	 *
 	 * Returns the configuration, or null, if no retry (or a bad retry value)
 	 * is specified.
-	 *
-	 * @param theSubscription
-	 * @return
 	 */
 	private ChannelRetryConfiguration getRetryConfigurationFromSubscriptionExtensions(CanonicalSubscription theSubscription) {
 		ChannelRetryConfiguration configuration = new ChannelRetryConfiguration();
@@ -135,7 +132,7 @@ public class SubscriptionRegistry {
 		myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED, params);
 	}
 
-	public void unregisterSubscriptionIfRegistered(String theSubscriptionId) {
+	public synchronized void unregisterSubscriptionIfRegistered(String theSubscriptionId) {
 		Validate.notNull(theSubscriptionId);
 
 		ActiveSubscription activeSubscription = myActiveSubscriptionCache.remove(theSubscriptionId);
@@ -150,14 +147,14 @@ public class SubscriptionRegistry {
 	}
 
 	@PreDestroy
-	public void unregisterAllSubscriptions() {
+	public synchronized void unregisterAllSubscriptions() {
 		// Once to set flag
 		unregisterAllSubscriptionsNotInCollection(Collections.emptyList());
 		// Twice to remove
 		unregisterAllSubscriptionsNotInCollection(Collections.emptyList());
 	}
 
-	void unregisterAllSubscriptionsNotInCollection(Collection<String> theAllIds) {
+	synchronized void unregisterAllSubscriptionsNotInCollection(Collection<String> theAllIds) {
 
 		List<String> idsToDelete = myActiveSubscriptionCache.markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(theAllIds);
 		for (String id : idsToDelete) {

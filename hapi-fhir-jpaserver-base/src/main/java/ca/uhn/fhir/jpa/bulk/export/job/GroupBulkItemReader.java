@@ -23,12 +23,13 @@ package ca.uhn.fhir.jpa.bulk.export.job;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
@@ -76,11 +77,13 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 	private boolean myMdmEnabled;
 
 	@Autowired
-	private IdHelperService myIdHelperService;
+	private IIdHelperService myIdHelperService;
 	@Autowired
 	private IMdmLinkDao myMdmLinkDao;
 	@Autowired
 	private MdmExpansionCacheSvc myMdmExpansionCacheSvc;
+	@Autowired
+	private IJpaIdHelperService myJpaIdHelperService;
 
 	@Override
 	protected Iterator<ResourcePersistentId> getResourcePidIterator() {
@@ -117,13 +120,13 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 	private Iterator<ResourcePersistentId> getExpandedPatientIterator() {
 		List<String> members = getMembers();
 		List<IIdType> ids = members.stream().map(member -> new IdDt("Patient/" + member)).collect(Collectors.toList());
-		List<Long> pidsOrThrowException = myIdHelperService.getPidsOrThrowException(ids);
+		List<Long> pidsOrThrowException =myJpaIdHelperService.getPidsOrThrowException(ids);
 		Set<Long> patientPidsToExport = new HashSet<>(pidsOrThrowException);
 
 		if (myMdmEnabled) {
 			SystemRequestDetails srd = SystemRequestDetails.newSystemRequestAllPartitions();
 			IBaseResource group = myDaoRegistry.getResourceDao("Group").read(new IdDt(myGroupId), srd);
-			Long pidOrNull = myIdHelperService.getPidOrNull(group);
+			Long pidOrNull = myJpaIdHelperService.getPidOrNull(group);
 			List<IMdmLinkDao.MdmPidTuple> goldenPidSourcePidTuple = myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(pidOrNull, MdmMatchResultEnum.MATCH);
 			goldenPidSourcePidTuple.forEach(tuple -> {
 				patientPidsToExport.add(tuple.getGoldenPid());
@@ -199,7 +202,7 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 		Set<String> expandedIds = new HashSet<>();
 		SystemRequestDetails requestDetails = SystemRequestDetails.newSystemRequestAllPartitions();
 		IBaseResource group = myDaoRegistry.getResourceDao("Group").read(new IdDt(myGroupId), requestDetails);
-		Long pidOrNull = myIdHelperService.getPidOrNull(group);
+		Long pidOrNull = myJpaIdHelperService.getPidOrNull(group);
 
 		//Attempt to perform MDM Expansion of membership
 		if (myMdmEnabled) {

@@ -40,6 +40,7 @@ public class JpaConstants {
 	public static final String OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE = "$apply-codesystem-delta-remove";
 	/**
 	 * Operation name for the $expunge operation
+	 *
 	 * @deprecated Replace with {@link ProviderConstants#OPERATION_EXPUNGE}
 	 */
 	@Deprecated
@@ -151,6 +152,14 @@ public class JpaConstants {
 	 */
 	public static final String OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM = "$upload-external-code-system";
 	/**
+	 * Operation name for the "$import" operation
+	 */
+	public static final String OPERATION_IMPORT = "$import";
+	/**
+	 * Operation name for the "$import-poll-status" operation
+	 */
+	public static final String OPERATION_IMPORT_POLL_STATUS = "$import-poll-status";
+	/**
 	 * Operation name for the "$export" operation
 	 */
 	public static final String OPERATION_EXPORT = "$export";
@@ -158,14 +167,6 @@ public class JpaConstants {
 	 * Operation name for the "$export-poll-status" operation
 	 */
 	public static final String OPERATION_EXPORT_POLL_STATUS = "$export-poll-status";
-        /**
-         * Operation name for the "$import" operation
-         */
-        public static final String OPERATION_IMPORT = "$import";
-        /**
-         * Operation name for the "$import-poll-status" operation
-         */
-        public static final String OPERATION_IMPORT_POLL_STATUS = "$import-poll-status";
 	/**
 	 * Operation name for the "$lastn" operation
 	 */
@@ -192,26 +193,26 @@ public class JpaConstants {
 	 */
 	public static final String PARAM_EXPORT_TYPE_FILTER = "_typeFilter";
 
-        /**
-         * Parameter for the $import operation
-         */
-        public static final String PARAM_IMPORT_POLL_STATUS_JOB_ID = "_jobId";
-        /**
-         * Parameter for the $import operation
-         */
-        public static final String PARAM_IMPORT_JOB_DESCRIPTION = "_jobDescription";
-        /**
-         * Parameter for the $import operation
-         */
-        public static final String PARAM_IMPORT_PROCESSING_MODE = "_processingMode";
-        /**
-         * Parameter for the $import operation
-         */
-        public static final String PARAM_IMPORT_FILE_COUNT = "_fileCount";
-        /**
-         * Parameter for the $import operation
-         */
-        public static final String PARAM_IMPORT_BATCH_SIZE = "_batchSize";
+	/**
+	 * Parameter for the $import operation
+	 */
+	public static final String PARAM_IMPORT_POLL_STATUS_JOB_ID = "_jobId";
+	/**
+	 * Parameter for the $import operation
+	 */
+	public static final String PARAM_IMPORT_JOB_DESCRIPTION = "_jobDescription";
+	/**
+	 * Parameter for the $import operation
+	 */
+	public static final String PARAM_IMPORT_PROCESSING_MODE = "_processingMode";
+	/**
+	 * Parameter for the $import operation
+	 */
+	public static final String PARAM_IMPORT_FILE_COUNT = "_fileCount";
+	/**
+	 * Parameter for the $import operation
+	 */
+	public static final String PARAM_IMPORT_BATCH_SIZE = "_batchSize";
 
 	/**
 	 * The [id] of the group when $export is called on /Group/[id]/$export

@@ -50,7 +50,7 @@ public class HttpClientExtension implements BeforeEachCallback, AfterEachCallbac
 			.build();
 	}
 
-	public CloseableHttpResponse execute(HttpUriRequest theHttpGet) throws IOException {
-		return myClient.execute(theHttpGet);
+	public CloseableHttpResponse execute(HttpUriRequest theRequest) throws IOException {
+		return myClient.execute(theRequest);
 	}
 }
