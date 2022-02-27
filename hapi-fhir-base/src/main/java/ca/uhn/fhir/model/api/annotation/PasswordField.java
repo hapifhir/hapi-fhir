@@ -2,7 +2,7 @@ package ca.uhn.fhir.model.api.annotation;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server - Batch2 Task Processor
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
