@@ -481,12 +481,6 @@ public class JpaConfig {
 		return new BulkDataImportSvcImpl();
 	}
 
-        @Bean
-        @Lazy
-        public BulkDataImportProvider bulkDataImportProvider() {
-                return new BulkDataImportProvider();
-        }
-
 	@Bean
 	public PersistedJpaBundleProviderFactory persistedJpaBundleProviderFactory() {
 		return new PersistedJpaBundleProviderFactory();
