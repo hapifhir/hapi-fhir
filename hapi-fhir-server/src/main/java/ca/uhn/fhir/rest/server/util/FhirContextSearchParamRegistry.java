@@ -79,7 +79,6 @@ public class FhirContextSearchParamRegistry implements ISearchParamRegistry {
 		myExtraSearchParams.add(theSearchParam);
 	}
 
-	// FIXME: adjust these numbers
 	@Override
 	public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, Set<String> theParamNames) {
 		throw new UnsupportedOperationException(Msg.code(2039));
