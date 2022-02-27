@@ -21,7 +21,6 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.util.FhirTerser;
-import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.ReflectionUtil;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.*;
@@ -134,11 +133,8 @@ public class OperationParameter implements IParameter {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
-		if (getContext().getVersion().getVersion().isRi()) {
-			if (IDatatype.class.isAssignableFrom(theParameterType)) {
-				throw new ConfigurationException(Msg.code(360) + "Incorrect use of type " + theParameterType.getSimpleName() + " as parameter type for method when context is for version " + getContext().getVersion().getVersion().name() + " in method: " + theMethod.toString());
-			}
-		}
+		FhirContext context = getContext();
+		validateTypeIsAppropriateVersionForContext(theMethod, theParameterType, context, "parameter");
 
 		myParameterType = theParameterType;
 		if (theInnerCollectionType != null) {
@@ -208,6 +204,23 @@ public class OperationParameter implements IParameter {
 
 		}
 
+	}
+
+	public static void validateTypeIsAppropriateVersionForContext(Method theMethod, Class<?> theParameterType, FhirContext theContext, String theUseDescription) {
+		if (theParameterType != null) {
+			if (theParameterType.isInterface()) {
+				// TODO: we could probably be a bit more nuanced here but things like
+				// IBaseResource are often used and they aren't version specific
+				return;
+			}
+
+			FhirVersionEnum elementVersion = FhirVersionEnum.determineVersionForType(theParameterType);
+			if (elementVersion != null) {
+				if (elementVersion != theContext.getVersion().getVersion()) {
+					throw new ConfigurationException(Msg.code(360) + "Incorrect use of type " + theParameterType.getSimpleName() + " as " + theUseDescription + " type for method when theContext is for version " + theContext.getVersion().getVersion().name() + " in method: " + theMethod.toString());
+				}
+			}
+		}
 	}
 
 	public OperationParameter setConverter(IOperationParamConverter theConverter) {

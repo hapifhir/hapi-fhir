@@ -110,6 +110,7 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 		Patient patientFromTarget = (Patient) getGoldenResourceFromTargetResource(patient2);
 		assertThat(patientFromTarget.getIdentifier(), hasSize(5));
 
+		ourLog.info("About to update patient...");
 		updatePatientAndUpdateLinks(patient2);
 		assertLinksMatchResult(MATCH, MATCH);
 		assertLinksCreatedNewResource(true, false);

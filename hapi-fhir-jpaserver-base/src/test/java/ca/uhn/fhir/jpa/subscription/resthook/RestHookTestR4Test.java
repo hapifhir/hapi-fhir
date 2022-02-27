@@ -304,6 +304,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		createSubscription(criteria2, payload);
 		waitForActivatedSubscriptionCount(2);
 
+		ourLog.info("Sending an Observation");
 		Observation obs = sendObservation(code, "SNOMED-CT");
 
 		// Should see 1 subscription notification
@@ -313,6 +314,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
 
 		// Send a meta-add
+		ourLog.info("Sending a meta-add");
 		obs.setId(obs.getIdElement().toUnqualifiedVersionless());
 		myClient.meta().add().onResource(obs.getIdElement()).meta(new Meta().addTag("http://blah", "blah", null)).execute();
 
@@ -509,8 +511,8 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		assertEquals(0, ourObservationProvider.getCountCreate());
 		ourObservationProvider.waitForUpdateCount(2);
 
-		Observation observation1 = ourObservationProvider.getResourceUpdates().get(0);
-		Observation observation2 = ourObservationProvider.getResourceUpdates().get(1);
+		Observation observation1 = ourObservationProvider.getResourceUpdates().stream().filter(t->t.getIdElement().getVersionIdPart().equals("1")).findFirst().orElseThrow(()->new IllegalArgumentException());
+		Observation observation2 = ourObservationProvider.getResourceUpdates().stream().filter(t->t.getIdElement().getVersionIdPart().equals("2")).findFirst().orElseThrow(()->new IllegalArgumentException());
 
 		assertEquals("1", observation1.getIdElement().getVersionIdPart());
 		assertNull(observation1.getNoteFirstRep().getText());

@@ -52,8 +52,6 @@ public class MdmEventIT extends BaseMdmR4Test {
 	@RegisterExtension
 	@Autowired
 	public MdmHelperR4 myMdmHelper;
-	@Autowired
-	private IdHelperService myIdHelperService;
 
 	@Test
 	public void testDuplicateLinkChangeEvent() throws InterruptedException {

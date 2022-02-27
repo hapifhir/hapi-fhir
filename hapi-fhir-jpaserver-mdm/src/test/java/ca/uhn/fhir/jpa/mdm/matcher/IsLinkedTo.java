@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.matcher;
 
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -12,21 +12,20 @@ import java.util.stream.Collectors;
 /**
  * A Matcher which allows us to check that a target patient/practitioner at a given link level.
  * is linked to a set of patients/practitioners via a golden resource.
- *
  */
 public class IsLinkedTo extends BaseGoldenResourceMatcher {
 
 	private List<Long> baseResourceGoldenResourcePids;
 	private Long incomingResourceGoldenResourcePid;
 
-	protected IsLinkedTo(IdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
+	protected IsLinkedTo(IJpaIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
 		super(theIdHelperService, theMdmLinkDaoSvc, theBaseResource);
 	}
 
 
 	@Override
 	protected boolean matchesSafely(IAnyResource theIncomingResource) {
-		incomingResourceGoldenResourcePid =  getMatchedResourcePidFromResource(theIncomingResource);
+		incomingResourceGoldenResourcePid = getMatchedResourcePidFromResource(theIncomingResource);
 
 		//OK, lets grab all the golden resource pids of the resources passed in via the constructor.
 		baseResourceGoldenResourcePids = myBaseResources.stream()
@@ -42,7 +41,7 @@ public class IsLinkedTo extends BaseGoldenResourceMatcher {
 	public void describeTo(Description theDescription) {
 	}
 
-	public static Matcher<IAnyResource> linkedTo(IdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
+	public static Matcher<IAnyResource> linkedTo(IJpaIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
 		return new IsLinkedTo(theIdHelperService, theMdmLinkDaoSvc, theBaseResource);
 	}
 }

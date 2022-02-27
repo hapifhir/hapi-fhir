@@ -157,6 +157,10 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 			if (nextActiveSubscription.getCriteria().getType() == SubscriptionCriteriaParser.TypeEnum.SEARCH_EXPRESSION) {
 				matchResult = mySubscriptionMatcher.match(nextActiveSubscription.getSubscription(), theMsg);
 				if (!matchResult.matched()) {
+					ourLog.trace("Subscription {} was not matched by resource {} {}",
+						nextActiveSubscription.getId(),
+						resourceId.toUnqualifiedVersionless().getValue(),
+						matchResult.isInMemory() ? "in-memory" : "by querying the repository");
 					continue;
 				}
 				ourLog.debug("Subscription {} was matched by resource {} {}",
@@ -164,6 +168,9 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 					resourceId.toUnqualifiedVersionless().getValue(),
 					matchResult.isInMemory() ? "in-memory" : "by querying the repository");
 			} else {
+				ourLog.trace("Subscription {} was not matched by resource {} - No search expression",
+					nextActiveSubscription.getId(),
+					resourceId.toUnqualifiedVersionless().getValue());
 				matchResult = InMemoryMatchResult.successfulMatch();
 				matchResult.setInMemory(true);
 			}
@@ -247,6 +254,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 		ourLog.trace("Checking subscription {} for {} with criteria {}", subscriptionId, resourceType, criteria);
 
 		if (criteria == null) {
+			ourLog.trace("Subscription {} has no criteria - Not matching", subscriptionId);
 			return false;
 		}
 
@@ -254,9 +262,13 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 			default:
 			case SEARCH_EXPRESSION:
 			case MULTITYPE_EXPRESSION:
-				return criteria.getApplicableResourceTypes().contains(resourceType);
+				boolean contains = criteria.getApplicableResourceTypes().contains(resourceType);
+				ourLog.trace("Subscription {} applicable resource type check: {}", subscriptionId, contains);
+				return contains;
 			case STARTYPE_EXPRESSION:
-				return !resourceType.equals("Subscription");
+				boolean match = !resourceType.equals("Subscription");
+				ourLog.trace("Subscription {} start resource type check: {}", subscriptionId, match);
+				return match;
 		}
 
 	}

@@ -2,11 +2,11 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
 import ca.uhn.fhir.util.VersionEnum;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ArbitrarySqlTaskTest extends BaseTest {
 
+	private static final Logger ourLog = LoggerFactory.getLogger(ArbitrarySqlTaskTest.class);
 
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
@@ -43,7 +44,7 @@ public class ArbitrarySqlTaskTest extends BaseTest {
 			Boolean present = (Boolean) t.get("SP_PRESENT");
 			String resType = (String) t.get("RES_TYPE");
 			String paramName = (String) t.get("PARAM_NAME");
-			Long hash = SearchParamPresent.calculateHashPresence(new PartitionSettings(), RequestPartitionId.defaultPartition(), resType, paramName, present);
+			Long hash = (long)((paramName + resType + present).hashCode()); // Note: not the real hash algorithm
 			task.executeSql("HFJ_RES_PARAM_PRESENT", "update HFJ_RES_PARAM_PRESENT set HASH_PRESENT = ? where PID = ?", hash, pid);
 		});
 
@@ -54,12 +55,11 @@ public class ArbitrarySqlTaskTest extends BaseTest {
 		List<Map<String, Object>> rows = executeQuery("select * from HFJ_RES_PARAM_PRESENT order by PID asc");
 		assertEquals(2, rows.size());
 		assertEquals(100L, rows.get(0).get("PID"));
-		assertEquals(-1100208805056022671L, rows.get(0).get("HASH_PRESENT"));
+		assertEquals(-844694102L, rows.get(0).get("HASH_PRESENT"));
 		assertEquals(101L, rows.get(1).get("PID"));
-		assertEquals(-756348509333838170L, rows.get(1).get("HASH_PRESENT"));
+		assertEquals(1197628431L, rows.get(1).get("HASH_PRESENT"));
 
 	}
-
 
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
@@ -110,6 +110,7 @@ public class ArbitrarySqlTaskTest extends BaseTest {
 	@MethodSource("data")
 	public void testArbitrarySql(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
 		before(theTestDatabaseDetails);
+		ourLog.info("Starting testArbitrarySql for {}", theTestDatabaseDetails.get().getDriverType());
 
 		executeSql("create table TEST_UPDATE_TASK (PID bigint not null, RES_TYPE varchar(255), PARAM_NAME varchar(255))");
 		executeSql("insert into TEST_UPDATE_TASK (PID, RES_TYPE, PARAM_NAME) values (1, 'Patient', 'identifier')");
@@ -125,7 +126,9 @@ public class ArbitrarySqlTaskTest extends BaseTest {
 			.executeRawSql("1", getDriverType(), "delete from TEST_UPDATE_TASK where RES_TYPE = 'Patient'")
 			.executeRawSql("2", getDriverType(), "delete from TEST_UPDATE_TASK where RES_TYPE = 'Encounter'");
 
-		getMigrator().addTasks(migrator.getTasks(VersionEnum.V3_3_0, VersionEnum.V3_6_0));
+		List<BaseTask> tasks = migrator.getTasks(VersionEnum.V3_3_0, VersionEnum.V3_6_0);
+		ourLog.info("Have tasks: {}", tasks);
+		getMigrator().addTasks(tasks);
 		getMigrator().migrate();
 
 		rows = executeQuery("select * from TEST_UPDATE_TASK");

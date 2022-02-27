@@ -2,6 +2,7 @@
 package ca.uhn.fhir.jpa.subscription;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jetty.websocket.api.Session;
@@ -17,7 +18,7 @@ public class SocketImplementation {
 	private String myCriteria;
 	protected String myError;
 	protected boolean myGotBound;
-	private List<String> myMessages = new ArrayList<String>();
+	private List<String> myMessages = Collections.synchronizedList(new ArrayList<>());
 	protected int myPingCount;
 	protected String mySubsId;
 	private Session session;
