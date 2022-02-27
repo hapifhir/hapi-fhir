@@ -1,6 +1,6 @@
 package ca.uhn.fhir.batch2.impl;
 
-import ca.uhn.fhir.batch2.api.PasswordField;
+import ca.uhn.fhir.model.api.annotation.PasswordField;
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.validator.constraints.Length;

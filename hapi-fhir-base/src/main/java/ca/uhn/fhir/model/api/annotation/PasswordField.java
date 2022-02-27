@@ -1,4 +1,4 @@
-package ca.uhn.fhir.batch2.api;
+package ca.uhn.fhir.model.api.annotation;
 
 /*-
  * #%L
@@ -27,9 +27,13 @@ import java.lang.annotation.Target;
 
 
 /**
- * This annotation should be added to any job parameters model fields
- * that contain a password or other credentials. Data in such a field will
- * be available to step workers, but will not be exposed to outside users/clients.
+ * This annotation should be added to any {@link ca.uhn.fhir.model.api.IModelJson}
+ * model fields
+ * that contain a password or other credentials. Data in such a field should not be
+ * serialized back to users.
+ *
+ * Note that there is not yet any global automatic processing for this annotation.
+ * Perhaps in the future.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
