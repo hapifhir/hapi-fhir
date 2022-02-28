@@ -32,6 +32,8 @@ public class HibernateSearchIndexWriter {
 	public static final String IDX_STRING_NORMALIZED = "norm";
 	public static final String IDX_STRING_EXACT = "exact";
 	public static final String IDX_STRING_TEXT = "text";
+	public static final String NESTED_SEARCH_PARAM_ROOT = "nsp";
+	public static final String SEARCH_PARAM_ROOT = "sp";
 	final HibernateSearchElementCache myNodeCache;
 	final FhirContext myFhirContext;
 
@@ -41,7 +43,7 @@ public class HibernateSearchIndexWriter {
 	}
 
 	public DocumentElement getSearchParamIndexNode(String theSearchParamName, String theIndexType) {
-		return myNodeCache.getObjectElement("sp", theSearchParamName, theIndexType);
+		return myNodeCache.getObjectElement(SEARCH_PARAM_ROOT, theSearchParamName, theIndexType);
 
 	}
 
@@ -59,7 +61,7 @@ public class HibernateSearchIndexWriter {
 	}
 
 	public void writeTokenIndex(String theSearchParam, IBaseCoding theValue) {
-		DocumentElement nestedRoot = myNodeCache.getObjectElement("nsp");
+		DocumentElement nestedRoot = myNodeCache.getObjectElement(NESTED_SEARCH_PARAM_ROOT);
 		DocumentElement nestedSpNode = nestedRoot.addObject(theSearchParam);
 		DocumentElement nestedTokenNode = nestedSpNode.addObject("token");
 		nestedTokenNode.addValue("code", theValue.getCode());

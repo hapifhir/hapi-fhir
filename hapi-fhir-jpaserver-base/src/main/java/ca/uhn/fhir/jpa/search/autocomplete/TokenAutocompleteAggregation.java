@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_TEXT;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.NESTED_SEARCH_PARAM_ROOT;
 
 /**
  * Compose the autocomplete aggregation, and parse the results.
@@ -51,7 +52,7 @@ class TokenAutocompleteAggregation {
 	static final JsonObject AGGREGATION_TEMPLATE =
 		new Gson().fromJson("" +
 			"         {" +
-			"            \"nested\": { \"path\": \"nsp.code\" }," +
+			"            \"nested\": { \"path\": \"nsp.PLACEHOLDER\" }," +
 			"            \"aggs\": {" +
 			"                \"search\": {" +
 			"                    \"filter\": {" +
@@ -117,9 +118,9 @@ class TokenAutocompleteAggregation {
 		if (StringUtils.isEmpty(theSearchText)) {
 			return RawElasticJsonBuilder.makeMatchAllPredicate();
 		} else if ("text".equalsIgnoreCase(theSearchModifier)) {
-			return RawElasticJsonBuilder.makeMatchBoolPrefixPredicate("nsp." + mySpName + ".string." + IDX_STRING_TEXT, theSearchText);
+			return RawElasticJsonBuilder.makeMatchBoolPrefixPredicate(NESTED_SEARCH_PARAM_ROOT + "." + mySpName + ".string." + IDX_STRING_TEXT, theSearchText);
 		} else {
-			return RawElasticJsonBuilder.makeWildcardPredicate("nsp." + mySpName + ".token.code", theSearchText + "*");
+			return RawElasticJsonBuilder.makeWildcardPredicate(NESTED_SEARCH_PARAM_ROOT + "." + mySpName + ".token.code", theSearchText + "*");
 		}
 	}
 
@@ -132,10 +133,12 @@ class TokenAutocompleteAggregation {
 		// clone and modify the template with the actual field names.
 		JsonObject result = AGGREGATION_TEMPLATE.deepCopy();
 		DocumentContext documentContext = parseContext.parse(result);
+		String nestedSearchParamPath = NESTED_SEARCH_PARAM_ROOT + "." + mySpName;
+		documentContext.set("nested.path", nestedSearchParamPath);
 		documentContext.set("aggs.search.filter.bool.must[0]", mySearch);
-		documentContext.set("aggs.search.aggs.group_by_token.terms.field", "nsp." + mySpName + ".token" + ".code-system");
+		documentContext.set("aggs.search.aggs.group_by_token.terms.field", NESTED_SEARCH_PARAM_ROOT + "." + mySpName + ".token" + ".code-system");
 		documentContext.set("aggs.search.aggs.group_by_token.terms.size", myCount);
-		documentContext.set("aggs.search.aggs.group_by_token.aggs.top_tags_hits.top_hits._source.includes[0]","nsp." + mySpName);
+		documentContext.set("aggs.search.aggs.group_by_token.aggs.top_tags_hits.top_hits._source.includes[0]", nestedSearchParamPath);
 		return result;
 	}
 

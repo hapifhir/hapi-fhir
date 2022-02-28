@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.dao.search;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import org.hibernate.search.engine.search.aggregation.AggregationKey;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -31,13 +30,15 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.SEARCH_PARAM_ROOT;
+
 /**
  * Builds lastN aggregation, and parse the results
  */
 public class LastNAggregation {
-	static final String SP_SUBJECT = "sp.subject.reference.value";
-	private static final String SP_CODE_TOKEN_CODE_AND_SYSTEM = "sp.code.token.code-system";
-	private static final String SP_DATE_DT_UPPER = "sp.date.dt.upper";
+	static final String SP_SUBJECT = SEARCH_PARAM_ROOT + ".subject.reference.value";
+	private static final String SP_CODE_TOKEN_CODE_AND_SYSTEM = SEARCH_PARAM_ROOT + ".code.token.code-system";
+	private static final String SP_DATE_DT_UPPER = SEARCH_PARAM_ROOT + ".date.dt.upper";
 	private static final String GROUP_BY_CODE_SYSTEM_SUB_AGGREGATION = "group_by_code_system";
 	private static final String MOST_RECENT_EFFECTIVE_SUB_AGGREGATION = "most_recent_effective";
 

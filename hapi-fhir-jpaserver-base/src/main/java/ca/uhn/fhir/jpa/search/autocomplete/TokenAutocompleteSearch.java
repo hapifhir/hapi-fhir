@@ -56,28 +56,26 @@ class TokenAutocompleteSearch {
 
 
 	/**
-	 * Search for tokens indexed by theSPName on theResourceType matching  theSearchText.
-	 * @param theResourceType The resource type (e.g. Observation)
+	 * Search for tokens indexed by theSPName on theResourceName matching  theSearchText.
+	 * @param theResourceName The resource type (e.g. Observation)
 	 * @param theSPName The search param code (e.g. combo-code)
 	 * @param theSearchText The search test (e.g. "bloo")
 	 * @return A collection of Coding elements
 	 */
 	@Nonnull
-	public List<TokenAutocompleteHit> search(String theResourceType, String theSPName, String theSearchText, String theSearchModifier, int theCount) {
-
-		ourLog.debug("search: {}?{}:{}={}", theResourceType,theSPName, theSearchModifier, theSearchText);
+	public List<TokenAutocompleteHit> search(String theResourceName, String theSPName, String theSearchText, String theSearchModifier, int theCount) {
 
 		TokenAutocompleteAggregation tokenAutocompleteAggregation =
 			new TokenAutocompleteAggregation(theSPName, theCount, theSearchText, theSearchModifier);
 
 		// compose the query json
 		SearchQueryOptionsStep<?, ?, SearchLoadingOptionsStep, ?, ?> query = mySession.search(ResourceTable.class)
-			.where(f -> f.bool(b -> {
-				ExtendedLuceneClauseBuilder clauseBuilder = new ExtendedLuceneClauseBuilder(myFhirContext, b, f);
+			.where(predFactory -> predFactory.bool(boolBuilder -> {
+				ExtendedLuceneClauseBuilder clauseBuilder = new ExtendedLuceneClauseBuilder(myFhirContext, boolBuilder, predFactory);
 
 				// we apply resource-level predicates here, at the top level
-				if (isNotBlank(theResourceType)) {
-					clauseBuilder.addResourceTypeClause(theResourceType);
+				if (isNotBlank(theResourceName)) {
+					clauseBuilder.addResourceTypeClause(theResourceName);
 				}
 			}))
 			.aggregation(AGGREGATION_KEY, buildAggregation(tokenAutocompleteAggregation));

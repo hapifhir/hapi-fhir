@@ -66,7 +66,7 @@ public class ExtendedLuceneIndexExtractor {
 			retVal.addStringIndexData(nextParam.getParamName(), nextParam.getValueExact()));
 
 		theNewParams.myTokenParams.forEach(nextParam ->
-			retVal.maybeAddTokenIndexData(nextParam.getParamName(), nextParam.getSystem(), nextParam.getValue()));
+			retVal.addTokenIndexDataIfNotPresent(nextParam.getParamName(), nextParam.getSystem(), nextParam.getValue()));
 
 		theNewParams.myDateParams.forEach(nextParam ->
 			retVal.addDateIndexData(nextParam.getParamName(), nextParam.getValueLow(), nextParam.getValueLowDateOrdinal(),
@@ -104,13 +104,13 @@ public class ExtendedLuceneIndexExtractor {
 	}
 
 	/**
-	 *
+	 * Re-extract token parameters so we can distinguish
 	 */
 	private void extractAutocompleteTokens(IBaseResource theResource, ExtendedLuceneIndexData theRetVal) {
 		// we need to re-index token params to match up display with codes.
 		myParams.values().stream()
 			.filter(p->p.getParamType() == RestSearchParameterTypeEnum.TOKEN)
-			// wipmb it would be nice to reuse TokenExtractor
+			// TODO it would be nice to reuse TokenExtractor
 			.forEach(p-> mySearchParamExtractor.extractValues(p.getPath(), theResource)
 				.stream()
 				.forEach(nextValue->indexTokenValue(theRetVal, p, nextValue)
@@ -127,7 +127,7 @@ public class ExtendedLuceneIndexExtractor {
 		case "Coding":
 			addToken_Coding(theRetVal, spName, (IBaseCoding) nextValue);
 			break;
-			// wipmb
+			// TODO share this with TokenExtractor and introduce a ITokenIndexer interface.
 		// Ignore unknown types for now.
 		// This is just for autocomplete, and we are focused on Observation.code, category, combo-code, etc.
 //					case "Identifier":
@@ -150,6 +150,5 @@ public class ExtendedLuceneIndexExtractor {
 
 	private void addToken_Coding(ExtendedLuceneIndexData theRetVal, String theSpName, IBaseCoding theNextValue) {
 		theRetVal.addTokenIndexData(theSpName, theNextValue);
-
 	}
 }

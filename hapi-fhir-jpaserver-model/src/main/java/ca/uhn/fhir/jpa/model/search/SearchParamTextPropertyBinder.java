@@ -107,9 +107,9 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 
 		// The following section is a bit ugly.  We need to enforce order and dependency or the object matches will be too big.
 		{
-			IndexSchemaObjectField spfield = indexSchemaElement.objectField("sp", ObjectStructure.FLATTENED);
+			IndexSchemaObjectField spfield = indexSchemaElement.objectField(HibernateSearchIndexWriter.SEARCH_PARAM_ROOT, ObjectStructure.FLATTENED);
 			spfield.toReference();
-			IndexSchemaObjectField nestedSpField = indexSchemaElement.objectField("nsp", ObjectStructure.FLATTENED);
+			IndexSchemaObjectField nestedSpField = indexSchemaElement.objectField(HibernateSearchIndexWriter.NESTED_SEARCH_PARAM_ROOT, ObjectStructure.FLATTENED);
 			nestedSpField.toReference();
 
 			// TODO MB: the lucene/elastic independent api is hurting a bit here.
