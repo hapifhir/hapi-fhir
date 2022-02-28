@@ -1365,7 +1365,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		output = myFhirValidator.validateWithResult(input);
 		all = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(2, all.size());
-		assertThat(all.get(0).getMessage(), containsString("Unknown code 'http://unitsofmeasure.org#Heck'"));
+		assertThat(all.get(0).getMessage(), containsString("Validation failed for 'http://unitsofmeasure.org#Heck'"));
 		assertThat(all.get(1).getMessage(), containsString("The value provided ('Heck') is not in the value set 'Body Temperature Units'"));
 
 	}
