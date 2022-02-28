@@ -129,7 +129,7 @@ public class ExtendedLuceneIndexExtractor {
 			break;
 			// wipmb
 		// Ignore unknown types for now.
-		// This is just for autocomplete, and NIH are focused on Observation.code, category, combo-code, etc.
+		// This is just for autocomplete, and we are focused on Observation.code, category, combo-code, etc.
 //					case "Identifier":
 //						mySearchParamExtractor.addToken_Identifier(myResourceTypeName, params, searchParam, value);
 //						break;
