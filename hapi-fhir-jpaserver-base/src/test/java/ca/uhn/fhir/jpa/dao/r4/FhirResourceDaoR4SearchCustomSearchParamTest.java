@@ -205,6 +205,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 
 	@Test
 	public void testReplaceInFhirPathInSearchParameterWorksAsExpected() {
+		String rawValue = "778-62-8144";
+		String strippedValue = "778628144";
+
 		SearchParameter numberParameter = new SearchParameter();
 		numberParameter.setId("stripped-ssn");
 		numberParameter.setName("SSN with no dashes");
@@ -217,22 +220,19 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		numberParameter.setExpression("Patient.identifier.where(system='http://hl7.org/fhir/sid/us-ssn' and value.matches('.*')).select(value.replace('-',''))");
 		mySearchParameterDao.update(numberParameter);
 
-		// This fires every 10 seconds
 		mySearchParamRegistry.refreshCacheIfNecessary();
 
 		Patient patient = new Patient();
-//		patient.setId("future-appointment-count-pt");
 		patient.setActive(true);
-		patient.addIdentifier().setSystem("http://hl7.org/fhir/sid/us-ssn").setValue("778-62-8144");
+		patient.addIdentifier().setSystem("http://hl7.org/fhir/sid/us-ssn").setValue(rawValue);
 		myPatientDao.create(patient);
-
 
 		IBundleProvider search;
 
-		search = myPatientDao.search(SearchParameterMap.newSynchronous("stripped-ssn", new StringParam("778628144")));
+		search = myPatientDao.search(SearchParameterMap.newSynchronous("stripped-ssn", new StringParam(strippedValue)));
 		assertEquals(1, search.size());
 
-		search = myPatientDao.search(SearchParameterMap.newSynchronous("stripped-ssn", new StringParam("778-62-8144")));
+		search = myPatientDao.search(SearchParameterMap.newSynchronous("stripped-ssn", new StringParam(rawValue)));
 		assertEquals(0, search.size());
 	}
 
