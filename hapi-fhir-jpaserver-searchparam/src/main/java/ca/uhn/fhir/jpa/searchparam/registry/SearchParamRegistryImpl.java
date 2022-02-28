@@ -278,6 +278,10 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 	@SuppressWarnings({"unchecked", "unused"})
 	public void start(ContextRefreshedEvent theEvent) {
 		myResourceChangeListenerRegistry = theEvent.getApplicationContext().getBean(IResourceChangeListenerRegistry.class);
+		registerListener();
+	}
+
+	public void registerListener() {
 		myResourceChangeListenerCache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener("SearchParameter", SearchParameterMap.newSynchronous(), this, REFRESH_INTERVAL);
 	}
 
