@@ -46,10 +46,11 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -83,9 +84,9 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 	private SearchParameterCanonicalizer mySearchParameterCanonicalizer;
 	@Autowired
 	private IInterceptorService myInterceptorBroadcaster;
-	@Autowired
-	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
 
+
+	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
 	private IResourceChangeListenerCache myResourceChangeListenerCache;
 	private volatile ReadOnlySearchParamCache myBuiltInSearchParams;
 	private volatile IPhoneticEncoder myPhoneticEncoder;
@@ -265,8 +266,18 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 		myResourceChangeListenerRegistry = theResourceChangeListenerRegistry;
 	}
 
-	@PostConstruct
-	public void registerListener() {
+
+	/**
+	 *
+	 * There is a circular reference between this class and the ResourceChangeListenerRegistry:
+	 * SearchParamRegistryImpl -> ResourceChangeListenerRegistry -> InMemoryResourceMatcher -> SearchParamRegistryImpl. Sicne we only need this once on boot-up, we delay
+	 * until ContextRefreshedEvent.
+	 *
+	 */
+	@EventListener
+	@SuppressWarnings({"unchecked", "unused"})
+	public void start(ContextRefreshedEvent theEvent) {
+		myResourceChangeListenerRegistry = theEvent.getApplicationContext().getBean(IResourceChangeListenerRegistry.class);
 		myResourceChangeListenerCache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener("SearchParameter", SearchParameterMap.newSynchronous(), this, REFRESH_INTERVAL);
 	}
 
