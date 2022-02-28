@@ -498,7 +498,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	 */
 	@Override
 	public List<IBase> extractValues(String thePaths, IBaseResource theResource) {
-		FhirContext theFhirContext = myContext;
 		List<IBase> values = new ArrayList<>();
 		if (isNotBlank(thePaths)) {
 			String[] nextPathsSplit = split(thePaths);
@@ -506,7 +505,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				List<? extends IBase> allValues;
 
 				// This path is hard to parse and isn't likely to produce anything useful anyway
-				if (theFhirContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2)) {
+				if (myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2)) {
 					if (nextPath.equals("Bundle.entry.resource(0)")) {
 						continue;
 					}
