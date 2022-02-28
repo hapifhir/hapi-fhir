@@ -42,6 +42,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.util.function.Function;
 
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -103,11 +104,7 @@ class JpaPersistedResourceValidationSupportTest {
 		@Test
 		void fetchValueSetMustUseForcedId() {
 			final String valueSetId = "string-containing-loinc";
-			ResourceNotFoundException thrown = assertThrows(
-				ResourceNotFoundException.class,
-				() -> testedClass.fetchValueSet(valueSetId));
-
-			assertTrue(thrown.getMessage().contains("Unable to find current version of ValueSet for url: " + valueSetId));
+			assertNull(testedClass.fetchValueSet(valueSetId));
 		}
 
 

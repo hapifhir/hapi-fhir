@@ -247,7 +247,7 @@ public interface IValidationSupport {
 	}
 
 	/**
-	 * Fetch the given ValueSet by URL
+	 * Fetch the given ValueSet by URL, or returns null if one can't be found for the given URL
 	 */
 	@Nullable
 	default IBaseResource fetchValueSet(String theValueSetUrl) {
