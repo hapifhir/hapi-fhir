@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 3436
+title: "A regression in HAPI FHIR 5.7.0 meant that when UnknownCodeSystemWarningValidationSupport was 
+  configured for WARNING behaviour, validating a field with an implicit code system could
+  incorrectly result in an error."
