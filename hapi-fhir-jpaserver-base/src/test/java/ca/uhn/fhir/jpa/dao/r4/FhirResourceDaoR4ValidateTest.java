@@ -36,6 +36,7 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
+import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -206,6 +207,48 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		ourLog.info(encoded);
 		assertTrue(oo.getIssueFirstRep().getDiagnostics().contains("No issues detected during validation"));
 	}
+
+	@Test
+	public void testValidateCodeInValueSet_InferredCodeSystem_WarningOnUnknown() {
+		// set to warning
+		myUnknownCodeSystemWarningValidationSupport.setNonExistentCodeSystemSeverity(IValidationSupport.IssueSeverity.WARNING);
+
+		OperationOutcome oo;
+		String encoded;
+
+		Binary binary = new Binary();
+		binary.setContentType("application/text");
+		binary.setContent("hello".getBytes(StandardCharsets.UTF_8));
+
+		// Valid code
+		oo = validateAndReturnOutcome(binary);
+		encoded = encode(oo);
+		ourLog.info(encoded);
+		assertTrue(oo.getIssueFirstRep().getDiagnostics().contains("No issues detected during validation"));
+
+	}
+
+	@Test
+	public void testValidateCodeInValueSet_InferredCodeSystem_ErrorOnUnknown() {
+		// set to warning
+		myUnknownCodeSystemWarningValidationSupport.setNonExistentCodeSystemSeverity(IValidationSupport.IssueSeverity.ERROR);
+
+		OperationOutcome oo;
+		String encoded;
+
+		Binary binary = new Binary();
+		binary.setContentType("application/text");
+		binary.setContent("hello".getBytes(StandardCharsets.UTF_8));
+
+		// Valid code
+		oo = validateAndReturnOutcome(binary);
+		encoded = encode(oo);
+		ourLog.info(encoded);
+		assertTrue(oo.getIssueFirstRep().getDiagnostics().contains("No issues detected during validation"));
+
+	}
+
+
 
 	@Test
 	public void testValidateCodeInValueSetWithUnknownCodeSystem_Error() {
