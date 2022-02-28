@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.term.api;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
+import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.TermReadSvcR4;
 import ca.uhn.fhir.jpa.term.TermReadSvcUtil;
@@ -41,7 +42,9 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NonUniqueResultException;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -232,4 +235,54 @@ class ITermReadSvcTest {
 
 	}
 
+
+	@Nested
+	public class TestGetMultipleCodeParentPids {
+
+		public static final String CODE_1 = "code-1";
+		public static final String CODE_2 = "code-2";
+		public static final String CODE_3 = "code-3";
+		public static final String CODE_4 = "code-4";
+		public static final String CODE_5 = "code-5";
+
+		@Mock TermConcept termConceptCode1;
+		@Mock TermConcept termConceptCode3;
+		@Mock TermConcept termConceptCode4;
+
+		@Test
+		public void morePropertiesThanValues() {
+			when(termConceptCode1.getCode()).thenReturn(CODE_1);
+			when(termConceptCode3.getCode()).thenReturn(CODE_3);
+			when(termConceptCode4.getCode()).thenReturn(CODE_4);
+
+			List<TermConcept> termConcepts = Lists.newArrayList(termConceptCode1, termConceptCode3, termConceptCode4);
+			List<String> values = Arrays.asList(CODE_1, CODE_2, CODE_3, CODE_4, CODE_5);
+			String msg = (String) ReflectionTestUtils.invokeMethod(
+				testedClass, "getTermConceptsFetchExceptionMsg", termConcepts, values);
+
+			assertTrue(msg.contains("No TermConcept(s) were found"));
+			assertFalse(msg.contains(CODE_1));
+			assertTrue(msg.contains(CODE_2));
+			assertFalse(msg.contains(CODE_3));
+			assertFalse(msg.contains(CODE_4));
+			assertTrue(msg.contains(CODE_5));
+		}
+
+		@Test
+		void moreValuesThanProperties() {
+			when(termConceptCode1.getCode()).thenReturn(CODE_1);
+			when(termConceptCode1.getId()).thenReturn(1L);
+			when(termConceptCode3.getCode()).thenReturn(CODE_3);
+			when(termConceptCode3.getId()).thenReturn(3L);
+
+			List<TermConcept> termConcepts = Lists.newArrayList(termConceptCode1, termConceptCode3);
+			List<String> values = Arrays.asList(CODE_3);
+			String msg = (String) ReflectionTestUtils.invokeMethod(
+				testedClass, "getTermConceptsFetchExceptionMsg", termConcepts, values);
+
+			assertTrue(msg.contains("More TermConcepts were found than indicated codes"));
+			assertFalse(msg.contains("Queried codes: [" + CODE_3 + "]"));
+			assertTrue(msg.contains("Obtained TermConcept IDs, codes: [1, code-1; 3, code-3]"));
+		}
+	}
 }

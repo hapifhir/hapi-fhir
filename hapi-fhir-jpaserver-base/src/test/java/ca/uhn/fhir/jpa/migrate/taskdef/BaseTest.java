@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -24,14 +25,13 @@ public abstract class BaseTest {
 
 	private static final String DATABASE_NAME = "DATABASE";
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseTest.class);
-	private static int ourDatabaseUrl = 0;
 	private BasicDataSource myDataSource;
 	private String myUrl;
 	private FlywayMigrator myMigrator;
 	private DriverTypeEnum.ConnectionProperties myConnectionProperties;
 
 	public static Stream<Supplier<TestDatabaseDetails>> data() {
-		ourLog.info("H2: {}", org.h2.Driver.class.toString());
+		ourLog.info("H2: {}", org.h2.Driver.class);
 
 		ArrayList<Supplier<TestDatabaseDetails>> retVal = new ArrayList<>();
 
@@ -39,7 +39,7 @@ public abstract class BaseTest {
 		retVal.add(new Supplier<TestDatabaseDetails>() {
 			@Override
 			public TestDatabaseDetails get() {
-				String url = "jdbc:h2:mem:" + DATABASE_NAME + ourDatabaseUrl++;
+				String url = "jdbc:h2:mem:" + DATABASE_NAME + UUID.randomUUID();
 				DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "SA", "SA");
 				BasicDataSource dataSource = new BasicDataSource();
 				dataSource.setUrl(url);
@@ -60,7 +60,7 @@ public abstract class BaseTest {
 		retVal.add(new Supplier<TestDatabaseDetails>() {
 			@Override
 			public TestDatabaseDetails get() {
-				String url = "jdbc:derby:memory:" + DATABASE_NAME + ourDatabaseUrl++ + ";create=true";
+				String url = "jdbc:derby:memory:" + DATABASE_NAME + UUID.randomUUID() + ";create=true";
 				DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.DERBY_EMBEDDED.newConnectionProperties(url, "SA", "SA");
 				BasicDataSource dataSource = new BasicDataSource();
 				dataSource.setUrl(url);

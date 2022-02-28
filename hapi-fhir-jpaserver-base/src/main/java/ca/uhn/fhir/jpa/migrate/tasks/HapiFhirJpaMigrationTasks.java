@@ -49,11 +49,10 @@ import java.util.stream.Collectors;
 @SuppressWarnings({"SqlNoDataSourceInspection", "SpellCheckingInspection"})
 public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
-	private final Set<FlagEnum> myFlags;
-
 	// H2, Derby, MariaDB, and MySql automatically add indexes to foreign keys
 	public static final DriverTypeEnum[] NON_AUTOMATIC_FK_INDEX_PLATFORMS = new DriverTypeEnum[] {
 		DriverTypeEnum.POSTGRES_9_4, DriverTypeEnum.ORACLE_12C, DriverTypeEnum.MSSQL_2012 };
+	private final Set<FlagEnum> myFlags;
 
 
 	/**
@@ -153,6 +152,55 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// drop obsolete
 		dateTable.dropIndexOnline("20220207.16", "IDX_SP_DATE_UPDATED");
 
+		// fix for https://github.com/hapifhir/hapi-fhir/issues/3316
+		// index must have same name that indexed FK or SchemaMigrationTest complains because H2 sets this index automatically
+
+		version.onTable("TRM_VALUESET_C_DESIGNATION")
+			.addIndex("20220223.1", "FK_TRM_VALUESET_CONCEPT_PID")
+			.unique(false)
+			.withColumns("VALUESET_CONCEPT_PID")
+			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
+
+		// Batch2 Framework
+
+		Builder.BuilderAddTableByColumns batchInstance = version.addTableByColumns("20220227.1", "BT2_JOB_INSTANCE", "ID");
+		batchInstance.addColumn("ID").nonNullable().type(ColumnTypeEnum.STRING, 100);
+		batchInstance.addColumn("CREATE_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		batchInstance.addColumn("START_TIME").nullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		batchInstance.addColumn("END_TIME").nullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		batchInstance.addColumn("DEFINITION_ID").nonNullable().type(ColumnTypeEnum.STRING, 100);
+		batchInstance.addColumn("DEFINITION_VER").nonNullable().type(ColumnTypeEnum.INT);
+		batchInstance.addColumn("STAT").nonNullable().type(ColumnTypeEnum.STRING, 20);
+		batchInstance.addColumn("JOB_CANCELLED").nonNullable().type(ColumnTypeEnum.BOOLEAN);
+		batchInstance.addColumn("PARAMS_JSON").nullable().type(ColumnTypeEnum.STRING, 2000);
+		batchInstance.addColumn("PARAMS_JSON_LOB").nullable().type(ColumnTypeEnum.CLOB);
+		batchInstance.addColumn("CMB_RECS_PROCESSED").nullable().type(ColumnTypeEnum.INT);
+		batchInstance.addColumn("CMB_RECS_PER_SEC").nullable().type(ColumnTypeEnum.DOUBLE);
+		batchInstance.addColumn("TOT_ELAPSED_MILLIS").nullable().type(ColumnTypeEnum.INT);
+		batchInstance.addColumn("WORK_CHUNKS_PURGED").nonNullable().type(ColumnTypeEnum.BOOLEAN);
+		batchInstance.addColumn("PROGRESS_PCT").nullable().type(ColumnTypeEnum.DOUBLE);
+		batchInstance.addColumn("ERROR_MSG").nullable().type(ColumnTypeEnum.STRING, 500);
+		batchInstance.addColumn("ERROR_COUNT").nullable().type(ColumnTypeEnum.INT);
+		batchInstance.addColumn("EST_REMAINING").nullable().type(ColumnTypeEnum.STRING, 100);
+		batchInstance.addIndex("20220227.2", "IDX_BT2JI_CT").unique(false).withColumns("CREATE_TIME");
+
+		Builder.BuilderAddTableByColumns batchChunk = version.addTableByColumns("20220227.3", "BT2_WORK_CHUNK", "ID");
+		batchChunk.addColumn("ID").nonNullable().type(ColumnTypeEnum.STRING, 100);
+		batchChunk.addColumn("SEQ").nonNullable().type(ColumnTypeEnum.INT);
+		batchChunk.addColumn("CREATE_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		batchChunk.addColumn("START_TIME").nullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		batchChunk.addColumn("END_TIME").nullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		batchChunk.addColumn("DEFINITION_ID").nonNullable().type(ColumnTypeEnum.STRING, 100);
+		batchChunk.addColumn("DEFINITION_VER").nonNullable().type(ColumnTypeEnum.INT);
+		batchChunk.addColumn("STAT").nonNullable().type(ColumnTypeEnum.STRING, 20);
+		batchChunk.addColumn("RECORDS_PROCESSED").nullable().type(ColumnTypeEnum.INT);
+		batchChunk.addColumn("TGT_STEP_ID").nonNullable().type(ColumnTypeEnum.STRING, 100);
+		batchChunk.addColumn("CHUNK_DATA").nullable().type(ColumnTypeEnum.CLOB);
+		batchChunk.addColumn("INSTANCE_ID").nonNullable().type(ColumnTypeEnum.STRING, 100);
+		batchChunk.addColumn("ERROR_MSG").nullable().type(ColumnTypeEnum.STRING, 500);
+		batchChunk.addColumn("ERROR_COUNT").nonNullable().type(ColumnTypeEnum.INT);
+		batchChunk.addIndex("20220227.4", "IDX_BT2WC_II_SEQ").unique(false).withColumns("INSTANCE_ID", "SEQ");
+		batchChunk.addForeignKey("20220227.5", "FK_BT2WC_INSTANCE").toColumn("INSTANCE_ID").references("BT2_JOB_INSTANCE", "ID");
 	}
 
 	/**
@@ -308,7 +356,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.migratePostgresTextClobToBinaryClob("20211003.3", "SEARCH_QUERY_STRING");
 		
 
-		
 	}
 
 	private void init540() {

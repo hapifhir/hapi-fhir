@@ -9,7 +9,6 @@ import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionActivatingSubscriber;
-
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -27,13 +26,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.List;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class SubscriptionLoaderTest {
@@ -68,6 +73,9 @@ public class SubscriptionLoaderTest {
 	@Mock
 	private IResourceChangeListenerCache mySubscriptionCache;
 
+	@Mock
+	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
+
 	@InjectMocks
 	private SubscriptionLoader mySubscriptionLoader;
 
@@ -80,11 +88,11 @@ public class SubscriptionLoaderTest {
 		myStoredLogLevel = ourLogger.getLevel();
 		ourLogger.addAppender(myAppender);
 
-		Mockito.when(myResourceChangeListenerRegistry.registerResourceResourceChangeListener(
-			Mockito.anyString(),
-			Mockito.any(SearchParameterMap.class),
-			Mockito.any(SubscriptionLoader.class),
-			Mockito.anyLong()
+		when(myResourceChangeListenerRegistry.registerResourceResourceChangeListener(
+			anyString(),
+			any(SearchParameterMap.class),
+			any(SubscriptionLoader.class),
+			anyLong()
 		)).thenReturn(mySubscriptionCache);
 
 		mySubscriptionLoader.registerListener();
@@ -109,34 +117,36 @@ public class SubscriptionLoaderTest {
 		Subscription subscription = new Subscription();
 		subscription.setId("Subscription/123");
 		subscription.setError("THIS IS AN ERROR");
-		IFhirResourceDao<Subscription> subscriptionDao = Mockito.mock(IFhirResourceDao.class);
+		IFhirResourceDao<Subscription> subscriptionDao = mock(IFhirResourceDao.class);
 
 		ourLogger.setLevel(Level.ERROR);
 
 		// when
-		Mockito.when(myDaoRegistery.getSubscriptionDao())
+		when(myDaoRegistery.getSubscriptionDao())
 				.thenReturn(subscriptionDao);
-		Mockito.when(myDaoRegistery.isResourceTypeSupported(Mockito.anyString()))
+		when(myDaoRegistery.isResourceTypeSupported(anyString()))
 				.thenReturn(true);
-		Mockito.when(subscriptionDao.search(Mockito.any(SearchParameterMap.class), Mockito.any(SystemRequestDetails.class)))
+		when(subscriptionDao.search(any(SearchParameterMap.class), any(SystemRequestDetails.class)))
 			.thenReturn(getSubscriptionList(
 				Collections.singletonList(subscription)
 			));
-		Mockito.when(mySchedulerSvc.isStopping())
+		when(mySchedulerSvc.isStopping())
 				.thenReturn(false);
 
-		Mockito.when(mySubscriptionActivatingInterceptor.activateSubscriptionIfRequired(Mockito.any(IBaseResource.class)))
+		when(mySubscriptionActivatingInterceptor.activateSubscriptionIfRequired(any(IBaseResource.class)))
 				.thenReturn(false);
 
+		when(mySubscriptionCanonicalizer.getSubscriptionStatus(any())).thenReturn(SubscriptionConstants.REQUESTED_STATUS);
+		
 		// test
 		mySubscriptionLoader.syncSubscriptions();
 
 		// verify
-		Mockito.verify(subscriptionDao)
-			.search(Mockito.any(SearchParameterMap.class), Mockito.any(SystemRequestDetails.class));
+		verify(subscriptionDao)
+			.search(any(SearchParameterMap.class), any(SystemRequestDetails.class));
 
 		ArgumentCaptor<ILoggingEvent> eventCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
-		Mockito.verify(myAppender).doAppend(eventCaptor.capture());
+		verify(myAppender).doAppend(eventCaptor.capture());
 		String actual = "Subscription "
 			+ subscription.getIdElement().getIdPart()
 			+ " could not be activated.";

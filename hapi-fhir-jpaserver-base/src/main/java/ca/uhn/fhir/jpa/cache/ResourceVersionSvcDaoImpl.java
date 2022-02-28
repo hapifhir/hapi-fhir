@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.cache;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -59,7 +60,7 @@ public class ResourceVersionSvcDaoImpl implements IResourceVersionSvc {
 	@Autowired
 	IResourceTableDao myResourceTableDao;
 	@Autowired
-	IdHelperService myIdHelperService;
+	IIdHelperService myIdHelperService;
 
 	@Override
 	@Nonnull
