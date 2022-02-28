@@ -77,7 +77,7 @@ public class ExtendedLuceneIndexData {
 	/**
 	 * Add if not already present.
 	 */
-	public void maybeAddTokenIndexData(String theSpName, String theSystem,  String theValue) {
+	public void addTokenIndexDataIfNotPresent(String theSpName, String theSystem,  String theValue) {
 		boolean isPresent = mySearchParamTokens.get(theSpName).stream()
 			.anyMatch(c -> Objects.equals(c.getSystem(), theSystem) && Objects.equals(c.getCode(), theValue));
 		if (!isPresent) {
