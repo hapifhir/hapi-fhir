@@ -14,28 +14,29 @@ class RawElasticJsonBuilderTest {
 	public void matchAll() {
 	    myJson = RawElasticJsonBuilder.makeMatchAllPredicate();
 
-		assertJson("{\"match_all\": {}}");
+		assertJson("""
+			{"match_all": {}}""");
 	}
 
 	@Test
 	public void wildcard() {
 		myJson = RawElasticJsonBuilder.makeWildcardPredicate("a.field", "pattern_text");
 
-		assertJson(
-			"{ \"wildcard\": " +
-			"   {  \"a.field\": {" +
-			"        \"value\": \"pattern_text\"" +
-			"      }}}");
+		assertJson("""
+				{ "wildcard": {  
+				   "a.field": { 
+				   	"value": "pattern_text"
+				}}}""");
 	}
 
 	@Test
 	public void matchBoolPrefix() {
 		myJson = RawElasticJsonBuilder.makeMatchBoolPrefixPredicate("a.field", "query_text");
 
-		assertJson(
-			"{ \"match_bool_prefix\" : { " +
-				"      \"a.field\" : \"query_text\" " +
-				"    }}");
+		assertJson("""
+			{ "match_bool_prefix" : {
+			  "a.field" : "query_text"
+			}}""");
 	}
 
 	private void assertJson(String expected) {
