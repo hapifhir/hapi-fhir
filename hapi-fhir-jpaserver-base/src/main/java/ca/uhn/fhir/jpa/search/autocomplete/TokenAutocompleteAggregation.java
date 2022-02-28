@@ -20,10 +20,8 @@ package ca.uhn.fhir.jpa.search.autocomplete;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneClauseBuilder;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
@@ -31,6 +29,7 @@ import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.ParseContext;
 import com.jayway.jsonpath.spi.json.GsonJsonProvider;
 import com.jayway.jsonpath.spi.mapper.GsonMappingProvider;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
 import javax.annotation.Nonnull;
@@ -38,33 +37,58 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_TEXT;
+
 /**
  * Compose the autocomplete aggregation, and parse the results.
  */
 class TokenAutocompleteAggregation {
-	static final String NESTED_AGG_NAME = "nestedTopNAgg";
 	/**
 	 * Aggregation template json.
 	 *
 	 * https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations.html
 	 */
 	static final JsonObject AGGREGATION_TEMPLATE =
-		new Gson().fromJson("{\n" +
-			"            \"terms\": {\n" +
-			"                \"field\": \"sp.TEMPLATE_DUMMY.token.code-system\",\n" +
-			"                \"size\": 30,\n" +
-			"                \"min_doc_count\": 1\n" +
-			"            },\n" +
-			"            \"aggs\": {\n" +
-			"                \"" + NESTED_AGG_NAME + "\": {\n" +
-			"                    \"top_hits\": {\n" +
-			"                        \"_source\": {\n" +
-			"                            \"includes\": [ \"sp.TEMPLATE_DUMMY\" ]\n" +
-			"                        },\n" +
-			"                        \"size\": 1\n" +
-			"                    }\n" +
-			"                }\n" +
-			"        }}", JsonObject.class);
+		new Gson().fromJson("" +
+			"         {" +
+			"            \"nested\": { \"path\": \"nsp.code\" }," +
+			"            \"aggs\": {" +
+			"                \"search\": {" +
+			"                    \"filter\": {" +
+			"                        \"bool\": {" +
+			"                            \"must\": [" +
+			"                                { \"match_bool_prefix\":" +
+			"                                  { \"nsp.PLACEHOLDER.string.text\": {" +
+			"                                      \"query\": \"Mors\"}" +
+			"                                  }" +
+			"                                }" +
+			"                            ]" +
+			"                        }" +
+			"                    }," +
+			"                    \"aggs\": {" +
+			"                        \"group_by_token\": {" +
+			"                            \"terms\": {" +
+			"                                \"field\": \"nsp.PLACEHOLDER.token.code-system\"," +
+			"                                \"size\": 30," +
+			"                                \"min_doc_count\": 1," +
+			"                                \"shard_min_doc_count\": 0," +
+			"                                \"show_term_doc_count_error\": false" +
+			"                            }," +
+			"                            \"aggs\": {" +
+			"                                \"top_tags_hits\": {" +
+			"                                    \"top_hits\": {" +
+			"                                        \"_source\": {" +
+			"                                            \"includes\": [ \"nsp.PLACEHOLDER\" ]" +
+			"                                        }," +
+			"                                        \"size\": 1" +
+			"                                    }" +
+			"                                }" +
+			"                            }" +
+			"                        }" +
+			"                    }" +
+			"                }" +
+			"            }" +
+			"        }", JsonObject.class);
 
 	static final Configuration configuration = Configuration
 		.builder()
@@ -75,12 +99,28 @@ class TokenAutocompleteAggregation {
 
 	private final String mySpName;
 	private final int myCount;
+	private final JsonObject mySearch;
 
-	public TokenAutocompleteAggregation(String theSpName, int theCount) {
+	public TokenAutocompleteAggregation(String theSpName, int theCount, String theSearchText, String theSearchModifier) {
 		Validate.notEmpty(theSpName);
 		Validate.isTrue(theCount>0, "count must be positive");
+		Validate.isTrue("text".equalsIgnoreCase(theSearchModifier) || "".equals(theSearchModifier) || theSearchModifier == null, "Unsupported search modifier " + theSearchModifier);
 		mySpName = theSpName;
 		myCount = theCount;
+		mySearch = makeSearch(theSearchText, theSearchModifier);
+	}
+
+	private JsonObject makeSearch(String theSearchText, String theSearchModifier) {
+		theSearchText = StringUtils.defaultString(theSearchText);
+		theSearchModifier = StringUtils.defaultString(theSearchModifier);
+
+		if (StringUtils.isEmpty(theSearchText)) {
+			return RawElasticJsonBuilder.makeMatchAllPredicate();
+		} else if ("text".equalsIgnoreCase(theSearchModifier)) {
+			return RawElasticJsonBuilder.makeMatchBoolPrefixPredicate("nsp." + mySpName + ".string." + IDX_STRING_TEXT, theSearchText);
+		} else {
+			return RawElasticJsonBuilder.makeWildcardPredicate("nsp." + mySpName + ".token.code", theSearchText + "*");
+		}
 	}
 
 	/**
@@ -92,9 +132,10 @@ class TokenAutocompleteAggregation {
 		// clone and modify the template with the actual field names.
 		JsonObject result = AGGREGATION_TEMPLATE.deepCopy();
 		DocumentContext documentContext = parseContext.parse(result);
-		documentContext.set("terms.field", ExtendedLuceneClauseBuilder.getTokenSystemCodeFieldPath(mySpName));
-		documentContext.set("terms.size", myCount);
-		documentContext.set("aggs." + NESTED_AGG_NAME + ".top_hits._source.includes[0]","sp." + mySpName);
+		documentContext.set("aggs.search.filter.bool.must[0]", mySearch);
+		documentContext.set("aggs.search.aggs.group_by_token.terms.field", "nsp." + mySpName + ".token" + ".code-system");
+		documentContext.set("aggs.search.aggs.group_by_token.terms.size", myCount);
+		documentContext.set("aggs.search.aggs.group_by_token.aggs.top_tags_hits.top_hits._source.includes[0]","nsp." + mySpName);
 		return result;
 	}
 
@@ -108,7 +149,11 @@ class TokenAutocompleteAggregation {
 	List<TokenAutocompleteHit> extractResults(@Nonnull JsonObject theAggregationResult) {
 		Validate.notNull(theAggregationResult);
 
-		JsonArray buckets = theAggregationResult.getAsJsonArray("buckets");
+		JsonArray buckets = theAggregationResult
+			.getAsJsonObject("search")
+			.getAsJsonObject("group_by_token")
+			.getAsJsonArray("buckets");
+
 		List<TokenAutocompleteHit> result = StreamSupport.stream(buckets.spliterator(), false)
 			.map(b-> bucketToEntry((JsonObject) b))
 			.collect(Collectors.toList());
@@ -129,16 +174,7 @@ class TokenAutocompleteAggregation {
 		String bucketKey = documentContext.read("key", String.class);
 
 		// The inner bucket has a hits array, and we only need the first.
-		JsonObject spRootNode = documentContext.read(NESTED_AGG_NAME + ".hits.hits[0]._source.sp");
-		// MB - JsonPath doesn't have placeholders, and I don't want to screw-up quoting mySpName, so read the JsonObject explicitly
-		JsonObject spNode = spRootNode.getAsJsonObject(mySpName);
-		JsonElement exactNode = spNode.get("string").getAsJsonObject().get("exact");
-		String displayText;
-		if (exactNode.isJsonArray()) {
-			displayText = exactNode.getAsJsonArray().get(0).getAsString();
-		} else {
-			displayText = exactNode.getAsString();
-		}
+		String displayText = documentContext.read("top_tags_hits.hits.hits[0]._source.string.text", String.class);
 
 		return new TokenAutocompleteHit(bucketKey,displayText);
 	}

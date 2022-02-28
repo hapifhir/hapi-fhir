@@ -167,6 +167,10 @@ public class TokenAutocompleteElasticsearchIT extends BaseJpaTest{
 		List<TokenAutocompleteHit> codes = autocompleteSearch("Observation", "code", null, null);
 		assertThat("null finds all three codes", codes, hasSize(3));
 
+		codes = autocompleteSearch("Observation", "code", null, "789");
+		assertThat("token prefix finds the matching code", codes, hasItem(matchingSystemAndCode(erythrocyte_by_volume)));
+		assertThat("token prefix finds only the matching code, not all codes on the resource", codes, contains(matchingSystemAndCode(erythrocyte_by_volume)));
+
 		codes = autocompleteSearch("Observation", "code", "text", "erythrocyte");
 		assertThat("text finds the matching code", codes, hasItem(matchingSystemAndCode(erythrocyte_by_volume)));
 		assertThat("text finds only the matching code, not all codes on the resource", codes, contains(matchingSystemAndCode(erythrocyte_by_volume)));

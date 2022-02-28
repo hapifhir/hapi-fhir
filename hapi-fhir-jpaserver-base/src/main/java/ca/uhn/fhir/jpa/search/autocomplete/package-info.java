@@ -9,9 +9,9 @@
  *
  * https://gitlab.com/simpatico.ai/cdr/-/issues/2452
  * wipmb TODO-LIST
- * wipmb - docs - no partition support
- * wipmb - link to docs
- * wipmb what if the sp isn't of type token?  do we check, or discard results without tokens?
+ * - docs - no partition support
+ * - link to docs
+ * what if the sp isn't of type token?  do we check, or discard results without tokens?
  *
  */
 package ca.uhn.fhir.jpa.search.autocomplete;
