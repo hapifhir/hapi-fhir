@@ -1643,8 +1643,13 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				.setMessage(msg);
 		}
 
+		// FIXME: remove
+		ourLog.info("All concepts: {}", myValueSetConceptDao.findAll().stream()
+			.map(t->"\n * " + t.toString())
+			.collect(joining()));
+
 		// Ok, we failed
-		List<TermValueSetConcept> outcome = myValueSetConceptDao.findByTermValueSetIdSystemOnly(Pageable.ofSize(1), valueSetResourcePid.getIdAsLong(), theSystem);
+		List<TermValueSetConcept> outcome = myValueSetConceptDao.findByTermValueSetIdSystemOnly(Pageable.ofSize(1), valueSetEntity.getId(), theSystem);
 		String append;
 		if (outcome.size() == 0) {
 			append = " - No codes in ValueSet belong to CodeSystem with URL " + theSystem;

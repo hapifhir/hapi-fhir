@@ -558,7 +558,7 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 				.execute();
 		} catch (ResourceNotFoundException e) {
 			assertEquals(404, e.getStatusCode());
-			assertEquals("HTTP 404 Not Found: HAPI-2030: Can not find ValueSet with URL: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fextensional-case-2%7C3", e.getMessage());
+			assertEquals("HTTP 404 Not Found: HAPI-2024: Unknown ValueSet: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fextensional-case-2%7C3", e.getMessage());
 		}
 	}
 
@@ -640,7 +640,7 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 				.execute();
 		} catch (ResourceNotFoundException e) {
 			assertEquals(404, e.getStatusCode());
-			assertEquals("HTTP 404 Not Found: HAPI-2030: Can not find ValueSet with URL: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fextensional-case-2%7C3", e.getMessage());
+			assertEquals("HTTP 404 Not Found: HAPI-2024: Unknown ValueSet: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fextensional-case-2%7C3", e.getMessage());
 		}
 	}
 

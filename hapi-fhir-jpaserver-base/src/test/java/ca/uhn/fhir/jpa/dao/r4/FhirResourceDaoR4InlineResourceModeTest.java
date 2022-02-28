@@ -11,6 +11,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -44,11 +46,11 @@ public class FhirResourceDaoR4InlineResourceModeTest extends BaseJpaR4Test {
 			// Version 1
 			ResourceHistoryTable entity = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(resourceId, 1);
 			assertNull(entity.getResource());
-			assertEquals("{\"resourceType\":\"Patient\",\"active\":true}", entity.getResourceTextVc());
+			assertThat(entity.getResourceTextVc(), containsString("\"active\":true"));
 			// Version 2
 			entity = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(resourceId, 2);
 			assertNull(entity.getResource());
-			assertEquals("{\"resourceType\":\"Patient\",\"active\":false}", entity.getResourceTextVc());
+			assertThat(entity.getResourceTextVc(), containsString("\"active\":false"));
 		});
 
 		patient = myPatientDao.read(new IdType("Patient/" + resourceId));
