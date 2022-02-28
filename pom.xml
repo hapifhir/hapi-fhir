@@ -851,6 +851,8 @@
         <fontawesomeVersion>5.4.1</fontawesomeVersion>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.testSource>17</maven.compiler.testSource>
+        <maven.compiler.testTarget>17</maven.compiler.testTarget>
     </properties>
 
 	<dependencyManagement>
