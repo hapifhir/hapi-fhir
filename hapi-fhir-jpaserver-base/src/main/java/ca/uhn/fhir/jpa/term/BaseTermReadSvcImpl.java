@@ -88,11 +88,13 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.gson.JsonObject;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.RegexpQuery;
 import org.apache.lucene.search.TermQuery;
@@ -144,6 +146,7 @@ import org.springframework.transaction.interceptor.NoRollbackRuleAttribute;
 import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.comparator.Comparators;
 
 import javax.annotation.Nonnull;
@@ -928,21 +931,19 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			.filter(StringUtils::isNotBlank)
 			.collect(Collectors.toList());
 
-		PredicateFinalStep expansionStep = buildExpansionPredicate(codes, predicate);
-		final PredicateFinalStep finishedQuery;
-		if (expansionStep == null) {
-			finishedQuery = step;
-		} else {
-			finishedQuery = predicate.bool().must(step).must(expansionStep);
-		}
+		Optional<PredicateFinalStep> expansionStepOpt = buildExpansionPredicate(codes, predicate);
+		final PredicateFinalStep finishedQuery = expansionStepOpt.isPresent()
+			? predicate.bool().must(step).must(expansionStepOpt.get()) : step;
 
 		/*
 		 * DM 2019-08-21 - Processing slows after any ValueSets with many codes explicitly identified. This might
 		 * be due to the dark arts that is memory management. Will monitor but not do anything about this right now.
 		 */
+
 		//BooleanQuery.setMaxClauseCount(SearchBuilder.getMaximumPageSize());
 		//TODO GGG HS looks like we can't set max clause count, but it can be set server side.
 		//BooleanQuery.setMaxClauseCount(10000);
+		// JM 2-22-02-15 - Hopefully increasing maxClauseCount should be not needed anymore
 
 		StopWatch sw = new StopWatch();
 		AtomicInteger count = new AtomicInteger(0);
@@ -1003,7 +1004,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		for (TermConcept concept : termConcepts) {
 			count.incrementAndGet();
 			countForBatch.incrementAndGet();
-			if (theAdd && expansionStep != null) {
+			if (theAdd && expansionStepOpt.isPresent()) {
 				ValueSet.ConceptReferenceComponent theIncludeConcept = getMatchedConceptIncludedInValueSet(theIncludeOrExclude, concept);
 				if (theIncludeConcept != null && isNotBlank(theIncludeConcept.getDisplay())) {
 					concept.setDisplay(theIncludeConcept.getDisplay());
@@ -1037,28 +1038,29 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	/**
 	 * Helper method which builds a predicate for the expansion
 	 */
-	private PredicateFinalStep buildExpansionPredicate(List<String> theCodes, SearchPredicateFactory thePredicate) {
-		PredicateFinalStep expansionStep;
-		/*
-		 * Include/Exclude Concepts
-		 */
-		List<Term> codes = theCodes
-			.stream()
-			.map(t -> new Term("myCode", t))
-			.collect(Collectors.toList());
+	private Optional<PredicateFinalStep> buildExpansionPredicate(List<String> theCodes, SearchPredicateFactory thePredicate) {
+		if (CollectionUtils.isEmpty(theCodes)) { return  Optional.empty(); }
 
-		if (codes.size() > 0) {
-			expansionStep = thePredicate.bool(b -> {
-				b.minimumShouldMatchNumber(1);
-				for (Term code : codes) {
-					b.should(thePredicate.match().field(code.field()).matching(code.text()));
-				}
-			});
-			return expansionStep;
-		} else {
-			return null;
+		if (theCodes.size() < BooleanQuery.getMaxClauseCount()) {
+			return Optional.of(thePredicate.simpleQueryString()
+				.field( "myCode" ).matching( String.join(" | ", theCodes)) );
 		}
+		
+		// Number of codes is larger than maxClauseCount, so we split the query in several clauses
+
+		// partition codes in lists of BooleanQuery.getMaxClauseCount() size
+		List<List<String>> listOfLists = ListUtils.partition(theCodes, BooleanQuery.getMaxClauseCount());
+
+		PredicateFinalStep step = thePredicate.bool(b -> {
+			b.minimumShouldMatchNumber(1);
+			for (List<String> codeList : listOfLists) {
+				b.should(p -> p.simpleQueryString().field("myCode").matching(String.join(" | ", codeList)));
+			}
+		});
+
+		return Optional.of(step);
 	}
+
 
 	private String buildCodeSystemUrlAndVersion(String theSystem, String theIncludeOrExcludeVersion) {
 		String codeSystemUrlAndVersion;
