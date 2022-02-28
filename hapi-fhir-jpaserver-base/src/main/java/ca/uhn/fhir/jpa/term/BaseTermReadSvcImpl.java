@@ -2277,7 +2277,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		}
 
 		// Check if someone is accidentally using a VS url where it should be a CS URL
-		if (retVal != null && retVal.getCode() == null) {
+		if (retVal != null && retVal.getCode() == null && theCodeSystem != null) {
 			if (isValueSetSupported(theValidationSupportContext, theCodeSystem)) {
 				if (!isCodeSystemSupported(theValidationSupportContext, theCodeSystem)) {
 					String newMessage = "Unable to validate code " + theCodeSystem + "#" + theCode + " - Supplied system URL is a ValueSet URL and not a CodeSystem URL, check if it is correct: " + theCodeSystem;
