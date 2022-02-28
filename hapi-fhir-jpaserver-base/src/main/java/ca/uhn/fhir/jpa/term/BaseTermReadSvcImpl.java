@@ -1642,12 +1642,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				.setCodeSystemVersion(concepts.get(0).getSystemVersion())
 				.setMessage(msg);
 		}
-
-		// FIXME: remove
-		ourLog.info("All concepts: {}", myValueSetConceptDao.findAll().stream()
-			.map(t->"\n * " + t.toString())
-			.collect(joining()));
-
+		
 		// Ok, we failed
 		List<TermValueSetConcept> outcome = myValueSetConceptDao.findByTermValueSetIdSystemOnly(Pageable.ofSize(1), valueSetEntity.getId(), theSystem);
 		String append;
