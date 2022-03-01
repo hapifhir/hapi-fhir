@@ -22,8 +22,15 @@ package ca.uhn.fhir.batch2.api;
 
 import ca.uhn.fhir.model.api.IModelJson;
 
+import javax.annotation.Nonnull;
+
 /**
- * @param <PT> The job parameterrs type datatype
+ * This interface is implemented by step workers within the Batch2 framework. It will be called
+ * 0..* times depending on the number of work chunks produced by the previous step. It will
+ * always be called once in the case of the first step. It can produce 0..* work chunks that
+ * will be processed in subsequent steps.
+ *
+ * @param <PT> The job parameters type datatype
  * @param <IT> The step input datatype
  * @param <OT> The step output datatype
  */
@@ -35,11 +42,13 @@ public interface IJobStepWorker<PT extends IModelJson, IT extends IModelJson, OT
 	 * @param theStepExecutionDetails Contains details about the individual execution
 	 * @param theDataSink             A data sink for data produced during this step. This may never
 	 *                                be used during the final step of a job.
+	 * @return Returns a {@link RunOutcome} containing details about the execution. See the javadoc for that class for details about how to populate it.
 	 * @throws JobExecutionFailedException This exception indicates an unrecoverable failure. If a
 	 *                                     step worker throws this exception, processing for the
 	 *                                     job will be aborted.
 	 */
-	RunOutcome run(StepExecutionDetails<PT, IT> theStepExecutionDetails, IJobDataSink<OT> theDataSink) throws JobExecutionFailedException;
+	@Nonnull
+	RunOutcome run(@Nonnull StepExecutionDetails<PT, IT> theStepExecutionDetails, @Nonnull IJobDataSink<OT> theDataSink) throws JobExecutionFailedException;
 
 	/**
 	 * Return type for {@link #run(StepExecutionDetails, IJobDataSink)}
@@ -48,6 +57,17 @@ public interface IJobStepWorker<PT extends IModelJson, IT extends IModelJson, OT
 
 		private final int myRecordsProcessed;
 
+		/**
+		 * Constructor
+		 *
+		 * @param theRecordsProcessed The number of records processed by this step. This number is not used for anything
+		 *                            other than calculating the total number of records processed by the job. Therefore in many
+		 *                            cases it will make sense to return a count of 0 for all steps except for the final
+		 *                            step. For example, if you have a step that fetches files and a step that saves them,
+		 *                            you might choose to only return a non-zero count indicating the number of saved files
+		 *                            (or even the number of records within those files) so that the ultimate total
+		 *                            reflects the real total.
+		 */
 		public RunOutcome(int theRecordsProcessed) {
 			myRecordsProcessed = theRecordsProcessed;
 		}

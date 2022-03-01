@@ -48,6 +48,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nonnull;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -70,8 +71,9 @@ public class ConsumeFilesStep implements ILastJobStepWorker<BulkImportJobParamet
 	@Autowired
 	private IFhirSystemDao<?, ?> mySystemDao;
 
+	@Nonnull
 	@Override
-	public RunOutcome run(StepExecutionDetails<BulkImportJobParameters, NdJsonFileJson> theStepExecutionDetails, IJobDataSink<VoidModel> theDataSink) {
+	public RunOutcome run(@Nonnull StepExecutionDetails<BulkImportJobParameters, NdJsonFileJson> theStepExecutionDetails, @Nonnull IJobDataSink<VoidModel> theDataSink) {
 
 		String ndjson = theStepExecutionDetails.getData().getNdJsonText();
 		String sourceName = theStepExecutionDetails.getData().getSourceName();

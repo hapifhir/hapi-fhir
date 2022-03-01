@@ -42,6 +42,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -53,8 +54,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class FetchFilesStep implements IFirstJobStepWorker<BulkImportJobParameters, NdJsonFileJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(FetchFilesStep.class);
 
+	@Nonnull
 	@Override
-	public RunOutcome run(StepExecutionDetails<BulkImportJobParameters, VoidModel> theStepExecutionDetails, IJobDataSink<NdJsonFileJson> theDataSink) {
+	public RunOutcome run(@Nonnull StepExecutionDetails<BulkImportJobParameters, VoidModel> theStepExecutionDetails, @Nonnull IJobDataSink<NdJsonFileJson> theDataSink) {
 
 		Integer maxBatchResourceCount = theStepExecutionDetails
 			.getParameters()
