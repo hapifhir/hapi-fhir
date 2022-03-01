@@ -111,6 +111,7 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataExportSvc);
 	}
 
+
 	void createCodeSystem() {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(CS_URL);
