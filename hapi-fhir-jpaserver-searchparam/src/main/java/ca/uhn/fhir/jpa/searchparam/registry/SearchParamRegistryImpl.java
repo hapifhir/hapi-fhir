@@ -85,9 +85,9 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 	private SearchParameterCanonicalizer mySearchParameterCanonicalizer;
 	@Autowired
 	private IInterceptorService myInterceptorBroadcaster;
-
-
+	@Autowired
 	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
+
 	private IResourceChangeListenerCache myResourceChangeListenerCache;
 	private volatile ReadOnlySearchParamCache myBuiltInSearchParams;
 	private volatile IPhoneticEncoder myPhoneticEncoder;
