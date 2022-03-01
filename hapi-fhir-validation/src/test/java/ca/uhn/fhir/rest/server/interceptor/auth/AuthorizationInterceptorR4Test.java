@@ -1116,10 +1116,64 @@ public class AuthorizationInterceptorR4Test {
 		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
 
+		// No acceptable codesystem present - Read
+		ourHitMethod = false;
+		observation = createObservation(10, "Patient/2");
+		observation
+			.getCode()
+			.addCoding()
+			.setSystem("http://blah")
+			.setCode("foo");
+		ourReturn = Collections.singletonList(observation);
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation/10");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertThat(response, containsString("Access denied by rule: Rule 1"));
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+	}
+
+	/**
+	 * Even if everything is allow, let's be safe and deny if the ValueSet can't be validated at all
+	 */
+	@Test
+	public void testCodeNotIn_DenySearch_UnableToValidateValueSet() throws IOException {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("Rule 1").read().resourcesOfType("Observation").withCodeNotInValueSet("code", "http://foo").andThen()
+					.allowAll()
+					.build();
+			}
+		});
+
+		HttpGet httpGet;
+		String response;
+		Observation observation;
+		CloseableHttpResponse status;
+
+		// Allowed code present - Read
+		ourHitMethod = false;
+		observation = createObservation(10, "Patient/2");
+		observation
+			.getCode()
+			.addCoding()
+			.setSystem("http://hl7.org/fhir/administrative-gender")
+			.setCode("male");
+		ourReturn = Collections.singletonList(observation);
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation/10");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
 	}
 
 
-	@Test
+		@Test
 	public void testCodeIn_TransactionCreate() throws IOException {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override

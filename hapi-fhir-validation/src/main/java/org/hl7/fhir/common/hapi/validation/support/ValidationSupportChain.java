@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.function.Function;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ValidationSupportChain implements IValidationSupport {
 
@@ -278,14 +279,12 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	@Override
-	public CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public CodeValidationResult validateCode(@Nonnull ValidationSupportContext theValidationSupportContext, @Nonnull ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		for (IValidationSupport next : myChain) {
-			if (isBlank(theValueSetUrl) || next.isValueSetSupported(theValidationSupportContext, theValueSetUrl)) {
-				if (theOptions.isInferSystem() || (theCodeSystem != null && next.isCodeSystemSupported(theValidationSupportContext, theCodeSystem))) {
-					CodeValidationResult retVal = next.validateCode(theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, theValueSetUrl);
-					if (retVal != null) {
-						return retVal;
-					}
+			if ((isBlank(theValueSetUrl) && next.isCodeSystemSupported(theValidationSupportContext, theCodeSystem)) || (isNotBlank(theValueSetUrl) && next.isValueSetSupported(theValidationSupportContext, theValueSetUrl))) {
+				CodeValidationResult retVal = next.validateCode(theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, theValueSetUrl);
+				if (retVal != null) {
+					return retVal;
 				}
 			}
 		}

@@ -7,8 +7,10 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -198,6 +200,39 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		assertEquals(1, search.size());
 
 		search = myPatientDao.search(SearchParameterMap.newSynchronous("future-appointment-count", new NumberParam("lt0")));
+		assertEquals(0, search.size());
+	}
+
+	@Test
+	public void testReplaceInFhirPathInSearchParameterWorksAsExpected() {
+		String rawValue = "778-62-8144";
+		String strippedValue = "778628144";
+
+		SearchParameter numberParameter = new SearchParameter();
+		numberParameter.setId("stripped-ssn");
+		numberParameter.setName("SSN with no dashes");
+		numberParameter.setCode("stripped-ssn");
+		numberParameter.setDescription("SSN with no dashes");
+		numberParameter.setUrl("http://example.com/stripped-ssn");
+		numberParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		numberParameter.addBase("Patient");
+		numberParameter.setType(Enumerations.SearchParamType.STRING);
+		numberParameter.setExpression("Patient.identifier.where(system='http://hl7.org/fhir/sid/us-ssn' and value.matches('.*')).select(value.replace('-',''))");
+		mySearchParameterDao.update(numberParameter);
+
+		mySearchParamRegistry.refreshCacheIfNecessary();
+
+		Patient patient = new Patient();
+		patient.setActive(true);
+		patient.addIdentifier().setSystem("http://hl7.org/fhir/sid/us-ssn").setValue(rawValue);
+		myPatientDao.create(patient);
+
+		IBundleProvider search;
+
+		search = myPatientDao.search(SearchParameterMap.newSynchronous("stripped-ssn", new StringParam(strippedValue)));
+		assertEquals(1, search.size());
+
+		search = myPatientDao.search(SearchParameterMap.newSynchronous("stripped-ssn", new StringParam(rawValue)));
 		assertEquals(0, search.size());
 	}
 

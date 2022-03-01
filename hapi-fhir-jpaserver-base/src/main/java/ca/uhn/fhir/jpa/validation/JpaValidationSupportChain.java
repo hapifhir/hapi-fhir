@@ -75,16 +75,17 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 
 	@PostConstruct
 	public void postConstruct() {
-		addValidationSupport(myUnknownCodeSystemWarningValidationSupport);
 		addValidationSupport(myDefaultProfileValidationSupport);
 		addValidationSupport(myJpaValidationSupport);
-		//TODO MAKE SURE THAT THIS IS BEING CAL
 		addValidationSupport(myTerminologyService);
 		addValidationSupport(new SnapshotGeneratingValidationSupport(myFhirContext));
 		addValidationSupport(new InMemoryTerminologyServerValidationSupport(myFhirContext));
 		addValidationSupport(myNpmJpaValidationSupport);
 		addValidationSupport(new CommonCodeSystemsTerminologyService(myFhirContext));
 		addValidationSupport(myConceptMappingSvc);
+
+		// This needs to be last in the chain, it was designed for that
+		addValidationSupport(myUnknownCodeSystemWarningValidationSupport);
 	}
 
 }

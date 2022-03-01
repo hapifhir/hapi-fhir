@@ -1,0 +1,7 @@
+---
+type: add
+issue: 3405
+title: "A consent service implementation that enforces search narrowing rules specified by the SearchNarrowingInterceptor 
+   has been added. This can be used to narrow results from searches in cases where this can't be done using search URL
+   manipulation. See [ResultSet Narrowing](/hapi-fhir/docs/security/search_narrowing_interceptor.html#resultset-narrowing) for 
+   more information."
