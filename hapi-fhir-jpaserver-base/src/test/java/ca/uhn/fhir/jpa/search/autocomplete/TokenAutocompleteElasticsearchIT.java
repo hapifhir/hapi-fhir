@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
+import ca.uhn.fhir.jpa.config.TestDataBuilderConfig;
 import ca.uhn.fhir.jpa.config.TestHibernateSearchAddInConfig;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
@@ -13,6 +14,7 @@ import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -35,9 +37,9 @@ import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
@@ -46,8 +48,11 @@ import static org.hamcrest.Matchers.not;
 
 @ExtendWith(SpringExtension.class)
 @RequiresDocker
-@ContextConfiguration(classes = {TestR4Config.class, TestHibernateSearchAddInConfig.Elasticsearch.class})
-public class TokenAutocompleteElasticsearchIT extends BaseJpaTest {
+@ContextConfiguration(classes = {
+	TestR4Config.class, TestHibernateSearchAddInConfig.Elasticsearch.class, TestDataBuilderConfig.class
+})
+public class TokenAutocompleteElasticsearchIT extends BaseJpaTest{
+	public static final Coding erythrocyte_by_volume = new Coding("http://loinc.org", "789-8", "Erythrocytes [#/volume] in Blood by Automated count");
 	@Autowired
 	protected PlatformTransactionManager myTxManager;
 	protected ServletRequestDetails mySrd = new ServletRequestDetails();
@@ -72,6 +77,12 @@ public class TokenAutocompleteElasticsearchIT extends BaseJpaTest {
 	IResourceReindexingSvc myResourceReindexingSvc;
 	@Autowired
 	IBulkDataExportSvc myBulkDataExportSvc;
+	@Autowired
+	ITestDataBuilder myDataBuilder;
+
+	// a few different codes
+	static final Coding mean_blood_pressure = new Coding("http://loinc.org", "8478-0", "Mean blood pressure");
+	static final Coding gram_positive_culture = new Coding("http://loinc.org", "88262-1", "Gram positive blood culture panel by Probe in Positive blood culture");
 
 	@BeforeEach
 	public void beforePurgeDatabase() {
@@ -88,14 +99,11 @@ public class TokenAutocompleteElasticsearchIT extends BaseJpaTest {
 	protected PlatformTransactionManager getTxManager() {
 		return myTxManager;
 	}
+
 	@Test
 	public void testAutocompleteByCodeDisplay() {
 
-		// a few different codes
-		Coding mean_blood_pressure = new Coding("http://loinc.org", "8478-0", "Mean blood pressure");
-		Coding gram_positive_culture = new Coding("http://loinc.org", "88262-1", "Gram positive blood culture panel by Probe in Positive blood culture");
-
-		createObservationWithCode(new Coding("http://loinc.org", "789-8", "Erythrocytes [#/volume] in Blood by Automated count"));
+		createObservationWithCode(erythrocyte_by_volume);
 		createObservationWithCode(mean_blood_pressure);
 		createObservationWithCode(mean_blood_pressure);
 		createObservationWithCode(new Coding("http://loinc.org", "788-0", "Erythrocyte distribution width [Ratio] by Automated count"));
@@ -146,6 +154,29 @@ public class TokenAutocompleteElasticsearchIT extends BaseJpaTest {
 
 	}
 
+	/**
+	 * If an observation has multiple codes, make sure searching by text only matches the right code.
+	 */
+	@Test
+	public void testAutocompleteDistinguishesMultipleCodes() {
+
+		createObservationWithCode(erythrocyte_by_volume,mean_blood_pressure,gram_positive_culture);
+		createObservationWithCode(gram_positive_culture);
+		createObservationWithCode(mean_blood_pressure);
+
+		List<TokenAutocompleteHit> codes = autocompleteSearch("Observation", "code", null, null);
+		assertThat("null finds all three codes", codes, hasSize(3));
+
+		codes = autocompleteSearch("Observation", "code", null, "789");
+		assertThat("token prefix finds the matching code", codes, hasItem(matchingSystemAndCode(erythrocyte_by_volume)));
+		assertThat("token prefix finds only the matching code, not all codes on the resource", codes, contains(matchingSystemAndCode(erythrocyte_by_volume)));
+
+		codes = autocompleteSearch("Observation", "code", "text", "erythrocyte");
+		assertThat("text finds the matching code", codes, hasItem(matchingSystemAndCode(erythrocyte_by_volume)));
+		assertThat("text finds only the matching code, not all codes on the resource", codes, contains(matchingSystemAndCode(erythrocyte_by_volume)));
+
+	}
+
 	List<TokenAutocompleteHit> autocompleteSearch(String theResourceType, String theSPName, String theModifier, String theSearchText) {
 		return new TransactionTemplate(myTxManager).execute(s -> {
 			TokenAutocompleteSearch tokenAutocompleteSearch = new TokenAutocompleteSearch(myFhirCtx, Search.session(myEntityManager));
@@ -153,9 +184,11 @@ public class TokenAutocompleteElasticsearchIT extends BaseJpaTest {
 		});
 	}
 
-	private IIdType createObservationWithCode(Coding c) {
+	private IIdType createObservationWithCode(Coding... theCodings) {
 		Observation obs1 = new Observation();
-		obs1.getCode().addCoding(c);
+		for (Coding coding : theCodings) {
+			obs1.getCode().addCoding(coding);
+		}
 		return myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
 	}
 

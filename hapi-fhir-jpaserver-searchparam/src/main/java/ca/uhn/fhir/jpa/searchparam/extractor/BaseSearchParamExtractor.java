@@ -730,7 +730,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		if ("Coding".equals(nextType)) {
 			String system = extractValueAsString(myCodingSystemValueChild, theValue);
 			String code = extractValueAsString(myCodingCodeValueChild, theValue);
-			return createTokenIndexIfNotBlank(theResourceType, theSearchParam, system, code);
+			return createTokenIndexIfNotBlank(theResourceType, system, code, theSearchParam.getName());
 		} else {
 			return null;
 		}
@@ -1079,7 +1079,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	private void createTokenIndexIfNotBlankAndAdd(String theResourceType, Set<BaseResourceIndexedSearchParam> theParams, RuntimeSearchParam theSearchParam, String theSystem, String theValue) {
-		ResourceIndexedSearchParamToken nextEntity = createTokenIndexIfNotBlank(theResourceType, theSearchParam, theSystem, theValue);
+		ResourceIndexedSearchParamToken nextEntity = createTokenIndexIfNotBlank(theResourceType, theSystem, theValue, theSearchParam.getName());
 		if (nextEntity != null) {
 			theParams.add(nextEntity);
 		}
@@ -1088,11 +1088,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	@VisibleForTesting
 	public void setPartitionSettings(PartitionSettings thePartitionSettings) {
 		myPartitionSettings = thePartitionSettings;
-	}
-
-	private ResourceIndexedSearchParamToken createTokenIndexIfNotBlank(String theResourceType, RuntimeSearchParam theSearchParam, String theSystem, String theValue) {
-		String searchParamName = theSearchParam.getName();
-		return createTokenIndexIfNotBlank(theResourceType, theSystem, theValue, searchParamName);
 	}
 
 	private ResourceIndexedSearchParamToken createTokenIndexIfNotBlank(String theResourceType, String theSystem, String theValue, String searchParamName) {
