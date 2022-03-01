@@ -86,7 +86,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 	private void init600() {
 		Builder version = forVersion(VersionEnum.V6_0_0);
-		
+
 		/**
 		 * New indexing for the core SPIDX tables.
 		 * Ensure all queries can be satisfied by the index directly,
@@ -1391,6 +1391,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.addCalculator("HASH_SYS", t -> ResourceIndexedSearchParamToken.calculateHashSystem(new PartitionSettings(), RequestPartitionId.defaultPartition(), t.getResourceType(), t.getParamName(), t.getString("SP_SYSTEM")))
 					.addCalculator("HASH_SYS_AND_VALUE", t -> ResourceIndexedSearchParamToken.calculateHashSystemAndValue(new PartitionSettings(), RequestPartitionId.defaultPartition(), t.getResourceType(), t.getParamName(), t.getString("SP_SYSTEM"), t.getString("SP_VALUE")))
 					.addCalculator("HASH_VALUE", t -> ResourceIndexedSearchParamToken.calculateHashValue(new PartitionSettings(), RequestPartitionId.defaultPartition(), t.getResourceType(), t.getParamName(), t.getString("SP_VALUE")))
+					.setDoNothing(true)
 				);
 		}
 
