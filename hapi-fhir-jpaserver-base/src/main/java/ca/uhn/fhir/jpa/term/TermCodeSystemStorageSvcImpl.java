@@ -26,7 +26,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
@@ -127,12 +126,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	private IResourceTableDao myResourceTableDao;
 
 	@Autowired
-	private IBatchJobSubmitter myJobSubmitter;
-
-	@Autowired
-	@Qualifier(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME)
-	private Job myTermCodeSystemVersionDeleteJob;
-
+	private TermConceptDaoSvc myTermConceptDaoSvc;
 
 	@Override
 	public ResourcePersistentId getValueSetResourcePid(IIdType theIdType) {
@@ -277,41 +271,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	 */
 	@Override
 	public int saveConcept(TermConcept theConcept) {
-		int retVal = 0;
-
-		/*
-		 * If the concept has an ID, we're reindexing, so there's no need to
-		 * save parent concepts first (it's way too slow to do that)
-		 */
-		if (theConcept.getId() == null) {
-			boolean needToSaveParents = false;
-			for (TermConceptParentChildLink next : theConcept.getParents()) {
-				if (next.getParent().getId() == null) {
-					needToSaveParents = true;
-				}
-			}
-			if (needToSaveParents) {
-				retVal += ensureParentsSaved(theConcept.getParents());
-			}
-		}
-
-		if (theConcept.getId() == null || theConcept.getIndexStatus() == null) {
-			retVal++;
-			theConcept.setIndexStatus(BaseHapiFhirDao.INDEX_STATUS_INDEXED);
-			theConcept.setUpdated(new Date());
-			myConceptDao.save(theConcept);
-
-			for (TermConceptProperty next : theConcept.getProperties()) {
-				myConceptPropertyDao.save(next);
-			}
-
-			for (TermConceptDesignation next : theConcept.getDesignations()) {
-				myConceptDesignationDao.save(next);
-			}
-		}
-
-		ourLog.trace("Saved {} and got PID {}", theConcept.getCode(), theConcept.getId());
-		return retVal;
+		return myTermConceptDaoSvc.saveConcept(theConcept);
 	}
 
 	@Override
