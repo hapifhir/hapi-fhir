@@ -32,10 +32,7 @@ import java.util.List;
 import java.util.Set;
 
 public interface IBulkDataExportSvc {
-	void buildExportFiles();
 
-	@Transactional(value = Transactional.TxType.NEVER)
-	void purgeExpiredFiles();
 
 	/**
 	 * Deprecated - Use {@link #submitJob(BulkDataExportOptions, Boolean, RequestDetails)} instead
@@ -52,7 +49,6 @@ public interface IBulkDataExportSvc {
 	 */
 	Set<String> getPatientCompartmentResources();
 
-	void cancelAndPurgeAllJobs();
 
 	class JobInfo {
 		private String myJobId;
