@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.search.autocomplete;
  */
 
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.annotation.Nonnull;
 
@@ -41,5 +42,13 @@ class TokenAutocompleteHit {
 	@Nonnull
 	public String getSystemCode() {
 		return mySystemCode;
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this)
+			.append("mySystemCode", mySystemCode)
+			.append("myDisplayText", myDisplayText)
+			.toString();
 	}
 }

@@ -20,8 +20,8 @@ package ca.uhn.fhir.jpa.dao.search;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.api.Constants;
@@ -46,7 +46,6 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.time.Instant;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -57,6 +56,7 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_EXACT;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_NORMALIZED;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_TEXT;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.SEARCH_PARAM_ROOT;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ExtendedLuceneClauseBuilder {
@@ -144,7 +144,7 @@ public class ExtendedLuceneClauseBuilder {
 						return myPredicateFactory.match().field(getTokenCodeFieldPath(theSearchParamName)).matching(token.getValue());
 					} else if (StringUtils.isBlank(token.getValue())) {
 						// system without value
-						return myPredicateFactory.match().field("sp." + theSearchParamName + ".token" + ".system").matching(token.getSystem());
+						return myPredicateFactory.match().field(SEARCH_PARAM_ROOT + "." + theSearchParamName + ".token" + ".system").matching(token.getSystem());
 					} else {
 						// system + value
 						return myPredicateFactory.match().field(getTokenSystemCodeFieldPath(theSearchParamName)).matching(token.getValueAsQueryToken(this.myFhirContext));
@@ -167,12 +167,12 @@ public class ExtendedLuceneClauseBuilder {
 
 	@Nonnull
 	public static String getTokenCodeFieldPath(String theSearchParamName) {
-		return "sp." + theSearchParamName + ".token" + ".code";
+		return SEARCH_PARAM_ROOT + "." + theSearchParamName + ".token" + ".code";
 	}
 
 	@Nonnull
 	public static String getTokenSystemCodeFieldPath(@Nonnull String theSearchParamName) {
-		return "sp." + theSearchParamName + ".token" + ".code-system";
+		return SEARCH_PARAM_ROOT + "." + theSearchParamName + ".token" + ".code-system";
 	}
 
 	public void addStringTextSearch(String theSearchParamName, List<List<IQueryParameterType>> stringAndOrTerms) {
@@ -190,7 +190,7 @@ public class ExtendedLuceneClauseBuilder {
 				fieldName = "myNarrativeText";
 				break;
 			default:
-				fieldName = "sp." + theSearchParamName + ".string." + IDX_STRING_TEXT;
+				fieldName = SEARCH_PARAM_ROOT + "." + theSearchParamName + ".string." + IDX_STRING_TEXT;
 				break;
 		}
 
@@ -213,7 +213,7 @@ public class ExtendedLuceneClauseBuilder {
 	}
 
 	public void addStringExactSearch(String theSearchParamName, List<List<IQueryParameterType>> theStringAndOrTerms) {
-		String fieldPath = "sp." + theSearchParamName + ".string." + IDX_STRING_EXACT;
+		String fieldPath = SEARCH_PARAM_ROOT + "." + theSearchParamName + ".string." + IDX_STRING_EXACT;
 
 		for (List<? extends IQueryParameterType> nextAnd : theStringAndOrTerms) {
 			Set<String> terms = extractOrStringParams(nextAnd);
@@ -227,7 +227,7 @@ public class ExtendedLuceneClauseBuilder {
 	}
 
 	public void addStringContainsSearch(String theSearchParamName, List<List<IQueryParameterType>> theStringAndOrTerms) {
-		String fieldPath = "sp." + theSearchParamName + ".string." + IDX_STRING_NORMALIZED;
+		String fieldPath = SEARCH_PARAM_ROOT + "." + theSearchParamName + ".string." + IDX_STRING_NORMALIZED;
 		for (List<? extends IQueryParameterType> nextAnd : theStringAndOrTerms) {
 			Set<String> terms = extractOrStringParams(nextAnd);
 			ourLog.debug("addStringContainsSearch {} {}", theSearchParamName, terms);
@@ -241,7 +241,7 @@ public class ExtendedLuceneClauseBuilder {
 	}
 
 	public void addStringUnmodifiedSearch(String theSearchParamName, List<List<IQueryParameterType>> theStringAndOrTerms) {
-		String fieldPath = "sp." + theSearchParamName + ".string." + IDX_STRING_NORMALIZED;
+		String fieldPath = SEARCH_PARAM_ROOT + "." + theSearchParamName + ".string." + IDX_STRING_NORMALIZED;
 		for (List<? extends IQueryParameterType> nextAnd : theStringAndOrTerms) {
 			Set<String> terms = extractOrStringParams(nextAnd);
 			ourLog.debug("addStringUnmodifiedSearch {} {}", theSearchParamName, terms);
@@ -255,7 +255,7 @@ public class ExtendedLuceneClauseBuilder {
 	}
 
 	public void addReferenceUnchainedSearch(String theSearchParamName, List<List<IQueryParameterType>> theReferenceAndOrTerms) {
-		String fieldPath = "sp." + theSearchParamName + ".reference.value";
+		String fieldPath = SEARCH_PARAM_ROOT + "." + theSearchParamName + ".reference.value";
 		for (List<? extends IQueryParameterType> nextAnd : theReferenceAndOrTerms) {
 			Set<String> terms = extractOrStringParams(nextAnd);
 			ourLog.trace("reference unchained search {}", terms);
@@ -362,8 +362,8 @@ public class ExtendedLuceneClauseBuilder {
 	}
 
 	private PredicateFinalStep generateDateOrdinalSearchTerms(String theSearchParamName, DateParam theDateParam) {
-		String lowerOrdinalField = "sp." + theSearchParamName + ".dt.lower-ord";
-		String upperOrdinalField = "sp." + theSearchParamName + ".dt.upper-ord";
+		String lowerOrdinalField = SEARCH_PARAM_ROOT + "." + theSearchParamName + ".dt.lower-ord";
+		String upperOrdinalField = SEARCH_PARAM_ROOT + "." + theSearchParamName + ".dt.upper-ord";
 		int lowerBoundAsOrdinal;
 		int upperBoundAsOrdinal;
 		ParamPrefixEnum prefix = theDateParam.getPrefix();
@@ -411,8 +411,8 @@ public class ExtendedLuceneClauseBuilder {
 	}
 
 	private PredicateFinalStep generateDateInstantSearchTerms(String theSearchParamName, DateParam theDateParam) {
-		String lowerInstantField = "sp." + theSearchParamName + ".dt.lower";
-		String upperInstantField = "sp." + theSearchParamName + ".dt.upper";
+		String lowerInstantField = SEARCH_PARAM_ROOT + "." + theSearchParamName + ".dt.lower";
+		String upperInstantField = SEARCH_PARAM_ROOT + "." + theSearchParamName + ".dt.upper";
 		ParamPrefixEnum prefix = theDateParam.getPrefix();
 
 		if (ParamPrefixEnum.NOT_EQUAL == prefix) {

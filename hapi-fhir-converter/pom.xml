@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.0.0-PRE3-SNAPSHOT</version>
+		<version>6.0.0-PRE5-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -205,7 +205,7 @@
 						<dependency>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
-							<version>1.18.16</version>
+							<version>1.18.22</version>
 						</dependency>
 						<dependency>
 							<groupId>org.jetbrains</groupId>

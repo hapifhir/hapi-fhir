@@ -1,16 +1,14 @@
 package ca.uhn.fhir.jpa.mdm.interceptor;
 
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperConfig;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperR4;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
-import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -62,7 +60,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 	@Autowired
 	public MdmHelperR4 myMdmHelper;
 	@Autowired
-	private IdHelperService myIdHelperService;
+	private IJpaIdHelperService myIdHelperService;
 
 	@Test
 	public void testCreatePractitioner() throws InterruptedException {
@@ -210,7 +208,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		patient.setId(patientId);
 
 		// Updating a Golden Resource Patient who was created via MDM should fail.
-		MdmLink mdmLink = runInTransaction(()->myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(patient)).orElseThrow(()->new IllegalStateException()));
+		MdmLink mdmLink = runInTransaction(() -> myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(patient)).orElseThrow(() -> new IllegalStateException()));
 		Long sourcePatientPid = mdmLink.getGoldenResourcePid();
 		Patient goldenResourcePatient = myPatientDao.readByPid(new ResourcePersistentId(sourcePatientPid));
 		goldenResourcePatient.setGender(Enumerations.AdministrativeGender.MALE);

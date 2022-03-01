@@ -162,6 +162,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.config.r4.FhirContextR4Config.DEFAULT_PRESERVE_VERSION_REFS;
 import static ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick;
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -228,6 +229,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	public void before() throws Exception {
 		super.before();
 		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
+		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths(DEFAULT_PRESERVE_VERSION_REFS);
 
 		myDaoConfig.setAllowMultipleDelete(true);
 		myClient.registerInterceptor(myCapturingInterceptor);

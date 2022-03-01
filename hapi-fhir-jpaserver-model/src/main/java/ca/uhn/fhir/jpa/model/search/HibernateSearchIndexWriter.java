@@ -21,8 +21,9 @@ package ca.uhn.fhir.jpa.model.search;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.param.TokenParam;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.search.engine.backend.document.DocumentElement;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +32,8 @@ public class HibernateSearchIndexWriter {
 	public static final String IDX_STRING_NORMALIZED = "norm";
 	public static final String IDX_STRING_EXACT = "exact";
 	public static final String IDX_STRING_TEXT = "text";
+	public static final String NESTED_SEARCH_PARAM_ROOT = "nsp";
+	public static final String SEARCH_PARAM_ROOT = "sp";
 	final HibernateSearchElementCache myNodeCache;
 	final FhirContext myFhirContext;
 
@@ -40,7 +43,7 @@ public class HibernateSearchIndexWriter {
 	}
 
 	public DocumentElement getSearchParamIndexNode(String theSearchParamName, String theIndexType) {
-		return myNodeCache.getObjectElement("sp", theSearchParamName, theIndexType);
+		return myNodeCache.getObjectElement(SEARCH_PARAM_ROOT, theSearchParamName, theIndexType);
 
 	}
 
@@ -57,14 +60,25 @@ public class HibernateSearchIndexWriter {
 		ourLog.debug("Adding Search Param Text: {} -- {}", theSearchParam, theValue);
 	}
 
-	public void writeTokenIndex(String theSearchParam, TokenParam theValue) {
+	public void writeTokenIndex(String theSearchParam, IBaseCoding theValue) {
+		DocumentElement nestedRoot = myNodeCache.getObjectElement(NESTED_SEARCH_PARAM_ROOT);
+		DocumentElement nestedSpNode = nestedRoot.addObject(theSearchParam);
+		DocumentElement nestedTokenNode = nestedSpNode.addObject("token");
+		nestedTokenNode.addValue("code", theValue.getCode());
+		nestedTokenNode.addValue("system", theValue.getSystem());
+		nestedTokenNode.addValue("code-system", theValue.getSystem() + "|" + theValue.getCode());
+		if (StringUtils.isNotEmpty(theValue.getDisplay())) {
+			DocumentElement nestedStringNode = nestedSpNode.addObject("string");
+			nestedStringNode.addValue(IDX_STRING_TEXT, theValue.getDisplay());
+		}
+
 		DocumentElement tokenIndexNode = getSearchParamIndexNode(theSearchParam, "token");
 		// TODO mb we can use a token_filter with pattern_capture to generate all three off a single value.  Do this next, after merge.
-		tokenIndexNode.addValue("code", theValue.getValue());
+		tokenIndexNode.addValue("code", theValue.getCode());
 		tokenIndexNode.addValue("system", theValue.getSystem());
-		//This next one returns as system|value
-		tokenIndexNode.addValue("code-system", theValue.getValueAsQueryToken(myFhirContext));
+		tokenIndexNode.addValue("code-system", theValue.getSystem() + "|" + theValue.getCode());
 		ourLog.debug("Adding Search Param Token: {} -- {}", theSearchParam, theValue);
+		// TODO mb should we write the strings here too?  Or leave it to the old spidx indexing?
 	}
 
 	public void writeReferenceIndex(String theSearchParam, String theValue) {

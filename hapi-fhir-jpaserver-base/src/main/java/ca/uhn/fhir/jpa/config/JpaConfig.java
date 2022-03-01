@@ -40,7 +40,8 @@ import ca.uhn.fhir.jpa.dao.expunge.ResourceExpungeService;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;
 import ca.uhn.fhir.jpa.dao.index.DaoResourceLinkResolver;
 import ca.uhn.fhir.jpa.dao.index.DaoSearchParamSynchronizer;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
+import ca.uhn.fhir.jpa.dao.index.JpaIdHelperService;
 import ca.uhn.fhir.jpa.dao.index.SearchParamWithInlineReferencesExtractor;
 import ca.uhn.fhir.jpa.dao.mdm.MdmLinkExpandSvc;
 import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilder;
@@ -479,7 +480,6 @@ public class JpaConfig {
 		return new BulkDataImportSvcImpl();
 	}
 
-
 	@Bean
 	public PersistedJpaBundleProviderFactory persistedJpaBundleProviderFactory() {
 		return new PersistedJpaBundleProviderFactory();
@@ -729,8 +729,8 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public IdHelperService idHelperService() {
-		return new IdHelperService();
+	public IJpaIdHelperService jpaIdHelperService() {
+		return new JpaIdHelperService();
 	}
 
 	@Bean

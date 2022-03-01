@@ -191,17 +191,13 @@ public interface ITestDataBuilder {
 
 	default Consumer<IBaseResource> withObservationCode(@Nullable String theSystem, @Nullable String theCode, String theDisplay) {
 		return t -> {
-			ICompositeType codeableConcept = (ICompositeType) getFhirContext().getElementDefinition("CodeableConcept").newInstance();
 			FhirTerser terser = getFhirContext().newTerser();
-			IBase coding = terser.addElement(codeableConcept, "coding");
+			IBase coding = terser.addElement(t, "code.coding");
 			terser.addElement(coding, "system", theSystem);
 			terser.addElement(coding, "code", theCode);
 			if (StringUtils.isNotEmpty(theDisplay)) {
 				terser.addElement(coding, "display", theDisplay);
 			}
-
-			RuntimeResourceDefinition resourceDef = getFhirContext().getResourceDefinition(t.getClass());
-			resourceDef.getChildByName("code").getMutator().addValue(t, codeableConcept);
 		};
 	}
 

@@ -6,10 +6,11 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>6.0.0-PRE3-SNAPSHOT</version>
+	<version>6.0.0-PRE5-SNAPSHOT</version>
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
 	<url>https://hapifhir.io</url>
+
 
 	<organization>
 		<name>Smile CDR, Inc.</name>
@@ -739,6 +740,7 @@
 			<organization>Google</organization>
 		</developer>
 		<developer>
+
 			<id>theGOTOguy</id>
 			<name>Ben Li-Sauerwine</name>
 		</developer>
@@ -756,7 +758,7 @@
 
     <properties>
 
-        <fhir_core_version>5.6.35</fhir_core_version>
+        <fhir_core_version>5.6.36</fhir_core_version>
         <ucum_version>1.0.3</ucum_version>
 
         <surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
@@ -799,7 +801,7 @@
         <jsr305_version>3.0.2</jsr305_version>
         <junit_version>5.8.2</junit_version>
         <flexmark_version>0.50.40</flexmark_version>
-        <flyway_version>8.4.4</flyway_version>
+        <flyway_version>8.5.0</flyway_version>
         <hibernate_version>5.6.2.Final</hibernate_version>
         <hibernate_search_version>6.0.3.Final</hibernate_search_version>
         <!-- Update lucene version when you update hibernate-search version -->
@@ -851,6 +853,8 @@
         <fontawesomeVersion>5.4.1</fontawesomeVersion>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.testSource>17</maven.compiler.testSource>
+        <maven.compiler.testTarget>17</maven.compiler.testTarget>
     </properties>
 
 	<dependencyManagement>
@@ -1705,7 +1709,7 @@
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>42.3.2</version>
+				<version>42.3.3</version>
 			</dependency>
 			<dependency>
 				<groupId>org.quartz-scheduler</groupId>
@@ -1999,7 +2003,7 @@
                             <groupId>ca.uhn.hapi.fhir</groupId>
                             <artifactId>hapi-fhir-checkstyle</artifactId>
 									<!-- Remember to bump this when you upgrade the version -->
-                            <version>6.0.0-PRE3-SNAPSHOT</version>
+                            <version>6.0.0-PRE5-SNAPSHOT</version>
                         </dependency>
 					</dependencies>
 				</plugin>
@@ -2364,6 +2368,9 @@
 								</copy>
 								<copy todir="target/site/apidocs-jpaserver-batch">
 									<fileset dir="hapi-fhir-batch/target/site/apidocs"/>
+								</copy>
+								<copy todir="target/site/apidocs-storage-batch2">
+									<fileset dir="hapi-fhir-storage-batch2/target/site/apidocs"/>
 								</copy>
 								<copy todir="target/site/apidocs-client">
 									<fileset dir="hapi-fhir-client/target/site/apidocs"/>
@@ -2800,6 +2807,8 @@
 				<module>hapi-fhir-validation-resources-r5</module>
 				<module>hapi-fhir-jpa</module>
 				<module>hapi-fhir-storage</module>
+				<module>hapi-fhir-storage-batch2</module>
+				<module>hapi-fhir-storage-batch2-jobs</module>
 				<module>hapi-fhir-jpaserver-cql</module>
 				<module>hapi-fhir-jpaserver-model</module>
 				<module>hapi-fhir-jpaserver-searchparam</module>

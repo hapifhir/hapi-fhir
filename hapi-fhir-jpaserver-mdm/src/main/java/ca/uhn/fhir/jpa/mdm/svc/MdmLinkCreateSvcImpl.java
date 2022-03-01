@@ -20,9 +20,9 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkCreateSvc;
@@ -39,18 +39,17 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-public class MdmLinkCreateSvcImpl implements IMdmLinkCreateSvc  {
+public class MdmLinkCreateSvcImpl implements IMdmLinkCreateSvc {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	@Autowired
 	FhirContext myFhirContext;
 	@Autowired
-	IdHelperService myIdHelperService;
+	IJpaIdHelperService myIdHelperService;
 	@Autowired
 	MdmLinkDaoSvc myMdmLinkDaoSvc;
 	@Autowired

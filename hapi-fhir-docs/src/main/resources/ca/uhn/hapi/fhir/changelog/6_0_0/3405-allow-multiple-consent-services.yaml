@@ -1,0 +1,5 @@
+---
+type: add
+issue: 3405
+title: "It is now possible to register multiple `IConsentService` implementations against a single
+   ConsentInterceptor."

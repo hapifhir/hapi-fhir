@@ -147,27 +147,26 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 
 			IFhirResourceDaoValueSet<IBaseResource, ICompositeType, ICompositeType> dao = getDao();
 
-			IBaseResource valueSet = theValueSet;
+			IValidationSupport.ValueSetExpansionOutcome outcome;
 			if (haveId) {
-				valueSet = dao.read(theId, theRequestDetails);
+				IBaseResource valueSet = dao.read(theId, theRequestDetails);
+				outcome = myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), options, valueSet);
 			} else if (haveIdentifier) {
 				String url;
 				if (haveValueSetVersion) {
 					url = theUrl.getValue() + "|" + theValueSetVersion.getValue();
-					valueSet = myValidationSupport.fetchValueSet(url);
 				} else {
 					url = theUrl.getValue();
-					valueSet = myValidationSupport.fetchValueSet(url);
 				}
-				if (valueSet == null) {
-					throw new ResourceNotFoundException(Msg.code(2030) + "Can not find ValueSet with URL: " + UrlUtil.escapeUrlParam(url));
-				}
+				outcome = myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), options, url);
+			} else {
+				outcome = myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), options, theValueSet);
 			}
 
-			IValidationSupport.ValueSetExpansionOutcome outcome = myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), options, valueSet);
 			if (outcome == null) {
-				throw new InternalErrorException(Msg.code(2028) + outcome.getError());
+				throw new InternalErrorException(Msg.code(2028) + "No validation support module was able to expand the given valueset");
 			}
+
 			if (outcome.getError() != null) {
 				throw new PreconditionFailedException(Msg.code(2029) + outcome.getError());
 			}

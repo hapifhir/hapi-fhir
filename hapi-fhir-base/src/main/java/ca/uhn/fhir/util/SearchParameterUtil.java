@@ -116,6 +116,11 @@ public class SearchParameterUtil {
 	}
 
 	@Nullable
+	public static String getURL(FhirContext theContext, IBaseResource theResource) {
+		return getStringChild(theContext, theResource, "url");
+	}
+
+	@Nullable
 	public static String getExpression(FhirContext theFhirContext, IBaseResource theResource) {
 		return getStringChild(theFhirContext, theResource, "expression");
 	}

@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.index;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.cache.ResourcePersistentIdMap;
 import ca.uhn.fhir.jpa.cache.ResourceVersionSvcDaoImpl;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
@@ -37,27 +38,12 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class ResourceVersionSvcTest {
 
-	// helper class to package up data for helper methods
-	private class ResourceIdPackage {
-		public IIdType MyResourceId;
-		public ResourcePersistentId MyPid;
-		public Long MyVersion;
-
-		public ResourceIdPackage(IIdType id,
-										 ResourcePersistentId pid,
-										 Long version) {
-			MyResourceId = id;
-			MyPid = pid;
-			MyVersion = version;
-		}
-	}
-
 	@Mock
 	DaoRegistry myDaoRegistry;
 	@Mock
 	IResourceTableDao myResourceTableDao;
 	@Mock
-	IdHelperService myIdHelperService;
+	IIdHelperService myIdHelperService;
 
 	// TODO KHS move the methods that use this out to a separate test class
 	@InjectMocks
@@ -66,13 +52,14 @@ public class ResourceVersionSvcTest {
 	/**
 	 * Gets a ResourceTable record for getResourceVersionsForPid
 	 * Order matters!
+	 *
 	 * @param resourceType
 	 * @param pid
 	 * @param version
 	 * @return
 	 */
 	private Object[] getResourceTableRecordForResourceTypeAndPid(String resourceType, long pid, long version) {
-		return new Object[] {
+		return new Object[]{
 			pid, // long
 			resourceType, // string
 			version // long
@@ -96,6 +83,7 @@ public class ResourceVersionSvcTest {
 	 * Helper function to mock out getIdsOfExistingResources
 	 * to return the matches and resources matching those provided
 	 * by parameters.
+	 *
 	 * @param theResourcePacks
 	 */
 	private void mockReturnsFor_getIdsOfExistingResources(ResourceIdPackage... theResourcePacks) {
@@ -115,8 +103,7 @@ public class ResourceVersionSvcTest {
 		ResourcePersistentId first = resourcePersistentIds.remove(0);
 		if (resourcePersistentIds.isEmpty()) {
 			when(myIdHelperService.resolveResourcePersistentIdsWithCache(any(), any())).thenReturn(Collections.singletonList(first));
-		}
-		else {
+		} else {
 			when(myIdHelperService.resolveResourcePersistentIdsWithCache(any(), any())).thenReturn(resourcePersistentIds);
 		}
 	}
@@ -204,6 +191,21 @@ public class ResourceVersionSvcTest {
 
 		RequestPartitionId outcome = svc.replaceDefault(RequestPartitionId.defaultPartition());
 		assertEquals(1, outcome.getPartitionIds().get(0));
+	}
+
+	// helper class to package up data for helper methods
+	private class ResourceIdPackage {
+		public IIdType MyResourceId;
+		public ResourcePersistentId MyPid;
+		public Long MyVersion;
+
+		public ResourceIdPackage(IIdType id,
+										 ResourcePersistentId pid,
+										 Long version) {
+			MyResourceId = id;
+			MyPid = pid;
+			MyVersion = version;
+		}
 	}
 
 }

@@ -131,8 +131,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 	public IBaseResource fetchValueSet(String theSystem) {
 		if (TermReadSvcUtil.isLoincUnversionedValueSet(theSystem)) {
 			Optional<IBaseResource> currentVSOpt = getValueSetCurrentVersion(new UriType(theSystem));
-			return currentVSOpt.orElseThrow(() -> new ResourceNotFoundException(
-				"Unable to find current version of ValueSet for url: " + theSystem));
+			return currentVSOpt.orElse(null);
 		}
 
 		return fetchResource(myValueSetType, theSystem);

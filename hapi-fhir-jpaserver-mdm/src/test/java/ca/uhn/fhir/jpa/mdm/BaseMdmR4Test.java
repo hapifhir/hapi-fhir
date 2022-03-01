@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.MdmLink;
@@ -103,7 +104,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 	@Autowired
 	protected MdmLinkDaoSvc myMdmLinkDaoSvc;
 	@Autowired
-	protected IdHelperService myIdHelperService;
+	protected IJpaIdHelperService myIdHelperService;
 	@Autowired
 	protected IMdmSettings myMdmSettings;
 	@Autowired
@@ -373,6 +374,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 
 	protected Patient updatePatientAndUpdateLinks(Patient thePatient) {
 		thePatient = (Patient) myPatientDao.update(thePatient).getResource();
+		ourLog.info("About to update links...");
 		myMdmMatchLinkSvc.updateMdmLinksForMdmSource(thePatient, createContextForUpdate(thePatient.getIdElement().getResourceType()));
 		return thePatient;
 	}
