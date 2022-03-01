@@ -55,13 +55,13 @@ public class TestHibernateSearchAddInConfig {
 
 		@Bean
 		@Primary
-		IHibernateSearchConfigurer hibernateSearchConfigurer() {
+		IHibernateSearchConfigurer hibernateSearchConfigurer() throws IOException {
 			ourLog.warn("Hibernate Search: using lucene - filesystem");
 
 			// replace by existing directory for debugging purposes
-//			Path tempDirPath = Files.createTempDirectory(null);
-//			String dirPath = tempDirPath.toString();
-			String dirPath = "/Users/juan.marchionattosmilecdr.com/temp/lucene-dir";
+			Path tempDirPath = Files.createTempDirectory(null);
+			String dirPath = tempDirPath.toString();
+
 
 			Map<String, String> luceneProperties = new HashMap<>();
 			luceneProperties.put(BackendSettings.backendKey(BackendSettings.TYPE), "lucene");
@@ -79,7 +79,6 @@ public class TestHibernateSearchAddInConfig {
 		}
 
 
-		@Bean(name={"searchDao", "searchDaoDstu2", "searchDaoDstu3", "searchDaoR4", "searchDaoR5"})
 		public IFulltextSearchSvc fullTextSearchSvc() {
 			ourLog.info("Hibernate Search: FulltextSearchSvcImpl present");
 			return new FulltextSearchSvcImpl();
