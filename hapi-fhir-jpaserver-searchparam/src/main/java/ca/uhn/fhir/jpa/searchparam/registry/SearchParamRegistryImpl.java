@@ -51,6 +51,7 @@ import org.springframework.context.event.EventListener;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -274,13 +275,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 	 * until ContextRefreshedEvent.
 	 *
 	 */
-	@EventListener
-	@SuppressWarnings({"unchecked", "unused"})
-	public void start(ContextRefreshedEvent theEvent) {
-		myResourceChangeListenerRegistry = theEvent.getApplicationContext().getBean(IResourceChangeListenerRegistry.class);
-		registerListener();
-	}
-
+	@PostConstruct
 	public void registerListener() {
 		myResourceChangeListenerCache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener("SearchParameter", SearchParameterMap.newSynchronous(), this, REFRESH_INTERVAL);
 	}
