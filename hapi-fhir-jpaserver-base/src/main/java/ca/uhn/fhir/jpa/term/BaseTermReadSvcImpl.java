@@ -1616,7 +1616,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		}
 
 		TermValueSet valueSetEntity = myTermValueSetDao.findByResourcePid(valueSetResourcePid.getIdAsLong()).orElseThrow(() -> new IllegalStateException());
-		Object timingDescription = toHumanReadableExpansionTimestamp(valueSetEntity);
+		String timingDescription = toHumanReadableExpansionTimestamp(valueSetEntity);
 		String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "validationPerformedAgainstPreExpansion", timingDescription);
 
 		if (theValidationOptions.isValidateDisplay() && concepts.size() > 0) {
@@ -1642,8 +1642,17 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				.setCodeSystemVersion(concepts.get(0).getSystemVersion())
 				.setMessage(msg);
 		}
+		
+		// Ok, we failed
+		List<TermValueSetConcept> outcome = myValueSetConceptDao.findByTermValueSetIdSystemOnly(Pageable.ofSize(1), valueSetEntity.getId(), theSystem);
+		String append;
+		if (outcome.size() == 0) {
+			append = " - No codes in ValueSet belong to CodeSystem with URL " + theSystem;
+		} else {
+			append = " - Unknown code " + theSystem + "#" + theCode + ". " + msg;
+		}
 
-		return createFailureCodeValidationResult(theSystem, theCode, null, " - Unknown code " + theSystem + "#" + theCode + ". " + msg);
+		return createFailureCodeValidationResult(theSystem, theCode, null, append);
 	}
 
 	private CodeValidationResult createFailureCodeValidationResult(String theSystem, String theCode, String theCodeSystemVersion, String theAppend) {
@@ -2207,7 +2216,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	@CoverageIgnore
 	@Override
-	public IValidationSupport.CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public IValidationSupport.CodeValidationResult validateCode(@Nonnull ValidationSupportContext theValidationSupportContext, @Nonnull ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		//TODO GGG TRY TO JUST AUTO_PASS HERE AND SEE WHAT HAPPENS.
 		invokeRunnableForUnitTest();
 
@@ -2235,24 +2244,41 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	IValidationSupport.CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theValidationOptions, String theValueSetUrl, String theCodeSystem, String theCode, String theDisplay) {
 		IBaseResource valueSet = theValidationSupportContext.getRootValidationSupport().fetchValueSet(theValueSetUrl);
+		CodeValidationResult retVal = null;
 
 		// If we don't have a PID, this came from some source other than the JPA
 		// database, so we don't need to check if it's pre-expanded or not
 		if (valueSet instanceof IAnyResource) {
 			Long pid = IDao.RESOURCE_PID.get((IAnyResource) valueSet);
 			if (pid != null) {
-				if (isValueSetPreExpandedForCodeValidation(valueSet)) {
-					return validateCodeIsInPreExpandedValueSet(theValidationOptions, valueSet, theCodeSystem, theCode, theDisplay, null, null);
-				}
+				TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
+				retVal = txTemplate.execute(tx -> {
+					if (isValueSetPreExpandedForCodeValidation(valueSet)) {
+						return validateCodeIsInPreExpandedValueSet(theValidationOptions, valueSet, theCodeSystem, theCode, theDisplay, null, null);
+					} else {
+						return null;
+					}
+				});
 			}
 		}
 
-		CodeValidationResult retVal;
-		if (valueSet != null) {
-			retVal = new InMemoryTerminologyServerValidationSupport(myContext).validateCodeInValueSet(theValidationSupportContext, theValidationOptions, theCodeSystem, theCode, theDisplay, valueSet);
-		} else {
-			String append = " - Unable to locate ValueSet[" + theValueSetUrl + "]";
-			retVal = createFailureCodeValidationResult(theCodeSystem, theCode, null, append);
+		if (retVal == null) {
+			if (valueSet != null) {
+				retVal = new InMemoryTerminologyServerValidationSupport(myContext).validateCodeInValueSet(theValidationSupportContext, theValidationOptions, theCodeSystem, theCode, theDisplay, valueSet);
+			} else {
+				String append = " - Unable to locate ValueSet[" + theValueSetUrl + "]";
+				retVal = createFailureCodeValidationResult(theCodeSystem, theCode, null, append);
+			}
+		}
+
+		// Check if someone is accidentally using a VS url where it should be a CS URL
+		if (retVal != null && retVal.getCode() == null && theCodeSystem != null) {
+			if (isValueSetSupported(theValidationSupportContext, theCodeSystem)) {
+				if (!isCodeSystemSupported(theValidationSupportContext, theCodeSystem)) {
+					String newMessage = "Unable to validate code " + theCodeSystem + "#" + theCode + " - Supplied system URL is a ValueSet URL and not a CodeSystem URL, check if it is correct: " + theCodeSystem;
+					retVal.setMessage(newMessage);
+				}
+			}
 		}
 
 		return retVal;

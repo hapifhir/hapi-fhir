@@ -179,6 +179,8 @@ public class QuestionnaireResponseValidatorR5Test {
 
 			when(myValSupport.fetchResource(eq(Questionnaire.class),
 				eq(qa.getQuestionnaire()))).thenReturn(q);
+			when(myValSupport.validateCode(any(), any(), any(), any(), any(), nullable(String.class)))
+				.thenReturn(new IValidationSupport.CodeValidationResult().setCode("code0"));
 
 			ValidationResult errors = myVal.validateWithResult(qa);
 
