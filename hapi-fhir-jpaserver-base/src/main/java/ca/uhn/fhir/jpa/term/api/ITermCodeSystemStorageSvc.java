@@ -92,5 +92,4 @@ public interface ITermCodeSystemStorageSvc {
 
 	int saveConcept(TermConcept theNextConcept);
 
-	ResourcePersistentId getValueSetResourcePid(IIdType theIdElement);
 }
