@@ -756,11 +756,10 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	public class DateSearchIT extends BaseDateSearchDaoTests {
 
 		@Override
-		protected Fixture getFixture() {
+		protected Fixture constructFixture() {
 			DaoTestDataBuilder testDataBuilder = new DaoTestDataBuilder(myFhirCtx, myDaoRegistry, new SystemRequestDetails());
 			return new TestDataBuilderFixture<>(testDataBuilder, myObservationDao);
 		}
-
 	}
 
 }

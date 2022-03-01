@@ -51,8 +51,8 @@ import static org.hamcrest.Matchers.not;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestR4Config.class, TestHibernateSearchAddInConfig.NoFT.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-public class FhirResourceDaoR4StandardQueriesNoFT extends BaseJpaTest {
-	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4StandardQueriesNoFT.class);
+public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
+	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4StandardQueriesNoFTTest.class);
 	@Autowired
 	PlatformTransactionManager myTxManager;
 	@Autowired
