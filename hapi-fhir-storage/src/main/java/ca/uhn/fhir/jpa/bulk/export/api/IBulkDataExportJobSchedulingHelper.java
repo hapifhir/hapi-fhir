@@ -6,6 +6,10 @@ public interface IBulkDataExportJobSchedulingHelper {
 
 	@Transactional(value = Transactional.TxType.NEVER)
 	void purgeExpiredFiles();
+
+	@Transactional(value = Transactional.TxType.NEVER)
 	void cancelAndPurgeAllJobs();
+
+	@Transactional(value = Transactional.TxType.NEVER)
 	void startSubmittedJobs();
 }
