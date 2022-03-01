@@ -3,6 +3,7 @@ package org.hl7.fhir.common.hapi.validation.support;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,28 +43,35 @@ public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSup
 		return canValidateCodeSystem(theValidationSupportContext, theSystem);
 	}
 
+	@Nullable
+	@Override
+	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode, String theDisplayLanguage) {
+		// filters out error/fatal
+		if (canValidateCodeSystem(theValidationSupportContext, theSystem)) {
+			return new LookupCodeResult()
+				.setFound(true);
+		}
+
+		return null;
+	}
+
 	@Override
 	public CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		// filters out error/fatal
-		// NB: this is a secondary check. isCodeSystemSupported
-		// should prevent this from ever calling validate code here
-		// ... but should it ever get called, we'll return null
 		if (!canValidateCodeSystem(theValidationSupportContext, theCodeSystem)) {
 			return null;
 		}
 
-		CodeValidationResult result = new CodeValidationResult()
-			.setSeverity(myNonExistentCodeSystemSeverity); // will be warning or info (error/fatal filtered out above)
+		CodeValidationResult result = new CodeValidationResult();
+		// will be warning or info (error/fatal filtered out above)
+		result.setSeverity(myNonExistentCodeSystemSeverity);
+		result.setMessage("CodeSystem is unknown and can't be validated: " + theCodeSystem);
 
-		result.setMessage("No issues detected during validation");
-
-		switch (myNonExistentCodeSystemSeverity) {
-			case INFORMATION:
-				// for warnings, we don't set the code
-				// cause if we do, the severity is stripped out
-				// (see VersionSpecificWorkerContextWrapper.convertValidationResult)
-				result.setCode(theCode);
-				break;
+		if (myNonExistentCodeSystemSeverity == IssueSeverity.INFORMATION) {
+			// for warnings, we don't set the code
+			// cause if we do, the severity is stripped out
+			// (see VersionSpecificWorkerContextWrapper.convertValidationResult)
+			result.setCode(theCode);
 		}
 
 		return result;
@@ -126,8 +134,6 @@ public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSup
 	/**
 	 * If set to allow, code system violations will be flagged with Warning by default.
 	 * Use setNonExistentCodeSystemSeverity instead.
-	 *
-	 * @param theAllowNonExistentCodeSystem
 	 */
 	@Deprecated
 	public void setAllowNonExistentCodeSystem(boolean theAllowNonExistentCodeSystem) {
@@ -140,9 +146,9 @@ public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSup
 
 	/**
 	 * Sets the non-existent code system severity.
-	 * @param theSeverity
 	 */
-	public void setNonExistentCodeSystemSeverity(IssueSeverity theSeverity) {
+	public void setNonExistentCodeSystemSeverity(@Nonnull IssueSeverity theSeverity) {
+		Validate.notNull(theSeverity, "theSeverity must not be null");
 		myNonExistentCodeSystemSeverity = theSeverity;
 	}
 }
