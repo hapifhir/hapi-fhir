@@ -59,6 +59,7 @@ public class TermConceptDaoSvc {
 			for (TermConceptParentChildLink next : theConcept.getParents()) {
 				if (next.getParent().getId() == null) {
 					needToSaveParents = true;
+					break;
 				}
 			}
 			if (needToSaveParents) {
