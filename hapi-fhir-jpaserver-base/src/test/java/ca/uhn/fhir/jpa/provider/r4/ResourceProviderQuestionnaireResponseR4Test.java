@@ -1,7 +1,9 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
@@ -39,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -85,12 +88,12 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 	public void testCreateWithNonLocalReferenceWorksWithIncludes() {
 		String baseUrl = "https://hapi.fhir.org/baseR4/";
 
-		myModelConfig.setTreatBaseUrlsAsLocal(Collections.singleton(baseUrl));
 		Questionnaire questionnaire = new Questionnaire();
+		questionnaire.setUrl(baseUrl + "Questionnaire/my-questionnaire");
 		questionnaire.setId("my-questionnaire");
 
 		QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse();
-		questionnaireResponse.setQuestionnaire(baseUrl + "Questionnaire/my-questionnaire");
+		questionnaireResponse.setQuestionnaire(questionnaire.getUrl());
 		questionnaireResponse.setId("my-questionnaire-response");
 
 		myQuestionnaireDao.update(questionnaire);
@@ -161,20 +164,20 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 
 		// Search
 		Bundle results = myClient.search()
-			.byUrl("QuestionnaireResponse?_id=" + qrIdType.getValue() + "&_include=QuestionnaireResponse:questionnaire")
+			.byUrl("QuestionnaireResponse?_id=" + qrIdType.toUnqualifiedVersionless()  + "&_include=QuestionnaireResponse:questionnaire")
 			.returnBundle(Bundle.class)
 			.execute();
 		assertThat(results.getEntry().size(), is(equalTo(2)));
 
 		List<String> expectedIds = new ArrayList<>();
-		expectedIds.add(qIdType.getValue());
 		expectedIds.add(qrIdType.getValue());
+		expectedIds.add(qIdType.getValue());
 
 		List<String> actualIds = results.getEntry().stream()
 			.map(Bundle.BundleEntryComponent::getResource)
 			.map(resource -> resource.getIdElement().toUnqualifiedVersionless().toString())
 			.collect(Collectors.toList());
-		assertThat(actualIds, contains(expectedIds));
+		assertEquals(expectedIds, actualIds);
 	}
 
 	@Test
