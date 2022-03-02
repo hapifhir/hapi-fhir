@@ -25,7 +25,9 @@ import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDesignationDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptPropertyDao;
 import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
+import ca.uhn.fhir.jpa.entity.TermConceptProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,16 +72,14 @@ public class TermConceptDaoSvc {
 			theConcept.setUpdated(new Date());
 			myConceptDao.save(theConcept);
 
-//			for (TermConceptProperty next : theConcept.getProperties()) {
-//				myConceptPropertyDao.save(next);
-//			}
-//
-//			for (TermConceptDesignation next : theConcept.getDesignations()) {
-//				myConceptDesignationDao.save(next);
-//			}
+			for (TermConceptProperty next : theConcept.getProperties()) {
+				myConceptPropertyDao.save(next);
+			}
 
-			myConceptPropertyDao.saveAll(theConcept.getProperties());
-			myConceptDesignationDao.saveAll(theConcept.getDesignations());
+			for (TermConceptDesignation next : theConcept.getDesignations()) {
+				myConceptDesignationDao.save(next);
+			}
+
 		}
 
 		ourLog.trace("Saved {} and got PID {}", theConcept.getCode(), theConcept.getId());

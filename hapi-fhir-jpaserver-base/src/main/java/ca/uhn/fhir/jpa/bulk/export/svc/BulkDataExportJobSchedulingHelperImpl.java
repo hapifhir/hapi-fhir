@@ -207,7 +207,7 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 					myBulkExportCollectionDao.deleteByPid(nextCollection.getId());
 				}
 
-				ourLog.info("*** ABOUT TO DELETE");
+				ourLog.debug("*** About to delete job with ID {}", job.getId());
 				myBulkExportJobDao.deleteByPid(job.getId());
 				return null;
 			});
