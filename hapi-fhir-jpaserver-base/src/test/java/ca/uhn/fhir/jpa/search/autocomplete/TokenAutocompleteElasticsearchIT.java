@@ -78,7 +78,6 @@ public class TokenAutocompleteElasticsearchIT extends BaseJpaTest{
 	IResourceReindexingSvc myResourceReindexingSvc;
 	@Autowired
 	private IBulkDataExportJobSchedulingHelper myBulkDataScheduleHelper;
-	IBulkDataExportSvc myBulkDataExportSvc;
 	@Autowired
 	ITestDataBuilder myDataBuilder;
 
