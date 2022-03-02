@@ -3,6 +3,7 @@ package ca.uhn.fhir.batch2.jobs.reindex;
 import ca.uhn.fhir.batch2.api.IFirstJobStepWorker;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
+import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.jpa.api.svc.IResourceReindexSvc;
@@ -35,7 +36,7 @@ public class GenerateRangeChunksStep implements IFirstJobStepWorker<ReindexJobPa
 			ReindexChunkRange nextRange = new ReindexChunkRange();
 			nextRange.setResourceType(params.getResourceType());
 			nextRange.setStart(nextStart);
-			nextRange.setStart(addDays(nextStart, 1));
+			nextRange.setEnd(addDays(nextStart, 1));
 			theDataSink.accept(nextRange);
 		}
 

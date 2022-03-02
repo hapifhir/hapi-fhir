@@ -20,13 +20,6 @@ package ca.uhn.fhir.batch2.jobs.reindex;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.api.IJobStepWorker;
-import ca.uhn.fhir.batch2.api.VoidModel;
-import ca.uhn.fhir.batch2.jobs.imprt.BulkDataImportProvider;
-import ca.uhn.fhir.batch2.jobs.imprt.BulkImportJobParameters;
-import ca.uhn.fhir.batch2.jobs.imprt.ConsumeFilesStep;
-import ca.uhn.fhir.batch2.jobs.imprt.FetchFilesStep;
-import ca.uhn.fhir.batch2.jobs.imprt.NdJsonFileJson;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,7 +27,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ReindexAppCtx {
 
-	private static final String JOB_REINDEX = "REINDEX";
+	public static final String JOB_REINDEX = "REINDEX";
 
 	@Bean
 	public JobDefinition reindexJobDefinition() {
@@ -50,12 +43,20 @@ public class ReindexAppCtx {
 				ReindexChunkRange.class,
 				reindexGenerateRangeChunksStep())
 			.addIntermediateStep(
-				"process-files",
-				"Process files",
-				ReindexChunkRange.class,
+				"load-ids",
+				"Load IDs of resources to reindex",
 				ReindexChunkIds.class,
 				loadIdsStep())
+			.addLastStep("reindex",
+				"Perform the resource reindex",
+				reindexStep()
+			)
 			.build();
+	}
+
+	@Bean
+	public ReindexStep reindexStep() {
+		return new ReindexStep();
 	}
 
 	@Bean

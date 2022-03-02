@@ -75,6 +75,7 @@ import java.util.stream.Collectors;
 @Table(name = "HFJ_RESOURCE", uniqueConstraints = {}, indexes = {
 	@Index(name = "IDX_RES_DATE", columnList = "RES_UPDATED"),
 	@Index(name = "IDX_RES_TYPE", columnList = "RES_TYPE"),
+	// FIXME: drop this index
 	@Index(name = "IDX_INDEXSTATUS", columnList = "SP_INDEX_STATUS")
 })
 @NamedEntityGraph(name = "Resource.noJoins")

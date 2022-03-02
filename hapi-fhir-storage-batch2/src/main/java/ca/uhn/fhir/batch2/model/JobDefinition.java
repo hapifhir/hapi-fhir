@@ -87,22 +87,36 @@ public class JobDefinition {
 		return mySteps;
 	}
 
-	public static Builder<IModelJson> newBuilder() {
+	public static Builder<IModelJson, VoidModel> newBuilder() {
 		return new Builder<>();
 	}
 
-	public static class Builder<PT extends IModelJson> {
+	public static class Builder<PT extends IModelJson, NIT extends IModelJson> {
 
-		private final List<JobDefinitionStep<?,?,?>> mySteps = new ArrayList<>();
+		private final List<JobDefinitionStep<?,?,?>> mySteps;
 		private String myJobDefinitionId;
 		private int myJobDefinitionVersion;
 		private String myJobDescription;
 		private Class<PT> myJobParametersType;
+		private Class<NIT> myNextInputType;
+
+		Builder() {
+			mySteps = new ArrayList<>();
+		}
+
+		Builder(List<JobDefinitionStep<?,?,?>> theSteps, String theJobDefinitionId, int theJobDefinitionVersion, String theJobDescription, Class<PT> theJobParametersType, Class<NIT> theNextInputType) {
+			mySteps = theSteps;
+			myJobDefinitionId = theJobDefinitionId;
+			myJobDefinitionVersion = theJobDefinitionVersion;
+			myJobDescription = theJobDescription;
+			myJobParametersType = theJobParametersType;
+			myNextInputType = theNextInputType;
+		}
 
 		/**
 		 * @param theJobDefinitionId A unique identifier for the job definition (i.e. for the "kind" of job)
 		 */
-		public Builder<PT> setJobDefinitionId(String theJobDefinitionId) {
+		public Builder<PT, NIT> setJobDefinitionId(String theJobDefinitionId) {
 			myJobDefinitionId = theJobDefinitionId;
 			return this;
 		}
@@ -110,7 +124,7 @@ public class JobDefinition {
 		/**
 		 * @param theJobDefinitionVersion A unique identifier for the version of the job definition. Higher means newer but numbers have no other meaning. Must be greater than 0.
 		 */
-		public Builder<PT> setJobDefinitionVersion(int theJobDefinitionVersion) {
+		public Builder<PT, NIT> setJobDefinitionVersion(int theJobDefinitionVersion) {
 			Validate.isTrue(theJobDefinitionVersion > 0, "theJobDefinitionVersion must be > 0");
 			myJobDefinitionVersion = theJobDefinitionVersion;
 			return this;
@@ -125,9 +139,9 @@ public class JobDefinition {
 		 * @param theStepDescription A description of this step
 		 * @param theStepWorker      The worker that will actually perform this step
 		 */
-		public <OT extends IModelJson> Builder<PT> addFirstStep(String theStepId, String theStepDescription, Class<OT> theOutputType, IJobStepWorker<PT, VoidModel, OT> theStepWorker) {
+		public <OT extends IModelJson> Builder<PT, OT> addFirstStep(String theStepId, String theStepDescription, Class<OT> theOutputType, IJobStepWorker<PT, VoidModel, OT> theStepWorker) {
 			mySteps.add(new JobDefinitionStep<>(theStepId, theStepDescription, theStepWorker, VoidModel.class, theOutputType));
-			return this;
+			return new Builder<>(mySteps, myJobDefinitionId, myJobDefinitionVersion, myJobDescription, myJobParametersType, theOutputType);
 		}
 
 		/**
@@ -139,9 +153,9 @@ public class JobDefinition {
 		 * @param theStepDescription A description of this step
 		 * @param theStepWorker      The worker that will actually perform this step
 		 */
-		public <IT extends IModelJson, OT extends IModelJson> Builder<PT> addIntermediateStep(String theStepId, String theStepDescription, Class<IT> theInputType, Class<OT> theOutputType, IJobStepWorker<PT, IT, OT> theStepWorker) {
-			mySteps.add(new JobDefinitionStep<>(theStepId, theStepDescription, theStepWorker, theInputType, theOutputType));
-			return this;
+		public <OT extends IModelJson> Builder<PT, OT> addIntermediateStep(String theStepId, String theStepDescription, Class<OT> theOutputType, IJobStepWorker<PT, NIT, OT> theStepWorker) {
+			mySteps.add(new JobDefinitionStep<>(theStepId, theStepDescription, theStepWorker, myNextInputType, theOutputType));
+			return new Builder<>(mySteps, myJobDefinitionId, myJobDefinitionVersion, myJobDescription, myJobParametersType, theOutputType);
 		}
 
 		/**
@@ -153,9 +167,9 @@ public class JobDefinition {
 		 * @param theStepDescription A description of this step
 		 * @param theStepWorker      The worker that will actually perform this step
 		 */
-		public <IT extends IModelJson> Builder<PT> addLastStep(String theStepId, String theStepDescription, Class<IT> theInputType, IJobStepWorker<PT, IT, VoidModel> theStepWorker) {
-			mySteps.add(new JobDefinitionStep<>(theStepId, theStepDescription, theStepWorker, theInputType, VoidModel.class));
-			return this;
+		public Builder<PT, VoidModel> addLastStep(String theStepId, String theStepDescription, IJobStepWorker<PT, NIT, VoidModel> theStepWorker) {
+			mySteps.add(new JobDefinitionStep<>(theStepId, theStepDescription, theStepWorker, myNextInputType, VoidModel.class));
+			return new Builder<>(mySteps, myJobDefinitionId, myJobDefinitionVersion, myJobDescription, myJobParametersType, VoidModel.class);
 		}
 
 		public JobDefinition build() {
@@ -163,7 +177,7 @@ public class JobDefinition {
 			return new JobDefinition(myJobDefinitionId, myJobDefinitionVersion, myJobDescription, myJobParametersType, Collections.unmodifiableList(mySteps));
 		}
 
-		public Builder<PT> setJobDescription(String theJobDescription) {
+		public Builder<PT, NIT> setJobDescription(String theJobDescription) {
 			myJobDescription = theJobDescription;
 			return this;
 		}
@@ -175,17 +189,17 @@ public class JobDefinition {
 		 * {@link javax.validation.constraints.Min} or {@link javax.validation.constraints.Pattern}).
 		 *
 		 * Any fields that contain sensitive data (e.g. passwords) that should not be
-		 * provided back to the end user must be marked with {@link ca.uhn.fhir.batch2.api.PasswordField}
+		 * provided back to the end user must be marked with {@link ca.uhn.fhir.model.api.annotation.PasswordField}
 		 * as well.
 		 *
-		 * @see ca.uhn.fhir.batch2.api.PasswordField
+		 * @see ca.uhn.fhir.model.api.annotation.PasswordField
 		 * @see javax.validation.constraints
 		 */
 		@SuppressWarnings("unchecked")
-		public <NPT extends IModelJson> Builder<NPT> setParametersType(Class<NPT> theJobParametersType) {
+		public <NPT extends IModelJson> Builder<NPT, NIT> setParametersType(Class<NPT> theJobParametersType) {
 			Validate.notNull(theJobParametersType, "theJobParametersType must not be null");
 			myJobParametersType = (Class<PT>) theJobParametersType;
-			return (Builder<NPT>) this;
+			return (Builder<NPT, NIT>) this;
 		}
 
 	}

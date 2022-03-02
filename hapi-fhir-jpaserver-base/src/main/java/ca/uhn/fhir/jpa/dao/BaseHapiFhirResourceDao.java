@@ -64,6 +64,7 @@ import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.dstu2.resource.ListResource;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -86,6 +87,7 @@ import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -1286,6 +1288,25 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Transactional
 	public String getCurrentVersionId(IIdType theReferenceElement) {
 		return Long.toString(readEntity(theReferenceElement.toVersionless(), null).getVersion());
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public void reindex(ResourcePersistentId theResourcePersistentId, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
+		Optional<ResourceTable> entityOpt = myResourceTableDao.findById(theResourcePersistentId.getIdAsLong());
+		if (!entityOpt.isPresent()) {
+			ourLog.warn("Unable to find entity with PID: {}", theResourcePersistentId.getId());
+			return;
+		}
+
+		ResourceTable entity = entityOpt.get();
+		try {
+			T resource = (T) toResource(entity, false);
+			reindex(resource, entity);
+		} catch (BaseServerResponseException | DataFormatException e) {
+			myResourceTableDao.updateIndexStatus(entity.getId(), INDEX_STATUS_INDEXING_FAILED);
+			throw e;
+		}
 	}
 
 	@Override

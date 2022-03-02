@@ -1,5 +1,9 @@
 package ca.uhn.fhir.jpa.delete.job;
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
+import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.jpa.batch.CommonBatchJobConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.batch.config.BatchConstants;
@@ -35,15 +39,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(ReindexJobTest.class);
 
 	@Autowired
-	private IBatchJobSubmitter myBatchJobSubmitter;
-	@Autowired
-	@Qualifier(BatchConstants.REINDEX_JOB_NAME)
-	private Job myReindexJob;
-	@Autowired
-	@Qualifier(BatchConstants.REINDEX_EVERYTHING_JOB_NAME)
-	private Job myReindexEverythingJob;
-	@Autowired
-	private BatchJobHelper myBatchJobHelper;
+	private IJobCoordinator myJobCoordinator;
 
 	private ReindexTestHelper myReindexTestHelper;
 
@@ -53,41 +49,14 @@ public class ReindexJobTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testReindexJob() throws Exception {
-		// setup
-
-		IIdType obsFinalId = myReindexTestHelper.createObservationWithAlleleExtension(Observation.ObservationStatus.FINAL);
-		IIdType obsCancelledId = myReindexTestHelper.createObservationWithAlleleExtension(Observation.ObservationStatus.CANCELLED);
-
-		myReindexTestHelper.createAlleleSearchParameter();
-
-		assertEquals(2, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
-		// The searchparam value is on the observation, but it hasn't been indexed yet
-		assertThat(myReindexTestHelper.getAlleleObservationIds(), hasSize(0));
-
-		// Only reindex one of them
-		JobParameters jobParameters = MultiUrlJobParameterUtil.buildJobParameters("Observation?status=final");
-
-		// execute
-		JobExecution jobExecution = myBatchJobSubmitter.runJob(myReindexJob, jobParameters);
-
-		myBatchJobHelper.awaitJobCompletion(jobExecution);
-
-		// validate
-		assertEquals(2, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
-		// Now one of them should be indexed
-		List<String> alleleObservationIds = myReindexTestHelper.getAlleleObservationIds();
-		assertThat(alleleObservationIds, hasSize(1));
-		assertEquals(obsFinalId.getIdPart(), alleleObservationIds.get(0));
-	}
-
-	@Test
-	public void testReindexEverythingJob() throws Exception {
+	public void testReindexEverythingJob() {
 		// setup
 
 		for (int i = 0; i < 50; ++i) {
 			myReindexTestHelper.createObservationWithAlleleExtension(Observation.ObservationStatus.FINAL);
 		}
+
+		sleepUntilTimeChanges();
 
 		myReindexTestHelper.createAlleleSearchParameter();
 		mySearchParamRegistry.forceRefresh();
@@ -96,26 +65,18 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		// The searchparam value is on the observation, but it hasn't been indexed yet
 		assertThat(myReindexTestHelper.getAlleleObservationIds(), hasSize(0));
 
-		JobParameters jobParameters = buildEverythingJobParameters(3L);
-
 		// execute
-		JobExecution jobExecution = myBatchJobSubmitter.runJob(myReindexEverythingJob, jobParameters);
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
+		startRequest.setParameters(new ReindexJobParameters());
+		String id = myJobCoordinator.startInstance(startRequest);
 
-		myBatchJobHelper.awaitJobCompletion(jobExecution);
+		myBatch2JobHelper.awaitJobCompletion(id);
 
 		// validate
 		assertEquals(50, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
 		// Now all of them should be indexed
 		assertThat(myReindexTestHelper.getAlleleObservationIds(), hasSize(50));
 	}
-
-	private JobParameters buildEverythingJobParameters(Long theBatchSize) {
-		Map<String, JobParameter> map = new HashMap<>();
-		map.put(CronologicalBatchAllResourcePidReader.JOB_PARAM_START_TIME, new JobParameter(DateUtils.addMinutes(new Date(), CommonBatchJobConfig.MINUTES_IN_FUTURE_TO_PROCESS_FROM)));
-		map.put(CronologicalBatchAllResourcePidReader.JOB_PARAM_BATCH_SIZE, new JobParameter(theBatchSize.longValue()));
-		JobParameters parameters = new JobParameters(map);
-		return parameters;
-	}
-
 
 }

@@ -57,6 +57,12 @@ public interface IResourceTableDao extends JpaRepository<ResourceTable, Long>, I
 	@Query("SELECT t.myId FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high ORDER BY t.myUpdated ASC")
 	Slice<Long> findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(Pageable thePage, @Param("low") Date theLow, @Param("high") Date theHigh);
 
+	/**
+	 * @return List of arrays containing [PID, resourceType, lastUpdated]
+	 */
+	@Query("SELECT t.myId, t.myResourceType, t.myUpdated FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high ORDER BY t.myUpdated ASC")
+	Slice<Object[]> findIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldest(Pageable thePage, @Param("low") Date theLow, @Param("high") Date theHigh);
+
 	@Query("SELECT t.myUpdated FROM ResourceTable t ORDER BY t.myUpdated ASC")
 	Slice<Date> findUpdatedDatesOfResourcesOrderedFromOldest(Pageable thePage);
 

@@ -55,6 +55,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.test.BaseTest;
+import ca.uhn.fhir.jpa.util.Batch2JobHelper;
 import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import ca.uhn.fhir.test.utilities.LoggingExtension;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
@@ -75,7 +76,6 @@ import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -183,6 +183,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected IFulltextSearchSvc myFulltestSearchSvc;
 	@Autowired(required = false)
 	protected BatchJobHelper myBatchJobHelper;
+	@Autowired(required = false)
+	protected Batch2JobHelper myBatch2JobHelper;
 	@Autowired
 	protected ITermConceptDao myTermConceptDao;
 	@Autowired

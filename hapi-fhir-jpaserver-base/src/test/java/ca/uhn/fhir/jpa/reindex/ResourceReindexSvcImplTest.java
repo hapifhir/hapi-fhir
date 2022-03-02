@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.reindex;
 
 import ca.uhn.fhir.jpa.api.svc.IResourceReindexSvc;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
@@ -10,8 +11,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@SuppressWarnings("unchecked")
 public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 
 	@Autowired
@@ -71,7 +77,7 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 		Date actual = mySvc.getOldestTimestamp("Patient");
 
 		// Verify
-		assertEquals(null, actual);
+		assertNull(actual);
 	}
 
 
@@ -84,6 +90,66 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 		Date actual = mySvc.getOldestTimestamp(null);
 
 		// Verify
-		assertEquals(null, actual);
+		assertNull(actual);
 	}
+
+	@Test
+	public void testFetchResourceIdsPage_WithData() {
+
+		// Setup
+
+		createPatient(withActiveFalse());
+		sleepUntilTimeChanges();
+
+		Date start = new Date();
+
+		Long id0 = createPatient(withActiveFalse()).getIdPartAsLong();
+		sleepUntilTimeChanges();
+		Long id1 = createPatient(withActiveFalse()).getIdPartAsLong();
+		sleepUntilTimeChanges();
+		Date beforeLastInRange = new Date();
+		sleepUntilTimeChanges();
+		Long id2 = createObservation(withObservationCode("http://foo", "bar")).getIdPartAsLong();
+		sleepUntilTimeChanges();
+
+		Date end = new Date();
+
+		sleepUntilTimeChanges();
+
+		createPatient(withActiveFalse());
+
+		// Execute
+
+		IResourceReindexSvc.IdChunk page = mySvc.fetchResourceIdsPage(start, end);
+
+		// Verify
+
+		assertThat(page.getResourceTypes().toString(), page.getResourceTypes(), contains("Patient", "Patient", "Observation"));
+		assertThat(page.getIds(), contains(new ResourcePersistentId(id0), new ResourcePersistentId(id1), new ResourcePersistentId(id2)));
+		assertTrue(page.getLastDate().after(beforeLastInRange));
+		assertTrue(page.getLastDate().before(end));
+
+	}
+
+
+	@Test
+	public void testFetchResourceIdsPage_NoData() {
+
+		// Setup
+
+		Date start = new Date();
+		Date end = new Date();
+
+		// Execute
+
+		IResourceReindexSvc.IdChunk page = mySvc.fetchResourceIdsPage(start, end);
+
+		// Verify
+
+		assertEquals(0, page.getResourceTypes().size());
+		assertEquals(0, page.getIds().size());
+		assertNull(page.getLastDate());
+
+	}
+
 }

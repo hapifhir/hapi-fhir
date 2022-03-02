@@ -1,0 +1,110 @@
+package ca.uhn.fhir.batch2.jobs.reindex;
+
+import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.IJobStepWorker;
+import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
+import ca.uhn.fhir.batch2.api.RunOutcome;
+import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.api.svc.IResourceReindexSvc;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallback;
+
+import javax.annotation.Nonnull;
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class ReindexStep implements IJobStepWorker<ReindexJobParameters, ReindexChunkIds, VoidModel> {
+
+	@Autowired
+	private HapiTransactionService myHapiTransactionService;
+
+	@Autowired
+	private IResourceReindexSvc myResourceReindexSvc;
+
+	@Autowired
+	private IFhirSystemDao<?, ?> mySystemDao;
+
+	@Autowired
+	private DaoRegistry myDaoRegistry;
+
+	@Autowired
+	private IIdHelperService myIdHelperService;
+
+	@Nonnull
+	@Override
+	public RunOutcome run(@Nonnull StepExecutionDetails<ReindexJobParameters, ReindexChunkIds> theStepExecutionDetails, @Nonnull IJobDataSink<VoidModel> theDataSink) throws JobExecutionFailedException {
+
+		ReindexChunkIds data = theStepExecutionDetails.getData();
+
+		return doReindex(data, theDataSink);
+	}
+
+	@Nonnull
+	public RunOutcome doReindex(ReindexChunkIds data, IJobDataSink<VoidModel> theDataSink) {
+		RequestDetails requestDetails = new SystemRequestDetails();
+		TransactionDetails transactionDetails = new TransactionDetails();
+		myHapiTransactionService.execute(requestDetails, transactionDetails, new ReindexJob(data, requestDetails, transactionDetails, theDataSink));
+
+		return new RunOutcome(data.getIds().size());
+	}
+
+	private class ReindexJob implements TransactionCallback<Void> {
+		private final ReindexChunkIds myData;
+		private final RequestDetails myRequestDetails;
+		private final TransactionDetails myTransactionDetails;
+		private final IJobDataSink<VoidModel> myDataSink;
+
+		public ReindexJob(ReindexChunkIds theData, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, IJobDataSink<VoidModel> theDataSink) {
+			myData = theData;
+			myRequestDetails = theRequestDetails;
+			myTransactionDetails = theTransactionDetails;
+			myDataSink = theDataSink;
+		}
+
+		@Override
+		public Void doInTransaction(TransactionStatus status) {
+
+			List<ResourcePersistentId> persistentIds = myData
+				.getIds()
+				.stream()
+				.map(t -> new ResourcePersistentId(t.getId()))
+				.collect(Collectors.toList());
+
+			mySystemDao.preFetchResources(persistentIds);
+
+			for (int i = 0; i < myData.getIds().size(); i++) {
+
+				String nextResourceType = myData.getIds().get(i).getResourceType();
+				IFhirResourceDao dao = myDaoRegistry.getResourceDao(nextResourceType);
+				ResourcePersistentId resourcePersistentId = persistentIds.get(i);
+				try {
+					dao.reindex(resourcePersistentId, myRequestDetails, myTransactionDetails);
+				} catch (BaseServerResponseException | DataFormatException e) {
+					String resourceForcedId = myIdHelperService.translatePidIdToForcedIdWithCache(resourcePersistentId).orElse(resourcePersistentId.toString());
+					String resourceId = nextResourceType + "/" + resourceForcedId;
+					ourLog.debug("Failure during reindexing {}", resourceId, e);
+					myDataSink.recoveredError("Failure reindexing " + resourceId + ": " + e.getMessage());
+				}
+			}
+
+			return null;
+		}
+	}
+
+	private static final Logger ourLog = LoggerFactory.getLogger(ReindexStep.class);
+}

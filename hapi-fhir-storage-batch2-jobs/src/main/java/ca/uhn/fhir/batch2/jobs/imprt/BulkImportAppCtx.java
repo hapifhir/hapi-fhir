@@ -48,7 +48,6 @@ public class BulkImportAppCtx {
 			.addLastStep(
 				"process-files",
 				"Process files",
-				NdJsonFileJson.class,
 				bulkImport2ConsumeFiles())
 			.build();
 	}
