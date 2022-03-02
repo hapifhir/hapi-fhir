@@ -20,12 +20,12 @@ package ca.uhn.fhir.jpa.search.builder;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -48,7 +48,6 @@ import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
@@ -104,10 +103,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.util.ReflectionUtils;
 
 import javax.annotation.Nonnull;
-import javax.persistence.Column;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
@@ -130,7 +127,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -152,6 +148,9 @@ public class SearchBuilder implements ISearchBuilder {
 	public static final int MAXIMUM_PAGE_SIZE_FOR_TESTING = 50;
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchBuilder.class);
 	private static final ResourcePersistentId NO_MORE = new ResourcePersistentId(-1L);
+	private static final String MY_TARGET_RESOURCE_PID = "myTargetResourcePid";
+	private static final String MY_SOURCE_RESOURCE_PID = "mySourceResourcePid";
+	private static final String MY_TARGET_RESOURCE_VERSION = "myTargetResourceVersion";
 	public static boolean myUseMaxPageSize50ForTest = false;
 	private final String myResourceName;
 	private final Class<? extends IBaseResource> myResourceType;
@@ -892,11 +891,11 @@ public class SearchBuilder implements ISearchBuilder {
 		if (theIncludes == null || theIncludes.isEmpty()) {
 			return new HashSet<>();
 		}
-		String searchPidFieldName = theReverseMode ? "myTargetResourcePid" : "mySourceResourcePid";
-		String findPidFieldName = theReverseMode ? "mySourceResourcePid" : "myTargetResourcePid";
+		String searchPidFieldName = theReverseMode ? MY_TARGET_RESOURCE_PID : MY_SOURCE_RESOURCE_PID;
+		String findPidFieldName = theReverseMode ? MY_SOURCE_RESOURCE_PID : MY_TARGET_RESOURCE_PID;
 		String findVersionFieldName = null;
 		if (!theReverseMode && myModelConfig.isRespectVersionsForSearchIncludes()) {
-			findVersionFieldName = "myTargetResourceVersion";
+			findVersionFieldName = MY_TARGET_RESOURCE_VERSION;
 		}
 
 		List<ResourcePersistentId> nextRoundMatches = new ArrayList<>(theMatches);
@@ -1016,11 +1015,10 @@ public class SearchBuilder implements ISearchBuilder {
 					String targetResourceType = defaultString(nextInclude.getParamTargetType(), null);
 					for (String nextPath : paths) {
 						boolean haveTargetTypesDefinedByParam = param.hasTargets();
-						Column findPidFieldSqlColumn = Objects.requireNonNull(ReflectionUtils.findField(ResourceLink.class, findPidFieldName)).getAnnotation(Column.class);
-						String fieldsToLoad = "r." + findPidFieldSqlColumn.name();
+						String findPidFieldSqlColumn = findPidFieldName.equals(MY_SOURCE_RESOURCE_PID) ? "src_resource_id" : "target_resource_id";
+						String fieldsToLoad = "r." + findPidFieldSqlColumn;
 						if (findVersionFieldName != null) {
-							Column findVersionFieldSqlColumn = Objects.requireNonNull(ReflectionUtils.findField(ResourceLink.class, findVersionFieldName)).getAnnotation(Column.class);
-							fieldsToLoad += ", r." + findVersionFieldSqlColumn.name();
+							fieldsToLoad += ", r.target_resource_version";
 						}
 
 						// Query for includes lookup has consider 2 cases
@@ -1028,12 +1026,12 @@ public class SearchBuilder implements ISearchBuilder {
 						// Case 2: Where target_resource_id is null in hfj_res_link table and referred by a canonical url in target_resource_url
 
 						// Case 1:
-						Column searchPidFieldSqlColumn = Objects.requireNonNull(ReflectionUtils.findField(ResourceLink.class, searchPidFieldName)).getAnnotation(Column.class);
+						String searchPidFieldSqlColumn = searchPidFieldName.equals(MY_TARGET_RESOURCE_PID) ? "target_resource_id" : "src_resource_id";
 						StringBuilder resourceIdBasedQuery = new StringBuilder("SELECT " + fieldsToLoad +
 							" FROM hfj_res_link r " +
 							" WHERE r.src_path = :src_path AND " +
 							" r.target_resource_id IS NOT NULL AND " +
-							" r." + searchPidFieldSqlColumn.name() + " IN (:target_pids) ");
+							" r." + searchPidFieldSqlColumn + " IN (:target_pids) ");
 						if(targetResourceType != null) {
 							resourceIdBasedQuery.append(" AND r.target_resource_type = :target_resource_type ");
 						} else if(haveTargetTypesDefinedByParam) {
@@ -1048,7 +1046,8 @@ public class SearchBuilder implements ISearchBuilder {
 								fieldsToLoadFromSpidxUriTable += ", NULL";
 							}
 						}
-						StringBuilder resourceUrlBasedQuery = new StringBuilder("SELECT " + fieldsToLoadFromSpidxUriTable +
+						//@formatter:off
+						String resourceUrlBasedQuery = "SELECT " + fieldsToLoadFromSpidxUriTable +
 							" FROM hfj_res_link r " +
 							" LEFT JOIN hfj_spidx_uri rUri ON ( " +
 							"   r.target_resource_url = rUri.sp_uri AND " +
@@ -1057,9 +1056,11 @@ public class SearchBuilder implements ISearchBuilder {
 							    (haveTargetTypesDefinedByParam ? " AND rUri.res_type IN (:target_resource_types) " : "") +
 							" ) " +
 							" WHERE r.src_path = :src_path AND " +
-							" r." + searchPidFieldSqlColumn.name() + " IN (:target_pids) ");
+							" r.target_resource_id IS NULL AND " +
+							" r." + searchPidFieldSqlColumn + " IN (:target_pids) ";
+						//@formatter:on
 
-						String sql = "( "  + resourceIdBasedQuery + " ) UNION ( " + resourceUrlBasedQuery + " )";
+						String sql = resourceIdBasedQuery + " UNION " + resourceUrlBasedQuery;
 
 						List<Collection<ResourcePersistentId>> partitions = partition(nextRoundMatches, getMaximumPageSize());
 						for (Collection<ResourcePersistentId> nextPartition : partitions) {
