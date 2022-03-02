@@ -165,7 +165,7 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 
 	private void enhanceBulkParametersWithGroupParameters(BulkExportJobEntity theBulkExportJobEntity, JobParametersBuilder theParameters) {
 		String theGroupId = getQueryParameterIfPresent(theBulkExportJobEntity.getRequest(), JpaConstants.PARAM_EXPORT_GROUP_ID);
-		String expandMdm  = getQueryParameterIfPresent(theBulkExportJobEntity.getRequest(), JpaConstants.PARAM_EXPORT_MDM);
+		String expandMdm = getQueryParameterIfPresent(theBulkExportJobEntity.getRequest(), JpaConstants.PARAM_EXPORT_MDM);
 		theParameters.addString(BatchConstants.GROUP_ID_PARAMETER, theGroupId);
 		theParameters.addString(BatchConstants.EXPAND_MDM_PARAMETER, expandMdm);
 	}
@@ -197,26 +197,6 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 		mySchedulerService.scheduleClusteredJob(DateUtils.MILLIS_PER_HOUR, jobDetail);
 	}
 
-	public static class Job implements HapiJob {
-		@Autowired
-		private IBulkDataExportJobSchedulingHelper myTarget;
-
-		@Override
-		public void execute(JobExecutionContext theContext) {
-			myTarget.startSubmittedJobs();
-		}
-	}
-
-	public static class PurgeExpiredFilesJob implements HapiJob {
-		@Autowired
-		private IBulkDataExportJobSchedulingHelper myTarget;
-
-		@Override
-		public void execute(JobExecutionContext theContext) {
-			myTarget.purgeExpiredFiles();
-		}
-	}
-
 	@Override
 	@Transactional(Transactional.TxType.NEVER)
 	public synchronized void cancelAndPurgeAllJobs() {
@@ -230,6 +210,7 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 			return null;
 		});
 	}
+
 	/**
 	 * This method is called by the scheduler to run a pass of the
 	 * generator
@@ -288,6 +269,26 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 		IIdType retVal = myContext.getVersion().newIdType();
 		retVal.setValue(theResourceId);
 		return retVal;
+	}
+
+	public static class Job implements HapiJob {
+		@Autowired
+		private IBulkDataExportJobSchedulingHelper myTarget;
+
+		@Override
+		public void execute(JobExecutionContext theContext) {
+			myTarget.startSubmittedJobs();
+		}
+	}
+
+	public static class PurgeExpiredFilesJob implements HapiJob {
+		@Autowired
+		private IBulkDataExportJobSchedulingHelper myTarget;
+
+		@Override
+		public void execute(JobExecutionContext theContext) {
+			myTarget.purgeExpiredFiles();
+		}
 	}
 }
 
