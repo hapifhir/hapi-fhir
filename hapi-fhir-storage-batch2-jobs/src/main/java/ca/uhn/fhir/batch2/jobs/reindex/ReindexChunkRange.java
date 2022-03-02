@@ -11,7 +11,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Date;
 
-public class ReindexRangeChunk implements IModelJson {
+public class ReindexChunkRange implements IModelJson {
 
 	@Nullable
 	@JsonProperty("resourceType")
@@ -26,7 +26,7 @@ public class ReindexRangeChunk implements IModelJson {
 	@JsonDeserialize(using = JsonDateDeserializer.class)
 	@JsonProperty("end")
 	@Nonnull
-	private String myEnd;
+	private Date myEnd;
 
 	@Nullable
 	public String getResourceType() {
@@ -47,11 +47,11 @@ public class ReindexRangeChunk implements IModelJson {
 	}
 
 	@Nonnull
-	public String getEnd() {
+	public Date getEnd() {
 		return myEnd;
 	}
 
-	public void setEnd(@Nonnull String theEnd) {
+	public void setEnd(@Nonnull Date theEnd) {
 		myEnd = theEnd;
 	}
 

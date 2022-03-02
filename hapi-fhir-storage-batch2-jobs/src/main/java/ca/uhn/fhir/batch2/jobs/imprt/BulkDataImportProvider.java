@@ -159,7 +159,7 @@ public class BulkDataImportProvider {
 		}
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
-		request.setJobDefinitionId(BulkImport2AppCtx.JOB_BULK_IMPORT_PULL);
+		request.setJobDefinitionId(BulkImportAppCtx.JOB_BULK_IMPORT_PULL);
 		request.setParameters(jobParameters);
 
 		ourLog.info("Requesting Bulk Import Job ($import by Manifest) with {} urls", typeAndUrls.size());

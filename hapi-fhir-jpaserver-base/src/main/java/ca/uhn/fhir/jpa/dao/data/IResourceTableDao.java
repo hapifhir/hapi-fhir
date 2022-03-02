@@ -57,6 +57,12 @@ public interface IResourceTableDao extends JpaRepository<ResourceTable, Long>, I
 	@Query("SELECT t.myId FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high ORDER BY t.myUpdated ASC")
 	Slice<Long> findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(Pageable thePage, @Param("low") Date theLow, @Param("high") Date theHigh);
 
+	@Query("SELECT t.myUpdated FROM ResourceTable t ORDER BY t.myUpdated ASC")
+	Slice<Date> findUpdatedDatesOfResourcesOrderedFromOldest(Pageable thePage);
+
+	@Query("SELECT t.myUpdated FROM ResourceTable t WHERE t.myResourceType = :type ORDER BY t.myUpdated ASC")
+	Slice<Date> findUpdatedDatesOfResourcesOrderedFromOldest(Pageable thePage, @Param("type") String theType);
+
 	// TODO in the future, consider sorting by pid as well so batch jobs process in the same order across restarts
 	@Query("SELECT t.myId FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high AND t.myPartitionIdValue = :partition_id ORDER BY t.myUpdated ASC")
 	Slice<Long> findIdsOfPartitionedResourcesWithinUpdatedRangeOrderedFromOldest(Pageable thePage, @Param("low") Date theLow, @Param("high") Date theHigh, @Param("partition_id") Integer theRequestPartitionId);

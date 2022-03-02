@@ -55,6 +55,11 @@ public interface IJobStepWorker<PT extends IModelJson, IT extends IModelJson, OT
 	 */
 	class RunOutcome {
 
+		/**
+		 * RunOutcome with 0 records processed
+		 */
+		public static final RunOutcome SUCCESS = new RunOutcome(0);
+
 		private final int myRecordsProcessed;
 
 		/**

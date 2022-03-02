@@ -33,7 +33,7 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 
 		// Execute
 
-		Date actual = mySvc.getOldestTimestamp(null);
+		Date actual = mySvc.getOldestTimestamp("Patient");
 
 		// Verify
 		assertEquals(expected, actual);
@@ -62,4 +62,28 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 		assertEquals(expected, actual);
 	}
 
+	@Test
+	public void testGetOldestTimestamp_NoData_Resource() {
+		// Setup
+
+		// Execute
+
+		Date actual = mySvc.getOldestTimestamp("Patient");
+
+		// Verify
+		assertEquals(null, actual);
+	}
+
+
+	@Test
+	public void testGetOldestTimestamp_NoData_Global() {
+		// Setup
+
+		// Execute
+
+		Date actual = mySvc.getOldestTimestamp(null);
+
+		// Verify
+		assertEquals(null, actual);
+	}
 }

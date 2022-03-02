@@ -1,4 +1,4 @@
-package ca.uhn.fhir.batch2.jobs.imprt;
+package ca.uhn.fhir.batch2.jobs.reindex;
 
 /*-
  * #%L
@@ -22,49 +22,49 @@ package ca.uhn.fhir.batch2.jobs.imprt;
 
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.batch2.jobs.imprt.BulkDataImportProvider;
+import ca.uhn.fhir.batch2.jobs.imprt.BulkImportJobParameters;
+import ca.uhn.fhir.batch2.jobs.imprt.ConsumeFilesStep;
+import ca.uhn.fhir.batch2.jobs.imprt.FetchFilesStep;
+import ca.uhn.fhir.batch2.jobs.imprt.NdJsonFileJson;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class BulkImport2AppCtx {
+public class ReindexAppCtx {
 
-	public static final String JOB_BULK_IMPORT_PULL = "BULK_IMPORT_PULL";
-	public static final int PARAM_MAXIMUM_BATCH_SIZE_DEFAULT = 800; // Avoid the 1000 SQL param limit
+	private static final String JOB_REINDEX = "REINDEX";
 
 	@Bean
-	public JobDefinition bulkImport2JobDefinition() {
+	public JobDefinition reindexJobDefinition() {
 		return JobDefinition
 			.newBuilder()
-			.setJobDefinitionId(JOB_BULK_IMPORT_PULL)
-			.setJobDescription("FHIR Bulk Import using pull-based data source")
+			.setJobDefinitionId(JOB_REINDEX)
+			.setJobDescription("Reindex resources")
 			.setJobDefinitionVersion(1)
-			.setParametersType(BulkImportJobParameters.class)
+			.setParametersType(ReindexJobParameters.class)
 			.addFirstStep(
-				"fetch-files",
-				"Fetch files for import",
-				NdJsonFileJson.class,
-				bulkImport2FetchFiles())
-			.addLastStep(
+				"generate-ranges",
+				"Generate data ranges to reindex",
+				ReindexChunkRange.class,
+				reindexGenerateRangeChunksStep())
+			.addIntermediateStep(
 				"process-files",
 				"Process files",
-				NdJsonFileJson.class,
-				bulkImport2ConsumeFiles())
+				ReindexChunkRange.class,
+				ReindexChunkIds.class,
+				loadIdsStep())
 			.build();
 	}
 
 	@Bean
-	public IJobStepWorker<BulkImportJobParameters, VoidModel, NdJsonFileJson> bulkImport2FetchFiles() {
-		return new FetchFilesStep();
+	public GenerateRangeChunksStep reindexGenerateRangeChunksStep() {
+		return new GenerateRangeChunksStep();
 	}
 
 	@Bean
-	public IJobStepWorker<BulkImportJobParameters, NdJsonFileJson, VoidModel> bulkImport2ConsumeFiles() {
-		return new ConsumeFilesStep();
-	}
-
-	@Bean
-	public BulkDataImportProvider bulkImportProvider() {
-		return new BulkDataImportProvider();
+	public LoadIdsStep loadIdsStep() {
+		return new LoadIdsStep();
 	}
 }
