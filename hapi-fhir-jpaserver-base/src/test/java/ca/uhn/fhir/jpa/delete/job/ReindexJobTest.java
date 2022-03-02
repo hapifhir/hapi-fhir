@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.delete.job;
 
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.batch.CommonBatchJobConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.batch.config.BatchConstants;
@@ -7,6 +8,7 @@ import ca.uhn.fhir.jpa.batch.job.MultiUrlJobParameterUtil;
 import ca.uhn.fhir.jpa.batch.reader.CronologicalBatchAllResourcePidReader;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -30,6 +32,7 @@ import java.util.Map;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ReindexJobTest extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(ReindexJobTest.class);
@@ -79,6 +82,49 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		List<String> alleleObservationIds = myReindexTestHelper.getAlleleObservationIds();
 		assertThat(alleleObservationIds, hasSize(1));
 		assertEquals(obsFinalId.getIdPart(), alleleObservationIds.get(0));
+	}
+
+	@Test
+	public void testReindexJobLastUpdatedFilter() throws Exception {
+		// Given
+		DaoMethodOutcome oldPatient = myReindexTestHelper.createEyeColourPatient(true);
+		Thread.sleep(3000);
+		DaoMethodOutcome newerPatient = myReindexTestHelper.createEyeColourPatient(true);
+
+		// Setup cutoff
+		Date firstPatientLastUpdated = oldPatient.getResource().getMeta().getLastUpdated();
+		Date secondPatientLastUpdated = newerPatient.getResource().getMeta().getLastUpdated();
+		Date cutoff = DateUtils.addMilliseconds(firstPatientLastUpdated, 1500);
+		ourLog.info("Older lastUpdated: {}", firstPatientLastUpdated);
+		ourLog.info("Newer lastUpdated: {}", secondPatientLastUpdated);
+		ourLog.info("Cutoff: {}", cutoff);
+		assertTrue(cutoff.after(firstPatientLastUpdated));
+		assertTrue(cutoff.before(secondPatientLastUpdated));
+
+		//Create our new SP.
+		myReindexTestHelper.createEyeColourSearchParameter();
+
+		//There exists 2 patients
+		assertEquals(2, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
+		// The searchparam value is on the patient, but it hasn't been indexed yet, so the call to search for all with eye-colour returns 0
+		assertThat(myReindexTestHelper.getEyeColourPatientIds(), hasSize(0));
+
+		// Only reindex one of them
+		String cutoffString = new DateTimeDt(cutoff).getValueAsString();
+		JobParameters jobParameters = MultiUrlJobParameterUtil.buildJobParameters("Patient?_lastUpdated=ge" + cutoffString);
+
+		// execute
+		JobExecution jobExecution = myBatchJobSubmitter.runJob(myReindexJob, jobParameters);
+
+		myBatchJobHelper.awaitJobCompletion(jobExecution);
+
+		// validate there are still 2 patients
+		assertEquals(2, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
+
+		// Now one of them should be indexed for the eye colour SP
+		List<String> eyeColourPatientIds = myReindexTestHelper.getEyeColourPatientIds();
+		assertThat(eyeColourPatientIds, hasSize(1));
+		assertEquals(newerPatient.getId().getIdPart(), eyeColourPatientIds.get(0));
 	}
 
 	@Test
