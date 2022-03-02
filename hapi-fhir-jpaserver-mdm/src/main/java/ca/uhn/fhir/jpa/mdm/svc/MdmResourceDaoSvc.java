@@ -72,7 +72,8 @@ public class MdmResourceDaoSvc {
 	 */
 	public void removeGoldenResourceTag(IAnyResource theGoldenResource, String theResourcetype) {
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResourcetype);
-		resourceDao.removeTag(theGoldenResource.getIdElement(), TagTypeEnum.TAG, MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_GOLDEN_RECORD);
+		RequestDetails requestDetails = new SystemRequestDetails().setRequestPartitionId((RequestPartitionId) theGoldenResource.getUserData(Constants.RESOURCE_PARTITION_ID));
+		resourceDao.removeTag(theGoldenResource.getIdElement(), TagTypeEnum.TAG, MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_GOLDEN_RECORD, requestDetails);
 	}
 
 	public IAnyResource readGoldenResourceByPid(ResourcePersistentId theGoldenResourcePid, String theResourceType) {
@@ -80,13 +81,17 @@ public class MdmResourceDaoSvc {
 		return (IAnyResource) resourceDao.readByPid(theGoldenResourcePid);
 	}
 
-	//TODO GGG MDM address this
 	public Optional<IAnyResource> searchGoldenResourceByEID(String theEid, String theResourceType) {
+		return this.searchGoldenResourceByEID(theEid, theResourceType, null);
+	}
+
+	public Optional<IAnyResource> searchGoldenResourceByEID(String theEid, String theResourceType, RequestPartitionId thePartitionId) {
 		SearchParameterMap map = buildEidSearchParameterMap(theEid, theResourceType);
 
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResourceType);
-		// FIXME KHS add partition to this search
-		IBundleProvider search = resourceDao.search(map);
+		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
+		systemRequestDetails.setRequestPartitionId(thePartitionId);
+		IBundleProvider search = resourceDao.search(map, systemRequestDetails);
 		List<IBaseResource> resources = search.getResources(0, MAX_MATCHING_GOLDEN_RESOURCES);
 
 		if (resources.isEmpty()) {

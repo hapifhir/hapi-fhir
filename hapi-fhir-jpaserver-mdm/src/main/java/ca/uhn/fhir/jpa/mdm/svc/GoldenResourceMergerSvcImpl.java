@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
@@ -31,6 +32,8 @@ import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
+import ca.uhn.fhir.mdm.util.MessageHelper;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
@@ -57,6 +60,8 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 	IdHelperService myIdHelperService;
 	@Autowired
 	MdmResourceDaoSvc myMdmResourceDaoSvc;
+	@Autowired
+	MessageHelper myMessageHelper;
 
 	@Override
 	@Transactional
@@ -65,7 +70,7 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 		Long toGoldenResourcePid = myIdHelperService.getPidOrThrowException(theToGoldenResource);
 		String resourceType = theMdmTransactionContext.getResourceType();
 
-		if (theMergedResource != null ) {
+		if (theMergedResource != null) {
 			if (myGoldenResourceHelper.hasIdentifier(theMergedResource)) {
 				throw new IllegalArgumentException("Manually merged resource can not contain identifiers");
 			}
@@ -79,6 +84,14 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 			myGoldenResourceHelper.mergeNonIdentiferFields(theFromGoldenResource, theToGoldenResource, theMdmTransactionContext);
 			//Save changes to the golden resource
 			myMdmResourceDaoSvc.upsertGoldenResource(theToGoldenResource, resourceType);
+		}
+
+		// check if the golden resource and the source resource are in the same partition, throw error if not
+		RequestPartitionId fromGoldenResourcePartitionId = (RequestPartitionId) theFromGoldenResource.getUserData(Constants.RESOURCE_PARTITION_ID);
+		RequestPartitionId toGoldenPartitionId = (RequestPartitionId) theToGoldenResource.getUserData(Constants.RESOURCE_PARTITION_ID);
+		if (fromGoldenResourcePartitionId != null && toGoldenPartitionId != null && fromGoldenResourcePartitionId.hasPartitionIds() && toGoldenPartitionId.hasPartitionIds() &&
+			!fromGoldenResourcePartitionId.hasPartitionId(toGoldenPartitionId.getFirstPartitionIdOrNull())) {
+			throw new InvalidRequestException(myMessageHelper.getMessageForMismatchPartition(theFromGoldenResource, theToGoldenResource));
 		}
 
 		//Merge the links from the FROM to the TO resource. Clean up dangling links.
