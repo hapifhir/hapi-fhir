@@ -57,6 +57,7 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 
 	@Autowired
 	private IBulkExportCollectionDao myBulkExportCollectionDao;
+
 	@Autowired
 	private IBulkExportCollectionFileDao myBulkExportCollectionFileDao;
 
@@ -87,6 +88,21 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 
 	@Autowired
 	private FhirContext myContext;
+
+	@PostConstruct
+	public void start() {
+		myTxTemplate = new TransactionTemplate(myTxManager);
+
+		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
+		jobDetail.setId(Job.class.getName());
+		jobDetail.setJobClass(Job.class);
+		mySchedulerService.scheduleClusteredJob(10 * DateUtils.MILLIS_PER_SECOND, jobDetail);
+
+		jobDetail = new ScheduledJobDefinition();
+		jobDetail.setId(PurgeExpiredFilesJob.class.getName());
+		jobDetail.setJobClass(PurgeExpiredFilesJob.class);
+		mySchedulerService.scheduleClusteredJob(DateUtils.MILLIS_PER_HOUR, jobDetail);
+	}
 
 	/**
 	 * This method is called by the scheduler to run a pass of the
@@ -133,69 +149,9 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 
 	}
 
-	private void processJob(BulkExportJobEntity theBulkExportJobEntity) {
-		String theJobUuid = theBulkExportJobEntity.getJobId();
-		JobParametersBuilder parameters = new JobParametersBuilder()
-			.addString(BatchConstants.JOB_UUID_PARAMETER, theJobUuid)
-			.addLong(BatchConstants.READ_CHUNK_PARAMETER, READ_CHUNK_SIZE);
 
-		ourLog.info("Submitting bulk export job {} to job scheduler", theJobUuid);
 
-		try {
-			if (isGroupBulkJob(theBulkExportJobEntity)) {
-				enhanceBulkParametersWithGroupParameters(theBulkExportJobEntity, parameters);
-				myJobSubmitter.runJob(myGroupBulkExportJob, parameters.toJobParameters());
-			} else if (isPatientBulkJob(theBulkExportJobEntity)) {
-				myJobSubmitter.runJob(myPatientBulkExportJob, parameters.toJobParameters());
-			} else {
-				myJobSubmitter.runJob(myBulkExportJob, parameters.toJobParameters());
-			}
-		} catch (JobParametersInvalidException theE) {
-			ourLog.error("Unable to start job with UUID: {}, the parameters are invalid. {}", theJobUuid, theE.getMessage());
-		}
-	}
 
-	private boolean isPatientBulkJob(BulkExportJobEntity theBulkExportJobEntity) {
-		return theBulkExportJobEntity.getRequest().startsWith("/Patient/");
-	}
-
-	private boolean isGroupBulkJob(BulkExportJobEntity theBulkExportJobEntity) {
-		return theBulkExportJobEntity.getRequest().startsWith("/Group/");
-	}
-
-	private void enhanceBulkParametersWithGroupParameters(BulkExportJobEntity theBulkExportJobEntity, JobParametersBuilder theParameters) {
-		String theGroupId = getQueryParameterIfPresent(theBulkExportJobEntity.getRequest(), JpaConstants.PARAM_EXPORT_GROUP_ID);
-		String expandMdm = getQueryParameterIfPresent(theBulkExportJobEntity.getRequest(), JpaConstants.PARAM_EXPORT_MDM);
-		theParameters.addString(BatchConstants.GROUP_ID_PARAMETER, theGroupId);
-		theParameters.addString(BatchConstants.EXPAND_MDM_PARAMETER, expandMdm);
-	}
-
-	private String getQueryParameterIfPresent(String theRequestString, String theParameter) {
-		Map<String, String[]> stringMap = UrlUtil.parseQueryString(theRequestString);
-		if (stringMap != null) {
-			String[] strings = stringMap.get(theParameter);
-			if (strings != null) {
-				return String.join(",", strings);
-			}
-		}
-		return null;
-
-	}
-
-	@PostConstruct
-	public void start() {
-		myTxTemplate = new TransactionTemplate(myTxManager);
-
-		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
-		jobDetail.setId(Job.class.getName());
-		jobDetail.setJobClass(Job.class);
-		mySchedulerService.scheduleClusteredJob(10 * DateUtils.MILLIS_PER_SECOND, jobDetail);
-
-		jobDetail = new ScheduledJobDefinition();
-		jobDetail.setId(PurgeExpiredFilesJob.class.getName());
-		jobDetail.setJobClass(PurgeExpiredFilesJob.class);
-		mySchedulerService.scheduleClusteredJob(DateUtils.MILLIS_PER_HOUR, jobDetail);
-	}
 
 	@Override
 	@Transactional(Transactional.TxType.NEVER)
@@ -269,6 +225,55 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 		IIdType retVal = myContext.getVersion().newIdType();
 		retVal.setValue(theResourceId);
 		return retVal;
+	}
+
+	private void processJob(BulkExportJobEntity theBulkExportJobEntity) {
+		String theJobUuid = theBulkExportJobEntity.getJobId();
+		JobParametersBuilder parameters = new JobParametersBuilder()
+			.addString(BatchConstants.JOB_UUID_PARAMETER, theJobUuid)
+			.addLong(BatchConstants.READ_CHUNK_PARAMETER, READ_CHUNK_SIZE);
+
+		ourLog.info("Submitting bulk export job {} to job scheduler", theJobUuid);
+
+		try {
+			if (isGroupBulkJob(theBulkExportJobEntity)) {
+				enhanceBulkParametersWithGroupParameters(theBulkExportJobEntity, parameters);
+				myJobSubmitter.runJob(myGroupBulkExportJob, parameters.toJobParameters());
+			} else if (isPatientBulkJob(theBulkExportJobEntity)) {
+				myJobSubmitter.runJob(myPatientBulkExportJob, parameters.toJobParameters());
+			} else {
+				myJobSubmitter.runJob(myBulkExportJob, parameters.toJobParameters());
+			}
+		} catch (JobParametersInvalidException theE) {
+			ourLog.error("Unable to start job with UUID: {}, the parameters are invalid. {}", theJobUuid, theE.getMessage());
+		}
+	}
+
+	private String getQueryParameterIfPresent(String theRequestString, String theParameter) {
+		Map<String, String[]> stringMap = UrlUtil.parseQueryString(theRequestString);
+		if (stringMap != null) {
+			String[] strings = stringMap.get(theParameter);
+			if (strings != null) {
+				return String.join(",", strings);
+			}
+		}
+		return null;
+
+	}
+
+	private boolean isPatientBulkJob(BulkExportJobEntity theBulkExportJobEntity) {
+		return theBulkExportJobEntity.getRequest().startsWith("/Patient/");
+	}
+
+	private boolean isGroupBulkJob(BulkExportJobEntity theBulkExportJobEntity) {
+		return theBulkExportJobEntity.getRequest().startsWith("/Group/");
+	}
+
+	private void enhanceBulkParametersWithGroupParameters(BulkExportJobEntity theBulkExportJobEntity, JobParametersBuilder theParameters) {
+		String theGroupId = getQueryParameterIfPresent(theBulkExportJobEntity.getRequest(), JpaConstants.PARAM_EXPORT_GROUP_ID);
+		String expandMdm = getQueryParameterIfPresent(theBulkExportJobEntity.getRequest(), JpaConstants.PARAM_EXPORT_MDM);
+		theParameters.addString(BatchConstants.GROUP_ID_PARAMETER, theGroupId);
+		theParameters.addString(BatchConstants.EXPAND_MDM_PARAMETER, expandMdm);
 	}
 
 	public static class Job implements HapiJob {

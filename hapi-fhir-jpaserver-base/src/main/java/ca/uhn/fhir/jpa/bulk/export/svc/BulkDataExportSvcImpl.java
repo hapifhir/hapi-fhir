@@ -285,13 +285,10 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		}
 	}
 
-
 	private IIdType toQualifiedBinaryId(String theIdPart) {
 		IIdType retVal = myContext.getVersion().newIdType();
 		retVal.setParts(null, "Binary", theIdPart, null);
 
 		return retVal;
 	}
-
-
 }
