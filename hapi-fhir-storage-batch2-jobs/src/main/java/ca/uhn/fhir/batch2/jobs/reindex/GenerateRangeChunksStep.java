@@ -15,6 +15,7 @@ import javax.annotation.Nonnull;
 
 import java.util.Date;
 
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.time.DateUtils.addDays;
 
 public class GenerateRangeChunksStep implements IFirstJobStepWorker<ReindexJobParameters, ReindexChunkRange> {
@@ -27,14 +28,22 @@ public class GenerateRangeChunksStep implements IFirstJobStepWorker<ReindexJobPa
 	@Override
 	public RunOutcome run(@Nonnull StepExecutionDetails<ReindexJobParameters, VoidModel> theStepExecutionDetails, @Nonnull IJobDataSink<ReindexChunkRange> theDataSink) throws JobExecutionFailedException {
 		ReindexJobParameters params = theStepExecutionDetails.getParameters();
-		Date start = myResourceReindexSvc.getOldestTimestamp(params.getResourceType());
+		String resourceType = null;
+		String url = defaultIfBlank(params.getUrl(), null);
+
+		if (url != null) {
+			resourceType = url.substring(0, url.indexOf('?'));
+		}
+
+		Date start = myResourceReindexSvc.getOldestTimestamp(resourceType);
 		Date end = new Date();
 
-		ourLog.info("Initiating reindex of type {} from {}", params.getResourceType() != null ? params.getResourceType() : "(all)", start);
+		ourLog.info("Initiating reindex of {} from {}", url != null ? url : "All Resources", start);
 
 		for (Date nextStart = start; nextStart.before(end); nextStart = addDays(nextStart, 1)) {
+
 			ReindexChunkRange nextRange = new ReindexChunkRange();
-			nextRange.setResourceType(params.getResourceType());
+			nextRange.setUrl(url);
 			nextRange.setStart(nextStart);
 			nextRange.setEnd(addDays(nextStart, 1));
 			theDataSink.accept(nextRange);

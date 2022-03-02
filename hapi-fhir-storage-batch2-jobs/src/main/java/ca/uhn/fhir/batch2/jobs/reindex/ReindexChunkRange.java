@@ -15,13 +15,14 @@ public class ReindexChunkRange implements IModelJson {
 
 	@Nullable
 	@JsonProperty("resourceType")
-	private String myResourceType;
+	private String myUrl;
 
 	@JsonSerialize(using = JsonDateSerializer.class)
 	@JsonDeserialize(using = JsonDateDeserializer.class)
 	@JsonProperty("start")
 	@Nonnull
 	private Date myStart;
+
 	@JsonSerialize(using = JsonDateSerializer.class)
 	@JsonDeserialize(using = JsonDateDeserializer.class)
 	@JsonProperty("end")
@@ -29,12 +30,12 @@ public class ReindexChunkRange implements IModelJson {
 	private Date myEnd;
 
 	@Nullable
-	public String getResourceType() {
-		return myResourceType;
+	public String getUrl() {
+		return myUrl;
 	}
 
-	public void setResourceType(@Nullable String theResourceType) {
-		myResourceType = theResourceType;
+	public void setUrl(@Nullable String theUrl) {
+		myUrl = theUrl;
 	}
 
 	@Nonnull

@@ -49,7 +49,39 @@ public class ReindexJobTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testReindexEverythingJob() {
+	public void testReindexJob() throws Exception {
+		// setup
+
+		IIdType obsFinalId = myReindexTestHelper.createObservationWithAlleleExtension(Observation.ObservationStatus.FINAL);
+		IIdType obsCancelledId = myReindexTestHelper.createObservationWithAlleleExtension(Observation.ObservationStatus.CANCELLED);
+
+		myReindexTestHelper.createAlleleSearchParameter();
+
+		assertEquals(2, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
+		// The searchparam value is on the observation, but it hasn't been indexed yet
+		assertThat(myReindexTestHelper.getAlleleObservationIds(), hasSize(0));
+
+		// Only reindex one of them
+		JobParameters jobParameters = MultiUrlJobParameterUtil.buildJobParameters("Observation?status=final");
+
+		// execute
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
+		startRequest.setParameters(new ReindexJobParameters());
+		String id = myJobCoordinator.startInstance(startRequest);
+		myBatch2JobHelper.awaitJobCompletion(id);
+
+		// validate
+		assertEquals(2, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
+
+		// Now one of them should be indexed
+		List<String> alleleObservationIds = myReindexTestHelper.getAlleleObservationIds();
+		assertThat(alleleObservationIds, hasSize(1));
+		assertEquals(obsFinalId.getIdPart(), alleleObservationIds.get(0));
+	}
+
+	@Test
+	public void testReindex_Everything() throws Exception {
 		// setup
 
 		for (int i = 0; i < 50; ++i) {
@@ -70,7 +102,6 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
 		startRequest.setParameters(new ReindexJobParameters());
 		String id = myJobCoordinator.startInstance(startRequest);
-
 		myBatch2JobHelper.awaitJobCompletion(id);
 
 		// validate
