@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
+import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
@@ -27,6 +28,14 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import org.apache.commons.collections4.ListUtils;
+import org.apache.lucene.search.BooleanQuery;
+import org.hibernate.search.engine.search.predicate.dsl.PredicateFinalStep;
+import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
+import org.hibernate.search.engine.search.query.SearchQuery;
+import org.hibernate.search.mapper.orm.Search;
+import org.hibernate.search.mapper.orm.common.EntityReference;
+import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -43,12 +52,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.util.AopTestUtils;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc.MAKE_LOADING_VERSION_CURRENT;
 import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.LOINC_URI;
@@ -57,6 +71,8 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -73,8 +89,8 @@ import static org.mockito.Mockito.when;
 //@ExtendWith(SpringExtension.class)
 //@ContextConfiguration(classes = {TestR4Config.class, TestHibernateSearchAddInConfig.DefaultLuceneHeap.class})
 //@ContextConfiguration(classes = {TestR4Config.class, TestHibernateSearchAddInConfig.DefaultLuceneHeap.class})
-public abstract class AbstractValeSetFreeTextExpansionR4Test extends BaseJpaTest {
-	private static final Logger ourLog = LoggerFactory.getLogger(AbstractValeSetFreeTextExpansionR4Test.class);
+public abstract class AbstractValueSetFreeTextExpansionR4Test extends BaseJpaTest {
+	private static final Logger ourLog = LoggerFactory.getLogger(AbstractValueSetFreeTextExpansionR4Test.class);
 
 	private static final String CS_URL = "http://example.com/my_code_system";
 	private static final String CS_URL_2 = "http://example.com/my_code_system2";
@@ -129,6 +145,9 @@ public abstract class AbstractValeSetFreeTextExpansionR4Test extends BaseJpaTest
 
 	@Autowired
 	private IBulkDataExportJobSchedulingHelper myBulkDataScheduleHelper;
+
+	@Autowired
+	protected ITermCodeSystemVersionDao myTermCodeSystemVersionDao;
 
 	@Mock
 	private IValueSetConceptAccumulator myValueSetCodeAccumulator;
@@ -1670,6 +1689,187 @@ public abstract class AbstractValeSetFreeTextExpansionR4Test extends BaseJpaTest
 	}
 
 
+	/**
+	 * Test associated to searching with a number of terms larger than BooleanQuery.getMaxClauseCount()
+	 */
+	@Nested
+	public class TestSearchWithManyCodes {
+
+		private List<String> allCodesNotIncludingSearched;
+		private List<String> existingCodes = Arrays.asList("50015-7", "43343-3", "43343-4", "47239-9");
+		private Long termCsId;
+
+		@BeforeEach
+		void generateLongSearchedCodesList() {
+			int codesQueriedCount = (int) (BooleanQuery.getMaxClauseCount() * 1.5);
+			allCodesNotIncludingSearched = generateCodes(codesQueriedCount);
+
+			termCsId = createLoincSystemWithSomeCodes();
+		}
+
+
+		@Test
+		public void testShouldNotFindAny() {
+			List<EntityReference> hits = search(allCodesNotIncludingSearched);
+			assertNotNull(hits);
+			assertTrue(hits.isEmpty());
+		}
+
+
+		@Test
+		public void testHitsInFirstSublist() {
+			int insertIndex = BooleanQuery.getMaxClauseCount() / 2;
+
+			// insert existing codes into list of codes searched
+			allCodesNotIncludingSearched.addAll(insertIndex, existingCodes);
+
+			List<EntityReference> hits =  search(allCodesNotIncludingSearched);
+			assertEquals(existingCodes.size(), hits.size());
+		}
+
+
+		@Test
+		public void testHitsInLastSublist() {
+			// insert existing codes into list of codes searched
+			allCodesNotIncludingSearched.addAll(allCodesNotIncludingSearched.size(), existingCodes);
+
+			List<EntityReference> hits = search(allCodesNotIncludingSearched);
+
+			assertEquals(existingCodes.size(), hits.size());
+		}
+
+
+		@Test
+		public void testHitsInBothSublists() {
+			// insert half of existing codes in first sublist and half in last
+
+			List<List<String>> partitionedExistingCodes = ListUtils.partition(existingCodes, existingCodes.size() / 2);
+			assertEquals(2, partitionedExistingCodes.size());
+
+			// insert first partition of existing codes into first sublist of searched codes
+			allCodesNotIncludingSearched.addAll(0, partitionedExistingCodes.get(0));
+
+			// insert last partition of existing codes into last sublist of searched codes
+			allCodesNotIncludingSearched.addAll(allCodesNotIncludingSearched.size(), partitionedExistingCodes.get(1));
+
+			List<EntityReference> hits = search(allCodesNotIncludingSearched);
+			assertEquals(existingCodes.size(), hits.size());
+		}
+
+		private List<EntityReference> search(List<String> theSearchedCodes) {
+			return runInTransaction(() -> {
+				TermCodeSystemVersion termCsVersion = myTermCodeSystemVersionDao.findCurrentVersionForCodeSystemResourcePid(termCsId);
+				Long termCsvPid = termCsVersion.getPid();
+
+				SearchSession searchSession = Search.session(myEntityManager);
+				SearchPredicateFactory predicate = searchSession.scope(TermConcept.class).predicate();
+
+				Optional<PredicateFinalStep> lastStepOpt = ReflectionTestUtils.invokeMethod(
+					new TermReadSvcR4(), "buildExpansionPredicate", theSearchedCodes, predicate);
+
+				assertNotNull(lastStepOpt);
+				assertTrue(lastStepOpt.isPresent());
+
+				PredicateFinalStep step = predicate.bool(b -> {
+					b.must(predicate.match().field("myCodeSystemVersionPid").matching(termCsvPid));
+					b.must(lastStepOpt.get());
+				});
+
+				int maxResultsPerBatch = 800;
+
+				SearchQuery<EntityReference> termConceptsQuery = searchSession
+					.search(TermConcept.class)
+					.selectEntityReference()
+					.where(f -> step)
+					.toQuery();
+
+				ourLog.trace("About to query: {}", termConceptsQuery.queryString());
+
+				return termConceptsQuery.fetchHits(0, maxResultsPerBatch);
+			});
+
+		}
+
+	}
+
+
+	private List<String> generateCodes(int theCodesQueriedCount) {
+		return IntStream.range(0, theCodesQueriedCount)
+			.mapToObj(i -> "generated-code-" + i).collect(Collectors.toList());
+	}
+
+
+
+	public long createLoincSystemWithSomeCodes() {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl(LOINC_URI);
+		codeSystem.setId("test-loinc");
+		codeSystem.setVersion("SYSTEM VERSION");
+		codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		IIdType csId = myCodeSystemDao.create(codeSystem).getId().toUnqualified();
+
+		ResourceTable table = myResourceTableDao.findById(csId.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
+
+		TermCodeSystemVersion termCodeSystemVersion = new TermCodeSystemVersion();
+		termCodeSystemVersion.setResource(table);
+
+		TermConcept code1 = new TermConcept(termCodeSystemVersion, "50015-7"); // has -3 as a child
+		TermConcept code2 = new TermConcept(termCodeSystemVersion, "43343-3"); // has -4 as a child
+		TermConcept code3 = new TermConcept(termCodeSystemVersion, "43343-4"); //has no children
+		TermConcept code4 = new TermConcept(termCodeSystemVersion, "47239-9"); //has no children
+
+		code1.addPropertyString("SYSTEM", "Bld/Bone mar^Donor");
+		code1.addPropertyCoding(
+			"child",
+			LOINC_URI,
+			code2.getCode(),
+			code2.getDisplay());
+		code1.addChild(code2, RelationshipTypeEnum.ISA);
+		termCodeSystemVersion.getConcepts().add(code1);
+
+		code2.addPropertyString("SYSTEM", "Ser");
+		code2.addPropertyString("HELLO", "12345-1");
+		code2.addPropertyCoding(
+			"parent",
+			LOINC_URI,
+			code1.getCode(),
+			code1.getDisplay());
+		code2.addPropertyCoding(
+			"child",
+			LOINC_URI,
+			code3.getCode(),
+			code3.getDisplay());
+		code2.addChild(code3, RelationshipTypeEnum.ISA);
+		code2.addPropertyCoding(
+			"child",
+			LOINC_URI,
+			code4.getCode(),
+			code4.getDisplay());
+		code2.addChild(code4, RelationshipTypeEnum.ISA);
+		termCodeSystemVersion.getConcepts().add(code2);
+
+		code3.addPropertyString("SYSTEM", "Ser");
+		code3.addPropertyString("HELLO", "12345-2");
+		code3.addPropertyCoding(
+			"parent",
+			LOINC_URI,
+			code2.getCode(),
+			code2.getDisplay());
+		termCodeSystemVersion.getConcepts().add(code3);
+
+		code4.addPropertyString("SYSTEM", "^Patient");
+		code4.addPropertyString("EXTERNAL_COPYRIGHT_NOTICE", "Copyright © 2006 World Health Organization...");
+		code4.addPropertyCoding(
+			"parent",
+			LOINC_URI,
+			code2.getCode(),
+			code2.getDisplay());
+		termCodeSystemVersion.getConcepts().add(code4);
+
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), LOINC_URI, "SYSTEM NAME", "SYSTEM VERSION", termCodeSystemVersion, table);
+
+		return csId.getIdPartAsLong();
+	}
 
 
 
@@ -1819,77 +2019,6 @@ public abstract class AbstractValeSetFreeTextExpansionR4Test extends BaseJpaTest
 		return id;
 	}
 
-
-	public void createLoincSystemWithSomeCodes() {
-		runInTransaction(() -> {
-			CodeSystem codeSystem = new CodeSystem();
-			codeSystem.setUrl(LOINC_URI);
-			codeSystem.setId("test-loinc");
-			codeSystem.setVersion("SYSTEM VERSION");
-			codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
-			IIdType id = myCodeSystemDao.create(codeSystem).getId().toUnqualified();
-
-			ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
-
-			TermCodeSystemVersion cs = new TermCodeSystemVersion();
-			cs.setResource(table);
-
-			TermConcept code1 = new TermConcept(cs, "50015-7"); // has -3 as a child
-			TermConcept code2 = new TermConcept(cs, "43343-3"); // has -4 as a child
-			TermConcept code3 = new TermConcept(cs, "43343-4"); //has no children
-			TermConcept code4 = new TermConcept(cs, "47239-9"); //has no children
-
-			code1.addPropertyString("SYSTEM", "Bld/Bone mar^Donor");
-			code1.addPropertyCoding(
-				"child",
-				LOINC_URI,
-				code2.getCode(),
-				code2.getDisplay());
-			code1.addChild(code2, RelationshipTypeEnum.ISA);
-			cs.getConcepts().add(code1);
-
-			code2.addPropertyString("SYSTEM", "Ser");
-			code2.addPropertyString("HELLO", "12345-1");
-			code2.addPropertyCoding(
-				"parent",
-				LOINC_URI,
-				code1.getCode(),
-				code1.getDisplay());
-			code2.addPropertyCoding(
-				"child",
-				LOINC_URI,
-				code3.getCode(),
-				code3.getDisplay());
-			code2.addChild(code3, RelationshipTypeEnum.ISA);
-			code2.addPropertyCoding(
-				"child",
-				LOINC_URI,
-				code4.getCode(),
-				code4.getDisplay());
-			code2.addChild(code4, RelationshipTypeEnum.ISA);
-			cs.getConcepts().add(code2);
-
-			code3.addPropertyString("SYSTEM", "Ser");
-			code3.addPropertyString("HELLO", "12345-2");
-			code3.addPropertyCoding(
-				"parent",
-				LOINC_URI,
-				code2.getCode(),
-				code2.getDisplay());
-			cs.getConcepts().add(code3);
-
-			code4.addPropertyString("SYSTEM", "^Patient");
-			code4.addPropertyString("EXTERNAL_COPYRIGHT_NOTICE", "Copyright © 2006 World Health Organization...");
-			code4.addPropertyCoding(
-				"parent",
-				LOINC_URI,
-				code2.getCode(),
-				code2.getDisplay());
-			cs.getConcepts().add(code4);
-
-			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), LOINC_URI, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
-		});
-	}
 
 	private List<String> toCodesContains(List<ValueSet.ValueSetExpansionContainsComponent> theContains) {
 		List<String> retVal = new ArrayList<>();

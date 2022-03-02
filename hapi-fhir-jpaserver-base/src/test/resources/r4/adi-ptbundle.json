@@ -1,0 +1,51 @@
+{
+	"resourceType": "Bundle",
+	"type": "transaction",
+	"entry": [
+		{
+			"fullUrl": "Patient/P",
+			"resource": {
+				"resourceType": "Patient",
+				"active": true,
+				"name": [
+					{
+						"family": "Gilbert",
+						"given": [
+							"Whitley"
+						]
+					}
+				],
+				"gender": "female",
+				"birthDate": "1988-04-18"
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Patient/P"
+			}
+		},
+		{
+			"fullUrl": "Observation/O",
+			"resource": {
+				"resourceType": "Observation",
+				"status": "final",
+				"code": {
+					"coding": [
+						{
+							"system": "http://hl7.org/fhir/sid/ndc",
+							"code": "0008-1222-30",
+							"display": "Pristiq Extended-Release, 30 TABLET, EXTENDED RELEASE in 1 BOTTLE, PLASTIC (0008-1222-30) (package)"
+						}
+					],
+					"text": "Pristiq Extended-Release, 30 TABLET, EXTENDED RELEASE in 1 BOTTLE, PLASTIC (0008-1222-30) (package)"
+				},
+				"subject": {
+					"reference": "Patient/P"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Observation/O"
+			}
+		}
+	]
+}

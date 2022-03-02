@@ -162,7 +162,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 	@Override
 	@Nullable
-	public CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public CodeValidationResult validateCode(@Nonnull ValidationSupportContext theValidationSupportContext, @Nonnull ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		IBaseResource vs;
 		if (isNotBlank(theValueSetUrl)) {
 			vs = theValidationSupportContext.getRootValidationSupport().fetchValueSet(theValueSetUrl);
@@ -598,14 +598,16 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 				if (theWantCode != null) {
 					if (theValidationSupportContext.getRootValidationSupport().isCodeSystemSupported(theValidationSupportContext, includeOrExcludeConceptSystemUrl)) {
 						LookupCodeResult lookup = theValidationSupportContext.getRootValidationSupport().lookupCode(theValidationSupportContext, includeOrExcludeConceptSystemUrl, theWantCode, null);
-						if (lookup != null && lookup.isFound()) {
-							CodeSystem.ConceptDefinitionComponent conceptDefinition = new CodeSystem.ConceptDefinitionComponent()
-								.addConcept()
-								.setCode(theWantCode)
-								.setDisplay(lookup.getCodeDisplay());
-							List<CodeSystem.ConceptDefinitionComponent> codesList = Collections.singletonList(conceptDefinition);
-							addCodes(includeOrExcludeConceptSystemUrl, includeOrExcludeConceptSystemVersion, codesList, nextCodeList, wantCodes);
+						if (lookup != null) {
 							ableToHandleCode = true;
+							if (lookup.isFound()) {
+								CodeSystem.ConceptDefinitionComponent conceptDefinition = new CodeSystem.ConceptDefinitionComponent()
+									.addConcept()
+									.setCode(theWantCode)
+									.setDisplay(lookup.getCodeDisplay());
+								List<CodeSystem.ConceptDefinitionComponent> codesList = Collections.singletonList(conceptDefinition);
+								addCodes(includeOrExcludeConceptSystemUrl, includeOrExcludeConceptSystemVersion, codesList, nextCodeList, wantCodes);
+							}
 						}
 					} else {
 

@@ -180,11 +180,7 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
 			if (modifier == TokenParamModifier.IN || modifier == TokenParamModifier.NOT_IN) {
 				if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2)) {
-					IBaseResource valueSet = myValidationSupport.fetchValueSet(code);
-					if (valueSet == null) {
-						throw new ResourceNotFoundException(Msg.code(2024) + "Unknown ValueSet: " + UrlUtil.escapeUrlParam(code));
-					}
-					IValidationSupport.ValueSetExpansionOutcome expanded = myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), new ValueSetExpansionOptions(), valueSet);
+					IValidationSupport.ValueSetExpansionOutcome expanded = myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), new ValueSetExpansionOptions(), code);
 					codes.addAll(extractValueSetCodes(expanded.getValueSet()));
 				} else {
 					codes.addAll(myTerminologySvc.expandValueSetIntoConceptList(null, code));
