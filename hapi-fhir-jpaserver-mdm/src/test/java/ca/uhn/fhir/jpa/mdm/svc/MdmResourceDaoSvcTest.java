@@ -7,9 +7,11 @@ import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.Patient;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -21,6 +23,12 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 	private static final String TEST_EID = "TEST_EID";
 	@Autowired
 	MdmResourceDaoSvc myResourceDaoSvc;
+
+	@AfterEach
+	public void after() throws IOException {
+		myPartitionSettings.setPartitioningEnabled(false);
+		super.after();
+	}
 
 	@Test
 	public void testSearchPatientByEidExcludesNonGoldenPatients() {
@@ -68,7 +76,7 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 	}
 
 	@Test
-	public void testSearchGoldenResourceOnDifferentPartition() {
+	public void testSearchGoldenResourceOnDifferentPartitions() {
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
 		RequestPartitionId requestPartitionId1 = RequestPartitionId.fromPartitionId(1);

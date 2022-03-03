@@ -11,9 +11,11 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.TerserUtil;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -43,6 +45,11 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 		myToGoldenPatientId = new StringType(myToGoldenPatient.getIdElement().getValue());
 	}
 
+	@AfterEach
+	public void after() throws IOException {
+		myPartitionSettings.setPartitioningEnabled(false);
+		super.after();
+	}
 
 	@Test
 	public void testMergeWithOverride() {
@@ -131,7 +138,7 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 	}
 
 	@Test
-	public void testMergeOnDifferentPartition() {
+	public void testMergeOnDifferentPartitions() {
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
 		RequestPartitionId requestPartitionId1 = RequestPartitionId.fromPartitionId(1);

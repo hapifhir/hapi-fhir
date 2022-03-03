@@ -58,6 +58,7 @@ public abstract class BaseLinkR4Test extends BaseProviderR4Test {
 	@AfterEach
 	public void after() throws IOException {
 		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
+		myPartitionSettings.setPartitioningEnabled(false);
 		super.after();
 	}
 

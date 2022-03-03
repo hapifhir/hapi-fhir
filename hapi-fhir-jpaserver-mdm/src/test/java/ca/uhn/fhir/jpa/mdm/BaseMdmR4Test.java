@@ -213,6 +213,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		DaoMethodOutcome outcome = myPatientDao.create(thePatient, systemRequestDetails);
 		Patient patient = (Patient) outcome.getResource();
 		patient.setId(outcome.getId());
+		patient.setUserData(Constants.RESOURCE_PARTITION_ID, theRequestPartitionId);
 		return patient;
 	}
 
