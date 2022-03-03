@@ -56,6 +56,9 @@ public interface IRequestPartitionHelperSvc {
 	}
 
 	@Nonnull
+	default void validateHasPartitionPermissions(RequestDetails theRequest, String theResourceType, RequestPartitionId theRequestPartitionId){}
+
+	@Nonnull
 	RequestPartitionId determineCreatePartitionForRequest(@Nullable RequestDetails theRequest, @Nonnull IBaseResource theResource, @Nonnull String theResourceType);
 
 	@Nonnull

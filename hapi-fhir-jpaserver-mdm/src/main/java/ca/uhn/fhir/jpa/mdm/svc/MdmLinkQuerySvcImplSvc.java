@@ -38,7 +38,6 @@ import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
 import java.util.List;
 
 public class MdmLinkQuerySvcImplSvc implements IMdmLinkQuerySvc {
@@ -54,10 +53,8 @@ public class MdmLinkQuerySvcImplSvc implements IMdmLinkQuerySvc {
 	@Autowired
 	IMdmModelConverterSvc myMdmModelConverterSvc;
 
-	@Autowired
-	protected EntityManager myEntityManager;
-
 	@Override
+	@Deprecated
 	@Transactional
 	public Page<MdmLinkJson> queryLinks(IIdType theGoldenResourceId, IIdType theSourceResourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest) {
 		return queryLinks(theGoldenResourceId, theSourceResourceId, theMatchResult, theLinkSource, theMdmContext, thePageRequest, null);

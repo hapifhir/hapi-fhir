@@ -37,6 +37,7 @@ import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.provider.MdmControllerHelper;
 import ca.uhn.fhir.mdm.provider.MdmControllerUtil;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.MultiUrlProcessor;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
@@ -52,7 +53,9 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * This class acts as a layer between MdmProviders and MDM services to support a REST API that's not a FHIR Operation API.
@@ -72,8 +75,6 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 	IMdmLinkUpdaterSvc myIMdmLinkUpdaterSvc;
 	@Autowired
 	IMdmLinkCreateSvc myIMdmLinkCreateSvc;
-	@Autowired
-	IPartitionLookupSvc myPartitionLookupSvc;
 	@Autowired
 	IMdmBatchJobSubmitterFactory myMdmBatchJobSubmitterFactory;
 	@Autowired
@@ -101,8 +102,12 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 
 	@Override
 	public Page<MdmLinkJson> queryLinks(@Nullable String theGoldenResourceId, @Nullable String theSourceResourceId, @Nullable String theMatchResult, @Nullable String theLinkSource, MdmTransactionContext theMdmTransactionContext, MdmPageRequest thePageRequest, @Nullable RequestDetails theRequestDetails) {
-		RequestPartitionId theReadPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, "MdmLink", null);
-		return queryLinksFromPartitionList(theGoldenResourceId, theSourceResourceId, theMatchResult, theLinkSource, theMdmTransactionContext, thePageRequest, theReadPartitionId.getPartitionIds());
+		RequestPartitionId theReadPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, null, null);
+		Page<MdmLinkJson> resultPage = queryLinksFromPartitionList(theGoldenResourceId, theSourceResourceId, theMatchResult, theLinkSource, theMdmTransactionContext, thePageRequest, theReadPartitionId.getPartitionIds());
+
+		validateMdmQueryPermissions(theReadPartitionId, resultPage.getContent(), theRequestDetails);
+
+		return resultPage;
 	}
 
 	@Override
@@ -154,5 +159,17 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 		IAnyResource target = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, theTargetGoldenResourceId);
 
 		myIMdmLinkUpdaterSvc.notDuplicateGoldenResource(goldenResource, target, theMdmTransactionContext);
+	}
+
+	private void validateMdmQueryPermissions(RequestPartitionId theRequestPartitionId, List<MdmLinkJson> theMdmLinkJsonList, RequestDetails theRequestDetails){
+		Set<String> theResourceTypeSet = new HashSet<>();
+		for (MdmLinkJson mdmLinkJson : theMdmLinkJsonList){
+			IdDt idDt = new IdDt(mdmLinkJson.getSourceId());
+
+			if (!theResourceTypeSet.contains(idDt.getResourceType())){
+				myRequestPartitionHelperSvc.validateHasPartitionPermissions(theRequestDetails, idDt.getResourceType(), theRequestPartitionId);
+				theResourceTypeSet.add(idDt.getResourceType());
+			}
+		}
 	}
 }

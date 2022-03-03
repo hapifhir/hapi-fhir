@@ -300,11 +300,11 @@ public class MdmLinkDaoSvc {
 		List<Predicate> andPredicates = new ArrayList<>();
 
 		if (theGoldenResourceId != null) {
-			Predicate goldenResourcePredicate = cb.equal(from.get("myGoldenResourcePid").as(Long.class), theGoldenResourceId);
+			Predicate goldenResourcePredicate = cb.equal(from.get("myGoldenResourcePid").as(Long.class), myIdHelperService.getPidOrThrowException(theGoldenResourceId));
 			andPredicates.add(goldenResourcePredicate);
 		}
 		if (theSourceId != null) {
-			Predicate sourceIdPredicate = cb.equal(from.get("mySourcePid").as(Long.class), theSourceId);
+			Predicate sourceIdPredicate = cb.equal(from.get("mySourcePid").as(Long.class), myIdHelperService.getPidOrThrowException(theSourceId));
 			andPredicates.add(sourceIdPredicate);
 		}
 		if (theMatchResult != null) {
@@ -316,7 +316,7 @@ public class MdmLinkDaoSvc {
 			andPredicates.add(linkSourcePredicate);
 		}
 		if (thePartitionId != null) {
-			Expression<Integer> exp = from.get("myPartitionId").as(Integer.class);
+			Expression<Integer> exp = from.get("myPartitionId").get("myPartitionId").as(Integer.class);
 			Predicate linkSourcePredicate = exp.in(thePartitionId);
 			andPredicates.add(linkSourcePredicate);
 		}
