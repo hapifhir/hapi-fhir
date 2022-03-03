@@ -70,7 +70,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamRegistryImpl.class);
 	private static final int MAX_MANAGED_PARAM_COUNT = 10000;
-	private static final long REFRESH_INTERVAL = DateUtils.MILLIS_PER_HOUR;
+	private static final long REFRESH_INTERVAL = DateUtils.MILLIS_PER_MINUTE;
 
 	private final JpaSearchParamCache myJpaSearchParamCache = new JpaSearchParamCache();
 	@Autowired
@@ -238,8 +238,13 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 			}
 
 			String name = runtimeSp.getName();
-			theSearchParams.add(nextBaseName, name, runtimeSp);
-			ourLog.debug("Adding search parameter {}.{} to SearchParamRegistry", nextBaseName, StringUtils.defaultString(name, "[composite]"));
+
+			RuntimeSearchParam previousSearchParam = theSearchParams.add(nextBaseName, name, runtimeSp);
+			if (previousSearchParam == null) {
+				ourLog.debug("Adding new search parameter {}.{} to SearchParamRegistry", nextBaseName, StringUtils.defaultString(name, "[composite]"));
+			} else if (!previousSearchParam.sameAs(runtimeSp)) {
+				ourLog.info("Updating search parameter {}.{} in SearchParamRegistry", nextBaseName, StringUtils.defaultString(name, "[composite]"));
+			}
 			retval++;
 		}
 		return retval;

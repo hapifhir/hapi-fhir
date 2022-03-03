@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.prependIfMissing;
 
 public class RuntimeSearchParamCache extends ReadOnlySearchParamCache {
 	private static final Logger ourLog = LoggerFactory.getLogger(RuntimeSearchParamCache.class);
@@ -36,8 +37,11 @@ public class RuntimeSearchParamCache extends ReadOnlySearchParamCache {
 	protected RuntimeSearchParamCache() {
 	}
 
-	public void add(String theResourceName, String theName, RuntimeSearchParam theSearchParam) {
-		getSearchParamMap(theResourceName).put(theName, theSearchParam);
+	/**
+	 * @return the previous value for that SearchParameter, or null if this is the first time adding it
+	 */
+	public RuntimeSearchParam add(String theResourceName, String theName, RuntimeSearchParam theSearchParam) {
+		RuntimeSearchParam previousSearchParam = getSearchParamMap(theResourceName).put(theName, theSearchParam);
 		String uri = theSearchParam.getUri();
 		if (isNotBlank(uri)) {
 			RuntimeSearchParam existingForUrl = myUrlToParam.get(uri);
@@ -55,6 +59,7 @@ public class RuntimeSearchParamCache extends ReadOnlySearchParamCache {
 			String value = theSearchParam.getId().toUnqualifiedVersionless().getValue();
 			myUrlToParam.put(value, theSearchParam);
 		}
+		return previousSearchParam;
 	}
 
 	public void remove(String theResourceName, String theName) {
