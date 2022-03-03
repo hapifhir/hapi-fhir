@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.config.TestDataBuilderConfig;
 import ca.uhn.fhir.jpa.config.TestHibernateSearchAddInConfig;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.BaseDateSearchDaoTests;
@@ -15,8 +16,6 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.method.SortParameter;
-import ca.uhn.fhir.test.utilities.ITestDataBuilder;
-import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Observation;
@@ -36,10 +35,7 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Consumer;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -49,7 +45,7 @@ import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TestR4Config.class, TestHibernateSearchAddInConfig.NoFT.class})
+@ContextConfiguration(classes = {TestR4Config.class, TestHibernateSearchAddInConfig.NoFT.class, TestDataBuilderConfig.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4StandardQueriesNoFTTest.class);
@@ -64,6 +60,8 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 	protected DaoRegistry myDaoRegistry;
 	@Autowired
 	MatchUrlService myMatchUrlService;
+	@Autowired
+	DaoTestDataBuilder myDataBuilder;
 
 	@Override
 	protected PlatformTransactionManager getTxManager() {
@@ -75,33 +73,46 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 		return myFhirCtx;
 	}
 
+	@AfterEach
+	public void cleanup() {
+		myDataBuilder.cleanup();
+	}
+
+	List<String> searchForIds(String theQueryUrl) {
+		// fake out the server url parsing
+		ResourceSearch search = myMatchUrlService.getResourceSearch(theQueryUrl);
+		SearchParameterMap map = search.getSearchParameterMap();
+		map.setLoadSynchronous(true);
+		SystemRequestDetails request = fakeRequestDetailsFromUrl(theQueryUrl);
+		SortSpec sort = (SortSpec) new SortParameter(myFhirCtx).translateQueryParametersIntoServerArgument(request, null);
+		if (sort != null) {
+			map.setSort(sort);
+		}
+
+		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(search.getResourceName());
+		IBundleProvider result = dao.search(map);
+
+		List<String> resourceIds = result.getAllResourceIds();
+		return resourceIds;
+	}
+
+	@Nonnull
+	private SystemRequestDetails fakeRequestDetailsFromUrl(String theQueryUrl) {
+		SystemRequestDetails request = new SystemRequestDetails();
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString(theQueryUrl).build();
+		uriComponents.getQueryParams().entrySet().forEach(nextEntry -> {
+			request.addParameter(nextEntry.getKey(), nextEntry.getValue().toArray(new String[0]));
+		});
+		return request;
+	}
+
+
+
 	@Nested
 	public class DateSearchTests extends BaseDateSearchDaoTests {
 		@Override
 		protected Fixture constructFixture() {
-			DaoTestDataBuilder testDataBuilder = new DaoTestDataBuilder(myFhirCtx, myDaoRegistry, new SystemRequestDetails());
-			return new TestDataBuilderFixture<>(testDataBuilder, myObservationDao);
-		}
-	}
-
-	public static class TokenTestCase {
-
-		private Consumer<IBaseResource>[] myBuilders;
-		private List<ImmutableTriple<Boolean, String, String>> mySearchCases = new ArrayList<>();
-
-		public static TokenTestCase onObservation(Consumer<IBaseResource>... theBuilders) {
-			TokenTestCase result = new TokenTestCase();
-			result.myBuilders = theBuilders;
-			return result;
-		}
-
-		public TokenTestCase finds(String theMessage, String theQuery) {
-			mySearchCases.add(new ImmutableTriple(true,theMessage, theQuery));
-			return this;
-		}
-		public TokenTestCase doesNotFind(String theMessage, String theQuery) {
-			mySearchCases.add(new ImmutableTriple(false,theMessage, theQuery));
-			return this;
+			return new TestDataBuilderFixture<>(myDataBuilder, myObservationDao);
 		}
 	}
 
@@ -112,16 +123,6 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 		String criteria = "_has:Condition:subject:code=http://snomed.info/sct|55822003,http://snomed.info/sct|55822005&" +
 			"_has:Condition:asserter:code=http://snomed.info/sct|55822003,http://snomed.info/sct|55822004";
 		 */
-
-		ITestDataBuilder myDataBuilder = new DaoTestDataBuilder(myFhirCtx, myDaoRegistry, new SystemRequestDetails());
-		Set<IIdType> myCreatedIds = new HashSet<>();
-
-		@AfterEach
-		public void cleanup() {
-			ourLog.info("cleanup {}", myCreatedIds);
-			myCreatedIds.forEach(myObservationDao::delete);
-		}
-
 
 		@Nested
 		public class Queries {
@@ -205,7 +206,6 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 
 			private IIdType withObservation(Consumer<IBaseResource>... theBuilder) {
 				myObservationId = myDataBuilder.createObservation(theBuilder);
-				myCreatedIds.add(myObservationId);
 				return myObservationId;
 			}
 
@@ -219,34 +219,93 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 				assertThat(theMessage, resourceIds, not(hasItem(equalTo(myObservationId.getIdPart()))));
 			}
 		}
-
-		private List<String> searchForIds(String theQueryUrl) {
-			// fake out the server url parsing
-			ResourceSearch search = myMatchUrlService.getResourceSearch(theQueryUrl);
-			SearchParameterMap map = search.getSearchParameterMap();
-			map.setLoadSynchronous(true);
-			SystemRequestDetails request = fakeRequestDetailsFromUrl(theQueryUrl);
-			SortSpec sort = (SortSpec) new SortParameter(myFhirCtx).translateQueryParametersIntoServerArgument(request, null);
-			if (sort != null) {
-				map.setSort(sort);
-			}
-
-			IBundleProvider result = myObservationDao.search(map);
-
-			List<String> resourceIds = result.getAllResourceIds();
-			return resourceIds;
-		}
-
 	}
 
-	@Nonnull
-	private SystemRequestDetails fakeRequestDetailsFromUrl(String theQueryUrl) {
-		SystemRequestDetails request = new SystemRequestDetails();
-		UriComponents uriComponents = UriComponentsBuilder.fromUriString(theQueryUrl).build();
-		uriComponents.getQueryParams().entrySet().forEach(nextEntry -> {
-			request.addParameter(nextEntry.getKey(), nextEntry.getValue().toArray(new String[0]));
-		});
-		return request;
+	@Nested
+	public class NumericSearch  {
+		IIdType myResourceId;
+
+		@Nested
+		public class Queries {
+
+			@Test
+			public void eq() {
+				double value = 0.6;
+				withRiskAssessmentWithProbabilty(value);
+
+				assertNotFind("when gt", "/RiskAssessment?probability=0.5");
+				assertFind("when eq", "/RiskAssessment?probability=0.6");
+				assertNotFind("when lt", "/RiskAssessment?probability=0.7");
+			}
+
+			@Test
+			public void gt() {
+				withRiskAssessmentWithProbabilty(0.6);
+
+				assertFind("when gt", "/RiskAssessment?probability=gt0.5");
+				assertNotFind("when eq", "/RiskAssessment?probability=gt0.6");
+				assertNotFind("when lt", "/RiskAssessment?probability=gt0.7");
+
+			}
+
+			@Test
+			public void ge() {
+				withRiskAssessmentWithProbabilty(0.6);
+
+				assertFind("when gt", "/RiskAssessment?probability=ge0.5");
+				assertFind("when eq", "/RiskAssessment?probability=ge0.6");
+				assertNotFind("when lt", "/RiskAssessment?probability=ge0.7");
+			}
+
+			@Test
+			public void lt() {
+				withRiskAssessmentWithProbabilty(0.6);
+
+				assertNotFind("when gt", "/RiskAssessment?probability=lt0.5");
+				assertNotFind("when eq", "/RiskAssessment?probability=lt0.6");
+				assertFind("when lt", "/RiskAssessment?probability=lt0.7");
+
+			}
+
+			@Test
+			public void le() {
+				withRiskAssessmentWithProbabilty(0.6);
+
+				assertNotFind("when gt", "/RiskAssessment?probability=le0.5");
+				assertFind("when eq", "/RiskAssessment?probability=le0.6");
+				assertFind("when lt", "/RiskAssessment?probability=le0.7");
+			}
+
+
+			private void assertFind(String theMessage, String theUrl) {
+				List<String> resourceIds = searchForIds(theUrl);
+				assertThat(theMessage, resourceIds, hasItem(equalTo(myResourceId.getIdPart())));
+			}
+
+			private void assertNotFind(String theMessage, String theUrl) {
+				List<String> resourceIds = searchForIds(theUrl);
+				assertThat(theMessage, resourceIds, not(hasItem(equalTo(myResourceId.getIdPart()))));
+			}
+		}
+
+		private IIdType withRiskAssessmentWithProbabilty(double theValue) {
+			myResourceId = myDataBuilder.createResource("RiskAssessment", myDataBuilder.withAttribute("prediction.probabilityDecimal", theValue));
+			return myResourceId;
+		}
+
+		@Nested
+		public class Sorting {
+			@Test
+			public void sortByNumeric() {
+				String idAlpha7 = withRiskAssessmentWithProbabilty(0.7).getIdPart();
+				String idAlpha2 = withRiskAssessmentWithProbabilty(0.2).getIdPart();
+				String idAlpha5 = withRiskAssessmentWithProbabilty(0.5).getIdPart();
+
+				List<String> allIds = searchForIds("/RiskAssessment?_sort=probability");
+				assertThat(allIds, hasItems(idAlpha2, idAlpha5, idAlpha7));
+			}
+		}
+
 	}
 
 }

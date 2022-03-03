@@ -185,6 +185,13 @@ public interface ITestDataBuilder {
 		};
 	}
 
+	default Consumer<IBaseResource> withAttribute(String thePath, Object theValue) {
+		return t->{
+			FhirTerser terser = getFhirContext().newTerser();
+			terser.addElement(t, thePath, ""+theValue);
+		};
+	}
+
 	default Consumer<IBaseResource> withObservationCode(@Nullable String theSystem, @Nullable String theCode) {
 		return withObservationCode(theSystem, theCode, null);
 	}
@@ -251,6 +258,5 @@ public interface ITestDataBuilder {
 		booleanType.setValueAsString(theValue);
 		activeChild.getMutator().addValue(theTarget, booleanType);
 	}
-
 
 }
