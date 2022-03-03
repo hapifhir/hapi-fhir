@@ -42,8 +42,6 @@ public class SubscriptionSubmitInterceptorLoader {
 	@Autowired
 	private DaoConfig myDaoConfig;
 	@Autowired
-	private ApplicationContext myApplicationContext;
-	@Autowired
 	private IInterceptorService myInterceptorRegistry;
 
 	@PostConstruct

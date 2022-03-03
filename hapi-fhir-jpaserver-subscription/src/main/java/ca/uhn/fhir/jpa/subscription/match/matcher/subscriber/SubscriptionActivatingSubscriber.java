@@ -54,15 +54,11 @@ import javax.annotation.Nonnull;
 public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscriptionResources implements MessageHandler {
 	private final Logger ourLog = LoggerFactory.getLogger(SubscriptionActivatingSubscriber.class);
 	@Autowired
-	private SubscriptionRegistry mySubscriptionRegistry;
-	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
 	@Autowired
 	private DaoConfig myDaoConfig;
-	@Autowired
-	private SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
 
 	/**
 	 * Constructor

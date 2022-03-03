@@ -57,8 +57,6 @@ public class SubscriptionRegisteringSubscriber extends BaseSubscriberForSubscrip
 	@Autowired
 	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
 	@Autowired
-	private PartitionSettings myPartitionSettings;
-	@Autowired
 	private DaoRegistry myDaoRegistry;
 
 	/**
