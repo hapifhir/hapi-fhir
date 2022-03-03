@@ -95,6 +95,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.healthmarketscience.sqlbuilder.Condition;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -109,6 +110,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.Query;
+import javax.persistence.SqlResultSetMapping;
+import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -151,6 +154,8 @@ public class SearchBuilder implements ISearchBuilder {
 	private static final String MY_TARGET_RESOURCE_PID = "myTargetResourcePid";
 	private static final String MY_SOURCE_RESOURCE_PID = "mySourceResourcePid";
 	private static final String MY_TARGET_RESOURCE_VERSION = "myTargetResourceVersion";
+	public static final String RESOURCE_ID_ALIAS = "resource_id";
+	public static final String RESOURCE_VERSION_ALIAS = "resource_version";
 	public static boolean myUseMaxPageSize50ForTest = false;
 	private final String myResourceName;
 	private final Class<? extends IBaseResource> myResourceType;
@@ -1016,9 +1021,9 @@ public class SearchBuilder implements ISearchBuilder {
 					for (String nextPath : paths) {
 						boolean haveTargetTypesDefinedByParam = param.hasTargets();
 						String findPidFieldSqlColumn = findPidFieldName.equals(MY_SOURCE_RESOURCE_PID) ? "src_resource_id" : "target_resource_id";
-						String fieldsToLoad = "r." + findPidFieldSqlColumn;
+						String fieldsToLoad = "r." + findPidFieldSqlColumn + " AS " + RESOURCE_ID_ALIAS;
 						if (findVersionFieldName != null) {
-							fieldsToLoad += ", r.target_resource_version";
+							fieldsToLoad += ", r.target_resource_version AS " + RESOURCE_VERSION_ALIAS;
 						}
 
 						// Query for includes lookup has consider 2 cases
@@ -1047,24 +1052,22 @@ public class SearchBuilder implements ISearchBuilder {
 							}
 						}
 						//@formatter:off
-						String resourceUrlBasedQuery = "SELECT " + fieldsToLoadFromSpidxUriTable +
+						StringBuilder resourceUrlBasedQuery = new StringBuilder("SELECT " + fieldsToLoadFromSpidxUriTable +
 							" FROM hfj_res_link r " +
-							" LEFT JOIN hfj_spidx_uri rUri ON ( " +
+							" JOIN hfj_spidx_uri rUri ON ( " +
 							"   r.target_resource_url = rUri.sp_uri AND " +
 							"   rUri.sp_name = 'url' " +
-							    (targetResourceType != null ? " AND rUri.res_type = :target_resource_type " : "") +
-							    (haveTargetTypesDefinedByParam ? " AND rUri.res_type IN (:target_resource_types) " : "") +
 							" ) " +
 							" WHERE r.src_path = :src_path AND " +
 							" r.target_resource_id IS NULL AND " +
-							" r." + searchPidFieldSqlColumn + " IN (:target_pids) ";
+							" r." + searchPidFieldSqlColumn + " IN (:target_pids) ");
 						//@formatter:on
 
 						String sql = resourceIdBasedQuery + " UNION " + resourceUrlBasedQuery;
 
 						List<Collection<ResourcePersistentId>> partitions = partition(nextRoundMatches, getMaximumPageSize());
 						for (Collection<ResourcePersistentId> nextPartition : partitions) {
-							Query q = theEntityManager.createNativeQuery(sql);
+							Query q = theEntityManager.createNativeQuery(sql, Tuple.class);
 							q.setParameter("src_path", nextPath);
 							q.setParameter("target_pids", ResourcePersistentId.toLongList(nextPartition));
 							if (targetResourceType != null) {
@@ -1072,25 +1075,18 @@ public class SearchBuilder implements ISearchBuilder {
 							} else if (haveTargetTypesDefinedByParam) {
 								q.setParameter("target_resource_types", param.getTargets());
 							}
-							List results = q.getResultList();
+							List<Tuple> results = q.getResultList();
 							if (theMaxCount != null) {
 								q.setMaxResults(theMaxCount);
 							}
-							for (Object resourceLink : results) {
-								if (resourceLink != null) {
-									ResourcePersistentId persistentId;
-									if (findVersionFieldName != null) {
-										Object resId = ((Object[]) resourceLink)[0];
-										persistentId = new ResourcePersistentId(Long.valueOf(String.valueOf(resId)));
-										Object resVerId = ((Object[]) resourceLink)[1];
-										if(resVerId != null) {
-											persistentId.setVersion(Long.valueOf(String.valueOf(resVerId)));
-										}
-									} else {
-										persistentId = new ResourcePersistentId(Long.valueOf(String.valueOf(resourceLink)));
+							for (Tuple result : results) {
+								if (result != null) {
+									Long resourceId = NumberUtils.createLong(String.valueOf(result.get(RESOURCE_ID_ALIAS)));
+									Long resourceVersion = null;
+									if (findVersionFieldName != null && result.get(RESOURCE_VERSION_ALIAS) != null) {
+										resourceVersion = NumberUtils.createLong(String.valueOf(result.get(RESOURCE_VERSION_ALIAS)));
 									}
-									assert persistentId.getId() instanceof Long;
-									pidsToInclude.add(persistentId);
+									pidsToInclude.add(new ResourcePersistentId(resourceId, resourceVersion));
 								}
 							}
 						}
