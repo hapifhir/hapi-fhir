@@ -50,8 +50,6 @@ import static ca.uhn.fhir.jpa.dao.index.IdHelperService.RESOURCE_PID;
 public class JpaIdHelperService extends IdHelperService implements IJpaIdHelperService, IIdHelperService {
 	@Autowired
 	protected IResourceTableDao myResourceTableDao;
-	@Autowired
-	private IIdHelperService myIdHelperService;
 
 	/**
 	 * @deprecated This method doesn't take a partition ID as input, so it is unsafe. It
@@ -61,7 +59,7 @@ public class JpaIdHelperService extends IdHelperService implements IJpaIdHelperS
 	@Deprecated
 	@Nonnull
 	public List<Long> getPidsOrThrowException(List<IIdType> theIds) {
-		List<ResourcePersistentId> resourcePersistentIds = myIdHelperService.resolveResourcePersistentIdsWithCache(RequestPartitionId.allPartitions(), theIds);
+		List<ResourcePersistentId> resourcePersistentIds = super.resolveResourcePersistentIdsWithCache(RequestPartitionId.allPartitions(), theIds);
 		return resourcePersistentIds.stream().map(ResourcePersistentId::getIdAsLong).collect(Collectors.toList());
 	}
 
@@ -80,7 +78,7 @@ public class JpaIdHelperService extends IdHelperService implements IJpaIdHelperS
 		if (retVal == null) {
 			IIdType id = theResource.getIdElement();
 			try {
-				retVal = myIdHelperService.resolveResourcePersistentIds(RequestPartitionId.allPartitions(), id.getResourceType(), id.getIdPart()).getIdAsLong();
+				retVal = super.resolveResourcePersistentIds(RequestPartitionId.allPartitions(), id.getResourceType(), id.getIdPart()).getIdAsLong();
 			} catch (ResourceNotFoundException e) {
 				return null;
 			}
@@ -100,7 +98,7 @@ public class JpaIdHelperService extends IdHelperService implements IJpaIdHelperS
 		assert TransactionSynchronizationManager.isSynchronizationActive();
 
 		List<IIdType> ids = Collections.singletonList(theId);
-		List<ResourcePersistentId> resourcePersistentIds = myIdHelperService.resolveResourcePersistentIdsWithCache(RequestPartitionId.allPartitions(), ids);
+		List<ResourcePersistentId> resourcePersistentIds = super.resolveResourcePersistentIdsWithCache(RequestPartitionId.allPartitions(), ids);
 		return resourcePersistentIds.get(0).getIdAsLong();
 	}
 
@@ -139,7 +137,7 @@ public class JpaIdHelperService extends IdHelperService implements IJpaIdHelperS
 	public Set<String> translatePidsToFhirResourceIds(Set<Long> thePids) {
 		assert TransactionSynchronizationManager.isSynchronizationActive();
 
-		Map<Long, Optional<String>> pidToForcedIdMap = myIdHelperService.translatePidsToForcedIds(thePids);
+		Map<Long, Optional<String>> pidToForcedIdMap = super.translatePidsToForcedIds(thePids);
 
 		//If the result of the translation is an empty optional, it means there is no forced id, and we can use the PID as the resource ID.
 		Set<String> resolvedResourceIds = pidToForcedIdMap.entrySet().stream()
