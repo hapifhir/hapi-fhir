@@ -213,6 +213,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		DaoMethodOutcome outcome = myPatientDao.create(thePatient, systemRequestDetails);
 		Patient patient = (Patient) outcome.getResource();
 		patient.setId(outcome.getId());
+		patient.setUserData(Constants.RESOURCE_PARTITION_ID, theRequestPartitionId);
 		return patient;
 	}
 
@@ -511,7 +512,8 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		map.setLoadSynchronous(true);
 		//TODO GGG ensure that this tag search works effectively.
 		map.add("_tag", new TokenParam(MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, theCode));
-		IBundleProvider bundle = myPatientDao.search(map);
+		SystemRequestDetails systemRequestDetails = SystemRequestDetails.forAllPartition();
+		IBundleProvider bundle = myPatientDao.search(map, systemRequestDetails);
 		return bundle.getResources(0, 999);
 	}
 

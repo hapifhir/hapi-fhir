@@ -20,11 +20,13 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.mdm.svc.MdmResourceDaoSvc;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.util.EIDHelper;
-import ca.uhn.fhir.jpa.mdm.svc.MdmResourceDaoSvc;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
@@ -51,7 +53,7 @@ public class FindCandidateByEidSvc extends BaseCandidateFinder {
 		List<CanonicalEID> eidFromResource = myEIDHelper.getExternalEid(theBaseResource);
 		if (!eidFromResource.isEmpty()) {
 			for (CanonicalEID eid : eidFromResource) {
-				Optional<IAnyResource> oFoundGoldenResource = myMdmResourceDaoSvc.searchGoldenResourceByEID(eid.getValue(), theBaseResource.getIdElement().getResourceType());
+				Optional<IAnyResource> oFoundGoldenResource = myMdmResourceDaoSvc.searchGoldenResourceByEID(eid.getValue(), theBaseResource.getIdElement().getResourceType(), (RequestPartitionId) theBaseResource.getUserData(Constants.RESOURCE_PARTITION_ID));
 				if (oFoundGoldenResource.isPresent()) {
 					IAnyResource foundGoldenResource = oFoundGoldenResource.get();
 					Long pidOrNull = myIdHelperService.getPidOrNull(foundGoldenResource);

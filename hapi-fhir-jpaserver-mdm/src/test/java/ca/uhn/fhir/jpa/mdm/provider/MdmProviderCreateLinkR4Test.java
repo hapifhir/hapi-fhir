@@ -69,7 +69,7 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 	}
 
 	@Test
-	public void testCreateLinkWithMatchResultOnDifferentPartition() {
+	public void testCreateLinkWithMatchResultOnDifferentPartitions() {
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
 		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2));
