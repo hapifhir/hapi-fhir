@@ -46,6 +46,8 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -265,6 +267,14 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 		myResourceChangeListenerRegistry = theResourceChangeListenerRegistry;
 	}
 
+
+	/**
+	 *
+	 * There is a circular reference between this class and the ResourceChangeListenerRegistry:
+	 * SearchParamRegistryImpl -> ResourceChangeListenerRegistry -> InMemoryResourceMatcher -> SearchParamRegistryImpl. Sicne we only need this once on boot-up, we delay
+	 * until ContextRefreshedEvent.
+	 *
+	 */
 	@PostConstruct
 	public void registerListener() {
 		myResourceChangeListenerCache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener("SearchParameter", SearchParameterMap.newSynchronous(), this, REFRESH_INTERVAL);
