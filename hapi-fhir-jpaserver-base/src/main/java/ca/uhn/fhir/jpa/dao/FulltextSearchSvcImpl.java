@@ -249,7 +249,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	 * Throws an error if configured with Lucene.
 	 *
 	 * Some features only work with Elasticsearch.
-	 * Lastn and the autocomplete search use aggregations which are Elasticsearch-only
+	 * Lastn and the autocomplete search use nested aggregations which are Elasticsearch-only
 	 */
 	private void ensureElastic() {
 		//String hibernateSearchBackend = (String) myEntityManager.g.getJpaPropertyMap().get(BackendSettings.backendKey(BackendSettings.TYPE));
