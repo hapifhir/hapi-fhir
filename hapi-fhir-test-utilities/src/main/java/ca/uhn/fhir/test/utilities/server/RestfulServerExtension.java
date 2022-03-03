@@ -24,12 +24,11 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
+import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServlet;
 import java.util.ArrayList;
@@ -45,6 +44,7 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 	private RestfulServer myServlet;
 	private List<Consumer<RestfulServer>> myConsumers = new ArrayList<>();
 	private ServerValidationModeEnum myServerValidationMode = ServerValidationModeEnum.NEVER;
+	private IPagingProvider myPagingProvider;
 
 	/**
 	 * Constructor
@@ -82,6 +82,9 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 			if (myProviders != null) {
 				myServlet.registerProviders(myProviders);
 			}
+            if (myPagingProvider != null) {
+                myServlet.setPagingProvider(myPagingProvider);
+            }
 
 			myConsumers.forEach(t -> t.accept(myServlet));
 		}
@@ -125,6 +128,7 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 	}
 
 	public RestfulServerExtension registerProvider(Object theProvider) {
+		Validate.notNull(theProvider);
 		if (myServlet != null) {
 			myServlet.registerProvider(theProvider);
 		} else {
@@ -155,4 +159,16 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 		myServlet.getInterceptorService().unregisterAllInterceptors();
 	}
 
+    public RestfulServerExtension withPagingProvider(IPagingProvider thePagingProvider) {
+        if (myServlet != null) {
+            myServlet.setPagingProvider(thePagingProvider);
+        } else {
+            myPagingProvider = thePagingProvider;
+        }
+        return this;
+    }
+
+	public RestfulServerExtension unregisterInterceptor(Object theInterceptor) {
+		return withServer(t -> t.getInterceptorService().unregisterInterceptor(theInterceptor));
+	}
 }

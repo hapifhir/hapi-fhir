@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.batch.config.BatchConstants;
+import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobParametersBuilder;
 import ca.uhn.fhir.jpa.bulk.export.job.GroupBulkExportJobParametersBuilder;
@@ -98,6 +99,8 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	@Autowired
 	private IBulkDataExportSvc myBulkDataExportSvc;
 	@Autowired
+	private IBulkDataExportJobSchedulingHelper myBulkDataExportJobSchedulingHelper;
+	@Autowired
 	private IBatchJobSubmitter myBatchJobSubmitter;
 	@Autowired
 	private BatchJobHelper myBatchJobHelper;
@@ -165,7 +168,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		});
 
 		// Run a purge pass
-		myBulkDataExportSvc.purgeExpiredFiles();
+		myBulkDataExportJobSchedulingHelper.purgeExpiredFiles();
 
 		// Check that things were deleted
 		runInTransaction(() -> {
@@ -313,7 +316,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			assertEquals(BulkExportJobStatusEnum.SUBMITTED, status.getStatus());
 
 			// Run a scheduled pass to build the export
-			myBulkDataExportSvc.buildExportFiles();
+			myBulkDataExportJobSchedulingHelper.startSubmittedJobs();
 
 			awaitAllBulkJobCompletions();
 
@@ -359,8 +362,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		assertEquals("/$export?_outputFormat=application%2Ffhir%2Bndjson&_type=Observation,Patient&_typeFilter=" + UrlUtil.escapeUrlParam(TEST_FILTER), status.getRequest());
 
 		// Run a scheduled pass to build the export
-		myBulkDataExportSvc.buildExportFiles();
-
+		myBulkDataExportJobSchedulingHelper.startSubmittedJobs();
 		awaitAllBulkJobCompletions();
 
 		// Fetch the job again
@@ -414,7 +416,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		assertEquals("/$export?_outputFormat=application%2Ffhir%2Bndjson", status.getRequest());
 
 		// Run a scheduled pass to build the export
-		myBulkDataExportSvc.buildExportFiles();
+		myBulkDataExportJobSchedulingHelper.startSubmittedJobs();
 
 		awaitAllBulkJobCompletions();
 
@@ -465,7 +467,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(bulkDataExportOptions);
 
 
-		myBulkDataExportSvc.buildExportFiles();
+		myBulkDataExportJobSchedulingHelper.startSubmittedJobs();
 		awaitAllBulkJobCompletions();
 
 		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
@@ -497,7 +499,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		assertEquals("/$export?_outputFormat=application%2Ffhir%2Bndjson&_type=Patient&_typeFilter=Patient%3F_has%3AObservation%3Apatient%3Aidentifier%3DSYS%7CVAL3", status.getRequest());
 
 		// Run a scheduled pass to build the export
-		myBulkDataExportSvc.buildExportFiles();
+		myBulkDataExportJobSchedulingHelper.startSubmittedJobs();
 
 		awaitAllBulkJobCompletions();
 
@@ -551,7 +553,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		assertEquals("/$export?_outputFormat=application%2Ffhir%2Bndjson&_type=EpisodeOfCare,Patient&_typeFilter=Patient%3F_id%3DP999999990&_typeFilter=EpisodeOfCare%3Fpatient%3DP999999990", status.getRequest());
 
 		// Run a scheduled pass to build the export
-		myBulkDataExportSvc.buildExportFiles();
+		myBulkDataExportJobSchedulingHelper.startSubmittedJobs();
 
 		awaitAllBulkJobCompletions();
 
@@ -611,7 +613,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		assertEquals("/$export?_outputFormat=application%2Ffhir%2Bndjson&_type=Observation,Patient&_since=" + cutoff.setTimeZoneZulu(true).getValueAsString(), status.getRequest());
 
 		// Run a scheduled pass to build the export
-		myBulkDataExportSvc.buildExportFiles();
+		myBulkDataExportJobSchedulingHelper.startSubmittedJobs();
 
 		awaitAllBulkJobCompletions();
 
@@ -705,7 +707,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(bulkDataExportOptions);
 
 
-		myBulkDataExportSvc.buildExportFiles();
+		myBulkDataExportJobSchedulingHelper.startSubmittedJobs();
 		awaitAllBulkJobCompletions();
 
 		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
@@ -740,7 +742,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
 		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(bulkDataExportOptions);
 
-		myBulkDataExportSvc.buildExportFiles();
+		myBulkDataExportJobSchedulingHelper.startSubmittedJobs();
 		awaitAllBulkJobCompletions();
 
 		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
@@ -847,7 +849,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		// Create a bulk job
 		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(bulkDataExportOptions);
 
-		myBulkDataExportSvc.buildExportFiles();
+		myBulkDataExportJobSchedulingHelper.startSubmittedJobs();
 		awaitAllBulkJobCompletions();
 
 		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
@@ -890,7 +892,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		options.setFilters(Sets.newHashSet("Immunization?vaccine-code=Flu", "Immunization?patient=Patient/PAT1"));
 
 		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(options);
-		myBulkDataExportSvc.buildExportFiles();
+		myBulkDataExportJobSchedulingHelper.startSubmittedJobs();
 		awaitAllBulkJobCompletions();
 
 
@@ -928,7 +930,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		options.setFilters(Sets.newHashSet("Observation?identifier=VAL0,VAL2", "Observation?identifier=VAL4"));
 
 		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(options);
-		myBulkDataExportSvc.buildExportFiles();
+		myBulkDataExportJobSchedulingHelper.startSubmittedJobs();
 		awaitAllBulkJobCompletions();
 
 		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
@@ -970,7 +972,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
 		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(bulkDataExportOptions);
 
-		myBulkDataExportSvc.buildExportFiles();
+		myBulkDataExportJobSchedulingHelper.startSubmittedJobs();
 		awaitAllBulkJobCompletions();
 
 		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
@@ -1000,7 +1002,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
 		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(bulkDataExportOptions);
 
-		myBulkDataExportSvc.buildExportFiles();
+		myBulkDataExportJobSchedulingHelper.startSubmittedJobs();
 		awaitAllBulkJobCompletions();
 
 		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
@@ -1066,7 +1068,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
 		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(bulkDataExportOptions);
 
-		myBulkDataExportSvc.buildExportFiles();
+		myBulkDataExportJobSchedulingHelper.startSubmittedJobs();
 		awaitAllBulkJobCompletions();
 
 		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
@@ -1104,7 +1106,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 		//Patient-style
 		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(bulkDataExportOptions);
-		myBulkDataExportSvc.buildExportFiles();
+		myBulkDataExportJobSchedulingHelper.startSubmittedJobs();
 		awaitAllBulkJobCompletions();
 		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
 		assertThat(jobInfo.getStatus(), is(equalTo(BulkExportJobStatusEnum.COMPLETE)));
@@ -1113,7 +1115,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
 		bulkDataExportOptions.setGroupId(myPatientGroupId);
 		jobDetails = myBulkDataExportSvc.submitJob(bulkDataExportOptions);
-		myBulkDataExportSvc.buildExportFiles();
+		myBulkDataExportJobSchedulingHelper.startSubmittedJobs();
 		awaitAllBulkJobCompletions();
 		jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
 		assertThat(jobInfo.getStatus(), is(equalTo(BulkExportJobStatusEnum.COMPLETE)));
@@ -1121,7 +1123,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		//System-style
 		bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
 		jobDetails = myBulkDataExportSvc.submitJob(bulkDataExportOptions);
-		myBulkDataExportSvc.buildExportFiles();
+		myBulkDataExportJobSchedulingHelper.startSubmittedJobs();
 		awaitAllBulkJobCompletions();
 		jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
 		assertThat(jobInfo.getStatus(), is(equalTo(BulkExportJobStatusEnum.COMPLETE)));
@@ -1183,7 +1185,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
 		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(bulkDataExportOptions);
 
-		myBulkDataExportSvc.buildExportFiles();
+		myBulkDataExportJobSchedulingHelper.startSubmittedJobs();
 		awaitAllBulkJobCompletions();
 
 		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());

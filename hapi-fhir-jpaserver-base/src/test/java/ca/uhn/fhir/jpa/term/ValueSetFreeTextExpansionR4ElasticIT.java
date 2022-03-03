@@ -7,11 +7,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /**
- * This class runs all parent class tests using Lucene configuration
- * There is also a LuceneFilesystem configuration available, for debugging purposes
+ * This class runs all parent class tests using Elasticsearch configuration
  */
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TestR4Config.class, TestHibernateSearchAddInConfig.DefaultLuceneHeap.class})
-public class ValeSetFreeTextExpansionR4LuceneIT extends AbstractValeSetFreeTextExpansionR4Test {
+@ContextConfiguration(classes = {TestR4Config.class, TestHibernateSearchAddInConfig.Elasticsearch.class})
+public class ValueSetFreeTextExpansionR4ElasticIT extends AbstractValueSetFreeTextExpansionR4Test {
 
 }
