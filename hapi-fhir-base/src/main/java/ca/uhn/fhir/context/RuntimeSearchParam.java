@@ -189,6 +189,25 @@ public class RuntimeSearchParam {
 			.isEquals();
 	}
 
+	public boolean sameAs(RuntimeSearchParam that) {
+		return new EqualsBuilder()
+			.append(getId(), that.getId())
+			.append(getBase(), that.getBase())
+			.append(getDescription(), that.getDescription())
+			.append(getName(), that.getName())
+			.append(getParamType(), that.getParamType())
+			.append(getPath(), that.getPath())
+			.append(getTargets(), that.getTargets())
+			.append(getProvidesMembershipInCompartments(), that.getProvidesMembershipInCompartments())
+			.append(getStatus(), that.getStatus())
+			.append(getUri(), that.getUri())
+			.append(myExtensions, that.myExtensions)
+			.append(getComboSearchParamType(), that.getComboSearchParamType())
+			.append(getComponents(), that.getComponents())
+			.append(myPhoneticEncoder, that.myPhoneticEncoder)
+			.isEquals();
+	}
+
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37)
