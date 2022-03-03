@@ -482,5 +482,5 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 			assertThat(e.getMessage(), startsWith(Msg.code(2070)));
 		}
 	}
-	
+
 }
