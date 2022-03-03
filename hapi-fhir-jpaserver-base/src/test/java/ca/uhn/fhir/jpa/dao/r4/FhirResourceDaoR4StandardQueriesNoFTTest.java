@@ -230,12 +230,31 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 
 			@Test
 			public void eq() {
-				double value = 0.6;
-				withRiskAssessmentWithProbabilty(value);
+				withRiskAssessmentWithProbabilty(0.6);
 
 				assertNotFind("when gt", "/RiskAssessment?probability=0.5");
 				assertFind("when eq", "/RiskAssessment?probability=0.6");
 				assertNotFind("when lt", "/RiskAssessment?probability=0.7");
+			}
+
+			@Test
+			public void ne() {
+				withRiskAssessmentWithProbabilty(0.6);
+
+				assertFind("when gt", "/RiskAssessment?probability=ne0.5");
+				assertNotFind("when eq", "/RiskAssessment?probability=ne0.6");
+				assertFind("when lt", "/RiskAssessment?probability=ne0.7");
+			}
+
+			@Test
+			public void ap() {
+				withRiskAssessmentWithProbabilty(0.6);
+
+				assertNotFind("when gt", "/RiskAssessment?probability=ap0.5");
+				assertFind("when a little gt", "/RiskAssessment?probability=ap0.58");
+				assertFind("when eq", "/RiskAssessment?probability=ap0.6");
+				assertFind("when a little lt", "/RiskAssessment?probability=ap0.62");
+				assertNotFind("when lt", "/RiskAssessment?probability=ap0.7");
 			}
 
 			@Test
