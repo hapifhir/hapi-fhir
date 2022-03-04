@@ -441,7 +441,6 @@ public class JpaConfig {
 	}
 
 	@Bean
-	@Lazy
 	public IBulkDataExportJobSchedulingHelper bulkDataExportJobSchedulingHelper() {
 		return new BulkDataExportJobSchedulingHelperImpl();
 	}
