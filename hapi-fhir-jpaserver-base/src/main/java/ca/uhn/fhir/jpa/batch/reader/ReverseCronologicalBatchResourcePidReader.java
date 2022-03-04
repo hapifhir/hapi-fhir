@@ -43,8 +43,6 @@ public class ReverseCronologicalBatchResourcePidReader extends BaseReverseCronol
 	@Override
 	protected Set<Long> getNextPidBatch(ResourceSearch resourceSearch) {
 		Set<Long> retval = new LinkedHashSet<>();
-		// TODO MBBI looks like the below method actually mucks with the lastUpdated SP on the ResourceSearch object, overwriting whatver is passed in.
-		// Recommend adding bounds, e.g. see if the request is ge or le (or both) then add guard rails.
 		addDateCountAndSortToSearch(resourceSearch);
 
 		// Perform the search

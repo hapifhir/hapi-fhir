@@ -86,7 +86,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testReindexJobLastUpdatedFilter() throws Exception { //TODO MBBI
+	public void testReindexJobLastUpdatedFilter() throws Exception {
 		// Given
 		DaoMethodOutcome T1_Patient = myReindexTestHelper.createEyeColourPatient(true);
 		Thread.sleep(3000);
