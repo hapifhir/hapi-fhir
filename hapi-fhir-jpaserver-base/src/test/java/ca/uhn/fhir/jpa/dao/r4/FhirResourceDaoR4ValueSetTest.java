@@ -6,6 +6,8 @@ import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -32,6 +34,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -90,6 +93,100 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		assertEquals("Unable to validate code http://payer-to-payer-exchange/fhir/CodeSystem/ndc#378397893 - No codes in ValueSet belong to CodeSystem with URL http://payer-to-payer-exchange/fhir/CodeSystem/ndc", outcome.getMessage());
 	}
 
+
+	@Test
+	public void testValidateCodeInValueSet_HierarchicalAndEnumeratedValueset() throws IOException {
+		ourLog.info("Creating CodeSystem");
+		CodeSystem cs = new CodeSystem();
+		cs.setId("CodeSystem/cs");
+		cs.setUrl("http://cs");
+		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		myCodeSystemDao.update(cs);
+
+		ourLog.info("Adding codes to codesystem");
+		CustomTerminologySet delta = new CustomTerminologySet();
+		TermConcept parent = delta.addRootConcept("parent");
+		for (int j = 0; j < 1200; j++) {
+			parent
+				.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA)
+				.setCode("child" + j);
+		}
+		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://cs", delta);
+
+		ourLog.info("Creating ValueSet");
+		ValueSet vs = new ValueSet();
+		vs.setId("ValueSet/vs");
+		vs.setUrl("http://vs");
+		vs.getCompose()
+			.addInclude()
+			.setSystem("http://cs")
+			.addFilter()
+			.setProperty("concept")
+			.setOp(ValueSet.FilterOperator.ISA)
+			.setValue("parent");
+		vs.getCompose()
+			.addInclude()
+			.setSystem("http://cs-np")
+			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("code0")))
+			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("code1")));
+		myValueSetDao.update(vs);
+
+		IValidationSupport.CodeValidationResult outcome;
+		ValidationSupportContext ctx = new ValidationSupportContext(myValidationSupport);
+		ConceptValidationOptions options = new ConceptValidationOptions();
+
+		// In memory - Hierarchy in existing CS
+
+		outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "child10", null, "http://vs");
+		assertNotNull(outcome);
+		assertTrue(outcome.isOk());
+		assertEquals("A", outcome.getMessage());
+
+		outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "childX", null, "http://vs");
+		assertNotNull(outcome);
+		assertFalse(outcome.isOk());
+		assertEquals("Unknown code 'http://cs#childX' for in-memory expansion of ValueSet 'http://vs'", outcome.getMessage());
+
+		// In memory - Enumerated in non-present CS
+
+		outcome = myValidationSupport.validateCode(ctx, options, "http://cs-np", "code1", null, "http://vs");
+		assertNotNull(outcome);
+		assertTrue(outcome.isOk());
+		assertEquals("A", outcome.getMessage());
+
+		outcome = myValidationSupport.validateCode(ctx, options, "http://cs-np", "codeX", null, "http://vs");
+		assertNotNull(outcome);
+		assertFalse(outcome.isOk());
+		assertEquals("Unknown code 'http://cs-np#codeX' for in-memory expansion of ValueSet 'http://vs'", outcome.getMessage());
+
+		// Precalculated
+
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "child10", null, "http://vs");
+		assertNotNull(outcome);
+		assertTrue(outcome.isOk());
+
+		outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "childX", null, "http://vs");
+		assertNotNull(outcome);
+		assertFalse(outcome.isOk());
+		assertEquals("Unknown code 'http://cs#childX' for in-memory expansion of ValueSet 'http://vs'", outcome.getMessage());
+
+		// Precalculated - Enumerated in non-present CS
+
+		outcome = myValidationSupport.validateCode(ctx, options, "http://cs-np", "code1", null, "http://vs");
+		assertNotNull(outcome);
+		assertTrue(outcome.isOk());
+		assertEquals("A", outcome.getMessage());
+
+		outcome = myValidationSupport.validateCode(ctx, options, "http://cs-np", "codeX", null, "http://vs");
+		assertNotNull(outcome);
+		assertFalse(outcome.isOk());
+		assertEquals("A", outcome.getMessage());
+
+	}
 
 	@Test
 	public void testValidateCodeOperationNoValueSet() {
@@ -340,14 +437,13 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 			"28571000087109",
 			"MODERNA COVID-19 mRNA-1273",
 			vs
-			);
+		);
 		assertTrue(outcome.isOk());
 
 		ValueSet expansion = myValueSetDao.expand(new IdType("ValueSet/vaccinecode"), new ValueSetExpansionOptions(), mySrd);
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 
 	}
-
 
 
 }

@@ -2181,7 +2181,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				return result;
 
 			} else {
-				return null;
+				return new LookupCodeResult()
+					.setFound(false);
 			}
 		});
 	}
