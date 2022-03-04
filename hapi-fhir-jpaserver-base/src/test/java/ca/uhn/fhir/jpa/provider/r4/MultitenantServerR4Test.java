@@ -346,10 +346,10 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 	}
 
 	@Test
-	public void testIncludeInTenant() throws Exception {
+	public void testIncludeInTenantWithAssignedID() throws Exception {
 		IIdType idA = createResource("Patient", withTenant(JpaConstants.DEFAULT_PARTITION_NAME), withId("test"), withFamily("Smith"), withActiveTrue());
 		createConditionWithAllowedUnqualified(idA);
-		Bundle response = myClient.search().byUrl(myClient.getServerBase() + "/TENANT-A/Condition?subject=Patient/" + idA.getIdPart() + "&_include=Condition:subject").returnBundle(Bundle.class).execute();
+		Bundle response = myClient.search().byUrl(myClient.getServerBase() + "/" + TENANT_A + "/Condition?subject=Patient/" + idA.getIdPart() + "&_include=Condition:subject").returnBundle(Bundle.class).execute();
 		assertThat(response.getEntry().size(), is(equalTo(2)));
 		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.NOT_ALLOWED);
 	}
@@ -359,7 +359,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		// Create patient
 		IIdType idA = createResource("Patient", withTenant(JpaConstants.DEFAULT_PARTITION_NAME), withFamily("Smith"), withActiveTrue());
 		createConditionWithAllowedUnqualified(idA);
-		Bundle response = myClient.search().byUrl(myClient.getServerBase() + "/TENANT-A/Condition?subject=Patient/" + idA.getIdPart() + "&_include=Condition:subject").returnBundle(Bundle.class).execute();
+		Bundle response = myClient.search().byUrl(myClient.getServerBase() + "/" + TENANT_A + "/Condition?subject=Patient/" + idA.getIdPart() + "&_include=Condition:subject").returnBundle(Bundle.class).execute();
 		assertThat(response.getEntry().size(), is(equalTo(2)));
 		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.NOT_ALLOWED);
 	}
