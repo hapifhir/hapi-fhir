@@ -9,10 +9,12 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DaoTestDataBuilder implements ITestDataBuilder {
+public class DaoTestDataBuilder implements ITestDataBuilder, AfterEachCallback {
 	private static final Logger ourLog = LoggerFactory.getLogger(DaoTestDataBuilder.class);
 
 	final FhirContext myFhirCtx;
@@ -60,5 +62,10 @@ public class DaoTestDataBuilder implements ITestDataBuilder {
 			myIds.get(nextType).forEach(dao::delete);
 		});
 		myIds.clear();
+	}
+
+	@Override
+	public void afterEach(ExtensionContext context) throws Exception {
+		cleanup();
 	}
 }

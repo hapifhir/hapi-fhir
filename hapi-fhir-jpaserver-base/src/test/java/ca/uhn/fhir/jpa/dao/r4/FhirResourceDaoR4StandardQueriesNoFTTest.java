@@ -23,6 +23,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.Extensions;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +62,7 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 	protected DaoRegistry myDaoRegistry;
 	@Autowired
 	MatchUrlService myMatchUrlService;
+	@RegisterExtension
 	@Autowired
 	DaoTestDataBuilder myDataBuilder;
 
@@ -73,11 +76,8 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 		return myFhirCtx;
 	}
 
-	@AfterEach
-	public void cleanup() {
-		myDataBuilder.cleanup();
-	}
 
+	// fixme mb extract to helper and add to TestDataBuilderConfig.
 	List<String> searchForIds(String theQueryUrl) {
 		// fake out the server url parsing
 		ResourceSearch search = myMatchUrlService.getResourceSearch(theQueryUrl);
@@ -105,8 +105,6 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 		});
 		return request;
 	}
-
-
 
 	@Nested
 	public class DateSearchTests extends BaseDateSearchDaoTests {
