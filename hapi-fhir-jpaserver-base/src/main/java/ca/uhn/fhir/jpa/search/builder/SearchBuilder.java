@@ -1052,15 +1052,17 @@ public class SearchBuilder implements ISearchBuilder {
 							}
 						}
 						//@formatter:off
-						StringBuilder resourceUrlBasedQuery = new StringBuilder("SELECT " + fieldsToLoadFromSpidxUriTable +
+						String resourceUrlBasedQuery = "SELECT " + fieldsToLoadFromSpidxUriTable +
 							" FROM hfj_res_link r " +
 							" JOIN hfj_spidx_uri rUri ON ( " +
 							"   r.target_resource_url = rUri.sp_uri AND " +
 							"   rUri.sp_name = 'url' " +
+							    (targetResourceType != null ? " AND rUri.res_type = :target_resource_type " : "") +
+							    (haveTargetTypesDefinedByParam ? " AND rUri.res_type IN (:target_resource_types) " : "") +
 							" ) " +
 							" WHERE r.src_path = :src_path AND " +
 							" r.target_resource_id IS NULL AND " +
-							" r." + searchPidFieldSqlColumn + " IN (:target_pids) ");
+							" r." + searchPidFieldSqlColumn + " IN (:target_pids) ";
 						//@formatter:on
 
 						String sql = resourceIdBasedQuery + " UNION " + resourceUrlBasedQuery;
