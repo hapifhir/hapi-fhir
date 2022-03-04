@@ -35,6 +35,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -155,9 +156,30 @@ public abstract class BaseReverseCronologicalBatchPidReader implements ItemReade
 
 	protected void addDateCountAndSortToSearch(ResourceSearch resourceSearch) {
 		SearchParameterMap map = resourceSearch.getSearchParameterMap();
-		map.setLastUpdated(new DateRangeParam().setUpperBoundInclusive(getCurrentHighThreshold()));
+		DateRangeParam rangeParam = getDateRangeParam(resourceSearch);
+		map.setLastUpdated(rangeParam);
 		map.setLoadSynchronousUpTo(myBatchSize);
 		map.setSort(new SortSpec(Constants.PARAM_LASTUPDATED, SortOrderEnum.DESC));
+	}
+
+	/**
+	 *
+	 * @param resourceSearch
+	 * @return
+	 */
+	private DateRangeParam getDateRangeParam(ResourceSearch resourceSearch) {
+		DateRangeParam rangeParam = resourceSearch.getSearchParameterMap().getLastUpdated();
+		if (rangeParam != null) {
+			if (rangeParam.getUpperBound() == null) {
+				rangeParam.setUpperBoundInclusive(getCurrentHighThreshold());
+			} else {
+				Date theUpperBound = rangeParam.getUpperBound().getValue().before(getCurrentHighThreshold()) ? rangeParam.getUpperBound().getValue() : getCurrentHighThreshold();
+				rangeParam.setUpperBoundInclusive(theUpperBound);
+			}
+		} else {
+			rangeParam = new DateRangeParam().setUpperBoundInclusive(getCurrentHighThreshold());
+		}
+		return rangeParam;
 	}
 
 	@Override
