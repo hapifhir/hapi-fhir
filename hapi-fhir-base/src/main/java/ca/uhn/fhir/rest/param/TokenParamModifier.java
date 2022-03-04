@@ -83,6 +83,14 @@ public enum TokenParamModifier {
 		return myValue;
 	}
 
+	/**
+	 * The modifier without the :
+	 * @return the string after the leading :
+	 */
+	public String getBareModifier() {
+		return myValue.substring(1);
+	}
+
 	public static TokenParamModifier forValue(String theValue) {
 		return VALUE_TO_ENUM.get(theValue);
 	}

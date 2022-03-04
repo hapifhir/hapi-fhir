@@ -36,7 +36,7 @@ class ValueSetAutocompleteOptionsTest {
 	private IPrimitiveType<String> myUrl;
 	private ValueSet myValueSet;
 	private ValueSetAutocompleteOptions myOptionsResult;
-	private DaoConfig myDaoConfig = new DaoConfig();
+	final private DaoConfig myDaoConfig = new DaoConfig();
 
 	{
 		myDaoConfig.setAdvancedLuceneIndexing(true);
@@ -160,13 +160,20 @@ class ValueSetAutocompleteOptionsTest {
 		}
 
 		@Test
+		public void withUnsupportedModifier() {
+			myFilter = new StringDt("blood");
+			myContext = new StringDt("Observation.code:exact");
+
+			assertParseThrowsInvalidRequestWithErrorCode(2069);
+		}
+
+		@Test
 		public void whenAdvancedIndexingOff() {
 		    // given
 			myDaoConfig.setAdvancedLuceneIndexing(false);
 
 			assertParseThrowsInvalidRequestWithErrorCode(ERROR_REQUIRES_EXTENDED_INDEXING);
 		}
-
 
 
 		private void assertParseThrowsInvalidRequestWithErrorCode(int theErrorCode) {
