@@ -1197,7 +1197,7 @@
 			<dependency>
 				 <groupId>net.sourceforge.htmlunit</groupId>
 				 <artifactId>htmlunit</artifactId>
-				 <version>2.56.0</version>
+				 <version>2.58.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.sf.json-lib</groupId>
@@ -1694,7 +1694,7 @@
 			<dependency>
 				<groupId>org.mariadb.jdbc</groupId>
 				<artifactId>mariadb-java-client</artifactId>
-				<version>2.7.2</version>
+				<version>3.0.3</version>
 			</dependency>
 			<dependency>
 				<groupId>org.mockito</groupId>
