@@ -163,9 +163,17 @@ public abstract class BaseReverseCronologicalBatchPidReader implements ItemReade
 	}
 
 	/**
+	 * Evaluates the passed in {@link ResourceSearch} to see if it contains a non-null {@link DateRangeParam}.
 	 *
-	 * @param resourceSearch
-	 * @return
+	 * If one such {@link DateRangeParam} exists, we use that to determine the upper and lower bounds for the returned
+	 * {@link DateRangeParam}. The {@link DateRangeParam#getUpperBound()} is compared to the
+	 * {@link BaseReverseCronologicalBatchPidReader#getCurrentHighThreshold()}, and the lower of the two date values
+	 * is used.
+	 *
+	 * If no {@link DateRangeParam} is set, we use the local {@link BaseReverseCronologicalBatchPidReader#getCurrentHighThreshold()}
+	 * to create a {@link DateRangeParam}.
+	 * @param resourceSearch The {@link ResourceSearch} to check.
+	 * @return {@link DateRangeParam}
 	 */
 	private DateRangeParam getDateRangeParam(ResourceSearch resourceSearch) {
 		DateRangeParam rangeParam = resourceSearch.getSearchParameterMap().getLastUpdated();
