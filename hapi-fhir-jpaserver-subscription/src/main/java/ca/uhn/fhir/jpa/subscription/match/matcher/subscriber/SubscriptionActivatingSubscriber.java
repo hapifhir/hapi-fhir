@@ -96,7 +96,13 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscript
 
 	}
 
-	public boolean activateSubscriptionIfRequired(final IBaseResource theSubscription) {
+	/**
+	 * Note: This is synchronized because this is called both by matching channel messages
+	 * as well as from Subscription Loader (which periodically refreshes from the DB to make
+	 * sure nothing got missed). If these two mechanisms try to activate the same subscription
+	 * at the same time they can get a constraint error.
+	 */
+	public synchronized boolean activateSubscriptionIfRequired(final IBaseResource theSubscription) {
 		// Grab the value for "Subscription.channel.type" so we can see if this
 		// subscriber applies..
 		CanonicalSubscriptionChannelType subscriptionChannelType = mySubscriptionCanonicalizer.getChannelType(theSubscription);

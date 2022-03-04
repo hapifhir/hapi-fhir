@@ -8,8 +8,9 @@ import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
-import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
+import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
@@ -24,7 +25,6 @@ import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDesignationDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptPropertyDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
@@ -75,7 +75,6 @@ import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -142,6 +141,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	static {
 		System.setProperty(Constants.TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS, "1000");
 		System.setProperty("test", "true");
+		System.setProperty("unit_test_mode", "true");
 		TestUtil.setShouldRandomizeTimezones(false);
 	}
 
@@ -191,7 +191,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	@Autowired
 	protected ITermConceptPropertyDao myTermConceptPropertyDao;
 	@Autowired
-	private IdHelperService myIdHelperService;
+	private IIdHelperService myIdHelperService;
 	@Autowired
 	private MemoryCacheService myMemoryCacheService;
 	@Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT)
@@ -722,16 +722,6 @@ public abstract class BaseJpaTest extends BaseTest {
 		doRandomizeLocaleAndTimezone();
 	}
 
-	@AfterAll
-	public static void afterClassShutdownDerby() {
-		// DriverManager.getConnection("jdbc:derby:;shutdown=true");
-		// try {
-		// DriverManager.getConnection("jdbc:derby:memory:myUnitTestDB;drop=true");
-		// } catch (SQLNonTransientConnectionException e) {
-		// // expected.. for some reason....
-		// }
-	}
-
 	public static String loadClasspath(String resource) throws IOException {
 		return new String(loadClasspathBytes(resource), Constants.CHARSET_UTF8);
 	}
@@ -745,10 +735,10 @@ public abstract class BaseJpaTest extends BaseTest {
 	}
 
 	@SuppressWarnings("BusyWait")
-	protected static void purgeDatabase(DaoConfig theDaoConfig, IFhirSystemDao<?, ?> theSystemDao, IResourceReindexingSvc theResourceReindexingSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc, ISearchParamRegistry theSearchParamRegistry, IBulkDataExportSvc theBulkDataExportSvc) {
+	protected static void purgeDatabase(DaoConfig theDaoConfig, IFhirSystemDao<?, ?> theSystemDao, IResourceReindexingSvc theResourceReindexingSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc, ISearchParamRegistry theSearchParamRegistry, IBulkDataExportJobSchedulingHelper theBulkDataJobActivator) {
 		theSearchCoordinatorSvc.cancelAllActiveSearches();
 		theResourceReindexingSvc.cancelAndPurgeAllJobs();
-		theBulkDataExportSvc.cancelAndPurgeAllJobs();
+		theBulkDataJobActivator.cancelAndPurgeAllJobs();
 
 		boolean expungeEnabled = theDaoConfig.isExpungeEnabled();
 		theDaoConfig.setExpungeEnabled(true);

@@ -110,9 +110,23 @@ public class SearchParameterUtil {
 	}
 
 
+	/**
+	 * Return true if any search parameter in the resource can point at a patient, false otherwise
+	 */
+	public static boolean isResourceTypeInPatientCompartment(FhirContext theFhirContext, String theResourceType) {
+		RuntimeResourceDefinition runtimeResourceDefinition = theFhirContext.getResourceDefinition(theResourceType);
+		 return getAllPatientCompartmentRuntimeSearchParams(runtimeResourceDefinition).size() > 0;
+	}
+
+
 	@Nullable
 	public static String getCode(FhirContext theContext, IBaseResource theResource) {
 		return getStringChild(theContext, theResource, "code");
+	}
+
+	@Nullable
+	public static String getURL(FhirContext theContext, IBaseResource theResource) {
+		return getStringChild(theContext, theResource, "url");
 	}
 
 	@Nullable

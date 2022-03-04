@@ -31,6 +31,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
@@ -73,7 +74,7 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 	@Autowired
 	private FhirContext myContext;
 	@Autowired
-	private IdHelperService myIdHelperService;
+	private IIdHelperService myIdHelperService;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 

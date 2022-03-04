@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.config.TestHibernateSearchAddInConfig;
 import ca.uhn.fhir.jpa.config.TestR4Config;
@@ -126,16 +127,15 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	@Autowired
 	private IResourceReindexingSvc myResourceReindexingSvc;
 	@Autowired
-	private IBulkDataExportSvc myBulkDataExportSvc;
+	private IBulkDataExportJobSchedulingHelper myBulkDataScheduleHelper;
 	@Autowired
 	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
-	private boolean myContainsSettings;
 
 	@BeforeEach
 	public void beforePurgeDatabase() {
-		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataExportSvc);
+		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
 	}
 
 	@Override
@@ -516,7 +516,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	}
 
 	@Nested
-	public class WithContainedIndexing {
+	public class WithContainedIndexingIT {
 		@BeforeEach
 		public void enableContains() {
 			// we don't support chained or contained yet, but turn it on to test we don't blow up.
@@ -753,13 +753,14 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	}
 
 	@Nested
-	public class DateSearchTests extends BaseDateSearchDaoTests {
+	public class DateSearchIT extends BaseDateSearchDaoTests {
 
 		@Override
 		protected Fixture getFixture() {
 			DaoTestDataBuilder testDataBuilder = new DaoTestDataBuilder(myFhirCtx, myDaoRegistry, new SystemRequestDetails());
 			return new TestDataBuilderFixture<>(testDataBuilder, myObservationDao);
 		}
+
 	}
 
 }

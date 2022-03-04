@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.config.TestHibernateSearchAddInConfig;
 import ca.uhn.fhir.jpa.config.TestR4Config;
@@ -85,7 +86,7 @@ public class FhirResourceDaoR4TerminologyElasticsearchIT extends BaseJpaTest {
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
-	private IBulkDataExportSvc myBulkDataExportSvc;
+	private IBulkDataExportJobSchedulingHelper myBulkDataScheduleHelper;
 
 
 	@BeforeEach
@@ -158,7 +159,7 @@ public class FhirResourceDaoR4TerminologyElasticsearchIT extends BaseJpaTest {
 
 	@AfterEach
 	public void afterPurgeDatabase() {
-		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataExportSvc);
+		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
 	}
 
 	@AfterAll

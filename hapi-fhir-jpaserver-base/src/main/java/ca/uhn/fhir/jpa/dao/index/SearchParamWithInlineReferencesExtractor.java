@@ -27,6 +27,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
@@ -91,7 +92,7 @@ public class SearchParamWithInlineReferencesExtractor {
 	@Autowired
 	private FhirContext myContext;
 	@Autowired
-	private IdHelperService myIdHelperService;
+	private IIdHelperService myIdHelperService;
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired

@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.jpa.dao.ObservationLastNIndexPersistSvc;
 import ca.uhn.fhir.jpa.term.TermCodeSystemStorageSvcImpl;
+import ca.uhn.fhir.jpa.term.TermConceptDaoSvc;
 import ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl;
 import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
@@ -36,6 +37,11 @@ public class SharedConfigDstu3Plus {
 	@Bean
 	public ITermCodeSystemStorageSvc termCodeSystemStorageSvc() {
 		return new TermCodeSystemStorageSvcImpl();
+	}
+
+	@Bean
+	public TermConceptDaoSvc termConceptDaoSvc() {
+		return new TermConceptDaoSvc();
 	}
 
 	@Bean

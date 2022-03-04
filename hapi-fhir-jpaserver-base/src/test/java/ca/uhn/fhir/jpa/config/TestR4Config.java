@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.config;
 
+import ca.uhn.fhir.batch2.jobs.config.Batch2JobsConfig;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.batch2.JpaBatch2Config;
 import ca.uhn.fhir.jpa.binstore.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.config.r4.JpaR4Config;
@@ -24,7 +26,13 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 
 import javax.sql.DataSource;
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadInfo;
+import java.lang.management.ThreadMXBean;
 import java.sql.Connection;
+import java.util.Deque;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
@@ -35,7 +43,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 	JpaR4Config.class,
 	HapiJpaConfig.class,
 	TestJPAConfig.class,
-	TestHibernateSearchAddInConfig.DefaultLuceneHeap.class
+	TestHibernateSearchAddInConfig.DefaultLuceneHeap.class,
+	JpaBatch2Config.class,
+	Batch2JobsConfig.class
 })
 public class TestR4Config {
 
@@ -60,8 +70,10 @@ public class TestR4Config {
 		}
 	}
 
-
-	private Exception myLastStackTrace;
+	private final Deque<Exception> myLastStackTrace = new LinkedList<>();
+	@Autowired
+	TestHibernateSearchAddInConfig.IHibernateSearchConfigurer hibernateSearchConfigurer;
+	private boolean myHaveDumpedThreads;
 
 	@Bean
 	public CircularQueueCaptureQueriesListener captureQueriesListener() {
@@ -87,7 +99,12 @@ public class TestR4Config {
 				try {
 					throw new Exception();
 				} catch (Exception e) {
-					myLastStackTrace = e;
+					synchronized (myLastStackTrace) {
+						myLastStackTrace.add(e);
+						while (myLastStackTrace.size() > ourMaxThreads) {
+							myLastStackTrace.removeFirst();
+						}
+					}
 				}
 
 				return retVal;
@@ -95,19 +112,32 @@ public class TestR4Config {
 
 			private void logGetConnectionStackTrace() {
 				StringBuilder b = new StringBuilder();
-				b.append("Last connection request stack trace:");
-				for (StackTraceElement next : myLastStackTrace.getStackTrace()) {
-					b.append("\n   ");
-					b.append(next.getClassName());
-					b.append(".");
-					b.append(next.getMethodName());
-					b.append("(");
-					b.append(next.getFileName());
-					b.append(":");
-					b.append(next.getLineNumber());
-					b.append(")");
+				int i = 0;
+				synchronized (myLastStackTrace) {
+					for (Iterator<Exception> iter = myLastStackTrace.descendingIterator(); iter.hasNext(); ) {
+						Exception nextStack = iter.next();
+						b.append("\n\nPrevious request stack trace ");
+						b.append(i++);
+						b.append(":");
+						for (StackTraceElement next : nextStack.getStackTrace()) {
+							b.append("\n   ");
+							b.append(next.getClassName());
+							b.append(".");
+							b.append(next.getMethodName());
+							b.append("(");
+							b.append(next.getFileName());
+							b.append(":");
+							b.append(next.getLineNumber());
+							b.append(")");
+						}
+					}
 				}
 				ourLog.info(b.toString());
+
+				if (!myHaveDumpedThreads) {
+					ourLog.info("Thread dump:" + crunchifyGenerateThreadDump());
+					myHaveDumpedThreads = true;
+				}
 			}
 
 		};
@@ -140,7 +170,6 @@ public class TestR4Config {
 		return new SingleQueryCountHolder();
 	}
 
-
 	@Bean
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext) {
 		LocalContainerEntityManagerFactoryBean retVal = HapiEntityManagerFactoryUtil.newEntityManagerFactory(theConfigurableListableBeanFactory, theFhirContext);
@@ -149,9 +178,6 @@ public class TestR4Config {
 		retVal.setJpaProperties(jpaProperties());
 		return retVal;
 	}
-
-	@Autowired
-	TestHibernateSearchAddInConfig.IHibernateSearchConfigurer hibernateSearchConfigurer;
 
 	private Properties jpaProperties() {
 		Properties extraProperties = new Properties();
@@ -185,6 +211,27 @@ public class TestR4Config {
 	@Bean
 	public IBinaryStorageSvc binaryStorage() {
 		return new MemoryBinaryStorageSvcImpl();
+	}
+
+	public static String crunchifyGenerateThreadDump() {
+		final StringBuilder dump = new StringBuilder();
+		final ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
+		final ThreadInfo[] threadInfos = threadMXBean.getThreadInfo(threadMXBean.getAllThreadIds(), 100);
+		for (ThreadInfo threadInfo : threadInfos) {
+			dump.append('"');
+			dump.append(threadInfo.getThreadName());
+			dump.append("\" ");
+			final Thread.State state = threadInfo.getThreadState();
+			dump.append("\n   java.lang.Thread.State: ");
+			dump.append(state);
+			final StackTraceElement[] stackTraceElements = threadInfo.getStackTrace();
+			for (final StackTraceElement stackTraceElement : stackTraceElements) {
+				dump.append("\n        at ");
+				dump.append(stackTraceElement);
+			}
+			dump.append("\n\n");
+		}
+		return dump.toString();
 	}
 
 	public static int getMaxThreads() {

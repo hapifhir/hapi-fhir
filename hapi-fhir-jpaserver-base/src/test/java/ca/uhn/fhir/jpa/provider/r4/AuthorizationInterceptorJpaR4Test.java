@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TerminologyTest;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -51,6 +52,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -264,9 +266,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		}
 
 
-
 	}
-
 
 
 	@Test
@@ -307,7 +307,6 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(bulkDataExportOptions, true, requestDetails);
 			assertEquals(BulkExportJobStatusEnum.SUBMITTED, jobDetails.getStatus());
 		}
-
 
 
 	}
@@ -698,13 +697,29 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		// Should be ok
 		myClient.read().resource(Observation.class).withId("Observation/allowed").execute();
 
-		try {
-			myClient.read().resource(Observation.class).withId("Observation/disallowed").execute();
-			fail();
-		} catch (ForbiddenOperationException e) {
-			// good
-		}
+	}
 
+	@Test
+	public void testReadCodeIn_AllowedInCompartment() throws IOException {
+		myValueSetDao.update(loadResourceFromClasspath(ValueSet.class, "r4/adi-vs2.json"));
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		logAllValueSetConcepts();
+
+		mySystemDao.transaction(mySrd, loadResourceFromClasspath(Bundle.class, "r4/adi-ptbundle.json"));
+
+		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.deny().read().resourcesOfType("Observation").withCodeNotInValueSet("code", "http://payer-to-payer-exchange/fhir/ValueSet/mental-health/ndc-canonical-valueset").andThen()
+					.allow().read().allResources().inCompartment("Patient", new IdType("Patient/P")).andThen()
+					.build();
+			}
+		}.setValidationSupport(myValidationSupport));
+
+		// Should be ok
+		myClient.read().resource(Patient.class).withId("Patient/P").execute();
+		myClient.read().resource(Observation.class).withId("Observation/O").execute();
 	}
 
 	/**
@@ -1215,7 +1230,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		p.setId("123");
 		request.addEntry().setResource(p).getRequest().setMethod(Bundle.HTTPVerb.POST)
 			.setUrl(
-				"Patient/"+
+				"Patient/" +
 					p.getId());
 
 		Observation o = new Observation();
@@ -1380,6 +1395,61 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		assertEquals(3, resp.getEntry().size());
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
 	}
+
+
+	@Test
+	public void testOperationEverything_SomeIncludedResourcesNotAuthorized() {
+		Patient pt1 = new Patient();
+		pt1.setActive(true);
+		final IIdType pid1 = myClient.create().resource(pt1).execute().getId().toUnqualifiedVersionless();
+
+		Observation obs1 = new Observation();
+		obs1.setStatus(ObservationStatus.FINAL);
+		obs1.setSubject(new Reference(pid1));
+		myClient.create().resource(obs1).execute();
+
+		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow().operation().named(JpaConstants.OPERATION_EVERYTHING).onInstance(pid1).andRequireExplicitResponseAuthorization().andThen()
+					.allow().read().resourcesOfType(Patient.class).inCompartment("Patient", pid1).andThen()
+					.allow().read().resourcesOfType(Observation.class).inCompartment("Patient", pid1).andThen()
+					.allow().create().resourcesOfType(Encounter.class).withAnyId().andThen()
+					.build();
+			}
+		});
+
+		Bundle outcome = myClient
+			.operation()
+			.onInstance(pid1)
+			.named(JpaConstants.OPERATION_EVERYTHING)
+			.withNoParameters(Parameters.class)
+			.returnResourceType(Bundle.class)
+			.execute();
+		assertEquals(2, outcome.getEntry().size());
+
+		// Add an Encounter, which will be returned by $everything but that hasn't been
+		// explicitly authorized
+
+		Encounter enc = new Encounter();
+		enc.setSubject(new Reference(pid1));
+		myClient.create().resource(enc).execute();
+
+		try {
+			outcome = myClient
+				.operation()
+				.onInstance(pid1)
+				.named(JpaConstants.OPERATION_EVERYTHING)
+				.withNoParameters(Parameters.class)
+				.returnResourceType(Bundle.class)
+				.execute();
+			fail();
+		} catch (ForbiddenOperationException e) {
+			assertThat(e.getMessage(), containsString("Access denied by default policy"));
+		}
+	}
+
 
 	@Test
 	public void testPatchWithinCompartment() {

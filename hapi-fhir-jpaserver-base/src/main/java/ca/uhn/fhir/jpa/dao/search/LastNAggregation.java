@@ -1,9 +1,28 @@
 package ca.uhn.fhir.jpa.dao.search;
 
+/*-
+ * #%L
+ * HAPI FHIR JPA Server
+ * %%
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import org.hibernate.search.engine.search.aggregation.AggregationKey;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -11,13 +30,15 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.SEARCH_PARAM_ROOT;
+
 /**
  * Builds lastN aggregation, and parse the results
  */
 public class LastNAggregation {
-	static final String SP_SUBJECT = "sp.subject.reference.value";
-	private static final String SP_CODE_TOKEN_CODE_AND_SYSTEM = "sp.code.token.code-system";
-	private static final String SP_DATE_DT_UPPER = "sp.date.dt.upper";
+	static final String SP_SUBJECT = SEARCH_PARAM_ROOT + ".subject.reference.value";
+	private static final String SP_CODE_TOKEN_CODE_AND_SYSTEM = SEARCH_PARAM_ROOT + ".code.token.code-system";
+	private static final String SP_DATE_DT_UPPER = SEARCH_PARAM_ROOT + ".date.dt.upper";
 	private static final String GROUP_BY_CODE_SYSTEM_SUB_AGGREGATION = "group_by_code_system";
 	private static final String MOST_RECENT_EFFECTIVE_SUB_AGGREGATION = "most_recent_effective";
 

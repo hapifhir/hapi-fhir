@@ -1,0 +1,36 @@
+{
+	"resourceType": "ValueSet",
+	"id": "vs",
+	"meta": {
+		"versionId": "1",
+		"lastUpdated": "2022-02-18T17:49:43.229-05:00"
+	},
+	"url": "http://payer-to-payer-exchange/fhir/ValueSet/mental-health/ndc",
+	"version": "20220214",
+	"name": "NDC-Codes-Mental-Health",
+	"status": "draft",
+	"experimental": true,
+	"date": "2022-02-14",
+	"compose": {
+		"include": [
+			{
+				"system": "http://payer-to-payer-exchange/fhir/CodeSystem/ndc-codes",
+				"version": "1.0",
+				"concept": [
+					{
+						"code": "378351391",
+						"display": "risperidone-3-mg-tablet"
+					},
+					{
+						"code": "378351570",
+						"display": "mirtazapine-15-mg-tablet"
+					},
+					{
+						"code": "378397893",
+						"display": "paliperidone-1.5-mg-tablet"
+					}
+				]
+			}
+		]
+	}
+}

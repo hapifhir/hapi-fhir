@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.config.HapiFhirLocalContainerEntityManagerFactoryBean;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
@@ -175,7 +176,7 @@ public class SearchBuilder implements ISearchBuilder {
 	@Autowired
 	private FhirContext myContext;
 	@Autowired
-	private IdHelperService myIdHelperService;
+	private IIdHelperService myIdHelperService;
 	@Autowired(required = false)
 	private IFulltextSearchSvc myFulltextSearchSvc;
 	@Autowired(required = false)

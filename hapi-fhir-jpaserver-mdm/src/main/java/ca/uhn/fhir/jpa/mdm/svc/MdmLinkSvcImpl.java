@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
  */
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
@@ -54,9 +54,7 @@ public class MdmLinkSvcImpl implements IMdmLinkSvc {
 	@Autowired
 	private MdmLinkDaoSvc myMdmLinkDaoSvc;
 	@Autowired
-	private IdHelperService myIdHelperService;
-	@Autowired
-	private IMdmModelConverterSvc myMdmModelConverterSvc;
+	private IJpaIdHelperService myIdHelperService;
 
 	@Override
 	@Transactional

@@ -5,13 +5,8 @@
  *
  * This work depends on on the Hibernate Search infrastructure in {@link ca.uhn.fhir.jpa.dao.search}.
  *
- * NIH sponsored this work to provide an interactive-autocomplete when browsing codes in a research dataset.
+ * Provides an interactive-autocomplete when browsing codes in a dataset.
  *
- * https://gitlab.com/simpatico.ai/cdr/-/issues/2452
- * wipmb TODO-LIST
- * wipmb - docs - no partition support
- * wipmb - link to docs
- * wipmb what if the sp isn't of type token?  do we check, or discard results without tokens?
  *
  */
 package ca.uhn.fhir.jpa.search.autocomplete;

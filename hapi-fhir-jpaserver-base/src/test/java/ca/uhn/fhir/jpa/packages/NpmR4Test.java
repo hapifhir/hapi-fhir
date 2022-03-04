@@ -458,7 +458,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 		spec.setInstallResourceTypes(resourceList);
 		try {
 			PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
-			fail();
+			fail(outcome.toString());
 		} catch (ImplementationGuideInstallationException theE) {
 			assertThat(theE.getMessage(), containsString("Resources in a package must have a url or identifier to be loaded by the package installer."));
 		}
@@ -478,6 +478,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("test-ig").setVersion("1.0.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		spec.setInstallResourceTypes(resourceList);
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
+		ourLog.info("Outcome: {}", outcome);
 		assertEquals(1, outcome.getResourcesInstalled().get("ImplementationGuide"));
 
 		// Be sure no further communication with the server
@@ -588,19 +589,14 @@ public class NpmR4Test extends BaseJpaR4Test {
 
 		runInTransaction(() -> {
 			NpmPackageMetadataJson metadata = myPackageCacheManager.loadPackageMetadata("hl7.fhir.uv.shorthand");
-			try {
-				ourLog.info(JsonUtil.serialize(metadata));
+			ourLog.info(JsonUtil.serialize(metadata));
 
-				assertEquals("0.12.0", metadata.getDistTags().getLatest());
+			assertEquals("0.12.0", metadata.getDistTags().getLatest());
 
-				assertThat(metadata.getVersions().keySet(), contains("0.12.0", "0.11.1"));
+			assertThat(metadata.getVersions().keySet(), contains("0.12.0", "0.11.1"));
 
-				NpmPackageMetadataJson.Version version0120 = metadata.getVersions().get("0.12.0");
-				assertEquals(3001, version0120.getBytes());
-
-			} catch (IOException e) {
-				throw new InternalErrorException(e);
-			}
+			NpmPackageMetadataJson.Version version0120 = metadata.getVersions().get("0.12.0");
+			assertEquals(3001, version0120.getBytes());
 		});
 
 	}

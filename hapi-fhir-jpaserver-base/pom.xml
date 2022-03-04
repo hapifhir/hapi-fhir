@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.0.0-PRE3-SNAPSHOT</version>
+		<version>6.0.0-PRE5-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -15,24 +15,6 @@
 	<name>HAPI FHIR JPA Server</name>
 
 	<dependencies>
-		<!--
-				<dependency>
-					<groupId>com.fasterxml.jackson.jaxrs</groupId>
-					<artifactId>jackson-jaxrs-json-provider</artifactId>
-					<version>${jackson.version}</version>
-				</dependency>
-				<dependency>
-					<groupId>com.fasterxml.jackson.datatype</groupId>
-					<artifactId>jackson-datatype-hibernate4</artifactId>
-					<version>${jackson.version}</version>
-				</dependency>
-
-				<dependency>
-					<groupId>org.apache.commons</groupId>
-					<artifactId>commons-lang3</artifactId>
-					<version>3.5</version>
-				</dependency>
-		-->
 
 		<dependency>
 			<groupId>com.fasterxml.woodstox</groupId>
@@ -152,6 +134,16 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-storage-batch2</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-storage-batch2-jobs</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-storage</artifactId>
 			<version>${project.version}</version>
 			<classifier>tests</classifier>
@@ -172,6 +164,12 @@
 		<dependency>
 			<groupId>org.javassist</groupId>
 			<artifactId>javassist</artifactId>
+		</dependency>
+
+		<!-- GraphQL -->
+		<dependency>
+			<groupId>com.graphql-java</groupId>
+			<artifactId>graphql-java</artifactId>
 		</dependency>
 
 		<!-- SQL Builder -->

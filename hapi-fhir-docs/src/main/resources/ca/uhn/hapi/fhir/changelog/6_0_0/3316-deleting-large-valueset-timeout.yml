@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 3316
+title: "When deleting a large ValueSet operation was timing out. This issue has been fixed."

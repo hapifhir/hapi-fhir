@@ -8,6 +8,10 @@
 		</encoder>
 	</appender>
 
+	<!--<logger name="ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingSubscriber" additivity="false" level="trace">
+		<appender-ref ref="STDOUT" />
+	</logger>-->
+
 	<logger name="org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator" additivity="false" level="info">
 		<appender-ref ref="STDOUT" />
 	</logger>

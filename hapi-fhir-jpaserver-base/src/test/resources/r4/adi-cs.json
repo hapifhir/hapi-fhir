@@ -1,0 +1,70 @@
+{
+	"resourceType": "CodeSystem",
+	"id": "cs",
+	"meta": {
+		"versionId": "1",
+		"lastUpdated": "2022-02-18T17:49:05.119-05:00"
+	},
+	"url": "http://payer-to-payer-exchange/fhir/CodeSystem/ndc",
+	"identifier": [
+		{
+			"system": "https://payer-to-payer-exchange/fhir/identifiers/codesystems",
+			"value": "internal"
+		}
+	],
+	"version": "1",
+	"name": "ndc",
+	"title": "National Drug Codes",
+	"status": "active",
+	"experimental": true,
+	"date": "2022-02-14",
+	"description": "National Drug Codes for granular consent",
+	"caseSensitive": true,
+	"content": "complete",
+	"concept": [
+		{
+			"code": "378351391",
+			"display": "risperidone-3-mg-tablet",
+			"definition": "Code for risperidone",
+			"property": [
+				{
+					"code": "consent-type",
+					"valueString": "mental-health"
+				}
+			]
+		},
+		{
+			"code": "378351570",
+			"display": "mirtazapine-15-mg-tablet",
+			"definition": "Code for risperidone",
+			"property": [
+				{
+					"code": "consent-type",
+					"valueString": "mental-health"
+				}
+			]
+		},
+		{
+			"code": "378381501",
+			"display": "clozapine-100-mg-tablet",
+			"definition": "Code for clozapine",
+			"property": [
+				{
+					"code": "consent-type",
+					"valueString": "mental-health"
+				}
+			]
+		},
+		{
+			"code": "378397893",
+			"display": "paliperidone-1.5-mg-tablet",
+			"definition": "Code for paliperidone",
+			"property": [
+				{
+					"code": "consent-type",
+					"valueString": "mental-health"
+				}
+			]
+		}
+	]
+}

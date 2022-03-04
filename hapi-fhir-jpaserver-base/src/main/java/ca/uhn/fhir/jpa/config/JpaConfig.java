@@ -17,8 +17,10 @@ import ca.uhn.fhir.jpa.batch.mdm.MdmClearJobSubmitterImpl;
 import ca.uhn.fhir.jpa.batch.reader.BatchResourceSearcher;
 import ca.uhn.fhir.jpa.binstore.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.binstore.BinaryStorageInterceptor;
+import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
+import ca.uhn.fhir.jpa.bulk.export.svc.BulkDataExportJobSchedulingHelperImpl;
 import ca.uhn.fhir.jpa.bulk.export.svc.BulkDataExportSvcImpl;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.svc.BulkDataImportSvcImpl;
@@ -40,7 +42,8 @@ import ca.uhn.fhir.jpa.dao.expunge.ResourceExpungeService;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;
 import ca.uhn.fhir.jpa.dao.index.DaoResourceLinkResolver;
 import ca.uhn.fhir.jpa.dao.index.DaoSearchParamSynchronizer;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
+import ca.uhn.fhir.jpa.dao.index.JpaIdHelperService;
 import ca.uhn.fhir.jpa.dao.index.SearchParamWithInlineReferencesExtractor;
 import ca.uhn.fhir.jpa.dao.mdm.MdmLinkExpandSvc;
 import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilder;
@@ -438,6 +441,11 @@ public class JpaConfig {
 	}
 
 	@Bean
+	public IBulkDataExportJobSchedulingHelper bulkDataExportJobSchedulingHelper() {
+		return new BulkDataExportJobSchedulingHelperImpl();
+	}
+
+	@Bean
 	@Lazy
 	public BulkDataExportProvider bulkDataExportProvider() {
 		return new BulkDataExportProvider();
@@ -478,7 +486,6 @@ public class JpaConfig {
 	public IBulkDataImportSvc bulkDataImportSvc() {
 		return new BulkDataImportSvcImpl();
 	}
-
 
 	@Bean
 	public PersistedJpaBundleProviderFactory persistedJpaBundleProviderFactory() {
@@ -729,8 +736,8 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public IdHelperService idHelperService() {
-		return new IdHelperService();
+	public IJpaIdHelperService jpaIdHelperService() {
+		return new JpaIdHelperService();
 	}
 
 	@Bean

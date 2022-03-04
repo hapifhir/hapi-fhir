@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.config.r5;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.config.GeneratedDaoAndResourceProviderConfigR5;
 import ca.uhn.fhir.jpa.config.JpaConfig;
@@ -9,6 +10,7 @@ import ca.uhn.fhir.jpa.config.SharedConfigDstu3Plus;
 import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
 import ca.uhn.fhir.jpa.dao.r5.TransactionProcessorVersionAdapterR5;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
+import ca.uhn.fhir.jpa.graphql.GraphQLProviderWithIntrospection;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import ca.uhn.fhir.jpa.term.TermReadSvcR5;
 import ca.uhn.fhir.jpa.term.TermVersionAdapterSvcR5;
@@ -17,6 +19,7 @@ import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR5;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Meta;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
@@ -68,8 +71,8 @@ public class JpaR5Config {
 
 	@Bean(name = JpaConfig.GRAPHQL_PROVIDER_NAME)
 	@Lazy
-	public GraphQLProvider graphQLProvider(FhirContext theFhirContext, IGraphQLStorageServices theGraphqlStorageServices, IValidationSupport theValidationSupport) {
-		return new GraphQLProvider(theFhirContext, theValidationSupport, theGraphqlStorageServices);
+	public GraphQLProvider graphQLProvider(FhirContext theFhirContext, IGraphQLStorageServices theGraphqlStorageServices, IValidationSupport theValidationSupport, ISearchParamRegistry theSearchParamRegistry, IDaoRegistry theDaoRegistry) {
+        return new GraphQLProviderWithIntrospection(theFhirContext, theValidationSupport, theGraphqlStorageServices, theSearchParamRegistry, theDaoRegistry);
 	}
 
 	@Bean(name = "mySystemDaoR5")
