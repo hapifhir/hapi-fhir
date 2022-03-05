@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.batch2;
+package ca.uhn.fhir.jpa.reindex;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.RunOutcome;

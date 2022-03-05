@@ -20,9 +20,12 @@ package ca.uhn.fhir.batch2.jobs.reindex;
  * #L%
  */
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.model.JobDefinition;
+import ca.uhn.fhir.context.FhirContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 
 @Configuration
 public class ReindexAppCtx {
@@ -68,4 +71,10 @@ public class ReindexAppCtx {
 	public LoadIdsStep loadIdsStep() {
 		return new LoadIdsStep();
 	}
+
+	@Bean
+	public ReindexProvider reindexProvider(FhirContext theFhirContext, IJobCoordinator theJobCoordinator) {
+		return new ReindexProvider(theFhirContext, theJobCoordinator);
+	}
+
 }

@@ -14,7 +14,7 @@ import java.util.Date;
 public class ReindexChunkRange implements IModelJson {
 
 	@Nullable
-	@JsonProperty("resourceType")
+	@JsonProperty("url")
 	private String myUrl;
 
 	@JsonSerialize(using = JsonDateSerializer.class)

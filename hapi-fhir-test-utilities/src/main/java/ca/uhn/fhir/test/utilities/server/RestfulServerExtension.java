@@ -82,9 +82,9 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 			if (myProviders != null) {
 				myServlet.registerProviders(myProviders);
 			}
-            if (myPagingProvider != null) {
-                myServlet.setPagingProvider(myPagingProvider);
-            }
+			if (myPagingProvider != null) {
+				myServlet.setPagingProvider(myPagingProvider);
+			}
 
 			myConsumers.forEach(t -> t.accept(myServlet));
 		}
@@ -159,16 +159,20 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 		myServlet.getInterceptorService().unregisterAllInterceptors();
 	}
 
-    public RestfulServerExtension withPagingProvider(IPagingProvider thePagingProvider) {
-        if (myServlet != null) {
-            myServlet.setPagingProvider(thePagingProvider);
-        } else {
-            myPagingProvider = thePagingProvider;
-        }
-        return this;
-    }
+	public RestfulServerExtension withPagingProvider(IPagingProvider thePagingProvider) {
+		if (myServlet != null) {
+			myServlet.setPagingProvider(thePagingProvider);
+		} else {
+			myPagingProvider = thePagingProvider;
+		}
+		return this;
+	}
 
 	public RestfulServerExtension unregisterInterceptor(Object theInterceptor) {
 		return withServer(t -> t.getInterceptorService().unregisterInterceptor(theInterceptor));
+	}
+
+	public void unregisterProvider(Object theProvider) {
+		withServer(t -> t.unregisterProvider(theProvider));
 	}
 }

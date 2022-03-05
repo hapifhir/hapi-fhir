@@ -43,14 +43,6 @@ public final class BatchConstants {
 	 */
 	public static final String DELETE_EXPUNGE_JOB_NAME = "deleteExpungeJob";
 	/**
-	 * Reindex
-	 */
-	public static final String REINDEX_JOB_NAME = "reindexJob";
-	/**
-	 * Reindex Everything
-	 */
-	public static final String REINDEX_EVERYTHING_JOB_NAME = "reindexEverythingJob";
-	/**
 	 * MDM Clear
 	 */
 	public static final String MDM_CLEAR_JOB_NAME = "mdmClearJob";

@@ -12,11 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
-
 import java.util.Date;
-
-import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
-import static org.apache.commons.lang3.time.DateUtils.addDays;
 
 public class GenerateRangeChunksStep implements IFirstJobStepWorker<ReindexJobParameters, ReindexChunkRange> {
 	private static final Logger ourLog = LoggerFactory.getLogger(GenerateRangeChunksStep.class);
@@ -28,25 +24,26 @@ public class GenerateRangeChunksStep implements IFirstJobStepWorker<ReindexJobPa
 	@Override
 	public RunOutcome run(@Nonnull StepExecutionDetails<ReindexJobParameters, VoidModel> theStepExecutionDetails, @Nonnull IJobDataSink<ReindexChunkRange> theDataSink) throws JobExecutionFailedException {
 		ReindexJobParameters params = theStepExecutionDetails.getParameters();
-		String resourceType = null;
-		String url = defaultIfBlank(params.getUrl(), null);
-
-		if (url != null) {
-			resourceType = url.substring(0, url.indexOf('?'));
-		}
-
-		Date start = myResourceReindexSvc.getOldestTimestamp(resourceType);
 		Date end = new Date();
 
-		ourLog.info("Initiating reindex of {} from {}", url != null ? url : "All Resources", start);
-
-		for (Date nextStart = start; nextStart.before(end); nextStart = addDays(nextStart, 1)) {
-
+		if (params.getUrl().isEmpty()) {
+			Date start = myResourceReindexSvc.getOldestTimestamp(null);
+			ourLog.info("Initiating reindex of All Resources from {} to {}", start, end);
 			ReindexChunkRange nextRange = new ReindexChunkRange();
-			nextRange.setUrl(url);
-			nextRange.setStart(nextStart);
-			nextRange.setEnd(addDays(nextStart, 1));
+			nextRange.setStart(start);
+			nextRange.setEnd(end);
 			theDataSink.accept(nextRange);
+		} else {
+			for (String nextUrl : params.getUrl()) {
+				String nextResourceType = nextUrl.substring(0, nextUrl.indexOf('?'));
+				Date start = myResourceReindexSvc.getOldestTimestamp(nextResourceType);
+				ourLog.info("Initiating reindex of [{}]] from {} to {}", nextUrl, start, end);
+				ReindexChunkRange nextRange = new ReindexChunkRange();
+				nextRange.setUrl(nextUrl);
+				nextRange.setStart(start);
+				nextRange.setEnd(end);
+				theDataSink.accept(nextRange);
+			}
 		}
 
 		return RunOutcome.SUCCESS;

@@ -5,7 +5,9 @@ import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.svc.IResourceReindexSvc;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,12 @@ public class LoadIdsStep implements IJobStepWorker<ReindexJobParameters, Reindex
 	@Autowired
 	private IResourceReindexSvc myResourceReindexSvc;
 
+	@Autowired
+	private DaoRegistry myDaoRegistry;
+
+	@Autowired
+	private MatchUrlService myMatchUrlService;
+
 	@Nonnull
 	@Override
 	public RunOutcome run(@Nonnull StepExecutionDetails<ReindexJobParameters, ReindexChunkRange> theStepExecutionDetails, @Nonnull IJobDataSink<ReindexChunkIds> theDataSink) throws JobExecutionFailedException {
@@ -38,14 +46,18 @@ public class LoadIdsStep implements IJobStepWorker<ReindexJobParameters, Reindex
 
 		Date nextStart = start;
 		Set<ReindexChunkIds.Id> idBuffer = new HashSet<>();
+		long previousLastTime = 0L;
 		while(true) {
-			IResourceReindexSvc.IdChunk nextChunk = myResourceReindexSvc.fetchResourceIdsPage(nextStart, end);
+			IResourceReindexSvc.IdChunk nextChunk = myResourceReindexSvc.fetchResourceIdsPage(nextStart, end, theStepExecutionDetails.getData().getUrl());
 			if (nextChunk.getIds().isEmpty()) {
 				break;
 			}
-			if (nextChunk.getLastDate().getTime() == nextStart.getTime()) {
+
+			// If we get the same last time twice in a row, we've clearly reached the end
+			if (nextChunk.getLastDate().getTime() == previousLastTime) {
 				break;
 			}
+			previousLastTime = nextChunk.getLastDate().getTime();
 
 			for (int i = 0; i < nextChunk.getIds().size(); i++) {
 				ReindexChunkIds.Id nextId = new ReindexChunkIds.Id();

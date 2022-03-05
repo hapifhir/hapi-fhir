@@ -9,21 +9,25 @@ import java.util.List;
 public interface IResourceReindexSvc {
 
 	/**
+	 * Indicates whether reindexing all resoure types is supported. Implementations are expected to provide a static response (either they support this or they don't).
+	 */
+	boolean isAllResourceTypeSupported();
+
+	/**
 	 * Returns the lastUpdated timestamp for the oldest resource in the storage module
 	 *
-	 * @param theResourceType The resource type, or <code>null</code> to return the oldest resource type across all resource types
+	 * @param theResourceType The resource type, or <code>null</code> to return the oldest resource type across all resource types. Null will only be supplied if {@link #isAllResourceTypeSupported()} returns <code>true</code>.
 	 */
 	Date getOldestTimestamp(@Nullable String theResourceType);
 
 	/**
-	 * Fetches a page of resource IDs. The page size is up to the discretion of the implementation.
+	 * Fetches a page of resource IDs for all resource types. The page size is up to the discretion of the implementation.
 	 *
 	 * @param theStart The start of the date range, must be inclusive.
 	 * @param theEnd   The end of the date range, should be exclusive.
+	 * @param theUrl   The search URL, or <code>null</code> to return IDs for all resources across all resource types. Null will only be supplied if {@link #isAllResourceTypeSupported()} returns <code>true</code>.
 	 */
-	IdChunk fetchResourceIdsPage(Date theStart, Date theEnd);
-
-//	void reindex(List<ResourcePersistentId>)
+	IdChunk fetchResourceIdsPage(Date theStart, Date theEnd, @Nullable String theUrl);
 
 	class IdChunk {
 

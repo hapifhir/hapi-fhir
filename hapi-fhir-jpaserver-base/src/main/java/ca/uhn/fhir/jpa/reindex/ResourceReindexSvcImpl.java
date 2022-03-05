@@ -1,13 +1,25 @@
 package ca.uhn.fhir.jpa.reindex;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IResourceReindexSvc;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.SortOrderEnum;
+import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Date;
@@ -20,6 +32,20 @@ public class ResourceReindexSvcImpl implements IResourceReindexSvc {
 
 	@Autowired
 	private IResourceTableDao myResourceTableDao;
+
+	@Autowired
+	private MatchUrlService myMatchUrlService;
+
+	@Autowired
+	private DaoRegistry myDaoRegistry;
+
+	@Autowired
+	private FhirContext myFhirContext;
+
+	@Override
+	public boolean isAllResourceTypeSupported() {
+		return true;
+	}
 
 	@Override
 	@Transactional
@@ -37,9 +63,46 @@ public class ResourceReindexSvcImpl implements IResourceReindexSvc {
 
 	@Override
 	@Transactional
-	public IdChunk fetchResourceIdsPage(Date theStart, Date theEnd) {
+	public IdChunk fetchResourceIdsPage(Date theStart, Date theEnd, @Nullable String theUrl) {
 
-		Pageable page = Pageable.ofSize(20000);
+		int pageSize = 20000;
+		if (theUrl == null) {
+			return fetchResourceIdsPageNoUrl(theStart, theEnd, pageSize);
+		} else {
+			return fetchResourceIdsPageWithUrl(theStart, theEnd, pageSize, theUrl);
+		}
+	}
+
+	private IdChunk fetchResourceIdsPageWithUrl(Date theStart, Date theEnd, int thePageSize, String theUrl) {
+
+		String resourceType = theUrl.substring(0, theUrl.indexOf('?'));
+		RuntimeResourceDefinition def = myFhirContext.getResourceDefinition(resourceType);
+
+		SearchParameterMap searchParamMap = myMatchUrlService.translateMatchUrl(theUrl, def);
+		searchParamMap.setSort(new SortSpec(Constants.PARAM_LASTUPDATED, SortOrderEnum.ASC));
+		searchParamMap.setLastUpdated(new DateRangeParam(theStart, theEnd));
+		searchParamMap.setCount(thePageSize);
+
+		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
+		List<ResourcePersistentId> ids = dao.searchForIds(searchParamMap, new SystemRequestDetails());
+
+		// just a list of the same size where every element is the same resource type
+		List<String> resourceTypes = ids
+			.stream()
+			.map(t -> resourceType)
+			.collect(Collectors.toList());
+
+		Date lastDate = null;
+		if (ids.size() > 0) {
+			lastDate = dao.readByPid(ids.get(ids.size() - 1)).getMeta().getLastUpdated();
+		}
+
+		return new IdChunk(ids, resourceTypes, lastDate);
+	}
+
+	@Nonnull
+	private IdChunk fetchResourceIdsPageNoUrl(Date theStart, Date theEnd, int thePagesize) {
+		Pageable page = Pageable.ofSize(thePagesize);
 		Slice<Object[]> slice = myResourceTableDao.findIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldest(page, theStart, theEnd);
 
 		List<Object[]> content = slice.getContent();
