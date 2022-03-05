@@ -50,7 +50,7 @@ import java.util.Objects;
 @Table(name = "HFJ_SPIDX_NUMBER", indexes = {
 //	We used to have an index with name IDX_SP_NUMBER - Dont reuse
 	@Index(name = "IDX_SP_NUMBER_HASH_VAL_V2", columnList = "HASH_IDENTITY,SP_VALUE,RES_ID,PARTITION_ID"),
-	@Index(name = "IDX_SP_NUMBER_RESID_V2", columnList = "RES_ID")
+	@Index(name = "IDX_SP_NUMBER_RESID_V2", columnList = "RES_ID, HASH_IDENTITY, SP_VALUE, PARTITION_ID")
 })
 public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchParam {
 
@@ -71,7 +71,7 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 	private Long myHashIdentity;
 
 	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = {})
-	@JoinColumn(foreignKey = @ForeignKey(name = "FKCLTIHNC5TGPRJ9BHPT7XI5OTB"),
+	@JoinColumn(foreignKey = @ForeignKey(name = "FK_SP_NUMBER_RES"),
 		name = "RES_ID", referencedColumnName = "RES_ID", nullable = false)
 	private ResourceTable myResource;
 

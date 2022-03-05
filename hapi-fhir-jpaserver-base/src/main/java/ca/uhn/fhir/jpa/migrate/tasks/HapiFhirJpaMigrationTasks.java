@@ -279,40 +279,36 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	 * @see ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber
 	 */
 	private void replaceNumericSPIndices(Builder theVersion) {
-		Builder.BuilderWithTableName tokenTable = theVersion.onTable("HFJ_SPIDX_NUMBER");
-//
-//		// replace and drop IDX_SP_DATE_HASH for sorting
-//		tokenTable
-//			.addIndex("20220208.1", "IDX_SP_TOKEN_HASH_V2")
-//			.unique(false).online(true)
-//			.withColumns("HASH_IDENTITY", "SP_SYSTEM", "SP_VALUE", "RES_ID", "PARTITION_ID");
-//
-//		tokenTable.dropIndexOnline("20220208.2", "IDX_SP_TOKEN_HASH");
-//
-//		// for search by system
-//		tokenTable
-//			.addIndex("20220208.3", "IDX_SP_TOKEN_HASH_S_V2")
-//			.unique(false).online(true)
-//			.withColumns("HASH_SYS", "RES_ID", "PARTITION_ID");
-//
-//		tokenTable.dropIndexOnline("20220208.4", "IDX_SP_TOKEN_HASH_S");
-//
-//		// for search by system+value
-//		tokenTable
-//			.addIndex("20220208.5", "IDX_SP_TOKEN_HASH_SV_V2")
-//			.unique(false).online(true)
-//			.withColumns("HASH_SYS_AND_VALUE", "RES_ID", "PARTITION_ID");
-//
-//		tokenTable.dropIndexOnline("20220208.6", "IDX_SP_TOKEN_HASH_SV");
-//
-//		// for search by value
-//		tokenTable
-//			.addIndex("20220208.7", "IDX_SP_TOKEN_HASH_V_V2")
-//			.unique(false).online(true)
-//			.withColumns("HASH_VALUE", "RES_ID", "PARTITION_ID");
-//
-//		tokenTable.dropIndexOnline("20220208.8", "IDX_SP_TOKEN_HASH_V");
+		Builder.BuilderWithTableName numberTable = theVersion.onTable("HFJ_SPIDX_NUMBER");
 
+		// Main query index
+		numberTable
+			.addIndex("20220304.1", "IDX_SP_NUMBER_HASH_VAL_V2")
+			.unique(false)
+			.online(true)
+			.withColumns("HASH_IDENTITY", "SP_VALUE", "RES_ID", "PARTITION_ID");
+
+		numberTable.dropIndexOnline("20220304.2", "IDX_SP_NUMBER_HASH_VAL");
+
+		// for joining to other queries
+		{
+			numberTable
+				.addIndex("20220304.3", "IDX_SP_NUMBER_RESID_V2")
+				.unique(false).online(true)
+				.withColumns("RES_ID", "HASH_IDENTITY", "SP_VALUE", "PARTITION_ID");
+
+			// some engines tie the FK constraint to a particular index.
+			// So we need to drop and recreate the constraint to drop the old RES_ID index.
+			// Rename it while we're at it.  FK7ULX3J1GG3V7MAQREJGC7YBC4 was not a pretty name.
+			numberTable.dropForeignKey("20220304.4", "FKCLTIHNC5TGPRJ9BHPT7XI5OTB", "HFJ_RESOURCE");
+			numberTable.dropIndexOnline("20220304.5", "IDX_SP_NUMBER_RESID");
+			numberTable.dropIndexOnline("20220304.6", "FKCLTIHNC5TGPRJ9BHPT7XI5OTB");
+
+			numberTable.addForeignKey("20220304.7", "FK_SP_NUMBER_RES")
+				.toColumn("RES_ID").references("HFJ_RESOURCE", "RES_ID");
+		}
+		// obsolete
+		numberTable.dropIndexOnline("20220304.8", "IDX_SP_NUMBER_UPDATED");
 	}
 
 	/**
@@ -1306,7 +1302,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			spidxNumber
 				.addIndex("20180903.13", "IDX_SP_NUMBER_HASH_VAL")
 				.unique(false)
-				.withColumns("HASH_IDENTITY", "SP_VALUE");
+				.withColumns("HASH_IDENTITY", "SP_VALUE")
+				.doNothing();
 			spidxNumber
 				.addTask(new CalculateHashesTask(VersionEnum.V3_5_0, "20180903.14")
 					.addCalculator("HASH_IDENTITY", t -> BaseResourceIndexedSearchParam.calculateHashIdentity(new PartitionSettings(), RequestPartitionId.defaultPartition(), t.getResourceType(), t.getString("SP_NAME")))
