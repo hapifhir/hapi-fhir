@@ -61,8 +61,8 @@ public class FhirContextSearchParamRegistry implements ISearchParamRegistry {
 	}
 
 	@Override
-	public Map<String, RuntimeSearchParam> getActiveSearchParams(String theResourceName) {
-		Map<String, RuntimeSearchParam> sps = new HashMap<>();
+	public ResourceSearchParams getActiveSearchParams(String theResourceName) {
+		ResourceSearchParams sps = new ResourceSearchParams(theResourceName);
 		RuntimeResourceDefinition nextResDef = myCtx.getResourceDefinition(theResourceName);
 		for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
 			sps.put(nextSp.getName(), nextSp);

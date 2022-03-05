@@ -23,6 +23,7 @@ import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import ca.uhn.fhir.jpa.searchparam.registry.ReadOnlySearchParamCache;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -34,9 +35,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -269,9 +268,9 @@ public class SearchParamExtractorMegaTest {
 		}
 
 		@Override
-		public Map<String, RuntimeSearchParam> getActiveSearchParams(String theResourceName) {
+		public ResourceSearchParams getActiveSearchParams(String theResourceName) {
 			RuntimeResourceDefinition nextResDef = myCtx.getResourceDefinition(theResourceName);
-			Map<String, RuntimeSearchParam> sps = new HashMap<>();
+			ResourceSearchParams sps = new ResourceSearchParams(theResourceName);
 			for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
 				sps.put(nextSp.getName(), nextSp);
 			}

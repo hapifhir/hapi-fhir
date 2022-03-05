@@ -20,6 +20,7 @@ import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import ca.uhn.fhir.jpa.searchparam.registry.ReadOnlySearchParamCache;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Sets;
@@ -255,9 +256,9 @@ public class SearchParamExtractorDstu3Test {
 		}
 
 		@Override
-		public Map<String, RuntimeSearchParam> getActiveSearchParams(String theResourceName) {
+		public ResourceSearchParams getActiveSearchParams(String theResourceName) {
 			RuntimeResourceDefinition nextResDef = ourCtx.getResourceDefinition(theResourceName);
-			Map<String, RuntimeSearchParam> sps = new HashMap<>();
+			ResourceSearchParams sps = new ResourceSearchParams(theResourceName);
 			for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
 				sps.put(nextSp.getName(), nextSp);
 			}

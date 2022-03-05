@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorDstu3;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.StopWatch;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.Test;
@@ -43,11 +44,10 @@ public class IndexStressTest {
 		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), new PartitionSettings(), ctx, searchParamRegistry);
 		extractor.start();
 
-		Map<String, RuntimeSearchParam> spMap = ctx
-			.getResourceDefinition("Patient")
+		ResourceSearchParams spMap = new ResourceSearchParams("Patient");
+		ctx.getResourceDefinition("Patient")
 			.getSearchParams()
-			.stream()
-			.collect(Collectors.toMap(RuntimeSearchParam::getName, t -> t));
+			.forEach(t -> spMap.put(t.getName(), t));
 		when(searchParamRegistry.getActiveSearchParams(eq("Patient"))).thenReturn(spMap);
 
 		Set<ResourceIndexedSearchParamString> params = extractor.extractSearchParamStrings(p);

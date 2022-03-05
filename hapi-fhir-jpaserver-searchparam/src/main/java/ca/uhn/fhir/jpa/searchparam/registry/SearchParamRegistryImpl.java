@@ -35,6 +35,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
@@ -46,8 +47,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.EventListener;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -57,7 +56,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -114,7 +112,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 
 	@Nonnull
 	@Override
-	public Map<String, RuntimeSearchParam> getActiveSearchParams(String theResourceName) {
+	public ResourceSearchParams getActiveSearchParams(String theResourceName) {
 		requiresActiveSearchParams();
 		return getActiveSearchParams().getSearchParamMap(theResourceName);
 	}
@@ -198,7 +196,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 
 	private void removeInactiveSearchParams(RuntimeSearchParamCache theSearchParams) {
 		for (String resourceName : theSearchParams.getResourceNameKeys()) {
-			Map<String, RuntimeSearchParam> map = theSearchParams.getSearchParamMap(resourceName);
+			ResourceSearchParams map = theSearchParams.getSearchParamMap(resourceName);
 			map.entrySet().removeIf(entry -> entry.getValue().getStatus() != RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE);
 		}
 	}
@@ -243,7 +241,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 
 			RuntimeSearchParam previousSearchParam = theSearchParams.add(nextBaseName, name, runtimeSp);
 			if (previousSearchParam == null) {
-				ourLog.debug("Adding new search parameter {}.{} to SearchParamRegistry", nextBaseName, StringUtils.defaultString(name, "[composite]"));
+				ourLog.info("Adding new search parameter {}.{} to SearchParamRegistry", nextBaseName, StringUtils.defaultString(name, "[composite]"));
 			} else if (!previousSearchParam.sameAs(runtimeSp)) {
 				ourLog.info("Updating search parameter {}.{} in SearchParamRegistry", nextBaseName, StringUtils.defaultString(name, "[composite]"));
 			}
@@ -326,7 +324,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 		if (result.updated > 0) {
 			ourLog.info("Updating {} search parameters in SearchParamRegistry", result.updated);
 		}
-		if (result.created > 0) {
+		if (result.deleted > 0) {
 			ourLog.info("Deleting {} search parameters from SearchParamRegistry", result.deleted);
 		}
 		rebuildActiveSearchParams();

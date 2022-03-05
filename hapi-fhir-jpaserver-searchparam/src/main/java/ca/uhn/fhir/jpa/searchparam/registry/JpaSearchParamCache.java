@@ -28,6 +28,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,7 +82,7 @@ public class JpaSearchParamCache {
 		 * Loop through parameters and find JPA params
 		 */
 		for (String theResourceName : theActiveSearchParams.getResourceNameKeys()) {
-			Map<String, RuntimeSearchParam> searchParamMap = theActiveSearchParams.getSearchParamMap(theResourceName);
+			ResourceSearchParams searchParamMap = theActiveSearchParams.getSearchParamMap(theResourceName);
 			List<RuntimeSearchParam> comboSearchParams = resourceNameToComboSearchParams.computeIfAbsent(theResourceName, k -> new ArrayList<>());
 			Collection<RuntimeSearchParam> nextSearchParamsForResourceName = searchParamMap.values();
 

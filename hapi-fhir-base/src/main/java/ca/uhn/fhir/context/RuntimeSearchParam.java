@@ -191,7 +191,6 @@ public class RuntimeSearchParam {
 
 	public boolean sameAs(RuntimeSearchParam that) {
 		return new EqualsBuilder()
-			.append(getId(), that.getId())
 			.append(getBase(), that.getBase())
 			.append(getDescription(), that.getDescription())
 			.append(getName(), that.getName())

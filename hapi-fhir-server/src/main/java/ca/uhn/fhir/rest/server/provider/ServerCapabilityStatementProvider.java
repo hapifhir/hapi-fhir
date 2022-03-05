@@ -28,6 +28,7 @@ import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.server.method.SearchParameter;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.HapiExtensions;
@@ -386,11 +387,11 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 				 * but also fill in any gaps using params from the server itself. This makes sure we include
 				 * global params like _lastUpdated
 				 */
-				Map<String, RuntimeSearchParam> searchParams;
+				ResourceSearchParams searchParams;
 				ISearchParamRegistry searchParamRegistry;
 				if (mySearchParamRegistry != null) {
 					searchParamRegistry = mySearchParamRegistry;
-					searchParams = new HashMap<>(mySearchParamRegistry.getActiveSearchParams(resourceName));
+					searchParams = mySearchParamRegistry.getActiveSearchParams(resourceName).readOnly();
 					for (Entry<String, RuntimeSearchParam> nextBuiltInSp : serverConfiguration.getActiveSearchParams(resourceName).entrySet()) {
 						String key = nextBuiltInSp.getKey();
 						if (key.startsWith("_") && !searchParams.containsKey(key) && searchParamEnabled(key)) {
