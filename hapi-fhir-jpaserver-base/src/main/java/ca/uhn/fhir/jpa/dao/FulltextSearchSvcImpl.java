@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneClauseBuilder;
@@ -43,9 +44,11 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
+import org.hibernate.search.backend.elasticsearch.ElasticsearchExtension;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hibernate.search.mapper.orm.work.SearchIndexingPlan;
+import org.hibernate.search.util.common.SearchException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -236,13 +239,35 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	@Transactional()
 	@Override
 	public IBaseResource tokenAutocompleteValueSetSearch(ValueSetAutocompleteOptions theOptions) {
+		ensureElastic();
 
 		ValueSetAutocompleteSearch autocomplete = new ValueSetAutocompleteSearch(myFhirContext, getSearchSession());
 
 		return autocomplete.search(theOptions);
 	}
+
+	/**
+	 * Throws an error if configured with Lucene.
+	 *
+	 * Some features only work with Elasticsearch.
+	 * Lastn and the autocomplete search use nested aggregations which are Elasticsearch-only
+	 */
+	private void ensureElastic() {
+		//String hibernateSearchBackend = (String) myEntityManager.g.getJpaPropertyMap().get(BackendSettings.backendKey(BackendSettings.TYPE));
+		try {
+			getSearchSession().scope( ResourceTable.class )
+				.aggregation()
+				.extension(ElasticsearchExtension.get());
+		} catch (SearchException e) {
+			// unsupported.  we are probably running Lucene.
+			throw new IllegalStateException(Msg.code(2070) + "This operation requires Elasticsearch.  Lucene is not supported.");
+		}
+
+	}
+
 	@Override
 	public List<ResourcePersistentId> lastN(SearchParameterMap theParams, Integer theMaximumResults) {
+		ensureElastic();
 		List<Long> pidList = new LastNOperation(getSearchSession(), myFhirContext, mySearchParamRegistry)
 			.executeLastN(theParams, theMaximumResults);
 		return convertLongsToResourcePersistentIds(pidList);
