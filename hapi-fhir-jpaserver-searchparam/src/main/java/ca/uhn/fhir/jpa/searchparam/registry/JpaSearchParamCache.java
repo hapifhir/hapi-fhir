@@ -82,11 +82,11 @@ public class JpaSearchParamCache {
 		 * Loop through parameters and find JPA params
 		 */
 		for (String theResourceName : theActiveSearchParams.getResourceNameKeys()) {
-			ResourceSearchParams searchParamMap = theActiveSearchParams.getSearchParamMap(theResourceName);
+			ResourceSearchParams searchParams = theActiveSearchParams.getSearchParamMap(theResourceName);
 			List<RuntimeSearchParam> comboSearchParams = resourceNameToComboSearchParams.computeIfAbsent(theResourceName, k -> new ArrayList<>());
-			Collection<RuntimeSearchParam> nextSearchParamsForResourceName = searchParamMap.values();
+			Collection<RuntimeSearchParam> nextSearchParamsForResourceName = searchParams.values();
 
-			ourLog.trace("Resource {} has {} params", theResourceName, searchParamMap.size());
+			ourLog.trace("Resource {} has {} params", theResourceName, searchParams.size());
 
 			for (RuntimeSearchParam nextCandidate : nextSearchParamsForResourceName) {
 

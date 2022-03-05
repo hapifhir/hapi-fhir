@@ -325,9 +325,9 @@ public class SearchParamRegistryImplTest {
 		resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus.ACTIVE);
 
 		mySearchParamRegistry.forceRefresh();
-		ResourceSearchParams outcome = mySearchParamRegistry.getActiveSearchParams("Patient");
+		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams("Patient");
 
-		RuntimeSearchParam converted = outcome.get("foo");
+		RuntimeSearchParam converted = activeSearchParams.get("foo");
 		assertNotNull(converted);
 
 		assertEquals(1, converted.getExtensions("http://foo").size());

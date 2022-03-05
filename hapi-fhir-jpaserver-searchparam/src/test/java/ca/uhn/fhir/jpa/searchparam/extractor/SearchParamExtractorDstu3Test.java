@@ -258,14 +258,14 @@ public class SearchParamExtractorDstu3Test {
 		@Override
 		public ResourceSearchParams getActiveSearchParams(String theResourceName) {
 			RuntimeResourceDefinition nextResDef = ourCtx.getResourceDefinition(theResourceName);
-			ResourceSearchParams sps = new ResourceSearchParams(theResourceName);
+			ResourceSearchParams retval = new ResourceSearchParams(theResourceName);
 			for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
-				sps.put(nextSp.getName(), nextSp);
+				retval.put(nextSp.getName(), nextSp);
 			}
 			for (RuntimeSearchParam next : myAddedSearchParams) {
-				sps.put(next.getName(), next);
+				retval.put(next.getName(), next);
 			}
-			return sps;
+			return retval;
 		}
 
 		@Override

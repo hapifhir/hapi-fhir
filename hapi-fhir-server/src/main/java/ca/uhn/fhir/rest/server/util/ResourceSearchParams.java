@@ -67,4 +67,8 @@ public class ResourceSearchParams {
 	public Set<Map.Entry<String, RuntimeSearchParam>> entrySet() {
 		return myMap.entrySet();
 	}
+
+	public void removeInactive() {
+		myMap.entrySet().removeIf(entry -> entry.getValue().getStatus() != RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE);
+	}
 }

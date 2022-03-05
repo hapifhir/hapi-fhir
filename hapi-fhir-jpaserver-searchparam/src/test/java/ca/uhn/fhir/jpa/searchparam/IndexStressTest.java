@@ -44,11 +44,11 @@ public class IndexStressTest {
 		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), new PartitionSettings(), ctx, searchParamRegistry);
 		extractor.start();
 
-		ResourceSearchParams spMap = new ResourceSearchParams("Patient");
+		ResourceSearchParams resourceSearchParams = new ResourceSearchParams("Patient");
 		ctx.getResourceDefinition("Patient")
 			.getSearchParams()
-			.forEach(t -> spMap.put(t.getName(), t));
-		when(searchParamRegistry.getActiveSearchParams(eq("Patient"))).thenReturn(spMap);
+			.forEach(t -> resourceSearchParams.put(t.getName(), t));
+		when(searchParamRegistry.getActiveSearchParams(eq("Patient"))).thenReturn(resourceSearchParams);
 
 		Set<ResourceIndexedSearchParamString> params = extractor.extractSearchParamStrings(p);
 

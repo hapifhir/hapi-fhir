@@ -196,8 +196,8 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 
 	private void removeInactiveSearchParams(RuntimeSearchParamCache theSearchParams) {
 		for (String resourceName : theSearchParams.getResourceNameKeys()) {
-			ResourceSearchParams map = theSearchParams.getSearchParamMap(resourceName);
-			map.entrySet().removeIf(entry -> entry.getValue().getStatus() != RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE);
+			ResourceSearchParams resourceSearchParams = theSearchParams.getSearchParamMap(resourceName);
+			resourceSearchParams.removeInactive();
 		}
 	}
 
@@ -241,6 +241,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 
 			RuntimeSearchParam previousSearchParam = theSearchParams.add(nextBaseName, name, runtimeSp);
 			if (previousSearchParam == null) {
+				// FIXME KHS why is this too noisy?
 				ourLog.info("Adding new search parameter {}.{} to SearchParamRegistry", nextBaseName, StringUtils.defaultString(name, "[composite]"));
 			} else if (!previousSearchParam.sameAs(runtimeSp)) {
 				ourLog.info("Updating search parameter {}.{} in SearchParamRegistry", nextBaseName, StringUtils.defaultString(name, "[composite]"));

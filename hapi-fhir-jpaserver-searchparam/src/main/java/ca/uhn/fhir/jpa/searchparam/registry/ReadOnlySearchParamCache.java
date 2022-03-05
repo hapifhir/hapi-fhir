@@ -128,10 +128,10 @@ public class ReadOnlySearchParamCache {
 					}
 
 					for (String nextResourceName : base) {
-						ResourceSearchParams nameToParam = retVal.myResourceNameToSpNameToSp.computeIfAbsent(nextResourceName, t -> new ResourceSearchParams(nextResourceName));
+						ResourceSearchParams resourceSearchParams = retVal.myResourceNameToSpNameToSp.computeIfAbsent(nextResourceName, t -> new ResourceSearchParams(nextResourceName));
 						String nextParamName = nextCanonical.getName();
 						if (theSearchParamPatternsToInclude == null || searchParamMatchesAtLeastOnePattern(theSearchParamPatternsToInclude, nextResourceName, nextParamName)) {
-							nameToParam.addSearchParamIfAbsent(nextParamName, nextCanonical);
+							resourceSearchParams.addSearchParamIfAbsent(nextParamName, nextCanonical);
 						}
 					}
 				}
@@ -142,11 +142,11 @@ public class ReadOnlySearchParamCache {
 			RuntimeResourceDefinition nextResDef = theFhirContext.getResourceDefinition(resourceName);
 			String nextResourceName = nextResDef.getName();
 
-			ResourceSearchParams nameToParam = retVal.myResourceNameToSpNameToSp.computeIfAbsent(nextResourceName, t -> new ResourceSearchParams(nextResourceName));
+			ResourceSearchParams resourceSearchParams = retVal.myResourceNameToSpNameToSp.computeIfAbsent(nextResourceName, t -> new ResourceSearchParams(nextResourceName));
 			for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
 				String nextParamName = nextSp.getName();
 				if (theSearchParamPatternsToInclude == null || searchParamMatchesAtLeastOnePattern(theSearchParamPatternsToInclude, nextResourceName, nextParamName)) {
-					nameToParam.addSearchParamIfAbsent(nextParamName, nextSp);
+					resourceSearchParams.addSearchParamIfAbsent(nextParamName, nextSp);
 				}
 			}
 		}

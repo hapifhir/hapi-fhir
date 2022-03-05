@@ -430,7 +430,7 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 	public ResourceSearchParams getActiveSearchParams(@Nonnull String theResourceName) {
 		Validate.notBlank(theResourceName, "theResourceName must not be null or blank");
 
-		ResourceSearchParams retVal = new ResourceSearchParams(theResourceName);
+		ResourceSearchParams retval = new ResourceSearchParams(theResourceName);
 
 		collectMethodBindings()
 			.getOrDefault(theResourceName, Collections.emptyList())
@@ -439,9 +439,9 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 			.filter(t -> t instanceof SearchMethodBinding)
 			.map(t -> (SearchMethodBinding) t)
 			.filter(t -> t.getQueryName() == null)
-			.forEach(t -> createRuntimeBinding(retVal, t));
+			.forEach(t -> createRuntimeBinding(retval, t));
 
-		return retVal;
+		return retval;
 	}
 
 	@Nullable
