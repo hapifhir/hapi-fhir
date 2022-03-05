@@ -270,6 +270,49 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		batchChunk.addIndex("20220227.4", "IDX_BT2WC_II_SEQ").unique(false).withColumns("INSTANCE_ID", "SEQ");
 		batchChunk.addForeignKey("20220227.5", "FK_BT2WC_INSTANCE").toColumn("INSTANCE_ID").references("BT2_JOB_INSTANCE", "ID");
 
+		replaceNumericSPIndices(version);
+	}
+
+	/**
+	 * new numeric search indexing
+	 * @see ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder
+	 * @see ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber
+	 */
+	private void replaceNumericSPIndices(Builder theVersion) {
+		Builder.BuilderWithTableName tokenTable = theVersion.onTable("HFJ_SPIDX_NUMBER");
+//
+//		// replace and drop IDX_SP_DATE_HASH for sorting
+//		tokenTable
+//			.addIndex("20220208.1", "IDX_SP_TOKEN_HASH_V2")
+//			.unique(false).online(true)
+//			.withColumns("HASH_IDENTITY", "SP_SYSTEM", "SP_VALUE", "RES_ID", "PARTITION_ID");
+//
+//		tokenTable.dropIndexOnline("20220208.2", "IDX_SP_TOKEN_HASH");
+//
+//		// for search by system
+//		tokenTable
+//			.addIndex("20220208.3", "IDX_SP_TOKEN_HASH_S_V2")
+//			.unique(false).online(true)
+//			.withColumns("HASH_SYS", "RES_ID", "PARTITION_ID");
+//
+//		tokenTable.dropIndexOnline("20220208.4", "IDX_SP_TOKEN_HASH_S");
+//
+//		// for search by system+value
+//		tokenTable
+//			.addIndex("20220208.5", "IDX_SP_TOKEN_HASH_SV_V2")
+//			.unique(false).online(true)
+//			.withColumns("HASH_SYS_AND_VALUE", "RES_ID", "PARTITION_ID");
+//
+//		tokenTable.dropIndexOnline("20220208.6", "IDX_SP_TOKEN_HASH_SV");
+//
+//		// for search by value
+//		tokenTable
+//			.addIndex("20220208.7", "IDX_SP_TOKEN_HASH_V_V2")
+//			.unique(false).online(true)
+//			.withColumns("HASH_VALUE", "RES_ID", "PARTITION_ID");
+//
+//		tokenTable.dropIndexOnline("20220208.8", "IDX_SP_TOKEN_HASH_V");
+
 	}
 
 	/**

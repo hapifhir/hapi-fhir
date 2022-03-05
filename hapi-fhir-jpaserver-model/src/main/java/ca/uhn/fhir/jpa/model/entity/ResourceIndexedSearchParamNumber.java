@@ -49,9 +49,8 @@ import java.util.Objects;
 @Entity
 @Table(name = "HFJ_SPIDX_NUMBER", indexes = {
 //	We used to have an index with name IDX_SP_NUMBER - Dont reuse
-	@Index(name = "IDX_SP_NUMBER_HASH_VAL", columnList = "HASH_IDENTITY,SP_VALUE"),
-	@Index(name = "IDX_SP_NUMBER_UPDATED", columnList = "SP_UPDATED"),
-	@Index(name = "IDX_SP_NUMBER_RESID", columnList = "RES_ID")
+	@Index(name = "IDX_SP_NUMBER_HASH_VAL_V2", columnList = "HASH_IDENTITY,SP_VALUE,RES_ID,PARTITION_ID"),
+	@Index(name = "IDX_SP_NUMBER_RESID_V2", columnList = "RES_ID")
 })
 public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchParam {
 
