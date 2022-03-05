@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -52,19 +51,19 @@ public class ResourceSearchParams {
 		return myMap.put(theName, theSearchParam);
 	}
 
-	// FIXME make these private and move usages inside here
-	public void putIfAbsent(String theParamName, RuntimeSearchParam theRuntimeSearchParam) {
+	public void addSearchParamIfAbsent(String theParamName, RuntimeSearchParam theRuntimeSearchParam) {
 		myMap.putIfAbsent(theParamName, theRuntimeSearchParam);
 	}
 
-	public TreeSet<String> keySet() {
+	public TreeSet<String> getSearchParamNames() {
 		return new TreeSet<>(myMap.keySet());
 	}
 
-	public boolean containsKey(String theParamName) {
+	public boolean containsParamName(String theParamName) {
 		return myMap.containsKey(theParamName);
 	}
 
+	// TODO KHS remove this method
 	public Set<Map.Entry<String, RuntimeSearchParam>> entrySet() {
 		return myMap.entrySet();
 	}

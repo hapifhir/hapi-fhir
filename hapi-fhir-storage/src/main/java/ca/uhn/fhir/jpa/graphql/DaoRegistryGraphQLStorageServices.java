@@ -62,7 +62,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -119,7 +118,7 @@ public class DaoRegistryGraphQLStorageServices implements IGraphQLStorageService
 			String searchParamName = graphqlArgumentToSearchParam(nextArgument.getName());
 			RuntimeSearchParam searchParam = searchParams.get(searchParamName);
 			if (searchParam == null) {
-				Set<String> graphqlArguments = searchParams.keySet().stream()
+				Set<String> graphqlArguments = searchParams.getSearchParamNames().stream()
 					.map(this::searchParamToGraphqlArgument)
 					.collect(Collectors.toSet());
 				String msg = myContext.getLocalizer().getMessageSanitized(DaoRegistryGraphQLStorageServices.class, "invalidGraphqlArgument", nextArgument.getName(), new TreeSet<>(graphqlArguments));

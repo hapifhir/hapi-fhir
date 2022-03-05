@@ -141,7 +141,7 @@ public class SearchPreferHandlingInterceptor {
 				} else {
 
 					// Strict handling
-					List<String> allowedParams = searchParamRetriever.getActiveSearchParams(resourceName).keySet().stream().sorted().distinct().collect(Collectors.toList());
+					List<String> allowedParams = searchParamRetriever.getActiveSearchParams(resourceName).getSearchParamNames().stream().sorted().distinct().collect(Collectors.toList());
 					HapiLocalizer localizer = theRequestDetails.getFhirContext().getLocalizer();
 					String msg = localizer.getMessage("ca.uhn.fhir.jpa.dao.BaseStorageDao.invalidSearchParameter", paramName, resourceName, allowedParams);
 					throw new InvalidRequestException(Msg.code(323) + msg);

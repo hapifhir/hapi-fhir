@@ -394,7 +394,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 					searchParams = mySearchParamRegistry.getActiveSearchParams(resourceName).readOnly();
 					for (Entry<String, RuntimeSearchParam> nextBuiltInSp : serverConfiguration.getActiveSearchParams(resourceName).entrySet()) {
 						String key = nextBuiltInSp.getKey();
-						if (key.startsWith("_") && !searchParams.containsKey(key) && searchParamEnabled(key)) {
+						if (key.startsWith("_") && !searchParams.containsParamName(key) && searchParamEnabled(key)) {
 							searchParams.put(key, nextBuiltInSp.getValue());
 						}
 					}

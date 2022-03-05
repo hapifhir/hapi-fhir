@@ -86,7 +86,7 @@ public interface ISearchParamRegistry {
 		if (searchParamMap == null) {
 			retval = new TreeSet<>();
 		} else {
-			retval = searchParamMap.keySet();
+			retval = searchParamMap.getSearchParamNames();
 		}
 		retval.add(IAnyResource.SP_RES_ID);
 		retval.add(Constants.PARAM_LASTUPDATED);

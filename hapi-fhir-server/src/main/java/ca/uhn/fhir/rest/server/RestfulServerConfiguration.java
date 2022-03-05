@@ -482,7 +482,7 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 				}
 			}
 
-			if (theMapToPopulate.containsKey(nextParamUnchainedName)) {
+			if (theMapToPopulate.containsParamName(nextParamUnchainedName)) {
 				continue;
 			}
 
