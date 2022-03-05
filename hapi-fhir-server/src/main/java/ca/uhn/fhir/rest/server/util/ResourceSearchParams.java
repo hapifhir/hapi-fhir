@@ -58,8 +58,8 @@ public class ResourceSearchParams {
 		myMap.putIfAbsent(theParamName, theRuntimeSearchParam);
 	}
 
-	public TreeSet<String> getSearchParamNames() {
-		return new TreeSet<>(myMap.keySet());
+	public Set<String> getSearchParamNames() {
+		return myMap.keySet();
 	}
 
 	public boolean containsParamName(String theParamName) {

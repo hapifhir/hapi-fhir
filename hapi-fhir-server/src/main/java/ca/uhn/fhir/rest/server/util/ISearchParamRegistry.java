@@ -82,11 +82,11 @@ public interface ISearchParamRegistry {
 	 */
 	default Collection<String> getValidSearchParameterNamesIncludingMeta(String theResourceName) {
 		TreeSet<String> retval;
-		ResourceSearchParams searchParamMap = getActiveSearchParams(theResourceName);
-		if (searchParamMap == null) {
+		ResourceSearchParams activeSearchParams = getActiveSearchParams(theResourceName);
+		if (activeSearchParams == null) {
 			retval = new TreeSet<>();
 		} else {
-			retval = searchParamMap.getSearchParamNames();
+			retval = new TreeSet<>(activeSearchParams.getSearchParamNames());
 		}
 		retval.add(IAnyResource.SP_RES_ID);
 		retval.add(Constants.PARAM_LASTUPDATED);
