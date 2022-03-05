@@ -20,12 +20,12 @@ package ca.uhn.fhir.jpa.search.builder;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -96,6 +96,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.healthmarketscience.sqlbuilder.Condition;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -109,6 +110,9 @@ import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
+import javax.persistence.Query;
+import javax.persistence.SqlResultSetMapping;
+import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -148,6 +152,11 @@ public class SearchBuilder implements ISearchBuilder {
 	public static final int MAXIMUM_PAGE_SIZE_FOR_TESTING = 50;
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchBuilder.class);
 	private static final ResourcePersistentId NO_MORE = new ResourcePersistentId(-1L);
+	private static final String MY_TARGET_RESOURCE_PID = "myTargetResourcePid";
+	private static final String MY_SOURCE_RESOURCE_PID = "mySourceResourcePid";
+	private static final String MY_TARGET_RESOURCE_VERSION = "myTargetResourceVersion";
+	public static final String RESOURCE_ID_ALIAS = "resource_id";
+	public static final String RESOURCE_VERSION_ALIAS = "resource_version";
 	public static boolean myUseMaxPageSize50ForTest = false;
 	private final String myResourceName;
 	private final Class<? extends IBaseResource> myResourceType;
@@ -888,11 +897,11 @@ public class SearchBuilder implements ISearchBuilder {
 		if (theIncludes == null || theIncludes.isEmpty()) {
 			return new HashSet<>();
 		}
-		String searchPidFieldName = theReverseMode ? "myTargetResourcePid" : "mySourceResourcePid";
-		String findPidFieldName = theReverseMode ? "mySourceResourcePid" : "myTargetResourcePid";
+		String searchPidFieldName = theReverseMode ? MY_TARGET_RESOURCE_PID : MY_SOURCE_RESOURCE_PID;
+		String findPidFieldName = theReverseMode ? MY_SOURCE_RESOURCE_PID : MY_TARGET_RESOURCE_PID;
 		String findVersionFieldName = null;
 		if (!theReverseMode && myModelConfig.isRespectVersionsForSearchIncludes()) {
-			findVersionFieldName = "myTargetResourceVersion";
+			findVersionFieldName = MY_TARGET_RESOURCE_VERSION;
 		}
 
 		List<ResourcePersistentId> nextRoundMatches = new ArrayList<>(theMatches);
@@ -1011,25 +1020,55 @@ public class SearchBuilder implements ISearchBuilder {
 
 					String targetResourceType = defaultString(nextInclude.getParamTargetType(), null);
 					for (String nextPath : paths) {
-						String sql;
-
 						boolean haveTargetTypesDefinedByParam = param.hasTargets();
-						String fieldsToLoad = "r." + findPidFieldName;
+						String findPidFieldSqlColumn = findPidFieldName.equals(MY_SOURCE_RESOURCE_PID) ? "src_resource_id" : "target_resource_id";
+						String fieldsToLoad = "r." + findPidFieldSqlColumn + " AS " + RESOURCE_ID_ALIAS;
 						if (findVersionFieldName != null) {
-							fieldsToLoad += ", r." + findVersionFieldName;
+							fieldsToLoad += ", r.target_resource_version AS " + RESOURCE_VERSION_ALIAS;
 						}
 
-						if (targetResourceType != null) {
-							sql = "SELECT " + fieldsToLoad + " FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchPidFieldName + " IN (:target_pids) AND r.myTargetResourceType = :target_resource_type";
-						} else if (haveTargetTypesDefinedByParam) {
-							sql = "SELECT " + fieldsToLoad + " FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchPidFieldName + " IN (:target_pids) AND r.myTargetResourceType in (:target_resource_types)";
-						} else {
-							sql = "SELECT " + fieldsToLoad + " FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchPidFieldName + " IN (:target_pids)";
+						// Query for includes lookup has consider 2 cases
+						// Case 1: Where target_resource_id is available in hfj_res_link table for local references
+						// Case 2: Where target_resource_id is null in hfj_res_link table and referred by a canonical url in target_resource_url
+
+						// Case 1:
+						String searchPidFieldSqlColumn = searchPidFieldName.equals(MY_TARGET_RESOURCE_PID) ? "target_resource_id" : "src_resource_id";
+						StringBuilder resourceIdBasedQuery = new StringBuilder("SELECT " + fieldsToLoad +
+							" FROM hfj_res_link r " +
+							" WHERE r.src_path = :src_path AND " +
+							" r.target_resource_id IS NOT NULL AND " +
+							" r." + searchPidFieldSqlColumn + " IN (:target_pids) ");
+						if(targetResourceType != null) {
+							resourceIdBasedQuery.append(" AND r.target_resource_type = :target_resource_type ");
+						} else if(haveTargetTypesDefinedByParam) {
+							resourceIdBasedQuery.append(" AND r.target_resource_type in (:target_resource_types) ");
 						}
+
+						// Case 2:
+						String fieldsToLoadFromSpidxUriTable = "rUri.res_id";
+						// to match the fields loaded in union
+						if(fieldsToLoad.split(",").length > 1) {
+							for (int i = 0; i < fieldsToLoad.split(",").length - 1; i++) {
+								fieldsToLoadFromSpidxUriTable += ", NULL";
+							}
+						}
+						//@formatter:off
+						StringBuilder resourceUrlBasedQuery = new StringBuilder("SELECT " + fieldsToLoadFromSpidxUriTable +
+							" FROM hfj_res_link r " +
+							" JOIN hfj_spidx_uri rUri ON ( " +
+							"   r.target_resource_url = rUri.sp_uri AND " +
+							"   rUri.sp_name = 'url' " +
+							" ) " +
+							" WHERE r.src_path = :src_path AND " +
+							" r.target_resource_id IS NULL AND " +
+							" r." + searchPidFieldSqlColumn + " IN (:target_pids) ");
+						//@formatter:on
+
+						String sql = resourceIdBasedQuery + " UNION " + resourceUrlBasedQuery;
 
 						List<Collection<ResourcePersistentId>> partitions = partition(nextRoundMatches, getMaximumPageSize());
 						for (Collection<ResourcePersistentId> nextPartition : partitions) {
-							TypedQuery<?> q = theEntityManager.createQuery(sql, Object[].class);
+							Query q = theEntityManager.createNativeQuery(sql, Tuple.class);
 							q.setParameter("src_path", nextPath);
 							q.setParameter("target_pids", ResourcePersistentId.toLongList(nextPartition));
 							if (targetResourceType != null) {
@@ -1037,21 +1076,18 @@ public class SearchBuilder implements ISearchBuilder {
 							} else if (haveTargetTypesDefinedByParam) {
 								q.setParameter("target_resource_types", param.getTargets());
 							}
-							List<?> results = q.getResultList();
+							List<Tuple> results = q.getResultList();
 							if (theMaxCount != null) {
 								q.setMaxResults(theMaxCount);
 							}
-							for (Object resourceLink : results) {
-								if (resourceLink != null) {
-									ResourcePersistentId persistentId;
-									if (findVersionFieldName != null) {
-										persistentId = new ResourcePersistentId(((Object[]) resourceLink)[0]);
-										persistentId.setVersion((Long) ((Object[]) resourceLink)[1]);
-									} else {
-										persistentId = new ResourcePersistentId(resourceLink);
+							for (Tuple result : results) {
+								if (result != null) {
+									Long resourceId = NumberUtils.createLong(String.valueOf(result.get(RESOURCE_ID_ALIAS)));
+									Long resourceVersion = null;
+									if (findVersionFieldName != null && result.get(RESOURCE_VERSION_ALIAS) != null) {
+										resourceVersion = NumberUtils.createLong(String.valueOf(result.get(RESOURCE_VERSION_ALIAS)));
 									}
-									assert persistentId.getId() instanceof Long;
-									pidsToInclude.add(persistentId);
+									pidsToInclude.add(new ResourcePersistentId(resourceId, resourceVersion));
 								}
 							}
 						}

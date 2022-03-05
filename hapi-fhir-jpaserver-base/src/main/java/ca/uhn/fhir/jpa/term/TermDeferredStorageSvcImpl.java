@@ -34,7 +34,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
-import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -103,8 +102,9 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	private ISchedulerService mySchedulerService;
 	@Autowired
 	private ITermVersionAdapterSvc myTerminologyVersionAdapterSvc;
+
 	@Autowired
-	private ITermCodeSystemStorageSvc myCodeSystemStorageSvc;
+	private TermConceptDaoSvc myTermConceptDaoSvc;
 
 	@Autowired
 	private IBatchJobSubmitter myJobSubmitter;
@@ -189,7 +189,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 			TermConcept next = myDeferredConcepts.remove(0);
 			if (myCodeSystemVersionDao.findById(next.getCodeSystemVersion().getPid()).isPresent()) {
 				try {
-					codeCount += myCodeSystemStorageSvc.saveConcept(next);
+					codeCount += myTermConceptDaoSvc.saveConcept(next);
 				} catch (Exception theE) {
 					ourLog.error("Exception thrown when attempting to save TermConcept {} in Code System {}",
 						next.getCode(), next.getCodeSystemVersion().getCodeSystemDisplayName(), theE);
@@ -465,9 +465,10 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		myTransactionMgr = theTxManager;
 	}
 
+
 	@VisibleForTesting
-	void setCodeSystemStorageSvcForUnitTest(ITermCodeSystemStorageSvc theCodeSystemStorageSvc) {
-		myCodeSystemStorageSvc = theCodeSystemStorageSvc;
+	void setTermConceptDaoSvc(TermConceptDaoSvc theTermConceptDaoSvc) {
+		myTermConceptDaoSvc = theTermConceptDaoSvc;
 	}
 
 	@VisibleForTesting

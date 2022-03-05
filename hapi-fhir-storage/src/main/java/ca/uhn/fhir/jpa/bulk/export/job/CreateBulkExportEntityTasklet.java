@@ -40,8 +40,7 @@ import java.util.stream.Collectors;
 
 public class CreateBulkExportEntityTasklet implements Tasklet {
 
-	@Autowired
-	private IBulkDataExportSvc myBulkDataExportSvc;
+	@Autowired private IBulkDataExportSvc myBulkDataExportSvc;
 
 	public static void addUUIDToJobContext(ChunkContext theChunkContext, String theJobUUID) {
 		theChunkContext
