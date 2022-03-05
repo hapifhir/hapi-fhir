@@ -1,13 +1,16 @@
 package ca.uhn.fhir.rest.server.util;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Stream;
 
 public class ResourceSearchParams {
 	private final String myResourceName;
@@ -63,12 +66,17 @@ public class ResourceSearchParams {
 		return myMap.containsKey(theParamName);
 	}
 
-	// TODO KHS remove this method
-	public Set<Map.Entry<String, RuntimeSearchParam>> entrySet() {
-		return myMap.entrySet();
-	}
-
 	public void removeInactive() {
 		myMap.entrySet().removeIf(entry -> entry.getValue().getStatus() != RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE);
+	}
+
+	public Stream<String> getReferenceSearchParamNames() {
+		return myMap.entrySet().stream()
+			.filter(entry -> entry.getValue().getParamType() == RestSearchParameterTypeEnum.REFERENCE)
+			.map(Map.Entry::getKey);
+	}
+
+	public ResourceSearchParams makeCopy() {
+		return new ResourceSearchParams(myResourceName, new HashMap<>(myMap));
 	}
 }

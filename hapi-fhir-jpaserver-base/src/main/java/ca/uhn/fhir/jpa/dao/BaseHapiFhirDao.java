@@ -155,6 +155,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -1403,14 +1404,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			for (String nextKey : newParams.getPopulatedResourceLinkParameters()) {
 				presentSearchParams.put(nextKey, Boolean.TRUE);
 			}
-			Set<Entry<String, RuntimeSearchParam>> activeSearchParams = mySearchParamRegistry.getActiveSearchParams(entity.getResourceType()).entrySet();
-			for (Entry<String, RuntimeSearchParam> nextSpEntry : activeSearchParams) {
-				if (nextSpEntry.getValue().getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
-					if (!presentSearchParams.containsKey(nextSpEntry.getKey())) {
-						presentSearchParams.put(nextSpEntry.getKey(), Boolean.FALSE);
-					}
+			Stream<String> referenceSearchParams = mySearchParamRegistry.getActiveSearchParams(entity.getResourceType()).getReferenceSearchParamNames();
+			referenceSearchParams.forEach(key -> {
+				if (!presentSearchParams.containsKey(key)) {
+					presentSearchParams.put(key, Boolean.FALSE);
 				}
-			}
+			});
+
 			AddRemoveCount presenceCount = mySearchParamPresenceSvc.updatePresence(entity, presentSearchParams);
 
 			// Interceptor broadcast: JPA_PERFTRACE_INFO

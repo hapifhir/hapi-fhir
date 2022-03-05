@@ -389,18 +389,20 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 				 */
 				ResourceSearchParams searchParams;
 				ISearchParamRegistry searchParamRegistry;
+				ResourceSearchParams serverConfigurationActiveSearchParams = serverConfiguration.getActiveSearchParams(resourceName);
 				if (mySearchParamRegistry != null) {
 					searchParamRegistry = mySearchParamRegistry;
-					searchParams = mySearchParamRegistry.getActiveSearchParams(resourceName).readOnly();
-					for (Entry<String, RuntimeSearchParam> nextBuiltInSp : serverConfiguration.getActiveSearchParams(resourceName).entrySet()) {
-						String key = nextBuiltInSp.getKey();
-						if (key.startsWith("_") && !searchParams.containsParamName(key) && searchParamEnabled(key)) {
-							searchParams.put(key, nextBuiltInSp.getValue());
+					searchParams = mySearchParamRegistry.getActiveSearchParams(resourceName).makeCopy();
+					for (String nextBuiltInSpName : serverConfigurationActiveSearchParams.getSearchParamNames()) {
+						if (nextBuiltInSpName.startsWith("_") &&
+							!searchParams.containsParamName(nextBuiltInSpName) &&
+							searchParamEnabled(nextBuiltInSpName)) {
+							searchParams.put(nextBuiltInSpName, serverConfigurationActiveSearchParams.get(nextBuiltInSpName));
 						}
 					}
 				} else {
 					searchParamRegistry = serverConfiguration;
-					searchParams = serverConfiguration.getActiveSearchParams(resourceName);
+					searchParams = serverConfigurationActiveSearchParams;
 				}
 
 
