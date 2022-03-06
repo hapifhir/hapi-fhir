@@ -1,6 +1,7 @@
 package ca.uhn.fhir.batch2.impl;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.RunOutcome;
@@ -459,14 +460,55 @@ public class JobCoordinatorImplTest {
 		} catch (InvalidRequestException e) {
 
 			// Verify
-			assertEquals("HAPI-2039: Failed to validate parameters for job of type JOB_DEFINITION_ID: [myParam1 must not be blank], [myParam2 length must be between 5 and 100]", e.getMessage());
+			String expected = """
+				HAPI-2039: Failed to validate parameters for job of type JOB_DEFINITION_ID:\s
+				 * myParam1 - must not be blank
+				 * myParam2 - length must be between 5 and 100""";
+			assertEquals(expected, e.getMessage());
+
+		}
+	}
+
+
+	@Test
+	public void testStartInstance_InvalidParameters_UsingProgrammaticApi() {
+
+		// Setup
+
+		IJobParametersValidator<TestJobParameters> v = p -> {
+			if (p.getParam1().equals("bad")) {
+				return Lists.newArrayList("Bad Parameter Value", "Bad Parameter Value 2");
+			}
+			return null;
+		};
+		JobDefinition<?> jobDefinition = createJobDefinition(t->t.setParametersValidator(v));
+		when(myJobDefinitionRegistry.getLatestJobDefinition(eq(JOB_DEFINITION_ID))).thenReturn(Optional.of(jobDefinition));
+
+		// Execute
+
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setJobDefinitionId(JOB_DEFINITION_ID);
+		startRequest.setParameters(new TestJobParameters().setParam1("bad").setParam2("aa"));
+
+		try {
+			mySvc.startInstance(startRequest);
+			fail();
+		} catch (InvalidRequestException e) {
+
+			// Verify
+			String expected = """
+				HAPI-2039: Failed to validate parameters for job of type JOB_DEFINITION_ID:\s
+				 * myParam2 - length must be between 5 and 100
+				 * Bad Parameter Value
+				 * Bad Parameter Value 2""";
+			assertEquals(expected, e.getMessage());
 
 		}
 	}
 
 	@SafeVarargs
-	private final JobDefinition createJobDefinition(Consumer<JobDefinition.Builder<TestJobParameters, ?>>... theModifiers) {
-		JobDefinition.Builder<TestJobParameters, ?> builder = JobDefinition
+	private JobDefinition<TestJobParameters> createJobDefinition(Consumer<JobDefinition.Builder<TestJobParameters, ?>>... theModifiers) {
+		JobDefinition.Builder<TestJobParameters, VoidModel> builder = JobDefinition
 			.newBuilder()
 			.setJobDefinitionId(JOB_DEFINITION_ID)
 			.setJobDescription("This is a job description")

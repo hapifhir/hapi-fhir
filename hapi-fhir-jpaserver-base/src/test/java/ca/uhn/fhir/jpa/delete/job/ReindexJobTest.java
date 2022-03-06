@@ -30,7 +30,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testReindexJob_ByUrl() {
+	public void testReindex_ByUrl() {
 		// setup
 
 		IIdType obsFinalId = myReindexTestHelper.createObservationWithAlleleExtension(Observation.ObservationStatus.FINAL);
