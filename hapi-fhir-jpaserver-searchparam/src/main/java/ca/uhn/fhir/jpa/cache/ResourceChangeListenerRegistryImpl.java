@@ -35,7 +35,9 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Nonnull;
 import java.util.Iterator;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.stream.Collectors;
 
 /**
  * This component holds an in-memory list of all registered {@link IResourceChangeListener} instances along
@@ -140,6 +142,13 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 				entry.requestRefreshIfWatching(theResource);
 			}
 		}
+	}
+
+	@Override
+	public Set<String> getWatchedResourceNames() {
+		return myListenerEntries.stream()
+			.map(ResourceChangeListenerCache::getResourceName)
+			.collect(Collectors.toSet());
 	}
 
 	@Override
