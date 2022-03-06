@@ -39,9 +39,9 @@ public class RuntimeSearchParamCache extends ReadOnlySearchParamCache {
 	/**
 	 * @return the previous value for that SearchParameter, or null if this is the first time adding it
 	 */
-	public RuntimeSearchParam add(String theResourceName, String theName, RuntimeSearchParam theSearchParam) {
+	public void add(String theResourceName, String theName, RuntimeSearchParam theSearchParam) {
 		ResourceSearchParams resourceSearchParams = getSearchParamMap(theResourceName);
-		RuntimeSearchParam previousSearchParam = resourceSearchParams.put(theName, theSearchParam);
+		resourceSearchParams.put(theName, theSearchParam);
 		String uri = theSearchParam.getUri();
 		if (isNotBlank(uri)) {
 			RuntimeSearchParam existingForUrl = myUrlToParam.get(uri);
@@ -59,7 +59,6 @@ public class RuntimeSearchParamCache extends ReadOnlySearchParamCache {
 			String value = theSearchParam.getId().toUnqualifiedVersionless().getValue();
 			myUrlToParam.put(value, theSearchParam);
 		}
-		return previousSearchParam;
 	}
 
 	public void remove(String theResourceName, String theName) {
@@ -100,7 +99,7 @@ public class RuntimeSearchParamCache extends ReadOnlySearchParamCache {
 		return myResourceNameToSpNameToSp.computeIfAbsent(theResourceName, k -> new ResourceSearchParams(theResourceName));
 	}
 
-	public static RuntimeSearchParamCache fromReadOnlySearchParmCache(ReadOnlySearchParamCache theBuiltInSearchParams) {
+	public static RuntimeSearchParamCache fromReadOnlySearchParamCache(ReadOnlySearchParamCache theBuiltInSearchParams) {
 		RuntimeSearchParamCache retVal = new RuntimeSearchParamCache();
 		retVal.putAll(theBuiltInSearchParams);
 		return retVal;

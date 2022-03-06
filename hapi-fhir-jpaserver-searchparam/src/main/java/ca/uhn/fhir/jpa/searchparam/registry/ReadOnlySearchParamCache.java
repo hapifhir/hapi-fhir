@@ -100,6 +100,7 @@ public class ReadOnlySearchParamCache {
 		}
 
 		if (allSearchParameterBundle != null) {
+			// For each SearchParameter resource in the bundle of all search parameters defined in this version of FHIR
 			for (IBaseResource next : BundleUtil.toListOfResources(theFhirContext, allSearchParameterBundle)) {
 				RuntimeSearchParam nextCanonical = theCanonicalizer.canonicalizeSearchParameter(next);
 
@@ -127,6 +128,7 @@ public class ReadOnlySearchParamCache {
 						base = resourceNames;
 					}
 
+					// Add it to our return value if permitted by the pattern parameters
 					for (String nextResourceName : base) {
 						ResourceSearchParams resourceSearchParams = retVal.myResourceNameToSpNameToSp.computeIfAbsent(nextResourceName, t -> new ResourceSearchParams(nextResourceName));
 						String nextParamName = nextCanonical.getName();
@@ -138,6 +140,7 @@ public class ReadOnlySearchParamCache {
 			}
 		}
 
+		// Now grab all the runtime search parameters from the resource definitions
 		for (String resourceName : resourceNames) {
 			RuntimeResourceDefinition nextResDef = theFhirContext.getResourceDefinition(resourceName);
 			String nextResourceName = nextResDef.getName();
@@ -145,6 +148,7 @@ public class ReadOnlySearchParamCache {
 			ResourceSearchParams resourceSearchParams = retVal.myResourceNameToSpNameToSp.computeIfAbsent(nextResourceName, t -> new ResourceSearchParams(nextResourceName));
 			for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
 				String nextParamName = nextSp.getName();
+				// Add it to our return value if permitted by the pattern parameters
 				if (theSearchParamPatternsToInclude == null || searchParamMatchesAtLeastOnePattern(theSearchParamPatternsToInclude, nextResourceName, nextParamName)) {
 					resourceSearchParams.addSearchParamIfAbsent(nextParamName, nextSp);
 				}

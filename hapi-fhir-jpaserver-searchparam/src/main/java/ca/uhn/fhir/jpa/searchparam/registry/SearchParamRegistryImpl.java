@@ -55,6 +55,7 @@ import javax.annotation.PreDestroy;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -167,7 +168,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 		StopWatch sw = new StopWatch();
 
 		ReadOnlySearchParamCache builtInSearchParams = getBuiltInSearchParams();
-		RuntimeSearchParamCache searchParams = RuntimeSearchParamCache.fromReadOnlySearchParmCache(builtInSearchParams);
+		RuntimeSearchParamCache searchParams = RuntimeSearchParamCache.fromReadOnlySearchParamCache(builtInSearchParams);
 		long overriddenCount = overrideBuiltinSearchParamsWithActiveJpaSearchParams(searchParams, theJpaSearchParams);
 		ourLog.trace("Have overridden {} built-in search parameters", overriddenCount);
 		removeInactiveSearchParams(searchParams);
@@ -239,13 +240,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 
 			String name = runtimeSp.getName();
 
-			RuntimeSearchParam previousSearchParam = theSearchParams.add(nextBaseName, name, runtimeSp);
-			if (previousSearchParam == null) {
-				// FIXME KHS why is this too noisy?
-				ourLog.info("Adding new search parameter {}.{} to SearchParamRegistry", nextBaseName, StringUtils.defaultString(name, "[composite]"));
-			} else if (!previousSearchParam.sameAs(runtimeSp)) {
-				ourLog.info("Updating search parameter {}.{} in SearchParamRegistry", nextBaseName, StringUtils.defaultString(name, "[composite]"));
-			}
+			theSearchParams.add(nextBaseName, name, runtimeSp);
 			retval++;
 		}
 		return retval;
@@ -320,15 +315,24 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 
 		ResourceChangeResult result = ResourceChangeResult.fromResourceChangeEvent(theResourceChangeEvent);
 		if (result.created > 0) {
-			ourLog.info("Adding {} search parameters to SearchParamRegistry", result.created);
+			ourLog.info("Adding {} search parameters to SearchParamRegistry: {}", result.created, unqualified(theResourceChangeEvent.getCreatedResourceIds()));
 		}
 		if (result.updated > 0) {
-			ourLog.info("Updating {} search parameters in SearchParamRegistry", result.updated);
+			ourLog.info("Updating {} search parameters in SearchParamRegistry: {}", result.updated, unqualified(theResourceChangeEvent.getUpdatedResourceIds()));
 		}
 		if (result.deleted > 0) {
-			ourLog.info("Deleting {} search parameters from SearchParamRegistry", result.deleted);
+			ourLog.info("Deleting {} search parameters from SearchParamRegistry: {}", result.deleted, unqualified(theResourceChangeEvent.getDeletedResourceIds()));
 		}
 		rebuildActiveSearchParams();
+	}
+
+	private String unqualified(List<IIdType> theIds) {
+		Iterator<String> unqualifiedIds = theIds.stream()
+			.map(IIdType::toUnqualifiedVersionless)
+			.map(IIdType::getValue)
+			.iterator();
+
+		return StringUtils.join(unqualifiedIds, ", ");
 	}
 
 	@Override
