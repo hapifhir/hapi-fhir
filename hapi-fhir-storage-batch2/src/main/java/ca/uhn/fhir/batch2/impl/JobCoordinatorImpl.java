@@ -22,6 +22,7 @@ package ca.uhn.fhir.batch2.impl;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
@@ -63,12 +64,14 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 import java.lang.reflect.Field;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinator {
@@ -96,7 +99,7 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 
 	@Override
 	public String startInstance(JobInstanceStartRequest theStartRequest) {
-		JobDefinition jobDefinition = myJobDefinitionRegistry
+		JobDefinition<?> jobDefinition = myJobDefinitionRegistry
 			.getLatestJobDefinition(theStartRequest.getJobDefinitionId())
 			.orElseThrow(() -> new IllegalArgumentException(Msg.code(2063) + "Unknown job definition ID: " + theStartRequest.getJobDefinitionId()));
 
@@ -104,19 +107,9 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 			throw new InvalidRequestException(Msg.code(2065) + "No parameters supplied");
 		}
 
+		validateJobParameters(theStartRequest, jobDefinition);
+
 		String firstStepId = jobDefinition.getSteps().get(0).getStepId();
-
-		Validator validator = myValidatorFactory.getValidator();
-		IModelJson parameters = theStartRequest.getParameters(jobDefinition.getParametersType());
-		Set<ConstraintViolation<IModelJson>> constraintErrors = validator.validate(parameters);
-		if (!constraintErrors.isEmpty()) {
-			String message = "Failed to validate parameters for job of type " +
-				jobDefinition.getJobDefinitionId() +
-				": " +
-				constraintErrors.stream().map(t -> "[" + t.getPropertyPath() + " " + t.getMessage() + "]").sorted().collect(Collectors.joining(", "));
-			throw new InvalidRequestException(Msg.code(2039) + message);
-		}
-
 		String jobDefinitionId = jobDefinition.getJobDefinitionId();
 		int jobDefinitionVersion = jobDefinition.getJobDefinitionVersion();
 
@@ -132,6 +125,39 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 		sendWorkChannelMessage(jobDefinitionId, jobDefinitionVersion, instanceId, firstStepId, chunkId);
 
 		return instanceId;
+	}
+
+	private <PT extends IModelJson> void validateJobParameters(JobInstanceStartRequest theStartRequest, JobDefinition<PT> theJobDefinition) {
+
+		// JSR 380
+		Validator validator = myValidatorFactory.getValidator();
+		PT parameters = theStartRequest.getParameters(theJobDefinition.getParametersType());
+		Set<ConstraintViolation<IModelJson>> constraintErrors = validator.validate(parameters);
+		List<String> errorStrings = constraintErrors
+			.stream()
+			.map(t -> t.getPropertyPath() + " - " + t.getMessage())
+			.sorted()
+			.collect(Collectors.toList());
+
+		// Programmatic Validator
+		IJobParametersValidator<PT> parametersValidator = theJobDefinition.getParametersValidator();
+		if (parametersValidator != null) {
+			List<String> outcome = parametersValidator.validate(parameters);
+			outcome = defaultIfNull(outcome, Collections.emptyList());
+			errorStrings.addAll(outcome);
+		}
+
+		if (!errorStrings.isEmpty()) {
+			String message = "Failed to validate parameters for job of type " +
+				theJobDefinition.getJobDefinitionId() +
+				": " +
+				errorStrings
+					.stream()
+					.map(t -> "\n * " + t)
+					.collect(Collectors.joining());
+
+			throw new InvalidRequestException(Msg.code(2039) + message);
+		}
 	}
 
 	@Override
@@ -250,14 +276,14 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 		String targetStepId = payload.getTargetStepId();
 		boolean firstStep = false;
 		for (int i = 0; i < definition.getSteps().size(); i++) {
-			JobDefinitionStep<?, ?, ?> step = definition.getSteps().get(i);
+			JobDefinitionStep<?, ?, ?> step = (JobDefinitionStep<?, ?, ?>) definition.getSteps().get(i);
 			if (step.getStepId().equals(targetStepId)) {
 				targetStep = step;
 				if (i == 0) {
 					firstStep = true;
 				}
 				if (i < (definition.getSteps().size() - 1)) {
-					nextStep = definition.getSteps().get(i + 1);
+					nextStep = (JobDefinitionStep<?, ?, ?>) definition.getSteps().get(i + 1);
 				}
 				break;
 			}
@@ -285,7 +311,7 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 	}
 
 	@SuppressWarnings("unchecked")
-	private <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> void executeStep(WorkChunk chunk, String jobDefinitionId, int jobDefinitionVersion, JobDefinition definition, JobDefinitionStep<PT, IT, OT> theStep, JobDefinitionStep<PT, OT, ?> theSubsequentStep, String targetStepId, boolean firstStep, JobInstance instance, String instanceId) {
+	private <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> void executeStep(WorkChunk chunk, String jobDefinitionId, int jobDefinitionVersion, JobDefinition<PT> definition, JobDefinitionStep<PT, IT, OT> theStep, JobDefinitionStep<PT, OT, ?> theSubsequentStep, String targetStepId, boolean firstStep, JobInstance instance, String instanceId) {
 		PT parameters = (PT) instance.getParameters(definition.getParametersType());
 		IJobStepWorker<PT, IT, OT> worker = theStep.getJobStepWorker();
 
@@ -309,14 +335,41 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 		}
 	}
 
-	private JobDefinition getDefinitionOrThrowException(String jobDefinitionId, int jobDefinitionVersion) {
-		Optional<JobDefinition> opt = myJobDefinitionRegistry.getJobDefinition(jobDefinitionId, jobDefinitionVersion);
+	private JobDefinition<?> getDefinitionOrThrowException(String jobDefinitionId, int jobDefinitionVersion) {
+		Optional<JobDefinition<?>> opt = myJobDefinitionRegistry.getJobDefinition(jobDefinitionId, jobDefinitionVersion);
 		if (!opt.isPresent()) {
 			String msg = "Unknown job definition ID[" + jobDefinitionId + "] version[" + jobDefinitionVersion + "]";
 			ourLog.warn(msg);
 			throw new InternalErrorException(Msg.code(2043) + msg);
 		}
 		return opt.get();
+	}
+
+	/**
+	 * Scans a model object for fields marked as {@link PasswordField}
+	 * and nulls them
+	 */
+	private static void stripPasswordFields(@Nonnull Object theParameters) {
+		Field[] declaredFields = theParameters.getClass().getDeclaredFields();
+		for (Field nextField : declaredFields) {
+
+			JsonProperty propertyAnnotation = nextField.getAnnotation(JsonProperty.class);
+			if (propertyAnnotation == null) {
+				continue;
+			}
+
+			nextField.setAccessible(true);
+			try {
+				Object nextValue = nextField.get(theParameters);
+				if (nextField.getAnnotation(PasswordField.class) != null) {
+					nextField.set(theParameters, null);
+				} else if (nextValue != null) {
+					stripPasswordFields(nextValue);
+				}
+			} catch (IllegalAccessException e) {
+				throw new InternalErrorException(Msg.code(2044) + e.getMessage(), e);
+			}
+		}
 	}
 
 	private class WorkChannelMessageHandler implements MessageHandler {
@@ -409,33 +462,6 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 		@Override
 		public int getWorkChunkCount() {
 			return 0;
-		}
-	}
-
-	/**
-	 * Scans a model object for fields marked as {@link PasswordField}
-	 * and nulls them
-	 */
-	private static void stripPasswordFields(@Nonnull Object theParameters) {
-		Field[] declaredFields = theParameters.getClass().getDeclaredFields();
-		for (Field nextField : declaredFields) {
-
-			JsonProperty propertyAnnotation = nextField.getAnnotation(JsonProperty.class);
-			if (propertyAnnotation == null) {
-				continue;
-			}
-
-			nextField.setAccessible(true);
-			try {
-				Object nextValue = nextField.get(theParameters);
-				if (nextField.getAnnotation(PasswordField.class) != null) {
-					nextField.set(theParameters, null);
-				} else if (nextValue != null) {
-					stripPasswordFields(nextValue);
-				}
-			} catch (IllegalAccessException e) {
-				throw new InternalErrorException(Msg.code(2044) + e.getMessage(), e);
-			}
 		}
 	}
 }
