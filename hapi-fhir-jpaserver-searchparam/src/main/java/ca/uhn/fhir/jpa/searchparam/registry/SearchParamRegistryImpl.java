@@ -241,6 +241,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 			String name = runtimeSp.getName();
 
 			theSearchParams.add(nextBaseName, name, runtimeSp);
+			ourLog.debug("Adding search parameter {}.{} to SearchParamRegistry", nextBaseName, StringUtils.defaultString(name, "[composite]"));
 			retval++;
 		}
 		return retval;

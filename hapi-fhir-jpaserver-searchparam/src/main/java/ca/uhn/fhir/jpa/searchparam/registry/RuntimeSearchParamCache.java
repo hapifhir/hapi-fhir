@@ -36,9 +36,6 @@ public class RuntimeSearchParamCache extends ReadOnlySearchParamCache {
 	protected RuntimeSearchParamCache() {
 	}
 
-	/**
-	 * @return the previous value for that SearchParameter, or null if this is the first time adding it
-	 */
 	public void add(String theResourceName, String theName, RuntimeSearchParam theSearchParam) {
 		ResourceSearchParams resourceSearchParams = getSearchParamMap(theResourceName);
 		resourceSearchParams.put(theName, theSearchParam);
