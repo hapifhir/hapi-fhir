@@ -176,27 +176,30 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 			data = theWorkChunk.getData(theInputType);
 		}
 
-		StepExecutionDetails<PT, IT> stepExecutionDetails = new StepExecutionDetails<>(parameters, data);
+		String instanceId = theWorkChunk.getInstanceId();
+		String chunkId = theWorkChunk.getId();
+
+		StepExecutionDetails<PT, IT> stepExecutionDetails = new StepExecutionDetails<>(parameters, data, instanceId, chunkId);
 		RunOutcome outcome;
 		try {
 			outcome = worker.run(stepExecutionDetails, dataSink);
 			Validate.notNull(outcome, "Step worker returned null: %s", worker.getClass());
 		} catch (JobExecutionFailedException e) {
 			ourLog.error("Unrecoverable failure executing job {} step {}", jobDefinitionId, targetStepId, e);
-			myJobPersistence.markWorkChunkAsFailed(theWorkChunk.getId(), e.toString());
+			myJobPersistence.markWorkChunkAsFailed(chunkId, e.toString());
 			return false;
 		} catch (Exception e) {
 			ourLog.error("Failure executing job {} step {}", jobDefinitionId, targetStepId, e);
-			myJobPersistence.markWorkChunkAsErroredAndIncrementErrorCount(theWorkChunk.getId(), e.toString());
+			myJobPersistence.markWorkChunkAsErroredAndIncrementErrorCount(chunkId, e.toString());
 			throw new JobExecutionFailedException(Msg.code(2041) + e.getMessage(), e);
 		}
 
 		int recordsProcessed = outcome.getRecordsProcessed();
-		myJobPersistence.markWorkChunkAsCompletedAndClearData(theWorkChunk.getId(), recordsProcessed);
+		myJobPersistence.markWorkChunkAsCompletedAndClearData(chunkId, recordsProcessed);
 
 		int recoveredErrorCount = dataSink.getRecoveredErrorCount();
 		if (recoveredErrorCount > 0) {
-			myJobPersistence.incrementWorkChunkErrorCount(theWorkChunk.getId(), recoveredErrorCount);
+			myJobPersistence.incrementWorkChunkErrorCount(chunkId, recoveredErrorCount);
 		}
 
 		return true;

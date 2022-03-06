@@ -48,13 +48,19 @@ public class LoadIdsStep implements IJobStepWorker<ReindexJobParameters, Reindex
 		Set<ReindexChunkIds.Id> idBuffer = new HashSet<>();
 		long previousLastTime = 0L;
 		while(true) {
-			IResourceReindexSvc.IdChunk nextChunk = myResourceReindexSvc.fetchResourceIdsPage(nextStart, end, theStepExecutionDetails.getData().getUrl());
+			String url = theStepExecutionDetails.getData().getUrl();
+
+			ourLog.info("Fetching resource ID chunk for URL {} - Range {} - {}", url, nextStart, end);
+			IResourceReindexSvc.IdChunk nextChunk = myResourceReindexSvc.fetchResourceIdsPage(nextStart, end, url);
+
 			if (nextChunk.getIds().isEmpty()) {
+				ourLog.info("No data returned");
 				break;
 			}
 
 			// If we get the same last time twice in a row, we've clearly reached the end
 			if (nextChunk.getLastDate().getTime() == previousLastTime) {
+				ourLog.info("Matching final timestamp of {}, loading is completed", new Date(previousLastTime));
 				break;
 			}
 			previousLastTime = nextChunk.getLastDate().getTime();

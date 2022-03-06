@@ -43,9 +43,7 @@ import java.util.concurrent.TimeUnit;
 @Import({CommonConfig.class, JpaDstu3Config.class, HapiJpaConfig.class})
 @EnableTransactionManagement()
 public class TestDstu3Config {
-	public static final String FHIR_DB_USERNAME = "${fhir.db.username}";
-	public static final String FHIR_DB_PASSWORD = "${fhir.db.password}";
-	public static final String FHIR_LUCENE_LOCATION_DSTU3 = "${fhir.lucene.location.dstu3}";
+	public static final String FHIR_LUCENE_LOCATION_DSTU3 = "fhir.lucene.location.dstu3";
 
 	private String myDbUsername = System.getProperty(TestR5Config.FHIR_DB_USERNAME);
 	private String myDbPassword = System.getProperty(TestR5Config.FHIR_DB_PASSWORD);

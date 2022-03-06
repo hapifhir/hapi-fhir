@@ -18,6 +18,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.util.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,7 @@ import org.springframework.transaction.support.TransactionCallback;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class ReindexStep implements IJobStepWorker<ReindexJobParameters, ReindexChunkIds, VoidModel> {
@@ -51,14 +53,14 @@ public class ReindexStep implements IJobStepWorker<ReindexJobParameters, Reindex
 
 		ReindexChunkIds data = theStepExecutionDetails.getData();
 
-		return doReindex(data, theDataSink);
+		return doReindex(data, theDataSink, theStepExecutionDetails.getInstanceId(), theStepExecutionDetails.getChunkId());
 	}
 
 	@Nonnull
-	public RunOutcome doReindex(ReindexChunkIds data, IJobDataSink<VoidModel> theDataSink) {
+	public RunOutcome doReindex(ReindexChunkIds data, IJobDataSink<VoidModel> theDataSink, String theInstanceId, String theChunkId) {
 		RequestDetails requestDetails = new SystemRequestDetails();
 		TransactionDetails transactionDetails = new TransactionDetails();
-		myHapiTransactionService.execute(requestDetails, transactionDetails, new ReindexJob(data, requestDetails, transactionDetails, theDataSink));
+		myHapiTransactionService.execute(requestDetails, transactionDetails, new ReindexJob(data, requestDetails, transactionDetails, theDataSink, theInstanceId, theChunkId));
 
 		return new RunOutcome(data.getIds().size());
 	}
@@ -68,16 +70,20 @@ public class ReindexStep implements IJobStepWorker<ReindexJobParameters, Reindex
 		private final RequestDetails myRequestDetails;
 		private final TransactionDetails myTransactionDetails;
 		private final IJobDataSink<VoidModel> myDataSink;
+		private final String myChunkId;
+		private final String myInstanceId;
 
-		public ReindexJob(ReindexChunkIds theData, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, IJobDataSink<VoidModel> theDataSink) {
+		public ReindexJob(ReindexChunkIds theData, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, IJobDataSink<VoidModel> theDataSink, String theInstanceId, String theChunkId) {
 			myData = theData;
 			myRequestDetails = theRequestDetails;
 			myTransactionDetails = theTransactionDetails;
 			myDataSink = theDataSink;
+			myInstanceId = theInstanceId;
+			myChunkId = theChunkId;
 		}
 
 		@Override
-		public Void doInTransaction(TransactionStatus status) {
+		public Void doInTransaction(@Nonnull TransactionStatus theStatus) {
 
 			List<ResourcePersistentId> persistentIds = myData
 				.getIds()
@@ -85,12 +91,21 @@ public class ReindexStep implements IJobStepWorker<ReindexJobParameters, Reindex
 				.map(t -> new ResourcePersistentId(t.getId()))
 				.collect(Collectors.toList());
 
-			mySystemDao.preFetchResources(persistentIds);
+			ourLog.info("Starting reindex work chunk with {} resources - Instance[{}] Chunk[{}]", persistentIds.size(), myInstanceId, myChunkId);
+			StopWatch sw = new StopWatch();
 
+			// Prefetch Resources from DB
+
+			mySystemDao.preFetchResources(persistentIds);
+			ourLog.info("Prefetched {} resources in {} - Instance[{}] Chunk[{}]", persistentIds.size(), sw, myInstanceId, myChunkId);
+
+			// Reindex
+
+			sw.restart();
 			for (int i = 0; i < myData.getIds().size(); i++) {
 
 				String nextResourceType = myData.getIds().get(i).getResourceType();
-				IFhirResourceDao dao = myDaoRegistry.getResourceDao(nextResourceType);
+				IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(nextResourceType);
 				ResourcePersistentId resourcePersistentId = persistentIds.get(i);
 				try {
 					dao.reindex(resourcePersistentId, myRequestDetails, myTransactionDetails);
@@ -101,6 +116,8 @@ public class ReindexStep implements IJobStepWorker<ReindexJobParameters, Reindex
 					myDataSink.recoveredError("Failure reindexing " + resourceId + ": " + e.getMessage());
 				}
 			}
+
+			ourLog.info("Finished reindexing {} resources in {} - {}/sec - Instance[{}] Chunk[{}]", persistentIds.size(), sw, sw.formatThroughput(persistentIds.size(), TimeUnit.SECONDS), myInstanceId, myChunkId);
 
 			return null;
 		}
