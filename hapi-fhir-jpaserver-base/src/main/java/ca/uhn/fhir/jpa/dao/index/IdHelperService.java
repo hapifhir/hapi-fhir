@@ -340,7 +340,7 @@ public class IdHelperService implements IIdHelperService {
 	 * 3. If the requested partition search is not all partition, return the request partition as predicate.
 	 */
 	private Optional<Predicate> getOptionalPartitionPredicate(RequestPartitionId theRequestPartitionId, CriteriaBuilder cb, Root<ForcedId> from) {
-		if (myPartitionSettings.getAllowReferencesAcrossPartitions().equals(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED)) {
+		if (myPartitionSettings.isAllowUnqualifiedCrossPartitionReference()) {
 			return Optional.empty();
 		} else if (theRequestPartitionId.isDefaultPartition() && myPartitionSettings.getDefaultPartitionId() == null) {
 			Predicate partitionIdCriteria = cb.isNull(from.get("myPartitionIdValue").as(Integer.class));
@@ -351,7 +351,7 @@ public class IdHelperService implements IIdHelperService {
 			if (partitionIds.size() > 1) {
 				Predicate partitionIdCriteria = from.get("myPartitionIdValue").as(Integer.class).in(partitionIds);
 				return Optional.of(partitionIdCriteria);
-			} else {
+			} else if (partitionIds.size() == 1){
 				Predicate partitionIdCriteria = cb.equal(from.get("myPartitionIdValue").as(Integer.class), partitionIds.get(0));
 				return Optional.of(partitionIdCriteria);
 			}
