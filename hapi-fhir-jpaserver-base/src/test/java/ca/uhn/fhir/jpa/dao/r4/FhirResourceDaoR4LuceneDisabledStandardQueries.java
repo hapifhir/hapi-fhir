@@ -5,10 +5,10 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.config.TestHibernateSearchAddInConfig;
 import ca.uhn.fhir.jpa.config.TestR4Config;
-import ca.uhn.fhir.jpa.dao.BaseDateSearchDaoTests;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
-import ca.uhn.fhir.jpa.dao.DaoTestDataBuilder;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.storage.test.BaseDateSearchDaoTests;
+import ca.uhn.fhir.storage.test.DaoTestDataBuilder;
 import org.hl7.fhir.r4.model.Observation;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,14 +27,14 @@ import org.springframework.transaction.PlatformTransactionManager;
 public class FhirResourceDaoR4LuceneDisabledStandardQueries extends BaseJpaTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4LuceneDisabledStandardQueries.class);
 	@Autowired
+	protected DaoRegistry myDaoRegistry;
+	@Autowired
 	PlatformTransactionManager myTxManager;
 	@Autowired
 	FhirContext myFhirCtx;
 	@Autowired
 	@Qualifier("myObservationDaoR4")
 	IFhirResourceDao<Observation> myObservationDao;
-	@Autowired
-	protected DaoRegistry myDaoRegistry;
 
 	@Override
 	protected PlatformTransactionManager getTxManager() {

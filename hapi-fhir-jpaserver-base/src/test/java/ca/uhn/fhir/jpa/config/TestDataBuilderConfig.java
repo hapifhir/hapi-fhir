@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.dao.DaoTestDataBuilder;
+import ca.uhn.fhir.jpa.test.DaoTestDataBuilder;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

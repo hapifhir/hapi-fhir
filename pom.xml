@@ -2809,6 +2809,7 @@
 				<module>hapi-fhir-storage</module>
 				<module>hapi-fhir-storage-batch2</module>
 				<module>hapi-fhir-storage-batch2-jobs</module>
+				<module>hapi-fhir-storage-test-utilities</module>
 				<module>hapi-fhir-jpaserver-cql</module>
 				<module>hapi-fhir-jpaserver-model</module>
 				<module>hapi-fhir-jpaserver-searchparam</module>

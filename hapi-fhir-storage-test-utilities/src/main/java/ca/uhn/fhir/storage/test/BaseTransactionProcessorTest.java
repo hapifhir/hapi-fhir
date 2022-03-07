@@ -1,5 +1,7 @@
-package ca.uhn.fhir.jpa.dao;
+package ca.uhn.fhir.storage.test;
 
+import ca.uhn.fhir.jpa.dao.BaseTransactionProcessor;
+import ca.uhn.fhir.jpa.dao.IdSubstitutionMap;
 import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.Test;
