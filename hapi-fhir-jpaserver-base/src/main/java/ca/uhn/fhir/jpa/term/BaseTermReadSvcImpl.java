@@ -1521,6 +1521,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				case "concept":
 				case "code":
 					if (nextFilter.getOp() == ValueSet.FilterOperator.ISA) {
+						theValueSetCodeAccumulator.addMessage("Processing IS-A filter in database - Note that Hibernate Search is not enabled on this server, so this operation can be inefficient.");
 						TermConcept code = findCodeForFilterCriteria(theSystem, nextFilter);
 						addConceptAndChildren(theValueSetCodeAccumulator, theAddedCodes, theInclude, theSystem, theAdd, code);
 						handled = true;
