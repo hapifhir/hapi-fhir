@@ -6,14 +6,19 @@ import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.PractitionerRole;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
 import org.junit.jupiter.api.AfterEach;
@@ -43,7 +48,6 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 		myValInterceptor = new RepositoryValidatingInterceptor();
 		myValInterceptor.setFhirContext(myFhirCtx);
 		myInterceptorRegistry.registerInterceptor(myValInterceptor);
-
 	}
 
 	@AfterEach
@@ -99,7 +103,6 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 		patient.getMeta().addProfile("http://foo/Profile1");
 		patient.getMeta().addProfile("http://foo/Profile9999");
 		myPatientDao.create(patient);
-
 	}
 
 	@Test
@@ -244,25 +247,54 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testRequireValidation_Allowed() {
+	public void testRequireValidationDoesNotApplyToPlaceholders() {
+
+		//Given
+		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
 		List<IRepositoryValidatingRule> rules = newRuleBuilder()
-			.forResourcesOfType("Observation")
+			.forResourcesOfType("Organization")
 			.requireValidationToDeclaredProfiles()
-			.withBestPracticeWarningLevel("IGNORE")
 			.build();
 		myValInterceptor.setRules(rules);
 
-		Observation obs = new Observation();
-		obs.getCode().addCoding().setSystem("http://foo").setCode("123").setDisplay("help im a bug");
-		obs.setStatus(Observation.ObservationStatus.AMENDED);
+		//When
+		PractitionerRole pr = new PractitionerRole();
+		pr.setOrganization(new Reference("Organization/400-40343834-7383-54b4-abfe-95281da21062-ProviderOrganiz"));
+
+		//Then
 		try {
-			IIdType id = myObservationDao.create(obs).getId();
+			IIdType id = myPractitionerRoleDao.create(pr).getId();
 			assertEquals("1", id.getVersionIdPart());
 		} catch (PreconditionFailedException e) {
 			// should not happen
 			fail(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 		}
 	}
+
+	@Test
+	public void testRequireAtLeastProfilesDoesNotApplyToPlaceholders() {
+		//Given
+		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+		List<IRepositoryValidatingRule> rules = newRuleBuilder()
+			.forResourcesOfType("Organization")
+			.requireAtLeastOneProfileOf("http://example.com/profile1", "http://example.com/profile2")
+			.build();
+		myValInterceptor.setRules(rules);
+
+		//When
+		PractitionerRole pr = new PractitionerRole();
+		pr.setOrganization(new Reference("Organization/400-40343834-7383-54b4-abfe-95281da21062-ProviderOrganiz"));
+
+		//Then
+		try {
+			IIdType id = myPractitionerRoleDao.create(pr).getId();
+			assertEquals("1", id.getVersionIdPart());
+		} catch (PreconditionFailedException e) {
+			// should not happen
+			fail(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+		}
+	}
+
 
 	@Test
 	public void testRequireValidation_AdditionalOptions() {

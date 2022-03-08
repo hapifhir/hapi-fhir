@@ -49,6 +49,30 @@ public class RepositoryValidatingInterceptorHttpR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testValidationIsSkippedOnAutoCreatedPlaceholderReferencesIfConfiguredToDoSo() {
+		List<IRepositoryValidatingRule> rules = newRuleBuilder()
+			.forResourcesOfType("Observation")
+			.requireValidationToDeclaredProfiles()
+			.build();
+		myValInterceptor.setRules(rules);
+
+		Observation obs = new Observation();
+		obs.getCode().addCoding().setSystem("http://foo").setCode("123").setDisplay("help im a bug");
+		obs.setStatus(Observation.ObservationStatus.AMENDED);
+
+		MethodOutcome outcome = myRestfulServerExtension
+			.getFhirClient()
+			.create()
+			.resource(obs)
+			.prefer(PreferReturnEnum.OPERATION_OUTCOME)
+			.execute();
+
+		String operationOutcomeEncoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
+		ourLog.info("Outcome: {}", operationOutcomeEncoded);
+		assertThat(operationOutcomeEncoded, containsString("All observations should have a subject"));
+
+	}
+	@Test
 	public void testValidationOutcomeAddedToRequestResponse() {
 		List<IRepositoryValidatingRule> rules = newRuleBuilder()
 			.forResourcesOfType("Observation")
