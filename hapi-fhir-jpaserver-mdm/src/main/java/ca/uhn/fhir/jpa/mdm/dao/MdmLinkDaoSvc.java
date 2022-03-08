@@ -32,9 +32,8 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
-import ca.uhn.fhir.mdm.provider.MdmProviderDstu3Plus;
 import ca.uhn.fhir.rest.api.Constants;
-import org.elasticsearch.index.query.TypeQueryBuilder;
+import org.apache.commons.collections4.CollectionUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -43,17 +42,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -282,16 +276,15 @@ public class MdmLinkDaoSvc {
 
 
 	/**
-	 * Given an example {@link MdmLink}, return all links from the database which match the example.
+	 * Given a list of criteria, return all links from the database which fits the criteria provided
 	 *
-	 * @param theExampleLink The MDM link containing the data we would like to search for.
+	 * @param theGoldenResourceId The resource ID of the golden resource being searched.
+	 * @param theSourceId The resource ID of the source resource being searched.
+	 * @param theMatchResult the {@link MdmMatchResultEnum} being searched.
+	 * @param theLinkSource the {@link MdmLinkSourceEnum} being searched.
+	 * @param thePartitionId List of partitions ID being searched, where the link's partition must be in the list.
 	 * @return a list of {@link MdmLink} entities which match the example.
 	 */
-	public Page<MdmLink> findMdmLinkByExample(Example<MdmLink> theExampleLink, MdmPageRequest thePageRequest) {
-		return myMdmLinkDao.findAll(theExampleLink, thePageRequest.toPageRequest());
-	}
-
-
 	public PageImpl<MdmLink> executeTypedQuery(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, List<Integer> thePartitionId) {
 		CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<MdmLink> criteriaQuery = cb.createQuery(MdmLink.class);
@@ -315,16 +308,16 @@ public class MdmLinkDaoSvc {
 			Predicate linkSourcePredicate = cb.equal(from.get("myMatchResult").as(MdmLinkSourceEnum.class), theLinkSource);
 			andPredicates.add(linkSourcePredicate);
 		}
-		if (thePartitionId != null) {
+		if (!CollectionUtils.isEmpty(thePartitionId)) {
 			Expression<Integer> exp = from.get("myPartitionId").get("myPartitionId").as(Integer.class);
 			Predicate linkSourcePredicate = exp.in(thePartitionId);
 			andPredicates.add(linkSourcePredicate);
 		}
 
 		Predicate finalQuery = cb.and(andPredicates.toArray(EMPTY_PREDICATE_ARRAY));
-		TypedQuery typedQuery = myEntityManager.createQuery(criteriaQuery.where(finalQuery));
+		TypedQuery<MdmLink> typedQuery = myEntityManager.createQuery(criteriaQuery.where(finalQuery));
 
-		return new PageImpl<MdmLink>(typedQuery.getResultList());
+		return new PageImpl<>(typedQuery.getResultList());
 	}
 
 	/**

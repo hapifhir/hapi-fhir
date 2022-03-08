@@ -20,10 +20,8 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
-import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
@@ -34,7 +32,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,9 +43,6 @@ public class MdmLinkQuerySvcImplSvc implements IMdmLinkQuerySvc {
 
 	@Autowired
 	MdmLinkDaoSvc myMdmLinkDaoSvc;
-
-	@Autowired
-	IdHelperService myIdHelperService;
 
 	@Autowired
 	IMdmModelConverterSvc myMdmModelConverterSvc;
@@ -64,8 +58,7 @@ public class MdmLinkQuerySvcImplSvc implements IMdmLinkQuerySvc {
 	@Transactional
 	public Page<MdmLinkJson> queryLinks(IIdType theGoldenResourceId, IIdType theSourceResourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest, List<Integer> thePartitionId) {
 		Page<MdmLink> mdmLinks = myMdmLinkDaoSvc.executeTypedQuery(theGoldenResourceId, theSourceResourceId, theMatchResult, theLinkSource, thePartitionId);
-		Page<MdmLinkJson> map = mdmLinks.map(myMdmModelConverterSvc::toJson);
-		return map;
+		return mdmLinks.map(myMdmModelConverterSvc::toJson);
 	}
 
 	@Override
@@ -76,31 +69,8 @@ public class MdmLinkQuerySvcImplSvc implements IMdmLinkQuerySvc {
 
 	@Override
 	@Transactional
-	public Page<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest, Integer thePartitionId) {
-		Example<MdmLink> exampleLink = exampleLinkFromParameters(null, null, MdmMatchResultEnum.POSSIBLE_DUPLICATE, null, thePartitionId);
-		Page<MdmLink> mdmLinkPage = myMdmLinkDaoSvc.findMdmLinkByExample(exampleLink, thePageRequest);
-		Page<MdmLinkJson> map = mdmLinkPage.map(myMdmModelConverterSvc::toJson);
-		return map;
-	}
-
-	private Example<MdmLink> exampleLinkFromParameters(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, Integer thePartitionId) {
-		MdmLink mdmLink = myMdmLinkDaoSvc.newMdmLink();
-		if (theGoldenResourceId != null) {
-			mdmLink.setGoldenResourcePid(myIdHelperService.getPidOrThrowException(theGoldenResourceId));
-		}
-		if (theSourceId != null) {
-			mdmLink.setSourcePid(myIdHelperService.getPidOrThrowException(theSourceId));
-		}
-		if (theMatchResult != null) {
-			mdmLink.setMatchResult(theMatchResult);
-		}
-		if (theLinkSource != null) {
-			mdmLink.setLinkSource(theLinkSource);
-		}
-		if (thePartitionId != null) {
-			mdmLink.setPartitionId(new PartitionablePartitionId(thePartitionId, null));
-		}
-
-		return Example.of(mdmLink);
+	public Page<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest, List<Integer> thePartitionId) {
+		Page<MdmLink> mdmLinkPage = myMdmLinkDaoSvc.executeTypedQuery(null, null, MdmMatchResultEnum.POSSIBLE_DUPLICATE, null, thePartitionId);
+		return mdmLinkPage.map(myMdmModelConverterSvc::toJson);
 	}
 }

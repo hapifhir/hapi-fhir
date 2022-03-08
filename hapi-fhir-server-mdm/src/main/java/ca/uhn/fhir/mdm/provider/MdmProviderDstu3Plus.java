@@ -206,7 +206,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 
 		MdmPageRequest mdmPageRequest = new MdmPageRequest(theOffset, theCount, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
 
-		Page<MdmLinkJson> possibleDuplicates = myMdmControllerSvc.getDuplicateGoldenResources(createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.DUPLICATE_GOLDEN_RESOURCES, null), mdmPageRequest);
+		Page<MdmLinkJson> possibleDuplicates = myMdmControllerSvc.getDuplicateGoldenResources(createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.DUPLICATE_GOLDEN_RESOURCES, null), mdmPageRequest, theRequestDetails);
 
 		return parametersFromMdmLinks(possibleDuplicates, false, theRequestDetails, mdmPageRequest);
 	}

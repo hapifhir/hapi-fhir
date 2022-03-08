@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
 import ca.uhn.fhir.mdm.api.IMdmBatchJobSubmitterFactory;
@@ -42,7 +41,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.MultiUrlProcessor;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -123,6 +121,16 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 	@Override
 	public Page<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmTransactionContext, MdmPageRequest thePageRequest) {
 		return myMdmLinkQuerySvc.getDuplicateGoldenResources(theMdmTransactionContext, thePageRequest);
+	}
+
+	@Override
+	public Page<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmTransactionContext, MdmPageRequest thePageRequest, RequestDetails theRequestDetails) {
+		RequestPartitionId theReadPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, null, null);
+		Page<MdmLinkJson> resultPage =  myMdmLinkQuerySvc.getDuplicateGoldenResources(theMdmTransactionContext, thePageRequest, theReadPartitionId.getPartitionIds());
+
+		validateMdmQueryPermissions(theReadPartitionId, resultPage.getContent(), theRequestDetails);
+
+		return resultPage;
 	}
 
 	@Override
