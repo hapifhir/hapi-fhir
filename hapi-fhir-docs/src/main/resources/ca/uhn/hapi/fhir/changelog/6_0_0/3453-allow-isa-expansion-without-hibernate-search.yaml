@@ -1,0 +1,5 @@
+---
+type: add
+issue: 3452
+title: "The JPA server terminology service can now process IS-A filters in ValueSet expansion on servers with
+   Hibernate Search disabled."
