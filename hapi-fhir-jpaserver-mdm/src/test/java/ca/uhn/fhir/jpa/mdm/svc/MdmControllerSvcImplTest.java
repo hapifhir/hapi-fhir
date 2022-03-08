@@ -13,7 +13,6 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
@@ -46,10 +45,8 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(1);
 
 		Patient patient = createPatientAndUpdateLinksOnPartition(buildFrankPatient(), requestPartitionId);
-		StringType patientId = new StringType(patient.getIdElement().getValue());
 
-		Patient sourcePatient = getGoldenResourceFromTargetResource(patient);
-		StringType sourcePatientId = new StringType(sourcePatient.getIdElement().getValue());
+		getGoldenResourceFromTargetResource(patient);
 
 		MdmLink link = myMdmLinkDaoSvc.findMdmLinkBySource(patient).get();
 		link.setMatchResult(MdmMatchResultEnum.POSSIBLE_MATCH);
@@ -63,6 +60,37 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 			new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.fromPartitionId(1)));
 
 		assertEquals(resultPage.getContent().size(), 1);
+
+		assertEquals(resultPage.getContent().get(0).getSourceId(), patient.getIdElement().getResourceType() + "/" + patient.getIdElement().getIdPart());
+
+		Mockito.verify(myRequestPartitionHelperSvc, Mockito.atLeastOnce()).validateHasPartitionPermissions(any(), eq("Patient"), argThat(new PartitionIdMatcher(requestPartitionId)));
+	}
+
+	@Test
+	public void testMdmDuplicateGoldenResource() {
+		myPartitionSettings.setPartitioningEnabled(true);
+		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
+		assertLinkCount(1);
+
+		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(1);
+
+		Patient patient = createPatientAndUpdateLinksOnPartition(buildFrankPatient(), requestPartitionId);
+
+		getGoldenResourceFromTargetResource(patient);
+
+		MdmLink link = myMdmLinkDaoSvc.findMdmLinkBySource(patient).get();
+		link.setMatchResult(MdmMatchResultEnum.POSSIBLE_DUPLICATE);
+		saveLink(link);
+		assertEquals(MdmLinkSourceEnum.AUTO, link.getLinkSource());
+		assertLinkCount(2);
+
+		Page<MdmLinkJson> resultPage = myMdmControllerSvc.getDuplicateGoldenResources(null,
+			new MdmPageRequest((Integer) null, null, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE),
+			new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.fromPartitionId(1)));
+
+		assertEquals(resultPage.getContent().size(), 1);
+
+		assertEquals(resultPage.getContent().get(0).getSourceId(), patient.getIdElement().getResourceType() + "/" + patient.getIdElement().getIdPart());
 
 		Mockito.verify(myRequestPartitionHelperSvc, Mockito.atLeastOnce()).validateHasPartitionPermissions(any(), eq("Patient"), argThat(new PartitionIdMatcher(requestPartitionId)));
 	}
