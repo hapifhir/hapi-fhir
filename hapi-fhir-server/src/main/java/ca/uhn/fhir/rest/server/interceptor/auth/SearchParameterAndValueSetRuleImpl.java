@@ -174,15 +174,16 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 						if (validateCodeResult != null) {
 							if (validateCodeResult.isOk()) {
 								codeMatchCount.addMatchingCode();
-								theTroubleshootingLog.debug("Code {}:{} was found in VS", system, code);
+								theTroubleshootingLog.debug("Code {}#{} was found in ValueSet[{}] - {}", system, code, theValueSetUrl, validateCodeResult.getMessage());
 								if (theReturnOnFirstMatch) {
 									return codeMatchCount;
 								}
 							} else {
 								codeMatchCount.addNonMatchingCode();
-								theTroubleshootingLog.debug("Code {}:{} was not found in VS: {}", system, code, validateCodeResult.getMessage());
+								theTroubleshootingLog.debug("Code {}#{} was not found in ValueSet[{}]: {}", system, code, theValueSetUrl, validateCodeResult.getMessage());
 							}
 						} else {
+							theTroubleshootingLog.debug("Terminology service was unable to validate code {}#{} in ValueSet[{}] - No service was able to handle this request", system, code, theValueSetUrl);
 							codeMatchCount.addUnableToValidate();
 						}
 					}
