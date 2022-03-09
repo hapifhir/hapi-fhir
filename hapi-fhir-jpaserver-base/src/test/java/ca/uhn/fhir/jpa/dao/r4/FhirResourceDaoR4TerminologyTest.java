@@ -49,6 +49,7 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -873,7 +874,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 			myObservationDao.search(params).size();
 			fail();
 		} catch (InternalErrorException e) {
-			assertEquals(Msg.code(885) + "Expansion of ValueSet produced too many codes (maximum 1) - Operation aborted!", e.getMessage());
+			assertThat(e.getMessage(), containsString(Msg.code(885) + "Expansion of ValueSet produced too many codes (maximum 1) - Operation aborted!"));
 		}
 	}
 

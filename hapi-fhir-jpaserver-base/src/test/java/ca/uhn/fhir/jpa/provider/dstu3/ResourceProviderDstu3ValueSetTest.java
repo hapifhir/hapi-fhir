@@ -686,23 +686,6 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 	}
 
-	@Test
-	public void testExpandLocalVsWithUnknownCode() {
-		createExternalCsAndLocalVsWithUnknownCode();
-		assertNotNull(myLocalValueSetId);
-
-		try {
-			ourClient
-				.operation()
-				.onInstance(myLocalValueSetId)
-				.named("expand")
-				.withNoParameters(Parameters.class)
-				.execute();
-		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: Invalid filter criteria - code does not exist: {http://example.com/my_code_system}childFOOOOOOO", e.getMessage());
-		}
-	}
-
 	/**
 	 * #516
 	 */

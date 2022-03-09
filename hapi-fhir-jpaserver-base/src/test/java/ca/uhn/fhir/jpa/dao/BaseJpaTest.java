@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDesignationDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptPropertyDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
+import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
@@ -189,6 +190,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected ITermConceptDao myTermConceptDao;
 	@Autowired
 	protected ITermValueSetConceptDao myTermValueSetConceptDao;
+	@Autowired
+	protected ITermValueSetDao myTermValueSetDao;
 	@Autowired
 	protected ITermConceptDesignationDao myTermConceptDesignationDao;
 	@Autowired
@@ -355,6 +358,14 @@ public abstract class BaseJpaTest extends BaseTest {
 			List<TermValueSetConcept> resources = myTermValueSetConceptDao.findAll();
 			ourLog.info("Concepts:\n * {}", resources.stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 			return resources.size();
+		});
+	}
+
+	protected int logAllValueSets() {
+		return runInTransaction(() -> {
+			List<TermValueSet> valueSets = myTermValueSetDao.findAll();
+			ourLog.info("ValueSets:\n * {}", valueSets.stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+			return valueSets.size();
 		});
 	}
 
