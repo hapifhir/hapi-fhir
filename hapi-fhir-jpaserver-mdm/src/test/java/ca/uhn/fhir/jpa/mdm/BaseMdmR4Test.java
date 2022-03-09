@@ -232,7 +232,6 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 
 	@Nonnull
 	protected Medication createMedication(Medication theMedication) {
-		//Note that since our mdm-rules block on active=true, all patients must be active.
 		DaoMethodOutcome outcome = myMedicationDao.create(theMedication);
 		Medication medication = (Medication) outcome.getResource();
 		medication.setId(outcome.getId());
@@ -437,6 +436,17 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		thePractitioner.setActive(true);
 		DaoMethodOutcome daoMethodOutcome = myPractitionerDao.create(thePractitioner);
 		thePractitioner.setId(daoMethodOutcome.getId());
+		myMdmMatchLinkSvc.updateMdmLinksForMdmSource(thePractitioner, createContextForCreate("Practitioner"));
+		return thePractitioner;
+	}
+
+	protected Practitioner createPractitionerAndUpdateLinksOnPartition(Practitioner thePractitioner, RequestPartitionId theRequestPartitionId) {
+		thePractitioner.setActive(true);
+		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
+		systemRequestDetails.setRequestPartitionId(theRequestPartitionId);
+		DaoMethodOutcome daoMethodOutcome = myPractitionerDao.create(thePractitioner, systemRequestDetails);
+		thePractitioner.setId(daoMethodOutcome.getId());
+		thePractitioner.setUserData(Constants.RESOURCE_PARTITION_ID, theRequestPartitionId);
 		myMdmMatchLinkSvc.updateMdmLinksForMdmSource(thePractitioner, createContextForCreate("Practitioner"));
 		return thePractitioner;
 	}

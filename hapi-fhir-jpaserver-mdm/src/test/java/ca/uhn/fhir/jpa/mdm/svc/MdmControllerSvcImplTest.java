@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
@@ -12,13 +13,23 @@ import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Patient;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.data.domain.Page;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 import static ca.uhn.fhir.mdm.provider.MdmProviderDstu3Plus.DEFAULT_PAGE_SIZE;
 import static ca.uhn.fhir.mdm.provider.MdmProviderDstu3Plus.MAX_PAGE_SIZE;
@@ -35,11 +46,19 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 	@Autowired
 	IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
-	@Test
-	public void testSurvivorshipIsCalledOnMatchingToTheSameGoldenResource() {
+	@Autowired
+	private IInterceptorService myInterceptorService;
 
+	@BeforeEach
+	public void before() {
+		super.before();
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
+		myInterceptorService.registerInterceptor(new RequestTenantPartitionInterceptor());
+	}
+
+	@Test
+	public void testSurvivorshipIsCalledOnMatchingToTheSameGoldenResource() {
 		assertLinkCount(1);
 
 		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(1);
@@ -68,8 +87,6 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 
 	@Test
 	public void testMdmDuplicateGoldenResource() {
-		myPartitionSettings.setPartitioningEnabled(true);
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
 		assertLinkCount(1);
 
 		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(1);
@@ -95,10 +112,37 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 		Mockito.verify(myRequestPartitionHelperSvc, Mockito.atLeastOnce()).validateHasPartitionPermissions(any(), eq("Patient"), argThat(new PartitionIdMatcher(requestPartitionId)));
 	}
 
+	@Test
+	public void testMdmClearWithProvidedResources() {
+		assertLinkCount(1);
+
+		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(1);
+
+		Patient patient = createPatientAndUpdateLinksOnPartition(buildFrankPatient(), requestPartitionId);
+		createPractitionerAndUpdateLinksOnPartition(buildJanePractitioner(), requestPartitionId);
+		getGoldenResourceFromTargetResource(patient);
+
+		MdmLink link = myMdmLinkDaoSvc.findMdmLinkBySource(patient).get();
+		link.setMatchResult(MdmMatchResultEnum.POSSIBLE_DUPLICATE);
+		saveLink(link);
+		assertEquals(MdmLinkSourceEnum.AUTO, link.getLinkSource());
+		assertLinkCount(3);
+
+		List<String> urls = new ArrayList<>();
+		urls.add("Patient?");
+		IPrimitiveType<BigDecimal> batchSize = new DecimalType(new BigDecimal(1));
+		ServletRequestDetails details = new ServletRequestDetails();
+		details.setTenantId(PARTITION_1);
+		IBaseParameters clearJob = myMdmControllerSvc.submitMdmClearJob(urls, batchSize, details);
+
+		// got the job to be created. not sure how to test the result, since it takes a long time to finish running the batch
+		Mockito.verify(myRequestPartitionHelperSvc, Mockito.atLeastOnce()).validateHasPartitionPermissions(any(), eq("Patient"), argThat(new PartitionIdMatcher(requestPartitionId)));
+	}
+
 	private class PartitionIdMatcher implements ArgumentMatcher<RequestPartitionId> {
 		private RequestPartitionId myRequestPartitionId;
 
-		PartitionIdMatcher(RequestPartitionId theRequestPartitionId){
+		PartitionIdMatcher(RequestPartitionId theRequestPartitionId) {
 			myRequestPartitionId = theRequestPartitionId;
 		}
 
