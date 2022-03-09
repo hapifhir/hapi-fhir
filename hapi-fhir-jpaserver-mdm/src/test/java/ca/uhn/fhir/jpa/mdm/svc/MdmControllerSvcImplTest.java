@@ -15,14 +15,18 @@ import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
+import org.springframework.batch.core.ExitStatus;
+import org.springframework.batch.core.JobExecution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.data.domain.Page;
@@ -48,12 +52,15 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 
 	@Autowired
 	private IInterceptorService myInterceptorService;
+	@Autowired
+	private BatchJobHelper myBatchJobHelper;
 
 	@BeforeEach
 	public void before() {
 		super.before();
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
+		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2));
 		myInterceptorService.registerInterceptor(new RequestTenantPartitionInterceptor());
 	}
 
@@ -116,27 +123,23 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 	public void testMdmClearWithProvidedResources() {
 		assertLinkCount(1);
 
-		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(1);
-
-		Patient patient = createPatientAndUpdateLinksOnPartition(buildFrankPatient(), requestPartitionId);
-		createPractitionerAndUpdateLinksOnPartition(buildJanePractitioner(), requestPartitionId);
-		getGoldenResourceFromTargetResource(patient);
-
-		MdmLink link = myMdmLinkDaoSvc.findMdmLinkBySource(patient).get();
-		link.setMatchResult(MdmMatchResultEnum.POSSIBLE_DUPLICATE);
-		saveLink(link);
-		assertEquals(MdmLinkSourceEnum.AUTO, link.getLinkSource());
+		RequestPartitionId requestPartitionId1 = RequestPartitionId.fromPartitionId(1);
+		RequestPartitionId requestPartitionId2 = RequestPartitionId.fromPartitionId(2);
+		createPractitionerAndUpdateLinksOnPartition(buildJanePractitioner(), requestPartitionId1);
+		createPractitionerAndUpdateLinksOnPartition(buildJanePractitioner(), requestPartitionId2);
 		assertLinkCount(3);
 
 		List<String> urls = new ArrayList<>();
-		urls.add("Patient?");
+		urls.add("Practitioner?");
 		IPrimitiveType<BigDecimal> batchSize = new DecimalType(new BigDecimal(1));
 		ServletRequestDetails details = new ServletRequestDetails();
 		details.setTenantId(PARTITION_1);
 		IBaseParameters clearJob = myMdmControllerSvc.submitMdmClearJob(urls, batchSize, details);
+		Long jobId = Long.valueOf(((DecimalType) ((Parameters) clearJob).getParameter("jobId")).getValueAsString());
+		JobExecution jobExecution = myBatchJobHelper.awaitJobExecution(jobId);
+		assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
 
-		// got the job to be created. not sure how to test the result, since it takes a long time to finish running the batch
-		Mockito.verify(myRequestPartitionHelperSvc, Mockito.atLeastOnce()).validateHasPartitionPermissions(any(), eq("Patient"), argThat(new PartitionIdMatcher(requestPartitionId)));
+		assertLinkCount(2);
 	}
 
 	private class PartitionIdMatcher implements ArgumentMatcher<RequestPartitionId> {
