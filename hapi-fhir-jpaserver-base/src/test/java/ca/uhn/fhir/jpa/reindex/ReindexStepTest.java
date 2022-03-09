@@ -46,7 +46,7 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		// Execute
 
 		myCaptureQueriesListener.clear();
-		RunOutcome outcome = myReindexStep.doReindex(data, myDataSink);
+		RunOutcome outcome = myReindexStep.doReindex(data, myDataSink, "index-id", "chunk-id");
 
 		// Verify
 		assertEquals(2, outcome.getRecordsProcessed());
@@ -79,7 +79,7 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		// Execute
 
 		myCaptureQueriesListener.clear();
-		RunOutcome outcome = myReindexStep.doReindex(data, myDataSink);
+		RunOutcome outcome = myReindexStep.doReindex(data, myDataSink, "index-id", "chunk-id");
 
 		// Verify
 		assertEquals(2, outcome.getRecordsProcessed());
@@ -124,7 +124,7 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		// Execute
 
 		myCaptureQueriesListener.clear();
-		RunOutcome outcome = myReindexStep.doReindex(data, myDataSink);
+		RunOutcome outcome = myReindexStep.doReindex(data, myDataSink, "index-id", "chunk-id");
 
 		// Verify
 		assertEquals(4, outcome.getRecordsProcessed());
