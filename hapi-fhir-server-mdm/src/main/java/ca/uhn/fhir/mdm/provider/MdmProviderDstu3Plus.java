@@ -86,21 +86,23 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	}
 
 	@Operation(name = ProviderConstants.EMPI_MATCH, typeName = "Patient")
-	public IBaseBundle match(@OperationParam(name = ProviderConstants.MDM_MATCH_RESOURCE, min = 1, max = 1, typeName = "Patient") IAnyResource thePatient) {
+	public IBaseBundle match(@OperationParam(name = ProviderConstants.MDM_MATCH_RESOURCE, min = 1, max = 1, typeName = "Patient") IAnyResource thePatient,
+									 RequestDetails theRequestDetails) {
 		if (thePatient == null) {
 			throw new InvalidRequestException("resource may not be null");
 		}
-		return myMdmControllerHelper.getMatchesAndPossibleMatchesForResource(thePatient, "Patient");
+		return myMdmControllerHelper.getMatchesAndPossibleMatchesForResource(thePatient, "Patient", theRequestDetails);
 	}
 
 	@Operation(name = ProviderConstants.MDM_MATCH)
 	public IBaseBundle serverMatch(@OperationParam(name = ProviderConstants.MDM_MATCH_RESOURCE, min = 1, max = 1) IAnyResource theResource,
-											 @OperationParam(name = ProviderConstants.MDM_RESOURCE_TYPE, min = 1, max = 1, typeName = "string") IPrimitiveType<String> theResourceType
+											 @OperationParam(name = ProviderConstants.MDM_RESOURCE_TYPE, min = 1, max = 1, typeName = "string") IPrimitiveType<String> theResourceType,
+											 RequestDetails theRequestDetails
 	) {
 		if (theResource == null) {
 			throw new InvalidRequestException("resource may not be null");
 		}
-		return myMdmControllerHelper.getMatchesAndPossibleMatchesForResource(theResource, theResourceType.getValueAsString());
+		return myMdmControllerHelper.getMatchesAndPossibleMatchesForResource(theResource, theResourceType.getValueAsString(), theRequestDetails);
 	}
 
 	@Operation(name = ProviderConstants.MDM_MERGE_GOLDEN_RESOURCES)

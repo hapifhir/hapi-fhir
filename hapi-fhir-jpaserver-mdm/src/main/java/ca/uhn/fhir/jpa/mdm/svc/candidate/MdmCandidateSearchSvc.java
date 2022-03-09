@@ -26,7 +26,6 @@ import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.rules.json.MdmFilterSearchParamJson;
 import ca.uhn.fhir.mdm.rules.json.MdmResourceSearchParamJson;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -68,11 +67,12 @@ public class MdmCandidateSearchSvc {
 	 *
 	 * @param theResourceType
 	 * @param theResource the {@link IBaseResource} we are attempting to match.
+	 * @param theRequestPartitionId  the {@link RequestPartitionId} representation of the partitions we are limited to when attempting to match
 	 *
 	 * @return the list of candidate {@link IBaseResource} which could be matches to theResource
 	 */
 	@Transactional
-	public Collection<IAnyResource> findCandidates(String theResourceType, IAnyResource theResource) {
+	public Collection<IAnyResource> findCandidates(String theResourceType, IAnyResource theResource, RequestPartitionId theRequestPartitionId) {
 		Map<Long, IAnyResource> matchedPidsToResources = new HashMap<>();
 		List<MdmFilterSearchParamJson> filterSearchParams = myMdmSettings.getMdmRules().getCandidateFilterSearchParams();
 		List<String> filterCriteria = buildFilterQuery(filterSearchParams, theResourceType);
@@ -81,7 +81,7 @@ public class MdmCandidateSearchSvc {
 		//If there are zero MdmResourceSearchParamJson, we end up only making a single search, otherwise we
 		//must perform one search per MdmResourceSearchParamJson.
 		if (candidateSearchParams.isEmpty()) {
-			searchForIdsAndAddToMap(theResourceType, theResource, matchedPidsToResources, filterCriteria, null);
+			searchForIdsAndAddToMap(theResourceType, theResource, matchedPidsToResources, filterCriteria, null, theRequestPartitionId);
 		} else {
 			for (MdmResourceSearchParamJson resourceSearchParam : candidateSearchParams) {
 
@@ -89,7 +89,7 @@ public class MdmCandidateSearchSvc {
 					continue;
 				}
 
-				searchForIdsAndAddToMap(theResourceType, theResource, matchedPidsToResources, filterCriteria, resourceSearchParam);
+				searchForIdsAndAddToMap(theResourceType, theResource, matchedPidsToResources, filterCriteria, resourceSearchParam, theRequestPartitionId);
 			}
 		}
 		//Obviously we don't want to consider the freshly added resource as a potential candidate.
@@ -116,7 +116,7 @@ public class MdmCandidateSearchSvc {
 	 * 4. Store all results in `theMatchedPidsToResources`
 	 */
 	@SuppressWarnings("rawtypes")
-	private void searchForIdsAndAddToMap(String theResourceType, IAnyResource theResource, Map<Long, IAnyResource> theMatchedPidsToResources, List<String> theFilterCriteria, MdmResourceSearchParamJson resourceSearchParam) {
+	private void searchForIdsAndAddToMap(String theResourceType, IAnyResource theResource, Map<Long, IAnyResource> theMatchedPidsToResources, List<String> theFilterCriteria, MdmResourceSearchParamJson resourceSearchParam, RequestPartitionId theRequestPartitionId) {
 		//1.
 		Optional<String> oResourceCriteria = myMdmCandidateSearchCriteriaBuilderSvc.buildResourceQueryString(theResourceType, theResource, theFilterCriteria, resourceSearchParam);
 		if (!oResourceCriteria.isPresent()) {
@@ -126,7 +126,7 @@ public class MdmCandidateSearchSvc {
 		ourLog.debug("Searching for {} candidates with {}", theResourceType, resourceCriteria);
 
 		//2.
-		Optional<IBundleProvider> bundleProvider = myCandidateSearcher.search(theResourceType, resourceCriteria, (RequestPartitionId) theResource.getUserData(Constants.RESOURCE_PARTITION_ID));
+		Optional<IBundleProvider> bundleProvider = myCandidateSearcher.search(theResourceType, resourceCriteria, theRequestPartitionId);
 		if (!bundleProvider.isPresent()) {
 			throw new TooManyCandidatesException("More than " + myMdmSettings.getCandidateSearchLimit() + " candidate matches found for " + resourceCriteria + ".  Aborting mdm matching.");
 		}
