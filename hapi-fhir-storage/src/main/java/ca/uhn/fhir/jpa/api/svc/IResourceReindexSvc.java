@@ -9,7 +9,7 @@ import java.util.List;
 public interface IResourceReindexSvc {
 
 	/**
-	 * Indicates whether reindexing all resoure types is supported. Implementations are expected to provide a static response (either they support this or they don't).
+	 * Indicates whether reindexing all resource types is supported. Implementations are expected to provide a static response (either they support this or they don't).
 	 */
 	boolean isAllResourceTypeSupported();
 
