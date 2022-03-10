@@ -165,7 +165,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		{
 			Builder.BuilderWithTableName tokenTable = version.onTable("HFJ_SPIDX_TOKEN");
 
-			// replace and drop IDX_SP_DATE_HASH for sorting
+			// replace and drop IDX_SP_TOKEN_HASH for sorting
 			tokenTable
 				.addIndex("20220208.1", "IDX_SP_TOKEN_HASH_V2")
 				.unique(false).online(true)
@@ -271,6 +271,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		batchChunk.addForeignKey("20220227.5", "FK_BT2WC_INSTANCE").toColumn("INSTANCE_ID").references("BT2_JOB_INSTANCE", "ID");
 
 		replaceNumericSPIndices(version);
+		replaceQuantitySPIndices(version);
 	}
 
 	/**
@@ -309,6 +310,117 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		}
 		// obsolete
 		numberTable.dropIndexOnline("20220304.8", "IDX_SP_NUMBER_UPDATED");
+	}
+
+	/**
+	 * new quantity search indexing
+	 * @see ca.uhn.fhir.jpa.search.builder.predicate.QuantityPredicateBuilder
+	 * @see ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity
+	 * @see ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized
+	 */
+	private void replaceQuantitySPIndices(Builder theVersion) {
+		{
+			Builder.BuilderWithTableName quantityTable = theVersion.onTable("HFJ_SPIDX_QUANTITY");
+
+			// bare quantity
+			quantityTable
+				.addIndex("20220304.11", "IDX_SP_QUANTITY_HASH_V2")
+				.unique(false)
+				.online(true)
+				.withColumns("HASH_IDENTITY", "SP_VALUE", "RES_ID", "PARTITION_ID");
+
+			quantityTable.dropIndexOnline("20220304.12", "IDX_SP_QUANTITY_HASH");
+
+			// quantity with system+units
+			quantityTable
+				.addIndex("20220304.13", "IDX_SP_QUANTITY_HASH_SYSUN_V2")
+				.unique(false)
+				.online(true)
+				.withColumns("HASH_IDENTITY_SYS_UNITS", "SP_VALUE", "RES_ID", "PARTITION_ID");
+
+			quantityTable.dropIndexOnline("20220304.14", "IDX_SP_QUANTITY_HASH_SYSUN");
+
+			// quantity with units
+			quantityTable
+				.addIndex("20220304.15", "IDX_SP_QUANTITY_HASH_UN_V2")
+				.unique(false)
+				.online(true)
+				.withColumns("HASH_IDENTITY_AND_UNITS", "SP_VALUE", "RES_ID", "PARTITION_ID");
+
+			quantityTable.dropIndexOnline("20220304.16", "IDX_SP_QUANTITY_HASH_UN");
+
+			// for joining to other queries and sorts
+			{
+				quantityTable
+					.addIndex("20220304.17", "IDX_SP_QUANTITY_RESID_V2")
+					.unique(false).online(true)
+					.withColumns("RES_ID", "HASH_IDENTITY", "HASH_IDENTITY_SYS_UNITS", "HASH_IDENTITY_AND_UNITS", "SP_VALUE", "PARTITION_ID");
+
+				// some engines tie the FK constraint to a particular index.
+				// So we need to drop and recreate the constraint to drop the old RES_ID index.
+				// Rename it while we're at it.  FK7ULX3J1GG3V7MAQREJGC7YBC4 was not a pretty name.
+				quantityTable.dropForeignKey("20220304.18", "FKN603WJJOI1A6ASEWXBBD78BI5", "HFJ_RESOURCE");
+				quantityTable.dropIndexOnline("20220304.19", "IDX_SP_QUANTITY_RESID");
+				quantityTable.dropIndexOnline("20220304.20", "FKN603WJJOI1A6ASEWXBBD78BI5");
+
+				quantityTable.addForeignKey("20220304.21", "FK_SP_QUANTITY_RES")
+					.toColumn("RES_ID").references("HFJ_RESOURCE", "RES_ID");
+			}
+			// obsolete
+			quantityTable.dropIndexOnline("20220304.22", "IDX_SP_QUANTITY_UPDATED");
+		}
+
+		{
+			Builder.BuilderWithTableName quantityNormTable = theVersion.onTable("HFJ_SPIDX_QUANTITY_NRML");
+
+			// bare quantity
+			quantityNormTable
+				.addIndex("20220304.23", "IDX_SP_QNTY_NRML_HASH_V2")
+				.unique(false)
+				.online(true)
+				.withColumns("HASH_IDENTITY", "SP_VALUE", "RES_ID", "PARTITION_ID");
+
+			quantityNormTable.dropIndexOnline("20220304.24", "IDX_SP_QNTY_NRML_HASH");
+
+			// quantity with system+units
+			quantityNormTable
+				.addIndex("20220304.25", "IDX_SP_QNTY_NRML_HASH_SYSUN_V2")
+				.unique(false)
+				.online(true)
+				.withColumns("HASH_IDENTITY_SYS_UNITS", "SP_VALUE", "RES_ID", "PARTITION_ID");
+
+			quantityNormTable.dropIndexOnline("20220304.26", "IDX_SP_QNTY_NRML_HASH_SYSUN");
+
+			// quantity with units
+			quantityNormTable
+				.addIndex("20220304.27", "IDX_SP_QNTY_NRML_HASH_UN_V2")
+				.unique(false)
+				.online(true)
+				.withColumns("HASH_IDENTITY_AND_UNITS", "SP_VALUE", "RES_ID", "PARTITION_ID");
+
+			quantityNormTable.dropIndexOnline("20220304.28", "IDX_SP_QNTY_NRML_HASH_UN");
+
+			// for joining to other queries and sorts
+			{
+				quantityNormTable
+					.addIndex("20220304.29", "IDX_SP_QNTY_NRML_RESID_V2")
+					.unique(false).online(true)
+					.withColumns("RES_ID", "HASH_IDENTITY", "HASH_IDENTITY_SYS_UNITS", "HASH_IDENTITY_AND_UNITS", "SP_VALUE", "PARTITION_ID");
+
+				// some engines tie the FK constraint to a particular index.
+				// So we need to drop and recreate the constraint to drop the old RES_ID index.
+				// Rename it while we're at it.  FK7ULX3J1GG3V7MAQREJGC7YBC4 was not a pretty name.
+				quantityNormTable.dropForeignKey("20220304.30", "FKRCJOVMUH5KC0O6FVBLE319PYV", "HFJ_RESOURCE");
+				quantityNormTable.dropIndexOnline("20220304.31", "IDX_SP_QNTY_NRML_RESID");
+				quantityNormTable.dropIndexOnline("20220304.32", "FKRCJOVMUH5KC0O6FVBLE319PYV");
+
+				quantityNormTable.addForeignKey("20220304.33", "FK_SP_QUANTITYNM_RES")
+					.toColumn("RES_ID").references("HFJ_RESOURCE", "RES_ID");
+			}
+			// obsolete
+			quantityNormTable.dropIndexOnline("20220304.34", "IDX_SP_QNTY_NRML_UPDATED");
+
+		}
 	}
 
 	/**
