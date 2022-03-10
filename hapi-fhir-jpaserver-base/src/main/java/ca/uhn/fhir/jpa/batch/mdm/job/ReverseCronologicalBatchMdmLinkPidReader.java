@@ -28,6 +28,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -41,8 +42,9 @@ public class ReverseCronologicalBatchMdmLinkPidReader extends BaseReverseCronolo
 	protected Set<Long> getNextPidBatch(ResourceSearch resourceSearch) {
 		String resourceName = resourceSearch.getResourceName();
 		Pageable pageable = PageRequest.of(0, getBatchSize());
+		List<Integer> partitionIds = resourceSearch.getRequestPartitionId().getPartitionIds();
 		//Expand out the list to handle the REDIRECT/POSSIBLE DUPLICATE ones.
-		return new HashSet<>(myMdmLinkDao.findPidByResourceNameAndThreshold(resourceName, getCurrentHighThreshold(), pageable));
+		return new HashSet<>(myMdmLinkDao.findPidByResourceNameAndThresholdAndPartitionId(resourceName, getCurrentHighThreshold(), partitionIds, pageable));
 	}
 
 	@Override

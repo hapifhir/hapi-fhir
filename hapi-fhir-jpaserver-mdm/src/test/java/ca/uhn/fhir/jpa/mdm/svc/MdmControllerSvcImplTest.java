@@ -131,9 +131,9 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 
 		List<String> urls = new ArrayList<>();
 		urls.add("Practitioner?");
-		IPrimitiveType<BigDecimal> batchSize = new DecimalType(new BigDecimal(1));
+		IPrimitiveType<BigDecimal> batchSize = new DecimalType(new BigDecimal(100));
 		ServletRequestDetails details = new ServletRequestDetails();
-		details.setTenantId(PARTITION_1);
+		details.setTenantId(PARTITION_2);
 		IBaseParameters clearJob = myMdmControllerSvc.submitMdmClearJob(urls, batchSize, details);
 		Long jobId = Long.valueOf(((DecimalType) ((Parameters) clearJob).getParameter("jobId")).getValueAsString());
 		JobExecution jobExecution = myBatchJobHelper.awaitJobExecution(jobId);
