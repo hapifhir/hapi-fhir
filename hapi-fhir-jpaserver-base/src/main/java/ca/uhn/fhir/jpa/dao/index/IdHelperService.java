@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.cross.ResourceLookup;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.QueryChunker;
@@ -311,23 +312,7 @@ public class IdHelperService implements IIdHelperService {
 
 			Predicate idCriteria = cb.equal(from.get("myForcedId").as(String.class), next.getIdPart());
 			andPredicates.add(idCriteria);
-
-			if (theRequestPartitionId.isDefaultPartition() && myPartitionSettings.getDefaultPartitionId() == null) {
-				Predicate partitionIdCriteria = cb.isNull(from.get("myPartitionIdValue").as(Integer.class));
-				andPredicates.add(partitionIdCriteria);
-			} else if (!theRequestPartitionId.isAllPartitions()) {
-				List<Integer> partitionIds = theRequestPartitionId.getPartitionIds();
-				partitionIds = replaceDefaultPartitionIdIfNonNull(myPartitionSettings, partitionIds);
-
-				if (partitionIds.size() > 1) {
-					Predicate partitionIdCriteria = from.get("myPartitionIdValue").as(Integer.class).in(partitionIds);
-					andPredicates.add(partitionIdCriteria);
-				} else {
-					Predicate partitionIdCriteria = cb.equal(from.get("myPartitionIdValue").as(Integer.class), partitionIds.get(0));
-					andPredicates.add(partitionIdCriteria);
-				}
-			}
-
+			getOptionalPartitionPredicate(theRequestPartitionId, cb, from).ifPresent(andPredicates::add);
 			predicates.add(cb.and(andPredicates.toArray(EMPTY_PREDICATE_ARRAY)));
 		}
 
@@ -346,9 +331,33 @@ public class IdHelperService implements IIdHelperService {
 				myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, persistentId);
 			}
 		}
-
 	}
 
+	/**
+	 * Return optional predicate for searching on forcedId
+	 * 1. If the partition mode is ALLOWED_UNQUALIFIED, the return optional predicate will be empty, so search is across all partitions.
+	 * 2. If it is default partition and default partition id is null, then return predicate for null partition.
+	 * 3. If the requested partition search is not all partition, return the request partition as predicate.
+	 */
+	private Optional<Predicate> getOptionalPartitionPredicate(RequestPartitionId theRequestPartitionId, CriteriaBuilder cb, Root<ForcedId> from) {
+		if (myPartitionSettings.isAllowUnqualifiedCrossPartitionReference()) {
+			return Optional.empty();
+		} else if (theRequestPartitionId.isDefaultPartition() && myPartitionSettings.getDefaultPartitionId() == null) {
+			Predicate partitionIdCriteria = cb.isNull(from.get("myPartitionIdValue").as(Integer.class));
+			return Optional.of(partitionIdCriteria);
+		} else if (!theRequestPartitionId.isAllPartitions()) {
+			List<Integer> partitionIds = theRequestPartitionId.getPartitionIds();
+			partitionIds = replaceDefaultPartitionIdIfNonNull(myPartitionSettings, partitionIds);
+			if (partitionIds.size() > 1) {
+				Predicate partitionIdCriteria = from.get("myPartitionIdValue").as(Integer.class).in(partitionIds);
+				return Optional.of(partitionIdCriteria);
+			} else if (partitionIds.size() == 1){
+				Predicate partitionIdCriteria = cb.equal(from.get("myPartitionIdValue").as(Integer.class), partitionIds.get(0));
+				return Optional.of(partitionIdCriteria);
+			}
+		}
+		return Optional.empty();
+	}
 
 	private void populateAssociatedResourceId(String nextResourceType, String forcedId, ResourcePersistentId persistentId) {
 		IIdType resourceId = myFhirCtx.getVersion().newIdType();

@@ -2,7 +2,9 @@
 extraction:
   java:
     index:
-      java_version: 17
+      java_version: 11
       maven: 
         version: 3.8.4
+      build_command:
+        - mvn -Dmaven.test.skip install
 

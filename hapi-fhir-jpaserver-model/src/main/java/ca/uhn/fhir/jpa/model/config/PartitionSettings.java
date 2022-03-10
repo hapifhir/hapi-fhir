@@ -151,4 +151,12 @@ public class PartitionSettings {
 
 	}
 
+	/**
+	 * If enabled the JPA server will allow unqualified cross partition reference
+	 *
+	 */
+	public boolean isAllowUnqualifiedCrossPartitionReference() {
+		return myAllowReferencesAcrossPartitions.equals(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+	}
+
 }

@@ -258,7 +258,7 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 			myValueSetDao.expand(vs, null);
 			fail();
 		} catch (InternalErrorException e) {
-			assertEquals(Msg.code(832) + "Expansion of ValueSet produced too many codes (maximum 50) - Operation aborted!", e.getMessage());
+			assertThat(e.getMessage(), containsString(Msg.code(832) + "Expansion of ValueSet produced too many codes (maximum 50) - Operation aborted!"));
 		}
 	}
 

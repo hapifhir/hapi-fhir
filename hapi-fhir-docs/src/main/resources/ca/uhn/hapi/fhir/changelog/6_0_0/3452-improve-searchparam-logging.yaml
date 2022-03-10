@@ -1,0 +1,4 @@
+---
+type: add
+issue: 3452
+title: "Improve logging so it is clear when a new search parameter has been loaded into the cache."
