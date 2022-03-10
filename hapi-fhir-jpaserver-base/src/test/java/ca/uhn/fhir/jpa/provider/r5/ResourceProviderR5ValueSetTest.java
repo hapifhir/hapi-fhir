@@ -947,23 +947,6 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 	}
 
 	@Test
-	public void testExpandLocalVsWithUnknownCode() {
-		createExternalCsAndLocalVsWithUnknownCode();
-		assertNotNull(myLocalValueSetId);
-
-		try {
-			myClient
-				.operation()
-				.onInstance(myLocalValueSetId)
-				.named("expand")
-				.withNoParameters(Parameters.class)
-				.execute();
-		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: Invalid filter criteria - code does not exist: {http://example.com/my_code_system}childFOOOOOOO", e.getMessage());
-		}
-	}
-
-	@Test
 	public void testExpandValueSetBasedOnCodeSystemWithChangedUrl() {
 
 		CodeSystem cs = new CodeSystem();
