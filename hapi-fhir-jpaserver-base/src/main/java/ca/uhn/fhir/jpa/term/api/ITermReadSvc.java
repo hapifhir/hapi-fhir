@@ -133,4 +133,10 @@ public interface ITermReadSvc extends IValidationSupport {
 	 */
 	Optional<IBaseResource> readCodeSystemByForcedId(String theForcedId);
 
+	/**
+	 * Version independent
+	 * Recreates freetext indexes for TermConcept and nested TermConceptProperty
+	 */
+	void reindexTerminology() throws InterruptedException;
+
 }

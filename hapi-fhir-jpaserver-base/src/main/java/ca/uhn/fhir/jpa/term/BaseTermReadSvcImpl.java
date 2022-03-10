@@ -98,6 +98,7 @@ import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.RegexpQuery;
 import org.apache.lucene.search.TermQuery;
+import org.hibernate.CacheMode;
 import org.hibernate.search.backend.elasticsearch.ElasticsearchExtension;
 import org.hibernate.search.backend.lucene.LuceneExtension;
 import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
@@ -106,6 +107,7 @@ import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
 import org.hibernate.search.engine.search.query.SearchQuery;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.common.EntityReference;
+import org.hibernate.search.mapper.orm.massindexing.impl.LoggingMassIndexingMonitor;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
@@ -132,7 +134,6 @@ import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
-import org.jetbrains.annotations.NotNull;
 import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -165,6 +166,7 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -2599,6 +2601,67 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		IBaseResource cs = csDao.toResource(resultList.get(0), false);
 		return Optional.of(cs);
 	}
+
+	private static final int SECONDS_IN_MINUTE = 60;
+	private static final int INDEXED_ROOTS_LOGGING_COUNT = 50_000;
+
+	@Transactional
+	@Override
+	public void reindexTerminology() throws InterruptedException {
+		if (myFulltextSearchSvc == null) {
+			throw new InvalidRequestException(Msg.code(2073) + "Freetext search service is not configured");
+		}
+
+//		waitForDeferredTerminologyTasksToFinish();
+
+		// disallow pre-expanding ValueSets while reindexing
+		myDeferredStorageSvc.setProcessDeferred(false);
+
+		try {
+			SearchSession searchSession = getSearchSession();
+			searchSession
+				.massIndexer( TermConcept.class )
+				.dropAndCreateSchemaOnStart( true )
+				.purgeAllOnStart( false )
+				.batchSizeToLoadObjects( 100 )
+				.cacheMode( CacheMode.IGNORE )
+				.threadsToLoadObjects( 8 )
+				.idFetchSize( 150 )
+				.transactionTimeout( 60 * SECONDS_IN_MINUTE )
+				.monitor( new LoggingMassIndexingMonitor(INDEXED_ROOTS_LOGGING_COUNT) )
+				.startAndWait();
+
+		} finally {
+			myDeferredStorageSvc.setProcessDeferred(true);
+		}
+	}
+
+//	private boolean deferredTerminologyTasksExecuting() {
+//		long timeout = System.currentTimeMillis() + SHUTDOWN_BUFFER_TIMEOUT;
+//		while (System.currentTimeMillis() < timeout && theWaitForQueueToBeEmpty) {
+//			if (myAppender.wasLastFetchedEventTheFinalOne() && myHandlerList.isEmpty()) {
+//				ourLog.info("Shutdown event has been broadcast to control client");
+//				break;
+//			}
+//			try {
+//				Thread.sleep(100);
+//			} catch (InterruptedException e) {
+//				// ignore
+//			}
+//		}
+//
+//		try {
+//			myServerSocket.close();
+//		} catch (IOException e) {
+//			ourLog.warn("Failed to close control socket", e);
+//		}	}
+
+
+	@VisibleForTesting
+	SearchSession getSearchSession() {
+		return Search.session( myEntityManager );
+	}
+
 
 	@VisibleForTesting
 	public static void setForceDisableHibernateSearchForUnitTest(boolean theForceDisableHibernateSearchForUnitTest) {

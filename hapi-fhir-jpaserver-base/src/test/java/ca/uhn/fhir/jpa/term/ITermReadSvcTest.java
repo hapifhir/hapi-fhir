@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.term.api;
+package ca.uhn.fhir.jpa.term;
 
 /*-
  * #%L
@@ -25,9 +25,10 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.term.TermReadSvcR4;
-import ca.uhn.fhir.jpa.term.TermReadSvcUtil;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import com.google.common.collect.Lists;
+import org.hibernate.search.mapper.orm.massindexing.MassIndexer;
+import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,6 +37,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -54,7 +56,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -284,5 +288,20 @@ class ITermReadSvcTest {
 			assertFalse(msg.contains("Queried codes: [" + CODE_3 + "]"));
 			assertTrue(msg.contains("Obtained TermConcept IDs, codes: [1, code-1; 3, code-3]"));
 		}
+	}
+
+	@Spy BaseTermReadSvcImpl myTermReadSvc = (BaseTermReadSvcImpl) spy(testedClass);
+	@Mock SearchSession mySearchSession;
+
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
+	MassIndexer myMassIndexer;
+
+	@Test
+	void testReindexTerminology() throws InterruptedException {
+		doReturn(mySearchSession).when(myTermReadSvc).getSearchSession();
+		when(mySearchSession.massIndexer(TermConcept.class)).thenReturn(myMassIndexer);
+
+		myTermReadSvc.reindexTerminology();
+		verify(mySearchSession, times(1)).massIndexer(TermConcept.class);
 	}
 }
