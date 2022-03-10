@@ -61,7 +61,7 @@ public class LastNAggregation {
 			"{" +
 				"   \"terms\":{" +
 				"      \"field\":\"" + SP_CODE_TOKEN_CODE_AND_SYSTEM + "\"," +
-				"      \"size\":100," +
+				"      \"size\":10000," +
 				"      \"min_doc_count\":1" +
 				"   }," +
 				"   \"aggs\":{" +
@@ -87,7 +87,7 @@ public class LastNAggregation {
 				"{" +
 					"  \"terms\": {" +
 					"    \"field\": \"" + SP_SUBJECT + "\"," +
-					"    \"size\": 100," +
+					"    \"size\": 10000," +
 					"    \"min_doc_count\": 1" +
 					"  }," +
 					"  \"aggs\": {" +

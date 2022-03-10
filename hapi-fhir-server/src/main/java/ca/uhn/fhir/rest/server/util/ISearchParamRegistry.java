@@ -29,10 +29,8 @@ import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 // TODO: JA remove default methods
 public interface ISearchParamRegistry {
@@ -45,7 +43,7 @@ public interface ISearchParamRegistry {
 	/**
 	 * @return Returns all active search params for the given resource
 	 */
-	Map<String, RuntimeSearchParam> getActiveSearchParams(String theResourceName);
+	ResourceSearchParams getActiveSearchParams(String theResourceName);
 
 	/**
 	 * Request that the cache be refreshed now, in the current thread
@@ -84,11 +82,11 @@ public interface ISearchParamRegistry {
 	 */
 	default Collection<String> getValidSearchParameterNamesIncludingMeta(String theResourceName) {
 		TreeSet<String> retval;
-		Map<String, RuntimeSearchParam> searchParamMap = getActiveSearchParams(theResourceName);
-		if (searchParamMap == null) {
+		ResourceSearchParams activeSearchParams = getActiveSearchParams(theResourceName);
+		if (activeSearchParams == null) {
 			retval = new TreeSet<>();
 		} else {
-			retval = new TreeSet<>(searchParamMap.keySet());
+			retval = new TreeSet<>(activeSearchParams.getSearchParamNames());
 		}
 		retval.add(IAnyResource.SP_RES_ID);
 		retval.add(Constants.PARAM_LASTUPDATED);
