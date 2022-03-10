@@ -24,10 +24,8 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
-import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionConstants;
-import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
@@ -35,7 +33,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.SubscriptionUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,15 +51,11 @@ import javax.annotation.Nonnull;
 public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscriptionResources implements MessageHandler {
 	private final Logger ourLog = LoggerFactory.getLogger(SubscriptionActivatingSubscriber.class);
 	@Autowired
-	private SubscriptionRegistry mySubscriptionRegistry;
-	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
 	@Autowired
 	private DaoConfig myDaoConfig;
-	@Autowired
-	private SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
 
 	/**
 	 * Constructor

@@ -20,11 +20,11 @@ package ca.uhn.fhir.jpa.dao.index;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
@@ -50,6 +50,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.UrlUtil;
@@ -71,7 +72,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -128,7 +128,7 @@ public class SearchParamWithInlineReferencesExtractor {
 
 		mySearchParamExtractorService.extractFromResource(theRequestPartitionId, theRequest, theParams, theEntity, theResource, theTransactionDetails, theFailOnInvalidReference);
 
-		Set<Map.Entry<String, RuntimeSearchParam>> activeSearchParams = mySearchParamRegistry.getActiveSearchParams(theEntity.getResourceType()).entrySet();
+		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(theEntity.getResourceType());
 		if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.ENABLED) {
 			theParams.findMissingSearchParams(myPartitionSettings, myDaoConfig.getModelConfig(), theEntity, activeSearchParams);
 		}
