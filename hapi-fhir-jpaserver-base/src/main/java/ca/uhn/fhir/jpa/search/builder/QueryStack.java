@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.search.builder;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -303,7 +304,7 @@ public class QueryStack {
 		for (IQueryParameterType next : theNextAnd) {
 
 			if (!(next instanceof CompositeParam<?, ?>)) {
-				throw new InvalidRequestException("Invalid type for composite param (must be " + CompositeParam.class.getSimpleName() + ": " + next.getClass());
+				throw new InvalidRequestException(Msg.code(1203) + "Invalid type for composite param (must be " + CompositeParam.class.getSimpleName() + ": " + next.getClass());
 			}
 			CompositeParam<?, ?> cp = (CompositeParam<?, ?>) next;
 
@@ -354,7 +355,7 @@ public class QueryStack {
 			case HAS:
 			case SPECIAL:
 			default:
-				throw new InvalidRequestException("Don't know how to handle composite parameter with type of " + theParam.getParamType());
+				throw new InvalidRequestException(Msg.code(1204) + "Don't know how to handle composite parameter with type of " + theParam.getParamType());
 		}
 
 	}
@@ -403,7 +404,7 @@ public class QueryStack {
 		List<Condition> codePredicates = new ArrayList<>();
 
 		for (IQueryParameterType nextOr : theList) {
-			Condition p = predicateBuilder.createPredicateDateWithoutIdentityPredicate(nextOr, predicateBuilder, theOperation);
+			Condition p = predicateBuilder.createPredicateDateWithoutIdentityPredicate(nextOr, theOperation);
 			codePredicates.add(p);
 		}
 
@@ -435,7 +436,7 @@ public class QueryStack {
 				return ComboCondition.or(xPredicate, yPredicate);
 			} else {
 				// Shouldn't happen
-				throw new InvalidRequestException("Don't know how to handle operation " + ((SearchFilterParser.FilterLogical) theFilter).getOperation());
+				throw new InvalidRequestException(Msg.code(1205) + "Don't know how to handle operation " + ((SearchFilterParser.FilterLogical) theFilter).getOperation());
 			}
 		} else {
 			return createPredicateFilter(theQueryStack3, ((SearchFilterParser.FilterParameterGroup) theFilter).getContained(), theResourceName, theRequest, theRequestPartitionId);
@@ -462,7 +463,7 @@ public class QueryStack {
 				if (searchParam == null) {
 					Collection<String> validNames = mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(theResourceName);
 					String msg = myFhirContext.getLocalizer().getMessageSanitized(BaseStorageDao.class, "invalidSearchParameter", paramName, theResourceName, validNames);
-					throw new InvalidRequestException(msg);
+					throw new InvalidRequestException(Msg.code(1206) + msg);
 				}
 				RestSearchParameterTypeEnum typeEnum = searchParam.getParamType();
 				if (typeEnum == RestSearchParameterTypeEnum.URI) {
@@ -483,7 +484,7 @@ public class QueryStack {
 				} else if (typeEnum == RestSearchParameterTypeEnum.QUANTITY) {
 					return theQueryStack3.createPredicateQuantity(null, theResourceName, null, searchParam, Collections.singletonList(new QuantityParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
 				} else if (typeEnum == RestSearchParameterTypeEnum.COMPOSITE) {
-					throw new InvalidRequestException("Composite search parameters not currently supported with _filter clauses");
+					throw new InvalidRequestException(Msg.code(1207) + "Composite search parameters not currently supported with _filter clauses");
 				} else if (typeEnum == RestSearchParameterTypeEnum.TOKEN) {
 					TokenParam param = new TokenParam();
 					param.setValueAsQueryToken(null,
@@ -524,7 +525,7 @@ public class QueryStack {
 			try {
 				myFhirContext.getResourceDefinition(targetResourceType);
 			} catch (DataFormatException e) {
-				throw new InvalidRequestException("Invalid resource type: " + targetResourceType);
+				throw new InvalidRequestException(Msg.code(1208) + "Invalid resource type: " + targetResourceType);
 			}
 
 			ArrayList<IQueryParameterType> orValues = Lists.newArrayList();
@@ -547,14 +548,14 @@ public class QueryStack {
 				// exists on the target resource type.
 				RuntimeSearchParam owningParameterDef = mySearchParamRegistry.getActiveSearchParam(targetResourceType, paramName);
 				if (owningParameterDef == null) {
-					throw new InvalidRequestException("Unknown parameter name: " + targetResourceType + ':' + parameterName);
+					throw new InvalidRequestException(Msg.code(1209) + "Unknown parameter name: " + targetResourceType + ':' + parameterName);
 				}
 
 				//Ensure that the name of the back-referenced search param on the target (e.g. the `subject` in Patient?_has:Observation:subject:code=sys|val)
 				//exists on the target resource.
 				RuntimeSearchParam joiningParameterDef = mySearchParamRegistry.getActiveSearchParam(targetResourceType, paramReference);
 				if (joiningParameterDef == null) {
-					throw new InvalidRequestException("Unknown parameter name: " + targetResourceType + ':' + paramReference);
+					throw new InvalidRequestException(Msg.code(1210) + "Unknown parameter name: " + targetResourceType + ':' + paramReference);
 				}
 
 				IQueryParameterAnd<?> parsedParam = JpaParamUtil.parseQueryParams(mySearchParamRegistry, myFhirContext, owningParameterDef, paramName, parameters);
@@ -633,7 +634,7 @@ public class QueryStack {
 				codePredicates.add(predicate);
 
 			} else {
-				throw new IllegalArgumentException("Invalid token type: " + nextOr.getClass());
+				throw new IllegalArgumentException(Msg.code(1211) + "Invalid token type: " + nextOr.getClass());
 			}
 
 		}
@@ -714,7 +715,7 @@ public class QueryStack {
 		if ((theOperation != null) &&
 			(theOperation != SearchFilterParser.CompareOperation.eq) &&
 			(theOperation != SearchFilterParser.CompareOperation.ne)) {
-			throw new InvalidRequestException("Invalid operator specified for reference predicate.  Supported operators for reference predicate are \"eq\" and \"ne\".");
+			throw new InvalidRequestException(Msg.code(1212) + "Invalid operator specified for reference predicate.  Supported operators for reference predicate are \"eq\" and \"ne\".");
 		}
 
 		if (theList.get(0).getMissing() != null) {
@@ -729,32 +730,34 @@ public class QueryStack {
 
 	private class ChainElement {
 		private final String myResourceType;
-		private final RuntimeSearchParam mySearchParam;
+		private final String mySearchParameterName;
+		private final String myPath;
 
-		public ChainElement(String theResourceType, RuntimeSearchParam theSearchParam) {
+		public ChainElement(String theResourceType, String theSearchParameterName, String thePath) {
 			this.myResourceType = theResourceType;
-			this.mySearchParam = theSearchParam;
+			this.mySearchParameterName = theSearchParameterName;
+			this.myPath = thePath;
 		}
 
 		public String getResourceType() {
 			return myResourceType;
 		}
 
-		public RuntimeSearchParam getSearchParam() {
-			return mySearchParam;
-		}
+		public String getPath() { return myPath; }
+		
+		public String getSearchParameterName() { return mySearchParameterName; }
 
 		@Override
 		public boolean equals(Object o) {
 			if (this == o) return true;
 			if (o == null || getClass() != o.getClass()) return false;
 			ChainElement that = (ChainElement) o;
-			return myResourceType.equals(that.myResourceType) && mySearchParam.equals(that.mySearchParam);
+			return myResourceType.equals(that.myResourceType) && mySearchParameterName.equals(that.mySearchParameterName) && myPath.equals(that.myPath);
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(myResourceType, mySearchParam);
+			return Objects.hash(myResourceType, mySearchParameterName, myPath);
 		}
 	}
 
@@ -767,25 +770,40 @@ public class QueryStack {
 			return split(theReferenceParam.getChain(), '.').length <= 3;
 		}
 
+		private List<String> extractPaths(String theResourceType, RuntimeSearchParam theSearchParam) {
+			List<String> pathsForType = theSearchParam.getPathsSplit().stream()
+				.map(String::trim)
+				.filter(t -> t.startsWith(theResourceType))
+				.collect(Collectors.toList());
+			if (pathsForType.isEmpty()) {
+				ourLog.warn("Search parameter {} does not have a path for resource type {}.", theSearchParam.getName(), theResourceType);
+			}
+
+			return pathsForType;
+		}
+
 		public void deriveChains(String theResourceType, RuntimeSearchParam theSearchParam, List<? extends IQueryParameterType> theList) {
-			List<ChainElement> searchParams = Lists.newArrayList();
-			searchParams.add(new ChainElement(theResourceType, theSearchParam));
-			for (IQueryParameterType nextOr : theList) {
-				String targetValue = nextOr.getValueAsQueryToken(myFhirContext);
-				if (nextOr instanceof ReferenceParam) {
-					ReferenceParam referenceParam = (ReferenceParam) nextOr;
+			List<String> paths = extractPaths(theResourceType, theSearchParam);
+			for (String path : paths) {
+				List<ChainElement> searchParams = Lists.newArrayList();
+				searchParams.add(new ChainElement(theResourceType, theSearchParam.getName(), path));
+				for (IQueryParameterType nextOr : theList) {
+					String targetValue = nextOr.getValueAsQueryToken(myFhirContext);
+					if (nextOr instanceof ReferenceParam) {
+						ReferenceParam referenceParam = (ReferenceParam) nextOr;
 
-					if (!isReferenceParamValid(referenceParam)) {
-						throw new InvalidRequestException(
-							"The search chain " + theSearchParam.getName() + "." + referenceParam.getChain() +
+						if (!isReferenceParamValid(referenceParam)) {
+							throw new InvalidRequestException(Msg.code(2007) +
+								"The search chain " + theSearchParam.getName() + "." + referenceParam.getChain() +
 								" is too long. Only chains up to three references are supported.");
+						}
+
+						String targetChain = referenceParam.getChain();
+						List<String> qualifiers = Lists.newArrayList(referenceParam.getResourceType());
+
+						processNextLinkInChain(searchParams, theSearchParam, targetChain, targetValue, qualifiers, referenceParam.getResourceType());
+
 					}
-
-					String targetChain = referenceParam.getChain();
-					List<String> qualifiers = Lists.newArrayList(referenceParam.getResourceType());
-
-					processNextLinkInChain(searchParams, theSearchParam, targetChain, targetValue, qualifiers, referenceParam.getResourceType());
-
 				}
 			}
 		}
@@ -821,9 +839,6 @@ public class QueryStack {
 					searchParamFound = true;
 					// If we find a search param on this resource type for this parameter name, keep iterating
 					//  Otherwise, abandon this branch and carry on to the next one
-					List<ChainElement> searchParamBranch = Lists.newArrayList();
-					searchParamBranch.addAll(theSearchParams);
-
 					if (StringUtils.isEmpty(nextChain)) {
 						// We've reached the end of the chain
 						ArrayList<IQueryParameterType> orValues = Lists.newArrayList();
@@ -836,21 +851,26 @@ public class QueryStack {
 							orValues.add(qp);
 						}
 
-						Set<LeafNodeDefinition> leafNodes = myChains.get(searchParamBranch);
+						Set<LeafNodeDefinition> leafNodes = myChains.get(theSearchParams);
 						if (leafNodes == null) {
 							leafNodes = Sets.newHashSet();
-							myChains.put(searchParamBranch, leafNodes);
+							myChains.put(theSearchParams, leafNodes);
 						}
 						leafNodes.add(new LeafNodeDefinition(nextSearchParam, orValues, nextTarget, nextParamName, "", qualifiersBranch));
 					} else {
+						List<String> nextPaths = extractPaths(nextTarget, nextSearchParam);
+						for (String nextPath : nextPaths) {
+							List<ChainElement> searchParamBranch = Lists.newArrayList();
+							searchParamBranch.addAll(theSearchParams);
 
-						searchParamBranch.add(new ChainElement(nextTarget, nextSearchParam));
-						processNextLinkInChain(searchParamBranch, nextSearchParam, nextChain, theTargetValue, qualifiersBranch, nextQualifier);
+							searchParamBranch.add(new ChainElement(nextTarget, nextSearchParam.getName(), nextPath));
+							processNextLinkInChain(searchParamBranch, nextSearchParam, nextChain, theTargetValue, qualifiersBranch, nextQualifier);
+						}
 					}
 				}
 			}
 			if (!searchParamFound) {
-				throw new InvalidRequestException(myFhirContext.getLocalizer().getMessage(BaseStorageDao.class, "invalidParameterChain", thePreviousSearchParam.getName() + '.' + theChain));
+				throw new InvalidRequestException(Msg.code(1214) + myFhirContext.getLocalizer().getMessage(BaseStorageDao.class, "invalidParameterChain", thePreviousSearchParam.getName() + '.' + theChain));
 			}
 		}
 	}
@@ -987,70 +1007,70 @@ public class QueryStack {
 		// Note: the first element in each chain is assumed to be discrete. This may need to change when we add proper support for `_contained`
 		if (nextChain.size() == 1) {
 			// discrete -> discrete
-			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(nextChain.get(0).getSearchParam().getPath()), leafNodes);
+			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(nextChain.get(0).getPath()), leafNodes);
 			// discrete -> contained
 			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(),
 				leafNodes
 					.stream()
-					.map(t -> t.withPathPrefix(nextChain.get(0).getResourceType(), nextChain.get(0).getSearchParam().getName()))
+					.map(t -> t.withPathPrefix(nextChain.get(0).getResourceType(), nextChain.get(0).getSearchParameterName()))
 					.collect(Collectors.toSet()));
 		} else if (nextChain.size() == 2) {
 			// discrete -> discrete -> discrete
-			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(nextChain.get(0).getSearchParam().getPath(), nextChain.get(1).getSearchParam().getPath()), leafNodes);
+			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(nextChain.get(0).getPath(), nextChain.get(1).getPath()), leafNodes);
 			// discrete -> discrete -> contained
-			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(nextChain.get(0).getSearchParam().getPath()),
+			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(nextChain.get(0).getPath()),
 				leafNodes
 					.stream()
-					.map(t -> t.withPathPrefix(nextChain.get(1).getResourceType(), nextChain.get(1).getSearchParam().getName()))
+					.map(t -> t.withPathPrefix(nextChain.get(1).getResourceType(), nextChain.get(1).getSearchParameterName()))
 					.collect(Collectors.toSet()));
 			// discrete -> contained -> discrete
-			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(mergePaths(nextChain.get(0).getSearchParam().getPath(), nextChain.get(1).getSearchParam().getPath())), leafNodes);
+			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(mergePaths(nextChain.get(0).getPath(), nextChain.get(1).getPath())), leafNodes);
 			if (myModelConfig.isIndexOnContainedResourcesRecursively()) {
 				// discrete -> contained -> contained
 				updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(),
 					leafNodes
 						.stream()
-						.map(t -> t.withPathPrefix(nextChain.get(0).getResourceType(), nextChain.get(0).getSearchParam().getName() + "." + nextChain.get(1).getSearchParam().getName()))
+						.map(t -> t.withPathPrefix(nextChain.get(0).getResourceType(), nextChain.get(0).getSearchParameterName() + "." + nextChain.get(1).getSearchParameterName()))
 						.collect(Collectors.toSet()));
 			}
 		} else if (nextChain.size() == 3) {
 			// discrete -> discrete -> discrete -> discrete
-			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(nextChain.get(0).getSearchParam().getPath(), nextChain.get(1).getSearchParam().getPath(), nextChain.get(2).getSearchParam().getPath()), leafNodes);
+			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(nextChain.get(0).getPath(), nextChain.get(1).getPath(), nextChain.get(2).getPath()), leafNodes);
 			// discrete -> discrete -> discrete -> contained
-			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(nextChain.get(0).getSearchParam().getPath(), nextChain.get(1).getSearchParam().getPath()),
+			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(nextChain.get(0).getPath(), nextChain.get(1).getPath()),
 				leafNodes
 					.stream()
-					.map(t -> t.withPathPrefix(nextChain.get(2).getResourceType(), nextChain.get(2).getSearchParam().getName()))
+					.map(t -> t.withPathPrefix(nextChain.get(2).getResourceType(), nextChain.get(2).getSearchParameterName()))
 					.collect(Collectors.toSet()));
 			// discrete -> discrete -> contained -> discrete
-			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(nextChain.get(0).getSearchParam().getPath(), mergePaths(nextChain.get(1).getSearchParam().getPath(), nextChain.get(2).getSearchParam().getPath())), leafNodes);
+			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(nextChain.get(0).getPath(), mergePaths(nextChain.get(1).getPath(), nextChain.get(2).getPath())), leafNodes);
 			// discrete -> contained -> discrete -> discrete
-			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(mergePaths(nextChain.get(0).getSearchParam().getPath(), nextChain.get(1).getSearchParam().getPath()), nextChain.get(2).getSearchParam().getPath()), leafNodes);
+			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(mergePaths(nextChain.get(0).getPath(), nextChain.get(1).getPath()), nextChain.get(2).getPath()), leafNodes);
 			// discrete -> contained -> discrete -> contained
-			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(mergePaths(nextChain.get(0).getSearchParam().getPath(), nextChain.get(1).getSearchParam().getPath())),
+			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(mergePaths(nextChain.get(0).getPath(), nextChain.get(1).getPath())),
 				leafNodes
 					.stream()
-					.map(t -> t.withPathPrefix(nextChain.get(2).getResourceType(), nextChain.get(2).getSearchParam().getName()))
+					.map(t -> t.withPathPrefix(nextChain.get(2).getResourceType(), nextChain.get(2).getSearchParameterName()))
 					.collect(Collectors.toSet()));
 			if (myModelConfig.isIndexOnContainedResourcesRecursively()) {
 				// discrete -> contained -> contained -> discrete
-				updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(mergePaths(nextChain.get(0).getSearchParam().getPath(), nextChain.get(1).getSearchParam().getPath(), nextChain.get(2).getSearchParam().getPath())), leafNodes);
+				updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(mergePaths(nextChain.get(0).getPath(), nextChain.get(1).getPath(), nextChain.get(2).getPath())), leafNodes);
 				// discrete -> discrete -> contained -> contained
-				updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(nextChain.get(0).getSearchParam().getPath()),
+				updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(nextChain.get(0).getPath()),
 					leafNodes
 						.stream()
-						.map(t -> t.withPathPrefix(nextChain.get(1).getResourceType(), nextChain.get(1).getSearchParam().getName() + "." + nextChain.get(2).getSearchParam().getName()))
+						.map(t -> t.withPathPrefix(nextChain.get(1).getResourceType(), nextChain.get(1).getSearchParameterName() + "." + nextChain.get(2).getSearchParameterName()))
 						.collect(Collectors.toSet()));
 				// discrete -> contained -> contained -> contained
 				updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(),
 					leafNodes
 						.stream()
-						.map(t -> t.withPathPrefix(nextChain.get(0).getResourceType(), nextChain.get(0).getSearchParam().getName() + "." + nextChain.get(1).getSearchParam().getName() + "." + nextChain.get(2).getSearchParam().getName()))
+						.map(t -> t.withPathPrefix(nextChain.get(0).getResourceType(), nextChain.get(0).getSearchParameterName() + "." + nextChain.get(1).getSearchParameterName() + "." + nextChain.get(2).getSearchParameterName()))
 						.collect(Collectors.toSet()));
 			}
 		} else {
 			// TODO: the chain is too long, it isn't practical to hard-code all the possible patterns. If anyone ever needs this, we should revisit the approach
-			throw new InvalidRequestException(
+			throw new InvalidRequestException(Msg.code(2011) +
 				"The search chain is too long. Only chains of up to three references are supported.");
 		}
 	}
@@ -1117,7 +1137,7 @@ public class QueryStack {
 			case SPECIAL:
 			default:
 				throw new InvalidRequestException(
-					"The search type:" + theParamDefinition.getParamType() + " is not supported.");
+					Msg.code(1215) + "The search type:" + theParamDefinition.getParamType() + " is not supported.");
 		}
 		return containedCondition;
 	}
@@ -1139,7 +1159,7 @@ public class QueryStack {
 	private Condition createPredicateSource(@Nullable DbColumn theSourceJoinColumn, List<? extends IQueryParameterType> theList) {
 		if (myDaoConfig.getStoreMetaSourceInformation() == DaoConfig.StoreMetaSourceInformationEnum.NONE) {
 			String msg = myFhirContext.getLocalizer().getMessage(LegacySearchBuilder.class, "sourceParamDisabled");
-			throw new InvalidRequestException(msg);
+			throw new InvalidRequestException(Msg.code(1216) + msg);
 		}
 
 		SourcePredicateBuilder join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.SOURCE, theSourceJoinColumn, Constants.PARAM_SOURCE, () -> mySqlBuilder.addSourcePredicateBuilder(theSourceJoinColumn)).getResult();
@@ -1201,7 +1221,7 @@ public class QueryStack {
 		} else if (Constants.PARAM_SECURITY.equals(theParamName)) {
 			tagType = TagTypeEnum.SECURITY_LABEL;
 		} else {
-			throw new IllegalArgumentException("Param name: " + theParamName); // shouldn't happen
+			throw new IllegalArgumentException(Msg.code(1217) + "Param name: " + theParamName); // shouldn't happen
 		}
 
 		List<Condition> andPredicates = new ArrayList<>();
@@ -1213,7 +1233,7 @@ public class QueryStack {
 					if (isNotBlank(nextParam.getValue())) {
 						haveTags = true;
 					} else if (isNotBlank(nextParam.getSystem())) {
-						throw new InvalidRequestException("Invalid " + theParamName + " parameter (must supply a value/code and not just a system): " + nextParam.getValueAsQueryToken(myFhirContext));
+						throw new InvalidRequestException(Msg.code(1218) + "Invalid " + theParamName + " parameter (must supply a value/code and not just a system): " + nextParam.getValueAsQueryToken(myFhirContext));
 					}
 				} else {
 					UriParam nextParam = (UriParam) nextParamUncasted;
@@ -1311,7 +1331,7 @@ public class QueryStack {
 							} else {
 								msg = myFhirContext.getLocalizer().getMessage(PredicateBuilderToken.class, "textModifierDisabledForSearchParam");
 							}
-							throw new MethodNotAllowedException(msg);
+							throw new MethodNotAllowedException(Msg.code(1219) + msg);
 						}
 
 						return createPredicateString(theSourceJoinColumn, theResourceName, theSpnamePrefix, theSearchParam, theList, null, theRequestPartitionId, theSqlBuilder);
@@ -1439,7 +1459,7 @@ public class QueryStack {
 
 			if (myPartitionSettings.isPartitioningEnabled() && myPartitionSettings.isIncludePartitionInSearchHashes()) {
 				if (theRequestPartitionId.isAllPartitions()) {
-					throw new PreconditionFailedException("This server is not configured to support search against all partitions");
+					throw new PreconditionFailedException(Msg.code(1220) + "This server is not configured to support search against all partitions");
 				}
 			}
 
@@ -1526,12 +1546,12 @@ public class QueryStack {
 						try {
 							filter = SearchFilterParser.parse(filterString);
 						} catch (SearchFilterParser.FilterSyntaxException theE) {
-							throw new InvalidRequestException("Error parsing _filter syntax: " + theE.getMessage());
+							throw new InvalidRequestException(Msg.code(1221) + "Error parsing _filter syntax: " + theE.getMessage());
 						}
 						if (filter != null) {
 
 							if (!myDaoConfig.isFilterParameterEnabled()) {
-								throw new InvalidRequestException(Constants.PARAM_FILTER + " parameter is disabled on this server");
+								throw new InvalidRequestException(Msg.code(1222) + Constants.PARAM_FILTER + " parameter is disabled on this server");
 							}
 
 							Condition predicate = createPredicateFilter(this, filter, theResourceName, theRequest, theRequestPartitionId);
@@ -1543,7 +1563,7 @@ public class QueryStack {
 
 				} else {
 					String msg = myFhirContext.getLocalizer().getMessageSanitized(BaseStorageDao.class, "invalidSearchParameter", theParamName, theResourceName, mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(theResourceName));
-					throw new InvalidRequestException(msg);
+					throw new InvalidRequestException(Msg.code(1223) + msg);
 				}
 			}
 		}
@@ -1601,7 +1621,7 @@ public class QueryStack {
 			case COMPOSITE:
 				List<RuntimeSearchParam> compositeOf = JpaParamUtil.resolveComponentParameters(mySearchParamRegistry, theParam);
 				if (compositeOf.size() != 2) {
-					throw new InternalErrorException("Parameter " + theParam.getName() + " has " + compositeOf.size() + " composite parts. Don't know how handlt this.");
+					throw new InternalErrorException(Msg.code(1224) + "Parameter " + theParam.getName() + " has " + compositeOf.size() + " composite parts. Don't know how handlt this.");
 				}
 				IQueryParameterType leftParam = toParameterType(compositeOf.get(0));
 				IQueryParameterType rightParam = toParameterType(compositeOf.get(1));
@@ -1614,7 +1634,7 @@ public class QueryStack {
 			case REFERENCE:
 			case SPECIAL:
 			default:
-				throw new InvalidRequestException("The search type: " + theParam.getParamType() + " is not supported.");
+				throw new InvalidRequestException(Msg.code(1225) + "The search type: " + theParam.getParamType() + " is not supported.");
 		}
 		return qp;
 	}

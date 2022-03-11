@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.term;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
@@ -33,7 +34,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
-import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -102,8 +102,9 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	private ISchedulerService mySchedulerService;
 	@Autowired
 	private ITermVersionAdapterSvc myTerminologyVersionAdapterSvc;
+
 	@Autowired
-	private ITermCodeSystemStorageSvc myCodeSystemStorageSvc;
+	private TermConceptDaoSvc myTermConceptDaoSvc;
 
 	@Autowired
 	private IBatchJobSubmitter myJobSubmitter;
@@ -188,7 +189,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 			TermConcept next = myDeferredConcepts.remove(0);
 			if (myCodeSystemVersionDao.findById(next.getCodeSystemVersion().getPid()).isPresent()) {
 				try {
-					codeCount += myCodeSystemStorageSvc.saveConcept(next);
+					codeCount += myTermConceptDaoSvc.saveConcept(next);
 				} catch (Exception theE) {
 					ourLog.error("Exception thrown when attempting to save TermConcept {} in Code System {}",
 						next.getCode(), next.getCodeSystemVersion().getCodeSystemDisplayName(), theE);
@@ -374,7 +375,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 			myCurrentJobExecutions.add(jobExecution);
 
 		} catch (JobParametersInvalidException theE) {
-			throw new InternalErrorException("Offline job submission for TermCodeSystemVersion: " +
+			throw new InternalErrorException(Msg.code(850) + "Offline job submission for TermCodeSystemVersion: " +
 				theCodeSystemVersionPid + " failed: " + theE);
 		}
 	}
@@ -391,7 +392,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 			myCurrentJobExecutions.add(jobExecution);
 
 		} catch (JobParametersInvalidException theE) {
-			throw new InternalErrorException("Offline job submission for TermCodeSystem: " +
+			throw new InternalErrorException(Msg.code(851) + "Offline job submission for TermCodeSystem: " +
 				theCodeSystemPid + " failed: " + theE);
 		}
 	}
@@ -464,9 +465,10 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		myTransactionMgr = theTxManager;
 	}
 
+
 	@VisibleForTesting
-	void setCodeSystemStorageSvcForUnitTest(ITermCodeSystemStorageSvc theCodeSystemStorageSvc) {
-		myCodeSystemStorageSvc = theCodeSystemStorageSvc;
+	void setTermConceptDaoSvc(TermConceptDaoSvc theTermConceptDaoSvc) {
+		myTermConceptDaoSvc = theTermConceptDaoSvc;
 	}
 
 	@VisibleForTesting

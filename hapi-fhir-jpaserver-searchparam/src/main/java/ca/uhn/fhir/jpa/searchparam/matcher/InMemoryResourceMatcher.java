@@ -23,11 +23,11 @@ package ca.uhn.fhir.jpa.searchparam.matcher;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.util.SourceParam;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
@@ -37,6 +37,7 @@ import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.MetaUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.Validate;
@@ -61,6 +62,8 @@ public class InMemoryResourceMatcher {
 	ModelConfig myModelConfig;
 	@Autowired
 	FhirContext myFhirContext;
+
+	public InMemoryResourceMatcher() {}
 
 	/**
 	 * This method is called in two different scenarios.  With a null theResource, it determines whether database matching might be required.
@@ -240,7 +243,7 @@ public class InMemoryResourceMatcher {
 			if (Constants.PARAM_CONTENT.equals(theParamName) || Constants.PARAM_TEXT.equals(theParamName)) {
 				return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName, InMemoryMatchResult.PARAM);
 			} else {
-				throw new InvalidRequestException("Unknown search parameter " + theParamName + " for resource type " + theResourceName);
+				throw new InvalidRequestException(Msg.code(509) + "Unknown search parameter " + theParamName + " for resource type " + theResourceName);
 			}
 		}
 	}

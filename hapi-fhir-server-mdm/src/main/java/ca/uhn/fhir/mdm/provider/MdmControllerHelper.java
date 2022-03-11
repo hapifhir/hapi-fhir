@@ -20,6 +20,7 @@ package ca.uhn.fhir.mdm.provider;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
@@ -82,7 +83,7 @@ public class MdmControllerHelper {
 	public void validateSameVersion(IAnyResource theResource, String theResourceId) {
 		String storedId = theResource.getIdElement().getValue();
 		if (hasVersionIdPart(theResourceId) && !storedId.equals(theResourceId)) {
-			throw new ResourceVersionConflictException("Requested resource " + theResourceId + " is not the latest version.  Latest version is " + storedId);
+			throw new ResourceVersionConflictException(Msg.code(1501) + "Requested resource " + theResourceId + " is not the latest version.  Latest version is " + storedId);
 		}
 	}
 
@@ -96,7 +97,7 @@ public class MdmControllerHelper {
 		if (MdmResourceUtil.isGoldenRecord(iAnyResource)) {
 			return iAnyResource;
 		} else {
-			throw new InvalidRequestException(myMessageHelper.getMessageForFailedGoldenResourceLoad(theParamName, theGoldenResourceId));
+			throw new InvalidRequestException(Msg.code(1502) + myMessageHelper.getMessageForFailedGoldenResourceLoad(theParamName, theGoldenResourceId));
 		}
 	}
 
@@ -123,13 +124,12 @@ public class MdmControllerHelper {
 	public void validateIsMdmManaged(String theName, IAnyResource theResource) {
 		String resourceType = myFhirContext.getResourceType(theResource);
 		if (!myMdmSettings.isSupportedMdmType(resourceType)) {
-			throw new InvalidRequestException(
-				myMessageHelper.getMessageForUnsupportedResource(theName, resourceType)
+			throw new InvalidRequestException(Msg.code(1503) + myMessageHelper.getMessageForUnsupportedResource(theName, resourceType)
 			);
 		}
 
 		if (!MdmResourceUtil.isMdmManaged(theResource)) {
-			throw new InvalidRequestException(myMessageHelper.getMessageForUnmanagedResource());
+			throw new InvalidRequestException(Msg.code(1504) + myMessageHelper.getMessageForUnmanagedResource());
 		}
 	}
 

@@ -1,11 +1,13 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -15,15 +17,11 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.util.BundleBuilder;
 import org.hibernate.Session;
 import org.hibernate.internal.SessionImpl;
-import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.MedicationKnowledge;
-import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Meta;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -72,7 +70,7 @@ public class TransactionProcessorTest {
 	@MockBean
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 	@MockBean
-	private IdHelperService myIdHelperService;
+	private IIdHelperService myIdHelperService;
 	@MockBean
 	private PartitionSettings myPartitionSettings;
 	@MockBean
@@ -85,7 +83,8 @@ public class TransactionProcessorTest {
 	private SearchParamMatcher mySearchParamMatcher;
 	@MockBean(answer = Answers.RETURNS_DEEP_STUBS)
 	private SessionImpl mySession;
-	private FhirContext myFhirCtx = FhirContext.forR4Cached();
+	@MockBean
+	private IFhirSystemDao<Bundle, Meta> mySystemDao;
 
 	@BeforeEach
 	public void before() {
@@ -119,7 +118,7 @@ public class TransactionProcessorTest {
 			myTransactionProcessor.transaction(null, input, false);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Resource MedicationKnowledge is not supported on this server. Supported resource types: []", e.getMessage());
+			assertEquals(Msg.code(544) + "Resource MedicationKnowledge is not supported on this server. Supported resource types: []", e.getMessage());
 		}
 	}
 

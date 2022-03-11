@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -60,12 +61,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.anyCollection;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 public class ValueSetExpansionR4Test extends BaseTermR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(ValueSetExpansionR4Test.class);
@@ -85,10 +80,10 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
-		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+		ourLog.info("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+		ourLog.info("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
@@ -117,7 +112,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 			.addInclude()
 			.setSystem("http://acme.org");
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(new ValueSetExpansionOptions(), input);
-		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+		ourLog.info("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertEquals(24, expandedValueSet.getExpansion().getTotal());
 	}
@@ -136,7 +131,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 			.setValue("Systolic blood pressure--inspiration");
 
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(new ValueSetExpansionOptions(), input);
-		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+		ourLog.info("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertEquals(1, expandedValueSet.getExpansion().getTotal());
 		assertThat(expandedValueSet.getExpansion().getContains().stream().map(t -> t.getDisplay()).collect(Collectors.toList()), containsInAnyOrder(
@@ -158,7 +153,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 			.setValue("Systolic blood pressure 1");
 
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(new ValueSetExpansionOptions(), input);
-		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+		ourLog.info("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertEquals(3, expandedValueSet.getExpansion().getTotal());
 		assertThat(expandedValueSet.getExpansion().getContains().stream().map(t -> t.getDisplay()).collect(Collectors.toList()), containsInAnyOrder(
@@ -184,7 +179,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		myCaptureQueriesListener.clear();
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(new ValueSetExpansionOptions(), input);
-		ourLog.debug("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertThat(ValueSetTestUtil.toCodes(expandedValueSet).toString(), ValueSetTestUtil.toCodes(expandedValueSet), containsInAnyOrder(
 			"code9", "code90", "code91", "code92", "code93", "code94", "code95", "code96", "code97", "code98", "code99"
@@ -270,7 +265,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(expansionOptions, input);
-		ourLog.debug("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		//Take our intial expanded list, and only get the elements that are relevant.
 		expandedConceptCodes.removeIf(concept -> !concept.startsWith("code9"));
@@ -302,7 +297,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		myCaptureQueriesListener.clear();
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, input);
-		ourLog.debug("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertThat(ValueSetTestUtil.toCodes(expandedValueSet).toString(), ValueSetTestUtil.toCodes(expandedValueSet), contains("code99"));
 
@@ -336,7 +331,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		myCaptureQueriesListener.clear();
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(new ValueSetExpansionOptions(), input);
-		ourLog.debug("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertThat(ValueSetTestUtil.toCodes(expandedValueSet).toString(), ValueSetTestUtil.toCodes(expandedValueSet), containsInAnyOrder(
 			"code9", "code91", "code92", "code93", "code94", "code95", "code96", "code97", "code98", "code99"
@@ -381,7 +376,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 			myTermSvc.expandValueSet(options, input);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("ValueSet expansion can not combine \"offset\" with \"ValueSet.compose.exclude\" unless the ValueSet has been pre-expanded. ValueSet \"Unidentified ValueSet\" must be pre-expanded for this operation to work.", e.getMessage());
+			assertEquals(Msg.code(887) + "ValueSet expansion can not combine \"offset\" with \"ValueSet.compose.exclude\" unless the ValueSet has been pre-expanded. ValueSet \"Unidentified ValueSet\" must be pre-expanded for this operation to work.", e.getMessage());
 		}
 	}
 
@@ -435,7 +430,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		myCaptureQueriesListener.clear();
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(new ValueSetExpansionOptions(), input);
-		ourLog.debug("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertThat(ValueSetTestUtil.toCodes(expandedValueSet).toString(), ValueSetTestUtil.toCodes(expandedValueSet), containsInAnyOrder(
 			"code9", "code90", "code91", "code92", "code93", "code94", "code95", "code96", "code97", "code98", "code99"
@@ -483,17 +478,17 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
-		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+		ourLog.info("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+		ourLog.info("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		myCaptureQueriesListener.clear();
 
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet);
-		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+		ourLog.info("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(3, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
@@ -523,10 +518,10 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 	public void testExpandTermValueSetAndChildren2() throws Exception {
 		myDaoConfig.setPreExpandValueSets(true);
 
-		CodeSystem codeSystem = loadResource(myFhirCtx, CodeSystem.class, "/r4/CodeSystem-iar-chymh-cb-calculated-cap-10.xml");
+		CodeSystem codeSystem = loadResource(myFhirContext, CodeSystem.class, "/r4/CodeSystem-iar-chymh-cb-calculated-cap-10.xml");
 		myCodeSystemDao.create(codeSystem);
 
-		ValueSet valueSet = loadResource(myFhirCtx, ValueSet.class, "/r4/ValueSet-iar-chymh-cb-calculated-cap-10.xml");
+		ValueSet valueSet = loadResource(myFhirContext, ValueSet.class, "/r4/ValueSet-iar-chymh-cb-calculated-cap-10.xml");
 		myValueSetDao.create(valueSet);
 
 
@@ -535,7 +530,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		myCaptureQueriesListener.clear();
 
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet);
-		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+		ourLog.info("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertEquals(3, expandedValueSet.getExpansion().getContains().size());
 	}
@@ -547,13 +542,13 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		myDaoConfig.setPreExpandValueSets(true);
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
-		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+		ourLog.info("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+		ourLog.info("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet);
-		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+		ourLog.info("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
 		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
@@ -571,7 +566,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		assertExpandedValueSetContainsConcept(expandedValueSet, "http://acme.org", "8492-1", "Systolic blood pressure 8 hour minimum", 0);
 
 		ValueSet reexpandedValueSet = myTermSvc.expandValueSet(null, valueSet);
-		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(reexpandedValueSet));
+		ourLog.info("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(reexpandedValueSet));
 
 		assertEquals(codeSystem.getConcept().size(), reexpandedValueSet.getExpansion().getTotal());
 		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffset(), reexpandedValueSet.getExpansion().getOffset());
@@ -603,15 +598,15 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.PUT);
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
-		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+		ourLog.info("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+		ourLog.info("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet);
-		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+		ourLog.info("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
 		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
@@ -642,10 +637,10 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
-		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+		ourLog.info("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+		ourLog.info("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
@@ -655,7 +650,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 			.setOffset(0)
 			.setCount(23);
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(options, valueSet);
-		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+		ourLog.info("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
 		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
@@ -677,7 +672,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.PUT);
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
-		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+		ourLog.info("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
 		// If this ever fails, it just means that new codes have been added to the
 		// code system used by this test, so the numbers below may also need to be
@@ -685,7 +680,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		assertEquals(24, codeSystem.getConcept().size());
 
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+		ourLog.info("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
@@ -693,7 +688,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 			.setOffset(0)
 			.setCount(24);
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(options, valueSet);
-		String expandedValueSetString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet);
+		String expandedValueSetString = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet);
 		ourLog.info("Expanded ValueSet:\n" + expandedValueSetString);
 		assertThat(expandedValueSetString, containsString("ValueSet was expanded using an expansion that was pre-calculated"));
 
@@ -725,10 +720,10 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
-		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+		ourLog.info("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+		ourLog.info("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
@@ -736,7 +731,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 			.setOffset(0)
 			.setCount(0);
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(options, valueSet);
-		String expanded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet);
+		String expanded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet);
 		ourLog.info("Expanded ValueSet:\n" + expanded);
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
@@ -757,10 +752,10 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.PUT);
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
-		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+		ourLog.info("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+		ourLog.info("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
@@ -768,7 +763,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 			.setOffset(0)
 			.setCount(0);
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(options, valueSet);
-		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+		ourLog.info("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
 		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
@@ -788,10 +783,10 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
-		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+		ourLog.info("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+		ourLog.info("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 		List<String> expandedConcepts = getExpandedConceptsByValueSetUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
@@ -799,7 +794,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 			.setOffset(1)
 			.setCount(1000);
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(options, valueSet);
-		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+		ourLog.info("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
 		assertEquals(1, expandedValueSet.getExpansion().getOffset());
@@ -820,10 +815,10 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.PUT);
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
-		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+		ourLog.info("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+		ourLog.info("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 		List<String> expandedConcepts = getExpandedConceptsByValueSetUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
@@ -831,7 +826,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 			.setOffset(1)
 			.setCount(1000);
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(options, valueSet);
-		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+		ourLog.info("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
 		assertEquals(1, expandedValueSet.getExpansion().getOffset());
@@ -852,10 +847,10 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
-		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+		ourLog.info("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+		ourLog.info("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
@@ -865,7 +860,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 			.setOffset(1)
 			.setCount(22);
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(options, valueSet);
-		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+		ourLog.info("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
 		assertEquals(1, expandedValueSet.getExpansion().getOffset());
@@ -903,7 +898,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 			myValueSetDao.expand(vs, new ValueSetExpansionOptions());
 			fail();
 		} catch (InternalErrorException e) {
-			assertEquals("Unable to expand ValueSet because CodeSystem could not be found: http://unknown-system", e.getMessage());
+			assertEquals(Msg.code(888) + "org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport$ExpansionCouldNotBeCompletedInternallyException: " + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://unknown-system", e.getMessage());
 		}
 
 		// Try validating a code against this VS - This code isn't in a system that's included by the VS, so we know
@@ -920,7 +915,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		codeSystemUrl = "http://unknown-system";
 		outcome = myValueSetDao.validateCode(new CodeType(valueSetUrl), null, new CodeType(code), new CodeType(codeSystemUrl), null, null, null, mySrd);
 		assertFalse(outcome.isOk());
-		assertEquals("Failed to expand ValueSet 'http://vs-with-invalid-cs' (in-memory). Could not validate code http://unknown-system#28571000087109. Error was: Unable to expand ValueSet because CodeSystem could not be found: http://unknown-system", outcome.getMessage());
+		assertEquals("Failed to expand ValueSet 'http://vs-with-invalid-cs' (in-memory). Could not validate code http://unknown-system#28571000087109. Error was: " + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://unknown-system", outcome.getMessage());
 		assertEquals("error", outcome.getSeverityCode());
 
 		// Perform Pre-Expansion
@@ -936,7 +931,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 			myValueSetDao.expand(vs, new ValueSetExpansionOptions());
 			fail();
 		} catch (InternalErrorException e) {
-			assertEquals("Unable to expand ValueSet because CodeSystem could not be found: http://unknown-system", e.getMessage());
+			assertEquals(Msg.code(888) + "org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport$ExpansionCouldNotBeCompletedInternallyException: " + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://unknown-system", e.getMessage());
 		}
 
 	}
@@ -948,10 +943,10 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.PUT);
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
-		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+		ourLog.info("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+		ourLog.info("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
@@ -961,7 +956,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 			.setOffset(1)
 			.setCount(22);
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(options, valueSet);
-		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+		ourLog.info("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
 		assertEquals(1, expandedValueSet.getExpansion().getOffset());
@@ -977,53 +972,6 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		assertThat(ValueSetTestUtil.toCodes(expandedValueSet), is(equalTo(expandedConceptCodes.subList(1, 23))));
 	}
 
-	@Test
-	public void testExpandValueSetInMemoryRespectsMaxSize() {
-		createCodeSystem();
-
-		// Add lots more codes
-		CustomTerminologySet additions = new CustomTerminologySet();
-		for (int i = 0; i < 100; i++) {
-			additions.addRootConcept("CODE" + i, "Display " + i);
-		}
-		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd(CS_URL, additions);
-
-
-		// Codes available exceeds the max
-		myDaoConfig.setMaximumExpansionSize(50);
-		ValueSet vs = new ValueSet();
-		ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
-		include.setSystem(CS_URL);
-		try {
-			ValueSet expansion = myTermSvc.expandValueSet(null, vs);
-			fail("Expanded to " + expansion.getExpansion().getContains().size() + " but max was " + myDaoConfig.getMaximumExpansionSize());
-		} catch (InternalErrorException e) {
-			assertEquals("Expansion of ValueSet produced too many codes (maximum 50) - Operation aborted!", e.getMessage());
-		}
-
-		// Increase the max so it won't exceed
-		myDaoConfig.setMaximumExpansionSize(150);
-		vs = new ValueSet();
-		include = vs.getCompose().addInclude();
-		include.setSystem(CS_URL);
-		ValueSet outcome = myTermSvc.expandValueSet(null, vs);
-		assertEquals(109, outcome.getExpansion().getContains().size());
-
-	}
-
-	@Test
-	public void testExpandValueSetWithValueSetCodeAccumulator() {
-		createCodeSystem();
-
-		when(myValueSetCodeAccumulator.getCapacityRemaining()).thenReturn(100);
-
-		ValueSet vs = new ValueSet();
-		ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
-		include.setSystem(CS_URL);
-
-		myTermSvc.expandValueSet(null, vs, myValueSetCodeAccumulator);
-		verify(myValueSetCodeAccumulator, times(9)).includeConceptWithDesignations(anyString(), anyString(), nullable(String.class), anyCollection(), nullable(Long.class), nullable(String.class), nullable(String.class));
-	}
 
 	@Test
 	public void testExpandValueSetPreservesExplicitOrder() {
@@ -1078,7 +1026,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		loadAndPersistCodeSystemWithDesignations(HttpVerb.POST);
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
-		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+		ourLog.info("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -1146,7 +1094,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		loadAndPersistCodeSystemWithDesignations(HttpVerb.PUT);
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
-		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+		ourLog.info("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -1212,7 +1160,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 	public void testStoreTermCodeSystemAndNestedChildren() {
 		IIdType codeSystemId = createCodeSystem();
 		CodeSystem codeSystemResource = myCodeSystemDao.read(codeSystemId);
-		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystemResource));
+		ourLog.info("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystemResource));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -1314,10 +1262,10 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
-		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+		ourLog.info("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+		ourLog.info("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		runInTransaction(() -> {
 			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable);
@@ -1375,10 +1323,10 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.PUT);
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
-		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+		ourLog.info("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+		ourLog.info("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		runInTransaction(() -> {
 			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable);
@@ -1433,10 +1381,10 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		loadAndPersistCodeSystemAndValueSetWithDesignationsAndExclude(HttpVerb.POST);
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
-		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+		ourLog.info("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+		ourLog.info("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		runInTransaction(() -> {
 			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable);
@@ -1493,10 +1441,10 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		loadAndPersistCodeSystemAndValueSetWithDesignationsAndExclude(HttpVerb.PUT);
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
-		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+		ourLog.info("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+		ourLog.info("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		runInTransaction(() -> {
 			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable);
@@ -1705,7 +1653,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		// In memory expansion
 		ValueSet expansion = myValueSetDao.expand(vs, new ValueSetExpansionOptions());
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 		assertThat(ValueSetTestUtil.extractExpansionMessage(expansion), containsString("has not yet been pre-expanded"));
 		assertThat(ValueSetTestUtil.extractExpansionMessage(expansion), containsString("Current status: NOT_EXPANDED"));
 		assertThat(ValueSetTestUtil.toCodes(expansion), contains("28571000087109"));
@@ -1728,7 +1676,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		// Try expansion again
 		expansion = myValueSetDao.expand(vs, new ValueSetExpansionOptions());
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 		assertThat(ValueSetTestUtil.extractExpansionMessage(expansion), containsString("ValueSet was expanded using an expansion that was pre-calculated"));
 		assertThat(ValueSetTestUtil.toCodes(expansion), contains("28571000087109"));
 	}
@@ -1766,7 +1714,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		try {
 			myValueSetDao.expand(vs, new ValueSetExpansionOptions());
 		} catch (InternalErrorException e) {
-			assertEquals("Unable to expand ValueSet because CodeSystem could not be found: http://foo-cs|0.17", e.getMessage());
+			assertEquals( Msg.code(888) + "org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport$ExpansionCouldNotBeCompletedInternallyException: " + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://foo-cs|0.17", e.getMessage());
 		}
 
 		codeSystemUrl = "http://snomed.info/sct";
@@ -1789,7 +1737,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		try {
 			myValueSetDao.expand(vs, new ValueSetExpansionOptions());
 		} catch (InternalErrorException e) {
-			assertEquals("Unable to expand ValueSet because CodeSystem could not be found: http://foo-cs|0.17", e.getMessage());
+			assertEquals(Msg.code(888) + "org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport$ExpansionCouldNotBeCompletedInternallyException: " + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://foo-cs|0.17", e.getMessage());
 		}
 	}
 
@@ -1970,7 +1918,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		// Expand
 		ValueSet expansion = myValueSetDao.expand(new IdType("ValueSet/vs"), new ValueSetExpansionOptions(), mySrd);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 		assertThat(ValueSetTestUtil.extractExpansionMessage(expansion), containsString("ValueSet was expanded using an expansion that was pre-calculated"));
 		assertThat(ValueSetTestUtil.toCodes(expansion), contains("A"));
 
@@ -1988,7 +1936,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		// Expand (should not use a precalculated expansion)
 		expansion = myValueSetDao.expand(new IdType("ValueSet/vs"), new ValueSetExpansionOptions(), mySrd);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 		assertThat(ValueSetTestUtil.extractExpansionMessage(expansion), containsString("Performing in-memory expansion without parameters"));
 		assertThat(ValueSetTestUtil.toCodes(expansion), contains("B"));
 
@@ -1998,7 +1946,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		// Expand (should use the new precalculated expansion)
 		expansion = myValueSetDao.expand(new IdType("ValueSet/vs"), new ValueSetExpansionOptions(), mySrd);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 		assertThat(ValueSetTestUtil.extractExpansionMessage(expansion), containsString("ValueSet was expanded using an expansion that was pre-calculated"));
 		assertThat(ValueSetTestUtil.toCodes(expansion), contains("B"));
 

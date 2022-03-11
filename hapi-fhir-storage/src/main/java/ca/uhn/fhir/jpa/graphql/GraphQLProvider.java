@@ -20,9 +20,11 @@ package ca.uhn.fhir.jpa.graphql;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.GraphQL;
@@ -31,6 +33,7 @@ import ca.uhn.fhir.rest.annotation.GraphQLQueryUrl;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Initialize;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -38,12 +41,12 @@ import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
-import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.utilities.graphql.IGraphQLEngine;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.hl7.fhir.utilities.graphql.ObjectValue;
+import org.hl7.fhir.utilities.graphql.Package;
 import org.hl7.fhir.utilities.graphql.Parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,9 +56,10 @@ import javax.annotation.Nullable;
 import java.util.function.Supplier;
 
 public class GraphQLProvider {
-	private final Supplier<IGraphQLEngine> engineFactory;
+	private static final Logger ourLog = LoggerFactory.getLogger(GraphQLProvider.class);
+
+	private final Supplier<IGraphQLEngine> myEngineFactory;
 	private final IGraphQLStorageServices myStorageServices;
-	private Logger ourLog = LoggerFactory.getLogger(GraphQLProvider.class);
 
 	/**
 	 * Constructor which uses a default context and validation support object
@@ -82,61 +86,68 @@ public class GraphQLProvider {
 				IValidationSupport validationSupport = theValidationSupport;
 				validationSupport = ObjectUtils.defaultIfNull(validationSupport, new DefaultProfileValidationSupport(theFhirContext));
 				org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext workerContext = new org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext(theFhirContext, validationSupport);
-				engineFactory = () -> new org.hl7.fhir.dstu3.utils.GraphQLEngine(workerContext);
+				myEngineFactory = () -> new org.hl7.fhir.dstu3.utils.GraphQLEngine(workerContext);
 				break;
 			}
 			case R4: {
 				IValidationSupport validationSupport = theValidationSupport;
 				validationSupport = ObjectUtils.defaultIfNull(validationSupport, new DefaultProfileValidationSupport(theFhirContext));
 				org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext workerContext = new org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext(theFhirContext, validationSupport);
-				engineFactory = () -> new org.hl7.fhir.r4.utils.GraphQLEngine(workerContext);
+				myEngineFactory = () -> new org.hl7.fhir.r4.utils.GraphQLEngine(workerContext);
 				break;
 			}
 			case R5: {
 				IValidationSupport validationSupport = theValidationSupport;
 				validationSupport = ObjectUtils.defaultIfNull(validationSupport, new DefaultProfileValidationSupport(theFhirContext));
 				org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext workerContext = new org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext(theFhirContext, validationSupport);
-				engineFactory = () -> new org.hl7.fhir.r5.utils.GraphQLEngine(workerContext);
+				myEngineFactory = () -> new org.hl7.fhir.r5.utils.GraphQLEngine(workerContext);
 				break;
 			}
 			case DSTU2:
 			case DSTU2_HL7ORG:
 			case DSTU2_1:
 			default: {
-				throw new UnsupportedOperationException("GraphQL not supported for version: " + theFhirContext.getVersion().getVersion());
+				throw new UnsupportedOperationException(Msg.code(1143) + "GraphQL not supported for version: " + theFhirContext.getVersion().getVersion());
 			}
 		}
 
 		myStorageServices = theStorageServices;
 	}
 
-	@Description(value="This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.")
-	@GraphQL(type=RequestTypeEnum.GET)
+	@Description(value = "This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.")
+	@GraphQL(type = RequestTypeEnum.GET)
 	public String processGraphQlGetRequest(ServletRequestDetails theRequestDetails, @IdParam IIdType theId, @GraphQLQueryUrl String theQueryUrl) {
 		if (theQueryUrl != null) {
 			return processGraphQLRequest(theRequestDetails, theId, theQueryUrl);
 		}
-		throw new InvalidRequestException("Unable to parse empty GraphQL expression");
+		throw new InvalidRequestException(Msg.code(1144) + "Unable to parse empty GraphQL expression");
 	}
 
-	@Description(value="This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.")
-	@GraphQL(type=RequestTypeEnum.POST)
-	public String processGraphQlPostRequest(ServletRequestDetails theRequestDetails, @IdParam IIdType theId, @GraphQLQueryBody String theQueryBody) {
+	@Description(value = "This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.")
+	@GraphQL(type = RequestTypeEnum.POST)
+	public String processGraphQlPostRequest(ServletRequestDetails theServletRequestDetails, RequestDetails theRequestDetails, @IdParam IIdType theId, @GraphQLQueryBody String theQueryBody) {
 		if (theQueryBody != null) {
-			return processGraphQLRequest(theRequestDetails, theId, theQueryBody);
+			return processGraphQLRequest(theServletRequestDetails, theId, theQueryBody);
 		}
-		throw new InvalidRequestException("Unable to parse empty GraphQL expression");
+		throw new InvalidRequestException(Msg.code(1145) + "Unable to parse empty GraphQL expression");
 	}
 
 	public String processGraphQLRequest(ServletRequestDetails theRequestDetails, IIdType theId, String theQuery) {
-		IGraphQLEngine engine = engineFactory.get();
+		Package parsedGraphQLRequest;
+		try {
+			parsedGraphQLRequest = Parser.parse(theQuery);
+		} catch (Exception e) {
+			throw new InvalidRequestException(Msg.code(1146) + "Unable to parse GraphQL Expression: " + e);
+		}
+
+		return processGraphQLRequest(theRequestDetails, theId, parsedGraphQLRequest);
+	}
+
+	protected String processGraphQLRequest(ServletRequestDetails theRequestDetails, IIdType theId, Package parsedGraphQLRequest) {
+		IGraphQLEngine engine = myEngineFactory.get();
 		engine.setAppInfo(theRequestDetails);
 		engine.setServices(myStorageServices);
-		try {
-			engine.setGraphQL(Parser.parse(theQuery));
-		} catch (Exception theE) {
-			throw new InvalidRequestException("Unable to parse GraphQL Expression: " + theE.toString());
-		}
+		engine.setGraphQL(parsedGraphQLRequest);
 
 		try {
 
@@ -166,7 +177,7 @@ public class GraphQLProvider {
 				ourLog.error("Failure during GraphQL processing", e);
 			}
 			b.append(e.getMessage());
-			throw new UnclassifiedServerFailureException(statusCode, b.toString());
+			throw new UnclassifiedServerFailureException(statusCode, Msg.code(1147) + b);
 		}
 	}
 
@@ -174,7 +185,7 @@ public class GraphQLProvider {
 	public void initialize(RestfulServer theServer) {
 		ourLog.trace("Initializing GraphQL provider");
 		if (!theServer.getFhirContext().getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
-			throw new ConfigurationException("Can not use " + getClass().getName() + " provider on server with FHIR " + theServer.getFhirContext().getVersion().getVersion().name() + " context");
+			throw new ConfigurationException(Msg.code(1148) + "Can not use " + getClass().getName() + " provider on server with FHIR " + theServer.getFhirContext().getVersion().getVersion().name() + " context");
 		}
 	}
 

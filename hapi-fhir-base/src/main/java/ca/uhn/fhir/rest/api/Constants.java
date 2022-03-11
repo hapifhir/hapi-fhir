@@ -218,6 +218,7 @@ public class Constants {
 	public static final String PARAMQUALIFIER_TOKEN_TEXT = ":text";
 	public static final String PARAMQUALIFIER_MDM = ":mdm";
 	public static final String PARAMQUALIFIER_TOKEN_OF_TYPE = ":of-type";
+	public static final String PARAMQUALIFIER_TOKEN_NOT = ":not";
 	public static final int STATUS_HTTP_200_OK = 200;
 	public static final int STATUS_HTTP_201_CREATED = 201;
 	public static final int STATUS_HTTP_204_NO_CONTENT = 204;
@@ -291,6 +292,11 @@ public class Constants {
 	public static final String SUBSCRIPTION_MULTITYPE_SUFFIX = "]";
 	public static final String SUBSCRIPTION_MULTITYPE_STAR = "*";
 	public static final String SUBSCRIPTION_STAR_CRITERIA = SUBSCRIPTION_MULTITYPE_PREFIX + SUBSCRIPTION_MULTITYPE_STAR + SUBSCRIPTION_MULTITYPE_SUFFIX;
+	public static final String INCLUDE_STAR = "*";
+	public static final String PARAMQUALIFIER_TOKEN_IN = ":in";
+	public static final String PARAMQUALIFIER_TOKEN_NOT_IN = ":not-in";
+	public static final String PARAMQUALIFIER_TOKEN_ABOVE = ":above";
+	public static final String PARAMQUALIFIER_TOKEN_BELOW = ":below";
 
 	static {
 		CHARSET_UTF8 = StandardCharsets.UTF_8;

@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.mdm.api.MdmConstants;
@@ -111,7 +112,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 			myMdmProvider.updateLink(mySourcePatientId, myPatientId, NO_MATCH_RESULT, myRequestDetails);
 			fail();
 		} catch (ResourceVersionConflictException e) {
-			assertThat(e.getMessage(), matchesPattern("Requested resource Patient/\\d+/_history/1 is not the latest version.  Latest version is Patient/\\d+/_history/2"));
+			assertThat(e.getMessage(), matchesPattern(Msg.code(1501) + "Requested resource Patient/\\d+/_history/1 is not the latest version.  Latest version is Patient/\\d+/_history/2"));
 		}
 	}
 
@@ -138,7 +139,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 			myMdmProvider.updateLink(mySourcePatientId, myPatientId, MATCH_RESULT, myRequestDetails);
 			fail();
 		} catch (ResourceVersionConflictException e) {
-			assertThat(e.getMessage(), matchesPattern("Requested resource Patient/\\d+/_history/1 is not the latest version.  Latest version is Patient/\\d+/_history/2"));
+			assertThat(e.getMessage(), matchesPattern(Msg.code(1501) + "Requested resource Patient/\\d+/_history/1 is not the latest version.  Latest version is Patient/\\d+/_history/2"));
 		}
 	}
 
@@ -148,7 +149,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 			myMdmProvider.updateLink(mySourcePatientId, myPatientId, POSSIBLE_MATCH_RESULT, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("$mdm-update-link illegal matchResult value 'POSSIBLE_MATCH'.  Must be NO_MATCH or MATCH", e.getMessage());
+			assertEquals(Msg.code(1495) + "$mdm-update-link illegal matchResult value 'POSSIBLE_MATCH'.  Must be NO_MATCH or MATCH", e.getMessage());
 		}
 	}
 
@@ -158,7 +159,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 			myMdmProvider.updateLink(mySourcePatientId, myPatientId, POSSIBLE_DUPLICATE_RESULT, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("$mdm-update-link illegal matchResult value 'POSSIBLE_DUPLICATE'.  Must be NO_MATCH or MATCH", e.getMessage());
+			assertEquals(Msg.code(1495) + "$mdm-update-link illegal matchResult value 'POSSIBLE_DUPLICATE'.  Must be NO_MATCH or MATCH", e.getMessage());
 		}
 	}
 
@@ -188,7 +189,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 			myMdmProvider.updateLink(mySourcePatientId, mySourcePatientId, NO_MATCH_RESULT, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), startsWith("No link"));
+			assertThat(e.getMessage(), startsWith(Msg.code(738) + "No link"));
 		}
 	}
 
@@ -200,7 +201,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 			fail();
 		} catch (InvalidRequestException e) {
 			String expectedMessage = myMessageHelper.getMessageForFailedGoldenResourceLoad("goldenResourceId", patient.getIdElement().getValue());
-			assertEquals(expectedMessage, e.getMessage());
+			assertEquals(Msg.code(1502) + expectedMessage, e.getMessage());
 		}
 	}
 
@@ -213,7 +214,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 			myMdmProvider.updateLink(mySourcePatientId, new StringType(patient.getIdElement().getValue()), NO_MATCH_RESULT, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(myMessageHelper.getMessageForUnsupportedSourceResource(), e.getMessage());
+			assertEquals(Msg.code(744) + myMessageHelper.getMessageForUnsupportedSourceResource(), e.getMessage());
 		}
 	}
 }

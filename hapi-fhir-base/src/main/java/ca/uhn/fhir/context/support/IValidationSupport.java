@@ -21,8 +21,10 @@ package ca.uhn.fhir.context.support;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.ParametersUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -83,13 +85,34 @@ public interface IValidationSupport {
 	 *
 	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
 	 *                                    other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
-	 * @param theExpansionOptions         If provided (may be <code>null</code>), contains options controlling the expansion
+	 * @param theExpansionOptions         If provided (can be <code>null</code>), contains options controlling the expansion
 	 * @param theValueSetToExpand         The valueset that should be expanded
 	 * @return The expansion, or null
 	 */
 	@Nullable
 	default ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext, @Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull IBaseResource theValueSetToExpand) {
 		return null;
+	}
+
+	/**
+	 * Expands the given portion of a ValueSet by canonical URL.
+	 *
+	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
+	 *                                    other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
+	 * @param theExpansionOptions         If provided (can be <code>null</code>), contains options controlling the expansion
+	 * @param theValueSetUrlToExpand      The valueset that should be expanded
+	 * @return The expansion, or null
+	 * @throws ResourceNotFoundException If no ValueSet can be found with the given URL
+	 * @since 6.0.0
+	 */
+	@Nullable
+	default ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext, @Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull String theValueSetUrlToExpand) throws ResourceNotFoundException {
+		Validate.notBlank(theValueSetUrlToExpand, "theValueSetUrlToExpand must not be null or blank");
+		IBaseResource valueSet = fetchValueSet(theValueSetUrlToExpand);
+		if (valueSet == null) {
+			throw new ResourceNotFoundException(Msg.code(2024) + "Unknown ValueSet: " + UrlUtil.escapeUrlParam(theValueSetUrlToExpand));
+		}
+		return expandValueSet(theValidationSupportContext, theExpansionOptions, valueSet);
 	}
 
 	/**
@@ -224,7 +247,7 @@ public interface IValidationSupport {
 	}
 
 	/**
-	 * Fetch the given ValueSet by URL
+	 * Fetch the given ValueSet by URL, or returns null if one can't be found for the given URL
 	 */
 	@Nullable
 	default IBaseResource fetchValueSet(String theValueSetUrl) {
@@ -234,7 +257,7 @@ public interface IValidationSupport {
 	/**
 	 * Validates that the given code exists and if possible returns a display
 	 * name. This method is called to check codes which are found in "example"
-	 * binding fields (e.g. <code>Observation.code</code> in the default profile.
+	 * binding fields (e.g. <code>Observation.code</code>) in the default profile.
 	 *
 	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
 	 *                                    other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
@@ -245,14 +268,14 @@ public interface IValidationSupport {
 	 * @return Returns a validation result object
 	 */
 	@Nullable
-	default CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	default CodeValidationResult validateCode(@Nonnull ValidationSupportContext theValidationSupportContext, @Nonnull ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		return null;
 	}
 
 	/**
 	 * Validates that the given code exists and if possible returns a display
 	 * name. This method is called to check codes which are found in "example"
-	 * binding fields (e.g. <code>Observation.code</code> in the default profile.
+	 * binding fields (e.g. <code>Observation.code</code>) in the default profile.
 	 *
 	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
 	 *                                    other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
@@ -274,7 +297,7 @@ public interface IValidationSupport {
 	 *                                    other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
 	 * @param theSystem                   The CodeSystem URL
 	 * @param theCode                     The code
-	 * @param theDisplayLanguage          to filter out the designation by the display language, to return all designation, the this value to null
+	 * @param theDisplayLanguage          to filter out the designation by the display language. To return all designation, set this value to <code>null</code>.
 	 */
 	@Nullable
 	default LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode, String theDisplayLanguage) {
@@ -293,7 +316,7 @@ public interface IValidationSupport {
 	default LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
 		return lookupCode(theValidationSupportContext, theSystem, theCode, null);
 	}
-	
+
 	/**
 	 * Returns <code>true</code> if the given valueset can be validated by the given
 	 * validation support module
@@ -711,7 +734,7 @@ public interface IValidationSupport {
 
 		public void throwNotFoundIfAppropriate() {
 			if (isFound() == false) {
-				throw new ResourceNotFoundException("Unable to find code[" + getSearchedForCode() + "] in system[" + getSearchedForSystem() + "]");
+				throw new ResourceNotFoundException(Msg.code(1738) + "Unable to find code[" + getSearchedForCode() + "] in system[" + getSearchedForSystem() + "]");
 			}
 		}
 
@@ -755,7 +778,7 @@ public interface IValidationSupport {
 						IValidationSupport.CodingConceptProperty prop = (IValidationSupport.CodingConceptProperty) next;
 						ParametersUtil.addPartCoding(theContext, property, "value", prop.getCodeSystem(), prop.getCode(), prop.getDisplay());
 					} else {
-						throw new IllegalStateException("Don't know how to handle " + next.getClass());
+						throw new IllegalStateException(Msg.code(1739) + "Don't know how to handle " + next.getClass());
 					}
 				}
 			}
@@ -836,7 +859,6 @@ public interface IValidationSupport {
 			return myTargetSystemUrl;
 		}
 	}
-
 
 
 }

@@ -20,17 +20,18 @@ package ca.uhn.fhir.jpa.searchparam.registry;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.context.phonetic.PhoneticEncoderEnum;
+import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.DatatypeUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.HapiExtensions;
-import org.apache.commons.lang3.EnumUtils;
+import ca.uhn.fhir.util.PhoneticEncoderUtil;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.SearchParameter;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -85,7 +86,7 @@ public class SearchParameterCanonicalizer {
 			case DSTU2_1:
 				// Non-supported - these won't happen so just fall through
 			default:
-				throw new InternalErrorException("SearchParameter canonicalization not supported for FHIR version" + myFhirContext.getVersion().getVersion());
+				throw new InternalErrorException(Msg.code(510) + "SearchParameter canonicalization not supported for FHIR version" + myFhirContext.getVersion().getVersion());
 		}
 
 		if (retVal != null) {
@@ -374,10 +375,15 @@ public class SearchParameterCanonicalizer {
 	private void setEncoder(RuntimeSearchParam theRuntimeSearchParam, IBaseDatatype theValue) {
 		if (theValue instanceof IPrimitiveType) {
 			String stringValue = ((IPrimitiveType<?>) theValue).getValueAsString();
-			PhoneticEncoderEnum encoderEnum = EnumUtils.getEnum(PhoneticEncoderEnum.class, stringValue);
-			if (encoderEnum != null) {
-				theRuntimeSearchParam.setPhoneticEncoder(encoderEnum.getPhoneticEncoder());
-			} else {
+
+			// every string creates a completely new encoder wrapper.
+			// this is fine, because the runtime search parameters are constructed at startup
+			// for every saved value
+			IPhoneticEncoder encoder = PhoneticEncoderUtil.getEncoder(stringValue);
+			if (encoder != null) {
+				theRuntimeSearchParam.setPhoneticEncoder(encoder);
+			}
+			else {
 				ourLog.error("Invalid PhoneticEncoderEnum value '" + stringValue + "'");
 			}
 		}

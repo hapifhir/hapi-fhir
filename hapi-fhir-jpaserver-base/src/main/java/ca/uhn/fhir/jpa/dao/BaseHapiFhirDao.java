@@ -7,7 +7,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -16,6 +16,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.dao.IJpaDao;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
@@ -24,7 +25,6 @@ import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
 import ca.uhn.fhir.jpa.dao.index.DaoSearchParamSynchronizer;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.index.SearchParamWithInlineReferencesExtractor;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
@@ -75,16 +75,17 @@ import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
+import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.MetaUtil;
@@ -110,6 +111,7 @@ import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -118,8 +120,12 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -144,10 +150,10 @@ import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -183,15 +189,16 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	public static final long INDEX_STATUS_INDEXED = 1L;
 	public static final long INDEX_STATUS_INDEXING_FAILED = 2L;
 	public static final String NS_JPA_PROFILE = "https://github.com/hapifhir/hapi-fhir/ns/jpa/profile";
+	// total attempts to do a tag transaction
+	private static final int TOTAL_TAG_READ_ATTEMPTS = 10;
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseHapiFhirDao.class);
-	private static final Map<FhirVersionEnum, FhirContext> ourRetrievalContexts = new HashMap<>();
 	private static boolean ourValidationDisabledForUnitTest;
 	private static boolean ourDisableIncrementOnUpdateForUnitTest = false;
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
 	@Autowired
-	protected IdHelperService myIdHelperService;
+	protected IIdHelperService myIdHelperService;
 	@Autowired
 	protected IForcedIdDao myForcedIdDao;
 	@Autowired
@@ -246,6 +253,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	private MemoryCacheService myMemoryCacheService;
 	@Autowired(required = false)
 	private IFulltextSearchSvc myFulltextSearchSvc;
+
+	@Autowired
+	private PlatformTransactionManager myTransactionManager;
 
 	@VisibleForTesting
 	public void setSearchParamPresenceSvc(ISearchParamPresenceSvc theSearchParamPresenceSvc) {
@@ -378,14 +388,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	public FhirContext getContext(FhirVersionEnum theVersion) {
 		Validate.notNull(theVersion, "theVersion must not be null");
-		synchronized (ourRetrievalContexts) {
-			FhirContext retVal = ourRetrievalContexts.get(theVersion);
-			if (retVal == null) {
-				retVal = new FhirContext(theVersion);
-				ourRetrievalContexts.put(theVersion, retVal);
-			}
-			return retVal;
+		if (theVersion == myFhirContext.getVersion().getVersion()) {
+			return myFhirContext;
 		}
+		return FhirContext.forCached(theVersion);
 	}
 
 	/**
@@ -398,46 +404,125 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		MemoryCacheService.TagDefinitionCacheKey key = toTagDefinitionMemoryCacheKey(theTagType, theScheme, theTerm);
 
-
 		TagDefinition retVal = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.TAG_DEFINITION, key);
-
 
 		if (retVal == null) {
 			HashMap<MemoryCacheService.TagDefinitionCacheKey, TagDefinition> resolvedTagDefinitions = theTransactionDetails.getOrCreateUserData(HapiTransactionService.XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS, () -> new HashMap<>());
 			retVal = resolvedTagDefinitions.get(key);
 
 			if (retVal == null) {
-				CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-				CriteriaQuery<TagDefinition> cq = builder.createQuery(TagDefinition.class);
-				Root<TagDefinition> from = cq.from(TagDefinition.class);
-
-				if (isNotBlank(theScheme)) {
-					cq.where(
-						builder.and(
-							builder.equal(from.get("myTagType"), theTagType),
-							builder.equal(from.get("mySystem"), theScheme),
-							builder.equal(from.get("myCode"), theTerm)));
-				} else {
-					cq.where(
-						builder.and(
-							builder.equal(from.get("myTagType"), theTagType),
-							builder.isNull(from.get("mySystem")),
-							builder.equal(from.get("myCode"), theTerm)));
-				}
-
-				TypedQuery<TagDefinition> q = myEntityManager.createQuery(cq);
-				try {
-					retVal = q.getSingleResult();
-				} catch (NoResultException e) {
-					retVal = new TagDefinition(theTagType, theScheme, theTerm, theLabel);
-					myEntityManager.persist(retVal);
-				}
+				// actual DB hit(s) happen here
+				retVal = getOrCreateTag(theTagType, theScheme, theTerm, theLabel);
 
 				TransactionSynchronization sync = new AddTagDefinitionToCacheAfterCommitSynchronization(key, retVal);
 				TransactionSynchronizationManager.registerSynchronization(sync);
 
 				resolvedTagDefinitions.put(key, retVal);
 			}
+		}
+
+		return retVal;
+	}
+
+	/**
+	 * Gets the tag defined by the fed in values, or saves it if it does not
+	 * exist.
+	 * <p>
+	 * Can also throw an InternalErrorException if something bad happens.
+	 */
+	private TagDefinition getOrCreateTag(TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel) {
+		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<TagDefinition> cq = builder.createQuery(TagDefinition.class);
+		Root<TagDefinition> from = cq.from(TagDefinition.class);
+
+		if (isNotBlank(theScheme)) {
+			cq.where(
+				builder.and(
+					builder.equal(from.get("myTagType"), theTagType),
+					builder.equal(from.get("mySystem"), theScheme),
+					builder.equal(from.get("myCode"), theTerm)));
+		} else {
+			cq.where(
+				builder.and(
+					builder.equal(from.get("myTagType"), theTagType),
+					builder.isNull(from.get("mySystem")),
+					builder.equal(from.get("myCode"), theTerm)));
+		}
+
+		TypedQuery<TagDefinition> q = myEntityManager.createQuery(cq);
+
+		TransactionTemplate template = new TransactionTemplate(myTransactionManager);
+		template.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+
+		// this transaction will attempt to get or create the tag,
+		// repeating (on any failure) 10 times.
+		// if it fails more than this, we will throw exceptions
+		TagDefinition retVal;
+		int count = 0;
+		HashSet<Throwable> throwables = new HashSet<>();
+		do {
+			try {
+				retVal = template.execute(new TransactionCallback<TagDefinition>() {
+
+					// do the actual DB call(s) to read and/or write the values
+					private TagDefinition readOrCreate() {
+						TagDefinition val;
+						try {
+							val = q.getSingleResult();
+						} catch (NoResultException e) {
+							val = new TagDefinition(theTagType, theScheme, theTerm, theLabel);
+							myEntityManager.persist(val);
+						}
+						return val;
+					}
+
+					@Override
+					public TagDefinition doInTransaction(TransactionStatus status) {
+						TagDefinition tag = null;
+
+						try {
+							tag = readOrCreate();
+						} catch (Exception ex) {
+							// log any exceptions - just in case
+							// they may be signs of things to come...
+							ourLog.warn(
+								"Tag read/write failed: "
+									+ ex.getMessage() + ". "
+									+ "This is not a failure on its own, "
+									+ "but could be useful information in the result of an actual failure."
+							);
+							throwables.add(ex);
+						}
+
+						return tag;
+					}
+				});
+			} catch (Exception ex) {
+				// transaction template can fail if connections to db are exhausted
+				// and/or timeout
+				ourLog.warn("Transaction failed with: "
+					+ ex.getMessage() + ". "
+					+ "Transaction will rollback and be reattempted."
+				);
+				retVal = null;
+			}
+			count++;
+		} while (retVal == null && count < TOTAL_TAG_READ_ATTEMPTS);
+
+		if (retVal == null) {
+			// if tag is still null,
+			// something bad must be happening
+			// - throw
+			String msg = throwables.stream()
+				.map(Throwable::getMessage)
+				.collect(Collectors.joining(", "));
+			throw new InternalErrorException(
+				Msg.code(2023)
+					+ "Tag get/create failed after "
+					+ TOTAL_TAG_READ_ATTEMPTS
+					+ " attempts with error(s): "
+					+ msg
+			);
 		}
 
 		return retVal;
@@ -851,7 +936,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	@CoverageIgnore
 	public BaseHasResource readEntity(IIdType theValueId, RequestDetails theRequest) {
-		throw new NotImplementedException("");
+		throw new NotImplementedException(Msg.code(927) + "");
 	}
 
 	/**
@@ -948,18 +1033,24 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			}
 		} else if (theEntity instanceof ResourceTable) {
 			ResourceTable resource = (ResourceTable) theEntity;
-			version = theEntity.getVersion();
-			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(theEntity.getId(), version);
-			((ResourceTable) theEntity).setCurrentVersionEntity(history);
+			ResourceHistoryTable history;
+			if (resource.getCurrentVersionEntity() != null) {
+				history = resource.getCurrentVersionEntity();
+			} else {
+				version = theEntity.getVersion();
+				history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(theEntity.getId(), version);
+				((ResourceTable) theEntity).setCurrentVersionEntity(history);
 
-			while (history == null) {
-				if (version > 1L) {
-					version--;
-					history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(theEntity.getId(), version);
-				} else {
-					return null;
+				while (history == null) {
+					if (version > 1L) {
+						version--;
+						history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(theEntity.getId(), version);
+					} else {
+						return null;
+					}
 				}
 			}
+
 			resourceBytes = history.getResource();
 			resourceEncoding = history.getEncoding();
 			resourceText = history.getResourceTextVc();
@@ -1059,7 +1150,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				b.append(e.getMessage());
 				String msg = b.toString();
 				ourLog.error(msg, e);
-				throw new DataFormatException(msg, e);
+				throw new DataFormatException(Msg.code(928) + msg, e);
 			}
 
 		} else {
@@ -1138,7 +1229,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		// Make sure that the match URL was actually appropriate for the supplied resource
 		InMemoryMatchResult outcome = myInMemoryResourceMatcher.match(theIfNoneExist, theResource, theParams);
 		if (outcome.supported() && !outcome.matched()) {
-			throw new InvalidRequestException("Failed to process conditional create. The supplied resource did not satisfy the conditional URL.");
+			throw new InvalidRequestException(Msg.code(929) + "Failed to process conditional create. The supplied resource did not satisfy the conditional URL.");
 		}
 	}
 
@@ -1265,7 +1356,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 
 		if (theUpdateVersion) {
-			entity.setVersion(entity.getVersion() + 1);
+			long newVersion = entity.getVersion() + 1;
+			entity.setVersion(newVersion);
 		}
 
 		/*
@@ -1306,19 +1398,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		 * those by path and not by parameter name.
 		 */
 		if (thePerformIndexing && newParams != null) {
-			Map<String, Boolean> presentSearchParams = new HashMap<>();
-			for (String nextKey : newParams.getPopulatedResourceLinkParameters()) {
-				presentSearchParams.put(nextKey, Boolean.TRUE);
-			}
-			Set<Entry<String, RuntimeSearchParam>> activeSearchParams = mySearchParamRegistry.getActiveSearchParams(entity.getResourceType()).entrySet();
-			for (Entry<String, RuntimeSearchParam> nextSpEntry : activeSearchParams) {
-				if (nextSpEntry.getValue().getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
-					if (!presentSearchParams.containsKey(nextSpEntry.getKey())) {
-						presentSearchParams.put(nextSpEntry.getKey(), Boolean.FALSE);
-					}
-				}
-			}
-			AddRemoveCount presenceCount = mySearchParamPresenceSvc.updatePresence(entity, presentSearchParams);
+			Map<String, Boolean> searchParamPresenceMap = getSearchParamPresenceMap(entity, newParams);
+
+			AddRemoveCount presenceCount = mySearchParamPresenceSvc.updatePresence(entity, searchParamPresenceMap);
 
 			// Interceptor broadcast: JPA_PERFTRACE_INFO
 			if (!presenceCount.isEmpty()) {
@@ -1374,6 +1456,23 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		return entity;
 	}
 
+	@NotNull
+	private Map<String, Boolean> getSearchParamPresenceMap(ResourceTable entity, ResourceIndexedSearchParams newParams) {
+		Map<String, Boolean> retval = new HashMap<>();
+
+		for (String nextKey : newParams.getPopulatedResourceLinkParameters()) {
+			retval.put(nextKey, Boolean.TRUE);
+		}
+
+		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(entity.getResourceType());
+		activeSearchParams.getReferenceSearchParamNames().forEach(key -> {
+			if (!retval.containsKey(key)) {
+				retval.put(key, Boolean.FALSE);
+			}
+		});
+		return retval;
+	}
+
 	private void createHistoryEntry(RequestDetails theRequest, IBaseResource theResource, ResourceTable theEntity, EncodedResource theChanged) {
 		boolean versionedTags = getConfig().getTagStorageMode() == DaoConfig.TagStorageModeEnum.VERSIONED;
 		final ResourceHistoryTable historyEntry = theEntity.toHistory(versionedTags);
@@ -1383,6 +1482,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		ourLog.debug("Saving history entry {}", historyEntry.getIdDt());
 		myResourceHistoryTableDao.save(historyEntry);
+		theEntity.setCurrentVersionEntity(historyEntry);
 
 		// Save resource source
 		String source = null;
@@ -1424,8 +1524,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	private void validateIncomingResourceTypeMatchesExisting(IBaseResource theResource, ResourceTable entity) {
 		String resourceType = myContext.getResourceType(theResource);
 		if (!resourceType.equals(entity.getResourceType())) {
-			throw new UnprocessableEntityException(
-				"Existing resource ID[" + entity.getIdDt().toUnqualifiedVersionless() + "] is of type[" + entity.getResourceType() + "] - Cannot update with [" + resourceType + "]");
+			throw new UnprocessableEntityException(Msg.code(930) + "Existing resource ID[" + entity.getIdDt().toUnqualifiedVersionless() + "] is of type[" + entity.getResourceType() + "] - Cannot update with [" + resourceType + "]");
 		}
 	}
 
@@ -1567,8 +1666,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 							if (!isLogicalReference(referencedId)) {
 								if (!referencedId.getValue().contains("?")) {
 									if (!validTypes.contains(referencedId.getResourceType())) {
-										throw new UnprocessableEntityException(
-											"Invalid reference found at path '" + newPath + "'. Resource type '" + referencedId.getResourceType() + "' is not valid for this path");
+										throw new UnprocessableEntityException(Msg.code(931) + "Invalid reference found at path '" + newPath + "'. Resource type '" + referencedId.getResourceType() + "' is not valid for this path");
 									}
 								}
 							}
@@ -1583,7 +1681,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	protected void validateMetaCount(int theMetaCount) {
 		if (myConfig.getResourceMetaCountHardLimit() != null) {
 			if (theMetaCount > myConfig.getResourceMetaCountHardLimit()) {
-				throw new UnprocessableEntityException("Resource contains " + theMetaCount + " meta entries (tag/profile/security label), maximum is " + myConfig.getResourceMetaCountHardLimit());
+				throw new UnprocessableEntityException(Msg.code(932) + "Resource contains " + theMetaCount + " meta entries (tag/profile/security label), maximum is " + myConfig.getResourceMetaCountHardLimit());
 			}
 		}
 	}
@@ -1620,7 +1718,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 
 		if (tag != null) {
-			throw new UnprocessableEntityException("Resource contains the 'subsetted' tag, and must not be stored as it may contain a subset of available data");
+			throw new UnprocessableEntityException(Msg.code(933) + "Resource contains the 'subsetted' tag, and must not be stored as it may contain a subset of available data");
 		}
 
 		if (getConfig().isEnforceReferenceTargetTypes()) {
@@ -1744,7 +1842,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					}
 				}
 			} catch (Exception e) {
-				throw new DataFormatException("Unable to convert DIV to string", e);
+				throw new DataFormatException(Msg.code(934) + "Unable to convert DIV to string", e);
 			}
 
 		}
@@ -1774,8 +1872,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	public static void validateResourceType(BaseHasResource theEntity, String theResourceName) {
 		if (!theResourceName.equals(theEntity.getResourceType())) {
-			throw new ResourceNotFoundException(
-				"Resource with ID " + theEntity.getIdDt().getIdPart() + " exists but it is not of type " + theResourceName + ", found resource of type " + theEntity.getResourceType());
+			throw new ResourceNotFoundException(Msg.code(935) + "Resource with ID " + theEntity.getIdDt().getIdPart() + " exists but it is not of type " + theResourceName + ", found resource of type " + theEntity.getResourceType());
 		}
 	}
 

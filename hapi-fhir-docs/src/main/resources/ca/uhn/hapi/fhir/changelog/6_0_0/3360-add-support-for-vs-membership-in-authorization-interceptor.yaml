@@ -1,0 +1,5 @@
+---
+type: add
+issue: 3360
+title: "SearchNarrowingInterceptor can now be used to automatically narrow searches to include a `code:in` or `code:not-in`
+  expression, for mandating that results must be in a specified list of codes."

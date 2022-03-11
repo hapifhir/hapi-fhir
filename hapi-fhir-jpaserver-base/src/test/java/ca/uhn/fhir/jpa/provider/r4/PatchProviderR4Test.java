@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import com.google.common.base.Charsets;
@@ -10,7 +11,15 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.Media;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,8 +28,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 
@@ -87,7 +96,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			.setMethod(Bundle.HTTPVerb.PATCH);
 
 		HttpPost post = new HttpPost(ourServerBase);
-		String encodedRequest = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
+		String encodedRequest = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
 		ourLog.info("Request:\n{}", encodedRequest);
 		post.setEntity(new StringEntity(encodedRequest, ContentType.parse(Constants.CT_FHIR_JSON_NEW+ Constants.CHARSET_UTF8_CTSUFFIX)));
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
@@ -196,7 +205,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			.setMethod(Bundle.HTTPVerb.PATCH);
 
 		HttpPost post = new HttpPost(ourServerBase);
-		String encodedRequest = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
+		String encodedRequest = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
 		ourLog.info("Request:\n{}", encodedRequest);
 		post.setEntity(new StringEntity(encodedRequest, ContentType.parse(Constants.CT_FHIR_JSON_NEW+ Constants.CHARSET_UTF8_CTSUFFIX)));
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
@@ -354,7 +363,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			assertEquals(409, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertThat(responseString, containsString("<OperationOutcome"));
-			assertThat(responseString, containsString("<diagnostics value=\"Version 9 is not the most recent version of this resource, unable to apply patch\"/>"));
+			assertThat(responseString, containsString("<diagnostics value=\"" + Msg.code(550) + Msg.code(974) + "Version 9 is not the most recent version of this resource, unable to apply patch\"/>"));
 		}
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
@@ -447,7 +456,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			.setMethod(Bundle.HTTPVerb.PATCH);
 
 		HttpPost post = new HttpPost(ourServerBase);
-		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
+		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
 		ourLog.info("Encoded output: {}", encoded);
 
 		post.setEntity(new StringEntity(encoded, ContentType.parse(Constants.CT_FHIR_JSON_NEW+ Constants.CHARSET_UTF8_CTSUFFIX)));
@@ -489,7 +498,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			.setMethod(Bundle.HTTPVerb.PATCH);
 
 		HttpPost post = new HttpPost(ourServerBase);
-		post.setEntity(new StringEntity(myFhirCtx.newJsonParser().encodeResourceToString(input), ContentType.parse(Constants.CT_FHIR_JSON_NEW+ Constants.CHARSET_UTF8_CTSUFFIX)));
+		post.setEntity(new StringEntity(myFhirContext.newJsonParser().encodeResourceToString(input), ContentType.parse(Constants.CT_FHIR_JSON_NEW+ Constants.CHARSET_UTF8_CTSUFFIX)));
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
 			assertEquals(400, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -527,7 +536,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			.setMethod(Bundle.HTTPVerb.PATCH);
 
 		HttpPost post = new HttpPost(ourServerBase);
-		post.setEntity(new StringEntity(myFhirCtx.newJsonParser().encodeResourceToString(input), ContentType.parse(Constants.CT_FHIR_JSON_NEW+ Constants.CHARSET_UTF8_CTSUFFIX)));
+		post.setEntity(new StringEntity(myFhirContext.newJsonParser().encodeResourceToString(input), ContentType.parse(Constants.CT_FHIR_JSON_NEW+ Constants.CHARSET_UTF8_CTSUFFIX)));
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
 			assertEquals(400, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -566,7 +575,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			.setMethod(Bundle.HTTPVerb.PATCH);
 
 		HttpPost post = new HttpPost(ourServerBase);
-		post.setEntity(new StringEntity(myFhirCtx.newJsonParser().encodeResourceToString(input), ContentType.parse(Constants.CT_FHIR_JSON_NEW+ Constants.CHARSET_UTF8_CTSUFFIX)));
+		post.setEntity(new StringEntity(myFhirContext.newJsonParser().encodeResourceToString(input), ContentType.parse(Constants.CT_FHIR_JSON_NEW+ Constants.CHARSET_UTF8_CTSUFFIX)));
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
 			assertEquals(400, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -604,7 +613,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			.setMethod(Bundle.HTTPVerb.PATCH);
 
 		HttpPost post = new HttpPost(ourServerBase);
-		post.setEntity(new StringEntity(myFhirCtx.newJsonParser().encodeResourceToString(input), ContentType.parse(Constants.CT_FHIR_JSON_NEW+ Constants.CHARSET_UTF8_CTSUFFIX)));
+		post.setEntity(new StringEntity(myFhirContext.newJsonParser().encodeResourceToString(input), ContentType.parse(Constants.CT_FHIR_JSON_NEW+ Constants.CHARSET_UTF8_CTSUFFIX)));
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
 			assertEquals(400, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);

@@ -43,20 +43,18 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
-
+import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Predicate;
-import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.compare;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -343,7 +341,7 @@ public final class ResourceIndexedSearchParams {
 			'}';
 	}
 
-	public void findMissingSearchParams(PartitionSettings thePartitionSettings, ModelConfig theModelConfig, ResourceTable theEntity, Set<Entry<String, RuntimeSearchParam>> theActiveSearchParams) {
+	public void findMissingSearchParams(PartitionSettings thePartitionSettings, ModelConfig theModelConfig, ResourceTable theEntity, ResourceSearchParams theActiveSearchParams) {
 		findMissingSearchParams(thePartitionSettings, theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.STRING, myStringParams);
 		findMissingSearchParams(thePartitionSettings, theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.NUMBER, myNumberParams);
 		findMissingSearchParams(thePartitionSettings, theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.QUANTITY, myQuantityParams);
@@ -354,15 +352,15 @@ public final class ResourceIndexedSearchParams {
 	}
 
 	@SuppressWarnings("unchecked")
-	private <RT extends BaseResourceIndexedSearchParam> void findMissingSearchParams(PartitionSettings thePartitionSettings, ModelConfig theModelConfig, ResourceTable theEntity, Set<Map.Entry<String, RuntimeSearchParam>> activeSearchParams, RestSearchParameterTypeEnum type,
-                                                                                     Collection<RT> paramCollection) {
-		for (Map.Entry<String, RuntimeSearchParam> nextEntry : activeSearchParams) {
-			String nextParamName = nextEntry.getKey();
+	private <RT extends BaseResourceIndexedSearchParam> void findMissingSearchParams(PartitionSettings thePartitionSettings, ModelConfig theModelConfig, ResourceTable theEntity, ResourceSearchParams activeSearchParams, RestSearchParameterTypeEnum type,
+																												Collection<RT> paramCollection) {
+		for (String nextParamName : activeSearchParams.getSearchParamNames()) {
 			if (nextParamName == null || nextParamName.startsWith("_")) {
 				continue;
 			}
 
-			if (nextEntry.getValue().getParamType() == type) {
+			RuntimeSearchParam searchParam = activeSearchParams.get(nextParamName);
+			if (searchParam.getParamType() == type) {
 				boolean haveParam = false;
 				for (BaseResourceIndexedSearchParam nextParam : paramCollection) {
 					if (nextParam.getParamName().equals(nextParamName)) {
@@ -394,7 +392,7 @@ public final class ResourceIndexedSearchParams {
 							param = new ResourceIndexedSearchParamUri();
 							break;
 						case SPECIAL:
-							if (BaseSearchParamExtractor.COORDS_INDEX_PATHS.contains(nextEntry.getValue().getPath())) {
+							if (BaseSearchParamExtractor.COORDS_INDEX_PATHS.contains(searchParam.getPath())) {
 								param = new ResourceIndexedSearchParamCoords();
 								break;
 							} else {

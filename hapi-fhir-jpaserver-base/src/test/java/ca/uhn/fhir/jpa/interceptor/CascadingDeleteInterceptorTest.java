@@ -106,7 +106,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 		DaoRegistry mockDaoRegistry = mock(DaoRegistry.class);
 		IFhirResourceDao mockResourceDao = mock (IFhirResourceDao.class);
 		IBaseResource mockResource = mock(IBaseResource.class);
-		CascadingDeleteInterceptor aDeleteInterceptor = new CascadingDeleteInterceptor(myFhirCtx, mockDaoRegistry, myInterceptorBroadcaster);
+		CascadingDeleteInterceptor aDeleteInterceptor = new CascadingDeleteInterceptor(myFhirContext, mockDaoRegistry, myInterceptorBroadcaster);
 		ourRestServer.getInterceptorService().unregisterInterceptor(myDeleteInterceptor);
 		ourRestServer.getInterceptorService().registerInterceptor(aDeleteInterceptor);
 		when(mockDaoRegistry.getResourceDao(any(String.class))).thenReturn(mockResourceDao);
@@ -143,7 +143,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 			fail();
 		} catch (ResourceVersionConflictException e) {
 			// good
-			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+			ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 		}
 	}
 
@@ -171,7 +171,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 			myClient.delete().resourceById(myPatientId).execute();
 			fail();
 		} catch (ResourceVersionConflictException e) {
-			String output = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome());
+			String output = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome());
 			ourLog.info(output);
 			assertThat(output, containsString("Note that cascading deletes are not active for this request. You can enable cascading deletes"));
 		}

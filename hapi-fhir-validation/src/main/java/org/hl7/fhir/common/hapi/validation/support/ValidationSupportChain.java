@@ -8,6 +8,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.i18n.Msg;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -21,6 +22,7 @@ import java.util.Set;
 import java.util.function.Function;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ValidationSupportChain implements IValidationSupport {
 
@@ -134,7 +136,7 @@ public class ValidationSupportChain implements IValidationSupport {
 
 		if (theValidationSupport.getFhirContext() == null) {
 			String message = "Can not add validation support: getFhirContext() returns null";
-			throw new ConfigurationException(message);
+			throw new ConfigurationException(Msg.code(708) + message);
 		}
 
 		FhirContext existingFhirContext = getFhirContext();
@@ -143,7 +145,7 @@ public class ValidationSupportChain implements IValidationSupport {
 			FhirVersionEnum existingVersion = existingFhirContext.getVersion().getVersion();
 			if (!existingVersion.equals(newVersion)) {
 				String message = "Trying to add validation support of version " + newVersion + " to chain with " + myChain.size() + " entries of version " + existingVersion;
-				throw new ConfigurationException(message);
+				throw new ConfigurationException(Msg.code(709) + message);
 			}
 		}
 
@@ -277,14 +279,12 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	@Override
-	public CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public CodeValidationResult validateCode(@Nonnull ValidationSupportContext theValidationSupportContext, @Nonnull ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		for (IValidationSupport next : myChain) {
-			if (isBlank(theValueSetUrl) || next.isValueSetSupported(theValidationSupportContext, theValueSetUrl)) {
-				if (theOptions.isInferSystem() || (theCodeSystem != null && next.isCodeSystemSupported(theValidationSupportContext, theCodeSystem))) {
-					CodeValidationResult retVal = next.validateCode(theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, theValueSetUrl);
-					if (retVal != null) {
-						return retVal;
-					}
+			if ((isBlank(theValueSetUrl) && next.isCodeSystemSupported(theValidationSupportContext, theCodeSystem)) || (isNotBlank(theValueSetUrl) && next.isValueSetSupported(theValidationSupportContext, theValueSetUrl))) {
+				CodeValidationResult retVal = next.validateCode(theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, theValueSetUrl);
+				if (retVal != null) {
+					return retVal;
 				}
 			}
 		}

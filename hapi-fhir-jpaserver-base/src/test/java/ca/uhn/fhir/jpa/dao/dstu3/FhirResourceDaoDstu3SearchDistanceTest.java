@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.CoordCalculatorTest;
@@ -39,7 +40,7 @@ public class FhirResourceDaoDstu3SearchDistanceTest extends BaseJpaDstu3Test {
 		SearchParameterMap map = myMatchUrlService.translateMatchUrl(
 			"Location?" +
 				Location.SP_NEAR + "=" + latitude + ":" + longitude,
-			myFhirCtx.getResourceDefinition("Location"));
+			myFhirContext.getResourceDefinition("Location"));
 
 		List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
 		assertThat(ids, contains(locId));
@@ -59,7 +60,7 @@ public class FhirResourceDaoDstu3SearchDistanceTest extends BaseJpaDstu3Test {
 				Location.SP_NEAR + "=" + latitude + ":" + longitude +
 				"&" +
 				Location.SP_NEAR_DISTANCE + "=0||",
-			myFhirCtx.getResourceDefinition("Location"));
+			myFhirContext.getResourceDefinition("Location"));
 
 		List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
 		assertThat(ids, contains(locId));
@@ -80,7 +81,7 @@ public class FhirResourceDaoDstu3SearchDistanceTest extends BaseJpaDstu3Test {
 				"Location?" +
 					Location.SP_NEAR + "=" + CoordCalculatorTest.LATITUDE_CHIN + ":" + CoordCalculatorTest.LONGITUDE_CHIN +
 					"&" +
-					Location.SP_NEAR_DISTANCE + "=" + bigEnoughDistance + "|http://unitsofmeasure.org|km", myFhirCtx.getResourceDefinition("Location"));
+					Location.SP_NEAR_DISTANCE + "=" + bigEnoughDistance + "|http://unitsofmeasure.org|km", myFhirContext.getResourceDefinition("Location"));
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
 			assertThat(ids, contains(locId));
@@ -92,7 +93,7 @@ public class FhirResourceDaoDstu3SearchDistanceTest extends BaseJpaDstu3Test {
 				"Location?" +
 					Location.SP_NEAR + "=" + CoordCalculatorTest.LATITUDE_CHIN + ":" + CoordCalculatorTest.LONGITUDE_CHIN +
 					"&" +
-					Location.SP_NEAR_DISTANCE + "=" + tooSmallDistance + "|http://unitsofmeasure.org|km", myFhirCtx.getResourceDefinition("Location"));
+					Location.SP_NEAR_DISTANCE + "=" + tooSmallDistance + "|http://unitsofmeasure.org|km", myFhirContext.getResourceDefinition("Location"));
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
 			assertThat(ids.size(), is(0));
@@ -116,7 +117,7 @@ public class FhirResourceDaoDstu3SearchDistanceTest extends BaseJpaDstu3Test {
 			myLocationDao.search(map);
 			fail();
 		} catch (InvalidDataAccessApiUsageException e) {
-			assertEquals("Invalid position format '" + theCoords + "'.  Required format is 'latitude:longitude'", e.getCause().getMessage());
+			assertEquals(Msg.code(1228) + "Invalid position format '" + theCoords + "'.  Required format is 'latitude:longitude'", e.getCause().getMessage());
 		}
 	}
 
@@ -129,7 +130,7 @@ public class FhirResourceDaoDstu3SearchDistanceTest extends BaseJpaDstu3Test {
 			myLocationDao.search(map);
 			fail();
 		} catch (InvalidDataAccessApiUsageException e) {
-			assertEquals("Invalid position format ':2'.  Both latitude and longitude must be provided.", e.getCause().getMessage());
+			assertEquals(Msg.code(1229) + "Invalid position format ':2'.  Both latitude and longitude must be provided.", e.getCause().getMessage());
 		}
 	}
 

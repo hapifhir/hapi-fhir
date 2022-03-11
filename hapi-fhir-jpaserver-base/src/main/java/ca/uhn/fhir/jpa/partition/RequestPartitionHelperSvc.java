@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.partition;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -145,7 +146,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 		RequestPartitionId requestPartitionId;
 		requestPartitionId = getSystemRequestPartitionId(theRequest);
 		if (theNonPartitionableResource && !requestPartitionId.isDefaultPartition()) {
-			throw new InternalErrorException("System call is attempting to write a non-partitionable resource to a partition! This is a bug!");
+			throw new InternalErrorException(Msg.code(1315) + "System call is attempting to write a non-partitionable resource to a partition! This is a bug!");
 		}
 		return requestPartitionId;
 	}
@@ -295,7 +296,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 					partition = myPartitionConfigSvc.getPartitionById(id);
 				} catch (IllegalArgumentException e) {
 					String msg = myFhirContext.getLocalizer().getMessage(RequestPartitionHelperSvc.class, "unknownPartitionId", theRequestPartitionId.getPartitionIds().get(i));
-					throw new ResourceNotFoundException(msg);
+					throw new ResourceNotFoundException(Msg.code(1316) + msg);
 				}
 			}
 
@@ -334,7 +335,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 				partition = myPartitionConfigSvc.getPartitionByName(theRequestPartitionId.getPartitionNames().get(i));
 			} catch (IllegalArgumentException e) {
 				String msg = myFhirContext.getLocalizer().getMessage(RequestPartitionHelperSvc.class, "unknownPartitionName", theRequestPartitionId.getPartitionNames().get(i));
-				throw new ResourceNotFoundException(msg);
+				throw new ResourceNotFoundException(Msg.code(1317) + msg);
 			}
 
 			if (theRequestPartitionId.hasPartitionIds()) {
@@ -377,7 +378,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 
 			if (myNonPartitionableResourceNames.contains(theResourceName)) {
 				String msg = myFhirContext.getLocalizer().getMessageSanitized(RequestPartitionHelperSvc.class, "nonDefaultPartitionSelectedForNonPartitionable", theResourceName);
-				throw new UnprocessableEntityException(msg);
+				throw new UnprocessableEntityException(Msg.code(1318) + msg);
 			}
 
 		}
@@ -386,13 +387,13 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 
 	private void validateRequestPartitionNotNull(RequestPartitionId theRequestPartitionId, Pointcut theThePointcut) {
 		if (theRequestPartitionId == null) {
-			throw new InternalErrorException("No interceptor provided a value for pointcut: " + theThePointcut);
+			throw new InternalErrorException(Msg.code(1319) + "No interceptor provided a value for pointcut: " + theThePointcut);
 		}
 	}
 
 	private void validateSinglePartitionIdOrNameForCreate(@Nullable List<?> thePartitionIds) {
 		if (thePartitionIds != null && thePartitionIds.size() != 1) {
-			throw new InternalErrorException("RequestPartitionId must contain a single partition for create operations, found: " + thePartitionIds);
+			throw new InternalErrorException(Msg.code(1320) + "RequestPartitionId must contain a single partition for create operations, found: " + thePartitionIds);
 		}
 	}
 }

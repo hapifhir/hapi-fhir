@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.method;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -95,7 +96,7 @@ public class MethodUtil {
 							theMethod = theMethod.getDeclaringClass().getSuperclass().getMethod(theMethod.getName(), parameterTypes);
 							parameterType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(theMethod, paramIndex);
 						} catch (NoSuchMethodException e) {
-							throw new ConfigurationException("A method with name '" + theMethod.getName() + "' does not exist for super class '"
+							throw new ConfigurationException(Msg.code(400) + "A method with name '" + theMethod.getName() + "' does not exist for super class '"
 								+ theMethod.getDeclaringClass().getSuperclass() + "'");
 						}
 					}
@@ -108,7 +109,7 @@ public class MethodUtil {
 					declaredParameterType = parameterType;
 				}
 				if (Collection.class.isAssignableFrom(parameterType)) {
-					throw new ConfigurationException("Argument #" + paramIndex + " of Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName()
+					throw new ConfigurationException(Msg.code(401) + "Argument #" + paramIndex + " of Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName()
 						+ "' is of an invalid generic type (can not be a collection of a collection of a collection)");
 				}
 
@@ -182,7 +183,7 @@ public class MethodUtil {
 							instantiableCollectionType = null;
 							specType = String.class;
 						} else if ((parameterType != Include.class) || innerCollectionType == null || outerCollectionType != null) {
-							throw new ConfigurationException("Method '" + theMethod.getName() + "' is annotated with @" + IncludeParam.class.getSimpleName() + " but has a type other than Collection<"
+							throw new ConfigurationException(Msg.code(402) + "Method '" + theMethod.getName() + "' is annotated with @" + IncludeParam.class.getSimpleName() + " but has a type other than Collection<"
 								+ Include.class.getSimpleName() + ">");
 						} else {
 							instantiableCollectionType = (Class<? extends Collection<Include>>) CollectionBinder.getInstantiableCollectionType(innerCollectionType, "Method '" + theMethod.getName() + "'");
@@ -209,7 +210,7 @@ public class MethodUtil {
 							b.append(" but has a type that is not an implementation of ");
 							b.append(IBaseResource.class.getCanonicalName());
 							b.append(" or String or byte[]");
-							throw new ConfigurationException(b.toString());
+							throw new ConfigurationException(Msg.code(403) + b.toString());
 						}
 						boolean methodIsOperation = theMethod.getAnnotation(Operation.class) != null;
 						boolean methodIsPatch = theMethod.getAnnotation(Patch.class) != null;
@@ -243,8 +244,7 @@ public class MethodUtil {
 					} else if (nextAnnotation instanceof OperationParam) {
 						Operation op = theMethod.getAnnotation(Operation.class);
 						if (op == null) {
-							throw new ConfigurationException(
-								"@OperationParam detected on method that is not annotated with @Operation: " + theMethod.toGenericString());
+							throw new ConfigurationException(Msg.code(404) + "@OperationParam detected on method that is not annotated with @Operation: " + theMethod.toGenericString());
 						}
 
 						OperationParam operationParam = (OperationParam) nextAnnotation;
@@ -260,14 +260,13 @@ public class MethodUtil {
 
 							Class<?> newParameterType = elementDefinition.getImplementingClass();
 							if (!declaredParameterType.isAssignableFrom(newParameterType)) {
-								throw new ConfigurationException("Non assignable parameter typeName=\"" + operationParam.typeName() + "\" specified on method " + theMethod);
+								throw new ConfigurationException(Msg.code(405) + "Non assignable parameter typeName=\"" + operationParam.typeName() + "\" specified on method " + theMethod);
 							}
 							parameterType = newParameterType;
 						}
 					} else if (nextAnnotation instanceof Validate.Mode) {
 						if (parameterType.equals(ValidationModeEnum.class) == false) {
-							throw new ConfigurationException(
-								"Parameter annotated with @" + Validate.class.getSimpleName() + "." + Validate.Mode.class.getSimpleName() + " must be of type " + ValidationModeEnum.class.getName());
+							throw new ConfigurationException(Msg.code(406) + "Parameter annotated with @" + Validate.class.getSimpleName() + "." + Validate.Mode.class.getSimpleName() + " must be of type " + ValidationModeEnum.class.getName());
 						}
 						String description = ParametersUtil.extractDescription(nextParameterAnnotations);
 						List<String> examples = ParametersUtil.extractExamples(nextParameterAnnotations);
@@ -291,8 +290,7 @@ public class MethodUtil {
 						});
 					} else if (nextAnnotation instanceof Validate.Profile) {
 						if (parameterType.equals(String.class) == false) {
-							throw new ConfigurationException(
-								"Parameter annotated with @" + Validate.class.getSimpleName() + "." + Validate.Profile.class.getSimpleName() + " must be of type " + String.class.getName());
+							throw new ConfigurationException(Msg.code(407) + "Parameter annotated with @" + Validate.class.getSimpleName() + "." + Validate.Profile.class.getSimpleName() + " must be of type " + String.class.getName());
 						}
 						String description = ParametersUtil.extractDescription(nextParameterAnnotations);
 						List<String> examples = ParametersUtil.extractExamples(nextParameterAnnotations);
@@ -316,8 +314,7 @@ public class MethodUtil {
 			}
 
 			if (param == null) {
-				throw new ConfigurationException(
-					"Parameter #" + ((paramIndex + 1)) + "/" + (parameterTypes.length) + " of method '" + theMethod.getName() + "' on type '" + theMethod.getDeclaringClass().getCanonicalName()
+				throw new ConfigurationException(Msg.code(408) + "Parameter #" + ((paramIndex + 1)) + "/" + (parameterTypes.length) + " of method '" + theMethod.getName() + "' on type '" + theMethod.getDeclaringClass().getCanonicalName()
 						+ "' has no recognized FHIR interface parameter nextParameterAnnotations. Don't know how to handle this parameter");
 			}
 

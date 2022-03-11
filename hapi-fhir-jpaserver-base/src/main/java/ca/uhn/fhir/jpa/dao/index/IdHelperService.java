@@ -21,8 +21,10 @@ package ca.uhn.fhir.jpa.dao.index;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -30,6 +32,7 @@ import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.cross.ResourceLookup;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -42,8 +45,6 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.MultimapBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,9 +95,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * </p>
  */
 @Service
-public class IdHelperService {
+public class IdHelperService implements IIdHelperService {
 	public static final Predicate[] EMPTY_PREDICATE_ARRAY = new Predicate[0];
-	private static final String RESOURCE_PID = "RESOURCE_PID";
+	public static final String RESOURCE_PID = "RESOURCE_PID";
 	@Autowired
 	protected IForcedIdDao myForcedIdDao;
 	@Autowired
@@ -118,16 +119,13 @@ public class IdHelperService {
 		myDontCheckActiveTransactionForUnitTest = theDontCheckActiveTransactionForUnitTest;
 	}
 
-	public void delete(ForcedId forcedId) {
-		myForcedIdDao.deleteByPid(forcedId.getId());
-	}
-
 	/**
 	 * Given a forced ID, convert it to it's Long value. Since you are allowed to use string IDs for resources, we need to
 	 * convert those to the underlying Long values that are stored, for lookup and comparison purposes.
 	 *
 	 * @throws ResourceNotFoundException If the ID can not be found
 	 */
+	@Override
 	@Nonnull
 	public IResourceLookup resolveResourceIdentity(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theResourceId) throws ResourceNotFoundException {
 		assert myDontCheckActiveTransactionForUnitTest || TransactionSynchronizationManager.isSynchronizationActive();
@@ -139,7 +137,7 @@ public class IdHelperService {
 
 		// We only pass 1 input in so only 0..1 will come back
 		if (matches.isEmpty() || !matches.containsKey(theResourceId)) {
-			throw new ResourceNotFoundException(id);
+			throw new ResourceNotFoundException(Msg.code(2001) + "Resource " + id + " is not known");
 		}
 
 		if (matches.size() > 1 || matches.get(theResourceId).size() > 1) {
@@ -149,7 +147,7 @@ public class IdHelperService {
 			 *  2. The unique constraint on this column-pair has been dropped
 			 */
 			String msg = myFhirCtx.getLocalizer().getMessage(IdHelperService.class, "nonUniqueForcedId");
-			throw new PreconditionFailedException(msg);
+			throw new PreconditionFailedException(Msg.code(1099) + msg);
 		}
 
 		return matches.get(theResourceId).get(0);
@@ -160,6 +158,7 @@ public class IdHelperService {
 	 * If any resource is not found, it will throw ResourceNotFound exception
 	 * (and no map will be returned)
 	 */
+	@Override
 	@Nonnull
 	public Map<String, ResourcePersistentId> resolveResourcePersistentIds(@Nonnull RequestPartitionId theRequestPartitionId,
 																								 String theResourceType,
@@ -190,7 +189,7 @@ public class IdHelperService {
 						// fetches from cache using a function that checks cache first...
 						List<ResourcePersistentId> resolvedIds = resolveResourcePersistentIdsWithCache(theRequestPartitionId, ids);
 						if (resolvedIds.isEmpty()) {
-							throw new ResourceNotFoundException(ids.get(0));
+							throw new ResourceNotFoundException(Msg.code(1100) + ids.get(0));
 						}
 						return resolvedIds.get(0);
 					});
@@ -207,6 +206,7 @@ public class IdHelperService {
 	 *
 	 * @throws ResourceNotFoundException If the ID can not be found
 	 */
+	@Override
 	@Nonnull
 	public ResourcePersistentId resolveResourcePersistentIds(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theId) {
 		Validate.notNull(theId, "theId must not be null");
@@ -224,6 +224,7 @@ public class IdHelperService {
 	 * <p>
 	 * In {@link ca.uhn.fhir.jpa.api.config.DaoConfig.ClientIdStrategyEnum#ANY} mode it will always return true.
 	 */
+	@Override
 	public boolean idRequiresForcedId(String theId) {
 		return myDaoConfig.getResourceClientIdStrategy() == DaoConfig.ClientIdStrategyEnum.ANY || !isValidPid(theId);
 	}
@@ -239,97 +240,123 @@ public class IdHelperService {
 	 * This implementation will always try to use a cache for performance, meaning that it can resolve resources that
 	 * are deleted (but note that forced IDs can't change, so the cache can't return incorrect results)
 	 */
+	@Override
 	@Nonnull
 	public List<ResourcePersistentId> resolveResourcePersistentIdsWithCache(RequestPartitionId theRequestPartitionId, List<IIdType> theIds) {
+		boolean onlyForcedIds = false;
+		return resolveResourcePersistentIdsWithCache(theRequestPartitionId, theIds, onlyForcedIds);
+	}
+
+	/**
+	 * Given a collection of resource IDs (resource type + id), resolves the internal persistent IDs.
+	 * <p>
+	 * This implementation will always try to use a cache for performance, meaning that it can resolve resources that
+	 * are deleted (but note that forced IDs can't change, so the cache can't return incorrect results)
+	 *
+	 * @param theOnlyForcedIds If <code>true</code>, resources which are not existing forced IDs will not be resolved
+	 */
+	@Override
+	@Nonnull
+	public List<ResourcePersistentId> resolveResourcePersistentIdsWithCache(RequestPartitionId theRequestPartitionId, List<IIdType> theIds, boolean theOnlyForcedIds) {
 		assert myDontCheckActiveTransactionForUnitTest || TransactionSynchronizationManager.isSynchronizationActive();
-
-		for (IIdType id : theIds) {
-			if (!id.hasIdPart()) {
-				throw new InvalidRequestException("Parameter value missing in request");
-			}
-		}
-
-		if (theIds.isEmpty()) {
-			return Collections.emptyList();
-		}
 
 		List<ResourcePersistentId> retVal = new ArrayList<>(theIds.size());
 
-		Set<IIdType> idsToCheck = new HashSet<>(theIds.size());
-		for (IIdType nextId : theIds) {
-			if (myDaoConfig.getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ANY) {
-				if (nextId.isIdPartValidLong()) {
-					retVal.add(new ResourcePersistentId(nextId.getIdPartAsLong()).setAssociatedResourceId(nextId));
-					continue;
-				}
+		for (IIdType id : theIds) {
+			if (!id.hasIdPart()) {
+				throw new InvalidRequestException(Msg.code(1101) + "Parameter value missing in request");
 			}
-
-			String key = toForcedIdToPidKey(theRequestPartitionId, nextId.getResourceType(), nextId.getIdPart());
-			ResourcePersistentId cachedId = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key);
-			if (cachedId != null) {
-				retVal.add(cachedId);
-				continue;
-			}
-
-			idsToCheck.add(nextId);
 		}
 
-		if (idsToCheck.size() > 0) {
-			CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
-			CriteriaQuery<ForcedId> criteriaQuery = cb.createQuery(ForcedId.class);
-			Root<ForcedId> from = criteriaQuery.from(ForcedId.class);
-
-			List<Predicate> predicates = new ArrayList<>(idsToCheck.size());
-			for (IIdType next : idsToCheck) {
-
-				List<Predicate> andPredicates = new ArrayList<>(3);
-
-				if (isNotBlank(next.getResourceType())) {
-					Predicate typeCriteria = cb.equal(from.get("myResourceType").as(String.class), next.getResourceType());
-					andPredicates.add(typeCriteria);
-				}
-
-				Predicate idCriteria = cb.equal(from.get("myForcedId").as(String.class), next.getIdPart());
-				andPredicates.add(idCriteria);
-
-				if (theRequestPartitionId.isDefaultPartition() && myPartitionSettings.getDefaultPartitionId() == null) {
-					Predicate partitionIdCriteria = cb.isNull(from.get("myPartitionIdValue").as(Integer.class));
-					andPredicates.add(partitionIdCriteria);
-				} else if (!theRequestPartitionId.isAllPartitions()) {
-					List<Integer> partitionIds = theRequestPartitionId.getPartitionIds();
-					partitionIds = replaceDefaultPartitionIdIfNonNull(myPartitionSettings, partitionIds);
-
-					if (partitionIds.size() > 1) {
-						Predicate partitionIdCriteria = from.get("myPartitionIdValue").as(Integer.class).in(partitionIds);
-						andPredicates.add(partitionIdCriteria);
-					} else {
-						Predicate partitionIdCriteria = cb.equal(from.get("myPartitionIdValue").as(Integer.class), partitionIds.get(0));
-						andPredicates.add(partitionIdCriteria);
+		if (!theIds.isEmpty()) {
+			Set<IIdType> idsToCheck = new HashSet<>(theIds.size());
+			for (IIdType nextId : theIds) {
+				if (myDaoConfig.getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ANY) {
+					if (nextId.isIdPartValidLong()) {
+						if (!theOnlyForcedIds) {
+							retVal.add(new ResourcePersistentId(nextId.getIdPartAsLong()).setAssociatedResourceId(nextId));
+						}
+						continue;
 					}
 				}
 
-				predicates.add(cb.and(andPredicates.toArray(EMPTY_PREDICATE_ARRAY)));
-			}
-
-			criteriaQuery.where(cb.or(predicates.toArray(EMPTY_PREDICATE_ARRAY)));
-
-			TypedQuery<ForcedId> query = myEntityManager.createQuery(criteriaQuery);
-			List<ForcedId> results = query.getResultList();
-			for (ForcedId nextId : results) {
-				// Check if the nextId has a resource ID. It may have a null resource ID if a commit is still pending.
-				if (nextId.getResourceId() != null) {
-					ResourcePersistentId persistentId = new ResourcePersistentId(nextId.getResourceId());
-					populateAssociatedResourceId(nextId.getResourceType(), nextId.getForcedId(), persistentId);
-					retVal.add(persistentId);
-
-					String key = toForcedIdToPidKey(theRequestPartitionId, nextId.getResourceType(), nextId.getForcedId());
-					myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, persistentId);
+				String key = toForcedIdToPidKey(theRequestPartitionId, nextId.getResourceType(), nextId.getIdPart());
+				ResourcePersistentId cachedId = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key);
+				if (cachedId != null) {
+					retVal.add(cachedId);
+					continue;
 				}
-			}
 
+				idsToCheck.add(nextId);
+			}
+			new QueryChunker<IIdType>().chunk(idsToCheck, SearchBuilder.getMaximumPageSize() / 2, ids -> doResolvePersistentIds(theRequestPartitionId, ids, retVal));
 		}
 
 		return retVal;
+	}
+
+	private void doResolvePersistentIds(RequestPartitionId theRequestPartitionId, List<IIdType> theIds, List<ResourcePersistentId> theOutputListToPopulate) {
+		CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<ForcedId> criteriaQuery = cb.createQuery(ForcedId.class);
+		Root<ForcedId> from = criteriaQuery.from(ForcedId.class);
+
+		List<Predicate> predicates = new ArrayList<>(theIds.size());
+		for (IIdType next : theIds) {
+
+			List<Predicate> andPredicates = new ArrayList<>(3);
+
+			if (isNotBlank(next.getResourceType())) {
+				Predicate typeCriteria = cb.equal(from.get("myResourceType").as(String.class), next.getResourceType());
+				andPredicates.add(typeCriteria);
+			}
+
+			Predicate idCriteria = cb.equal(from.get("myForcedId").as(String.class), next.getIdPart());
+			andPredicates.add(idCriteria);
+			getOptionalPartitionPredicate(theRequestPartitionId, cb, from).ifPresent(andPredicates::add);
+			predicates.add(cb.and(andPredicates.toArray(EMPTY_PREDICATE_ARRAY)));
+		}
+
+		criteriaQuery.where(cb.or(predicates.toArray(EMPTY_PREDICATE_ARRAY)));
+
+		TypedQuery<ForcedId> query = myEntityManager.createQuery(criteriaQuery);
+		List<ForcedId> results = query.getResultList();
+		for (ForcedId nextId : results) {
+			// Check if the nextId has a resource ID. It may have a null resource ID if a commit is still pending.
+			if (nextId.getResourceId() != null) {
+				ResourcePersistentId persistentId = new ResourcePersistentId(nextId.getResourceId());
+				populateAssociatedResourceId(nextId.getResourceType(), nextId.getForcedId(), persistentId);
+				theOutputListToPopulate.add(persistentId);
+
+				String key = toForcedIdToPidKey(theRequestPartitionId, nextId.getResourceType(), nextId.getForcedId());
+				myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, persistentId);
+			}
+		}
+	}
+
+	/**
+	 * Return optional predicate for searching on forcedId
+	 * 1. If the partition mode is ALLOWED_UNQUALIFIED, the return optional predicate will be empty, so search is across all partitions.
+	 * 2. If it is default partition and default partition id is null, then return predicate for null partition.
+	 * 3. If the requested partition search is not all partition, return the request partition as predicate.
+	 */
+	private Optional<Predicate> getOptionalPartitionPredicate(RequestPartitionId theRequestPartitionId, CriteriaBuilder cb, Root<ForcedId> from) {
+		if (myPartitionSettings.isAllowUnqualifiedCrossPartitionReference()) {
+			return Optional.empty();
+		} else if (theRequestPartitionId.isDefaultPartition() && myPartitionSettings.getDefaultPartitionId() == null) {
+			Predicate partitionIdCriteria = cb.isNull(from.get("myPartitionIdValue").as(Integer.class));
+			return Optional.of(partitionIdCriteria);
+		} else if (!theRequestPartitionId.isAllPartitions()) {
+			List<Integer> partitionIds = theRequestPartitionId.getPartitionIds();
+			partitionIds = replaceDefaultPartitionIdIfNonNull(myPartitionSettings, partitionIds);
+			if (partitionIds.size() > 1) {
+				Predicate partitionIdCriteria = from.get("myPartitionIdValue").as(Integer.class).in(partitionIds);
+				return Optional.of(partitionIdCriteria);
+			} else if (partitionIds.size() == 1){
+				Predicate partitionIdCriteria = cb.equal(from.get("myPartitionIdValue").as(Integer.class), partitionIds.get(0));
+				return Optional.of(partitionIdCriteria);
+			}
+		}
+		return Optional.empty();
 	}
 
 	private void populateAssociatedResourceId(String nextResourceType, String forcedId, ResourcePersistentId persistentId) {
@@ -342,6 +369,7 @@ public class IdHelperService {
 	 * Given a persistent ID, returns the associated resource ID
 	 */
 	@Nonnull
+	@Override
 	public IIdType translatePidIdToForcedId(FhirContext theCtx, String theResourceType, ResourcePersistentId theId) {
 		if (theId.getAssociatedResourceId() != null) {
 			return theId.getAssociatedResourceId();
@@ -359,6 +387,7 @@ public class IdHelperService {
 		return retVal;
 	}
 
+	@Override
 	public Optional<String> translatePidIdToForcedIdWithCache(ResourcePersistentId theId) {
 		return myMemoryCacheService.get(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theId.getIdAsLong(), pid -> myForcedIdDao.findByResourcePid(pid).map(t -> t.getForcedId()));
 	}
@@ -521,31 +550,7 @@ public class IdHelperService {
 		}
 	}
 
-	/**
-	 * Given a set of PIDs, return a set of public FHIR Resource IDs.
-	 * This function will resolve a forced ID if it resolves, and if it fails to resolve to a forced it, will just return the pid
-	 * Example:
-	 * Let's say we have Patient/1(pid == 1), Patient/pat1 (pid == 2), Patient/3 (pid == 3), their pids would resolve as follows:
-	 * <p>
-	 * [1,2,3] -> ["1","pat1","3"]
-	 *
-	 * @param thePids The Set of pids you would like to resolve to external FHIR Resource IDs.
-	 * @return A Set of strings representing the FHIR IDs of the pids.
-	 */
-	public Set<String> translatePidsToFhirResourceIds(Set<Long> thePids) {
-		assert myDontCheckActiveTransactionForUnitTest || TransactionSynchronizationManager.isSynchronizationActive();
-
-		Map<Long, Optional<String>> pidToForcedIdMap = translatePidsToForcedIds(thePids);
-
-		//If the result of the translation is an empty optional, it means there is no forced id, and we can use the PID as the resource ID.
-		Set<String> resolvedResourceIds = pidToForcedIdMap.entrySet().stream()
-			.map(entry -> entry.getValue().isPresent() ? entry.getValue().get() : entry.getKey().toString())
-			.collect(Collectors.toSet());
-
-		return resolvedResourceIds;
-
-	}
-
+	@Override
 	public Map<Long, Optional<String>> translatePidsToForcedIds(Set<Long> thePids) {
 		assert myDontCheckActiveTransactionForUnitTest || TransactionSynchronizationManager.isSynchronizationActive();
 
@@ -580,76 +585,9 @@ public class IdHelperService {
 	}
 
 	/**
-	 * @deprecated This method doesn't take a partition ID as input, so it is unsafe. It
-	 * should be reworked to include the partition ID before any new use is incorporated
-	 */
-	@Deprecated
-	@Nullable
-	public Long getPidOrNull(IBaseResource theResource) {
-		assert myDontCheckActiveTransactionForUnitTest || TransactionSynchronizationManager.isSynchronizationActive();
-
-		IAnyResource anyResource = (IAnyResource) theResource;
-		Long retVal = (Long) anyResource.getUserData(RESOURCE_PID);
-		if (retVal == null) {
-			IIdType id = theResource.getIdElement();
-			try {
-				retVal = this.resolveResourcePersistentIds(RequestPartitionId.allPartitions(), id.getResourceType(), id.getIdPart()).getIdAsLong();
-			} catch (ResourceNotFoundException e) {
-				return null;
-			}
-		}
-		return retVal;
-	}
-
-	/**
-	 * @deprecated This method doesn't take a partition ID as input, so it is unsafe. It
-	 * should be reworked to include the partition ID before any new use is incorporated
-	 */
-	@Deprecated
-	@Nonnull
-	public Long getPidOrThrowException(IIdType theId) {
-		assert myDontCheckActiveTransactionForUnitTest || TransactionSynchronizationManager.isSynchronizationActive();
-
-		List<IIdType> ids = Collections.singletonList(theId);
-		List<ResourcePersistentId> resourcePersistentIds = this.resolveResourcePersistentIdsWithCache(RequestPartitionId.allPartitions(), ids);
-		return resourcePersistentIds.get(0).getIdAsLong();
-	}
-
-	/**
-	 * @deprecated This method doesn't take a partition ID as input, so it is unsafe. It
-	 * should be reworked to include the partition ID before any new use is incorporated
-	 */
-	@Deprecated
-	@Nonnull
-	public List<Long> getPidsOrThrowException(List<IIdType> theIds) {
-		assert myDontCheckActiveTransactionForUnitTest || TransactionSynchronizationManager.isSynchronizationActive();
-
-		List<ResourcePersistentId> resourcePersistentIds = this.resolveResourcePersistentIdsWithCache(RequestPartitionId.allPartitions(), theIds);
-		return resourcePersistentIds.stream().map(ResourcePersistentId::getIdAsLong).collect(Collectors.toList());
-	}
-
-	@Nonnull
-	public Long getPidOrThrowException(@Nonnull IAnyResource theResource) {
-		Long retVal = (Long) theResource.getUserData(RESOURCE_PID);
-		if (retVal == null) {
-			throw new IllegalStateException(
-				String.format("Unable to find %s in the user data for %s with ID %s", RESOURCE_PID, theResource, theResource.getId())
-			);
-		}
-		return retVal;
-	}
-
-	public IIdType resourceIdFromPidOrThrowException(Long thePid) {
-		Optional<ResourceTable> optionalResource = myResourceTableDao.findById(thePid);
-		if (!optionalResource.isPresent()) {
-			throw new ResourceNotFoundException("Requested resource not found");
-		}
-		return optionalResource.get().getIdDt().toVersionless();
-	}
-
-	/**
 	 * Pre-cache a PID-to-Resource-ID mapping for later retrieval by {@link #translatePidsToForcedIds(Set)} and related methods
 	 */
+	@Override
 	public void addResolvedPidToForcedId(ResourcePersistentId theResourcePersistentId, @Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, @Nullable String theForcedId, @Nullable Date theDeletedAt) {
 		if (theForcedId != null) {
 			if (theResourcePersistentId.getAssociatedResourceId() == null) {

@@ -20,6 +20,7 @@ package ca.uhn.fhir.model.dstu2;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import java.io.InputStream;
 import java.util.Date;
 
@@ -42,7 +43,7 @@ public class FhirDstu2 implements IFhirVersion {
 
 	@Override
 	public IFhirPath createFhirPathExecutor(FhirContext theFhirContext) {
-		throw new UnsupportedOperationException("FluentPath is not supported in DSTU2 contexts");
+		throw new UnsupportedOperationException(Msg.code(74) + "FluentPath is not supported in DSTU2 contexts");
 	}
 
 
@@ -73,7 +74,7 @@ public class FhirDstu2 implements IFhirVersion {
 			str = FhirDstu2.class.getResourceAsStream("ca/uhn/fhir/model/dstu2/fhirversion.properties");
 		}
 		if (str == null) {
-			throw new ConfigurationException("Can not find model property file on classpath: " + "/ca/uhn/fhir/model/dstu2/fhirversion.properties");
+			throw new ConfigurationException(Msg.code(75) + "Can not find model property file on classpath: " + "/ca/uhn/fhir/model/dstu2/fhirversion.properties");
 		}
 		return str;
 	}
@@ -100,7 +101,7 @@ public class FhirDstu2 implements IFhirVersion {
 
 	@Override
 	public IVersionSpecificBundleFactory newBundleFactory(FhirContext theContext) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(76));
 	}
 
 	@Override

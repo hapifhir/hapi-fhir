@@ -17,6 +17,7 @@ import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.binstore.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.binstore.BinaryStorageInterceptor;
+import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
@@ -51,7 +52,7 @@ import ca.uhn.fhir.jpa.dao.data.ITermConceptPropertyDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDesignationDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -87,9 +88,7 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.BasePagingProvider;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
-import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
-import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.validation.FhirValidator;
@@ -153,6 +152,7 @@ import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.RiskAssessment;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.ServiceRequest;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Substance;
@@ -168,15 +168,10 @@ import org.hl7.fhir.r5.utils.validation.constants.BindingKind;
 import org.hl7.fhir.r5.utils.validation.constants.CodedContentValidationPolicy;
 import org.hl7.fhir.r5.utils.validation.constants.ContainedReferenceValidationPolicy;
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.event.Level;
-import org.springframework.batch.core.repository.dao.JobExecutionDao;
-import org.springframework.batch.core.repository.dao.JobInstanceDao;
-import org.springframework.batch.core.repository.dao.MapJobExecutionDao;
-import org.springframework.batch.core.repository.dao.MapJobInstanceDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
@@ -205,8 +200,7 @@ import static org.mockito.Mockito.mock;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestR4Config.class})
 public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuilder {
-	private static IValidationSupport ourJpaValidationSupportChainR4;
-	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
+	public static final String MY_VALUE_SET = "my-value-set";
 
 	@Autowired
 	protected IPackageInstallerSvc myPackageInstallerSvc;
@@ -322,7 +316,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	protected EntityManager myEntityManager;
 	@Autowired
-	protected FhirContext myFhirCtx;
+	protected FhirContext myFhirContext;
 	@Autowired
 	@Qualifier("myGroupDaoR4")
 	protected IFhirResourceDao<Group> myGroupDao;
@@ -498,7 +492,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	protected DaoRegistry myDaoRegistry;
 	@Autowired
-	protected IdHelperService myIdHelperService;
+	protected IJpaIdHelperService myIdHelperService;
 	@Autowired
 	protected IBatchJobSubmitter myBatchJobSubmitter;
 	@Autowired
@@ -509,7 +503,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	private IValidationSupport myJpaValidationSupportChainR4;
 	private PerformanceTracingLoggingInterceptor myPerformanceTracingLoggingInterceptor;
 	@Autowired
-	private IBulkDataExportSvc myBulkDataExportSvc;
+	private IBulkDataExportJobSchedulingHelper myBulkDataScheduleHelper;
 
 	@AfterEach()
 	public void afterCleanupDao() {
@@ -519,6 +513,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
 		myDaoConfig.setSuppressUpdatesWithNoChange(new DaoConfig().isSuppressUpdatesWithNoChange());
 		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
+		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(new DaoConfig().isAutoCreatePlaceholderReferenceTargets());
 
 		myPagingProvider.setDefaultPageSize(BasePagingProvider.DEFAULT_DEFAULT_PAGE_SIZE);
 		myPagingProvider.setMaximumPageSize(BasePagingProvider.DEFAULT_MAX_PAGE_SIZE);
@@ -539,12 +534,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		TermConceptMappingSvcImpl.clearOurLastResultsFromTranslationWithReverseCache();
 		TermDeferredStorageSvcImpl termDeferredStorageSvc = AopTestUtils.getTargetObject(myTerminologyDeferredStorageSvc);
 		termDeferredStorageSvc.clearDeferred();
-	}
-
-	@AfterEach()
-	public void afterGrabCaches() {
-		ourValueSetDao = myValueSetDao;
-		ourJpaValidationSupportChainR4 = myJpaValidationSupportChainR4;
 	}
 
 	@BeforeEach
@@ -573,12 +562,12 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		runInTransaction(() -> {
 			myMdmLinkDao.deleteAll();
 		});
-		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataExportSvc);
+		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
 	}
 
 	@BeforeEach
 	public void beforeResetConfig() {
-		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
+		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
 		myValidationSettings.setLocalReferenceValidationDefaultPolicy(new ValidationSettings().getLocalReferenceValidationDefaultPolicy());
 	}
 
@@ -595,17 +584,12 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	}
 
 	protected String encode(IBaseResource theResource) {
-		return myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(theResource);
+		return myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(theResource);
 	}
 
 	@Override
 	public FhirContext getFhirContext() {
-		return myFhirCtx;
-	}
-
-	@Override
-	protected FhirContext getContext() {
-		return myFhirCtx;
+		return myFhirContext;
 	}
 
 	@Override
@@ -614,25 +598,25 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	}
 
 	protected <T extends IBaseResource> T loadResourceFromClasspath(Class<T> type, String resourceName) throws IOException {
-		return ClasspathUtil.loadResource(myFhirCtx, type, resourceName);
+		return ClasspathUtil.loadResource(myFhirContext, type, resourceName);
 	}
 
 	protected void validate(IBaseResource theResource) {
-		FhirValidator validatorModule = myFhirCtx.newValidator();
+		FhirValidator validatorModule = myFhirContext.newValidator();
 		FhirInstanceValidator instanceValidator = new FhirInstanceValidator(myValidationSupport);
 		instanceValidator.setBestPracticeWarningLevel(BestPracticeWarningLevel.Ignore);
 		instanceValidator.setValidatorPolicyAdvisor(new ValidationPolicyAdvisor());
 		validatorModule.registerValidatorModule(instanceValidator);
 		ValidationResult result = validatorModule.validateWithResult(theResource);
 		if (!result.isSuccessful()) {
-			fail(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
+			fail(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
 		}
 	}
 
 	@SuppressWarnings("unchecked")
 	protected void upload(String theClasspath) throws IOException {
 		String resource = loadResource(theClasspath);
-		IParser parser = EncodingEnum.detectEncoding(resource).newParser(myFhirCtx);
+		IParser parser = EncodingEnum.detectEncoding(resource).newParser(myFhirContext);
 		IBaseResource resourceParsed = parser.parseResource(resource);
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceParsed.getIdElement().getResourceType());
 		dao.update(resourceParsed);
@@ -702,7 +686,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 		Optional<ValueSet.ValueSetExpansionContainsComponent> first = stream.findFirst();
 		if (!first.isPresent()) {
-			String expandedValueSetString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(theValueSet);
+			String expandedValueSetString = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(theValueSet);
 			String failureMessage = String.format("Expanded ValueSet %s did not contain concept [%s|%s|%s] with [%d] designations. Outcome:\n%s", theValueSet.getId(), theSystem, theCode, theDisplay, theDesignationCount, expandedValueSetString);
 			fail(failureMessage);
 			return null;
@@ -719,6 +703,38 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 			List<TermValueSetConcept> concepts = valueSet.getConcepts();
 			return concepts.stream().map(concept -> concept.getCode()).collect(Collectors.toList());
 		});
+	}
+
+	protected void createLocalCsAndVs() {
+		//@formatter:off
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl(FhirResourceDaoR4TerminologyTest.URL_MY_CODE_SYSTEM);
+		codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		codeSystem
+			.addConcept().setCode("A").setDisplay("Code A").addDesignation(
+				new CodeSystem.ConceptDefinitionDesignationComponent().setLanguage("en").setValue("CodeADesignation")).addProperty(
+				new CodeSystem.ConceptPropertyComponent().setCode("CodeAProperty").setValue(new StringType("CodeAPropertyValue"))
+			)
+			.addConcept(new CodeSystem.ConceptDefinitionComponent().setCode("AA").setDisplay("Code AA")
+				.addConcept(new CodeSystem.ConceptDefinitionComponent().setCode("AAA").setDisplay("Code AAA"))
+			)
+			.addConcept(new CodeSystem.ConceptDefinitionComponent().setCode("AB").setDisplay("Code AB"));
+		codeSystem
+			.addConcept().setCode("B").setDisplay("Code B")
+			.addConcept(new CodeSystem.ConceptDefinitionComponent().setCode("BA").setDisplay("Code BA"))
+			.addConcept(new CodeSystem.ConceptDefinitionComponent().setCode("BB").setDisplay("Code BB"));
+		//@formatter:on
+		myCodeSystemDao.create(codeSystem, mySrd);
+
+		createLocalVs(codeSystem);
+	}
+
+	protected void createLocalVs(CodeSystem codeSystem) {
+		ValueSet valueSet = new ValueSet();
+		valueSet.setId(MY_VALUE_SET);
+		valueSet.setUrl(FhirResourceDaoR4TerminologyTest.URL_MY_VALUE_SET);
+		valueSet.getCompose().addInclude().setSystem(codeSystem.getUrl());
+		myValueSetDao.update(valueSet, mySrd);
 	}
 
 	private static void flattenExpansionHierarchy(List<String> theFlattenedHierarchy, List<TermConcept> theCodes, String thePrefix) {
@@ -738,10 +754,10 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		}
 	}
 
-	@AfterAll
-	public static void afterClassClearContextBaseJpaR4Test() {
-		ourValueSetDao.purgeCaches();
-		ourJpaValidationSupportChainR4.invalidateCaches();
+	@AfterEach
+	public void afterEachClearCaches() {
+		myValueSetDao.purgeCaches();
+		myJpaValidationSupportChainR4.invalidateCaches();
 	}
 
 	/**

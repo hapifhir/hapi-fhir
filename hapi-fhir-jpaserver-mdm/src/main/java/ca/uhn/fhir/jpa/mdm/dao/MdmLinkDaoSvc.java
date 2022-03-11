@@ -23,7 +23,7 @@ package ca.uhn.fhir.jpa.mdm.dao;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
@@ -69,7 +69,7 @@ public class MdmLinkDaoSvc {
 	@Autowired
 	private MdmLinkFactory myMdmLinkFactory;
 	@Autowired
-	private IdHelperService myIdHelperService;
+	private IJpaIdHelperService myJpaIdHelperService;
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
@@ -79,8 +79,8 @@ public class MdmLinkDaoSvc {
 
 	@Transactional
 	public MdmLink createOrUpdateLinkEntity(IBaseResource theGoldenResource, IBaseResource theSourceResource, MdmMatchOutcome theMatchOutcome, MdmLinkSourceEnum theLinkSource, @Nullable MdmTransactionContext theMdmTransactionContext) {
-		Long goldenResourcePid = myIdHelperService.getPidOrNull(theGoldenResource);
-		Long sourceResourcePid = myIdHelperService.getPidOrNull(theSourceResource);
+		Long goldenResourcePid = myJpaIdHelperService.getPidOrNull(theGoldenResource);
+		Long sourceResourcePid = myJpaIdHelperService.getPidOrNull(theSourceResource);
 
 		MdmLink mdmLink = getOrCreateMdmLinkByGoldenResourcePidAndSourceResourcePid(goldenResourcePid, sourceResourcePid);
 		mdmLink.setLinkSource(theLinkSource);
@@ -179,7 +179,7 @@ public class MdmLinkDaoSvc {
 
 	@Nonnull
 	private Optional<MdmLink> getMdmLinkWithMatchResult(IBaseResource theSourceResource, MdmMatchResultEnum theMatchResult) {
-		Long pid = myIdHelperService.getPidOrNull(theSourceResource);
+		Long pid = myJpaIdHelperService.getPidOrNull(theSourceResource);
 		if (pid == null) {
 			return Optional.empty();
 		}
@@ -223,7 +223,7 @@ public class MdmLinkDaoSvc {
 
 	@Transactional
 	public Optional<MdmLink> findMdmLinkBySource(IBaseResource theSourceResource) {
-		@Nullable Long pid = myIdHelperService.getPidOrNull(theSourceResource);
+		@Nullable Long pid = myJpaIdHelperService.getPidOrNull(theSourceResource);
 		if (pid == null) {
 			return Optional.empty();
 		}
@@ -251,7 +251,7 @@ public class MdmLinkDaoSvc {
 	 */
 	@Transactional
 	public List<MdmLink> findMdmLinksByGoldenResource(IBaseResource theGoldenResource) {
-		Long pid = myIdHelperService.getPidOrNull(theGoldenResource);
+		Long pid = myJpaIdHelperService.getPidOrNull(theGoldenResource);
 		if (pid == null) {
 			return Collections.emptyList();
 		}
@@ -329,7 +329,7 @@ public class MdmLinkDaoSvc {
 	 */
 	@Transactional
 	public List<MdmLink> findMdmLinksBySourceResource(IBaseResource theSourceResource) {
-		Long pid = myIdHelperService.getPidOrNull(theSourceResource);
+		Long pid = myJpaIdHelperService.getPidOrNull(theSourceResource);
 		if (pid == null) {
 			return Collections.emptyList();
 		}
@@ -346,7 +346,7 @@ public class MdmLinkDaoSvc {
 	 * @return all links for the source.
 	 */
 	public List<MdmLink> findMdmMatchLinksByGoldenResource(IBaseResource theGoldenResource) {
-		Long pid = myIdHelperService.getPidOrNull(theGoldenResource);
+		Long pid = myJpaIdHelperService.getPidOrNull(theGoldenResource);
 		if (pid == null) {
 			return Collections.emptyList();
 		}

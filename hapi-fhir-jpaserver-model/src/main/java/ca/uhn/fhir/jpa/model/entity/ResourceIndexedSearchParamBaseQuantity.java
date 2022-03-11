@@ -21,6 +21,9 @@ package ca.uhn.fhir.jpa.model.entity;
  */
 
 import javax.persistence.Column;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -59,6 +62,10 @@ public abstract class ResourceIndexedSearchParamBaseQuantity extends BaseResourc
 	 */
 	@Column(name = "HASH_IDENTITY", nullable = true)
 	private Long myHashIdentity;
+
+	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = {})
+	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false)
+	private ResourceTable myResource;
 
 	/**
 	 * Constructor
@@ -157,5 +164,17 @@ public abstract class ResourceIndexedSearchParamBaseQuantity extends BaseResourc
 
 	public static long calculateHashUnits(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName, String theUnits) {
 		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, theUnits);
+	}
+
+	@Override
+	public ResourceTable getResource() {
+		return myResource;
+	}
+
+	@Override
+	public BaseResourceIndexedSearchParam setResource(ResourceTable theResource) {
+		myResource = theResource;
+		setResourceType(theResource.getResourceType());
+		return this;
 	}
 }

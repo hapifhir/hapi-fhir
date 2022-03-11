@@ -20,8 +20,22 @@ package ca.uhn.fhir.parser;
  * #L%
  */
 
-import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeChildContainedResources;
+import ca.uhn.fhir.context.RuntimeChildExtension;
+import ca.uhn.fhir.context.RuntimeChildNarrativeDefinition;
+import ca.uhn.fhir.context.RuntimeChildUndeclaredExtensionDefinition;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.api.Tag;
+import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -33,11 +47,31 @@ import ca.uhn.fhir.util.NonPrettyPrintWriterWrapper;
 import ca.uhn.fhir.util.PrettyPrintWriterWrapper;
 import ca.uhn.fhir.util.XmlUtil;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBinary;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBaseXhtml;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import javax.xml.namespace.QName;
-import javax.xml.stream.*;
-import javax.xml.stream.events.*;
+import javax.xml.stream.FactoryConfigurationError;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.events.Attribute;
+import javax.xml.stream.events.Characters;
+import javax.xml.stream.events.Comment;
+import javax.xml.stream.events.EntityReference;
+import javax.xml.stream.events.Namespace;
+import javax.xml.stream.events.StartElement;
+import javax.xml.stream.events.XMLEvent;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -72,9 +106,9 @@ public class XmlParser extends BaseParser {
 		try {
 			return XmlUtil.createXmlReader(theReader);
 		} catch (FactoryConfigurationError e1) {
-			throw new ConfigurationException("Failed to initialize STaX event factory", e1);
+			throw new ConfigurationException(Msg.code(1848) + "Failed to initialize STaX event factory", e1);
 		} catch (XMLStreamException e1) {
-			throw new DataFormatException(e1);
+			throw new DataFormatException(Msg.code(1849) + e1);
 		}
 	}
 
@@ -103,7 +137,7 @@ public class XmlParser extends BaseParser {
 			encodeResourceToXmlStreamWriter(theResource, eventWriter, false, theEncodeContext);
 			eventWriter.flush();
 		} catch (XMLStreamException e) {
-			throw new ConfigurationException("Failed to initialize STaX event factory", e);
+			throw new ConfigurationException(Msg.code(1850) + "Failed to initialize STaX event factory", e);
 		}
 	}
 
@@ -194,12 +228,12 @@ public class XmlParser extends BaseParser {
 					parserState.xmlEvent(nextEvent);
 
 				} catch (DataFormatException e) {
-					throw new DataFormatException("DataFormatException at [" + nextEvent.getLocation().toString() + "]: " + e.getMessage(), e);
+					throw new DataFormatException(Msg.code(1851) + "DataFormatException at [" + nextEvent.getLocation().toString() + "]: " + e.getMessage(), e);
 				}
 			}
 			return parserState.getObject();
 		} catch (XMLStreamException e) {
-			throw new DataFormatException(e);
+			throw new DataFormatException(Msg.code(1852) + e);
 		}
 	}
 
@@ -321,7 +355,7 @@ public class XmlParser extends BaseParser {
 				}
 				case EXTENSION_DECLARED:
 				case UNDECL_EXT: {
-					throw new IllegalStateException("state should not happen: " + childDef.getName());
+					throw new IllegalStateException(Msg.code(1853) + "state should not happen: " + childDef.getName());
 				}
 			}
 
@@ -412,8 +446,6 @@ public class XmlParser extends BaseParser {
 							}
 						}
 						encodeChildElementToStreamWriter(theResource, theEventWriter, nextChild, nextValue, childName, childDef, getExtensionUrl(extension.getUrl()), theContainedResource, nextChildElem, theEncodeContext);
-					} else if (nextChild instanceof RuntimeChildNarrativeDefinition && theContainedResource) {
-						// suppress narratives from contained resources
 					} else {
 						encodeChildElementToStreamWriter(theResource, theEventWriter, nextChild, nextValue, childName, childDef, extensionUrl, theContainedResource, nextChildElem, theEncodeContext);
 					}
@@ -488,7 +520,7 @@ public class XmlParser extends BaseParser {
 	private void encodeResourceToXmlStreamWriter(IBaseResource theResource, XMLStreamWriter theEventWriter, boolean theContainedResource, IIdType theResourceId, EncodeContext theEncodeContext) throws XMLStreamException {
 		RuntimeResourceDefinition resDef = getContext().getResourceDefinition(theResource);
 		if (resDef == null) {
-			throw new ConfigurationException("Unknown resource type: " + theResource.getClass());
+			throw new ConfigurationException(Msg.code(1854) + "Unknown resource type: " + theResource.getClass());
 		}
 
 		if (!theContainedResource) {
@@ -617,13 +649,13 @@ public class XmlParser extends BaseParser {
 				if (childName == null) {
 					childDef = getContext().getElementDefinition(value.getClass());
 					if (childDef == null) {
-						throw new ConfigurationException("Unable to encode extension, unrecognized child element type: " + value.getClass().getCanonicalName());
+						throw new ConfigurationException(Msg.code(1855) + "Unable to encode extension, unrecognized child element type: " + value.getClass().getCanonicalName());
 					}
 					childName = RuntimeChildUndeclaredExtensionDefinition.createExtensionChildName(childDef);
 				} else {
 					childDef = extDef.getChildElementDefinitionByDatatype(value.getClass());
 					if (childDef == null) {
-						throw new ConfigurationException("Unable to encode extension, unrecognized child element type: " + value.getClass().getCanonicalName());
+						throw new ConfigurationException(Msg.code(1856) + "Unable to encode extension, unrecognized child element type: " + value.getClass().getCanonicalName());
 					}
 				}
 				encodeChildElementToStreamWriter(theResource, theEventWriter, extDef, value, childName, childDef, null, theIncludedResource, null, theEncodeContext);

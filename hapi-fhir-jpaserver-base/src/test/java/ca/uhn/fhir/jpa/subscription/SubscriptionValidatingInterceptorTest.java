@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -236,7 +237,7 @@ public class SubscriptionValidatingInterceptorTest {
 			mySvc.validateSubmittedSubscription(subscription, requestDetails);
 			fail();
 		} catch (UnprocessableEntityException theUnprocessableEntityException) {
-			assertEquals("Cross partition subscription must be created on the default partition", theUnprocessableEntityException.getMessage());
+			assertEquals(Msg.code(2010) + "Cross partition subscription must be created on the default partition", theUnprocessableEntityException.getMessage());
 		}
 	}
 
@@ -259,7 +260,7 @@ public class SubscriptionValidatingInterceptorTest {
 			mySvc.validateSubmittedSubscription(subscription, requestDetails);
 			fail();
 		} catch (UnprocessableEntityException theUnprocessableEntityException) {
-			assertEquals("Cross partition subscription is not enabled on this server", theUnprocessableEntityException.getMessage());
+			assertEquals(Msg.code(2009) + "Cross partition subscription is not enabled on this server", theUnprocessableEntityException.getMessage());
 		}
 	}
 

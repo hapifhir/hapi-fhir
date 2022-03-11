@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -31,6 +32,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IDao;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
@@ -148,7 +150,7 @@ public class LegacySearchBuilder implements ISearchBuilder {
 	@Autowired
 	private FhirContext myContext;
 	@Autowired
-	private IdHelperService myIdHelperService;
+	private IIdHelperService myIdHelperService;
 	@Autowired(required = false)
 	private IFulltextSearchSvc myFulltextSearchSvc;
 	@Autowired(required = false)
@@ -279,9 +281,9 @@ public class LegacySearchBuilder implements ISearchBuilder {
 			if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT)) {
 				if (myFulltextSearchSvc == null || myFulltextSearchSvc.isDisabled()) {
 					if (myParams.containsKey(Constants.PARAM_TEXT)) {
-						throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
+						throw new InvalidRequestException(Msg.code(937) + "Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
 					} else if (myParams.containsKey(Constants.PARAM_CONTENT)) {
-						throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
+						throw new InvalidRequestException(Msg.code(938) + "Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
 					}
 				}
 
@@ -293,7 +295,7 @@ public class LegacySearchBuilder implements ISearchBuilder {
 			} else if (myParams.isLastN()) {
 				if (myIElasticsearchSvc == null) {
 					if (myParams.isLastN()) {
-						throw new InvalidRequestException("LastN operation is not enabled on this service, can not process this request");
+						throw new InvalidRequestException(Msg.code(939) + "LastN operation is not enabled on this service, can not process this request");
 					}
 				}
 				List<String> lastnResourceIds = myIElasticsearchSvc.executeLastN(myParams, myContext, theMaximumResults);
@@ -491,7 +493,7 @@ public class LegacySearchBuilder implements ISearchBuilder {
 
 		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(myResourceName, theSort.getParamName());
 		if (param == null) {
-			throw new InvalidRequestException("Unknown sort parameter '" + theSort.getParamName() + "'");
+			throw new InvalidRequestException(Msg.code(940) + "Unknown sort parameter '" + theSort.getParamName() + "'");
 		}
 
 		String[] sortAttrName;
@@ -530,7 +532,7 @@ public class LegacySearchBuilder implements ISearchBuilder {
 			case COMPOSITE:
 			case HAS:
 			default:
-				throw new InvalidRequestException("This server does not support _sort specifications of type " + param.getParamType() + " - Can't serve _sort=" + theSort.getParamName());
+				throw new InvalidRequestException(Msg.code(941) + "This server does not support _sort specifications of type " + param.getParamType() + " - Can't serve _sort=" + theSort.getParamName());
 		}
 
 		/*

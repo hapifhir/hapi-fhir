@@ -96,7 +96,7 @@ public class NpmDstu3Test extends BaseJpaDstu3Test {
 			myConditionDao.validate(condition, null, null, null, ValidationModeEnum.CREATE, null, mySrd);
 			fail();
 		} catch (PreconditionFailedException e) {
-			ourLog.info("Fail Outcome: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+			ourLog.info("Fail Outcome: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 
 			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
 			assertEquals("Condition.subject: minimum required = 1, but only found 0 (from http://fhir.de/StructureDefinition/condition-de-basis/0.2)", oo.getIssueFirstRep().getDiagnostics());

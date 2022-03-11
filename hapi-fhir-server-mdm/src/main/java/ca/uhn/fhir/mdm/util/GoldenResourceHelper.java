@@ -20,6 +20,7 @@ package ca.uhn.fhir.mdm.util;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
@@ -150,7 +151,7 @@ public class GoldenResourceHelper {
 		if (fhirVersion == R4 || fhirVersion == DSTU3) {
 			return;
 		}
-		throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
+		throw new UnsupportedOperationException(Msg.code(1489) + "Version not supported: " + myFhirContext.getVersion().getVersion());
 	}
 
 	/**
@@ -180,8 +181,7 @@ public class GoldenResourceHelper {
 		} else if (!goldenResourceOfficialEid.isEmpty() && myEIDHelper.eidMatchExists(goldenResourceOfficialEid, incomingSourceEid)) {
 			log(theMdmTransactionContext, "incoming resource:" + theSourceResource.getIdElement().toVersionless() + " with EIDs " + incomingSourceEid.stream().map(CanonicalEID::toString).collect(Collectors.joining(",")) + " does not need to overwrite Golden Resource, as this EID is already present");
 		} else {
-			throw new IllegalArgumentException(
-				String.format("Source EIDs %s would create a duplicate golden resource, as EIDs %s already exist!",
+			throw new IllegalArgumentException(Msg.code(1490) + String.format("Source EIDs %s would create a duplicate golden resource, as EIDs %s already exist!",
 					incomingSourceEid.toString(), goldenResourceOfficialEid.toString()));
 		}
 		return theGoldenResource;

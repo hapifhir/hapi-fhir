@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.subscription.match.deliver.message;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
@@ -102,7 +103,7 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 		}
 
 		if (payloadType != EncodingEnum.JSON) {
-			throw new UnsupportedOperationException("Only JSON payload type is currently supported for Message Subscriptions");
+			throw new UnsupportedOperationException(Msg.code(4) + "Only JSON payload type is currently supported for Message Subscriptions");
 		}
 
 		deliverPayload(theMessage, subscription, channelProducer);

@@ -1,14 +1,10 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.parser.StrictErrorHandler;
+import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -25,9 +21,13 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.parser.StrictErrorHandler;
-import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4Test {
@@ -57,7 +57,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 	@Override
 	public void before() throws Exception {
 		super.before();
-		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
+		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
 
 		myDaoConfig.setAllowMultipleDelete(true);
 		myClient.registerInterceptor(myCapturingInterceptor);
@@ -213,7 +213,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 			myClient.search().byUrl(uri).execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: Invalid parameter value for :of-type query", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(2013) +  "Invalid parameter value for :of-type query", e.getMessage());
 		}
 
 		try {
@@ -221,7 +221,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 			myClient.search().byUrl(uri).execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: Invalid parameter value for :of-type query", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(2014) + "Invalid parameter value for :of-type query", e.getMessage());
 		}
 
 		try {
@@ -229,7 +229,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 			myClient.search().byUrl(uri).execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: Invalid parameter value for :of-type query", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(2014) + "Invalid parameter value for :of-type query", e.getMessage());
 		}
 
 		try {
@@ -237,7 +237,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 			myClient.search().byUrl(uri).execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: Invalid parameter value for :of-type query", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(2013) + "Invalid parameter value for :of-type query", e.getMessage());
 		}
 
 		try {
@@ -245,7 +245,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 			myClient.search().byUrl(uri).execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: Invalid parameter value for :of-type query", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(2013) + "Invalid parameter value for :of-type query", e.getMessage());
 		}
 
 		try {
@@ -253,7 +253,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 			myClient.search().byUrl(uri).execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: Invalid parameter value for :of-type query", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(2013) + "Invalid parameter value for :of-type query", e.getMessage());
 		}
 
 		try {
@@ -261,7 +261,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 			myClient.search().byUrl(uri).execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: Invalid parameter value for :of-type query", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(2014) + "Invalid parameter value for :of-type query", e.getMessage());
 		}
 
 		try {
@@ -269,7 +269,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 			myClient.search().byUrl(uri).execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: Invalid parameter value for :of-type query", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(2013) + "Invalid parameter value for :of-type query", e.getMessage());
 		}
 
 	}
@@ -281,8 +281,8 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response was: {}", resp);
-			Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, resp);
-			ourLog.info("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+			Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, resp);
+			ourLog.info("Bundle: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 			ids = toUnqualifiedVersionlessIdValues(bundle);
 		}
 		return ids;

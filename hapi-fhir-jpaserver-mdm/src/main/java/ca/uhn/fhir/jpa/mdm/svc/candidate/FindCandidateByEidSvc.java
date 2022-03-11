@@ -47,6 +47,7 @@ public class FindCandidateByEidSvc extends BaseCandidateFinder {
 	@Autowired
 	private MdmResourceDaoSvc myMdmResourceDaoSvc;
 
+	@Override
 	protected List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(IAnyResource theBaseResource) {
 		List<MatchedGoldenResourceCandidate> retval = new ArrayList<>();
 

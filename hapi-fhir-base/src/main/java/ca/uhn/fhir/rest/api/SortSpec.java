@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.api;
 
+import ca.uhn.fhir.i18n.Msg;
+
 import java.io.Serializable;
 
 /*
@@ -114,7 +116,7 @@ public class SortSpec implements Serializable {
 	 */
 	public SortSpec setChain(SortSpec theChain) {
 		if (theChain == this) {
-			throw new IllegalArgumentException("Can not chain this to itself");
+			throw new IllegalArgumentException(Msg.code(1966) + "Can not chain this to itself");
 		}
 		myChain = theChain;
 		return this;

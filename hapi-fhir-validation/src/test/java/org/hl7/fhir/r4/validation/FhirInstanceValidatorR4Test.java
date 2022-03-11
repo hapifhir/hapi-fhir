@@ -6,6 +6,7 @@ import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.test.utilities.LoggingExtension;
@@ -79,7 +80,6 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -101,7 +101,6 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.nullable;
@@ -168,7 +167,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 		myValidConcepts = new ArrayList<>();
 
-		when(mockSupport.expandValueSet(any(), nullable(ValueSetExpansionOptions.class), any())).thenAnswer(t -> {
+		when(mockSupport.expandValueSet(any(), nullable(ValueSetExpansionOptions.class), any(IBaseResource.class))).thenAnswer(t -> {
 			ValueSet arg = (ValueSet) t.getArgument(2, IBaseResource.class);
 			ValueSetExpansionComponent retVal = mySupportedCodeSystemsForExpansion.get(arg.getCompose().getIncludeFirstRep().getSystem());
 			if (retVal == null) {
@@ -1367,7 +1366,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		all = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(2, all.size());
 		assertThat(all.get(0).getMessage(), containsString("Validation failed for 'http://unitsofmeasure.org#Heck'"));
-		assertThat(all.get(1).getMessage(), containsString("The value provided ('Heck') is not in the value set 'Body Temperature Units' (http://hl7.org/fhir/ValueSet/ucum-bodytemp|4.0.1), and a code is required from this value set) (error message = Failed to expand ValueSet 'http://hl7.org/fhir/ValueSet/ucum-bodytemp' (in-memory). Could not validate code null#Heck. Error was: Unable to expand ValueSet because CodeSystem could not be found: http://unitsofmeasure.org)"));
+		assertThat(all.get(1).getMessage(), containsString("The value provided ('Heck') is not in the value set 'Body Temperature Units'"));
 
 	}
 

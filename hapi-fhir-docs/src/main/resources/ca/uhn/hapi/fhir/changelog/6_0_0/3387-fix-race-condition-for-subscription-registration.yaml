@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 3387
+title: "A race condition in the Subscription processor meant that a Subscription could fail to 
+  register right away if it was modified immediately after being created. Note that this issue only
+  affects rapid changes, and only caused the subscription to be unregistered for a maximum of one minute
+  after its initial creation so the impact of this issue is expected to be low."

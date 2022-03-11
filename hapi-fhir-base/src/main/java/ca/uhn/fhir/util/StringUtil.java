@@ -20,6 +20,7 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
+import javax.annotation.Nonnull;
 import java.io.CharArrayWriter;
 import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
@@ -105,4 +106,13 @@ public class StringUtil {
 		return theString.substring(0, theString.offsetByCodePoints(0, theCodePointCount));
 	}
 
+	@Nonnull
+	public static String prependLineNumbers(@Nonnull String theInput) {
+		StringBuilder schemaOutput = new StringBuilder();
+		int index = 0;
+		for (String next : theInput.split("\\n")) {
+			schemaOutput.append(index++).append(": ").append(next.replace("\r", "")).append("\n");
+		}
+		return schemaOutput.toString();
+	}
 }

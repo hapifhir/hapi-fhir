@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.packages;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
@@ -167,7 +168,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 				NpmPackage npmPackage = myPackageCacheManager.installPackage(theInstallationSpec);
 				if (npmPackage == null) {
-					throw new IOException("Package not found");
+					throw new IOException(Msg.code(1284) + "Package not found");
 				}
 
 				retVal.getMessage().addAll(JpaPackageCache.getProcessingMessages(npmPackage));
@@ -184,7 +185,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 				}
 
 			} catch (IOException e) {
-				throw new ImplementationGuideInstallationException("Could not load NPM package " + theInstallationSpec.getName() + "#" + theInstallationSpec.getVersion(), e);
+				throw new ImplementationGuideInstallationException(Msg.code(1285) + "Could not load NPM package " + theInstallationSpec.getName() + "#" + theInstallationSpec.getVersion(), e);
 			}
 		}
 
@@ -227,7 +228,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					create(next, theOutcome);
 				} catch (Exception e) {
 					ourLog.warn("Failed to upload resource of type {} with ID {} - Error: {}", myFhirContext.getResourceType(next), next.getIdElement().getValue(), e.toString());
-					throw new ImplementationGuideInstallationException(String.format("Error installing IG %s#%s: %s", name, version, e), e);
+					throw new ImplementationGuideInstallationException(Msg.code(1286) + String.format("Error installing IG %s#%s: %s", name, version, e), e);
 				}
 
 			}
@@ -273,7 +274,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					}
 
 				} catch (IOException e) {
-					throw new ImplementationGuideInstallationException(String.format(
+					throw new ImplementationGuideInstallationException(Msg.code(1287) + String.format(
 						"Cannot resolve dependency %s#%s", id, ver), e);
 				}
 			}
@@ -293,7 +294,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		Validate.notNull(currentFhirVersionEnum, "Invalid FHIR version string: %s", currentFhirVersion);
 		boolean compatible = fhirVersionEnum.equals(currentFhirVersionEnum);
 		if (!compatible) {
-			throw new ImplementationGuideInstallationException(String.format(
+			throw new ImplementationGuideInstallationException(Msg.code(1288) + String.format(
 				"Cannot install implementation guide: FHIR versions mismatch (expected <=%s, package uses %s)",
 				currentFhirVersion, fhirVersion));
 		}
@@ -315,7 +316,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					byte[] content = pkg.getFolders().get("package").fetchFile(file);
 					resources.add(myFhirContext.newJsonParser().parseResource(new String(content)));
 				} catch (IOException e) {
-					throw new InternalErrorException("Cannot install resource of type " + type + ": Could not fetch file " + file, e);
+					throw new InternalErrorException(Msg.code(1289) + "Cannot install resource of type " + type + ": Could not fetch file " + file, e);
 				}
 			}
 		}
@@ -353,7 +354,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					theOutcome.incrementResourcesInstalled(myFhirContext.getResourceType(theResource));
 				}
 			}
-
+		}
+		else{
+			ourLog.warn("Failed to upload resource of type {} with ID {} - Error: Resource failed validation", theResource.fhirType(), theResource.getIdElement().getValue());
 		}
 	}
 
@@ -397,22 +400,27 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 			String code = SearchParameterUtil.getCode(myFhirContext, theResource);
 			if (defaultString(code).startsWith("_")) {
+				ourLog.warn("Failed to validate resource of type {} with url {} - Error: Resource code starts with \"_\"", theResource.fhirType(), SearchParameterUtil.getURL(myFhirContext, theResource));
 				return false;
 			}
 
 			String expression = SearchParameterUtil.getExpression(myFhirContext, theResource);
 			if (isBlank(expression)) {
+				ourLog.warn("Failed to validate resource of type {} with url {} - Error: Resource expression is blank", theResource.fhirType(), SearchParameterUtil.getURL(myFhirContext, theResource));
 				return false;
 			}
 
 			if (SearchParameterUtil.getBaseAsStrings(myFhirContext, theResource).isEmpty()) {
+				ourLog.warn("Failed to validate resource of type {} with url {} - Error: Resource base is empty", theResource.fhirType(), SearchParameterUtil.getURL(myFhirContext, theResource));
 				return false;
 			}
+
 		}
 
 		List<IPrimitiveType> statusTypes = myFhirContext.newFhirPath().evaluate(theResource, "status", IPrimitiveType.class);
-		if (statusTypes.size() > 0) {
-			return statusTypes.get(0).getValueAsString().equals("active");
+		if (statusTypes.size() > 0 && !statusTypes.get(0).getValueAsString().equals("active")) {
+			ourLog.warn("Failed to validate resource of type {} with ID {} - Error: Resource status not equal to \"active\"", theResource.fhirType(), theResource.getIdElement().getValue());
+			return false;
 		}
 
 		return true;
@@ -434,7 +442,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		try {
 			return validationSupport.generateSnapshot(new ValidationSupportContext(validationSupport), sd, null, null, null);
 		} catch (Exception e) {
-			throw new ImplementationGuideInstallationException(String.format(
+			throw new ImplementationGuideInstallationException(Msg.code(1290) + String.format(
 				"Failure when generating snapshot of StructureDefinition: %s", sd.getIdElement()), e);
 		}
 	}
@@ -459,7 +467,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		FhirTerser terser = myFhirContext.newTerser();
 		IBase uniqueIdComponent = (IBase) terser.getSingleValueOrNull(resource, "uniqueId");
 		if (uniqueIdComponent == null) {
-			throw new ImplementationGuideInstallationException("NamingSystem does not have uniqueId component.");
+			throw new ImplementationGuideInstallationException(Msg.code(1291) + "NamingSystem does not have uniqueId component.");
 		}
 		IPrimitiveType<?> asPrimitiveType = (IPrimitiveType<?>) terser.getSingleValueOrNull(uniqueIdComponent, "value");
 		return (String) asPrimitiveType.getValue();
@@ -483,14 +491,14 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		if (identifier != null) {
 			return new TokenParam(identifier.getSystem(), identifier.getValue());
 		} else {
-			throw new UnsupportedOperationException("Resources in a package must have a url or identifier to be loaded by the package installer.");
+			throw new UnsupportedOperationException(Msg.code(1292) + "Resources in a package must have a url or identifier to be loaded by the package installer.");
 		}
 	}
 
 	private boolean resourceHasUrlElement(IBaseResource resource) {
 		BaseRuntimeElementDefinition<?> def = myFhirContext.getElementDefinition(resource.getClass());
 		if (!(def instanceof BaseRuntimeElementCompositeDefinition)) {
-			throw new IllegalArgumentException("Resource is not a composite type: " + resource.getClass().getName());
+			throw new IllegalArgumentException(Msg.code(1293) + "Resource is not a composite type: " + resource.getClass().getName());
 		}
 		BaseRuntimeElementCompositeDefinition<?> currentDef = (BaseRuntimeElementCompositeDefinition<?>) def;
 		BaseRuntimeChildDefinition nextDef = currentDef.getChildByName("url");

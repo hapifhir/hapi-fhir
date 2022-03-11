@@ -1,11 +1,12 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
@@ -40,7 +41,7 @@ class BaseHapiFhirResourceDaoTest {
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	@Mock
-	private IdHelperService myIdHelperService;
+	private IIdHelperService myIdHelperService;
 
 	@Mock
 	private EntityManager myEntityManager;
@@ -67,6 +68,7 @@ class BaseHapiFhirResourceDaoTest {
 	/**
 	 * To be called for tests that require additional
 	 * setup
+	 *
 	 * @param clazz
 	 */
 	private void setup(Class clazz) {
@@ -92,7 +94,7 @@ class BaseHapiFhirResourceDaoTest {
 			mySvc.validateResourceIdCreation(patient, sysRequest);
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertEquals("failedToCreateWithClientAssignedIdNotAllowed", e.getMessage());
+			assertEquals(Msg.code(959) + "failedToCreateWithClientAssignedIdNotAllowed", e.getMessage());
 		}
 	}
 
@@ -106,7 +108,7 @@ class BaseHapiFhirResourceDaoTest {
 			mySvc.validateResourceIdCreation(patient, sysRequest);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("failedToCreateWithClientAssignedNumericId", e.getMessage());
+			assertEquals(Msg.code(960) + "failedToCreateWithClientAssignedNumericId", e.getMessage());
 		}
 	}
 

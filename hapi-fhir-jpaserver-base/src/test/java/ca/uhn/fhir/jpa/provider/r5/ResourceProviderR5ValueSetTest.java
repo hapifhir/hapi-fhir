@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r5;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
@@ -484,7 +485,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 				.execute();
 		} catch (ResourceNotFoundException e) {
 			assertEquals(404, e.getStatusCode());
-			assertEquals("HTTP 404 Not Found: Unknown ValueSet: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fbogus", e.getMessage());
+			assertEquals("HTTP 404 Not Found: HAPI-2024: Unknown ValueSet: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fbogus", e.getMessage());
 		}
 	}
 
@@ -621,7 +622,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 				.execute();
 		} catch (ResourceNotFoundException e) {
 			assertEquals(404, e.getStatusCode());
-			assertEquals("HTTP 404 Not Found: Unknown ValueSet: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fbogus", e.getMessage());
+			assertEquals("HTTP 404 Not Found: HAPI-2024: Unknown ValueSet: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fbogus", e.getMessage());
 		}
 	}
 
@@ -826,7 +827,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: $expand operation at the type level (no ID specified) requires a url or a valueSet as a part of the request.", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1133) + "$expand operation at the type level (no ID specified) requires a url or a valueSet as a part of the request.", e.getMessage());
 		}
 
 		try {
@@ -840,7 +841,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: $expand must EITHER be invoked at the instance level, or have a url specified, or have a ValueSet specified. Can not combine these options.", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1134) + "$expand must EITHER be invoked at the instance level, or have a url specified, or have a ValueSet specified. Can not combine these options.", e.getMessage());
 		}
 
 		try {
@@ -854,7 +855,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: $expand must EITHER be invoked at the instance level, or have a url specified, or have a ValueSet specified. Can not combine these options.", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1134) + "$expand must EITHER be invoked at the instance level, or have a url specified, or have a ValueSet specified. Can not combine these options.", e.getMessage());
 		}
 
 		try {
@@ -866,7 +867,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: offset parameter for $expand operation must be >= 0 when specified. offset: -1", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1135) + "offset parameter for $expand operation must be >= 0 when specified. offset: -1", e.getMessage());
 		}
 
 		try {
@@ -878,7 +879,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: count parameter for $expand operation must be >= 0 when specified. count: -1", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1136) + "count parameter for $expand operation must be >= 0 when specified. count: -1", e.getMessage());
 		}
 	}
 
@@ -943,23 +944,6 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		assertThat(resp, containsStringIgnoringCase("<code value=\"childAAB\"/>"));
 		assertThat(resp, not(containsStringIgnoringCase("<code value=\"ParentA\"/>")));
 
-	}
-
-	@Test
-	public void testExpandLocalVsWithUnknownCode() {
-		createExternalCsAndLocalVsWithUnknownCode();
-		assertNotNull(myLocalValueSetId);
-
-		try {
-			myClient
-				.operation()
-				.onInstance(myLocalValueSetId)
-				.named("expand")
-				.withNoParameters(Parameters.class)
-				.execute();
-		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: Invalid filter criteria - code does not exist: {http://example.com/my_code_system}childFOOOOOOO", e.getMessage());
-		}
 	}
 
 	@Test

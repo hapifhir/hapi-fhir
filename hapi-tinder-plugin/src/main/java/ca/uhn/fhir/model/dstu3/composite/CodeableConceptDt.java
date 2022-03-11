@@ -16,6 +16,7 @@
 
 package ca.uhn.fhir.model.dstu3.composite;
 
+import ca.uhn.fhir.i18n.Msg;
 import java.util.List;
 
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
@@ -141,7 +142,7 @@ public class CodeableConceptDt
 	 */
 	public CodeableConceptDt addCoding(CodingDt theValue) {
 		if (theValue == null) {
-			throw new NullPointerException("theValue must not be null");
+			throw new NullPointerException(Msg.code(87) + "theValue must not be null");
 		}
 		getCoding().add(theValue);
 		return this;

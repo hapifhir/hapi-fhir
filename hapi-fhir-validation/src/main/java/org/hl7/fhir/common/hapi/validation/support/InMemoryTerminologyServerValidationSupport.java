@@ -1,5 +1,6 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
@@ -95,7 +96,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			case DSTU2:
 			case DSTU2_1:
 			default:
-				throw new IllegalArgumentException("Can not handle version: " + myCtx.getVersion().getVersion());
+				throw new IllegalArgumentException(Msg.code(697) + "Can not handle version: " + myCtx.getVersion().getVersion());
 		}
 
 		return new ValueSetExpansionOutcome(expansion);
@@ -126,7 +127,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			}
 			case DSTU2_1:
 			default:
-				throw new IllegalArgumentException("Can not handle version: " + myCtx.getVersion().getVersion());
+				throw new IllegalArgumentException(Msg.code(698) + "Can not handle version: " + myCtx.getVersion().getVersion());
 		}
 
 		return expansionR5;
@@ -161,7 +162,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 	@Override
 	@Nullable
-	public CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public CodeValidationResult validateCode(@Nonnull ValidationSupportContext theValidationSupportContext, @Nonnull ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		IBaseResource vs;
 		if (isNotBlank(theValueSetUrl)) {
 			vs = theValidationSupportContext.getRootValidationSupport().fetchValueSet(theValueSetUrl);
@@ -220,7 +221,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 				case DSTU2:
 				case DSTU2_1:
 				default:
-					throw new IllegalArgumentException("Can not handle version: " + myCtx.getVersion().getVersion());
+					throw new IllegalArgumentException(Msg.code(699) + "Can not handle version: " + myCtx.getVersion().getVersion());
 			}
 		}
 
@@ -277,7 +278,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			case DSTU2:
 			case DSTU2_1:
 			default:
-				throw new IllegalArgumentException("Can not handle version: " + myCtx.getVersion().getVersion());
+				throw new IllegalArgumentException(Msg.code(700) + "Can not handle version: " + myCtx.getVersion().getVersion());
 		}
 
 		String codeSystemResourceName = null;
@@ -316,7 +317,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 				case DSTU2:
 				case DSTU2_1:
 				default:
-					throw new IllegalArgumentException("Can not handle version: " + myCtx.getVersion().getVersion());
+					throw new IllegalArgumentException(Msg.code(701) + "Can not handle version: " + myCtx.getVersion().getVersion());
 			}
 		}
 
@@ -597,14 +598,16 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 				if (theWantCode != null) {
 					if (theValidationSupportContext.getRootValidationSupport().isCodeSystemSupported(theValidationSupportContext, includeOrExcludeConceptSystemUrl)) {
 						LookupCodeResult lookup = theValidationSupportContext.getRootValidationSupport().lookupCode(theValidationSupportContext, includeOrExcludeConceptSystemUrl, theWantCode, null);
-						if (lookup != null && lookup.isFound()) {
-							CodeSystem.ConceptDefinitionComponent conceptDefinition = new CodeSystem.ConceptDefinitionComponent()
-								.addConcept()
-								.setCode(theWantCode)
-								.setDisplay(lookup.getCodeDisplay());
-							List<CodeSystem.ConceptDefinitionComponent> codesList = Collections.singletonList(conceptDefinition);
-							addCodes(includeOrExcludeConceptSystemUrl, includeOrExcludeConceptSystemVersion, codesList, nextCodeList, wantCodes);
+						if (lookup != null) {
 							ableToHandleCode = true;
+							if (lookup.isFound()) {
+								CodeSystem.ConceptDefinitionComponent conceptDefinition = new CodeSystem.ConceptDefinitionComponent()
+									.addConcept()
+									.setCode(theWantCode)
+									.setDisplay(lookup.getCodeDisplay());
+								List<CodeSystem.ConceptDefinitionComponent> codesList = Collections.singletonList(conceptDefinition);
+								addCodes(includeOrExcludeConceptSystemUrl, includeOrExcludeConceptSystemVersion, codesList, nextCodeList, wantCodes);
+							}
 						}
 					} else {
 
@@ -668,7 +671,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 					failureType = FailureType.UNKNOWN_CODE_SYSTEM;
 				}
 
-				throw new ExpansionCouldNotBeCompletedInternallyException(failureMessage, failureType);
+				throw new ExpansionCouldNotBeCompletedInternallyException(Msg.code(702) + failureMessage, failureType);
 			}
 
 			if (includeOrExcludeSystemResource != null && includeOrExcludeSystemResource.getContent() != CodeSystem.CodeSystemContentMode.NOTPRESENT) {
@@ -682,7 +685,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			if (vs != null) {
 				org.hl7.fhir.r5.model.ValueSet subExpansion = expandValueSetR5(theValidationSupportContext, vs, theWantSystemUrlAndVersion, theWantCode);
 				if (subExpansion == null) {
-					throw new ExpansionCouldNotBeCompletedInternallyException("Failed to expand ValueSet: " + nextValueSetInclude.getValueAsString(), FailureType.OTHER);
+					throw new ExpansionCouldNotBeCompletedInternallyException(Msg.code(703) + "Failed to expand ValueSet: " + nextValueSetInclude.getValueAsString(), FailureType.OTHER);
 				}
 				for (org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionContainsComponent next : subExpansion.getExpansion().getContains()) {
 					nextCodeList.add(new FhirVersionIndependentConcept(next.getSystem(), next.getCode(), next.getDisplay(), next.getVersion()));

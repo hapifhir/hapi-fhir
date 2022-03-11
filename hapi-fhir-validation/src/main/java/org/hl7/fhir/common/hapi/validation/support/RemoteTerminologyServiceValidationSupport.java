@@ -1,5 +1,6 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
@@ -55,7 +56,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 	}
 
 	@Override
-	public CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public CodeValidationResult validateCode(@Nonnull ValidationSupportContext theValidationSupportContext, @Nonnull ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		return invokeRemoteValidateCode(theCodeSystem, theCode, theDisplay, theValueSetUrl, null);
 	}
 
@@ -178,7 +179,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 				}
 				break;
 			default:
-				throw new UnsupportedOperationException("Unsupported FHIR version '" + fhirVersion.getFhirVersionString() +
+				throw new UnsupportedOperationException(Msg.code(710) + "Unsupported FHIR version '" + fhirVersion.getFhirVersionString() +
 					"'. Only DSTU3 and R4 are supported.");
 		}
 		return null;

@@ -1,16 +1,13 @@
 package ca.uhn.fhir.jpa.term.loinc;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.trim;
-
-import java.util.List;
-
-import javax.annotation.Nonnull;
-import javax.validation.constraints.NotNull;
-
+import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
 import org.apache.commons.csv.CSVRecord;
 
-import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
+import javax.annotation.Nonnull;
+import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 /*-
  * #%L

@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -36,9 +37,6 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextFi
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 
 import javax.persistence.Column;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -67,10 +65,6 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	@FullTextField
 	@Column(name = "SP_NAME", length = MAX_SP_NAME, nullable = false)
 	private String myParamName;
-
-	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = {})
-	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false)
-	private ResourceTable myResource;
 
 	@Column(name = "RES_ID", insertable = false, updatable = false, nullable = false)
 	private Long myResourcePid;
@@ -104,15 +98,12 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 		}
 	}
 
-	public ResourceTable getResource() {
-		return myResource;
-	}
-
-	public BaseResourceIndexedSearchParam setResource(ResourceTable theResource) {
-		myResource = theResource;
-		myResourceType = theResource.getResourceType();
-		return this;
-	}
+	// MB pushed these down to the individual SP classes so we could name the FK in the join annotation
+	/**
+	 * Get the Resource this SP indexes
+	 */
+	public abstract ResourceTable getResource();
+	public abstract BaseResourceIndexedSearchParam setResource(ResourceTable theResource);
 
 	@Override
 	public <T extends BaseResourceIndex> void copyMutableValuesFrom(T theSource) {
@@ -157,7 +148,7 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	public abstract IQueryParameterType toQueryParameterType();
 
 	public boolean matches(IQueryParameterType theParam) {
-		throw new UnsupportedOperationException("No parameter matcher for " + theParam);
+		throw new UnsupportedOperationException(Msg.code(1526) + "No parameter matcher for " + theParam);
 	}
 
 	public PartitionSettings getPartitionSettings() {
@@ -206,7 +197,7 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 
 		if (thePartitionSettings.isPartitioningEnabled() && thePartitionSettings.isIncludePartitionInSearchHashes() && theRequestPartitionId != null) {
 			if (theRequestPartitionId.getPartitionIds().size() > 1) {
-				throw new InternalErrorException("Can not search multiple partitions when partitions are included in search hashes");
+				throw new InternalErrorException(Msg.code(1527) + "Can not search multiple partitions when partitions are included in search hashes");
 			}
 			Integer partitionId = theRequestPartitionId.getFirstPartitionIdOrNull();
 			if (partitionId != null) {

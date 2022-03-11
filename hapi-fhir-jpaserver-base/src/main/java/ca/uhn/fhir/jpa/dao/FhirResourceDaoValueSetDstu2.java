@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
@@ -50,7 +51,6 @@ import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
@@ -68,14 +68,13 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueSet>
 	implements IFhirResourceDaoValueSet<ValueSet, CodingDt, CodeableConceptDt>, IFhirResourceDaoCodeSystem<ValueSet, CodingDt, CodeableConceptDt> {
 
+	private static FhirContext ourRiCtx;
+
 	private DefaultProfileValidationSupport myDefaultProfileValidationSupport;
 
 	@Autowired
 	private IValidationSupport myJpaValidationSupport;
 
-	@Autowired
-	@Qualifier("myFhirContextDstu2Hl7Org")
-	private FhirContext myRiCtx;
 	@Autowired
 	private FhirContext myFhirContext;
 
@@ -153,20 +152,20 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 	@Override
 	public ValueSet expandByIdentifier(String theUri, ValueSetExpansionOptions theOptions) {
 		if (isBlank(theUri)) {
-			throw new InvalidRequestException("URI must not be blank or missing");
+			throw new InvalidRequestException(Msg.code(946) + "URI must not be blank or missing");
 		}
 		ValueSet source;
 
 		ValueSet defaultValueSet = myDefaultProfileValidationSupport.fetchResource(ValueSet.class, theUri);
 		if (defaultValueSet != null) {
-			source = getContext().newJsonParser().parseResource(ValueSet.class, myRiCtx.newJsonParser().encodeResourceToString(defaultValueSet));
+			source = getContext().newJsonParser().parseResource(ValueSet.class, getRiCtx().newJsonParser().encodeResourceToString(defaultValueSet));
 		} else {
 			SearchParameterMap params = new SearchParameterMap();
 			params.setLoadSynchronousUpTo(1);
 			params.add(ValueSet.SP_URL, new UriParam(theUri));
 			IBundleProvider ids = search(params);
 			if (ids.size() == 0) {
-				throw new InvalidRequestException("Unknown ValueSet URI: " + theUri);
+				throw new InvalidRequestException(Msg.code(947) + "Unknown ValueSet URI: " + theUri);
 			}
 			source = (ValueSet) ids.getResources(0, 1).get(0);
 		}
@@ -194,15 +193,22 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 		if (theId.getValue().startsWith("http://hl7.org/fhir/")) {
 			org.hl7.fhir.dstu2.model.ValueSet valueSet = myValidationSupport.fetchResource(org.hl7.fhir.dstu2.model.ValueSet.class, theId.getValue());
 			if (valueSet != null) {
-				return getContext().newJsonParser().parseResource(ValueSet.class, myRiCtx.newJsonParser().encodeResourceToString(valueSet));
+				return getContext().newJsonParser().parseResource(ValueSet.class, getRiCtx().newJsonParser().encodeResourceToString(valueSet));
 			}
 		}
 		BaseHasResource sourceEntity = readEntity(theId, theRequest);
 		if (sourceEntity == null) {
-			throw new ResourceNotFoundException(theId);
+			throw new ResourceNotFoundException(Msg.code(2002) + theId);
 		}
 		ValueSet source = (ValueSet) toResource(sourceEntity, false);
 		return source;
+	}
+
+	private FhirContext getRiCtx() {
+		if (ourRiCtx == null) {
+			ourRiCtx = FhirContext.forDstu2Hl7Org();
+		}
+		return ourRiCtx;
 	}
 
 	private IValidationSupport.LookupCodeResult lookup(List<ExpansionContains> theContains, String theSystem, String theCode) {
@@ -245,10 +251,10 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 		boolean haveSystem = theSystem != null && theSystem.isEmpty() == false;
 
 		if (!haveCoding && !(haveSystem && haveCode)) {
-			throw new InvalidRequestException("No code, coding, or codeableConcept provided to validate");
+			throw new InvalidRequestException(Msg.code(949) + "No code, coding, or codeableConcept provided to validate");
 		}
 		if (!multiXor(haveCoding, (haveSystem && haveCode)) || (haveSystem != haveCode)) {
-			throw new InvalidRequestException("$lookup can only validate (system AND code) OR (coding.system AND coding.code)");
+			throw new InvalidRequestException(Msg.code(950) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)");
 		}
 
 		String code;
@@ -305,7 +311,7 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 	@Override
 	public CodeValidationResult validateCode(IIdType theCodeSystemId, IPrimitiveType<String> theCodeSystemUrl, IPrimitiveType<String> theVersion, IPrimitiveType<String> theCode,
 														  IPrimitiveType<String> theDisplay, CodingDt theCoding, CodeableConceptDt theCodeableConcept, RequestDetails theRequestDetails) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(951));
 	}
 
 	public static String toStringOrNull(IPrimitiveType<String> thePrimitive) {

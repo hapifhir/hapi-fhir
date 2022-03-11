@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.interceptor;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4SystemTest;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -7,7 +8,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
-import ca.uhn.fhir.util.MultimapCollector;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -15,6 +15,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.util.MultimapCollector;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
 import org.hl7.fhir.r4.model.Bundle;
@@ -56,7 +57,7 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 
 	@BeforeEach
 	public void before() {
-		mySvc = new PatientIdPartitionInterceptor(myFhirCtx, mySearchParamExtractor);
+		mySvc = new PatientIdPartitionInterceptor(myFhirContext, mySearchParamExtractor);
 		myForceOffsetSearchModeInterceptor = new ForceOffsetSearchModeInterceptor();
 
 		myInterceptorRegistry.registerInterceptor(mySvc);
@@ -116,7 +117,7 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 			myPatientDao.create(patient);
 			fail();
 		} catch (MethodNotAllowedException e) {
-			assertEquals("Patient resource IDs must be client-assigned in patient compartment mode", e.getMessage());
+			assertEquals(Msg.code(1321) + "Patient resource IDs must be client-assigned in patient compartment mode", e.getMessage());
 		}
 	}
 
@@ -245,7 +246,7 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		// Typed
 		myCaptureQueriesListener.clear();
 		ReferenceParam referenceParam = new ReferenceParam();
-		referenceParam.setValueAsQueryToken(myFhirCtx, "subject", ":Patient", "A");
+		referenceParam.setValueAsQueryToken(myFhirContext, "subject", ":Patient", "A");
 		outcome = myObservationDao.search(SearchParameterMap.newSynchronous("subject", referenceParam), mySrd);
 		assertEquals(1, outcome.size());
 		myCaptureQueriesListener.logSelectQueries();
@@ -276,7 +277,7 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 					.add("subject", new TokenParam("http://foo", "2"))
 				, mySrd);
 		} catch (MethodNotAllowedException e) {
-			assertEquals("Multiple values for parameter subject is not supported in patient compartment mode", e.getMessage());
+			assertEquals(Msg.code(1325) + "Multiple values for parameter subject is not supported in patient compartment mode", e.getMessage());
 		}
 
 		// Multiple ORs
@@ -286,7 +287,7 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 					"subject", new TokenOrListParam("http://foo", "1", "2")
 				), mySrd);
 		} catch (MethodNotAllowedException e) {
-			assertEquals("Multiple values for parameter subject is not supported in patient compartment mode", e.getMessage());
+			assertEquals(Msg.code(1324) + "Multiple values for parameter subject is not supported in patient compartment mode", e.getMessage());
 		}
 	}
 
@@ -299,7 +300,7 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		try {
 			myObservationDao.search(SearchParameterMap.newSynchronous().add("subject", new ReferenceParam("identifier", "http://foo|123")), mySrd);
 		} catch (MethodNotAllowedException e) {
-			assertEquals("The parameter subject.identifier is not supported in patient compartment mode", e.getMessage());
+			assertEquals(Msg.code(1322) + "The parameter subject.identifier is not supported in patient compartment mode", e.getMessage());
 		}
 
 
@@ -307,7 +308,7 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		try {
 			myObservationDao.search(SearchParameterMap.newSynchronous().add("subject", new ReferenceParam("Patient/ABC").setMdmExpand(true)), mySrd);
 		} catch (MethodNotAllowedException e) {
-			assertEquals("The parameter subject:mdm is not supported in patient compartment mode", e.getMessage());
+			assertEquals(Msg.code(1322) + "The parameter subject:mdm is not supported in patient compartment mode", e.getMessage());
 		}
 
 	}

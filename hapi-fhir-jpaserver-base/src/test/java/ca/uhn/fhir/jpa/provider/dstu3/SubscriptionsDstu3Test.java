@@ -1,9 +1,9 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorDstu3;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.util.TestUtil;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
@@ -13,7 +13,6 @@ import org.hl7.fhir.dstu3.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.dstu3.model.Subscription.SubscriptionStatus;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -92,7 +91,7 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 			ourClient.create().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: Subscription.status must be 'off' or 'requested' on a newly created subscription", e.getMessage());
+			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(816) + "Subscription.status must be 'off' or 'requested' on a newly created subscription", e.getMessage());
 		}
 
 		subs.setId("ABC");
@@ -100,7 +99,7 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 			ourClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: Subscription.status must be 'off' or 'requested' on a newly created subscription", e.getMessage());
+			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(816) + "Subscription.status must be 'off' or 'requested' on a newly created subscription", e.getMessage());
 		}
 	}
 
@@ -122,7 +121,7 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 			ourClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: Subscription.status can not be changed from 'requested' to 'active'", e.getMessage());
+			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(814) + "Subscription.status can not be changed from 'requested' to 'active'", e.getMessage());
 		}
 
 		try {
@@ -153,7 +152,7 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 			ourClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: Subscription.status can not be changed from 'requested' to 'active'", e.getMessage());
+			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(814) + "Subscription.status can not be changed from 'requested' to 'active'", e.getMessage());
 		}
 
 		try {
@@ -216,7 +215,7 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 				myPingCount++;
 			} else if (myGotBound && theMsg.startsWith("add " + mySubsId + "\n")) {
 				String text = theMsg.substring(("add " + mySubsId + "\n").length());
-				IBaseResource res = myEncoding.newParser(myFhirCtx).parseResource(text);
+				IBaseResource res = myEncoding.newParser(myFhirContext).parseResource(text);
 				myReceived.add(res);
 				myPingCount++;
 			} else {

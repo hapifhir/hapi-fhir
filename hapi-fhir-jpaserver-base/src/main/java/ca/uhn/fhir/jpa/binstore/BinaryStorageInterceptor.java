@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.binstore;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
@@ -171,7 +172,7 @@ public class BinaryStorageInterceptor {
 
 				if (hasExternalizedBinaryReference.isPresent()) {
 					String msg = myCtx.getLocalizer().getMessage(BaseHapiFhirDao.class, "externalizedBinaryStorageExtensionFoundInRequestBody", EXT_EXTERNALIZED_BINARY_ID, hasExternalizedBinaryReference.get());
-					throw new InvalidRequestException(msg);
+					throw new InvalidRequestException(Msg.code(1329) + msg);
 				}
 			}
 		}
@@ -260,7 +261,7 @@ public class BinaryStorageInterceptor {
 					StoredDetails blobDetails = myBinaryStorageSvc.fetchBlobDetails(resourceId, attachmentId.get());
 					if (blobDetails == null) {
 						String msg = myCtx.getLocalizer().getMessage(BinaryAccessProvider.class, "unknownBlobId");
-						throw new InvalidRequestException(msg);
+						throw new InvalidRequestException(Msg.code(1330) + msg);
 					}
 
 					if ((unmarshalledByteCount + blobDetails.getBytes()) < myAutoDeExternalizeMaximumBytes) {

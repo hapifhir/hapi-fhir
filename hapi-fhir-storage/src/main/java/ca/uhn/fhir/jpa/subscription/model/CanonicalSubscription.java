@@ -78,7 +78,6 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 	private boolean myCrossPartitionEnabled;
 	@JsonProperty("sendDeleteMessages")
 	private boolean mySendDeleteMessages;
-
 	/**
 	 * Constructor
 	 */
@@ -147,20 +146,19 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 		}
 	}
 
+	public void setHeaders(String theHeaders) {
+		myHeaders = new ArrayList<>();
+		if (isNotBlank(theHeaders)) {
+			myHeaders.add(theHeaders);
+		}
+	}
+
 	public Map<String, String> getTags() {
 		return myTags;
 	}
 
 	public void setTags(Map<String, String> theTags) {
 		this.myTags = theTags;
-	}
-
-
-	public void setHeaders(String theHeaders) {
-		myHeaders = new ArrayList<>();
-		if (isNotBlank(theHeaders)) {
-			myHeaders.add(theHeaders);
-		}
 	}
 
 	public String getChannelExtension(String theUrl) {
@@ -285,6 +283,10 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 		b.append(myEmailDetails, that.myEmailDetails);
 		b.append(myRestHookDetails, that.myRestHookDetails);
 		b.append(myChannelExtensions, that.myChannelExtensions);
+		b.append(myCrossPartitionEnabled, that.myCrossPartitionEnabled);
+		b.append(myChannelExtensions, that.myChannelExtensions);
+		b.append(mySendDeleteMessages, that.mySendDeleteMessages);
+		b.append(myPayloadSearchCriteria, that.myPayloadSearchCriteria);
 		return b.isEquals();
 	}
 

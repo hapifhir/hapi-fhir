@@ -22,8 +22,15 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
@@ -42,20 +49,23 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
+import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.Sets;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
-import com.healthmarketscience.sqlbuilder.InCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
-import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -76,9 +86,13 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 	private final DbColumn myColumnValue;
 
 	@Autowired
+	private IValidationSupport myValidationSupport;
+	@Autowired
 	private ITermReadSvc myTerminologySvc;
 	@Autowired
 	private ModelConfig myModelConfig;
+	@Autowired
+	private FhirContext myContext;
 
 	/**
 	 * Constructor
@@ -118,10 +132,10 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 													  RuntimeSearchParam theSearchParam,
 													  SearchFilterParser.CompareOperation theOperation,
 													  RequestPartitionId theRequestPartitionId) {
-		
-		
+
+
 		final List<FhirVersionIndependentConcept> codes = new ArrayList<>();
-		
+
 		String paramName = QueryStack.getParamNameWithPrefix(theSpnamePrefix, theSearchParam.getName());
 
 		SearchFilterParser.CompareOperation operation = theOperation;
@@ -149,25 +163,31 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 				system = null;
 				code = number.getValueAsQueryToken(getFhirContext());
 			} else {
-				throw new IllegalArgumentException("Invalid token type: " + nextParameter.getClass());
+				throw new IllegalArgumentException(Msg.code(1236) + "Invalid token type: " + nextParameter.getClass());
 			}
 
 			if (system != null && system.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
-				throw new InvalidRequestException(
-					"Parameter[" + paramName + "] has system (" + system.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + system);
+				throw new InvalidRequestException(Msg.code(1237) + "Parameter[" + paramName + "] has system (" + system.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + system);
 			}
 
 			if (code != null && code.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
-				throw new InvalidRequestException(
-					"Parameter[" + paramName + "] has code (" + code.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + code);
+				throw new InvalidRequestException(Msg.code(1238) + "Parameter[" + paramName + "] has code (" + code.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + code);
 			}
 
 			/*
 			 * Process token modifiers (:in, :below, :above)
 			 */
 
-			if (modifier == TokenParamModifier.IN) {
-				codes.addAll(myTerminologySvc.expandValueSetIntoConceptList(null, code));
+			if (modifier == TokenParamModifier.IN || modifier == TokenParamModifier.NOT_IN) {
+				if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2)) {
+					IValidationSupport.ValueSetExpansionOutcome expanded = myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), new ValueSetExpansionOptions(), code);
+					codes.addAll(extractValueSetCodes(expanded.getValueSet()));
+				} else {
+					codes.addAll(myTerminologySvc.expandValueSetIntoConceptList(null, code));
+				}
+				if (modifier == TokenParamModifier.NOT_IN) {
+					operation = SearchFilterParser.CompareOperation.ne;
+				}
 			} else if (modifier == TokenParamModifier.ABOVE) {
 				system = determineSystemIfMissing(theSearchParam, code, system);
 				validateHaveSystemAndCodeForToken(paramName, code, system);
@@ -178,14 +198,14 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 				codes.addAll(myTerminologySvc.findCodesBelow(system, code));
 			} else if (modifier == TokenParamModifier.OF_TYPE) {
 				if (!myModelConfig.isIndexIdentifierOfType()) {
-					throw new MethodNotAllowedException("The :of-type modifier is not enabled on this server");
+					throw new MethodNotAllowedException(Msg.code(2012) + "The :of-type modifier is not enabled on this server");
 				}
 				if (isBlank(system) || isBlank(code)) {
-					throw new InvalidRequestException("Invalid parameter value for :of-type query");
+					throw new InvalidRequestException(Msg.code(2013) + "Invalid parameter value for :of-type query");
 				}
 				int pipeIdx = code.indexOf('|');
 				if (pipeIdx < 1 || pipeIdx == code.length() - 1) {
-					throw new InvalidRequestException("Invalid parameter value for :of-type query");
+					throw new InvalidRequestException(Msg.code(2014) + "Invalid parameter value for :of-type query");
 				}
 
 				paramName = paramName + Constants.PARAMQUALIFIER_TOKEN_OF_TYPE;
@@ -236,6 +256,46 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 		return predicate;
 	}
 
+	private List<FhirVersionIndependentConcept> extractValueSetCodes(IBaseResource theValueSet) {
+		List<FhirVersionIndependentConcept> retVal = new ArrayList<>();
+
+		RuntimeResourceDefinition vsDef = myContext.getResourceDefinition("ValueSet");
+		BaseRuntimeChildDefinition expansionChild = vsDef.getChildByName("expansion");
+		Optional<IBase> expansionOpt = expansionChild.getAccessor().getFirstValueOrNull(theValueSet);
+		if (expansionOpt.isPresent()) {
+			IBase expansion = expansionOpt.get();
+			BaseRuntimeElementCompositeDefinition<?> expansionDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(expansion.getClass());
+			BaseRuntimeChildDefinition containsChild = expansionDef.getChildByName("contains");
+			List<IBase> contains = containsChild.getAccessor().getValues(expansion);
+				
+			BaseRuntimeChildDefinition.IAccessor systemAccessor = null;
+			BaseRuntimeChildDefinition.IAccessor codeAccessor = null;
+			for (IBase nextContains : contains) {
+				if (systemAccessor == null) {
+					systemAccessor = myContext.getElementDefinition(nextContains.getClass()).getChildByName("system").getAccessor();
+				}
+				if (codeAccessor == null) {
+					codeAccessor = myContext.getElementDefinition(nextContains.getClass()).getChildByName("code").getAccessor();
+				}
+				String system = systemAccessor
+					.getFirstValueOrNull(nextContains)
+					.map(t->(IPrimitiveType<?>)t)
+					.map(t->t.getValueAsString())
+					.orElse(null);
+				String code = codeAccessor
+					.getFirstValueOrNull(nextContains)
+					.map(t->(IPrimitiveType<?>)t)
+					.map(t->t.getValueAsString())
+					.orElse(null);
+				if (isNotBlank(system) && isNotBlank(code)) {
+					retVal.add(new FhirVersionIndependentConcept(system, code));
+				}
+			}
+		}
+
+		return retVal;
+	}
+
 	private String determineSystemIfMissing(RuntimeSearchParam theSearchParam, String code, String theSystem) {
 		String retVal = theSystem;
 		if (retVal == null) {
@@ -281,11 +341,11 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 		String codeDesc = defaultIfBlank(theCode, "(missing)");
 		if (isBlank(theCode)) {
 			String msg = getFhirContext().getLocalizer().getMessage(LegacySearchBuilder.class, "invalidCodeMissingSystem", theParamName, systemDesc, codeDesc);
-			throw new InvalidRequestException(msg);
+			throw new InvalidRequestException(Msg.code(1239) + msg);
 		}
 		if (isBlank(theSystem)) {
 			String msg = getFhirContext().getLocalizer().getMessage(LegacySearchBuilder.class, "invalidCodeMissingCode", theParamName, systemDesc, codeDesc);
-			throw new InvalidRequestException(msg);
+			throw new InvalidRequestException(Msg.code(1240) + msg);
 		}
 	}
 

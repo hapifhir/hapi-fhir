@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -60,6 +61,7 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 		myInterceptorService.registerAnonymousInterceptor(Pointcut.MDM_AFTER_PERSISTED_RESOURCE_CHECKED, afterMdmLatch);
 	}
 
+	@Override
 	@AfterEach
 	public void after() throws IOException {
 		myInterceptorService.unregisterInterceptor(afterMdmLatch);
@@ -149,7 +151,7 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 			myMdmProvider.mdmBatchPractitionerType(criteria, null);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), is(equalTo("Failed to parse match URL[death-date=2020-06-01] - Resource type Practitioner does not have a parameter with name: death-date")));
+			assertThat(e.getMessage(), is(equalTo(Msg.code(488) + "Failed to parse match URL[death-date=2020-06-01] - Resource type Practitioner does not have a parameter with name: death-date")));
 		}
 	}
 }

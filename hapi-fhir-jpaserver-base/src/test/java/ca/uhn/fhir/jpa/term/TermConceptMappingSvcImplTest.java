@@ -1,8 +1,9 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.support.TranslateConceptResult;
-import ca.uhn.fhir.jpa.api.model.TranslationRequest;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.model.TranslationRequest;
 import ca.uhn.fhir.jpa.entity.TermConceptMap;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroup;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElement;
@@ -63,7 +64,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -117,7 +118,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -159,7 +160,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -212,7 +213,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -280,7 +281,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -328,7 +329,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -388,7 +389,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -458,7 +459,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -506,7 +507,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -566,7 +567,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -636,7 +637,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -706,7 +707,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -755,7 +756,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -778,7 +779,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -834,7 +835,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -883,7 +884,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -932,7 +933,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -990,7 +991,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -1050,7 +1051,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -1108,7 +1109,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -1169,7 +1170,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 			createAndPersistConceptMap();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Can not create multiple ConceptMap resources with ConceptMap.url \"http://example.com/my_concept_map\", already have one with resource ID: ConceptMap/" + myConceptMapId.getIdPart(), e.getMessage());
+			assertEquals(Msg.code(840) + "Can not create multiple ConceptMap resources with ConceptMap.url \"http://example.com/my_concept_map\", already have one with resource ID: ConceptMap/" + myConceptMapId.getIdPart(), e.getMessage());
 		}
 
 	}
@@ -1182,7 +1183,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 			createAndPersistConceptMap("v1");
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Can not create multiple ConceptMap resources with ConceptMap.url \"http://example.com/my_concept_map\" and ConceptMap.version \"v1\", already have one with resource ID: ConceptMap/" + myConceptMapId.getIdPart(), e.getMessage());
+			assertEquals(Msg.code(841) + "Can not create multiple ConceptMap resources with ConceptMap.url \"http://example.com/my_concept_map\" and ConceptMap.version \"v1\", already have one with resource ID: ConceptMap/" + myConceptMapId.getIdPart(), e.getMessage());
 		}
 
 	}
@@ -1193,7 +1194,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -1372,7 +1373,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.util;
 
+import ca.uhn.fhir.i18n.Msg;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +20,7 @@ public class XmlUtilTest {
 			XmlUtil.newInputFactory();
 			fail();
 		} catch (Exception e) {
-			assertEquals("Unable to initialize StAX - XML processing is disabled", e.getMessage());
+			assertEquals(Msg.code(1753) + "Unable to initialize StAX - XML processing is disabled", e.getMessage());
 		}
 	}
 
@@ -30,7 +31,7 @@ public class XmlUtilTest {
 			XmlUtil.newOutputFactory();
 			fail();
 		} catch (Exception e) {
-			assertEquals("Unable to initialize StAX - XML processing is disabled", e.getMessage());
+			assertEquals(Msg.code(1754) + "Unable to initialize StAX - XML processing is disabled", e.getMessage());
 		}
 	}
 

@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -56,13 +56,13 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 		obs.getCode().setText("Some Observation");
 		obs.setSubject(new Reference(p));
 		 				
-		ourLog.info("Input: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		ourLog.info("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
 		IIdType id = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
 		Observation createdObs = myObservationDao.read(id);
 		
-		ourLog.info("Output: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
+		ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
 		
 		runInTransaction(()->{
 			ourLog.info("String indexes:\n * {}", myResourceIndexedSearchParamStringDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
@@ -92,13 +92,13 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 		obs.getContained().add(p);
 		obs.getSubject().setReference("#fooId");
 		
-		ourLog.info("Input: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		ourLog.info("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
 		IIdType id = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
 		Observation createdObs = myObservationDao.read(id);
 		
-		ourLog.info("Output: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
+		ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
 		
 		runInTransaction(()->{
 			Long i = myEntityManager
@@ -152,13 +152,13 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 		patient.addGeneralPractitioner().setReference("#org1");
 		patient.getManagingOrganization().setReference("#org2");
 				
-		ourLog.info("Input: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		ourLog.info("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 
 		IIdType id = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		Patient createdPatient = myPatientDao.read(id);
 		
-		ourLog.info("Output: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdPatient));
+		ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdPatient));
 		
 		runInTransaction(()->{
 			Long i = myEntityManager
@@ -223,13 +223,13 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 		encounter.addReasonReference().setReference("#obs1");
 		encounter.getContained().add(obs);
 		
-		ourLog.info("Input: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
+		ourLog.info("Input: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
 
 		IIdType id = myEncounterDao.create(encounter, mySrd).getId().toUnqualifiedVersionless();
 
 		Encounter createdEncounter = myEncounterDao.read(id);
 		
-		ourLog.info("Output: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdEncounter));
+		ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdEncounter));
 		
 		runInTransaction(()->{
 			// The practitioner
@@ -282,7 +282,7 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 			outcome.getResources(0, 1).get(0);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Invalid parameter chain: subject.marital-status", e.getMessage());
+			assertEquals(Msg.code(1214) + "Invalid parameter chain: subject.marital-status", e.getMessage());
 		}
 		
 	}

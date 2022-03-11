@@ -30,7 +30,6 @@ public abstract class BaseDateSearchDaoTests {
 	 */
 	IIdType myObservationId;
 
-
 	/**
 	 * Test for our date search operators.
 	 * <p>
@@ -55,7 +54,6 @@ public abstract class BaseDateSearchDaoTests {
 		if (isShouldSkip(theResourceDate, theQuery)) {
 			return;
 		}
-
 		// setup
 		myObservationId = fixture.createObservationWithEffectiveDate(theResourceDate);
 

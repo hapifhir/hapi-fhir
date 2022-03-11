@@ -20,15 +20,16 @@ package ca.uhn.fhir.rest.param.binder;
  * #L%
  */
 
-import java.util.Collections;
-import java.util.List;
-
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+
+import java.util.Collections;
+import java.util.List;
 
 public final class QueryParameterOrBinder extends BaseBinder<IQueryParameterOr<?>> implements IParamBinder<IQueryParameterOr<?>> {
 
@@ -53,12 +54,12 @@ public final class QueryParameterOrBinder extends BaseBinder<IQueryParameterOr<?
 				return dt;
 			}
 			if (theString.size() > 1) {
-				throw new InvalidRequestException("Multiple values detected for non-repeatable parameter '" + theParamName + "'. This server is not configured to allow multiple (AND/OR) values for this param.");
+				throw new InvalidRequestException(Msg.code(1953) + "Multiple values detected for non-repeatable parameter '" + theParamName + "'. This server is not configured to allow multiple (AND/OR) values for this param.");
 			}
 			
 			dt.setValuesAsQueryTokens(theContext, theParamName, theString.get(0));
 		} catch (SecurityException e) {
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(1954) + e);
 		}
 		return dt;
 	}

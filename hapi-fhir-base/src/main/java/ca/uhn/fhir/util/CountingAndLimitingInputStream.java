@@ -20,6 +20,7 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import com.google.common.io.CountingInputStream;
 
 import java.io.IOException;
@@ -52,7 +53,7 @@ public class CountingAndLimitingInputStream extends InputStream {
 
 	private void validateCount() throws IOException {
 		if (myWrap.getCount() > myMaxBytes) {
-			throw new IOException("Stream exceeds maximum allowable size: " + myMaxBytes);
+			throw new IOException(Msg.code(1807) + "Stream exceeds maximum allowable size: " + myMaxBytes);
 		}
 	}
 

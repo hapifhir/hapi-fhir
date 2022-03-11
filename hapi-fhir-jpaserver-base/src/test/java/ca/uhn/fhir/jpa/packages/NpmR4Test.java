@@ -59,6 +59,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -156,7 +158,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 				ourLog.info("**************************************************************************");
 				ourLog.info("**************************************************************************");
 				ourLog.info("Res " + i);
-				ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resources.get(i)));
+				ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resources.get(i)));
 			}
 		});
 
@@ -250,13 +252,13 @@ public class NpmR4Test extends BaseJpaR4Test {
 		// Fetch resource by URL
 		runInTransaction(() -> {
 			IBaseResource asset = myPackageCacheManager.loadPackageAssetByUrl(FhirVersionEnum.R4, "http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand");
-			assertThat(myFhirCtx.newJsonParser().encodeResourceToString(asset), containsString("\"url\":\"http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand\",\"version\":\"0.12.0\""));
+			assertThat(myFhirContext.newJsonParser().encodeResourceToString(asset), containsString("\"url\":\"http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand\",\"version\":\"0.12.0\""));
 		});
 
 		// Fetch resource by URL with version
 		runInTransaction(() -> {
 			IBaseResource asset = myPackageCacheManager.loadPackageAssetByUrl(FhirVersionEnum.R4, "http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand|0.12.0");
-			assertThat(myFhirCtx.newJsonParser().encodeResourceToString(asset), containsString("\"url\":\"http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand\",\"version\":\"0.12.0\""));
+			assertThat(myFhirContext.newJsonParser().encodeResourceToString(asset), containsString("\"url\":\"http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand\",\"version\":\"0.12.0\""));
 		});
 
 		// Search for the installed resource
@@ -320,13 +322,13 @@ public class NpmR4Test extends BaseJpaR4Test {
 		// Fetch resource by URL
 		runInTransaction(() -> {
 			IBaseResource asset = myPackageCacheManager.loadPackageAssetByUrl(FhirVersionEnum.R4, "http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand");
-			assertThat(myFhirCtx.newJsonParser().encodeResourceToString(asset), containsString("\"url\":\"http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand\",\"version\":\"0.12.0\""));
+			assertThat(myFhirContext.newJsonParser().encodeResourceToString(asset), containsString("\"url\":\"http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand\",\"version\":\"0.12.0\""));
 		});
 
 		// Fetch resource by URL with version
 		runInTransaction(() -> {
 			IBaseResource asset = myPackageCacheManager.loadPackageAssetByUrl(FhirVersionEnum.R4, "http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand|0.12.0");
-			assertThat(myFhirCtx.newJsonParser().encodeResourceToString(asset), containsString("\"url\":\"http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand\",\"version\":\"0.12.0\""));
+			assertThat(myFhirContext.newJsonParser().encodeResourceToString(asset), containsString("\"url\":\"http://hl7.org/fhir/uv/shorthand/ImplementationGuide/hl7.fhir.uv.shorthand\",\"version\":\"0.12.0\""));
 		});
 
 		// Search for the installed resource
@@ -456,7 +458,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 		spec.setInstallResourceTypes(resourceList);
 		try {
 			PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
-			fail();
+			fail(outcome.toString());
 		} catch (ImplementationGuideInstallationException theE) {
 			assertThat(theE.getMessage(), containsString("Resources in a package must have a url or identifier to be loaded by the package installer."));
 		}
@@ -476,6 +478,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("test-ig").setVersion("1.0.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		spec.setInstallResourceTypes(resourceList);
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
+		ourLog.info("Outcome: {}", outcome);
 		assertEquals(1, outcome.getResourcesInstalled().get("ImplementationGuide"));
 
 		// Be sure no further communication with the server
@@ -586,19 +589,14 @@ public class NpmR4Test extends BaseJpaR4Test {
 
 		runInTransaction(() -> {
 			NpmPackageMetadataJson metadata = myPackageCacheManager.loadPackageMetadata("hl7.fhir.uv.shorthand");
-			try {
-				ourLog.info(JsonUtil.serialize(metadata));
+			ourLog.info(JsonUtil.serialize(metadata));
 
-				assertEquals("0.12.0", metadata.getDistTags().getLatest());
+			assertEquals("0.12.0", metadata.getDistTags().getLatest());
 
-				assertThat(metadata.getVersions().keySet(), contains("0.12.0", "0.11.1"));
+			assertThat(metadata.getVersions().keySet(), contains("0.12.0", "0.11.1"));
 
-				NpmPackageMetadataJson.Version version0120 = metadata.getVersions().get("0.12.0");
-				assertEquals(3001, version0120.getBytes());
-
-			} catch (IOException e) {
-				throw new InternalErrorException(e);
-			}
+			NpmPackageMetadataJson.Version version0120 = metadata.getVersions().get("0.12.0");
+			assertEquals(3001, version0120.getBytes());
 		});
 
 	}
@@ -924,17 +922,36 @@ public class NpmR4Test extends BaseJpaR4Test {
 			map.add(StructureDefinition.SP_URL, new UriParam("https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/LogicalModel/Laborbefund"));
 			IBundleProvider result = myStructureDefinitionDao.search(map);
 			assertEquals(1, result.sizeOrThrowNpe());
-			List<IBaseResource> resources = result.getResources(0,1);
-			assertFalse(((StructureDefinition)resources.get(0)).hasSnapshot());
+			List<IBaseResource> resources = result.getResources(0, 1);
+			assertFalse(((StructureDefinition) resources.get(0)).hasSnapshot());
 
 			// Confirm that DiagnosticLab (a resource StructureDefinition with differential but no snapshot) was created with a generated snapshot.
 			map = SearchParameterMap.newSynchronous();
 			map.add(StructureDefinition.SP_URL, new UriParam("https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab"));
 			result = myStructureDefinitionDao.search(map);
 			assertEquals(1, result.sizeOrThrowNpe());
-			resources = result.getResources(0,1);
-			assertTrue(((StructureDefinition)resources.get(0)).hasSnapshot());
+			resources = result.getResources(0, 1);
+			assertTrue(((StructureDefinition) resources.get(0)).hasSnapshot());
 
+		});
+	}
+
+	@Test
+	public void testInstallR4PackageFromFile() {
+
+		Path currentRelativePath = Paths.get("");
+		String s = currentRelativePath.toAbsolutePath().toString();
+		System.out.println("Current absolute path is: " + s);
+
+		String fileUrl = "file:" + s + "/src/test/resources/packages/de.basisprofil.r4-1.2.0.tgz";
+
+		myPackageInstallerSvc.install(new PackageInstallationSpec()
+			.setName("de.basisprofil.r4")
+			.setVersion("1.2.0")
+			.setPackageUrl(fileUrl)
+		);
+		runInTransaction(() -> {
+			assertTrue(myPackageVersionDao.findByPackageIdAndVersion("de.basisprofil.r4", "1.2.0").isPresent());
 		});
 	}
 

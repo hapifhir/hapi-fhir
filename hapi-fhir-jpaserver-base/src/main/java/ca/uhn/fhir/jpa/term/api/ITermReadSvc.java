@@ -74,6 +74,8 @@ public interface ITermReadSvc extends IValidationSupport {
 
 	Optional<TermConcept> findCode(String theCodeSystem, String theCode);
 
+	List<TermConcept> findCodes(String theCodeSystem, List<String> theCodes);
+
 	Set<TermConcept> findCodesAbove(Long theCodeSystemResourcePid, Long theCodeSystemResourceVersionPid, String theCode);
 
 	List<FhirVersionIndependentConcept> findCodesAbove(String theSystem, String theCode);

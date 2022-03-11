@@ -22,6 +22,8 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.rules.json.MdmFilterSearchParamJson;
@@ -52,7 +54,7 @@ public class MdmCandidateSearchSvc {
 	@Autowired
 	private IMdmSettings myMdmSettings;
 	@Autowired
-	private IdHelperService myIdHelperService;
+	private IJpaIdHelperService myJpaIdHelperService;
 	@Autowired
 	private MdmCandidateSearchCriteriaBuilderSvc myMdmCandidateSearchCriteriaBuilderSvc;
 	@Autowired
@@ -64,11 +66,14 @@ public class MdmCandidateSearchSvc {
 	/**
 	 * Given a source resource, search for all resources that are considered an MDM match based on defined MDM rules.
 	 *
-	 *
 	 * @param theResourceType
+<<<<<<< HEAD
 	 * @param theResource the {@link IBaseResource} we are attempting to match.
 	 * @param theRequestPartitionId  the {@link RequestPartitionId} representation of the partitions we are limited to when attempting to match
 	 *
+=======
+	 * @param theResource     the {@link IBaseResource} we are attempting to match.
+>>>>>>> dfd99c5471f9a49f8eda4ed0f55863d176e230f9
 	 * @return the list of candidate {@link IBaseResource} which could be matches to theResource
 	 */
 	@Transactional
@@ -96,7 +101,7 @@ public class MdmCandidateSearchSvc {
 		//Sometimes, we are running this function on a resource that has not yet been persisted,
 		//so it may not have an ID yet, precluding the need to remove it.
 		if (theResource.getIdElement().getIdPart() != null) {
-			matchedPidsToResources.remove(myIdHelperService.getPidOrNull(theResource));
+			matchedPidsToResources.remove(myJpaIdHelperService.getPidOrNull(theResource));
 		}
 
 		ourLog.info("Found {} resources for {}", matchedPidsToResources.size(), theResourceType);
@@ -128,14 +133,14 @@ public class MdmCandidateSearchSvc {
 		//2.
 		Optional<IBundleProvider> bundleProvider = myCandidateSearcher.search(theResourceType, resourceCriteria, theRequestPartitionId);
 		if (!bundleProvider.isPresent()) {
-			throw new TooManyCandidatesException("More than " + myMdmSettings.getCandidateSearchLimit() + " candidate matches found for " + resourceCriteria + ".  Aborting mdm matching.");
+			throw new TooManyCandidatesException(Msg.code(762) + "More than " + myMdmSettings.getCandidateSearchLimit() + " candidate matches found for " + resourceCriteria + ".  Aborting mdm matching.");
 		}
 		List<IBaseResource> resources = bundleProvider.get().getAllResources();
 
 		int initialSize = theMatchedPidsToResources.size();
 
 		//4.
-		resources.forEach(resource -> theMatchedPidsToResources.put(myIdHelperService.getPidOrNull(resource), (IAnyResource) resource));
+		resources.forEach(resource -> theMatchedPidsToResources.put(myJpaIdHelperService.getPidOrNull(resource), (IAnyResource) resource));
 
 		int newSize = theMatchedPidsToResources.size();
 

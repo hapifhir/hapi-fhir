@@ -20,6 +20,7 @@ package org.hl7.fhir.dstu3.hapi.ctx;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -76,7 +77,7 @@ public class FhirDstu3 implements IFhirVersion {
       str = FhirDstu3.class.getResourceAsStream("/org/hl7/fhir/dstu3/model/fhirversion.properties");
     }
     if (str == null) {
-      throw new ConfigurationException("Can not find model property file on classpath: " + "/ca/uhn/fhir/model/dstu3/fhirversion.properties");
+      throw new ConfigurationException(Msg.code(609) + "Can not find model property file on classpath: " + "/ca/uhn/fhir/model/dstu3/fhirversion.properties");
     }
     return str;
   }

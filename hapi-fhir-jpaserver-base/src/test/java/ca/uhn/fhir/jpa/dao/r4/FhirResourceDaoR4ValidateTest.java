@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -35,6 +36,7 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
+import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -119,28 +121,16 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		BaseTermReadSvcImpl.setInvokeOnNextCallForUnitTest(null);
 
 		myValidationSettings.setLocalReferenceValidationDefaultPolicy(ReferenceValidationPolicy.IGNORE);
-		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
+		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
 
 		myUnknownCodeSystemWarningValidationSupport.setNonExistentCodeSystemSeverity(UnknownCodeSystemWarningValidationSupport.DEFAULT_SEVERITY);
 	}
 
-	/**
-	 * By default an unknown code system should fail vaildation
-	 */
 	@Test
 	public void testValidateCodeInValueSetWithUnknownCodeSystem_FailValidation() {
-		createStructureDefWithBindingToUnknownCs();
+		createStructureDefWithBindingToUnknownCs(true);
 
-		Observation obs = new Observation();
-		obs.getMeta().addProfile("http://sd");
-		obs.getText().setDivAsString("<div>Hello</div>");
-		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
-		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs");
-		obs.getCode().setText("hello");
-		obs.setSubject(new Reference("Patient/123"));
-		obs.addPerformer(new Reference("Practitioner/123"));
-		obs.setEffective(DateTimeType.now());
-		obs.setStatus(ObservationStatus.FINAL);
+		Observation obs = createObservationForUnknownCodeSystemTest();
 
 		OperationOutcome oo;
 
@@ -162,6 +152,210 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 	}
 
+	@Test
+	public void testValidateCodeInEnumeratedValueSetWithUnknownCodeSystem_Information() {
+		myUnknownCodeSystemWarningValidationSupport.setNonExistentCodeSystemSeverity(IValidationSupport.IssueSeverity.INFORMATION);
+
+		createStructureDefWithBindingToUnknownCs(true);
+
+		Observation obs = createObservationForUnknownCodeSystemTest();
+
+		OperationOutcome oo;
+		String encoded;
+
+		// Valid code
+		obs.setValue(new Quantity().setSystem("http://cs").setCode("code1").setValue(123));
+		oo = validateAndReturnOutcome(obs, false);
+		encoded = encode(oo);
+		ourLog.info(encoded);
+		assertEquals(1, oo.getIssue().size());
+		assertEquals("No issues detected during validation", oo.getIssueFirstRep().getDiagnostics());
+		assertEquals(OperationOutcome.IssueSeverity.INFORMATION, oo.getIssueFirstRep().getSeverity());
+
+		// Invalid code
+		obs.setValue(new Quantity().setSystem("http://cs").setCode("code99").setValue(123));
+		oo = validateAndReturnOutcome(obs, true);
+		encoded = encode(oo);
+		ourLog.info(encoded);
+		assertEquals(1, oo.getIssue().size());
+		assertEquals("The code provided (http://cs#code99) is not in the value set http://vs, and a code from this value set is required: Unknown code 'http://cs#code99' for in-memory expansion of ValueSet 'http://vs'", oo.getIssueFirstRep().getDiagnostics());
+		assertEquals(OperationOutcome.IssueSeverity.ERROR, oo.getIssueFirstRep().getSeverity());
+	}
+
+	/**
+	 * By default, an unknown code system should fail validation
+	 */
+	@Test
+	public void testValidateCodeInEnumeratedValueSetWithUnknownCodeSystem_Warning() {
+		// set to warning
+		myUnknownCodeSystemWarningValidationSupport.setNonExistentCodeSystemSeverity(IValidationSupport.IssueSeverity.WARNING);
+
+		createStructureDefWithBindingToUnknownCs(true);
+
+		Observation obs = createObservationForUnknownCodeSystemTest();
+
+		OperationOutcome oo;
+		String encoded;
+
+		// Valid code
+		obs.setValue(new Quantity().setSystem("http://cs").setCode("code1").setValue(123));
+		oo = validateAndReturnOutcome(obs, false);
+		encoded = encode(oo);
+		ourLog.info(encoded);
+		assertEquals(1, oo.getIssue().size());
+		assertEquals("CodeSystem is unknown and can't be validated: http://cs for 'http://cs#code1'", oo.getIssueFirstRep().getDiagnostics());
+		assertEquals(OperationOutcome.IssueSeverity.WARNING, oo.getIssueFirstRep().getSeverity());
+
+		// Invalid code
+		obs.setValue(new Quantity().setSystem("http://cs").setCode("code99").setValue(123));
+		oo = validateAndReturnOutcome(obs, true);
+		encoded = encode(oo);
+		ourLog.info(encoded);
+		assertEquals(2, oo.getIssue().size());
+		assertEquals("CodeSystem is unknown and can't be validated: http://cs for 'http://cs#code99'", oo.getIssue().get(0).getDiagnostics());
+		assertEquals(OperationOutcome.IssueSeverity.WARNING, oo.getIssue().get(0).getSeverity());
+		assertEquals("The code provided (http://cs#code99) is not in the value set http://vs, and a code from this value set is required: Unknown code 'http://cs#code99' for in-memory expansion of ValueSet 'http://vs'", oo.getIssue().get(1).getDiagnostics());
+		assertEquals(OperationOutcome.IssueSeverity.ERROR, oo.getIssue().get(1).getSeverity());
+	}
+
+	@Test
+	public void testValidateCodeInEnumeratedValueSetWithUnknownCodeSystem_Error() {
+		myUnknownCodeSystemWarningValidationSupport.setNonExistentCodeSystemSeverity(IValidationSupport.IssueSeverity.ERROR);
+
+		createStructureDefWithBindingToUnknownCs(true);
+
+		Observation obs = new Observation();
+		obs.getMeta().addProfile("http://sd");
+		obs.getText().setDivAsString("<div>Hello</div>");
+		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs");
+		obs.getCode().setText("hello");
+		obs.setSubject(new Reference("Patient/123"));
+		obs.addPerformer(new Reference("Practitioner/123"));
+		obs.setEffective(DateTimeType.now());
+		obs.setStatus(ObservationStatus.FINAL);
+
+		OperationOutcome oo;
+		String encoded;
+
+		// Valid code
+		obs.setValue(new Quantity().setSystem("http://cs").setCode("code1").setValue(123));
+		oo = validateAndReturnOutcome(obs, false);
+		encoded = encode(oo);
+		ourLog.info(encoded);
+		assertEquals(1, oo.getIssue().size());
+		assertTrue(oo.getIssueFirstRep().getDiagnostics().contains("No issues detected during validation"));
+		assertEquals(OperationOutcome.IssueSeverity.INFORMATION, oo.getIssueFirstRep().getSeverity());
+
+		// Invalid code
+		obs.setValue(new Quantity().setSystem("http://cs").setCode("code99").setValue(123));
+		oo = validateAndReturnOutcome(obs, true);
+		encoded = encode(oo);
+		ourLog.info(encoded);
+		assertEquals(1, oo.getIssue().size());
+		assertTrue(oo.getIssueFirstRep()
+			.getDiagnostics().contains("The code provided (http://cs#code99) is not in the value set http://vs, and a code from this value set is required: Unknown code 'http://cs#code99' for in-memory expansion of ValueSet 'http://vs'")
+		);
+		assertEquals(OperationOutcome.IssueSeverity.ERROR, oo.getIssueFirstRep().getSeverity());
+	}
+
+
+	@Test
+	public void testValidateCodeInNonEnumeratedValueSetWithUnknownCodeSystem_Information() {
+		myUnknownCodeSystemWarningValidationSupport.setNonExistentCodeSystemSeverity(IValidationSupport.IssueSeverity.INFORMATION);
+
+		createStructureDefWithBindingToUnknownCs(false);
+
+		Observation obs = createObservationForUnknownCodeSystemTest();
+
+		OperationOutcome oo;
+		String encoded;
+
+		// Valid code
+		obs.setValue(new Quantity().setSystem("http://cs").setCode("code1").setValue(123));
+		oo = validateAndReturnOutcome(obs, false);
+		encoded = encode(oo);
+		ourLog.info(encoded);
+		assertEquals(1, oo.getIssue().size());
+		assertEquals("No issues detected during validation", oo.getIssueFirstRep().getDiagnostics());
+		assertEquals(OperationOutcome.IssueSeverity.INFORMATION, oo.getIssueFirstRep().getSeverity());
+
+		// Invalid code
+		obs.setValue(new Quantity().setSystem("http://cs").setCode("code99").setValue(123));
+		oo = validateAndReturnOutcome(obs, false);
+		encoded = encode(oo);
+		ourLog.info(encoded);
+		assertEquals(1, oo.getIssue().size());
+		assertEquals("No issues detected during validation", oo.getIssueFirstRep().getDiagnostics());
+		assertEquals(OperationOutcome.IssueSeverity.INFORMATION, oo.getIssueFirstRep().getSeverity());
+	}
+
+	/**
+	 * By default, an unknown code system should fail validation
+	 */
+	@Test
+	public void testValidateCodeInNonEnumeratedValueSetWithUnknownCodeSystem_Warning() {
+		// set to warning
+		myUnknownCodeSystemWarningValidationSupport.setNonExistentCodeSystemSeverity(IValidationSupport.IssueSeverity.WARNING);
+
+		createStructureDefWithBindingToUnknownCs(false);
+
+		Observation obs = createObservationForUnknownCodeSystemTest();
+
+		OperationOutcome oo;
+		String encoded;
+
+		// Valid code
+		obs.setValue(new Quantity().setSystem("http://cs").setCode("code1").setValue(123));
+		oo = validateAndReturnOutcome(obs, false);
+		encoded = encode(oo);
+		ourLog.info(encoded);
+		assertEquals(1, oo.getIssue().size());
+		assertEquals("CodeSystem is unknown and can't be validated: http://cs for 'http://cs#code1'", oo.getIssueFirstRep().getDiagnostics());
+		assertEquals(OperationOutcome.IssueSeverity.WARNING, oo.getIssueFirstRep().getSeverity());
+
+		// Invalid code
+		obs.setValue(new Quantity().setSystem("http://cs").setCode("code99").setValue(123));
+		oo = validateAndReturnOutcome(obs, false);
+		encoded = encode(oo);
+		ourLog.info(encoded);
+		assertEquals(1, oo.getIssue().size());
+		assertEquals("CodeSystem is unknown and can't be validated: http://cs for 'http://cs#code99'", oo.getIssue().get(0).getDiagnostics());
+		assertEquals(OperationOutcome.IssueSeverity.WARNING, oo.getIssue().get(0).getSeverity());
+	}
+
+	@Test
+	public void testValidateCodeInNonEnumeratedValueSetWithUnknownCodeSystem_Error() {
+		myUnknownCodeSystemWarningValidationSupport.setNonExistentCodeSystemSeverity(IValidationSupport.IssueSeverity.ERROR);
+
+		createStructureDefWithBindingToUnknownCs(false);
+
+		Observation obs = new Observation();
+		obs.getMeta().addProfile("http://sd");
+		obs.getText().setDivAsString("<div>Hello</div>");
+		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs");
+		obs.getCode().setText("hello");
+		obs.setSubject(new Reference("Patient/123"));
+		obs.addPerformer(new Reference("Practitioner/123"));
+		obs.setEffective(DateTimeType.now());
+		obs.setStatus(ObservationStatus.FINAL);
+
+		OperationOutcome oo;
+		String encoded;
+
+		// Valid code
+		obs.setValue(new Quantity().setSystem("http://cs").setCode("code1").setValue(123));
+		oo = validateAndReturnOutcome(obs, true);
+		encoded = encode(oo);
+		ourLog.info(encoded);
+		assertEquals(1, oo.getIssue().size());
+		assertEquals("The code provided (http://cs#code1) is not in the value set http://vs, and a code from this value set is required: Failed to expand ValueSet 'http://vs' (in-memory). Could not validate code http://cs#code1. Error was: HAPI-0702: Unable to expand ValueSet because CodeSystem could not be found: http://cs", oo.getIssueFirstRep().getDiagnostics());
+		assertEquals(OperationOutcome.IssueSeverity.ERROR, oo.getIssueFirstRep().getSeverity());
+
+	}
+
+
 	private Observation createObservationForUnknownCodeSystemTest() {
 		Observation obs = new Observation();
 		obs.getMeta().addProfile("http://sd");
@@ -176,85 +370,60 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		return obs;
 	}
 
-	/**
-	 * By default, an unknown code system should fail validation
-	 */
 	@Test
-	public void testValidateCodeInValueSetWithUnknownCodeSystem_Warning() {
+	public void testValidateCodeInValueSet_InferredCodeSystem_WarningOnUnknown() {
 		// set to warning
 		myUnknownCodeSystemWarningValidationSupport.setNonExistentCodeSystemSeverity(IValidationSupport.IssueSeverity.WARNING);
 
-		createStructureDefWithBindingToUnknownCs();
-
-		Observation obs = createObservationForUnknownCodeSystemTest();
-
 		OperationOutcome oo;
 		String encoded;
 
+		Binary binary = new Binary();
+		binary.setContentType("application/text");
+		binary.setContent("hello".getBytes(StandardCharsets.UTF_8));
+
 		// Valid code
-		obs.setValue(new Quantity().setSystem("http://cs").setCode("code1").setValue(123));
-		oo = validateAndReturnOutcome(obs);
+		oo = validateAndReturnOutcome(binary);
 		encoded = encode(oo);
 		ourLog.info(encoded);
 		assertTrue(oo.getIssueFirstRep().getDiagnostics().contains("No issues detected during validation"));
 
-		// Invalid code
-		obs.setValue(new Quantity().setSystem("http://cs").setCode("code99").setValue(123));
-		oo = validateAndReturnOutcome(obs);
-		encoded = encode(oo);
-		ourLog.info(encoded);
-		assertTrue(oo.getIssueFirstRep().getDiagnostics().contains("No issues detected during validation"));
 	}
 
 	@Test
-	public void testValidateCodeInValueSetWithUnknownCodeSystem_Error() {
+	public void testValidateCodeInValueSet_InferredCodeSystem_ErrorOnUnknown() {
+		// set to warning
 		myUnknownCodeSystemWarningValidationSupport.setNonExistentCodeSystemSeverity(IValidationSupport.IssueSeverity.ERROR);
-
-		createStructureDefWithBindingToUnknownCs();
-
-		Observation obs = new Observation();
-		obs.getMeta().addProfile("http://sd");
-		obs.getText().setDivAsString("<div>Hello</div>");
-		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
-		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs");
-		obs.getCode().setText("hello");
-		obs.setSubject(new Reference("Patient/123"));
-		obs.addPerformer(new Reference("Practitioner/123"));
-		obs.setEffective(DateTimeType.now());
-		obs.setStatus(ObservationStatus.FINAL);
 
 		OperationOutcome oo;
 		String encoded;
 
+		Binary binary = new Binary();
+		binary.setContentType("application/text");
+		binary.setContent("hello".getBytes(StandardCharsets.UTF_8));
+
 		// Valid code
-		obs.setValue(new Quantity().setSystem("http://cs").setCode("code1").setValue(123));
-		oo = validateAndReturnOutcome(obs);
+		oo = validateAndReturnOutcome(binary);
 		encoded = encode(oo);
 		ourLog.info(encoded);
 		assertTrue(oo.getIssueFirstRep().getDiagnostics().contains("No issues detected during validation"));
 
-
-		// Invalid code
-		obs.setValue(new Quantity().setSystem("http://cs").setCode("code99").setValue(123));
-		oo = validateAndReturnOutcome(obs);
-		encoded = encode(oo);
-		ourLog.info(encoded);
-		assertTrue(oo.getIssueFirstRep()
-			.getDiagnostics().contains("The code provided (http://cs#code99) is not in the value set http://vs, and a code from this value set is required: Unknown code 'http://cs#code99' for in-memory expansion of ValueSet 'http://vs'")
-		);
 	}
 
-	public void createStructureDefWithBindingToUnknownCs() {
+
+	public void createStructureDefWithBindingToUnknownCs(boolean theEnumeratedCodeSystem) {
 		myValidationSupport.fetchCodeSystem("http://not-exist"); // preload DefaultProfileValidationSupport
 
 		ValueSet vs = new ValueSet();
 		vs.setUrl("http://vs");
-		vs
+		ValueSet.ConceptSetComponent include = vs
 			.getCompose()
 			.addInclude()
-			.setSystem("http://cs")
-			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("code1")))
-			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("code2")));
+			.setSystem("http://cs");
+		if (theEnumeratedCodeSystem) {
+			include.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("code1")));
+			include.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("code2")));
+		}
 		myValueSetDao.create(vs);
 
 		StructureDefinition sd = new StructureDefinition();
@@ -288,7 +457,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			myStructureDefinitionDao.generateSnapshot(sd, null, null, null);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertEquals("StructureDefinition[id=null, url=http://sd] has no base", e.getMessage());
+			assertEquals(Msg.code(704) + "StructureDefinition[id=null, url=http://sd] has no base", e.getMessage());
 		}
 
 		myStructureDefinitionDao.create(sd);
@@ -310,7 +479,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			myObservationDao.validate(obs, null, null, null, ValidationModeEnum.CREATE, null, mySrd);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertEquals("StructureDefinition[id=null, url=http://sd] has no base", e.getMessage());
+			assertEquals(Msg.code(704) + "StructureDefinition[id=null, url=http://sd] has no base", e.getMessage());
 		}
 	}
 
@@ -332,7 +501,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		// Use a code that's in the ValueSet
 		{
 			outcome = (OperationOutcome) myObservationDao.validate(loadResourceFromClasspath(Observation.class, "/r4/bl/bb-obs-code-in-valueset.json"), null, null, null, null, null, mySrd).getOperationOutcome();
-			String outcomeStr = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+			String outcomeStr = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 			ourLog.info("Validation outcome: {}", outcomeStr);
 			assertThat(outcomeStr, not(containsString("\"error\"")));
 		}
@@ -340,12 +509,12 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		// Use a code that's not in the ValueSet
 		try {
 			outcome = (OperationOutcome) myObservationDao.validate(loadResourceFromClasspath(Observation.class, "/r4/bl/bb-obs-code-not-in-valueset.json"), null, null, null, null, null, mySrd).getOperationOutcome();
-			String outcomeStr = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+			String outcomeStr = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 			ourLog.info("Validation outcome: {}", outcomeStr);
 			fail();
 		} catch (PreconditionFailedException e) {
 			outcome = (OperationOutcome) e.getOperationOutcome();
-			String outcomeStr = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+			String outcomeStr = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 			ourLog.info("Validation outcome: {}", outcomeStr);
 			assertThat(outcomeStr, containsString("The code provided (http://unitsofmeasure.org#cm) is not in the value set https://bb/ValueSet/BBDemographicAgeUnit, and a code from this value set is required"));
 		}
@@ -366,7 +535,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		// Use a code that's in the ValueSet
 		{
 			outcome = (OperationOutcome) myObservationDao.validate(loadResourceFromClasspath(Observation.class, "/r4/bl/bb-obs-code-in-valueset.json"), null, null, null, null, null, mySrd).getOperationOutcome();
-			String outcomeStr = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+			String outcomeStr = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 			ourLog.info("Validation outcome: {}", outcomeStr);
 			assertThat(outcomeStr, not(containsString("\"error\"")));
 		}
@@ -374,12 +543,12 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		// Use a code that's not in the ValueSet
 		try {
 			outcome = (OperationOutcome) myObservationDao.validate(loadResourceFromClasspath(Observation.class, "/r4/bl/bb-obs-code-not-in-valueset.json"), null, null, null, null, null, mySrd).getOperationOutcome();
-			String outcomeStr = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+			String outcomeStr = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 			ourLog.info("Validation outcome: {}", outcomeStr);
 			fail();
 		} catch (PreconditionFailedException e) {
 			outcome = (OperationOutcome) e.getOperationOutcome();
-			String outcomeStr = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+			String outcomeStr = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 			ourLog.info("Validation outcome: {}", outcomeStr);
 			assertThat(outcomeStr, containsString("The code provided (http://unitsofmeasure.org#cm) is not in the value set https://bb/ValueSet/BBDemographicAgeUnit, and a code from this value set is required: Unknown code 'http://unitsofmeasure.org#cm'"));
 		}
@@ -401,30 +570,30 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		// Use the wrong datatype
 		try {
-			myFhirCtx.setParserErrorHandler(new LenientErrorHandler());
+			myFhirContext.setParserErrorHandler(new LenientErrorHandler());
 			Observation resource = loadResourceFromClasspath(Observation.class, "/r4/bl/bb-obs-value-is-not-quantity2.json");
 			outcome = (OperationOutcome) myObservationDao.validate(resource, null, null, null, null, null, mySrd).getOperationOutcome();
-			String outcomeStr = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+			String outcomeStr = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 			ourLog.info("Validation outcome: {}", outcomeStr);
 			fail();
 		} catch (PreconditionFailedException e) {
 			outcome = (OperationOutcome) e.getOperationOutcome();
-			String outcomeStr = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+			String outcomeStr = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 			ourLog.info("Validation outcome: {}", outcomeStr);
 			assertThat(outcomeStr, containsString("\"error\""));
 		}
 
 		// Use the wrong datatype
 		try {
-			myFhirCtx.setParserErrorHandler(new LenientErrorHandler());
+			myFhirContext.setParserErrorHandler(new LenientErrorHandler());
 			Observation resource = loadResourceFromClasspath(Observation.class, "/r4/bl/bb-obs-value-is-not-quantity.json");
 			outcome = (OperationOutcome) myObservationDao.validate(resource, null, null, null, null, null, mySrd).getOperationOutcome();
-			String outcomeStr = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+			String outcomeStr = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 			ourLog.info("Validation outcome: {}", outcomeStr);
 			fail();
 		} catch (PreconditionFailedException e) {
 			outcome = (OperationOutcome) e.getOperationOutcome();
-			String outcomeStr = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+			String outcomeStr = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 			ourLog.info("Validation outcome: {}", outcomeStr);
 			assertThat(outcomeStr, containsString("The Profile 'https://bb/StructureDefinition/BBDemographicAge' definition allows for the type Quantity but found type string"));
 		}
@@ -581,19 +750,19 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		// Non-existent target
 		obs.setSubject(new Reference("Group/123"));
 		oo = validateAndReturnOutcome(obs);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertEquals("Unable to resolve resource 'Group/123'", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
 
 		// Target of wrong type
 		obs.setSubject(new Reference("Group/ABC"));
 		oo = validateAndReturnOutcome(obs);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertEquals("Invalid Resource target type. Found Group, but expected one of ([Patient])", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
 
 		// Target of right type
 		obs.setSubject(new Reference("Patient/DEF"));
 		oo = validateAndReturnOutcome(obs);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertEquals("No issues detected during validation", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
 
 	}
@@ -648,19 +817,19 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		// Non-existent target
 		obs.setSubject(new Reference("Group/123"));
 		oo = validateAndReturnOutcome(obs);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertEquals("Unable to resolve resource 'Group/123'", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
 
 		// Target of wrong type
 		obs.setSubject(new Reference("Group/ABC"));
 		oo = validateAndReturnOutcome(obs);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertEquals("Unable to find a match for profile Group/ABC (by type) among choices: ; [CanonicalType[http://hl7.org/fhir/StructureDefinition/Patient]]", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
 
 		// Target of right type
 		obs.setSubject(new Reference("Patient/DEF"));
 		oo = validateAndReturnOutcome(obs);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertEquals("No issues detected during validation", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
 
 	}
@@ -714,19 +883,19 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		// Non-existent target
 		obs.setSubject(new Reference("Group/123"));
 		OperationOutcome oo = validateAndReturnOutcome(obs);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertEquals("Unable to resolve resource 'Group/123'", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
 
 		// Target of wrong type
 		obs.setSubject(new Reference("Group/ABC"));
 		oo = validateAndReturnOutcome(obs);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertEquals("No issues detected during validation", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
 
 		// Target of right type
 		obs.setSubject(new Reference("Patient/DEF"));
 		oo = validateAndReturnOutcome(obs);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertEquals("No issues detected during validation", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
 
 	}
@@ -777,9 +946,9 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			"  }\n" +
 			"}";
 
-		ValueSet vs = myFhirCtx.newJsonParser().parseResource(ValueSet.class, input);
+		ValueSet vs = myFhirContext.newJsonParser().parseResource(ValueSet.class, input);
 		OperationOutcome oo = validateAndReturnOutcome(vs);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 
 		assertEquals("The code 123 is not valid in the system https://bb", oo.getIssue().get(0).getDiagnostics());
 	}
@@ -797,7 +966,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		MethodOutcome outcome = myLocationDao.validate(location, null, null, null, ValidationModeEnum.CREATE, null, null);
 
 		OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
-		String ooString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
+		String ooString = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
 		ourLog.info(ooString);
 
 		assertThat(ooString, containsString("Unknown code in fragment CodeSystem 'http://example.com/codesystem#foo'"));
@@ -835,7 +1004,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.getCode().getCodingFirstRep().setCode("foo-foo");
 		obs.getCode().getCodingFirstRep().setDisplay("Some Code");
 		outcome = (OperationOutcome) myObservationDao.validate(obs, null, null, null, ValidationModeEnum.CREATE, "http://example.com/structuredefinition", mySrd).getOperationOutcome();
-		ourLog.info("Outcome: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.info("Outcome: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		assertEquals("Unknown code in fragment CodeSystem 'http://example.com/codesystem#foo-foo' for in-memory expansion of ValueSet 'http://example.com/valueset'", outcome.getIssueFirstRep().getDiagnostics());
 		assertEquals(OperationOutcome.IssueSeverity.WARNING, outcome.getIssueFirstRep().getSeverity());
 
@@ -844,7 +1013,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.getCode().getCodingFirstRep().setCode("some-code");
 		obs.getCode().getCodingFirstRep().setDisplay("Some Code");
 		outcome = (OperationOutcome) myObservationDao.validate(obs, null, null, null, ValidationModeEnum.CREATE, "http://example.com/structuredefinition", mySrd).getOperationOutcome();
-		ourLog.info("Outcome: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.info("Outcome: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		assertEquals("No issues detected during validation", outcome.getIssueFirstRep().getDiagnostics());
 		assertEquals(OperationOutcome.IssueSeverity.INFORMATION, outcome.getIssueFirstRep().getSeverity());
 
@@ -854,13 +1023,13 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.getCode().getCodingFirstRep().setDisplay("Some Code");
 		try {
 			outcome = (OperationOutcome) myObservationDao.validate(obs, null, null, null, ValidationModeEnum.CREATE, "http://example.com/structuredefinition", mySrd).getOperationOutcome();
-			ourLog.info("Outcome: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+			ourLog.info("Outcome: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 			assertEquals("", outcome.getIssueFirstRep().getDiagnostics());
 			assertEquals(OperationOutcome.IssueSeverity.INFORMATION, outcome.getIssueFirstRep().getSeverity());
 			fail();
 		} catch (PreconditionFailedException e) {
 			outcome = (OperationOutcome) e.getOperationOutcome();
-			ourLog.info("Outcome: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+			ourLog.info("Outcome: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 			assertEquals("None of the codings provided are in the value set 'MessageCategory' (http://example.com/valueset), and a coding from this value set is required) (codes = http://example.com/foo-foo#some-code)", outcome.getIssueFirstRep().getDiagnostics());
 			assertEquals(OperationOutcome.IssueSeverity.ERROR, outcome.getIssueFirstRep().getSeverity());
 		}
@@ -979,7 +1148,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			}
 			return null;
 		});
-		when(validationSupport.getFhirContext()).thenReturn(myFhirCtx);
+		when(validationSupport.getFhirContext()).thenReturn(myFhirContext);
 
 		myJpaValidationSupportChain.addValidationSupport(0, validationSupport);
 		try {
@@ -1070,7 +1239,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.getCode().getCodingFirstRep().setSystem("http://FOO").setCode("CODE99999").setDisplay("Display 3");
 
 		OperationOutcome oo = validateAndReturnOutcome(obs);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertEquals("Error MY ERROR validating Coding: java.lang.NullPointerException: MY ERROR", oo.getIssueFirstRep().getDiagnostics());
 		assertEquals(OperationOutcome.IssueSeverity.ERROR, oo.getIssueFirstRep().getSeverity());
 	}
@@ -1087,7 +1256,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			.setText("This is text")
 			.setAuthor(new Reference("Patient/123"));
 
-		ourLog.info(myFhirCtx.newJsonParser().encodeResourceToString(allergy));
+		ourLog.info(myFhirContext.newJsonParser().encodeResourceToString(allergy));
 
 		OperationOutcome oo = validateAndReturnOutcome(allergy);
 		assertThat(encode(oo), containsString("None of the codings provided are in the value set 'AllergyIntolerance Clinical Status Codes' (http://hl7.org/fhir/ValueSet/allergyintolerance-clinical|4.0.1)"));
@@ -1104,18 +1273,29 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		}
 	}
 
+	private <T extends IBaseResource> OperationOutcome validateAndReturnOutcome(T theObs, Boolean theWantError) {
+		IFhirResourceDao<T> dao = (IFhirResourceDao<T>) myDaoRegistry.getResourceDao(theObs.getClass());
+		try {
+			MethodOutcome outcome = dao.validate(theObs, null, null, null, ValidationModeEnum.CREATE, null, mySrd);
+			assertTrue(theWantError == null || !theWantError, "Wanted an error response but got a non-error");
+			return (OperationOutcome) outcome.getOperationOutcome();
+		} catch (PreconditionFailedException e) {
+			assertTrue(theWantError == null || theWantError, "Wanted a non-error response but got an error");
+			return (OperationOutcome) e.getOperationOutcome();
+		}
+	}
 
 	@Test
 	public void testValidateStructureDefinition() throws Exception {
 		String input = IOUtils.toString(getClass().getResourceAsStream("/r4/sd-david-dhtest7.json"), StandardCharsets.UTF_8);
-		StructureDefinition sd = myFhirCtx.newJsonParser().parseResource(StructureDefinition.class, input);
+		StructureDefinition sd = myFhirContext.newJsonParser().parseResource(StructureDefinition.class, input);
 
 
 		ourLog.info("Starting validation");
 		try {
 			myStructureDefinitionDao.validate(sd, null, null, null, ValidationModeEnum.UPDATE, null, mySrd);
 		} catch (PreconditionFailedException e) {
-			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+			ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 		}
 		ourLog.info("Done validation");
 
@@ -1133,14 +1313,17 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	@Test
 	public void testValidateDocument() throws Exception {
 		String input = IOUtils.toString(getClass().getResourceAsStream("/r4/document-bundle.json"), StandardCharsets.UTF_8);
-		Bundle document = myFhirCtx.newJsonParser().parseResource(Bundle.class, input);
+		Bundle document = myFhirContext.newJsonParser().parseResource(Bundle.class, input);
 
 
 		ourLog.info("Starting validation");
 		try {
 			MethodOutcome outcome = myBundleDao.validate(document, null, null, null, ValidationModeEnum.CREATE, null, mySrd);
+			String encodedResponse = myFhirContext.newJsonParser().encodeResourceToString(outcome.getOperationOutcome());
+			ourLog.info("Validation result: {}", encodedResponse);
+			fail();
 		} catch (PreconditionFailedException e) {
-			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+			ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 		}
 		ourLog.info("Done validation");
 
@@ -1152,7 +1335,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		String methodName = "testValidateResourceContainingProfileDeclarationJson";
 		OperationOutcome outcome = doTestValidateResourceContainingProfileDeclaration(methodName, EncodingEnum.JSON);
 
-		String ooString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+		String ooString = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(ooString);
 		assertThat(ooString, containsString("Element '.subject': minimum required = 1, but only found 0"));
 		assertThat(ooString, containsString("Element encounter @ : max allowed = 0, but found 1"));
@@ -1165,7 +1348,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		String methodName = "testValidateResourceContainingProfileDeclarationXml";
 		OperationOutcome outcome = doTestValidateResourceContainingProfileDeclaration(methodName, EncodingEnum.XML);
 
-		String ooString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+		String ooString = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(ooString);
 		assertThat(ooString, containsString("Element '/f:Observation.subject': minimum required = 1, but only found 0"));
 		assertThat(ooString, containsString("Element encounter @ /f:Observation: max allowed = 0, but found 1"));
@@ -1196,11 +1379,11 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			.setCode("bar");
 		MethodOutcome outcome = myPatientDao.validate(patient, null, encode(patient), EncodingEnum.JSON, ValidationModeEnum.CREATE, null, mySrd);
 		IBaseOperationOutcome oo = outcome.getOperationOutcome();
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 
 		// It would be ok for this to produce 0 issues, or just an information message too
-		assertEquals(1, OperationOutcomeUtil.getIssueCount(myFhirCtx, oo));
-		assertEquals("None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://foo#bar)", OperationOutcomeUtil.getFirstIssueDetails(myFhirCtx, oo));
+		assertEquals(1, OperationOutcomeUtil.getIssueCount(myFhirContext, oo));
+		assertEquals("None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://foo#bar)", OperationOutcomeUtil.getFirstIssueDetails(myFhirContext, oo));
 
 	}
 
@@ -1234,7 +1417,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		ValidationModeEnum mode = ValidationModeEnum.CREATE;
 		switch (enc) {
 			case JSON:
-				encoded = myFhirCtx.newJsonParser().encodeResourceToString(input);
+				encoded = myFhirContext.newJsonParser().encodeResourceToString(input);
 				try {
 					myObservationDao.validate(input, null, encoded, EncodingEnum.JSON, mode, null, mySrd);
 					fail();
@@ -1243,7 +1426,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 				}
 				break;
 			case XML:
-				encoded = myFhirCtx.newXmlParser().encodeResourceToString(input);
+				encoded = myFhirContext.newXmlParser().encodeResourceToString(input);
 				try {
 					myObservationDao.validate(input, null, encoded, EncodingEnum.XML, mode, null, mySrd);
 					fail();
@@ -1270,14 +1453,14 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
 
 		ValidationModeEnum mode = ValidationModeEnum.CREATE;
-		String encoded = myFhirCtx.newJsonParser().encodeResourceToString(input);
+		String encoded = myFhirContext.newJsonParser().encodeResourceToString(input);
 
 		try {
 			myObservationDao.validate(input, null, encoded, EncodingEnum.JSON, mode, null, mySrd);
 			fail();
 		} catch (PreconditionFailedException e) {
 			org.hl7.fhir.r4.model.OperationOutcome oo = (org.hl7.fhir.r4.model.OperationOutcome) e.getOperationOutcome();
-			String outputString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
+			String outputString = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
 			ourLog.info(outputString);
 			assertThat(outputString, containsString("Profile reference 'http://example.com/StructureDefinition/testValidateResourceContainingProfileDeclarationInvalid' has not been checked because it is unknown"));
 		}
@@ -1305,7 +1488,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			.setMethod(Bundle.HTTPVerb.POST);
 
 		ValidationModeEnum mode = ValidationModeEnum.CREATE;
-		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
+		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
 		ourLog.info(encoded);
 
 		try {
@@ -1313,7 +1496,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			fail();
 		} catch (PreconditionFailedException e) {
 			org.hl7.fhir.r4.model.OperationOutcome oo = (org.hl7.fhir.r4.model.OperationOutcome) e.getOperationOutcome();
-			String outputString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
+			String outputString = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
 			ourLog.info(outputString);
 			assertThat(outputString, containsString("Profile reference 'http://example.com/StructureDefinition/testValidateResourceContainingProfileDeclarationInvalid' has not been checked because it is unknown"));
 		}
@@ -1354,11 +1537,11 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		try {
 			MethodOutcome outcome = myQuestionnaireResponseDao.validate(qr, null, null, null, ValidationModeEnum.CREATE, null, mySrd);
 			OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
-			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+			ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 			fail();
 		} catch (PreconditionFailedException e) {
 			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
-			String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
+			String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
 			ourLog.info(encoded);
 			assertThat(encoded, containsString("is not in the options value set"));
 		}
@@ -1389,7 +1572,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			myCapabilityStatementDao.validate(cs, null, null, null, ValidationModeEnum.CREATE, null, mySrd);
 			fail();
 		} catch (PreconditionFailedException e) {
-			String oo = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome());
+			String oo = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome());
 			ourLog.info(oo);
 			assertThat(oo, oo, containsString("Type mismatch - SearchParameter 'http://example.com/name' type is string, but type here is date"));
 		}
@@ -1482,7 +1665,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			outcome = (OperationOutcome) e.getOperationOutcome();
 		}
 
-		String ooString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+		String ooString = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(ooString);
 		assertThat(ooString, containsString("Unable to delete Organization"));
 
@@ -1491,7 +1674,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		myPatientDao.update(pat, mySrd);
 
 		outcome = (OperationOutcome) myOrganizationDao.validate(null, orgId, null, null, ValidationModeEnum.DELETE, null, mySrd).getOperationOutcome();
-		ooString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+		ooString = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(ooString);
 		assertThat(ooString, containsString("Ok to delete"));
 
@@ -1558,36 +1741,36 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		{
 			String resource = loadResource("/r4/uscore/patient-resource-badcode.json");
-			IBaseResource parsedResource = myFhirCtx.newJsonParser().parseResource(resource);
+			IBaseResource parsedResource = myFhirContext.newJsonParser().parseResource(resource);
 			try {
 				myPatientDao.validate((Patient) parsedResource, null, resource, null, null, null, mySrd);
 				fail();
 			} catch (PreconditionFailedException e) {
 				OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
-				String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
+				String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
 				ourLog.info("Outcome:\n{}", encoded);
 				assertThat(encoded, containsString("Unable to validate code urn:oid:2.16.840.1.113883.6.238#2106-3AAA"));
 			}
 		}
 		{
 			String resource = loadResource("/r4/uscore/patient-resource-good.json");
-			IBaseResource parsedResource = myFhirCtx.newJsonParser().parseResource(resource);
+			IBaseResource parsedResource = myFhirContext.newJsonParser().parseResource(resource);
 			try {
 				MethodOutcome outcome = myPatientDao.validate((Patient) parsedResource, null, resource, null, null, null, mySrd);
 				OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
-				String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
+				String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
 				ourLog.info("Outcome:\n{}", encoded);
 				assertThat(encoded, containsString("No issues detected"));
 			} catch (PreconditionFailedException e) {
-				fail(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+				fail(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 			}
 		}
 		{
 			String resource = loadResource("/r4/uscore/observation-resource-good.json");
-			IBaseResource parsedResource = myFhirCtx.newJsonParser().parseResource(resource);
+			IBaseResource parsedResource = myFhirContext.newJsonParser().parseResource(resource);
 			MethodOutcome outcome = myObservationDao.validate((Observation) parsedResource, null, resource, null, null, null, mySrd);
 			OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
-			String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
+			String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
 			ourLog.info("Outcome:\n{}", encoded);
 			assertThat(encoded, not(containsString("error")));
 		}
@@ -1672,7 +1855,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			OperationOutcome oo = (OperationOutcome) validationOutcome.getOperationOutcome();
 			assertEquals("The questionnaire 'http://foo/Questionnaire/DOES_NOT_EXIST' could not be resolved, so no validation can be performed against the base questionnaire", oo.getIssueFirstRep().getDiagnostics());
 		} catch (PreconditionFailedException e) {
-			fail(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+			fail(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 		}
 	}
 
@@ -1686,7 +1869,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			fail();
 		} catch (PreconditionFailedException e) {
 			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
-			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+			ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 			assertThat(oo.getIssueFirstRep().getDiagnostics(),
 				containsString("None of the codings provided are in the value set 'Condition Clinical Status Codes' (http://hl7.org/fhir/ValueSet/condition-clinical|4.0.1), and a coding from this value set is required) (codes = http://terminology.hl7.org/CodeSystem/condition-clinical/wrong-system#notrealcode)"));
 		}
@@ -1717,10 +1900,10 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		try {
 			MethodOutcome results = myQuestionnaireDao.validate(null, null, input, EncodingEnum.XML, ValidationModeEnum.UPDATE, null, mySrd);
 			OperationOutcome oo = (OperationOutcome) results.getOperationOutcome();
-			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+			ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		} catch (PreconditionFailedException e) {
 			// this is a failure of the test
-			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+			ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 			throw e;
 		}
 	}
@@ -1736,10 +1919,10 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		p.getMeta().addProfile("http://example.com/fhir/StructureDefinition/patient-1a-extensions");
 		p.setActive(true);
 
-		String raw = myFhirCtx.newJsonParser().encodeResourceToString(p);
+		String raw = myFhirContext.newJsonParser().encodeResourceToString(p);
 		MethodOutcome outcome = myPatientDao.validate(p, null, raw, EncodingEnum.JSON, null, null, mySrd);
 
-		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
+		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
 		ourLog.info("OO: {}", encoded);
 		assertThat(encoded, containsString("No issues detected"));
 	}
@@ -1761,7 +1944,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		ValueSetExpansionOptions options = ValueSetExpansionOptions.forOffsetAndCount(0, 10000);
 		ValueSet expansion = myValueSetDao.expand(id, options, mySrd);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 
 		assertEquals(2, expansion.getExpansion().getContains().size());
 	}

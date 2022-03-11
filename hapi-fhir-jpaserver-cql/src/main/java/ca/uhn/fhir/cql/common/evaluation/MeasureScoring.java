@@ -20,6 +20,7 @@ package ca.uhn.fhir.cql.common.evaluation;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -58,7 +59,7 @@ public enum MeasureScoring {
             // } else if (Configuration.isAcceptInvalidEnums()) {
             //     return null;
             // } else {
-            //     // throw new FHIRException("Unknown MeasureScoring code \'" + code + "\'");
+            //     // throw new FHIRException(Msg.code(1656) + "Unknown MeasureScoring code \'" + code + "\'");
             // }
         }
 

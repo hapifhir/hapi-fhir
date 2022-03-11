@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -33,6 +34,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -79,8 +81,9 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	private Long myId;
 
 	@ManyToOne(optional = false)
-	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", insertable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_SPIDXSTR_RESOURCE"))
-	private ResourceTable myResourceTable;
+	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false,
+		foreignKey = @ForeignKey(name = "FK_SPIDXSTR_RESOURCE"))
+	private ResourceTable myResource;
 
 	@Column(name = "SP_VALUE_EXACT", length = MAX_LENGTH, nullable = true)
 	private String myValueExact;
@@ -214,7 +217,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 
 	public ResourceIndexedSearchParamString setValueExact(String theValueExact) {
 		if (defaultString(theValueExact).length() > MAX_LENGTH) {
-			throw new IllegalArgumentException("Value is too long: " + theValueExact.length());
+			throw new IllegalArgumentException(Msg.code(1529) + "Value is too long: " + theValueExact.length());
 		}
 		myValueExact = theValueExact;
 		return this;
@@ -226,7 +229,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 
 	public ResourceIndexedSearchParamString setValueNormalized(String theValueNormalized) {
 		if (defaultString(theValueNormalized).length() > MAX_LENGTH) {
-			throw new IllegalArgumentException("Value is too long: " + theValueNormalized.length());
+			throw new IllegalArgumentException(Msg.code(1530) + "Value is too long: " + theValueNormalized.length());
 		}
 		myValueNormalized = theValueNormalized;
 		return this;
@@ -297,4 +300,15 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, value);
 	}
 
+	@Override
+	public ResourceTable getResource() {
+		return myResource;
+	}
+
+	@Override
+	public BaseResourceIndexedSearchParam setResource(ResourceTable theResource) {
+		myResource = theResource;
+		setResourceType(theResource.getResourceType());
+		return this;
+	}
 }

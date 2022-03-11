@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -33,6 +34,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.config.HapiFhirLocalContainerEntityManagerFactoryBean;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
@@ -94,6 +96,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.healthmarketscience.sqlbuilder.Condition;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -107,6 +110,9 @@ import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
+import javax.persistence.Query;
+import javax.persistence.SqlResultSetMapping;
+import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -146,6 +152,11 @@ public class SearchBuilder implements ISearchBuilder {
 	public static final int MAXIMUM_PAGE_SIZE_FOR_TESTING = 50;
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchBuilder.class);
 	private static final ResourcePersistentId NO_MORE = new ResourcePersistentId(-1L);
+	private static final String MY_TARGET_RESOURCE_PID = "myTargetResourcePid";
+	private static final String MY_SOURCE_RESOURCE_PID = "mySourceResourcePid";
+	private static final String MY_TARGET_RESOURCE_VERSION = "myTargetResourceVersion";
+	public static final String RESOURCE_ID_ALIAS = "resource_id";
+	public static final String RESOURCE_VERSION_ALIAS = "resource_version";
 	public static boolean myUseMaxPageSize50ForTest = false;
 	private final String myResourceName;
 	private final Class<? extends IBaseResource> myResourceType;
@@ -165,7 +176,7 @@ public class SearchBuilder implements ISearchBuilder {
 	@Autowired
 	private FhirContext myContext;
 	@Autowired
-	private IdHelperService myIdHelperService;
+	private IIdHelperService myIdHelperService;
 	@Autowired(required = false)
 	private IFulltextSearchSvc myFulltextSearchSvc;
 	@Autowired(required = false)
@@ -366,18 +377,28 @@ public class SearchBuilder implements ISearchBuilder {
 
 	private void failIfUsed(String theParamName) {
 		if (myParams.containsKey(theParamName)) {
-			throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + theParamName);
+			throw new InvalidRequestException(Msg.code(1192) + "Fulltext search is not enabled on this service, can not process parameter: " + theParamName);
 		}
 	}
 
 	private List<ResourcePersistentId> executeLastNAgainstIndex(Integer theMaximumResults) {
-		validateLastNIsEnabled();
-
-		List<String> lastnResourceIds = myIElasticsearchSvc.executeLastN(myParams, myContext, theMaximumResults);
-
-		return lastnResourceIds.stream()
-			.map(lastnResourceId -> myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, lastnResourceId))
-			.collect(Collectors.toList());
+		// Can we use our hibernate search generated index on resource to support lastN?:
+		if (myDaoConfig.isAdvancedLuceneIndexing()) {
+			if (myFulltextSearchSvc == null) {
+				throw new InvalidRequestException(Msg.code(2027) + "LastN operation is not enabled on this service, can not process this request");
+			}
+			return myFulltextSearchSvc.lastN(myParams, theMaximumResults)
+				.stream().map(lastNResourceId -> myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, String.valueOf(lastNResourceId)))
+				.collect(Collectors.toList());
+		} else {
+			if (myIElasticsearchSvc == null) {
+				throw new InvalidRequestException(Msg.code(2033) + "LastN operation is not enabled on this service, can not process this request");
+			}
+			// use the dedicated observation ES/Lucene index to support lastN query
+			return myIElasticsearchSvc.executeLastN(myParams, myContext, theMaximumResults).stream()
+				.map(lastnResourceId -> myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, lastnResourceId))
+				.collect(Collectors.toList());
+		}
 	}
 
 	private List<ResourcePersistentId> queryLuceneForPIDs(RequestDetails theRequest) {
@@ -391,7 +412,6 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 		return pids;
 	}
-
 
 	private void doCreateChunkedQueries(SearchParameterMap theParams, List<Long> thePids, Integer theOffset, SortSpec sort, boolean theCount, RequestDetails theRequest, ArrayList<SearchQueryExecutor> theQueries) {
 		if (thePids.size() < getMaximumPageSize()) {
@@ -420,7 +440,7 @@ public class SearchBuilder implements ISearchBuilder {
 					ids.add(((TokenParam) param).getValue());
 				} else {
 					// we do not expect the _id parameter to be a non-string value
-					throw new IllegalArgumentException("_id parameter must be a StringParam or TokenParam");
+					throw new IllegalArgumentException(Msg.code(1193) + "_id parameter must be a StringParam or TokenParam");
 				}
 			}
 		}
@@ -626,7 +646,7 @@ public class SearchBuilder implements ISearchBuilder {
 			RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(myResourceName, theSort.getParamName());
 			if (param == null) {
 				String msg = myContext.getLocalizer().getMessageSanitized(BaseStorageDao.class, "invalidSortParameter", theSort.getParamName(), getResourceName(), mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(getResourceName()));
-				throw new InvalidRequestException(msg);
+				throw new InvalidRequestException(Msg.code(1194) + msg);
 			}
 
 			switch (param.getParamType()) {
@@ -654,10 +674,10 @@ public class SearchBuilder implements ISearchBuilder {
 				case COMPOSITE:
 					List<RuntimeSearchParam> compositeList = JpaParamUtil.resolveComponentParameters(mySearchParamRegistry, param);
 					if (compositeList == null) {
-						throw new InvalidRequestException("The composite _sort parameter " + theSort.getParamName() + " is not defined by the resource " + myResourceName);
+						throw new InvalidRequestException(Msg.code(1195) + "The composite _sort parameter " + theSort.getParamName() + " is not defined by the resource " + myResourceName);
 					}
 					if (compositeList.size() != 2) {
-						throw new InvalidRequestException("The composite _sort parameter " + theSort.getParamName()
+						throw new InvalidRequestException(Msg.code(1196) + "The composite _sort parameter " + theSort.getParamName()
 							+ " must have 2 composite types declared in parameter annotation, found "
 							+ compositeList.size());
 					}
@@ -671,7 +691,7 @@ public class SearchBuilder implements ISearchBuilder {
 				case SPECIAL:
 				case HAS:
 				default:
-					throw new InvalidRequestException("This server does not support _sort specifications of type " + param.getParamType() + " - Can't serve _sort=" + theSort.getParamName());
+					throw new InvalidRequestException(Msg.code(1197) + "This server does not support _sort specifications of type " + param.getParamType() + " - Can't serve _sort=" + theSort.getParamName());
 			}
 
 		}
@@ -703,7 +723,7 @@ public class SearchBuilder implements ISearchBuilder {
 			case HAS:
 			case SPECIAL:
 			default:
-				throw new InvalidRequestException("Don't know how to handle composite parameter with type of " + theParamType + " on _sort=" + theParamName);
+				throw new InvalidRequestException(Msg.code(1198) + "Don't know how to handle composite parameter with type of " + theParamType + " on _sort=" + theParamName);
 		}
 
 	}
@@ -877,11 +897,11 @@ public class SearchBuilder implements ISearchBuilder {
 		if (theIncludes == null || theIncludes.isEmpty()) {
 			return new HashSet<>();
 		}
-		String searchPidFieldName = theReverseMode ? "myTargetResourcePid" : "mySourceResourcePid";
-		String findPidFieldName = theReverseMode ? "mySourceResourcePid" : "myTargetResourcePid";
+		String searchPidFieldName = theReverseMode ? MY_TARGET_RESOURCE_PID : MY_SOURCE_RESOURCE_PID;
+		String findPidFieldName = theReverseMode ? MY_SOURCE_RESOURCE_PID : MY_TARGET_RESOURCE_PID;
 		String findVersionFieldName = null;
 		if (!theReverseMode && myModelConfig.isRespectVersionsForSearchIncludes()) {
-			findVersionFieldName = "myTargetResourceVersion";
+			findVersionFieldName = MY_TARGET_RESOURCE_VERSION;
 		}
 
 		List<ResourcePersistentId> nextRoundMatches = new ArrayList<>(theMatches);
@@ -996,29 +1016,61 @@ public class SearchBuilder implements ISearchBuilder {
 						continue;
 					}
 
-					paths = param.getPathsSplit();
+					paths = param.getPathsSplitForResourceType(resType);
 
 					String targetResourceType = defaultString(nextInclude.getParamTargetType(), null);
 					for (String nextPath : paths) {
-						String sql;
-
 						boolean haveTargetTypesDefinedByParam = param.hasTargets();
-						String fieldsToLoad = "r." + findPidFieldName;
+						String findPidFieldSqlColumn = findPidFieldName.equals(MY_SOURCE_RESOURCE_PID) ? "src_resource_id" : "target_resource_id";
+						String fieldsToLoad = "r." + findPidFieldSqlColumn + " AS " + RESOURCE_ID_ALIAS;
 						if (findVersionFieldName != null) {
-							fieldsToLoad += ", r." + findVersionFieldName;
+							fieldsToLoad += ", r.target_resource_version AS " + RESOURCE_VERSION_ALIAS;
 						}
 
-						if (targetResourceType != null) {
-							sql = "SELECT " + fieldsToLoad + " FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchPidFieldName + " IN (:target_pids) AND r.myTargetResourceType = :target_resource_type";
-						} else if (haveTargetTypesDefinedByParam) {
-							sql = "SELECT " + fieldsToLoad + " FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchPidFieldName + " IN (:target_pids) AND r.myTargetResourceType in (:target_resource_types)";
-						} else {
-							sql = "SELECT " + fieldsToLoad + " FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchPidFieldName + " IN (:target_pids)";
+						// Query for includes lookup has consider 2 cases
+						// Case 1: Where target_resource_id is available in hfj_res_link table for local references
+						// Case 2: Where target_resource_id is null in hfj_res_link table and referred by a canonical url in target_resource_url
+
+						// Case 1:
+						String searchPidFieldSqlColumn = searchPidFieldName.equals(MY_TARGET_RESOURCE_PID) ? "target_resource_id" : "src_resource_id";
+						StringBuilder resourceIdBasedQuery = new StringBuilder("SELECT " + fieldsToLoad +
+							" FROM hfj_res_link r " +
+							" WHERE r.src_path = :src_path AND " +
+							" r.target_resource_id IS NOT NULL AND " +
+							" r." + searchPidFieldSqlColumn + " IN (:target_pids) ");
+						if(targetResourceType != null) {
+							resourceIdBasedQuery.append(" AND r.target_resource_type = :target_resource_type ");
+						} else if(haveTargetTypesDefinedByParam) {
+							resourceIdBasedQuery.append(" AND r.target_resource_type in (:target_resource_types) ");
 						}
+
+						// Case 2:
+						String fieldsToLoadFromSpidxUriTable = "rUri.res_id";
+						// to match the fields loaded in union
+						if(fieldsToLoad.split(",").length > 1) {
+							for (int i = 0; i < fieldsToLoad.split(",").length - 1; i++) {
+								fieldsToLoadFromSpidxUriTable += ", NULL";
+							}
+						}
+						//@formatter:off
+						String resourceUrlBasedQuery = "SELECT " + fieldsToLoadFromSpidxUriTable +
+							" FROM hfj_res_link r " +
+							" JOIN hfj_spidx_uri rUri ON ( " +
+							"   r.target_resource_url = rUri.sp_uri AND " +
+							"   rUri.sp_name = 'url' " +
+							    (targetResourceType != null ? " AND rUri.res_type = :target_resource_type " : "") +
+							    (haveTargetTypesDefinedByParam ? " AND rUri.res_type IN (:target_resource_types) " : "") +
+							" ) " +
+							" WHERE r.src_path = :src_path AND " +
+							" r.target_resource_id IS NULL AND " +
+							" r." + searchPidFieldSqlColumn + " IN (:target_pids) ";
+						//@formatter:on
+
+						String sql = resourceIdBasedQuery + " UNION " + resourceUrlBasedQuery;
 
 						List<Collection<ResourcePersistentId>> partitions = partition(nextRoundMatches, getMaximumPageSize());
 						for (Collection<ResourcePersistentId> nextPartition : partitions) {
-							TypedQuery<?> q = theEntityManager.createQuery(sql, Object[].class);
+							Query q = theEntityManager.createNativeQuery(sql, Tuple.class);
 							q.setParameter("src_path", nextPath);
 							q.setParameter("target_pids", ResourcePersistentId.toLongList(nextPartition));
 							if (targetResourceType != null) {
@@ -1026,21 +1078,18 @@ public class SearchBuilder implements ISearchBuilder {
 							} else if (haveTargetTypesDefinedByParam) {
 								q.setParameter("target_resource_types", param.getTargets());
 							}
-							List<?> results = q.getResultList();
+							List<Tuple> results = q.getResultList();
 							if (theMaxCount != null) {
 								q.setMaxResults(theMaxCount);
 							}
-							for (Object resourceLink : results) {
-								if (resourceLink != null) {
-									ResourcePersistentId persistentId;
-									if (findVersionFieldName != null) {
-										persistentId = new ResourcePersistentId(((Object[]) resourceLink)[0]);
-										persistentId.setVersion((Long) ((Object[]) resourceLink)[1]);
-									} else {
-										persistentId = new ResourcePersistentId(resourceLink);
+							for (Tuple result : results) {
+								if (result != null) {
+									Long resourceId = NumberUtils.createLong(String.valueOf(result.get(RESOURCE_ID_ALIAS)));
+									Long resourceVersion = null;
+									if (findVersionFieldName != null && result.get(RESOURCE_VERSION_ALIAS) != null) {
+										resourceVersion = NumberUtils.createLong(String.valueOf(result.get(RESOURCE_VERSION_ALIAS)));
 									}
-									assert persistentId.getId() instanceof Long;
-									pidsToInclude.add(persistentId);
+									pidsToInclude.add(new ResourcePersistentId(resourceId, resourceVersion));
 								}
 							}
 						}
@@ -1619,20 +1668,14 @@ public class SearchBuilder implements ISearchBuilder {
 		return thePredicates.toArray(new Predicate[0]);
 	}
 
-	private void validateLastNIsEnabled() {
-		if (myIElasticsearchSvc == null) {
-			throw new InvalidRequestException("LastN operation is not enabled on this service, can not process this request");
-		}
-	}
-
 	private void validateFullTextSearchIsEnabled() {
 		if (myFulltextSearchSvc == null) {
 			if (myParams.containsKey(Constants.PARAM_TEXT)) {
-				throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
+				throw new InvalidRequestException(Msg.code(1200) + "Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
 			} else if (myParams.containsKey(Constants.PARAM_CONTENT)) {
-				throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
+				throw new InvalidRequestException(Msg.code(1201) + "Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
 			} else {
-				throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process qualifier :text");
+				throw new InvalidRequestException(Msg.code(1202) + "Fulltext search is not enabled on this service, can not process qualifier :text");
 			}
 		}
 	}

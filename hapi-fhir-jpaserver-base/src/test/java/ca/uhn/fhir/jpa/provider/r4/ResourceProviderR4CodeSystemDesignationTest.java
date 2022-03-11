@@ -1,12 +1,5 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
@@ -17,6 +10,13 @@ import org.hl7.fhir.r4.model.UriType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class ResourceProviderR4CodeSystemDesignationTest extends BaseResourceProviderR4Test {
 
@@ -42,7 +42,7 @@ public class ResourceProviderR4CodeSystemDesignationTest extends BaseResourcePro
 			.andParameter("displayLanguage",new CodeType("de-AT"))
 			.execute();
 
-		String resp = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		//-- The designations should have de-AT and default language
@@ -68,7 +68,7 @@ public class ResourceProviderR4CodeSystemDesignationTest extends BaseResourcePro
 			.andParameter("displayLanguage",new CodeType("zh-CN"))
 			.execute();
 
-		String resp = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		//-- The designations should have default language only
@@ -92,7 +92,7 @@ public class ResourceProviderR4CodeSystemDesignationTest extends BaseResourcePro
 			.andParameter("system", new UriType(CS_ACME_URL))
 			.execute();
 
-		String resp = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		//-- The designations should have all languages and the default language
@@ -121,7 +121,7 @@ public class ResourceProviderR4CodeSystemDesignationTest extends BaseResourcePro
 			.andParameter("displayLanguage",new CodeType("de-AT"))
 			.execute();
 
-		String resp = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		//-- The designations should have de-AT and default language
@@ -144,7 +144,7 @@ public class ResourceProviderR4CodeSystemDesignationTest extends BaseResourcePro
 				.andParameter("displayLanguage",new CodeType("zh-CN"))
 				.execute();
 
-		resp = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		//-- The designations should have default language only
@@ -165,7 +165,7 @@ public class ResourceProviderR4CodeSystemDesignationTest extends BaseResourcePro
 				.andParameter("system", new UriType(CS_ACME_URL))
 				.execute();
 
-		resp = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		//-- The designations should have all languages and the default language
@@ -189,7 +189,7 @@ public class ResourceProviderR4CodeSystemDesignationTest extends BaseResourcePro
 				.andParameter("displayLanguage",new CodeType("fr-FR"))
 				.execute();
 
-		resp = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		//-- The designations should have fr-FR languages and the default language

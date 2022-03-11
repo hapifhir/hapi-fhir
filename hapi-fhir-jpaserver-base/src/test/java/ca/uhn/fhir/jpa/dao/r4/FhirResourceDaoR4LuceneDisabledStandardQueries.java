@@ -3,7 +3,8 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.config.TestR4WithLuceneDisabledConfig;
+import ca.uhn.fhir.jpa.config.TestHibernateSearchAddInConfig;
+import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.BaseDateSearchDaoTests;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.dao.DaoTestDataBuilder;
@@ -21,7 +22,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TestR4WithLuceneDisabledConfig.class})
+@ContextConfiguration(classes = {TestR4Config.class, TestHibernateSearchAddInConfig.NoFT.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class FhirResourceDaoR4LuceneDisabledStandardQueries extends BaseJpaTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4LuceneDisabledStandardQueries.class);
@@ -41,7 +42,7 @@ public class FhirResourceDaoR4LuceneDisabledStandardQueries extends BaseJpaTest 
 	}
 
 	@Override
-	protected FhirContext getContext() {
+	protected FhirContext getFhirContext() {
 		return myFhirCtx;
 	}
 

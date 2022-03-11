@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -53,6 +54,16 @@ public abstract class BaseTask {
 	private String myDescription;
 	private int myChangesCount;
 	private boolean myDryRun;
+
+	/**
+	 * Some migrations can not be run in a transaction.
+	 * When this is true, {@link BaseTask#executeSql} will run without a transaction
+	 */
+	public void setTransactional(boolean theTransactional) {
+		myTransactional = theTransactional;
+	}
+
+	private boolean myTransactional = true;
 	private boolean myDoNothing;
 	private List<ExecutedStatement> myExecutedStatements = new ArrayList<>();
 	private Set<DriverTypeEnum> myOnlyAppliesToPlatforms = new HashSet<>();
@@ -133,32 +144,41 @@ public abstract class BaseTask {
 	 * @param theArguments The SQL statement arguments
 	 */
 	public void executeSql(String theTableName, @Language("SQL") String theSql, Object... theArguments) {
-		if (isDryRun() == false) {
-			Integer changes = getConnectionProperties().getTxTemplate().execute(t -> {
-				JdbcTemplate jdbcTemplate = getConnectionProperties().newJdbcTemplate();
-				try {
-					int changesCount = jdbcTemplate.update(theSql, theArguments);
-					if (!"true".equals(System.getProperty("unit_test_mode"))) {
-						logInfo(ourLog, "SQL \"{}\" returned {}", theSql, changesCount);
-					}
-					return changesCount;
-				} catch (DataAccessException e) {
-					if (myFailureAllowed) {
-						ourLog.info("Task {} did not exit successfully, but task is allowed to fail", getFlywayVersion());
-						ourLog.debug("Error was: {}", e.getMessage(), e);
-						return 0;
-					} else {
-						throw new DataAccessException("Failed during task " + getFlywayVersion() + ": " + e, e) {
-							private static final long serialVersionUID = 8211678931579252166L;
-						};
-					}
-				}
-			});
+		if (!isDryRun()) {
+			Integer changes;
+			if (myTransactional) {
+				changes = getConnectionProperties().getTxTemplate().execute(t -> {
+					return doExecuteSql(theSql, theArguments);
+				});
+			} else {
+				changes =  doExecuteSql(theSql, theArguments);
+			}
 
 			myChangesCount += changes;
 		}
 
 		captureExecutedStatement(theTableName, theSql, theArguments);
+	}
+
+	private int doExecuteSql(@Language("SQL") String theSql, Object[] theArguments) {
+		JdbcTemplate jdbcTemplate = getConnectionProperties().newJdbcTemplate();
+		try {
+			int changesCount = jdbcTemplate.update(theSql, theArguments);
+			if (!"true".equals(System.getProperty("unit_test_mode"))) {
+				logInfo(ourLog, "SQL \"{}\" returned {}", theSql, changesCount);
+			}
+			return changesCount;
+		} catch (DataAccessException e) {
+			if (myFailureAllowed) {
+				ourLog.info("Task {} did not exit successfully, but task is allowed to fail", getFlywayVersion());
+				ourLog.debug("Error was: {}", e.getMessage(), e);
+				return 0;
+			} else {
+				throw new DataAccessException(Msg.code(61) + "Failed during task " + getFlywayVersion() + ": " + e, e) {
+					private static final long serialVersionUID = 8211678931579252166L;
+				};
+			}
+		}
 	}
 
 	protected void captureExecutedStatement(String theTableName, @Language("SQL") String theSql, Object[] theArguments) {
@@ -238,7 +258,7 @@ public abstract class BaseTask {
 	public void validateVersion() {
 		Matcher matcher = versionPattern.matcher(mySchemaVersion);
 		if (!matcher.matches()) {
-			throw new IllegalStateException("The version " + mySchemaVersion + " does not match the expected pattern " + MIGRATION_VERSION_PATTERN);
+			throw new IllegalStateException(Msg.code(62) + "The version " + mySchemaVersion + " does not match the expected pattern " + MIGRATION_VERSION_PATTERN);
 		}
 	}
 
