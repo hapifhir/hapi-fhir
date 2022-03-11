@@ -285,7 +285,7 @@ public class TestUtil {
 				Validate.notNull(fk);
 				Validate.isTrue(isNotBlank(fk.name()), "Foreign key on " + theAnnotatedElement + " has no name()");
 				List<String> legacySPHibernateFKNames = Arrays.asList(
-					"FKC97MPK37OKWU8QVTCEG2NH9VN", "FKCLTIHNC5TGPRJ9BHPT7XI5OTB", "FKGXSREUTYMMFJUWDSWV3Y887DO");
+					"FKC97MPK37OKWU8QVTCEG2NH9VN", "FKGXSREUTYMMFJUWDSWV3Y887DO");
 				if (legacySPHibernateFKNames.contains(fk.name())) {
 					// wipmb temporarily allow the hibernate legacy sp fk names
 				} else {
