@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.util.FhirTerser;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -185,11 +186,18 @@ public interface ITestDataBuilder {
 	}
 
 	default Consumer<IBaseResource> withObservationCode(@Nullable String theSystem, @Nullable String theCode) {
+		return withObservationCode(theSystem, theCode, null);
+	}
+
+	default Consumer<IBaseResource> withObservationCode(@Nullable String theSystem, @Nullable String theCode, String theDisplay) {
 		return t -> {
 			FhirTerser terser = getFhirContext().newTerser();
 			IBase coding = terser.addElement(t, "code.coding");
 			terser.addElement(coding, "system", theSystem);
 			terser.addElement(coding, "code", theCode);
+			if (StringUtils.isNotEmpty(theDisplay)) {
+				terser.addElement(coding, "display", theDisplay);
+			}
 		};
 	}
 
