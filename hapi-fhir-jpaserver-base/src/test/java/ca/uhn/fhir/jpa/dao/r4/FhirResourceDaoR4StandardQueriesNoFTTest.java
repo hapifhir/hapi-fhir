@@ -17,8 +17,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.annotation.DirtiesContext;
@@ -44,7 +42,6 @@ import static org.hamcrest.Matchers.not;
 })
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
-	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4StandardQueriesNoFTTest.class);
 	@Autowired
 	PlatformTransactionManager myTxManager;
 	@Autowired
@@ -163,6 +160,7 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 				}
 			}
 
+			@SafeVarargs
 			private IIdType withObservation(Consumer<IBaseResource>... theBuilder) {
 				myObservationId = myDataBuilder.createObservation(theBuilder);
 				return myObservationId;
