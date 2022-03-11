@@ -139,7 +139,6 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 				assertNotFind("by same system, different code", "/Observation?code=http://example.com|other");
 				assertNotFind("by same code, different system", "/Observation?code=http://example2.com|value");
 				assertNotFind("by different code, different system", "/Observation?code=http://example2.com|otherValue");
-				assertNotFind("by two codes", "/Observation?code=fpp&code=bar");
 			}
 
 			@Test
@@ -328,6 +327,7 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 				List<String> allIds = searchForIds("/RiskAssessment?_sort=probability");
 				assertThat(allIds, hasItems(idAlpha2, idAlpha5, idAlpha7));
 			}
+
 		}
 
 	}
