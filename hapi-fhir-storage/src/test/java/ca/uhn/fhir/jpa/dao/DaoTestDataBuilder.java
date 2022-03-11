@@ -13,6 +13,9 @@ import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 public class DaoTestDataBuilder implements ITestDataBuilder, AfterEachCallback {
 	private static final Logger ourLog = LoggerFactory.getLogger(DaoTestDataBuilder.class);
@@ -67,5 +70,17 @@ public class DaoTestDataBuilder implements ITestDataBuilder, AfterEachCallback {
 	@Override
 	public void afterEach(ExtensionContext context) throws Exception {
 		cleanup();
+	}
+
+	@Configuration
+	public static class Config {
+
+		@Bean
+		DaoTestDataBuilder testDataBuilder(
+			@Autowired FhirContext myFhirContext,
+			@Autowired DaoRegistry myDaoRegistry
+		) {
+			return new DaoTestDataBuilder(myFhirContext, myDaoRegistry, new SystemRequestDetails());
+		}
 	}
 }

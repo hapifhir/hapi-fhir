@@ -1,23 +1,15 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.config.TestDataBuilderConfig;
 import ca.uhn.fhir.jpa.config.TestHibernateSearchAddInConfig;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.BaseDateSearchDaoTests;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.dao.DaoTestDataBuilder;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.jpa.dao.TestDaoSearch;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
-import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.server.method.SortParameter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Observation;
@@ -33,10 +25,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.web.util.UriComponents;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -47,7 +36,12 @@ import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TestR4Config.class, TestHibernateSearchAddInConfig.NoFT.class, TestDataBuilderConfig.class})
+@ContextConfiguration(classes = {
+	TestR4Config.class,
+	TestHibernateSearchAddInConfig.NoFT.class,
+	DaoTestDataBuilder.Config.class,
+	TestDaoSearch.Config.class
+})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4StandardQueriesNoFTTest.class);
@@ -66,8 +60,7 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 	@Autowired
 	DaoTestDataBuilder myDataBuilder;
 	@Autowired
-	PartitionSettings myPartitionSettings;
-	private RequestPartitionId myPartitionId;
+	TestDaoSearch myTestDaoSearch;
 
 	@Override
 	protected PlatformTransactionManager getTxManager() {
@@ -79,35 +72,6 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 		return myFhirCtx;
 	}
 
-	// fixme mb extract to helper and add to TestDataBuilderConfig.
-	List<String> searchForIds(String theQueryUrl) {
-		// fake out the server url parsing
-		ResourceSearch search = myMatchUrlService.getResourceSearch(theQueryUrl);
-		SearchParameterMap map = search.getSearchParameterMap();
-		map.setLoadSynchronous(true);
-		SystemRequestDetails request = fakeRequestDetailsFromUrl(theQueryUrl);
-		request.setRequestPartitionId(myPartitionId);
-		SortSpec sort = (SortSpec) new SortParameter(myFhirCtx).translateQueryParametersIntoServerArgument(request, null);
-		if (sort != null) {
-			map.setSort(sort);
-		}
-
-		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(search.getResourceName());
-		IBundleProvider result = dao.search(map, request);
-
-		List<String> resourceIds = result.getAllResourceIds();
-		return resourceIds;
-	}
-
-	@Nonnull
-	private SystemRequestDetails fakeRequestDetailsFromUrl(String theQueryUrl) {
-		SystemRequestDetails request = new SystemRequestDetails();
-		UriComponents uriComponents = UriComponentsBuilder.fromUriString(theQueryUrl).build();
-		uriComponents.getQueryParams().entrySet().forEach(nextEntry -> {
-			request.addParameter(nextEntry.getKey(), nextEntry.getValue().toArray(new String[0]));
-		});
-		return request;
-	}
 
 	@Nested
 	public class DateSearchTests extends BaseDateSearchDaoTests {
@@ -119,11 +83,6 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 
 	@Nested
 	public class TokenSearch  {
-		// wipmb make this generic and share with ES, and Mongo.
-		/*
-		String criteria = "_has:Condition:subject:code=http://snomed.info/sct|55822003,http://snomed.info/sct|55822005&" +
-			"_has:Condition:asserter:code=http://snomed.info/sct|55822003,http://snomed.info/sct|55822004";
-		 */
 
 		@Nested
 		public class Queries {
@@ -196,12 +155,11 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 					String idExA = withObservation(myDataBuilder.withObservationCode("http://example.org", "AValue")).getIdPart();
 					String idExM = withObservation(myDataBuilder.withObservationCode("http://example.org", "MValue")).getIdPart();
 
-					List<String> allIds = searchForIds("/Observation?_sort=code");
+					List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_sort=code");
 					assertThat(allIds, hasItems(idAlphaA, idAlphaM, idAlphaZ, idExA, idExD, idExM));
 
-					allIds = searchForIds("/Observation?_sort=code&code=http://example.org|");
+					allIds = myTestDaoSearch.searchForIds("/Observation?_sort=code&code=http://example.org|");
 					assertThat(allIds, hasItems(idExA, idExD, idExM));
-
 				}
 			}
 
@@ -211,12 +169,12 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 			}
 
 			private void assertFind(String theMessage, String theUrl) {
-				List<String> resourceIds = searchForIds(theUrl);
+				List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
 				assertThat(theMessage, resourceIds, hasItem(equalTo(myObservationId.getIdPart())));
 			}
 
 			private void assertNotFind(String theMessage, String theUrl) {
-				List<String> resourceIds = searchForIds(theUrl);
+				List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
 				assertThat(theMessage, resourceIds, not(hasItem(equalTo(myObservationId.getIdPart()))));
 			}
 		}
@@ -301,12 +259,12 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 
 
 			private void assertFind(String theMessage, String theUrl) {
-				List<String> resourceIds = searchForIds(theUrl);
+				List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
 				assertThat(theMessage, resourceIds, hasItem(equalTo(myResourceId.getIdPart())));
 			}
 
 			private void assertNotFind(String theMessage, String theUrl) {
-				List<String> resourceIds = searchForIds(theUrl);
+				List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
 				assertThat(theMessage, resourceIds, not(hasItem(equalTo(myResourceId.getIdPart()))));
 			}
 		}
@@ -324,7 +282,7 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 				String idAlpha2 = withRiskAssessmentWithProbabilty(0.2).getIdPart();
 				String idAlpha5 = withRiskAssessmentWithProbabilty(0.5).getIdPart();
 
-				List<String> allIds = searchForIds("/RiskAssessment?_sort=probability");
+				List<String> allIds = myTestDaoSearch.searchForIds("/RiskAssessment?_sort=probability");
 				assertThat(allIds, hasItems(idAlpha2, idAlpha5, idAlpha7));
 			}
 
@@ -415,12 +373,12 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 
 
 			private void assertFind(String theMessage, String theUrl) {
-				List<String> resourceIds = searchForIds(theUrl);
+				List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
 				assertThat(theMessage, resourceIds, hasItem(equalTo(myResourceId.getIdPart())));
 			}
 
 			private void assertNotFind(String theMessage, String theUrl) {
-				List<String> resourceIds = searchForIds(theUrl);
+				List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
 				assertThat(theMessage, resourceIds, not(hasItem(equalTo(myResourceId.getIdPart()))));
 			}
 		}
@@ -447,7 +405,7 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 				String idAlpha2 = withObservationWithValueQuantity(0.2).getIdPart();
 				String idAlpha5 = withObservationWithValueQuantity(0.5).getIdPart();
 
-				List<String> allIds = searchForIds("/Observation?_sort=value-quantity");
+				List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_sort=value-quantity");
 				assertThat(allIds, hasItems(idAlpha2, idAlpha5, idAlpha7));
 			}
 		}
