@@ -5329,7 +5329,7 @@ public class FhirResourceDaoR4LegacySearchBuilderTest extends BaseJpaR4Test {
 		}
 
 		@Override
-		protected Fixture getFixture() {
+		protected Fixture constructFixture() {
 			return new TestDataBuilderFixture(FhirResourceDaoR4LegacySearchBuilderTest.this, myObservationDao);
 		}
 	}
