@@ -1543,7 +1543,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.addCalculator("HASH_SYS", t -> ResourceIndexedSearchParamToken.calculateHashSystem(new PartitionSettings(), RequestPartitionId.defaultPartition(), t.getResourceType(), t.getParamName(), t.getString("SP_SYSTEM")))
 					.addCalculator("HASH_SYS_AND_VALUE", t -> ResourceIndexedSearchParamToken.calculateHashSystemAndValue(new PartitionSettings(), RequestPartitionId.defaultPartition(), t.getResourceType(), t.getParamName(), t.getString("SP_SYSTEM"), t.getString("SP_VALUE")))
 					.addCalculator("HASH_VALUE", t -> ResourceIndexedSearchParamToken.calculateHashValue(new PartitionSettings(), RequestPartitionId.defaultPartition(), t.getResourceType(), t.getParamName(), t.getString("SP_VALUE")))
-					.setDoNothing(true)
 				);
 		}
 
