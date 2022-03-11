@@ -293,11 +293,11 @@ public class MdmLinkDaoSvc {
 		List<Predicate> andPredicates = new ArrayList<>();
 
 		if (theGoldenResourceId != null) {
-			Predicate goldenResourcePredicate = cb.equal(from.get("myGoldenResourcePid").as(Long.class), myIdHelperService.getPidOrThrowException(theGoldenResourceId));
+			Predicate goldenResourcePredicate = cb.equal(from.get("myGoldenResourcePid").as(Long.class), myJpaIdHelperService.getPidOrThrowException(theGoldenResourceId));
 			andPredicates.add(goldenResourcePredicate);
 		}
 		if (theSourceId != null) {
-			Predicate sourceIdPredicate = cb.equal(from.get("mySourcePid").as(Long.class), myIdHelperService.getPidOrThrowException(theSourceId));
+			Predicate sourceIdPredicate = cb.equal(from.get("mySourcePid").as(Long.class), myJpaIdHelperService.getPidOrThrowException(theSourceId));
 			andPredicates.add(sourceIdPredicate);
 		}
 		if (theMatchResult != null) {
