@@ -67,7 +67,9 @@ public class LoadIdsStep implements IJobStepWorker<ReindexJobParameters, Reindex
 		Date nextStart = start;
 		Set<ReindexChunkIds.Id> idBuffer = new HashSet<>();
 		long previousLastTime = 0L;
-		while(true) {
+		int totalIdsFound = 0;
+		int chunkCount = 0;
+		while (true) {
 			String url = theStepExecutionDetails.getData().getUrl();
 
 			ourLog.info("Fetching resource ID chunk for URL {} - Range {} - {}", url, nextStart, end);
@@ -77,6 +79,8 @@ public class LoadIdsStep implements IJobStepWorker<ReindexJobParameters, Reindex
 				ourLog.info("No data returned");
 				break;
 			}
+
+			ourLog.info("Found {} IDs form {} to {}", nextChunk.getIds().size(), start, nextChunk.getLastDate());
 
 			// If we get the same last time twice in a row, we've clearly reached the end
 			if (nextChunk.getLastDate().getTime() == previousLastTime) {
@@ -105,12 +109,17 @@ public class LoadIdsStep implements IJobStepWorker<ReindexJobParameters, Reindex
 					}
 				}
 
+				totalIdsFound += submissionIds.size();
+				chunkCount++;
 				submitWorkChunk(submissionIds, theDataSink);
 			}
 		}
 
+		totalIdsFound += idBuffer.size();
+		chunkCount++;
 		submitWorkChunk(idBuffer, theDataSink);
 
+		ourLog.info("Submitted {} chunks with {} resource IDs", chunkCount, totalIdsFound);
 		return RunOutcome.SUCCESS;
 	}
 
@@ -118,6 +127,8 @@ public class LoadIdsStep implements IJobStepWorker<ReindexJobParameters, Reindex
 		if (theIdBuffer.isEmpty()) {
 			return;
 		}
+		ourLog.info("Submitting work chunk with {} IDs", theIdBuffer.size());
+
 		ReindexChunkIds data = new ReindexChunkIds();
 		data.getIds().addAll(theIdBuffer);
 		theDataSink.accept(data);
