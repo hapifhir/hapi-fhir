@@ -201,6 +201,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		batchChunk.addColumn("ERROR_COUNT").nonNullable().type(ColumnTypeEnum.INT);
 		batchChunk.addIndex("20220227.4", "IDX_BT2WC_II_SEQ").unique(false).withColumns("INSTANCE_ID", "SEQ");
 		batchChunk.addForeignKey("20220227.5", "FK_BT2WC_INSTANCE").toColumn("INSTANCE_ID").references("BT2_JOB_INSTANCE", "ID");
+
+		// Drop Index on HFJ_RESOURCE.INDEX_STATUS
+		version
+			.onTable("HFJ_RESOURCE")
+			.dropIndex("20220313.1", "IDX_INDEXSTATUS");
+
 	}
 
 	/**

@@ -46,7 +46,7 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		// Execute
 
 		myCaptureQueriesListener.clear();
-		RunOutcome outcome = myReindexStep.doReindex(data, myDataSink);
+		RunOutcome outcome = myReindexStep.doReindex(data, myDataSink, "index-id", "chunk-id");
 
 		// Verify
 		assertEquals(2, outcome.getRecordsProcessed());
@@ -79,7 +79,7 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		// Execute
 
 		myCaptureQueriesListener.clear();
-		RunOutcome outcome = myReindexStep.doReindex(data, myDataSink);
+		RunOutcome outcome = myReindexStep.doReindex(data, myDataSink, "index-id", "chunk-id");
 
 		// Verify
 		assertEquals(2, outcome.getRecordsProcessed());
@@ -124,7 +124,7 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		// Execute
 
 		myCaptureQueriesListener.clear();
-		RunOutcome outcome = myReindexStep.doReindex(data, myDataSink);
+		RunOutcome outcome = myReindexStep.doReindex(data, myDataSink, "index-id", "chunk-id");
 
 		// Verify
 		assertEquals(4, outcome.getRecordsProcessed());
@@ -138,7 +138,7 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		verify(myDataSink, times(1)).recoveredError(myErrorCaptor.capture());
 		String message = myErrorCaptor.getValue();
 		message = message.replace("Observation.subject.where(resolve() is Patient)", "Observation.subject"); // depending on whether subject or patient gets indexed first
-		assertEquals("Failure reindexing Patient/3: HAPI-0928: Failed to parse database resource[Patient/" + idPatientToInvalidate + " (pid " + idPatientToInvalidate + ", version R4): HAPI-1861: Failed to parse JSON encoded FHIR content: HAPI-1859: Content does not appear to be FHIR JSON, first non-whitespace character was: 'A' (must be '{')", message);
+		assertEquals("Failure reindexing Patient/" + idPatientToInvalidate + ": HAPI-0928: Failed to parse database resource[Patient/" + idPatientToInvalidate + " (pid " + idPatientToInvalidate + ", version R4): HAPI-1861: Failed to parse JSON encoded FHIR content: HAPI-1859: Content does not appear to be FHIR JSON, first non-whitespace character was: 'A' (must be '{')", message);
 
 		runInTransaction(() -> {
 			ResourceTable table = myResourceTableDao.findById(idPatientToInvalidate).orElseThrow();
