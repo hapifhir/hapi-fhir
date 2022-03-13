@@ -19,8 +19,7 @@ public class Batch2JobHelper {
 	private IJobCoordinator myJobCoordinator;
 
 	public void awaitJobCompletion(String theId) {
-		// FIXME: remove atmost
-		await().atMost(1, TimeUnit.HOURS).until(() -> {
+		await().until(() -> {
 			myJobCleanerService.runCleanupPass();
 			return myJobCoordinator.getInstance(theId).getStatus();
 		}, equalTo(StatusEnum.COMPLETED));
