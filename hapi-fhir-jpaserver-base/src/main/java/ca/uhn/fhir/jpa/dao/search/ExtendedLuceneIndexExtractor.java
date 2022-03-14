@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -47,10 +48,10 @@ import java.util.Map;
 public class ExtendedLuceneIndexExtractor {
 
 	private final FhirContext myContext;
-	private final Map<String, RuntimeSearchParam> myParams;
+	private final ResourceSearchParams myParams;
 	private final ISearchParamExtractor mySearchParamExtractor;
 
-	public ExtendedLuceneIndexExtractor(FhirContext theContext, Map<String, RuntimeSearchParam> theActiveParams, ISearchParamExtractor theSearchParamExtractor) {
+	public ExtendedLuceneIndexExtractor(FhirContext theContext, ResourceSearchParams theActiveParams, ISearchParamExtractor theSearchParamExtractor) {
 		myContext = theContext;
 		myParams = theActiveParams;
 		mySearchParamExtractor = theSearchParamExtractor;
