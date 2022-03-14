@@ -80,7 +80,7 @@ public class LoadIdsStep implements IJobStepWorker<ReindexJobParameters, Reindex
 				break;
 			}
 
-			ourLog.info("Found {} IDs form {} to {}", nextChunk.getIds().size(), start, nextChunk.getLastDate());
+			ourLog.info("Found {} IDs from {} to {}", nextChunk.getIds().size(), nextStart, nextChunk.getLastDate());
 
 			// If we get the same last time twice in a row, we've clearly reached the end
 			if (nextChunk.getLastDate().getTime() == previousLastTime) {
