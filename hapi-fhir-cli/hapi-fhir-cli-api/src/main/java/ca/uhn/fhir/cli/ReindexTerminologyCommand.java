@@ -87,7 +87,7 @@ public class ReindexTerminologyCommand extends BaseRequestGeneratingCommand {
 		}
 
 		Optional<String> isSuccessResponse = ParametersUtil.getNamedParameterValueAsString(myFhirCtx, response, RESP_PARAM_SUCCESS);
-		if (isSuccessResponse.isEmpty()) {
+		if ( ! isSuccessResponse.isPresent() ) {
 			ParametersUtil.addParameterToParametersBoolean(myFhirCtx, response, RESP_PARAM_SUCCESS, false);
 			ParametersUtil.addParameterToParametersString(myFhirCtx, response, "message",
 				"Internal error. Command result unknown. Check system logs for details");

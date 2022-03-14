@@ -142,7 +142,7 @@ public class BaseJpaSystemProvider<T, MT> extends BaseJpaProvider implements IJp
 
 		} catch (Exception theE) {
 			throw new InternalErrorException(Msg.code(2072) +
-				"Re-creating terminology freetext indexes failed with exception: " + theE);
+				"Re-creating terminology freetext indexes failed with exception: " + theE.getMessage());
 		}
 
 		IBaseParameters retVal = ParametersUtil.newInstance(getContext());
