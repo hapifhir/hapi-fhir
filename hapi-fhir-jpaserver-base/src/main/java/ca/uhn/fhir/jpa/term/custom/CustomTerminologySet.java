@@ -62,8 +62,8 @@ public class CustomTerminologySet {
 		myRootConcepts = theRootConcepts;
 	}
 
-	public void addRootConcept(String theCode) {
-		addRootConcept(theCode, null);
+	public TermConcept addRootConcept(String theCode) {
+		return addRootConcept(theCode, null);
 	}
 
 	public TermConcept addRootConcept(String theCode, String theDisplay) {

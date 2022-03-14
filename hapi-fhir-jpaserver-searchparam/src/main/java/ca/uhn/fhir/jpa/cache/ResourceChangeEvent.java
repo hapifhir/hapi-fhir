@@ -43,10 +43,6 @@ public class ResourceChangeEvent implements IResourceChangeEvent {
 		myDeletedResourceIds = copyFrom(theDeletedResourceIds);
 	}
 
-	public static ResourceChangeEvent fromCreatedResourceIds(Collection<IIdType> theCreatedResourceIds) {
-		return new ResourceChangeEvent(theCreatedResourceIds, Collections.emptyList(), Collections.emptyList());
-	}
-
 	public static ResourceChangeEvent fromCreatedUpdatedDeletedResourceIds(List<IIdType> theCreatedResourceIds, List<IIdType> theUpdatedResourceIds, List<IIdType> theDeletedResourceIds) {
 		return new ResourceChangeEvent(theCreatedResourceIds, theUpdatedResourceIds, theDeletedResourceIds);
 	}
