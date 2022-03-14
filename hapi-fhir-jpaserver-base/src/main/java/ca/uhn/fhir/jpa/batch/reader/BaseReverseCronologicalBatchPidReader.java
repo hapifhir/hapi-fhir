@@ -181,7 +181,8 @@ public abstract class BaseReverseCronologicalBatchPidReader implements ItemReade
 			if (rangeParam.getUpperBound() == null) {
 				rangeParam.setUpperBoundInclusive(getCurrentHighThreshold());
 			} else {
-				Date theUpperBound = rangeParam.getUpperBound().getValue().before(getCurrentHighThreshold()) ? rangeParam.getUpperBound().getValue() : getCurrentHighThreshold();
+				Date theUpperBound = (getCurrentHighThreshold() == null || rangeParam.getUpperBound().getValue().before(getCurrentHighThreshold()))
+					? rangeParam.getUpperBound().getValue() : getCurrentHighThreshold();
 				rangeParam.setUpperBoundInclusive(theUpperBound);
 			}
 		} else {
