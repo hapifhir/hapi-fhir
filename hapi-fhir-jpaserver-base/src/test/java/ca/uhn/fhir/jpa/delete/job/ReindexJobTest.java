@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.batch.job.MultiUrlJobParameterUtil;
 import ca.uhn.fhir.jpa.batch.reader.CronologicalBatchAllResourcePidReader;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import org.apache.commons.lang3.time.DateUtils;
@@ -85,26 +86,34 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		assertEquals(obsFinalId.getIdPart(), alleleObservationIds.get(0));
 	}
 
+	private long generateAndReturnTimeGap() {
+		long start_time = System.currentTimeMillis();
+		sleepUntilTimeChanges();
+		long end_time = System.currentTimeMillis();
+		return end_time - start_time;
+	}
+
 	@Test
 	public void testReindexJobLastUpdatedFilter() throws Exception {
 		// Given
 		DaoMethodOutcome T1_Patient = myReindexTestHelper.createEyeColourPatient(true);
-		Thread.sleep(3000);
+		long timeGap1 = generateAndReturnTimeGap();
 		DaoMethodOutcome T3_Patient = myReindexTestHelper.createEyeColourPatient(true);
-		Thread.sleep(3000);
+		long timeGap2 = generateAndReturnTimeGap();
 		DaoMethodOutcome T6_Patient = myReindexTestHelper.createEyeColourPatient(true);
 
 		// Setup cutoff
 		Date firstPatientLastUpdated = T1_Patient.getResource().getMeta().getLastUpdated();
 		Date secondPatientLastUpdated = T3_Patient.getResource().getMeta().getLastUpdated();
-		Date T2_Date = DateUtils.addMilliseconds(firstPatientLastUpdated, 1500);
-		Date T4_Date = DateUtils.addMilliseconds(T2_Date, 3000);
+		Date T2_Date = DateUtils.addMilliseconds(firstPatientLastUpdated, (int) (timeGap1 / 2));
+		Date T4_Date = DateUtils.addMilliseconds(secondPatientLastUpdated, (int) (timeGap2 / 2));
 		ourLog.info("Older lastUpdated: {}", firstPatientLastUpdated);
 		ourLog.info("Newer lastUpdated: {}", secondPatientLastUpdated);
 		ourLog.info("Cutoff Lowerbound: {}", T2_Date);
 		ourLog.info("Cutoff Upperbound: {}", T4_Date);
 		assertTrue(T2_Date.after(firstPatientLastUpdated));
 		assertTrue(T2_Date.before(secondPatientLastUpdated));
+		assertTrue(T4_Date.after(secondPatientLastUpdated));
 
 		//Create our new SP.
 		myReindexTestHelper.createEyeColourSearchParameter();
@@ -115,8 +124,8 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		assertThat(myReindexTestHelper.getEyeColourPatientIds(), hasSize(0));
 
 		// Only reindex one of them
-		String T2_DateString = new DateTimeDt(T2_Date).getValueAsString();
-		String T4_DateString = new DateTimeDt(T4_Date).getValueAsString();
+		String T2_DateString = new DateTimeDt(T2_Date).setPrecision(TemporalPrecisionEnum.MILLI).getValueAsString();
+		String T4_DateString = new DateTimeDt(T4_Date).setPrecision(TemporalPrecisionEnum.MILLI).getValueAsString();
 		JobParameters T3_Patient_JobParams = MultiUrlJobParameterUtil.buildJobParameters("Patient?_lastUpdated=ge" +
 			T2_DateString + "&_lastUpdated=le" + T4_DateString);
 		JobParameters T1_Patient_JobParams = MultiUrlJobParameterUtil.buildJobParameters("Patient?_lastUpdated=le" + T2_DateString);
