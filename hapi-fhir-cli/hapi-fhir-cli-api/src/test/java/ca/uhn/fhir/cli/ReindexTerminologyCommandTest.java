@@ -2,9 +2,6 @@ package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.provider.BaseJpaSystemProvider;
-import ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl;
-import ca.uhn.fhir.jpa.term.TermReadSvcR4;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -13,10 +10,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.PrintStream;
 
 import static ca.uhn.fhir.jpa.provider.BaseJpaSystemProvider.RESP_PARAM_SUCCESS;
@@ -32,7 +27,8 @@ class ReindexTerminologyCommandTest {
 
 	private final FhirContext myContext = FhirContext.forR4();
 
-	@Spy private BaseJpaSystemProvider<?, ?> myProvider = spy(new BaseJpaSystemProvider<>());
+	@Spy
+	private BaseJpaSystemProvider<?, ?> myProvider = spy(new BaseJpaSystemProvider<>());
 
 	@RegisterExtension
 	public final RestfulServerExtension myRestfulServerExtension =
@@ -54,7 +50,7 @@ class ReindexTerminologyCommandTest {
 		ParametersUtil.addParameterToParametersBoolean(myContext, retVal, RESP_PARAM_SUCCESS, true);
 		doReturn(retVal).when(myProvider).reindexTerminology(any());
 
-		App.main(new String[] {
+		App.main(new String[]{
 			ReindexTerminologyCommand.REINDEX_TERMINOLOGY,
 			"-v", "r4",
 			"-t", myRestfulServerExtension.getBaseUrl()
@@ -66,7 +62,7 @@ class ReindexTerminologyCommandTest {
 
 
 	@Test
-	public void testNoVersionReturnsThrows() {
+	public void testNoVersionThrows() {
 		IBaseParameters retVal = ParametersUtil.newInstance(myContext);
 		ParametersUtil.addParameterToParametersBoolean(myContext, retVal, RESP_PARAM_SUCCESS, true);
 		doReturn(retVal).when(myProvider).reindexTerminology(any());
@@ -80,16 +76,60 @@ class ReindexTerminologyCommandTest {
 		assertThat(thrown.getMessage(), containsString("Missing required option: v"));
 	}
 
+
 	@Test
-	public void testNoTargetReturnsThrows() {
+	public void testNoTargetThrows() {
 		IBaseParameters retVal = ParametersUtil.newInstance(myContext);
 		ParametersUtil.addParameterToParametersBoolean(myContext, retVal, RESP_PARAM_SUCCESS, true);
 		doReturn(retVal).when(myProvider).reindexTerminology(any());
 
 		Error thrown = assertThrows(Error.class, () ->
-			App.main(new String[] { ReindexTerminologyCommand.REINDEX_TERMINOLOGY, "-v", "r4" })
+			App.main(new String[]{ReindexTerminologyCommand.REINDEX_TERMINOLOGY, "-v", "r4"})
 		);
 		assertThat(thrown.getMessage(), containsString("Missing required option: t"));
+	}
+
+
+	@Test
+	public void testHandleUnexpectedResponse() {
+		System.setOut(new PrintStream(outputStreamCaptor));
+		IBaseParameters retVal = ParametersUtil.newInstance(myContext);
+		doReturn(retVal).when(myProvider).reindexTerminology(any());
+
+		App.main(new String[]{
+			ReindexTerminologyCommand.REINDEX_TERMINOLOGY,
+			"-v", "r4",
+			"-t", myRestfulServerExtension.getBaseUrl()
+		});
+
+		assertThat(outputStreamCaptor.toString().trim(),
+			outputStreamCaptor.toString().trim(), containsString("<valueBoolean value=\"false\"/>"));
+		assertThat(outputStreamCaptor.toString().trim(),
+			outputStreamCaptor.toString().trim(), containsString("<valueString value=\"Internal error. " +
+				"Command result unknown. Check system logs for details\"/>"));
+
+	}
+
+
+	@Test
+	public void testHandleServiceError() {
+		System.setOut(new PrintStream(outputStreamCaptor));
+		IBaseParameters retVal = ParametersUtil.newInstance(myContext);
+		ParametersUtil.addParameterToParametersBoolean(myContext, retVal, RESP_PARAM_SUCCESS, false);
+		ParametersUtil.addParameterToParametersString(myContext, retVal, "message",
+			"Freetext service is not configured. Operation didn't run.");
+		doReturn(retVal).when(myProvider).reindexTerminology(any());
+
+		App.main(new String[]{
+			ReindexTerminologyCommand.REINDEX_TERMINOLOGY,
+			"-v", "r4",
+			"-t", myRestfulServerExtension.getBaseUrl()
+		});
+
+		assertThat(outputStreamCaptor.toString().trim(),
+			outputStreamCaptor.toString().trim(), containsString("<valueBoolean value=\"false\"/>"));
+		assertThat(outputStreamCaptor.toString().trim(),
+			outputStreamCaptor.toString().trim(), containsString("<valueString value=\"Freetext service is not configured. Operation didn't run.\"/>"));
 	}
 
 }

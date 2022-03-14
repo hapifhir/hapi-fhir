@@ -20,36 +20,18 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.util.AttachmentUtil;
-import ca.uhn.fhir.util.FileUtil;
 import ca.uhn.fhir.util.ParametersUtil;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Charsets;
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.input.CountingInputStream;
-import org.hl7.fhir.dstu3.model.codesystems.SystemVersionProcessingModeEnumFactory;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.r4.model.Parameters;
 
-import java.io.*;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
+import java.util.Optional;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static ca.uhn.fhir.jpa.provider.BaseJpaSystemProvider.RESP_PARAM_SUCCESS;
 
 public class ReindexTerminologyCommand extends BaseRequestGeneratingCommand {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReindexTerminologyCommand.class);
@@ -104,9 +86,25 @@ public class ReindexTerminologyCommand extends BaseRequestGeneratingCommand {
 			throw e;
 		}
 
+		Optional<String> isSuccessResponse = ParametersUtil.getNamedParameterValueAsString(myFhirCtx, response, RESP_PARAM_SUCCESS);
+		if (isSuccessResponse.isEmpty()) {
+			ParametersUtil.addParameterToParametersBoolean(myFhirCtx, response, RESP_PARAM_SUCCESS, false);
+			ParametersUtil.addParameterToParametersString(myFhirCtx, response, "message",
+				"Internal error. Command result unknown. Check system logs for details");
+			ourLog.info("Response:{}{}", NL, myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
+			return;
+		}
+
+		boolean succeeded = Boolean.parseBoolean( isSuccessResponse.get() );
+		if ( ! succeeded) {
+			ourLog.info("Response:{}{}", NL, myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
+			return;
+		}
+
 		ourLog.info("Recreation of terminology freetext indexes complete!");
-		ourLog.info("Response:\n{}", myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.info("Response:{}{}", NL, myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
 	}
+
 
 	public static final String NL = System.getProperty("line.separator");
 

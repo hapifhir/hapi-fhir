@@ -137,6 +137,6 @@ public interface ITermReadSvc extends IValidationSupport {
 	 * Version independent
 	 * Recreates freetext indexes for TermConcept and nested TermConceptProperty
 	 */
-	void reindexTerminology() throws InterruptedException;
+	ReindexTerminologyResult reindexTerminology() throws InterruptedException;
 
 }

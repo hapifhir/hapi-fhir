@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
+import ca.uhn.fhir.jpa.term.api.ReindexTerminologyResult;
 import ca.uhn.fhir.rest.annotation.At;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.Offset;
@@ -134,9 +135,10 @@ public class BaseJpaSystemProvider<T, MT> extends BaseJpaProvider implements IJp
 	@Operation(name = ProviderConstants.OPERATION_REINDEX_TERMINOLOGY, idempotent = false)
 	public IBaseParameters reindexTerminology(RequestDetails theRequestDetails) {
 
+		ReindexTerminologyResult result;
 		StopWatch sw = new StopWatch();
 		try {
-			myTermReadSvc.reindexTerminology();
+			result = myTermReadSvc.reindexTerminology();
 
 		} catch (Exception theE) {
 			throw new InternalErrorException(Msg.code(2072) +
@@ -144,8 +146,16 @@ public class BaseJpaSystemProvider<T, MT> extends BaseJpaProvider implements IJp
 		}
 
 		IBaseParameters retVal = ParametersUtil.newInstance(getContext());
-		ParametersUtil.addParameterToParametersBoolean(getContext(), retVal, RESP_PARAM_SUCCESS, true);
+		if ( ! result.equals(ReindexTerminologyResult.SUCCESS) ) {
+			ParametersUtil.addParameterToParametersBoolean(getContext(), retVal, RESP_PARAM_SUCCESS, false);
+			String msg = result.equals(ReindexTerminologyResult.SEARCH_SVC_DISABLED)
+				? "Freetext service is not configured. Operation didn't run."
+				: "Operation was cancelled because other terminology background tasks are currently running. Try again in a few minutes.";
+			ParametersUtil.addParameterToParametersString(getContext(), retVal, "message", msg);
+			return retVal;
+		}
 
+		ParametersUtil.addParameterToParametersBoolean(getContext(), retVal, RESP_PARAM_SUCCESS, true);
 		ourLog.info("Re-creating terminology freetext indexes took {}", sw);
 		return retVal;
 	}

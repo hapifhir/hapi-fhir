@@ -22,9 +22,12 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.config.util.IConnectionPoolInfoProvider;
+import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import com.google.common.collect.Lists;
 import org.hibernate.search.mapper.orm.massindexing.MassIndexer;
@@ -36,6 +39,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -49,7 +53,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -261,9 +267,10 @@ class ITermReadSvcTest {
 
 			List<TermConcept> termConcepts = Lists.newArrayList(termConceptCode1, termConceptCode3, termConceptCode4);
 			List<String> values = Arrays.asList(CODE_1, CODE_2, CODE_3, CODE_4, CODE_5);
-			String msg = (String) ReflectionTestUtils.invokeMethod(
+			String msg = ReflectionTestUtils.invokeMethod(
 				testedClass, "getTermConceptsFetchExceptionMsg", termConcepts, values);
 
+			assertNotNull(msg);
 			assertTrue(msg.contains("No TermConcept(s) were found"));
 			assertFalse(msg.contains(CODE_1));
 			assertTrue(msg.contains(CODE_2));
@@ -280,28 +287,71 @@ class ITermReadSvcTest {
 			when(termConceptCode3.getId()).thenReturn(3L);
 
 			List<TermConcept> termConcepts = Lists.newArrayList(termConceptCode1, termConceptCode3);
-			List<String> values = Arrays.asList(CODE_3);
-			String msg = (String) ReflectionTestUtils.invokeMethod(
+			List<String> values = List.of(CODE_3);
+			String msg = ReflectionTestUtils.invokeMethod(
 				testedClass, "getTermConceptsFetchExceptionMsg", termConcepts, values);
 
+			assertNotNull(msg);
 			assertTrue(msg.contains("More TermConcepts were found than indicated codes"));
 			assertFalse(msg.contains("Queried codes: [" + CODE_3 + "]"));
 			assertTrue(msg.contains("Obtained TermConcept IDs, codes: [1, code-1; 3, code-3]"));
 		}
 	}
 
-	@Spy BaseTermReadSvcImpl myTermReadSvc = (BaseTermReadSvcImpl) spy(testedClass);
-	@Mock SearchSession mySearchSession;
 
-	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
-	MassIndexer myMassIndexer;
+	@Nested
+	public class TestReindexTerminology {
+		private @Mock SearchSession mySearchSession;
 
-	@Test
-	void testReindexTerminology() throws InterruptedException {
-		doReturn(mySearchSession).when(myTermReadSvc).getSearchSession();
-		when(mySearchSession.massIndexer(TermConcept.class)).thenReturn(myMassIndexer);
+		@Mock(answer = Answers.RETURNS_DEEP_STUBS)
+		private MassIndexer myMassIndexer;
 
-		myTermReadSvc.reindexTerminology();
-		verify(mySearchSession, times(1)).massIndexer(TermConcept.class);
+		private @Mock IFulltextSearchSvc myFulltextSearchSvc;
+		private @Mock ITermDeferredStorageSvc myDeferredStorageSvc;
+
+		@InjectMocks
+		private @Spy BaseTermReadSvcImpl myTermReadSvc = (BaseTermReadSvcImpl) spy(testedClass);
+
+
+		@Test
+		void testReindexTerminology() throws InterruptedException {
+			doReturn(mySearchSession).when(myTermReadSvc).getSearchSession();
+			doReturn(false).when(myTermReadSvc).isBatchTerminologyTasksRunning();
+			doReturn(10).when(myTermReadSvc).calculateObjectLoadingThreadNumber();
+			when(mySearchSession.massIndexer(TermConcept.class)).thenReturn(myMassIndexer);
+
+			myTermReadSvc.reindexTerminology();
+			verify(mySearchSession, times(1)).massIndexer(TermConcept.class);
+		}
+
+		@Nested
+		public class TestCalculateObjectLoadingThreadNumber {
+
+			@Mock private IConnectionPoolInfoProvider myConnectionPoolInfoProvider;
+
+			@BeforeEach
+			void setUp() {
+				ReflectionTestUtils.setField(myTermReadSvc, "myConnectionPoolInfoProvider", myConnectionPoolInfoProvider);
+			}
+
+			@Test
+			void testLessThanSix() {
+				when(myConnectionPoolInfoProvider.getTotalConnectionSize()).thenReturn(Optional.of(5));
+
+				int retMaxConnectionSize = myTermReadSvc.calculateObjectLoadingThreadNumber();
+
+				assertEquals(1, retMaxConnectionSize);
+			}
+
+			@Test
+			void testMoreThanSix() {
+				when(myConnectionPoolInfoProvider.getTotalConnectionSize()).thenReturn(Optional.of(12));
+
+				int retMaxConnectionSize = myTermReadSvc.calculateObjectLoadingThreadNumber();
+
+				assertEquals(7, retMaxConnectionSize);
+			}
+
+		}
 	}
 }

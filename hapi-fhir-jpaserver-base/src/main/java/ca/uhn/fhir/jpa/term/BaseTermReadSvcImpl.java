@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
+import ca.uhn.fhir.jpa.config.util.IConnectionPoolInfoProvider;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
@@ -67,6 +68,7 @@ import ca.uhn.fhir.jpa.search.ElasticsearchNestedQueryBuilderUtil;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
+import ca.uhn.fhir.jpa.term.api.ReindexTerminologyResult;
 import ca.uhn.fhir.jpa.term.ex.ExpansionTooCostlyException;
 import ca.uhn.fhir.jpa.util.LogicUtil;
 import ca.uhn.fhir.rest.api.Constants;
@@ -137,6 +139,7 @@ import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
 import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -166,7 +169,6 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -217,6 +219,10 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	private static final String IDX_PROP_KEY = IDX_PROPERTIES + ".myKey";
 	private static final String IDX_PROP_VALUE_STRING = IDX_PROPERTIES + ".myValueString";
 	private static final String IDX_PROP_DISPLAY_STRING = IDX_PROPERTIES + ".myDisplayString";
+
+	public static final int DEFAULT_MASS_INDEXER_OBJECT_LOADING_THREADS = 2;
+
+	private boolean myPreExpandingValueSets = false;
 
 	private final Cache<String, TermCodeSystemVersion> myCodeSystemCurrentVersionCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build();
 	@Autowired
@@ -272,6 +278,11 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	//We need this bean so we can tell which mode hibernate search is running in.
 	@Autowired
 	private HibernatePropertiesProvider myHibernatePropertiesProvider;
+
+	@Autowired
+	@Lazy
+	private IConnectionPoolInfoProvider myConnectionPoolInfoProvider;
+
 
 	private boolean isFullTextSetToUseElastic() {
 		return "elasticsearch".equalsIgnoreCase(myHibernatePropertiesProvider.getHibernateSearchBackend());
@@ -1956,6 +1967,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			}
 
 			// We have a ValueSet to pre-expand.
+			setPreExpandingValueSets(true);
 			try {
 				ValueSet valueSet = txTemplate.execute(t -> {
 					TermValueSet refreshedValueSetToExpand = myTermValueSetDao.findById(valueSetToExpand.getId()).orElseThrow(() -> new IllegalStateException("Unknown VS ID: " + valueSetToExpand.getId()));
@@ -1985,8 +1997,19 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 					myTermValueSetDao.saveAndFlush(valueSetToExpand);
 
 				});
+
+			} finally {
+				setPreExpandingValueSets(false);
 			}
 		}
+	}
+
+	private synchronized void setPreExpandingValueSets(boolean thePreExpandingValueSets) {
+		myPreExpandingValueSets = thePreExpandingValueSets;
+	}
+
+	private synchronized boolean isPreExpandingValueSets() {
+		return myPreExpandingValueSets;
 	}
 
 	@Override
@@ -2645,20 +2668,27 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		return Optional.of(cs);
 	}
 
+
 	private static final int SECONDS_IN_MINUTE = 60;
 	private static final int INDEXED_ROOTS_LOGGING_COUNT = 50_000;
 
+
 	@Transactional
 	@Override
-	public void reindexTerminology() throws InterruptedException {
+	public ReindexTerminologyResult reindexTerminology() throws InterruptedException {
 		if (myFulltextSearchSvc == null) {
-			throw new InvalidRequestException(Msg.code(2073) + "Freetext search service is not configured");
+			return ReindexTerminologyResult.SEARCH_SVC_DISABLED;
 		}
 
-//		waitForDeferredTerminologyTasksToFinish();
+		if (isBatchTerminologyTasksRunning()) {
+			return ReindexTerminologyResult.OTHER_BATCH_TERMINOLOGY_TASKS_RUNNING;
+		}
 
 		// disallow pre-expanding ValueSets while reindexing
 		myDeferredStorageSvc.setProcessDeferred(false);
+
+		int objectLoadingThreadNumber = calculateObjectLoadingThreadNumber();
+		ourLog.info("Using {} threads to load objects", objectLoadingThreadNumber);
 
 		try {
 			SearchSession searchSession = getSearchSession();
@@ -2668,8 +2698,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				.purgeAllOnStart( false )
 				.batchSizeToLoadObjects( 100 )
 				.cacheMode( CacheMode.IGNORE )
-				.threadsToLoadObjects( 8 )
-				.idFetchSize( 150 )
+				.threadsToLoadObjects( objectLoadingThreadNumber )
 				.transactionTimeout( 60 * SECONDS_IN_MINUTE )
 				.monitor( new LoggingMassIndexingMonitor(INDEXED_ROOTS_LOGGING_COUNT) )
 				.startAndWait();
@@ -2677,27 +2706,27 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		} finally {
 			myDeferredStorageSvc.setProcessDeferred(true);
 		}
+
+		return ReindexTerminologyResult.SUCCESS;
 	}
 
-//	private boolean deferredTerminologyTasksExecuting() {
-//		long timeout = System.currentTimeMillis() + SHUTDOWN_BUFFER_TIMEOUT;
-//		while (System.currentTimeMillis() < timeout && theWaitForQueueToBeEmpty) {
-//			if (myAppender.wasLastFetchedEventTheFinalOne() && myHandlerList.isEmpty()) {
-//				ourLog.info("Shutdown event has been broadcast to control client");
-//				break;
-//			}
-//			try {
-//				Thread.sleep(100);
-//			} catch (InterruptedException e) {
-//				// ignore
-//			}
-//		}
-//
-//		try {
-//			myServerSocket.close();
-//		} catch (IOException e) {
-//			ourLog.warn("Failed to close control socket", e);
-//		}	}
+
+	@VisibleForTesting
+	boolean isBatchTerminologyTasksRunning() {
+		return isNotSafeToPreExpandValueSets() || isPreExpandingValueSets();
+	}
+
+
+	@VisibleForTesting
+	int calculateObjectLoadingThreadNumber() {
+		Optional<Integer> maxConnectionsOpt = myConnectionPoolInfoProvider.getTotalConnectionSize();
+		int maxConnections = maxConnectionsOpt.orElse(DEFAULT_MASS_INDEXER_OBJECT_LOADING_THREADS);
+
+		int objectThreads = maxConnections < 6 ? 1 : maxConnections - 5;
+		ourLog.info("Data source connection pool has {} connections allocated, so reindexing will use {} object " +
+			"loading threads (each using a connection) to avoid depleting the pool", maxConnections, objectThreads);
+		return objectThreads;
+	}
 
 
 	@VisibleForTesting
