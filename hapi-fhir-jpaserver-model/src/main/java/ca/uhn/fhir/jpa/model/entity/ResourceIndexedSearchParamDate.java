@@ -97,7 +97,10 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_DATE")
 	@Column(name = "SP_ID")
 	private Long myId;
+
 	/**
+	 * Composite of resourceType, paramName, and partition info if configured.
+	 * Combined with the various date fields for a query.
 	 * @since 3.5.0 - At some point this should be made not-null
 	 */
 	@Column(name = "HASH_IDENTITY", nullable = true)

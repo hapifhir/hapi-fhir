@@ -70,6 +70,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -101,6 +102,9 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	@BeforeEach
 	public void disableAdvanceIndexing() {
 		myDaoConfig.setAdvancedLuceneIndexing(false);
+		// ugh - somewhere the hibernate round trip is mangling LocalDate to h2 date column unless the tz=GMT
+		TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
+		ourLog.info("Running with Timezone {}", TimeZone.getDefault().getID());
 	}
 
 	@Test
