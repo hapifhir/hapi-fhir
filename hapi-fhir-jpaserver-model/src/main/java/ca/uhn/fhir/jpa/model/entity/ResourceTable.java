@@ -40,6 +40,7 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextFi
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexingDependency;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.KeywordField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.ObjectPath;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyBinding;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyValue;
@@ -139,6 +140,12 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@IndexingDependency(derivedFrom = @ObjectPath(@PropertyValue(propertyName = "myVersion")))
 	@PropertyBinding(binder = @PropertyBinderRef(type = SearchParamTextPropertyBinder.class))
 	private ExtendedLuceneIndexData myLuceneIndexData;
+
+	@Transient
+	@KeywordField(name="myRawResource")
+	@IndexingDependency(derivedFrom = @ObjectPath(@PropertyValue(propertyName = "myVersion")))
+	@OptimisticLock(excluded = true)
+	private String myRawResourceData;
 
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	@OptimisticLock(excluded = true)
@@ -774,5 +781,9 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	public void setLuceneIndexData(ExtendedLuceneIndexData theLuceneIndexData) {
 		myLuceneIndexData = theLuceneIndexData;
+	}
+
+	public void setRawResourceData(String theResourceData) {
+		myRawResourceData = theResourceData;
 	}
 }
