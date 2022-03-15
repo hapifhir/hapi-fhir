@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.config.util.IConnectionPoolInfoProvider;
+import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -30,6 +30,8 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import com.google.common.collect.Lists;
+import net.ttddyy.dsproxy.support.ProxyDataSource;
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.hibernate.search.mapper.orm.massindexing.MassIndexer;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -48,11 +50,14 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NonUniqueResultException;
+import javax.sql.DataSource;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl.DEFAULT_MASS_INDEXER_OBJECT_LOADING_THREADS;
+import static ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl.MAX_MASS_INDEXER_OBJECT_LOADING_THREADS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -306,11 +311,12 @@ class ITermReadSvcTest {
 		@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 		private MassIndexer myMassIndexer;
 
-		private @Mock IFulltextSearchSvc myFulltextSearchSvc;
-		private @Mock ITermDeferredStorageSvc myDeferredStorageSvc;
+		@Mock private IFulltextSearchSvc myFulltextSearchSvc;
+		@Mock private ITermDeferredStorageSvc myDeferredStorageSvc;
+		@Mock private HibernatePropertiesProvider myHibernatePropertiesProvider;
 
 		@InjectMocks
-		private @Spy BaseTermReadSvcImpl myTermReadSvc = (BaseTermReadSvcImpl) spy(testedClass);
+		@Spy private BaseTermReadSvcImpl myTermReadSvc = (BaseTermReadSvcImpl) spy(testedClass);
 
 
 		@Test
@@ -327,16 +333,17 @@ class ITermReadSvcTest {
 		@Nested
 		public class TestCalculateObjectLoadingThreadNumber {
 
-			@Mock private IConnectionPoolInfoProvider myConnectionPoolInfoProvider;
+			private final BasicDataSource myBasicDataSource = new BasicDataSource();
+			private final ProxyDataSource myProxyDataSource = new ProxyDataSource(myBasicDataSource) ;
 
 			@BeforeEach
 			void setUp() {
-				ReflectionTestUtils.setField(myTermReadSvc, "myConnectionPoolInfoProvider", myConnectionPoolInfoProvider);
+				doReturn(myProxyDataSource).when(myHibernatePropertiesProvider).getDataSource();
 			}
 
 			@Test
 			void testLessThanSix() {
-				when(myConnectionPoolInfoProvider.getTotalConnectionSize()).thenReturn(Optional.of(5));
+				myBasicDataSource.setMaxTotal(5);
 
 				int retMaxConnectionSize = myTermReadSvc.calculateObjectLoadingThreadNumber();
 
@@ -344,12 +351,40 @@ class ITermReadSvcTest {
 			}
 
 			@Test
-			void testMoreThanSix() {
-				when(myConnectionPoolInfoProvider.getTotalConnectionSize()).thenReturn(Optional.of(12));
+			void testMoreThanSixButLessThanLimit() {
+				myBasicDataSource.setMaxTotal(10);
 
 				int retMaxConnectionSize = myTermReadSvc.calculateObjectLoadingThreadNumber();
 
-				assertEquals(7, retMaxConnectionSize);
+				assertEquals(5, retMaxConnectionSize);
+			}
+
+			@Test
+			void testMoreThanSixAndMoreThanLimit() {
+				myBasicDataSource.setMaxTotal(35);
+
+				int retMaxConnectionSize = myTermReadSvc.calculateObjectLoadingThreadNumber();
+
+				assertEquals(MAX_MASS_INDEXER_OBJECT_LOADING_THREADS, retMaxConnectionSize);
+			}
+
+		}
+
+		@Nested
+		public class TestCalculateObjectLoadingThreadNumberDefault {
+
+			@Mock private DataSource myDataSource = new BasicDataSource();
+
+			@BeforeEach
+			void setUp() {
+				doReturn(myDataSource).when(myHibernatePropertiesProvider).getDataSource();
+			}
+
+			@Test
+			void testDefaultWhenCantGetMaxConnections() {
+				int retMaxConnectionSize = myTermReadSvc.calculateObjectLoadingThreadNumber();
+
+				assertEquals(DEFAULT_MASS_INDEXER_OBJECT_LOADING_THREADS, retMaxConnectionSize);
 			}
 
 		}

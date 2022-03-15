@@ -7,9 +7,6 @@ import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.config.GeneratedDaoAndResourceProviderConfigR4;
 import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.config.SharedConfigDstu3Plus;
-import ca.uhn.fhir.jpa.config.util.BasicDataSourceConnectionPoolInfoProvider;
-import ca.uhn.fhir.jpa.config.util.IConnectionPoolInfoProvider;
-import ca.uhn.fhir.jpa.config.util.NoOpConnectionPoolInfoProvider;
 import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
 import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
@@ -23,22 +20,14 @@ import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import net.ttddyy.dsproxy.support.ProxyDataSource;
-import org.apache.commons.dbcp2.BasicDataSource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-
-import javax.sql.DataSource;
-import java.sql.SQLException;
 
 /*
  * #%L
@@ -69,8 +58,6 @@ import java.sql.SQLException;
 	JpaConfig.class
 })
 public class JpaR4Config {
-	private static final Logger ourLog = LoggerFactory.getLogger(JpaR4Config.class);
-
 
 	@Bean
 	public ITermVersionAdapterSvc terminologyVersionAdapterSvc() {
@@ -111,32 +98,5 @@ public class JpaR4Config {
 	public ITermReadSvcR4 terminologyService() {
 		return new TermReadSvcR4();
 	}
-
-	@Autowired
-	@Lazy
-	private DataSource myDataSource;
-
-	@Bean
-	@Lazy
-	public IConnectionPoolInfoProvider connectionPoolInfoProvider() {
-		if (myDataSource.getClass().equals(BasicDataSource.class) ) {
-			return new BasicDataSourceConnectionPoolInfoProvider((BasicDataSource) myDataSource);
-		}
-
-		if ( ProxyDataSource.class.equals(myDataSource.getClass()) ) {
-			boolean basiDataSourceWrapped = false;
-			try {
-				basiDataSourceWrapped = myDataSource.isWrapperFor(BasicDataSource.class);
-				if (basiDataSourceWrapped) {
-					BasicDataSource basicDataSource = myDataSource.unwrap(BasicDataSource.class);
-					return new BasicDataSourceConnectionPoolInfoProvider(basicDataSource);
-				}
-			} catch (SQLException ignored) { }
-		}
-
-		ourLog.warn("A No-Op ConnectionPoolInfoProvider was configured");
-		return new NoOpConnectionPoolInfoProvider();
-	}
-
 
 }

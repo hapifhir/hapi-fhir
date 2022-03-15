@@ -16,6 +16,8 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
@@ -57,11 +59,13 @@ class ConnectionPoolInfoProviderTest {
 
 
 	@Nested
-	public class TestNoOpImplementation {
+	public class TestFailedProviderSetup {
+
+		@Mock DataSource unknownDataSource;
 
 		@BeforeEach
 		void setUp() {
-			tested = new NoOpConnectionPoolInfoProvider();
+			tested = new ConnectionPoolInfoProvider(unknownDataSource);
 		}
 
 
@@ -95,45 +99,46 @@ class ConnectionPoolInfoProviderTest {
 		@Test
 		void dataSourceIsBasicDataSource() {
 			DataSource ds = new BasicDataSource();
-			ReflectionTestUtils.setField(config, "myDataSource", ds);
 
-			IConnectionPoolInfoProvider provider = config.connectionPoolInfoProvider();
+			IConnectionPoolInfoProvider provider = new ConnectionPoolInfoProvider(ds);
 
-			assertTrue(provider.getClass().isAssignableFrom(BasicDataSourceConnectionPoolInfoProvider.class));
-			DataSource provideDataSource = (DataSource) ReflectionTestUtils.getField(provider, "myDataSource");
-			assertEquals(ds, provideDataSource);
+			IConnectionPoolInfoProvider instantiatedProvider =
+				(IConnectionPoolInfoProvider) ReflectionTestUtils.getField(provider, "provider");
+
+			assertNotNull(instantiatedProvider);
+			assertTrue(instantiatedProvider.getClass().isAssignableFrom(BasicDataSourceConnectionPoolInfoProvider.class));
 		}
 
 		@Test
 		void dataSourceIsProxyDataSourceWrappingBasicDataSource() {
 			DataSource ds = new BasicDataSource();
 			ProxyDataSource proxyDs = new ProxyDataSource(ds);
-			ReflectionTestUtils.setField(config, "myDataSource", proxyDs);
 
-			IConnectionPoolInfoProvider provider = config.connectionPoolInfoProvider();
+			IConnectionPoolInfoProvider provider = new ConnectionPoolInfoProvider(proxyDs);
 
-			assertTrue(provider.getClass().isAssignableFrom(BasicDataSourceConnectionPoolInfoProvider.class));
-			DataSource provideDataSource = (DataSource) ReflectionTestUtils.getField(provider, "myDataSource");
-			assertEquals(ds, provideDataSource);
+			IConnectionPoolInfoProvider instantiatedProvider =
+				(IConnectionPoolInfoProvider) ReflectionTestUtils.getField(provider, "provider");
+			assertNotNull(instantiatedProvider);
+			assertTrue(instantiatedProvider.getClass().isAssignableFrom(BasicDataSourceConnectionPoolInfoProvider.class));
 		}
 
 		@Test
 		void dataSourceIsProxyDataSourceWrappingNotBasicDataSource() {
 			ProxyDataSource proxyDs = new ProxyDataSource(unknownDataSource);
-			ReflectionTestUtils.setField(config, "myDataSource", proxyDs);
 
-			IConnectionPoolInfoProvider provider = config.connectionPoolInfoProvider();
-
-			assertTrue(provider.getClass().isAssignableFrom(NoOpConnectionPoolInfoProvider.class));
+			IConnectionPoolInfoProvider provider = new ConnectionPoolInfoProvider(proxyDs);
+			IConnectionPoolInfoProvider instantiatedProvider =
+				(IConnectionPoolInfoProvider) ReflectionTestUtils.getField(provider, "provider");
+			assertNull(instantiatedProvider);
 		}
 
 		@Test
 		void dataSourceIsNotBasicDataSourceOrProxyDataSource() {
-			ReflectionTestUtils.setField(config, "myDataSource", unknownDataSource);
+			IConnectionPoolInfoProvider provider = new ConnectionPoolInfoProvider(unknownDataSource);
 
-			IConnectionPoolInfoProvider provider = config.connectionPoolInfoProvider();
-
-			assertTrue(provider.getClass().isAssignableFrom(NoOpConnectionPoolInfoProvider.class));
+			IConnectionPoolInfoProvider instantiatedProvider =
+				(IConnectionPoolInfoProvider) ReflectionTestUtils.getField(provider, "provider");
+			assertNull(instantiatedProvider);
 		}
 
 	}

@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
+import ca.uhn.fhir.jpa.config.util.ConnectionPoolInfoProvider;
 import ca.uhn.fhir.jpa.config.util.IConnectionPoolInfoProvider;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
@@ -221,6 +222,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	private static final String IDX_PROP_DISPLAY_STRING = IDX_PROPERTIES + ".myDisplayString";
 
 	public static final int DEFAULT_MASS_INDEXER_OBJECT_LOADING_THREADS = 2;
+	// doesn't seem to be much gain by using more threads than this value
+	public static final int MAX_MASS_INDEXER_OBJECT_LOADING_THREADS = 6;
 
 	private boolean myPreExpandingValueSets = false;
 
@@ -278,10 +281,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	//We need this bean so we can tell which mode hibernate search is running in.
 	@Autowired
 	private HibernatePropertiesProvider myHibernatePropertiesProvider;
-
-	@Autowired
-	@Lazy
-	private IConnectionPoolInfoProvider myConnectionPoolInfoProvider;
 
 
 	private boolean isFullTextSetToUseElastic() {
@@ -2698,7 +2697,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				.purgeAllOnStart( false )
 				.batchSizeToLoadObjects( 100 )
 				.cacheMode( CacheMode.IGNORE )
-				.threadsToLoadObjects( objectLoadingThreadNumber )
+				.threadsToLoadObjects( 6 )
 				.transactionTimeout( 60 * SECONDS_IN_MINUTE )
 				.monitor( new LoggingMassIndexingMonitor(INDEXED_ROOTS_LOGGING_COUNT) )
 				.startAndWait();
@@ -2719,12 +2718,18 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	@VisibleForTesting
 	int calculateObjectLoadingThreadNumber() {
-		Optional<Integer> maxConnectionsOpt = myConnectionPoolInfoProvider.getTotalConnectionSize();
-		int maxConnections = maxConnectionsOpt.orElse(DEFAULT_MASS_INDEXER_OBJECT_LOADING_THREADS);
+		IConnectionPoolInfoProvider connectionPoolInfoProvider =
+			new ConnectionPoolInfoProvider(myHibernatePropertiesProvider.getDataSource());
+		Optional<Integer> maxConnectionsOpt = connectionPoolInfoProvider.getTotalConnectionSize();
+		if (maxConnectionsOpt.isEmpty()) {
+			return DEFAULT_MASS_INDEXER_OBJECT_LOADING_THREADS;
+		}
 
-		int objectThreads = maxConnections < 6 ? 1 : maxConnections - 5;
-		ourLog.info("Data source connection pool has {} connections allocated, so reindexing will use {} object " +
-			"loading threads (each using a connection) to avoid depleting the pool", maxConnections, objectThreads);
+		int maxConnections = maxConnectionsOpt.get();
+		int usableThreads = maxConnections < 6 ? 1 : maxConnections - 5;
+		int objectThreads = Math.min(usableThreads, MAX_MASS_INDEXER_OBJECT_LOADING_THREADS);
+		ourLog.debug("Data source connection pool has {} connections allocated, so reindexing will use {} object " +
+			"loading threads (each using a connection)", maxConnections, objectThreads);
 		return objectThreads;
 	}
 
