@@ -10,12 +10,12 @@ import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
-import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.config.TestHibernateSearchAddInConfig;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.BaseDateSearchDaoTests;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.dao.DaoTestDataBuilder;
+import ca.uhn.fhir.jpa.dao.TestDaoSearch;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -37,6 +37,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
@@ -75,14 +76,21 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(SpringExtension.class)
 @RequiresDocker
-@ContextConfiguration(classes = {TestR4Config.class, TestHibernateSearchAddInConfig.Elasticsearch.class})
+@ContextConfiguration(classes = {
+	TestR4Config.class,
+	TestHibernateSearchAddInConfig.Elasticsearch.class,
+	DaoTestDataBuilder.Config.class,
+	TestDaoSearch.Config.class
+})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";
@@ -132,6 +140,11 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+	@Autowired
+	ITestDataBuilder myTestDataBuilder;
+	@Autowired
+	TestDaoSearch myTestDaoSearch;
+
 
 	@BeforeEach
 	public void beforePurgeDatabase() {
@@ -159,6 +172,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		DaoConfig defaultConfig = new DaoConfig();
 		myDaoConfig.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
 		myDaoConfig.setAdvancedLuceneIndexing(defaultConfig.isAdvancedLuceneIndexing());
+		myDaoConfig.setStoreResourceInLuceneIndex(defaultConfig.isStoreResourceInLuceneIndex());
 	}
 
 	@Test
@@ -760,6 +774,55 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			DaoTestDataBuilder testDataBuilder = new DaoTestDataBuilder(myFhirCtx, myDaoRegistry, new SystemRequestDetails());
 			return new TestDataBuilderFixture<>(testDataBuilder, myObservationDao);
 		}
+	}
+
+	/**
+	 * We have a fast path where we skip the database entirely when we can satisfy the queries completely
+	 * from Elasticsearch.
+	 */
+	@Nested
+	public class FastPath {
+		@BeforeEach
+		public void enableResourceStorage() {
+			myDaoConfig.setStoreResourceInLuceneIndex(true);
+		}
+
+		@AfterEach
+		public void resetResourceStorage() {
+			myDaoConfig.setStoreResourceInLuceneIndex(new DaoConfig().isStoreResourceInLuceneIndex());
+		}
+
+
+		@Test
+		public void simpleTokenSkipsSql() {
+
+			IIdType id = myTestDataBuilder.createObservation(myTestDataBuilder.withObservationCode("http://example.com/", "theCode"));
+			myCaptureQueriesListener.clear();
+
+			List<String> ids = myTestDaoSearch.searchForIds("Observation?code=theCode");
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+			assertThat(ids, hasSize(1));
+			assertThat(ids, contains(id.getIdPart()));
+			// fixme mb this should be 0 once we fetch resources from elastic.
+			assertEquals(1, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		}
+
+		@Test
+		public void sortStillRequiresSql() {
+
+			IIdType id = myTestDataBuilder.createObservation(myTestDataBuilder.withObservationCode("http://example.com/", "theCode"));
+			myCaptureQueriesListener.clear();
+
+			List<String> ids = myTestDaoSearch.searchForIds("Observation?code=theCode&_sort=code");
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+			assertThat(ids, hasSize(1));
+			assertThat(ids, contains(id.getIdPart()));
+
+			assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		}
+
 	}
 
 }

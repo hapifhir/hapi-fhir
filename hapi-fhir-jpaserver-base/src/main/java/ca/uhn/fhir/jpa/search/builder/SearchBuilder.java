@@ -43,7 +43,6 @@ import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -111,7 +110,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.Query;
-import javax.persistence.SqlResultSetMapping;
 import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -278,11 +276,11 @@ public class SearchBuilder implements ISearchBuilder {
 
 		init(theParams, theSearchUuid, theRequestPartitionId);
 
-		ArrayList<SearchQueryExecutor> queries = createQuery(myParams, null, null, null, true, theRequest, null);
+		List<ISearchQueryExecutor> queries = createQuery(myParams, null, null, null, true, theRequest, null);
 		if (queries.isEmpty()) {
 			return Collections.emptyIterator();
 		}
-		try (SearchQueryExecutor queryExecutor = queries.get(0)) {
+		try (ISearchQueryExecutor queryExecutor = queries.get(0)) {
 			return Lists.newArrayList(queryExecutor.next()).iterator();
 		}
 	}
@@ -317,10 +315,11 @@ public class SearchBuilder implements ISearchBuilder {
 		myRequestPartitionId = theRequestPartitionId;
 	}
 
-	private ArrayList<SearchQueryExecutor> createQuery(SearchParameterMap theParams, SortSpec sort, Integer theOffset, Integer theMaximumResults, boolean theCount, RequestDetails theRequest,
-																		SearchRuntimeDetails theSearchRuntimeDetails) {
+	private List<ISearchQueryExecutor> createQuery(SearchParameterMap theParams, SortSpec sort, Integer theOffset, Integer theMaximumResults, boolean theCount, RequestDetails theRequest,
+																		 SearchRuntimeDetails theSearchRuntimeDetails) {
 
 		List<ResourcePersistentId> pids = new ArrayList<>();
+		ArrayList<ISearchQueryExecutor> queries = new ArrayList<>();
 
 		if (checkUseHibernateSearch()) {
 			if (myParams.isLastN()) {
@@ -338,6 +337,34 @@ public class SearchBuilder implements ISearchBuilder {
 				CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INDEXSEARCH_QUERY_COMPLETE, params);
 			}
 
+			// fixme fastpath!  Can we return here?
+			// fixme are there pointcuts to also call?
+			// fixme extract and test this.  Maybe to fulltext service?
+			if (!myPartitionSettings.isPartitioningEnabled() &&
+				theParams.isEmpty() &&
+				theParams.getSort() == null) {
+				Iterator<ResourcePersistentId> iterator = pids.iterator();
+				ISearchQueryExecutor fast = new ISearchQueryExecutor() {
+
+					@Override
+					public boolean hasNext() {
+						return iterator.hasNext();
+					}
+
+					@Override
+					public Long next() {
+						return iterator.next().getIdAsLong();
+					}
+
+					@Override
+					public void close() {
+						// empty
+					}
+				};
+				queries.add(fast);
+				return queries;
+			}
+
 			if (pids.isEmpty()) {
 				// Will never match
 				pids = Collections.singletonList(new ResourcePersistentId(-1L));
@@ -345,7 +372,6 @@ public class SearchBuilder implements ISearchBuilder {
 
 		}
 
-		ArrayList<SearchQueryExecutor> queries = new ArrayList<>();
 
 		if (!pids.isEmpty()) {
 			new QueryChunker<Long>().chunk(ResourcePersistentId.toLongList(pids), t -> doCreateChunkedQueries(theParams, t, theOffset, sort, theCount, theRequest, queries));
@@ -413,7 +439,7 @@ public class SearchBuilder implements ISearchBuilder {
 		return pids;
 	}
 
-	private void doCreateChunkedQueries(SearchParameterMap theParams, List<Long> thePids, Integer theOffset, SortSpec sort, boolean theCount, RequestDetails theRequest, ArrayList<SearchQueryExecutor> theQueries) {
+	private void doCreateChunkedQueries(SearchParameterMap theParams, List<Long> thePids, Integer theOffset, SortSpec sort, boolean theCount, RequestDetails theRequest, ArrayList<ISearchQueryExecutor> theQueries) {
 		if (thePids.size() < getMaximumPageSize()) {
 			normalizeIdListForLastNInClause(thePids);
 		}
@@ -876,6 +902,7 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	private boolean isLoadingFromElasticSearchSupported(boolean noIncludePids) {
+		// fixme mb must this be lastn?
 		return noIncludePids && !Objects.isNull(myParams) && myParams.isLastN() && myDaoConfig.isStoreResourceInLuceneIndex()
 			&& myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3);
 	}
@@ -1381,11 +1408,11 @@ public class SearchBuilder implements ISearchBuilder {
 		private boolean myFirst = true;
 		private IncludesIterator myIncludesIterator;
 		private ResourcePersistentId myNext;
-		private SearchQueryExecutor myResultsIterator;
+		private ISearchQueryExecutor myResultsIterator;
 		private boolean myStillNeedToFetchIncludes;
 		private int mySkipCount = 0;
 		private int myNonSkipCount = 0;
-		private ArrayList<SearchQueryExecutor> myQueryList = new ArrayList<>();
+		private List<ISearchQueryExecutor> myQueryList = new ArrayList<>();
 
 		private QueryIterator(SearchRuntimeDetails theSearchRuntimeDetails, RequestDetails theRequest) {
 			mySearchRuntimeDetails = theSearchRuntimeDetails;
