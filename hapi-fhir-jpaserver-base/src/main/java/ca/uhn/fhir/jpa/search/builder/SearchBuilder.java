@@ -337,45 +337,33 @@ public class SearchBuilder implements ISearchBuilder {
 				CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INDEXSEARCH_QUERY_COMPLETE, params);
 			}
 
+			List<Long> rawPids = ResourcePersistentId.toLongList(pids);
+
 			// fixme fastpath!  Can we return here?
 			// fixme are there pointcuts to also call?
 			// fixme extract and test this.  Maybe to fulltext service?
-			if (!myPartitionSettings.isPartitioningEnabled() &&
-				theParams.isEmpty() &&
-				theParams.getSort() == null) {
-				Iterator<ResourcePersistentId> iterator = pids.iterator();
-				ISearchQueryExecutor fast = new ISearchQueryExecutor() {
 
-					@Override
-					public boolean hasNext() {
-						return iterator.hasNext();
-					}
+			// can we skip the database entirely and return the pid list from here?
+			boolean canSkipDatabase =
+				// if we processed an AND clause, and it returned nothing, then nothing can match.
+				rawPids.isEmpty() ||
+					// Our hibernate search query doesn't support partitions yet
+					(!myPartitionSettings.isPartitioningEnabled() &&
+					// were there AND terms left?  Then we still need the db.
+						theParams.isEmpty() &&
+						// or sorting?
+						theParams.getSort() == null);
 
-					@Override
-					public Long next() {
-						return iterator.next().getIdAsLong();
-					}
-
-					@Override
-					public void close() {
-						// empty
-					}
-				};
-				queries.add(fast);
-				return queries;
+			if (canSkipDatabase) {
+				queries.add(ResolvedSearchQueryExecutor.from(rawPids));
+			} else {
+				// Finish the query in the database for the rest of the search parameters, sorting, partitioning, etc.
+				// break the pids into chunks that fit in the 1k limit for jdbc bind params.
+				new QueryChunker<Long>()
+					.chunk(rawPids, t -> doCreateChunkedQueries(theParams, t, theOffset, sort, theCount, theRequest, queries));
 			}
-
-			if (pids.isEmpty()) {
-				// Will never match
-				pids = Collections.singletonList(new ResourcePersistentId(-1L));
-			}
-
-		}
-
-
-		if (!pids.isEmpty()) {
-			new QueryChunker<Long>().chunk(ResourcePersistentId.toLongList(pids), t -> doCreateChunkedQueries(theParams, t, theOffset, sort, theCount, theRequest, queries));
 		} else {
+			// do everything in the database.
 			Optional<SearchQueryExecutor> query = createChunkedQuery(theParams, sort, theOffset, theMaximumResults, theCount, theRequest, null);
 			query.ifPresent(t -> queries.add(t));
 		}
@@ -1355,6 +1343,38 @@ public class SearchBuilder implements ISearchBuilder {
 	@VisibleForTesting
 	public void setDaoConfigForUnitTest(DaoConfig theDaoConfig) {
 		myDaoConfig = theDaoConfig;
+	}
+
+	public static class ResolvedSearchQueryExecutor implements ISearchQueryExecutor {
+		private final Iterator<Long> myIterator;
+
+		ResolvedSearchQueryExecutor(Iterable<Long> theIterable) {
+			this(theIterable.iterator());
+		}
+
+		ResolvedSearchQueryExecutor(Iterator<Long> theIterator) {
+			myIterator = theIterator;
+		}
+
+		@Nonnull
+		public static ResolvedSearchQueryExecutor from(List<Long> rawPids) {
+			return new ResolvedSearchQueryExecutor(rawPids);
+		}
+
+		@Override
+		public boolean hasNext() {
+			return myIterator.hasNext();
+		}
+
+		@Override
+		public Long next() {
+			return myIterator.next();
+		}
+
+		@Override
+		public void close() {
+			// empty
+		}
 	}
 
 	public class IncludesIterator extends BaseIterator<ResourcePersistentId> implements Iterator<ResourcePersistentId> {
