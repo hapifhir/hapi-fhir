@@ -82,6 +82,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(SpringExtension.class)
 @RequiresDocker
@@ -822,6 +823,18 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 			assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		}
+
+		@Test
+		public void forcedIdSurvives() {
+			fail();
+		}
+
+		@Test
+		public void tagsSurvive() {
+			// do we need to support DSTU2?
+			fail();
+		}
+
 
 	}
 

@@ -318,18 +318,19 @@ public class SearchBuilder implements ISearchBuilder {
 	private List<ISearchQueryExecutor> createQuery(SearchParameterMap theParams, SortSpec sort, Integer theOffset, Integer theMaximumResults, boolean theCount, RequestDetails theRequest,
 																		 SearchRuntimeDetails theSearchRuntimeDetails) {
 
-		List<ResourcePersistentId> pids = new ArrayList<>();
 		ArrayList<ISearchQueryExecutor> queries = new ArrayList<>();
 
 		if (checkUseHibernateSearch()) {
+			// we're going to run at least part of the search against the Fulltext service.
+			List<ResourcePersistentId> fulltextMatchIds;
 			if (myParams.isLastN()) {
-				pids = executeLastNAgainstIndex(theMaximumResults);
+				fulltextMatchIds = executeLastNAgainstIndex(theMaximumResults);
 			} else {
-				pids = queryLuceneForPIDs(theRequest);
+				fulltextMatchIds = queryLuceneForPIDs(theRequest);
 			}
 
 			if (theSearchRuntimeDetails != null) {
-				theSearchRuntimeDetails.setFoundIndexMatchesCount(pids.size());
+				theSearchRuntimeDetails.setFoundIndexMatchesCount(fulltextMatchIds.size());
 				HookParams params = new HookParams()
 					.add(RequestDetails.class, theRequest)
 					.addIfMatchesType(ServletRequestDetails.class, theRequest)
@@ -337,7 +338,7 @@ public class SearchBuilder implements ISearchBuilder {
 				CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INDEXSEARCH_QUERY_COMPLETE, params);
 			}
 
-			List<Long> rawPids = ResourcePersistentId.toLongList(pids);
+			List<Long> rawPids = ResourcePersistentId.toLongList(fulltextMatchIds);
 
 			// fixme fastpath!  Can we return here?
 			// fixme are there pointcuts to also call?
@@ -358,7 +359,7 @@ public class SearchBuilder implements ISearchBuilder {
 				queries.add(ResolvedSearchQueryExecutor.from(rawPids));
 			} else {
 				// Finish the query in the database for the rest of the search parameters, sorting, partitioning, etc.
-				// break the pids into chunks that fit in the 1k limit for jdbc bind params.
+				// We break the pids into chunks that fit in the 1k limit for jdbc bind params.
 				new QueryChunker<Long>()
 					.chunk(rawPids, t -> doCreateChunkedQueries(theParams, t, theOffset, sort, theCount, theRequest, queries));
 			}
@@ -1345,7 +1346,7 @@ public class SearchBuilder implements ISearchBuilder {
 		myDaoConfig = theDaoConfig;
 	}
 
-	public static class ResolvedSearchQueryExecutor implements ISearchQueryExecutor {
+	static class ResolvedSearchQueryExecutor implements ISearchQueryExecutor {
 		private final Iterator<Long> myIterator;
 
 		ResolvedSearchQueryExecutor(Iterable<Long> theIterable) {
