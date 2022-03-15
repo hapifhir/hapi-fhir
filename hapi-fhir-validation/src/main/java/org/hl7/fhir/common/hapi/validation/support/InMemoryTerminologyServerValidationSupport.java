@@ -544,6 +544,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	private boolean expandValueSetR5IncludeOrExclude(ValidationSupportContext theValidationSupportContext, Consumer<FhirVersionIndependentConcept> theConsumer, @Nullable String theWantSystemUrlAndVersion, @Nullable String theWantCode, org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent theInclude) throws ExpansionCouldNotBeCompletedInternallyException {
 		String wantSystemUrl = null;
 		String wantSystemVersion = null;
+
 		if (theWantSystemUrlAndVersion != null) {
 			int versionIndex = theWantSystemUrlAndVersion.indexOf("|");
 			if (versionIndex > -1) {
@@ -554,14 +555,25 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			}
 		}
 
+		String includeOrExcludeConceptSystemUrl = theInclude.getSystem();
+		String includeOrExcludeConceptSystemVersion = theInclude.getVersion();
+
 		Function<String, CodeSystem> codeSystemLoader = newCodeSystemLoader(theValidationSupportContext);
 		Function<String, org.hl7.fhir.r5.model.ValueSet> valueSetLoader = newValueSetLoader(theValidationSupportContext);
 
 		List<FhirVersionIndependentConcept> nextCodeList = new ArrayList<>();
-		String includeOrExcludeConceptSystemUrl = theInclude.getSystem();
-		String includeOrExcludeConceptSystemVersion = theInclude.getVersion();
+
 		CodeSystem includeOrExcludeSystemResource = null;
 		if (isNotBlank(includeOrExcludeConceptSystemUrl)) {
+
+			if( includeOrExcludeConceptSystemUrl.contains("|") && isBlank(includeOrExcludeConceptSystemVersion)){
+				int versionIndex = includeOrExcludeConceptSystemUrl.indexOf("|");
+				if(versionIndex > -1){
+					String temp = includeOrExcludeConceptSystemUrl;
+					includeOrExcludeConceptSystemUrl = temp.substring(0, versionIndex);
+					includeOrExcludeConceptSystemVersion = temp.substring(versionIndex + 1);
+				}
+			}
 
 			if (wantSystemUrl != null && !wantSystemUrl.equals(includeOrExcludeConceptSystemUrl)) {
 				return false;
