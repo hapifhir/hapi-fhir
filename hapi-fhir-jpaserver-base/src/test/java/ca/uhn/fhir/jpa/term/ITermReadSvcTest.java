@@ -306,7 +306,7 @@ class ITermReadSvcTest {
 
 	@Nested
 	public class TestReindexTerminology {
-		private @Mock SearchSession mySearchSession;
+		@Mock private SearchSession mySearchSession;
 
 		@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 		private MassIndexer myMassIndexer;

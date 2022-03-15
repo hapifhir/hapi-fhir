@@ -92,8 +92,6 @@ class ConnectionPoolInfoProviderTest {
 	@Nested
 	public class TestConfig {
 
-		private JpaR4Config config = new JpaR4Config();
-
 		@Mock DataSource unknownDataSource;
 
 		@Test
