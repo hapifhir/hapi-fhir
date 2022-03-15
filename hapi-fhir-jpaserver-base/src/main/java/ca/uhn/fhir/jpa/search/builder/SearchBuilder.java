@@ -894,7 +894,7 @@ public class SearchBuilder implements ISearchBuilder {
 		List<ResourcePersistentId> pids = new ArrayList<>(thePids);
 		// Can we fast track this loading by checking elastic search?
 		if (isLoadingFromElasticSearchSupported(theIncludedPids.isEmpty())) {
-			theResourceListToPopulate.addAll(loadObservationResourcesFromElasticSearch(thePids));
+			theResourceListToPopulate.addAll(loadResourcesFromElasticSearch(thePids));
 		} else {
 			// We only chunk because some jdbc drivers can't handle long param lists.
 			new QueryChunker<ResourcePersistentId>().chunk(pids, t -> doLoadPids(t, theIncludedPids, theResourceListToPopulate, theForHistoryOperation, position));
@@ -902,13 +902,20 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	private boolean isLoadingFromElasticSearchSupported(boolean noIncludePids) {
-		// fixme mb must this be lastn?
-		return noIncludePids && !Objects.isNull(myParams) && myParams.isLastN() && myDaoConfig.isStoreResourceInLuceneIndex()
+		return noIncludePids && myDaoConfig.isStoreResourceInLuceneIndex()
 			&& myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3);
 	}
 
-	private List<IBaseResource> loadObservationResourcesFromElasticSearch(Collection<ResourcePersistentId> thePids) {
-		return myIElasticsearchSvc.getObservationResources(thePids);
+	private List<IBaseResource> loadResourcesFromElasticSearch(Collection<ResourcePersistentId> thePids) {
+		// Do we use the fulltextsvc via hibernate-search to load resources or be backwards compatible with older ES only impl
+		// to handle lastN?
+		if (myDaoConfig.isAdvancedLuceneIndexing()) {
+			return myFulltextSearchSvc.getResources(thePids);
+		} else if (!Objects.isNull(myParams) && myParams.isLastN()) {
+			return myIElasticsearchSvc.getObservationResources(thePids);
+		} else {
+			return Collections.emptyList();
+		}
 	}
 
 	/**

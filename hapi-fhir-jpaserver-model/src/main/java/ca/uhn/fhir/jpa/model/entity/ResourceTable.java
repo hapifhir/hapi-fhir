@@ -32,8 +32,10 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.OptimisticLock;
+import org.hibernate.search.engine.backend.types.Aggregable;
 import org.hibernate.search.engine.backend.types.Projectable;
 import org.hibernate.search.engine.backend.types.Searchable;
+import org.hibernate.search.engine.backend.types.Sortable;
 import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.PropertyBinderRef;
 import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.RoutingBinderRef;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
@@ -142,7 +144,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	private ExtendedLuceneIndexData myLuceneIndexData;
 
 	@Transient
-	@KeywordField(name="myRawResource")
+	@GenericField(name="myRawResource", projectable = Projectable.YES, searchable = Searchable.NO)
 	@IndexingDependency(derivedFrom = @ObjectPath(@PropertyValue(propertyName = "myVersion")))
 	@OptimisticLock(excluded = true)
 	private String myRawResourceData;

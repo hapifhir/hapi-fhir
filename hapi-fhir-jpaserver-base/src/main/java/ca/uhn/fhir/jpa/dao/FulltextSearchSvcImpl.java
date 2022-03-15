@@ -36,6 +36,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -59,6 +60,7 @@ import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -271,4 +273,20 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		return convertLongsToResourcePersistentIds(pidList);
 	}
 
+	@Override
+	public List<IBaseResource> getResources(Collection<ResourcePersistentId> thePids) {
+		List<Long> pidList = thePids.stream().map(ResourcePersistentId::getIdAsLong).collect(Collectors.toList());
+		SearchSession session = getSearchSession();
+		List<String> rawResourceDataList = session.search(ResourceTable.class)
+			.select(
+				f -> f.field("myRawResource", String.class)
+			)
+			.where(
+				f -> f.id().matchingAny(pidList) // matches '_id' from resource index
+			).fetchAllHits();
+		IParser parser = myFhirContext.newJsonParser();
+		return rawResourceDataList.stream()
+			.map(parser::parseResource)
+			.collect(Collectors.toList());
+	}
 }

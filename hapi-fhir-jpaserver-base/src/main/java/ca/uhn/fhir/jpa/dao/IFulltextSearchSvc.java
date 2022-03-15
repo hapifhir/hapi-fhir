@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import java.util.Collection;
 import java.util.List;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -71,5 +72,13 @@ public interface IFulltextSearchSvc {
 	 void reindex(ResourceTable theEntity);
 
 	List<ResourcePersistentId> lastN(SearchParameterMap theParams, Integer theMaximumResults);
+
+	/**
+	 * Returns inlined resource stored along with index mappings for matched identifiers
+	 *
+	 * @param thePids
+	 * @return Resources list or empty if nothing found
+	 */
+	List<IBaseResource> getResources(Collection<ResourcePersistentId> thePids);
 
 }
