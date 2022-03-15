@@ -2721,7 +2721,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		IConnectionPoolInfoProvider connectionPoolInfoProvider =
 			new ConnectionPoolInfoProvider(myHibernatePropertiesProvider.getDataSource());
 		Optional<Integer> maxConnectionsOpt = connectionPoolInfoProvider.getTotalConnectionSize();
-		if (maxConnectionsOpt.isEmpty()) {
+		if ( ! maxConnectionsOpt.isPresent() ) {
 			return DEFAULT_MASS_INDEXER_OBJECT_LOADING_THREADS;
 		}
 
