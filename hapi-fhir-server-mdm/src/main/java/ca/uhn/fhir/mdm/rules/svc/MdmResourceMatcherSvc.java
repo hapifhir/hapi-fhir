@@ -131,6 +131,7 @@ public class MdmResourceMatcherSvc {
 				ourLog.debug("Matcher {} is not valid for resource type: {}. Skipping it.", fieldComparator.getName(), resourceType);
 				continue;
 			}
+			// FIXME Part2: this is where we will determine what we want to log
 			ourLog.debug("Matcher {} is valid for resource type: {}. Evaluating match.", fieldComparator.getName(), resourceType);
 			MdmMatchEvaluation matchEvaluation = fieldComparator.match(theLeftResource, theRightResource);
 			if (matchEvaluation.match) {

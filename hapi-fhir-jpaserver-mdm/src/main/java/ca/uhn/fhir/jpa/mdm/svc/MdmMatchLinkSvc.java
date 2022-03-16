@@ -132,10 +132,13 @@ public class MdmMatchLinkSvc {
 		// 1. Get the right helper
 		// 2. Create source resource for the MDM source
 		// 3. UPDATE MDM LINK TABLE
+
+		// FIXME PART1: it is within this call that we will be generating the comment with the with the NULL/NULL values.
 		myMdmLinkSvc.updateLink(newGoldenResource, theResource, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 	}
 
 	private void handleMdmCreate(IAnyResource theTargetResource, MatchedGoldenResourceCandidate theGoldenResourceCandidate, MdmTransactionContext theMdmTransactionContext) {
+		// FIXME PART3: let's move this log bellow (see comment in next method)
 		log(theMdmTransactionContext, "MDM has narrowed down to one candidate for matching.");
 		IAnyResource goldenResource = myMdmGoldenResourceFindingSvc.getGoldenResourceFromMatchedGoldenResourceCandidate(theGoldenResourceCandidate, theMdmTransactionContext.getResourceType());
 
@@ -156,10 +159,14 @@ public class MdmMatchLinkSvc {
 	}
 
 	private void handleMdmWithSingleCandidate(IAnyResource theResource, MatchedGoldenResourceCandidate theGoldenResourceCandidate, MdmTransactionContext theMdmTransactionContext) {
+		// FIXME PART3: this log should be moved within the if statement to mark that we will be updating. there is a log
+		// addressing the create in method handleMdmCreate.
+
 		log(theMdmTransactionContext, "MDM has narrowed down to one candidate for matching.");
 		if (theMdmTransactionContext.getRestOperation().equals(MdmTransactionContext.OperationType.UPDATE_RESOURCE)) {
 			myEidUpdateService.handleMdmUpdate(theResource, theGoldenResourceCandidate, theMdmTransactionContext);
 		} else {
+			// FIXME PART3: move the logging from above here and enhance it
 			handleMdmCreate(theResource, theGoldenResourceCandidate, theMdmTransactionContext);
 		}
 	}
