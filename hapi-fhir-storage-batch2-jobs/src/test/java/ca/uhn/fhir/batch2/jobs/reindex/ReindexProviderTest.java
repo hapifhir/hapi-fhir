@@ -5,6 +5,7 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Parameters;
@@ -16,11 +17,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -32,6 +37,8 @@ import static org.mockito.Mockito.when;
 public class ReindexProviderTest {
 	public static final String TEST_JOB_ID = "test-job-id";
 	private static final Logger ourLog = LoggerFactory.getLogger(ReindexProviderTest.class);
+
+	@Spy
 	private final FhirContext myCtx = FhirContext.forR4Cached();
 
 	@RegisterExtension
@@ -43,11 +50,11 @@ public class ReindexProviderTest {
 	@Captor
 	private ArgumentCaptor<JobInstanceStartRequest> myStartRequestCaptor;
 
+	@InjectMocks
 	private ReindexProvider mySvc;
 
 	@BeforeEach
 	public void beforeEach() {
-		mySvc = new ReindexProvider(myCtx, myJobCoordinator);
 		myServerExtension.registerProvider(mySvc);
 
 		when(myJobCoordinator.startInstance(any())).thenReturn(TEST_JOB_ID);
@@ -87,7 +94,7 @@ public class ReindexProviderTest {
 
 		verify(myJobCoordinator, times(1)).startInstance(myStartRequestCaptor.capture());
 		ReindexJobParameters params = myStartRequestCaptor.getValue().getParameters(ReindexJobParameters.class);
-		assertEquals(url, params.getUrl());
+		assertThat(params.getUrl(), Matchers.contains(url));
 	}
 
 	@Test
@@ -118,7 +125,7 @@ public class ReindexProviderTest {
 
 		verify(myJobCoordinator, times(1)).startInstance(myStartRequestCaptor.capture());
 		ReindexJobParameters params = myStartRequestCaptor.getValue().getParameters(ReindexJobParameters.class);
-		assertNull(params.getUrl());
+		assertThat(params.getUrl(), empty());
 
 	}
 }

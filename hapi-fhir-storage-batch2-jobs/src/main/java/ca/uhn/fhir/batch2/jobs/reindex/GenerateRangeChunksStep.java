@@ -27,6 +27,7 @@ import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.jpa.api.svc.IResourceReindexSvc;
+import org.hl7.fhir.r4.model.InstantType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,10 +45,11 @@ public class GenerateRangeChunksStep implements IFirstJobStepWorker<ReindexJobPa
 	@Override
 	public RunOutcome run(@Nonnull StepExecutionDetails<ReindexJobParameters, VoidModel> theStepExecutionDetails, @Nonnull IJobDataSink<ReindexChunkRange> theDataSink) throws JobExecutionFailedException {
 		ReindexJobParameters params = theStepExecutionDetails.getParameters();
+
+		Date start = new InstantType("2000-01-01T00:00:00Z").getValue();
 		Date end = new Date();
 
 		if (params.getUrl().isEmpty()) {
-			Date start = myResourceReindexSvc.getOldestTimestamp(null);
 			ourLog.info("Initiating reindex of All Resources from {} to {}", start, end);
 			ReindexChunkRange nextRange = new ReindexChunkRange();
 			nextRange.setStart(start);
@@ -55,8 +57,6 @@ public class GenerateRangeChunksStep implements IFirstJobStepWorker<ReindexJobPa
 			theDataSink.accept(nextRange);
 		} else {
 			for (String nextUrl : params.getUrl()) {
-				String nextResourceType = nextUrl.substring(0, nextUrl.indexOf('?'));
-				Date start = myResourceReindexSvc.getOldestTimestamp(nextResourceType);
 				ourLog.info("Initiating reindex of [{}]] from {} to {}", nextUrl, start, end);
 				ReindexChunkRange nextRange = new ReindexChunkRange();
 				nextRange.setUrl(nextUrl);

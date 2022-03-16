@@ -233,11 +233,11 @@ public class JobDefinition<PT extends IModelJson> {
 		 * @param theParametersValidator The validator (must not be null. Do not call this method at all if you do not want a parameters validator).
 		 */
 		@SuppressWarnings("unchecked")
-		public <NPT extends IModelJson> Builder<NPT, NIT> setParametersValidator(@Nonnull IJobParametersValidator<PT> theParametersValidator) {
+		public <NPT extends IModelJson> Builder<PT, NIT> setParametersValidator(@Nonnull IJobParametersValidator<PT> theParametersValidator) {
 			Validate.notNull(theParametersValidator, "theParametersValidator must not be null");
 			Validate.isTrue(myParametersValidator == null, "Can not supply multiple parameters validators. Already have: %s", myParametersValidator);
 			myParametersValidator = theParametersValidator;
-			return (Builder<NPT, NIT>) this;
+			return (Builder<PT, NIT>) this;
 		}
 	}
 
