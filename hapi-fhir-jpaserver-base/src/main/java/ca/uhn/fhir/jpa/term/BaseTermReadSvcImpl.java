@@ -1958,6 +1958,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				}
 
 				TermValueSet termValueSet = optionalTermValueSet.get();
+				termValueSet.setTotalConcepts(0L);
+				termValueSet.setTotalConceptDesignations(0L);
 				termValueSet.setExpansionStatus(TermValueSetPreExpansionStatusEnum.EXPANSION_IN_PROGRESS);
 				return myTermValueSetDao.saveAndFlush(termValueSet);
 			});
