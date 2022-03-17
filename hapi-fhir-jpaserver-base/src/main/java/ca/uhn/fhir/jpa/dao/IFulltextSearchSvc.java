@@ -20,10 +20,6 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import java.util.Collection;
-import java.util.List;
-
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
 import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteOptions;
@@ -32,6 +28,9 @@ import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import java.util.Collection;
+import java.util.List;
 
 public interface IFulltextSearchSvc {
 
@@ -76,9 +75,9 @@ public interface IFulltextSearchSvc {
 	/**
 	 * Returns inlined resource stored along with index mappings for matched identifiers
 	 *
-	 * @param thePids
+	 * @param thePids raw pids - we dont support versioned references
 	 * @return Resources list or empty if nothing found
 	 */
-	List<IBaseResource> getResources(Collection<ResourcePersistentId> thePids);
+	List<IBaseResource> getResources(Collection<Long> thePids);
 
 }

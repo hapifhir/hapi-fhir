@@ -42,6 +42,9 @@ import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 import org.hamcrest.Matchers;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.IBaseMetaType;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -78,11 +81,11 @@ import java.util.stream.Collectors;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(SpringExtension.class)
 @RequiresDocker
@@ -778,8 +781,8 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	}
 
 	/**
-	 * We have a fast path where we skip the database entirely when we can satisfy the queries completely
-	 * from Elasticsearch.
+	 * We have a fast path that skips the database entirely
+	 * when we can satisfy the queries completely from Hibernate Search.
 	 */
 	@Nested
 	public class FastPath {
@@ -805,8 +808,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 			assertThat(ids, hasSize(1));
 			assertThat(ids, contains(id.getIdPart()));
-			// fixme mb this should be 0 once we fetch resources from elastic.
-			assertEquals(1, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
 		}
 
 		@Test
@@ -821,18 +823,60 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			assertThat(ids, hasSize(1));
 			assertThat(ids, contains(id.getIdPart()));
 
-			assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+			assertEquals(1, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "the pids come from elastic, but we use sql to sort");
 		}
 
 		@Test
-		public void forcedIdSurvives() {
-			fail();
+		public void forcedIdSurvivesWithNoSql() {
+			IIdType id = myTestDataBuilder.createObservation(
+				myTestDataBuilder.withObservationCode("http://example.com/", "theCode"),
+				myTestDataBuilder.withId("forcedid"));
+			assertThat(id.getIdPart(), equalTo("forcedid"));
+			myCaptureQueriesListener.clear();
+
+			List<String> ids = myTestDaoSearch.searchForIds("Observation?code=theCode");
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+			assertThat(ids, hasSize(1));
+			assertThat(ids, contains(id.getIdPart()));
+
+			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		}
 
+		/**
+		 * A paranoid test to make sure tags stay with the resource.
+		 *
+		 * Tags live outside the resource, and can be modified by
+		 * Since we lost the id, also check tags in case someone changes metadata processing during ingestion.
+		 */
 		@Test
 		public void tagsSurvive() {
-			// do we need to support DSTU2?
-			fail();
+			IIdType id = myTestDataBuilder.createObservation(
+				myTestDataBuilder.withObservationCode("http://example.com/", "theCode"),
+				myTestDataBuilder.withTag("http://example.com", "aTag"));
+
+			myCaptureQueriesListener.clear();
+			List<IBaseResource> observations = myTestDaoSearch.searchForResources("Observation?code=theCode");
+
+			assertThat(observations, hasSize(1));
+			List<? extends IBaseCoding> tags = observations.get(0).getMeta().getTag();
+			assertThat(tags, hasSize(1));
+			assertThat(tags.get(0).getSystem(), equalTo("http://example.com"));
+			assertThat(tags.get(0).getCode(), equalTo("aTag"));
+
+			Meta meta = new Meta();
+			meta.addTag().setSystem("tag_scheme1").setCode("tag_code1");
+			meta.addProfile("http://profile/1");
+			meta.addSecurity().setSystem("seclabel_sys1").setCode("seclabel_code1");
+			myObservationDao.metaAddOperation(id, meta, mySrd);
+
+			observations = myTestDaoSearch.searchForResources("Observation?code=theCode");
+
+			assertThat(observations, hasSize(1));
+			IBaseMetaType newMeta = observations.get(0).getMeta();
+			assertThat(newMeta.getProfile(), hasSize(1));
+			assertThat(newMeta.getSecurity(), hasSize(1));
+			assertThat(newMeta.getTag(), hasSize(2));
 		}
 
 

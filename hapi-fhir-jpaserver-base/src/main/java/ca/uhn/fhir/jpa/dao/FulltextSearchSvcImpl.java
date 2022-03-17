@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneClauseBuilder;
 import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneIndexExtractor;
 import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneSearchBuilder;
@@ -36,6 +35,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -68,8 +68,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FulltextSearchSvcImpl.class);
-	@Autowired
-	protected IForcedIdDao myForcedIdDao;
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	private EntityManager myEntityManager;
 	@Autowired
@@ -273,20 +271,51 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		return convertLongsToResourcePersistentIds(pidList);
 	}
 
+	public static class ResourceProjection {
+		final long myPid;
+		final String myForcedId;
+		final String myResourceString;
+
+		public ResourceProjection(long thePid, String theForcedId, String theResourceString) {
+			myPid = thePid;
+			myForcedId = theForcedId;
+			myResourceString = theResourceString;
+		}
+
+		public IBaseResource toResource(IParser theParser) {
+			// fixme test
+			IBaseResource result = theParser.parseResource(myResourceString);
+
+			IdDt id;
+			if (myForcedId != null) {
+				id = new IdDt(myForcedId);
+			} else {
+				id = new IdDt(myPid);
+			}
+			result.setId(id);
+
+			return result;
+		}
+	}
+
 	@Override
-	public List<IBaseResource> getResources(Collection<ResourcePersistentId> thePids) {
-		List<Long> pidList = thePids.stream().map(ResourcePersistentId::getIdAsLong).collect(Collectors.toList());
+	public List<IBaseResource> getResources(Collection<Long> thePids) {
 		SearchSession session = getSearchSession();
-		List<String> rawResourceDataList = session.search(ResourceTable.class)
+		List<ResourceProjection> rawResourceDataList = session.search(ResourceTable.class)
 			.select(
-				f -> f.field("myRawResource", String.class)
+				f -> f.composite(
+					(pid, forcedId, resource)-> new ResourceProjection(pid, forcedId, resource),
+					f.field("myId", Long.class),
+					f.field("myForcedId", String.class),
+					f.field("myRawResource", String.class))
+				//f -> f.field("myRawResource", String.class)
 			)
 			.where(
-				f -> f.id().matchingAny(pidList) // matches '_id' from resource index
+				f -> f.id().matchingAny(thePids) // matches '_id' from resource index
 			).fetchAllHits();
 		IParser parser = myFhirContext.newJsonParser();
 		return rawResourceDataList.stream()
-			.map(parser::parseResource)
+			.map(p -> p.toResource(parser))
 			.collect(Collectors.toList());
 	}
 }

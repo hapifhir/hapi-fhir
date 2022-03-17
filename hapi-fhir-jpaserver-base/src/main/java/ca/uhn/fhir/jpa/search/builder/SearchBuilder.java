@@ -366,7 +366,7 @@ public class SearchBuilder implements ISearchBuilder {
 		} else {
 			// do everything in the database.
 			Optional<SearchQueryExecutor> query = createChunkedQuery(theParams, sort, theOffset, theMaximumResults, theCount, theRequest, null);
-			query.ifPresent(t -> queries.add(t));
+			query.ifPresent(queries::add);
 		}
 
 		return queries;
@@ -835,14 +835,19 @@ public class SearchBuilder implements ISearchBuilder {
 				idList.add(resource.getId());
 		}
 
+		return getPidToTagMap(idList);
+	}
+
+	@Nonnull
+	private Map<Long, Collection<ResourceTag>> getPidToTagMap(List<Long> thePidList) {
 		Map<Long, Collection<ResourceTag>> tagMap = new HashMap<>();
 
 		//-- no tags
-		if (idList.size() == 0)
+		if (thePidList.size() == 0)
 			return tagMap;
 
 		//-- get all tags for the idList
-		Collection<ResourceTag> tagList = myResourceTagDao.findByResourceIds(idList);
+		Collection<ResourceTag> tagList = myResourceTagDao.findByResourceIds(thePidList);
 
 		//-- build the map, key = resourceId, value = list of ResourceTag
 		ResourcePersistentId resourceId;
@@ -880,29 +885,52 @@ public class SearchBuilder implements ISearchBuilder {
 			theResourceListToPopulate.add(null);
 		}
 
-		List<ResourcePersistentId> pids = new ArrayList<>(thePids);
 		// Can we fast track this loading by checking elastic search?
-		if (isLoadingFromElasticSearchSupported(theIncludedPids.isEmpty())) {
+		if (isLoadingFromElasticSearchSupported(theIncludedPids)) {
 			theResourceListToPopulate.addAll(loadResourcesFromElasticSearch(thePids));
 		} else {
 			// We only chunk because some jdbc drivers can't handle long param lists.
-			new QueryChunker<ResourcePersistentId>().chunk(pids, t -> doLoadPids(t, theIncludedPids, theResourceListToPopulate, theForHistoryOperation, position));
+			new QueryChunker<ResourcePersistentId>().chunk(thePids, t -> doLoadPids(t, theIncludedPids, theResourceListToPopulate, theForHistoryOperation, position));
 		}
 	}
 
-	private boolean isLoadingFromElasticSearchSupported(boolean noIncludePids) {
-		return noIncludePids && myDaoConfig.isStoreResourceInLuceneIndex()
-			&& myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3);
+	/**
+	 * Check if we can load the resources from Hibernate Search instead of the database.
+	 * We assume this is faster.
+	 *
+	 * Hibernate Search only stores the current version, and only if enabled.
+	 * @param theIncludedPids the _include target to check for versioned ids
+	 * @return can we fetch from Hibernate Search?
+	 */
+	private boolean isLoadingFromElasticSearchSupported(Collection<ResourcePersistentId> theIncludedPids) {
+		// fixme mb we can be smarter here.
+		// fixme check if theIncludedPids has any with version not null.
+
+		// is storage enabled?
+		return myDaoConfig.isStoreResourceInLuceneIndex() &&
+			// do we need to worry about versions?
+			theIncludedPids.isEmpty() &&
+			// fixme What's this about Jaison?
+			myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3);
 	}
 
 	private List<IBaseResource> loadResourcesFromElasticSearch(Collection<ResourcePersistentId> thePids) {
 		// Do we use the fulltextsvc via hibernate-search to load resources or be backwards compatible with older ES only impl
 		// to handle lastN?
-		if (myDaoConfig.isAdvancedLuceneIndexing()) {
-			return myFulltextSearchSvc.getResources(thePids);
+		if (myDaoConfig.isAdvancedLuceneIndexing() && myDaoConfig.isStoreResourceInLuceneIndex()) {
+			List<Long> pidList = thePids.stream().map(ResourcePersistentId::getIdAsLong).collect(Collectors.toList());
+
+			// fixme design?
+			//Map<Long, Collection<ResourceTag>> pidToTagMap = getPidToTagMap(pidList);
+			// fixme need to inject metadata - use profile to build resource, tags, and security labels
+			List<IBaseResource> resources = myFulltextSearchSvc.getResources(pidList);
+			return resources;
 		} else if (!Objects.isNull(myParams) && myParams.isLastN()) {
+			// legacy LastN implementation
 			return myIElasticsearchSvc.getObservationResources(thePids);
 		} else {
+			// fixme I wonder if we should drop this path, and only support the new Hibernate Search path.
+			Validate.isTrue(false, "Unexpected");
 			return Collections.emptyList();
 		}
 	}

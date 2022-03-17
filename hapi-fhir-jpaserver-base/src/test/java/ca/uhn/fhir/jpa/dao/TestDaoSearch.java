@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.method.SortParameter;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -43,6 +44,11 @@ public class TestDaoSearch {
 		myMatchUrlService = theMatchUrlService;
 		myDaoRegistry = theDaoRegistry;
 		myFhirCtx = theFhirCtx;
+	}
+
+	public List<IBaseResource> searchForResources(String theQueryUrl) {
+		IBundleProvider result = searchForBundleProvider(theQueryUrl);
+		return result.getAllResources();
 	}
 
 	public List<String> searchForIds(String theQueryUrl) {
