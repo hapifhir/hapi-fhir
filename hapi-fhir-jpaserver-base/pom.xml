@@ -50,7 +50,7 @@
 		</dependency>
 
 		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
 			<version>${project.version}</version>
 			<exclusions>
@@ -61,97 +61,97 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>hapi-fhir-client</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>hapi-fhir-server</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>hapi-fhir-server-mdm</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>hapi-fhir-jpaserver-subscription</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>hapi-fhir-jpaserver-searchparam</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>hapi-fhir-sql-migrate</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>hapi-fhir-jpaserver-model</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>hapi-fhir-validation</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>hapi-fhir-structures-dstu2</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>hapi-fhir-structures-dstu3</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>hapi-fhir-structures-r4</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>hapi-fhir-structures-r5</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>hapi-fhir-structures-hl7org-dstu2</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>hapi-fhir-validation-resources-dstu2</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>hapi-fhir-validation-resources-r4</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>hapi-fhir-validation-resources-r5</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>hapi-fhir-batch</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>hapi-fhir-storage</artifactId>
 			<version>${project.version}</version>
 			<classifier>tests</classifier>
@@ -286,7 +286,7 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>hapi-fhir-test-utilities</artifactId>
 			<version>${project.version}</version>
 			<scope>test</scope>
@@ -485,7 +485,7 @@
 		</dependency>
 
 		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>hapi-fhir-server-openapi</artifactId>
 			<version>${project.version}</version>
 			<scope>test</scope>
@@ -609,7 +609,7 @@
 						<version>${jaxb_runtime_version}</version>
 					</dependency>
 					<dependency>
-						<groupId>ca.uhn.hapi.fhir</groupId>
+						<groupId>${project.groupId}</groupId>
 						<artifactId>hapi-fhir-jpaserver-model</artifactId>
 						<version>${project.version}</version>
 					</dependency>
@@ -641,7 +641,7 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>ca.uhn.hapi.fhir</groupId>
+				<groupId>${project.groupId}</groupId>
 				<artifactId>hapi-tinder-plugin</artifactId>
 				<version>${project.version}</version>
 				<executions>
@@ -712,23 +712,23 @@
 
 				<dependencies>
 					<dependency>
-						<groupId>ca.uhn.hapi.fhir</groupId>
+						<groupId>${project.groupId}</groupId>
 						<artifactId>hapi-fhir-structures-dstu2</artifactId>
 						<version>${project.version}</version>
 					</dependency>
 					<dependency>
-						<groupId>ca.uhn.hapi.fhir</groupId>
+						<groupId>${project.groupId}</groupId>
 						<artifactId>hapi-fhir-structures-dstu3</artifactId>
 						<version>${project.version}</version>
 					</dependency>
 					<dependency>
-						<groupId>ca.uhn.hapi.fhir</groupId>
+						<groupId>${project.groupId}</groupId>
 						<artifactId>hapi-fhir-structures-r4</artifactId>
 						<version>${project.version}</version>
 					</dependency>
 
 					<dependency>
-						<groupId>ca.uhn.hapi.fhir</groupId>
+						<groupId>${project.groupId}</groupId>
 						<artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
 						<version>${project.version}</version>
 					</dependency>

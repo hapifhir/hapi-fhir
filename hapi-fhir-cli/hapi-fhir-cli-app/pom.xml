@@ -18,26 +18,26 @@
 	<dependencies>
 
 		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>hapi-fhir-cli-api</artifactId>
 			<version>${project.version}</version>
 			<type>jar</type>
 		</dependency>
 		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>hapi-fhir-cli-jpaserver</artifactId>
 			<version>${project.version}</version>
 			<type>war</type>
 		</dependency>
 		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>hapi-fhir-cli-jpaserver</artifactId>
 			<version>${project.version}</version>
 			<type>jar</type>
 			<classifier>classes</classifier>
 		</dependency>
 		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>hapi-fhir-testpage-overlay</artifactId>
 			<version>${project.version}</version>
 			<classifier>classes</classifier>
@@ -68,7 +68,7 @@
 						<configuration>
 							<artifactItems>
 								<artifactItem>
-									<groupId>ca.uhn.hapi.fhir</groupId>
+									<groupId>${project.groupId}</groupId>
 									<artifactId>hapi-fhir-cli-jpaserver</artifactId>
 									<type>war</type>
 									<overWrite>true</overWrite>

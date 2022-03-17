@@ -19,7 +19,7 @@
 			<artifactId>spring-boot-starter</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>hapi-fhir-spring-boot-autoconfigure</artifactId>
 			<version>${project.version}</version>
 		</dependency>

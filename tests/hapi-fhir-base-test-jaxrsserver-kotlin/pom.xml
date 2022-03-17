@@ -29,22 +29,22 @@
 
 		<!-- This dependency includes the core HAPI-FHIR classes -->
 		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>hapi-fhir-jaxrsserver-base</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>hapi-fhir-structures-dstu2</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>hapi-fhir-structures-dstu3</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>hapi-fhir-structures-r4</artifactId>
 			<version>${project.version}</version>
 		</dependency>
@@ -80,7 +80,7 @@
 			<artifactId>logback-classic</artifactId>
 		</dependency>
 	  <dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>hapi-fhir-test-utilities</artifactId>
 			<version>${project.version}</version>
 			<scope>test</scope>

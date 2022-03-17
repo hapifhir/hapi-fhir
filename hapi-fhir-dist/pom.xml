@@ -34,19 +34,19 @@
 			<id>DIST</id>
 			<dependencies>
 				<dependency>
-					<groupId>ca.uhn.hapi.fhir</groupId>
+					<groupId>${project.groupId}</groupId>
 					<artifactId>hapi-fhir-base</artifactId>
 					<version>${project.version}</version>
 				</dependency>
 				<dependency>
-					<groupId>ca.uhn.hapi.fhir</groupId>
+					<groupId>${project.groupId}</groupId>
 					<artifactId>hapi-fhir-base</artifactId>
 					<version>${project.version}</version>
 					<classifier>sources</classifier>
 					<scope>provided</scope>
 				</dependency>
 				<dependency>
-					<groupId>ca.uhn.hapi.fhir</groupId>
+					<groupId>${project.groupId}</groupId>
 					<artifactId>hapi-fhir-base</artifactId>
 					<version>${project.version}</version>
 					<classifier>javadoc</classifier>
@@ -54,19 +54,19 @@
 				</dependency>
 
 				<dependency>
-					<groupId>ca.uhn.hapi.fhir</groupId>
+					<groupId>${project.groupId}</groupId>
 					<artifactId>hapi-fhir-client</artifactId>
 					<version>${project.version}</version>
 				</dependency>
 				<dependency>
-					<groupId>ca.uhn.hapi.fhir</groupId>
+					<groupId>${project.groupId}</groupId>
 					<artifactId>hapi-fhir-client</artifactId>
 					<version>${project.version}</version>
 					<classifier>sources</classifier>
 					<scope>provided</scope>
 				</dependency>
 				<dependency>
-					<groupId>ca.uhn.hapi.fhir</groupId>
+					<groupId>${project.groupId}</groupId>
 					<artifactId>hapi-fhir-client</artifactId>
 					<version>${project.version}</version>
 					<classifier>javadoc</classifier>
@@ -74,38 +74,38 @@
 				</dependency>
 
 				<dependency>
-					<groupId>ca.uhn.hapi.fhir</groupId>
+					<groupId>${project.groupId}</groupId>
 					<artifactId>hapi-fhir-server</artifactId>
 					<version>${project.version}</version>
 				</dependency>
 				<dependency>
-					<groupId>ca.uhn.hapi.fhir</groupId>
+					<groupId>${project.groupId}</groupId>
 					<artifactId>hapi-fhir-server</artifactId>
 					<version>${project.version}</version>
 					<classifier>sources</classifier>
 					<scope>provided</scope>
 				</dependency>
 				<dependency>
-					<groupId>ca.uhn.hapi.fhir</groupId>
+					<groupId>${project.groupId}</groupId>
 					<artifactId>hapi-fhir-server</artifactId>
 					<version>${project.version}</version>
 					<classifier>javadoc</classifier>
 					<scope>provided</scope>
 				</dependency>
 				<dependency>
-					<groupId>ca.uhn.hapi.fhir</groupId>
+					<groupId>${project.groupId}</groupId>
 					<artifactId>hapi-fhir-structures-dstu2</artifactId>
 					<version>${project.version}</version>
 				</dependency>
 				<dependency>
-					<groupId>ca.uhn.hapi.fhir</groupId>
+					<groupId>${project.groupId}</groupId>
 					<artifactId>hapi-fhir-structures-dstu2</artifactId>
 					<version>${project.version}</version>
 					<classifier>sources</classifier>
 					<scope>provided</scope>
 				</dependency>
 				<dependency>
-					<groupId>ca.uhn.hapi.fhir</groupId>
+					<groupId>${project.groupId}</groupId>
 					<artifactId>hapi-fhir-structures-dstu2</artifactId>
 					<version>${project.version}</version>
 					<classifier>javadoc</classifier>
@@ -113,19 +113,19 @@
 				</dependency>
 		
 				<dependency>
-					<groupId>ca.uhn.hapi.fhir</groupId>
+					<groupId>${project.groupId}</groupId>
 					<artifactId>hapi-fhir-structures-hl7org-dstu2</artifactId>
 					<version>${project.version}</version>
 				</dependency>
 				<dependency>
-					<groupId>ca.uhn.hapi.fhir</groupId>
+					<groupId>${project.groupId}</groupId>
 					<artifactId>hapi-fhir-structures-hl7org-dstu2</artifactId>
 					<version>${project.version}</version>
 					<classifier>sources</classifier>
 					<scope>provided</scope>
 				</dependency>
 				<dependency>
-					<groupId>ca.uhn.hapi.fhir</groupId>
+					<groupId>${project.groupId}</groupId>
 					<artifactId>hapi-fhir-structures-hl7org-dstu2</artifactId>
 					<version>${project.version}</version>
 					<classifier>javadoc</classifier>
@@ -133,19 +133,19 @@
 				</dependency>
 				
 				<dependency>
-					<groupId>ca.uhn.hapi.fhir</groupId>
+					<groupId>${project.groupId}</groupId>
 					<artifactId>hapi-fhir-structures-dstu2.1</artifactId>
 					<version>${project.version}</version>
 				</dependency>
 				<dependency>
-					<groupId>ca.uhn.hapi.fhir</groupId>
+					<groupId>${project.groupId}</groupId>
 					<artifactId>hapi-fhir-structures-dstu2.1</artifactId>
 					<version>${project.version}</version>
 					<classifier>sources</classifier>
 					<scope>provided</scope>
 				</dependency>
 				<dependency>
-					<groupId>ca.uhn.hapi.fhir</groupId>
+					<groupId>${project.groupId}</groupId>
 					<artifactId>hapi-fhir-structures-dstu2.1</artifactId>
 					<version>${project.version}</version>
 					<classifier>javadoc</classifier>
@@ -153,19 +153,19 @@
 				</dependency>
 		
 				<dependency>
-					<groupId>ca.uhn.hapi.fhir</groupId>
+					<groupId>${project.groupId}</groupId>
 					<artifactId>hapi-fhir-structures-dstu3</artifactId>
 					<version>${project.version}</version>
 				</dependency>
 				<dependency>
-					<groupId>ca.uhn.hapi.fhir</groupId>
+					<groupId>${project.groupId}</groupId>
 					<artifactId>hapi-fhir-structures-dstu3</artifactId>
 					<version>${project.version}</version>
 					<classifier>sources</classifier>
 					<scope>provided</scope>
 				</dependency>
 				<dependency>
-					<groupId>ca.uhn.hapi.fhir</groupId>
+					<groupId>${project.groupId}</groupId>
 					<artifactId>hapi-fhir-structures-dstu3</artifactId>
 					<version>${project.version}</version>
 					<classifier>javadoc</classifier>
@@ -173,19 +173,19 @@
 				</dependency>
 
 				<dependency>
-					<groupId>ca.uhn.hapi.fhir</groupId>
+					<groupId>${project.groupId}</groupId>
 					<artifactId>hapi-fhir-structures-r4</artifactId>
 					<version>${project.version}</version>
 				</dependency>
 				<dependency>
-					<groupId>ca.uhn.hapi.fhir</groupId>
+					<groupId>${project.groupId}</groupId>
 					<artifactId>hapi-fhir-structures-r4</artifactId>
 					<version>${project.version}</version>
 					<classifier>sources</classifier>
 					<scope>provided</scope>
 				</dependency>
 				<dependency>
-					<groupId>ca.uhn.hapi.fhir</groupId>
+					<groupId>${project.groupId}</groupId>
 					<artifactId>hapi-fhir-structures-r4</artifactId>
 					<version>${project.version}</version>
 					<classifier>javadoc</classifier>
@@ -193,35 +193,35 @@
 				</dependency>
 
 				<dependency>
-					<groupId>ca.uhn.hapi.fhir</groupId>
+					<groupId>${project.groupId}</groupId>
 					<artifactId>hapi-fhir-validation-resources-dstu2</artifactId>
 					<version>${project.version}</version>
 				</dependency>
 				<dependency>
-					<groupId>ca.uhn.hapi.fhir</groupId>
+					<groupId>${project.groupId}</groupId>
 					<artifactId>hapi-fhir-validation-resources-dstu2.1</artifactId>
 					<version>${project.version}</version>
 				</dependency>
 				<dependency>
-					<groupId>ca.uhn.hapi.fhir</groupId>
+					<groupId>${project.groupId}</groupId>
 					<artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
 					<version>${project.version}</version>
 				</dependency>
 				<dependency>
-					<groupId>ca.uhn.hapi.fhir</groupId>
+					<groupId>${project.groupId}</groupId>
 					<artifactId>hapi-fhir-validation-resources-r4</artifactId>
 					<version>${project.version}</version>
 				</dependency>
 
 				<dependency>
-					<groupId>ca.uhn.hapi.fhir</groupId>
+					<groupId>${project.groupId}</groupId>
 					<artifactId>hapi-fhir-cli-app</artifactId>
 					<version>${project.version}</version>
 					<!-- Don't include in standard distribution -->
 					<scope>provided</scope>
 				</dependency>
 				<dependency>
-					<groupId>ca.uhn.hapi.fhir</groupId>
+					<groupId>${project.groupId}</groupId>
 					<artifactId>hapi-fhir-android</artifactId>
 					<version>${project.version}</version>
 					<!-- Don't include in standard distribution -->
