@@ -348,6 +348,16 @@ public class SearchBuilder implements ISearchBuilder {
 					(!myPartitionSettings.isPartitioningEnabled() &&
 					// were there AND terms left?  Then we still need the db.
 						theParams.isEmpty() &&
+						// not every param is a param. :-(
+						theParams.getEverythingMode() == null &&
+						theParams.getCount() == null &&
+						theParams.getOffset() == null &&
+						theParams.getLastUpdated() == null &&
+						theParams.getSort() == null &&
+						theParams.getNearDistanceParam() == null &&
+						theParams.getLastUpdated() == null &&
+						// todo MB Ugh - review with someone else
+						//theParams.toNormalizedQueryString(myContext).length() <= 1 &&
 						// or sorting?
 						theParams.getSort() == null);
 
@@ -383,7 +393,7 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		// TODO MB someday we'll want a query planner to figure out if we _should_ or _must_ use the ft index, not just if we can.
-		return fulltextEnabled &&
+		return fulltextEnabled && myParams.getSearchContainedMode() == SearchContainedModeEnum.FALSE &&
 			myFulltextSearchSvc.supportsSomeOf(myParams);
 	}
 
