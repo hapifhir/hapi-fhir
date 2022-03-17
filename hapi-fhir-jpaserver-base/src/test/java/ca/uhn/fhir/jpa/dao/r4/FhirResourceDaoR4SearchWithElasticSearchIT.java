@@ -440,6 +440,10 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			map.add("code", new TokenParam("Bodum").setModifier(TokenParamModifier.TEXT));
 			assertObservationSearchMatchesNothing("search with shared prefix does not match", map);
 		}
+
+		{
+			assertObservationSearchMatches("empty params finds everything", "Observation?", id1, id2, id3, id4);
+		}
 	}
 
 	@Test
@@ -531,6 +535,11 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 	private void assertObservationSearchMatches(String message, SearchParameterMap map, IIdType... iIdTypes) {
 		assertThat(message, toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(iIdTypes)));
+	}
+
+	private void assertObservationSearchMatches(String theMessage, String theSearch, IIdType... theIds) {
+		SearchParameterMap map = myTestDaoSearch.toSearchParameters(theSearch);
+		assertObservationSearchMatches(theMessage, map, theIds);
 	}
 
 	@Nested

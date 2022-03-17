@@ -281,7 +281,6 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 					f.field("myId", Long.class),
 					f.field("myForcedId", String.class),
 					f.field("myRawResource", String.class))
-				//f -> f.field("myRawResource", String.class)
 			)
 			.where(
 				f -> f.id().matchingAny(thePids) // matches '_id' from resource index

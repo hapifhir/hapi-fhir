@@ -326,7 +326,7 @@ public class SearchBuilder implements ISearchBuilder {
 			if (myParams.isLastN()) {
 				fulltextMatchIds = executeLastNAgainstIndex(theMaximumResults);
 			} else {
-				fulltextMatchIds = queryLuceneForPIDs(theRequest);
+				fulltextMatchIds = queryHibernateSearchForPIDs(theRequest);
 			}
 
 			if (theSearchRuntimeDetails != null) {
@@ -344,7 +344,7 @@ public class SearchBuilder implements ISearchBuilder {
 			boolean canSkipDatabase =
 				// if we processed an AND clause, and it returned nothing, then nothing can match.
 				rawPids.isEmpty() ||
-					// Our hibernate search query doesn't support partitions yet
+					// Our hibernate search query doesn't respect partitions yet
 					(!myPartitionSettings.isPartitioningEnabled() &&
 					// were there AND terms left?  Then we still need the db.
 						theParams.isEmpty() &&
@@ -382,8 +382,9 @@ public class SearchBuilder implements ISearchBuilder {
 			failIfUsed(Constants.PARAM_CONTENT);
 		}
 
-		// TODO MB someday we'll want a query planner to figure out if we _should_ use the ft index, not just if we can.
-		return fulltextEnabled && myFulltextSearchSvc.supportsSomeOf(myParams);
+		// TODO MB someday we'll want a query planner to figure out if we _should_ or _must_ use the ft index, not just if we can.
+		return fulltextEnabled &&
+			myFulltextSearchSvc.supportsSomeOf(myParams);
 	}
 
 	private void failIfUsed(String theParamName) {
@@ -412,7 +413,7 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 	}
 
-	private List<ResourcePersistentId> queryLuceneForPIDs(RequestDetails theRequest) {
+	private List<ResourcePersistentId> queryHibernateSearchForPIDs(RequestDetails theRequest) {
 		validateFullTextSearchIsEnabled();
 
 		List<ResourcePersistentId> pids;
@@ -1371,6 +1372,9 @@ public class SearchBuilder implements ISearchBuilder {
 		myDaoConfig = theDaoConfig;
 	}
 
+	/**
+	 * Adapt simple Iterator to our internal query interface.
+	 */
 	static class ResolvedSearchQueryExecutor implements ISearchQueryExecutor {
 		private final Iterator<Long> myIterator;
 
