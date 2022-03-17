@@ -16,11 +16,8 @@ import java.util.List;
 import java.util.Objects;
 
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.EQUAL;
-import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
-import static ca.uhn.fhir.rest.param.ParamPrefixEnum.LESSTHAN;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.LESSTHAN_OR_EQUALS;
-import static ca.uhn.fhir.rest.param.ParamPrefixEnum.NOT_EQUAL;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 

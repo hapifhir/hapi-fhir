@@ -196,6 +196,20 @@ public class DateRangeParamR4Test {
 	}
 
 	@Test
+	public void testSearchForOneQualifiedDateNe() throws Exception {
+		HttpGet httpGet = new HttpGet(ourBaseUrl + "?birthdate=ne2012-01-01");
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		consumeResponse(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+
+		assertEquals("2012-01-01", ourLastDateRange.getLowerBound().getValueAsString());
+		assertEquals("2012-01-01", ourLastDateRange.getUpperBound().getValueAsString());
+
+		assertEquals(ParamPrefixEnum.NOT_EQUAL, ourLastDateRange.getLowerBound().getPrefix());
+		assertEquals(ParamPrefixEnum.NOT_EQUAL, ourLastDateRange.getUpperBound().getPrefix());
+	}
+
+	@Test
 	public void testRangeWithDatePrecision() throws Exception {
 		HttpGet httpGet = new HttpGet(ourBaseUrl + "?birthdate=gt2012-01-01&birthdate=lt2012-01-03");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
