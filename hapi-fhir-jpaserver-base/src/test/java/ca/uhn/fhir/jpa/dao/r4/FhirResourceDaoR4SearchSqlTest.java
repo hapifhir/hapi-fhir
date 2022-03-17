@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -17,7 +16,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.test.context.TestPropertySource;
 
 import java.util.UUID;
 
@@ -107,7 +105,7 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.INLINE);
 
 		SearchParameter searchParameter = FhirResourceDaoR4TagsTest.createSearchParamForInlineResourceProfile();
-		ourLog.info("SearchParam:\n{}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
+		ourLog.info("SearchParam:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
 		mySearchParameterDao.update(searchParameter, mySrd);
 		mySearchParamRegistry.forceRefresh();
 

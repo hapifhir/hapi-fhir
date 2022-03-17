@@ -139,7 +139,7 @@ public abstract class BaseMultitenantResourceProviderR4Test extends BaseResource
 
 	@Override
 	public FhirContext getFhirContext() {
-		return myFhirCtx;
+		return myFhirContext;
 	}
 
 }

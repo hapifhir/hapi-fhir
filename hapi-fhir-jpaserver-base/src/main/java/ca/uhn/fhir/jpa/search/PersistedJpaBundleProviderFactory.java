@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.search;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.config.BaseConfig;
+import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -33,16 +33,16 @@ public class PersistedJpaBundleProviderFactory {
 	private ApplicationContext myApplicationContext;
 
 	public PersistedJpaBundleProvider newInstance(RequestDetails theRequest, String theUuid) {
-		Object retVal = myApplicationContext.getBean(BaseConfig.PERSISTED_JPA_BUNDLE_PROVIDER, theRequest, theUuid);
+		Object retVal = myApplicationContext.getBean(JpaConfig.PERSISTED_JPA_BUNDLE_PROVIDER, theRequest, theUuid);
 		return (PersistedJpaBundleProvider) retVal;
 	}
 
 	public PersistedJpaBundleProvider newInstance(RequestDetails theRequest, Search theSearch) {
-		Object retVal = myApplicationContext.getBean(BaseConfig.PERSISTED_JPA_BUNDLE_PROVIDER_BY_SEARCH, theRequest, theSearch);
+		Object retVal = myApplicationContext.getBean(JpaConfig.PERSISTED_JPA_BUNDLE_PROVIDER_BY_SEARCH, theRequest, theSearch);
 		return (PersistedJpaBundleProvider) retVal;
 	}
 
 	public PersistedJpaSearchFirstPageBundleProvider newInstanceFirstPage(RequestDetails theRequestDetails, Search theSearch, SearchCoordinatorSvcImpl.SearchTask theTask, ISearchBuilder theSearchBuilder) {
-		return (PersistedJpaSearchFirstPageBundleProvider) myApplicationContext.getBean(BaseConfig.PERSISTED_JPA_SEARCH_FIRST_PAGE_BUNDLE_PROVIDER, theRequestDetails, theSearch, theTask, theSearchBuilder);
+		return (PersistedJpaSearchFirstPageBundleProvider) myApplicationContext.getBean(JpaConfig.PERSISTED_JPA_SEARCH_FIRST_PAGE_BUNDLE_PROVIDER, theRequestDetails, theSearch, theTask, theSearchBuilder);
 	}
 }

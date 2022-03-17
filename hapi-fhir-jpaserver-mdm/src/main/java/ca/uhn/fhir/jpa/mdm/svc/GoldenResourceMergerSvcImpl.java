@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
  */
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
@@ -55,7 +55,7 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 	@Autowired
 	IMdmLinkSvc myMdmLinkSvc;
 	@Autowired
-	IdHelperService myIdHelperService;
+	IJpaIdHelperService myIdHelperService;
 	@Autowired
 	MdmResourceDaoSvc myMdmResourceDaoSvc;
 
@@ -66,7 +66,7 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 		Long toGoldenResourcePid = myIdHelperService.getPidOrThrowException(theToGoldenResource);
 		String resourceType = theMdmTransactionContext.getResourceType();
 
-		if (theMergedResource != null ) {
+		if (theMergedResource != null) {
 			if (myGoldenResourceHelper.hasIdentifier(theMergedResource)) {
 				throw new IllegalArgumentException(Msg.code(751) + "Manually merged resource can not contain identifiers");
 			}
@@ -116,7 +116,7 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 
 	/**
 	 * Helper method which performs merger of links between resources, and cleans up dangling links afterwards.
-	 *
+	 * <p>
 	 * For each incomingLink, either ignore it, move it, or replace the original one
 	 * 1. If the link already exists on the TO resource, and it is an automatic link, ignore the link, and subsequently delete it.
 	 * 2. If the link does not exist on the TO resource, redirect the link from the FROM resource to the TO resource

@@ -33,6 +33,7 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -120,9 +121,11 @@ public abstract class BaseHapiFhirResourceDaoObservation<T extends IBaseResource
 
 			theSearchParameterMap.remove(getSubjectParamName());
 			theSearchParameterMap.remove(getPatientParamName());
-			for (Long subjectPid : orderedSubjectReferenceMap.keySet()) {
-				theSearchParameterMap.add(getSubjectParamName(), orderedSubjectReferenceMap.get(subjectPid));
-			}
+
+			// Subject PIDs ordered - so create 'OR' list of subjects for lastN operation
+			ReferenceOrListParam orList = new ReferenceOrListParam();
+			orderedSubjectReferenceMap.keySet().forEach(key -> orList.addOr((ReferenceParam) orderedSubjectReferenceMap.get(key)));
+			theSearchParameterMap.add(getSubjectParamName(), orList);
 		}
 
 	}

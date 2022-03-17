@@ -168,11 +168,13 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 				if (type.getMax() == OperationParam.MAX_DEFAULT) {
 					type.setMax(1);
 				}
-				if (!next.type().equals(IBase.class)) {
-					if (next.type().isInterface() || Modifier.isAbstract(next.type().getModifiers())) {
-						throw new ConfigurationException(Msg.code(424) + "Invalid value for @OperationParam.type(): " + next.type().getName());
+				Class<? extends IBase> returnType = next.type();
+				if (!returnType.equals(IBase.class)) {
+					if (returnType.isInterface() || Modifier.isAbstract(returnType.getModifiers())) {
+						throw new ConfigurationException(Msg.code(424) + "Invalid value for @OperationParam.type(): " + returnType.getName());
 					}
-					type.setType(theContext.getElementDefinition(next.type()).getName());
+					OperationParameter.validateTypeIsAppropriateVersionForContext(theMethod, returnType, theContext, "return");
+					type.setType(theContext.getElementDefinition(returnType).getName());
 				}
 				myReturnParams.add(type);
 			}

@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
@@ -31,6 +32,8 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 	private static final MdmMatchOutcome POSSIBLE_MATCH = new MdmMatchOutcome(null, null).setMatchResultEnum(MdmMatchResultEnum.POSSIBLE_MATCH);
 	@Autowired
 	IMdmLinkSvc myMdmLinkSvc;
+	@Autowired
+	ExpungeEverythingService myExpungeEverythingService;
 
 	@Override
 	@AfterEach

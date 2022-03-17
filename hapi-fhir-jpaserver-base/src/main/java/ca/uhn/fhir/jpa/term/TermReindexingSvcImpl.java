@@ -63,11 +63,11 @@ public class TermReindexingSvcImpl implements ITermReindexingSvc {
 	@Autowired
 	private ITermConceptParentChildLinkDao myConceptParentChildLinkDao;
 	@Autowired
-	private ITermCodeSystemStorageSvc myConceptStorageSvc;
-	@Autowired
 	private ITermDeferredStorageSvc myDeferredStorageSvc;
 	@Autowired
 	private ISchedulerService mySchedulerService;
+	@Autowired
+	private TermConceptDaoSvc myTermConceptDaoSvc;
 
 	@Override
 	public void processReindexing() {
@@ -138,7 +138,7 @@ public class TermReindexingSvcImpl implements ITermReindexingSvc {
 						nextConcept.setParentPids(parentsBuilder.toString());
 					}
 
-					myConceptStorageSvc.saveConcept(nextConcept);
+					myTermConceptDaoSvc.saveConcept(nextConcept);
 					count++;
 				}
 

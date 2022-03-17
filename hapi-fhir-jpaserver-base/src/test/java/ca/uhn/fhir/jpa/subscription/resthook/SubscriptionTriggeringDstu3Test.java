@@ -46,6 +46,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.containsString;
@@ -66,10 +67,10 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 	private static String ourListenerServerBase;
 	private static final List<Observation> ourCreatedObservations = Collections.synchronizedList(Lists.newArrayList());
 	private static final List<Observation> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
-	private static final List<Patient> ourCreatedPatients = Lists.newArrayList();
-	private static final List<Patient> ourUpdatedPatients = Lists.newArrayList();
-	private static final List<String> ourContentTypes = new ArrayList<>();
-	private final List<IIdType> mySubscriptionIds = new ArrayList<>();
+	private static final List<Patient> ourCreatedPatients = Collections.synchronizedList(Lists.newArrayList());
+	private static final List<Patient> ourUpdatedPatients = Collections.synchronizedList(Lists.newArrayList());
+	private static final List<String> ourContentTypes = Collections.synchronizedList(Lists.newArrayList());
+	private final List<IIdType> mySubscriptionIds = Collections.synchronizedList(Lists.newArrayList());
 
 	@Autowired
 	private SubscriptionTestUtil mySubscriptionTestUtil;
@@ -261,7 +262,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(0, ourCreatedPatients);
 		waitForSize(50, ourUpdatedPatients);
-
+		ourLog.info("Updated patients: {}", ourUpdatedPatients.stream().map(t->t.getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList()));
 	}
 
 	@Test

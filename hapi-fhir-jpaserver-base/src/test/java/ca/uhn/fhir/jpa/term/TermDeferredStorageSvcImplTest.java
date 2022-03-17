@@ -32,7 +32,7 @@ public class TermDeferredStorageSvcImplTest {
 	@Mock
 	private PlatformTransactionManager myTxManager;
 	@Mock
-	private ITermCodeSystemStorageSvc myTermConceptStorageSvc;
+	private TermConceptDaoSvc myTermConceptDaoSvc;
 	@Mock
 	private ITermConceptDao myConceptDao;
 	@Mock
@@ -71,15 +71,15 @@ public class TermDeferredStorageSvcImplTest {
 
 		TermDeferredStorageSvcImpl svc = new TermDeferredStorageSvcImpl();
 		svc.setTransactionManagerForUnitTest(myTxManager);
-		svc.setCodeSystemStorageSvcForUnitTest(myTermConceptStorageSvc);
+		svc.setTermConceptDaoSvc(myTermConceptDaoSvc);
 
 		when(myTermCodeSystemVersionDao.findById(anyLong())).thenReturn(Optional.of(myTermCodeSystemVersion));
 		svc.setCodeSystemVersionDaoForUnitTest(myTermCodeSystemVersionDao);
 		svc.setProcessDeferred(true);
 		svc.addConceptToStorageQueue(concept);
 		svc.saveDeferred();
-		verify(myTermConceptStorageSvc, times(1)).saveConcept(same(concept));
-		verifyNoMoreInteractions(myTermConceptStorageSvc);
+		verify(myTermConceptDaoSvc, times(1)).saveConcept(same(concept));
+		verifyNoMoreInteractions(myTermConceptDaoSvc);
 
 	}
 
@@ -94,7 +94,7 @@ public class TermDeferredStorageSvcImplTest {
 
 		TermDeferredStorageSvcImpl svc = new TermDeferredStorageSvcImpl();
 		svc.setTransactionManagerForUnitTest(myTxManager);
-		svc.setCodeSystemStorageSvcForUnitTest(myTermConceptStorageSvc);
+		svc.setTermConceptDaoSvc(myTermConceptDaoSvc);
 
 		when(myTermCodeSystemVersionDao.findById(anyLong())).thenReturn(Optional.empty());
 		svc.setCodeSystemVersionDaoForUnitTest(myTermCodeSystemVersionDao);
@@ -102,8 +102,8 @@ public class TermDeferredStorageSvcImplTest {
 		svc.addConceptToStorageQueue(concept);
 		svc.saveDeferred();
 
-		verify(myTermConceptStorageSvc, times(0)).saveConcept(same(concept));
-		verifyNoMoreInteractions(myTermConceptStorageSvc);
+		verify(myTermConceptDaoSvc, times(0)).saveConcept(same(concept));
+		verifyNoMoreInteractions(myTermConceptDaoSvc);
 
 	}
 
@@ -119,18 +119,18 @@ public class TermDeferredStorageSvcImplTest {
 
 		TermDeferredStorageSvcImpl svc = new TermDeferredStorageSvcImpl();
 		svc.setTransactionManagerForUnitTest(myTxManager);
-		svc.setCodeSystemStorageSvcForUnitTest(myTermConceptStorageSvc);
+		svc.setTermConceptDaoSvc(myTermConceptDaoSvc);
 
 		// Simulate the case where an exception is thrown despite a valid code system version.
 		when(myTermCodeSystemVersionDao.findById(anyLong())).thenReturn(Optional.of(myTermCodeSystemVersion));
-		when(myTermConceptStorageSvc.saveConcept(concept)).thenThrow(new RuntimeException("Foreign Constraint Violation"));
+		when(myTermConceptDaoSvc.saveConcept(concept)).thenThrow(new RuntimeException("Foreign Constraint Violation"));
 		svc.setCodeSystemVersionDaoForUnitTest(myTermCodeSystemVersionDao);
 		svc.setProcessDeferred(true);
 		svc.addConceptToStorageQueue(concept);
 		svc.saveDeferred();
 
-		verify(myTermConceptStorageSvc, times(1)).saveConcept(same(concept));
-		verifyNoMoreInteractions(myTermConceptStorageSvc);
+		verify(myTermConceptDaoSvc, times(1)).saveConcept(same(concept));
+		verifyNoMoreInteractions(myTermConceptDaoSvc);
 
 	}
 
@@ -142,13 +142,13 @@ public class TermDeferredStorageSvcImplTest {
 
 		TermDeferredStorageSvcImpl svc = new TermDeferredStorageSvcImpl();
 		svc.setTransactionManagerForUnitTest(myTxManager);
-		svc.setCodeSystemStorageSvcForUnitTest(myTermConceptStorageSvc);
+		svc.setTermConceptDaoSvc(myTermConceptDaoSvc);
 		svc.setConceptDaoForUnitTest(myConceptDao);
 		svc.setProcessDeferred(true);
 		svc.addConceptLinkToStorageQueue(conceptLink);
 		svc.saveDeferred();
 
-		verifyNoMoreInteractions(myTermConceptStorageSvc);
+		verifyNoMoreInteractions(myTermConceptDaoSvc);
 	}
 
 }

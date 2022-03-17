@@ -7,7 +7,6 @@ import ca.uhn.fhir.model.dstu2.valueset.SubscriptionChannelTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.util.TestUtil;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
@@ -15,7 +14,6 @@ import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -24,8 +22,8 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.in;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 
@@ -264,7 +262,7 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 				myPingCount++;
 			} else if (myGotBound && theMsg.startsWith("add " + mySubsId + "\n")) {
 				String text = theMsg.substring(("add " + mySubsId + "\n").length());
-				IBaseResource res = myEncoding.newParser(myFhirCtx).parseResource(text);
+				IBaseResource res = myEncoding.newParser(myFhirContext).parseResource(text);
 				myReceived.add(res);
 				myPingCount++;
 			} else {

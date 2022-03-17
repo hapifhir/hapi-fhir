@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.dao.BaseJpaTest;
+import ca.uhn.fhir.jpa.config.TestHibernateSearchAddInConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
@@ -97,7 +97,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -127,9 +127,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
-@TestPropertySource(properties = {
-	BaseJpaTest.CONFIG_ENABLE_LUCENE_FALSE
-})
+@ContextConfiguration(classes = TestHibernateSearchAddInConfig.NoFT.class)
 @SuppressWarnings("unchecked")
 public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu3SearchNoFtTest.class);
@@ -263,10 +261,10 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 	 */
 	@Test
 	public void testEverythingWithLargeSet() throws Exception {
-		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
+		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
 
 		String inputString = IOUtils.toString(getClass().getResourceAsStream("/david_big_bundle.json"), StandardCharsets.UTF_8);
-		Bundle inputBundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, inputString);
+		Bundle inputBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, inputString);
 		inputBundle.setType(BundleType.TRANSACTION);
 
 		Set<String> allIds = new TreeSet<>();
@@ -331,7 +329,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		map.setLoadSynchronous(true);
 
 		ReferenceParam referenceParam = new ReferenceParam();
-		referenceParam.setValueAsQueryToken(myFhirCtx, "subject", "._has:Group:member:_id", "Group/G");
+		referenceParam.setValueAsQueryToken(myFhirContext, "subject", "._has:Group:member:_id", "Group/G");
 		map.add("subject", referenceParam);
 		List<String> actual = toUnqualifiedVersionlessIdValues(myDiagnosticReportDao.search(map));
 		assertThat(actual, containsInAnyOrder("DiagnosticReport/DR"));
@@ -673,7 +671,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 	public void testIndexWithUtf8Chars() throws IOException {
 		String input = IOUtils.toString(getClass().getResourceAsStream("/bug454_utf8.json"), StandardCharsets.UTF_8);
 
-		CodeSystem cs = (CodeSystem) myFhirCtx.newJsonParser().parseResource(input);
+		CodeSystem cs = (CodeSystem) myFhirContext.newJsonParser().parseResource(input);
 		myCodeSystemDao.create(cs);
 	}
 
@@ -2922,7 +2920,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		value = myDeviceDao.search(new SearchParameterMap());
 		if (value.size() > 0) {
 			ourLog.info("Found: " + (value.getResources(0, 1).get(0).getIdElement()));
-			fail(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(value.getResources(0, 1).get(0)));
+			fail(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(value.getResources(0, 1).get(0)));
 		}
 		assertEquals(0, value.size().intValue());
 
@@ -3254,7 +3252,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 
 	@Test
 	public void testSearchWithUriParamBelow() throws Exception {
-		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
+		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
 
 		Class<ValueSet> type = ValueSet.class;
 		String resourceName = "/valueset-dstu2.json";

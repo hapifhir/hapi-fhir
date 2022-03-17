@@ -24,6 +24,8 @@ import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.util.FhirTerser;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -183,15 +185,52 @@ public interface ITestDataBuilder {
 		};
 	}
 
-	default Consumer<IBaseResource> withObservationCode(@Nullable String theSystem, @Nullable String theCode) {
-		return t -> {
-			ICompositeType codeableConcept = (ICompositeType) getFhirContext().getElementDefinition("CodeableConcept").newInstance();
-			IBase coding = getFhirContext().newTerser().addElement(codeableConcept, "coding");
-			getFhirContext().newTerser().addElement(coding, "system", theSystem);
-			getFhirContext().newTerser().addElement(coding, "code", theCode);
+	default <T extends IBase> Consumer<T> withPrimitiveAttribute(String thePath, Object theValue) {
+		return t->{
+			FhirTerser terser = getFhirContext().newTerser();
+			terser.addElement(t, thePath, ""+theValue);
+		};
+	}
 
-			RuntimeResourceDefinition resourceDef = getFhirContext().getResourceDefinition(t.getClass());
-			resourceDef.getChildByName("code").getMutator().addValue(t, codeableConcept);
+	default <T extends IBase> Consumer<T> withAttribute(String thePath, Consumer<IBase>... theModifiers) {
+		return t->{
+			FhirTerser terser = getFhirContext().newTerser();
+			IBase element = terser.addElement(t, thePath);
+			applyElementModifiers(element, theModifiers);
+		};
+	}
+
+	/**
+	 * Create an Element and apply modifiers
+	 * @param theElementType the FHIR Element type to create
+	 * @param theModifiers modifiers to apply after construction
+	 * @return the Element
+	 */
+	default IBase withElementOfType(String theElementType, Consumer<IBase>... theModifiers) {
+		IBase element = getFhirContext().getElementDefinition(theElementType).newInstance();
+		applyElementModifiers(element, theModifiers);
+		return element;
+	}
+
+	default void applyElementModifiers(IBase element, Consumer<IBase>[] theModifiers) {
+		for (Consumer<IBase> nextModifier : theModifiers) {
+			nextModifier.accept(element);
+		}
+	}
+
+	default Consumer<IBaseResource> withObservationCode(@Nullable String theSystem, @Nullable String theCode) {
+		return withObservationCode(theSystem, theCode, null);
+	}
+
+	default Consumer<IBaseResource> withObservationCode(@Nullable String theSystem, @Nullable String theCode, String theDisplay) {
+		return t -> {
+			FhirTerser terser = getFhirContext().newTerser();
+			IBase coding = terser.addElement(t, "code.coding");
+			terser.addElement(coding, "system", theSystem);
+			terser.addElement(coding, "code", theCode);
+			if (StringUtils.isNotEmpty(theDisplay)) {
+				terser.addElement(coding, "display", theDisplay);
+			}
 		};
 	}
 
@@ -245,6 +284,5 @@ public interface ITestDataBuilder {
 		booleanType.setValueAsString(theValue);
 		activeChild.getMutator().addValue(theTarget, booleanType);
 	}
-
 
 }

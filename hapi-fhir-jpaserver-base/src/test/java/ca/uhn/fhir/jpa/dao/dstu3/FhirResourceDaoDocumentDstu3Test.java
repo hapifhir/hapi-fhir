@@ -1,10 +1,8 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
-import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -16,7 +14,7 @@ public class FhirResourceDaoDocumentDstu3Test extends BaseJpaDstu3Test {
 	@Test
 	public void testPostDocument() throws Exception {
 		String input = IOUtils.toString(getClass().getResourceAsStream("/sample-document.xml"), StandardCharsets.UTF_8);
-		Bundle inputBundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, input);
+		Bundle inputBundle = myFhirContext.newXmlParser().parseResource(Bundle.class, input);
 		DaoMethodOutcome responseBundle = myBundleDao.create(inputBundle, mySrd);
 	}
 }

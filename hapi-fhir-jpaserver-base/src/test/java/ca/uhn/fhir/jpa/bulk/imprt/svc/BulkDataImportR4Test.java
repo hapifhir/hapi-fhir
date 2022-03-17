@@ -203,10 +203,10 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 			StringBuilder fileContents = new StringBuilder();
 
 			for (int transactionIdx = 0; transactionIdx < transactionsPerFile; transactionIdx++) {
-				BundleBuilder bundleBuilder = new BundleBuilder(myFhirCtx);
+				BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
 				IBaseResource patient = buildPatient(withFamily("FAM " + fileIndex + " " + transactionIdx), withIdentifier(null, "patient" + counter++));
 				bundleBuilder.addTransactionCreateEntry(patient);
-				fileContents.append(myFhirCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(bundleBuilder.getBundle()));
+				fileContents.append(myFhirContext.newJsonParser().setPrettyPrint(false).encodeResourceToString(bundleBuilder.getBundle()));
 				fileContents.append("\n");
 			}
 

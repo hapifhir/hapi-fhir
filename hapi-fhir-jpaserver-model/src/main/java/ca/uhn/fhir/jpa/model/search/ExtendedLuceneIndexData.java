@@ -21,13 +21,16 @@ package ca.uhn.fhir.jpa.model.search;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 import org.hibernate.search.engine.backend.document.DocumentElement;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Date;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 
 /**
@@ -39,8 +42,9 @@ public class ExtendedLuceneIndexData {
 
 	final FhirContext myFhirContext;
 	final SetMultimap<String, String> mySearchParamStrings = HashMultimap.create();
-	final SetMultimap<String, TokenParam> mySearchParamTokens = HashMultimap.create();
+	final SetMultimap<String, IBaseCoding> mySearchParamTokens = HashMultimap.create();
 	final SetMultimap<String, String> mySearchParamLinks = HashMultimap.create();
+	final SetMultimap<String, DateSearchIndexData> mySearchParamDates = HashMultimap.create();
 
 	public ExtendedLuceneIndexData(FhirContext theFhirContext) {
 		this.myFhirContext = theFhirContext;
@@ -62,17 +66,35 @@ public class ExtendedLuceneIndexData {
 		mySearchParamStrings.forEach(ifNotContained(indexWriter::writeStringIndex));
 		mySearchParamTokens.forEach(ifNotContained(indexWriter::writeTokenIndex));
 		mySearchParamLinks.forEach(ifNotContained(indexWriter::writeReferenceIndex));
+		// TODO MB Use RestSearchParameterTypeEnum to define templates.
+		mySearchParamDates.forEach(ifNotContained(indexWriter::writeDateIndex));
 	}
 
 	public void addStringIndexData(String theSpName, String theText) {
 		mySearchParamStrings.put(theSpName, theText);
 	}
 
-	public void addTokenIndexData(String theSpName, String theSystem,  String theValue) {
-		mySearchParamTokens.put(theSpName, new TokenParam(theSystem, theValue));
+	/**
+	 * Add if not already present.
+	 */
+	public void addTokenIndexDataIfNotPresent(String theSpName, String theSystem,  String theValue) {
+		boolean isPresent = mySearchParamTokens.get(theSpName).stream()
+			.anyMatch(c -> Objects.equals(c.getSystem(), theSystem) && Objects.equals(c.getCode(), theValue));
+		if (!isPresent) {
+			addTokenIndexData(theSpName, new CodingDt(theSystem, theValue));
+		}
 	}
 
-	public void addResourceLinkIndexData(String theSpName, String theTargetResourceId){
+	public void addTokenIndexData(String theSpName, IBaseCoding theNextValue) {
+		mySearchParamTokens.put(theSpName, theNextValue);
+	}
+
+	public void addResourceLinkIndexData(String theSpName, String theTargetResourceId) {
 		mySearchParamLinks.put(theSpName, theTargetResourceId);
 	}
+
+	public void addDateIndexData(String theSpName, Date theLowerBound, int theLowerBoundOrdinal, Date theUpperBound, int theUpperBoundOrdinal) {
+		mySearchParamDates.put(theSpName, new DateSearchIndexData(theLowerBound, theLowerBoundOrdinal, theUpperBound, theUpperBoundOrdinal));
+	}
+
 }

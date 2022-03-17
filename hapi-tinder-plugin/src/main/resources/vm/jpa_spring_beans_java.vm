@@ -9,7 +9,7 @@ import javax.persistence.EntityManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 
-import org.springframework.beans.factory.annotation.Autowire;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -18,6 +18,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
+import ca.uhn.fhir.rest.api.IResourceSupportedSvc;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -26,23 +27,25 @@ import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 
 @Configuration
-public abstract class BaseJavaConfig${versionCapitalized} extends ca.uhn.fhir.jpa.config${package_suffix}.Base${versionCapitalized}Config {
+public class GeneratedDaoAndResourceProviderConfig${versionCapitalized} {
+@Autowired
+FhirContext myFhirContext;
 
 	@Bean(name="myResourceProviders${versionCapitalized}")
-	public ResourceProviderFactory resourceProviders${versionCapitalized}() {
+	public ResourceProviderFactory resourceProviders${versionCapitalized}(IResourceSupportedSvc theResourceSupportedSvc) {
 		ResourceProviderFactory retVal = new ResourceProviderFactory();
 #foreach ( $res in $resources )
-		retVal.addSupplier(() -> isSupported("${res.name}") ? rp${res.declaringClassNameComplete}${versionCapitalized}() : null);
+		retVal.addSupplier(() -> theResourceSupportedSvc.isSupported("${res.name}") ? rp${res.declaringClassNameComplete}${versionCapitalized}() : null);
 #end
 		return retVal;
 	}
 
 
 	@Bean(name="myResourceDaos${versionCapitalized}")
-	public List<IFhirResourceDao<?>> resourceDaos${versionCapitalized}() {
+	public List<IFhirResourceDao<?>> resourceDaos${versionCapitalized}(IResourceSupportedSvc theResourceSupportedSvc) {
 		List<IFhirResourceDao<?>> retVal = new ArrayList<IFhirResourceDao<?>>();
 #foreach ( $res in $resources )
-		if (isSupported("${res.name}")) {
+		if (theResourceSupportedSvc.isSupported("${res.name}")) {
 			retVal.add(dao${res.declaringClassNameComplete}${versionCapitalized}());
 		}
 #end
@@ -50,7 +53,7 @@ public abstract class BaseJavaConfig${versionCapitalized} extends ca.uhn.fhir.jp
 	}
 
 #foreach ( $res in $resources )
-	@Bean(name="my${res.name}Dao${versionCapitalized}", autowire=Autowire.BY_NAME)
+	@Bean(name="my${res.name}Dao${versionCapitalized}")
 	public
 #if ( ${versionCapitalized} == 'Dstu2' && ${res.name} == 'ValueSet' )
 		IFhirResourceDaoValueSet<ca.uhn.fhir.model.dstu2.resource.ValueSet, ca.uhn.fhir.model.dstu2.composite.CodingDt, ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt>
@@ -92,7 +95,7 @@ public abstract class BaseJavaConfig${versionCapitalized} extends ca.uhn.fhir.jp
 		retVal = new ca.uhn.fhir.jpa.dao.JpaResourceDao<${resourcePackage}.${res.declaringClassNameComplete}>();
 #end
 		retVal.setResourceType(${resourcePackage}.${res.declaringClassNameComplete}.class);
-		retVal.setContext(fhirContext${versionCapitalized}());
+		retVal.setContext(myFhirContext);
 		return retVal;
 	}
 
@@ -101,7 +104,7 @@ public abstract class BaseJavaConfig${versionCapitalized} extends ca.uhn.fhir.jp
 	public ca.uhn.fhir.jpa.rp.${version}.${res.declaringClassNameComplete}ResourceProvider rp${res.declaringClassNameComplete}${versionCapitalized}() {
 		ca.uhn.fhir.jpa.rp.${version}.${res.declaringClassNameComplete}ResourceProvider retVal;
 		retVal = new ca.uhn.fhir.jpa.rp.${version}.${res.declaringClassNameComplete}ResourceProvider();
-		retVal.setContext(fhirContext${versionCapitalized}());
+		retVal.setContext(myFhirContext);
 		retVal.setDao(dao${res.declaringClassNameComplete}${versionCapitalized}());
 		return retVal;
 	}

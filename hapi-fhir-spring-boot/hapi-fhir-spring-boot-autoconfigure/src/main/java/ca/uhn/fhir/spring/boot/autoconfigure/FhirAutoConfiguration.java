@@ -24,9 +24,10 @@ package ca.uhn.fhir.spring.boot.autoconfigure;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jaxrs.server.AbstractJaxRsProvider;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu2;
-import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu3;
-import ca.uhn.fhir.jpa.config.BaseJavaConfigR4;
+import ca.uhn.fhir.jpa.config.HapiJpaConfig;
+import ca.uhn.fhir.jpa.config.JpaDstu2Config;
+import ca.uhn.fhir.jpa.config.dstu3.JpaDstu3Config;
+import ca.uhn.fhir.jpa.config.r4.JpaR4Config;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.provider.BaseJpaProvider;
@@ -234,21 +235,24 @@ public class FhirAutoConfiguration {
 		}
 
 		@Configuration
-		@ConditionalOnMissingBean(type = "ca.uhn.fhir.jpa.config.BaseConfig")
+		@Import({JpaDstu3Config.class, HapiJpaConfig.class})
+		@ConditionalOnMissingBean(type = "ca.uhn.fhir.jpa.config.JpaConfig")
 		@ConditionalOnProperty(name = "hapi.fhir.version", havingValue = "DSTU3")
-		static class Dstu3 extends BaseJavaConfigDstu3 {
+		static class Dstu3 {
 		}
 
 		@Configuration
-		@ConditionalOnMissingBean(type = "ca.uhn.fhir.jpa.config.BaseConfig")
+		@Import({JpaDstu2Config.class, HapiJpaConfig.class})
+		@ConditionalOnMissingBean(type = "ca.uhn.fhir.jpa.config.JpaConfig")
 		@ConditionalOnProperty(name = "hapi.fhir.version", havingValue = "DSTU2")
-		static class Dstu2 extends BaseJavaConfigDstu2 {
+		static class Dstu2 {
 		}
 
 		@Configuration
-		@ConditionalOnMissingBean(type = "ca.uhn.fhir.jpa.config.BaseConfig")
+		@Import({JpaR4Config.class, HapiJpaConfig.class})
+		@ConditionalOnMissingBean(type = "ca.uhn.fhir.jpa.config.JpaConfig")
 		@ConditionalOnProperty(name = "hapi.fhir.version", havingValue = "R4")
-		static class R4 extends BaseJavaConfigR4 {
+		static class R4 {
 		}
 	}
 

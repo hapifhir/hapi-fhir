@@ -485,7 +485,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 				.execute();
 		} catch (ResourceNotFoundException e) {
 			assertEquals(404, e.getStatusCode());
-			assertEquals("HTTP 404 Not Found: " + Msg.code(886) + "Unknown ValueSet: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fbogus", e.getMessage());
+			assertEquals("HTTP 404 Not Found: HAPI-2024: Unknown ValueSet: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fbogus", e.getMessage());
 		}
 	}
 
@@ -622,7 +622,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 				.execute();
 		} catch (ResourceNotFoundException e) {
 			assertEquals(404, e.getStatusCode());
-			assertEquals("HTTP 404 Not Found: " + Msg.code(886) + "Unknown ValueSet: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fbogus", e.getMessage());
+			assertEquals("HTTP 404 Not Found: HAPI-2024: Unknown ValueSet: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fbogus", e.getMessage());
 		}
 	}
 
@@ -944,23 +944,6 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		assertThat(resp, containsStringIgnoringCase("<code value=\"childAAB\"/>"));
 		assertThat(resp, not(containsStringIgnoringCase("<code value=\"ParentA\"/>")));
 
-	}
-
-	@Test
-	public void testExpandLocalVsWithUnknownCode() {
-		createExternalCsAndLocalVsWithUnknownCode();
-		assertNotNull(myLocalValueSetId);
-
-		try {
-			myClient
-				.operation()
-				.onInstance(myLocalValueSetId)
-				.named("expand")
-				.withNoParameters(Parameters.class)
-				.execute();
-		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: Invalid filter criteria - code does not exist: {http://example.com/my_code_system}childFOOOOOOO", e.getMessage());
-		}
 	}
 
 	@Test

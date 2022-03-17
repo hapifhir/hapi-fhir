@@ -3,8 +3,8 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.config.TestHibernateSearchAddInConfig;
 import ca.uhn.fhir.jpa.config.TestR4Config;
-import ca.uhn.fhir.jpa.config.TestR4WithLuceneDisabledConfig;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
@@ -47,7 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TestR4WithLuceneDisabledConfig.class})
+@ContextConfiguration(classes = {TestR4Config.class, TestHibernateSearchAddInConfig.NoFT.class})
 @DirtiesContext
 public class SyntheaPerfTest extends BaseJpaTest {
 
@@ -65,7 +65,7 @@ public class SyntheaPerfTest extends BaseJpaTest {
 
 	@AfterEach
 	public void afterEach() {
-		myCtx.getParserOptions().setAutoContainReferenceTargetsWithNoId(true);
+		myFhirContext.getParserOptions().setAutoContainReferenceTargetsWithNoId(true);
 	}
 
 	private static final Logger ourLog = LoggerFactory.getLogger(SyntheaPerfTest.class);
@@ -73,7 +73,7 @@ public class SyntheaPerfTest extends BaseJpaTest {
 	public static final String PATH_TO_SYNTHEA_OUTPUT = "../../synthea/output/fhir/";
 	public static final int CONCURRENCY = 4;
 	@Autowired
-	private FhirContext myCtx;
+	private FhirContext myFhirContext;
 	@Autowired
 	private PlatformTransactionManager myTxManager;
 	@Autowired
@@ -88,7 +88,7 @@ public class SyntheaPerfTest extends BaseJpaTest {
 		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.INLINE);
 		myDaoConfig.setMatchUrlCacheEnabled(true);
 		myDaoConfig.setDeleteEnabled(false);
-		myCtx.getParserOptions().setAutoContainReferenceTargetsWithNoId(false);
+		myFhirContext.getParserOptions().setAutoContainReferenceTargetsWithNoId(false);
 		myDaoConfig.setInlineResourceTextBelowSize(4000);
 
 		assertTrue(myDaoConfig.isMassIngestionMode());
@@ -112,8 +112,8 @@ public class SyntheaPerfTest extends BaseJpaTest {
 	}
 
 	@Override
-	protected FhirContext getContext() {
-		return myCtx;
+	public FhirContext getFhirContext() {
+		return myFhirContext;
 	}
 
 	@Override

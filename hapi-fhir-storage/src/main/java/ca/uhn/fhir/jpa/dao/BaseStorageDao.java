@@ -20,10 +20,10 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -59,6 +59,7 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
@@ -462,7 +463,7 @@ public abstract class BaseStorageDao {
 			return;
 		}
 
-		Map<String, RuntimeSearchParam> searchParams = mySearchParamRegistry.getActiveSearchParams(getResourceName());
+		ResourceSearchParams searchParams = mySearchParamRegistry.getActiveSearchParams(getResourceName());
 
 		Set<String> paramNames = theSource.keySet();
 		for (String nextParamName : paramNames) {

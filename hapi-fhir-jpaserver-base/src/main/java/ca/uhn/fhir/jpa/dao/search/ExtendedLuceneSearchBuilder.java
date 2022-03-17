@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -64,7 +65,7 @@ public class ExtendedLuceneSearchBuilder {
 
 	/**
 	 * Do we support this query param type+modifier?
-	 *
+	 * <p>
 	 * NOTE - keep this in sync with addAndConsumeAdvancedQueryClauses() below.
 	 */
 	private boolean isParamTypeSupported(IQueryParameterType param) {
@@ -103,6 +104,11 @@ public class ExtendedLuceneSearchBuilder {
 				default:
 					return false;
 			}
+		} else if (param instanceof DateParam) {
+			if (EMPTY_MODIFIER.equals(modifier)) {
+				return true;
+			}
+			return false;
 		} else {
 			return false;
 		}
@@ -151,6 +157,11 @@ public class ExtendedLuceneSearchBuilder {
 				case REFERENCE:
 					List<List<IQueryParameterType>> referenceAndOrTerms = theParams.removeByNameUnmodified(nextParam);
 					builder.addReferenceUnchainedSearch(nextParam, referenceAndOrTerms);
+					break;
+
+				case DATE:
+					List<List<IQueryParameterType>> dateAndOrTerms = theParams.removeByNameUnmodified(nextParam);
+					builder.addDateUnmodifiedSearch(nextParam, dateAndOrTerms);
 					break;
 
 				default:

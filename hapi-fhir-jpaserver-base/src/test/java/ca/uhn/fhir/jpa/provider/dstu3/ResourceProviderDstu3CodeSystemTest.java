@@ -64,7 +64,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 			.andParameter("system", new UriType(FhirResourceDaoDstu3TerminologyTest.URL_MY_CODE_SYSTEM))
 			.execute();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
@@ -86,7 +86,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 			.useHttpGet()
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
@@ -130,7 +130,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 			"}";
 
 		// Create the code system
-		CodeSystem cs = (CodeSystem) myFhirCtx.newJsonParser().parseResource(input);
+		CodeSystem cs = (CodeSystem) myFhirContext.newJsonParser().parseResource(input);
 		ourClient.update().resource(cs).execute();
 		runInTransaction(() -> assertEquals(26L, myConceptDao.count()));
 
@@ -156,7 +156,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 			.andParameter("system", new UriType("http://hl7.org/fhir/v2/0203"))
 			.execute();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
@@ -197,7 +197,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 			.andParameter("system", new UriType("http://acme.org"))
 			.execute();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
@@ -235,7 +235,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 			.withParameter(Parameters.class, "coding", new Coding().setSystem("http://acme.org").setCode("8450-9"))
 			.execute();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
@@ -310,7 +310,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 			.andParameter("system", new UriType("http://hl7.org/fhir/v3/MaritalStatus"))
 			.execute();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());

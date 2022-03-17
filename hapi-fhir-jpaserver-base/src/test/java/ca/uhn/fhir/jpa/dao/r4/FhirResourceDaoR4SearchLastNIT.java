@@ -136,7 +136,7 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseR4SearchLastN {
 
 		List<String> expectedObservationList = observationIds.stream()
 			.map(id -> id.toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
-		assertThat(results, is(expectedObservationList));
+		assertEquals(results, expectedObservationList);
 	}
 
 }

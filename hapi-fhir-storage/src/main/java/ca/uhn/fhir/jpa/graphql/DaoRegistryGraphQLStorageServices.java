@@ -47,6 +47,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -61,7 +62,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -105,7 +105,7 @@ public class DaoRegistryGraphQLStorageServices implements IGraphQLStorageService
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronousUpTo(MAX_SEARCH_SIZE);
 
-		Map<String, RuntimeSearchParam> searchParams = mySearchParamRegistry.getActiveSearchParams(typeDef.getName());
+		ResourceSearchParams searchParams = mySearchParamRegistry.getActiveSearchParams(typeDef.getName());
 
 		for (Argument nextArgument : theSearchParams) {
 
@@ -118,7 +118,7 @@ public class DaoRegistryGraphQLStorageServices implements IGraphQLStorageService
 			String searchParamName = graphqlArgumentToSearchParam(nextArgument.getName());
 			RuntimeSearchParam searchParam = searchParams.get(searchParamName);
 			if (searchParam == null) {
-				Set<String> graphqlArguments = searchParams.keySet().stream()
+				Set<String> graphqlArguments = searchParams.getSearchParamNames().stream()
 					.map(this::searchParamToGraphqlArgument)
 					.collect(Collectors.toSet());
 				String msg = myContext.getLocalizer().getMessageSanitized(DaoRegistryGraphQLStorageServices.class, "invalidGraphqlArgument", nextArgument.getName(), new TreeSet<>(graphqlArguments));

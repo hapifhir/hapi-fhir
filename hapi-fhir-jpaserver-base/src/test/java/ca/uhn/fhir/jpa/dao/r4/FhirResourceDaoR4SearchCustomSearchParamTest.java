@@ -1,18 +1,19 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.phonetic.PhoneticEncoderEnum;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -57,7 +58,6 @@ import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Specimen;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -204,6 +204,39 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 	}
 
 	@Test
+	public void testReplaceInFhirPathInSearchParameterWorksAsExpected() {
+		String rawValue = "778-62-8144";
+		String strippedValue = "778628144";
+
+		SearchParameter numberParameter = new SearchParameter();
+		numberParameter.setId("stripped-ssn");
+		numberParameter.setName("SSN with no dashes");
+		numberParameter.setCode("stripped-ssn");
+		numberParameter.setDescription("SSN with no dashes");
+		numberParameter.setUrl("http://example.com/stripped-ssn");
+		numberParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		numberParameter.addBase("Patient");
+		numberParameter.setType(Enumerations.SearchParamType.STRING);
+		numberParameter.setExpression("Patient.identifier.where(system='http://hl7.org/fhir/sid/us-ssn' and value.matches('.*')).select(value.replace('-',''))");
+		mySearchParameterDao.update(numberParameter);
+
+		mySearchParamRegistry.refreshCacheIfNecessary();
+
+		Patient patient = new Patient();
+		patient.setActive(true);
+		patient.addIdentifier().setSystem("http://hl7.org/fhir/sid/us-ssn").setValue(rawValue);
+		myPatientDao.create(patient);
+
+		IBundleProvider search;
+
+		search = myPatientDao.search(SearchParameterMap.newSynchronous("stripped-ssn", new StringParam(strippedValue)));
+		assertEquals(1, search.size());
+
+		search = myPatientDao.search(SearchParameterMap.newSynchronous("stripped-ssn", new StringParam(rawValue)));
+		assertEquals(0, search.size());
+	}
+
+	@Test
 	public void testCreatePhoneticSearchParameterWithOptionalCharacterLength() {
 		String testString = "Richard Smith";
 		int modifiedLength = 7;
@@ -290,7 +323,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		fooSp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
 		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
 
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(fooSp));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(fooSp));
 
 		mySearchParameterDao.create(fooSp, mySrd);
 		mySearchParamRegistry.forceRefresh();
@@ -306,7 +339,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		bundle.setType(Bundle.BundleType.DOCUMENT);
 		bundle.addEntry().setResource(composition);
 
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		String bundleId = myBundleDao.create(bundle).getId().toUnqualifiedVersionless().getValue();
 
 		SearchParameterMap map;
@@ -475,7 +508,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		pract.addName().setFamily("PRACT");
 		myPractitionerDao.update(pract);
 
-		Patient pat = myFhirCtx.newJsonParser().parseResource(Patient.class, loadClasspath("/r4/custom_resource_patient.json"));
+		Patient pat = myFhirContext.newJsonParser().parseResource(Patient.class, loadClasspath("/r4/custom_resource_patient.json"));
 		IIdType pid = myPatientDao.create(pat, mySrd).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap params = new SearchParameterMap();
@@ -499,7 +532,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		sp.setExpression("Bundle.entry.resource.as(MessageHeader).id");
 		sp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
 		sp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
 		mySearchParameterDao.create(sp);
 
 		mySearchParamRegistry.forceRefresh();
@@ -512,7 +545,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		bundle.addEntry()
 			.setResource(messageHeader);
 
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		myBundleDao.create(bundle);
 
 		SearchParameterMap params = new SearchParameterMap();
@@ -1481,7 +1514,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		sp.setExpression("Observation.specimen.resolve().receivedTime");
 		sp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
 		sp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
 		mySearchParameterDao.create(sp);
 
 		mySearchParamRegistry.forceRefresh();
@@ -1494,7 +1527,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		o.getContained().add(specimen);
 		o.setStatus(Observation.ObservationStatus.FINAL);
 		o.setSpecimen(new Reference("#FOO"));
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(o));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(o));
 		myObservationDao.update(o);
 
 		specimen = new Specimen();

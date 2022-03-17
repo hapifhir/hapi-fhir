@@ -187,6 +187,7 @@ public abstract class BaseApp {
 		commands.add(new ImportCsvToConceptMapCommand());
 		commands.add(new HapiFlywayMigrateDatabaseCommand());
 		commands.add(new CreatePackageCommand());
+		commands.add(new BulkImportCommand());
 		return commands;
 	}
 

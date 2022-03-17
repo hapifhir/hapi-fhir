@@ -14,15 +14,14 @@ import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.test.utilities.JettyUtil;
-import ca.uhn.fhir.util.TestUtil;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.web.context.ContextLoader;
@@ -57,17 +56,17 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 
 	@AfterEach
 	public void after() throws Exception {
-		myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
+		myFhirContext.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	@BeforeEach
 	public void before() throws Exception {
-		myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-		myFhirCtx.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
+		myFhirContext.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+		myFhirContext.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
 
 		if (ourServer == null) {
-			ourRestServer = new RestfulServer(myFhirCtx);
+			ourRestServer = new RestfulServer(myFhirContext);
 			ourRestServer.registerProviders(myResourceProviders.createProviders());
 			ourRestServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 			ourRestServer.registerProvider(mySystemProvider);
@@ -111,7 +110,7 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 			ourPort = JettyUtil.getPortForStartedServer(server);
 			ourServerBase = "http://localhost:" + ourPort + "/fhir/context";
 
-			ourClient = myFhirCtx.newRestfulGenericClient(ourServerBase);
+			ourClient = myFhirContext.newRestfulGenericClient(ourServerBase);
 			ourClient.registerInterceptor(new LoggingInterceptor());
 
 			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);

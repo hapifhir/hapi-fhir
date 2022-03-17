@@ -35,6 +35,7 @@ import ca.uhn.fhir.rest.server.interceptor.FhirPathFilterInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
+import ca.uhn.fhirtest.config.SqlCaptureInterceptor;
 import ca.uhn.fhirtest.config.TestDstu2Config;
 import ca.uhn.fhirtest.config.TestDstu3Config;
 import ca.uhn.fhirtest.config.TestR4Config;
@@ -282,6 +283,8 @@ public class TestRestfulServer extends RestfulServer {
 		loggingInterceptor.setMessageFormat("${operationType} Content-Type: ${requestHeader.content-type} - Accept: ${responseEncodingNoDefault} \"${requestHeader.accept}\" - Agent: ${requestHeader.user-agent}");
 		registerInterceptor(loggingInterceptor);
 
+		// SQL Capturing
+		registerInterceptor(myAppCtx.getBean(SqlCaptureInterceptor.class));
 	}
 
 	/**

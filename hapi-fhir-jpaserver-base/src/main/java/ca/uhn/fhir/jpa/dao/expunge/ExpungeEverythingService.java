@@ -23,6 +23,8 @@ package ca.uhn.fhir.jpa.dao.expunge;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
+import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.entity.BulkImportJobEntity;
 import ca.uhn.fhir.jpa.entity.BulkImportJobFileEntity;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
@@ -126,6 +128,8 @@ public class ExpungeEverythingService {
 			counter.addAndGet(doExpungeEverythingQuery("UPDATE " + TermCodeSystem.class.getSimpleName() + " d SET d.myCurrentVersion = null"));
 			return null;
 		});
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(Batch2WorkChunkEntity.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(Batch2JobInstanceEntity.class));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(NpmPackageVersionResourceEntity.class));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(NpmPackageVersionEntity.class));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(NpmPackageEntity.class));
