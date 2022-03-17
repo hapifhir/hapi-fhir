@@ -97,4 +97,7 @@ public class ExtendedLuceneIndexData {
 		mySearchParamDates.put(theSpName, new DateSearchIndexData(theLowerBound, theLowerBoundOrdinal, theUpperBound, theUpperBoundOrdinal));
 	}
 
+	// fixme jm write quantity index info
+
+
 }

@@ -152,6 +152,7 @@ public class ExtendedLuceneSearchBuilder {
 					break;
 
 				case QUANTITY:
+					// fixme jm implement this block.
 					break;
 
 				case REFERENCE:

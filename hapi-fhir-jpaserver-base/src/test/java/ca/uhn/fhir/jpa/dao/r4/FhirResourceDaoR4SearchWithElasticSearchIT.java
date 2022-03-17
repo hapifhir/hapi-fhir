@@ -10,12 +10,12 @@ import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
-import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.config.TestHibernateSearchAddInConfig;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.BaseDateSearchDaoTests;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.dao.DaoTestDataBuilder;
+import ca.uhn.fhir.jpa.dao.TestDaoSearch;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -61,6 +61,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.annotation.DirtiesContext;
@@ -76,13 +77,22 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(SpringExtension.class)
 @RequiresDocker
-@ContextConfiguration(classes = {TestR4Config.class, TestHibernateSearchAddInConfig.Elasticsearch.class})
+@ContextConfiguration(classes = {
+	TestR4Config.class,
+	TestHibernateSearchAddInConfig.Elasticsearch.class,
+	DaoTestDataBuilder.Config.class,
+	TestDaoSearch.Config.class
+})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";
@@ -132,6 +142,11 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+	@RegisterExtension
+	@Autowired
+	DaoTestDataBuilder myDataBuilder;
+	@Autowired
+	TestDaoSearch myTestDaoSearch;
 
 	@BeforeEach
 	public void beforePurgeDatabase() {
@@ -761,5 +776,133 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			return new TestDataBuilderFixture<>(testDataBuilder, myObservationDao);
 		}
 	}
+
+
+	//fixme JM make these pass
+	@Nested
+	public class QuantitySearch {
+		IIdType myResourceId;
+
+		@Nested
+		public class Queries {
+
+			@Test
+			public void eq() {
+				withObservationWithValueQuantity(0.6);
+
+				assertNotFind("when gt", "/Observation?value-quantity=0.5||mmHg");
+				assertNotFind("when gt unitless", "/Observation?value-quantity=0.5");
+				// fixme we break the spec here.
+				// assertFind("when a little gt - default is approx", "/Observation?value-quantity=0.599");
+				// assertFind("when a little lt - default is approx", "/Observation?value-quantity=0.601");
+				// fixme we don't seem to support "units", only "code".
+				assertFind("when eq with units", "/Observation?value-quantity=0.6||mm[Hg]");
+				assertFind("when eq unitless", "/Observation?value-quantity=0.6");
+				assertNotFind("when lt", "/Observation?value-quantity=0.7||mmHg");
+				assertNotFind("when lt", "/Observation?value-quantity=0.7");
+			}
+
+			@Test
+			public void ne() {
+				withObservationWithValueQuantity(0.6);
+
+				assertFind("when gt", "/Observation?value-quantity=ne0.5");
+				assertNotFind("when eq", "/Observation?value-quantity=ne0.6");
+				assertFind("when lt", "/Observation?value-quantity=ne0.7");
+			}
+
+			@Test
+			public void ap() {
+				withObservationWithValueQuantity(0.6);
+
+				assertNotFind("when gt", "/Observation?value-quantity=ap0.5");
+				assertFind("when a little gt", "/Observation?value-quantity=ap0.58");
+				assertFind("when eq", "/Observation?value-quantity=ap0.6");
+				assertFind("when a little lt", "/Observation?value-quantity=ap0.62");
+				assertNotFind("when lt", "/Observation?value-quantity=ap0.7");
+			}
+
+			@Test
+			public void gt() {
+				withObservationWithValueQuantity(0.6);
+
+				assertFind("when gt", "/Observation?value-quantity=gt0.5");
+				assertNotFind("when eq", "/Observation?value-quantity=gt0.6");
+				assertNotFind("when lt", "/Observation?value-quantity=gt0.7");
+
+			}
+
+			@Test
+			public void ge() {
+				withObservationWithValueQuantity(0.6);
+
+				assertFind("when gt", "/Observation?value-quantity=ge0.5");
+				assertFind("when eq", "/Observation?value-quantity=ge0.6");
+				assertNotFind("when lt", "/Observation?value-quantity=ge0.7");
+			}
+
+			@Test
+			public void lt() {
+				withObservationWithValueQuantity(0.6);
+
+				assertNotFind("when gt", "/Observation?value-quantity=lt0.5");
+				assertNotFind("when eq", "/Observation?value-quantity=lt0.6");
+				assertFind("when lt", "/Observation?value-quantity=lt0.7");
+
+			}
+
+			@Test
+			public void le() {
+				withObservationWithValueQuantity(0.6);
+
+				myCaptureQueriesListener.clear();
+				assertNotFind("when gt", "/Observation?value-quantity=le0.5");
+				assertThat(myCaptureQueriesListener.getSelectQueries(), hasSize(1));
+
+				assertFind("when eq", "/Observation?value-quantity=le0.6");
+				assertFind("when lt", "/Observation?value-quantity=le0.7");
+			}
+
+
+			private void assertFind(String theMessage, String theUrl) {
+				List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
+				assertThat(theMessage, resourceIds, hasItem(equalTo(myResourceId.getIdPart())));
+			}
+
+			private void assertNotFind(String theMessage, String theUrl) {
+				List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
+				assertThat(theMessage, resourceIds, not(hasItem(equalTo(myResourceId.getIdPart()))));
+			}
+		}
+
+		private IIdType withObservationWithValueQuantity(double theValue) {
+//			IBase quantity = myDataBuilder.withElementOfType("Quantity",
+//				myDataBuilder.withPrimitiveAttribute("value", theValue),
+//				myDataBuilder.withPrimitiveAttribute("unit", "mmHg"),
+//				myDataBuilder.withPrimitiveAttribute("system", "http://unitsofmeasure.org"));
+			myResourceId = myDataBuilder.createObservation(myDataBuilder.withAttribute("valueQuantity",
+				myDataBuilder.withPrimitiveAttribute("value", theValue),
+				myDataBuilder.withPrimitiveAttribute("unit", "mmHg"),
+				myDataBuilder.withPrimitiveAttribute("system", "http://unitsofmeasure.org"),
+				myDataBuilder.withPrimitiveAttribute("code", "mm[Hg]")
+			));
+			return myResourceId;
+		}
+
+		@Nested
+		public class Sorting {
+			@Test
+			public void sortByNumeric() {
+				String idAlpha7 = withObservationWithValueQuantity(0.7).getIdPart();
+				String idAlpha2 = withObservationWithValueQuantity(0.2).getIdPart();
+				String idAlpha5 = withObservationWithValueQuantity(0.5).getIdPart();
+
+				List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_sort=value-quantity");
+				assertThat(allIds, hasItems(idAlpha2, idAlpha5, idAlpha7));
+			}
+		}
+
+	}
+
 
 }

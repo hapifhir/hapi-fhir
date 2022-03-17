@@ -483,4 +483,5 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 		}
 	}
 
+	// fixme add Quantity tests here too for lucene.
 }

@@ -73,6 +73,8 @@ public class ExtendedLuceneIndexExtractor {
 			retVal.addDateIndexData(nextParam.getParamName(), nextParam.getValueLow(), nextParam.getValueLowDateOrdinal(),
 				nextParam.getValueHigh(), nextParam.getValueHighDateOrdinal()));
 
+		// fixme jm write quantity index info
+
 		if (!theNewParams.myLinks.isEmpty()) {
 
 			// awkwardly, links are indexed by jsonpath, not by search param.

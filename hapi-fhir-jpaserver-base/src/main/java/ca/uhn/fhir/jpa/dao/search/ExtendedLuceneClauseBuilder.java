@@ -453,4 +453,7 @@ public class ExtendedLuceneClauseBuilder {
 
 		throw new IllegalArgumentException(Msg.code(2026) + "Date search param does not support prefix of type: " + prefix);
 	}
+
+	// fixme jm add quantity query writer.
+
 }
