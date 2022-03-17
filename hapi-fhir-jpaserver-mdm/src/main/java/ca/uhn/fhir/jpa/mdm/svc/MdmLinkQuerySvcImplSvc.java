@@ -57,7 +57,7 @@ public class MdmLinkQuerySvcImplSvc implements IMdmLinkQuerySvc {
 	@Override
 	@Transactional
 	public Page<MdmLinkJson> queryLinks(IIdType theGoldenResourceId, IIdType theSourceResourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest, List<Integer> thePartitionId) {
-		Page<MdmLink> mdmLinks = myMdmLinkDaoSvc.executeTypedQuery(theGoldenResourceId, theSourceResourceId, theMatchResult, theLinkSource, thePartitionId);
+		Page<MdmLink> mdmLinks = myMdmLinkDaoSvc.executeTypedQuery(theGoldenResourceId, theSourceResourceId, theMatchResult, theLinkSource, thePageRequest, thePartitionId);
 		return mdmLinks.map(myMdmModelConverterSvc::toJson);
 	}
 
@@ -70,7 +70,7 @@ public class MdmLinkQuerySvcImplSvc implements IMdmLinkQuerySvc {
 	@Override
 	@Transactional
 	public Page<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest, List<Integer> thePartitionId) {
-		Page<MdmLink> mdmLinkPage = myMdmLinkDaoSvc.executeTypedQuery(null, null, MdmMatchResultEnum.POSSIBLE_DUPLICATE, null, thePartitionId);
+		Page<MdmLink> mdmLinkPage = myMdmLinkDaoSvc.executeTypedQuery(null, null, MdmMatchResultEnum.POSSIBLE_DUPLICATE, null, thePageRequest, thePartitionId);
 		return mdmLinkPage.map(myMdmModelConverterSvc::toJson);
 	}
 }

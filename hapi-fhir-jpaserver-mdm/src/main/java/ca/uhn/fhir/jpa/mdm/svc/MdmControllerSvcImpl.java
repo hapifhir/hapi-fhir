@@ -101,9 +101,14 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 	@Override
 	public Page<MdmLinkJson> queryLinks(@Nullable String theGoldenResourceId, @Nullable String theSourceResourceId, @Nullable String theMatchResult, @Nullable String theLinkSource, MdmTransactionContext theMdmTransactionContext, MdmPageRequest thePageRequest, @Nullable RequestDetails theRequestDetails) {
 		RequestPartitionId theReadPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, null, null);
-		Page<MdmLinkJson> resultPage = queryLinksFromPartitionList(theGoldenResourceId, theSourceResourceId, theMatchResult, theLinkSource, theMdmTransactionContext, thePageRequest, theReadPartitionId.getPartitionIds());
-
-		validateMdmQueryPermissions(theReadPartitionId, resultPage.getContent(), theRequestDetails);
+		Page<MdmLinkJson> resultPage;
+		if (theReadPartitionId.hasPartitionIds()) {
+			resultPage = queryLinksFromPartitionList(theGoldenResourceId, theSourceResourceId, theMatchResult, theLinkSource, theMdmTransactionContext, thePageRequest, theReadPartitionId.getPartitionIds());
+			validateMdmQueryPermissions(theReadPartitionId, resultPage.getContent(), theRequestDetails);
+		}
+		else {
+			resultPage = queryLinksFromPartitionList(theGoldenResourceId, theSourceResourceId, theMatchResult, theLinkSource, theMdmTransactionContext, thePageRequest, null);
+		}
 
 		return resultPage;
 	}

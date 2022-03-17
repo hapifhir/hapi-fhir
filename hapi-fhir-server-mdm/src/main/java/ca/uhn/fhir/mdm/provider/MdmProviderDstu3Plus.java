@@ -241,9 +241,9 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		String resourceType = convertStringTypeToString(theResourceType);
 		long submittedCount;
 		if (resourceType != null) {
-			submittedCount = myMdmSubmitSvc.submitSourceResourceTypeToMdm(resourceType, criteria);
+			submittedCount = myMdmSubmitSvc.submitSourceResourceTypeToMdm(resourceType, criteria, theRequestDetails);
 		} else {
-			submittedCount = myMdmSubmitSvc.submitAllSourceTypesToMdm(criteria);
+			submittedCount = myMdmSubmitSvc.submitAllSourceTypesToMdm(criteria, theRequestDetails);
 		}
 		return buildMdmOutParametersWithCount(submittedCount);
 	}
@@ -259,7 +259,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	public IBaseParameters mdmBatchPatientInstance(
 		@IdParam IIdType theIdParam,
 		RequestDetails theRequest) {
-		long submittedCount = myMdmSubmitSvc.submitSourceResourceToMdm(theIdParam);
+		long submittedCount = myMdmSubmitSvc.submitSourceResourceToMdm(theIdParam, theRequest);
 		return buildMdmOutParametersWithCount(submittedCount);
 	}
 
@@ -270,7 +270,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		@OperationParam(name = ProviderConstants.MDM_BATCH_RUN_CRITERIA, typeName = "string") IPrimitiveType<String> theCriteria,
 		RequestDetails theRequest) {
 		String criteria = convertStringTypeToString(theCriteria);
-		long submittedCount = myMdmSubmitSvc.submitPatientTypeToMdm(criteria);
+		long submittedCount = myMdmSubmitSvc.submitPatientTypeToMdm(criteria, theRequest);
 		return buildMdmOutParametersWithCount(submittedCount);
 	}
 
@@ -280,7 +280,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	public IBaseParameters mdmBatchPractitionerInstance(
 		@IdParam IIdType theIdParam,
 		RequestDetails theRequest) {
-		long submittedCount = myMdmSubmitSvc.submitSourceResourceToMdm(theIdParam);
+		long submittedCount = myMdmSubmitSvc.submitSourceResourceToMdm(theIdParam, theRequest);
 		return buildMdmOutParametersWithCount(submittedCount);
 	}
 
@@ -291,7 +291,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		@OperationParam(name = ProviderConstants.MDM_BATCH_RUN_CRITERIA, typeName = "string") IPrimitiveType<String> theCriteria,
 		RequestDetails theRequest) {
 		String criteria = convertStringTypeToString(theCriteria);
-		long submittedCount = myMdmSubmitSvc.submitPractitionerTypeToMdm(criteria);
+		long submittedCount = myMdmSubmitSvc.submitPractitionerTypeToMdm(criteria, theRequest);
 		return buildMdmOutParametersWithCount(submittedCount);
 	}
 

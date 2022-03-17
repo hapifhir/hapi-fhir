@@ -42,6 +42,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -282,30 +284,31 @@ public class MdmLinkDaoSvc {
 	 * @param theSourceId The resource ID of the source resource being searched.
 	 * @param theMatchResult the {@link MdmMatchResultEnum} being searched.
 	 * @param theLinkSource the {@link MdmLinkSourceEnum} being searched.
+	 * @param thePageRequest the {@link MdmPageRequest} paging information
 	 * @param thePartitionId List of partitions ID being searched, where the link's partition must be in the list.
 	 * @return a list of {@link MdmLink} entities which match the example.
 	 */
-	public PageImpl<MdmLink> executeTypedQuery(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, List<Integer> thePartitionId) {
-		CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
-		CriteriaQuery<MdmLink> criteriaQuery = cb.createQuery(MdmLink.class);
+	public PageImpl<MdmLink> executeTypedQuery(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmPageRequest thePageRequest, List<Integer> thePartitionId) {
+		CriteriaBuilder criteriaBuilder = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<MdmLink> criteriaQuery = criteriaBuilder.createQuery(MdmLink.class);
 		Root<MdmLink> from = criteriaQuery.from(MdmLink.class);
 
 		List<Predicate> andPredicates = new ArrayList<>();
 
 		if (theGoldenResourceId != null) {
-			Predicate goldenResourcePredicate = cb.equal(from.get("myGoldenResourcePid").as(Long.class), myJpaIdHelperService.getPidOrThrowException(theGoldenResourceId));
+			Predicate goldenResourcePredicate = criteriaBuilder.equal(from.get("myGoldenResourcePid").as(Long.class), myJpaIdHelperService.getPidOrThrowException(theGoldenResourceId));
 			andPredicates.add(goldenResourcePredicate);
 		}
 		if (theSourceId != null) {
-			Predicate sourceIdPredicate = cb.equal(from.get("mySourcePid").as(Long.class), myJpaIdHelperService.getPidOrThrowException(theSourceId));
+			Predicate sourceIdPredicate = criteriaBuilder.equal(from.get("mySourcePid").as(Long.class), myJpaIdHelperService.getPidOrThrowException(theSourceId));
 			andPredicates.add(sourceIdPredicate);
 		}
 		if (theMatchResult != null) {
-			Predicate matchResultPredicate = cb.equal(from.get("myMatchResult").as(MdmMatchResultEnum.class), theMatchResult);
+			Predicate matchResultPredicate = criteriaBuilder.equal(from.get("myMatchResult").as(MdmMatchResultEnum.class), theMatchResult);
 			andPredicates.add(matchResultPredicate);
 		}
 		if (theLinkSource != null) {
-			Predicate linkSourcePredicate = cb.equal(from.get("myMatchResult").as(MdmLinkSourceEnum.class), theLinkSource);
+			Predicate linkSourcePredicate = criteriaBuilder.equal(from.get("myMatchResult").as(MdmLinkSourceEnum.class), theLinkSource);
 			andPredicates.add(linkSourcePredicate);
 		}
 		if (!CollectionUtils.isEmpty(thePartitionId)) {
@@ -314,10 +317,18 @@ public class MdmLinkDaoSvc {
 			andPredicates.add(linkSourcePredicate);
 		}
 
-		Predicate finalQuery = cb.and(andPredicates.toArray(EMPTY_PREDICATE_ARRAY));
+		Predicate finalQuery = criteriaBuilder.and(andPredicates.toArray(EMPTY_PREDICATE_ARRAY));
 		TypedQuery<MdmLink> typedQuery = myEntityManager.createQuery(criteriaQuery.where(finalQuery));
 
-		return new PageImpl<>(typedQuery.getResultList());
+		CriteriaQuery<Long> countQuery = criteriaBuilder.createQuery(Long.class);
+		countQuery.select(criteriaBuilder.count(countQuery.from(MdmLink.class)))
+			.where(finalQuery);
+
+		Long totalResults = myEntityManager.createQuery(countQuery).getSingleResult();
+
+		return new PageImpl<>(typedQuery.setFirstResult(thePageRequest.getOffset()).setMaxResults(thePageRequest.getCount()).getResultList(),
+			PageRequest.of(thePageRequest.getPage(), thePageRequest.getCount()),
+			totalResults);
 	}
 
 	/**
