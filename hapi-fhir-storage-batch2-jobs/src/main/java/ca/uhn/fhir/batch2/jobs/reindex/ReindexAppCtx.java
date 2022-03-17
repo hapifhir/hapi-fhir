@@ -25,7 +25,6 @@ import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 
 @Configuration
 public class ReindexAppCtx {
@@ -33,13 +32,14 @@ public class ReindexAppCtx {
 	public static final String JOB_REINDEX = "REINDEX";
 
 	@Bean
-	public JobDefinition reindexJobDefinition() {
+	public JobDefinition<ReindexJobParameters> reindexJobDefinition() {
 		return JobDefinition
 			.newBuilder()
 			.setJobDefinitionId(JOB_REINDEX)
 			.setJobDescription("Reindex resources")
 			.setJobDefinitionVersion(1)
 			.setParametersType(ReindexJobParameters.class)
+			.setParametersValidator(reindexJobParametersValidator())
 			.addFirstStep(
 				"generate-ranges",
 				"Generate data ranges to reindex",
@@ -55,6 +55,11 @@ public class ReindexAppCtx {
 				reindexStep()
 			)
 			.build();
+	}
+
+	@Bean
+	public ReindexJobParametersValidator reindexJobParametersValidator() {
+		return new ReindexJobParametersValidator();
 	}
 
 	@Bean

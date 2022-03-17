@@ -69,20 +69,6 @@ public class ResourceReindexSvcImpl implements IResourceReindexSvc {
 
 	@Override
 	@Transactional
-	public Date getOldestTimestamp(@Nullable String theResourceType) {
-		Slice<Date> slice;
-		Pageable page = Pageable.ofSize(1);
-		if (isBlank(theResourceType)) {
-			slice = myResourceTableDao.findUpdatedDatesOfResourcesOrderedFromOldest(page);
-		} else {
-			slice = myResourceTableDao.findUpdatedDatesOfResourcesOrderedFromOldest(page, theResourceType);
-		}
-
-		return slice.get().findFirst().map(t -> new Date(t.getTime())).orElse(null);
-	}
-
-	@Override
-	@Transactional
 	public IdChunk fetchResourceIdsPage(Date theStart, Date theEnd, @Nullable String theUrl) {
 
 		int pageSize = 20000;

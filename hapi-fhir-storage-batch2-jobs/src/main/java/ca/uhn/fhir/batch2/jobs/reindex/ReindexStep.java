@@ -52,18 +52,15 @@ import java.util.stream.Collectors;
 
 public class ReindexStep implements IJobStepWorker<ReindexJobParameters, ReindexChunkIds, VoidModel> {
 
+	private static final Logger ourLog = LoggerFactory.getLogger(ReindexStep.class);
 	@Autowired
 	private HapiTransactionService myHapiTransactionService;
-
 	@Autowired
 	private IResourceReindexSvc myResourceReindexSvc;
-
 	@Autowired
 	private IFhirSystemDao<?, ?> mySystemDao;
-
 	@Autowired
 	private DaoRegistry myDaoRegistry;
-
 	@Autowired
 	private IIdHelperService myIdHelperService;
 
@@ -142,6 +139,4 @@ public class ReindexStep implements IJobStepWorker<ReindexJobParameters, Reindex
 			return null;
 		}
 	}
-
-	private static final Logger ourLog = LoggerFactory.getLogger(ReindexStep.class);
 }

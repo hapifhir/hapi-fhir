@@ -34,13 +34,6 @@ public interface IResourceReindexSvc {
 	boolean isAllResourceTypeSupported();
 
 	/**
-	 * Returns the lastUpdated timestamp for the oldest resource in the storage module
-	 *
-	 * @param theResourceType The resource type, or <code>null</code> to return the oldest resource type across all resource types. Null will only be supplied if {@link #isAllResourceTypeSupported()} returns <code>true</code>.
-	 */
-	Date getOldestTimestamp(@Nullable String theResourceType);
-
-	/**
 	 * Fetches a page of resource IDs for all resource types. The page size is up to the discretion of the implementation.
 	 *
 	 * @param theStart The start of the date range, must be inclusive.
