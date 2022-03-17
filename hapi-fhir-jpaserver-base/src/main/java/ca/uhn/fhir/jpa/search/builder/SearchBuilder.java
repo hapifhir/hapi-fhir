@@ -340,10 +340,6 @@ public class SearchBuilder implements ISearchBuilder {
 
 			List<Long> rawPids = ResourcePersistentId.toLongList(fulltextMatchIds);
 
-			// fixme fastpath!  Can we return here?
-			// fixme are there pointcuts to also call?
-			// fixme extract and test this.  Maybe to fulltext service?
-
 			// can we skip the database entirely and return the pid list from here?
 			boolean canSkipDatabase =
 				// if we processed an AND clause, and it returned nothing, then nothing can match.
@@ -903,8 +899,8 @@ public class SearchBuilder implements ISearchBuilder {
 	 * @return can we fetch from Hibernate Search?
 	 */
 	private boolean isLoadingFromElasticSearchSupported(Collection<ResourcePersistentId> theIncludedPids) {
-		// fixme mb we can be smarter here.
-		// fixme check if theIncludedPids has any with version not null.
+		// todo mb we can be smarter here.
+		// todo check if theIncludedPids has any with version not null.
 
 		// is storage enabled?
 		return myDaoConfig.isStoreResourceInLuceneIndex() &&
@@ -912,7 +908,7 @@ public class SearchBuilder implements ISearchBuilder {
 			myParams.isLastN() &&
 			// do we need to worry about versions?
 			theIncludedPids.isEmpty() &&
-			// fixme What's this about Jaison?
+			// skip the complexity for metadata in dstu2
 			myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3);
 	}
 
@@ -922,16 +918,15 @@ public class SearchBuilder implements ISearchBuilder {
 		if (myDaoConfig.isAdvancedLuceneIndexing() && myDaoConfig.isStoreResourceInLuceneIndex()) {
 			List<Long> pidList = thePids.stream().map(ResourcePersistentId::getIdAsLong).collect(Collectors.toList());
 
-			// fixme design?
+			// todo need to inject metadata - use profile to build resource, tags, and security labels
 			//Map<Long, Collection<ResourceTag>> pidToTagMap = getPidToTagMap(pidList);
-			// fixme need to inject metadata - use profile to build resource, tags, and security labels
 			List<IBaseResource> resources = myFulltextSearchSvc.getResources(pidList);
 			return resources;
 		} else if (!Objects.isNull(myParams) && myParams.isLastN()) {
 			// legacy LastN implementation
 			return myIElasticsearchSvc.getObservationResources(thePids);
 		} else {
-			// fixme I wonder if we should drop this path, and only support the new Hibernate Search path.
+			// TODO I wonder if we should drop this path, and only support the new Hibernate Search path.
 			Validate.isTrue(false, "Unexpected");
 			return Collections.emptyList();
 		}

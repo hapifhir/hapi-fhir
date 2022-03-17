@@ -813,9 +813,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	private <MT extends IBaseMetaType> void doMetaDelete(MT theMetaDel, BaseHasResource theEntity, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails) {
 
-		// fixme mb update hibernate search.
 		IBaseResource oldVersion = toResource(theEntity, false);
-
 
 		List<TagDefinition> tags = toTagList(theMetaDel);
 

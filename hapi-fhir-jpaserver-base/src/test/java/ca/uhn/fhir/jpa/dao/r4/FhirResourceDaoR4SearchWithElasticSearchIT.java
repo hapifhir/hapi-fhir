@@ -781,12 +781,11 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	}
 
 	/**
-	 * We have a fast path that skips the database entirely
-	 * when we can satisfy the queries completely from Hibernate Search.
+	 * Some queries can be satisfied directly from Hibernate Search.
+	 * We still need at least one query to fetch the resources.
 	 */
 	@Nested
 	public class FastPath {
-		// fixme clean this up.  New test for fast-ish path?
 		@BeforeEach
 		public void enableResourceStorage() {
 			myDaoConfig.setStoreResourceInLuceneIndex(false);
@@ -809,7 +808,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 			assertThat(ids, hasSize(1));
 			assertThat(ids, contains(id.getIdPart()));
-			assertEquals(1, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			assertEquals(1, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "sql just to fetch resources");
 		}
 
 		@Test
@@ -824,7 +823,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			assertThat(ids, hasSize(1));
 			assertThat(ids, contains(id.getIdPart()));
 
-			assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "the pids come from elastic, but we use sql to sort");
+			assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "the pids come from elastic, but we use sql to sort, and fetch resources");
 		}
 
 		@Test
@@ -839,7 +838,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 			assertThat(ids, hasSize(0));
 
-			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "the pids come from elastic");
+			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "the pids come from elastic, and nothing to fetch");
 		}
 
 		@Test

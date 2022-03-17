@@ -140,7 +140,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@PropertyBinding(binder = @PropertyBinderRef(type = SearchParamTextPropertyBinder.class))
 	private ExtendedLuceneIndexData myLuceneIndexData;
 
-	// fixme mb move this to ExtendedLuceneIndexData
+	// todo mb move this to ExtendedLuceneIndexData
 	@Transient
 	@GenericField(name="myRawResource", projectable = Projectable.YES, searchable = Searchable.NO)
 	@IndexingDependency(derivedFrom = @ObjectPath(@PropertyValue(propertyName = "myVersion")))

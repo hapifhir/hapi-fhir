@@ -71,7 +71,6 @@ public class ExtendedLuceneIndexData {
 
 		ourLog.debug("Writing JPA index to Hibernate Search");
 
-		// fixme test this
 		theDocument.addValue("myForcedId", myForcedId);
 
 		mySearchParamStrings.forEach(ifNotContained(indexWriter::writeStringIndex));
