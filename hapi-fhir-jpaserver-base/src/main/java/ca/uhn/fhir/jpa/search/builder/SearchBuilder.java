@@ -908,6 +908,8 @@ public class SearchBuilder implements ISearchBuilder {
 
 		// is storage enabled?
 		return myDaoConfig.isStoreResourceInLuceneIndex() &&
+			// only support lastN for now.
+			myParams.isLastN() &&
 			// do we need to worry about versions?
 			theIncludedPids.isEmpty() &&
 			// fixme What's this about Jaison?

@@ -786,9 +786,10 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	 */
 	@Nested
 	public class FastPath {
+		// fixme clean this up.  New test for fast-ish path?
 		@BeforeEach
 		public void enableResourceStorage() {
-			myDaoConfig.setStoreResourceInLuceneIndex(true);
+			myDaoConfig.setStoreResourceInLuceneIndex(false);
 		}
 
 		@AfterEach
@@ -808,7 +809,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 			assertThat(ids, hasSize(1));
 			assertThat(ids, contains(id.getIdPart()));
-			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			assertEquals(1, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
 		}
 
 		@Test
@@ -823,7 +824,22 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			assertThat(ids, hasSize(1));
 			assertThat(ids, contains(id.getIdPart()));
 
-			assertEquals(1, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "the pids come from elastic, but we use sql to sort");
+			assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "the pids come from elastic, but we use sql to sort");
+		}
+
+		@Test
+		public void deletedResourceNotFound() {
+
+			IIdType id = myTestDataBuilder.createObservation(myTestDataBuilder.withObservationCode("http://example.com/", "theCode"));
+			myObservationDao.delete(id);
+			myCaptureQueriesListener.clear();
+
+			List<String> ids = myTestDaoSearch.searchForIds("Observation?code=theCode&_sort=code");
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+			assertThat(ids, hasSize(0));
+
+			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "the pids come from elastic");
 		}
 
 		@Test
@@ -840,7 +856,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			assertThat(ids, hasSize(1));
 			assertThat(ids, contains(id.getIdPart()));
 
-			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+			assertEquals(1, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "just 1 to fetch the resources");
 		}
 
 		/**
