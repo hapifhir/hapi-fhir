@@ -29,7 +29,7 @@
 			<artifactId>commons-dbcp2</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
 			<version>${project.version}</version>
 		</dependency>
@@ -145,7 +145,7 @@
 					</archive>
 					<overlays>
 						<overlay>
-							<groupId>ca.uhn.hapi.fhir</groupId>
+							<groupId>${project.groupId}</groupId>
 							<artifactId>hapi-fhir-testpage-overlay</artifactId>
 						</overlay>
 					</overlays>
