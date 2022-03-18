@@ -23,6 +23,7 @@ package ca.uhn.fhir.batch2.jobs.reindex;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -78,8 +79,8 @@ public class ReindexAppCtx {
 	}
 
 	@Bean
-	public ReindexProvider reindexProvider(FhirContext theFhirContext, IJobCoordinator theJobCoordinator) {
-		return new ReindexProvider(theFhirContext, theJobCoordinator);
+	public ReindexProvider reindexProvider(FhirContext theFhirContext, IJobCoordinator theJobCoordinator, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+		return new ReindexProvider(theFhirContext, theJobCoordinator, theRequestPartitionHelperSvc);
 	}
 
 }
