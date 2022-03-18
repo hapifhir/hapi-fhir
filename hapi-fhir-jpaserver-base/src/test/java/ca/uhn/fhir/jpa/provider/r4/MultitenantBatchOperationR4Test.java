@@ -21,6 +21,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -152,9 +153,9 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 			.withParameters(input)
 			.execute();
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
-		DecimalType jobId = (DecimalType) response.getParameter(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
+		StringType jobId = (StringType) response.getParameter(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
 
-		myBatchJobHelper.awaitJobExecution(jobId.getValueAsNumber().longValue());
+		myBatch2JobHelper.awaitJobCompletion(jobId.getValue());
 
 		// validate
 		List<String> alleleObservationIds = reindexTestHelper.getAlleleObservationIds(myClient);
@@ -202,9 +203,9 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 			.withParameters(input)
 			.execute();
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
-		DecimalType jobId = (DecimalType) response.getParameter(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
+		StringType jobId = (StringType) response.getParameter(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
 
-		myBatchJobHelper.awaitJobExecution(jobId.getValueAsNumber().longValue());
+		myBatch2JobHelper.awaitJobCompletion(jobId.getValue());
 
 		// validate
 		List<String> alleleObservationIds = reindexTestHelper.getAlleleObservationIds(myClient);
