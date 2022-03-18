@@ -55,7 +55,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 	,ReindexTerminologyFreetextR4Test.NoopMandatoryTransactionListener.class
 })
 public class ReindexTerminologyFreetextR4Test extends BaseJpaR4Test {
-		private static final Logger ourLog = LoggerFactory.getLogger(ReindexTerminologyFreetextR4Test.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(ReindexTerminologyFreetextR4Test.class);
 
 	public static final String LOINC_URL = "http://loinc.org";
 	public static final String TEST_FILES_CLASSPATH = "loinc-reindex/";
@@ -180,7 +180,7 @@ public class ReindexTerminologyFreetextR4Test extends BaseJpaR4Test {
 			myTermConceptDao.countByCodeSystemVersion(termCodeSystemVersionWithNoVersionId) );
 		assertEquals(CS_CONCEPTS_NUMBER, dbTermConceptCountForNullVersion);
 
-		long termConceptCountNullVersion = searchAllIndexedTermConceptCount(termCodeSystemVersionWithVersionId);
+		long termConceptCountNullVersion = searchAllIndexedTermConceptCount(termCodeSystemVersionWithNoVersionId);
 		ourLog.info("=================> Number of freetext found concepts after re-indexing for version {}: {}",
 			NULL, termConceptCountNullVersion);
 		assertEquals(CS_CONCEPTS_NUMBER, termConceptCountNullVersion);

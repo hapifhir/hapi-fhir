@@ -88,15 +88,15 @@ public class TerminologyFreetextIndexingProviderTest {
 
 
 	@Test
-	void testServiceThroes() throws InterruptedException {
+	void testServiceThrows() throws InterruptedException {
 		String exceptionMsg = "some msg";
 		when(myTermReadSvc.reindexTerminology()).thenThrow(new InterruptedException(exceptionMsg));
 
 		InternalErrorException thrown = assertThrows(InternalErrorException.class,
 			() -> testedProvider.reindexTerminology(myRequestDetails));
 
-		assertEquals(Msg.code(2072) + "Re-creating terminology freetext indexes " +
-			"failed with exception: " + exceptionMsg, thrown.getMessage());
+		assertTrue(thrown.getMessage().startsWith(Msg.code(2072) + "Re-creating terminology freetext indexes " +
+			"failed with exception: " + exceptionMsg));
 	}
 
 

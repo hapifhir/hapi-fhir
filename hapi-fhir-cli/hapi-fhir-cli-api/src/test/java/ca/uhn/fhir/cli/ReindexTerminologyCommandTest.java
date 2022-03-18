@@ -35,7 +35,6 @@ class ReindexTerminologyCommandTest {
 		new RestfulServerExtension(myContext, myProvider);
 
 
-	private final PrintStream standardOut = System.out;
 	private final ByteArrayOutputStream outputStreamCaptor = new ByteArrayOutputStream();
 
 	static {
