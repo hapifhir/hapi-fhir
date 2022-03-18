@@ -91,7 +91,7 @@ public class ReindexTerminologyCommand extends BaseRequestGeneratingCommand {
 			ParametersUtil.addParameterToParametersBoolean(myFhirCtx, response, RESP_PARAM_SUCCESS, false);
 			ParametersUtil.addParameterToParametersString(myFhirCtx, response, "message",
 				"Internal error. Command result unknown. Check system logs for details");
-			ourLog.info("Response:{}{}", NL, myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
+			ourLog.error("Response:{}{}", NL, myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
 			return;
 		}
 
