@@ -133,12 +133,12 @@ public class MdmMatchLinkSvc {
 		// 2. Create source resource for the MDM source
 		// 3. UPDATE MDM LINK TABLE
 
-		// FIXME PART1: it is within this call that we will be generating the comment with the with the NULL/NULL values.
+		// FIXME Anna PART1: it is within this call that we will be generating the comment with the with the NULL/NULL values.
 		myMdmLinkSvc.updateLink(newGoldenResource, theResource, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 	}
 
 	private void handleMdmCreate(IAnyResource theTargetResource, MatchedGoldenResourceCandidate theGoldenResourceCandidate, MdmTransactionContext theMdmTransactionContext) {
-		// FIXME PART3: let's move this log bellow (see comment in next method)
+		// FIXME Anna PART3: Let's rework this log and move it to '//MOVE_HERE
 		log(theMdmTransactionContext, "MDM has narrowed down to one candidate for matching.");
 		IAnyResource goldenResource = myMdmGoldenResourceFindingSvc.getGoldenResourceFromMatchedGoldenResourceCandidate(theGoldenResourceCandidate, theMdmTransactionContext.getResourceType());
 
@@ -149,6 +149,7 @@ public class MdmMatchLinkSvc {
 			myMdmLinkSvc.updateLink(newGoldenResource, theTargetResource, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 			myMdmLinkSvc.updateLink(newGoldenResource, goldenResource, MdmMatchOutcome.POSSIBLE_DUPLICATE, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 		} else {
+			//MOVE_HERE
 			if (theGoldenResourceCandidate.isMatch()) {
 				myGoldenResourceHelper.handleExternalEidAddition(goldenResource, theTargetResource, theMdmTransactionContext);
 				myEidUpdateService.applySurvivorshipRulesAndSaveGoldenResource(theTargetResource, goldenResource, theMdmTransactionContext);
@@ -159,14 +160,13 @@ public class MdmMatchLinkSvc {
 	}
 
 	private void handleMdmWithSingleCandidate(IAnyResource theResource, MatchedGoldenResourceCandidate theGoldenResourceCandidate, MdmTransactionContext theMdmTransactionContext) {
-		// FIXME PART3: this log should be moved within the if statement to mark that we will be updating. there is a log
-		// addressing the create in method handleMdmCreate.
-
+		// FIXME Anna PART3: this log should be moved within the if statement to mark that we will be updating. there is a log
 		log(theMdmTransactionContext, "MDM has narrowed down to one candidate for matching.");
+
 		if (theMdmTransactionContext.getRestOperation().equals(MdmTransactionContext.OperationType.UPDATE_RESOURCE)) {
 			myEidUpdateService.handleMdmUpdate(theResource, theGoldenResourceCandidate, theMdmTransactionContext);
 		} else {
-			// FIXME PART3: move the logging from above here and enhance it
+			// FIXME Anna PART3: move the logging from above here and enhance it
 			handleMdmCreate(theResource, theGoldenResourceCandidate, theMdmTransactionContext);
 		}
 	}
