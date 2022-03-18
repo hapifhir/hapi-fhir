@@ -41,6 +41,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.StopWatch;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
@@ -142,7 +143,8 @@ public class BaseJpaSystemProvider<T, MT> extends BaseJpaProvider implements IJp
 
 		} catch (Exception theE) {
 			throw new InternalErrorException(Msg.code(2072) +
-				"Re-creating terminology freetext indexes failed with exception: " + theE.getMessage());
+				"Re-creating terminology freetext indexes failed with exception: " + theE.getMessage() +
+				NL +  "With trace:" + NL + ExceptionUtils.getStackTrace(theE));
 		}
 
 		IBaseParameters retVal = ParametersUtil.newInstance(getContext());
@@ -161,6 +163,6 @@ public class BaseJpaSystemProvider<T, MT> extends BaseJpaProvider implements IJp
 	}
 
 
-
+	public static final String NL = System.getProperty("line.separator");
 
 }

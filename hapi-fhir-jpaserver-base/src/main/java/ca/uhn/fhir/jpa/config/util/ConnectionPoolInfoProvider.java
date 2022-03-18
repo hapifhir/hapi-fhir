@@ -15,22 +15,22 @@ import java.util.Optional;
 public class ConnectionPoolInfoProvider implements IConnectionPoolInfoProvider {
 	private static final Logger ourLog = LoggerFactory.getLogger(ConnectionPoolInfoProvider.class);
 
-	private IConnectionPoolInfoProvider provider;
+	private IConnectionPoolInfoProvider myProvider;
 
 
 	public ConnectionPoolInfoProvider(DataSource theDataSource) {
 		if (theDataSource.getClass().isAssignableFrom(BasicDataSource.class)) {
-			provider =  new BasicDataSourceConnectionPoolInfoProvider((BasicDataSource) theDataSource);
+			myProvider =  new BasicDataSourceConnectionPoolInfoProvider((BasicDataSource) theDataSource);
 			return;
 		}
 
 		if ( theDataSource.getClass().isAssignableFrom(ProxyDataSource.class)) {
-			boolean basiDataSourceWrapped = false;
+			boolean basiDataSourceWrapped;
 			try {
 				basiDataSourceWrapped = theDataSource.isWrapperFor(BasicDataSource.class);
 				if (basiDataSourceWrapped) {
 					BasicDataSource basicDataSource = theDataSource.unwrap(BasicDataSource.class);
-					provider = new BasicDataSourceConnectionPoolInfoProvider(basicDataSource);
+					myProvider = new BasicDataSourceConnectionPoolInfoProvider(basicDataSource);
 				}
 			} catch (SQLException ignored) { }
 		}
@@ -39,17 +39,17 @@ public class ConnectionPoolInfoProvider implements IConnectionPoolInfoProvider {
 
 	@Override
 	public Optional<Integer> getTotalConnectionSize() {
-		return provider == null ? Optional.empty() : provider.getTotalConnectionSize();
+		return myProvider == null ? Optional.empty() : myProvider.getTotalConnectionSize();
 	}
 
 	@Override
 	public Optional<Integer> getActiveConnections() {
-		return provider == null ? Optional.empty() : provider.getActiveConnections();
+		return myProvider == null ? Optional.empty() : myProvider.getActiveConnections();
 	}
 
 	@Override
 	public Optional<Long> getMaxWaitMillis() {
-		return provider == null ? Optional.empty() : provider.getMaxWaitMillis();
+		return myProvider == null ? Optional.empty() : myProvider.getMaxWaitMillis();
 	}
 }
 

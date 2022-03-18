@@ -1,5 +1,5 @@
 ---
-type: fix
+type: add
 issue: 3450
-title: "There was no way to recreate freetext indexes for terminology entities. Command line operation
-   reindex-terminology was added for this purpose."
+title: "Previously there was no way to recreate freetext indexes for terminology entities. A new CLI operation,
+   reindex-terminology now exists for this purpose."

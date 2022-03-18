@@ -101,7 +101,7 @@ class ConnectionPoolInfoProviderTest {
 			IConnectionPoolInfoProvider provider = new ConnectionPoolInfoProvider(ds);
 
 			IConnectionPoolInfoProvider instantiatedProvider =
-				(IConnectionPoolInfoProvider) ReflectionTestUtils.getField(provider, "provider");
+				(IConnectionPoolInfoProvider) ReflectionTestUtils.getField(provider, "myProvider");
 
 			assertNotNull(instantiatedProvider);
 			assertTrue(instantiatedProvider.getClass().isAssignableFrom(BasicDataSourceConnectionPoolInfoProvider.class));
@@ -115,7 +115,7 @@ class ConnectionPoolInfoProviderTest {
 			IConnectionPoolInfoProvider provider = new ConnectionPoolInfoProvider(proxyDs);
 
 			IConnectionPoolInfoProvider instantiatedProvider =
-				(IConnectionPoolInfoProvider) ReflectionTestUtils.getField(provider, "provider");
+				(IConnectionPoolInfoProvider) ReflectionTestUtils.getField(provider, "myProvider");
 			assertNotNull(instantiatedProvider);
 			assertTrue(instantiatedProvider.getClass().isAssignableFrom(BasicDataSourceConnectionPoolInfoProvider.class));
 		}
@@ -126,7 +126,7 @@ class ConnectionPoolInfoProviderTest {
 
 			IConnectionPoolInfoProvider provider = new ConnectionPoolInfoProvider(proxyDs);
 			IConnectionPoolInfoProvider instantiatedProvider =
-				(IConnectionPoolInfoProvider) ReflectionTestUtils.getField(provider, "provider");
+				(IConnectionPoolInfoProvider) ReflectionTestUtils.getField(provider, "myProvider");
 			assertNull(instantiatedProvider);
 		}
 
@@ -135,7 +135,7 @@ class ConnectionPoolInfoProviderTest {
 			IConnectionPoolInfoProvider provider = new ConnectionPoolInfoProvider(unknownDataSource);
 
 			IConnectionPoolInfoProvider instantiatedProvider =
-				(IConnectionPoolInfoProvider) ReflectionTestUtils.getField(provider, "provider");
+				(IConnectionPoolInfoProvider) ReflectionTestUtils.getField(provider, "myProvider");
 			assertNull(instantiatedProvider);
 		}
 
