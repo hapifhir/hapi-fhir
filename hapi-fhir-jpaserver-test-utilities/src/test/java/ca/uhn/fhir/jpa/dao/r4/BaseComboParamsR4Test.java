@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
+import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.util.SpringObjectCaster;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.junit.jupiter.api.AfterEach;

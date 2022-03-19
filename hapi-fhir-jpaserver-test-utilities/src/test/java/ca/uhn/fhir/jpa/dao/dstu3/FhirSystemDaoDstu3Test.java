@@ -25,6 +25,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Maps;
@@ -629,7 +630,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@Test
 	public void testTransaction1() throws IOException {
-		String inputBundleString = loadClasspath("/david-bundle-error.json");
+		String inputBundleString = ClasspathUtil.loadResource("/david-bundle-error.json");
 		Bundle bundle = myFhirContext.newJsonParser().parseResource(Bundle.class, inputBundleString);
 		Bundle resp = mySystemDao.transaction(mySrd, bundle);
 
@@ -2487,7 +2488,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@Test
 	public void testTransactionWithMultiBundle() throws IOException {
-		String inputBundleString = loadClasspath("/batch-error.xml");
+		String inputBundleString = ClasspathUtil.loadResource("/batch-error.xml");
 		Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, inputBundleString);
 		Bundle resp = mySystemDao.transaction(mySrd, bundle);
 

@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.packages;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
-import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
+import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.test.utilities.JettyUtil;

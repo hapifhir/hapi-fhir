@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.config;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
+import ca.uhn.fhir.jpa.test.config.TestHibernateSearchAddInConfig;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
@@ -56,6 +57,8 @@ public class TestDstu2Config {
 
 	}
 
+	@Autowired
+	TestHibernateSearchAddInConfig.IHibernateSearchConfigurer hibernateSearchConfigurer;
 	private Exception myLastStackTrace;
 	private String myLastStackTraceThreadName;
 
@@ -147,9 +150,6 @@ public class TestDstu2Config {
 	public Integer getMaxThread() {
 		return ourMaxThreads;
 	}
-
-	@Autowired
-	TestHibernateSearchAddInConfig.IHibernateSearchConfigurer hibernateSearchConfigurer;
 
 	private Properties jpaProperties() {
 		Properties extraProperties = new Properties();

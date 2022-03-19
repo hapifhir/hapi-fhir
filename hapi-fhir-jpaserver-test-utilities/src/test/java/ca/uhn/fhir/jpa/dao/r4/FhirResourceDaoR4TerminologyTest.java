@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
+import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.TokenParam;

@@ -315,8 +315,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	protected EntityManager myEntityManager;
 	@Autowired
-	protected FhirContext myFhirContext;
-	@Autowired
 	@Qualifier("myGroupDaoR4")
 	protected IFhirResourceDao<Group> myGroupDao;
 	@Autowired
@@ -594,10 +592,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Override
 	protected PlatformTransactionManager getTxManager() {
 		return myTxManager;
-	}
-
-	protected <T extends IBaseResource> T loadResourceFromClasspath(Class<T> type, String resourceName) throws IOException {
-		return ClasspathUtil.loadResource(myFhirContext, type, resourceName);
 	}
 
 	protected void validate(IBaseResource theResource) {

@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.delete.job;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.batch.job.MultiUrlJobParameterUtil;
-import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
+import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import org.hl7.fhir.instance.model.api.IIdType;

@@ -39,6 +39,7 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
+import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
@@ -5766,7 +5767,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testTransaction() throws Exception {
-		String contents = loadClasspath("/update.xml");
+		String contents = ClasspathUtil.loadResource("/update.xml");
 		HttpPost post = new HttpPost(ourServerBase);
 		post.setEntity(new StringEntity(contents, ContentType.create("application/xml+fhir", "UTF-8")));
 		try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {

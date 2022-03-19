@@ -34,6 +34,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.BaseValidatingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
+import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.validation.IValidatorModule;
@@ -3941,7 +3942,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testTransaction() throws Exception {
-		String contents = loadClasspath("/update.xml");
+		String contents = ClasspathUtil.loadResource("/update.xml");
 		HttpPost post = new HttpPost(ourServerBase);
 		post.setEntity(new StringEntity(contents, ContentType.create("application/xml+fhir", "UTF-8")));
 		CloseableHttpResponse resp = ourHttpClient.execute(post);

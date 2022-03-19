@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
+import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;

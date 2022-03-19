@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
+import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.CodeSystem;

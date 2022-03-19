@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.config.r4.JpaR4Config;
 import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
+import ca.uhn.fhir.jpa.test.config.TestHibernateSearchAddInConfig;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
@@ -155,7 +156,7 @@ public class TestR4Config {
 //			.logQueryBySlf4j(level)
 			.logSlowQueryBySlf4j(10, TimeUnit.SECONDS, level)
 			.beforeQuery(new BlockLargeNumbersOfParamsListener())
-			.beforeQuery( getMandatoryTransactionListener() )
+			.beforeQuery(getMandatoryTransactionListener())
 			.afterQuery(captureQueriesListener())
 			.afterQuery(new CurrentThreadCaptureQueriesListener())
 			.countQuery(singleQueryCountHolder())

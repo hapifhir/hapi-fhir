@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.support.TranslateConceptResult;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.jpa.api.model.TranslationRequest;
 import ca.uhn.fhir.jpa.entity.TermConceptMap;
+import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 import org.hl7.fhir.dstu3.model.ConceptMap;
 import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.instance.model.api.IIdType;

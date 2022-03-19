@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.dao.data.ITermConceptMapGroupDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptMapGroupElementDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptMapGroupElementTargetDao;
 import ca.uhn.fhir.jpa.entity.TermConceptMap;
+import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;

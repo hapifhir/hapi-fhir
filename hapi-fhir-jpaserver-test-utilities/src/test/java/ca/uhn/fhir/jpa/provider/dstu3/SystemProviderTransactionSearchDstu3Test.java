@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.provider.dstu3;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
+import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 import ca.uhn.fhir.jpa.rp.dstu3.ObservationResourceProvider;
 import ca.uhn.fhir.jpa.rp.dstu3.OrganizationResourceProvider;
 import ca.uhn.fhir.jpa.rp.dstu3.PatientResourceProvider;

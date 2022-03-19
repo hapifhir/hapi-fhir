@@ -3,8 +3,9 @@ package ca.uhn.fhir.jpa.packages;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionResourceDao;
-import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
+import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
+import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.JsonUtil;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,15 +47,15 @@ public class NpmSearchR4Test extends BaseJpaR4Test {
 		PackageInstallationSpec spec;
 		byte[] bytes;
 
-		bytes = loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz");
+		bytes = ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz");
 		spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.11.1").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY).setPackageContents(bytes);
 		igInstaller.install(spec);
 
-		bytes = loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz");
+		bytes = ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz");
 		spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY).setPackageContents(bytes);
 		igInstaller.install(spec);
 
-		bytes = loadClasspathBytes("/packages/nictiz.fhir.nl.stu3.questionnaires-1.0.2.tgz");
+		bytes = ClasspathUtil.loadResourceAsByteArray("/packages/nictiz.fhir.nl.stu3.questionnaires-1.0.2.tgz");
 		spec = new PackageInstallationSpec().setName("nictiz.fhir.nl.stu3.questionnaires").setVersion("1.0.2").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY).setPackageContents(bytes);
 		igInstaller.install(spec);
 
@@ -82,11 +83,11 @@ public class NpmSearchR4Test extends BaseJpaR4Test {
 		PackageInstallationSpec spec;
 		byte[] bytes;
 
-		bytes = loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz");
+		bytes = ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz");
 		spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.11.1").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY).setPackageContents(bytes);
 		igInstaller.install(spec);
 
-		bytes = loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz");
+		bytes = ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz");
 		spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY).setPackageContents(bytes);
 		igInstaller.install(spec);
 
@@ -124,7 +125,7 @@ public class NpmSearchR4Test extends BaseJpaR4Test {
 	public void testSearchByFhirVersion() throws IOException {
 		PackageInstallationSpec spec;
 		byte[] bytes;
-		bytes = loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz");
+		bytes = ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz");
 		spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY).setPackageContents(bytes);
 		igInstaller.install(spec);
 
@@ -182,11 +183,11 @@ public class NpmSearchR4Test extends BaseJpaR4Test {
 		PackageInstallationSpec spec;
 		byte[] bytes;
 
-		bytes = loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz");
+		bytes = ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz");
 		spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.11.1").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY).setPackageContents(bytes);
 		igInstaller.install(spec);
 
-		bytes = loadClasspathBytes("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz");
+		bytes = ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz");
 		spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY).setPackageContents(bytes);
 		igInstaller.install(spec);
 

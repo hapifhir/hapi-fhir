@@ -63,10 +63,10 @@ import ca.uhn.fhir.test.utilities.LoggingExtension;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
 import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
-import org.apache.commons.io.IOUtils;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -102,7 +102,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -153,6 +152,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	protected ServletRequestDetails mySrd;
 	protected InterceptorService mySrdInterceptorService;
+	@Autowired
+	protected FhirContext myFhirContext;
 	@Autowired
 	protected DaoConfig myDaoConfig = new DaoConfig();
 	@Autowired
@@ -216,6 +217,10 @@ public abstract class BaseJpaTest extends BaseTest {
 	private JobExecutionDao myMapJobExecutionDao;
 	@Autowired(required = false)
 	private JobInstanceDao myMapJobInstanceDao;
+
+	protected <T extends IBaseResource> T loadResourceFromClasspath(Class<T> type, String resourceName) throws IOException {
+		return ClasspathUtil.loadResource(myFhirContext, type, resourceName);
+	}
 
 	@AfterEach
 	public void afterEnsureNoStaleBatchJobs() {

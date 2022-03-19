@@ -71,6 +71,7 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
@@ -2539,7 +2540,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	@Test
 	public void testTransaction() throws Exception {
-		String contents = loadClasspath("/update.xml");
+		String contents = ClasspathUtil.loadResource("/update.xml");
 		HttpPost post = new HttpPost(ourServerBase);
 		post.setEntity(new StringEntity(contents, ContentType.create("application/xml+fhir", "UTF-8")));
 		CloseableHttpResponse resp = ourHttpClient.execute(post);

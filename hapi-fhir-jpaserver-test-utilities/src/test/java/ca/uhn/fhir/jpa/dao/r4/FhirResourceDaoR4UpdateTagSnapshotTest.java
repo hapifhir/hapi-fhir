@@ -1,12 +1,11 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import com.google.common.collect.Lists;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;

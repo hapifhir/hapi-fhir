@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.config.TestHibernateSearchAddInConfig;
+import ca.uhn.fhir.jpa.test.config.TestHibernateSearchAddInConfig;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import org.apache.commons.io.IOUtils;
@@ -87,23 +87,25 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 
 	}
 
-	public static Matcher<ValueSet.ValueSetExpansionContainsComponent> valueSetExpansionMatching(IBaseCoding theTarget) {
-		return new TypeSafeDiagnosingMatcher<ValueSet.ValueSetExpansionContainsComponent>() {
-			public void describeTo(Description description) {
-				description.appendText("ValueSetExpansionContainsComponent matching ").appendValue(theTarget.getSystem() + "|" + theTarget.getCode());
-			}
-
-			protected boolean matchesSafely(ValueSet.ValueSetExpansionContainsComponent theItem, Description mismatchDescription) {
-				return Objects.equals(theItem.getSystem(), theTarget.getSystem()) &&
-						Objects.equals(theItem.getCode(), theTarget.getCode());
-			}
-		};
-	}
-
 	private void createObservationWithCode(Coding c) {
 		Observation observation = new Observation();
 		observation.getCode().addCoding(c);
 		myObservationDao.create(observation, mySrd).getId().toUnqualifiedVersionless();
+	}
+
+	public static Matcher<ValueSet.ValueSetExpansionContainsComponent> valueSetExpansionMatching(IBaseCoding theTarget) {
+		return new TypeSafeDiagnosingMatcher<ValueSet.ValueSetExpansionContainsComponent>() {
+			@Override
+			public void describeTo(Description description) {
+				description.appendText("ValueSetExpansionContainsComponent matching ").appendValue(theTarget.getSystem() + "|" + theTarget.getCode());
+			}
+
+			@Override
+			protected boolean matchesSafely(ValueSet.ValueSetExpansionContainsComponent theItem, Description mismatchDescription) {
+				return Objects.equals(theItem.getSystem(), theTarget.getSystem()) &&
+					Objects.equals(theItem.getCode(), theTarget.getCode());
+			}
+		};
 	}
 
 }

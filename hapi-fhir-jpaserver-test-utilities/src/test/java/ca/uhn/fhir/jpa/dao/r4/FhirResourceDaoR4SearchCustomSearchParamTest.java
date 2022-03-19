@@ -7,13 +7,12 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -24,6 +23,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.HapiExtensions;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -508,7 +508,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		pract.addName().setFamily("PRACT");
 		myPractitionerDao.update(pract);
 
-		Patient pat = myFhirContext.newJsonParser().parseResource(Patient.class, loadClasspath("/r4/custom_resource_patient.json"));
+		Patient pat = myFhirContext.newJsonParser().parseResource(Patient.class, ClasspathUtil.loadResource("/r4/custom_resource_patient.json"));
 		IIdType pid = myPatientDao.create(pat, mySrd).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap params = new SearchParameterMap();

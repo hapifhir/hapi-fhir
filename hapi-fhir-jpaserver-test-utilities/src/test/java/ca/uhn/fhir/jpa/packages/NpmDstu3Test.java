@@ -1,11 +1,12 @@
 package ca.uhn.fhir.jpa.packages;
 
-import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
+import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
+import ca.uhn.fhir.util.ClasspathUtil;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -70,7 +71,7 @@ public class NpmDstu3Test extends BaseJpaDstu3Test {
 
 	@Test
 	public void installDstu3Package() throws Exception {
-		byte[] bytes = loadClasspathBytes("/packages/basisprofil.de.tar.gz");
+		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/basisprofil.de.tar.gz");
 		myResponses.put("/basisprofil.de/0.2.40", bytes);
 
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("basisprofil.de").setVersion("0.2.40").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY);

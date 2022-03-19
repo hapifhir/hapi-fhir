@@ -17,9 +17,8 @@ import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.binstore.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.binstore.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
-import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.config.TestR5Config;
-import ca.uhn.fhir.jpa.dao.BaseJpaTest;
+import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
@@ -492,16 +491,6 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	@Override
 	protected PlatformTransactionManager getTxManager() {
 		return myTxManager;
-	}
-
-	protected <T extends IBaseResource> T loadResourceFromClasspath(Class<T> type, String resourceName) throws IOException {
-		InputStream stream = FhirResourceDaoDstu2SearchNoFtTest.class.getResourceAsStream(resourceName);
-		if (stream == null) {
-			fail("Unable to load resource: " + resourceName);
-		}
-		String string = IOUtils.toString(stream, StandardCharsets.UTF_8);
-		IParser newJsonParser = EncodingEnum.detectEncodingNoDefault(string).newParser(myFhirCtx);
-		return newJsonParser.parseResource(type, string);
 	}
 
 	protected void validate(IBaseResource theResource) {

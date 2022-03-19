@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.config.r5.JpaR5Config;
 import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
+import ca.uhn.fhir.jpa.test.config.TestHibernateSearchAddInConfig;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
@@ -61,8 +62,9 @@ public class TestR5Config {
 	}
 
 	@Autowired
+	TestHibernateSearchAddInConfig.IHibernateSearchConfigurer hibernateSearchConfigurer;
+	@Autowired
 	private Environment myEnvironment;
-
 	private Exception myLastStackTrace;
 
 	@Bean
@@ -149,9 +151,6 @@ public class TestR5Config {
 		retVal.setJpaProperties(jpaProperties());
 		return retVal;
 	}
-
-	@Autowired
-	TestHibernateSearchAddInConfig.IHibernateSearchConfigurer hibernateSearchConfigurer;
 
 	private Properties jpaProperties() {
 		Properties extraProperties = new Properties();

@@ -10,10 +10,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
-import ca.uhn.fhir.jpa.config.TestHibernateSearchAddInConfig;
 import ca.uhn.fhir.jpa.config.TestR4Config;
-import ca.uhn.fhir.storage.test.BaseDateSearchDaoTests;
-import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -26,6 +23,8 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
+import ca.uhn.fhir.jpa.test.BaseJpaTest;
+import ca.uhn.fhir.jpa.test.config.TestHibernateSearchAddInConfig;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -35,6 +34,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.storage.test.BaseDateSearchDaoTests;
 import ca.uhn.fhir.storage.test.DaoTestDataBuilder;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import ca.uhn.fhir.validation.FhirValidator;
@@ -505,7 +505,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	}
 
 
-
 	private void assertObservationSearchMatchesNothing(String message, SearchParameterMap map) {
 		assertObservationSearchMatches(message, map);
 	}
@@ -513,48 +512,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	private void assertObservationSearchMatches(String message, SearchParameterMap map, IIdType... iIdTypes) {
 		assertThat(message, toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(iIdTypes)));
 	}
-
-	@Nested
-	public class WithContainedIndexingIT {
-		@BeforeEach
-		public void enableContains() {
-			// we don't support chained or contained yet, but turn it on to test we don't blow up.
-			myDaoConfig.getModelConfig().setIndexOnContainedResources(true);
-			myDaoConfig.getModelConfig().setIndexOnContainedResourcesRecursively(true);
-		}
-
-		@AfterEach
-		public void restoreContains() {
-			ModelConfig defaultModelConfig = new ModelConfig();
-			myDaoConfig.getModelConfig().setIndexOnContainedResources(defaultModelConfig.isIndexOnContainedResources());
-			myDaoConfig.getModelConfig().setIndexOnContainedResourcesRecursively(defaultModelConfig.isIndexOnContainedResourcesRecursively());
-		}
-		/**
-		 * We were throwing when indexing contained.
-		 * https://github.com/hapifhir/hapi-fhir/issues/3371
-		 */
-		@Test
-		public void ignoreContainedResources_noError() {
-			// given
-			String json =
-				"{" +
-					"\"resourceType\": \"Observation\"," +
-					"\"contained\": [{" +
-					"\"resourceType\": \"Patient\"," +
-					"\"id\": \"contained-patient\"," +
-					"\"name\": [{ \"family\": \"Smith\"}]" +
-					"}]," +
-					"\"subject\": { \"reference\": \"#contained-patient\" }" +
-					"}";
-			Observation o = myFhirCtx.newJsonParser().parseResource(Observation.class, json);
-
-			myObservationDao.create(o, mySrd).getId().toUnqualifiedVersionless();
-
-			// no error.
-		}
-	}
-
-
 
 	@Test
 	public void testExpandWithIsAInExternalValueSet() {
@@ -646,7 +603,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			.collect(Collectors.toList());
 		assertThat(codes.toString(), codes, Matchers.contains("advice", "message", "note", "notification"));
 	}
-
 
 	@Test
 	public void testExpandVsWithMultiInclude_Some() throws IOException {
@@ -749,6 +705,47 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 		assertEquals(0, result.getMessages().size());
 
+	}
+
+	@Nested
+	public class WithContainedIndexingIT {
+		@BeforeEach
+		public void enableContains() {
+			// we don't support chained or contained yet, but turn it on to test we don't blow up.
+			myDaoConfig.getModelConfig().setIndexOnContainedResources(true);
+			myDaoConfig.getModelConfig().setIndexOnContainedResourcesRecursively(true);
+		}
+
+		@AfterEach
+		public void restoreContains() {
+			ModelConfig defaultModelConfig = new ModelConfig();
+			myDaoConfig.getModelConfig().setIndexOnContainedResources(defaultModelConfig.isIndexOnContainedResources());
+			myDaoConfig.getModelConfig().setIndexOnContainedResourcesRecursively(defaultModelConfig.isIndexOnContainedResourcesRecursively());
+		}
+
+		/**
+		 * We were throwing when indexing contained.
+		 * https://github.com/hapifhir/hapi-fhir/issues/3371
+		 */
+		@Test
+		public void ignoreContainedResources_noError() {
+			// given
+			String json =
+				"{" +
+					"\"resourceType\": \"Observation\"," +
+					"\"contained\": [{" +
+					"\"resourceType\": \"Patient\"," +
+					"\"id\": \"contained-patient\"," +
+					"\"name\": [{ \"family\": \"Smith\"}]" +
+					"}]," +
+					"\"subject\": { \"reference\": \"#contained-patient\" }" +
+					"}";
+			Observation o = myFhirCtx.newJsonParser().parseResource(Observation.class, json);
+
+			myObservationDao.create(o, mySrd).getId().toUnqualifiedVersionless();
+
+			// no error.
+		}
 	}
 
 	@Nested

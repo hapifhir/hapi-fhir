@@ -828,7 +828,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testTransaction1() throws IOException {
-		String inputBundleString = loadClasspath("/david-bundle-error.json");
+		String inputBundleString = ClasspathUtil.loadResource("/david-bundle-error.json");
 		Bundle bundle = myFhirContext.newJsonParser().parseResource(Bundle.class, inputBundleString);
 		Bundle resp = mySystemDao.transaction(mySrd, bundle);
 
@@ -3895,7 +3895,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testTransactionWithMultiBundle() throws IOException {
-		String inputBundleString = loadClasspath("/r4/batch-error.xml");
+		String inputBundleString = ClasspathUtil.loadResource("/r4/batch-error.xml");
 		Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, inputBundleString);
 		Bundle resp = mySystemDao.transaction(mySrd, bundle);
 

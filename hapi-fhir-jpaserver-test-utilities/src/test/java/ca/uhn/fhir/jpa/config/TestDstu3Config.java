@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.EmailSenderImpl;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
+import ca.uhn.fhir.jpa.test.config.TestHibernateSearchAddInConfig;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
@@ -43,14 +44,14 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class TestDstu3Config {
 
 	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestDstu3Config.class);
+	@Autowired
+	TestHibernateSearchAddInConfig.IHibernateSearchConfigurer hibernateSearchConfigurer;
 	private Exception myLastStackTrace;
-
 
 	@Bean
 	public CircularQueueCaptureQueriesListener captureQueriesListener() {
 		return new CircularQueueCaptureQueriesListener();
 	}
-
 
 	@Bean
 	public BasicDataSource basicDataSource() {
@@ -154,9 +155,6 @@ public class TestDstu3Config {
 		retVal.setJpaProperties(jpaProperties());
 		return retVal;
 	}
-
-	@Autowired
-	TestHibernateSearchAddInConfig.IHibernateSearchConfigurer hibernateSearchConfigurer;
 
 	private Properties jpaProperties() {
 		Properties extraProperties = new Properties();

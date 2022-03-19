@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.dao.r5;
 
-import ca.uhn.fhir.jpa.config.TestHibernateSearchAddInConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.test.config.TestHibernateSearchAddInConfig;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.HasAndListParam;
 import ca.uhn.fhir.rest.param.HasOrListParam;
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@ContextConfiguration(classes= TestHibernateSearchAddInConfig.NoFT.class)
+@ContextConfiguration(classes = TestHibernateSearchAddInConfig.NoFT.class)
 @SuppressWarnings({"Duplicates"})
 public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR5SearchNoFtTest.class);
@@ -94,8 +94,8 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 		role.getOrganization().setReference("Organization/ORG");
 		myPractitionerRoleDao.update(role);
 
-		runInTransaction(()->{
-			ourLog.info("Links:\n * {}", myResourceLinkDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+		runInTransaction(() -> {
+			ourLog.info("Links:\n * {}", myResourceLinkDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 		});
 
 		SearchParameterMap params = SearchParameterMap.newSynchronous();
@@ -126,7 +126,7 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 		IBundleProvider outcome = myPatientDao.search(new SearchParameterMap());
 		assertEquals(3, outcome.size().intValue());
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			ResourceTable table = myResourceTableDao.findById(id).orElseThrow(() -> new IllegalArgumentException());
 			table.setDeleted(new Date());
 			myResourceTableDao.save(table);
@@ -134,7 +134,7 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 
 		assertEquals(2, outcome.getResources(0, 3).size());
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			myResourceHistoryTableDao.deleteAll();
 		});
 

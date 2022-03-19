@@ -12,7 +12,7 @@ import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobJson;
 import ca.uhn.fhir.jpa.bulk.imprt.model.JobFileRowProcessingModeEnum;
 import ca.uhn.fhir.jpa.dao.data.IBulkImportJobDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkImportJobFileDao;
-import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
+import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.BulkImportJobEntity;
 import ca.uhn.fhir.jpa.entity.BulkImportJobFileEntity;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;

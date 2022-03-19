@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
+import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IIdType;

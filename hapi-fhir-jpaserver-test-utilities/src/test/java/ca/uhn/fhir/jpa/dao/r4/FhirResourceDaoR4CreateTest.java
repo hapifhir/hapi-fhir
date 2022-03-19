@@ -15,6 +15,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -24,6 +25,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.BundleBuilder;
+import ca.uhn.fhir.util.ClasspathUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -366,7 +368,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 	@Test
 	public void testCreateResourceWithKoreanText() throws IOException {
-		String input = loadClasspath("/r4/bug832-korean-text.xml");
+		String input = ClasspathUtil.loadResource("/r4/bug832-korean-text.xml");
 		Patient p = myFhirContext.newXmlParser().parseResource(Patient.class, input);
 		String id = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
 

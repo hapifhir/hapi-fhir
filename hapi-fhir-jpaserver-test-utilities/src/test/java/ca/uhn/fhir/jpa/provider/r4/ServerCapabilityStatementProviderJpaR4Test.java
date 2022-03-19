@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.packages.PackageInstallationSpec;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.provider.ServerCapabilityStatementProvider;
+import ca.uhn.fhir.util.ClasspathUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.Bundle;
@@ -278,7 +279,7 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 
 	@Test
 	public void testRegisteredProfilesReflected_StoredInPackageRegistry() throws IOException {
-		byte[] bytes = loadClasspathBytes("/packages/UK.Core.r4-1.1.0.tgz");
+		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/UK.Core.r4-1.1.0.tgz");
 		PackageInstallationSpec spec = new PackageInstallationSpec()
 			.setName("UK.Core.r4")
 			.setVersion("1.1.0")

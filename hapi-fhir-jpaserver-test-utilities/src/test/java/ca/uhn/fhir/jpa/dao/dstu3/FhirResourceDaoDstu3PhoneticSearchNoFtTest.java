@@ -4,9 +4,10 @@ import ca.uhn.fhir.context.phonetic.ApacheEncoder;
 import ca.uhn.fhir.context.phonetic.NumericEncoder;
 import ca.uhn.fhir.context.phonetic.PhoneticEncoderEnum;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.config.TestHibernateSearchAddInConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
+import ca.uhn.fhir.jpa.test.config.TestHibernateSearchAddInConfig;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.HapiExtensions;
@@ -34,12 +35,12 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 @ContextConfiguration(classes = TestHibernateSearchAddInConfig.NoFT.class)
 public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu3PhoneticSearchNoFtTest.class);
 	public static final String GALE = "Gale";
 	public static final String GAIL = "Gail";
 	public static final String NAME_SOUNDEX_SP = "nameSoundex";
 	public static final String ADDRESS_LINE_SOUNDEX_SP = "addressLineSoundex";
 	public static final String PHONE_NUMBER_SP = "phoneNumber";
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu3PhoneticSearchNoFtTest.class);
 	private static final String BOB = "BOB";
 	private static final String ADDRESS = "123 Nohili St";
 	private static final String ADDRESS_CLOSE = "123 Nohily St";

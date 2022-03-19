@@ -3,13 +3,13 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
-import ca.uhn.fhir.jpa.config.TestHibernateSearchAddInConfig;
 import ca.uhn.fhir.jpa.config.TestR4Config;
-import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.dao.dstu2.FhirResourceDaoDstu2SearchNoFtTest;
 import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.subscription.match.config.WebsocketDispatcherConfig;
+import ca.uhn.fhir.jpa.test.BaseJpaTest;
+import ca.uhn.fhir.jpa.test.config.TestHibernateSearchAddInConfig;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -62,7 +62,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestR4Config.class, TestHibernateSearchAddInConfig.NoFT.class})
 @SuppressWarnings({"Duplicates"})
-public class ResourceProviderR4ValueSetLuceneDisabledTest  extends BaseJpaTest {
+public class ResourceProviderR4ValueSetLuceneDisabledTest extends BaseJpaTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4ValueSetLuceneDisabledTest.class);
 
@@ -97,16 +97,6 @@ public class ResourceProviderR4ValueSetLuceneDisabledTest  extends BaseJpaTest {
 		loadAndPersistValueSet();
 	}
 
-	private <T extends IBaseResource> T loadResourceFromClasspath(Class<T> type, String resourceName) throws IOException {
-		InputStream stream = FhirResourceDaoDstu2SearchNoFtTest.class.getResourceAsStream(resourceName);
-		if (stream == null) {
-			fail("Unable to load resource: " + resourceName);
-		}
-		String string = IOUtils.toString(stream, StandardCharsets.UTF_8);
-		IParser newJsonParser = EncodingEnum.detectEncodingNoDefault(string).newParser(myFhirCtx);
-		return newJsonParser.parseResource(type, string);
-	}
-
 	private void loadAndPersistCodeSystem() throws IOException {
 		CodeSystem codeSystem = loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs.xml");
 		codeSystem.setId("CodeSystem/cs");
@@ -131,11 +121,11 @@ public class ResourceProviderR4ValueSetLuceneDisabledTest  extends BaseJpaTest {
 
 	private void persistValueSet(ValueSet theValueSet) {
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-					@Override
-					protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
+			@Override
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				myExtensionalVsId = myValueSetDao.create(theValueSet, mySrd).getId().toUnqualifiedVersionless();
 			}
-				});
+		});
 		myValueSetDao.readEntity(myExtensionalVsId, null).getId();
 	}
 
@@ -250,7 +240,6 @@ public class ResourceProviderR4ValueSetLuceneDisabledTest  extends BaseJpaTest {
 
 		myClient = myFhirCtx.newRestfulGenericClient(ourServerBase);
 	}
-
 
 
 }

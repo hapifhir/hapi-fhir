@@ -1,9 +1,7 @@
 package ca.uhn.fhir.jpa.term.freetext;
 
-import ca.uhn.fhir.jpa.config.TestHibernateSearchAddInConfig;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
-import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -13,7 +11,8 @@ import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.jpa.test.config.TestHibernateSearchAddInConfig;
 import net.ttddyy.dsproxy.ExecutionInfo;
 import net.ttddyy.dsproxy.QueryInfo;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
@@ -22,10 +21,7 @@ import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
 import org.hibernate.search.engine.search.query.SearchQuery;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.common.EntityReference;
-import org.hibernate.search.mapper.orm.mapping.SearchMapping;
 import org.hibernate.search.mapper.orm.session.SearchSession;
-import org.hibernate.search.mapper.orm.work.SearchWorkspace;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
@@ -44,46 +40,29 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static ca.uhn.fhir.jpa.batch.config.BatchConstants.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static java.util.Map.entry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestR4Config.class, TestHibernateSearchAddInConfig.LuceneFilesystem.class
-	,ReindexTerminologyFreetextR4Test.NoopMandatoryTransactionListener.class
+	, ReindexTerminologyFreetextR4Test.NoopMandatoryTransactionListener.class
 })
 public class ReindexTerminologyFreetextR4Test extends BaseJpaR4Test {
-	private static final Logger ourLog = LoggerFactory.getLogger(ReindexTerminologyFreetextR4Test.class);
-
 	public static final String LOINC_URL = "http://loinc.org";
 	public static final String TEST_FILES_CLASSPATH = "loinc-reindex/";
 	public static final String NULL = "'null'";
-
 	// set to false to avoid cleanup for debugging purposes
 	public static final boolean CLEANUP_DATA = true;
-
 	public static final String CS_VERSION = "2.68";
 	public static final int CS_CONCEPTS_NUMBER = 81;
-
 	public static final String LOINC_PROPERTIES_CLASSPATH =
 		ResourceUtils.CLASSPATH_URL_PREFIX + TEST_FILES_CLASSPATH + "Loinc_small_v68.zip";
-
 	public static final String LOINC_ZIP_CLASSPATH =
 		ResourceUtils.CLASSPATH_URL_PREFIX + TEST_FILES_CLASSPATH + "v268_loincupload.properties";
-
-
-	@Autowired private EntityManager myEntityManager;
-	@Autowired private TermLoaderSvcImpl myTermLoaderSvc;
-	@Autowired private ITermReadSvc myITermReadSvc;
-	@Autowired private ITermConceptDao myTermConceptDao;
-	@Autowired private ITermReadSvc myTermReadSvc;
-
-
+	private static final Logger ourLog = LoggerFactory.getLogger(ReindexTerminologyFreetextR4Test.class);
 	long termCodeSystemVersionWithVersionId;
 	long termCodeSystemVersionWithNoVersionId;
-
 	Map<String, Long> conceptCounts = Map.ofEntries(
 		entry("http://loinc.org/vs", 81L),
 		entry("http://loinc.org/vs/LG100-4", 0L),
@@ -98,7 +77,6 @@ public class ReindexTerminologyFreetextR4Test extends BaseJpaR4Test {
 		entry("http://loinc.org/vs/top-2000-lab-observations-si", 0L),
 		entry("http://loinc.org/vs/top-2000-lab-observations-us", 0L)
 	);
-
 	Map<String, Long> conceptDesignationCounts = Map.ofEntries(
 		entry("http://loinc.org/vs", 55L),
 		entry("http://loinc.org/vs/LG100-4", 0L),
@@ -113,9 +91,16 @@ public class ReindexTerminologyFreetextR4Test extends BaseJpaR4Test {
 		entry("http://loinc.org/vs/top-2000-lab-observations-si", 0L),
 		entry("http://loinc.org/vs/top-2000-lab-observations-us", 0L)
 	);
-
-
-
+	@Autowired
+	private EntityManager myEntityManager;
+	@Autowired
+	private TermLoaderSvcImpl myTermLoaderSvc;
+	@Autowired
+	private ITermReadSvc myITermReadSvc;
+	@Autowired
+	private ITermConceptDao myTermConceptDao;
+	@Autowired
+	private ITermReadSvc myTermReadSvc;
 
 	@Test()
 	public void uploadLoincCodeSystem() throws FileNotFoundException, InterruptedException {
@@ -167,7 +152,7 @@ public class ReindexTerminologyFreetextR4Test extends BaseJpaR4Test {
 	 */
 	private void validateFreetextCounts() {
 		int dbTermConceptCountForVersion = runInTransaction(() ->
-			myTermConceptDao.countByCodeSystemVersion(termCodeSystemVersionWithVersionId) );
+			myTermConceptDao.countByCodeSystemVersion(termCodeSystemVersionWithVersionId));
 		assertEquals(CS_CONCEPTS_NUMBER, dbTermConceptCountForVersion);
 
 		long termConceptCountForVersion = searchAllIndexedTermConceptCount(termCodeSystemVersionWithVersionId);
@@ -177,7 +162,7 @@ public class ReindexTerminologyFreetextR4Test extends BaseJpaR4Test {
 
 
 		int dbTermConceptCountForNullVersion = runInTransaction(() ->
-			myTermConceptDao.countByCodeSystemVersion(termCodeSystemVersionWithNoVersionId) );
+			myTermConceptDao.countByCodeSystemVersion(termCodeSystemVersionWithNoVersionId));
 		assertEquals(CS_CONCEPTS_NUMBER, dbTermConceptCountForNullVersion);
 
 		long termConceptCountNullVersion = searchAllIndexedTermConceptCount(termCodeSystemVersionWithNoVersionId);
@@ -185,7 +170,6 @@ public class ReindexTerminologyFreetextR4Test extends BaseJpaR4Test {
 			NULL, termConceptCountNullVersion);
 		assertEquals(CS_CONCEPTS_NUMBER, termConceptCountNullVersion);
 	}
-
 
 
 	private void validateFreetextIndexesEmpty() {
@@ -203,9 +187,9 @@ public class ReindexTerminologyFreetextR4Test extends BaseJpaR4Test {
 		List<TermValueSet> termValueSets = myTermValueSetDao.findAll();
 		for (TermValueSet termValueSet : termValueSets) {
 			ourLog.debug("=================> testing ValueSet: {}", termValueSet.getUrl());
-			long conceptCount  = conceptCounts.get( termValueSet.getUrl() );
+			long conceptCount = conceptCounts.get(termValueSet.getUrl());
 			assertEquals(conceptCount, termValueSet.getTotalConcepts());
-			long conceptDesignationCount  = conceptDesignationCounts.get( termValueSet.getUrl() );
+			long conceptDesignationCount = conceptDesignationCounts.get(termValueSet.getUrl());
 			assertEquals(conceptDesignationCount, termValueSet.getTotalConceptDesignations());
 		}
 	}
@@ -214,13 +198,13 @@ public class ReindexTerminologyFreetextR4Test extends BaseJpaR4Test {
 	private void validateSavedConceptsCount() {
 		termCodeSystemVersionWithVersionId = getTermCodeSystemVersionNotNullId();
 		int dbVersionedTermConceptCount = runInTransaction(() ->
-			myTermConceptDao.countByCodeSystemVersion(termCodeSystemVersionWithVersionId) );
+			myTermConceptDao.countByCodeSystemVersion(termCodeSystemVersionWithVersionId));
 		ourLog.info("=================> Number of stored concepts for version {}: {}", CS_VERSION, dbVersionedTermConceptCount);
 		assertEquals(CS_CONCEPTS_NUMBER, dbVersionedTermConceptCount);
 
 		termCodeSystemVersionWithNoVersionId = getTermCodeSystemVersionNullId();
 		int dbNotVersionedTermConceptCount = runInTransaction(() ->
-			myTermConceptDao.countByCodeSystemVersion(termCodeSystemVersionWithNoVersionId) );
+			myTermConceptDao.countByCodeSystemVersion(termCodeSystemVersionWithNoVersionId));
 		ourLog.info("=================> Number of stored concepts for version {}: {}", NULL, dbNotVersionedTermConceptCount);
 		assertEquals(CS_CONCEPTS_NUMBER, dbNotVersionedTermConceptCount);
 	}
@@ -257,14 +241,13 @@ public class ReindexTerminologyFreetextR4Test extends BaseJpaR4Test {
 		List<ITermLoaderSvc.FileDescriptor> fileDescriptors = new ArrayList<>();
 
 		File propsFile = ResourceUtils.getFile(LOINC_PROPERTIES_CLASSPATH);
-		fileDescriptors.add( new TerminologyUploaderProvider.FileBackedFileDescriptor(propsFile) );
+		fileDescriptors.add(new TerminologyUploaderProvider.FileBackedFileDescriptor(propsFile));
 
 		File zipFile = ResourceUtils.getFile(LOINC_ZIP_CLASSPATH);
-		fileDescriptors.add( new TerminologyUploaderProvider.FileBackedFileDescriptor(zipFile) );
+		fileDescriptors.add(new TerminologyUploaderProvider.FileBackedFileDescriptor(zipFile));
 
 		return fileDescriptors;
 	}
-
 
 
 	private long searchAllIndexedTermConceptCount(long theCodeSystemVersionId) {
@@ -272,7 +255,7 @@ public class ReindexTerminologyFreetextR4Test extends BaseJpaR4Test {
 			SearchSession searchSession = Search.session(myEntityManager);
 			SearchPredicateFactory predicate = searchSession.scope(TermConcept.class).predicate();
 			PredicateFinalStep step = predicate.bool(b ->
-				b.must(predicate.match().field("myCodeSystemVersionPid").matching(theCodeSystemVersionId)) );
+				b.must(predicate.match().field("myCodeSystemVersionPid").matching(theCodeSystemVersionId)));
 
 			SearchQuery<EntityReference> termConceptsQuery = searchSession
 				.search(TermConcept.class)
@@ -285,24 +268,6 @@ public class ReindexTerminologyFreetextR4Test extends BaseJpaR4Test {
 		});
 
 	}
-
-	/**
-	 * This configuration bypasses the MandatoryTransactionListener, which breaks this test
-	 * (I think it is because hibernate search massIndexer starts threads which don't participate of test transactions)
-	 */
-	@Configuration
-	public static class NoopMandatoryTransactionListener {
-
-		@Bean
-		public ProxyDataSourceBuilder.SingleQueryExecution getMandatoryTransactionListener() {
-			return  new ProxyDataSourceBuilder.SingleQueryExecution() {
-				@Override
-				public void execute(ExecutionInfo execInfo, List<QueryInfo> queryInfoList) {
-				}
-			};
-		}
-	}
-
 
 	@Override
 	public void afterCleanupDao() {
@@ -336,6 +301,23 @@ public class ReindexTerminologyFreetextR4Test extends BaseJpaR4Test {
 	public void afterEachClearCaches() {
 		if (CLEANUP_DATA) {
 			super.afterEachClearCaches();
+		}
+	}
+
+	/**
+	 * This configuration bypasses the MandatoryTransactionListener, which breaks this test
+	 * (I think it is because hibernate search massIndexer starts threads which don't participate of test transactions)
+	 */
+	@Configuration
+	public static class NoopMandatoryTransactionListener {
+
+		@Bean
+		public ProxyDataSourceBuilder.SingleQueryExecution getMandatoryTransactionListener() {
+			return new ProxyDataSourceBuilder.SingleQueryExecution() {
+				@Override
+				public void execute(ExecutionInfo execInfo, List<QueryInfo> queryInfoList) {
+				}
+			};
 		}
 	}
 }

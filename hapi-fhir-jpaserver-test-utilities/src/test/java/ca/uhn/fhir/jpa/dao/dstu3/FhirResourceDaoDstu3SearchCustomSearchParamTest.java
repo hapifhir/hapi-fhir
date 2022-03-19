@@ -4,6 +4,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -14,6 +15,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.ClasspathUtil;
 import org.hl7.fhir.dstu3.model.Appointment;
 import org.hl7.fhir.dstu3.model.Appointment.AppointmentStatus;
 import org.hl7.fhir.dstu3.model.CodeType;
@@ -179,7 +181,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		pract.addName().setFamily("PRACT");
 		myPractitionerDao.update(pract);
 
-		Patient pat = myFhirContext.newJsonParser().parseResource(Patient.class, loadClasspath("/dstu3_custom_resource_patient.json"));
+		Patient pat = myFhirContext.newJsonParser().parseResource(Patient.class, ClasspathUtil.loadResource("/dstu3_custom_resource_patient.json"));
 		IIdType pid = myPatientDao.create(pat, mySrd).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap params = new SearchParameterMap();

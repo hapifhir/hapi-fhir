@@ -3,12 +3,12 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.config.TestHibernateSearchAddInConfig;
 import ca.uhn.fhir.jpa.config.TestR4Config;
-import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.search.reindex.BlockPolicy;
+import ca.uhn.fhir.jpa.test.BaseJpaTest;
+import ca.uhn.fhir.jpa.test.config.TestHibernateSearchAddInConfig;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.Validate;
@@ -51,33 +51,21 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DirtiesContext
 public class SyntheaPerfTest extends BaseJpaTest {
 
-	@BeforeAll
-	public static void beforeAll() {
-		System.setProperty("unlimited_db_connection", "true");
-		System.setProperty("mass_ingestion_mode", "true");
-	}
-
-	@AfterAll
-	public static void afterAll() {
-		System.clearProperty("unlimited_db_connection");
-		System.clearProperty("mass_ingestion_mode");
-	}
-
-	@AfterEach
-	public void afterEach() {
-		myFhirContext.getParserOptions().setAutoContainReferenceTargetsWithNoId(true);
-	}
-
-	private static final Logger ourLog = LoggerFactory.getLogger(SyntheaPerfTest.class);
-	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	public static final String PATH_TO_SYNTHEA_OUTPUT = "../../synthea/output/fhir/";
 	public static final int CONCURRENCY = 4;
+	private static final Logger ourLog = LoggerFactory.getLogger(SyntheaPerfTest.class);
+	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
 	private PlatformTransactionManager myTxManager;
 	@Autowired
 	private IFhirSystemDao<Bundle, Meta> mySystemDao;
+
+	@AfterEach
+	public void afterEach() {
+		myFhirContext.getParserOptions().setAutoContainReferenceTargetsWithNoId(true);
+	}
 
 	@Disabled
 	@Test
@@ -95,7 +83,7 @@ public class SyntheaPerfTest extends BaseJpaTest {
 
 		List<Path> files = Files
 			.list(FileSystems.getDefault().getPath(PATH_TO_SYNTHEA_OUTPUT))
-			.filter(t->t.toString().endsWith(".json"))
+			.filter(t -> t.toString().endsWith(".json"))
 			.collect(Collectors.toList());
 
 		List<Path> meta = files.stream().filter(t -> t.toString().contains("hospital") || t.toString().contains("practitioner")).collect(Collectors.toList());
@@ -121,6 +109,17 @@ public class SyntheaPerfTest extends BaseJpaTest {
 		return myTxManager;
 	}
 
+	@BeforeAll
+	public static void beforeAll() {
+		System.setProperty("unlimited_db_connection", "true");
+		System.setProperty("mass_ingestion_mode", "true");
+	}
+
+	@AfterAll
+	public static void afterAll() {
+		System.clearProperty("unlimited_db_connection");
+		System.clearProperty("mass_ingestion_mode");
+	}
 
 	private class Uploader {
 
@@ -215,7 +214,6 @@ public class SyntheaPerfTest extends BaseJpaTest {
 
 
 	}
-
 
 
 }

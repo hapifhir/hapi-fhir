@@ -39,6 +39,7 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.ClasspathUtil;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -208,7 +209,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 	 */
 	@Test
 	public void testTransactionBug638() throws Exception {
-		String input = loadClasspath("/bug638.xml");
+		String input = ClasspathUtil.loadResource("/bug638.xml");
 		Bundle request = myFhirContext.newXmlParser().parseResource(Bundle.class, input);
 
 		Bundle resp = mySystemDao.transaction(mySrd, request);

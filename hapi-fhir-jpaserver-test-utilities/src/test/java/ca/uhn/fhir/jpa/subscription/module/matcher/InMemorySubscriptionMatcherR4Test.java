@@ -1,9 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.module.matcher;
 
 import ca.uhn.fhir.context.FhirContext;
-
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.config.TestHibernateSearchAddInConfig;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
@@ -18,6 +16,7 @@ import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingS
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.jpa.test.config.TestHibernateSearchAddInConfig;
 import ca.uhn.fhir.jpa.util.CoordCalculatorTest;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.param.CompositeParam;
@@ -102,11 +101,11 @@ public class InMemorySubscriptionMatcherR4Test {
 
 	@Autowired
 	ModelConfig myModelConfig;
-	
+
 	@AfterEach
 	public void after() throws Exception {
-        myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
-    }
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
+	}
 
 	private void assertMatched(Resource resource, SearchParameterMap params) {
 		InMemoryMatchResult result = match(resource, params);
@@ -248,7 +247,7 @@ public class InMemorySubscriptionMatcherR4Test {
 		SearchParameterMap params = new SearchParameterMap().setLoadSynchronous(true).add(param, v1);
 		assertMatched(o1, params);
 	}
-	
+
 	@Test
 	public void testSearchWithNormalizedQuantitySearchSupported() {
 
@@ -264,7 +263,7 @@ public class InMemorySubscriptionMatcherR4Test {
 		QuantityParam v1 = new QuantityParam(null, 1.5, UcumServiceUtil.UCUM_CODESYSTEM_URL, "m");
 		SearchParameterMap params1 = new SearchParameterMap().setLoadSynchronous(true).add(param1, v1);
 		assertMatched(o1, params1);
-		
+
 		Observation o2 = new Observation();
 		o2.addComponent()
 			.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://foo").setCode("cm")))
@@ -281,7 +280,7 @@ public class InMemorySubscriptionMatcherR4Test {
 		assertMatched(o2, params2);
 
 	}
-	
+
 	@Test
 	public void testSearchWithNormalizedQuantitySearchSupported_InvalidUCUMUnit() {
 		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
@@ -297,7 +296,7 @@ public class InMemorySubscriptionMatcherR4Test {
 		SearchParameterMap params1 = new SearchParameterMap().setLoadSynchronous(true).add(param1, v1);
 		assertMatched(o1, params1);
 	}
-	
+
 	@Test
 	public void testSearchWithNormalizedQuantitySearchSupported_NoSystem() {
 		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
@@ -313,7 +312,7 @@ public class InMemorySubscriptionMatcherR4Test {
 		SearchParameterMap params1 = new SearchParameterMap().setLoadSynchronous(true).add(param1, v1);
 		assertMatched(o1, params1);
 	}
-	
+
 	@Test
 	public void testSearchWithNormalizedQuantitySearchSupported_NotUcumSystem() {
 
@@ -330,7 +329,7 @@ public class InMemorySubscriptionMatcherR4Test {
 		SearchParameterMap params1 = new SearchParameterMap().setLoadSynchronous(true).add(param1, v1);
 		assertMatched(o1, params1);
 	}
-	
+
 	@Test
 	public void testIdSupported() {
 		Observation o1 = new Observation();
