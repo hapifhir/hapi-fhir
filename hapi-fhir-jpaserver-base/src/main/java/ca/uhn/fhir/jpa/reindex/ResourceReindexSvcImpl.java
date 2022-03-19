@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.reindex;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IResourceReindexSvc;
@@ -46,8 +47,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
 public class ResourceReindexSvcImpl implements IResourceReindexSvc {
 
 	@Autowired
@@ -69,17 +68,17 @@ public class ResourceReindexSvcImpl implements IResourceReindexSvc {
 
 	@Override
 	@Transactional
-	public IdChunk fetchResourceIdsPage(Date theStart, Date theEnd, @Nullable String theUrl) {
+	public IdChunk fetchResourceIdsPage(Date theStart, Date theEnd, @Nullable RequestPartitionId theRequestPartitionId, @Nullable String theUrl) {
 
 		int pageSize = 20000;
 		if (theUrl == null) {
-			return fetchResourceIdsPageNoUrl(theStart, theEnd, pageSize);
+			return fetchResourceIdsPageNoUrl(theStart, theEnd, pageSize, theRequestPartitionId);
 		} else {
-			return fetchResourceIdsPageWithUrl(theStart, theEnd, pageSize, theUrl);
+			return fetchResourceIdsPageWithUrl(theStart, theEnd, pageSize, theUrl, theRequestPartitionId);
 		}
 	}
 
-	private IdChunk fetchResourceIdsPageWithUrl(Date theStart, Date theEnd, int thePageSize, String theUrl) {
+	private IdChunk fetchResourceIdsPageWithUrl(Date theStart, Date theEnd, int thePageSize, String theUrl, RequestPartitionId theRequestPartitionId) {
 
 		String resourceType = theUrl.substring(0, theUrl.indexOf('?'));
 		RuntimeResourceDefinition def = myFhirContext.getResourceDefinition(resourceType);
@@ -90,7 +89,9 @@ public class ResourceReindexSvcImpl implements IResourceReindexSvc {
 		searchParamMap.setCount(thePageSize);
 
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
-		List<ResourcePersistentId> ids = dao.searchForIds(searchParamMap, new SystemRequestDetails());
+		SystemRequestDetails request = new SystemRequestDetails();
+		request.setRequestPartitionId(theRequestPartitionId);
+		List<ResourcePersistentId> ids = dao.searchForIds(searchParamMap, request);
 
 		// just a list of the same size where every element is the same resource type
 		List<String> resourceTypes = ids
@@ -107,9 +108,16 @@ public class ResourceReindexSvcImpl implements IResourceReindexSvc {
 	}
 
 	@Nonnull
-	private IdChunk fetchResourceIdsPageNoUrl(Date theStart, Date theEnd, int thePagesize) {
+	private IdChunk fetchResourceIdsPageNoUrl(Date theStart, Date theEnd, int thePagesize, RequestPartitionId theRequestPartitionId) {
 		Pageable page = Pageable.ofSize(thePagesize);
-		Slice<Object[]> slice = myResourceTableDao.findIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldest(page, theStart, theEnd);
+		Slice<Object[]> slice;
+		if (theRequestPartitionId == null || theRequestPartitionId.isAllPartitions()) {
+			slice = myResourceTableDao.findIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldest(page, theStart, theEnd);
+		} else if (theRequestPartitionId.isDefaultPartition()) {
+			slice = myResourceTableDao.findIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldestForDefaultPartition(page, theStart, theEnd);
+		} else {
+			slice = myResourceTableDao.findIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldestForPartitionIds(page, theStart, theEnd, theRequestPartitionId.getPartitionIds());
+		}
 
 		List<Object[]> content = slice.getContent();
 		if (content.isEmpty()) {

@@ -51,7 +51,7 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 		// Execute
 
 		myCaptureQueriesListener.clear();
-		IResourceReindexSvc.IdChunk page = mySvc.fetchResourceIdsPage(start, end, null);
+		IResourceReindexSvc.IdChunk page = mySvc.fetchResourceIdsPage(start, end, null, null);
 
 		// Verify
 
@@ -81,7 +81,7 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 		// Execute
 
 		myCaptureQueriesListener.clear();
-		IResourceReindexSvc.IdChunk page = mySvc.fetchResourceIdsPage(start, end, null);
+		IResourceReindexSvc.IdChunk page = mySvc.fetchResourceIdsPage(start, end, null, null);
 
 		// Verify
 
@@ -129,7 +129,7 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 		// Execute
 
 		myCaptureQueriesListener.clear();
-		IResourceReindexSvc.IdChunk page = mySvc.fetchResourceIdsPage(start, end, "Patient?active=false");
+		IResourceReindexSvc.IdChunk page = mySvc.fetchResourceIdsPage(start, end, null, "Patient?active=false");
 
 		// Verify
 

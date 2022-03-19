@@ -23,8 +23,12 @@ package ca.uhn.fhir.batch2.jobs.reindex;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.ParametersUtil;
@@ -39,10 +43,15 @@ public class ReindexProvider {
 
 	private final FhirContext myFhirContext;
 	private final IJobCoordinator myJobCoordinator;
+	private final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
-	public ReindexProvider(FhirContext theFhirContext, IJobCoordinator theJobCoordinator) {
+	/**
+	 * Constructor
+	 */
+	public ReindexProvider(FhirContext theFhirContext, IJobCoordinator theJobCoordinator, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
 		myFhirContext = theFhirContext;
 		myJobCoordinator = theJobCoordinator;
+		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
 	}
 
 	@Operation(name = ProviderConstants.OPERATION_REINDEX, idempotent = false)
@@ -59,6 +68,10 @@ public class ReindexProvider {
 				.filter(t -> isNotBlank(t))
 				.forEach(t -> params.getUrl().add(t));
 		}
+
+		ReadPartitionIdRequestDetails details= new ReadPartitionIdRequestDetails(null, RestOperationTypeEnum.EXTENDED_OPERATION_SERVER, null, null, null);
+		RequestPartitionId requestPartition = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, null, details);
+		params.setRequestPartitionId(requestPartition);
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
 		request.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);

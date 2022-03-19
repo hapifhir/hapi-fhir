@@ -3,6 +3,8 @@ package ca.uhn.fhir.batch2.jobs.reindex;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import org.hamcrest.Matchers;
@@ -27,7 +29,6 @@ import org.slf4j.LoggerFactory;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -47,6 +48,9 @@ public class ReindexProviderTest {
 	@Mock
 	private IJobCoordinator myJobCoordinator;
 
+	@Mock
+	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+
 	@Captor
 	private ArgumentCaptor<JobInstanceStartRequest> myStartRequestCaptor;
 
@@ -58,6 +62,7 @@ public class ReindexProviderTest {
 		myServerExtension.registerProvider(mySvc);
 
 		when(myJobCoordinator.startInstance(any())).thenReturn(TEST_JOB_ID);
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequest(any(), any(), any())).thenReturn(RequestPartitionId.allPartitions());
 	}
 
 	@AfterEach

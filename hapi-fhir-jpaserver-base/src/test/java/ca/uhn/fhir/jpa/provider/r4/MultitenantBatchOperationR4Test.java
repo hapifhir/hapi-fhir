@@ -21,6 +21,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -128,6 +129,9 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 		myTenantClientInterceptor.setTenantId(TENANT_B);
 		IIdType obsFinalB = doCreateResource(reindexTestHelper.buildObservationWithAlleleExtension());
 
+		myTenantClientInterceptor.setTenantId(DEFAULT_PARTITION_NAME);
+		IIdType obsFinalD = doCreateResource(reindexTestHelper.buildObservationWithAlleleExtension());
+
 		reindexTestHelper.createAlleleSearchParameter();
 
 		// The searchparam value is on the observation, but it hasn't been indexed yet
@@ -135,13 +139,11 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 		assertThat(reindexTestHelper.getAlleleObservationIds(myClient), hasSize(0));
 		myTenantClientInterceptor.setTenantId(TENANT_B);
 		assertThat(reindexTestHelper.getAlleleObservationIds(myClient), hasSize(0));
+		myTenantClientInterceptor.setTenantId(DEFAULT_PARTITION_NAME);
+		assertThat(reindexTestHelper.getAlleleObservationIds(myClient), hasSize(0));
+
 		// setup
 		Parameters input = new Parameters();
-		Integer batchSize = 2401;
-		input.addParameter(ProviderConstants.OPERATION_REINDEX_PARAM_BATCH_SIZE, new DecimalType(batchSize));
-		input.addParameter(ProviderConstants.OPERATION_REINDEX_PARAM_EVERYTHING, new BooleanType(true));
-
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		// reindex all of Tenant A
 		myTenantClientInterceptor.setTenantId(TENANT_A);
@@ -152,9 +154,9 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 			.withParameters(input)
 			.execute();
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
-		DecimalType jobId = (DecimalType) response.getParameter(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
+		StringType jobId = (StringType) response.getParameter(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
 
-		myBatchJobHelper.awaitJobExecution(jobId.getValueAsNumber().longValue());
+		myBatch2JobHelper.awaitJobCompletion(jobId.getValue());
 
 		// validate
 		List<String> alleleObservationIds = reindexTestHelper.getAlleleObservationIds(myClient);
@@ -164,6 +166,25 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 		assertEquals(obsFinalA.getIdPart(), alleleObservationIds.get(0));
 		myTenantClientInterceptor.setTenantId(TENANT_B);
 		assertThat(reindexTestHelper.getAlleleObservationIds(myClient), hasSize(0));
+		myTenantClientInterceptor.setTenantId(DEFAULT_PARTITION_NAME);
+		assertThat(reindexTestHelper.getAlleleObservationIds(myClient), hasSize(0));
+
+		// Reindex default partition
+		myTenantClientInterceptor.setTenantId(DEFAULT_PARTITION_NAME);
+		response = myClient
+			.operation()
+			.onServer()
+			.named(ProviderConstants.OPERATION_REINDEX)
+			.withParameters(input)
+			.execute();
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		jobId = (StringType) response.getParameter(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
+
+		myBatch2JobHelper.awaitJobCompletion(jobId.getValue());
+
+
+		myTenantClientInterceptor.setTenantId(DEFAULT_PARTITION_NAME);
+		assertThat(reindexTestHelper.getAlleleObservationIds(myClient), hasSize(1));
 	}
 
 	@Test
@@ -187,8 +208,6 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 
 		// setup
 		Parameters input = new Parameters();
-		Integer batchSize = 2401;
-		input.addParameter(ProviderConstants.OPERATION_REINDEX_PARAM_BATCH_SIZE, new DecimalType(batchSize));
 		input.addParameter(ProviderConstants.OPERATION_REINDEX_PARAM_URL, "Observation?status=final");
 
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
@@ -202,9 +221,9 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 			.withParameters(input)
 			.execute();
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
-		DecimalType jobId = (DecimalType) response.getParameter(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
+		StringType jobId = (StringType) response.getParameter(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
 
-		myBatchJobHelper.awaitJobExecution(jobId.getValueAsNumber().longValue());
+		myBatch2JobHelper.awaitJobCompletion(jobId.getValue());
 
 		// validate
 		List<String> alleleObservationIds = reindexTestHelper.getAlleleObservationIds(myClient);

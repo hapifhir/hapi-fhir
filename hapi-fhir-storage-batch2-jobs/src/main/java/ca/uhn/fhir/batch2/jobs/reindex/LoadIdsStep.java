@@ -25,6 +25,7 @@ import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.svc.IResourceReindexSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -65,6 +66,7 @@ public class LoadIdsStep implements IJobStepWorker<ReindexJobParameters, Reindex
 		ourLog.info("Beginning scan for reindex IDs in range {} to {}", start, end);
 
 		Date nextStart = start;
+		RequestPartitionId requestPartitionId = theStepExecutionDetails.getParameters().getRequestPartitionId();
 		Set<ReindexChunkIds.Id> idBuffer = new HashSet<>();
 		long previousLastTime = 0L;
 		int totalIdsFound = 0;
@@ -73,7 +75,7 @@ public class LoadIdsStep implements IJobStepWorker<ReindexJobParameters, Reindex
 			String url = theStepExecutionDetails.getData().getUrl();
 
 			ourLog.info("Fetching resource ID chunk for URL {} - Range {} - {}", url, nextStart, end);
-			IResourceReindexSvc.IdChunk nextChunk = myResourceReindexSvc.fetchResourceIdsPage(nextStart, end, url);
+			IResourceReindexSvc.IdChunk nextChunk = myResourceReindexSvc.fetchResourceIdsPage(nextStart, end, requestPartitionId, url);
 
 			if (nextChunk.getIds().isEmpty()) {
 				ourLog.info("No data returned");
