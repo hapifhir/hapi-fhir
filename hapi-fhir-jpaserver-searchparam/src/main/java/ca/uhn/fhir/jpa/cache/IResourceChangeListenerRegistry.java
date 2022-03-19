@@ -24,6 +24,8 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import java.util.Set;
+
 /**
  * This component holds an in-memory list of all registered {@link IResourceChangeListener} instances along
  * with their caches and other details needed to maintain those caches.  Register an {@link IResourceChangeListener} instance
@@ -80,4 +82,8 @@ public interface IResourceChangeListenerRegistry {
 
 	void requestRefreshIfWatching(IBaseResource theResource);
 
+	/**
+	 * @return a set of resource names watched by the registered listeners
+	 */
+	Set<String> getWatchedResourceNames();
 }

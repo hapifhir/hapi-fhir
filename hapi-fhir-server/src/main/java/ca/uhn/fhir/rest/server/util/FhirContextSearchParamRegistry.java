@@ -30,11 +30,8 @@ import org.apache.commons.lang3.Validate;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class FhirContextSearchParamRegistry implements ISearchParamRegistry {
 
@@ -61,18 +58,18 @@ public class FhirContextSearchParamRegistry implements ISearchParamRegistry {
 	}
 
 	@Override
-	public Map<String, RuntimeSearchParam> getActiveSearchParams(String theResourceName) {
-		Map<String, RuntimeSearchParam> sps = new HashMap<>();
+	public ResourceSearchParams getActiveSearchParams(String theResourceName) {
+		ResourceSearchParams retval = new ResourceSearchParams(theResourceName);
 		RuntimeResourceDefinition nextResDef = myCtx.getResourceDefinition(theResourceName);
 		for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
-			sps.put(nextSp.getName(), nextSp);
+			retval.put(nextSp.getName(), nextSp);
 		}
 
 		for (RuntimeSearchParam next : myExtraSearchParams) {
-			sps.put(next.getName(), next);
+			retval.put(next.getName(), next);
 		}
 
-		return sps;
+		return retval;
 	}
 
 	public void addSearchParam(RuntimeSearchParam theSearchParam) {
