@@ -34,6 +34,8 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
+import ca.uhn.fhir.jpa.config.util.ConnectionPoolInfoProvider;
+import ca.uhn.fhir.jpa.config.util.IConnectionPoolInfoProvider;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
@@ -67,6 +69,7 @@ import ca.uhn.fhir.jpa.search.ElasticsearchNestedQueryBuilderUtil;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
+import ca.uhn.fhir.jpa.term.api.ReindexTerminologyResult;
 import ca.uhn.fhir.jpa.term.ex.ExpansionTooCostlyException;
 import ca.uhn.fhir.jpa.util.LogicUtil;
 import ca.uhn.fhir.rest.api.Constants;
@@ -98,6 +101,7 @@ import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.RegexpQuery;
 import org.apache.lucene.search.TermQuery;
+import org.hibernate.CacheMode;
 import org.hibernate.search.backend.elasticsearch.ElasticsearchExtension;
 import org.hibernate.search.backend.lucene.LuceneExtension;
 import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
@@ -106,6 +110,7 @@ import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
 import org.hibernate.search.engine.search.query.SearchQuery;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.common.EntityReference;
+import org.hibernate.search.mapper.orm.massindexing.impl.LoggingMassIndexingMonitor;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
@@ -135,6 +140,7 @@ import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
 import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -215,6 +221,12 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	private static final String IDX_PROP_VALUE_STRING = IDX_PROPERTIES + ".myValueString";
 	private static final String IDX_PROP_DISPLAY_STRING = IDX_PROPERTIES + ".myDisplayString";
 
+	public static final int DEFAULT_MASS_INDEXER_OBJECT_LOADING_THREADS = 2;
+	// doesn't seem to be much gain by using more threads than this value
+	public static final int MAX_MASS_INDEXER_OBJECT_LOADING_THREADS = 6;
+
+	private boolean myPreExpandingValueSets = false;
+
 	private final Cache<String, TermCodeSystemVersion> myCodeSystemCurrentVersionCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build();
 	@Autowired
 	protected DaoRegistry myDaoRegistry;
@@ -269,6 +281,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	//We need this bean so we can tell which mode hibernate search is running in.
 	@Autowired
 	private HibernatePropertiesProvider myHibernatePropertiesProvider;
+
 
 	private boolean isFullTextSetToUseElastic() {
 		return "elasticsearch".equalsIgnoreCase(myHibernatePropertiesProvider.getHibernateSearchBackend());
@@ -1945,6 +1958,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				}
 
 				TermValueSet termValueSet = optionalTermValueSet.get();
+				termValueSet.setTotalConcepts(0L);
+				termValueSet.setTotalConceptDesignations(0L);
 				termValueSet.setExpansionStatus(TermValueSetPreExpansionStatusEnum.EXPANSION_IN_PROGRESS);
 				return myTermValueSetDao.saveAndFlush(termValueSet);
 			});
@@ -1953,6 +1968,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			}
 
 			// We have a ValueSet to pre-expand.
+			setPreExpandingValueSets(true);
 			try {
 				ValueSet valueSet = txTemplate.execute(t -> {
 					TermValueSet refreshedValueSetToExpand = myTermValueSetDao.findById(valueSetToExpand.getId()).orElseThrow(() -> new IllegalStateException("Unknown VS ID: " + valueSetToExpand.getId()));
@@ -1982,8 +1998,19 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 					myTermValueSetDao.saveAndFlush(valueSetToExpand);
 
 				});
+
+			} finally {
+				setPreExpandingValueSets(false);
 			}
 		}
+	}
+
+	private synchronized void setPreExpandingValueSets(boolean thePreExpandingValueSets) {
+		myPreExpandingValueSets = thePreExpandingValueSets;
+	}
+
+	private synchronized boolean isPreExpandingValueSets() {
+		return myPreExpandingValueSets;
 	}
 
 	@Override
@@ -2641,6 +2668,79 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		IBaseResource cs = csDao.toResource(resultList.get(0), false);
 		return Optional.of(cs);
 	}
+
+
+	private static final int SECONDS_IN_MINUTE = 60;
+	private static final int INDEXED_ROOTS_LOGGING_COUNT = 50_000;
+
+
+	@Transactional
+	@Override
+	public ReindexTerminologyResult reindexTerminology() throws InterruptedException {
+		if (myFulltextSearchSvc == null) {
+			return ReindexTerminologyResult.SEARCH_SVC_DISABLED;
+		}
+
+		if (isBatchTerminologyTasksRunning()) {
+			return ReindexTerminologyResult.OTHER_BATCH_TERMINOLOGY_TASKS_RUNNING;
+		}
+
+		// disallow pre-expanding ValueSets while reindexing
+		myDeferredStorageSvc.setProcessDeferred(false);
+
+		int objectLoadingThreadNumber = calculateObjectLoadingThreadNumber();
+		ourLog.info("Using {} threads to load objects", objectLoadingThreadNumber);
+
+		try {
+			SearchSession searchSession = getSearchSession();
+			searchSession
+				.massIndexer( TermConcept.class )
+				.dropAndCreateSchemaOnStart( true )
+				.purgeAllOnStart( false )
+				.batchSizeToLoadObjects( 100 )
+				.cacheMode( CacheMode.IGNORE )
+				.threadsToLoadObjects( 6 )
+				.transactionTimeout( 60 * SECONDS_IN_MINUTE )
+				.monitor( new LoggingMassIndexingMonitor(INDEXED_ROOTS_LOGGING_COUNT) )
+				.startAndWait();
+
+		} finally {
+			myDeferredStorageSvc.setProcessDeferred(true);
+		}
+
+		return ReindexTerminologyResult.SUCCESS;
+	}
+
+
+	@VisibleForTesting
+	boolean isBatchTerminologyTasksRunning() {
+		return isNotSafeToPreExpandValueSets() || isPreExpandingValueSets();
+	}
+
+
+	@VisibleForTesting
+	int calculateObjectLoadingThreadNumber() {
+		IConnectionPoolInfoProvider connectionPoolInfoProvider =
+			new ConnectionPoolInfoProvider(myHibernatePropertiesProvider.getDataSource());
+		Optional<Integer> maxConnectionsOpt = connectionPoolInfoProvider.getTotalConnectionSize();
+		if ( ! maxConnectionsOpt.isPresent() ) {
+			return DEFAULT_MASS_INDEXER_OBJECT_LOADING_THREADS;
+		}
+
+		int maxConnections = maxConnectionsOpt.get();
+		int usableThreads = maxConnections < 6 ? 1 : maxConnections - 5;
+		int objectThreads = Math.min(usableThreads, MAX_MASS_INDEXER_OBJECT_LOADING_THREADS);
+		ourLog.debug("Data source connection pool has {} connections allocated, so reindexing will use {} object " +
+			"loading threads (each using a connection)", maxConnections, objectThreads);
+		return objectThreads;
+	}
+
+
+	@VisibleForTesting
+	SearchSession getSearchSession() {
+		return Search.session( myEntityManager );
+	}
+
 
 	@VisibleForTesting
 	public static void setForceDisableHibernateSearchForUnitTest(boolean theForceDisableHibernateSearchForUnitTest) {
