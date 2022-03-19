@@ -7,8 +7,8 @@ import ca.uhn.fhir.cql.config.CqlDstu3Config;
 import ca.uhn.fhir.cql.config.TestCqlConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
+import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.test.utilities.RequestDetailsHelper;
 import org.apache.commons.io.FileUtils;
@@ -38,10 +38,10 @@ public class BaseCqlDstu3Test extends BaseJpaDstu3Test implements CqlProviderTes
 	protected
 	DaoRegistry myDaoRegistry;
 	@Autowired
-	IFhirSystemDao mySystemDao;
-	@Autowired
 	@RegisterExtension
 	protected PartitionHelper myPartitionHelper;
+	@Autowired
+	IFhirSystemDao mySystemDao;
 
 	protected int loadDataFromDirectory(String theDirectoryName) throws IOException {
 		int count = 0;
@@ -84,14 +84,6 @@ public class BaseCqlDstu3Test extends BaseJpaDstu3Test implements CqlProviderTes
 		return bundle;
 	}
 
-	@Configuration
-	static class Config {
-		@Bean
-		public PartitionHelper myPartitionHelper() {
-			return new PartitionHelper();
-		}
-	}
-
 	protected Bundle loadBundle(String theLocation) throws IOException {
 		Bundle bundle = parseBundle(theLocation);
 		return loadBundle(bundle);
@@ -100,5 +92,13 @@ public class BaseCqlDstu3Test extends BaseJpaDstu3Test implements CqlProviderTes
 	@Override
 	public FhirContext getTestFhirContext() {
 		return myFhirContext;
+	}
+
+	@Configuration
+	static class Config {
+		@Bean
+		public PartitionHelper myPartitionHelper() {
+			return new PartitionHelper();
+		}
 	}
 }

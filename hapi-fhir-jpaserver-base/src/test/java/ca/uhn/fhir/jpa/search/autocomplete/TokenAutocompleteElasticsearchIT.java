@@ -9,11 +9,11 @@ import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.config.TestHibernateSearchAddInConfig;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
-import ca.uhn.fhir.jpa.dao.DaoTestDataBuilder;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.storage.test.DaoTestDataBuilder;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import org.hamcrest.Description;
@@ -51,16 +51,14 @@ import static org.hamcrest.Matchers.not;
 @ContextConfiguration(classes = {
 	TestR4Config.class, TestHibernateSearchAddInConfig.Elasticsearch.class, DaoTestDataBuilder.Config.class
 })
-public class TokenAutocompleteElasticsearchIT extends BaseJpaTest{
+public class TokenAutocompleteElasticsearchIT extends BaseJpaTest {
 	public static final Coding erythrocyte_by_volume = new Coding("http://loinc.org", "789-8", "Erythrocytes [#/volume] in Blood by Automated count");
+	// a few different codes
+	static final Coding mean_blood_pressure = new Coding("http://loinc.org", "8478-0", "Mean blood pressure");
+	static final Coding gram_positive_culture = new Coding("http://loinc.org", "88262-1", "Gram positive blood culture panel by Probe in Positive blood culture");
 	@Autowired
 	protected PlatformTransactionManager myTxManager;
 	protected ServletRequestDetails mySrd = new ServletRequestDetails();
-	@Autowired
-	@Qualifier("myObservationDaoR4")
-	private IFhirResourceDao<Observation> myObservationDao;
-	@Autowired
-	private FhirContext myFhirCtx;
 	@Autowired
 	protected EntityManager myEntityManager;
 	@Autowired
@@ -72,17 +70,18 @@ public class TokenAutocompleteElasticsearchIT extends BaseJpaTest{
 	@Autowired
 	protected ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
-	IFhirSystemDao<?,?> mySystemDao;
+	IFhirSystemDao<?, ?> mySystemDao;
 	@Autowired
 	IResourceReindexingSvc myResourceReindexingSvc;
 	@Autowired
-	private IBulkDataExportJobSchedulingHelper myBulkDataScheduleHelper;
-	@Autowired
 	ITestDataBuilder myDataBuilder;
-
-	// a few different codes
-	static final Coding mean_blood_pressure = new Coding("http://loinc.org", "8478-0", "Mean blood pressure");
-	static final Coding gram_positive_culture = new Coding("http://loinc.org", "88262-1", "Gram positive blood culture panel by Probe in Positive blood culture");
+	@Autowired
+	@Qualifier("myObservationDaoR4")
+	private IFhirResourceDao<Observation> myObservationDao;
+	@Autowired
+	private FhirContext myFhirCtx;
+	@Autowired
+	private IBulkDataExportJobSchedulingHelper myBulkDataScheduleHelper;
 
 	@BeforeEach
 	public void beforePurgeDatabase() {
@@ -160,7 +159,7 @@ public class TokenAutocompleteElasticsearchIT extends BaseJpaTest{
 	@Test
 	public void testAutocompleteDistinguishesMultipleCodes() {
 
-		createObservationWithCode(erythrocyte_by_volume,mean_blood_pressure,gram_positive_culture);
+		createObservationWithCode(erythrocyte_by_volume, mean_blood_pressure, gram_positive_culture);
 		createObservationWithCode(gram_positive_culture);
 		createObservationWithCode(mean_blood_pressure);
 
@@ -180,7 +179,7 @@ public class TokenAutocompleteElasticsearchIT extends BaseJpaTest{
 	List<TokenAutocompleteHit> autocompleteSearch(String theResourceType, String theSPName, String theModifier, String theSearchText) {
 		return new TransactionTemplate(myTxManager).execute(s -> {
 			TokenAutocompleteSearch tokenAutocompleteSearch = new TokenAutocompleteSearch(myFhirCtx, Search.session(myEntityManager));
-			return  tokenAutocompleteSearch.search(theResourceType, theSPName, theSearchText, theModifier,30);
+			return tokenAutocompleteSearch.search(theResourceType, theSPName, theSearchText, theModifier, 30);
 		});
 	}
 
@@ -202,6 +201,7 @@ public class TokenAutocompleteElasticsearchIT extends BaseJpaTest{
 				return Objects.equals(mySystemAndCode, item.getSystemCode());
 
 			}
+
 			@Override
 			public void describeTo(Description description) {
 				description.appendText("search hit matching ").appendValue(mySystemAndCode);

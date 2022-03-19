@@ -5,11 +5,11 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.config.TestHibernateSearchAddInConfig;
 import ca.uhn.fhir.jpa.config.TestR4Config;
-import ca.uhn.fhir.jpa.dao.BaseDateSearchDaoTests;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
-import ca.uhn.fhir.jpa.dao.DaoTestDataBuilder;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.storage.test.BaseDateSearchDaoTests;
+import ca.uhn.fhir.storage.test.DaoTestDataBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Observation;
@@ -43,14 +43,14 @@ import static org.hamcrest.Matchers.not;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 	@Autowired
+	protected DaoRegistry myDaoRegistry;
+	@Autowired
 	PlatformTransactionManager myTxManager;
 	@Autowired
 	FhirContext myFhirCtx;
 	@Autowired
 	@Qualifier("myObservationDaoR4")
 	IFhirResourceDao<Observation> myObservationDao;
-	@Autowired
-	protected DaoRegistry myDaoRegistry;
 	@Autowired
 	MatchUrlService myMatchUrlService;
 	@RegisterExtension
@@ -73,13 +73,13 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 	@Nested
 	public class DateSearchTests extends BaseDateSearchDaoTests {
 		@Override
-		protected Fixture constructFixture() {
+		protected BaseDateSearchDaoTests.Fixture constructFixture() {
 			return new TestDataBuilderFixture<>(myDataBuilder, myObservationDao);
 		}
 	}
 
 	@Nested
-	public class TokenSearch  {
+	public class TokenSearch {
 
 		@Nested
 		public class Queries {
@@ -104,6 +104,22 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 				assertFind("by system and code", "/Observation?code=|value");
 				assertFind("by system, any code", "/Observation?code=|");
 				assertFind("by code, any system", "/Observation?code=value");
+			}
+
+			@SafeVarargs
+			private IIdType withObservation(Consumer<IBaseResource>... theBuilder) {
+				myObservationId = myDataBuilder.createObservation(theBuilder);
+				return myObservationId;
+			}
+
+			private void assertFind(String theMessage, String theUrl) {
+				List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
+				assertThat(theMessage, resourceIds, hasItem(equalTo(myObservationId.getIdPart())));
+			}
+
+			private void assertNotFind(String theMessage, String theUrl) {
+				List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
+				assertThat(theMessage, resourceIds, not(hasItem(equalTo(myObservationId.getIdPart()))));
 			}
 
 			@Nested
@@ -159,28 +175,17 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 					assertThat(allIds, hasItems(idExA, idExD, idExM));
 				}
 			}
-
-			@SafeVarargs
-			private IIdType withObservation(Consumer<IBaseResource>... theBuilder) {
-				myObservationId = myDataBuilder.createObservation(theBuilder);
-				return myObservationId;
-			}
-
-			private void assertFind(String theMessage, String theUrl) {
-				List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-				assertThat(theMessage, resourceIds, hasItem(equalTo(myObservationId.getIdPart())));
-			}
-
-			private void assertNotFind(String theMessage, String theUrl) {
-				List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-				assertThat(theMessage, resourceIds, not(hasItem(equalTo(myObservationId.getIdPart()))));
-			}
 		}
 	}
 
 	@Nested
-	public class NumericSearch  {
+	public class NumericSearch {
 		IIdType myResourceId;
+
+		private IIdType withRiskAssessmentWithProbabilty(double theValue) {
+			myResourceId = myDataBuilder.createResource("RiskAssessment", myDataBuilder.withPrimitiveAttribute("prediction.probabilityDecimal", theValue));
+			return myResourceId;
+		}
 
 		@Nested
 		public class Queries {
@@ -267,11 +272,6 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 			}
 		}
 
-		private IIdType withRiskAssessmentWithProbabilty(double theValue) {
-			myResourceId = myDataBuilder.createResource("RiskAssessment", myDataBuilder.withPrimitiveAttribute("prediction.probabilityDecimal", theValue));
-			return myResourceId;
-		}
-
 		@Nested
 		public class Sorting {
 			@Test
@@ -291,6 +291,20 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 	@Nested
 	public class QuantitySearch {
 		IIdType myResourceId;
+
+		private IIdType withObservationWithValueQuantity(double theValue) {
+//			IBase quantity = myDataBuilder.withElementOfType("Quantity",
+//				myDataBuilder.withPrimitiveAttribute("value", theValue),
+//				myDataBuilder.withPrimitiveAttribute("unit", "mmHg"),
+//				myDataBuilder.withPrimitiveAttribute("system", "http://unitsofmeasure.org"));
+			myResourceId = myDataBuilder.createObservation(myDataBuilder.withAttribute("valueQuantity",
+				myDataBuilder.withPrimitiveAttribute("value", theValue),
+				myDataBuilder.withPrimitiveAttribute("unit", "mmHg"),
+				myDataBuilder.withPrimitiveAttribute("system", "http://unitsofmeasure.org"),
+				myDataBuilder.withPrimitiveAttribute("code", "mm[Hg]")
+			));
+			return myResourceId;
+		}
 
 		@Nested
 		public class Queries {
@@ -379,20 +393,6 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 				List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
 				assertThat(theMessage, resourceIds, not(hasItem(equalTo(myResourceId.getIdPart()))));
 			}
-		}
-
-		private IIdType withObservationWithValueQuantity(double theValue) {
-//			IBase quantity = myDataBuilder.withElementOfType("Quantity",
-//				myDataBuilder.withPrimitiveAttribute("value", theValue),
-//				myDataBuilder.withPrimitiveAttribute("unit", "mmHg"),
-//				myDataBuilder.withPrimitiveAttribute("system", "http://unitsofmeasure.org"));
-			myResourceId = myDataBuilder.createObservation(myDataBuilder.withAttribute("valueQuantity",
-				myDataBuilder.withPrimitiveAttribute("value", theValue),
-				myDataBuilder.withPrimitiveAttribute("unit", "mmHg"),
-				myDataBuilder.withPrimitiveAttribute("system", "http://unitsofmeasure.org"),
-				myDataBuilder.withPrimitiveAttribute("code", "mm[Hg]")
-				));
-			return myResourceId;
 		}
 
 		@Nested
