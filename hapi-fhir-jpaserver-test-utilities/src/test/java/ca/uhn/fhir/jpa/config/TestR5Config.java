@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.config;
 
+import ca.uhn.fhir.batch2.jobs.config.Batch2JobsConfig;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.batch2.JpaBatch2Config;
 import ca.uhn.fhir.jpa.binstore.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.config.r5.JpaR5Config;
@@ -35,6 +37,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 	JpaR5Config.class,
 	HapiJpaConfig.class,
 	TestJPAConfig.class,
+	JpaBatch2Config.class,
+	Batch2JobsConfig.class,
 	TestHibernateSearchAddInConfig.DefaultLuceneHeap.class
 })
 public class TestR5Config {

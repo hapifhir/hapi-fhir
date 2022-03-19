@@ -186,6 +186,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected IFulltextSearchSvc myFulltestSearchSvc;
 	@Autowired(required = false)
 	protected BatchJobHelper myBatchJobHelper;
+	@Autowired(required = false)
+	protected Batch2JobHelper myBatch2JobHelper;
 	@Autowired
 	protected ITermConceptDao myTermConceptDao;
 	@Autowired
@@ -196,8 +198,6 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected ITermConceptDesignationDao myTermConceptDesignationDao;
 	@Autowired
 	protected ITermConceptPropertyDao myTermConceptPropertyDao;
-	@Autowired
-	private IIdHelperService myIdHelperService;
 	@Autowired
 	private MemoryCacheService myMemoryCacheService;
 	@Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT)

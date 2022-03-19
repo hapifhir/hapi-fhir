@@ -1,18 +1,28 @@
 package ca.uhn.fhir.batch2.impl;
 
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
+import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.context.ConfigurationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
+@ExtendWith(MockitoExtension.class)
 class JobDefinitionRegistryTest {
 
 	private JobDefinitionRegistry mySvc;
+
+	@Mock
+	private IJobStepWorker<TestJobParameters, VoidModel, TestJobStep2InputType> myFirstStep;
+	@Mock
+	private IJobStepWorker<TestJobParameters, TestJobStep2InputType, VoidModel> myLastStep;
 
 	@BeforeEach
 	void beforeEach() {
@@ -24,8 +34,8 @@ class JobDefinitionRegistryTest {
 			.setJobDefinitionVersion(1)
 			.setJobDescription("the description")
 			.setParametersType(TestJobParameters.class)
-			.addFirstStep("S1", "S1", TestJobStep2InputType.class, mock(IJobStepWorker.class))
-			.addLastStep("S2", "S2", TestJobStep2InputType.class, mock(IJobStepWorker.class))
+			.addFirstStep("S1", "S1", TestJobStep2InputType.class, myFirstStep)
+			.addLastStep("S2", "S2", myLastStep)
 			.build());
 
 		mySvc.addJobDefinition(JobDefinition
@@ -34,8 +44,8 @@ class JobDefinitionRegistryTest {
 			.setJobDefinitionVersion(2)
 			.setJobDescription("the description")
 			.setParametersType(TestJobParameters.class)
-			.addFirstStep("S1", "S1", TestJobStep2InputType.class, mock(IJobStepWorker.class))
-			.addLastStep("S2", "S2", TestJobStep2InputType.class, mock(IJobStepWorker.class))
+			.addFirstStep("S1", "S1", TestJobStep2InputType.class, myFirstStep)
+			.addLastStep("S2", "S2", myLastStep)
 			.build());
 	}
 
@@ -60,8 +70,8 @@ class JobDefinitionRegistryTest {
 				.setJobDefinitionVersion(2)
 				.setJobDescription("The description")
 				.setParametersType(TestJobParameters.class)
-				.addFirstStep("S1", "S1", TestJobStep2InputType.class, mock(IJobStepWorker.class))
-				.addLastStep("S2", "S2", TestJobStep2InputType.class, mock(IJobStepWorker.class))
+				.addFirstStep("S1", "S1", TestJobStep2InputType.class, myFirstStep)
+				.addLastStep("S2", "S2", myLastStep)
 				.build());
 			fail();
 		} catch (ConfigurationException e) {
@@ -75,8 +85,8 @@ class JobDefinitionRegistryTest {
 				.setJobDefinitionVersion(3)
 				.setJobDescription("The description")
 				.setParametersType(TestJobParameters.class)
-				.addFirstStep("S1", "S1", TestJobStep2InputType.class, mock(IJobStepWorker.class))
-				.addLastStep("S1", "S2", TestJobStep2InputType.class, mock(IJobStepWorker.class))
+				.addFirstStep("S1", "S1", TestJobStep2InputType.class, myFirstStep)
+				.addLastStep("S1", "S2", myLastStep)
 				.build());
 			fail();
 		} catch (ConfigurationException e) {
@@ -89,8 +99,8 @@ class JobDefinitionRegistryTest {
 				.setJobDefinitionId("A")
 				.setJobDefinitionVersion(2)
 				.setParametersType(TestJobParameters.class)
-				.addFirstStep("S1", "S1", TestJobStep2InputType.class, mock(IJobStepWorker.class))
-				.addLastStep("", "S2", TestJobStep2InputType.class, mock(IJobStepWorker.class))
+				.addFirstStep("S1", "S1", TestJobStep2InputType.class, myFirstStep)
+				.addLastStep("", "S2", myLastStep)
 				.build());
 			fail();
 		} catch (IllegalArgumentException e) {

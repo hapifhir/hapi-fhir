@@ -20,6 +20,15 @@ package ca.uhn.fhir.batch2.api;
  * #L%
  */
 
+/**
+ * This exception indicates an <b>unrecoverable</b> processing failure. It should be
+ * thrown by {@link IJobStepWorker} instances in the case that an error occurs that
+ * is not expected to produce a success if it is retried.
+ * <p>
+ * In the case of potentially recoverable errors (IOException, database constraint errors, etc)
+ * you should throw {@link ca.uhn.fhir.rest.server.exceptions.InternalErrorException} instead.
+ * </p>
+ */
 public class JobExecutionFailedException extends RuntimeException {
 
 	private static final long serialVersionUID = 4871161727526723730L;

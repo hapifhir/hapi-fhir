@@ -32,6 +32,10 @@ import javax.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class is the parameters model object for starting a
+ * bulk import job.
+ */
 public class BulkImportJobParameters implements IModelJson {
 
 	@JsonProperty(value = "ndJsonUrls", required = true)

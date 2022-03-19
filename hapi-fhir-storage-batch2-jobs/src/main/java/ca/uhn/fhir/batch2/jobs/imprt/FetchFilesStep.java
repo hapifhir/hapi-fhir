@@ -22,8 +22,8 @@ package ca.uhn.fhir.batch2.jobs.imprt;
 
 import ca.uhn.fhir.batch2.api.IFirstJobStepWorker;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
-import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
+import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.i18n.Msg;
@@ -42,6 +42,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -53,14 +54,15 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class FetchFilesStep implements IFirstJobStepWorker<BulkImportJobParameters, NdJsonFileJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(FetchFilesStep.class);
 
+	@Nonnull
 	@Override
-	public RunOutcome run(StepExecutionDetails<BulkImportJobParameters, VoidModel> theStepExecutionDetails, IJobDataSink<NdJsonFileJson> theDataSink) {
+	public RunOutcome run(@Nonnull StepExecutionDetails<BulkImportJobParameters, VoidModel> theStepExecutionDetails, @Nonnull IJobDataSink<NdJsonFileJson> theDataSink) {
 
 		Integer maxBatchResourceCount = theStepExecutionDetails
 			.getParameters()
 			.getMaxBatchResourceCount();
 		if (maxBatchResourceCount == null || maxBatchResourceCount <= 0) {
-			maxBatchResourceCount = BulkImport2AppCtx.PARAM_MAXIMUM_BATCH_SIZE_DEFAULT;
+			maxBatchResourceCount = BulkImportAppCtx.PARAM_MAXIMUM_BATCH_SIZE_DEFAULT;
 		}
 
 		try (CloseableHttpClient httpClient = newHttpClient(theStepExecutionDetails)) {

@@ -1,6 +1,8 @@
 package ca.uhn.fhirtest.config;
 
+import ca.uhn.fhir.batch2.jobs.config.Batch2JobsConfig;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.jpa.batch2.JpaBatch2Config;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.subscription.channel.config.SubscriptionChannelConfig;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
@@ -19,7 +21,9 @@ import org.springframework.context.annotation.Import;
 	WebsocketDispatcherConfig.class,
 	SubscriptionChannelConfig.class,
 	SubscriptionProcessorConfig.class,
-	SubscriptionSubmitterConfig.class
+	SubscriptionSubmitterConfig.class,
+	JpaBatch2Config.class,
+	Batch2JobsConfig.class
 })
 public class CommonConfig {
 

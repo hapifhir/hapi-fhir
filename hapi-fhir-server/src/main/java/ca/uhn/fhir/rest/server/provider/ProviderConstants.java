@@ -157,7 +157,7 @@ public class ProviderConstants {
 	public static final String OPERATION_BATCH_RESPONSE_JOB_ID = "jobId";
 
 	/**
-	 * Operation name for the $delete-expunge operation
+	 * Operation name for the $reindex operation
 	 */
 	public static final String OPERATION_REINDEX = "$reindex";
 
