@@ -261,6 +261,27 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testIncrementWorkChunkErrorCount() {
+		// Setup
+
+		JobInstance instance = createInstance();
+		String instanceId = mySvc.storeNewInstance(instance);
+		String chunkId = mySvc.storeWorkChunk("definition-chunkId", 1, "step-chunkId", instanceId, 1, null);
+		assertNotNull(chunkId);
+
+		// Execute
+
+		mySvc.incrementWorkChunkErrorCount(chunkId, 2);
+		mySvc.incrementWorkChunkErrorCount(chunkId, 3);
+
+		// Verify
+
+		List<WorkChunk> chunks = mySvc.fetchWorkChunksWithoutData(instanceId, 100, 0);
+		assertEquals(1, chunks.size());
+		assertEquals(5, chunks.get(0).getErrorCount());
+	}
+
+	@Test
 	public void testMarkChunkAsCompleted_Error() {
 		JobInstance instance = createInstance();
 		String instanceId = mySvc.storeNewInstance(instance);

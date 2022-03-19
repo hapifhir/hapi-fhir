@@ -40,7 +40,7 @@ public class JobInstanceStartRequest implements IModelJson {
 	}
 
 	/**
-	 * Coopy constructor
+	 * Copy constructor
 	 */
 	public JobInstanceStartRequest(JobInstanceStartRequest theJobInstance) {
 		super();
@@ -72,6 +72,5 @@ public class JobInstanceStartRequest implements IModelJson {
 	public <T extends IModelJson> T getParameters(Class<T> theType) {
 		return JsonUtil.deserialize(myParameters, theType);
 	}
-
 
 }

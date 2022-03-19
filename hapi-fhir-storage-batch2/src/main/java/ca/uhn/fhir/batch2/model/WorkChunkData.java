@@ -29,13 +29,6 @@ public class WorkChunkData<OT extends IModelJson> {
 	/**
 	 * Constructor
 	 */
-	public WorkChunkData() {
-		this(null);
-	}
-
-	/**
-	 * Constructor
-	 */
 	public WorkChunkData(OT theData) {
 		myData = theData;
 	}
