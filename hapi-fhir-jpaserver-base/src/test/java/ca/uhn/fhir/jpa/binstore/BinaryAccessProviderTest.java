@@ -8,6 +8,9 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.binary.BinaryAccessProvider;
+import ca.uhn.fhir.jpa.binary.IBinaryStorageSvc;
+import ca.uhn.fhir.jpa.binary.StoredDetails;
 import ca.uhn.fhir.mdm.util.MessageHelper;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import org.hl7.fhir.instance.model.api.IBaseResource;
