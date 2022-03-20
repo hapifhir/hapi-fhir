@@ -84,7 +84,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		myModelConfig.setDefaultSearchParamsCanBeOverridden(true);
 
 		myPartitionDate = LocalDate.of(2020, Month.JANUARY, 14);
-		myPartitionDate2 = LocalDate.of(2020, Month.JANUARY, 15);
+		myPartitionDate2 = LocalDate.of(2020, Month.FEBRUARY, 15);
 		myPartitionId = 1;
 		myPartitionId2 = 2;
 
