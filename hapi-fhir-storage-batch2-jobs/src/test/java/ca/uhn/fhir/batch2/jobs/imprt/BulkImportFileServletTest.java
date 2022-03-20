@@ -36,7 +36,7 @@ public class BulkImportFileServletTest {
 	public void testDownloadFile() throws IOException {
 		String input = "{\"resourceType\":\"Patient\", \"id\": \"A\", \"active\": true}\n" +
 			"{\"resourceType\":\"Patient\", \"id\": \"B\", \"active\": false}";
-		String index = mySvc.registerFile(() -> new StringReader(input));
+		String index = mySvc.registerFileByContents(input);
 
 		CloseableHttpClient client = myServletExtension.getHttpClient();
 

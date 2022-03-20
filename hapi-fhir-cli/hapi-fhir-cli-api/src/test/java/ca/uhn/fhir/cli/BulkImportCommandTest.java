@@ -25,12 +25,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.zip.GZIPOutputStream;
 
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
@@ -111,6 +115,40 @@ public class BulkImportCommandTest {
 		assertEquals(fileContents1, fetchFile(jobParameters.getNdJsonUrls().get(1)));
 	}
 
+	@Test
+	public void testBulkImport_GzippedFile() throws IOException {
+
+		String fileContents1 = "{\"resourceType\":\"Observation\"}\n{\"resourceType\":\"Observation\"}";
+		String fileContents2 = "{\"resourceType\":\"Patient\"}\n{\"resourceType\":\"Patient\"}";
+		writeNdJsonFileToTempDirectory(fileContents1, "file1.json.gz");
+		writeNdJsonFileToTempDirectory(fileContents2, "file2.json.gz");
+
+		when(myJobCoordinator.startInstance(any())).thenReturn("THE-JOB-ID");
+
+		// Start the command in a separate thread
+		new Thread(() -> App.main(new String[]{
+			BulkImportCommand.BULK_IMPORT,
+			"--" + BaseCommand.FHIR_VERSION_PARAM_LONGOPT, "r4",
+			"--" + BulkImportCommand.PORT, "0",
+			"--" + BulkImportCommand.SOURCE_DIRECTORY, myTempDir.toAbsolutePath().toString(),
+			"--" + BulkImportCommand.TARGET_BASE, myRestfulServerExtension.getBaseUrl()
+		})).start();
+
+		ourLog.info("Waiting for initiation requests");
+		await().until(() -> myRestfulServerExtension.getRequestContentTypes().size(), equalTo(2));
+		ourLog.info("Initiation requests complete");
+
+		verify(myJobCoordinator, timeout(10000).times(1)).startInstance(myStartCaptor.capture());
+
+		JobInstanceStartRequest startRequest = myStartCaptor.getValue();
+		BulkImportJobParameters jobParameters = startRequest.getParameters(BulkImportJobParameters.class);
+
+		// Reverse order because Patient should be first
+		assertEquals(2, jobParameters.getNdJsonUrls().size());
+		assertEquals(fileContents2, fetchFile(jobParameters.getNdJsonUrls().get(0)));
+		assertEquals(fileContents1, fetchFile(jobParameters.getNdJsonUrls().get(1)));
+	}
+
 	private String fetchFile(String url) throws IOException {
 		String outcome;
 		try (CloseableHttpResponse response = myHttpClientExtension.getClient().execute(new HttpGet(url))) {
@@ -120,9 +158,15 @@ public class BulkImportCommandTest {
 		return outcome;
 	}
 
-	private void writeNdJsonFileToTempDirectory(String fileContents1, String fileName) throws IOException {
-		try (Writer w = new FileWriter(new File(myTempDir.toFile(), fileName))) {
-			w.append(fileContents1);
+	private void writeNdJsonFileToTempDirectory(String theContents, String theFileName) throws IOException {
+		try (FileOutputStream fos = new FileOutputStream(new File(myTempDir.toFile(), theFileName), false)) {
+			OutputStream os = fos;
+			if (theFileName.endsWith(".gz")) {
+				os = new GZIPOutputStream(os);
+			}
+			try (Writer w = new OutputStreamWriter(os)) {
+				w.append(theContents);
+			}
 		}
 	}
 
