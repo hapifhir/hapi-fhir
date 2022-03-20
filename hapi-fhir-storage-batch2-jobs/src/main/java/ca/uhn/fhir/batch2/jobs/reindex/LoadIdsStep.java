@@ -26,9 +26,7 @@ import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.svc.IResourceReindexSvc;
-import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +37,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -47,12 +46,6 @@ public class LoadIdsStep implements IJobStepWorker<ReindexJobParameters, Reindex
 
 	@Autowired
 	private IResourceReindexSvc myResourceReindexSvc;
-
-	@Autowired
-	private DaoRegistry myDaoRegistry;
-
-	@Autowired
-	private MatchUrlService myMatchUrlService;
 
 	@Nonnull
 	@Override
@@ -67,7 +60,7 @@ public class LoadIdsStep implements IJobStepWorker<ReindexJobParameters, Reindex
 
 		Date nextStart = start;
 		RequestPartitionId requestPartitionId = theStepExecutionDetails.getParameters().getRequestPartitionId();
-		Set<ReindexChunkIds.Id> idBuffer = new HashSet<>();
+		Set<ReindexChunkIds.Id> idBuffer = new LinkedHashSet<>();
 		long previousLastTime = 0L;
 		int totalIdsFound = 0;
 		int chunkCount = 0;
@@ -84,13 +77,6 @@ public class LoadIdsStep implements IJobStepWorker<ReindexJobParameters, Reindex
 
 			ourLog.info("Found {} IDs from {} to {}", nextChunk.getIds().size(), nextStart, nextChunk.getLastDate());
 
-			// If we get the same last time twice in a row, we've clearly reached the end
-			if (nextChunk.getLastDate().getTime() == previousLastTime) {
-				ourLog.info("Matching final timestamp of {}, loading is completed", new Date(previousLastTime));
-				break;
-			}
-			previousLastTime = nextChunk.getLastDate().getTime();
-
 			for (int i = 0; i < nextChunk.getIds().size(); i++) {
 				ReindexChunkIds.Id nextId = new ReindexChunkIds.Id();
 				nextId.setResourceType(nextChunk.getResourceTypes().get(i));
@@ -98,9 +84,16 @@ public class LoadIdsStep implements IJobStepWorker<ReindexJobParameters, Reindex
 				idBuffer.add(nextId);
 			}
 
+			// If we get the same last time twice in a row, we've clearly reached the end
+			if (nextChunk.getLastDate().getTime() == previousLastTime) {
+				ourLog.info("Matching final timestamp of {}, loading is completed", new Date(previousLastTime));
+				break;
+			}
+
+			previousLastTime = nextChunk.getLastDate().getTime();
 			nextStart = nextChunk.getLastDate();
 
-			if (idBuffer.size() >= 1000) {
+			while (idBuffer.size() >= 1000) {
 
 				List<ReindexChunkIds.Id> submissionIds = new ArrayList<>();
 				for (Iterator<ReindexChunkIds.Id> iter = idBuffer.iterator(); iter.hasNext(); ) {
