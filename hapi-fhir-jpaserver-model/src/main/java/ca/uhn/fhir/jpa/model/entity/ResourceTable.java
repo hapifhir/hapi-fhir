@@ -264,7 +264,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	@OneToMany(mappedBy = "myResource", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	@OptimisticLock(excluded = true)
-	private Collection<SearchParamPresent> mySearchParamPresents;
+	private Collection<SearchParamPresentEntity> mySearchParamPresents;
 
 	@OneToMany(mappedBy = "myResource", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	@OptimisticLock(excluded = true)
@@ -774,5 +774,12 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	public void setLuceneIndexData(ExtendedLuceneIndexData theLuceneIndexData) {
 		myLuceneIndexData = theLuceneIndexData;
+	}
+
+	public Collection<SearchParamPresentEntity> getSearchParamPresents() {
+		if (mySearchParamPresents == null) {
+			mySearchParamPresents = new ArrayList<>();
+		}
+		return mySearchParamPresents;
 	}
 }
