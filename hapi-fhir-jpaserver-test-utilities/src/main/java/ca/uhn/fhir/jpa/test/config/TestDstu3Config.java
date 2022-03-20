@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.test.config;
 
+import ca.uhn.fhir.batch2.jobs.config.Batch2JobsConfig;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.batch2.JpaBatch2Config;
 import ca.uhn.fhir.jpa.config.HapiJpaConfig;
 import ca.uhn.fhir.jpa.config.dstu3.JpaDstu3Config;
 import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
@@ -39,19 +41,21 @@ import static org.junit.jupiter.api.Assertions.fail;
 	JpaDstu3Config.class,
 	HapiJpaConfig.class,
 	TestJPAConfig.class,
+	JpaBatch2Config.class,
+	Batch2JobsConfig.class,
 	TestHibernateSearchAddInConfig.DefaultLuceneHeap.class
 })
 public class TestDstu3Config {
 
 	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestDstu3Config.class);
+	@Autowired
+	TestHibernateSearchAddInConfig.IHibernateSearchConfigurer hibernateSearchConfigurer;
 	private Exception myLastStackTrace;
-
 
 	@Bean
 	public CircularQueueCaptureQueriesListener captureQueriesListener() {
 		return new CircularQueueCaptureQueriesListener();
 	}
-
 
 	@Bean
 	public BasicDataSource basicDataSource() {
@@ -155,9 +159,6 @@ public class TestDstu3Config {
 		retVal.setJpaProperties(jpaProperties());
 		return retVal;
 	}
-
-	@Autowired
-	TestHibernateSearchAddInConfig.IHibernateSearchConfigurer hibernateSearchConfigurer;
 
 	private Properties jpaProperties() {
 		Properties extraProperties = new Properties();

@@ -156,7 +156,7 @@ public class TestR4Config {
 //			.logQueryBySlf4j(level)
 			.logSlowQueryBySlf4j(10, TimeUnit.SECONDS, level)
 			.beforeQuery(new BlockLargeNumbersOfParamsListener())
-			.beforeQuery(new MandatoryTransactionListener())
+			.beforeQuery(getMandatoryTransactionListener())
 			.afterQuery(captureQueriesListener())
 			.afterQuery(new CurrentThreadCaptureQueriesListener())
 			.countQuery(singleQueryCountHolder())
@@ -170,6 +170,12 @@ public class TestR4Config {
 	public SingleQueryCountHolder singleQueryCountHolder() {
 		return new SingleQueryCountHolder();
 	}
+
+	@Bean
+	public ProxyDataSourceBuilder.SingleQueryExecution getMandatoryTransactionListener() {
+		return new MandatoryTransactionListener();
+	}
+
 
 	@Bean
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext) {

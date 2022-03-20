@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.config;
+package ca.uhn.fhir.jpa.test.util;
 
 import ca.uhn.fhir.jpa.subscription.match.deliver.resthook.SubscriptionDeliveringRestHookSubscriber;
 import org.slf4j.Logger;

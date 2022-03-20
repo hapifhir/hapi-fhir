@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.config.TestR4Config;
+import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.io.IOUtils;
@@ -66,7 +66,7 @@ public class ResourceProviderConcurrencyR4Test extends BaseResourceProviderR4Tes
 	/**
 	 * This test is intended to verify that we are in fact executing searches in parallel
 	 * when two different searches come in.
-	 *
+	 * <p>
 	 * We execute two identical searches (which should result in only one actual
 	 * execution that will be reused by both) and one other search. We use an
 	 * interceptor to artifically delay the execution of the first search in order

@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
@@ -10,6 +9,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
+import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.UriDt;
@@ -371,14 +371,14 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertEquals(400, resp.getStatusLine().getStatusCode());
 		}
 
-		 get = new HttpGet(ourServerBase + "/Condition?onset-date=ge");
+		get = new HttpGet(ourServerBase + "/Condition?onset-date=ge");
 		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
 			String output = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
 			assertThat(output, containsString("Invalid date/time format: &quot;ge&quot;"));
 			assertEquals(400, resp.getStatusLine().getStatusCode());
 		}
 
-		 get = new HttpGet(ourServerBase + "/Condition?onset-date=" + UrlUtil.escapeUrlParam(">"));
+		get = new HttpGet(ourServerBase + "/Condition?onset-date=" + UrlUtil.escapeUrlParam(">"));
 		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
 			String output = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
 			assertThat(output, containsString("Invalid date/time format: &quot;&gt;&quot;"));
@@ -820,7 +820,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			ids = toUnqualifiedVersionlessIdValues(bundle);
 			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		}
-		
+
 		return ids;
 	}
 
@@ -983,7 +983,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		}
 		List<IBaseResource> outcome = myClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			assertEquals(100, myResourceTableDao.count());
 		});
 
@@ -2149,7 +2149,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		IIdType o1Id = createOrganization(methodName, "1");
 		IIdType o2Id = createOrganization(methodName, "2");
 
-		IIdType p1Id = createPatientWithIndexAtOrganization(methodName, "1" , o1Id);
+		IIdType p1Id = createPatientWithIndexAtOrganization(methodName, "1", o1Id);
 		IIdType c1Id = createConditionForPatient(methodName, "1", p1Id);
 
 		IIdType p2Id = createPatientWithIndexAtOrganization(methodName, "2", o2Id);
@@ -2249,7 +2249,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			// Test combining 2 or-listed params
 			// e.g. _id=1,2&_id=3,4
 			Parameters parameters = new Parameters();
-			parameters.addParameter("_id", "Patient/" +p1Id.getIdPart() + "," + p2Id.getIdPart());
+			parameters.addParameter("_id", "Patient/" + p1Id.getIdPart() + "," + p2Id.getIdPart());
 			parameters.addParameter("_id", p3Id.getIdPart() + "," + p4Id.getIdPart());
 			parameters.addParameter(new Parameters.ParametersParameterComponent().setName("_count").setValue(new UnsignedIntType(20)));
 
@@ -2267,7 +2267,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			// Test paging works.
 			// There are 12 results, lets make 2 pages of 6.
 			Parameters parameters = new Parameters();
-			parameters.addParameter("_id", "Patient/" +p1Id.getIdPart() + "," + p2Id.getIdPart());
+			parameters.addParameter("_id", "Patient/" + p1Id.getIdPart() + "," + p2Id.getIdPart());
 			parameters.addParameter("_id", p3Id.getIdPart() + "," + p4Id.getIdPart());
 			parameters.addParameter(new Parameters.ParametersParameterComponent().setName("_count").setValue(new UnsignedIntType(6)));
 
@@ -2275,7 +2275,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			Bundle bundle = (Bundle) output.getParameter().get(0).getResource();
 
 			String next = bundle.getLink("next").getUrl();
-			Bundle nextBundle= myClient.loadPage().byUrl(next).andReturnBundle(Bundle.class).execute();
+			Bundle nextBundle = myClient.loadPage().byUrl(next).andReturnBundle(Bundle.class).execute();
 			assertEquals(BundleType.SEARCHSET, bundle.getType());
 
 			assertThat(bundle.getEntry(), hasSize(6));
@@ -2310,7 +2310,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		Patient patientDEF = new Patient();
 		patientDEF.setId("def");
 		patientDEF.setManagingOrganization(new Reference(o2Id));
-		IIdType pdefId= myPatientDao.update(patientDEF).getId().toUnqualifiedVersionless();
+		IIdType pdefId = myPatientDao.update(patientDEF).getId().toUnqualifiedVersionless();
 		IIdType c2Id = createConditionForPatient(methodName, "2", pdefId);
 
 		IIdType c3Id = createConditionForPatient(methodName, "2", null);
@@ -2329,7 +2329,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertThat(ids, containsInAnyOrder(o1Id, pabcId, c1Id, pdefId, o2Id, c2Id));
 			assertThat(ids, not(contains(c3Id)));
 		}
-
 
 
 	}
@@ -4466,9 +4465,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			CodeableConcept cc = obs.getCode();
 			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
 			obs.setValue(new Quantity().setValueElement(new DecimalType(125.12)).setUnit("CM").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("cm"));
-			
+
 			myObservationDao.create(obs, mySrd);
-			
+
 			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
@@ -4479,9 +4478,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			CodeableConcept cc = obs.getCode();
 			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
 			obs.setValue(new Quantity().setValueElement(new DecimalType(13.45)).setUnit("DM").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("dm"));
-			
+
 			myObservationDao.create(obs, mySrd);
-			
+
 			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
@@ -4494,10 +4493,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			obs.setValue(new Quantity().setValueElement(new DecimalType(1.45)).setUnit("M").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("m"));
 
 			myObservationDao.create(obs, mySrd);
-			
+
 			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
-		
+
 		{
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
@@ -4505,18 +4504,18 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			CodeableConcept cc = obs.getCode();
 			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
 			obs.setValue(new Quantity().setValueElement(new DecimalType(25)).setUnit("CM").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("cm"));
-								
+
 			myObservationDao.create(obs, mySrd);
-			
+
 			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
-		
+
 		// > 1m
 		String uri = ourServerBase + "/Observation?code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$gt1|http://unitsofmeasure.org|m");
 		ourLog.info("uri = " + uri);
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 		assertEquals(3, ids.size());
-		
+
 		//>= 100cm
 		uri = ourServerBase + "/Observation?code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$gt100|http://unitsofmeasure.org|cm");
 		ourLog.info("uri = " + uri);
@@ -4529,7 +4528,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 		assertEquals(3, ids.size());
 	}
-	
+
 	@Test
 	public void testSearchWithNormalizedQuantitySearchSupported_CombineUCUMOrNonUCUM() throws Exception {
 
@@ -4547,9 +4546,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
 			obs.getSubject().setReferenceElement(pid0);
 			obs.setValue(new Quantity().setValueElement(new DecimalType(1)).setUnit("M").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("m"));
-			
+
 			myObservationDao.create(obs, mySrd);
-			
+
 			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
@@ -4558,9 +4557,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
 			obs.getSubject().setReferenceElement(pid0);
 			obs.setValue(new Quantity().setValueElement(new DecimalType(13.45)).setUnit("DM").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("dm"));
-			
+
 			myObservationDao.create(obs, mySrd);
-			
+
 			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
@@ -4571,22 +4570,22 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			obs.setValue(new Quantity().setValueElement(new DecimalType(1.45)).setUnit("M").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("m"));
 
 			myObservationDao.create(obs, mySrd);
-			
+
 			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
-		
+
 		{
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
 			obs.getSubject().setReferenceElement(pid0);
 			CodeableConcept cc = obs.getCode();
 			obs.setValue(new Quantity().setValueElement(new DecimalType(100)).setUnit("CM").setSystem("http://foo").setCode("cm"));
-								
+
 			myObservationDao.create(obs, mySrd);
-			
+
 			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
-		
+
 		String uri;
 		List<String> ids;
 
@@ -4600,8 +4599,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 		assertEquals(2, ids.size());
 	}
-	
-	
+
+
 	@Test
 	public void testSearchWithNormalizedQuantitySearchSupported_DegreeFahrenheit() throws Exception {
 
@@ -4619,9 +4618,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
 			obs.getSubject().setReferenceElement(pid0);
 			obs.setValue(new Quantity().setValueElement(new DecimalType(99.82)).setUnit("F").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("[degF]"));
-			
+
 			myObservationDao.create(obs, mySrd);
-			
+
 			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
@@ -4630,9 +4629,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
 			obs.getSubject().setReferenceElement(pid0);
 			obs.setValue(new Quantity().setValueElement(new DecimalType(97.6)).setUnit("F").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("[degF]"));
-			
+
 			myObservationDao.create(obs, mySrd);
-			
+
 			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
@@ -4643,25 +4642,25 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			obs.getSubject().setReferenceElement(pid0);
 			CodeableConcept cc = obs.getCode();
 			obs.setValue(new Quantity().setUnit("CM").setSystem("http://foo").setCode("cm"));
-								
+
 			myObservationDao.create(obs, mySrd);
-			
+
 			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		myCaptureQueriesListener.clear();
 		Bundle returnedBundle = myClient
-	      .search()
-		  .forResource(Observation.class)
-		   .where(Observation.VALUE_QUANTITY.withPrefix(ParamPrefixEnum.EQUAL).number("99.82").andUnits("http://unitsofmeasure.org", "[degF]"))
-		   .prettyPrint()
-		   .returnBundle(Bundle.class)
-		   .execute();
-	
+			.search()
+			.forResource(Observation.class)
+			.where(Observation.VALUE_QUANTITY.withPrefix(ParamPrefixEnum.EQUAL).number("99.82").andUnits("http://unitsofmeasure.org", "[degF]"))
+			.prettyPrint()
+			.returnBundle(Bundle.class)
+			.execute();
+
 		assertEquals(1, returnedBundle.getEntry().size());
-		
+
 		//-- check only use original quantity table to search
-		String searchSql = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true,true);
+		String searchSql = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, true);
 		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
 		assertThat(searchSql, not(containsString("HFJ_SPIDX_QUANTITY_NRML")));
 	}
@@ -5196,7 +5195,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testSearchWithCompositeSortWith_CodeValueQuantity() throws IOException {
-		
+
 		IIdType pid0;
 		IIdType oid1;
 		IIdType oid2;
@@ -5214,59 +5213,59 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			obs.getSubject().setReferenceElement(pid0);
 			obs.getCode().addCoding().setCode("2345-7").setSystem("http://loinc.org");
 			obs.setValue(new Quantity().setValue(200));
-			
+
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-			
+
 			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
-		
+
 		{
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
 			obs.getSubject().setReferenceElement(pid0);
 			obs.getCode().addCoding().setCode("2345-7").setSystem("http://loinc.org");
 			obs.setValue(new Quantity().setValue(300));
-			
+
 			oid2 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-			
+
 			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
-		
+
 		{
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
 			obs.getSubject().setReferenceElement(pid0);
 			obs.getCode().addCoding().setCode("2345-7").setSystem("http://loinc.org");
 			obs.setValue(new Quantity().setValue(150));
-			
+
 			oid3 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-			
+
 			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
-		
+
 		{
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
 			obs.getSubject().setReferenceElement(pid0);
 			obs.getCode().addCoding().setCode("2345-7").setSystem("http://loinc.org");
 			obs.setValue(new Quantity().setValue(250));
-			
+
 			oid4 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-			
+
 			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
-		
+
 		String uri = ourServerBase + "/Observation?_sort=code-value-quantity";
 		Bundle found;
-		
+
 		HttpGet get = new HttpGet(uri);
 		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
 			String output = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
 			found = myFhirContext.newXmlParser().parseResource(Bundle.class, output);
 		}
-		
+
 		ourLog.info("Bundle: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
-		
+
 		List<IIdType> list = toUnqualifiedVersionlessIds(found);
 		assertEquals(4, found.getEntry().size());
 		assertEquals(oid3, list.get(0));
@@ -5274,10 +5273,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals(oid4, list.get(2));
 		assertEquals(oid2, list.get(3));
 	}
-	
+
 	@Test
 	public void testSearchWithCompositeSortWith_CompCodeValueQuantity() throws IOException {
-		
+
 		IIdType pid0;
 		IIdType oid1;
 		IIdType oid2;
@@ -5293,76 +5292,76 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
 			obs.getSubject().setReferenceElement(pid0);
-			
+
 			ObservationComponentComponent comp = obs.addComponent();
 			CodeableConcept cc = new CodeableConcept();
-			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");			
-			comp.setCode(cc);			
+			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
+			comp.setCode(cc);
 			comp.setValue(new Quantity().setValue(200));
-			
+
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-			
+
 			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
-		
+
 		{
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
 			obs.getSubject().setReferenceElement(pid0);
-			
+
 			ObservationComponentComponent comp = obs.addComponent();
 			CodeableConcept cc = new CodeableConcept();
-			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");			
-			comp.setCode(cc);			
+			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
+			comp.setCode(cc);
 			comp.setValue(new Quantity().setValue(300));
-			
+
 			oid2 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-			
+
 			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
-		
+
 		{
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
 			obs.getSubject().setReferenceElement(pid0);
-			
+
 			ObservationComponentComponent comp = obs.addComponent();
 			CodeableConcept cc = new CodeableConcept();
-			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");			
-			comp.setCode(cc);			
+			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
+			comp.setCode(cc);
 			comp.setValue(new Quantity().setValue(150));
-			
+
 			oid3 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-			
+
 			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
-		
+
 		{
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
 			obs.getSubject().setReferenceElement(pid0);
-			
+
 			ObservationComponentComponent comp = obs.addComponent();
 			CodeableConcept cc = new CodeableConcept();
-			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");			
-			comp.setCode(cc);			
+			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
+			comp.setCode(cc);
 			comp.setValue(new Quantity().setValue(250));
 			oid4 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-			
+
 			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
-		
-		String uri = ourServerBase + "/Observation?_sort=combo-code-value-quantity";		
+
+		String uri = ourServerBase + "/Observation?_sort=combo-code-value-quantity";
 		Bundle found;
-		
+
 		HttpGet get = new HttpGet(uri);
 		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
 			String output = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
 			found = myFhirContext.newXmlParser().parseResource(Bundle.class, output);
 		}
-		
+
 		ourLog.info("Bundle: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
-		
+
 		List<IIdType> list = toUnqualifiedVersionlessIds(found);
 		assertEquals(4, found.getEntry().size());
 		assertEquals(oid3, list.get(0));
@@ -5370,8 +5369,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals(oid4, list.get(2));
 		assertEquals(oid2, list.get(3));
 	}
-	
-	
+
+
 	@Test
 	public void testSearchWithMissing() {
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
@@ -6559,7 +6558,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			patient.addName().setFamily("Tester").addGiven("Joe");
 			myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
-		
+
 		{
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
@@ -6570,8 +6569,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
-			IIdType opid1 = myObservationDao.create(obs, mySrd).getId();			
-			
+			IIdType opid1 = myObservationDao.create(obs, mySrd).getId();
+
 			//-- update quantity
 			obs = new Observation();
 			obs.setId(opid1);
@@ -6580,13 +6579,13 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			cc = obs.getCode();
 			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
 			obs.setValue(new Quantity().setValueElement(new DecimalType(24.12)).setUnit("CM").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("cm"));
-			
+
 			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
-			
+
 			myObservationDao.update(obs, mySrd);
 		}
 
-		
+
 		{
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
@@ -6594,9 +6593,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			CodeableConcept cc = obs.getCode();
 			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
 			obs.setValue(new Quantity().setValueElement(new DecimalType(13.45)).setUnit("DM").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("dm"));
-			
+
 			myObservationDao.create(obs, mySrd);
-			
+
 			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
@@ -6609,10 +6608,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			obs.setValue(new Quantity().setValueElement(new DecimalType(1.45)).setUnit("M").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("m"));
 
 			myObservationDao.create(obs, mySrd);
-			
+
 			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
-		
+
 		{
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
@@ -6620,19 +6619,19 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			CodeableConcept cc = obs.getCode();
 			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
 			obs.setValue(new Quantity().setValueElement(new DecimalType(25)).setUnit("CM").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("cm"));
-								
+
 			myObservationDao.create(obs, mySrd);
-			
+
 			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
-		
+
 		// > 1m
 		String uri = ourServerBase + "/Observation?code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$gt1|http://unitsofmeasure.org|m");
 		ourLog.info("uri = " + uri);
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 		assertEquals(2, ids.size());
-		
-		
+
+
 		//>= 100cm
 		uri = ourServerBase + "/Observation?code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$gt100|http://unitsofmeasure.org|cm");
 		ourLog.info("uri = " + uri);
@@ -6648,7 +6647,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testSearchWithLowerBoundDate() throws Exception {
-		
+
 		// Issue 2424 test case
 		IIdType pid0;
 		{
@@ -6657,12 +6656,12 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			patient.addName().setFamily("Tester").addGiven("Joe");
 			patient.setBirthDateElement(new DateType("2073"));
 			pid0 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
-			
+
 			ourLog.info("Patient: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
-			
+
 			System.out.println("pid0 " + pid0);
 		}
-		
+
 		String uri = ourServerBase + "/Patient?_total=accurate&birthdate=gt2072";
 
 		List<String> ids;
@@ -6675,7 +6674,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			ids = toUnqualifiedVersionlessIdValues(bundle);
 			ourLog.info("Patient: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		}
-		
+
 		uri = ourServerBase + "/Patient?_total=accurate&birthdate=gt2072-01-01";
 
 		get = new HttpGet(uri);
@@ -6687,8 +6686,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			ids = toUnqualifiedVersionlessIdValues(bundle);
 			ourLog.info("Patient: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		}
-	
+
 	}
+
 	private String toStr(Date theDate) {
 		return new InstantDt(theDate).getValueAsString();
 	}
