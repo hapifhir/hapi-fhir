@@ -393,7 +393,8 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		// TODO MB someday we'll want a query planner to figure out if we _should_ or _must_ use the ft index, not just if we can.
-		return fulltextEnabled && myParams.getSearchContainedMode() == SearchContainedModeEnum.FALSE &&
+		return fulltextEnabled &&
+			myParams.getSearchContainedMode() == SearchContainedModeEnum.FALSE &&
 			myFulltextSearchSvc.supportsSomeOf(myParams);
 	}
 
@@ -428,10 +429,29 @@ public class SearchBuilder implements ISearchBuilder {
 
 		List<ResourcePersistentId> pids;
 		if (myParams.getEverythingMode() != null) {
-			pids = myFulltextSearchSvc.everything(myResourceName, myParams, theRequest);
+			pids = queryHibernateSearchForEverythingPids();
 		} else {
 			pids = myFulltextSearchSvc.search(myResourceName, myParams);
 		}
+		return pids;
+	}
+
+	private List<ResourcePersistentId> queryHibernateSearchForEverythingPids() {
+		ResourcePersistentId pid = null;
+		if (myParams.get(IAnyResource.SP_RES_ID) != null) {
+			String idParamValue;
+			IQueryParameterType idParam = myParams.get(IAnyResource.SP_RES_ID).get(0).get(0);
+			if (idParam instanceof TokenParam) {
+				TokenParam idParm = (TokenParam) idParam;
+				idParamValue = idParm.getValue();
+			} else {
+				StringParam idParm = (StringParam) idParam;
+				idParamValue = idParm.getValue();
+			}
+
+			pid = myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, idParamValue);
+		}
+		List<ResourcePersistentId> pids = myFulltextSearchSvc.everything(myResourceName, myParams, pid);
 		return pids;
 	}
 
