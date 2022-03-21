@@ -1,12 +1,12 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import org.apache.commons.lang3.Validate;
@@ -39,6 +39,8 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.substringAfter;
+import static org.apache.commons.lang3.StringUtils.substringBefore;
 
 /**
  * This class is a basic in-memory terminology service, designed to expand ValueSets and validate codes
@@ -542,11 +544,13 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	 * Returns <code>true</code> if at least one code was addded
 	 */
 	private boolean expandValueSetR5IncludeOrExclude(ValidationSupportContext theValidationSupportContext, Consumer<FhirVersionIndependentConcept> theConsumer, @Nullable String theWantSystemUrlAndVersion, @Nullable String theWantCode, org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent theInclude) throws ExpansionCouldNotBeCompletedInternallyException {
+		final String PIPE_CHARACTER = "|";
+
 		String wantSystemUrl = null;
 		String wantSystemVersion = null;
 
 		if (theWantSystemUrlAndVersion != null) {
-			int versionIndex = theWantSystemUrlAndVersion.indexOf("|");
+			int versionIndex = theWantSystemUrlAndVersion.indexOf(PIPE_CHARACTER);
 			if (versionIndex > -1) {
 				wantSystemUrl = theWantSystemUrlAndVersion.substring(0, versionIndex);
 				wantSystemVersion = theWantSystemUrlAndVersion.substring(versionIndex + 1);
@@ -562,17 +566,15 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		Function<String, org.hl7.fhir.r5.model.ValueSet> valueSetLoader = newValueSetLoader(theValidationSupportContext);
 
 		List<FhirVersionIndependentConcept> nextCodeList = new ArrayList<>();
-
 		CodeSystem includeOrExcludeSystemResource = null;
+
 		if (isNotBlank(includeOrExcludeConceptSystemUrl)) {
 
-			if( includeOrExcludeConceptSystemUrl.contains("|") && isBlank(includeOrExcludeConceptSystemVersion)){
-				int versionIndex = includeOrExcludeConceptSystemUrl.indexOf("|");
-				if(versionIndex > -1){
-					String temp = includeOrExcludeConceptSystemUrl;
-					includeOrExcludeConceptSystemUrl = temp.substring(0, versionIndex);
-					includeOrExcludeConceptSystemVersion = temp.substring(versionIndex + 1);
+			if( includeOrExcludeConceptSystemUrl.contains(PIPE_CHARACTER) ){
+				if(isBlank(includeOrExcludeConceptSystemVersion)){
+					includeOrExcludeConceptSystemVersion = substringAfter(includeOrExcludeConceptSystemUrl, PIPE_CHARACTER);
 				}
+				includeOrExcludeConceptSystemUrl = substringBefore(includeOrExcludeConceptSystemUrl, PIPE_CHARACTER);
 			}
 
 			if (wantSystemUrl != null && !wantSystemUrl.equals(includeOrExcludeConceptSystemUrl)) {
