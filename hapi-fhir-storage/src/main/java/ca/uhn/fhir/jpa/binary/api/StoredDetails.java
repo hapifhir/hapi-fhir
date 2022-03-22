@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.binary;
+package ca.uhn.fhir.jpa.binary.api;
 
 /*-
  * #%L

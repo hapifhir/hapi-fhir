@@ -22,8 +22,8 @@ package ca.uhn.fhir.jpa.binstore;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.jpa.binary.BaseBinaryStorageSvcImpl;
-import ca.uhn.fhir.jpa.binary.StoredDetails;
+import ca.uhn.fhir.jpa.binary.svc.BaseBinaryStorageSvcImpl;
+import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;

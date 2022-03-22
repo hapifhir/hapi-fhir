@@ -20,9 +20,9 @@ package ca.uhn.fhir.jpa.binstore;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.binary.BaseBinaryStorageSvcImpl;
-import ca.uhn.fhir.jpa.binary.IBinaryStorageSvc;
-import ca.uhn.fhir.jpa.binary.StoredDetails;
+import ca.uhn.fhir.jpa.binary.svc.BaseBinaryStorageSvcImpl;
+import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
+import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import com.google.common.hash.HashingInputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.CountingInputStream;

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.binary;
+package ca.uhn.fhir.jpa.binary.svc;
 
 /*-
  * #%L
@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.binary;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.binary.IBinaryStorageSvc;
+import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PayloadTooLargeException;
 import ca.uhn.fhir.util.BinaryUtil;
@@ -54,6 +54,7 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	private final int ID_LENGTH = 100;
 	private int myMaximumBinarySize = Integer.MAX_VALUE;
 	private int myMinimumBinarySize;
+
 	@Autowired
 	private FhirContext myFhirContext;
 
