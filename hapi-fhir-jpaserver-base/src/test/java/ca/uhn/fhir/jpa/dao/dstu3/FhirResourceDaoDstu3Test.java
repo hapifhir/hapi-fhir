@@ -117,7 +117,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-@SuppressWarnings({"unchecked", "deprecation"})
+@SuppressWarnings({"unchecked"})
 public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu3Test.class);
@@ -161,8 +161,8 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	}
 
 	private List<String> extractNames(IBundleProvider theSearch) {
-		ArrayList<String> retVal = new ArrayList<String>();
-		for (IBaseResource next : theSearch.getResources(0, theSearch.size())) {
+		ArrayList<String> retVal = new ArrayList<>();
+		for (IBaseResource next : theSearch.getResources(0, theSearch.sizeOrThrowNpe())) {
 			Patient nextPt = (Patient) next;
 			retVal.add(nextPt.getName().get(0).getNameAsSingleString());
 		}
@@ -187,7 +187,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	}
 
 	private List<UriType> sortIds(List<UriType> theProfiles) {
-		ArrayList<UriType> retVal = new ArrayList<UriType>(theProfiles);
+		ArrayList<UriType> retVal = new ArrayList<>(theProfiles);
 		retVal.sort(Comparator.comparing(PrimitiveType::getValue));
 		return retVal;
 	}
@@ -199,7 +199,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		org.setLanguageElement(new CodeType("EN_ca"));
 		org.setName(methodName);
 
-		ArrayList<Coding> tl = new ArrayList<Coding>();
+		ArrayList<Coding> tl = new ArrayList<>();
 		tl.add(new Coding().setSystem(methodName).setCode(methodName));
 		org.getMeta().getTag().addAll(tl);
 
@@ -254,11 +254,11 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		IIdType id2 = myObservationDao.create(o2, mySrd).getId();
 
 		{
-			Set<ResourcePersistentId> found = myObservationDao.searchForIds(new SearchParameterMap(Observation.SP_DATE, new DateParam(">2001-01-02")), null);
+			List<ResourcePersistentId> found = myObservationDao.searchForIds(new SearchParameterMap(Observation.SP_DATE, new DateParam(">2001-01-02")), null);
 			assertThat(ResourcePersistentId.toLongList(found), hasItem(id2.getIdPartAsLong()));
 		}
 		{
-			Set<ResourcePersistentId> found = myObservationDao.searchForIds(new SearchParameterMap(Observation.SP_DATE, new DateParam(">2016-01-02")), null);
+			List<ResourcePersistentId> found = myObservationDao.searchForIds(new SearchParameterMap(Observation.SP_DATE, new DateParam(">2016-01-02")), null);
 			assertThat(ResourcePersistentId.toLongList(found), not(hasItem(id2.getIdPartAsLong())));
 		}
 	}
@@ -1914,7 +1914,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 				"}\n";
 		//@formatter:on
 
-		Set<ResourcePersistentId> val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
+		List<ResourcePersistentId> val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
 		int initial = val.size();
 
 		Organization org = myFhirContext.newJsonParser().parseResource(Organization.class, inputStr);
@@ -2533,7 +2533,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 	@Test()
 	public void testSortByComposite() {
-		
+
 		IIdType pid0;
 		IIdType oid1;
 		IIdType oid2;
@@ -2551,54 +2551,54 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			obs.getSubject().setReferenceElement(pid0);
 			obs.getCode().addCoding().setCode("2345-7").setSystem("http://loinc.org");
 			obs.setValue(new StringType("200"));
-			
+
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-			
+
 			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
-		
+
 		{
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
 			obs.getSubject().setReferenceElement(pid0);
 			obs.getCode().addCoding().setCode("2345-7").setSystem("http://loinc.org");
 			obs.setValue(new StringType("300"));
-			
+
 			oid2 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-			
+
 			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
-		
+
 		{
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
 			obs.getSubject().setReferenceElement(pid0);
 			obs.getCode().addCoding().setCode("2345-7").setSystem("http://loinc.org");
 			obs.setValue(new StringType("150"));
-			
+
 			oid3 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-			
+
 			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
-		
+
 		{
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
 			obs.getSubject().setReferenceElement(pid0);
 			obs.getCode().addCoding().setCode("2345-7").setSystem("http://loinc.org");
 			obs.setValue(new StringType("250"));
-			
+
 			oid4 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-			
+
 			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 
 		SearchParameterMap pm = new SearchParameterMap();
 		pm.setSort(new SortSpec(Observation.SP_CODE_VALUE_STRING));
-		
+
 		IBundleProvider found = myObservationDao.search(pm);
-		
+
 		List<IIdType> list = toUnqualifiedVersionlessIds(found);
 		assertEquals(4, list.size());
 		assertEquals(oid3, list.get(0));
@@ -3165,7 +3165,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		assertThat(str.length(), greaterThan(ResourceIndexedSearchParamString.MAX_LENGTH));
 
-		Set<ResourcePersistentId> val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
+		List<ResourcePersistentId> val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
 		int initial = val.size();
 
 		myOrganizationDao.create(org, mySrd);
@@ -3266,8 +3266,8 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		assertEquals("http://profile/1", profiles.get(0).getValue());
 		assertEquals("http://profile/2", profiles.get(1).getValue());
 
-		myPatientDao.metaAddOperation(patientId, new Meta().addTag( "http://foo", "Cat", "Kittens"), null);
-		myPatientDao.metaAddOperation(patientId, new Meta().addTag( "http://foo", "Cow", "Calves"), null);
+		myPatientDao.metaAddOperation(patientId, new Meta().addTag("http://foo", "Cat", "Kittens"), null);
+		myPatientDao.metaAddOperation(patientId, new Meta().addTag("http://foo", "Cow", "Calves"), null);
 
 		retrieved = myPatientDao.read(patientId, mySrd);
 		published = (ArrayList<Coding>) retrieved.getMeta().getTag();
@@ -3344,7 +3344,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		String subStr1 = longStr1.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
 		String subStr2 = longStr2.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
-		Set<ResourcePersistentId> val = myOrganizationDao.searchForIds(new SearchParameterMap("type", new TokenParam(subStr1, subStr2)), null);
+		List<ResourcePersistentId> val = myOrganizationDao.searchForIds(new SearchParameterMap("type", new TokenParam(subStr1, subStr2)), null);
 		int initial = val.size();
 
 		myOrganizationDao.create(org, mySrd);
@@ -3368,7 +3368,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	}
 
 	@Test
-	public void testUpdateRejectsIdWhichPointsToForcedId() throws InterruptedException {
+	public void testUpdateRejectsIdWhichPointsToForcedId() {
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testUpdateRejectsIdWhichPointsToForcedId01");
 		p1.addName().setFamily("Tester").addGiven("testUpdateRejectsIdWhichPointsToForcedId01");
@@ -3416,7 +3416,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	}
 
 	private static List<String> toStringList(List<UriType> theUriType) {
-		ArrayList<String> retVal = new ArrayList<String>();
+		ArrayList<String> retVal = new ArrayList<>();
 		for (UriType next : theUriType) {
 			retVal.add(next.getValue());
 		}

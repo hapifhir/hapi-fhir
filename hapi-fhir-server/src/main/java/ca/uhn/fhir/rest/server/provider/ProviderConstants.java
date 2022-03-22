@@ -158,7 +158,7 @@ public class ProviderConstants {
 	public static final String OPERATION_BATCH_RESPONSE_JOB_ID = "jobId";
 
 	/**
-	 * Operation name for the $delete-expunge operation
+	 * Operation name for the $reindex operation
 	 */
 	public static final String OPERATION_REINDEX = "$reindex";
 
@@ -191,6 +191,11 @@ public class ProviderConstants {
 	 * Operation name for the $member-match operation
 	 */
 	public static final String OPERATION_MEMBER_MATCH = "$member-match";
+
+	/**
+	 * Operation name for the $reindex-terminology operation
+	 */
+	public static final String OPERATION_REINDEX_TERMINOLOGY = "$reindex-terminology";
 
 	@Deprecated
 	public static final String MARK_ALL_RESOURCES_FOR_REINDEXING = "$mark-all-resources-for-reindexing";

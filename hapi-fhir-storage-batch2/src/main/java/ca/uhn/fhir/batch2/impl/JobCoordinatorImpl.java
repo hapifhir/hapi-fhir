@@ -22,10 +22,11 @@ package ca.uhn.fhir.batch2.impl;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
-import ca.uhn.fhir.model.api.annotation.PasswordField;
+import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.model.JobDefinition;
@@ -41,6 +42,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.model.api.annotation.PasswordField;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -62,12 +64,14 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 import java.lang.reflect.Field;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinator {
@@ -77,7 +81,7 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 	private final IChannelReceiver myWorkChannelReceiver;
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final MessageHandler myReceiverHandler = new WorkChannelMessageHandler();
-	private ValidatorFactory myValidatorFactory = Validation.buildDefaultValidatorFactory();
+	private final ValidatorFactory myValidatorFactory = Validation.buildDefaultValidatorFactory();
 
 	/**
 	 * Constructor
@@ -95,7 +99,7 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 
 	@Override
 	public String startInstance(JobInstanceStartRequest theStartRequest) {
-		JobDefinition jobDefinition = myJobDefinitionRegistry
+		JobDefinition<?> jobDefinition = myJobDefinitionRegistry
 			.getLatestJobDefinition(theStartRequest.getJobDefinitionId())
 			.orElseThrow(() -> new IllegalArgumentException(Msg.code(2063) + "Unknown job definition ID: " + theStartRequest.getJobDefinitionId()));
 
@@ -103,20 +107,9 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 			throw new InvalidRequestException(Msg.code(2065) + "No parameters supplied");
 		}
 
+		validateJobParameters(theStartRequest, jobDefinition);
+
 		String firstStepId = jobDefinition.getSteps().get(0).getStepId();
-
-		Validator validator = myValidatorFactory.getValidator();
-		IModelJson parameters = theStartRequest.getParameters(jobDefinition.getParametersType());
-		Set<ConstraintViolation<IModelJson>> constraintErrors = validator.validate(parameters);
-		if (!constraintErrors.isEmpty()) {
-			String message = "Failed to validate parameters for job of type " +
-				jobDefinition.getJobDefinitionId() +
-				": " +
-				constraintErrors.stream().map(t -> "[" + t.getPropertyPath() + " " + t.getMessage() + "]").sorted().collect(Collectors.joining(", "))
-				;
-			throw new InvalidRequestException(Msg.code(2039) + message);
-		}
-
 		String jobDefinitionId = jobDefinition.getJobDefinitionId();
 		int jobDefinitionVersion = jobDefinition.getJobDefinitionVersion();
 
@@ -132,6 +125,39 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 		sendWorkChannelMessage(jobDefinitionId, jobDefinitionVersion, instanceId, firstStepId, chunkId);
 
 		return instanceId;
+	}
+
+	private <PT extends IModelJson> void validateJobParameters(JobInstanceStartRequest theStartRequest, JobDefinition<PT> theJobDefinition) {
+
+		// JSR 380
+		Validator validator = myValidatorFactory.getValidator();
+		PT parameters = theStartRequest.getParameters(theJobDefinition.getParametersType());
+		Set<ConstraintViolation<IModelJson>> constraintErrors = validator.validate(parameters);
+		List<String> errorStrings = constraintErrors
+			.stream()
+			.map(t -> t.getPropertyPath() + " - " + t.getMessage())
+			.sorted()
+			.collect(Collectors.toList());
+
+		// Programmatic Validator
+		IJobParametersValidator<PT> parametersValidator = theJobDefinition.getParametersValidator();
+		if (parametersValidator != null) {
+			List<String> outcome = parametersValidator.validate(parameters);
+			outcome = defaultIfNull(outcome, Collections.emptyList());
+			errorStrings.addAll(outcome);
+		}
+
+		if (!errorStrings.isEmpty()) {
+			String message = "Failed to validate parameters for job of type " +
+				theJobDefinition.getJobDefinitionId() +
+				": " +
+				errorStrings
+					.stream()
+					.map(t -> "\n * " + t)
+					.collect(Collectors.joining());
+
+			throw new InvalidRequestException(Msg.code(2039) + message);
+		}
 	}
 
 	@Override
@@ -170,29 +196,37 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 		return retVal;
 	}
 
-	private <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> boolean executeStep(@Nonnull WorkChunk theWorkChunk, String jobDefinitionId, String targetStepId, Class<IT> theInputType, PT parameters, IJobStepWorker<PT, IT, OT> worker, IJobDataSink<OT> dataSink) {
+	private <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> boolean executeStep(@Nonnull WorkChunk theWorkChunk, String jobDefinitionId, String targetStepId, Class<IT> theInputType, PT parameters, IJobStepWorker<PT, IT, OT> worker, BaseDataSink<OT> dataSink) {
 		IT data = null;
 		if (!theInputType.equals(VoidModel.class)) {
 			data = theWorkChunk.getData(theInputType);
 		}
 
-		StepExecutionDetails<PT, IT> stepExecutionDetails = new StepExecutionDetails<>(parameters, data);
-		IJobStepWorker.RunOutcome outcome;
+		String instanceId = theWorkChunk.getInstanceId();
+		String chunkId = theWorkChunk.getId();
+
+		StepExecutionDetails<PT, IT> stepExecutionDetails = new StepExecutionDetails<>(parameters, data, instanceId, chunkId);
+		RunOutcome outcome;
 		try {
 			outcome = worker.run(stepExecutionDetails, dataSink);
 			Validate.notNull(outcome, "Step worker returned null: %s", worker.getClass());
 		} catch (JobExecutionFailedException e) {
 			ourLog.error("Unrecoverable failure executing job {} step {}", jobDefinitionId, targetStepId, e);
-			myJobPersistence.markWorkChunkAsFailed(theWorkChunk.getId(), e.toString());
+			myJobPersistence.markWorkChunkAsFailed(chunkId, e.toString());
 			return false;
 		} catch (Exception e) {
 			ourLog.error("Failure executing job {} step {}", jobDefinitionId, targetStepId, e);
-			myJobPersistence.markWorkChunkAsErroredAndIncrementErrorCount(theWorkChunk.getId(), e.toString());
+			myJobPersistence.markWorkChunkAsErroredAndIncrementErrorCount(chunkId, e.toString());
 			throw new JobExecutionFailedException(Msg.code(2041) + e.getMessage(), e);
 		}
 
 		int recordsProcessed = outcome.getRecordsProcessed();
-		myJobPersistence.markWorkChunkAsCompletedAndClearData(theWorkChunk.getId(), recordsProcessed);
+		myJobPersistence.markWorkChunkAsCompletedAndClearData(chunkId, recordsProcessed);
+
+		int recoveredErrorCount = dataSink.getRecoveredErrorCount();
+		if (recoveredErrorCount > 0) {
+			myJobPersistence.incrementWorkChunkErrorCount(chunkId, recoveredErrorCount);
+		}
 
 		return true;
 	}
@@ -242,14 +276,14 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 		String targetStepId = payload.getTargetStepId();
 		boolean firstStep = false;
 		for (int i = 0; i < definition.getSteps().size(); i++) {
-			JobDefinitionStep<?, ?, ?> step = definition.getSteps().get(i);
+			JobDefinitionStep<?, ?, ?> step = (JobDefinitionStep<?, ?, ?>) definition.getSteps().get(i);
 			if (step.getStepId().equals(targetStepId)) {
 				targetStep = step;
 				if (i == 0) {
 					firstStep = true;
 				}
 				if (i < (definition.getSteps().size() - 1)) {
-					nextStep = definition.getSteps().get(i + 1);
+					nextStep = (JobDefinitionStep<?, ?, ?>) definition.getSteps().get(i + 1);
 				}
 				break;
 			}
@@ -276,15 +310,16 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 		executeStep(chunk, jobDefinitionId, jobDefinitionVersion, definition, targetStep, nextStep, targetStepId, firstStep, instance, instanceId);
 	}
 
-	private <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> void executeStep(WorkChunk chunk, String jobDefinitionId, int jobDefinitionVersion, JobDefinition definition, JobDefinitionStep<PT, IT, OT> theStep, JobDefinitionStep<PT, OT, ?> theSubsequentStep, String targetStepId, boolean firstStep, JobInstance instance, String instanceId) {
+	@SuppressWarnings("unchecked")
+	private <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> void executeStep(WorkChunk chunk, String jobDefinitionId, int jobDefinitionVersion, JobDefinition<PT> definition, JobDefinitionStep<PT, IT, OT> theStep, JobDefinitionStep<PT, OT, ?> theSubsequentStep, String targetStepId, boolean firstStep, JobInstance instance, String instanceId) {
 		PT parameters = (PT) instance.getParameters(definition.getParametersType());
 		IJobStepWorker<PT, IT, OT> worker = theStep.getJobStepWorker();
 
-		IJobDataSink<OT> dataSink;
+		BaseDataSink<OT> dataSink;
 		if (theSubsequentStep != null) {
-			dataSink = new JobDataSink(jobDefinitionId, jobDefinitionVersion, theSubsequentStep, instanceId);
+			dataSink = new JobDataSink<>(jobDefinitionId, jobDefinitionVersion, theSubsequentStep, instanceId, theStep.getStepId());
 		} else {
-			dataSink = new FinalStepDataSink(jobDefinitionId);
+			dataSink = (BaseDataSink<OT>) new FinalStepDataSink(jobDefinitionId, instanceId, theStep.getStepId());
 		}
 
 		Class<IT> inputType = theStep.getInputType();
@@ -300,8 +335,8 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 		}
 	}
 
-	private JobDefinition getDefinitionOrThrowException(String jobDefinitionId, int jobDefinitionVersion) {
-		Optional<JobDefinition> opt = myJobDefinitionRegistry.getJobDefinition(jobDefinitionId, jobDefinitionVersion);
+	private JobDefinition<?> getDefinitionOrThrowException(String jobDefinitionId, int jobDefinitionVersion) {
+		Optional<JobDefinition<?>> opt = myJobDefinitionRegistry.getJobDefinition(jobDefinitionId, jobDefinitionVersion);
 		if (!opt.isPresent()) {
 			String msg = "Unknown job definition ID[" + jobDefinitionId + "] version[" + jobDefinitionVersion + "]";
 			ourLog.warn(msg);
@@ -344,25 +379,52 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 		}
 	}
 
-	private class JobDataSink<OT extends IModelJson> implements IJobDataSink<OT> {
+	private abstract class BaseDataSink<OT extends IModelJson> implements IJobDataSink<OT> {
+
+		private final String myInstanceId;
+		private final String myCurrentStepId;
+		private int myRecoveredErrorCount;
+
+		protected BaseDataSink(String theInstanceId, String theCurrentStepId) {
+			myInstanceId = theInstanceId;
+			myCurrentStepId = theCurrentStepId;
+		}
+
+		public String getInstanceId() {
+			return myInstanceId;
+		}
+
+		@Override
+		public void recoveredError(String theMessage) {
+			ourLog.error("Error during job[{}] step[{}]: {}", myInstanceId, myCurrentStepId, theMessage);
+			myRecoveredErrorCount++;
+		}
+
+		public int getRecoveredErrorCount() {
+			return myRecoveredErrorCount;
+		}
+
+		public abstract int getWorkChunkCount();
+	}
+
+	private class JobDataSink<OT extends IModelJson> extends BaseDataSink<OT> {
 		private final String myJobDefinitionId;
 		private final int myJobDefinitionVersion;
 		private final JobDefinitionStep<?, ?, ?> myTargetStep;
-		private final String myInstanceId;
 		private final AtomicInteger myChunkCounter = new AtomicInteger(0);
 
-		public JobDataSink(String theJobDefinitionId, int theJobDefinitionVersion, JobDefinitionStep theTargetStep, String theInstanceId) {
+		public JobDataSink(String theJobDefinitionId, int theJobDefinitionVersion, JobDefinitionStep<?, ?, ?> theTargetStep, String theInstanceId, String theCurrentStepId) {
+			super(theInstanceId, theCurrentStepId);
 			myJobDefinitionId = theJobDefinitionId;
 			myJobDefinitionVersion = theJobDefinitionVersion;
 			myTargetStep = theTargetStep;
-			myInstanceId = theInstanceId;
 		}
 
 		@Override
 		public void accept(WorkChunkData<OT> theData) {
 			String jobDefinitionId = myJobDefinitionId;
 			int jobDefinitionVersion = myJobDefinitionVersion;
-			String instanceId = myInstanceId;
+			String instanceId = getInstanceId();
 			String targetStepId = myTargetStep.getStepId();
 			int sequence = myChunkCounter.getAndIncrement();
 			OT dataValue = theData.getData();
@@ -379,18 +441,19 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 
 	}
 
-	private static class FinalStepDataSink implements IJobDataSink {
+	private class FinalStepDataSink extends BaseDataSink<VoidModel> {
 		private final String myJobDefinitionId;
 
 		/**
 		 * Constructor
 		 */
-		private FinalStepDataSink(String theJobDefinitionId) {
+		private FinalStepDataSink(String theJobDefinitionId, String theInstanceId, String theCurrentStepId) {
+			super(theInstanceId, theCurrentStepId);
 			myJobDefinitionId = theJobDefinitionId;
 		}
 
 		@Override
-		public void accept(WorkChunkData theData) {
+		public void accept(WorkChunkData<VoidModel> theData) {
 			String msg = "Illegal attempt to store data during final step of job " + myJobDefinitionId;
 			ourLog.error(msg);
 			throw new JobExecutionFailedException(Msg.code(2045) + msg);

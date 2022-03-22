@@ -20,43 +20,43 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
-import java.math.BigDecimal;
-import java.util.Objects;
-
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.param.QuantityParam;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.fhir.ucum.Pair;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.ScaledNumberField;
 
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import java.math.BigDecimal;
+import java.util.Objects;
 
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.rest.param.QuantityParam;
-import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 //@formatter:off
 @Embeddable
 @Entity
 @Table(name = "HFJ_SPIDX_QUANTITY_NRML", indexes = {
-	@Index(name = "IDX_SP_QNTY_NRML_HASH", columnList = "HASH_IDENTITY,SP_VALUE"),
-	@Index(name = "IDX_SP_QNTY_NRML_HASH_UN", columnList = "HASH_IDENTITY_AND_UNITS,SP_VALUE"),
-	@Index(name = "IDX_SP_QNTY_NRML_HASH_SYSUN", columnList = "HASH_IDENTITY_SYS_UNITS,SP_VALUE"),
-	@Index(name = "IDX_SP_QNTY_NRML_UPDATED", columnList = "SP_UPDATED"),
-	@Index(name = "IDX_SP_QNTY_NRML_RESID", columnList = "RES_ID")
+	@Index(name = "IDX_SP_QNTY_NRML_HASH_V2", columnList = "HASH_IDENTITY,SP_VALUE,RES_ID,PARTITION_ID"),
+	@Index(name = "IDX_SP_QNTY_NRML_HASH_UN_V2", columnList = "HASH_IDENTITY_AND_UNITS,SP_VALUE,RES_ID,PARTITION_ID"),
+	@Index(name = "IDX_SP_QNTY_NRML_HASH_SYSUN_V2", columnList = "HASH_IDENTITY_SYS_UNITS,SP_VALUE,RES_ID,PARTITION_ID"),
+	@Index(name = "IDX_SP_QNTY_NRML_RESID_V2", columnList = "RES_ID,HASH_IDENTITY,HASH_IDENTITY_SYS_UNITS,HASH_IDENTITY_AND_UNITS,SP_VALUE,PARTITION_ID")
 })
 /**
  * Support UCUM service
@@ -78,6 +78,11 @@ public class ResourceIndexedSearchParamQuantityNormalized extends ResourceIndexe
 	@Column(name = "SP_VALUE", nullable = true)
 	@ScaledNumberField
 	public Double myValue;
+
+	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = {})
+	@JoinColumn(foreignKey = @ForeignKey(name = "FK_SP_QUANTITYNM_RES"),
+		name = "RES_ID", referencedColumnName = "RES_ID", nullable = false)
+	private ResourceTable myResource;
 
 	public ResourceIndexedSearchParamQuantityNormalized() {
 		super();
@@ -221,5 +226,17 @@ public class ResourceIndexedSearchParamQuantityNormalized extends ResourceIndexe
 		}
 		
 		return retval;
+	}
+
+	@Override
+	public ResourceTable getResource() {
+		return myResource;
+	}
+
+	@Override
+	public BaseResourceIndexedSearchParam setResource(ResourceTable theResource) {
+		myResource = theResource;
+		setResourceType(theResource.getResourceType());
+		return this;
 	}
 }

@@ -6,11 +6,10 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
-import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
-import ca.uhn.fhir.jpa.config.TestDataBuilderConfig;
 import ca.uhn.fhir.jpa.config.TestHibernateSearchAddInConfig;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
+import ca.uhn.fhir.jpa.dao.DaoTestDataBuilder;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -50,7 +49,7 @@ import static org.hamcrest.Matchers.not;
 @ExtendWith(SpringExtension.class)
 @RequiresDocker
 @ContextConfiguration(classes = {
-	TestR4Config.class, TestHibernateSearchAddInConfig.Elasticsearch.class, TestDataBuilderConfig.class
+	TestR4Config.class, TestHibernateSearchAddInConfig.Elasticsearch.class, DaoTestDataBuilder.Config.class
 })
 public class TokenAutocompleteElasticsearchIT extends BaseJpaTest{
 	public static final Coding erythrocyte_by_volume = new Coding("http://loinc.org", "789-8", "Erythrocytes [#/volume] in Blood by Automated count");

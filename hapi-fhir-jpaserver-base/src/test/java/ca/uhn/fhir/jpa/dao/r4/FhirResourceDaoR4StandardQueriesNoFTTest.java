@@ -8,38 +8,23 @@ import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.BaseDateSearchDaoTests;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.dao.DaoTestDataBuilder;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.jpa.dao.TestDaoSearch;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
-import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.server.method.SortParameter;
-import ca.uhn.fhir.test.utilities.ITestDataBuilder;
-import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Observation;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.web.util.UriComponents;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Consumer;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -49,10 +34,14 @@ import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TestR4Config.class, TestHibernateSearchAddInConfig.NoFT.class})
+@ContextConfiguration(classes = {
+	TestR4Config.class,
+	TestHibernateSearchAddInConfig.NoFT.class,
+	DaoTestDataBuilder.Config.class,
+	TestDaoSearch.Config.class
+})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
-	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4StandardQueriesNoFTTest.class);
 	@Autowired
 	PlatformTransactionManager myTxManager;
 	@Autowired
@@ -64,6 +53,11 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 	protected DaoRegistry myDaoRegistry;
 	@Autowired
 	MatchUrlService myMatchUrlService;
+	@RegisterExtension
+	@Autowired
+	DaoTestDataBuilder myDataBuilder;
+	@Autowired
+	TestDaoSearch myTestDaoSearch;
 
 	@Override
 	protected PlatformTransactionManager getTxManager() {
@@ -75,53 +69,17 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 		return myFhirCtx;
 	}
 
+
 	@Nested
 	public class DateSearchTests extends BaseDateSearchDaoTests {
 		@Override
 		protected Fixture constructFixture() {
-			DaoTestDataBuilder testDataBuilder = new DaoTestDataBuilder(myFhirCtx, myDaoRegistry, new SystemRequestDetails());
-			return new TestDataBuilderFixture<>(testDataBuilder, myObservationDao);
-		}
-	}
-
-	public static class TokenTestCase {
-
-		private Consumer<IBaseResource>[] myBuilders;
-		private List<ImmutableTriple<Boolean, String, String>> mySearchCases = new ArrayList<>();
-
-		public static TokenTestCase onObservation(Consumer<IBaseResource>... theBuilders) {
-			TokenTestCase result = new TokenTestCase();
-			result.myBuilders = theBuilders;
-			return result;
-		}
-
-		public TokenTestCase finds(String theMessage, String theQuery) {
-			mySearchCases.add(new ImmutableTriple(true,theMessage, theQuery));
-			return this;
-		}
-		public TokenTestCase doesNotFind(String theMessage, String theQuery) {
-			mySearchCases.add(new ImmutableTriple(false,theMessage, theQuery));
-			return this;
+			return new TestDataBuilderFixture<>(myDataBuilder, myObservationDao);
 		}
 	}
 
 	@Nested
 	public class TokenSearch  {
-		// wipmb make this generic and share with ES, and Mongo.
-		/*
-		String criteria = "_has:Condition:subject:code=http://snomed.info/sct|55822003,http://snomed.info/sct|55822005&" +
-			"_has:Condition:asserter:code=http://snomed.info/sct|55822003,http://snomed.info/sct|55822004";
-		 */
-
-		ITestDataBuilder myDataBuilder = new DaoTestDataBuilder(myFhirCtx, myDaoRegistry, new SystemRequestDetails());
-		Set<IIdType> myCreatedIds = new HashSet<>();
-
-		@AfterEach
-		public void cleanup() {
-			ourLog.info("cleanup {}", myCreatedIds);
-			myCreatedIds.forEach(myObservationDao::delete);
-		}
-
 
 		@Nested
 		public class Queries {
@@ -194,59 +152,262 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 					String idExA = withObservation(myDataBuilder.withObservationCode("http://example.org", "AValue")).getIdPart();
 					String idExM = withObservation(myDataBuilder.withObservationCode("http://example.org", "MValue")).getIdPart();
 
-					List<String> allIds = searchForIds("/Observation?_sort=code");
+					List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_sort=code");
 					assertThat(allIds, hasItems(idAlphaA, idAlphaM, idAlphaZ, idExA, idExD, idExM));
 
-					allIds = searchForIds("/Observation?_sort=code&code=http://example.org|");
+					allIds = myTestDaoSearch.searchForIds("/Observation?_sort=code&code=http://example.org|");
 					assertThat(allIds, hasItems(idExA, idExD, idExM));
-
 				}
 			}
 
+			@SafeVarargs
 			private IIdType withObservation(Consumer<IBaseResource>... theBuilder) {
 				myObservationId = myDataBuilder.createObservation(theBuilder);
-				myCreatedIds.add(myObservationId);
 				return myObservationId;
 			}
 
 			private void assertFind(String theMessage, String theUrl) {
-				List<String> resourceIds = searchForIds(theUrl);
+				List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
 				assertThat(theMessage, resourceIds, hasItem(equalTo(myObservationId.getIdPart())));
 			}
 
 			private void assertNotFind(String theMessage, String theUrl) {
-				List<String> resourceIds = searchForIds(theUrl);
+				List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
 				assertThat(theMessage, resourceIds, not(hasItem(equalTo(myObservationId.getIdPart()))));
 			}
 		}
+	}
 
-		private List<String> searchForIds(String theQueryUrl) {
-			// fake out the server url parsing
-			ResourceSearch search = myMatchUrlService.getResourceSearch(theQueryUrl);
-			SearchParameterMap map = search.getSearchParameterMap();
-			map.setLoadSynchronous(true);
-			SystemRequestDetails request = fakeRequestDetailsFromUrl(theQueryUrl);
-			SortSpec sort = (SortSpec) new SortParameter(myFhirCtx).translateQueryParametersIntoServerArgument(request, null);
-			if (sort != null) {
-				map.setSort(sort);
+	@Nested
+	public class NumericSearch  {
+		IIdType myResourceId;
+
+		@Nested
+		public class Queries {
+
+			@Test
+			public void eq() {
+				withRiskAssessmentWithProbabilty(0.6);
+
+				assertNotFind("when gt", "/RiskAssessment?probability=0.5");
+				// fixme we break the spec here.
+				// assertFind("when a little gt - default is approx", "/RiskAssessment?probability=0.599");
+				// assertFind("when a little lt - default is approx", "/RiskAssessment?probability=0.601");
+				assertFind("when eq", "/RiskAssessment?probability=0.6");
+				assertNotFind("when lt", "/RiskAssessment?probability=0.7");
 			}
 
-			IBundleProvider result = myObservationDao.search(map);
+			@Test
+			public void ne() {
+				withRiskAssessmentWithProbabilty(0.6);
 
-			List<String> resourceIds = result.getAllResourceIds();
-			return resourceIds;
+				assertFind("when gt", "/RiskAssessment?probability=ne0.5");
+				assertNotFind("when eq", "/RiskAssessment?probability=ne0.6");
+				assertFind("when lt", "/RiskAssessment?probability=ne0.7");
+			}
+
+			@Test
+			public void ap() {
+				withRiskAssessmentWithProbabilty(0.6);
+
+				assertNotFind("when gt", "/RiskAssessment?probability=ap0.5");
+				assertFind("when a little gt", "/RiskAssessment?probability=ap0.58");
+				assertFind("when eq", "/RiskAssessment?probability=ap0.6");
+				assertFind("when a little lt", "/RiskAssessment?probability=ap0.62");
+				assertNotFind("when lt", "/RiskAssessment?probability=ap0.7");
+			}
+
+			@Test
+			public void gt() {
+				withRiskAssessmentWithProbabilty(0.6);
+
+				assertFind("when gt", "/RiskAssessment?probability=gt0.5");
+				assertNotFind("when eq", "/RiskAssessment?probability=gt0.6");
+				assertNotFind("when lt", "/RiskAssessment?probability=gt0.7");
+
+			}
+
+			@Test
+			public void ge() {
+				withRiskAssessmentWithProbabilty(0.6);
+
+				assertFind("when gt", "/RiskAssessment?probability=ge0.5");
+				assertFind("when eq", "/RiskAssessment?probability=ge0.6");
+				assertNotFind("when lt", "/RiskAssessment?probability=ge0.7");
+			}
+
+			@Test
+			public void lt() {
+				withRiskAssessmentWithProbabilty(0.6);
+
+				assertNotFind("when gt", "/RiskAssessment?probability=lt0.5");
+				assertNotFind("when eq", "/RiskAssessment?probability=lt0.6");
+				assertFind("when lt", "/RiskAssessment?probability=lt0.7");
+
+			}
+
+			@Test
+			public void le() {
+				withRiskAssessmentWithProbabilty(0.6);
+
+				assertNotFind("when gt", "/RiskAssessment?probability=le0.5");
+				assertFind("when eq", "/RiskAssessment?probability=le0.6");
+				assertFind("when lt", "/RiskAssessment?probability=le0.7");
+			}
+
+
+			private void assertFind(String theMessage, String theUrl) {
+				List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
+				assertThat(theMessage, resourceIds, hasItem(equalTo(myResourceId.getIdPart())));
+			}
+
+			private void assertNotFind(String theMessage, String theUrl) {
+				List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
+				assertThat(theMessage, resourceIds, not(hasItem(equalTo(myResourceId.getIdPart()))));
+			}
+		}
+
+		private IIdType withRiskAssessmentWithProbabilty(double theValue) {
+			myResourceId = myDataBuilder.createResource("RiskAssessment", myDataBuilder.withPrimitiveAttribute("prediction.probabilityDecimal", theValue));
+			return myResourceId;
+		}
+
+		@Nested
+		public class Sorting {
+			@Test
+			public void sortByNumeric() {
+				String idAlpha7 = withRiskAssessmentWithProbabilty(0.7).getIdPart();
+				String idAlpha2 = withRiskAssessmentWithProbabilty(0.2).getIdPart();
+				String idAlpha5 = withRiskAssessmentWithProbabilty(0.5).getIdPart();
+
+				List<String> allIds = myTestDaoSearch.searchForIds("/RiskAssessment?_sort=probability");
+				assertThat(allIds, hasItems(idAlpha2, idAlpha5, idAlpha7));
+			}
+
 		}
 
 	}
 
-	@Nonnull
-	private SystemRequestDetails fakeRequestDetailsFromUrl(String theQueryUrl) {
-		SystemRequestDetails request = new SystemRequestDetails();
-		UriComponents uriComponents = UriComponentsBuilder.fromUriString(theQueryUrl).build();
-		uriComponents.getQueryParams().entrySet().forEach(nextEntry -> {
-			request.addParameter(nextEntry.getKey(), nextEntry.getValue().toArray(new String[0]));
-		});
-		return request;
+	@Nested
+	public class QuantitySearch {
+		IIdType myResourceId;
+
+		@Nested
+		public class Queries {
+
+			@Test
+			public void eq() {
+				withObservationWithValueQuantity(0.6);
+
+				assertNotFind("when gt", "/Observation?value-quantity=0.5||mmHg");
+				assertNotFind("when gt unitless", "/Observation?value-quantity=0.5");
+				// fixme we break the spec here.
+				// assertFind("when a little gt - default is approx", "/Observation?value-quantity=0.599");
+				// assertFind("when a little lt - default is approx", "/Observation?value-quantity=0.601");
+				// fixme we don't seem to support "units", only "code".
+				assertFind("when eq with units", "/Observation?value-quantity=0.6||mm[Hg]");
+				assertFind("when eq unitless", "/Observation?value-quantity=0.6");
+				assertNotFind("when lt", "/Observation?value-quantity=0.7||mmHg");
+				assertNotFind("when lt", "/Observation?value-quantity=0.7");
+			}
+
+			@Test
+			public void ne() {
+				withObservationWithValueQuantity(0.6);
+
+				assertFind("when gt", "/Observation?value-quantity=ne0.5");
+				assertNotFind("when eq", "/Observation?value-quantity=ne0.6");
+				assertFind("when lt", "/Observation?value-quantity=ne0.7");
+			}
+
+			@Test
+			public void ap() {
+				withObservationWithValueQuantity(0.6);
+
+				assertNotFind("when gt", "/Observation?value-quantity=ap0.5");
+				assertFind("when a little gt", "/Observation?value-quantity=ap0.58");
+				assertFind("when eq", "/Observation?value-quantity=ap0.6");
+				assertFind("when a little lt", "/Observation?value-quantity=ap0.62");
+				assertNotFind("when lt", "/Observation?value-quantity=ap0.7");
+			}
+
+			@Test
+			public void gt() {
+				withObservationWithValueQuantity(0.6);
+
+				assertFind("when gt", "/Observation?value-quantity=gt0.5");
+				assertNotFind("when eq", "/Observation?value-quantity=gt0.6");
+				assertNotFind("when lt", "/Observation?value-quantity=gt0.7");
+
+			}
+
+			@Test
+			public void ge() {
+				withObservationWithValueQuantity(0.6);
+
+				assertFind("when gt", "/Observation?value-quantity=ge0.5");
+				assertFind("when eq", "/Observation?value-quantity=ge0.6");
+				assertNotFind("when lt", "/Observation?value-quantity=ge0.7");
+			}
+
+			@Test
+			public void lt() {
+				withObservationWithValueQuantity(0.6);
+
+				assertNotFind("when gt", "/Observation?value-quantity=lt0.5");
+				assertNotFind("when eq", "/Observation?value-quantity=lt0.6");
+				assertFind("when lt", "/Observation?value-quantity=lt0.7");
+
+			}
+
+			@Test
+			public void le() {
+				withObservationWithValueQuantity(0.6);
+
+				assertNotFind("when gt", "/Observation?value-quantity=le0.5");
+				assertFind("when eq", "/Observation?value-quantity=le0.6");
+				assertFind("when lt", "/Observation?value-quantity=le0.7");
+			}
+
+
+			private void assertFind(String theMessage, String theUrl) {
+				List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
+				assertThat(theMessage, resourceIds, hasItem(equalTo(myResourceId.getIdPart())));
+			}
+
+			private void assertNotFind(String theMessage, String theUrl) {
+				List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
+				assertThat(theMessage, resourceIds, not(hasItem(equalTo(myResourceId.getIdPart()))));
+			}
+		}
+
+		private IIdType withObservationWithValueQuantity(double theValue) {
+//			IBase quantity = myDataBuilder.withElementOfType("Quantity",
+//				myDataBuilder.withPrimitiveAttribute("value", theValue),
+//				myDataBuilder.withPrimitiveAttribute("unit", "mmHg"),
+//				myDataBuilder.withPrimitiveAttribute("system", "http://unitsofmeasure.org"));
+			myResourceId = myDataBuilder.createObservation(myDataBuilder.withAttribute("valueQuantity",
+				myDataBuilder.withPrimitiveAttribute("value", theValue),
+				myDataBuilder.withPrimitiveAttribute("unit", "mmHg"),
+				myDataBuilder.withPrimitiveAttribute("system", "http://unitsofmeasure.org"),
+				myDataBuilder.withPrimitiveAttribute("code", "mm[Hg]")
+				));
+			return myResourceId;
+		}
+
+		@Nested
+		public class Sorting {
+			@Test
+			public void sortByNumeric() {
+				String idAlpha7 = withObservationWithValueQuantity(0.7).getIdPart();
+				String idAlpha2 = withObservationWithValueQuantity(0.2).getIdPart();
+				String idAlpha5 = withObservationWithValueQuantity(0.5).getIdPart();
+
+				List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_sort=value-quantity");
+				assertThat(allIds, hasItems(idAlpha2, idAlpha5, idAlpha7));
+			}
+		}
+
 	}
 
 }

@@ -45,9 +45,9 @@ import java.util.concurrent.TimeUnit;
 @Import({CommonConfig.class, JpaR5Config.class, HapiJpaConfig.class})
 @EnableTransactionManagement()
 public class TestR5Config {
-	public static final String FHIR_DB_USERNAME = "${fhir.db.username}";
-	public static final String FHIR_DB_PASSWORD = "${fhir.db.password}";
-	public static final String FHIR_LUCENE_LOCATION_R5 = "${fhir.lucene.location.r5}";
+	public static final String FHIR_DB_USERNAME = "fhir.db.username";
+	public static final String FHIR_DB_PASSWORD = "fhir.db.password";
+	public static final String FHIR_LUCENE_LOCATION_R5 = "fhir.lucene.location.r5";
 	public static final Integer COUNT_SEARCH_RESULTS_UP_TO = 50000;
 	private static final Logger ourLog = LoggerFactory.getLogger(TestR5Config.class);
 	private String myDbUsername = System.getProperty(TestR5Config.FHIR_DB_USERNAME);

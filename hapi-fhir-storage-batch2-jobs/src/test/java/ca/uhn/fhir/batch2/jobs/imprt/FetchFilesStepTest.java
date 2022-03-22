@@ -26,6 +26,8 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 public class FetchFilesStepTest {
 
+	public static final String INSTANCE_ID = "instance-id";
+	public static final String CHUNK_ID = "chunk-id";
 	private final BulkImportFileServlet myBulkImportFileServlet = new BulkImportFileServlet();
 	@RegisterExtension
 	private final HttpServletExtension myHttpServletExtension = new HttpServletExtension()
@@ -45,7 +47,7 @@ public class FetchFilesStepTest {
 		BulkImportJobParameters parameters = new BulkImportJobParameters()
 			.addNdJsonUrl(myHttpServletExtension.getBaseUrl() + "/download?index=" + index)
 			.setHttpBasicCredentials("admin:password");
-		StepExecutionDetails<BulkImportJobParameters, VoidModel> details = new StepExecutionDetails<>(parameters, null);
+		StepExecutionDetails<BulkImportJobParameters, VoidModel> details = new StepExecutionDetails<>(parameters, null, INSTANCE_ID, CHUNK_ID);
 
 		// Test
 
@@ -74,7 +76,7 @@ public class FetchFilesStepTest {
 		BulkImportJobParameters parameters = new BulkImportJobParameters()
 			.addNdJsonUrl(myHttpServletExtension.getBaseUrl() + "/download?index=" + index)
 			.setMaxBatchResourceCount(3);
-		StepExecutionDetails<BulkImportJobParameters, VoidModel> details = new StepExecutionDetails<>(parameters, null);
+		StepExecutionDetails<BulkImportJobParameters, VoidModel> details = new StepExecutionDetails<>(parameters, null, INSTANCE_ID, CHUNK_ID);
 
 		// Test
 
@@ -96,7 +98,7 @@ public class FetchFilesStepTest {
 		BulkImportJobParameters parameters = new BulkImportJobParameters()
 			.addNdJsonUrl(myHttpServletExtension.getBaseUrl() + "/download?index=" + index)
 			.setHttpBasicCredentials("admin");
-		StepExecutionDetails<BulkImportJobParameters, VoidModel> details = new StepExecutionDetails<>(parameters, null);
+		StepExecutionDetails<BulkImportJobParameters, VoidModel> details = new StepExecutionDetails<>(parameters, null, INSTANCE_ID, CHUNK_ID);
 
 		// Test & Verify
 

@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
@@ -28,6 +27,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -1413,11 +1413,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					addUnexpectedDatatypeWarning(theParams, theSearchParam, theValue);
 					break;
 			}
-		}
-
-		private boolean isOrCanBeTreatedAsLocal(IIdType theId) {
-			boolean acceptableAsLocalReference = !theId.isAbsolute() || myModelConfig.getTreatBaseUrlsAsLocal().contains(theId.getBaseUrl());
-			return acceptableAsLocalReference;
 		}
 
 		public PathAndRef get(IBase theValue, String thePath) {

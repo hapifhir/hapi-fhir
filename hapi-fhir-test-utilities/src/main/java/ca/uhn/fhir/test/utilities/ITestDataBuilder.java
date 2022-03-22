@@ -185,6 +185,39 @@ public interface ITestDataBuilder {
 		};
 	}
 
+	default <T extends IBase> Consumer<T> withPrimitiveAttribute(String thePath, Object theValue) {
+		return t->{
+			FhirTerser terser = getFhirContext().newTerser();
+			terser.addElement(t, thePath, ""+theValue);
+		};
+	}
+
+	default <T extends IBase> Consumer<T> withAttribute(String thePath, Consumer<IBase>... theModifiers) {
+		return t->{
+			FhirTerser terser = getFhirContext().newTerser();
+			IBase element = terser.addElement(t, thePath);
+			applyElementModifiers(element, theModifiers);
+		};
+	}
+
+	/**
+	 * Create an Element and apply modifiers
+	 * @param theElementType the FHIR Element type to create
+	 * @param theModifiers modifiers to apply after construction
+	 * @return the Element
+	 */
+	default IBase withElementOfType(String theElementType, Consumer<IBase>... theModifiers) {
+		IBase element = getFhirContext().getElementDefinition(theElementType).newInstance();
+		applyElementModifiers(element, theModifiers);
+		return element;
+	}
+
+	default void applyElementModifiers(IBase element, Consumer<IBase>[] theModifiers) {
+		for (Consumer<IBase> nextModifier : theModifiers) {
+			nextModifier.accept(element);
+		}
+	}
+
 	default Consumer<IBaseResource> withObservationCode(@Nullable String theSystem, @Nullable String theCode) {
 		return withObservationCode(theSystem, theCode, null);
 	}
@@ -251,6 +284,5 @@ public interface ITestDataBuilder {
 		booleanType.setValueAsString(theValue);
 		activeChild.getMutator().addValue(theTarget, booleanType);
 	}
-
 
 }
