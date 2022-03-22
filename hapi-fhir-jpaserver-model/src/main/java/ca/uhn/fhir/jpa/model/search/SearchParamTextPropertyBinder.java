@@ -100,10 +100,17 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 			.projectable(Projectable.NO)
 			.sortable(Sortable.YES);
 
+		StringIndexFieldTypeOptionsStep<?> forcedIdType = indexFieldTypeFactory.asString()
+			.projectable(Projectable.YES)
+			.aggregable(Aggregable.NO);
+
 		// the old style for _text and _contains
 		indexSchemaElement
 			.fieldTemplate("SearchParamText", standardAnalyzer)
 			.matchingPathGlob(SEARCH_PARAM_TEXT_PREFIX + "*");
+
+
+		indexSchemaElement.field("myForcedId", forcedIdType).toReference();
 
 		// The following section is a bit ugly.  We need to enforce order and dependency or the object matches will be too big.
 		{

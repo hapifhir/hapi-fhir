@@ -140,6 +140,13 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@PropertyBinding(binder = @PropertyBinderRef(type = SearchParamTextPropertyBinder.class))
 	private ExtendedLuceneIndexData myLuceneIndexData;
 
+	// todo mb move this to ExtendedLuceneIndexData
+	@Transient
+	@GenericField(name="myRawResource", projectable = Projectable.YES, searchable = Searchable.NO)
+	@IndexingDependency(derivedFrom = @ObjectPath(@PropertyValue(propertyName = "myVersion")))
+	@OptimisticLock(excluded = true)
+	private String myRawResourceData;
+
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceIndexedSearchParamCoords> myParamsCoords;
@@ -774,5 +781,9 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	public void setLuceneIndexData(ExtendedLuceneIndexData theLuceneIndexData) {
 		myLuceneIndexData = theLuceneIndexData;
+	}
+
+	public void setRawResourceData(String theResourceData) {
+		myRawResourceData = theResourceData;
 	}
 }
