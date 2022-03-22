@@ -1,0 +1,6 @@
+---
+type: change
+issue: 2843
+title: "Reverting the change to treat canonical references as local when setting the flag `getTreatBaseUrlsAsLocal()`. This
+was added to address a limitation in `_include` that did not process references by canonical URLs. 
+The `_include` search operation now includes canonical references without special configuration."
