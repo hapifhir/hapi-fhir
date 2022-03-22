@@ -188,6 +188,7 @@ public abstract class BaseApp {
 		commands.add(new HapiFlywayMigrateDatabaseCommand());
 		commands.add(new CreatePackageCommand());
 		commands.add(new BulkImportCommand());
+		commands.add(new ReindexTerminologyCommand());
 		return commands;
 	}
 

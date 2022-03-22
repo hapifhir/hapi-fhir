@@ -25,7 +25,6 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
@@ -38,10 +37,10 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	public SynchronizedJobPersistenceWrapper(IJobPersistence theJobPersistence) {
 		myWrap = theJobPersistence;
 	}
-	
+
 	@Override
 	public synchronized String storeWorkChunk(String theJobDefinitionId, int theJobDefinitionVersion, String theTargetStepId, String theInstanceId, int theSequence, String theDataSerialized) {
-		return myWrap.storeWorkChunk(theJobDefinitionId,theJobDefinitionVersion, theTargetStepId, theInstanceId, theSequence, theDataSerialized);
+		return myWrap.storeWorkChunk(theJobDefinitionId, theJobDefinitionVersion, theTargetStepId, theInstanceId, theSequence, theDataSerialized);
 	}
 
 	@Override
@@ -76,17 +75,22 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 
 	@Override
 	public synchronized void markWorkChunkAsFailed(String theChunkId, String theErrorMessage) {
-		myWrap.markWorkChunkAsFailed(theChunkId,theErrorMessage);
+		myWrap.markWorkChunkAsFailed(theChunkId, theErrorMessage);
 	}
 
 	@Override
 	public synchronized void markWorkChunkAsCompletedAndClearData(String theChunkId, int theRecordsProcessed) {
-		myWrap.markWorkChunkAsCompletedAndClearData(theChunkId,theRecordsProcessed);
+		myWrap.markWorkChunkAsCompletedAndClearData(theChunkId, theRecordsProcessed);
+	}
+
+	@Override
+	public void incrementWorkChunkErrorCount(String theChunkId, int theIncrementBy) {
+		myWrap.incrementWorkChunkErrorCount(theChunkId, theIncrementBy);
 	}
 
 	@Override
 	public synchronized List<WorkChunk> fetchWorkChunksWithoutData(String theInstanceId, int thePageSize, int thePageIndex) {
-		return myWrap.fetchWorkChunksWithoutData(theInstanceId,thePageSize,thePageIndex);
+		return myWrap.fetchWorkChunksWithoutData(theInstanceId, thePageSize, thePageIndex);
 	}
 
 	@Override

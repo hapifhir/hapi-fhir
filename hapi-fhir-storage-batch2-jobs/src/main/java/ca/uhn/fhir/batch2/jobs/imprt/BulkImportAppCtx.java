@@ -27,7 +27,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class BulkImport2AppCtx {
+public class BulkImportAppCtx {
 
 	public static final String JOB_BULK_IMPORT_PULL = "BULK_IMPORT_PULL";
 	public static final int PARAM_MAXIMUM_BATCH_SIZE_DEFAULT = 800; // Avoid the 1000 SQL param limit
@@ -48,7 +48,6 @@ public class BulkImport2AppCtx {
 			.addLastStep(
 				"process-files",
 				"Process files",
-				NdJsonFileJson.class,
 				bulkImport2ConsumeFiles())
 			.build();
 	}
