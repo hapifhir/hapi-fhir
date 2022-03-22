@@ -76,7 +76,7 @@ public class MdmLinkCreateSvcImpl implements IMdmLinkCreateSvc {
 		RequestPartitionId sourceResourcePartitionId = (RequestPartitionId) theSourceResource.getUserData(Constants.RESOURCE_PARTITION_ID);
 		if (goldenResourcePartitionId != null && sourceResourcePartitionId != null && goldenResourcePartitionId.hasPartitionIds() && sourceResourcePartitionId.hasPartitionIds() &&
 			!goldenResourcePartitionId.hasPartitionId(sourceResourcePartitionId.getFirstPartitionIdOrNull())) {
-			throw new InvalidRequestException(myMessageHelper.getMessageForMismatchPartition(theGoldenResource, theSourceResource));
+			throw new InvalidRequestException(Msg.code(2074) + myMessageHelper.getMessageForMismatchPartition(theGoldenResource, theSourceResource));
 		}
 
 		Optional<MdmLink> optionalMdmLink = myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenResourceId, targetId);

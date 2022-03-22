@@ -93,7 +93,7 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 		RequestPartitionId toGoldenPartitionId = (RequestPartitionId) theToGoldenResource.getUserData(Constants.RESOURCE_PARTITION_ID);
 		if (fromGoldenResourcePartitionId != null && toGoldenPartitionId != null && fromGoldenResourcePartitionId.hasPartitionIds() && toGoldenPartitionId.hasPartitionIds() &&
 			!fromGoldenResourcePartitionId.hasPartitionId(toGoldenPartitionId.getFirstPartitionIdOrNull())) {
-			throw new InvalidRequestException(myMessageHelper.getMessageForMismatchPartition(theFromGoldenResource, theToGoldenResource));
+			throw new InvalidRequestException(Msg.code(2075) + myMessageHelper.getMessageForMismatchPartition(theFromGoldenResource, theToGoldenResource));
 		}
 
 		//Merge the links from the FROM to the TO resource. Clean up dangling links.
