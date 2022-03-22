@@ -325,8 +325,10 @@ public class SearchBuilder implements ISearchBuilder {
 			List<ResourcePersistentId> fulltextMatchIds;
 			if (myParams.isLastN()) {
 				fulltextMatchIds = executeLastNAgainstIndex(theMaximumResults);
+			} else if (myParams.getEverythingMode() != null) {
+				fulltextMatchIds = queryHibernateSearchForEverythingPids();
 			} else {
-				fulltextMatchIds = queryHibernateSearchForPIDs(theRequest);
+				fulltextMatchIds = myFulltextSearchSvc.search(myResourceName, myParams);
 			}
 
 			if (theSearchRuntimeDetails != null) {
@@ -349,17 +351,15 @@ public class SearchBuilder implements ISearchBuilder {
 					// were there AND terms left?  Then we still need the db.
 						theParams.isEmpty() &&
 						// not every param is a param. :-(
-						theParams.getEverythingMode() == null &&
-						theParams.getCount() == null &&
-						theParams.getOffset() == null &&
-						theParams.getLastUpdated() == null &&
-						theParams.getSort() == null &&
 						theParams.getNearDistanceParam() == null &&
 						theParams.getLastUpdated() == null &&
+						theParams.getEverythingMode() == null &&
+						theParams.getOffset() == null &&
+						// or sorting?
+						theParams.getSort() == null
 						// todo MB Ugh - review with someone else
 						//theParams.toNormalizedQueryString(myContext).length() <= 1 &&
-						// or sorting?
-						theParams.getSort() == null);
+					);
 
 			if (canSkipDatabase) {
 				queries.add(ResolvedSearchQueryExecutor.from(rawPids));
@@ -422,18 +422,6 @@ public class SearchBuilder implements ISearchBuilder {
 				.map(lastnResourceId -> myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, lastnResourceId))
 				.collect(Collectors.toList());
 		}
-	}
-
-	private List<ResourcePersistentId> queryHibernateSearchForPIDs(RequestDetails theRequest) {
-		validateFullTextSearchIsEnabled();
-
-		List<ResourcePersistentId> pids;
-		if (myParams.getEverythingMode() != null) {
-			pids = queryHibernateSearchForEverythingPids();
-		} else {
-			pids = myFulltextSearchSvc.search(myResourceName, myParams);
-		}
-		return pids;
 	}
 
 	private List<ResourcePersistentId> queryHibernateSearchForEverythingPids() {
@@ -1782,15 +1770,4 @@ public class SearchBuilder implements ISearchBuilder {
 		return thePredicates.toArray(new Predicate[0]);
 	}
 
-	private void validateFullTextSearchIsEnabled() {
-		if (myFulltextSearchSvc == null) {
-			if (myParams.containsKey(Constants.PARAM_TEXT)) {
-				throw new InvalidRequestException(Msg.code(1200) + "Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
-			} else if (myParams.containsKey(Constants.PARAM_CONTENT)) {
-				throw new InvalidRequestException(Msg.code(1201) + "Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
-			} else {
-				throw new InvalidRequestException(Msg.code(1202) + "Fulltext search is not enabled on this service, can not process qualifier :text");
-			}
-		}
-	}
 }
