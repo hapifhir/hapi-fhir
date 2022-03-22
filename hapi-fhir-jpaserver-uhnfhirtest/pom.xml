@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>6.0.0-PRE6-SNAPSHOT</version>
+		<version>6.0.0-PRE8-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -193,14 +193,6 @@
 							<contextPath>/</contextPath>
 							<allowDuplicateFragmentNames>true</allowDuplicateFragmentNames>
 						</webApp>
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-compiler-plugin</artifactId>
-					<configuration>
-						<source>1.8</source>
-						<target>1.8</target>
 					</configuration>
 				</plugin>
 				<!--This plugin's configuration is used to store Eclipse m2e settings 

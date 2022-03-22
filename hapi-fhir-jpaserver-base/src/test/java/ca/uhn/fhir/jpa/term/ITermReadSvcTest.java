@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.term.api;
+package ca.uhn.fhir.jpa.term;
 
 /*-
  * #%L
@@ -22,12 +22,18 @@ package ca.uhn.fhir.jpa.term.api;
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
+import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.term.TermReadSvcR4;
-import ca.uhn.fhir.jpa.term.TermReadSvcUtil;
+import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import com.google.common.collect.Lists;
+import net.ttddyy.dsproxy.support.ProxyDataSource;
+import org.apache.commons.dbcp2.BasicDataSource;
+import org.hibernate.search.mapper.orm.massindexing.MassIndexer;
+import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,26 +41,35 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NonUniqueResultException;
+import javax.sql.DataSource;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl.DEFAULT_MASS_INDEXER_OBJECT_LOADING_THREADS;
+import static ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl.MAX_MASS_INDEXER_OBJECT_LOADING_THREADS;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -257,9 +272,10 @@ class ITermReadSvcTest {
 
 			List<TermConcept> termConcepts = Lists.newArrayList(termConceptCode1, termConceptCode3, termConceptCode4);
 			List<String> values = Arrays.asList(CODE_1, CODE_2, CODE_3, CODE_4, CODE_5);
-			String msg = (String) ReflectionTestUtils.invokeMethod(
+			String msg = ReflectionTestUtils.invokeMethod(
 				testedClass, "getTermConceptsFetchExceptionMsg", termConcepts, values);
 
+			assertNotNull(msg);
 			assertTrue(msg.contains("No TermConcept(s) were found"));
 			assertFalse(msg.contains(CODE_1));
 			assertTrue(msg.contains(CODE_2));
@@ -276,13 +292,101 @@ class ITermReadSvcTest {
 			when(termConceptCode3.getId()).thenReturn(3L);
 
 			List<TermConcept> termConcepts = Lists.newArrayList(termConceptCode1, termConceptCode3);
-			List<String> values = Arrays.asList(CODE_3);
-			String msg = (String) ReflectionTestUtils.invokeMethod(
+			List<String> values = List.of(CODE_3);
+			String msg = ReflectionTestUtils.invokeMethod(
 				testedClass, "getTermConceptsFetchExceptionMsg", termConcepts, values);
 
+			assertNotNull(msg);
 			assertTrue(msg.contains("More TermConcepts were found than indicated codes"));
 			assertFalse(msg.contains("Queried codes: [" + CODE_3 + "]"));
 			assertTrue(msg.contains("Obtained TermConcept IDs, codes: [1, code-1; 3, code-3]"));
+		}
+	}
+
+
+	@Nested
+	public class TestReindexTerminology {
+		@Mock private SearchSession mySearchSession;
+
+		@Mock(answer = Answers.RETURNS_DEEP_STUBS)
+		private MassIndexer myMassIndexer;
+
+		@Mock private IFulltextSearchSvc myFulltextSearchSvc;
+		@Mock private ITermDeferredStorageSvc myDeferredStorageSvc;
+		@Mock private HibernatePropertiesProvider myHibernatePropertiesProvider;
+
+		@InjectMocks
+		@Spy private BaseTermReadSvcImpl myTermReadSvc = (BaseTermReadSvcImpl) spy(testedClass);
+
+
+		@Test
+		void testReindexTerminology() throws InterruptedException {
+			doReturn(mySearchSession).when(myTermReadSvc).getSearchSession();
+			doReturn(false).when(myTermReadSvc).isBatchTerminologyTasksRunning();
+			doReturn(10).when(myTermReadSvc).calculateObjectLoadingThreadNumber();
+			when(mySearchSession.massIndexer(TermConcept.class)).thenReturn(myMassIndexer);
+
+			myTermReadSvc.reindexTerminology();
+			verify(mySearchSession, times(1)).massIndexer(TermConcept.class);
+		}
+
+		@Nested
+		public class TestCalculateObjectLoadingThreadNumber {
+
+			private final BasicDataSource myBasicDataSource = new BasicDataSource();
+			private final ProxyDataSource myProxyDataSource = new ProxyDataSource(myBasicDataSource) ;
+
+			@BeforeEach
+			void setUp() {
+				doReturn(myProxyDataSource).when(myHibernatePropertiesProvider).getDataSource();
+			}
+
+			@Test
+			void testLessThanSix() {
+				myBasicDataSource.setMaxTotal(5);
+
+				int retMaxConnectionSize = myTermReadSvc.calculateObjectLoadingThreadNumber();
+
+				assertEquals(1, retMaxConnectionSize);
+			}
+
+			@Test
+			void testMoreThanSixButLessThanLimit() {
+				myBasicDataSource.setMaxTotal(10);
+
+				int retMaxConnectionSize = myTermReadSvc.calculateObjectLoadingThreadNumber();
+
+				assertEquals(5, retMaxConnectionSize);
+			}
+
+			@Test
+			void testMoreThanSixAndMoreThanLimit() {
+				myBasicDataSource.setMaxTotal(35);
+
+				int retMaxConnectionSize = myTermReadSvc.calculateObjectLoadingThreadNumber();
+
+				assertEquals(MAX_MASS_INDEXER_OBJECT_LOADING_THREADS, retMaxConnectionSize);
+			}
+
+		}
+
+		@Nested
+		public class TestCalculateObjectLoadingThreadNumberDefault {
+
+			@Mock private DataSource myDataSource = new BasicDataSource();
+
+			@BeforeEach
+			void setUp() {
+				doReturn(myDataSource).when(myHibernatePropertiesProvider).getDataSource();
+			}
+
+			@Test
+			void testDefaultWhenCantGetMaxConnections() {
+				int retMaxConnectionSize = myTermReadSvc.calculateObjectLoadingThreadNumber();
+
+				assertEquals(DEFAULT_MASS_INDEXER_OBJECT_LOADING_THREADS, retMaxConnectionSize);
+			}
+
 		}
 	}
 }

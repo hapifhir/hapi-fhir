@@ -476,11 +476,11 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		IIdType id2 = myObservationDao.create(o2, mySrd).getId();
 
 		{
-			Set<ResourcePersistentId> found = myObservationDao.searchForIds(new SearchParameterMap(Observation.SP_DATE, new DateParam(">2001-01-02")), null);
+			List<ResourcePersistentId> found = myObservationDao.searchForIds(new SearchParameterMap(Observation.SP_DATE, new DateParam(">2001-01-02")), null);
 			assertThat(ResourcePersistentId.toLongList(found), hasItem(id2.getIdPartAsLong()));
 		}
 		{
-			Set<ResourcePersistentId> found = myObservationDao.searchForIds(new SearchParameterMap(Observation.SP_DATE, new DateParam(">2016-01-02")), null);
+			List<ResourcePersistentId> found = myObservationDao.searchForIds(new SearchParameterMap(Observation.SP_DATE, new DateParam(">2016-01-02")), null);
 			assertThat(ResourcePersistentId.toLongList(found), not(hasItem(id2.getIdPartAsLong())));
 		}
 	}
@@ -2481,7 +2481,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 				"}\n";
 		//@formatter:on
 
-		Set<ResourcePersistentId> val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
+		List<ResourcePersistentId> val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
 		int initial = val.size();
 
 		Organization org = myFhirContext.newJsonParser().parseResource(Organization.class, inputStr);
@@ -3914,7 +3914,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 		assertThat(str.length(), greaterThan(ResourceIndexedSearchParamString.MAX_LENGTH));
 
-		Set<ResourcePersistentId> val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
+		List<ResourcePersistentId> val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
 		int initial = val.size();
 
 		myOrganizationDao.create(org, mySrd);
@@ -4093,7 +4093,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 		String subStr1 = longStr1.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
 		String subStr2 = longStr2.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
-		Set<ResourcePersistentId> val = myOrganizationDao.searchForIds(new SearchParameterMap("type", new TokenParam(subStr1, subStr2)), null);
+		List<ResourcePersistentId> val = myOrganizationDao.searchForIds(new SearchParameterMap("type", new TokenParam(subStr1, subStr2)), null);
 		int initial = val.size();
 
 		myOrganizationDao.create(org, mySrd);

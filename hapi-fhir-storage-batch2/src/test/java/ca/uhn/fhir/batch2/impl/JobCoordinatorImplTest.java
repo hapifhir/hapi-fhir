@@ -1,8 +1,10 @@
 package ca.uhn.fhir.batch2.impl;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
+import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.model.JobDefinition;
@@ -161,7 +163,7 @@ public class JobCoordinatorImplTest {
 		when(myStep1Worker.run(any(), any())).thenAnswer(t -> {
 			IJobDataSink<TestJobStep2InputType> sink = t.getArgument(1, IJobDataSink.class);
 			sink.accept(new TestJobStep2InputType("data value 1", "data value 2"));
-			return new IJobStepWorker.RunOutcome(50);
+			return new RunOutcome(50);
 		});
 		mySvc.start();
 
@@ -192,7 +194,7 @@ public class JobCoordinatorImplTest {
 		when(myJobDefinitionRegistry.getJobDefinition(eq(JOB_DEFINITION_ID), eq(1))).thenReturn(Optional.of(createJobDefinition()));
 		when(myJobInstancePersister.fetchInstanceAndMarkInProgress(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
 		when(myJobInstancePersister.fetchWorkChunkSetStartTimeAndMarkInProgress(eq(CHUNK_ID))).thenReturn(Optional.of(createWorkChunkStep1()));
-		when(myStep1Worker.run(any(), any())).thenReturn(new IJobStepWorker.RunOutcome(50));
+		when(myStep1Worker.run(any(), any())).thenReturn(new RunOutcome(50));
 		mySvc.start();
 
 		// Execute
@@ -218,7 +220,7 @@ public class JobCoordinatorImplTest {
 		when(myJobInstancePersister.fetchWorkChunkSetStartTimeAndMarkInProgress(eq(CHUNK_ID))).thenReturn(Optional.of(createWorkChunk(STEP_2, new TestJobStep2InputType(DATA_1_VALUE, DATA_2_VALUE))));
 		when(myJobDefinitionRegistry.getJobDefinition(eq(JOB_DEFINITION_ID), eq(1))).thenReturn(Optional.of(createJobDefinition()));
 		when(myJobInstancePersister.fetchInstanceAndMarkInProgress(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
-		when(myStep2Worker.run(any(), any())).thenReturn(new IJobStepWorker.RunOutcome(50));
+		when(myStep2Worker.run(any(), any())).thenReturn(new RunOutcome(50));
 		mySvc.start();
 
 		// Execute
@@ -269,6 +271,39 @@ public class JobCoordinatorImplTest {
 	}
 
 	@Test
+	public void testPerformStep_SecondStep_WorkerReportsRecoveredErrors() {
+
+		// Setup
+
+		when(myJobInstancePersister.fetchWorkChunkSetStartTimeAndMarkInProgress(eq(CHUNK_ID))).thenReturn(Optional.of(createWorkChunk(STEP_2, new TestJobStep2InputType(DATA_1_VALUE, DATA_2_VALUE))));
+		when(myJobDefinitionRegistry.getJobDefinition(eq(JOB_DEFINITION_ID), eq(1))).thenReturn(Optional.of(createJobDefinition()));
+		when(myJobInstancePersister.fetchInstanceAndMarkInProgress(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
+		when(myStep2Worker.run(any(), any())).thenAnswer(t->{
+			IJobDataSink<?> sink = t.getArgument(1, IJobDataSink.class);
+			sink.recoveredError("Error message 1");
+			sink.recoveredError("Error message 2");
+			return new RunOutcome(50);
+		});
+		mySvc.start();
+
+		// Execute
+
+		myWorkChannelReceiver.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_2)));
+
+		// Verify
+
+		verify(myStep2Worker, times(1)).run(myStep2ExecutionDetailsCaptor.capture(), any());
+		TestJobParameters params = myStep2ExecutionDetailsCaptor.getValue().getParameters();
+		assertEquals(PARAM_1_VALUE, params.getParam1());
+		assertEquals(PARAM_2_VALUE, params.getParam2());
+		assertEquals(PASSWORD_VALUE, params.getPassword());
+
+		verify(myJobInstancePersister, times(1)).incrementWorkChunkErrorCount(eq(CHUNK_ID), eq(2));
+		verify(myJobInstancePersister, times(1)).markWorkChunkAsCompletedAndClearData(eq(CHUNK_ID), eq(50));
+
+	}
+
+	@Test
 	public void testPerformStep_FinalStep() {
 
 		// Setup
@@ -276,7 +311,7 @@ public class JobCoordinatorImplTest {
 		when(myJobInstancePersister.fetchWorkChunkSetStartTimeAndMarkInProgress(eq(CHUNK_ID))).thenReturn(Optional.of(createWorkChunkStep3()));
 		when(myJobDefinitionRegistry.getJobDefinition(eq(JOB_DEFINITION_ID), eq(1))).thenReturn(Optional.of(createJobDefinition()));
 		when(myJobInstancePersister.fetchInstanceAndMarkInProgress(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
-		when(myStep3Worker.run(any(), any())).thenReturn(new IJobStepWorker.RunOutcome(50));
+		when(myStep3Worker.run(any(), any())).thenReturn(new RunOutcome(50));
 		mySvc.start();
 
 		// Execute
@@ -306,7 +341,7 @@ public class JobCoordinatorImplTest {
 		when(myStep3Worker.run(any(), any())).thenAnswer(t -> {
 			IJobDataSink<VoidModel> sink = t.getArgument(1, IJobDataSink.class);
 			sink.accept(new VoidModel());
-			return new IJobStepWorker.RunOutcome(50);
+			return new RunOutcome(50);
 		});
 		mySvc.start();
 
@@ -425,24 +460,64 @@ public class JobCoordinatorImplTest {
 		} catch (InvalidRequestException e) {
 
 			// Verify
-			assertEquals("HAPI-2039: Failed to validate parameters for job of type JOB_DEFINITION_ID: [myParam1 must not be blank], [myParam2 length must be between 5 and 100]", e.getMessage());
+			String expected = """
+				HAPI-2039: Failed to validate parameters for job of type JOB_DEFINITION_ID:\s
+				 * myParam1 - must not be blank
+				 * myParam2 - length must be between 5 and 100""";
+			assertEquals(expected, e.getMessage());
+
+		}
+	}
+
+	@Test
+	public void testStartInstance_InvalidParameters_UsingProgrammaticApi() {
+
+		// Setup
+
+		IJobParametersValidator<TestJobParameters> v = p -> {
+			if (p.getParam1().equals("bad")) {
+				return Lists.newArrayList("Bad Parameter Value", "Bad Parameter Value 2");
+			}
+			return null;
+		};
+		JobDefinition<?> jobDefinition = createJobDefinition(t->t.setParametersValidator(v));
+		when(myJobDefinitionRegistry.getLatestJobDefinition(eq(JOB_DEFINITION_ID))).thenReturn(Optional.of(jobDefinition));
+
+		// Execute
+
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setJobDefinitionId(JOB_DEFINITION_ID);
+		startRequest.setParameters(new TestJobParameters().setParam1("bad").setParam2("aa"));
+
+		try {
+			mySvc.startInstance(startRequest);
+			fail();
+		} catch (InvalidRequestException e) {
+
+			// Verify
+			String expected = """
+				HAPI-2039: Failed to validate parameters for job of type JOB_DEFINITION_ID:\s
+				 * myParam2 - length must be between 5 and 100
+				 * Bad Parameter Value
+				 * Bad Parameter Value 2""";
+			assertEquals(expected, e.getMessage());
 
 		}
 	}
 
 	@SafeVarargs
-	private final JobDefinition createJobDefinition(Consumer<JobDefinition.Builder<TestJobParameters>>... theModifiers) {
-		JobDefinition.Builder<TestJobParameters> builder = JobDefinition
+	private JobDefinition<TestJobParameters> createJobDefinition(Consumer<JobDefinition.Builder<TestJobParameters, ?>>... theModifiers) {
+		JobDefinition.Builder<TestJobParameters, VoidModel> builder = JobDefinition
 			.newBuilder()
 			.setJobDefinitionId(JOB_DEFINITION_ID)
 			.setJobDescription("This is a job description")
 			.setJobDefinitionVersion(1)
 			.setParametersType(TestJobParameters.class)
 			.addFirstStep(STEP_1, "Step 1", TestJobStep2InputType.class, myStep1Worker)
-			.addIntermediateStep(STEP_2, "Step 2", TestJobStep2InputType.class, TestJobStep3InputType.class, myStep2Worker)
-			.addLastStep(STEP_3, "Step 3", TestJobStep3InputType.class, myStep3Worker);
+			.addIntermediateStep(STEP_2, "Step 2", TestJobStep3InputType.class, myStep2Worker)
+			.addLastStep(STEP_3, "Step 3", myStep3Worker);
 
-		for (Consumer<JobDefinition.Builder<TestJobParameters>> next : theModifiers) {
+		for (Consumer<JobDefinition.Builder<TestJobParameters, ?>> next : theModifiers) {
 			next.accept(builder);
 		}
 

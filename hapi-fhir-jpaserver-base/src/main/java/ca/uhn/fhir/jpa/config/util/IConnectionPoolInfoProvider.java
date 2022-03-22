@@ -1,6 +1,6 @@
-package ca.uhn.fhir.jpa.util;
+package ca.uhn.fhir.jpa.config.util;
 
-/*
+/*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
@@ -20,17 +20,13 @@ package ca.uhn.fhir.jpa.util;
  * #L%
  */
 
-public class ReindexFailureException extends RuntimeException {
-	private static final long serialVersionUID = 1L;
-	
-	private Long myResourceId;
 
-	public ReindexFailureException(Long theResourceId) {
-		myResourceId = theResourceId;
-	}
+import java.util.Optional;
 
-	public Long getResourceId() {
-		return myResourceId;
-	}
+public interface IConnectionPoolInfoProvider {
+	Optional<Integer> getTotalConnectionSize();
 
+	Optional<Integer> getActiveConnections();
+
+	Optional<Long> getMaxWaitMillis();
 }

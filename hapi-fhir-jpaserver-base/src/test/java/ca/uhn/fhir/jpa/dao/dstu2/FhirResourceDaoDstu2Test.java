@@ -290,7 +290,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 			assertThat(toUnqualifiedVersionlessIdValues(found), hasItem(id2.getValue()));
 		}
 		{
-			Set<ResourcePersistentId> found = myObservationDao.searchForIds(new SearchParameterMap(Observation.SP_DATE, new DateParam(">2016-01-02")), null);
+			List<ResourcePersistentId> found = myObservationDao.searchForIds(new SearchParameterMap(Observation.SP_DATE, new DateParam(">2016-01-02")), null);
 			assertThat(ResourcePersistentId.toLongList(found), not(hasItem(id2.getIdPartAsLong())));
 		}
 	}
@@ -1507,7 +1507,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 				"}\n";
 		//@formatter:on
 
-		Set<ResourcePersistentId> val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
+		List<ResourcePersistentId> val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
 		int initial = val.size();
 
 		Organization org = myFhirContext.newJsonParser().parseResource(Organization.class, inputStr);
@@ -2698,7 +2698,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		assertThat(str.length(), greaterThan(ResourceIndexedSearchParamString.MAX_LENGTH));
 
-		Set<ResourcePersistentId> val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
+		List<ResourcePersistentId> val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
 		int initial = val.size();
 
 		myOrganizationDao.create(org, mySrd);
@@ -2813,7 +2813,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		String subStr1 = longStr1.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
 		String subStr2 = longStr2.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
-		Set<ResourcePersistentId> val = myOrganizationDao.searchForIds(new SearchParameterMap("type", new IdentifierDt(subStr1, subStr2)), null);
+		List<ResourcePersistentId> val = myOrganizationDao.searchForIds(new SearchParameterMap("type", new IdentifierDt(subStr1, subStr2)), null);
 		int initial = val.size();
 
 		myOrganizationDao.create(org, mySrd);
@@ -2840,12 +2840,12 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 	public void testValidateAgainstDstu2Profile() throws Exception {
 		myDaoConfig.setAllowExternalReferences(true);
 
-		String stream = IOUtils.toString(getClass().getResourceAsStream("/binu_testpatient_structuredefinition_dstu2.xml"), StandardCharsets.UTF_8);
+		String stream = loadResource("/binu_testpatient_structuredefinition_dstu2.xml");
 
 		StructureDefinition sd = myFhirContext.newXmlParser().parseResource(StructureDefinition.class, stream);
 		myStructureDefinitionDao.create(sd, mySrd);
 
-		String rawResource = IOUtils.toString(getClass().getResourceAsStream("/binu_testpatient_resource.json"), StandardCharsets.UTF_8);
+		String rawResource = loadResource("/binu_testpatient_resource.json");
 		IBaseResource parsedResource = myFhirContext.newJsonParser().parseResource(rawResource);
 		try {
 			myPatientDao.validate((Patient) parsedResource, null, rawResource, EncodingEnum.JSON, ValidationModeEnum.UPDATE, null, mySrd);
