@@ -60,6 +60,7 @@ import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Optional;
 
 import static ca.uhn.fhir.util.UrlUtil.sanitizeUrlPart;
@@ -188,8 +189,12 @@ public class BinaryAccessProvider {
 
 		if (size > 0) {
 			if (myBinaryStorageSvc != null) {
+				InputStream inputStream = theRequestDetails.getInputStream();
+				if (inputStream.available() == 0 ) {
+					throw new IllegalStateException(Msg.code(2073) + "Input stream is empty! Ensure that you are uploading data, and if so, ensure that no interceptors are in use that may be consuming the input stream");
+				}
 				if (myBinaryStorageSvc.shouldStoreBlob(size, theResourceId, requestContentType)) {
-					StoredDetails storedDetails = myBinaryStorageSvc.storeBlob(theResourceId, null, requestContentType, theRequestDetails.getInputStream());
+					StoredDetails storedDetails = myBinaryStorageSvc.storeBlob(theResourceId, null, requestContentType, inputStream);
 					size = storedDetails.getBytes();
 					blobId = storedDetails.getBlobId();
 					Validate.notBlank(blobId, "BinaryStorageSvc returned a null blob ID"); // should not happen
