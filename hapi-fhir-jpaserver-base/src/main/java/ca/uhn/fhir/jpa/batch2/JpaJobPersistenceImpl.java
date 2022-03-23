@@ -175,6 +175,11 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
+	public void incrementWorkChunkErrorCount(String theChunkId, int theIncrementBy) {
+		myWorkChunkRepository.incrementWorkChunkErrorCount(theChunkId, theIncrementBy);
+	}
+
+	@Override
 	public List<WorkChunk> fetchWorkChunksWithoutData(String theInstanceId, int thePageSize, int thePageIndex) {
 		List<Batch2WorkChunkEntity> chunks = myWorkChunkRepository.fetchChunks(PageRequest.of(thePageIndex, thePageSize), theInstanceId);
 		return chunks.stream().map(t -> toChunk(t, false)).collect(Collectors.toList());

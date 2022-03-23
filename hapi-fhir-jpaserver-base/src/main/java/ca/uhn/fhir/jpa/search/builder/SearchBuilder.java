@@ -325,8 +325,10 @@ public class SearchBuilder implements ISearchBuilder {
 			List<ResourcePersistentId> fulltextMatchIds;
 			if (myParams.isLastN()) {
 				fulltextMatchIds = executeLastNAgainstIndex(theMaximumResults);
+			} else if (myParams.getEverythingMode() != null) {
+				fulltextMatchIds = queryHibernateSearchForEverythingPids();
 			} else {
-				fulltextMatchIds = queryLuceneForPIDs(theRequest);
+				fulltextMatchIds = myFulltextSearchSvc.search(myResourceName, myParams);
 			}
 
 			if (theSearchRuntimeDetails != null) {
@@ -340,20 +342,23 @@ public class SearchBuilder implements ISearchBuilder {
 
 			List<Long> rawPids = ResourcePersistentId.toLongList(fulltextMatchIds);
 
-			// fixme fastpath!  Can we return here?
-			// fixme are there pointcuts to also call?
-			// fixme extract and test this.  Maybe to fulltext service?
-
+			// wipmb extract
 			// can we skip the database entirely and return the pid list from here?
 			boolean canSkipDatabase =
 				// if we processed an AND clause, and it returned nothing, then nothing can match.
 				rawPids.isEmpty() ||
-					// Our hibernate search query doesn't support partitions yet
+					// Our hibernate search query doesn't respect partitions yet
 					(!myPartitionSettings.isPartitioningEnabled() &&
 					// were there AND terms left?  Then we still need the db.
 						theParams.isEmpty() &&
+						// not every param is a param. :-(
+						theParams.getNearDistanceParam() == null &&
+						theParams.getLastUpdated() == null &&
+						theParams.getEverythingMode() == null &&
+						theParams.getOffset() == null &&
 						// or sorting?
-						theParams.getSort() == null);
+						theParams.getSort() == null
+					);
 
 			if (canSkipDatabase) {
 				queries.add(ResolvedSearchQueryExecutor.from(rawPids));
@@ -386,8 +391,10 @@ public class SearchBuilder implements ISearchBuilder {
 			failIfUsed(Constants.PARAM_CONTENT);
 		}
 
-		// TODO MB someday we'll want a query planner to figure out if we _should_ use the ft index, not just if we can.
-		return fulltextEnabled && myFulltextSearchSvc.supportsSomeOf(myParams);
+		// TODO MB someday we'll want a query planner to figure out if we _should_ or _must_ use the ft index, not just if we can.
+		return fulltextEnabled &&
+			myParams.getSearchContainedMode() == SearchContainedModeEnum.FALSE &&
+			myFulltextSearchSvc.supportsSomeOf(myParams);
 	}
 
 	private void failIfUsed(String theParamName) {
@@ -416,15 +423,22 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 	}
 
-	private List<ResourcePersistentId> queryLuceneForPIDs(RequestDetails theRequest) {
-		validateFullTextSearchIsEnabled();
+	private List<ResourcePersistentId> queryHibernateSearchForEverythingPids() {
+		ResourcePersistentId pid = null;
+		if (myParams.get(IAnyResource.SP_RES_ID) != null) {
+			String idParamValue;
+			IQueryParameterType idParam = myParams.get(IAnyResource.SP_RES_ID).get(0).get(0);
+			if (idParam instanceof TokenParam) {
+				TokenParam idParm = (TokenParam) idParam;
+				idParamValue = idParm.getValue();
+			} else {
+				StringParam idParm = (StringParam) idParam;
+				idParamValue = idParm.getValue();
+			}
 
-		List<ResourcePersistentId> pids;
-		if (myParams.getEverythingMode() != null) {
-			pids = myFulltextSearchSvc.everything(myResourceName, myParams, theRequest);
-		} else {
-			pids = myFulltextSearchSvc.search(myResourceName, myParams);
+			pid = myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, idParamValue);
 		}
+		List<ResourcePersistentId> pids = myFulltextSearchSvc.everything(myResourceName, myParams, pid);
 		return pids;
 	}
 
@@ -903,8 +917,8 @@ public class SearchBuilder implements ISearchBuilder {
 	 * @return can we fetch from Hibernate Search?
 	 */
 	private boolean isLoadingFromElasticSearchSupported(Collection<ResourcePersistentId> theIncludedPids) {
-		// fixme mb we can be smarter here.
-		// fixme check if theIncludedPids has any with version not null.
+		// wipmb mb we can be smarter here.
+		// wipmb check if theIncludedPids has any with version not null.
 
 		// is storage enabled?
 		return myDaoConfig.isStoreResourceInLuceneIndex() &&
@@ -912,7 +926,7 @@ public class SearchBuilder implements ISearchBuilder {
 			myParams.isLastN() &&
 			// do we need to worry about versions?
 			theIncludedPids.isEmpty() &&
-			// fixme What's this about Jaison?
+			// skip the complexity for metadata in dstu2
 			myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3);
 	}
 
@@ -922,17 +936,13 @@ public class SearchBuilder implements ISearchBuilder {
 		if (myDaoConfig.isAdvancedLuceneIndexing() && myDaoConfig.isStoreResourceInLuceneIndex()) {
 			List<Long> pidList = thePids.stream().map(ResourcePersistentId::getIdAsLong).collect(Collectors.toList());
 
-			// fixme design?
-			//Map<Long, Collection<ResourceTag>> pidToTagMap = getPidToTagMap(pidList);
-			// fixme need to inject metadata - use profile to build resource, tags, and security labels
+			// wipmb standardize on ResourcePersistentId
 			List<IBaseResource> resources = myFulltextSearchSvc.getResources(pidList);
 			return resources;
 		} else if (!Objects.isNull(myParams) && myParams.isLastN()) {
 			// legacy LastN implementation
 			return myIElasticsearchSvc.getObservationResources(thePids);
 		} else {
-			// fixme I wonder if we should drop this path, and only support the new Hibernate Search path.
-			Validate.isTrue(false, "Unexpected");
 			return Collections.emptyList();
 		}
 	}
@@ -1376,6 +1386,9 @@ public class SearchBuilder implements ISearchBuilder {
 		myDaoConfig = theDaoConfig;
 	}
 
+	/**
+	 * Adapt bare Iterator to our internal query interface.
+	 */
 	static class ResolvedSearchQueryExecutor implements ISearchQueryExecutor {
 		private final Iterator<Long> myIterator;
 
@@ -1753,15 +1766,4 @@ public class SearchBuilder implements ISearchBuilder {
 		return thePredicates.toArray(new Predicate[0]);
 	}
 
-	private void validateFullTextSearchIsEnabled() {
-		if (myFulltextSearchSvc == null) {
-			if (myParams.containsKey(Constants.PARAM_TEXT)) {
-				throw new InvalidRequestException(Msg.code(1200) + "Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
-			} else if (myParams.containsKey(Constants.PARAM_CONTENT)) {
-				throw new InvalidRequestException(Msg.code(1201) + "Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
-			} else {
-				throw new InvalidRequestException(Msg.code(1202) + "Fulltext search is not enabled on this service, can not process qualifier :text");
-			}
-		}
-	}
 }

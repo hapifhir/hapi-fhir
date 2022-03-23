@@ -440,6 +440,10 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			map.add("code", new TokenParam("Bodum").setModifier(TokenParamModifier.TEXT));
 			assertObservationSearchMatchesNothing("search with shared prefix does not match", map);
 		}
+
+		{
+			assertObservationSearchMatches("empty params finds everything", "Observation?", id1, id2, id3, id4);
+		}
 	}
 
 	@Test
@@ -531,6 +535,11 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 	private void assertObservationSearchMatches(String message, SearchParameterMap map, IIdType... iIdTypes) {
 		assertThat(message, toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(iIdTypes)));
+	}
+
+	private void assertObservationSearchMatches(String theMessage, String theSearch, IIdType... theIds) {
+		SearchParameterMap map = myTestDaoSearch.toSearchParameters(theSearch);
+		assertObservationSearchMatches(theMessage, map, theIds);
 	}
 
 	@Nested
@@ -787,9 +796,10 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	@Nested
 	public class FastPath {
 		// fixme clean this up.  New test for fast-ish path?
+
 		@BeforeEach
 		public void enableResourceStorage() {
-			myDaoConfig.setStoreResourceInLuceneIndex(false);
+			myDaoConfig.setStoreResourceInLuceneIndex(true);
 		}
 
 		@AfterEach
@@ -809,7 +819,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 			assertThat(ids, hasSize(1));
 			assertThat(ids, contains(id.getIdPart()));
-			assertEquals(1, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
 		}
 
 		@Test
@@ -824,7 +834,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			assertThat(ids, hasSize(1));
 			assertThat(ids, contains(id.getIdPart()));
 
-			assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "the pids come from elastic, but we use sql to sort");
+			assertEquals(1, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "the pids come from elastic, but we use sql to sort");
 		}
 
 		@Test
@@ -839,7 +849,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 			assertThat(ids, hasSize(0));
 
-			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "the pids come from elastic");
+			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "the pids come from elastic, and nothing to fetch");
 		}
 
 		@Test

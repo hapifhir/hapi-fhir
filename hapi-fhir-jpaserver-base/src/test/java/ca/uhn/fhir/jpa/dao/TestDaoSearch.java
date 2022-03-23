@@ -61,17 +61,29 @@ public class TestDaoSearch {
 
 	public IBundleProvider searchForBundleProvider(String theQueryUrl) {
 		ResourceSearch search = myMatchUrlService.getResourceSearch(theQueryUrl);
+		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(search.getResourceName());
+
 		SearchParameterMap map = search.getSearchParameterMap();
 		map.setLoadSynchronous(true);
-		SystemRequestDetails request = fakeRequestDetailsFromUrl(theQueryUrl);
-		SortSpec sort = (SortSpec) new SortParameter(myFhirCtx).translateQueryParametersIntoServerArgument(request, null);
+		SortSpec sort = (SortSpec) new SortParameter(myFhirCtx).translateQueryParametersIntoServerArgument(fakeRequestDetailsFromUrl(theQueryUrl), null);
 		if (sort != null) {
 			map.setSort(sort);
 		}
 
-		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(search.getResourceName());
-		IBundleProvider result = dao.search(map, request);
+		IBundleProvider result = dao.search(map, fakeRequestDetailsFromUrl(theQueryUrl));
 		return result;
+	}
+
+	public SearchParameterMap toSearchParameters(String theQueryUrl) {
+		ResourceSearch search = myMatchUrlService.getResourceSearch(theQueryUrl);
+
+		SearchParameterMap map = search.getSearchParameterMap();
+		map.setLoadSynchronous(true);
+		SortSpec sort = (SortSpec) new SortParameter(myFhirCtx).translateQueryParametersIntoServerArgument(fakeRequestDetailsFromUrl(theQueryUrl), null);
+		if (sort != null) {
+			map.setSort(sort);
+		}
+		return map;
 	}
 
 	@Nonnull

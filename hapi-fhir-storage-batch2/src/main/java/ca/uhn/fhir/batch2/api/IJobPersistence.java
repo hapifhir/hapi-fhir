@@ -102,6 +102,14 @@ public interface IJobPersistence {
 	void markWorkChunkAsCompletedAndClearData(String theChunkId, int theRecordsProcessed);
 
 	/**
+	 * Increments the work chunk error count by the given amount
+	 *
+	 * @param theChunkId The chunk ID
+	 * @param theIncrementBy The number to increment the error count by
+	 */
+	void incrementWorkChunkErrorCount(String theChunkId, int theIncrementBy);
+
+	/**
 	 * Fetches all chunks for a given instance, without loading the data
 	 *
 	 * @param theInstanceId The instance ID
@@ -144,4 +152,5 @@ public interface IJobPersistence {
 	 * @param theInstanceId The instance ID
 	 */
 	void cancelInstance(String theInstanceId);
+
 }

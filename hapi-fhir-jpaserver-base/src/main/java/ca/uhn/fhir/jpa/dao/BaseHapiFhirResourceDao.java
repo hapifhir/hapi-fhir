@@ -59,11 +59,11 @@ import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.dstu2.resource.ListResource;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -86,6 +86,7 @@ import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -333,10 +334,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (resourceHadIdBeforeStorage) {
 			if (resourceIdWasServerAssigned) {
 				boolean createForPureNumericIds = true;
-				createForcedIdIfNeeded(entity, resourceIdBeforeStorage, createForPureNumericIds, persistentId, theRequestPartitionId);
+				createForcedIdIfNeeded(entity, resourceIdBeforeStorage, createForPureNumericIds);
 			} else {
 				boolean createForPureNumericIds = getConfig().getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ALPHANUMERIC;
-				createForcedIdIfNeeded(entity, resourceIdBeforeStorage, createForPureNumericIds, persistentId, theRequestPartitionId);
+				createForcedIdIfNeeded(entity, resourceIdBeforeStorage, createForPureNumericIds);
 			}
 		} else {
 			switch (getConfig().getResourceClientIdStrategy()) {
@@ -345,7 +346,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					break;
 				case ANY:
 					boolean createForPureNumericIds = true;
-					createForcedIdIfNeeded(updatedEntity, theResource.getIdElement().getIdPart(), createForPureNumericIds, persistentId, theRequestPartitionId);
+					createForcedIdIfNeeded(updatedEntity, theResource.getIdElement().getIdPart(), createForPureNumericIds);
 					// for client ID mode ANY, we will always have a forced ID. If we ever
 					// stop populating the transient forced ID be warned that we use it
 					// (and expect it to be set correctly) farther below.
@@ -399,7 +400,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return outcome;
 	}
 
-	private void createForcedIdIfNeeded(ResourceTable theEntity, String theResourceId, boolean theCreateForPureNumericIds, ResourcePersistentId thePersistentId, RequestPartitionId theRequestPartitionId) {
+	private void createForcedIdIfNeeded(ResourceTable theEntity, String theResourceId, boolean theCreateForPureNumericIds) {
 		if (isNotBlank(theResourceId) && theEntity.getForcedId() == null) {
 			if (theCreateForPureNumericIds || !IdHelperService.isValidPid(theResourceId)) {
 				ForcedId forcedId = new ForcedId();
@@ -815,7 +816,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		// fixme mb update hibernate search.
 		IBaseResource oldVersion = toResource(theEntity, false);
-
 
 		List<TagDefinition> tags = toTagList(theMetaDel);
 
@@ -1289,6 +1289,25 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return Long.toString(readEntity(theReferenceElement.toVersionless(), null).getVersion());
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public void reindex(ResourcePersistentId theResourcePersistentId, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
+		Optional<ResourceTable> entityOpt = myResourceTableDao.findById(theResourcePersistentId.getIdAsLong());
+		if (!entityOpt.isPresent()) {
+			ourLog.warn("Unable to find entity with PID: {}", theResourcePersistentId.getId());
+			return;
+		}
+
+		ResourceTable entity = entityOpt.get();
+		try {
+			T resource = (T) toResource(entity, false);
+			reindex(resource, entity);
+		} catch (BaseServerResponseException | DataFormatException e) {
+			myResourceTableDao.updateIndexStatus(entity.getId(), INDEX_STATUS_INDEXING_FAILED);
+			throw e;
+		}
+	}
+
 	@Override
 	@Transactional
 	public BaseHasResource readEntity(IIdType theId, boolean theCheckForForcedId, RequestDetails theRequest) {
@@ -1570,7 +1589,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	public Set<ResourcePersistentId> searchForIds(SearchParameterMap theParams, RequestDetails theRequest, @Nullable IBaseResource theConditionalOperationTargetOrNull) {
+	public List<ResourcePersistentId> searchForIds(SearchParameterMap theParams, RequestDetails theRequest, @Nullable IBaseResource theConditionalOperationTargetOrNull) {
 		TransactionDetails transactionDetails = new TransactionDetails();
 
 		return myTransactionService.execute(theRequest, transactionDetails, tx -> {
@@ -1583,7 +1602,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 			ISearchBuilder builder = mySearchBuilderFactory.newSearchBuilder(this, getResourceName(), getResourceType());
 
-			HashSet<ResourcePersistentId> retVal = new HashSet<>();
+			List<ResourcePersistentId> ids = new ArrayList<>();
 
 			String uuid = UUID.randomUUID().toString();
 			RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(theRequest, getResourceName(), theParams, theConditionalOperationTargetOrNull);
@@ -1591,13 +1610,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(theRequest, uuid);
 			try (IResultIterator iter = builder.createQuery(theParams, searchRuntimeDetails, theRequest, requestPartitionId)) {
 				while (iter.hasNext()) {
-					retVal.add(iter.next());
+					ids.add(iter.next());
 				}
 			} catch (IOException e) {
 				ourLog.error("IO failure during database access", e);
 			}
 
-			return retVal;
+			return ids;
 		});
 	}
 
@@ -1928,10 +1947,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@VisibleForTesting
 	public void setIdHelperSvcForUnitTest(IIdHelperService theIdHelperService) {
 		myIdHelperService = theIdHelperService;
-	}
-
-	private static ResourceIndexedSearchParams toResourceIndexedSearchParams(ResourceTable theEntity) {
-		return new ResourceIndexedSearchParams(theEntity);
 	}
 
 	private static class IdChecker implements IValidatorModule {

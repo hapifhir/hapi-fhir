@@ -64,14 +64,13 @@ public class ExtendedLuceneIndexData {
 	 * Write the index document.
 	 *
 	 * Keep this in sync with the schema defined in {@link SearchParamTextPropertyBinder}
-	 * @param theDocument
+	 * @param theDocument the Hibernate Search document root for  ResourceTable
 	 */
 	public void writeIndexElements(DocumentElement theDocument) {
 		HibernateSearchIndexWriter indexWriter = HibernateSearchIndexWriter.forRoot(myFhirContext, theDocument);
 
 		ourLog.debug("Writing JPA index to Hibernate Search");
 
-		// fixme test this
 		theDocument.addValue("myForcedId", myForcedId);
 
 		mySearchParamStrings.forEach(ifNotContained(indexWriter::writeStringIndex));

@@ -30,11 +30,15 @@ public class StepExecutionDetails<PT extends IModelJson, IT extends IModelJson> 
 
 	private final PT myParameters;
 	private final IT myData;
+	private final String myInstanceId;
+	private final String myChunkId;
 
-	public StepExecutionDetails(@Nonnull PT theParameters, @Nullable IT theData) {
+	public StepExecutionDetails(@Nonnull PT theParameters, @Nullable IT theData, @Nonnull String theInstanceId, @Nonnull String theChunkId) {
 		Validate.notNull(theParameters);
 		myParameters = theParameters;
 		myData = theData;
+		myInstanceId = theInstanceId;
+		myChunkId = theChunkId;
 	}
 
 	/**
@@ -57,6 +61,22 @@ public class StepExecutionDetails<PT extends IModelJson, IT extends IModelJson> 
 	@Nonnull
 	public PT getParameters() {
 		return myParameters;
+	}
+
+	/**
+	 * Returns the job instance ID being executed
+	 */
+	@Nonnull
+	public String getInstanceId() {
+		return myInstanceId;
+	}
+
+	/**
+	 * Returns the work chunk ID being executed
+	 */
+	@Nonnull
+	public String getChunkId() {
+		return myChunkId;
 	}
 
 }
