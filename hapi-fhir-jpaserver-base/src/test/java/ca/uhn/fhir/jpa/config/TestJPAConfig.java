@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.subscription.channel.config.SubscriptionChannelConfig;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.subscription.match.deliver.resthook.SubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSubmitterConfig;
+import ca.uhn.fhir.jpa.util.Batch2JobHelper;
 import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.context.annotation.Bean;
@@ -77,6 +78,11 @@ public class TestJPAConfig {
 	@Bean
 	public BatchJobHelper batchJobHelper(JobExplorer theJobExplorer) {
 		return new BatchJobHelper(theJobExplorer);
+	}
+
+	@Bean
+	public Batch2JobHelper batch2JobHelper() {
+		return new Batch2JobHelper();
 	}
 
 	@Bean

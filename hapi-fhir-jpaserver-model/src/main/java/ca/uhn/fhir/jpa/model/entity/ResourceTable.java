@@ -73,9 +73,9 @@ import java.util.stream.Collectors;
 @Indexed(routingBinder= @RoutingBinderRef(type = ResourceTableRoutingBinder.class))
 @Entity
 @Table(name = "HFJ_RESOURCE", uniqueConstraints = {}, indexes = {
+	// Do not reuse previously used index name: IDX_INDEXSTATUS
 	@Index(name = "IDX_RES_DATE", columnList = "RES_UPDATED"),
 	@Index(name = "IDX_RES_TYPE", columnList = "RES_TYPE"),
-	@Index(name = "IDX_INDEXSTATUS", columnList = "SP_INDEX_STATUS")
 })
 @NamedEntityGraph(name = "Resource.noJoins")
 public class ResourceTable extends BaseHasResource implements Serializable, IBasePersistedResource, IResourceLookup {
@@ -139,6 +139,13 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@IndexingDependency(derivedFrom = @ObjectPath(@PropertyValue(propertyName = "myVersion")))
 	@PropertyBinding(binder = @PropertyBinderRef(type = SearchParamTextPropertyBinder.class))
 	private ExtendedLuceneIndexData myLuceneIndexData;
+
+	// todo mb move this to ExtendedLuceneIndexData
+	@Transient
+	@GenericField(name="myRawResource", projectable = Projectable.YES, searchable = Searchable.NO)
+	@IndexingDependency(derivedFrom = @ObjectPath(@PropertyValue(propertyName = "myVersion")))
+	@OptimisticLock(excluded = true)
+	private String myRawResourceData;
 
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	@OptimisticLock(excluded = true)
@@ -774,5 +781,9 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	public void setLuceneIndexData(ExtendedLuceneIndexData theLuceneIndexData) {
 		myLuceneIndexData = theLuceneIndexData;
+	}
+
+	public void setRawResourceData(String theResourceData) {
+		myRawResourceData = theResourceData;
 	}
 }

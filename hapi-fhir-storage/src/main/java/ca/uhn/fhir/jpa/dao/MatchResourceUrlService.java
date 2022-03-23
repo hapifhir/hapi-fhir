@@ -53,6 +53,7 @@ import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -195,7 +196,7 @@ public class MatchResourceUrlService {
 		StopWatch sw = new StopWatch();
 		IFhirResourceDao<R> dao = getResourceDao(theResourceType);
 
-		Set<ResourcePersistentId> retVal = dao.searchForIds(theParamMap, theRequest, theConditionalOperationTargetOrNull);
+		List<ResourcePersistentId> retVal = dao.searchForIds(theParamMap, theRequest, theConditionalOperationTargetOrNull);
 
 		// Interceptor broadcast: JPA_PERFTRACE_INFO
 		if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO, myInterceptorBroadcaster, theRequest)) {
@@ -207,7 +208,8 @@ public class MatchResourceUrlService {
 				.add(StorageProcessingMessage.class, message);
 			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INFO, params);
 		}
-		return retVal;
+
+		return new HashSet<>(retVal);
 	}
 
 

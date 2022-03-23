@@ -10,12 +10,12 @@ import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
-import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.config.TestHibernateSearchAddInConfig;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.BaseDateSearchDaoTests;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.dao.DaoTestDataBuilder;
+import ca.uhn.fhir.jpa.dao.TestDaoSearch;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -37,10 +37,14 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 import org.hamcrest.Matchers;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.IBaseMetaType;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -75,14 +79,22 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(SpringExtension.class)
 @RequiresDocker
-@ContextConfiguration(classes = {TestR4Config.class, TestHibernateSearchAddInConfig.Elasticsearch.class})
+@ContextConfiguration(classes = {
+	TestR4Config.class,
+	TestHibernateSearchAddInConfig.Elasticsearch.class,
+	DaoTestDataBuilder.Config.class,
+	TestDaoSearch.Config.class
+})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";
@@ -132,6 +144,11 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+	@Autowired
+	ITestDataBuilder myTestDataBuilder;
+	@Autowired
+	TestDaoSearch myTestDaoSearch;
+
 
 	@BeforeEach
 	public void beforePurgeDatabase() {
@@ -159,6 +176,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		DaoConfig defaultConfig = new DaoConfig();
 		myDaoConfig.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
 		myDaoConfig.setAdvancedLuceneIndexing(defaultConfig.isAdvancedLuceneIndexing());
+		myDaoConfig.setStoreResourceInLuceneIndex(defaultConfig.isStoreResourceInLuceneIndex());
 	}
 
 	@Test
@@ -422,6 +440,10 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			map.add("code", new TokenParam("Bodum").setModifier(TokenParamModifier.TEXT));
 			assertObservationSearchMatchesNothing("search with shared prefix does not match", map);
 		}
+
+		{
+			assertObservationSearchMatches("empty params finds everything", "Observation?", id1, id2, id3, id4);
+		}
 	}
 
 	@Test
@@ -513,6 +535,11 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 	private void assertObservationSearchMatches(String message, SearchParameterMap map, IIdType... iIdTypes) {
 		assertThat(message, toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(iIdTypes)));
+	}
+
+	private void assertObservationSearchMatches(String theMessage, String theSearch, IIdType... theIds) {
+		SearchParameterMap map = myTestDaoSearch.toSearchParameters(theSearch);
+		assertObservationSearchMatches(theMessage, map, theIds);
 	}
 
 	@Nested
@@ -760,6 +787,123 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			DaoTestDataBuilder testDataBuilder = new DaoTestDataBuilder(myFhirCtx, myDaoRegistry, new SystemRequestDetails());
 			return new TestDataBuilderFixture<>(testDataBuilder, myObservationDao);
 		}
+	}
+
+	/**
+	 * Some queries can be satisfied directly from Hibernate Search.
+	 * We still need at least one query to fetch the resources.
+	 */
+	@Nested
+	public class FastPath {
+		@BeforeEach
+		public void enableResourceStorage() {
+			myDaoConfig.setStoreResourceInLuceneIndex(false);
+		}
+
+		@AfterEach
+		public void resetResourceStorage() {
+			myDaoConfig.setStoreResourceInLuceneIndex(new DaoConfig().isStoreResourceInLuceneIndex());
+		}
+
+
+		@Test
+		public void simpleTokenSkipsSql() {
+
+			IIdType id = myTestDataBuilder.createObservation(myTestDataBuilder.withObservationCode("http://example.com/", "theCode"));
+			myCaptureQueriesListener.clear();
+
+			List<String> ids = myTestDaoSearch.searchForIds("Observation?code=theCode");
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+			assertThat(ids, hasSize(1));
+			assertThat(ids, contains(id.getIdPart()));
+			assertEquals(1, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "sql just to fetch resources");
+		}
+
+		@Test
+		public void sortStillRequiresSql() {
+
+			IIdType id = myTestDataBuilder.createObservation(myTestDataBuilder.withObservationCode("http://example.com/", "theCode"));
+			myCaptureQueriesListener.clear();
+
+			List<String> ids = myTestDaoSearch.searchForIds("Observation?code=theCode&_sort=code");
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+			assertThat(ids, hasSize(1));
+			assertThat(ids, contains(id.getIdPart()));
+
+			assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "the pids come from elastic, but we use sql to sort, and fetch resources");
+		}
+
+		@Test
+		public void deletedResourceNotFound() {
+
+			IIdType id = myTestDataBuilder.createObservation(myTestDataBuilder.withObservationCode("http://example.com/", "theCode"));
+			myObservationDao.delete(id);
+			myCaptureQueriesListener.clear();
+
+			List<String> ids = myTestDaoSearch.searchForIds("Observation?code=theCode&_sort=code");
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+			assertThat(ids, hasSize(0));
+
+			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "the pids come from elastic, and nothing to fetch");
+		}
+
+		@Test
+		public void forcedIdSurvivesWithNoSql() {
+			IIdType id = myTestDataBuilder.createObservation(
+				myTestDataBuilder.withObservationCode("http://example.com/", "theCode"),
+				myTestDataBuilder.withId("forcedid"));
+			assertThat(id.getIdPart(), equalTo("forcedid"));
+			myCaptureQueriesListener.clear();
+
+			List<String> ids = myTestDaoSearch.searchForIds("Observation?code=theCode");
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+			assertThat(ids, hasSize(1));
+			assertThat(ids, contains(id.getIdPart()));
+
+			assertEquals(1, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "just 1 to fetch the resources");
+		}
+
+		/**
+		 * A paranoid test to make sure tags stay with the resource.
+		 *
+		 * Tags live outside the resource, and can be modified by
+		 * Since we lost the id, also check tags in case someone changes metadata processing during ingestion.
+		 */
+		@Test
+		public void tagsSurvive() {
+			IIdType id = myTestDataBuilder.createObservation(
+				myTestDataBuilder.withObservationCode("http://example.com/", "theCode"),
+				myTestDataBuilder.withTag("http://example.com", "aTag"));
+
+			myCaptureQueriesListener.clear();
+			List<IBaseResource> observations = myTestDaoSearch.searchForResources("Observation?code=theCode");
+
+			assertThat(observations, hasSize(1));
+			List<? extends IBaseCoding> tags = observations.get(0).getMeta().getTag();
+			assertThat(tags, hasSize(1));
+			assertThat(tags.get(0).getSystem(), equalTo("http://example.com"));
+			assertThat(tags.get(0).getCode(), equalTo("aTag"));
+
+			Meta meta = new Meta();
+			meta.addTag().setSystem("tag_scheme1").setCode("tag_code1");
+			meta.addProfile("http://profile/1");
+			meta.addSecurity().setSystem("seclabel_sys1").setCode("seclabel_code1");
+			myObservationDao.metaAddOperation(id, meta, mySrd);
+
+			observations = myTestDaoSearch.searchForResources("Observation?code=theCode");
+
+			assertThat(observations, hasSize(1));
+			IBaseMetaType newMeta = observations.get(0).getMeta();
+			assertThat(newMeta.getProfile(), hasSize(1));
+			assertThat(newMeta.getSecurity(), hasSize(1));
+			assertThat(newMeta.getTag(), hasSize(2));
+		}
+
+
 	}
 
 }

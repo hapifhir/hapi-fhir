@@ -1139,7 +1139,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			} catch (Exception e) {
 				StringBuilder b = new StringBuilder();
 				b.append("Failed to parse database resource[");
-				b.append(resourceType);
+				b.append(myFhirContext.getResourceType(resourceType));
 				b.append("/");
 				b.append(theEntity.getIdDt().getIdPart());
 				b.append(" (pid ");
@@ -1750,6 +1750,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			if (myDaoConfig.isAdvancedLuceneIndexing()) {
 				ExtendedLuceneIndexData luceneIndexData = myFulltextSearchSvc.extractLuceneIndexData(theResource, theNewParams);
 				theEntity.setLuceneIndexData(luceneIndexData);
+				if(myDaoConfig.isStoreResourceInLuceneIndex()) {
+					theEntity.setRawResourceData(theContext.newJsonParser().encodeResourceToString(theResource));
+				}
 			}
 		}
 	}
