@@ -24,7 +24,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,7 +33,6 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 public class FhirResourceDaoR4SearchLastNIT extends BaseR4SearchLastN {
-
 	@AfterEach
 	public void reset() {
 		SearchBuilder.setMaxPageSize50ForTest(false);
@@ -127,16 +125,22 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseR4SearchLastN {
 		when(mySrd.getParameters()).thenReturn(requestParameters);
 
 		List<String> results = toUnqualifiedVersionlessIdValues(myObservationDao.observationsLastN(params, mockSrd(), null));
+		verifyResourcesLoadedFromElastic(observationIds, results);
+
+	}
+
+	void verifyResourcesLoadedFromElastic(List<IIdType> theObservationIds, List<String> theResults) {
 		List<ResourcePersistentId> expectedArgumentPids = ResourcePersistentId.fromLongList(
-			observationIds.stream().map(IIdType::getIdPartAsLong).collect(Collectors.toList())
+			theObservationIds.stream().map(IIdType::getIdPartAsLong).collect(Collectors.toList())
 		);
 		ArgumentCaptor<List<ResourcePersistentId>> actualPids = ArgumentCaptor.forClass(List.class);
 		verify(myElasticsearchSvc, times(1)).getObservationResources(actualPids.capture());
 		assertThat(actualPids.getValue(), is(expectedArgumentPids));
 
-		List<String> expectedObservationList = observationIds.stream()
+		List<String> expectedObservationList = theObservationIds.stream()
 			.map(id -> id.toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
-		assertEquals(results, expectedObservationList);
+		assertEquals(expectedObservationList, theResults);
+
 	}
 
 }

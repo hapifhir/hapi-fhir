@@ -45,6 +45,7 @@ public class ExtendedLuceneIndexData {
 	final SetMultimap<String, IBaseCoding> mySearchParamTokens = HashMultimap.create();
 	final SetMultimap<String, String> mySearchParamLinks = HashMultimap.create();
 	final SetMultimap<String, DateSearchIndexData> mySearchParamDates = HashMultimap.create();
+	String myForcedId;
 
 	public ExtendedLuceneIndexData(FhirContext theFhirContext) {
 		this.myFhirContext = theFhirContext;
@@ -58,10 +59,19 @@ public class ExtendedLuceneIndexData {
 			}
 		};
 	}
+
+	/**
+	 * Write the index document.
+	 *
+	 * Keep this in sync with the schema defined in {@link SearchParamTextPropertyBinder}
+	 * @param theDocument
+	 */
 	public void writeIndexElements(DocumentElement theDocument) {
 		HibernateSearchIndexWriter indexWriter = HibernateSearchIndexWriter.forRoot(myFhirContext, theDocument);
 
 		ourLog.debug("Writing JPA index to Hibernate Search");
+
+		theDocument.addValue("myForcedId", myForcedId);
 
 		mySearchParamStrings.forEach(ifNotContained(indexWriter::writeStringIndex));
 		mySearchParamTokens.forEach(ifNotContained(indexWriter::writeTokenIndex));
@@ -97,4 +107,11 @@ public class ExtendedLuceneIndexData {
 		mySearchParamDates.put(theSpName, new DateSearchIndexData(theLowerBound, theLowerBoundOrdinal, theUpperBound, theUpperBoundOrdinal));
 	}
 
+	public void setForcedId(String theForcedId) {
+		myForcedId = theForcedId;
+	}
+
+	public String getForcedId() {
+		return myForcedId;
+	}
 }
