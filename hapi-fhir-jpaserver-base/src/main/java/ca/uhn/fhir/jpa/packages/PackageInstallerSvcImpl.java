@@ -426,6 +426,14 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		return true;
 	}
 
+	/**
+	 * For resources like {@link org.hl7.fhir.r4.model.Subscription}, {@link org.hl7.fhir.r4.model.DocumentReference},
+	 * and {@link org.hl7.fhir.r4.model.Communication}, the status field doesn't necessarily need to be set to 'active'
+	 * for that resource to be eligible for upload via packages. For example, all {@link org.hl7.fhir.r4.model.Subscription}
+	 * have a status of {@link org.hl7.fhir.r4.model.Subscription.SubscriptionStatus#REQUESTED} when they are originally
+	 * inserted into the database.
+	 * @return {@link Boolean#TRUE} if the status value of this resource is acceptable for package upload.
+	 */
 	private boolean isValidResourceStatusForPackageUpload(IBaseResource theResource) {
 		List<IPrimitiveType> statusTypes = myFhirContext.newFhirPath().evaluate(theResource, "status", IPrimitiveType.class);
 		if (statusTypes.isEmpty() || statusTypes.get(0).getValue() == null) return false;

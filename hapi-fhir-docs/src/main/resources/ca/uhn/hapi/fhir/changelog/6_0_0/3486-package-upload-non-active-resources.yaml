@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 3486
+title: "When doing package upload, filtering on the value of active for all resources is not a great solution, as that 
+field means different things to different resources. For Subscription, we need to check if the value is requested, for 
+DocumentReference and Communication. This change adds a check for those types of resources outside of the normal 
+check done for active matching value."
