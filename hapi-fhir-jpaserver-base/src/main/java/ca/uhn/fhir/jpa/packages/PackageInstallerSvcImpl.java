@@ -417,13 +417,23 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 		}
 
-		List<IPrimitiveType> statusTypes = myFhirContext.newFhirPath().evaluate(theResource, "status", IPrimitiveType.class);
-		if (statusTypes.size() > 0 && !statusTypes.get(0).getValueAsString().equals("active")) {
-			ourLog.warn("Failed to validate resource of type {} with ID {} - Error: Resource status not equal to \"active\"", theResource.fhirType(), theResource.getIdElement().getValue());
+		if (!isValidResourceStatusForPackageUpload(theResource)) {
+			ourLog.warn("Failed to validate resource of type {} with ID {} - Error: Resource status not accepted value.",
+				theResource.fhirType(), theResource.getIdElement().getValue());
 			return false;
 		}
 
 		return true;
+	}
+
+	private boolean isValidResourceStatusForPackageUpload(IBaseResource theResource) {
+		List<IPrimitiveType> statusTypes = myFhirContext.newFhirPath().evaluate(theResource, "status", IPrimitiveType.class);
+		if (statusTypes.isEmpty() || statusTypes.get(0).getValue() == null) return false;
+		return switch (theResource.fhirType()) {
+			case "Subscription" -> (statusTypes.get(0).getValueAsString().equals("requested"));
+			case "DocumentReference", "Communication" -> (!statusTypes.get(0).getValueAsString().equals("?"));
+			default -> (statusTypes.get(0).getValueAsString().equals("active"));
+		};
 	}
 
 	private boolean isStructureDefinitionWithoutSnapshot(IBaseResource r) {
