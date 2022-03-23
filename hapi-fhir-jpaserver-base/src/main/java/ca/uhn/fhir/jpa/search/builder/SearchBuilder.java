@@ -900,7 +900,7 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		// Can we fast track this loading by checking elastic search?
-		if (isLoadingFromElasticSearchSupported(theIncludedPids)) {
+		if (isLoadingFromElasticSearchSupported(thePids)) {
 			theResourceListToPopulate.addAll(loadResourcesFromElasticSearch(thePids));
 		} else {
 			// We only chunk because some jdbc drivers can't handle long param lists.
@@ -913,19 +913,15 @@ public class SearchBuilder implements ISearchBuilder {
 	 * We assume this is faster.
 	 *
 	 * Hibernate Search only stores the current version, and only if enabled.
-	 * @param theIncludedPids the _include target to check for versioned ids
+	 * @param thePids the pids to check for versioned references
 	 * @return can we fetch from Hibernate Search?
 	 */
-	private boolean isLoadingFromElasticSearchSupported(Collection<ResourcePersistentId> theIncludedPids) {
-		// wipmb mb we can be smarter here.
-		// wipmb check if theIncludedPids has any with version not null.
+	private boolean isLoadingFromElasticSearchSupported(Collection<ResourcePersistentId> thePids) {
 
 		// is storage enabled?
 		return myDaoConfig.isStoreResourceInLuceneIndex() &&
-			// only support lastN for now.
-			myParams.isLastN() &&
-			// do we need to worry about versions?
-			theIncludedPids.isEmpty() &&
+			// we don't support history
+			thePids.stream().noneMatch(p->p.getVersion()!=null) &&
 			// skip the complexity for metadata in dstu2
 			myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3);
 	}
