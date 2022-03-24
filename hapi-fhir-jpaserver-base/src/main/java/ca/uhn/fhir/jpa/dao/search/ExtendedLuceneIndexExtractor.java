@@ -61,6 +61,8 @@ public class ExtendedLuceneIndexExtractor {
 	public ExtendedLuceneIndexData extract(IBaseResource theResource, ResourceIndexedSearchParams theNewParams) {
 		ExtendedLuceneIndexData retVal = new ExtendedLuceneIndexData(myContext);
 
+		retVal.setForcedId(theResource.getIdElement().getIdPart());
+
 		extractAutocompleteTokens(theResource, retVal);
 
 		theNewParams.myStringParams.forEach(nextParam ->

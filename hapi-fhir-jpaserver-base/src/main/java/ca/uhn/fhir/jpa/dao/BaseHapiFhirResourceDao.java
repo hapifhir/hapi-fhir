@@ -816,7 +816,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		IBaseResource oldVersion = toResource(theEntity, false);
 
-
 		List<TagDefinition> tags = toTagList(theMetaDel);
 
 		for (TagDefinition nextDef : tags) {

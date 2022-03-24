@@ -195,7 +195,7 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 				withRiskAssessmentWithProbabilty(0.6);
 
 				assertNotFind("when gt", "/RiskAssessment?probability=0.5");
-				// fixme we break the spec here.
+				// TODO we break the spec here.  Default search should be approx
 				// assertFind("when a little gt - default is approx", "/RiskAssessment?probability=0.599");
 				// assertFind("when a little lt - default is approx", "/RiskAssessment?probability=0.601");
 				assertFind("when eq", "/RiskAssessment?probability=0.6");
@@ -315,10 +315,10 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 
 				assertNotFind("when gt", "/Observation?value-quantity=0.5||mmHg");
 				assertNotFind("when gt unitless", "/Observation?value-quantity=0.5");
-				// fixme we break the spec here.
+				// TODO we break the spec here.  Default search should be approx
 				// assertFind("when a little gt - default is approx", "/Observation?value-quantity=0.599");
 				// assertFind("when a little lt - default is approx", "/Observation?value-quantity=0.601");
-				// fixme we don't seem to support "units", only "code".
+				// TODO we don't seem to support "units", only "code".
 				assertFind("when eq with units", "/Observation?value-quantity=0.6||mm[Hg]");
 				assertFind("when eq unitless", "/Observation?value-quantity=0.6");
 				assertNotFind("when lt", "/Observation?value-quantity=0.7||mmHg");
