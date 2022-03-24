@@ -40,6 +40,7 @@ will return a ValueSet containing the most common values indexed under `Observat
 display text contains a word starting with "press", such as `http://loinc.org|8478-0` - "Mean blood pressure".
 This extension is only valid at the type level, and requires that Extended Lucene Indexing be enabled.
 
+## Resource Storage
 
-
-
+As an experimental feature with the extended indexing, the full resource can be stored in the 
+search index.  This allows some queries to return results without using the relational database.
