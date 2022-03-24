@@ -86,6 +86,33 @@ public class ApacheProxyAddressStrategyTest {
 		assertEquals("https://my.example.host:345/imagingstudy/fhir",
 				serverBase);
 	}
+	
+	@Test
+	public void testWithForwardedHostAndUnsetPort() {
+		ApacheProxyAddressStrategy addressStrategy = new ApacheProxyAddressStrategy(
+				true);
+		MockHttpServletRequest request = prepareRequest();
+
+		request.addHeader("X-Forwarded-Host", "my.example.host");
+		request.addHeader("X-Forwarded-Port", "-1");
+		String serverBase = addressStrategy.determineServerBase(null, request);
+		assertEquals("https://my.example.host/imagingstudy/fhir",
+				serverBase);
+	}
+	
+	@Test
+	public void testWithRfc7239 () {
+		ApacheProxyAddressStrategy addressStrategy = new ApacheProxyAddressStrategy(
+				true);
+		MockHttpServletRequest request = prepareRequest();
+
+		request.addHeader("Forwarded", "Forwarded: for=192.0.2.43,"
+				+ " for=198.51.100.17;by=203.0.113.60;proto=http;host=example.com");
+		request.addHeader("X-Forwarded-Port", "-1");
+		String serverBase = addressStrategy.determineServerBase(null, request);
+		assertEquals("http://example.com/imagingstudy/fhir",
+				serverBase);
+	}
 
 	private MockHttpServletRequest prepareRequest() {
 		MockHttpServletRequest request = new MockHttpServletRequest();

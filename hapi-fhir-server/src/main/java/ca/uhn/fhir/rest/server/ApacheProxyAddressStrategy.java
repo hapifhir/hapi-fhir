@@ -1,7 +1,5 @@
 package ca.uhn.fhir.rest.server;
 
-import java.net.URI;
-
 /*
  * #%L
  * HAPI FHIR - Server Framework
@@ -24,18 +22,20 @@ import java.net.URI;
 
 import java.util.Optional;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+
+
 
 import static java.util.Optional.ofNullable;
 
-import ca.uhn.fhir.rest.server.IncomingRequestAddressStrategy;
 
 /**
  * Works like the normal
@@ -77,7 +77,7 @@ public class ApacheProxyAddressStrategy extends IncomingRequestAddressStrategy {
 	private static final String X_FORWARDED_PREFIX = "x-forwarded-prefix";
 	private static final String X_FORWARDED_PROTO = "x-forwarded-proto";
 	private static final String X_FORWARDED_HOST = "x-forwarded-host";
-	private static final String X_FORWARDED_PORT = "x-forwarded-port";
+
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(ApacheProxyAddressStrategy.class);
@@ -99,60 +99,47 @@ public class ApacheProxyAddressStrategy extends IncomingRequestAddressStrategy {
 		String serverBase = super.determineServerBase(servletContext, request);
 		ServletServerHttpRequest requestWrapper = new ServletServerHttpRequest(
 				request);
+		UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpRequest(requestWrapper);
+		uriBuilder.replaceQuery(null);
 		HttpHeaders headers = requestWrapper.getHeaders();
-		Optional<String> forwardedHost = headers
-				.getValuesAsList(X_FORWARDED_HOST).stream().findFirst();
-		return forwardedHost
-				.map(s -> forwardedServerBase(serverBase, headers, s))
-				.orElse(serverBase);
+		adjustSchemeForHttp(uriBuilder, headers);
+		return forwardedServerBase(serverBase, headers, uriBuilder);
+	}
+
+	/**
+	 * Spring use https per default. If {@link ApacheProxyAddressStrategy} is
+	 * configured with useSsl false, override default behavior.
+	 * 
+	 * @param uriBuilder
+	 * @param headers
+	 */
+	private void adjustSchemeForHttp(UriComponentsBuilder uriBuilder,
+			HttpHeaders headers) {
+		if (headers.getFirst(X_FORWARDED_HOST) != null
+				&& headers.getFirst(X_FORWARDED_PROTO) == null && !useHttps) {
+			uriBuilder.scheme("http");
+		}
 	}
 
 	private String forwardedServerBase(String originalServerBase,
-			HttpHeaders headers, String forwardedHost) {
+			HttpHeaders headers, UriComponentsBuilder uriBuilder) {
 		Optional<String> forwardedPrefix = getForwardedPrefix(headers);
-		LOG.debug("serverBase: {}, forwardedHost: {}, forwardedPrefix: {}",
-				originalServerBase, forwardedHost, forwardedPrefix);
+		LOG.debug("serverBase: {}, forwardedPrefix: {}", originalServerBase, forwardedPrefix);
 		LOG.debug("request header: {}", headers);
-
-		String host = protocol(headers) + "://" + forwardedHost;
-		String hostWithOptionalPort = port(headers).map(p -> (host + ":" + p))
-				.orElse(host);
 
 		String path = forwardedPrefix
 				.orElseGet(() -> pathFrom(originalServerBase));
-		return joinStringsWith(hostWithOptionalPort, path, "/");
-	}
-
-	private Optional<String> port(HttpHeaders headers) {
-		return ofNullable(headers.getFirst(X_FORWARDED_PORT));
+		uriBuilder.replacePath(path);
+		return uriBuilder.build().toUriString();
 	}
 
 	private String pathFrom(String serverBase) {
-		String serverBasePath = URI.create(serverBase).getPath();
-		return StringUtils.defaultIfBlank(serverBasePath, "");
-	}
-
-	private static String joinStringsWith(String left, String right,
-			String joiner) {
-		if (left.endsWith(joiner) && right.startsWith(joiner)) {
-			return left + right.substring(1);
-		} else if (left.endsWith(joiner) || right.startsWith(joiner)) {
-			return left + right;
-		} else {
-			return left + joiner + right;
-		}
+		UriComponents build = UriComponentsBuilder.fromHttpUrl(serverBase).build();
+		return build.getPath();
 	}
 
 	private Optional<String> getForwardedPrefix(HttpHeaders headers) {
 		return ofNullable(headers.getFirst(X_FORWARDED_PREFIX));
-	}
-
-	private String protocol(HttpHeaders headers) {
-		String protocol = headers.getFirst(X_FORWARDED_PROTO);
-		if (protocol != null) {
-			return protocol;
-		}
-		return useHttps ? "https" : "http";
 	}
 
 	/**
