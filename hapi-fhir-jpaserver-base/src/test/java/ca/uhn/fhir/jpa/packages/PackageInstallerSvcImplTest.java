@@ -106,9 +106,8 @@ class PackageInstallerSvcImplTest {
 	}
 
 	@Test
-	public void testValidForUpload_DocumentRefStatusValueNullOrAbsent() {
+	public void testValidForUpload_DocumentRefStatusValueNull() {
 		DocumentReference documentReference = new DocumentReference();
-		assertFalse(mySvc.validForUpload(documentReference));
 		documentReference.setStatus(Enumerations.DocumentReferenceStatus.NULL);
 		assertFalse(mySvc.validForUpload(documentReference));
 		documentReference.setStatus(null);
@@ -123,9 +122,8 @@ class PackageInstallerSvcImplTest {
 	}
 
 	@Test
-	public void testValidForUpload_CommunicationStatusValueNullOrAbsent() {
+	public void testValidForUpload_CommunicationStatusValueNull() {
 		Communication communication = new Communication();
-		assertFalse(mySvc.validForUpload(communication));
 		communication.setStatus(Communication.CommunicationStatus.NULL);
 		assertFalse(mySvc.validForUpload(communication));
 		communication.setStatus(null);

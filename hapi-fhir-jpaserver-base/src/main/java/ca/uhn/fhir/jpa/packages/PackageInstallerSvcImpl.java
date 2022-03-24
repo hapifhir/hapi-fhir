@@ -436,7 +436,11 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	 */
 	private boolean isValidResourceStatusForPackageUpload(IBaseResource theResource) {
 		List<IPrimitiveType> statusTypes = myFhirContext.newFhirPath().evaluate(theResource, "status", IPrimitiveType.class);
+		// Resource does not have a status field
+		if (statusTypes.size() == 0) return true;
+		// Resource has an empty or null status field
 		if (statusTypes.isEmpty() || statusTypes.get(0).getValue() == null) return false;
+		// Resource has a status, and we need to check based on type
 		return switch (theResource.fhirType()) {
 			case "Subscription" -> (statusTypes.get(0).getValueAsString().equals("requested"));
 			case "DocumentReference", "Communication" -> (!statusTypes.get(0).getValueAsString().equals("?"));
