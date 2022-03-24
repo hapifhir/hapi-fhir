@@ -64,8 +64,10 @@ public class ExtendedLuceneIndexData {
 	/**
 	 * Write the index document.
 	 *
+	 * Called by Hibernate Search after the ResourceTable entity has been flushed/committed.
 	 * Keep this in sync with the schema defined in {@link SearchParamTextPropertyBinder}
-	 * @param theDocument the Hibernate Search document root for  ResourceTable
+	 *
+	 * @param theDocument the Hibernate Search document for ResourceTable
 	 */
 	public void writeIndexElements(DocumentElement theDocument) {
 		HibernateSearchIndexWriter indexWriter = HibernateSearchIndexWriter.forRoot(myFhirContext, theDocument);
