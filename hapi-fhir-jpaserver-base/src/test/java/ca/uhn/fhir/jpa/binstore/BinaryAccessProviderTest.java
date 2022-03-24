@@ -28,6 +28,8 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -248,7 +250,32 @@ public class BinaryAccessProviderTest {
 
 		DaoMethodOutcome daoOutcome = new DaoMethodOutcome();
 		daoOutcome.setResource(docRef);
-		ServletInputStream sis = spy(ServletInputStream.class);
+		ServletInputStream sis = new ServletInputStream() {
+			@Override
+			public boolean isFinished() {
+				return false;
+			}
+
+			@Override
+			public boolean isReady() {
+				return false;
+			}
+
+			@Override
+			public void setReadListener(ReadListener readListener) {
+
+			}
+
+			@Override
+			public int read() throws IOException {
+				return 0;
+			}
+
+			@Override
+			public int available() throws IOException {
+				return 15;
+			}
+		};
 		StoredDetails sd = spy(StoredDetails.class);
 		sd.setBlobId("123");
 		when(myDaoRegistry.getResourceDao(eq("DocumentReference"))).thenReturn(myResourceDao);
