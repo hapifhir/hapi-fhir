@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -84,6 +85,8 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 @RequiresDocker
@@ -778,28 +781,50 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	}
 
 
-	//fixme JM make these pass
 	@Nested
 	public class QuantitySearch {
 		IIdType myResourceId;
 
 		@Nested
-		public class Queries {
+		public class SimpleQueries {
+
+			@Test
+			public void noQuantityThrows() {
+				withObservationWithValueQuantity(0.6);
+
+				String invalidQtyParam = "|http://another.org";
+				DataFormatException thrown = assertThrows(DataFormatException.class,
+					() -> myTestDaoSearch.searchForIds("/Observation?value-quantity=" + invalidQtyParam));
+
+				assertTrue(thrown.getMessage().startsWith("HAPI-1940: Invalid"));
+				assertTrue(thrown.getMessage().contains(invalidQtyParam));
+			}
+
+			@Test
+			public void invalidPrefixThrows() {
+				withObservationWithValueQuantity(0.6);
+
+				DataFormatException thrown = assertThrows(DataFormatException.class,
+					() -> myTestDaoSearch.searchForIds("/Observation?value-quantity=st5.35"));
+
+				assertEquals("HAPI-1941: Invalid prefix: \"st\"", thrown.getMessage());
+			}
 
 			@Test
 			public void eq() {
 				withObservationWithValueQuantity(0.6);
 
-				assertNotFind("when gt", "/Observation?value-quantity=0.5||mmHg");
 				assertNotFind("when gt unitless", "/Observation?value-quantity=0.5");
-				// fixme we break the spec here.
-				// assertFind("when a little gt - default is approx", "/Observation?value-quantity=0.599");
-				// assertFind("when a little lt - default is approx", "/Observation?value-quantity=0.601");
-				// fixme we don't seem to support "units", only "code".
-				assertFind("when eq with units", "/Observation?value-quantity=0.6||mm[Hg]");
-				assertFind("when eq unitless", "/Observation?value-quantity=0.6");
+				assertNotFind("when wrong system", "/Observation?value-quantity=0.6|http://another.org");
+				assertNotFind("when wrong units", "/Observation?value-quantity=0.6||mmHg");
+				assertNotFind("when lt unitless", "/Observation?value-quantity=0.7");
 				assertNotFind("when lt", "/Observation?value-quantity=0.7||mmHg");
-				assertNotFind("when lt", "/Observation?value-quantity=0.7");
+
+				assertFind("when a little gt - default is approx", "/Observation?value-quantity=0.599");
+				assertFind("when a little lt - default is approx", "/Observation?value-quantity=0.601");
+
+				assertFind("when eq unitless", "/Observation?value-quantity=0.6");
+				assertFind("when eq with units", "/Observation?value-quantity=0.6||mm[Hg]");
 			}
 
 			@Test
@@ -848,7 +873,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 				assertNotFind("when gt", "/Observation?value-quantity=lt0.5");
 				assertNotFind("when eq", "/Observation?value-quantity=lt0.6");
 				assertFind("when lt", "/Observation?value-quantity=lt0.7");
-
 			}
 
 			@Test
@@ -862,27 +886,37 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 				assertFind("when eq", "/Observation?value-quantity=le0.6");
 				assertFind("when lt", "/Observation?value-quantity=le0.7");
 			}
+		}
 
 
-			private void assertFind(String theMessage, String theUrl) {
-				List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-				assertThat(theMessage, resourceIds, hasItem(equalTo(myResourceId.getIdPart())));
-			}
+		@Nested
+		public class MultipleQueries {
 
-			private void assertNotFind(String theMessage, String theUrl) {
-				List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-				assertThat(theMessage, resourceIds, not(hasItem(equalTo(myResourceId.getIdPart()))));
+			@Test
+			void gtAndLt() {
+				withObservationWithValueQuantity(0.6);
+
+				assertFind("when gt0.5 and lt0.7", "/Observation?value-quantity=gt0.5&value-quantity=lt0.7");
+				assertNotFind("when gt0.5 and lt0.6", "/Observation?value-quantity=gt0.5&value-quantity=lt0.6");
+				assertNotFind("when gt6.5 and lt0.7", "/Observation?value-quantity=gt6.5&value-quantity=lt0.7");
+				assertNotFind("impossible matching", "/Observation?value-quantity=gt0.7&value-quantity=lt0.5");
 			}
 		}
 
+
+		private void assertFind(String theMessage, String theUrl) {
+			List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
+			assertThat(theMessage, resourceIds, hasItem(equalTo(myResourceId.getIdPart())));
+		}
+
+		private void assertNotFind(String theMessage, String theUrl) {
+			List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
+			assertThat(theMessage, resourceIds, not(hasItem(equalTo(myResourceId.getIdPart()))));
+		}
+
 		private IIdType withObservationWithValueQuantity(double theValue) {
-//			IBase quantity = myDataBuilder.withElementOfType("Quantity",
-//				myDataBuilder.withPrimitiveAttribute("value", theValue),
-//				myDataBuilder.withPrimitiveAttribute("unit", "mmHg"),
-//				myDataBuilder.withPrimitiveAttribute("system", "http://unitsofmeasure.org"));
 			myResourceId = myDataBuilder.createObservation(myDataBuilder.withAttribute("valueQuantity",
 				myDataBuilder.withPrimitiveAttribute("value", theValue),
-				myDataBuilder.withPrimitiveAttribute("unit", "mmHg"),
 				myDataBuilder.withPrimitiveAttribute("system", "http://unitsofmeasure.org"),
 				myDataBuilder.withPrimitiveAttribute("code", "mm[Hg]")
 			));

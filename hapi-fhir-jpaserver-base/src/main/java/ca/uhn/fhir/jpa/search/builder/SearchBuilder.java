@@ -324,7 +324,6 @@ public class SearchBuilder implements ISearchBuilder {
 			if (myParams.isLastN()) {
 				pids = executeLastNAgainstIndex(theMaximumResults);
 			} else {
-				// fixme jm marker of main entry point
 				pids = queryLuceneForPIDs(theRequest);
 			}
 

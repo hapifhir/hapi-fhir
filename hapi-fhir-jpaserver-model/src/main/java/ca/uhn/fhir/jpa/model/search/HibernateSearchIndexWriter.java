@@ -34,6 +34,14 @@ public class HibernateSearchIndexWriter {
 	public static final String IDX_STRING_TEXT = "text";
 	public static final String NESTED_SEARCH_PARAM_ROOT = "nsp";
 	public static final String SEARCH_PARAM_ROOT = "sp";
+
+	public static final String QTY_PARAM_NAME = "quantity";
+	public static final String QTY_CODE = "code";
+	public static final String QTY_SYSTEM = "system";
+	public static final String QTY_VALUE = "value";
+
+
+
 	final HibernateSearchElementCache myNodeCache;
 	final FhirContext myFhirContext;
 
@@ -97,4 +105,14 @@ public class HibernateSearchIndexWriter {
 		dateIndexNode.addValue("upper", theValue.getUpperBoundDate().toInstant());
 		ourLog.trace("Adding Search Param Reference: {} -- {}", theSearchParam, theValue);
 	}
+
+	public void writeQuantityIndex(String theSearchParam, QuantitySearchIndexData theValue) {
+		DocumentElement qtyIndexNode = getSearchParamIndexNode(theSearchParam, QTY_PARAM_NAME);
+		qtyIndexNode.addValue(QTY_CODE, theValue.getCode());
+		qtyIndexNode.addValue(QTY_SYSTEM, theValue.getSystem());
+		qtyIndexNode.addValue(QTY_VALUE, theValue.getValue());
+		ourLog.trace("Adding Search Param Quantity: {} -- {}", theSearchParam, theValue);
+	}
+
+
 }

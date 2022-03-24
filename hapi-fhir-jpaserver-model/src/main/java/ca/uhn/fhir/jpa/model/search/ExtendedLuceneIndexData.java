@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.model.search;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
@@ -29,6 +30,7 @@ import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -45,6 +47,7 @@ public class ExtendedLuceneIndexData {
 	final SetMultimap<String, IBaseCoding> mySearchParamTokens = HashMultimap.create();
 	final SetMultimap<String, String> mySearchParamLinks = HashMultimap.create();
 	final SetMultimap<String, DateSearchIndexData> mySearchParamDates = HashMultimap.create();
+	final SetMultimap<String, QuantitySearchIndexData> mySearchParamQuantities = HashMultimap.create();
 
 	public ExtendedLuceneIndexData(FhirContext theFhirContext) {
 		this.myFhirContext = theFhirContext;
@@ -66,6 +69,7 @@ public class ExtendedLuceneIndexData {
 		mySearchParamStrings.forEach(ifNotContained(indexWriter::writeStringIndex));
 		mySearchParamTokens.forEach(ifNotContained(indexWriter::writeTokenIndex));
 		mySearchParamLinks.forEach(ifNotContained(indexWriter::writeReferenceIndex));
+		mySearchParamQuantities.forEach(ifNotContained(indexWriter::writeQuantityIndex));
 		// TODO MB Use RestSearchParameterTypeEnum to define templates.
 		mySearchParamDates.forEach(ifNotContained(indexWriter::writeDateIndex));
 	}
@@ -97,7 +101,8 @@ public class ExtendedLuceneIndexData {
 		mySearchParamDates.put(theSpName, new DateSearchIndexData(theLowerBound, theLowerBoundOrdinal, theUpperBound, theUpperBoundOrdinal));
 	}
 
-	// fixme jm write quantity index info
-
+	public void addQuantityIndexData(String theSpName, String theUnits, String theSystem, BigDecimal theValue) {
+		mySearchParamQuantities.put(theSpName, new QuantitySearchIndexData(theUnits, theSystem, theValue));
+	}
 
 }

@@ -22,12 +22,14 @@ package ca.uhn.fhir.jpa.dao.search;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -44,6 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -56,6 +59,9 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_EXACT;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_NORMALIZED;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_TEXT;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_CODE;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_SYSTEM;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_VALUE;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.SEARCH_PARAM_ROOT;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -454,6 +460,121 @@ public class ExtendedLuceneClauseBuilder {
 		throw new IllegalArgumentException(Msg.code(2026) + "Date search param does not support prefix of type: " + prefix);
 	}
 
-	// fixme jm add quantity query writer.
+
+	/**
+	 * No unit conversions are performed at the moment (3|ml and 0.003|l don't match)
+	 * The prefix combines with default range (5%) in this way:
+	 *   	APPROXIMATE: searches for resource quantity between passed param value +/- 10%
+	 * 	ENDS_BEFORE: searches for resource quantity (higher range boundary) > param value + 5%
+	 * 	LESSTHAN: searches for resource quantity < param value
+	 * 	LESSTHAN_OR_EQUALS: searches for resource quantity <= param value
+	 * 	EQUAL: searches for resource quantity between passed param value +/- 5%
+	 * 	STARTS_AFTER: searches for resource quantity (lower range boundary) > param value + 5%
+	 * 	GREATERTHAN: searches for resource quantity > param value
+	 * 	GREATERTHAN_OR_EQUALS: searches for resource quantity >= param value
+	 * 	NOT_EQUAL: searches for resource quantity not between passed param value +/- 5%
+	 */
+	public void addQuantityUnmodifiedSearch(String theSearchParamName, List<List<IQueryParameterType>> theQuantityAndOrTerms) {
+		String fieldPath = SEARCH_PARAM_ROOT + "." + theSearchParamName + "." + HibernateSearchIndexWriter.QTY_PARAM_NAME;
+
+		for (List<IQueryParameterType> nextAnd : theQuantityAndOrTerms) {
+			for (IQueryParameterType paramType : nextAnd) {
+				QuantityParam qtyParam = QuantityParam.toQuantityParam(paramType);
+
+				BooleanPredicateClausesStep<?> quantityTerms = myPredicateFactory.bool();
+
+				ParamPrefixEnum activePrefix = qtyParam.getPrefix() == null ? ParamPrefixEnum.EQUAL : qtyParam.getPrefix();
+				setPrefixedQuantityPredicate(quantityTerms, activePrefix, qtyParam.getValue(), fieldPath + "." + QTY_VALUE);
+
+				if ( isNotBlank(qtyParam.getSystem()) ) {
+					quantityTerms.must(
+						myPredicateFactory.match()
+							.field(fieldPath + "." + QTY_SYSTEM).matching(qtyParam.getSystem()) );
+				}
+
+				if ( isNotBlank(qtyParam.getUnits()) ) {
+					quantityTerms.must(
+					 	myPredicateFactory.match()
+							.field(fieldPath + "." + QTY_CODE).matching(qtyParam.getUnits()) );
+				}
+
+				myRootClause.must(quantityTerms);
+			}
+		}
+	}
+
+
+	private void setPrefixedQuantityPredicate(BooleanPredicateClausesStep<?> theQuantityTerms,
+			ParamPrefixEnum thePrefix, BigDecimal theValue, String theFieldName) {
+
+		switch (thePrefix) {
+			case APPROXIMATE -> {
+				//	APPROXIMATE: searches for resource quantity between passed param value +/- 10%
+				BigDecimal tolerance = theValue.multiply(BigDecimal.valueOf(.10));
+				BigDecimal lowerExcludedBoundary = theValue.subtract(tolerance);
+				BigDecimal upperExcludedBoundary = theValue.add(tolerance);
+				theQuantityTerms.must(
+					myPredicateFactory.range()
+						.field(theFieldName)
+						.between(lowerExcludedBoundary, upperExcludedBoundary));
+			}
+
+			case EQUAL -> {
+				// EQUAL: searches for resource quantity between passed param value +/- 5%
+				BigDecimal tolerance = theValue.multiply(BigDecimal.valueOf(.05));
+				BigDecimal lowerExcludedBoundary = theValue.subtract(tolerance);
+				BigDecimal upperExcludedBoundary = theValue.add(tolerance);
+				theQuantityTerms.must(
+					myPredicateFactory.range()
+						.field(theFieldName)
+						.between(lowerExcludedBoundary, upperExcludedBoundary));
+			}
+
+			case STARTS_AFTER,  // treated as GREATERTHAN because search doesn't handle ranges
+				GREATERTHAN ->
+				// GREATERTHAN: searches for resource quantity > param value
+				theQuantityTerms.must(
+					myPredicateFactory.range()
+						.field(theFieldName)
+						.greaterThan(theValue));
+
+			case GREATERTHAN_OR_EQUALS ->
+				// GREATERTHAN_OR_EQUALS: searches for resource quantity >= param value
+				theQuantityTerms.mustNot(
+					myPredicateFactory.range()
+						.field(theFieldName)
+						.lessThan(theValue));
+
+
+			// LESSTHAN: searches for resource quantity < param value
+			case ENDS_BEFORE, // treated as LESSTHAN because search doesn't handle ranges
+				LESSTHAN ->
+				theQuantityTerms.must(
+					myPredicateFactory.range()
+						.field(theFieldName)
+						.lessThan(theValue));
+
+
+			// LESSTHAN_OR_EQUALS: searches for resource quantity <= param value
+			case LESSTHAN_OR_EQUALS ->
+				theQuantityTerms.mustNot(
+					myPredicateFactory.range()
+						.field(theFieldName)
+						.greaterThan(theValue));
+
+
+			// NOT_EQUAL: searches for resource quantity not between passed param value +/- 5%
+			case NOT_EQUAL -> {
+				BigDecimal tolerance = theValue.multiply(BigDecimal.valueOf(.05));
+				BigDecimal lowerExcludedBoundary = theValue.subtract(tolerance);
+				BigDecimal upperExcludedBoundary = theValue.add(tolerance);
+				theQuantityTerms.mustNot(
+					myPredicateFactory.range()
+						.field(theFieldName)
+						.between(lowerExcludedBoundary, upperExcludedBoundary));
+			}
+		}
+	}
+
 
 }

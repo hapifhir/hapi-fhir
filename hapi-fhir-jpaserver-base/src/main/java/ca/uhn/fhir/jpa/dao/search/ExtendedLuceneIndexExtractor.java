@@ -73,7 +73,9 @@ public class ExtendedLuceneIndexExtractor {
 			retVal.addDateIndexData(nextParam.getParamName(), nextParam.getValueLow(), nextParam.getValueLowDateOrdinal(),
 				nextParam.getValueHigh(), nextParam.getValueHighDateOrdinal()));
 
-		// fixme jm write quantity index info
+		theNewParams.myQuantityParams.forEach(nextParam ->
+			retVal.addQuantityIndexData(nextParam.getParamName(), nextParam.getUnits(), nextParam.getSystem(), nextParam.getValue()));
+
 
 		if (!theNewParams.myLinks.isEmpty()) {
 

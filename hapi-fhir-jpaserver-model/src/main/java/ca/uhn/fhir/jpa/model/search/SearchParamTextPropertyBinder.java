@@ -37,6 +37,7 @@ import org.hibernate.search.mapper.pojo.bridge.runtime.PropertyBridgeWriteContex
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_EXACT;
@@ -59,7 +60,9 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 	public void bind(PropertyBindingContext thePropertyBindingContext) {
 		// TODO Is it safe to use object identity of the Map to track dirty?
 		// N.B. GGG I would hazard that it is not, we could potentially use Version of the resource.
-		thePropertyBindingContext.dependencies().use("mySearchParamStrings");
+		thePropertyBindingContext.dependencies()
+			.use("mySearchParamStrings")
+			.use("mySearchParamQuantities");
 
 		defineIndexingTemplate(thePropertyBindingContext);
 
@@ -97,6 +100,12 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 			.sortable(Sortable.YES);
 
 		StandardIndexFieldTypeOptionsStep<?, Integer> dateTimeOrdinalFieldType = indexFieldTypeFactory.asInteger()
+			.projectable(Projectable.NO)
+			.sortable(Sortable.YES);
+
+		StandardIndexFieldTypeOptionsStep<?, BigDecimal> bigDecimalFieldType = indexFieldTypeFactory.asBigDecimal()
+//			fixme jm: what should it be? shouldn't we use double and avoid this conversion?
+			.decimalScale(10)
 			.projectable(Projectable.NO)
 			.sortable(Sortable.YES);
 
@@ -146,9 +155,14 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 			nestedSpField.fieldTemplate("token-system", keywordFieldType).matchingPathGlob(tokenPathGlob + ".system").multiValued();
 
 			// reference
-
-			// reference
 			spfield.fieldTemplate("reference-value", keywordFieldType).matchingPathGlob("*.reference.value").multiValued();
+
+			//quantity
+			String quantityPathGlob = "*.quantity";
+			spfield.objectFieldTemplate("quantityIndex", ObjectStructure.FLATTENED).matchingPathGlob(quantityPathGlob);
+			spfield.fieldTemplate("quantity-code", keywordFieldType).matchingPathGlob(quantityPathGlob + ".code");
+			spfield.fieldTemplate("quantity-system", keywordFieldType).matchingPathGlob(quantityPathGlob + ".system");
+			spfield.fieldTemplate("quantity-value", bigDecimalFieldType).matchingPathGlob(quantityPathGlob + ".value");
 
 			// date
 			String dateTimePathGlob = "*.dt";
