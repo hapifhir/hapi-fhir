@@ -45,7 +45,8 @@ public class ExtendedLuceneIndexData {
 	final SetMultimap<String, IBaseCoding> mySearchParamTokens = HashMultimap.create();
 	final SetMultimap<String, String> mySearchParamLinks = HashMultimap.create();
 	final SetMultimap<String, DateSearchIndexData> mySearchParamDates = HashMultimap.create();
-	String myForcedId;
+	private String myForcedId;
+	private String myResourceJSON;
 
 	public ExtendedLuceneIndexData(FhirContext theFhirContext) {
 		this.myFhirContext = theFhirContext;
@@ -71,7 +72,12 @@ public class ExtendedLuceneIndexData {
 
 		ourLog.debug("Writing JPA index to Hibernate Search");
 
+		// todo can this be moved back to ResourceTable as a computed field to merge with myId?
 		theDocument.addValue("myForcedId", myForcedId);
+
+		if (myResourceJSON != null) {
+			theDocument.addValue("myRawResource", myResourceJSON);
+		}
 
 		mySearchParamStrings.forEach(ifNotContained(indexWriter::writeStringIndex));
 		mySearchParamTokens.forEach(ifNotContained(indexWriter::writeTokenIndex));
@@ -114,4 +120,8 @@ public class ExtendedLuceneIndexData {
 	public String getForcedId() {
 		return myForcedId;
 	}
+
+    public void setRawResourceData(String theResourceJSON) {
+		 myResourceJSON = theResourceJSON;
+    }
 }

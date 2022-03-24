@@ -95,7 +95,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	public ExtendedLuceneIndexData extractLuceneIndexData(IBaseResource theResource, ResourceIndexedSearchParams theNewParams) {
 		String resourceType = myFhirContext.getResourceType(theResource);
 		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(resourceType);
-		ExtendedLuceneIndexExtractor extractor = new ExtendedLuceneIndexExtractor(myFhirContext, activeSearchParams, mySearchParamExtractor);
+		ExtendedLuceneIndexExtractor extractor = new ExtendedLuceneIndexExtractor(myDaoConfig, myFhirContext, activeSearchParams, mySearchParamExtractor);
 		return extractor.extract(theResource,theNewParams);
 	}
 

@@ -1750,9 +1750,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			if (myDaoConfig.isAdvancedLuceneIndexing()) {
 				ExtendedLuceneIndexData luceneIndexData = myFulltextSearchSvc.extractLuceneIndexData(theResource, theNewParams);
 				theEntity.setLuceneIndexData(luceneIndexData);
-				if(myDaoConfig.isStoreResourceInLuceneIndex()) {
-					theEntity.setRawResourceData(theContext.newJsonParser().encodeResourceToString(theResource));
-				}
 			}
 		}
 	}
