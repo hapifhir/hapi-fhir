@@ -852,6 +852,7 @@
         <fontawesomeVersion>5.4.1</fontawesomeVersion>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
+		  <maven.compiler.release>11</maven.compiler.release>
         <maven.compiler.testSource>17</maven.compiler.testSource>
         <maven.compiler.testTarget>17</maven.compiler.testTarget>
     </properties>
@@ -2055,7 +2056,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.8.1</version>
+					<version>3.10.1</version>
 					<configuration>
 						<forceJavacCompilerUse>true</forceJavacCompilerUse>
 						<encoding>UTF-8</encoding>
@@ -3006,8 +3007,9 @@
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-compiler-plugin</artifactId>
 						<configuration>
-							<source>11</source>
-							<target>11</target>
+							<source>17</source>
+							<target>17</target>
+							<release>17</release>
 							<testSource>17</testSource>
 							<testTarget>17</testTarget>
 						</configuration>

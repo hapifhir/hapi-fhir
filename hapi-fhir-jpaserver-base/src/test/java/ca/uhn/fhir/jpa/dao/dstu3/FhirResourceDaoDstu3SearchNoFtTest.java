@@ -3558,9 +3558,9 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		myObservationDao.update(obs);
 
 		assertEquals(10, myCaptureQueriesListener.countSelectQueries());
-		assertEquals(2, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(4, myCaptureQueriesListener.countInsertQueries());
-		assertEquals(3, myCaptureQueriesListener.countDeleteQueries());
+		assertEquals(5, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(1, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 		String unformattedSql = myCaptureQueriesListener.getUpdateQueriesForCurrentThread().get(0).getSql(true, false);
 		assertThat(unformattedSql, stringContainsInOrder(
 			"SRC_PATH='Observation.performer'",
