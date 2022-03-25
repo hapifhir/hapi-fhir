@@ -431,15 +431,23 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	 * and {@link org.hl7.fhir.r4.model.Communication}, the status field doesn't necessarily need to be set to 'active'
 	 * for that resource to be eligible for upload via packages. For example, all {@link org.hl7.fhir.r4.model.Subscription}
 	 * have a status of {@link org.hl7.fhir.r4.model.Subscription.SubscriptionStatus#REQUESTED} when they are originally
-	 * inserted into the database.
+	 * inserted into the database, so we accept that value for {@link org.hl7.fhir.r4.model.Subscription} isntead.
+	 * Furthermore, {@link org.hl7.fhir.r4.model.DocumentReference} and {@link org.hl7.fhir.r4.model.Communication} can
+	 * exist with a wide variety of values for status that include ones such as
+	 * {@link org.hl7.fhir.r4.model.Communication.CommunicationStatus#ENTEREDINERROR},
+	 * {@link org.hl7.fhir.r4.model.Communication.CommunicationStatus#UNKNOWN},
+	 * {@link org.hl7.fhir.r4.model.DocumentReference.ReferredDocumentStatus#ENTEREDINERROR},
+	 * {@link org.hl7.fhir.r4.model.DocumentReference.ReferredDocumentStatus#PRELIMINARY}, and others, which while not considered
+	 * 'final' values, should still be uploaded for reference.
+	 *
 	 * @return {@link Boolean#TRUE} if the status value of this resource is acceptable for package upload.
 	 */
 	private boolean isValidResourceStatusForPackageUpload(IBaseResource theResource) {
 		List<IPrimitiveType> statusTypes = myFhirContext.newFhirPath().evaluate(theResource, "status", IPrimitiveType.class);
 		// Resource does not have a status field
-		if (statusTypes.size() == 0) return true;
-		// Resource has an empty or null status field
-		if (statusTypes.isEmpty() || statusTypes.get(0).getValue() == null) return false;
+		if (statusTypes.isEmpty()) return true;
+		// Resource has a null status field
+		if (statusTypes.get(0).getValue() == null) return false;
 		// Resource has a status, and we need to check based on type
 		return switch (theResource.fhirType()) {
 			case "Subscription" -> (statusTypes.get(0).getValueAsString().equals("requested"));
