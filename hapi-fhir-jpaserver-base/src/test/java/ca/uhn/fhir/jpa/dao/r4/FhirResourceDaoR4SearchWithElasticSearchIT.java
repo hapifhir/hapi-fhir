@@ -887,7 +887,10 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			assertThat(tags, hasSize(1));
 			assertThat(tags.get(0).getSystem(), equalTo("http://example.com"));
 			assertThat(tags.get(0).getCode(), equalTo("aTag"));
-//
+
+			// TODO
+			// we assume tags, etc. are inline,
+			// but the meta operations don't update the Hibernate Search index yet, so this fails
 //			Meta meta = new Meta();
 //			meta.addTag().setSystem("tag_scheme1").setCode("tag_code1");
 //			meta.addProfile("http://profile/1");
