@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.server;
 
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -116,8 +117,8 @@ public class ApacheProxyAddressStrategy extends IncomingRequestAddressStrategy {
 	private void adjustSchemeForHttp(UriComponentsBuilder uriBuilder,
 			HttpHeaders headers) {
 		if (headers.getFirst(X_FORWARDED_HOST) != null
-				&& headers.getFirst(X_FORWARDED_PROTO) == null && !useHttps) {
-			uriBuilder.scheme("http");
+				&& headers.getFirst(X_FORWARDED_PROTO) == null) {
+			uriBuilder.scheme(useHttps ? "https" : "http");
 		}
 	}
 
@@ -135,7 +136,7 @@ public class ApacheProxyAddressStrategy extends IncomingRequestAddressStrategy {
 
 	private String pathFrom(String serverBase) {
 		UriComponents build = UriComponentsBuilder.fromHttpUrl(serverBase).build();
-		return build.getPath();
+		return StringUtils.defaultIfBlank(build.getPath(), "");
 	}
 
 	private Optional<String> getForwardedPrefix(HttpHeaders headers) {
