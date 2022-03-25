@@ -26,7 +26,7 @@ public class DateRangeParamTest {
 	 * Can happen e.g. when the query parameter for {@code _lastUpdated} is left empty.
 	 */
 	@Test
-	public void testParamWithoutPrefixAndWithoutValue() {
+	public void testParamWithoutPrefixAndWithoutValue_dateRangeParamRemainsEmpty() {
 		QualifiedParamList qualifiedParamList = new QualifiedParamList(1);
 		qualifiedParamList.add("");
 
@@ -42,7 +42,7 @@ public class DateRangeParamTest {
 	 * Can happen e.g. when the query parameter for {@code _lastUpdated} is given as {@code lt} without any value.
 	 */
 	@Test
-	public void testUpperBoundWithPrefixWithoutValue() {
+	public void testUpperBoundWithPrefixWithoutValue_throwsDateFormatException() {
 		QualifiedParamList qualifiedParamList = new QualifiedParamList(1);
 		qualifiedParamList.add("lt");
 
@@ -61,7 +61,7 @@ public class DateRangeParamTest {
 	 * Can happen e.g. when the query parameter for {@code _lastUpdated} is given as {@code gt} without any value.
 	 */
 	@Test
-	public void testLowerBoundWithPrefixWithoutValue() {
+	public void testLowerBoundWithPrefixWithoutValue_throwsDateFormatException() {
 		QualifiedParamList qualifiedParamList = new QualifiedParamList(1);
 		qualifiedParamList.add("gt");
 
@@ -77,7 +77,7 @@ public class DateRangeParamTest {
 	}
 
 	@Test
-	public void testSetValueAsQueryTokens_neYear() {
+	public void testSetValueAsQueryTokens_neYear_setsUpperAndLowerBounds() {
 		QualifiedParamList qualifiedParamList = new QualifiedParamList(1);
 		qualifiedParamList.add("ne1965");
 
@@ -93,7 +93,7 @@ public class DateRangeParamTest {
 	}
 
 	@Test
-	public void testSetValueAsQueryTokens_neMonth() {
+	public void testSetValueAsQueryTokens_neMonth_setsUpperAndLowerBounds() {
 		QualifiedParamList qualifiedParamList = new QualifiedParamList(1);
 		qualifiedParamList.add("ne1965-11");
 
@@ -109,7 +109,7 @@ public class DateRangeParamTest {
 	}
 
 	@Test
-	public void testSetValueAsQueryTokens_neDay() {
+	public void testSetValueAsQueryTokens_neDay_setsUpperAndLowerBounds() {
 		QualifiedParamList qualifiedParamList = new QualifiedParamList(1);
 		qualifiedParamList.add("ne1965-11-23");
 
