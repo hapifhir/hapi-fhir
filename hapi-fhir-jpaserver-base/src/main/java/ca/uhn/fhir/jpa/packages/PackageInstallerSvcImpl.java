@@ -449,11 +449,15 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		// Resource has a null status field
 		if (statusTypes.get(0).getValue() == null) return false;
 		// Resource has a status, and we need to check based on type
-		return switch (theResource.fhirType()) {
-			case "Subscription" -> (statusTypes.get(0).getValueAsString().equals("requested"));
-			case "DocumentReference", "Communication" -> (!statusTypes.get(0).getValueAsString().equals("?"));
-			default -> (statusTypes.get(0).getValueAsString().equals("active"));
-		};
+		switch (theResource.fhirType()) {
+			case "Subscription":
+				return (statusTypes.get(0).getValueAsString().equals("requested"));
+			case "DocumentReference":
+			case "Communication":
+				return (!statusTypes.get(0).getValueAsString().equals("?"));
+			default:
+				return (statusTypes.get(0).getValueAsString().equals("active"));
+		}
 	}
 
 	private boolean isStructureDefinitionWithoutSnapshot(IBaseResource r) {
