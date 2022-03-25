@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.server;
 
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -102,22 +103,21 @@ public class ApacheProxyAddressStrategy extends IncomingRequestAddressStrategy {
 		UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpRequest(requestWrapper);
 		uriBuilder.replaceQuery(null);
 		HttpHeaders headers = requestWrapper.getHeaders();
-		adjustSchemeForHttp(uriBuilder, headers);
+		adjustSchemeWithDefault(uriBuilder, headers);
 		return forwardedServerBase(serverBase, headers, uriBuilder);
 	}
 
 	/**
-	 * Spring use https per default. If {@link ApacheProxyAddressStrategy} is
-	 * configured with useSsl false, override default behavior.
+	 * If forward host ist defined, but no forward protocol, use the configured default.
 	 * 
 	 * @param uriBuilder
 	 * @param headers
 	 */
-	private void adjustSchemeForHttp(UriComponentsBuilder uriBuilder,
+	private void adjustSchemeWithDefault(UriComponentsBuilder uriBuilder,
 			HttpHeaders headers) {
 		if (headers.getFirst(X_FORWARDED_HOST) != null
-				&& headers.getFirst(X_FORWARDED_PROTO) == null && !useHttps) {
-			uriBuilder.scheme("http");
+				&& headers.getFirst(X_FORWARDED_PROTO) == null) {
+			uriBuilder.scheme(useHttps ? "https" : "http");
 		}
 	}
 
@@ -135,7 +135,7 @@ public class ApacheProxyAddressStrategy extends IncomingRequestAddressStrategy {
 
 	private String pathFrom(String serverBase) {
 		UriComponents build = UriComponentsBuilder.fromHttpUrl(serverBase).build();
-		return build.getPath();
+		return StringUtils.defaultIfBlank(build.getPath(), "");
 	}
 
 	private Optional<String> getForwardedPrefix(HttpHeaders headers) {
