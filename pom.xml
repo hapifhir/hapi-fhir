@@ -2147,11 +2147,6 @@
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>animal-sniffer-maven-plugin</artifactId>
-					<version>1.20</version>
-				</plugin>
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>cobertura-maven-plugin</artifactId>
 					<version>2.7</version>
 					<configuration>
@@ -2976,13 +2971,6 @@
 						<artifactId>maven-checkstyle-plugin</artifactId>
 						<executions>
 							<execution><id>validate</id><phase>none</phase></execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>animal-sniffer-maven-plugin</artifactId>
-						<executions>
-							<execution><id>check-java-api</id><phase>none</phase></execution>
 						</executions>
 					</plugin>
 				</plugins>
