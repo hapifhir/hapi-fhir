@@ -775,4 +775,11 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	public void setLuceneIndexData(ExtendedLuceneIndexData theLuceneIndexData) {
 		myLuceneIndexData = theLuceneIndexData;
 	}
+
+	public Collection<SearchParamPresentEntity> getSearchParamPresents() {
+		if (mySearchParamPresents == null) {
+			mySearchParamPresents = new ArrayList<>();
+		}
+		return mySearchParamPresents;
+	}
 }
