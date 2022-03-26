@@ -37,7 +37,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
-import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
+import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.util.VersionEnum;
 
 import java.util.Arrays;
@@ -1608,7 +1608,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			Boolean present = columnToBoolean(t.get("SP_PRESENT"));
 			String resType = (String) t.get("RES_TYPE");
 			String paramName = (String) t.get("PARAM_NAME");
-			Long hash = SearchParamPresent.calculateHashPresence(new PartitionSettings(), (RequestPartitionId) null, resType, paramName, present);
+			Long hash = SearchParamPresentEntity.calculateHashPresence(new PartitionSettings(), (RequestPartitionId) null, resType, paramName, present);
 			consolidateSearchParamPresenceIndexesTask.executeSql("HFJ_RES_PARAM_PRESENT", "update HFJ_RES_PARAM_PRESENT set HASH_PRESENCE = ? where PID = ?", hash, pid);
 		});
 		version.addTask(consolidateSearchParamPresenceIndexesTask);
