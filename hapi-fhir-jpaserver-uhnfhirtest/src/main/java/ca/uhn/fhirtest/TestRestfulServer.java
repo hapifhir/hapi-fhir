@@ -16,6 +16,7 @@ import ca.uhn.fhir.jpa.provider.JpaCapabilityStatementProvider;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu2;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
+import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
 import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
@@ -265,20 +266,12 @@ public class TestRestfulServer extends RestfulServer {
 		registerInterceptor(cascadingDeleteInterceptor);
 
 		/*
-		 * Bulk Export
+		 * Register some providers
 		 */
 		registerProvider(myAppCtx.getBean(BulkDataExportProvider.class));
-
-		/*
-		 * $reindex
-		 */
 		registerProvider(myAppCtx.getBean(ReindexProvider.class));
-
-
-		/*
-		 * $diff operation
-		 */
 		registerProvider(myAppCtx.getBean(DiffProvider.class));
+		registerProvider(myAppCtx.getBean(ValueSetOperationProvider.class));
 
 		/*
 		 * OpenAPI

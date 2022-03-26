@@ -42,7 +42,7 @@ public class FetchFilesStepTest {
 
 		// Setup
 
-		String index = myBulkImportFileServlet.registerFile(() -> new StringReader("{\"resourceType\":\"Patient\"}"));
+		String index = myBulkImportFileServlet.registerFileByContents("{\"resourceType\":\"Patient\"}");
 
 		BulkImportJobParameters parameters = new BulkImportJobParameters()
 			.addNdJsonUrl(myHttpServletExtension.getBaseUrl() + "/download?index=" + index)
@@ -71,7 +71,7 @@ public class FetchFilesStepTest {
 			b.append("{\"resourceType\":\"Patient\"}").append("\n");
 		}
 		String resource = b.toString();
-		String index = myBulkImportFileServlet.registerFile(() -> new StringReader(resource));
+		String index = myBulkImportFileServlet.registerFileByContents(resource);
 
 		BulkImportJobParameters parameters = new BulkImportJobParameters()
 			.addNdJsonUrl(myHttpServletExtension.getBaseUrl() + "/download?index=" + index)
@@ -93,7 +93,7 @@ public class FetchFilesStepTest {
 
 		// Setup
 
-		String index = myBulkImportFileServlet.registerFile(() -> new StringReader("{\"resourceType\":\"Patient\"}"));
+		String index = myBulkImportFileServlet.registerFileByContents("{\"resourceType\":\"Patient\"}");
 
 		BulkImportJobParameters parameters = new BulkImportJobParameters()
 			.addNdJsonUrl(myHttpServletExtension.getBaseUrl() + "/download?index=" + index)

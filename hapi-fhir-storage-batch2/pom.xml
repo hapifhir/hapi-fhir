@@ -14,7 +14,7 @@
 	<packaging>jar</packaging>
 
 	<name>HAPI FHIR JPA Server - Batch2 Task Processor</name>
-	<description></description>
+	<description>Batch2 is a framework for managing and executing long running "batch" jobs</description>
 
 	<dependencies>
 

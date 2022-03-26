@@ -355,7 +355,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 
-		// Populate the resource with it's actual final stored ID from the entity
+		// Populate the resource with its actual final stored ID from the entity
 		theResource.setId(entity.getIdDt());
 
 		// Pre-cache the resource ID
