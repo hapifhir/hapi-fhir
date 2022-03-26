@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.binstore;
+package ca.uhn.fhir.jpa.binary.svc;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR Storage api
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.binstore;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PayloadTooLargeException;
 import ca.uhn.fhir.util.BinaryUtil;
@@ -47,16 +48,17 @@ import java.util.Optional;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
+public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	private final SecureRandom myRandom;
 	private final String CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 	private final int ID_LENGTH = 100;
 	private int myMaximumBinarySize = Integer.MAX_VALUE;
 	private int myMinimumBinarySize;
+
 	@Autowired
 	private FhirContext myFhirContext;
 
-	BaseBinaryStorageSvcImpl() {
+	public BaseBinaryStorageSvcImpl() {
 		myRandom = new SecureRandom();
 	}
 
@@ -98,13 +100,13 @@ abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 
 	@SuppressWarnings("UnstableApiUsage")
 	@Nonnull
-	HashingInputStream createHashingInputStream(InputStream theInputStream) {
+	protected HashingInputStream createHashingInputStream(InputStream theInputStream) {
 		HashFunction hash = Hashing.sha256();
 		return new HashingInputStream(hash, theInputStream);
 	}
 
 	@Nonnull
-	CountingInputStream createCountingInputStream(InputStream theInputStream) {
+	protected CountingInputStream createCountingInputStream(InputStream theInputStream) {
 		InputStream is = ByteStreams.limit(theInputStream, getMaximumBinarySize() + 1L);
 		return new CountingInputStream(is) {
 			@Override
@@ -118,7 +120,7 @@ abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 		};
 	}
 
-	String provideIdForNewBlob(String theBlobIdOrNull) {
+	protected String provideIdForNewBlob(String theBlobIdOrNull) {
 		String id = theBlobIdOrNull;
 		if (isBlank(theBlobIdOrNull)) {
 			id = newBlobId();
