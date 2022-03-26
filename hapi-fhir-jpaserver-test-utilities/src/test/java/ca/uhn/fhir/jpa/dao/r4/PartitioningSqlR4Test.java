@@ -3156,7 +3156,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	 * execution, so we can have an off by one error.. but as long as it's close
 	 * this is definitely working
 	 */
-	private void assertLocalDateFromDbMatches(LocalDate theExpected, LocalDate theActual) {
+	public static void assertLocalDateFromDbMatches(LocalDate theExpected, LocalDate theActual) {
 		LocalDate expMinus1 = theExpected.minusDays(1);
 		LocalDate expMinus2 = theExpected.minusDays(2);
 		LocalDate expPlus1 = theExpected.plusDays(1);

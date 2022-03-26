@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import static ca.uhn.fhir.jpa.dao.r4.PartitioningSqlR4Test.assertLocalDateFromDbMatches;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.in;
@@ -101,7 +102,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 			LocalDate expectedDate = LocalDate.of(2021, 2, 22);
 			assertEquals(1, resources.size());
 			assertEquals(null, resources.get(0).getPartitionId().getPartitionId());
-			assertEquals(expectedDate.getDayOfMonth(), resources.get(0).getPartitionId().getPartitionDate().getDayOfMonth());
+			assertLocalDateFromDbMatches(expectedDate, resources.get(0).getPartitionId().getPartitionDate());
 		});
 	}
 
