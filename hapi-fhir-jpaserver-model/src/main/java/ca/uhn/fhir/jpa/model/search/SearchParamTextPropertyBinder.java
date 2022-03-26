@@ -26,6 +26,7 @@ import org.hibernate.search.engine.backend.document.model.dsl.IndexSchemaObjectF
 import org.hibernate.search.engine.backend.types.Aggregable;
 import org.hibernate.search.engine.backend.types.ObjectStructure;
 import org.hibernate.search.engine.backend.types.Projectable;
+import org.hibernate.search.engine.backend.types.Searchable;
 import org.hibernate.search.engine.backend.types.Sortable;
 import org.hibernate.search.engine.backend.types.dsl.IndexFieldTypeFactory;
 import org.hibernate.search.engine.backend.types.dsl.StandardIndexFieldTypeOptionsStep;
@@ -104,6 +105,12 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 			.projectable(Projectable.YES)
 			.aggregable(Aggregable.NO);
 
+		// type to store payload fields that do not participate in search, only results
+		StringIndexFieldTypeOptionsStep<?> stringStorageType = indexFieldTypeFactory.asString()
+			.searchable(Searchable.NO)
+			.projectable(Projectable.YES)
+			.aggregable(Aggregable.NO);
+
 		// the old style for _text and _contains
 		indexSchemaElement
 			.fieldTemplate("SearchParamText", standardAnalyzer)
@@ -111,6 +118,8 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 
 
 		indexSchemaElement.field("myForcedId", forcedIdType).toReference();
+
+		indexSchemaElement.field("myRawResource", stringStorageType).toReference();
 
 		// The following section is a bit ugly.  We need to enforce order and dependency or the object matches will be too big.
 		{
