@@ -5,9 +5,15 @@ import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexChunkIds;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexStep;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.SearchParameter;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -31,6 +37,11 @@ public class ReindexStepTest extends BaseJpaR4Test {
 	@Captor
 	private ArgumentCaptor<String> myErrorCaptor;
 
+	@AfterEach
+	public void after() {
+		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
+	}
+
 	@Test
 	public void testReindex_NoActionNeeded() {
 
@@ -51,6 +62,36 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		// Verify
 		assertEquals(2, outcome.getRecordsProcessed());
 		assertEquals(4, myCaptureQueriesListener.logSelectQueries().size());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		assertEquals(1, myCaptureQueriesListener.getCommitCount());
+		assertEquals(0, myCaptureQueriesListener.getRollbackCount());
+	}
+
+
+	@Test
+	public void testReindex_NoActionNeeded_IndexMissingFieldsEnabled() {
+
+		// Setup
+
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+
+		Long id0 = createPatient(withActiveTrue(), withFamily("SIMPSON")).getIdPartAsLong();
+		Long id1 = createPatient(withActiveTrue(), withFamily("FLANDERS")).getIdPartAsLong();
+
+		ReindexChunkIds data = new ReindexChunkIds();
+		data.getIds().add(new ReindexChunkIds.Id().setResourceType("Patient").setId(id0.toString()));
+		data.getIds().add(new ReindexChunkIds.Id().setResourceType("Patient").setId(id1.toString()));
+
+		// Execute
+
+		myCaptureQueriesListener.clear();
+		RunOutcome outcome = myReindexStep.doReindex(data, myDataSink, "index-id", "chunk-id");
+
+		// Verify
+		assertEquals(2, outcome.getRecordsProcessed());
+		assertEquals(6, myCaptureQueriesListener.logSelectQueries().size());
 		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
@@ -92,6 +133,70 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		assertEquals(0, myCaptureQueriesListener.getRollbackCount());
 	}
 
+
+	@Test
+	public void testReindex_IndexesAddedAndRemoved_IndexMissingFieldsEnabled() {
+
+		// Setup
+
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+
+		IIdType orgId = createOrganization(withId("ORG"));
+		Long id0 = createPatient(withActiveTrue(), withFamily("SIMPSON"), withOrganization(orgId)).getIdPartAsLong();
+		Long id1 = createPatient(withActiveTrue(), withFamily("FLANDERS"), withOrganization(orgId)).getIdPartAsLong();
+
+		ReindexChunkIds data = new ReindexChunkIds();
+		data.getIds().add(new ReindexChunkIds.Id().setResourceType("Patient").setId(id0.toString()));
+		data.getIds().add(new ReindexChunkIds.Id().setResourceType("Patient").setId(id1.toString()));
+
+		SearchParameter sp = new SearchParameter();
+		sp.setType(Enumerations.SearchParamType.STRING);
+		sp.addBase("Patient");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.setCode("family2");
+		sp.setExpression("Patient.name.family");
+		mySearchParameterDao.create(sp);
+
+		sp = new SearchParameter();
+		sp.setType(Enumerations.SearchParamType.REFERENCE);
+		sp.addBase("Patient");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.setCode(Patient.SP_ORGANIZATION + "2");
+		sp.setExpression("Patient.managingOrganization");
+		mySearchParameterDao.create(sp);
+
+		sp = new SearchParameter();
+		sp.setType(Enumerations.SearchParamType.STRING);
+		sp.addBase("Patient");
+		sp.setStatus(Enumerations.PublicationStatus.RETIRED);
+		sp.setCode("family");
+		sp.setExpression("Patient.name.family");
+		mySearchParameterDao.create(sp);
+
+		sp = new SearchParameter();
+		sp.setType(Enumerations.SearchParamType.REFERENCE);
+		sp.addBase("Patient");
+		sp.setStatus(Enumerations.PublicationStatus.RETIRED);
+		sp.setCode(Patient.SP_ORGANIZATION);
+		sp.setExpression("Patient.managingOrganization");
+		mySearchParameterDao.create(sp);
+
+		mySearchParamRegistry.forceRefresh();
+
+		// Execute
+
+		myCaptureQueriesListener.clear();
+		RunOutcome outcome = myReindexStep.doReindex(data, myDataSink, "index-id", "chunk-id");
+
+		// Verify
+		assertEquals(2, outcome.getRecordsProcessed());
+		assertEquals(10, myCaptureQueriesListener.logSelectQueries().size());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(4, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		assertEquals(1, myCaptureQueriesListener.getCommitCount());
+		assertEquals(0, myCaptureQueriesListener.getRollbackCount());
+	}
 
 	@Test
 	public void testReindex_OneResourceReindexFailedButOthersSucceeded() {

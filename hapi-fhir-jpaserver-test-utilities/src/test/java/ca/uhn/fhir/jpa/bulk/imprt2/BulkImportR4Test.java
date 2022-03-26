@@ -203,7 +203,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 
 		int fileCount = 3;
 		List<String> indexes = addFiles(fileCount - 1);
-		indexes.add(myBulkImportFileServlet.registerFile(() -> new StringReader("{\"resourceType\":\"Foo\"}")));
+		indexes.add(myBulkImportFileServlet.registerFileByContents("{\"resourceType\":\"Foo\"}"));
 
 		BulkImportJobParameters parameters = new BulkImportJobParameters();
 		for (String next : indexes) {
@@ -378,7 +378,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 			builder.append("\n");
 			builder.append("\n");
 
-			String index = myBulkImportFileServlet.registerFile(() -> new StringReader(builder.toString()));
+			String index = myBulkImportFileServlet.registerFileByContents(builder.toString());
 			retVal.add(index);
 		}
 		return retVal;

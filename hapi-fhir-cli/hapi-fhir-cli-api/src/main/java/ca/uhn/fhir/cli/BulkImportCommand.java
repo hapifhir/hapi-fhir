@@ -20,8 +20,8 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.jobs.imprt.BulkImportFileServlet;
 import ca.uhn.fhir.batch2.jobs.imprt.BulkDataImportProvider;
+import ca.uhn.fhir.batch2.jobs.imprt.BulkImportFileServlet;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -32,8 +32,12 @@ import ca.uhn.fhir.util.ParametersUtil;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOCase;
 import org.apache.commons.io.LineIterator;
+import org.apache.commons.io.file.PathUtils;
+import org.apache.commons.io.filefilter.FileFileFilter;
+import org.apache.commons.io.filefilter.IOFileFilter;
+import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
@@ -47,12 +51,20 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.FileVisitOption;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutionException;
+import java.util.zip.GZIPInputStream;
 
 public class BulkImportCommand extends BaseCommand {
 
@@ -86,7 +98,7 @@ public class BulkImportCommand extends BaseCommand {
 		addFhirVersionOption(options);
 		addRequiredOption(options, null, PORT, PORT, "The port to listen on. If set to 0, an available free port will be selected.");
 		addOptionalOption(options, null, SOURCE_BASE, "base url", "The URL to advertise as the base URL for accessing the files (i.e. this is the address that this command will declare that it is listening on). If not present, the server will default to \"http://localhost:[port]\" which will only work if the server is on the same host.");
-		addRequiredOption(options, null, SOURCE_DIRECTORY, "directory", "The source directory. This directory will be scanned for files with an extension of .json or .ndjson and any files in this directory will be assumed to be NDJSON and uploaded. This command will read the first resource from each file to verify its resource type, and will assume that all resources in the file are of the same type.");
+		addRequiredOption(options, null, SOURCE_DIRECTORY, "directory", "The source directory. This directory will be scanned for files with an extensions of .json, .ndjson, .json.gz and .ndjson.gz, and any files in this directory will be assumed to be NDJSON and uploaded. This command will read the first resource from each file to verify its resource type, and will assume that all resources in the file are of the same type.");
 		addRequiredOption(options, null, TARGET_BASE, "base url", "The base URL of the target FHIR server.");
 		addBasicAuthOption(options);
 		return options;
@@ -169,7 +181,18 @@ public class BulkImportCommand extends BaseCommand {
 
 		myServlet = new BulkImportFileServlet();
 		for (File t : files) {
-			BulkImportFileServlet.IFileSupplier fileSupplier = () -> new FileReader(t);
+
+			BulkImportFileServlet.IFileSupplier fileSupplier = new BulkImportFileServlet.IFileSupplier() {
+				@Override
+				public boolean isGzip() {
+					return t.getName().toLowerCase(Locale.ROOT).endsWith(".gz");
+				}
+
+				@Override
+				public InputStream get() throws IOException {
+					return new FileInputStream(t);
+				}
+			};
 			indexes.add(myServlet.registerFile(fileSupplier));
 		}
 
@@ -195,18 +218,28 @@ public class BulkImportCommand extends BaseCommand {
 	private void scanDirectoryForJsonFiles(String baseDirectory, List<String> types, List<File> files) {
 		try {
 			File directory = new File(baseDirectory);
-			FileUtils
-				.streamFiles(directory, false, "json", "ndjson", "JSON", "NDJSON")
+			final String[] extensions = new String[]{".json", ".ndjson", ".json.gz", ".ndjson.gz"};
+			final IOFileFilter filter = FileFileFilter.INSTANCE.and(new SuffixFileFilter(extensions, IOCase.INSENSITIVE));
+			PathUtils
+				.walk(directory.toPath(), filter, 1, false, FileVisitOption.FOLLOW_LINKS)
+				.map(Path::toFile)
 				.filter(t -> t.isFile())
 				.filter(t -> t.exists())
 				.forEach(t -> files.add(t));
 			if (files.isEmpty()) {
-				throw new CommandFailureException(Msg.code(2058) + "No .json/.ndjson files found in directory: " + directory.getAbsolutePath());
+				throw new CommandFailureException(Msg.code(2058) + "No files found in directory \"" + directory.getAbsolutePath() + "\". Allowed extensions: " + Arrays.asList(extensions));
 			}
 
 			FhirContext ctx = getFhirContext();
 			for (File next : files) {
-				try (Reader reader = new FileReader(next)) {
+				try (InputStream nextIs = new FileInputStream(next)) {
+					InputStream is;
+					if (next.getName().toLowerCase(Locale.ROOT).endsWith(".gz")) {
+						is = new GZIPInputStream(nextIs);
+					} else {
+						is = nextIs;
+					}
+					Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8);
 					LineIterator lineIterator = new LineIterator(reader);
 					String firstLine = lineIterator.next();
 					IBaseResource resource = ctx.newJsonParser().parseResource(firstLine);

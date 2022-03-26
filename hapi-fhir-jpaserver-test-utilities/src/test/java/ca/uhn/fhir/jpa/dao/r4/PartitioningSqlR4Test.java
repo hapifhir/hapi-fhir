@@ -19,7 +19,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
-import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
+import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -445,7 +445,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			assertLocalDateFromDbMatches(myPartitionDate, resourceLinks.get(0).getPartitionId().getPartitionDate());
 
 			// HFJ_RES_PARAM_PRESENT
-			List<SearchParamPresent> presents = mySearchParamPresentDao.findAllForResource(resourceTable);
+			List<SearchParamPresentEntity> presents = mySearchParamPresentDao.findAllForResource(resourceTable);
 			assertEquals(3, presents.size());
 			assertEquals(myPartitionId, presents.get(0).getPartitionId().getPartitionId().intValue());
 			assertLocalDateFromDbMatches(myPartitionDate, presents.get(0).getPartitionId().getPartitionDate());
@@ -532,7 +532,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			assertLocalDateFromDbMatches(myPartitionDate, resourceLinks.get(0).getPartitionId().getPartitionDate());
 
 			// HFJ_RES_PARAM_PRESENT
-			List<SearchParamPresent> presents = mySearchParamPresentDao.findAllForResource(resourceTable);
+			List<SearchParamPresentEntity> presents = mySearchParamPresentDao.findAllForResource(resourceTable);
 			assertEquals(3, presents.size());
 			assertEquals(null, presents.get(0).getPartitionId().getPartitionId());
 			assertLocalDateFromDbMatches(myPartitionDate, presents.get(0).getPartitionId().getPartitionDate());
