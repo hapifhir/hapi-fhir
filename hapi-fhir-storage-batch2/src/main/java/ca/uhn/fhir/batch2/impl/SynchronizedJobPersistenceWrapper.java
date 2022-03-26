@@ -24,6 +24,7 @@ import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 

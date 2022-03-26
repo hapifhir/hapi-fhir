@@ -14,7 +14,7 @@
 	<packaging>jar</packaging>
 
 	<name>HAPI FHIR JPA Server - Batch2 Task Processor</name>
-	<description></description>
+	<description>Batch2 is a framework for managing and executing long running "batch" jobs</description>
 
 	<dependencies>
 
@@ -101,14 +101,6 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>15</source>
-					<target>15</target>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>
