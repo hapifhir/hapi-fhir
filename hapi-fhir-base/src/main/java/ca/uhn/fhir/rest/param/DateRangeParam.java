@@ -89,6 +89,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 			setRangeFromDatesInclusive(theDateParam.getValueAsString(), theDateParam.getValueAsString());
 		} else {
 			switch (theDateParam.getPrefix()) {
+				case NOT_EQUAL:
 				case EQUAL:
 					setRangeFromDatesInclusive(theDateParam.getValueAsString(), theDateParam.getValueAsString());
 					break;
@@ -161,41 +162,42 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	}
 
 	private void addParam(DateParam theParsed) throws InvalidRequestException {
-		if (theParsed.getPrefix() == null || theParsed.getPrefix() == EQUAL) {
-			if (myLowerBound != null || myUpperBound != null) {
-				throw new InvalidRequestException(Msg.code(1922) + "Can not have multiple date range parameters for the same param without a qualifier");
-			}
-
-			if (theParsed.getMissing() != null) {
-				myLowerBound = theParsed;
-				myUpperBound = theParsed;
-			} else {
-				myLowerBound = new DateParam(EQUAL, theParsed.getValueAsString());
-				myUpperBound = new DateParam(EQUAL, theParsed.getValueAsString());
-			}
-
-		} else {
-
-			switch (theParsed.getPrefix()) {
-				case GREATERTHAN:
-				case GREATERTHAN_OR_EQUALS:
-					if (myLowerBound != null) {
-						throw new InvalidRequestException(Msg.code(1923) + "Can not have multiple date range parameters for the same param that specify a lower bound");
-					}
-					myLowerBound = theParsed;
-					break;
-				case LESSTHAN:
-				case LESSTHAN_OR_EQUALS:
-					if (myUpperBound != null) {
-						throw new InvalidRequestException(Msg.code(1924) + "Can not have multiple date range parameters for the same param that specify an upper bound");
-					}
-					myUpperBound = theParsed;
-					break;
-				default:
-					throw new InvalidRequestException(Msg.code(1925) + "Unknown comparator: " + theParsed.getPrefix());
-			}
-
+		if (theParsed.getPrefix() == null){
+			theParsed.setPrefix(EQUAL);
 		}
+
+		switch (theParsed.getPrefix()) {
+			case NOT_EQUAL:
+			case EQUAL:
+				if (myLowerBound != null || myUpperBound != null) {
+					throw new InvalidRequestException(Msg.code(1922) + "Can not have multiple date range parameters for the same param without a qualifier");
+				}
+				if (theParsed.getMissing() != null) {
+					myLowerBound = theParsed;
+					myUpperBound = theParsed;
+				} else {
+					myLowerBound = new DateParam(theParsed.getPrefix(), theParsed.getValueAsString());
+					myUpperBound = new DateParam(theParsed.getPrefix(), theParsed.getValueAsString());
+				}
+				break;
+			case GREATERTHAN:
+			case GREATERTHAN_OR_EQUALS:
+				if (myLowerBound != null) {
+					throw new InvalidRequestException(Msg.code(1923) + "Can not have multiple date range parameters for the same param that specify a lower bound");
+				}
+				myLowerBound = theParsed;
+				break;
+			case LESSTHAN:
+			case LESSTHAN_OR_EQUALS:
+				if (myUpperBound != null) {
+					throw new InvalidRequestException(Msg.code(1924) + "Can not have multiple date range parameters for the same param that specify an upper bound");
+				}
+				myUpperBound = theParsed;
+				break;
+			default:
+				throw new InvalidRequestException(Msg.code(1925) + "Unknown comparator: " + theParsed.getPrefix());
+		}
+
 	}
 
 	@Override

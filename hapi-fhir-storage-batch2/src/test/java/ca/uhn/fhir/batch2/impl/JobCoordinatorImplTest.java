@@ -469,7 +469,6 @@ public class JobCoordinatorImplTest {
 		}
 	}
 
-
 	@Test
 	public void testStartInstance_InvalidParameters_UsingProgrammaticApi() {
 

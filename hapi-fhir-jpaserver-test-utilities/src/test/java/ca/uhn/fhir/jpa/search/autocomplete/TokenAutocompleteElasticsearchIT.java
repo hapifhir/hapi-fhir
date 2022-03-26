@@ -20,6 +20,7 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
 import org.hibernate.search.mapper.orm.Search;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Observation;
@@ -192,7 +193,7 @@ public class TokenAutocompleteElasticsearchIT extends BaseJpaTest {
 	}
 
 	@Nonnull
-	private Matcher<TokenAutocompleteHit> matchingSystemAndCode(Coding theCoding) {
+	private Matcher<TokenAutocompleteHit> matchingSystemAndCode(IBaseCoding theCoding) {
 		return new TypeSafeDiagnosingMatcher<TokenAutocompleteHit>() {
 			private final String mySystemAndCode = theCoding.getSystem() + "|" + theCoding.getCode();
 

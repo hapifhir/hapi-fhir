@@ -23,9 +23,10 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneClauseBuilder;
 import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneIndexExtractor;
+import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneResourceProjection;
 import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneSearchBuilder;
 import ca.uhn.fhir.jpa.dao.search.LastNOperation;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -36,11 +37,9 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
-import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import org.hibernate.search.backend.elasticsearch.ElasticsearchExtension;
@@ -48,7 +47,6 @@ import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hibernate.search.mapper.orm.work.SearchIndexingPlan;
 import org.hibernate.search.util.common.SearchException;
-import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -59,6 +57,8 @@ import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -66,8 +66,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FulltextSearchSvcImpl.class);
-	@Autowired
-	protected IForcedIdDao myForcedIdDao;
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	private EntityManager myEntityManager;
 	@Autowired
@@ -80,6 +78,9 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	private DaoConfig myDaoConfig;
 	@Autowired
 	ISearchParamExtractor mySearchParamExtractor;
+	@Autowired
+	IIdHelperService myIdHelperService;
+
 	final private ExtendedLuceneSearchBuilder myAdvancedIndexQueryBuilder = new ExtendedLuceneSearchBuilder();
 
 	private Boolean ourDisabled;
@@ -94,7 +95,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	public ExtendedLuceneIndexData extractLuceneIndexData(IBaseResource theResource, ResourceIndexedSearchParams theNewParams) {
 		String resourceType = myFhirContext.getResourceType(theResource);
 		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(resourceType);
-		ExtendedLuceneIndexExtractor extractor = new ExtendedLuceneIndexExtractor(myFhirContext, activeSearchParams, mySearchParamExtractor);
+		ExtendedLuceneIndexExtractor extractor = new ExtendedLuceneIndexExtractor(myDaoConfig, myFhirContext, activeSearchParams, mySearchParamExtractor);
 		return extractor.extract(theResource,theNewParams);
 	}
 
@@ -140,7 +141,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 					/*
 					 * Handle _text parameter (resource narrative content)
 					 *
-					 * Positerity:
+					 * Posterity:
 					 * We do not want the HAPI-FHIR dao's to process the
 					 * _text parameter, so we remove it from the map here
 					 */
@@ -158,7 +159,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 					/*
 					 * Handle other supported parameters
 					 */
-					if (myDaoConfig.isAdvancedLuceneIndexing()) {
+					if (myDaoConfig.isAdvancedLuceneIndexing() && theParams.getEverythingMode() == null) {
 						myAdvancedIndexQueryBuilder.addAndConsumeAdvancedQueryClauses(builder, theResourceType, theParams, mySearchParamRegistry);
 					}
 					//DROP EARLY HERE IF BOOL IS EMPTY?
@@ -181,26 +182,12 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	}
 
 	@Override
-	public List<ResourcePersistentId> everything(String theResourceName, SearchParameterMap theParams, RequestDetails theRequest) {
+	public List<ResourcePersistentId> everything(String theResourceName, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
 
-		ResourcePersistentId pid = null;
-		if (theParams.get(IAnyResource.SP_RES_ID) != null) {
-			String idParamValue;
-			IQueryParameterType idParam = theParams.get(IAnyResource.SP_RES_ID).get(0).get(0);
-			if (idParam instanceof TokenParam) {
-				TokenParam idParm = (TokenParam) idParam;
-				idParamValue = idParm.getValue();
-			} else {
-				StringParam idParm = (StringParam) idParam;
-				idParamValue = idParm.getValue();
-			}
-//			pid = myIdHelperService.translateForcedIdToPid_(theResourceName, idParamValue, theRequest);
-		}
 
-		ResourcePersistentId referencingPid = pid;
-		List<ResourcePersistentId> retVal = doSearch(null, theParams, referencingPid);
-		if (referencingPid != null) {
-			retVal.add(referencingPid);
+		List<ResourcePersistentId> retVal = doSearch(null, theParams, theReferencingPid);
+		if (theReferencingPid != null) {
+			retVal.add(theReferencingPid);
 		}
 		return retVal;
 	}
@@ -271,4 +258,26 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		return convertLongsToResourcePersistentIds(pidList);
 	}
 
+	@Override
+	public List<IBaseResource> getResources(Collection<Long> thePids) {
+		if (thePids.isEmpty()) {
+			return Collections.emptyList();
+		}
+		SearchSession session = getSearchSession();
+		List<ExtendedLuceneResourceProjection> rawResourceDataList = session.search(ResourceTable.class)
+			.select(
+				f -> f.composite(
+					(pid, forcedId, resource)-> new ExtendedLuceneResourceProjection(pid, forcedId, resource),
+					f.field("myId", Long.class),
+					f.field("myForcedId", String.class),
+					f.field("myRawResource", String.class))
+			)
+			.where(
+				f -> f.id().matchingAny(thePids) // matches '_id' from resource index
+			).fetchAllHits();
+		IParser parser = myFhirContext.newJsonParser();
+		return rawResourceDataList.stream()
+			.map(p -> p.toResource(parser))
+			.collect(Collectors.toList());
+	}
 }

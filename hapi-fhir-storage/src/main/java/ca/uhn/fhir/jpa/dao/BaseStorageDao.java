@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
@@ -70,7 +69,6 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
@@ -174,9 +172,7 @@ public abstract class BaseStorageDao {
 		verifyBundleTypeIsAppropriateForStorage(theResource);
 
 		if(!getConfig().getTreatBaseUrlsAsLocal().isEmpty()) {
-			FhirTerser terser = myFhirContext.newTerser();
-			replaceAbsoluteReferencesWithRelative(theResource, terser);
-			replaceAbsoluteUrisWithRelative(theResource, terser);
+			replaceAbsoluteReferencesWithRelative(theResource, myFhirContext.newTerser());
 		}
 
 		performAutoVersioning(theResource, thePerformIndexing);
@@ -233,27 +229,6 @@ public abstract class BaseStorageDao {
 					}
 				}
 			}
-	}
-
-	/**
-	 * Replace Canonical URI's with local references, if we find that the canonical should be treated as local.
-	 */
-	private void replaceAbsoluteUrisWithRelative(IBaseResource theResource, FhirTerser theTerser) {
-
-		BaseRuntimeElementDefinition<?> canonicalElementDefinition = myFhirContext.getElementDefinition("canonical");
-		if (canonicalElementDefinition != null) {
-			Class<? extends IPrimitiveType<String>> canonicalType = (Class<? extends IPrimitiveType<String>>) canonicalElementDefinition.getImplementingClass();
-			List<? extends IPrimitiveType<String>> canonicals = theTerser.getAllPopulatedChildElementsOfType(theResource, canonicalType);
-
-			//TODO GGG this is pretty inefficient if there are many baseUrls, and many canonicals. Consider improving.
-			for (String baseUrl : myModelConfig.getTreatBaseUrlsAsLocal()) {
-				for (IPrimitiveType<String> canonical : canonicals) {
-					if (canonical.getValue().startsWith(baseUrl)) {
-						canonical.setValue(canonical.getValue().substring(baseUrl.length() + 1));
-					}
-				}
-			}
-		}
 	}
 
 	/**

@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.search.builder.sql;
  */
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.search.builder.ISearchQueryExecutor;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.IoUtil;
@@ -35,12 +36,10 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.Query;
-import java.io.Closeable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.util.Iterator;
 
-public class SearchQueryExecutor implements Iterator<Long>, Closeable {
+public class SearchQueryExecutor implements ISearchQueryExecutor {
 
 	private static final Long NO_MORE = -1L;
 	private static final SearchQueryExecutor NO_VALUE_EXECUTOR = new SearchQueryExecutor();

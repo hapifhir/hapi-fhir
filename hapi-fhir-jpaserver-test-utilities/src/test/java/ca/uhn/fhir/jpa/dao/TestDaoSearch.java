@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.method.SortParameter;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -45,6 +46,11 @@ public class TestDaoSearch {
 		myFhirCtx = theFhirCtx;
 	}
 
+	public List<IBaseResource> searchForResources(String theQueryUrl) {
+		IBundleProvider result = searchForBundleProvider(theQueryUrl);
+		return result.getAllResources();
+	}
+
 	public List<String> searchForIds(String theQueryUrl) {
 		// fake out the server url parsing
 		IBundleProvider result = searchForBundleProvider(theQueryUrl);
@@ -55,17 +61,29 @@ public class TestDaoSearch {
 
 	public IBundleProvider searchForBundleProvider(String theQueryUrl) {
 		ResourceSearch search = myMatchUrlService.getResourceSearch(theQueryUrl);
+		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(search.getResourceName());
+
 		SearchParameterMap map = search.getSearchParameterMap();
 		map.setLoadSynchronous(true);
-		SystemRequestDetails request = fakeRequestDetailsFromUrl(theQueryUrl);
-		SortSpec sort = (SortSpec) new SortParameter(myFhirCtx).translateQueryParametersIntoServerArgument(request, null);
+		SortSpec sort = (SortSpec) new SortParameter(myFhirCtx).translateQueryParametersIntoServerArgument(fakeRequestDetailsFromUrl(theQueryUrl), null);
 		if (sort != null) {
 			map.setSort(sort);
 		}
 
-		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(search.getResourceName());
-		IBundleProvider result = dao.search(map, request);
+		IBundleProvider result = dao.search(map, fakeRequestDetailsFromUrl(theQueryUrl));
 		return result;
+	}
+
+	public SearchParameterMap toSearchParameters(String theQueryUrl) {
+		ResourceSearch search = myMatchUrlService.getResourceSearch(theQueryUrl);
+
+		SearchParameterMap map = search.getSearchParameterMap();
+		map.setLoadSynchronous(true);
+		SortSpec sort = (SortSpec) new SortParameter(myFhirCtx).translateQueryParametersIntoServerArgument(fakeRequestDetailsFromUrl(theQueryUrl), null);
+		if (sort != null) {
+			map.setSort(sort);
+		}
+		return map;
 	}
 
 	@Nonnull
