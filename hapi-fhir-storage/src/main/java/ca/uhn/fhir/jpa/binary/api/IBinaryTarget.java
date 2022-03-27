@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.binstore;
+package ca.uhn.fhir.jpa.binary.api;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR Storage api
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
@@ -32,7 +32,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * Wraps an Attachment datatype or Binary resource, since they both
  * hold binary content but don't look entirely similar
  */
-interface IBinaryTarget {
+public interface IBinaryTarget {
 
 	void setSize(Integer theSize);
 

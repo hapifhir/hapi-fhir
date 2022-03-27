@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.binstore;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import ca.uhn.fhir.rest.server.exceptions.PayloadTooLargeException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.apache.commons.io.FileUtils;

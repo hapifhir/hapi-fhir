@@ -13,6 +13,7 @@ import com.google.common.collect.Sets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullWriter;
 import org.apache.commons.lang.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.AuditEvent;
 import org.hl7.fhir.r4.model.Basic;
 import org.hl7.fhir.r4.model.Binary;
@@ -59,6 +60,9 @@ import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -85,6 +89,27 @@ public class JsonParserR4Test extends BaseTest {
 	@AfterEach
 	public void afterEach() {
 		ourCtx.getParserOptions().setAutoContainReferenceTargetsWithNoId(true);
+	}
+
+	@Test
+	public void testNonDomainResourcesHaveIdResourceTypeParsed() {
+		//Test a non-domain resource
+		String binaryPayload = "{\n" +
+			"  \"resourceType\": \"Binary\",\n" +
+			"  \"id\": \"b123\"\n" +
+			"}\n";
+		IBaseResource iBaseResource = ourCtx.newJsonParser().parseResource(binaryPayload);
+		String resourceType = iBaseResource.getIdElement().getResourceType();
+		assertThat(resourceType, is(equalTo("Binary")));
+
+		//Test a domain resource.
+		String observationPayload = "{\n" +
+			"  \"resourceType\": \"Observation\",\n" +
+			"  \"id\": \"o123\"\n" +
+			"}\n";
+		IBaseResource obs = ourCtx.newJsonParser().parseResource(observationPayload);
+		resourceType = obs.getIdElement().getResourceType();
+		assertThat(resourceType, is(equalTo("Observation")));
 	}
 
 	@Test
