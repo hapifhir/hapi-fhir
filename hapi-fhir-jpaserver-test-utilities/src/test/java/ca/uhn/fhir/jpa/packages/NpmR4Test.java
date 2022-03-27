@@ -446,15 +446,15 @@ public class NpmR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testInstallR4Package_NoIdentifierNoUrl() throws Exception {
+	public void testInstallR4Package_NoIdentifierNoUrl() {
 		myDaoConfig.setAllowExternalReferences(true);
 
 		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/test-missing-identifier-package.tgz");
-		myFakeNpmServlet.myResponses.put("/test-organizations/1.0.0", bytes);
+		myFakeNpmServlet.myResponses.put("/test-missing-identifier-package/1.0.0", bytes);
 
 		List<String> resourceList = new ArrayList<>();
 		resourceList.add("Organization");
-		PackageInstallationSpec spec = new PackageInstallationSpec().setName("test-organizations").setVersion("1.0.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+		PackageInstallationSpec spec = new PackageInstallationSpec().setName("test-missing-identifier-package").setVersion("1.0.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		spec.setInstallResourceTypes(resourceList);
 		try {
 			PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
@@ -464,7 +464,9 @@ public class NpmR4Test extends BaseJpaR4Test {
 		}
 	}
 
-	// Reproduces https://github.com/hapifhir/hapi-fhir/issues/2332
+	/**
+	 * Reproduces https://github.com/hapifhir/hapi-fhir/issues/2332
+	 */
 	@Test
 	public void testInstallR4Package_AutoCreatePlaceholder() throws Exception {
 		myDaoConfig.setAllowExternalReferences(true);
