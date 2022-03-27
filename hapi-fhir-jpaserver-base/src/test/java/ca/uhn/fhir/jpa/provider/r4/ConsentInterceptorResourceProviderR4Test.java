@@ -561,7 +561,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		});
 
 		Bundle response = myClient.search().forResource(Patient.class).count(1).returnBundle(Bundle.class).execute();
-		String searchId = response.getId();
+		String searchId = response.getIdElement().getIdPart();
 
 		// 2 results returned, but no total since it's stripped
 		assertEquals(1, response.getEntry().size());
@@ -616,7 +616,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		myClient.create().resource(new Patient().setGender(Enumerations.AdministrativeGender.FEMALE).addName(new HumanName().setFamily("3"))).execute();
 
 		Bundle response = myClient.search().forResource(Patient.class).count(1).returnBundle(Bundle.class).execute();
-		String searchId = response.getId();
+		String searchId = response.getIdElement().getIdPart();
 
 		assertEquals(1, response.getEntry().size());
 		assertNull(response.getTotalElement().getValue());
