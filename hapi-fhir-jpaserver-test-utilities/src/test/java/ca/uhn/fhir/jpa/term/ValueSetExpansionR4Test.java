@@ -1940,9 +1940,31 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		assertThat(ValueSetTestUtil.extractExpansionMessage(expansion), containsString("Performing in-memory expansion without parameters"));
 		assertThat(ValueSetTestUtil.toCodes(expansion), contains("B"));
 
+		runInTransaction(()->{
+			List<TermValueSetPreExpansionStatusEnum> statuses = myTermValueSetDao
+				.findAll()
+				.stream()
+				.map(t -> t.getExpansionStatus())
+				.collect(Collectors.toList());
+			assertThat(statuses, contains(
+				TermValueSetPreExpansionStatusEnum.NOT_EXPANDED
+			));
+		});
+
 		// Perform pre-expansion
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		runInTransaction(()->{
+			List<TermValueSetPreExpansionStatusEnum> statuses = myTermValueSetDao
+				.findAll()
+				.stream()
+				.map(t -> t.getExpansionStatus())
+				.collect(Collectors.toList());
+			assertThat(statuses, contains(
+				TermValueSetPreExpansionStatusEnum.EXPANDED
+			));
+		});
 
 		// Expand (should use the new precalculated expansion)
 		expansion = myValueSetDao.expand(new IdType("ValueSet/vs"), new ValueSetExpansionOptions(), mySrd);
