@@ -11,6 +11,7 @@ import ca.uhn.fhir.util.StopWatch;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -22,6 +23,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Disabled
 public class ClientConnectionReuseTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ClientConnectionReuseTest.class);
