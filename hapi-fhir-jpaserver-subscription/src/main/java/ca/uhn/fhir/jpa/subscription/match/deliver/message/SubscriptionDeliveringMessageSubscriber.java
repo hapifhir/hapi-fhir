@@ -47,14 +47,14 @@ import java.net.URISyntaxException;
 public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDeliverySubscriber {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringMessageSubscriber.class);
 
-	@Autowired
-	private IChannelFactory myChannelFactory;
+	private final IChannelFactory myChannelFactory;
 
 	/**
 	 * Constructor
 	 */
-	public SubscriptionDeliveringMessageSubscriber() {
+	public SubscriptionDeliveringMessageSubscriber(IChannelFactory theChannelFactory) {
 		super();
+		myChannelFactory = theChannelFactory;
 	}
 
 	protected void deliverPayload(ResourceDeliveryMessage theMsg, CanonicalSubscription theSubscription, IChannelProducer theChannelProducer) {
@@ -121,10 +121,5 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 	private String extractQueueNameFromEndpoint(String theEndpointUrl) throws URISyntaxException {
 		URI uri = new URI(theEndpointUrl);
 		return uri.getSchemeSpecificPart();
-	}
-
-	@VisibleForTesting
-	public void setChannelFactoryForUnitTest(IChannelFactory theChannelFactory) {
-		myChannelFactory = theChannelFactory;
 	}
 }

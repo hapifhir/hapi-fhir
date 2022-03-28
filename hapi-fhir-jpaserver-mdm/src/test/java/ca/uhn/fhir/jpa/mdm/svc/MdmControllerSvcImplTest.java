@@ -59,8 +59,8 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 	public void before() {
 		super.before();
 		myPartitionSettings.setPartitioningEnabled(true);
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2));
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2));
 		myInterceptorService.registerInterceptor(new RequestTenantPartitionInterceptor());
 	}
 

@@ -49,7 +49,7 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 	@Test
 	public void testCreateLinkWithMatchResultOnSamePartition() {
 		myPartitionSettings.setPartitioningEnabled(true);
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
 		assertLinkCount(1);
 
 		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(1);
@@ -63,6 +63,7 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 		assertLinkCount(2);
 
 		List<MdmLink> links = myMdmLinkDaoSvc.findMdmLinksBySourceResource(patient);
+		assertEquals(links.size(), 1);
 		assertEquals(MdmLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
 		assertEquals(MdmMatchResultEnum.MATCH, links.get(0).getMatchResult());
 		assertNotNull(links.get(0).getPartitionId());
@@ -72,8 +73,8 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 	@Test
 	public void testCreateLinkWithMatchResultOnDifferentPartitions() {
 		myPartitionSettings.setPartitioningEnabled(true);
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2));
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2));
 		assertLinkCount(1);
 
 		RequestPartitionId requestPartitionId1 = RequestPartitionId.fromPartitionId(1);

@@ -66,14 +66,10 @@ public class MdmCandidateSearchSvc {
 	/**
 	 * Given a source resource, search for all resources that are considered an MDM match based on defined MDM rules.
 	 *
-	 * @param theResourceType
-<<<<<<< HEAD
+	 * @param theResourceType the resource type of the resource being matched
 	 * @param theResource the {@link IBaseResource} we are attempting to match.
 	 * @param theRequestPartitionId  the {@link RequestPartitionId} representation of the partitions we are limited to when attempting to match
 	 *
-=======
-	 * @param theResource     the {@link IBaseResource} we are attempting to match.
->>>>>>> dfd99c5471f9a49f8eda4ed0f55863d176e230f9
 	 * @return the list of candidate {@link IBaseResource} which could be matches to theResource
 	 */
 	@Transactional

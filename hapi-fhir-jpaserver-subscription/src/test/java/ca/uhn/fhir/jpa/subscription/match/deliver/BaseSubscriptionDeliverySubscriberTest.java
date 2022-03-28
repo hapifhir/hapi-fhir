@@ -80,11 +80,10 @@ public class BaseSubscriptionDeliverySubscriberTest {
 		mySubscriber.setInterceptorBroadcasterForUnitTest(myInterceptorBroadcaster);
 		mySubscriber.setSubscriptionRegistryForUnitTest(mySubscriptionRegistry);
 
-		myMessageSubscriber = new SubscriptionDeliveringMessageSubscriber();
+		myMessageSubscriber = new SubscriptionDeliveringMessageSubscriber(myChannelFactory);
 		myMessageSubscriber.setFhirContextForUnitTest(myCtx);
 		myMessageSubscriber.setInterceptorBroadcasterForUnitTest(myInterceptorBroadcaster);
 		myMessageSubscriber.setSubscriptionRegistryForUnitTest(mySubscriptionRegistry);
-		myMessageSubscriber.setChannelFactoryForUnitTest(myChannelFactory);
 
 		myCtx.setRestfulClientFactory(myRestfulClientFactory);
 		when(myRestfulClientFactory.newGenericClient(any())).thenReturn(myGenericClient);

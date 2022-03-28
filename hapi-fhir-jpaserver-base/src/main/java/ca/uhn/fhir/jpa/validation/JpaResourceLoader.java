@@ -36,7 +36,7 @@ public class JpaResourceLoader implements IResourceLoader {
 
 	@Override
 	public <T extends IBaseResource> T load(Class<T> theType, IIdType theId) throws ResourceNotFoundException {
-		SystemRequestDetails systemRequestDetails = SystemRequestDetails.forAllPartition();
+		SystemRequestDetails systemRequestDetails = SystemRequestDetails.forAllPartitions();
 		return myDaoRegistry.getResourceDao(theType).read(theId, systemRequestDetails);
 	}
 }

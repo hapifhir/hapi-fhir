@@ -498,10 +498,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// Add partition id column for mdm
 		Builder.BuilderWithTableName empiLink = version.onTable("MPI_LINK");
 
-		empiLink.addColumn("20220216.1", "PARTITION_ID")
+		empiLink.addColumn("20220324.1", "PARTITION_ID")
 			.nullable()
 			.type(ColumnTypeEnum.INT);
-		empiLink.addColumn("20220216.2", "PARTITION_DATE")
+		empiLink.addColumn("20220324.2", "PARTITION_DATE")
 			.nullable()
 			.type(ColumnTypeEnum.DATE_ONLY);
 	}

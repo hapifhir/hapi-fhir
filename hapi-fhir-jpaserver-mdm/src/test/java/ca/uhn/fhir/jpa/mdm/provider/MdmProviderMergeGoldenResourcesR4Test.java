@@ -4,6 +4,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
@@ -48,7 +49,7 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 
 	@AfterEach
 	public void after() throws IOException {
-		myPartitionSettings.setPartitioningEnabled(false);
+		myPartitionSettings.setPartitioningEnabled(new PartitionSettings().isPartitioningEnabled());
 		super.after();
 	}
 
@@ -109,7 +110,7 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 	@Test
 	public void testMergeOnSamePartition() {
 		myPartitionSettings.setPartitioningEnabled(true);
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
 		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(1);
 		Patient fromGoldenPatient = createPatientOnPartition(new Patient(), true, false, requestPartitionId);
 		StringType fromGoldenPatientId = new StringType(fromGoldenPatient.getIdElement().getValue());
@@ -141,9 +142,9 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 	@Test
 	public void testMergeOnDifferentPartitions() {
 		myPartitionSettings.setPartitioningEnabled(true);
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
 		RequestPartitionId requestPartitionId1 = RequestPartitionId.fromPartitionId(1);
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2));
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2));
 		RequestPartitionId requestPartitionId2 = RequestPartitionId.fromPartitionId(2);
 		Patient fromGoldenPatient = createPatientOnPartition(new Patient(), true, false, requestPartitionId1);
 		StringType fromGoldenPatientId = new StringType(fromGoldenPatient.getIdElement().getValue());

@@ -25,7 +25,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
@@ -92,10 +91,10 @@ public class MdmSubscriptionLoader {
 
 	synchronized void updateIfNotPresent(IBaseResource theSubscription) {
 		try {
-			mySubscriptionDao.read(theSubscription.getIdElement(), SystemRequestDetails.forAllPartition());
+			mySubscriptionDao.read(theSubscription.getIdElement(), SystemRequestDetails.forAllPartitions());
 		} catch (ResourceNotFoundException | ResourceGoneException e) {
 			ourLog.info("Creating subscription " + theSubscription.getIdElement());
-			mySubscriptionDao.update(theSubscription, SystemRequestDetails.forAllPartition());
+			mySubscriptionDao.update(theSubscription, SystemRequestDetails.forAllPartitions());
 		}
 	}
 

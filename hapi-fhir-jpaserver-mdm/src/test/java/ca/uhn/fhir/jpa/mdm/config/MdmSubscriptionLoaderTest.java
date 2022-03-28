@@ -52,7 +52,7 @@ class MdmSubscriptionLoaderTest {
 	IMdmSettings myMdmSettings;
 
 	@Spy
-	FhirContext myFhirContext = FhirContext.forR4();
+	FhirContext myFhirContext = FhirContext.forR4Cached();
 
 	@Mock
 	IChannelNamer myChannelNamer;

@@ -57,7 +57,7 @@ class MdmBatchSvcImplIT extends BaseMdmR4Test {
 		assertLinkCount(0);
 
 		//SUT
-		afterMdmLatch.runWithExpectedCount(30, () -> myMdmSubmitSvc.submitAllSourceTypesToMdm(null, SystemRequestDetails.forAllPartition()));
+		afterMdmLatch.runWithExpectedCount(30, () -> myMdmSubmitSvc.submitAllSourceTypesToMdm(null, SystemRequestDetails.forAllPartitions()));
 
 		assertLinkCount(30);
 	}

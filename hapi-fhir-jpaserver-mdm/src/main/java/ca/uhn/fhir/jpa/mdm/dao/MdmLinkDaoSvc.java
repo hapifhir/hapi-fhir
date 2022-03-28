@@ -77,8 +77,6 @@ public class MdmLinkDaoSvc {
 	@Autowired
 	protected EntityManager myEntityManager;
 
-	public static final Predicate[] EMPTY_PREDICATE_ARRAY = new Predicate[0];
-
 	@Transactional
 	public MdmLink createOrUpdateLinkEntity(IBaseResource theGoldenResource, IBaseResource theSourceResource, MdmMatchOutcome theMatchOutcome, MdmLinkSourceEnum theLinkSource, @Nullable MdmTransactionContext theMdmTransactionContext) {
 		Long goldenResourcePid = myJpaIdHelperService.getPidOrNull(theGoldenResource);
@@ -98,7 +96,7 @@ public class MdmLinkDaoSvc {
 		}
 		// Add partition for the mdm link if it's available in the source resource
 		RequestPartitionId partitionId = (RequestPartitionId) theSourceResource.getUserData(Constants.RESOURCE_PARTITION_ID);
-		if (partitionId != null && partitionId.hasPartitionIds() && partitionId.getFirstPartitionIdOrNull() != null) {
+		if (partitionId != null && partitionId.getFirstPartitionIdOrNull() != null) {
 			mdmLink.setPartitionId(new PartitionablePartitionId(partitionId.getFirstPartitionIdOrNull(), partitionId.getPartitionDate()));
 		}
 
@@ -317,7 +315,7 @@ public class MdmLinkDaoSvc {
 			andPredicates.add(linkSourcePredicate);
 		}
 
-		Predicate finalQuery = criteriaBuilder.and(andPredicates.toArray(EMPTY_PREDICATE_ARRAY));
+		Predicate finalQuery = criteriaBuilder.and(andPredicates.toArray(new Predicate[0]));
 		TypedQuery<MdmLink> typedQuery = myEntityManager.createQuery(criteriaQuery.where(finalQuery));
 
 		CriteriaQuery<Long> countQuery = criteriaBuilder.createQuery(Long.class);

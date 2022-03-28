@@ -27,6 +27,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
+import ca.uhn.fhir.jpa.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.mdm.api.IMdmLinkCreateSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
@@ -60,6 +61,8 @@ public class MdmLinkCreateSvcImpl implements IMdmLinkCreateSvc {
 	IMdmSettings myMdmSettings;
 	@Autowired
 	MessageHelper myMessageHelper;
+	@Autowired
+	MdmPartitionHelper myMdmPartitionHelper;
 
 	@Transactional
 	@Override
@@ -72,12 +75,7 @@ public class MdmLinkCreateSvcImpl implements IMdmLinkCreateSvc {
 		Long targetId = myIdHelperService.getPidOrThrowException(theSourceResource);
 
 		// check if the golden resource and the source resource are in the same partition, throw error if not
-		RequestPartitionId goldenResourcePartitionId = (RequestPartitionId) theGoldenResource.getUserData(Constants.RESOURCE_PARTITION_ID);
-		RequestPartitionId sourceResourcePartitionId = (RequestPartitionId) theSourceResource.getUserData(Constants.RESOURCE_PARTITION_ID);
-		if (goldenResourcePartitionId != null && sourceResourcePartitionId != null && goldenResourcePartitionId.hasPartitionIds() && sourceResourcePartitionId.hasPartitionIds() &&
-			!goldenResourcePartitionId.hasPartitionId(sourceResourcePartitionId.getFirstPartitionIdOrNull())) {
-			throw new InvalidRequestException(Msg.code(2074) + myMessageHelper.getMessageForMismatchPartition(theGoldenResource, theSourceResource));
-		}
+		myMdmPartitionHelper.validateResourcesInSamePartition(theGoldenResource, theSourceResource);
 
 		Optional<MdmLink> optionalMdmLink = myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenResourceId, targetId);
 		if (optionalMdmLink.isPresent()) {
@@ -97,6 +95,7 @@ public class MdmLinkCreateSvcImpl implements IMdmLinkCreateSvc {
 			mdmLink.setMatchResult(theMatchResult);
 		}
 		// Add partition for the mdm link if it doesn't exist
+		RequestPartitionId goldenResourcePartitionId = (RequestPartitionId) theGoldenResource.getUserData(Constants.RESOURCE_PARTITION_ID);
 		if (goldenResourcePartitionId != null && goldenResourcePartitionId.hasPartitionIds() && goldenResourcePartitionId.getFirstPartitionIdOrNull() != null &&
 			(mdmLink.getPartitionId() == null || mdmLink.getPartitionId().getPartitionId() == null)) {
 			mdmLink.setPartitionId(new PartitionablePartitionId(goldenResourcePartitionId.getFirstPartitionIdOrNull(), goldenResourcePartitionId.getPartitionDate()));

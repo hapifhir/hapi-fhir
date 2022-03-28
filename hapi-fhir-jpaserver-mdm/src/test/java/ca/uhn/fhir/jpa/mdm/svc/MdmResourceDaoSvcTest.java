@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -26,7 +27,7 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 
 	@AfterEach
 	public void after() throws IOException {
-		myPartitionSettings.setPartitioningEnabled(false);
+		myPartitionSettings.setPartitioningEnabled(new PartitionSettings().isPartitioningEnabled());
 		super.after();
 	}
 
@@ -62,7 +63,7 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 	@Test
 	public void testSearchGoldenResourceOnSamePartition() {
 		myPartitionSettings.setPartitioningEnabled(true);
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
 		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(1);
 		Patient patientOnPartition = createPatientOnPartition(new Patient(), true, false, requestPartitionId);
 		Patient goodSourcePatient = addExternalEID(patientOnPartition, TEST_EID);
@@ -78,9 +79,9 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 	@Test
 	public void testSearchGoldenResourceOnDifferentPartitions() {
 		myPartitionSettings.setPartitioningEnabled(true);
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
 		RequestPartitionId requestPartitionId1 = RequestPartitionId.fromPartitionId(1);
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2));
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2));
 		RequestPartitionId requestPartitionId2 = RequestPartitionId.fromPartitionId(2);
 		Patient patientOnPartition = createPatientOnPartition(new Patient(), true, false, requestPartitionId1);
 		Patient goodSourcePatient = addExternalEID(patientOnPartition, TEST_EID);

@@ -7,7 +7,6 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
 import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.config.MdmConsumerConfig;
@@ -128,7 +127,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 	@Autowired
 	protected PartitionSettings myPartitionSettings;
 	@Autowired
-	protected IPartitionLookupSvc myPartitionConfigSvc;
+	protected IPartitionLookupSvc myPartitionLookupSvc;
 
 	@BeforeEach
 	public void beforeSetRequestDetails() {
@@ -519,7 +518,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		map.setLoadSynchronous(true);
 		//TODO GGG ensure that this tag search works effectively.
 		map.add("_tag", new TokenParam(MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, theCode));
-		SystemRequestDetails systemRequestDetails = SystemRequestDetails.forAllPartition();
+		SystemRequestDetails systemRequestDetails = SystemRequestDetails.forAllPartitions();
 		IBundleProvider bundle = myPatientDao.search(map, systemRequestDetails);
 		return bundle.getResources(0, 999);
 	}

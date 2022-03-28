@@ -130,10 +130,10 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 
 	@Override
 	public Page<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmTransactionContext, MdmPageRequest thePageRequest, RequestDetails theRequestDetails) {
-		RequestPartitionId theReadPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, null, null);
-		Page<MdmLinkJson> resultPage =  myMdmLinkQuerySvc.getDuplicateGoldenResources(theMdmTransactionContext, thePageRequest, theReadPartitionId.getPartitionIds());
+		RequestPartitionId readPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, null, null);
+		Page<MdmLinkJson> resultPage =  myMdmLinkQuerySvc.getDuplicateGoldenResources(theMdmTransactionContext, thePageRequest, readPartitionId.getPartitionIds());
 
-		validateMdmQueryPermissions(theReadPartitionId, resultPage.getContent(), theRequestDetails);
+		validateMdmQueryPermissions(readPartitionId, resultPage.getContent(), theRequestDetails);
 
 		return resultPage;
 	}
@@ -175,13 +175,13 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 	}
 
 	private void validateMdmQueryPermissions(RequestPartitionId theRequestPartitionId, List<MdmLinkJson> theMdmLinkJsonList, RequestDetails theRequestDetails){
-		Set<String> theResourceTypeSet = new HashSet<>();
+		Set<String> seenResourceTypes = new HashSet<>();
 		for (MdmLinkJson mdmLinkJson : theMdmLinkJsonList){
 			IdDt idDt = new IdDt(mdmLinkJson.getSourceId());
 
-			if (!theResourceTypeSet.contains(idDt.getResourceType())){
+			if (!seenResourceTypes.contains(idDt.getResourceType())){
 				myRequestPartitionHelperSvc.validateHasPartitionPermissions(theRequestDetails, idDt.getResourceType(), theRequestPartitionId);
-				theResourceTypeSet.add(idDt.getResourceType());
+				seenResourceTypes.add(idDt.getResourceType());
 			}
 		}
 	}
