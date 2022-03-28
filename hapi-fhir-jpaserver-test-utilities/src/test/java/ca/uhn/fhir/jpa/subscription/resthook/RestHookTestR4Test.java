@@ -534,18 +534,10 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		createSubscription(criteria1, payload, sendDeleteMessagesExtension);
 		waitForActivatedSubscriptionCount(1);
 
-		myStoppableSubscriptionDeliveringRestHookSubscriber.pause();
-		final CountDownLatch countDownLatch = new CountDownLatch(1);
-		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(countDownLatch);
-
 		ourLog.info("** About to send observation");
 		Observation observation = sendObservation("OB-01", "SNOMED-CT");
 		assertEquals("1", observation.getIdElement().getVersionIdPart());
-
-		// Wait for our delivery channel thread to be paused
-		assertTrue(countDownLatch.await(5L, TimeUnit.SECONDS));
-		// Open the floodgates!
-		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
+		ourObservationProvider.waitForUpdateCount(1);
 
 		ourLog.info("** About to delete observation");
 		myObservationDao.delete(IdDt.of(observation).toUnqualifiedVersionless());
