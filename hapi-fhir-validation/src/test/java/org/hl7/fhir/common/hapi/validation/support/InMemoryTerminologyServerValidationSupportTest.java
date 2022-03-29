@@ -426,6 +426,16 @@ public class InMemoryTerminologyServerValidationSupportTest {
 
     @Test
     void testExpandValuevalidateCodeInValueSet() {
+		 CodeSystem cs = new CodeSystem();
+		 cs.setId("v2-2.7-0360");
+		 cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		 cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		 cs.setUrl("http://terminology.hl7.org/CodeSystem/v2-0360|2.7");
+//		 cs.setVersion("2.7");
+		 cs.addConcept().setCode("MD").setDisplay("Doctor of Medicine");
+		 myPrePopulated.addCodeSystem(cs);
+
+
 		 ValueSet vs = new ValueSet();
 		 vs.setUrl("http://vs");
 		 vs
