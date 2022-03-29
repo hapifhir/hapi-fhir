@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
@@ -53,6 +54,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -85,6 +88,34 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		} catch (UnprocessableEntityException e) {
 			assertEquals(Msg.code(1113) + "SearchParameter.base is missing", e.getMessage());
 		}
+	}
+
+	@Test
+	public void testCreateSpWithMultiplePaths(){
+		SearchParameter sp = new SearchParameter();
+		sp.setCode("telephone-unformatted");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.setExpression("Patient.telecom.where(system='phone' or system='email')");
+		sp.getBase().add(new CodeType("Patient"));
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+
+		DaoMethodOutcome daoMethodOutcome = mySearchParameterDao.create(sp);
+		assertThat(daoMethodOutcome.getId(), is(notNullValue()));
+
+		sp.setExpression("Patient.telecom.where(system='phone') or Patient.telecome.where(system='email')");
+		sp.setCode("telephone-unformatted-2");
+		daoMethodOutcome = mySearchParameterDao.create(sp);
+		assertThat(daoMethodOutcome.getId(), is(notNullValue()));
+
+		sp.setExpression("Patient.telecom.where(system='phone' or system='email') | Patient.telecome.where(system='email')");
+		sp.setCode("telephone-unformatted-3");
+		daoMethodOutcome = mySearchParameterDao.create(sp);
+		assertThat(daoMethodOutcome.getId(), is(notNullValue()));
+
+		sp.setExpression("Patient.telecom.where(system='phone' or system='email') | Patient.telecom.where(system='email') or Patient.telecom.where(system='mail' | system='phone')");
+		sp.setCode("telephone-unformatted-3");
+		daoMethodOutcome = mySearchParameterDao.create(sp);
+		assertThat(daoMethodOutcome.getId(), is(notNullValue()));
 	}
 
 	@Test

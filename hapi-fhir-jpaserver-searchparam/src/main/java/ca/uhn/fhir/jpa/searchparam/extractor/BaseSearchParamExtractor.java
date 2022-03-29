@@ -95,7 +95,6 @@ import static org.apache.commons.lang3.StringUtils.trim;
 public abstract class BaseSearchParamExtractor implements ISearchParamExtractor {
 
 	public static final Set<String> COORDS_INDEX_PATHS;
-	private static final Pattern SPLIT = Pattern.compile("\\||( or )");
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseSearchParamExtractor.class);
 
 	static {
@@ -1119,8 +1118,50 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			if (!thePaths.contains("|") && !thePaths.contains(" or ")) {
 				return new String[]{thePaths};
 			}
-			return SPLIT.split(thePaths);
+			return splitOutOfParenOrs(thePaths);
 		}
+	}
+
+	/**
+	 * Iteratively splits a string on any ` or ` or | that is ** not**contained inside a set of parentheses. e.g.
+	 *
+	 * "Patient.select(a or b)" -->  ["Patient.select(a or b)"]
+	 * "Patient.select(a or b) or Patient.select(c or d )" --> ["Patient.select(a or b)", "Patient.select(c or d)"]
+	 * "Patient.select(a|b) or Patient.select(c or d )" --> ["Patient.select(a|b)", "Patient.select(c or d)"]
+	 * "Patient.select(b) | Patient.select(c)" -->  ["Patient.select(b)", "Patient.select(c)"]
+	 *
+	 * @param thePaths The string to split
+	 * @return The split string
+
+	 */
+	private String[] splitOutOfParenOrs(String thePaths) {
+		List<String> topLevelOrExpressions = splitOutOfParensToken(thePaths, " or ");
+		List<String> retVal = topLevelOrExpressions.stream()
+			.flatMap(s -> splitOutOfParensToken(s, "|").stream())
+			.collect(Collectors.toList());
+		return retVal.toArray(new String[retVal.size()]);
+	}
+	private List<String> splitOutOfParensToken(String thePath, String theToken) {
+		int tokenLength = theToken.length();
+		int index = thePath.indexOf(theToken);
+		int rightIndex = 0;
+		List<String> retVal = new ArrayList<>();
+		while (index > -1 ) {
+			String left = thePath.substring(rightIndex, index);
+			if (allParensHaveBeenClosed(left)) {
+				retVal.add(left);
+				rightIndex = index + tokenLength;
+			}
+			index = thePath.indexOf(theToken, index + tokenLength);
+		}
+		retVal.add(thePath.substring(rightIndex));//Get the final element
+		return retVal;
+	}
+
+	private boolean allParensHaveBeenClosed(String thePaths) {
+		int open = StringUtils.countMatches(thePaths, "(");
+		int close = StringUtils.countMatches(thePaths, ")");
+		return open == close;
 	}
 
 	private BigDecimal normalizeQuantityContainingTimeUnitsIntoDaysForNumberParam(String theSystem, String theCode, BigDecimal theValue) {
