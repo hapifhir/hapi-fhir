@@ -852,12 +852,10 @@
         <fontawesomeVersion>5.4.1</fontawesomeVersion>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
-		  <!--		 TODO GGG/JA this is breaking a downstream project. disabling for now-->
-		  <!--		  <maven.compiler.release>11</maven.compiler.release>-->
+		  <maven.compiler.release>11</maven.compiler.release>
         <maven.compiler.testSource>17</maven.compiler.testSource>
-        <maven.compiler.testTarget>17</maven.compiler.testTarget>
-		  <!--		 TODO GGG/JA this is breaking a downstream project. disabling for now-->
-		  <!--		  <maven.compiler.testRelease>17</maven.compiler.testRelease>-->
+		  <maven.compiler.testTarget>17</maven.compiler.testTarget>
+		  <maven.compiler.testRelease>17</maven.compiler.testRelease>
     </properties>
 
 	<dependencyManagement>
