@@ -883,10 +883,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 				public void le() {
 					withObservationWithValueQuantity(0.6);
 
-					myCaptureQueriesListener.clear();
 					assertNotFind("when gt", "/Observation?value-quantity=le0.5");
-					assertThat(myCaptureQueriesListener.getSelectQueries(), hasSize(1));
-
 					assertFind("when eq", "/Observation?value-quantity=le0.6");
 					assertFind("when lt", "/Observation?value-quantity=le0.7");
 				}
@@ -1043,7 +1040,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			}
 
 			/**
-			 * Sorting is not implemented for normalized quantities yet, so quantities will be sorted
+			 * Sorting is not implemented for normalized quantities, so quantities will be sorted
 			 * by their absolute values (with no unit conversions)
 			 */
 			@Nested
@@ -1055,6 +1052,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 					String idAlpha5 = withObservationWithQuantity(50, UcumServiceUtil.UCUM_CODESYSTEM_URL, "10*3/L" ).getIdPart();
 					String idAlpha7 = withObservationWithQuantity(0.000070, UcumServiceUtil.UCUM_CODESYSTEM_URL, "10*9/L" ).getIdPart();
 
+					// this search is not freetext because there is no freetext-known parameter name
 					List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_sort=value-quantity");
 					assertThat(allIds, contains(idAlpha7, idAlpha6, idAlpha5));
 				}
@@ -1070,7 +1068,11 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		}
 
 		private void assertNotFind(String theMessage, String theUrl) {
+			myCaptureQueriesListener.clear();
 			List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
+
+			// only DB query for resources should be present. query for resource IDs should be freetext, not DB
+			assertThat(myCaptureQueriesListener.getSelectQueries(), hasSize(1));
 			assertThat(theMessage, resourceIds, not(hasItem(equalTo(myResourceId.getIdPart()))));
 		}
 
