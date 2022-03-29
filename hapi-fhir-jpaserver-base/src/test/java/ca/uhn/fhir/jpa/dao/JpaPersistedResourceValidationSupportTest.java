@@ -22,13 +22,11 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.github.benmanes.caffeine.cache.Cache;
-import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -76,20 +74,9 @@ class JpaPersistedResourceValidationSupportTest {
 		ReflectionTestUtils.setField(testedClass, "myValueSetType", myValueSetType);
 	}
 
+
 	@Nested
 	public class FetchCodeSystemTests {
-
-
-
-		@Test
-		void validateCodeSystemWithCanonicalVersion() {
-
-//			ValidationSupportChain myChain = new ValidationSupportChain(mySvc, myPrePopulated, myDefaultSupport, myCommonCodeSystemsTermSvc);
-//			ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
-//
-//			testedClass.validateCodeInValueSet(valCtx, options, codeSystemUrlAndVersion, code, display, vs);
-
-		}
 
 		@Test
 		void fetchCodeSystemMustUseForcedId() {
