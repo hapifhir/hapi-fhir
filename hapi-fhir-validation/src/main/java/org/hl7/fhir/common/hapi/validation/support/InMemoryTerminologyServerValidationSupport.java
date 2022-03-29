@@ -587,7 +587,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 			String loadedCodeSystemUrl;
 			if (includeOrExcludeConceptSystemVersion != null) {
-				loadedCodeSystemUrl = includeOrExcludeConceptSystemUrl + "|" + includeOrExcludeConceptSystemVersion;
+				loadedCodeSystemUrl = includeOrExcludeConceptSystemUrl + PIPE_CHARACTER + includeOrExcludeConceptSystemVersion;
 			} else {
 				loadedCodeSystemUrl = includeOrExcludeConceptSystemUrl;
 			}
