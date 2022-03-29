@@ -120,7 +120,7 @@ public class IdHelperService implements IIdHelperService {
 	}
 
 	/**
-	 * Given a forced ID, convert it to it's Long value. Since you are allowed to use string IDs for resources, we need to
+	 * Given a forced ID, convert it to its Long value. Since you are allowed to use string IDs for resources, we need to
 	 * convert those to the underlying Long values that are stored, for lookup and comparison purposes.
 	 *
 	 * @throws ResourceNotFoundException If the ID can not be found
@@ -418,15 +418,13 @@ public class IdHelperService implements IIdHelperService {
 		Map<String, List<IResourceLookup>> retVal = new HashMap<>();
 		RequestPartitionId requestPartitionId = replaceDefault(theRequestPartitionId);
 
-		if (myDaoConfig.getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ANY) {
-			List<Long> pids = theId
-				.stream()
-				.filter(t -> isValidPid(t))
-				.map(t -> t.getIdPartAsLong())
-				.collect(Collectors.toList());
-			if (!pids.isEmpty()) {
-				resolvePids(requestPartitionId, pids, retVal);
-			}
+		List<Long> pids = theId
+			.stream()
+			.filter(t -> isValidPid(t))
+			.map(t -> t.getIdPartAsLong())
+			.collect(Collectors.toList());
+		if (!pids.isEmpty()) {
+			resolvePids(requestPartitionId, pids, retVal);
 		}
 
 		// returns a map of resourcetype->id

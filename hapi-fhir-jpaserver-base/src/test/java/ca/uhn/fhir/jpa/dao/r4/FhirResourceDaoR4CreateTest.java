@@ -29,6 +29,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DecimalType;
@@ -420,6 +421,19 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		p = myPatientDao.read(id);
 		assertEquals("FAM", p.getNameFirstRep().getFamily());
 
+	}
+
+	@Test
+	public void testCreateWithUuidServerResourceStrategy_AnyClientIdAllowed() {
+		myDaoConfig.setResourceServerIdStrategy(DaoConfig.IdStrategyEnum.UUID);
+		myDaoConfig.setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.ANY);
+
+		CodeSystem cs = new CodeSystem();
+		cs.setId("123a");
+		cs.setUrl("http://fooCS");
+		IIdType id = myCodeSystemDao.update(cs).getId();
+		cs = myCodeSystemDao.read(id);
+		assertEquals("http://fooCS", cs.getUrl());
 	}
 
 	/**
