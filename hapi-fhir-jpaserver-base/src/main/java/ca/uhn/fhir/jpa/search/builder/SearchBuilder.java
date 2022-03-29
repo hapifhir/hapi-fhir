@@ -342,12 +342,15 @@ public class SearchBuilder implements ISearchBuilder {
 
 			List<Long> rawPids = ResourcePersistentId.toLongList(fulltextMatchIds);
 
+			// wipmb extract
 			// can we skip the database entirely and return the pid list from here?
 			boolean canSkipDatabase =
 				// if we processed an AND clause, and it returned nothing, then nothing can match.
 				rawPids.isEmpty() ||
 					// Our hibernate search query doesn't respect partitions yet
 					(!myPartitionSettings.isPartitioningEnabled() &&
+						// we don't support _count=0 yet.
+						!theCount &&
 					// were there AND terms left?  Then we still need the db.
 						theParams.isEmpty() &&
 						// not every param is a param. :-(
@@ -357,8 +360,6 @@ public class SearchBuilder implements ISearchBuilder {
 						theParams.getOffset() == null &&
 						// or sorting?
 						theParams.getSort() == null
-						// todo MB Ugh - review with someone else
-						//theParams.toNormalizedQueryString(myContext).length() <= 1 &&
 					);
 
 			if (canSkipDatabase) {
@@ -901,7 +902,7 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		// Can we fast track this loading by checking elastic search?
-		if (isLoadingFromElasticSearchSupported(theIncludedPids)) {
+		if (isLoadingFromElasticSearchSupported(thePids)) {
 			theResourceListToPopulate.addAll(loadResourcesFromElasticSearch(thePids));
 		} else {
 			// We only chunk because some jdbc drivers can't handle long param lists.
@@ -914,19 +915,15 @@ public class SearchBuilder implements ISearchBuilder {
 	 * We assume this is faster.
 	 *
 	 * Hibernate Search only stores the current version, and only if enabled.
-	 * @param theIncludedPids the _include target to check for versioned ids
+	 * @param thePids the pids to check for versioned references
 	 * @return can we fetch from Hibernate Search?
 	 */
-	private boolean isLoadingFromElasticSearchSupported(Collection<ResourcePersistentId> theIncludedPids) {
-		// todo mb we can be smarter here.
-		// todo check if theIncludedPids has any with version not null.
+	private boolean isLoadingFromElasticSearchSupported(Collection<ResourcePersistentId> thePids) {
 
 		// is storage enabled?
 		return myDaoConfig.isStoreResourceInLuceneIndex() &&
-			// only support lastN for now.
-			myParams.isLastN() &&
-			// do we need to worry about versions?
-			theIncludedPids.isEmpty() &&
+			// we don't support history
+			thePids.stream().noneMatch(p->p.getVersion()!=null) &&
 			// skip the complexity for metadata in dstu2
 			myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3);
 	}
@@ -937,16 +934,13 @@ public class SearchBuilder implements ISearchBuilder {
 		if (myDaoConfig.isAdvancedLuceneIndexing() && myDaoConfig.isStoreResourceInLuceneIndex()) {
 			List<Long> pidList = thePids.stream().map(ResourcePersistentId::getIdAsLong).collect(Collectors.toList());
 
-			// todo need to inject metadata - use profile to build resource, tags, and security labels
-			//Map<Long, Collection<ResourceTag>> pidToTagMap = getPidToTagMap(pidList);
+			// wipmb standardize on ResourcePersistentId
 			List<IBaseResource> resources = myFulltextSearchSvc.getResources(pidList);
 			return resources;
 		} else if (!Objects.isNull(myParams) && myParams.isLastN()) {
 			// legacy LastN implementation
 			return myIElasticsearchSvc.getObservationResources(thePids);
 		} else {
-			// TODO I wonder if we should drop this path, and only support the new Hibernate Search path.
-			Validate.isTrue(false, "Unexpected");
 			return Collections.emptyList();
 		}
 	}
@@ -1391,7 +1385,7 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	/**
-	 * Adapt simple Iterator to our internal query interface.
+	 * Adapt bare Iterator to our internal query interface.
 	 */
 	static class ResolvedSearchQueryExecutor implements ISearchQueryExecutor {
 		private final Iterator<Long> myIterator;

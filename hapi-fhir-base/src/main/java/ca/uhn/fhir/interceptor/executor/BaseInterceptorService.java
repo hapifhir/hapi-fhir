@@ -164,13 +164,22 @@ public abstract class BaseInterceptorService<POINTCUT extends IPointcut> impleme
 	}
 
 	@Override
+	public void unregisterAllAnonymousInterceptors() {
+		synchronized (myRegistryMutex) {
+			unregisterInterceptorsIf(t -> true, myAnonymousInvokers);
+		}
+	}
+
+	@Override
 	public void unregisterInterceptorsIf(Predicate<Object> theShouldUnregisterFunction) {
 		unregisterInterceptorsIf(theShouldUnregisterFunction, myGlobalInvokers);
 		unregisterInterceptorsIf(theShouldUnregisterFunction, myAnonymousInvokers);
 	}
 
 	private void unregisterInterceptorsIf(Predicate<Object> theShouldUnregisterFunction, ListMultimap<POINTCUT, BaseInvoker> theGlobalInvokers) {
-		theGlobalInvokers.entries().removeIf(t -> theShouldUnregisterFunction.test(t.getValue().getInterceptor()));
+		synchronized (myRegistryMutex) {
+			theGlobalInvokers.entries().removeIf(t -> theShouldUnregisterFunction.test(t.getValue().getInterceptor()));
+		}
 	}
 
 	@Override
@@ -476,6 +485,32 @@ public abstract class BaseInterceptorService<POINTCUT extends IPointcut> impleme
 
 	protected abstract Optional<HookDescriptor> scanForHook(Method nextMethod);
 
+	protected static <T extends Annotation> Optional<T> findAnnotation(AnnotatedElement theObject, Class<T> theHookClass) {
+		T annotation;
+		if (theObject instanceof Method) {
+			annotation = MethodUtils.getAnnotation((Method) theObject, theHookClass, true, true);
+		} else {
+			annotation = theObject.getAnnotation(theHookClass);
+		}
+		return Optional.ofNullable(annotation);
+	}
+
+	private static int determineOrder(Class<?> theInterceptorClass) {
+		int typeOrder = Interceptor.DEFAULT_ORDER;
+		Optional<Interceptor> typeOrderAnnotation = findAnnotation(theInterceptorClass, Interceptor.class);
+		if (typeOrderAnnotation.isPresent()) {
+			typeOrder = typeOrderAnnotation.get().order();
+		}
+		return typeOrder;
+	}
+
+	private static String toErrorString(List<String> theParameterTypes) {
+		return theParameterTypes
+			.stream()
+			.sorted()
+			.collect(Collectors.joining(","));
+	}
+
 	protected abstract static class BaseInvoker implements Comparable<BaseInvoker> {
 
 		private final int myOrder;
@@ -603,32 +638,6 @@ public abstract class BaseInterceptorService<POINTCUT extends IPointcut> impleme
 			return myOrder;
 		}
 
-	}
-
-	protected static <T extends Annotation> Optional<T> findAnnotation(AnnotatedElement theObject, Class<T> theHookClass) {
-		T annotation;
-		if (theObject instanceof Method) {
-			annotation = MethodUtils.getAnnotation((Method) theObject, theHookClass, true, true);
-		} else {
-			annotation = theObject.getAnnotation(theHookClass);
-		}
-		return Optional.ofNullable(annotation);
-	}
-
-	private static int determineOrder(Class<?> theInterceptorClass) {
-		int typeOrder = Interceptor.DEFAULT_ORDER;
-		Optional<Interceptor> typeOrderAnnotation = findAnnotation(theInterceptorClass, Interceptor.class);
-		if (typeOrderAnnotation.isPresent()) {
-			typeOrder = typeOrderAnnotation.get().order();
-		}
-		return typeOrder;
-	}
-
-	private static String toErrorString(List<String> theParameterTypes) {
-		return theParameterTypes
-			.stream()
-			.sorted()
-			.collect(Collectors.joining(","));
 	}
 
 }

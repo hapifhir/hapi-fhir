@@ -65,7 +65,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
-import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
+import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
@@ -133,7 +133,7 @@ public class ExpungeEverythingService {
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(NpmPackageVersionResourceEntity.class));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(NpmPackageVersionEntity.class));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(NpmPackageEntity.class));
-		counter.addAndGet(expungeEverythingByTypeWithoutPurging(SearchParamPresent.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(SearchParamPresentEntity.class));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(BulkImportJobFileEntity.class));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(BulkImportJobEntity.class));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(ForcedId.class));

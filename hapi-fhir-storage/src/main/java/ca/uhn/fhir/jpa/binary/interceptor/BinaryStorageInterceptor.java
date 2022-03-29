@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.binstore;
+package ca.uhn.fhir.jpa.binary.interceptor;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR Storage api
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
@@ -27,7 +27,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
+import ca.uhn.fhir.jpa.binary.api.StoredDetails;
+import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
+import ca.uhn.fhir.jpa.binary.api.IBinaryTarget;
+import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
@@ -171,7 +174,7 @@ public class BinaryStorageInterceptor {
 					.findFirst();
 
 				if (hasExternalizedBinaryReference.isPresent()) {
-					String msg = myCtx.getLocalizer().getMessage(BaseHapiFhirDao.class, "externalizedBinaryStorageExtensionFoundInRequestBody", EXT_EXTERNALIZED_BINARY_ID, hasExternalizedBinaryReference.get());
+					String msg = myCtx.getLocalizer().getMessage(BinaryStorageInterceptor.class, "externalizedBinaryStorageExtensionFoundInRequestBody", EXT_EXTERNALIZED_BINARY_ID, hasExternalizedBinaryReference.get());
 					throw new InvalidRequestException(Msg.code(1329) + msg);
 				}
 			}
@@ -213,9 +216,7 @@ public class BinaryStorageInterceptor {
 					myBinaryAccessProvider.replaceDataWithExtension(nextTarget, newBlobId);
 				}
 			}
-
 		}
-
 	}
 
 	@Nonnull

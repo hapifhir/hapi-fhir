@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.0.0-PRE8-SNAPSHOT</version>
+		<version>6.0.0-PRE9-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -14,7 +14,7 @@
 	<packaging>jar</packaging>
 
 	<name>HAPI FHIR JPA Server - Batch2 Task Processor</name>
-	<description></description>
+	<description>Batch2 is a framework for managing and executing long running "batch" jobs</description>
 
 	<dependencies>
 

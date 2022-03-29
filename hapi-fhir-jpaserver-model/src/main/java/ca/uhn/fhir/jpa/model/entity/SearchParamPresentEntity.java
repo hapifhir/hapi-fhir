@@ -34,7 +34,7 @@ import java.io.Serializable;
 	@Index(name = "IDX_RESPARMPRESENT_RESID", columnList = "RES_ID"),
 	@Index(name = "IDX_RESPARMPRESENT_HASHPRES", columnList = "HASH_PRESENCE")
 })
-public class SearchParamPresent extends BasePartitionable implements Serializable {
+public class SearchParamPresentEntity extends BasePartitionable implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -60,7 +60,7 @@ public class SearchParamPresent extends BasePartitionable implements Serializabl
 	/**
 	 * Constructor
 	 */
-	public SearchParamPresent() {
+	public SearchParamPresentEntity() {
 		super();
 	}
 
@@ -124,6 +124,18 @@ public class SearchParamPresent extends BasePartitionable implements Serializabl
 
 	public void setPartitionSettings(PartitionSettings thePartitionSettings) {
 		myPartitionSettings = thePartitionSettings;
+	}
+
+	/**
+	 * Copy all mutable values from the given source
+	 */
+	public void updateValues(SearchParamPresentEntity theSource) {
+		super.setPartitionId(theSource.getPartitionId());
+		setResource(theSource.getResource());
+		setPartitionSettings(theSource.getPartitionSettings());
+		setHashPresence(theSource.getHashPresence());
+		setParamName(theSource.getParamName());
+		setPresent(theSource.isPresent());
 	}
 
 	public static long calculateHashPresence(PartitionSettings thePartitionSettings, PartitionablePartitionId theRequestPartitionId, String theResourceType, String theParamName, Boolean thePresent) {

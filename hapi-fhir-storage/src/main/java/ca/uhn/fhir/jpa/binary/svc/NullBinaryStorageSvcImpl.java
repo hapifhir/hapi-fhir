@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.binstore;
+package ca.uhn.fhir.jpa.binary.svc;
 
 /*-
  * #%L
@@ -21,6 +21,8 @@ package ca.uhn.fhir.jpa.binstore;
  */
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
+import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IIdType;
 

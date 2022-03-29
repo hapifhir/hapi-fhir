@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.binstore;
 
+import ca.uhn.fhir.jpa.binary.svc.NullBinaryStorageSvcImpl;
 import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.Test;
 

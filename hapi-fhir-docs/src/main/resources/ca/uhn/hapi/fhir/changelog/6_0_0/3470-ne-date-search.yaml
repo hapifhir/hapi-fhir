@@ -1,0 +1,4 @@
+---
+type: add
+issue: 3470
+title: "The server now supports date searches with the NOT_EQUALS (`ne`) prefix."
