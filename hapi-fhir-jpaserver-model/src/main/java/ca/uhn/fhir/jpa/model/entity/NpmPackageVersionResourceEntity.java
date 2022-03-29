@@ -74,7 +74,7 @@ public class NpmPackageVersionResourceEntity {
 	@Enumerated(EnumType.STRING)
 	@Column(name = "FHIR_VERSION", length = NpmPackageVersionEntity.FHIR_VERSION_LENGTH, nullable = false)
 	private FhirVersionEnum myFhirVersion;
-	@Column(name = "FHIR_VERSION_ID", length = NpmPackageVersionEntity.FHIR_VERSION_LENGTH, nullable = false)
+	@Column(name = "FHIR_VERSION_ID", length = NpmPackageVersionEntity.FHIR_VERSION_ID_LENGTH, nullable = false)
 	private String myFhirVersionId;
 	@Column(name = "RES_SIZE_BYTES", nullable = false)
 	private long myResSizeBytes;
