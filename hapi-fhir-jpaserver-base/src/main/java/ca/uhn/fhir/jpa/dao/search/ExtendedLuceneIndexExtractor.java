@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao.search;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
@@ -50,16 +51,19 @@ public class ExtendedLuceneIndexExtractor {
 	private final FhirContext myContext;
 	private final ResourceSearchParams myParams;
 	private final ISearchParamExtractor mySearchParamExtractor;
+	private final ModelConfig myModelConfig;
 
-	public ExtendedLuceneIndexExtractor(FhirContext theContext, ResourceSearchParams theActiveParams, ISearchParamExtractor theSearchParamExtractor) {
+	public ExtendedLuceneIndexExtractor(FhirContext theContext, ResourceSearchParams theActiveParams,
+			ISearchParamExtractor theSearchParamExtractor, ModelConfig theModelConfig) {
 		myContext = theContext;
 		myParams = theActiveParams;
 		mySearchParamExtractor = theSearchParamExtractor;
+		myModelConfig = theModelConfig;
 	}
 
 	@NotNull
 	public ExtendedLuceneIndexData extract(IBaseResource theResource, ResourceIndexedSearchParams theNewParams) {
-		ExtendedLuceneIndexData retVal = new ExtendedLuceneIndexData(myContext);
+		ExtendedLuceneIndexData retVal = new ExtendedLuceneIndexData(myContext, myModelConfig);
 
 		extractAutocompleteTokens(theResource, retVal);
 

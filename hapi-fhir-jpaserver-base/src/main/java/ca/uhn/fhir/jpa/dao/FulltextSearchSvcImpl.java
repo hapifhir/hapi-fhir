@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneClauseBuilder;
 import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneIndexExtractor;
 import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneSearchBuilder;
 import ca.uhn.fhir.jpa.dao.search.LastNOperation;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
 import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteOptions;
@@ -80,6 +81,11 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	private DaoConfig myDaoConfig;
 	@Autowired
 	ISearchParamExtractor mySearchParamExtractor;
+
+	@Autowired
+	private ModelConfig myModelConfig;
+
+
 	final private ExtendedLuceneSearchBuilder myAdvancedIndexQueryBuilder = new ExtendedLuceneSearchBuilder();
 
 	private Boolean ourDisabled;
@@ -94,7 +100,8 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	public ExtendedLuceneIndexData extractLuceneIndexData(IBaseResource theResource, ResourceIndexedSearchParams theNewParams) {
 		String resourceType = myFhirContext.getResourceType(theResource);
 		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(resourceType);
-		ExtendedLuceneIndexExtractor extractor = new ExtendedLuceneIndexExtractor(myFhirContext, activeSearchParams, mySearchParamExtractor);
+		ExtendedLuceneIndexExtractor extractor = new ExtendedLuceneIndexExtractor(
+			myFhirContext, activeSearchParams, mySearchParamExtractor, myModelConfig);
 		return extractor.extract(theResource,theNewParams);
 	}
 

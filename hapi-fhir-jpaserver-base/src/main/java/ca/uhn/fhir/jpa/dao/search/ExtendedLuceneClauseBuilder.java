@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.dao.search;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter;
+import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.api.Constants;
@@ -60,6 +61,7 @@ import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_NORMALIZED;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_TEXT;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_CODE;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_NORM_INDEX_NAME;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_SYSTEM;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_VALUE;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.SEARCH_PARAM_ROOT;
@@ -462,40 +464,42 @@ public class ExtendedLuceneClauseBuilder {
 
 
 	/**
-	 * No unit conversions are performed at the moment (3|ml and 0.003|l don't match)
-	 * The prefix combines with default range (5%) in this way:
-	 *   	APPROXIMATE: searches for resource quantity between passed param value +/- 10%
-	 * 	ENDS_BEFORE: searches for resource quantity (higher range boundary) > param value + 5%
-	 * 	LESSTHAN: searches for resource quantity < param value
-	 * 	LESSTHAN_OR_EQUALS: searches for resource quantity <= param value
-	 * 	EQUAL: searches for resource quantity between passed param value +/- 5%
-	 * 	STARTS_AFTER: searches for resource quantity (lower range boundary) > param value + 5%
-	 * 	GREATERTHAN: searches for resource quantity > param value
-	 * 	GREATERTHAN_OR_EQUALS: searches for resource quantity >= param value
-	 * 	NOT_EQUAL: searches for resource quantity not between passed param value +/- 5%
+	 * Differences with DB search:
+	 *  _ is no all-normalized-or-all-not. Each parameter is applied on quantity or  normalized quantity depending on UCUM fitness
+	 *  _ respects ranges for equal and approximate qualifiers
+	 *
+	 * Strategy: For each parameter, if it can be canonicalized, it is, and used against 'normalized-value-quantity' index
+	 * 	otherwise it is applied as-is to 'value-quantity'
 	 */
 	public void addQuantityUnmodifiedSearch(String theSearchParamName, List<List<IQueryParameterType>> theQuantityAndOrTerms) {
-		String fieldPath = SEARCH_PARAM_ROOT + "." + theSearchParamName + "." + HibernateSearchIndexWriter.QTY_PARAM_NAME;
 
 		for (List<IQueryParameterType> nextAnd : theQuantityAndOrTerms) {
 			for (IQueryParameterType paramType : nextAnd) {
-				QuantityParam qtyParam = QuantityParam.toQuantityParam(paramType);
 
+				QuantityParam qtyParam = QuantityParam.toQuantityParam(paramType);
+				ParamPrefixEnum activePrefix = qtyParam.getPrefix() == null ? ParamPrefixEnum.EQUAL : qtyParam.getPrefix();
 				BooleanPredicateClausesStep<?> quantityTerms = myPredicateFactory.bool();
 
-				ParamPrefixEnum activePrefix = qtyParam.getPrefix() == null ? ParamPrefixEnum.EQUAL : qtyParam.getPrefix();
-				setPrefixedQuantityPredicate(quantityTerms, activePrefix, qtyParam.getValue(), fieldPath + "." + QTY_VALUE);
+				QuantityParam canonicalQty = UcumServiceUtil.toCanonicalQuantityOrNull(qtyParam);
+				if (canonicalQty != null) {
+					String fieldPath = SEARCH_PARAM_ROOT + "." + QTY_NORM_INDEX_NAME + "." + HibernateSearchIndexWriter.QTY_PARAM_NAME;
+					setPrefixedQuantityPredicate(quantityTerms, activePrefix, canonicalQty.getValue(), fieldPath + "." + QTY_VALUE);
+				} else {
+				// non-canonicalizable parameter
+					String fieldPath = SEARCH_PARAM_ROOT + "." + theSearchParamName + "." + HibernateSearchIndexWriter.QTY_PARAM_NAME;
+					setPrefixedQuantityPredicate(quantityTerms, activePrefix, qtyParam.getValue(), fieldPath + "." + QTY_VALUE);
 
-				if ( isNotBlank(qtyParam.getSystem()) ) {
-					quantityTerms.must(
-						myPredicateFactory.match()
-							.field(fieldPath + "." + QTY_SYSTEM).matching(qtyParam.getSystem()) );
-				}
+					if ( isNotBlank(qtyParam.getSystem()) ) {
+						quantityTerms.must(
+							myPredicateFactory.match()
+								.field(fieldPath + "." + QTY_SYSTEM).matching(qtyParam.getSystem()) );
+					}
 
-				if ( isNotBlank(qtyParam.getUnits()) ) {
-					quantityTerms.must(
-					 	myPredicateFactory.match()
-							.field(fieldPath + "." + QTY_CODE).matching(qtyParam.getUnits()) );
+					if ( isNotBlank(qtyParam.getUnits()) ) {
+						quantityTerms.must(
+							myPredicateFactory.match()
+								.field(fieldPath + "." + QTY_CODE).matching(qtyParam.getUnits()) );
+					}
 				}
 
 				myRootClause.must(quantityTerms);
@@ -548,19 +552,17 @@ public class ExtendedLuceneClauseBuilder {
 
 			// LESSTHAN: searches for resource quantity < param value
 			case ENDS_BEFORE, // treated as LESSTHAN because search doesn't handle ranges
-				LESSTHAN ->
-				theQuantityTerms.must(
-					myPredicateFactory.range()
-						.field(theFieldName)
-						.lessThan(theValue));
+				LESSTHAN -> theQuantityTerms.must(
+				myPredicateFactory.range()
+					.field(theFieldName)
+					.lessThan(theValue));
 
 
 			// LESSTHAN_OR_EQUALS: searches for resource quantity <= param value
-			case LESSTHAN_OR_EQUALS ->
-				theQuantityTerms.mustNot(
-					myPredicateFactory.range()
-						.field(theFieldName)
-						.greaterThan(theValue));
+			case LESSTHAN_OR_EQUALS -> theQuantityTerms.mustNot(
+				myPredicateFactory.range()
+					.field(theFieldName)
+					.greaterThan(theValue));
 
 
 			// NOT_EQUAL: searches for resource quantity not between passed param value +/- 5%

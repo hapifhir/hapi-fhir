@@ -21,11 +21,18 @@ package ca.uhn.fhir.jpa.model.search;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.fhir.ucum.Pair;
 import org.hibernate.search.engine.backend.document.DocumentElement;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.math.BigDecimal;
+
+import static org.hl7.fhir.r4.model.Observation.SP_VALUE_QUANTITY;
 
 public class HibernateSearchIndexWriter {
 	private static final Logger ourLog = LoggerFactory.getLogger(HibernateSearchIndexWriter.class);
@@ -36,6 +43,7 @@ public class HibernateSearchIndexWriter {
 	public static final String SEARCH_PARAM_ROOT = "sp";
 
 	public static final String QTY_PARAM_NAME = "quantity";
+	public static final String QTY_NORM_INDEX_NAME = "normalized-value-quantity";
 	public static final String QTY_CODE = "code";
 	public static final String QTY_SYSTEM = "system";
 	public static final String QTY_VALUE = "value";
@@ -44,19 +52,21 @@ public class HibernateSearchIndexWriter {
 
 	final HibernateSearchElementCache myNodeCache;
 	final FhirContext myFhirContext;
+	final ModelConfig myModelConfig;
 
-	HibernateSearchIndexWriter(FhirContext theFhirContext, DocumentElement theRoot) {
+	HibernateSearchIndexWriter(FhirContext theFhirContext, ModelConfig theModelConfig, DocumentElement theRoot) {
 		myFhirContext = theFhirContext;
+		myModelConfig = theModelConfig;
 		myNodeCache = new HibernateSearchElementCache(theRoot);
 	}
 
 	public DocumentElement getSearchParamIndexNode(String theSearchParamName, String theIndexType) {
 		return myNodeCache.getObjectElement(SEARCH_PARAM_ROOT, theSearchParamName, theIndexType);
-
 	}
 
-	public static HibernateSearchIndexWriter forRoot(FhirContext theFhirContext, DocumentElement theDocument) {
-		return new HibernateSearchIndexWriter(theFhirContext, theDocument);
+	public static HibernateSearchIndexWriter forRoot(
+			FhirContext theFhirContext, ModelConfig theModelConfig, DocumentElement theDocument) {
+		return new HibernateSearchIndexWriter(theFhirContext, theModelConfig, theDocument);
 	}
 
 	public void writeStringIndex(String theSearchParam, String theValue) {
@@ -106,12 +116,32 @@ public class HibernateSearchIndexWriter {
 		ourLog.trace("Adding Search Param Reference: {} -- {}", theSearchParam, theValue);
 	}
 
+
 	public void writeQuantityIndex(String theSearchParam, QuantitySearchIndexData theValue) {
 		DocumentElement qtyIndexNode = getSearchParamIndexNode(theSearchParam, QTY_PARAM_NAME);
 		qtyIndexNode.addValue(QTY_CODE, theValue.getCode());
 		qtyIndexNode.addValue(QTY_SYSTEM, theValue.getSystem());
 		qtyIndexNode.addValue(QTY_VALUE, theValue.getValue());
 		ourLog.trace("Adding Search Param Quantity: {} -- {}", theSearchParam, theValue);
+
+		// need to add this only once, so we do it for only one quantity parameter
+		if ( ! theSearchParam.equals(SP_VALUE_QUANTITY) ) { return; }
+
+		if ( ! myModelConfig.getNormalizedQuantitySearchLevel().storageOrSearchSupported()) { return; }
+
+		//-- convert the value/unit to the canonical form if any
+		Pair canonicalForm = UcumServiceUtil.getCanonicalForm(theValue.getSystem(), theValue.getValue(), theValue.getCode());
+		if (canonicalForm == null) { return; }
+
+		ourLog.trace("Adding search param quantity normalized: {} -- {}", theSearchParam, theValue);
+		BigDecimal canonicalValue = BigDecimal.valueOf(Double.parseDouble(canonicalForm.getValue().asDecimal()));
+		String canonicalUnits = canonicalForm.getCode();
+
+		DocumentElement qtyNormIndexNode = getSearchParamIndexNode(QTY_NORM_INDEX_NAME, QTY_PARAM_NAME);
+		qtyNormIndexNode.addValue(QTY_CODE, canonicalUnits);
+		qtyNormIndexNode.addValue(QTY_SYSTEM, theValue.getSystem());
+		qtyNormIndexNode.addValue(QTY_VALUE, canonicalValue);
+
 	}
 
 

@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.model.search;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
@@ -43,14 +43,17 @@ public class ExtendedLuceneIndexData {
 	private static final Logger ourLog = LoggerFactory.getLogger(ExtendedLuceneIndexData.class);
 
 	final FhirContext myFhirContext;
+	final ModelConfig myModelConfig;
+
 	final SetMultimap<String, String> mySearchParamStrings = HashMultimap.create();
 	final SetMultimap<String, IBaseCoding> mySearchParamTokens = HashMultimap.create();
 	final SetMultimap<String, String> mySearchParamLinks = HashMultimap.create();
 	final SetMultimap<String, DateSearchIndexData> mySearchParamDates = HashMultimap.create();
 	final SetMultimap<String, QuantitySearchIndexData> mySearchParamQuantities = HashMultimap.create();
 
-	public ExtendedLuceneIndexData(FhirContext theFhirContext) {
+	public ExtendedLuceneIndexData(FhirContext theFhirContext, ModelConfig theModelConfig) {
 		this.myFhirContext = theFhirContext;
+		this.myModelConfig = theModelConfig;
 	}
 
 	private <V> BiConsumer<String, V> ifNotContained(BiConsumer<String, V> theIndexWriter) {
@@ -62,7 +65,7 @@ public class ExtendedLuceneIndexData {
 		};
 	}
 	public void writeIndexElements(DocumentElement theDocument) {
-		HibernateSearchIndexWriter indexWriter = HibernateSearchIndexWriter.forRoot(myFhirContext, theDocument);
+		HibernateSearchIndexWriter indexWriter = HibernateSearchIndexWriter.forRoot(myFhirContext, myModelConfig, theDocument);
 
 		ourLog.debug("Writing JPA index to Hibernate Search");
 

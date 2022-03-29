@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.model.search;
 import java.math.BigDecimal;
 
 class QuantitySearchIndexData {
+
 	// unit is also referred as code
 	private final String myCode;
 	private final String mySystem;

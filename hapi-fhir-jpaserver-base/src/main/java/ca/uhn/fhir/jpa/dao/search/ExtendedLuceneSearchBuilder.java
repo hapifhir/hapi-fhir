@@ -91,7 +91,6 @@ public class ExtendedLuceneSearchBuilder {
 					return false;
 			}
 		} else if (param instanceof QuantityParam) {
-//			fixme jm: this always the case?
 			return modifier.equals(EMPTY_MODIFIER);
 
 		} else if (param instanceof ReferenceParam) {
