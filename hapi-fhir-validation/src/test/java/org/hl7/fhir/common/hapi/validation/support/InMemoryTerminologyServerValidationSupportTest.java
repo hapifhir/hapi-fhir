@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -425,31 +424,38 @@ public class InMemoryTerminologyServerValidationSupportTest {
 	}
 
     @Test
-    void testExpandValuevalidateCodeInValueSet() {
-		 CodeSystem cs = new CodeSystem();
-		 cs.setId("v2-2.7-0360");
-		 cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		 cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
-		 cs.setUrl("http://terminology.hl7.org/CodeSystem/v2-0360|2.7");
-//		 cs.setVersion("2.7");
-		 cs.addConcept().setCode("MD").setDisplay("Doctor of Medicine");
-		 myPrePopulated.addCodeSystem(cs);
-
-
-		 ValueSet vs = new ValueSet();
-		 vs.setUrl("http://vs");
-		 vs
-			 .getCompose()
-			 .addInclude()
-			 .setSystem("http://terminology.hl7.org/CodeSystem/v2-0360|2.7");
-
-		 ConceptValidationOptions options = new ConceptValidationOptions().setInferSystem(true);
+    void testValidateCodeWhenCodeSystemUrlIsInCanonicalFormat() {
+		 ConceptValidationOptions options = new ConceptValidationOptions();
 		 ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
 
-		 String codeSystemUrlAndVersion = "http://terminology.hl7.org/CodeSystem/v2-0360|2.7";
-		 String code = "MD";
-		 String display = "dontCare";
-		 IValidationSupport.CodeValidationResult codeValidationResult = mySvc.validateCodeInValueSet(valCtx, options, codeSystemUrlAndVersion, code, display, vs);
+		 String pipedCodeSystemUrl = "http://terminology.hl7.org/CodeSystem/v2-0360|2.7";
+		 String codeMD = "MD";
+
+		 CodeSystem cs = new CodeSystem();
+		 cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		 cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		 cs.setUrl(pipedCodeSystemUrl);
+		 cs.setVersion("2.7");
+		 cs.addConcept()
+			 .setCode(codeMD)
+			 .setDisplay("Doctor of Medicine");
+		 myPrePopulated.addCodeSystem(cs);
+
+		 ValueSet theValueSet = new ValueSet();
+		 theValueSet.setUrl("http://someValueSetURL");
+		 theValueSet.setVersion("0360");
+		 theValueSet.getCompose().addInclude().setSystem(pipedCodeSystemUrl);
+
+		 String theCodeToValidateCodeSystemUrl = pipedCodeSystemUrl;
+		 String theCodeToValidate = codeMD;
+
+		 IValidationSupport.CodeValidationResult codeValidationResult = mySvc.validateCodeInValueSet(
+			 valCtx,
+			 options,
+			 theCodeToValidateCodeSystemUrl,
+			 theCodeToValidate,
+			 "dontCare",
+			 theValueSet);
 
 		 assertTrue(codeValidationResult.isOk());
 	 }
