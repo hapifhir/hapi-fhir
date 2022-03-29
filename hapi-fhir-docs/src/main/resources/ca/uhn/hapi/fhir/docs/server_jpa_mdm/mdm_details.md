@@ -31,6 +31,47 @@ external system).
 
 1. Source resources are only ever compared to Golden Resources via this EID.
 
+
+## Meta Tags
+
+In order for MDM to work, the service adds several pieces of metadata to a given resource. This section explains what MDM does to the resources it processes.
+When a resource is created via MDM (a Golden Resource), the following meta tag is added to the resource:
+
+```json
+{
+  "resourceType": "Patient",
+  "meta": {
+    "tag": [
+      {
+        "system": "https://hapifhir.org/NamingSystem/managing-mdm-system",
+        "code": "HAPI-MDM"
+      }
+    ]
+  }
+}
+```
+
+When this tag is present, the resource is considered managed by MDM. Any resource that is MDM-managed is considered read-only by the FHIR endpoint. Changes to it 
+can only happen via MDM operations, and attribute survivorship. 
+
+There may be use cases where a resource is ingested into the system but you _don't_ want to perform MDM processing on it. Consider the example of multiple patients being admitted into a hospital as "John Doe". If MDM were performed on this patient, it's 
+possible that hundreds of John Doe's could be linked to the same Golden Resource. This would be a very bad situation as they are likely not the same person. To prevent this, you can add the `NO-MDM` tag to the resource. This will prevent MDM from processing it.
+
+```json
+{
+  "resourceType": "Patient",
+  "meta": {
+    "tag": [
+      {
+        "system": "https://hapifhir.org/NamingSystem/managing-mdm-system",
+        "code": "NO-MDM"
+      }
+    ]
+  }
+}
+```
+
+
 ## Links
 
 1. HAPI MDM manages mdm-link records ("links") that link a source resource to a Golden Resource. When these are created/updated by matching rules, the links are marked as AUTO.  When these links are changed manually, they are marked as MANUAL.
