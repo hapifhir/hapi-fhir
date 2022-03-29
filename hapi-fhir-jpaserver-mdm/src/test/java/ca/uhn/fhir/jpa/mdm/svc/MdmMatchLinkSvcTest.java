@@ -286,6 +286,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		// Patient with "no-mdm" tag is not matched
 		Patient janePatient = buildJanePatient();
 		janePatient.getMeta().addTag(MdmConstants.SYSTEM_MDM_MANAGED, MdmConstants.CODE_NO_MDM_MANAGED, "Don't MDM on me!");
+		String s = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(janePatient);
 		createPatientAndUpdateLinks(janePatient);
 		assertLinkCount(0);
 	}
