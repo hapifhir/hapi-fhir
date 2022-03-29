@@ -85,7 +85,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -1118,12 +1117,12 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			if (!thePaths.contains("|") && !thePaths.contains(" or ")) {
 				return new String[]{thePaths};
 			}
-			return splitOutOfParenOrs(thePaths);
+			return splitOutOfParensOrs(thePaths);
 		}
 	}
 
 	/**
-	 * Iteratively splits a string on any ` or ` or | that is ** not**contained inside a set of parentheses. e.g.
+	 * Iteratively splits a string on any ` or ` or | that is ** not** contained inside a set of parentheses. e.g.
 	 *
 	 * "Patient.select(a or b)" -->  ["Patient.select(a or b)"]
 	 * "Patient.select(a or b) or Patient.select(c or d )" --> ["Patient.select(a or b)", "Patient.select(c or d)"]
@@ -1134,13 +1133,14 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	 * @return The split string
 
 	 */
-	private String[] splitOutOfParenOrs(String thePaths) {
+	private String[] splitOutOfParensOrs(String thePaths) {
 		List<String> topLevelOrExpressions = splitOutOfParensToken(thePaths, " or ");
 		List<String> retVal = topLevelOrExpressions.stream()
 			.flatMap(s -> splitOutOfParensToken(s, "|").stream())
 			.collect(Collectors.toList());
 		return retVal.toArray(new String[retVal.size()]);
 	}
+
 	private List<String> splitOutOfParensToken(String thePath, String theToken) {
 		int tokenLength = theToken.length();
 		int index = thePath.indexOf(theToken);
@@ -1154,7 +1154,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			}
 			index = thePath.indexOf(theToken, index + tokenLength);
 		}
-		retVal.add(thePath.substring(rightIndex));//Get the final element
+		retVal.add(thePath.substring(rightIndex));
 		return retVal;
 	}
 
