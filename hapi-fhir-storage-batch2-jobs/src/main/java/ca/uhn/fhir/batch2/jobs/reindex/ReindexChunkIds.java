@@ -24,6 +24,8 @@ import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +42,13 @@ public class ReindexChunkIds implements IModelJson {
 		return myIds;
 	}
 
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+			.append("ids", myIds)
+			.toString();
+	}
+
 
 	public static class Id implements IModelJson {
 
@@ -47,6 +56,13 @@ public class ReindexChunkIds implements IModelJson {
 		private String myResourceType;
 		@JsonProperty("id")
 		private String myId;
+
+		@Override
+		public String toString() {
+			// We put a space in here and not a "/" since this is a PID, not
+			// a resource ID
+			return "[" + myResourceType + " " + myId + "]";
+		}
 
 		public String getResourceType() {
 			return myResourceType;

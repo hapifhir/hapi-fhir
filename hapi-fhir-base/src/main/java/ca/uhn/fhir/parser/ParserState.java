@@ -1249,8 +1249,8 @@ class ParserState<T> {
 		public void wereBack() {
 			super.wereBack();
 
-			if (getCurrentElement() instanceof IDomainResource) {
-				IDomainResource elem = (IDomainResource) getCurrentElement();
+			if (getCurrentElement() instanceof IBaseResource) {
+				IBaseResource elem = (IBaseResource) getCurrentElement();
 				String resourceName = myContext.getResourceType(elem);
 				String versionId = elem.getMeta().getVersionId();
 				if (StringUtils.isBlank(elem.getIdElement().getIdPart())) {

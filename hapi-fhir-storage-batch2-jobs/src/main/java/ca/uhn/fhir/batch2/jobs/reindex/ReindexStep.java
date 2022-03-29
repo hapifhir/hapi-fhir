@@ -30,7 +30,6 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.api.svc.IResourceReindexSvc;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -55,8 +54,6 @@ public class ReindexStep implements IJobStepWorker<ReindexJobParameters, Reindex
 	private static final Logger ourLog = LoggerFactory.getLogger(ReindexStep.class);
 	@Autowired
 	private HapiTransactionService myHapiTransactionService;
-	@Autowired
-	private IResourceReindexSvc myResourceReindexSvc;
 	@Autowired
 	private IFhirSystemDao<?, ?> mySystemDao;
 	@Autowired

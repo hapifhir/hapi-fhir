@@ -33,7 +33,7 @@ public abstract class RestfulResponse<T extends RequestDetails> implements IRest
 
 	private IIdType myOperationResourceId;
 	private IPrimitiveType<Date> myOperationResourceLastUpdated;
-	private Map<String, List<String>> theHeaders = new HashMap<>();
+	private final Map<String, List<String>> myHeaders = new HashMap<>();
 	private T theRequestDetails;
 
 	public RestfulResponse(T requestDetails) {
@@ -51,7 +51,7 @@ public abstract class RestfulResponse<T extends RequestDetails> implements IRest
 	 */
 	@Override
 	public Map<String, List<String>> getHeaders() {
-		return theHeaders;
+		return myHeaders;
 	}
 
 	/**
