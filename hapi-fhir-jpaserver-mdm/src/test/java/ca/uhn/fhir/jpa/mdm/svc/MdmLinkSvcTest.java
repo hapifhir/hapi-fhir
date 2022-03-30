@@ -197,6 +197,6 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 		List<MdmLink> targets = myMdmLinkDaoSvc.findMdmLinksByGoldenResource(goldenPatient);
 		assertFalse(targets.isEmpty());
 		assertEquals(1, targets.size());
-		assertEquals(requestPartitionId.getFirstPartitionIdOrNull(), targets.get(0).getPartitionId());
+		assertEquals(requestPartitionId.getFirstPartitionIdOrNull(), targets.get(0).getPartitionId().getPartitionId());
 	}
 }
