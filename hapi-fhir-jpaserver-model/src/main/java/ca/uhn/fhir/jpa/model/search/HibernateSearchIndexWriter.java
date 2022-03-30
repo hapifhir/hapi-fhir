@@ -130,7 +130,8 @@ public class HibernateSearchIndexWriter {
 		if ( ! myModelConfig.getNormalizedQuantitySearchLevel().storageOrSearchSupported()) { return; }
 
 		//-- convert the value/unit to the canonical form if any
-		Pair canonicalForm = UcumServiceUtil.getCanonicalForm(theValue.getSystem(), theValue.getValue(), theValue.getCode());
+		Pair canonicalForm = UcumServiceUtil.getCanonicalForm(theValue.getSystem(),
+			BigDecimal.valueOf(theValue.getValue()), theValue.getCode());
 		if (canonicalForm == null) { return; }
 
 		ourLog.trace("Adding search param quantity normalized: {} -- {}", theSearchParam, theValue);
@@ -140,7 +141,7 @@ public class HibernateSearchIndexWriter {
 		DocumentElement qtyNormIndexNode = getSearchParamIndexNode(QTY_NORM_INDEX_NAME, QTY_PARAM_NAME);
 		qtyNormIndexNode.addValue(QTY_CODE, canonicalUnits);
 		qtyNormIndexNode.addValue(QTY_SYSTEM, theValue.getSystem());
-		qtyNormIndexNode.addValue(QTY_VALUE, canonicalValue);
+		qtyNormIndexNode.addValue(QTY_VALUE, canonicalValue.doubleValue());
 
 	}
 

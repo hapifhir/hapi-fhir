@@ -27,10 +27,10 @@ class QuantitySearchIndexData {
 	// unit is also referred as code
 	private final String myCode;
 	private final String mySystem;
-	private final BigDecimal myValue;
+	private final double myValue;
 
 
-	QuantitySearchIndexData(String theCode, String theSystem, BigDecimal theValue) {
+	QuantitySearchIndexData(String theCode, String theSystem, double theValue) {
 		myCode = theCode;
 		mySystem = theSystem;
 		myValue = theValue;
@@ -41,5 +41,5 @@ class QuantitySearchIndexData {
 
 	public String getSystem() { return mySystem; }
 
-	public BigDecimal getValue() { return myValue; }
+	public double getValue() { return myValue; }
 }

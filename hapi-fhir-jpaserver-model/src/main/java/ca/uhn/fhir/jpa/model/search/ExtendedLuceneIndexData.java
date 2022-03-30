@@ -104,7 +104,7 @@ public class ExtendedLuceneIndexData {
 		mySearchParamDates.put(theSpName, new DateSearchIndexData(theLowerBound, theLowerBoundOrdinal, theUpperBound, theUpperBoundOrdinal));
 	}
 
-	public void addQuantityIndexData(String theSpName, String theUnits, String theSystem, BigDecimal theValue) {
+	public void addQuantityIndexData(String theSpName, String theUnits, String theSystem, double theValue) {
 		mySearchParamQuantities.put(theSpName, new QuantitySearchIndexData(theUnits, theSystem, theValue));
 	}
 

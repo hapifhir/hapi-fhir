@@ -103,9 +103,7 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 			.projectable(Projectable.NO)
 			.sortable(Sortable.YES);
 
-		StandardIndexFieldTypeOptionsStep<?, BigDecimal> bigDecimalFieldType = indexFieldTypeFactory.asBigDecimal()
-//			fixme jm: what should it be? shouldn't we use double and avoid this conversion?
-			.decimalScale(10)
+		StandardIndexFieldTypeOptionsStep<?, Double> bigDecimalFieldType = indexFieldTypeFactory.asDouble()
 			.projectable(Projectable.NO)
 			.sortable(Sortable.YES);
 

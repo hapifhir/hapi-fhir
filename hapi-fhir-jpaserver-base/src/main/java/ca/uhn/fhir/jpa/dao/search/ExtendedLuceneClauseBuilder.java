@@ -70,6 +70,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class ExtendedLuceneClauseBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(ExtendedLuceneClauseBuilder.class);
 
+	private static final double QTY_APPROX_TOLERANCE_PERCENT = .10;
+	private static final double QTY_TOLERANCE_PERCENT = .10;
+
 	final FhirContext myFhirContext;
 	public final SearchPredicateFactory myPredicateFactory;
 	public final BooleanPredicateClausesStep<?> myRootClause;
@@ -483,11 +486,13 @@ public class ExtendedLuceneClauseBuilder {
 				QuantityParam canonicalQty = UcumServiceUtil.toCanonicalQuantityOrNull(qtyParam);
 				if (canonicalQty != null) {
 					String fieldPath = SEARCH_PARAM_ROOT + "." + QTY_NORM_INDEX_NAME + "." + HibernateSearchIndexWriter.QTY_PARAM_NAME;
-					setPrefixedQuantityPredicate(quantityTerms, activePrefix, canonicalQty.getValue(), fieldPath + "." + QTY_VALUE);
+					setPrefixedQuantityPredicate(quantityTerms, activePrefix,
+						canonicalQty.getValue().doubleValue(), fieldPath + "." + QTY_VALUE);
 				} else {
 				// non-canonicalizable parameter
 					String fieldPath = SEARCH_PARAM_ROOT + "." + theSearchParamName + "." + HibernateSearchIndexWriter.QTY_PARAM_NAME;
-					setPrefixedQuantityPredicate(quantityTerms, activePrefix, qtyParam.getValue(), fieldPath + "." + QTY_VALUE);
+					setPrefixedQuantityPredicate(quantityTerms, activePrefix,
+						qtyParam.getValue().doubleValue(), fieldPath + "." + QTY_VALUE);
 
 					if ( isNotBlank(qtyParam.getSystem()) ) {
 						quantityTerms.must(
@@ -509,29 +514,25 @@ public class ExtendedLuceneClauseBuilder {
 
 
 	private void setPrefixedQuantityPredicate(BooleanPredicateClausesStep<?> theQuantityTerms,
-			ParamPrefixEnum thePrefix, BigDecimal theValue, String theFieldName) {
+			ParamPrefixEnum thePrefix, double theValue, String theFieldName) {
 
 		switch (thePrefix) {
 			case APPROXIMATE -> {
 				//	APPROXIMATE: searches for resource quantity between passed param value +/- 10%
-				BigDecimal tolerance = theValue.multiply(BigDecimal.valueOf(.10));
-				BigDecimal lowerExcludedBoundary = theValue.subtract(tolerance);
-				BigDecimal upperExcludedBoundary = theValue.add(tolerance);
+				double tolerance = theValue * QTY_APPROX_TOLERANCE_PERCENT;
 				theQuantityTerms.must(
 					myPredicateFactory.range()
 						.field(theFieldName)
-						.between(lowerExcludedBoundary, upperExcludedBoundary));
+						.between(theValue-tolerance, theValue+tolerance));
 			}
 
 			case EQUAL -> {
 				// EQUAL: searches for resource quantity between passed param value +/- 5%
-				BigDecimal tolerance = theValue.multiply(BigDecimal.valueOf(.05));
-				BigDecimal lowerExcludedBoundary = theValue.subtract(tolerance);
-				BigDecimal upperExcludedBoundary = theValue.add(tolerance);
+				double tolerance = theValue * QTY_TOLERANCE_PERCENT;
 				theQuantityTerms.must(
 					myPredicateFactory.range()
 						.field(theFieldName)
-						.between(lowerExcludedBoundary, upperExcludedBoundary));
+						.between(theValue-tolerance, theValue+tolerance));
 			}
 
 			case STARTS_AFTER,  // treated as GREATERTHAN because search doesn't handle ranges
@@ -567,13 +568,11 @@ public class ExtendedLuceneClauseBuilder {
 
 			// NOT_EQUAL: searches for resource quantity not between passed param value +/- 5%
 			case NOT_EQUAL -> {
-				BigDecimal tolerance = theValue.multiply(BigDecimal.valueOf(.05));
-				BigDecimal lowerExcludedBoundary = theValue.subtract(tolerance);
-				BigDecimal upperExcludedBoundary = theValue.add(tolerance);
+				double tolerance = theValue * QTY_TOLERANCE_PERCENT;
 				theQuantityTerms.mustNot(
 					myPredicateFactory.range()
 						.field(theFieldName)
-						.between(lowerExcludedBoundary, upperExcludedBoundary));
+						.between(theValue-tolerance, theValue+tolerance));
 			}
 		}
 	}
