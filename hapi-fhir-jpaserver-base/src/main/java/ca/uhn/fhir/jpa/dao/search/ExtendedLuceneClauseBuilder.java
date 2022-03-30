@@ -516,8 +516,8 @@ public class ExtendedLuceneClauseBuilder {
 			ParamPrefixEnum thePrefix, double theValue, String theFieldName) {
 
 		switch (thePrefix) {
+			//	searches for resource quantity between passed param value +/- 10%
 			case APPROXIMATE -> {
-				//	APPROXIMATE: searches for resource quantity between passed param value +/- 10%
 				double tolerance = theValue * QTY_APPROX_TOLERANCE_PERCENT;
 				theQuantityTerms.must(
 					myPredicateFactory.range()
@@ -525,8 +525,8 @@ public class ExtendedLuceneClauseBuilder {
 						.between(theValue-tolerance, theValue+tolerance));
 			}
 
+			// searches for resource quantity between passed param value +/- 5%
 			case EQUAL -> {
-				// EQUAL: searches for resource quantity between passed param value +/- 5%
 				double tolerance = theValue * QTY_TOLERANCE_PERCENT;
 				theQuantityTerms.must(
 					myPredicateFactory.range()
@@ -534,31 +534,40 @@ public class ExtendedLuceneClauseBuilder {
 						.between(theValue-tolerance, theValue+tolerance));
 			}
 
-			case STARTS_AFTER,  // treated as GREATERTHAN because search doesn't handle ranges
-				GREATERTHAN ->
-				// GREATERTHAN: searches for resource quantity > param value
+//			todo: following duplication can be replaced by comma separated cases after source >= 14
+			// searches for resource quantity > param value
+			case GREATERTHAN ->
+				theQuantityTerms.must(
+					myPredicateFactory.range()
+						.field(theFieldName)
+						.greaterThan(theValue));
+			case STARTS_AFTER  -> // treated as GREATERTHAN because search doesn't handle ranges
 				theQuantityTerms.must(
 					myPredicateFactory.range()
 						.field(theFieldName)
 						.greaterThan(theValue));
 
+			// searches for resource quantity not < param value
 			case GREATERTHAN_OR_EQUALS ->
-				// GREATERTHAN_OR_EQUALS: searches for resource quantity >= param value
 				theQuantityTerms.mustNot(
 					myPredicateFactory.range()
 						.field(theFieldName)
 						.lessThan(theValue));
 
+//			todo: following duplication can be replaced by comma separated cases after source >= 14
+			// searches for resource quantity < param value
+			case LESSTHAN ->
+				theQuantityTerms.must(
+					myPredicateFactory.range()
+						.field(theFieldName)
+						.lessThan(theValue));
+			case ENDS_BEFORE -> // treated as LESSTHAN because search doesn't handle ranges
+				theQuantityTerms.must(
+					myPredicateFactory.range()
+						.field(theFieldName)
+						.lessThan(theValue));
 
-			// LESSTHAN: searches for resource quantity < param value
-			case ENDS_BEFORE, // treated as LESSTHAN because search doesn't handle ranges
-				LESSTHAN -> theQuantityTerms.must(
-				myPredicateFactory.range()
-					.field(theFieldName)
-					.lessThan(theValue));
-
-
-			// LESSTHAN_OR_EQUALS: searches for resource quantity <= param value
+			// searches for resource quantity not > param value
 			case LESSTHAN_OR_EQUALS -> theQuantityTerms.mustNot(
 				myPredicateFactory.range()
 					.field(theFieldName)
