@@ -1,5 +1,7 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
+import ca.uhn.fhir.context.support.TranslateConceptResult;
+import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -11,20 +13,27 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.ParametersUtil;
+import ca.uhn.fhir.util.StringUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.sql.Array;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -329,6 +338,92 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 	@Override
 	public boolean isValueSetSupported(ValidationSupportContext theValidationSupportContext, String theValueSetUrl) {
 		return fetchValueSet(theValueSetUrl) != null;
+	}
+
+	@Override
+	public TranslateConceptResults translateConcept(TranslateCodeRequest theRequest) {
+		IGenericClient client = provideClient();
+		FhirContext fhirContext = client.getFhirContext();
+		IBaseParameters params = ParametersUtil.newInstance(fhirContext);
+
+		if (!StringUtils.isEmpty(theRequest.getConceptMapUrl())) {
+			ParametersUtil.addParameterToParametersUri(fhirContext, params, "url", theRequest.getConceptMapUrl());
+		}
+		if (!StringUtils.isEmpty(theRequest.getConceptMapVersion())) {
+			ParametersUtil.addParameterToParametersString(fhirContext, params, "conceptMapVersion", theRequest.getConceptMapVersion());
+		}
+		if (!StringUtils.isEmpty(theRequest.getSourceCode())) {
+			ParametersUtil.addParameterToParametersString(fhirContext, params, "code", theRequest.getSourceCode());
+		}
+		if (!StringUtils.isEmpty(theRequest.getSourceSystemUrl())) {
+			ParametersUtil.addParameterToParametersUri(fhirContext, params, "system", theRequest.getSourceSystemUrl());
+		}
+		if (!StringUtils.isEmpty(theRequest.getSourceSystemVersion())) {
+			ParametersUtil.addParameterToParametersString(fhirContext, params, "version", theRequest.getSourceSystemVersion());
+		}
+		if (!StringUtils.isEmpty(theRequest.getSourceValueSetUrl())) {
+			ParametersUtil.addParameterToParametersUri(fhirContext, params, "source", theRequest.getSourceValueSetUrl());
+		}
+		if (!StringUtils.isEmpty(theRequest.getTargetValueSetUrl())) {
+			ParametersUtil.addParameterToParametersUri(fhirContext, params, "target", theRequest.getTargetValueSetUrl());
+		}
+		if (!StringUtils.isEmpty(theRequest.getTargetSystemUrl())) {
+			ParametersUtil.addParameterToParametersUri(fhirContext, params, "targetsystem", theRequest.getTargetSystemUrl());
+		}
+		if (theRequest.isReverse()) {
+			ParametersUtil.addParameterToParametersBoolean(fhirContext, params, "reverse", theRequest.isReverse());
+		}
+
+		IBaseParameters outcome = client
+			.operation()
+			.onType("ConceptMap")
+			.named("$translate")
+			.withParameters(params)
+			.useHttpGet()
+			.execute();
+
+		Optional<String> result = ParametersUtil.getNamedParameterValueAsString(fhirContext, outcome, "result");
+		Optional<String> message = ParametersUtil.getNamedParameterValueAsString(fhirContext, outcome, "message");
+		List<IBase> matches = ParametersUtil.getNamedParameters(fhirContext, outcome, "match");
+
+		TranslateConceptResults retVal = new TranslateConceptResults();
+		if (result.isPresent()) {
+			retVal.setResult(Boolean.parseBoolean(result.get()));
+		}
+		if (message.isPresent()) {
+			retVal.setMessage(message.get());
+		}
+		if (!matches.isEmpty()) {
+
+			List<TranslateConceptResult> resultList = new ArrayList();
+			for (IBase m : matches) {
+				TranslateConceptResult match = new TranslateConceptResult();
+				String equivalence = ParametersUtil.getParameterPartValueAsString(fhirContext, m, "equivalence");
+				Optional<IBase> concept = ParametersUtil.getParameterPartValue(fhirContext, m, "concept");
+				String source = ParametersUtil.getParameterPartValueAsString(fhirContext, m, "source");
+
+				if (StringUtils.isNotBlank(equivalence)) {
+					match.setEquivalence(equivalence);
+				}
+
+				if (concept.isPresent()) {
+					IBaseCoding matchedCoding = (IBaseCoding) concept.get();
+					match.setSystem(matchedCoding.getSystem());
+					match.setCode(matchedCoding.getCode());
+					match.setDisplay(matchedCoding.getDisplay());
+
+					if (StringUtils.isNotBlank(source)) {
+						match.setConceptMapUrl(source);
+					}
+
+					resultList.add(match);
+				}
+			}
+
+			retVal.setResults(resultList);
+		}
+
+		return retVal;
 	}
 
 	private IGenericClient provideClient() {

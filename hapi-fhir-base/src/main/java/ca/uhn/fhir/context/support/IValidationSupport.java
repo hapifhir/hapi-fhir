@@ -807,20 +807,46 @@ public interface IValidationSupport {
 
 	class TranslateCodeRequest {
 		private final String mySourceSystemUrl;
+		private final String mySourceSystemVersion;
 		private final String mySourceCode;
 		private final String myTargetSystemUrl;
-		private final int myHashCode;
+		private final String myConceptMapUrl;
+		private final String myConceptMapVersion;
+		private final String mySourceValueSetUrl;
+		private final String myTargetValueSetUrl;
+		private final boolean myReverse;
 
 		public TranslateCodeRequest(String theSourceSystemUrl, String theSourceCode, String theTargetSystemUrl) {
 			mySourceSystemUrl = theSourceSystemUrl;
+			mySourceSystemVersion = null;
 			mySourceCode = theSourceCode;
 			myTargetSystemUrl = theTargetSystemUrl;
+			myConceptMapUrl = null;
+			myConceptMapVersion = null;
+			mySourceValueSetUrl = null;
+			myTargetValueSetUrl = null;
+			myReverse = false;
+		}
 
-			myHashCode = new HashCodeBuilder(17, 37)
-				.append(mySourceSystemUrl)
-				.append(mySourceCode)
-				.append(myTargetSystemUrl)
-				.toHashCode();
+		public TranslateCodeRequest(
+				String theSourceSystemUrl,
+				String theSourceSystemVersion,
+				String theSourceCode,
+				String theTargetSystemUrl,
+				String theConceptMapUrl,
+				String theConceptMapVersion,
+				String theSourceValueSetUrl,
+				String theTargetValueSetUrl,
+				boolean theReverse) {
+			mySourceSystemUrl = theSourceSystemUrl;
+			mySourceSystemVersion = theSourceSystemVersion;
+			mySourceCode = theSourceCode;
+			myTargetSystemUrl = theTargetSystemUrl;
+			myConceptMapUrl = theConceptMapUrl;
+			myConceptMapVersion = theConceptMapVersion;
+			mySourceValueSetUrl = theSourceValueSetUrl;
+			myTargetValueSetUrl = theTargetValueSetUrl;
+			myReverse = theReverse;
 		}
 
 		@Override
@@ -837,18 +863,38 @@ public interface IValidationSupport {
 
 			return new EqualsBuilder()
 				.append(mySourceSystemUrl, that.mySourceSystemUrl)
+				.append(mySourceSystemVersion, that.mySourceSystemVersion)
 				.append(mySourceCode, that.mySourceCode)
 				.append(myTargetSystemUrl, that.myTargetSystemUrl)
+				.append(myConceptMapUrl, that.myConceptMapUrl)
+				.append(myConceptMapVersion, that.myConceptMapVersion)
+				.append(mySourceValueSetUrl, that.mySourceValueSetUrl)
+				.append(myTargetValueSetUrl, that.myTargetValueSetUrl)
+				.append(myReverse, that.myReverse)
 				.isEquals();
 		}
 
 		@Override
 		public int hashCode() {
-			return myHashCode;
+			return new HashCodeBuilder(17, 37)
+				.append(mySourceSystemUrl)
+				.append(mySourceSystemVersion)
+				.append(mySourceCode)
+				.append(myTargetSystemUrl)
+				.append(myConceptMapUrl)
+				.append(myConceptMapVersion)
+				.append(mySourceValueSetUrl)
+				.append(myTargetValueSetUrl)
+				.append(myReverse)
+				.toHashCode();
 		}
 
 		public String getSourceSystemUrl() {
 			return mySourceSystemUrl;
+		}
+
+		public String getSourceSystemVersion() {
+			return mySourceSystemVersion;
 		}
 
 		public String getSourceCode() {
@@ -857,6 +903,26 @@ public interface IValidationSupport {
 
 		public String getTargetSystemUrl() {
 			return myTargetSystemUrl;
+		}
+
+		public String getConceptMapUrl() {
+			return myConceptMapUrl;
+		}
+
+		public String getConceptMapVersion() {
+			return myConceptMapVersion;
+		}
+
+		public String getSourceValueSetUrl() {
+			return mySourceValueSetUrl;
+		}
+
+		public String getTargetValueSetUrl() {
+			return myTargetValueSetUrl;
+		}
+
+		public boolean isReverse() {
+			return myReverse;
 		}
 	}
 
