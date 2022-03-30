@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.batch.mdm.job;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.batch.reader.BaseReverseCronologicalBatchPidReader;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
@@ -42,7 +43,11 @@ public class ReverseCronologicalBatchMdmLinkPidReader extends BaseReverseCronolo
 	protected Set<Long> getNextPidBatch(ResourceSearch resourceSearch) {
 		String resourceName = resourceSearch.getResourceName();
 		Pageable pageable = PageRequest.of(0, getBatchSize());
-		List<Integer> partitionIds = resourceSearch.getRequestPartitionId().getPartitionIds();
+		RequestPartitionId requestPartitionId = resourceSearch.getRequestPartitionId();
+		if (requestPartitionId.isAllPartitions()){
+			return new HashSet<>(myMdmLinkDao.findPidByResourceNameAndThreshold(resourceName, getCurrentHighThreshold(), pageable));
+		}
+		List<Integer> partitionIds = requestPartitionId.getPartitionIds();
 		//Expand out the list to handle the REDIRECT/POSSIBLE DUPLICATE ones.
 		return new HashSet<>(myMdmLinkDao.findPidByResourceNameAndThresholdAndPartitionId(resourceName, getCurrentHighThreshold(), partitionIds, pageable));
 	}

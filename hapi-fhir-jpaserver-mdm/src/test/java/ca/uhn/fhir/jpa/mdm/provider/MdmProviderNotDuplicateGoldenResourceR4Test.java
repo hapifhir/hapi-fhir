@@ -67,7 +67,7 @@ public class MdmProviderNotDuplicateGoldenResourceR4Test extends BaseProviderR4T
 			myMdmProvider.notDuplicate(myGoldenPatientId, myTargetPatientId, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), startsWith("No link exists between"));
+			assertThat(e.getMessage(), startsWith("HAPI-0745: No link exists between"));
 		}
 	}
 
@@ -119,7 +119,7 @@ public class MdmProviderNotDuplicateGoldenResourceR4Test extends BaseProviderR4T
 			myMdmProvider.notDuplicate(goldenPatientId, targetPatientId, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), startsWith("No link exists between"));
+			assertThat(e.getMessage(), startsWith("HAPI-0745: No link exists between"));
 		}
 	}
 }

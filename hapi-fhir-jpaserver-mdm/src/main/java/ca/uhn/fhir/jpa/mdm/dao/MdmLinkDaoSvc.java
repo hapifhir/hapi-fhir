@@ -306,7 +306,7 @@ public class MdmLinkDaoSvc {
 			andPredicates.add(matchResultPredicate);
 		}
 		if (theLinkSource != null) {
-			Predicate linkSourcePredicate = criteriaBuilder.equal(from.get("myMatchResult").as(MdmLinkSourceEnum.class), theLinkSource);
+			Predicate linkSourcePredicate = criteriaBuilder.equal(from.get("myLinkSource").as(MdmLinkSourceEnum.class), theLinkSource);
 			andPredicates.add(linkSourcePredicate);
 		}
 		if (!CollectionUtils.isEmpty(thePartitionId)) {
