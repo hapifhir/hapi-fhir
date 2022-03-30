@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3504
+title: "Previously, allowing any client assigned id by setting `ClientIdStrategyEnum` to `ANY` threw an exception when 
+creating resources due to a bug with converting the forced ID to its primary key. This has been corrected."
