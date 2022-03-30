@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.dao.search;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
@@ -48,13 +49,15 @@ import java.util.Map;
  */
 public class ExtendedLuceneIndexExtractor {
 
+	private final DaoConfig myDaoConfig;
 	private final FhirContext myContext;
 	private final ResourceSearchParams myParams;
 	private final ISearchParamExtractor mySearchParamExtractor;
 	private final ModelConfig myModelConfig;
 
-	public ExtendedLuceneIndexExtractor(FhirContext theContext, ResourceSearchParams theActiveParams,
+	public ExtendedLuceneIndexExtractor(DaoConfig theDaoConfig, FhirContext theContext, ResourceSearchParams theActiveParams,
 			ISearchParamExtractor theSearchParamExtractor, ModelConfig theModelConfig) {
+		myDaoConfig = theDaoConfig;
 		myContext = theContext;
 		myParams = theActiveParams;
 		mySearchParamExtractor = theSearchParamExtractor;
@@ -64,6 +67,12 @@ public class ExtendedLuceneIndexExtractor {
 	@NotNull
 	public ExtendedLuceneIndexData extract(IBaseResource theResource, ResourceIndexedSearchParams theNewParams) {
 		ExtendedLuceneIndexData retVal = new ExtendedLuceneIndexData(myContext, myModelConfig);
+
+		if(myDaoConfig.isStoreResourceInLuceneIndex()) {
+			retVal.setRawResourceData(myContext.newJsonParser().encodeResourceToString(theResource));
+		}
+
+		retVal.setForcedId(theResource.getIdElement().getIdPart());
 
 		extractAutocompleteTokens(theResource, retVal);
 
@@ -121,7 +130,6 @@ public class ExtendedLuceneIndexExtractor {
 			.filter(p->p.getParamType() == RestSearchParameterTypeEnum.TOKEN)
 			// TODO it would be nice to reuse TokenExtractor
 			.forEach(p-> mySearchParamExtractor.extractValues(p.getPath(), theResource)
-				.stream()
 				.forEach(nextValue->indexTokenValue(theRetVal, p, nextValue)
 			));
 	}

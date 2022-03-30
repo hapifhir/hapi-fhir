@@ -63,8 +63,9 @@ public class ReindexChunkRange implements IModelJson {
 		return myStart;
 	}
 
-	public void setStart(@Nonnull Date theStart) {
+	public ReindexChunkRange setStart(@Nonnull Date theStart) {
 		myStart = theStart;
+		return this;
 	}
 
 	@Nonnull
@@ -72,8 +73,9 @@ public class ReindexChunkRange implements IModelJson {
 		return myEnd;
 	}
 
-	public void setEnd(@Nonnull Date theEnd) {
+	public ReindexChunkRange setEnd(@Nonnull Date theEnd) {
 		myEnd = theEnd;
+		return this;
 	}
 
 }

@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.binstore;
+package ca.uhn.fhir.jpa.binary.api;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR Storage api
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%

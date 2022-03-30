@@ -20,8 +20,6 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
-import java.util.Optional;
-
 /**
  * Support different UCUM services level for FHIR Quantity data type.
  * 

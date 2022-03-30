@@ -791,7 +791,7 @@ public class GenericJaxRsClientDstu3Test {
 		org.hl7.fhir.dstu3.model.Bundle responseBundle = (org.hl7.fhir.dstu3.model.Bundle) outParams.getParameter().get(0).getResource();
 
 		// Print the response bundle
-		assertEquals("8cef5f2a-0ba9-43a5-be26-c8dde9ff0e19", responseBundle.getId());
+		assertEquals("Bundle/8cef5f2a-0ba9-43a5-be26-c8dde9ff0e19", responseBundle.getId());
 	}
 
 	@Test

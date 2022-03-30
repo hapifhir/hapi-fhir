@@ -218,6 +218,10 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 			ourLog.error("Failure executing job {} step {}", jobDefinitionId, targetStepId, e);
 			myJobPersistence.markWorkChunkAsErroredAndIncrementErrorCount(chunkId, e.toString());
 			throw new JobExecutionFailedException(Msg.code(2041) + e.getMessage(), e);
+		} catch (Throwable t) {
+			ourLog.error("Unexpected failure executing job {} step {}", jobDefinitionId, targetStepId, t);
+			myJobPersistence.markWorkChunkAsFailed(chunkId, t.toString());
+			return false;
 		}
 
 		int recordsProcessed = outcome.getRecordsProcessed();

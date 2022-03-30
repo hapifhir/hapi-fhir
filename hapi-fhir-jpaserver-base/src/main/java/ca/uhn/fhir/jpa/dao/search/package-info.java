@@ -16,6 +16,12 @@
  * This pid list is used as a narrowing where clause against the remaining unprocessed search parameters in a jdbc query.
  * The actual queries for the different search types (e.g. token, string, modifiers, etc.) are
  * generated in {@link ca.uhn.fhir.jpa.dao.search.ExtendedLuceneSearchBuilder}.
+ * <p>
+ *    Full resource bodies can be stored in the Hibernate Search index.
+ *    The {@link ca.uhn.fhir.jpa.dao.search.ExtendedLuceneResourceProjection} is used to extract these.
+ *    This is currently restricted to LastN, and misses tag changes from $meta-add and $meta-delete since those don't
+ *    update Hibernate Search.
+ * </p>
  *
  * <h2>Operation</h2>
  * During startup, Hibernate Search uses {@link ca.uhn.fhir.jpa.model.search.SearchParamTextPropertyBinder} to generate a schema.
