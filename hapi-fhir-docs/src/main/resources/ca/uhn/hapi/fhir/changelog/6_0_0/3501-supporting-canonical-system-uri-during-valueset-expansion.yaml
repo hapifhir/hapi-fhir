@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 3501
+title: "Supporting expansion of ValueSet include/exclude system URI expressed in canonical format during validation."

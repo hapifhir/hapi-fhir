@@ -49,6 +49,8 @@ import static org.apache.commons.lang3.StringUtils.substringBefore;
  * external term service API)
  */
 public class InMemoryTerminologyServerValidationSupport implements IValidationSupport {
+	private static final String OUR_PIPE_CHARACTER = "|";
+
 	private final FhirContext myCtx;
 
 	public InMemoryTerminologyServerValidationSupport(FhirContext theCtx) {
@@ -541,16 +543,15 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	}
 
 	/**
-	 * Returns <code>true</code> if at least one code was addded
+	 * Returns <code>true</code> if at least one code was added
 	 */
 	private boolean expandValueSetR5IncludeOrExclude(ValidationSupportContext theValidationSupportContext, Consumer<FhirVersionIndependentConcept> theConsumer, @Nullable String theWantSystemUrlAndVersion, @Nullable String theWantCode, org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent theInclude) throws ExpansionCouldNotBeCompletedInternallyException {
-		final String PIPE_CHARACTER = "|";
 
 		String wantSystemUrl = null;
 		String wantSystemVersion = null;
 
 		if (theWantSystemUrlAndVersion != null) {
-			int versionIndex = theWantSystemUrlAndVersion.indexOf(PIPE_CHARACTER);
+			int versionIndex = theWantSystemUrlAndVersion.indexOf(OUR_PIPE_CHARACTER);
 			if (versionIndex > -1) {
 				wantSystemUrl = theWantSystemUrlAndVersion.substring(0, versionIndex);
 				wantSystemVersion = theWantSystemUrlAndVersion.substring(versionIndex + 1);
@@ -570,11 +571,9 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 		if (isNotBlank(includeOrExcludeConceptSystemUrl)) {
 
-			if( includeOrExcludeConceptSystemUrl.contains(PIPE_CHARACTER) ){
-				if(isBlank(includeOrExcludeConceptSystemVersion)){
-					includeOrExcludeConceptSystemVersion = substringAfter(includeOrExcludeConceptSystemUrl, PIPE_CHARACTER);
-				}
-				includeOrExcludeConceptSystemUrl = substringBefore(includeOrExcludeConceptSystemUrl, PIPE_CHARACTER);
+			if( includeOrExcludeConceptSystemUrl.contains(OUR_PIPE_CHARACTER) ){
+				includeOrExcludeConceptSystemVersion = optionallyPopulateVersionFromUrl(includeOrExcludeConceptSystemUrl, includeOrExcludeConceptSystemVersion);
+				includeOrExcludeConceptSystemUrl = substringBefore(includeOrExcludeConceptSystemUrl, OUR_PIPE_CHARACTER);
 			}
 
 			if (wantSystemUrl != null && !wantSystemUrl.equals(includeOrExcludeConceptSystemUrl)) {
@@ -587,7 +586,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 			String loadedCodeSystemUrl;
 			if (includeOrExcludeConceptSystemVersion != null) {
-				loadedCodeSystemUrl = includeOrExcludeConceptSystemUrl + PIPE_CHARACTER + includeOrExcludeConceptSystemVersion;
+				loadedCodeSystemUrl = includeOrExcludeConceptSystemUrl + OUR_PIPE_CHARACTER + includeOrExcludeConceptSystemVersion;
 			} else {
 				loadedCodeSystemUrl = includeOrExcludeConceptSystemUrl;
 			}
@@ -824,6 +823,12 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		}
 	}
 
+	private String optionallyPopulateVersionFromUrl(String theSystemUrl, String theVersion) {
+		if(isBlank(theVersion)){
+			theVersion = substringAfter(theSystemUrl, OUR_PIPE_CHARACTER);
+		}
+		return theVersion;
+	}
 
 	public enum FailureType {
 

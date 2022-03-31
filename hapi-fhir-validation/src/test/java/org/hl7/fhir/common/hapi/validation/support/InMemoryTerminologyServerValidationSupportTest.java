@@ -454,7 +454,7 @@ public class InMemoryTerminologyServerValidationSupportTest {
 			 options,
 			 theCodeToValidateCodeSystemUrl,
 			 theCodeToValidate,
-			 "dontCare",
+			 null,
 			 theValueSet);
 
 		 assertTrue(codeValidationResult.isOk());
