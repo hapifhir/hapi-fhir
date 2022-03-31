@@ -809,8 +809,8 @@
         <hibernate_validator_version>6.1.5.Final</hibernate_validator_version>
         <httpcore_version>4.4.13</httpcore_version>
         <httpclient_version>4.5.13</httpclient_version>
-        <jackson_version>2.13.1</jackson_version>
-        <jackson_databind_version>${jackson_version}</jackson_databind_version>
+        <jackson_version>2.13.2</jackson_version>
+        <jackson_databind_version>2.13.2.2</jackson_databind_version>
         <maven_assembly_plugin_version>3.3.0</maven_assembly_plugin_version>
         <maven_license_plugin_version>1.8</maven_license_plugin_version>
         <okhttp_version>3.8.1</okhttp_version>
@@ -825,7 +825,7 @@
         <swagger_version>2.1.12</swagger_version>
         <slf4j_version>1.7.33</slf4j_version>
         <log4j_to_slf4j_version>2.17.1</log4j_to_slf4j_version>
-        <spring_version>5.3.15</spring_version>
+        <spring_version>5.3.18</spring_version>
         <spring_data_version>2.6.1</spring_data_version>
         <spring_batch_version>4.3.3</spring_batch_version>
         <spring_boot_version>2.6.2</spring_boot_version>
@@ -1695,7 +1695,7 @@
 			<dependency>
 				<groupId>org.mariadb.jdbc</groupId>
 				<artifactId>mariadb-java-client</artifactId>
-				<version>3.0.3</version>
+				<version>3.0.4</version>
 			</dependency>
 			<dependency>
 				<groupId>org.mockito</groupId>
