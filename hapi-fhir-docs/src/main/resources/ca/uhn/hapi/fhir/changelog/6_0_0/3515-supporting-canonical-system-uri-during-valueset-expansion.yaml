@@ -1,4 +1,5 @@
 ---
 type: fix
-issue: 3501
+issue: 3515
+jira: SMILE-2991
 title: "Supporting expansion of ValueSet include/exclude system URI expressed in canonical format during validation."
