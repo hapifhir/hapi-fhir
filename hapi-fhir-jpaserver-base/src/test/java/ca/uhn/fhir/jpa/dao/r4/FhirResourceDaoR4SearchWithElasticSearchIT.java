@@ -71,7 +71,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestContext;
+import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
+import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.persistence.EntityManager;
@@ -102,6 +106,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 	TestDaoSearch.Config.class
 })
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@TestExecutionListeners(listeners = {
+	DependencyInjectionTestExecutionListener.class
+	,FhirResourceDaoR4SearchWithElasticSearchIT.TestDirtiesContextTestExecutionListener.class
+	})
 public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";
 	public static final String URL_MY_VALUE_SET = "http://example.com/my_value_set";
@@ -1234,7 +1242,18 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	}
 
 
+	/**
+	 * Disallow context dirtying for nested classes
+	 */
+	public static final class TestDirtiesContextTestExecutionListener extends DirtiesContextTestExecutionListener {
 
+		@Override
+		protected void beforeOrAfterTestClass(TestContext testContext, DirtiesContext.ClassMode requiredClassMode) throws Exception {
+			if ( ! testContext.getTestClass().getName().contains("$")) {
+				super.beforeOrAfterTestClass(testContext, requiredClassMode);
+			}
+		}
+	}
 
 
 }
