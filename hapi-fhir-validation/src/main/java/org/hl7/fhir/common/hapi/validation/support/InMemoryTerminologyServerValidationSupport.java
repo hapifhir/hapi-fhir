@@ -36,6 +36,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.contains;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -571,10 +572,8 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 		if (isNotBlank(includeOrExcludeConceptSystemUrl)) {
 
-			if( includeOrExcludeConceptSystemUrl.contains(OUR_PIPE_CHARACTER) ){
-				includeOrExcludeConceptSystemVersion = optionallyPopulateVersionFromUrl(includeOrExcludeConceptSystemUrl, includeOrExcludeConceptSystemVersion);
-				includeOrExcludeConceptSystemUrl = substringBefore(includeOrExcludeConceptSystemUrl, OUR_PIPE_CHARACTER);
-			}
+			includeOrExcludeConceptSystemVersion = optionallyPopulateVersionFromUrl(includeOrExcludeConceptSystemUrl, includeOrExcludeConceptSystemVersion);
+			includeOrExcludeConceptSystemUrl = substringBefore(includeOrExcludeConceptSystemUrl, OUR_PIPE_CHARACTER);
 
 			if (wantSystemUrl != null && !wantSystemUrl.equals(includeOrExcludeConceptSystemUrl)) {
 				return false;
@@ -824,7 +823,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	}
 
 	private String optionallyPopulateVersionFromUrl(String theSystemUrl, String theVersion) {
-		if(isBlank(theVersion)){
+		if(contains(theSystemUrl, OUR_PIPE_CHARACTER) && isBlank(theVersion)){
 			theVersion = substringAfter(theSystemUrl, OUR_PIPE_CHARACTER);
 		}
 		return theVersion;

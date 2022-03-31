@@ -14,6 +14,8 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -423,18 +425,17 @@ public class InMemoryTerminologyServerValidationSupportTest {
 		assertEquals("MODERNA COVID-19 mRNA-1273", valueSet.getExpansion().getContains().get(0).getDisplay());
 	}
 
-    @Test
-    void testValidateCodeWhenCodeSystemUrlIsInCanonicalFormat() {
+    @ParameterizedTest
+	 @ValueSource(strings = {"http://terminology.hl7.org/CodeSystem/v2-0360|2.7","http://terminology.hl7.org/CodeSystem/v2-0360"})
+    void testValidateCodeInValueSet_VsExpandedWithIncludes(String theCodeSystemUri) {
 		 ConceptValidationOptions options = new ConceptValidationOptions();
 		 ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
-
-		 String pipedCodeSystemUrl = "http://terminology.hl7.org/CodeSystem/v2-0360|2.7";
 		 String codeMD = "MD";
 
 		 CodeSystem cs = new CodeSystem();
 		 cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		 cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
-		 cs.setUrl(pipedCodeSystemUrl);
+		 cs.setUrl(theCodeSystemUri);
 		 cs.setVersion("2.7");
 		 cs.addConcept()
 			 .setCode(codeMD)
@@ -444,9 +445,9 @@ public class InMemoryTerminologyServerValidationSupportTest {
 		 ValueSet theValueSet = new ValueSet();
 		 theValueSet.setUrl("http://someValueSetURL");
 		 theValueSet.setVersion("0360");
-		 theValueSet.getCompose().addInclude().setSystem(pipedCodeSystemUrl);
+		 theValueSet.getCompose().addInclude().setSystem(theCodeSystemUri);
 
-		 String theCodeToValidateCodeSystemUrl = pipedCodeSystemUrl;
+		 String theCodeToValidateCodeSystemUrl = theCodeSystemUri;
 		 String theCodeToValidate = codeMD;
 
 		 IValidationSupport.CodeValidationResult codeValidationResult = mySvc.validateCodeInValueSet(
@@ -459,7 +460,6 @@ public class InMemoryTerminologyServerValidationSupportTest {
 
 		 assertTrue(codeValidationResult.isOk());
 	 }
-
 
     private static class PrePopulatedValidationSupportDstu2 extends PrePopulatedValidationSupport {
 		private final Map<String, IBaseResource> myDstu2ValueSets;
