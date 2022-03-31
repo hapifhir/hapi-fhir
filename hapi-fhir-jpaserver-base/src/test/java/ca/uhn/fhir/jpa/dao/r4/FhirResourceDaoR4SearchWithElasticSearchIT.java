@@ -1082,6 +1082,8 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 					assertNotFind("when ne UCUM 10*3/L", "/Observation?value-quantity=80|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|10*3/L");
 					assertNotFind("when gt UCUM 10*3/L", "/Observation?value-quantity=50|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|10*3/L");
 					assertNotFind("when lt UCUM 10*3/L", "/Observation?value-quantity=70|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|10*3/L");
+
+					assertNotFind("Units required to match", "/Observation?value-quantity=60000000|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|g");
 				}
 
 				@Test
