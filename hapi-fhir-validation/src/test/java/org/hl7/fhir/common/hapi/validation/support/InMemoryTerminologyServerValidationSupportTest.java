@@ -436,7 +436,6 @@ public class InMemoryTerminologyServerValidationSupportTest {
 		 cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		 cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
 		 cs.setUrl(theCodeSystemUri);
-		 cs.setVersion("2.7");
 		 cs.addConcept()
 			 .setCode(codeMD)
 			 .setDisplay("Doctor of Medicine");
