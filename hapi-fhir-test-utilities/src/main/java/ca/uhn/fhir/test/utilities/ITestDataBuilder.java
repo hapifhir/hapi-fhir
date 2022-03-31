@@ -192,13 +192,22 @@ public interface ITestDataBuilder {
 		};
 	}
 
-	default <T extends IBase> Consumer<T> withAttribute(String thePath, Consumer<IBase>... theModifiers) {
+	default <T extends IBase> Consumer<T> withElementAt(String thePath, Consumer<IBase>... theModifiers) {
 		return t->{
 			FhirTerser terser = getFhirContext().newTerser();
 			IBase element = terser.addElement(t, thePath);
 			applyElementModifiers(element, theModifiers);
 		};
 	}
+
+	default Consumer<IBaseResource> withQuantityAtPath(String thePath, double theValue, String theSystem, String theCode) {
+		return withElementAt(thePath,
+			withPrimitiveAttribute("value", theValue),
+			withPrimitiveAttribute("system", theSystem),
+			withPrimitiveAttribute("code", theCode)
+		);
+	}
+
 
 	/**
 	 * Create an Element and apply modifiers

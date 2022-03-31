@@ -41,9 +41,11 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
+import ca.uhn.fhir.test.utilities.LogbackLevelOverrideExtension;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
+import ch.qos.logback.classic.Level;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -67,6 +69,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.annotation.DirtiesContext;
@@ -154,7 +157,8 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	ITestDataBuilder myTestDataBuilder;
 	@Autowired
 	TestDaoSearch myTestDaoSearch;
-
+	@RegisterExtension
+	LogbackLevelOverrideExtension myLogbackLevelOverrideExtension = new LogbackLevelOverrideExtension();
 
 	@BeforeEach
 	public void beforePurgeDatabase() {
@@ -1170,6 +1174,26 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 						"?value-quantity=gt50|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|10*3/L" +
 						"&value-quantity=lt0.000070|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|10*9/L");
 				}
+
+				@Test
+				public void multipleSearchParamsAreSeparate() {
+					// todo - just for debugging
+					myLogbackLevelOverrideExtension.setLogLevel(DaoTestDataBuilder.class, Level.DEBUG);
+
+					myResourceId = myTestDataBuilder.createObservation(
+						myTestDataBuilder.withQuantityAtPath("valueQuantity", 0.02, UcumServiceUtil.UCUM_CODESYSTEM_URL, "10*6/L"),
+						myTestDataBuilder.withQuantityAtPath("component.valueQuantity", 0.06, UcumServiceUtil.UCUM_CODESYSTEM_URL, "10*6/L")
+					);
+
+					myLogbackLevelOverrideExtension.resetLevel(DaoTestDataBuilder.class);
+
+					assertFind("by value", "Observation?value=0.02|http://unitsofmeasure.org|10*6/L");
+					assertFind("by component value", "Observation?value=0.06|http://unitsofmeasure.org|10*6/L");
+
+					assertNotFind("by value", "Observation?value=0.06|http://unitsofmeasure.org|10*6/L");
+					assertNotFind("by component value", "Observation?value=0.02|http://unitsofmeasure.org|10*6/L");
+
+				}
 			}
 
 			/**
@@ -1214,16 +1238,14 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		}
 
 		private IIdType withObservationWithQuantity(double theValue, String theSystem, String theCode) {
-			myResourceId = myTestDataBuilder.createObservation(myTestDataBuilder.withAttribute("valueQuantity",
-				myTestDataBuilder.withPrimitiveAttribute("value", theValue),
-				myTestDataBuilder.withPrimitiveAttribute("system", theSystem),
-				myTestDataBuilder.withPrimitiveAttribute("code", theCode)
-			));
+			myResourceId = myTestDataBuilder.createObservation(
+				myTestDataBuilder.withQuantityAtPath("valueQuantity", theValue, theSystem, theCode)
+			);
 			return myResourceId;
 		}
 
 		private IIdType withObservationWithValueQuantity(double theValue) {
-			myResourceId = myTestDataBuilder.createObservation(myTestDataBuilder.withAttribute("valueQuantity",
+			myResourceId = myTestDataBuilder.createObservation(myTestDataBuilder.withElementAt("valueQuantity",
 				myTestDataBuilder.withPrimitiveAttribute("value", theValue),
 				myTestDataBuilder.withPrimitiveAttribute("system", UcumServiceUtil.UCUM_CODESYSTEM_URL),
 				myTestDataBuilder.withPrimitiveAttribute("code", "mm[Hg]")
