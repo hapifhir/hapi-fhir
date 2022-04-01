@@ -21,7 +21,6 @@ package ca.uhn.fhir.batch2.impl;
  */
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
-import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
@@ -37,9 +36,7 @@ import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
-import ca.uhn.fhir.batch2.model.WorkChunkData;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.model.api.annotation.PasswordField;
@@ -68,7 +65,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
@@ -77,7 +73,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinator {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(JobCoordinatorImpl.class);
-	private final IChannelProducer myWorkChannelProducer;
+	private final BatchJobSender myBatchJobSender;
 	private final IChannelReceiver myWorkChannelReceiver;
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final MessageHandler myReceiverHandler = new WorkChannelMessageHandler();
@@ -87,12 +83,12 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 	 * Constructor
 	 */
 	public JobCoordinatorImpl(
-		@Nonnull IChannelProducer theWorkChannelProducer,
+		@Nonnull BatchJobSender theBatchJobSender,
 		@Nonnull IChannelReceiver theWorkChannelReceiver,
 		@Nonnull IJobPersistence theJobPersistence,
 		@Nonnull JobDefinitionRegistry theJobDefinitionRegistry) {
 		super(theJobPersistence);
-		myWorkChannelProducer = theWorkChannelProducer;
+		myBatchJobSender = theBatchJobSender;
 		myWorkChannelReceiver = theWorkChannelReceiver;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 	}
@@ -120,9 +116,12 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 		instance.setParameters(theStartRequest.getParameters());
 
 		String instanceId = myJobPersistence.storeNewInstance(instance);
-		String chunkId = myJobPersistence.storeWorkChunk(jobDefinitionId, jobDefinitionVersion, firstStepId, instanceId, 0, null);
 
-		sendWorkChannelMessage(jobDefinitionId, jobDefinitionVersion, instanceId, firstStepId, chunkId);
+		BatchWorkChunk batchWorkChunk = new BatchWorkChunk(jobDefinitionId, jobDefinitionVersion, firstStepId, instanceId, 0, null);
+		String chunkId = myJobPersistence.storeWorkChunk(batchWorkChunk);
+
+		JobWorkNotification workNotification = new JobWorkNotification(jobDefinitionId, jobDefinitionVersion, instanceId, firstStepId, chunkId);
+		myBatchJobSender.sendWorkChannelMessage(workNotification);
 
 		return instanceId;
 	}
@@ -245,20 +244,6 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 		myWorkChannelReceiver.unsubscribe(myReceiverHandler);
 	}
 
-	private void sendWorkChannelMessage(String theJobDefinitionId, int jobDefinitionVersion, String theInstanceId, String theTargetStepId, String theChunkId) {
-		JobWorkNotificationJsonMessage message = new JobWorkNotificationJsonMessage();
-		JobWorkNotification workNotification = new JobWorkNotification();
-		workNotification.setJobDefinitionId(theJobDefinitionId);
-		workNotification.setJobDefinitionVersion(jobDefinitionVersion);
-		workNotification.setChunkId(theChunkId);
-		workNotification.setInstanceId(theInstanceId);
-		workNotification.setTargetStepId(theTargetStepId);
-		message.setPayload(workNotification);
-
-		ourLog.info("Sending work notification for job[{}] instance[{}] step[{}] chunk[{}]", theJobDefinitionId, theInstanceId, theTargetStepId, theChunkId);
-		myWorkChannelProducer.send(message);
-	}
-
 	private void handleWorkChannelMessage(JobWorkNotificationJsonMessage theMessage) {
 		JobWorkNotification payload = theMessage.getPayload();
 
@@ -321,7 +306,7 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 
 		BaseDataSink<OT> dataSink;
 		if (theSubsequentStep != null) {
-			dataSink = new JobDataSink<>(jobDefinitionId, jobDefinitionVersion, theSubsequentStep, instanceId, theStep.getStepId());
+			dataSink = new JobDataSink<>(myBatchJobSender, myJobPersistence, jobDefinitionId, jobDefinitionVersion, theSubsequentStep, instanceId, theStep.getStepId());
 		} else {
 			dataSink = (BaseDataSink<OT>) new FinalStepDataSink(jobDefinitionId, instanceId, theStep.getStepId());
 		}
@@ -380,92 +365,6 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 		@Override
 		public void handleMessage(@Nonnull Message<?> theMessage) throws MessagingException {
 			handleWorkChannelMessage((JobWorkNotificationJsonMessage) theMessage);
-		}
-	}
-
-	private abstract class BaseDataSink<OT extends IModelJson> implements IJobDataSink<OT> {
-
-		private final String myInstanceId;
-		private final String myCurrentStepId;
-		private int myRecoveredErrorCount;
-
-		protected BaseDataSink(String theInstanceId, String theCurrentStepId) {
-			myInstanceId = theInstanceId;
-			myCurrentStepId = theCurrentStepId;
-		}
-
-		public String getInstanceId() {
-			return myInstanceId;
-		}
-
-		@Override
-		public void recoveredError(String theMessage) {
-			ourLog.error("Error during job[{}] step[{}]: {}", myInstanceId, myCurrentStepId, theMessage);
-			myRecoveredErrorCount++;
-		}
-
-		public int getRecoveredErrorCount() {
-			return myRecoveredErrorCount;
-		}
-
-		public abstract int getWorkChunkCount();
-	}
-
-	private class JobDataSink<OT extends IModelJson> extends BaseDataSink<OT> {
-		private final String myJobDefinitionId;
-		private final int myJobDefinitionVersion;
-		private final JobDefinitionStep<?, ?, ?> myTargetStep;
-		private final AtomicInteger myChunkCounter = new AtomicInteger(0);
-
-		public JobDataSink(String theJobDefinitionId, int theJobDefinitionVersion, JobDefinitionStep<?, ?, ?> theTargetStep, String theInstanceId, String theCurrentStepId) {
-			super(theInstanceId, theCurrentStepId);
-			myJobDefinitionId = theJobDefinitionId;
-			myJobDefinitionVersion = theJobDefinitionVersion;
-			myTargetStep = theTargetStep;
-		}
-
-		@Override
-		public void accept(WorkChunkData<OT> theData) {
-			String jobDefinitionId = myJobDefinitionId;
-			int jobDefinitionVersion = myJobDefinitionVersion;
-			String instanceId = getInstanceId();
-			String targetStepId = myTargetStep.getStepId();
-			int sequence = myChunkCounter.getAndIncrement();
-			OT dataValue = theData.getData();
-			String dataValueString = JsonUtil.serialize(dataValue, false);
-			String chunkId = myJobPersistence.storeWorkChunk(jobDefinitionId, jobDefinitionVersion, targetStepId, instanceId, sequence, dataValueString);
-
-			sendWorkChannelMessage(jobDefinitionId, jobDefinitionVersion, instanceId, targetStepId, chunkId);
-		}
-
-		@Override
-		public int getWorkChunkCount() {
-			return myChunkCounter.get();
-		}
-
-	}
-
-	private class FinalStepDataSink extends BaseDataSink<VoidModel> {
-		private final String myJobDefinitionId;
-
-		/**
-		 * Constructor
-		 */
-		private FinalStepDataSink(String theJobDefinitionId, String theInstanceId, String theCurrentStepId) {
-			super(theInstanceId, theCurrentStepId);
-			myJobDefinitionId = theJobDefinitionId;
-		}
-
-		@Override
-		public void accept(WorkChunkData<VoidModel> theData) {
-			String msg = "Illegal attempt to store data during final step of job " + myJobDefinitionId;
-			ourLog.error(msg);
-			throw new JobExecutionFailedException(Msg.code(2045) + msg);
-		}
-
-		@Override
-		public int getWorkChunkCount() {
-			return 0;
 		}
 	}
 }
