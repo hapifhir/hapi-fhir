@@ -24,7 +24,6 @@ import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,8 +39,8 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	}
 
 	@Override
-	public synchronized String storeWorkChunk(String theJobDefinitionId, int theJobDefinitionVersion, String theTargetStepId, String theInstanceId, int theSequence, String theDataSerialized) {
-		return myWrap.storeWorkChunk(theJobDefinitionId, theJobDefinitionVersion, theTargetStepId, theInstanceId, theSequence, theDataSerialized);
+	public synchronized String storeWorkChunk(BatchWorkChunk theBatchWorkChunk) {
+		return myWrap.storeWorkChunk(theBatchWorkChunk);
 	}
 
 	@Override
