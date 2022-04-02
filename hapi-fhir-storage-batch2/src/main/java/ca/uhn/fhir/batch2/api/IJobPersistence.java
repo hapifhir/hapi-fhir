@@ -36,7 +36,7 @@ public interface IJobPersistence {
 	 * Chunk should be stored with a status of {@link ca.uhn.fhir.batch2.model.StatusEnum#QUEUED}
 	 *
 	 * @param theBatchWorkChunk the batch work chunk to be stored
-	 * @return Returns a globally unique identifier for this chunk. This should be a sequentially generated ID, a UUID, or something like that which is guaranteed to never overlap across jobs or instances.@return
+	 * @return a globally unique identifier for this chunk. This should be a sequentially generated ID, a UUID, or something like that which is guaranteed to never overlap across jobs or instances.
 	 */
 	String storeWorkChunk(BatchWorkChunk theBatchWorkChunk);
 
