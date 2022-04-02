@@ -1,12 +1,12 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import org.apache.commons.lang3.Validate;
@@ -36,9 +36,12 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.contains;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.substringAfter;
+import static org.apache.commons.lang3.StringUtils.substringBefore;
 
 /**
  * This class is a basic in-memory terminology service, designed to expand ValueSets and validate codes
@@ -47,6 +50,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * external term service API)
  */
 public class InMemoryTerminologyServerValidationSupport implements IValidationSupport {
+	private static final String OUR_PIPE_CHARACTER = "|";
+
 	private final FhirContext myCtx;
 
 	public InMemoryTerminologyServerValidationSupport(FhirContext theCtx) {
@@ -539,13 +544,15 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	}
 
 	/**
-	 * Returns <code>true</code> if at least one code was addded
+	 * Returns <code>true</code> if at least one code was added
 	 */
 	private boolean expandValueSetR5IncludeOrExclude(ValidationSupportContext theValidationSupportContext, Consumer<FhirVersionIndependentConcept> theConsumer, @Nullable String theWantSystemUrlAndVersion, @Nullable String theWantCode, org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent theInclude) throws ExpansionCouldNotBeCompletedInternallyException {
+
 		String wantSystemUrl = null;
 		String wantSystemVersion = null;
+
 		if (theWantSystemUrlAndVersion != null) {
-			int versionIndex = theWantSystemUrlAndVersion.indexOf("|");
+			int versionIndex = theWantSystemUrlAndVersion.indexOf(OUR_PIPE_CHARACTER);
 			if (versionIndex > -1) {
 				wantSystemUrl = theWantSystemUrlAndVersion.substring(0, versionIndex);
 				wantSystemVersion = theWantSystemUrlAndVersion.substring(versionIndex + 1);
@@ -554,14 +561,19 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			}
 		}
 
+		String includeOrExcludeConceptSystemUrl = theInclude.getSystem();
+		String includeOrExcludeConceptSystemVersion = theInclude.getVersion();
+
 		Function<String, CodeSystem> codeSystemLoader = newCodeSystemLoader(theValidationSupportContext);
 		Function<String, org.hl7.fhir.r5.model.ValueSet> valueSetLoader = newValueSetLoader(theValidationSupportContext);
 
 		List<FhirVersionIndependentConcept> nextCodeList = new ArrayList<>();
-		String includeOrExcludeConceptSystemUrl = theInclude.getSystem();
-		String includeOrExcludeConceptSystemVersion = theInclude.getVersion();
 		CodeSystem includeOrExcludeSystemResource = null;
+
 		if (isNotBlank(includeOrExcludeConceptSystemUrl)) {
+
+			includeOrExcludeConceptSystemVersion = optionallyPopulateVersionFromUrl(includeOrExcludeConceptSystemUrl, includeOrExcludeConceptSystemVersion);
+			includeOrExcludeConceptSystemUrl = substringBefore(includeOrExcludeConceptSystemUrl, OUR_PIPE_CHARACTER);
 
 			if (wantSystemUrl != null && !wantSystemUrl.equals(includeOrExcludeConceptSystemUrl)) {
 				return false;
@@ -573,7 +585,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 			String loadedCodeSystemUrl;
 			if (includeOrExcludeConceptSystemVersion != null) {
-				loadedCodeSystemUrl = includeOrExcludeConceptSystemUrl + "|" + includeOrExcludeConceptSystemVersion;
+				loadedCodeSystemUrl = includeOrExcludeConceptSystemUrl + OUR_PIPE_CHARACTER + includeOrExcludeConceptSystemVersion;
 			} else {
 				loadedCodeSystemUrl = includeOrExcludeConceptSystemUrl;
 			}
@@ -810,6 +822,12 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		}
 	}
 
+	private String optionallyPopulateVersionFromUrl(String theSystemUrl, String theVersion) {
+		if(contains(theSystemUrl, OUR_PIPE_CHARACTER) && isBlank(theVersion)){
+			theVersion = substringAfter(theSystemUrl, OUR_PIPE_CHARACTER);
+		}
+		return theVersion;
+	}
 
 	public enum FailureType {
 
