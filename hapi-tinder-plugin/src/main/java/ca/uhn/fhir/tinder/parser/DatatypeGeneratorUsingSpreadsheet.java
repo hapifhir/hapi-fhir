@@ -1,5 +1,6 @@
 package ca.uhn.fhir.tinder.parser;
 
+import ca.uhn.fhir.i18n.Msg;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -71,9 +72,9 @@ public class DatatypeGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 				}
 			}
 		} catch (IOException e) {
-			throw new MojoFailureException(e.getMessage(), e);
+			throw new MojoFailureException(Msg.code(182) + e.getMessage(), e);
 		} catch (ClassNotFoundException e) {
-			throw new MojoFailureException(e.getMessage(), e);
+			throw new MojoFailureException(Msg.code(183) + e.getMessage(), e);
 		}
 
 		try {
@@ -87,9 +88,9 @@ public class DatatypeGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 				}
 			}
 		} catch (IOException e) {
-			throw new MojoFailureException(e.getMessage(), e);
+			throw new MojoFailureException(Msg.code(184) + e.getMessage(), e);
 		} catch (ClassNotFoundException e) {
-			throw new MojoFailureException(e.getMessage(), e);
+			throw new MojoFailureException(Msg.code(185) + e.getMessage(), e);
 		}
 
 		super.writeAll(theOutputDirectory, theResourceOutputDirectory, thePackageBase);

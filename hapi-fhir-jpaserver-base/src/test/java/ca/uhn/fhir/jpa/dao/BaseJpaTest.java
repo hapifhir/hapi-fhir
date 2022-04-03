@@ -8,30 +8,37 @@ import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
-import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
-import ca.uhn.fhir.jpa.config.BaseConfig;
-import ca.uhn.fhir.jpa.config.TestDstu2Config;
+import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
+import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboTokensNonUniqueDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamDateDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamStringDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
+import ca.uhn.fhir.jpa.dao.data.ITermConceptDesignationDao;
+import ca.uhn.fhir.jpa.dao.data.ITermConceptPropertyDao;
+import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
+import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
 import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
+import ca.uhn.fhir.jpa.entity.TermConceptProperty;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
@@ -49,6 +56,8 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.test.BaseTest;
+import ca.uhn.fhir.jpa.util.Batch2JobHelper;
+import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import ca.uhn.fhir.test.utilities.LoggingExtension;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
@@ -60,11 +69,7 @@ import org.apache.commons.io.IOUtils;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.search.backend.lucene.cfg.LuceneBackendSettings;
-import org.hibernate.search.backend.lucene.cfg.LuceneIndexSettings;
-import org.hibernate.search.engine.cfg.BackendSettings;
 import org.hibernate.search.mapper.orm.Search;
-import org.hibernate.search.mapper.orm.cfg.HibernateOrmMapperSettings;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
@@ -72,8 +77,6 @@ import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -81,6 +84,10 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.batch.core.repository.dao.JobExecutionDao;
+import org.springframework.batch.core.repository.dao.JobInstanceDao;
+import org.springframework.batch.core.repository.dao.MapJobExecutionDao;
+import org.springframework.batch.core.repository.dao.MapJobInstanceDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.orm.jpa.JpaTransactionManager;
@@ -96,10 +103,10 @@ import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -123,9 +130,6 @@ import static org.mockito.Mockito.when;
 	UnregisterScheduledProcessor.SCHEDULING_DISABLED_EQUALS_TRUE
 })
 public abstract class BaseJpaTest extends BaseTest {
-	public static final String CONFIG_ENABLE_LUCENE="hapi_test.enable_lucene";
-	public static final String CONFIG_ENABLE_LUCENE_FALSE = CONFIG_ENABLE_LUCENE + "=false";
-	public static final boolean CONFIG_ENABLE_LUCENE_DEFAULT_VALUE = true;
 
 	protected static final String CM_URL = "http://example.com/my_concept_map";
 	protected static final String CS_URL = "http://example.com/my_code_system";
@@ -139,6 +143,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	static {
 		System.setProperty(Constants.TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS, "1000");
 		System.setProperty("test", "true");
+		System.setProperty("unit_test_mode", "true");
 		TestUtil.setShouldRandomizeTimezones(false);
 	}
 
@@ -170,14 +175,32 @@ public abstract class BaseJpaTest extends BaseTest {
 	@Autowired
 	protected IResourceIndexedSearchParamTokenDao myResourceIndexedSearchParamTokenDao;
 	@Autowired
+	protected IResourceIndexedSearchParamStringDao myResourceIndexedSearchParamStringDao;
+	@Autowired
 	protected IResourceIndexedSearchParamDateDao myResourceIndexedSearchParamDateDao;
 	@Autowired
 	protected IResourceIndexedComboTokensNonUniqueDao myResourceIndexedComboTokensNonUniqueDao;
+	@Autowired(required = false)
+	protected IFulltextSearchSvc myFulltestSearchSvc;
+	@Autowired(required = false)
+	protected BatchJobHelper myBatchJobHelper;
+	@Autowired(required = false)
+	protected Batch2JobHelper myBatch2JobHelper;
 	@Autowired
-	private IdHelperService myIdHelperService;
+	protected ITermConceptDao myTermConceptDao;
+	@Autowired
+	protected ITermValueSetConceptDao myTermValueSetConceptDao;
+	@Autowired
+	protected ITermValueSetDao myTermValueSetDao;
+	@Autowired
+	protected ITermConceptDesignationDao myTermConceptDesignationDao;
+	@Autowired
+	protected ITermConceptPropertyDao myTermConceptPropertyDao;
+	@Autowired
+	private IIdHelperService myIdHelperService;
 	@Autowired
 	private MemoryCacheService myMemoryCacheService;
-	@Qualifier(BaseConfig.JPA_VALIDATION_SUPPORT)
+	@Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT)
 	@Autowired
 	private IValidationSupport myJpaPersistedValidationSupport;
 	@Autowired
@@ -191,7 +214,18 @@ public abstract class BaseJpaTest extends BaseTest {
 	@Autowired
 	private IForcedIdDao myForcedIdDao;
 	@Autowired(required = false)
-	protected IFulltextSearchSvc myFulltestSearchSvc;
+	private JobExecutionDao myMapJobExecutionDao;
+	@Autowired(required = false)
+	private JobInstanceDao myMapJobInstanceDao;
+
+	@AfterEach
+	public void afterEnsureNoStaleBatchJobs() {
+		if (myMapJobInstanceDao != null) {
+			myBatchJobHelper.ensureNoRunningJobs();
+			ProxyUtil.getSingletonTarget(myMapJobExecutionDao, MapJobExecutionDao.class).clear();
+			ProxyUtil.getSingletonTarget(myMapJobInstanceDao, MapJobInstanceDao.class).clear();
+		}
+	}
 
 	@AfterEach
 	public void afterPerformCleanup() {
@@ -277,7 +311,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		});
 	}
 
-	protected abstract FhirContext getContext();
+	protected abstract FhirContext getFhirContext();
 
 	protected abstract PlatformTransactionManager getTxManager();
 
@@ -287,38 +321,51 @@ public abstract class BaseJpaTest extends BaseTest {
 		});
 	}
 
-	@SuppressWarnings("BusyWait")
-	public static void waitForSize(int theTarget, List<?> theList) {
-		StopWatch sw = new StopWatch();
-		while (theList.size() != theTarget && sw.getMillis() <= 16000) {
-			try {
-				Thread.sleep(50);
-			} catch (InterruptedException theE) {
-				throw new Error(theE);
-			}
-		}
-		if (sw.getMillis() >= 16000 || theList.size() > theTarget) {
-			String describeResults = theList
-				.stream()
-				.map(t -> {
-					if (t == null) {
-						return "null";
-					}
-					if (t instanceof IBaseResource) {
-						return ((IBaseResource) t).getIdElement().getValue();
-					}
-					return t.toString();
-				})
-				.collect(Collectors.joining(", "));
-			fail("Size " + theList.size() + " is != target " + theTarget + " - Got: " + describeResults);
-		}
-	}
-
 	protected int logAllResources() {
 		return runInTransaction(() -> {
 			List<ResourceTable> resources = myResourceTableDao.findAll();
 			ourLog.info("Resources:\n * {}", resources.stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 			return resources.size();
+		});
+	}
+
+	protected int logAllConceptDesignations() {
+		return runInTransaction(() -> {
+			List<TermConceptDesignation> resources = myTermConceptDesignationDao.findAll();
+			ourLog.info("Concept Designations:\n * {}", resources.stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+			return resources.size();
+		});
+	}
+
+	protected int logAllConceptProperties() {
+		return runInTransaction(() -> {
+			List<TermConceptProperty> resources = myTermConceptPropertyDao.findAll();
+			ourLog.info("Concept Designations:\n * {}", resources.stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+			return resources.size();
+		});
+	}
+
+	protected int logAllConcepts() {
+		return runInTransaction(() -> {
+			List<TermConcept> resources = myTermConceptDao.findAll();
+			ourLog.info("Concepts:\n * {}", resources.stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+			return resources.size();
+		});
+	}
+
+	protected int logAllValueSetConcepts() {
+		return runInTransaction(() -> {
+			List<TermValueSetConcept> resources = myTermValueSetConceptDao.findAll();
+			ourLog.info("Concepts:\n * {}", resources.stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+			return resources.size();
+		});
+	}
+
+	protected int logAllValueSets() {
+		return runInTransaction(() -> {
+			List<TermValueSet> valueSets = myTermValueSetDao.findAll();
+			ourLog.info("ValueSets:\n * {}", valueSets.stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+			return valueSets.size();
 		});
 	}
 
@@ -345,6 +392,19 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected void logAllTokenIndexes() {
 		runInTransaction(() -> {
 			ourLog.info("Token indexes:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+		});
+	}
+
+	protected void logAllStringIndexes(String... theParamNames) {
+		String messageSuffix = theParamNames.length > 0 ? " containing " + Arrays.asList(theParamNames) : "";
+		runInTransaction(() -> {
+			String message = myResourceIndexedSearchParamStringDao
+				.findAll()
+				.stream()
+				.filter(t -> theParamNames.length == 0 ? true : Arrays.asList(theParamNames).contains(t.getParamName()))
+				.map(t -> t.toString())
+				.collect(Collectors.joining("\n * "));
+			ourLog.info("String indexes{}:\n * {}", messageSuffix, message);
 		});
 	}
 
@@ -412,7 +472,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected List<String> toUnqualifiedIdValues(IBaseBundle theFound) {
 		List<String> retVal = new ArrayList<>();
 
-		List<IBaseResource> res = BundleUtil.toListOfResources(getContext(), theFound);
+		List<IBaseResource> res = BundleUtil.toListOfResources(getFhirContext(), theFound);
 		int size = res.size();
 		ourLog.info("Found {} results", size);
 		for (IBaseResource next : res) {
@@ -435,7 +495,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected List<String> toUnqualifiedVersionlessIdValues(IBaseBundle theFound) {
 		List<String> retVal = new ArrayList<>();
 
-		List<IBaseResource> res = BundleUtil.toListOfResources(getContext(), theFound);
+		List<IBaseResource> res = BundleUtil.toListOfResources(getFhirContext(), theFound);
 		int size = res.size();
 		ourLog.info("Found {} results", size);
 		for (IBaseResource next : res) {
@@ -580,7 +640,7 @@ public abstract class BaseJpaTest extends BaseTest {
 
 	protected int logAllResourceVersions() {
 		return runInTransaction(() -> {
-			List<ResourceTable> resources = myResourceTableDao.findAll();
+			List<ResourceHistoryTable> resources = myResourceHistoryTableDao.findAll();
 			ourLog.info("Resources Versions:\n * {}", resources.stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 			return resources.size();
 		});
@@ -615,44 +675,65 @@ public abstract class BaseJpaTest extends BaseTest {
 		}
 	}
 
-	@NotNull
-	public static Map<String, String> buildHibernateSearchProperties(boolean enableLucene) {
-		Map<String, String> hibernateSearchProperties;
-		if (enableLucene) {
-			ourLog.info("Hibernate Search is enabled");
-			hibernateSearchProperties = buildHeapLuceneHibernateSearchProperties();
-		} else {
-			ourLog.info("Hibernate Search is disabled");
-			hibernateSearchProperties = new HashMap<>();
-			hibernateSearchProperties.put("hibernate.search.enabled", "false");
+	protected TermValueSetConceptDesignation assertTermConceptContainsDesignation(TermValueSetConcept theConcept, String theLanguage, String theUseSystem, String theUseCode, String theUseDisplay, String theDesignationValue) {
+		Stream<TermValueSetConceptDesignation> stream = theConcept.getDesignations().stream();
+		if (theLanguage != null) {
+			stream = stream.filter(designation -> theLanguage.equalsIgnoreCase(designation.getLanguage()));
 		}
-		return hibernateSearchProperties;
+		if (theUseSystem != null) {
+			stream = stream.filter(designation -> theUseSystem.equalsIgnoreCase(designation.getUseSystem()));
+		}
+		if (theUseCode != null) {
+			stream = stream.filter(designation -> theUseCode.equalsIgnoreCase(designation.getUseCode()));
+		}
+		if (theUseDisplay != null) {
+			stream = stream.filter(designation -> theUseDisplay.equalsIgnoreCase(designation.getUseDisplay()));
+		}
+		if (theDesignationValue != null) {
+			stream = stream.filter(designation -> theDesignationValue.equalsIgnoreCase(designation.getValue()));
+		}
+
+		Optional<TermValueSetConceptDesignation> first = stream.findFirst();
+		if (!first.isPresent()) {
+			String failureMessage = String.format("Concept %s did not contain designation [%s|%s|%s|%s|%s] ", theConcept, theLanguage, theUseSystem, theUseCode, theUseDisplay, theDesignationValue);
+			fail(failureMessage);
+			return null;
+		} else {
+			return first.get();
+		}
+
 	}
 
-	public static Map<String, String> buildHeapLuceneHibernateSearchProperties() {
-		Map<String, String> props = new HashMap<>();
-		ourLog.warn("Hibernate Search: using lucene - local-heap");
-		props.put(BackendSettings.backendKey(BackendSettings.TYPE), "lucene");
-		props.put(BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER), HapiLuceneAnalysisConfigurer.class.getName());
-		props.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_TYPE), "local-heap");
-		props.put(BackendSettings.backendKey(LuceneBackendSettings.LUCENE_VERSION), "LUCENE_CURRENT");
-		props.put(HibernateOrmMapperSettings.ENABLED, "true");
-		return props;
+	@SuppressWarnings("BusyWait")
+	public static void waitForSize(int theTarget, List<?> theList) {
+		StopWatch sw = new StopWatch();
+		while (theList.size() != theTarget && sw.getMillis() <= 16000) {
+			try {
+				Thread.sleep(50);
+			} catch (InterruptedException theE) {
+				throw new Error(theE);
+			}
+		}
+		if (sw.getMillis() >= 16000 || theList.size() > theTarget) {
+			String describeResults = theList
+				.stream()
+				.map(t -> {
+					if (t == null) {
+						return "null";
+					}
+					if (t instanceof IBaseResource) {
+						return ((IBaseResource) t).getIdElement().getValue();
+					}
+					return t.toString();
+				})
+				.collect(Collectors.joining(", "));
+			fail("Size " + theList.size() + " is != target " + theTarget + " - Got: " + describeResults);
+		}
 	}
 
 	@BeforeAll
 	public static void beforeClassRandomizeLocale() {
 		doRandomizeLocaleAndTimezone();
-	}
-
-	@AfterAll
-	public static void afterClassShutdownDerby() {
-		// DriverManager.getConnection("jdbc:derby:;shutdown=true");
-		// try {
-		// DriverManager.getConnection("jdbc:derby:memory:myUnitTestDB;drop=true");
-		// } catch (SQLNonTransientConnectionException e) {
-		// // expected.. for some reason....
-		// }
 	}
 
 	public static String loadClasspath(String resource) throws IOException {
@@ -668,10 +749,10 @@ public abstract class BaseJpaTest extends BaseTest {
 	}
 
 	@SuppressWarnings("BusyWait")
-	protected static void purgeDatabase(DaoConfig theDaoConfig, IFhirSystemDao<?, ?> theSystemDao, IResourceReindexingSvc theResourceReindexingSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc, ISearchParamRegistry theSearchParamRegistry, IBulkDataExportSvc theBulkDataExportSvc) {
+	protected static void purgeDatabase(DaoConfig theDaoConfig, IFhirSystemDao<?, ?> theSystemDao, IResourceReindexingSvc theResourceReindexingSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc, ISearchParamRegistry theSearchParamRegistry, IBulkDataExportJobSchedulingHelper theBulkDataJobActivator) {
 		theSearchCoordinatorSvc.cancelAllActiveSearches();
 		theResourceReindexingSvc.cancelAndPurgeAllJobs();
-		theBulkDataExportSvc.cancelAndPurgeAllJobs();
+		theBulkDataJobActivator.cancelAndPurgeAllJobs();
 
 		boolean expungeEnabled = theDaoConfig.isExpungeEnabled();
 		theDaoConfig.setExpungeEnabled(true);
@@ -712,35 +793,6 @@ public abstract class BaseJpaTest extends BaseTest {
 			retVal.add(next.getCode());
 		}
 		return retVal;
-	}
-
-	protected TermValueSetConceptDesignation assertTermConceptContainsDesignation(TermValueSetConcept theConcept, String theLanguage, String theUseSystem, String theUseCode, String theUseDisplay, String theDesignationValue) {
-		Stream<TermValueSetConceptDesignation> stream = theConcept.getDesignations().stream();
-		if (theLanguage != null) {
-			stream = stream.filter(designation -> theLanguage.equalsIgnoreCase(designation.getLanguage()));
-		}
-		if (theUseSystem != null) {
-			stream = stream.filter(designation -> theUseSystem.equalsIgnoreCase(designation.getUseSystem()));
-		}
-		if (theUseCode != null) {
-			stream = stream.filter(designation -> theUseCode.equalsIgnoreCase(designation.getUseCode()));
-		}
-		if (theUseDisplay != null) {
-			stream = stream.filter(designation -> theUseDisplay.equalsIgnoreCase(designation.getUseDisplay()));
-		}
-		if (theDesignationValue != null) {
-			stream = stream.filter(designation -> theDesignationValue.equalsIgnoreCase(designation.getValue()));
-		}
-
-		Optional<TermValueSetConceptDesignation> first = stream.findFirst();
-		if (!first.isPresent()) {
-			String failureMessage = String.format("Concept %s did not contain designation [%s|%s|%s|%s|%s] ", theConcept, theLanguage, theUseSystem, theUseCode, theUseDisplay, theDesignationValue);
-			fail(failureMessage);
-			return null;
-		} else {
-			return first.get();
-		}
-
 	}
 
 	public static void waitForSize(int theTarget, Callable<Number> theCallable, Callable<String> theFailureMessage) throws Exception {

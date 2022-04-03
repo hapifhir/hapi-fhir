@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.util;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -178,6 +178,10 @@ public class MemoryCacheService {
 		TAG_DEFINITION(TagDefinitionCacheKey.class),
 		RESOURCE_LOOKUP(String.class),
 		FORCED_ID_TO_PID(String.class),
+		/**
+		 * Key type: {@literal Long}
+		 * Value type: {@literal Optional<String>}
+		 */
 		PID_TO_FORCED_ID(Long.class),
 		CONCEPT_TRANSLATION(TranslationQuery.class),
 		MATCH_URL(String.class),

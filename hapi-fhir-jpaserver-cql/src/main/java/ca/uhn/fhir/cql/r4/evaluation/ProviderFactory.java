@@ -4,7 +4,7 @@ package ca.uhn.fhir.cql.r4.evaluation;
  * #%L
  * HAPI FHIR JPA Server - Clinical Quality Language
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.cql.r4.evaluation;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.cql.common.provider.EvaluationProviderFactory;
 import ca.uhn.fhir.cql.common.retrieve.JpaFhirRetrieveProvider;
@@ -71,8 +72,7 @@ public class ProviderFactory implements EvaluationProviderFactory {
 			return new CompositeDataProvider(myModelResolver, retrieveProvider);
 		}
 
-		throw new IllegalArgumentException(
-			String.format("Can't construct a data provider for model %s version %s", model, version));
+		throw new IllegalArgumentException(Msg.code(1674) + String.format("Can't construct a data provider for model %s version %s", model, version));
 	}
 
 	public TerminologyProvider createTerminologyProvider(String model, String version, String url, String user,

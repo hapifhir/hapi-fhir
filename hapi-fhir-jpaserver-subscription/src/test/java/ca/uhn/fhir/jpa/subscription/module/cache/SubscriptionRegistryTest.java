@@ -4,9 +4,12 @@ import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import org.hl7.fhir.dstu3.model.Subscription;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SubscriptionRegistryTest extends BaseSubscriptionRegistryTest {
+
 	@Test
 	public void updateSubscriptionReusesActiveSubscription() {
 		Subscription subscription = createSubscription();

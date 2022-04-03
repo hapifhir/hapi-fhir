@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.batch.reader;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -155,9 +156,39 @@ public abstract class BaseReverseCronologicalBatchPidReader implements ItemReade
 
 	protected void addDateCountAndSortToSearch(ResourceSearch resourceSearch) {
 		SearchParameterMap map = resourceSearch.getSearchParameterMap();
-		map.setLastUpdated(new DateRangeParam().setUpperBoundInclusive(getCurrentHighThreshold()));
+		DateRangeParam rangeParam = getDateRangeParam(resourceSearch);
+		map.setLastUpdated(rangeParam);
 		map.setLoadSynchronousUpTo(myBatchSize);
 		map.setSort(new SortSpec(Constants.PARAM_LASTUPDATED, SortOrderEnum.DESC));
+	}
+
+	/**
+	 * Evaluates the passed in {@link ResourceSearch} to see if it contains a non-null {@link DateRangeParam}.
+	 *
+	 * If one such {@link DateRangeParam} exists, we use that to determine the upper and lower bounds for the returned
+	 * {@link DateRangeParam}. The {@link DateRangeParam#getUpperBound()} is compared to the
+	 * {@link BaseReverseCronologicalBatchPidReader#getCurrentHighThreshold()}, and the lower of the two date values
+	 * is used.
+	 *
+	 * If no {@link DateRangeParam} is set, we use the local {@link BaseReverseCronologicalBatchPidReader#getCurrentHighThreshold()}
+	 * to create a {@link DateRangeParam}.
+	 * @param resourceSearch The {@link ResourceSearch} to check.
+	 * @return {@link DateRangeParam}
+	 */
+	private DateRangeParam getDateRangeParam(ResourceSearch resourceSearch) {
+		DateRangeParam rangeParam = resourceSearch.getSearchParameterMap().getLastUpdated();
+		if (rangeParam != null) {
+			if (rangeParam.getUpperBound() == null) {
+				rangeParam.setUpperBoundInclusive(getCurrentHighThreshold());
+			} else {
+				Date theUpperBound = (getCurrentHighThreshold() == null || rangeParam.getUpperBound().getValue().before(getCurrentHighThreshold()))
+					? rangeParam.getUpperBound().getValue() : getCurrentHighThreshold();
+				rangeParam.setUpperBoundInclusive(theUpperBound);
+			}
+		} else {
+			rangeParam = new DateRangeParam().setUpperBoundInclusive(getCurrentHighThreshold());
+		}
+		return rangeParam;
 	}
 
 	@Override

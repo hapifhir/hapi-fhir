@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.provider;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.provider;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -110,11 +111,11 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		startRequest(theServletRequest);
 
 		if (theCodeSystemUrl == null || isBlank(theCodeSystemUrl.getValueAsString())) {
-			throw new InvalidRequestException("Missing mandatory parameter: " + PARAM_SYSTEM);
+			throw new InvalidRequestException(Msg.code(1137) + "Missing mandatory parameter: " + PARAM_SYSTEM);
 		}
 
 		if (theFiles == null || theFiles.size() == 0) {
-			throw new InvalidRequestException("No '" + PARAM_FILE + "' parameter, or package had no data");
+			throw new InvalidRequestException(Msg.code(1138) + "No '" + PARAM_FILE + "' parameter, or package had no data");
 		}
 		for (ICompositeType next : theFiles) {
 			ValidateUtil.isTrueOrThrowInvalidRequest(getContext().getElementDefinition(next.getClass()).getName().equals("Attachment"), "Package must be of type Attachment");
@@ -337,7 +338,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 
 	private void validateHaveSystem(IPrimitiveType<String> theSystem) {
 		if (theSystem == null || isBlank(theSystem.getValueAsString())) {
-			throw new InvalidRequestException("Missing mandatory parameter: " + PARAM_SYSTEM);
+			throw new InvalidRequestException(Msg.code(1139) + "Missing mandatory parameter: " + PARAM_SYSTEM);
 		}
 	}
 
@@ -356,7 +357,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 				}
 			}
 		}
-		throw new InvalidRequestException("Missing mandatory parameter: " + PARAM_FILE);
+		throw new InvalidRequestException(Msg.code(1140) + "Missing mandatory parameter: " + PARAM_FILE);
 	}
 
 	@Nonnull
@@ -377,7 +378,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 						ourLog.info("Reading in local file: {}", nextLocalFile);
 						File nextFile = new File(nextLocalFile);
 						if (!nextFile.exists() || !nextFile.isFile()) {
-							throw new InvalidRequestException("Unknown file: " + nextFile.getName());
+							throw new InvalidRequestException(Msg.code(1141) + "Unknown file: " + nextFile.getName());
 						}
 						files.add(new FileBackedFileDescriptor(nextFile));
 					}
@@ -416,7 +417,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			try {
 				return new FileInputStream(myNextFile);
 			} catch (FileNotFoundException theE) {
-				throw new InternalErrorException(theE);
+				throw new InternalErrorException(Msg.code(1142) + theE);
 			}
 		}
 	}

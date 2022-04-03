@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.bulk.imprt.svc;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -234,6 +234,15 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 		return job.toJson();
 	}
 
+        @Override
+        public JobInfo getJobStatus(String theJobId) {
+                BulkImportJobEntity theJob = findJobByJobId(theJobId);
+                return new JobInfo()
+                        .setStatus(theJob.getStatus())
+                        .setStatusMessage(theJob.getStatusMessage())
+                        .setStatusTime(theJob.getStatusTime());
+        }
+
 	@Transactional
 	@Override
 	public BulkImportJobFileJson fetchFile(String theJobId, int theFileIndex) {
@@ -306,6 +315,4 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 			myTarget.activateNextReadyJob();
 		}
 	}
-
-
 }

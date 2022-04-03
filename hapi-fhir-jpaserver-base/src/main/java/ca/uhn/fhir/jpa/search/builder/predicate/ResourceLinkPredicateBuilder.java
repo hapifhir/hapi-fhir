@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.ConfigurationException;
@@ -34,6 +35,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilderReference;
@@ -115,7 +117,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
-	private IdHelperService myIdHelperService;
+	private IIdHelperService myIdHelperService;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
@@ -203,7 +205,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 				}
 
 			} else {
-				throw new IllegalArgumentException("Invalid token type (expecting ReferenceParam): " + nextOr.getClass());
+				throw new IllegalArgumentException(Msg.code(1241) + "Invalid token type (expecting ReferenceParam): " + nextOr.getClass());
 			}
 
 		}
@@ -265,7 +267,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 	}
 
 	@Nonnull
-	private Condition createPredicateSourcePaths(List<String> thePathsToMatch) {
+	public Condition createPredicateSourcePaths(List<String> thePathsToMatch) {
 		return toEqualToOrInPredicate(myColumnSrcPath, generatePlaceholders(thePathsToMatch));
 	}
 
@@ -404,7 +406,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 			}
 
 			if (!foundChainMatch) {
-				throw new InvalidRequestException(getFhirContext().getLocalizer().getMessage(BaseStorageDao.class, "invalidParameterChain", theParamName + '.' + theReferenceParam.getChain()));
+				throw new InvalidRequestException(Msg.code(1242) + getFhirContext().getLocalizer().getMessage(BaseStorageDao.class, "invalidParameterChain", theParamName + '.' + theReferenceParam.getChain()));
 			}
 
 			candidateTargetTypes.add(nextType);
@@ -418,7 +420,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 		}
 
 		if (candidateTargetTypes.isEmpty()) {
-			throw new InvalidRequestException(getFhirContext().getLocalizer().getMessage(BaseStorageDao.class, "invalidParameterChain", theParamName + '.' + theReferenceParam.getChain()));
+			throw new InvalidRequestException(Msg.code(1243) + getFhirContext().getLocalizer().getMessage(BaseStorageDao.class, "invalidParameterChain", theParamName + '.' + theReferenceParam.getChain()));
 		}
 
 		if (candidateTargetTypes.size() > 1) {
@@ -448,7 +450,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 			if (resourceTypes.isEmpty()) {
 				RuntimeSearchParam searchParamByName = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
 				if (searchParamByName == null) {
-					throw new InternalErrorException("Could not find parameter " + theParamName);
+					throw new InternalErrorException(Msg.code(1244) + "Could not find parameter " + theParamName);
 				}
 				String paramPath = searchParamByName.getPath();
 				if (paramPath.endsWith(".as(Reference)")) {
@@ -473,11 +475,11 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 					resourceTypes.addAll(resDef.getResourceTypes());
 					if (resourceTypes.size() == 1) {
 						if (resourceTypes.get(0).isInterface()) {
-							throw new InvalidRequestException("Unable to perform search for unqualified chain '" + theParamName + "' as this SearchParameter does not declare any target types. Add a qualifier of the form '" + theParamName + ":[ResourceType]' to perform this search.");
+							throw new InvalidRequestException(Msg.code(1245) + "Unable to perform search for unqualified chain '" + theParamName + "' as this SearchParameter does not declare any target types. Add a qualifier of the form '" + theParamName + ":[ResourceType]' to perform this search.");
 						}
 					}
 				} else {
-					throw new ConfigurationException("Property " + paramPath + " of type " + getResourceType() + " is not a resource: " + def.getClass());
+					throw new ConfigurationException(Msg.code(1246) + "Property " + paramPath + " of type " + getResourceType() + " is not a resource: " + def.getClass());
 				}
 			}
 
@@ -641,7 +643,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 			case COMPOSITE:
 				List<RuntimeSearchParam> compositeOf = JpaParamUtil.resolveComponentParameters(mySearchParamRegistry, theParam);
 				if (compositeOf.size() != 2) {
-					throw new InternalErrorException("Parameter " + theParam.getName() + " has " + compositeOf.size() + " composite parts. Don't know how handlt this.");
+					throw new InternalErrorException(Msg.code(1247) + "Parameter " + theParam.getName() + " has " + compositeOf.size() + " composite parts. Don't know how handlt this.");
 				}
 				IQueryParameterType leftParam = toParameterType(compositeOf.get(0));
 				IQueryParameterType rightParam = toParameterType(compositeOf.get(1));
@@ -655,13 +657,13 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 					qp = new SpecialParam();
 					break;
 				}
-				throw new InternalErrorException("Don't know how to convert param type: " + theParam.getParamType());
+				throw new InternalErrorException(Msg.code(1248) + "Don't know how to convert param type: " + theParam.getParamType());
 			case URI:
 				qp = new UriParam();
 				break;
 			case HAS:
 			default:
-				throw new InternalErrorException("Don't know how to convert param type: " + theParam.getParamType());
+				throw new InternalErrorException(Msg.code(1249) + "Don't know how to convert param type: " + theParam.getParamType());
 		}
 		return qp;
 	}
@@ -684,7 +686,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 	@Nonnull
 	private InvalidRequestException newInvalidResourceTypeException(String theResourceType) {
 		String msg = getFhirContext().getLocalizer().getMessageSanitized(PredicateBuilderReference.class, "invalidResourceType", theResourceType);
-		throw new InvalidRequestException(msg);
+		throw new InvalidRequestException(Msg.code(1250) + msg);
 	}
 
 	@Nonnull

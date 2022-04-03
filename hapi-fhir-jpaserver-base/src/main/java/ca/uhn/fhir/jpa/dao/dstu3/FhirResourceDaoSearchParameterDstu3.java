@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,8 +64,10 @@ public class FhirResourceDaoSearchParameterDstu3 extends BaseHapiFhirResourceDao
 	protected void validateResourceForStorage(SearchParameter theResource, ResourceTable theEntityToSave) {
 		super.validateResourceForStorage(theResource, theEntityToSave);
 
+		org.hl7.fhir.r4.model.SearchParameter resource = (org.hl7.fhir.r4.model.SearchParameter) VersionConvertorFactory_30_40.convertResource(theResource, new BaseAdvisor_30_40(false));
+
 		FhirResourceDaoSearchParameterR4.validateSearchParam(
-			(org.hl7.fhir.r4.model.SearchParameter) VersionConvertorFactory_30_40.convertResource(theResource, new BaseAdvisor_30_40(false)),
+			resource,
 			getContext(), getConfig(), mySearchParamRegistry, mySearchParamExtractor);
 	}
 

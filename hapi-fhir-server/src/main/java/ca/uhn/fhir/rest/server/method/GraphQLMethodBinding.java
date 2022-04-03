@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.method;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.annotation.Nonnull;
@@ -109,8 +110,10 @@ public class GraphQLMethodBinding extends OperationMethodBinding {
 	private String getQueryValue(Object[] methodParams) {
 		switch (myMethodRequestType) {
 			case POST:
+				Validate.notNull(myQueryBodyParamIndex, "GraphQL method does not have @" + GraphQLQueryBody.class.getSimpleName() + " parameter");
 				return (String) methodParams[myQueryBodyParamIndex];
 			case GET:
+				Validate.notNull(myQueryUrlParamIndex, "GraphQL method does not have @" + GraphQLQueryUrl.class.getSimpleName() + " parameter");
 				return (String) methodParams[myQueryUrlParamIndex];
 		}
 		return null;

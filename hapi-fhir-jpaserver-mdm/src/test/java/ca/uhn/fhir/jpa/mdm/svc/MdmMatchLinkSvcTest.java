@@ -157,7 +157,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		Patient patient = getTargetResourceFromMdmLink(mdmLink.get(), "Patient");
 		List<CanonicalEID> externalEid = myEidHelper.getExternalEid(patient);
 
-		assertThat(externalEid.get(0).getSystem(), is(equalTo(myMdmSettings.getMdmRules().getEnterpriseEIDSystem())));
+		assertThat(externalEid.get(0).getSystem(), is(equalTo(myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType("Patient"))));
 		assertThat(externalEid.get(0).getValue(), is(equalTo(sampleEID)));
 	}
 
@@ -222,7 +222,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 
 		//The collision should have added a new identifier with the external system.
 		Identifier secondIdentifier = identifier.get(1);
-		assertThat(secondIdentifier.getSystem(), is(equalTo(myMdmSettings.getMdmRules().getEnterpriseEIDSystem())));
+		assertThat(secondIdentifier.getSystem(), is(equalTo(myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType("Patient"))));
 		assertThat(secondIdentifier.getValue(), is(equalTo("12345")));
 	}
 
@@ -286,6 +286,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		// Patient with "no-mdm" tag is not matched
 		Patient janePatient = buildJanePatient();
 		janePatient.getMeta().addTag(MdmConstants.SYSTEM_MDM_MANAGED, MdmConstants.CODE_NO_MDM_MANAGED, "Don't MDM on me!");
+		String s = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(janePatient);
 		createPatientAndUpdateLinks(janePatient);
 		assertLinkCount(0);
 	}

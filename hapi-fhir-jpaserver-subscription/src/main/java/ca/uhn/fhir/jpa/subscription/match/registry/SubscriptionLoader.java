@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription.match.registry;
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,13 +27,14 @@ import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCache;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionActivatingSubscriber;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -57,7 +58,7 @@ import java.util.stream.Collectors;
 public class SubscriptionLoader implements IResourceChangeListener {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionLoader.class);
 	private static final int MAX_RETRIES = 60; // 60 * 5 seconds = 5 minutes
-	private static long REFRESH_INTERVAL = DateUtils.MILLIS_PER_MINUTE;
+	private static final long REFRESH_INTERVAL = DateUtils.MILLIS_PER_MINUTE;
 
 	private final Object mySyncSubscriptionsLock = new Object();
 	@Autowired
@@ -73,8 +74,11 @@ public class SubscriptionLoader implements IResourceChangeListener {
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
+	@Autowired
+	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
 
 	private SearchParameterMap mySearchParameterMap;
+	private SystemRequestDetails mySystemRequestDetails;
 
 	/**
 	 * Constructor
@@ -86,6 +90,8 @@ public class SubscriptionLoader implements IResourceChangeListener {
 	@PostConstruct
 	public void registerListener() {
 		mySearchParameterMap = getSearchParameterMap();
+		mySystemRequestDetails = SystemRequestDetails.forAllPartition();
+
 		IResourceChangeListenerCache subscriptionCache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener("Subscription", mySearchParameterMap, this, REFRESH_INTERVAL);
 		subscriptionCache.forceRefresh();
 	}
@@ -130,6 +136,8 @@ public class SubscriptionLoader implements IResourceChangeListener {
 	}
 
 	synchronized int doSyncSubscriptionsWithRetry() {
+		// retry runs MAX_RETRIES times
+		// and if errors result every time, it will fail
 		Retrier<Integer> syncSubscriptionRetrier = new Retrier<>(this::doSyncSubscriptions, MAX_RETRIES);
 		return syncSubscriptionRetrier.runWithRetry();
 	}
@@ -142,7 +150,7 @@ public class SubscriptionLoader implements IResourceChangeListener {
 		synchronized (mySyncSubscriptionsLock) {
 			ourLog.debug("Starting sync subscriptions");
 
-			IBundleProvider subscriptionBundleList =  getSubscriptionDao().search(mySearchParameterMap);
+			IBundleProvider subscriptionBundleList = getSubscriptionDao().search(mySearchParameterMap, mySystemRequestDetails);
 
 			Integer subscriptionCount = subscriptionBundleList.size();
 			assert subscriptionCount != null;
@@ -182,9 +190,9 @@ public class SubscriptionLoader implements IResourceChangeListener {
 			String nextId = resource.getIdElement().getIdPart();
 			allIds.add(nextId);
 
-			boolean activated = mySubscriptionActivatingInterceptor.activateSubscriptionIfRequired(resource);
+			boolean activated = activateSubscriptionIfRequested(resource);
 			if (activated) {
-				activatedCount++;
+				++activatedCount;
 			}
 
 			boolean registered = mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(resource);
@@ -198,6 +206,45 @@ public class SubscriptionLoader implements IResourceChangeListener {
 		return activatedCount;
 	}
 
+	/**
+	 * @param theSubscription
+	 * @return true if activated
+	 */
+	private boolean activateSubscriptionIfRequested(IBaseResource theSubscription) {
+		if (SubscriptionConstants.REQUESTED_STATUS.equals(mySubscriptionCanonicalizer.getSubscriptionStatus(theSubscription))) {
+			// internally, subscriptions that cannot activate will be set to error
+			if (mySubscriptionActivatingInterceptor.activateSubscriptionIfRequired(theSubscription)) {
+				return true;
+			}
+			logSubscriptionNotActivatedPlusErrorIfPossible(theSubscription);
+		}
+		return false;
+	}
+
+	/**
+	 * Logs
+	 *
+	 * @param theSubscription
+	 */
+	private void logSubscriptionNotActivatedPlusErrorIfPossible(IBaseResource theSubscription) {
+		String error;
+		if (theSubscription instanceof Subscription) {
+			error = ((Subscription) theSubscription).getError();
+		} else if (theSubscription instanceof org.hl7.fhir.dstu3.model.Subscription) {
+			error = ((org.hl7.fhir.dstu3.model.Subscription) theSubscription).getError();
+		} else if (theSubscription instanceof org.hl7.fhir.dstu2.model.Subscription) {
+			error = ((org.hl7.fhir.dstu2.model.Subscription) theSubscription).getError();
+		} else {
+			error = "";
+		}
+		ourLog.error("Subscription "
+			+ theSubscription.getIdElement().getIdPart()
+			+ " could not be activated."
+			+ " This will not prevent startup, but it could lead to undesirable outcomes! "
+			+ error
+		);
+	}
+
 	@Override
 	public void handleInit(Collection<IIdType> theResourceIds) {
 		if (!subscriptionsDaoExists()) {
@@ -205,7 +252,8 @@ public class SubscriptionLoader implements IResourceChangeListener {
 			return;
 		}
 		IFhirResourceDao<?> subscriptionDao = getSubscriptionDao();
-		List<IBaseResource> resourceList = theResourceIds.stream().map(subscriptionDao::read).collect(Collectors.toList());
+		SystemRequestDetails systemRequestDetails = SystemRequestDetails.forAllPartition();
+		List<IBaseResource> resourceList = theResourceIds.stream().map(n -> subscriptionDao.read(n, systemRequestDetails)).collect(Collectors.toList());
 		updateSubscriptionRegistry(resourceList);
 	}
 

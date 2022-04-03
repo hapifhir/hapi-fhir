@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.api.dao;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.api.dao;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
@@ -170,7 +171,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * Read a resource by its internal PID
 	 */
 	default T readByPid(ResourcePersistentId thePid, boolean theDeletedOk) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(571));
 	}
 
 	/**
@@ -212,7 +213,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	/**
 	 * Search for IDs for processing a match URLs, etc.
 	 */
-	default Set<ResourcePersistentId> searchForIds(SearchParameterMap theParams, RequestDetails theRequest) {
+	default List<ResourcePersistentId> searchForIds(SearchParameterMap theParams, RequestDetails theRequest) {
 		return searchForIds(theParams, theRequest, null);
 	}
 
@@ -223,7 +224,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 *                                            create/update, this is the resource being searched for
 	 * @since 5.5.0
 	 */
-	default Set<ResourcePersistentId> searchForIds(SearchParameterMap theParams, RequestDetails theRequest, @Nullable IBaseResource theConditionalOperationTargetOrNull) {
+	default List<ResourcePersistentId> searchForIds(SearchParameterMap theParams, RequestDetails theRequest, @Nullable IBaseResource theConditionalOperationTargetOrNull) {
 		return searchForIds(theParams, theRequest);
 	}
 
@@ -293,4 +294,10 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 		return read(theReferenceElement.toVersionless()).getIdElement().getVersionIdPart();
 	}
 
+	/**
+	 * Reindex the given resource
+	 *
+	 * @param theResourcePersistentId The ID
+	 */
+	void reindex(ResourcePersistentId theResourcePersistentId, RequestDetails theRequest, TransactionDetails theTransactionDetails);
 }

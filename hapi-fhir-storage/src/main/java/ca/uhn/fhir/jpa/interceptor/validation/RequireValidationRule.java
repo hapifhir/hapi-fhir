@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.interceptor.validation;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.interceptor.validation;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.jpa.validation.ValidatorPolicyAdvisor;
 import ca.uhn.fhir.jpa.validation.ValidatorResourceFetcher;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.ValidationResultEnrichingInterceptor;
@@ -36,7 +37,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r5.utils.IResourceValidator;
+import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -49,17 +50,23 @@ class RequireValidationRule extends BaseTypedRule {
 	private ResultSeverityEnum myRejectOnSeverity = ResultSeverityEnum.ERROR;
 	private List<TagOnSeverity> myTagOnSeverity = Collections.emptyList();
 
-	public RequireValidationRule(FhirContext theFhirContext, String theType, IValidationSupport theValidationSupport, ValidatorResourceFetcher theValidatorResourceFetcher, IInterceptorBroadcaster theInterceptorBroadcaster) {
+	public RequireValidationRule(FhirContext theFhirContext,
+										  String theType,
+										  IValidationSupport theValidationSupport,
+										  ValidatorResourceFetcher theValidatorResourceFetcher,
+										  ValidatorPolicyAdvisor theValidationPolicyAdvisor,
+										  IInterceptorBroadcaster theInterceptorBroadcaster) {
 		super(theFhirContext, theType);
 
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
 
 		myValidator = new FhirInstanceValidator(theValidationSupport);
 		myValidator.setValidatorResourceFetcher(theValidatorResourceFetcher);
-		myValidator.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Warning);
+		myValidator.setValidatorPolicyAdvisor(theValidationPolicyAdvisor);
+		myValidator.setBestPracticeWarningLevel(BestPracticeWarningLevel.Warning);
 	}
 
-	void setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel theBestPracticeWarningLevel) {
+	void setBestPracticeWarningLevel(BestPracticeWarningLevel theBestPracticeWarningLevel) {
 		myValidator.setBestPracticeWarningLevel(theBestPracticeWarningLevel);
 	}
 

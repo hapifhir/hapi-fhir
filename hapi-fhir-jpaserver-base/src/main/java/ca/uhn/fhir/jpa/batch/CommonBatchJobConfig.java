@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.batch;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,7 @@ import ca.uhn.fhir.jpa.batch.processor.GoldenResourceAnnotatingProcessor;
 import ca.uhn.fhir.jpa.batch.processor.PidToIBaseResourceProcessor;
 import ca.uhn.fhir.jpa.batch.reader.ReverseCronologicalBatchResourcePidReader;
 import ca.uhn.fhir.jpa.batch.writer.SqlExecutorWriter;
-import ca.uhn.fhir.jpa.reindex.job.ReindexWriter;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
-import org.springframework.batch.core.JobParametersValidator;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -71,12 +69,6 @@ public class CommonBatchJobConfig {
 	@StepScope
 	public GoldenResourceAnnotatingProcessor goldenResourceAnnotatingProcessor() {
 		return new GoldenResourceAnnotatingProcessor();
-	}
-
-	@Bean
-	@StepScope
-	public ReindexWriter reindexWriter() {
-		return new ReindexWriter();
 	}
 
 }

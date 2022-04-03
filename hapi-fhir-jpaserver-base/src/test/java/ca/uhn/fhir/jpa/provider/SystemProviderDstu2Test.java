@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.dstu2.BaseJpaDstu2Test;
 import ca.uhn.fhir.jpa.rp.dstu2.BinaryResourceProvider;
 import ca.uhn.fhir.jpa.rp.dstu2.DiagnosticOrderResourceProvider;
@@ -216,7 +217,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		for (int i = 0; i < 10; i++) {
 			ourLog.info("** Beginning pass {}", i);
 
-			Bundle input = myFhirCtx.newJsonParser().parseResource(Bundle.class, IOUtils.toString(getClass().getResourceAsStream("/dstu2/createdeletebundle.json"), Charsets.UTF_8));
+			Bundle input = myFhirContext.newJsonParser().parseResource(Bundle.class, IOUtils.toString(getClass().getResourceAsStream("/dstu2/createdeletebundle.json"), Charsets.UTF_8));
 			ourClient.transaction().withBundle(input).execute();
 
 			myPatientDao.read(new IdType("Patient/Patient1063259"));
@@ -242,7 +243,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 	}
 
 	private void deleteAllOfType(String theType) {
-		BundleUtil.toListOfResources(myFhirCtx, ourClient.search().forResource(theType).execute())
+		BundleUtil.toListOfResources(myFhirContext, ourClient.search().forResource(theType).execute())
 			.forEach(t -> {
 				ourClient.delete().resourceById(t.getIdElement()).execute();
 			});
@@ -330,7 +331,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 			fail();
 		} catch (InvalidRequestException e) {
 			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
-			assertEquals("Invalid placeholder ID found: uri:uuid:bb0cd4bc-1839-4606-8c46-ba3069e69b1d - Must be of the form 'urn:uuid:[uuid]' or 'urn:oid:[oid]'", oo.getIssue().get(0).getDiagnostics());
+			assertEquals(Msg.code(533) + "Invalid placeholder ID found: uri:uuid:bb0cd4bc-1839-4606-8c46-ba3069e69b1d - Must be of the form 'urn:uuid:[uuid]' or 'urn:oid:[oid]'", oo.getIssue().get(0).getDiagnostics());
 			assertEquals("processing", oo.getIssue().get(0).getCode());
 		}
 	}

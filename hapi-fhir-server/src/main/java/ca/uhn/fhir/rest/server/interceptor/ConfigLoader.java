@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.interceptor;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.ClasspathUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -47,7 +48,7 @@ public class ConfigLoader {
 		try {
 			props.load(new StringReader(propsString));
 		} catch (IOException e) {
-			throw new RuntimeException(String.format("Unable to load properties at %s", theResourcePath), e);
+			throw new RuntimeException(Msg.code(324) + String.format("Unable to load properties at %s", theResourcePath), e);
 		}
 		return props;
 	}
@@ -57,7 +58,7 @@ public class ConfigLoader {
 		try {
 			return mapper.readValue(loadResourceContent(theResourcePath), theModelClass);
 		} catch (Exception e) {
-			throw new RuntimeException(String.format("Unable to parse resource at %s", theResourcePath), e);
+			throw new RuntimeException(Msg.code(325) + String.format("Unable to parse resource at %s", theResourcePath), e);
 		}
 	}
 

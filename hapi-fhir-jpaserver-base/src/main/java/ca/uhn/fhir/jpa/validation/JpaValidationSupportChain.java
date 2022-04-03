@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.validation;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,9 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 	@Autowired
 	private UnknownCodeSystemWarningValidationSupport myUnknownCodeSystemWarningValidationSupport;
 
+	/**
+	 * Constructor
+	 */
 	public JpaValidationSupportChain(FhirContext theFhirContext) {
 		myFhirContext = theFhirContext;
 	}
@@ -72,16 +75,17 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 
 	@PostConstruct
 	public void postConstruct() {
-		addValidationSupport(myUnknownCodeSystemWarningValidationSupport);
 		addValidationSupport(myDefaultProfileValidationSupport);
 		addValidationSupport(myJpaValidationSupport);
-		//TODO MAKE SURE THAT THIS IS BEING CAL
 		addValidationSupport(myTerminologyService);
 		addValidationSupport(new SnapshotGeneratingValidationSupport(myFhirContext));
 		addValidationSupport(new InMemoryTerminologyServerValidationSupport(myFhirContext));
 		addValidationSupport(myNpmJpaValidationSupport);
 		addValidationSupport(new CommonCodeSystemsTerminologyService(myFhirContext));
 		addValidationSupport(myConceptMappingSvc);
+
+		// This needs to be last in the chain, it was designed for that
+		addValidationSupport(myUnknownCodeSystemWarningValidationSupport);
 	}
 
 }

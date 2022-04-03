@@ -4,7 +4,7 @@ package ca.uhn.fhir.mdm.rules.json;
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.mdm.rules.json;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.api.MdmMatchEvaluation;
 import ca.uhn.fhir.mdm.rules.matcher.MdmMatcherEnum;
@@ -113,7 +114,7 @@ public class MdmFieldMatchJson implements IModelJson {
 		if (mySimilarity != null) {
 			return mySimilarity.match(theFhirContext, theLeftValue, theRightValue);
 		}
-		throw new InternalErrorException("Field Match " + myName + " has neither a matcher nor a similarity.");
+		throw new InternalErrorException(Msg.code(1522) + "Field Match " + myName + " has neither a matcher nor a similarity.");
 	}
 
 	public String getFhirPath() {

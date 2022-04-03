@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.search;
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.BasePagingProvider;
@@ -38,6 +39,8 @@ public class DatabaseBackedPagingProvider extends BasePagingProvider {
 	private SearchBuilderFactory mySearchBuilderFactory;
 	@Autowired
 	private PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
+	@Autowired
+	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	/**
 	 * Constructor
@@ -57,6 +60,7 @@ public class DatabaseBackedPagingProvider extends BasePagingProvider {
 
 	@Override
 	public synchronized IBundleProvider retrieveResultList(RequestDetails theRequestDetails, String theId) {
+		myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(theRequestDetails, "Bundle", null, null);
 		PersistedJpaBundleProvider provider = myPersistedJpaBundleProviderFactory.newInstance(theRequestDetails, theId);
 		if (!provider.ensureSearchEntityLoaded()) {
 			return null;

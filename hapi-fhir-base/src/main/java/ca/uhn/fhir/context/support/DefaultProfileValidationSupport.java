@@ -4,7 +4,7 @@ package ca.uhn.fhir.context.support;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ package ca.uhn.fhir.context.support;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.BundleUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -99,7 +100,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 						structureDefinitionResources.add("/org/hl7/fhir/instance/model/profile/" + nextKey);
 					}
 				} catch (IOException e) {
-					throw new ConfigurationException(e);
+					throw new ConfigurationException(Msg.code(1740) + e);
 				}
 				break;
 			case DSTU2_1:
@@ -380,5 +381,4 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 		ArrayList<IBaseResource> retVal = new ArrayList<>(theMap.values());
 		return (List<T>) Collections.unmodifiableList(retVal);
 	}
-
 }

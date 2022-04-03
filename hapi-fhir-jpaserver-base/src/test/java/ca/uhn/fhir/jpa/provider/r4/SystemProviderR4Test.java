@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
@@ -293,7 +294,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	public void testMarkResourcesForReindexingTyped() throws Exception {
 
 		HttpPost post = new HttpPost(ourServerBase + "/$mark-all-resources-for-reindexing?type=Patient");
-		post.setEntity(new ResourceEntity(myFhirCtx, new Parameters().addParameter("type", new CodeType("Patient"))));
+		post.setEntity(new ResourceEntity(myFhirContext, new Parameters().addParameter("type", new CodeType("Patient"))));
 		CloseableHttpResponse http = ourHttpClient.execute(post);
 		try {
 			String output = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -304,7 +305,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		}
 
 		post = new HttpPost(ourServerBase + "/$mark-all-resources-for-reindexing?type=FOO");
-		post.setEntity(new ResourceEntity(myFhirCtx, new Parameters().addParameter("type", new CodeType("FOO"))));
+		post.setEntity(new ResourceEntity(myFhirContext, new Parameters().addParameter("type", new CodeType("FOO"))));
 		http = ourHttpClient.execute(post);
 		try {
 			String output = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -405,7 +406,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		for (int i = 0; i < 10; i++) {
 			ourLog.info("** Beginning pass {}", i);
 
-			Bundle input = myFhirCtx.newJsonParser().parseResource(Bundle.class, IOUtils.toString(getClass().getResourceAsStream("/r4/createdeletebundle.json"), Charsets.UTF_8));
+			Bundle input = myFhirContext.newJsonParser().parseResource(Bundle.class, IOUtils.toString(getClass().getResourceAsStream("/r4/createdeletebundle.json"), Charsets.UTF_8));
 			myClient.transaction().withBundle(input).execute();
 
 			myPatientDao.read(new IdType("Patient/Patient1063259"));
@@ -441,7 +442,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	}
 
 	private void deleteAllOfType(String theType) {
-		BundleUtil.toListOfResources(myFhirCtx, myClient.search().forResource(theType).execute())
+		BundleUtil.toListOfResources(myFhirContext, myClient.search().forResource(theType).execute())
 			.forEach(t -> {
 				myClient.delete().resourceById(t.getIdElement()).execute();
 			});
@@ -462,7 +463,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		inputBundle.addEntry().getRequest().setMethod(HTTPVerb.DELETE).setUrl(id.getValue());
 		inputBundle.addEntry().getRequest().setMethod(HTTPVerb.DELETE).setUrl(id.getValue());
 		inputBundle.addEntry().getRequest().setMethod(HTTPVerb.DELETE).setUrl("Patient?name=Pietercx85ioqWJbI");
-		String input = myFhirCtx.newXmlParser().encodeResourceToString(inputBundle);
+		String input = myFhirContext.newXmlParser().encodeResourceToString(inputBundle);
 
 		HttpPost req = new HttpPost(ourServerBase + "?_pretty=true");
 		req.setEntity(new StringEntity(input, ContentType.parse(Constants.CT_FHIR_XML + "; charset=utf-8")));
@@ -474,7 +475,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 			assertThat(encoded, containsString("transaction-response"));
 
-			Bundle response = myFhirCtx.newXmlParser().parseResource(Bundle.class, encoded);
+			Bundle response = myFhirContext.newXmlParser().parseResource(Bundle.class, encoded);
 			assertEquals(3, response.getEntry().size());
 
 		} finally {
@@ -572,7 +573,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			fail();
 		} catch (InvalidRequestException e) {
 			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
-			assertEquals("Invalid placeholder ID found: uri:uuid:bb0cd4bc-1839-4606-8c46-ba3069e69b1d - Must be of the form 'urn:uuid:[uuid]' or 'urn:oid:[oid]'", oo.getIssue().get(0).getDiagnostics());
+			assertEquals(Msg.code(533) + "Invalid placeholder ID found: uri:uuid:bb0cd4bc-1839-4606-8c46-ba3069e69b1d - Must be of the form 'urn:uuid:[uuid]' or 'urn:oid:[oid]'", oo.getIssue().get(0).getDiagnostics());
 			assertEquals("processing", oo.getIssue().get(0).getCode().toCode());
 		}
 	}
@@ -583,7 +584,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 
 		for (int pass = 0; pass < 10000; pass++) {
-			BundleBuilder bb = new BundleBuilder(myFhirCtx);
+			BundleBuilder bb = new BundleBuilder(myFhirContext);
 			for (int i = 0; i < 100; i++) {
 				Patient pt = new Patient();
 				pt.setId(org.hl7.fhir.dstu3.model.IdType.newRandomUuid());
@@ -856,12 +857,12 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 		// validate
 		Bundle obsBundle = getAllResourcesOfType("Observation");
-		List<Observation> observations = BundleUtil.toListOfResourcesOfType(myFhirCtx, obsBundle, Observation.class);
+		List<Observation> observations = BundleUtil.toListOfResourcesOfType(myFhirContext, obsBundle, Observation.class);
 		assertThat(observations, hasSize(1));
 		assertEquals(oKeepId, observations.get(0).getIdElement());
 
 		Bundle patientBundle = getAllResourcesOfType("Patient");
-		List<Patient> patients = BundleUtil.toListOfResourcesOfType(myFhirCtx, patientBundle, Patient.class);
+		List<Patient> patients = BundleUtil.toListOfResourcesOfType(myFhirContext, patientBundle, Patient.class);
 		assertThat(patients, hasSize(1));
 		assertEquals(pKeepId, patients.get(0).getIdElement());
 

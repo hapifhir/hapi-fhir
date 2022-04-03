@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 3400
+title: "User was permitted to bulk export all groups/patients when they were unauthorized. This issue has been fixed."

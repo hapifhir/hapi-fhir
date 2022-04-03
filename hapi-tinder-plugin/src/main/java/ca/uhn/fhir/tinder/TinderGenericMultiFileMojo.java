@@ -1,5 +1,6 @@
 package ca.uhn.fhir.tinder;
 
+import ca.uhn.fhir.i18n.Msg;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -280,16 +281,16 @@ public class TinderGenericMultiFileMojo extends AbstractMojo {
 			context.setValueSetFiles(valueSetFiles);
 			if (ResourceSource.MODEL.equals(context.getResourceSource())) {
 				if (generateDatatypes) {
-					throw new MojoFailureException("Cannot use \"generateDatatypes\" when resourceSource=model");
+					throw new MojoFailureException(Msg.code(128) + "Cannot use \"generateDatatypes\" when resourceSource=model");
 				}
 				if (generateValueSets) {
-					throw new MojoFailureException("Cannot use \"generateValueSets\" when resourceSource=model");
+					throw new MojoFailureException(Msg.code(129) + "Cannot use \"generateValueSets\" when resourceSource=model");
 				}
 			}
 
 			generator.prepare(context);
 		} catch (FailureException e) {
-			throw new MojoFailureException(e.getMessage(), e.getCause());
+			throw new MojoFailureException(Msg.code(130) + e.getMessage(), e.getCause());
 		}
 		
 		/*
@@ -299,17 +300,17 @@ public class TinderGenericMultiFileMojo extends AbstractMojo {
 		File targetDirectory = null;
 		if (targetSourceDirectory != null) {
 			if (targetResourceDirectory != null) {
-				throw new MojoFailureException("Both [targetSourceDirectory] and [targetResourceDirectory] are specified. Please choose just one.");
+				throw new MojoFailureException(Msg.code(131) + "Both [targetSourceDirectory] and [targetResourceDirectory] are specified. Please choose just one.");
 			}
 			targetType = TargetType.SOURCE;
 			if (null == targetPackage) {
-				throw new MojoFailureException("The [targetPackage] property must be specified when generating Java source code.");
+				throw new MojoFailureException(Msg.code(132) + "The [targetPackage] property must be specified when generating Java source code.");
 			}
 			targetDirectory = new File(targetSourceDirectory, targetPackage.replace('.', File.separatorChar));
 		} else
 		if (targetResourceDirectory != null) {
 			if (targetSourceDirectory != null) {
-				throw new MojoFailureException("Both [targetSourceDirectory] and [targetResourceDirectory] are specified. Please choose just one.");
+				throw new MojoFailureException(Msg.code(133) + "Both [targetSourceDirectory] and [targetResourceDirectory] are specified. Please choose just one.");
 			}
 			targetType = TargetType.RESOURCE;
 			if (targetFolder != null) {
@@ -321,7 +322,7 @@ public class TinderGenericMultiFileMojo extends AbstractMojo {
 				targetPackage = "";
 			}
 		} else {
-			throw new MojoFailureException("Either [targetSourceDirectory] or [targetResourceDirectory] must be specified.");
+			throw new MojoFailureException(Msg.code(134) + "Either [targetSourceDirectory] or [targetResourceDirectory] must be specified.");
 		}
 		targetDirectory.mkdirs();
 		ourLog.info(" * Output ["+targetType.toString()+"] Directory: " + targetDirectory.getAbsolutePath());

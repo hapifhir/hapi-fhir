@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription.channel.api;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,13 @@ package ca.uhn.fhir.jpa.subscription.channel.api;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.subscription.model.ChannelRetryConfiguration;
+
 public abstract class BaseChannelSettings implements IChannelSettings {
 	private boolean myQualifyChannelName = true;
+
+	private ChannelRetryConfiguration myRetryConfigurationParameters;
+
 
 	/**
 	 * Default true.  Used by IChannelNamer to decide how to qualify the channel name.
@@ -36,5 +41,13 @@ public abstract class BaseChannelSettings implements IChannelSettings {
 	 */
 	public void setQualifyChannelName(boolean theQualifyChannelName) {
 		myQualifyChannelName = theQualifyChannelName;
+	}
+
+	public void setRetryConfiguration(ChannelRetryConfiguration theParams) {
+		myRetryConfigurationParameters = theParams;
+	}
+
+	public ChannelRetryConfiguration getRetryConfigurationParameters() {
+		return myRetryConfigurationParameters;
 	}
 }

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.cache;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ package ca.uhn.fhir.jpa.cache;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import java.util.Set;
 
 /**
  * This component holds an in-memory list of all registered {@link IResourceChangeListener} instances along
@@ -80,4 +82,8 @@ public interface IResourceChangeListenerRegistry {
 
 	void requestRefreshIfWatching(IBaseResource theResource);
 
+	/**
+	 * @return a set of resource names watched by the registered listeners
+	 */
+	Set<String> getWatchedResourceNames();
 }

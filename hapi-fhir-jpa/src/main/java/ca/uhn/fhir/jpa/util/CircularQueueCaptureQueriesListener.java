@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.util;
  * #%L
  * hapi-fhir-jpa
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -313,23 +313,35 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	/**
 	 * Log all captured INSERT queries
 	 */
-	public void logInsertQueries() {
-		List<String> queries = getInsertQueries()
+	public int logInsertQueries() {
+		List<SqlQuery> insertQueries = getInsertQueries();
+		List<String> queries = insertQueries
 			.stream()
 			.map(CircularQueueCaptureQueriesListener::formatQueryAsSql)
 			.collect(Collectors.toList());
 		ourLog.info("Insert Queries:\n{}", String.join("\n", queries));
+
+		return insertQueries
+			.stream()
+			.map(t -> t.getSize())
+			.reduce(0, Integer::sum);
 	}
 
 	/**
 	 * Log all captured INSERT queries
 	 */
-	public void logUpdateQueries() {
-		List<String> queries = getUpdateQueries()
+	public int logUpdateQueries() {
+		List<SqlQuery> updateQueries = getUpdateQueries();
+		List<String> queries = updateQueries
 			.stream()
 			.map(CircularQueueCaptureQueriesListener::formatQueryAsSql)
 			.collect(Collectors.toList());
 		ourLog.info("Update Queries:\n{}", String.join("\n", queries));
+
+		return updateQueries
+			.stream()
+			.map(t -> t.getSize())
+			.reduce(0, Integer::sum);
 	}
 
 	/**
@@ -349,12 +361,18 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	/**
 	 * Log all captured DELETE queries
 	 */
-	public void logDeleteQueries() {
-		List<String> queries = getDeleteQueries()
+	public int logDeleteQueries() {
+		List<SqlQuery> deleteQueries = getDeleteQueries();
+		List<String> queries = deleteQueries
 			.stream()
 			.map(CircularQueueCaptureQueriesListener::formatQueryAsSql)
 			.collect(Collectors.toList());
 		ourLog.info("Delete Queries:\n{}", String.join("\n", queries));
+
+		return deleteQueries
+			.stream()
+			.map(t -> t.getSize())
+			.reduce(0, Integer::sum);
 	}
 
 	public int countSelectQueries() {
@@ -362,15 +380,24 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	}
 
 	public int countInsertQueries() {
-		return getInsertQueries().size();
+		return getInsertQueries()
+			.stream()
+			.map(t->t.getSize())
+			.reduce(0, Integer::sum);
 	}
 
 	public int countUpdateQueries() {
-		return getUpdateQueries().size();
+		return getUpdateQueries()
+			.stream()
+			.map(t->t.getSize())
+			.reduce(0, Integer::sum);
 	}
 
 	public int countDeleteQueries() {
-		return getDeleteQueries().size();
+		return getDeleteQueries()
+			.stream()
+			.map(t->t.getSize())
+			.reduce(0, Integer::sum);
 	}
 
 	public int countSelectQueriesForCurrentThread() {

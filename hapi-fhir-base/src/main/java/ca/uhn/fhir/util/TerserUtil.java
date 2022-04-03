@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Triple;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -230,7 +231,7 @@ public final class TerserUtil {
 			try {
 				return (Boolean) theMethod.invoke(theItem1, theItem2);
 			} catch (Exception e) {
-				throw new RuntimeException(String.format("Unable to compare equality via %s", EQUALS_DEEP), e);
+				throw new RuntimeException(Msg.code(1746) + String.format("Unable to compare equality via %s", EQUALS_DEEP), e);
 			}
 		}
 		return theItem1.equals(theItem2);
@@ -315,12 +316,11 @@ public final class TerserUtil {
 
 	/**
 	 * Clears the specified field on the resource provided
-	 *
-	 * @param theFhirContext Context holding resource definition
-	 * @param theFieldName
+	 *  @param theFhirContext Context holding resource definition
 	 * @param theResource
+	 * @param theFieldName
 	 */
-	public static void clearField(FhirContext theFhirContext, String theFieldName, IBaseResource theResource) {
+	public static void clearField(FhirContext theFhirContext, IBaseResource theResource, String theFieldName) {
 		BaseRuntimeChildDefinition childDefinition = getBaseRuntimeChildDefinition(theFhirContext, theFieldName, theResource);
 		clear(childDefinition.getAccessor().getValues(theResource));
 	}
@@ -341,7 +341,7 @@ public final class TerserUtil {
 
 	/**
 	 * Sets the provided field with the given values. This method will add to the collection of existing field values
-	 * in case of multiple cardinality. Use {@link #clearField(FhirContext, String, IBaseResource)}
+	 * in case of multiple cardinality. Use {@link #clearField(FhirContext, IBaseResource, String)}
 	 * to remove values before setting
 	 *
 	 * @param theFhirContext Context holding resource definition
@@ -355,7 +355,7 @@ public final class TerserUtil {
 
 	/**
 	 * Sets the provided field with the given values. This method will add to the collection of existing field values
-	 * in case of multiple cardinality. Use {@link #clearField(FhirContext, String, IBaseResource)}
+	 * in case of multiple cardinality. Use {@link #clearField(FhirContext, IBaseResource, String)}
 	 * to remove values before setting
 	 *
 	 * @param theFhirContext Context holding resource definition

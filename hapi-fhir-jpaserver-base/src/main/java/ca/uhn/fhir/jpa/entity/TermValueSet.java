@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -250,15 +250,15 @@ public class TermValueSet implements Serializable {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("myId", myId)
-			.append("myUrl", myUrl)
-			.append(myResource != null ? ("myResource=" + myResource.toString()) : ("myResource=(null)"))
-			.append("myResourcePid", myResourcePid)
-			.append("myName", myName)
-			.append(myConcepts != null ? ("myConcepts - size=" + myConcepts.size()) : ("myConcepts=(null)"))
-			.append("myTotalConcepts", myTotalConcepts)
-			.append("myTotalConceptDesignations", myTotalConceptDesignations)
-			.append("myExpansionStatus", myExpansionStatus)
+			.append("id", myId)
+			.append("url", myUrl)
+			.append(myResource != null ? ("resource=" + myResource.toString()) : ("resource=(null)"))
+			.append("resourcePid", myResourcePid)
+			.append("name", myName)
+			.append(myConcepts != null ? ("concepts - size=" + myConcepts.size()) : ("concepts=(null)"))
+			.append("totalConcepts", myTotalConcepts)
+			.append("totalConceptDesignations", myTotalConceptDesignations)
+			.append("expansionStatus", myExpansionStatus)
 			.toString();
 	}
 }

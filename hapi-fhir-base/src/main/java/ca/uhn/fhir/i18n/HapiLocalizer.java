@@ -5,10 +5,20 @@ import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.VersionUtil;
 
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 
 
@@ -16,7 +26,7 @@ import static org.apache.commons.lang3.StringUtils.*;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,7 +105,7 @@ public class HapiLocalizer {
 		if (formatString == null) {
 			ourLog.warn("Unknown localization key: {}", theQualifiedKey);
 			if (ourFailOnMissingMessage) {
-				throw new ConfigurationException("Unknown localization key: " + theQualifiedKey);
+				throw new ConfigurationException(Msg.code(1908) + "Unknown localization key: " + theQualifiedKey);
 			}
 			formatString = UNKNOWN_I18N_KEY_MESSAGE;
 		}

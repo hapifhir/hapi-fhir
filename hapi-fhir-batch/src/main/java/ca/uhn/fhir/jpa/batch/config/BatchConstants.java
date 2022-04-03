@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.batch.config;
  * #%L
  * HAPI FHIR JPA Server - Batch Task Processor
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,17 +43,34 @@ public final class BatchConstants {
 	 */
 	public static final String DELETE_EXPUNGE_JOB_NAME = "deleteExpungeJob";
 	/**
-	 * Reindex
-	 */
-	public static final String REINDEX_JOB_NAME = "reindexJob";
-	/**
-	 * Reindex Everything
-	 */
-	public static final String REINDEX_EVERYTHING_JOB_NAME = "reindexEverythingJob";
-	/**
 	 * MDM Clear
 	 */
 	public static final String MDM_CLEAR_JOB_NAME = "mdmClearJob";
+
+	/**
+	 * TermCodeSystem delete
+	 */
+	public static final String TERM_CODE_SYSTEM_DELETE_JOB_NAME 			= "termCodeSystemDeleteJob";
+	public static final String TERM_CONCEPT_RELATIONS_DELETE_STEP_NAME	= "termConceptRelationsDeleteStep";
+	public static final String TERM_CONCEPTS_DELETE_STEP_NAME 				= "termConceptsDeleteStep";
+	public static final String TERM_CODE_SYSTEM_VERSION_DELETE_STEP_NAME = "termCodeSystemVersionDeleteStep";
+	public static final String TERM_CODE_SYSTEM_DELETE_STEP_NAME 			= "termCodeSystemDeleteStep";
+	public static final String JOB_PARAM_CODE_SYSTEM_ID 						= "termCodeSystemPid";
+
+	/**
+	 * TermCodeSystemVersion delete
+	 */
+	public static final String TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME 						= "termCodeSystemVersionDeleteJob";
+	public static final String TERM_CONCEPT_RELATIONS_UNIQUE_VERSION_DELETE_STEP_NAME 	= "termConceptRelationsUniqueVersionDeleteStep";
+	public static final String TERM_CONCEPTS_UNIQUE_VERSION_DELETE_STEP_NAME 				= "termConceptsUniqueVersionDeleteStep";
+	public static final String TERM_CODE_SYSTEM_UNIQUE_VERSION_DELETE_STEP_NAME 			= "termCodeSystemUniqueVersionDeleteStep";
+
+	/**
+	 * Both: TermCodeSystem delete and TermCodeSystemVersion delete
+	 */
+	public static final String JOB_PARAM_CODE_SYSTEM_VERSION_ID 			= "termCodeSystemVersionPid";
+
+
 	public static final String BULK_EXPORT_READ_CHUNK_PARAMETER = "readChunkSize";
 	public static final String BULK_EXPORT_GROUP_ID_PARAMETER = "groupId";
 	/**

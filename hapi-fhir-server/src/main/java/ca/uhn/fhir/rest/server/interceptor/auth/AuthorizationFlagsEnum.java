@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ public enum AuthorizationFlagsEnum {
 	 * version, this flag was the default and there was no ability to
 	 * proactively block compartment read access.
 	 */
-	NO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS,
+	DO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS,
 
 	ALLOW_PATCH_REQUEST_UNCHALLENGED;
 }

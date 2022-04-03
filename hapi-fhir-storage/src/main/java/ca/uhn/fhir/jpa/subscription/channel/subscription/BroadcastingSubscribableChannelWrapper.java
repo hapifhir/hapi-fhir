@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription.channel.subscription;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,6 @@ public class BroadcastingSubscribableChannelWrapper extends AbstractSubscribable
 		super.addInterceptor(interceptor);
 		myWrappedChannel.addInterceptor(interceptor);
 	}
-
 
 	@Override
 	public String getName() {

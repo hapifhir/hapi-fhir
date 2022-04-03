@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.tx;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.tx;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -40,6 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nullable;
@@ -134,10 +136,10 @@ public class HapiTransactionService {
 				if (maxRetries > 0) {
 					String msg = "Max retries (" + maxRetries + ") exceeded for version conflict: " + e.getMessage();
 					ourLog.info(msg, maxRetries);
-					throw new ResourceVersionConflictException(msg);
+					throw new ResourceVersionConflictException(Msg.code(549) + msg);
 				}
 
-				throw new ResourceVersionConflictException(e.getMessage(), e, oo);
+				throw new ResourceVersionConflictException(Msg.code(550) + e.getMessage(), e, oo);
 			}
 		}
 
@@ -151,7 +153,7 @@ public class HapiTransactionService {
 			if (e.getCause() instanceof RuntimeException) {
 				throw (RuntimeException) e.getCause();
 			} else {
-				throw new InternalErrorException(e);
+				throw new InternalErrorException(Msg.code(551) + e);
 			}
 		}
 	}

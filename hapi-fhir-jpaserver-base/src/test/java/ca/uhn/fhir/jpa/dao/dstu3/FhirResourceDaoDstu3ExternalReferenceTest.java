@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -43,7 +44,7 @@ public class FhirResourceDaoDstu3ExternalReferenceTest extends BaseJpaDstu3Test 
 			myPatientDao.create(p, mySrd);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Resource Organization/FOO not found, specified in path: Patient.managingOrganization", e.getMessage());
+			assertEquals(Msg.code(1094) + "Resource Organization/FOO not found, specified in path: Patient.managingOrganization", e.getMessage());
 		}
 	}
 
@@ -60,7 +61,7 @@ public class FhirResourceDaoDstu3ExternalReferenceTest extends BaseJpaDstu3Test 
 			myPatientDao.create(p, mySrd);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Resource contains external reference to URL \"http://example.com/base/Organization/FOO\" but this server is not configured to allow external references", e.getMessage());
+			assertEquals(Msg.code(507) + "Resource contains external reference to URL \"http://example.com/base/Organization/FOO\" but this server is not configured to allow external references", e.getMessage());
 		}
 	}
 

@@ -1,5 +1,6 @@
 package org.hl7.fhir.common.hapi.validation.validator;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeCompositeDatatypeDefinition;
@@ -63,7 +64,7 @@ public class ProfileKnowledgeWorkerR5 implements org.hl7.fhir.r5.conformance.Pro
 
     @Override
     public String getLinkForUrl(String corePath, String url) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException(Msg.code(693));
     }
 
 }

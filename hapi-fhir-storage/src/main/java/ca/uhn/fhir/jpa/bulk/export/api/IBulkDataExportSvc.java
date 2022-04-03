@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.bulk.export.api;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,11 +32,6 @@ import java.util.List;
 import java.util.Set;
 
 public interface IBulkDataExportSvc {
-	void buildExportFiles();
-
-	@Transactional(value = Transactional.TxType.NEVER)
-	void purgeExpiredFiles();
-
 	/**
 	 * Deprecated - Use {@link #submitJob(BulkDataExportOptions, Boolean, RequestDetails)} instead
 	 */
@@ -51,8 +46,6 @@ public interface IBulkDataExportSvc {
 	 * Return a set of all resource types which contain search parameters which have Patient as a target.
 	 */
 	Set<String> getPatientCompartmentResources();
-
-	void cancelAndPurgeAllJobs();
 
 	class JobInfo {
 		private String myJobId;

@@ -4,7 +4,7 @@ package ca.uhn.fhir.narrative2;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ package ca.uhn.fhir.narrative2;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.thymeleaf.IEngineConfiguration;
@@ -45,7 +46,10 @@ import org.thymeleaf.templateresolver.DefaultTemplateResolver;
 import org.thymeleaf.templateresource.ITemplateResource;
 import org.thymeleaf.templateresource.StringTemplateResource;
 
-import java.util.*;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -113,12 +117,12 @@ public class ThymeleafNarrativeGenerator extends BaseNarrativeGenerator {
 		if (isNotBlank(theName)) {
 			templateOpt = getManifest().getTemplateByName(theFhirContext, getStyle(), theName);
 			if (templateOpt.isEmpty()) {
-				throw new InternalErrorException("Unknown template name: " + theName);
+				throw new InternalErrorException(Msg.code(1863) + "Unknown template name: " + theName);
 			}
 		} else {
 			templateOpt = getManifest().getTemplateByElement(theFhirContext, getStyle(), elementValue);
 			if (templateOpt.isEmpty()) {
-				throw new InternalErrorException("No template for type: " + elementValue.getClass());
+				throw new InternalErrorException(Msg.code(1864) + "No template for type: " + elementValue.getClass());
 			}
 		}
 

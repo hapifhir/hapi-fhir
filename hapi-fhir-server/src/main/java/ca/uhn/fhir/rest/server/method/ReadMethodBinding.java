@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.method;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.method;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
@@ -76,12 +77,12 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 		myIdIndex = idIndex;
 
 		if (myIdIndex == null) {
-			throw new ConfigurationException("@" + Read.class.getSimpleName() + " method " + theMethod.getName() + " on type \"" + theMethod.getDeclaringClass().getName() + "\" does not have a parameter annotated with @" + IdParam.class.getSimpleName());
+			throw new ConfigurationException(Msg.code(382) + "@" + Read.class.getSimpleName() + " method " + theMethod.getName() + " on type \"" + theMethod.getDeclaringClass().getName() + "\" does not have a parameter annotated with @" + IdParam.class.getSimpleName());
 		}
 		myIdParameterType = (Class<? extends IIdType>) parameterTypes[myIdIndex];
 
 		if (!IIdType.class.isAssignableFrom(myIdParameterType)) {
-			throw new ConfigurationException("ID parameter must be of type IdDt or IdType - Found: " + myIdParameterType);
+			throw new ConfigurationException(Msg.code(383) + "ID parameter must be of type IdDt or IdType - Found: " + myIdParameterType);
 		}
 
 	}
@@ -168,7 +169,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 
 		if (!invalidQueryStringParamsInRequest.isEmpty()) {
-			throw new InvalidRequestException(ctx.getLocalizer().getMessage(ReadMethodBinding.class, "invalidParamsInRequest", invalidQueryStringParamsInRequest));
+			throw new InvalidRequestException(Msg.code(384) + ctx.getLocalizer().getMessage(ReadMethodBinding.class, "invalidParamsInRequest", invalidQueryStringParamsInRequest));
 		}
 
 		theMethodParams[myIdIndex] = ParameterUtil.convertIdToType(requestId, myIdParameterType);
@@ -192,7 +193,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 					}
 					if (ifNoneMatch.equals(versionIdPart)) {
 						ourLog.debug("Returning HTTP 304 because request specified {}={}", Constants.HEADER_IF_NONE_MATCH, ifNoneMatch);
-						throw new NotModifiedException("Not Modified");
+						throw new NotModifiedException(Msg.code(385) + "Not Modified");
 					}
 				}
 			}
@@ -213,7 +214,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 				
 				if (lastModified != null && lastModified.getTime() <= ifModifiedSinceDate.getTime()) {
 					ourLog.debug("Returning HTTP 304 because If-Modified-Since does not match");
-					throw new NotModifiedException("Not Modified");
+					throw new NotModifiedException(Msg.code(386) + "Not Modified");
 				}
 			}
 				

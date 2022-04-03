@@ -3,10 +3,11 @@ package ca.uhn.fhir.jpa.mdm.provider;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.mdm.api.IMdmClearJobSubmitter;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
-import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
 import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
+import ca.uhn.fhir.mdm.provider.MdmControllerHelper;
 import ca.uhn.fhir.mdm.provider.MdmProviderDstu3Plus;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
+import ca.uhn.fhir.mdm.util.MessageHelper;
 import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -28,8 +29,6 @@ import java.util.List;
 public abstract class BaseProviderR4Test extends BaseMdmR4Test {
 	MdmProviderDstu3Plus myMdmProvider;
 	@Autowired
-	private IMdmMatchFinderSvc myMdmMatchFinderSvc;
-	@Autowired
 	private IMdmControllerSvc myMdmControllerSvc;
 	@Autowired
 	private IMdmClearJobSubmitter myMdmClearJobSubmitter;
@@ -38,7 +37,11 @@ public abstract class BaseProviderR4Test extends BaseMdmR4Test {
 	@Autowired
 	private MdmSettings myMdmSettings;
 	@Autowired
+	private MdmControllerHelper myMdmHelper;
+	@Autowired
 	BatchJobHelper myBatchJobHelper;
+	@Autowired
+	MessageHelper myMessageHelper;
 
 	private String defaultScript;
 
@@ -52,10 +55,11 @@ public abstract class BaseProviderR4Test extends BaseMdmR4Test {
 
 	@BeforeEach
 	public void before() {
-		myMdmProvider = new MdmProviderDstu3Plus(myFhirContext, myMdmControllerSvc, myMdmMatchFinderSvc, myMdmSubmitSvc, myMdmSettings);
+		myMdmProvider = new MdmProviderDstu3Plus(myFhirContext, myMdmControllerSvc, myMdmHelper, myMdmSubmitSvc, myMdmSettings);
 		defaultScript = myMdmSettings.getScriptText();
 	}
 
+	@Override
 	@AfterEach
 	public void after() throws IOException {
 		super.after();

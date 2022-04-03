@@ -1,16 +1,20 @@
 package ca.uhn.fhir.jpa.term;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 
+import static ca.uhn.fhir.jpa.batch.config.BatchConstants.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -18,12 +22,16 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 
 	public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";
 
+	@Autowired
+	private BatchJobHelper myBatchJobHelper;
+
+
 	@Test
 	public void testStoreNewCodeSystemVersionForExistingCodeSystemNoVersionId() {
 		CodeSystem firstUpload = createCodeSystemWithMoreThan100Concepts();
 		CodeSystem duplicateUpload = createCodeSystemWithMoreThan100Concepts();
 
-		testCreatingAndUpdatingCodeSystemEntity(firstUpload, duplicateUpload, 125, "Can not create multiple CodeSystem resources with CodeSystem.url \"http://example.com/my_code_system\", already have one with resource ID: CodeSystem/");
+		testCreatingAndUpdatingCodeSystemEntity(firstUpload, duplicateUpload, 125, Msg.code(848) + "Can not create multiple CodeSystem resources with CodeSystem.url \"http://example.com/my_code_system\", already have one with resource ID: CodeSystem/");
 
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());
@@ -45,7 +53,7 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 		CodeSystem duplicateUpload = createCodeSystemWithMoreThan100Concepts();
 		duplicateUpload.setVersion("1");
 
-		testCreatingAndUpdatingCodeSystemEntity(firstUpload, duplicateUpload, 125, "Can not create multiple CodeSystem resources with CodeSystem.url \"http://example.com/my_code_system\" and CodeSystem.version \"1\", already have one with resource ID: CodeSystem/");
+		testCreatingAndUpdatingCodeSystemEntity(firstUpload, duplicateUpload, 125, Msg.code(848) + "Can not create multiple CodeSystem resources with CodeSystem.url \"http://example.com/my_code_system\" and CodeSystem.version \"1\", already have one with resource ID: CodeSystem/");
 
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());
@@ -64,7 +72,7 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 		duplicateUpload = createCodeSystemWithMoreThan100Concepts();
 		duplicateUpload.setVersion("2");
 
-		testCreatingAndUpdatingCodeSystemEntity(firstUpload, duplicateUpload, 251, "Can not create multiple CodeSystem resources with CodeSystem.url \"http://example.com/my_code_system\" and CodeSystem.version \"2\", already have one with resource ID: CodeSystem/");
+		testCreatingAndUpdatingCodeSystemEntity(firstUpload, duplicateUpload, 251, Msg.code(848) + "Can not create multiple CodeSystem resources with CodeSystem.url \"http://example.com/my_code_system\" and CodeSystem.version \"2\", already have one with resource ID: CodeSystem/");
 
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());
@@ -126,6 +134,7 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 		myTerminologyDeferredStorageSvc.setProcessDeferred(true);
 		myTerminologyDeferredStorageSvc.saveDeferred();
 		myTerminologyDeferredStorageSvc.setProcessDeferred(false);
+		myBatchJobHelper.awaitAllBulkJobCompletions(false, TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
 		assertEquals(theExpectedConceptCount, runInTransaction(() -> myTermConceptDao.count()));
 
 	}

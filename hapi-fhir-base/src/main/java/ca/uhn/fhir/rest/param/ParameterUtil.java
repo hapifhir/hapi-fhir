@@ -2,6 +2,7 @@ package ca.uhn.fhir.rest.param;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -26,7 +27,7 @@ import java.util.stream.Collectors;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,7 +124,7 @@ public class ParameterUtil {
 			boolean isRi = theContext.getVersion().getVersion().isRi();
 			boolean usesHapiId = IdDt.class.equals(paramType);
 			if (isRi == usesHapiId) {
-				throw new ConfigurationException("Method uses the wrong Id datatype (IdDt / IdType) for the given context FHIR version: " + theMethod.toString());
+				throw new ConfigurationException(Msg.code(1936) + "Method uses the wrong Id datatype (IdDt / IdType) for the given context FHIR version: " + theMethod.toString());
 			}
 		}
 		return index;
@@ -221,8 +222,7 @@ public class ParameterUtil {
 					return;
 				}
 				if (theParameters.size() > 1) {
-					throw new IllegalArgumentException(
-						"Type " + theParam.getClass().getCanonicalName() + " does not support multiple values");
+					throw new IllegalArgumentException(Msg.code(1937) + "Type " + theParam.getClass().getCanonicalName() + " does not support multiple values");
 				}
 				theParam.setValueAsQueryToken(theContext, theParamName, theParameters.getQualifier(),
 					theParameters.get(0));

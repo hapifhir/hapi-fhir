@@ -4,7 +4,7 @@ package ca.uhn.fhir.jaxrs.server;
  * #%L
  * HAPI FHIR JAX-RS Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,16 @@ package ca.uhn.fhir.jaxrs.server;
 import java.io.IOException;
 
 import javax.interceptor.Interceptors;
-import javax.ws.rs.*;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.BundleInclusionRule;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsExceptionInterceptor;
 import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsResponseException;
 import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest;
@@ -55,7 +59,7 @@ public abstract class AbstractJaxRsPageProvider extends AbstractJaxRsProvider im
 		try {
 			myBinding = new PageMethodBinding(getFhirContext(), PageProvider.class.getMethod("getPage"));
 		} catch (Exception e) {
-			throw new ca.uhn.fhir.context.ConfigurationException(e);
+			throw new ca.uhn.fhir.context.ConfigurationException(Msg.code(1983), e);
 		}
 	}
 
@@ -68,7 +72,7 @@ public abstract class AbstractJaxRsPageProvider extends AbstractJaxRsProvider im
 	    try {
 	        myBinding = new PageMethodBinding(getFhirContext(), PageProvider.class.getMethod("getPage"));
 	    } catch (Exception e) {
-	        throw new ca.uhn.fhir.context.ConfigurationException(e);
+	        throw new ca.uhn.fhir.context.ConfigurationException(Msg.code(1984), e);
 	    }
 	}
 	

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.batch.mdm;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.batch.mdm;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -65,7 +66,7 @@ public class MdmClearJobSubmitterImpl implements IMdmClearJobSubmitter {
 			theBatchSize = myDaoConfig.getExpungeBatchSize();
 		}
 		if (!myDaoConfig.canDeleteExpunge()) {
-			throw new ForbiddenOperationException("Delete Expunge not allowed:  " + myDaoConfig.cannotDeleteExpungeReason());
+			throw new ForbiddenOperationException(Msg.code(1278) + "Delete Expunge not allowed:  " + myDaoConfig.cannotDeleteExpungeReason());
 		}
 
 		RequestListJson requestListJson = myPartitionedUrlValidator.buildRequestListJson(theRequest, theUrls);

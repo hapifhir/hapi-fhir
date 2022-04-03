@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.view;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,18 @@ package ca.uhn.fhir.model.view;
  * #L%
  */
 
-import ca.uhn.fhir.context.*;
-import org.hl7.fhir.instance.model.api.*;
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeChildDeclaredExtensionDefinition;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.List;
 
@@ -48,7 +58,7 @@ public class ViewGenerator {
 		try {
 			retVal = theTargetType.newInstance();
 		} catch (Exception e) {
-			throw new ConfigurationException("Failed to instantiate " + theTargetType, e);
+			throw new ConfigurationException(Msg.code(1886) + "Failed to instantiate " + theTargetType, e);
 		}
 
 		copyChildren(sourceDef, (IBase) theResource, targetDef, (IBase) retVal);

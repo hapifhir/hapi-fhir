@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription.match.registry;
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.ISubscriptionDeliveryChannelNamer;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
+import ca.uhn.fhir.jpa.subscription.model.ChannelRetryConfiguration;
+import ca.uhn.fhir.util.HapiExtensions;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -65,11 +67,11 @@ public class SubscriptionRegistry {
 		super();
 	}
 
-	public ActiveSubscription get(String theIdPart) {
+	public synchronized ActiveSubscription get(String theIdPart) {
 		return myActiveSubscriptionCache.get(theIdPart);
 	}
 
-	public Collection<ActiveSubscription> getAll() {
+	public synchronized Collection<ActiveSubscription> getAll() {
 		return myActiveSubscriptionCache.getAll();
 	}
 
@@ -80,17 +82,45 @@ public class SubscriptionRegistry {
 		return activeSubscription.map(ActiveSubscription::getSubscription);
 	}
 
-	private void registerSubscription(IIdType theId, IBaseResource theSubscription) {
+	/**
+	 * Extracts the retry configuration settings from the CanonicalSubscription object.
+	 *
+	 * Returns the configuration, or null, if no retry (or a bad retry value)
+	 * is specified.
+	 */
+	private ChannelRetryConfiguration getRetryConfigurationFromSubscriptionExtensions(CanonicalSubscription theSubscription) {
+		ChannelRetryConfiguration configuration = new ChannelRetryConfiguration();
+
+		List<String> retryCount = theSubscription.getChannelExtensions(HapiExtensions.EX_RETRY_COUNT);
+		if (retryCount.size() == 1) {
+			String val = retryCount.get(0);
+			configuration.setRetryCount(Integer.parseInt(val));
+		}
+		// else - 0 or more than 1 means no retry policy at all
+
+		// retry count is required for any retry policy
+		if (configuration.getRetryCount() == null || configuration.getRetryCount() < 0) {
+			configuration = null;
+		}
+
+		return configuration;
+	}
+
+	private void registerSubscription(IIdType theId, CanonicalSubscription theCanonicalSubscription) {
 		Validate.notNull(theId);
 		String subscriptionId = theId.getIdPart();
 		Validate.notBlank(subscriptionId);
-		Validate.notNull(theSubscription);
+		Validate.notNull(theCanonicalSubscription);
 
-		CanonicalSubscription canonicalized = mySubscriptionCanonicalizer.canonicalize(theSubscription);
+		String channelName = mySubscriptionDeliveryChannelNamer.nameFromSubscription(theCanonicalSubscription);
 
-		String channelName = mySubscriptionDeliveryChannelNamer.nameFromSubscription(canonicalized);
+		// get the actual retry configuration
+		ChannelRetryConfiguration configuration = getRetryConfigurationFromSubscriptionExtensions(theCanonicalSubscription);
 
-		ActiveSubscription activeSubscription = new ActiveSubscription(canonicalized, channelName);
+		ActiveSubscription activeSubscription = new ActiveSubscription(theCanonicalSubscription, channelName);
+		activeSubscription.setRetryConfiguration(configuration);
+
+		// add to our registries
 		mySubscriptionChannelRegistry.add(activeSubscription);
 		myActiveSubscriptionCache.put(subscriptionId, activeSubscription);
 
@@ -98,12 +128,11 @@ public class SubscriptionRegistry {
 
 		// Interceptor call: SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED
 		HookParams params = new HookParams()
-			.add(CanonicalSubscription.class, canonicalized);
+			.add(CanonicalSubscription.class, theCanonicalSubscription);
 		myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED, params);
-
 	}
 
-	public void unregisterSubscriptionIfRegistered(String theSubscriptionId) {
+	public synchronized void unregisterSubscriptionIfRegistered(String theSubscriptionId) {
 		Validate.notNull(theSubscriptionId);
 
 		ActiveSubscription activeSubscription = myActiveSubscriptionCache.remove(theSubscriptionId);
@@ -114,19 +143,18 @@ public class SubscriptionRegistry {
 			// Interceptor call: SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_UNREGISTERED
 			HookParams params = new HookParams();
 			myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_UNREGISTERED, params);
-
 		}
 	}
 
 	@PreDestroy
-	public void unregisterAllSubscriptions() {
+	public synchronized void unregisterAllSubscriptions() {
 		// Once to set flag
 		unregisterAllSubscriptionsNotInCollection(Collections.emptyList());
 		// Twice to remove
 		unregisterAllSubscriptionsNotInCollection(Collections.emptyList());
 	}
 
-	void unregisterAllSubscriptionsNotInCollection(Collection<String> theAllIds) {
+	synchronized void unregisterAllSubscriptionsNotInCollection(Collection<String> theAllIds) {
 
 		List<String> idsToDelete = myActiveSubscriptionCache.markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(theAllIds);
 		for (String id : idsToDelete) {
@@ -135,6 +163,7 @@ public class SubscriptionRegistry {
 	}
 
 	public synchronized boolean registerSubscriptionUnlessAlreadyRegistered(IBaseResource theSubscription) {
+		Validate.notNull(theSubscription);
 		Optional<CanonicalSubscription> existingSubscription = hasSubscription(theSubscription.getIdElement());
 		CanonicalSubscription newSubscription = mySubscriptionCanonicalizer.canonicalize(theSubscription);
 
@@ -152,7 +181,7 @@ public class SubscriptionRegistry {
 			unregisterSubscriptionIfRegistered(theSubscription.getIdElement().getIdPart());
 		}
 		if (Subscription.SubscriptionStatus.ACTIVE.equals(newSubscription.getStatus())) {
-			registerSubscription(theSubscription.getIdElement(), theSubscription);
+			registerSubscription(theSubscription.getIdElement(), newSubscription);
 			return true;
 		} else {
 			return false;

@@ -18,6 +18,7 @@ import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.util.ObjectUtil;
 import ca.uhn.fhir.util.UrlUtil;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -44,7 +45,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,6 +88,45 @@ public class SearchParameterMap implements Serializable {
 	 */
 	public SearchParameterMap() {
 		super();
+	}
+
+	/**
+	 * Creates and returns a copy of this map
+	 */
+	@JsonIgnore
+	@Override
+	public SearchParameterMap clone() {
+		SearchParameterMap map = new SearchParameterMap();
+		map.setSummaryMode(getSummaryMode());
+		map.setSort(getSort());
+		map.setSearchTotalMode(getSearchTotalMode());
+		map.setRevIncludes(getRevIncludes());
+		map.setIncludes(getIncludes());
+		map.setEverythingMode(getEverythingMode());
+		map.setCount(getCount());
+		map.setDeleteExpunge(isDeleteExpunge());
+		map.setLastN(isLastN());
+		map.setLastNMax(getLastNMax());
+		map.setLastUpdated(getLastUpdated());
+		map.setLoadSynchronous(isLoadSynchronous());
+		map.setNearDistanceParam(getNearDistanceParam());
+		map.setLoadSynchronousUpTo(getLoadSynchronousUpTo());
+		map.setOffset(getOffset());
+		map.setSearchContainedMode(getSearchContainedMode());
+
+		for (Map.Entry<String, List<List<IQueryParameterType>>> entry : mySearchParameterMap.entrySet()) {
+			List<List<IQueryParameterType>> andParams = entry.getValue();
+			List<List<IQueryParameterType>> newAndParams = new ArrayList<>();
+			for(List<IQueryParameterType> orParams: andParams) {
+				List<IQueryParameterType> newOrParams = new ArrayList<>(orParams);
+				newAndParams.add(newOrParams);
+			}
+			map.put(entry.getKey(), newAndParams);
+		}
+
+
+
+		return map;
 	}
 
 	/**

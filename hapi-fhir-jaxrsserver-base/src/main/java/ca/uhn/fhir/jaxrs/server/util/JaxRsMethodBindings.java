@@ -4,7 +4,7 @@ package ca.uhn.fhir.jaxrs.server.util;
  * #%L
  * HAPI FHIR JAX-RS Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jaxrs.server.util;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jaxrs.server.AbstractJaxRsProvider;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -91,7 +92,7 @@ public class JaxRsMethodBindings {
     private void addMethodBinding(String key, BaseMethodBinding<?> binding) {
     	ConcurrentHashMap<String, BaseMethodBinding<?>> mapByOperation = getMapForOperation(binding.getRestOperationType());
         if (mapByOperation.containsKey(key)) {
-            throw new IllegalArgumentException("Multiple Search Method Bindings Found : " + mapByOperation.get(key) + " -- " + binding.getMethod());
+            throw new IllegalArgumentException(Msg.code(597) + "Multiple Search Method Bindings Found : " + mapByOperation.get(key) + " -- " + binding.getMethod());
         }
         mapByOperation.put(key, binding);
     }
@@ -125,7 +126,7 @@ public class JaxRsMethodBindings {
         String bindingKey = StringUtils.defaultIfBlank(theBindingKey, DEFAULT_METHOD_KEY);
 		ConcurrentHashMap<String, BaseMethodBinding<?>> map = getMapForOperation(operationType);
         if(map == null || !map.containsKey(bindingKey)) {
-            throw new NotImplementedOperationException("Operation not implemented");
+            throw new NotImplementedOperationException(Msg.code(598) + "Operation not implemented");
         }  else {
             return map.get(bindingKey);
         }

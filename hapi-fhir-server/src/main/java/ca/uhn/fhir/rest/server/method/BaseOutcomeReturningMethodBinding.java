@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.method;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.server.method;
  */
 
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.*;
@@ -53,7 +54,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 
 		if (!theMethod.getReturnType().equals(MethodOutcome.class)) {
 			if (!allowVoidReturnType()) {
-				throw new ConfigurationException("Method " + theMethod.getName() + " in type " + theMethod.getDeclaringClass().getName() + " is a @" + theMethodAnnotation.getSimpleName() + " method but it does not return " + MethodOutcome.class);
+				throw new ConfigurationException(Msg.code(367) + "Method " + theMethod.getName() + " in type " + theMethod.getDeclaringClass().getName() + " is a @" + theMethodAnnotation.getSimpleName() + " method but it does not return " + MethodOutcome.class);
 			} else if (theMethod.getReturnType() == void.class) {
 				myReturnVoid = true;
 			}
@@ -106,7 +107,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 
 	private void validateResponseNotNullIfItShouldntBe(MethodOutcome response) {
 		if (response == null && !isReturnVoid()) {
-			throw new InternalErrorException("Method " + getMethod().getName() + " in type " + getMethod().getDeclaringClass().getCanonicalName() + " returned null");
+			throw new InternalErrorException(Msg.code(368) + "Method " + getMethod().getName() + " in type " + getMethod().getDeclaringClass().getCanonicalName() + " returned null");
 		}
 	}
 
@@ -162,7 +163,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 
 		if (response != null && response.getId() != null && response.getId().hasResourceType()) {
 			if (getContext().getResourceDefinition(response.getId().getResourceType()) == null) {
-				throw new InternalErrorException("Server method returned invalid resource ID: " + response.getId().getValue());
+				throw new InternalErrorException(Msg.code(369) + "Server method returned invalid resource ID: " + response.getId().getValue());
 			}
 		}
 

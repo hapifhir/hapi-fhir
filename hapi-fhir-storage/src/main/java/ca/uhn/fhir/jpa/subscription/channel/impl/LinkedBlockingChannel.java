@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription.channel.impl;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 
 public class LinkedBlockingChannel extends ExecutorSubscribableChannel implements IChannelProducer, IChannelReceiver {
@@ -57,4 +58,13 @@ public class LinkedBlockingChannel extends ExecutorSubscribableChannel implement
 	public void destroy() {
 		// nothing
 	}
+
+
+	/**
+	 * Creates a synchronous channel, mostly intended for testing
+	 */
+	public static LinkedBlockingChannel newSynchronous(String theName) {
+		return new LinkedBlockingChannel(theName, null, new LinkedBlockingQueue<>(1));
+	}
+
 }

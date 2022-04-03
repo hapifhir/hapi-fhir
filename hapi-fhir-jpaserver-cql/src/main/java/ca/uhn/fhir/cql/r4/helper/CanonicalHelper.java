@@ -4,7 +4,7 @@ package ca.uhn.fhir.cql.r4.helper;
  * #%L
  * HAPI FHIR JPA Server - Clinical Quality Language
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.cql.r4.helper;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import org.hl7.fhir.r4.model.CanonicalType;
 
 public class CanonicalHelper {
@@ -31,7 +32,7 @@ public class CanonicalHelper {
             return temp.split("\\|")[0];
         }
 
-        throw new RuntimeException("CanonicalType must have a value for id extraction");
+        throw new RuntimeException(Msg.code(1675) + "CanonicalType must have a value for id extraction");
     }
 
     public static String getResourceName(CanonicalType canonical) {
@@ -44,6 +45,6 @@ public class CanonicalHelper {
             return null;
         }
 
-        throw new RuntimeException("CanonicalType must have a value for resource name extraction");
+        throw new RuntimeException(Msg.code(1676) + "CanonicalType must have a value for resource name extraction");
     }
 }

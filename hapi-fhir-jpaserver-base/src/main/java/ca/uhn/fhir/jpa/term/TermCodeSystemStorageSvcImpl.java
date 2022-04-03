@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.term;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,10 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
@@ -32,7 +34,6 @@ import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDesignationDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptParentChildLinkDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptPropertyDao;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -59,8 +60,9 @@ import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.Job;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -106,9 +108,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	@Autowired
 	protected ITermConceptDesignationDao myConceptDesignationDao;
 	@Autowired
-	protected IdHelperService myIdHelperService;
-	@Autowired
-	private PlatformTransactionManager myTransactionManager;
+	protected IIdHelperService myIdHelperService;
 	@Autowired
 	private ITermConceptParentChildLinkDao myConceptParentChildLinkDao;
 	@Autowired
@@ -124,10 +124,9 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	@Autowired
 	private IResourceTableDao myResourceTableDao;
 
-	@Override
-	public ResourcePersistentId getValueSetResourcePid(IIdType theIdType) {
-		return myIdHelperService.resolveResourcePersistentIds(RequestPartitionId.allPartitions(), theIdType.getResourceType(), theIdType.getIdPart());
-	}
+	@Autowired
+	private TermConceptDaoSvc myTermConceptDaoSvc;
+
 
 	@Transactional
 	@Override
@@ -154,7 +153,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 		CodeSystem codeSystem = myTerminologySvc.fetchCanonicalCodeSystemFromCompleteContext(theSystem);
 		if (codeSystem.getContent() != CodeSystem.CodeSystemContentMode.NOTPRESENT) {
-			throw new InvalidRequestException("CodeSystem with url[" + Constants.codeSystemWithDefaultDescription(theSystem) + "] can not apply a delta - wrong content mode: " + codeSystem.getContent());
+			throw new InvalidRequestException(Msg.code(844) + "CodeSystem with url[" + Constants.codeSystemWithDefaultDescription(theSystem) + "] can not apply a delta - wrong content mode: " + codeSystem.getContent());
 		}
 
 		Validate.notNull(cs);
@@ -182,7 +181,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 		TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(theSystem);
 		if (cs == null) {
-			throw new InvalidRequestException("Unknown code system: " + theSystem);
+			throw new InvalidRequestException(Msg.code(845) + "Unknown code system: " + theSystem);
 		}
 		IIdType target = cs.getResource().getIdDt();
 
@@ -262,84 +261,12 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		return childTermConcepts;
 	}
 
-	@Override
-	@Transactional
-	public void deleteCodeSystem(TermCodeSystem theCodeSystem) {
-		assert TransactionSynchronizationManager.isActualTransactionActive();
-
-		ourLog.info(" * Deleting code system {}", theCodeSystem.getPid());
-
-		myEntityManager.flush();
-		TermCodeSystem cs = myCodeSystemDao.findById(theCodeSystem.getPid()).orElseThrow(IllegalStateException::new);
-		cs.setCurrentVersion(null);
-		myCodeSystemDao.save(cs);
-		myCodeSystemDao.flush();
-
-		List<TermCodeSystemVersion> codeSystemVersions = myCodeSystemVersionDao.findByCodeSystemPid(theCodeSystem.getPid());
-		List<Long> codeSystemVersionPids = codeSystemVersions
-			.stream()
-			.map(TermCodeSystemVersion::getPid)
-			.collect(Collectors.toList());
-		for (Long next : codeSystemVersionPids) {
-			deleteCodeSystemVersion(next);
-		}
-
-		myCodeSystemVersionDao.deleteForCodeSystem(theCodeSystem);
-		myCodeSystemDao.delete(theCodeSystem);
-		myEntityManager.flush();
-	}
-
-	@Override
-	@Transactional(propagation = Propagation.NEVER)
-	public void deleteCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion) {
-		assert !TransactionSynchronizationManager.isActualTransactionActive();
-
-		// Delete TermCodeSystemVersion
-		ourLog.info(" * Deleting TermCodeSystemVersion {}", theCodeSystemVersion.getCodeSystemVersionId());
-		deleteCodeSystemVersion(theCodeSystemVersion.getPid());
-
-	}
-
 	/**
 	 * Returns the number of saved concepts
 	 */
 	@Override
 	public int saveConcept(TermConcept theConcept) {
-		int retVal = 0;
-
-		/*
-		 * If the concept has an ID, we're reindexing, so there's no need to
-		 * save parent concepts first (it's way too slow to do that)
-		 */
-		if (theConcept.getId() == null) {
-			boolean needToSaveParents = false;
-			for (TermConceptParentChildLink next : theConcept.getParents()) {
-				if (next.getParent().getId() == null) {
-					needToSaveParents = true;
-				}
-			}
-			if (needToSaveParents) {
-				retVal += ensureParentsSaved(theConcept.getParents());
-			}
-		}
-
-		if (theConcept.getId() == null || theConcept.getIndexStatus() == null) {
-			retVal++;
-			theConcept.setIndexStatus(BaseHapiFhirDao.INDEX_STATUS_INDEXED);
-			theConcept.setUpdated(new Date());
-			myConceptDao.save(theConcept);
-
-			for (TermConceptProperty next : theConcept.getProperties()) {
-				myConceptPropertyDao.save(next);
-			}
-
-			for (TermConceptDesignation next : theConcept.getDesignations()) {
-				myConceptDesignationDao.save(next);
-			}
-		}
-
-		ourLog.trace("Saved {} and got PID {}", theConcept.getCode(), theConcept.getId());
-		return retVal;
+		return myTermConceptDaoSvc.saveConcept(theConcept);
 	}
 
 	@Override
@@ -385,7 +312,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	@Override
 	@Transactional
 	public IIdType storeNewCodeSystemVersion(CodeSystem theCodeSystemResource, TermCodeSystemVersion theCodeSystemVersion,
-			RequestDetails theRequest, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps) {
+														  RequestDetails theRequest, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps) {
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		Validate.notBlank(theCodeSystemResource.getUrl(), "theCodeSystemResource must have a URL");
@@ -412,8 +339,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	@Override
 	@Transactional
 	public void storeNewCodeSystemVersion(ResourcePersistentId theCodeSystemResourcePid, String theSystemUri,
-			String theSystemName, String theCodeSystemVersionId, TermCodeSystemVersion theCodeSystemVersion,
-			ResourceTable theCodeSystemResourceTable, RequestDetails theRequestDetails) {
+													  String theSystemName, String theCodeSystemVersionId, TermCodeSystemVersion theCodeSystemVersion,
+													  ResourceTable theCodeSystemResourceTable, RequestDetails theRequestDetails) {
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		ourLog.debug("Storing code system");
@@ -495,7 +422,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		}
 
 		ourLog.debug("Done saving concepts, flushing to database");
-		if (! myDeferredStorageSvc.isStorageQueueEmpty()) {
+		if (!myDeferredStorageSvc.isStorageQueueEmpty()) {
 			ourLog.info("Note that some concept saving has been deferred");
 		}
 	}
@@ -512,26 +439,6 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		return existing;
 	}
 
-	private void deleteCodeSystemVersion(final Long theCodeSystemVersionPid) {
-		assert TransactionSynchronizationManager.isActualTransactionActive();
-		ourLog.info(" * Marking code system version {} for deletion", theCodeSystemVersionPid);
-
-		Optional<TermCodeSystem> codeSystemOpt = myCodeSystemDao.findWithCodeSystemVersionAsCurrentVersion(theCodeSystemVersionPid);
-		if (codeSystemOpt.isPresent()) {
-			TermCodeSystem codeSystem = codeSystemOpt.get();
-			if (codeSystem.getCurrentVersion() != null && codeSystem.getCurrentVersion().getPid().equals(theCodeSystemVersionPid)) {
-				ourLog.info(" * Removing code system version {} as current version of code system {}", theCodeSystemVersionPid, codeSystem.getPid());
-				codeSystem.setCurrentVersion(null);
-				myCodeSystemDao.save(codeSystem);
-			}
-		}
-
-		TermCodeSystemVersion codeSystemVersion = myCodeSystemVersionDao.findById(theCodeSystemVersionPid).orElseThrow(() -> new IllegalStateException());
-		codeSystemVersion.setCodeSystemVersionId("DELETED_" + UUID.randomUUID().toString());
-		myCodeSystemVersionDao.save(codeSystemVersion);
-
-		myDeferredStorageSvc.deleteCodeSystemVersion(codeSystemVersion);
-	}
 
 	private void validateDstu3OrNewer() {
 		Validate.isTrue(myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3), "Terminology operations only supported in DSTU3+ mode");
@@ -571,7 +478,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 				nextParentOpt = myConceptDao.findByCodeSystemAndCode(theCsv, nextParentCode).orElse(null);
 			}
 			if (nextParentOpt == null) {
-				throw new InvalidRequestException("Unable to add code \"" + nextCodeToAdd + "\" to unknown parent: " + nextParentCode);
+				throw new InvalidRequestException(Msg.code(846) + "Unable to add code \"" + nextCodeToAdd + "\" to unknown parent: " + nextParentCode);
 			}
 			parentConceptsWeShouldLinkTo.add(nextParentOpt);
 		}
@@ -585,7 +492,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		conceptToAdd.setParentPids(null);
 		conceptToAdd.setCodeSystemVersion(theCsv);
 
-		if (conceptToAdd.getProperties() !=null)
+		if (conceptToAdd.getProperties() != null)
 			conceptToAdd.getProperties().forEach(termConceptProperty -> {
 				termConceptProperty.setConcept(theConceptToAdd);
 				termConceptProperty.setCodeSystemVersion(theCsv);
@@ -637,7 +544,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 						parentConcept = myConceptDao.findByCodeSystemAndCode(theCsv, parentCode).orElse(null);
 					}
 					if (parentConcept == null) {
-						throw new IllegalArgumentException("Unknown parent code: " + parentCode);
+						throw new IllegalArgumentException(Msg.code(847) + "Unknown parent code: " + parentCode);
 					}
 
 					nextChild.getParents().get(i).setParent(parentConcept);
@@ -694,8 +601,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		for (TermConceptParentChildLink next : theNext.getChildren()) {
 			populateVersion(next.getChild(), theCodeSystemVersion);
 		}
-		theNext.getProperties().forEach(t->t.setCodeSystemVersion(theCodeSystemVersion));
-		theNext.getDesignations().forEach(t->t.setCodeSystemVersion(theCodeSystemVersion));
+		theNext.getProperties().forEach(t -> t.setCodeSystemVersion(theCodeSystemVersion));
+		theNext.getDesignations().forEach(t -> t.setCodeSystemVersion(theCodeSystemVersion));
 	}
 
 	private void saveConceptLink(TermConceptParentChildLink next) {
@@ -762,7 +669,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		// Throw exception if the TermCodeSystemVersion is being duplicated.
 		if (codeSystemVersionEntity != null) {
 			if (!ObjectUtil.equals(codeSystemVersionEntity.getResource().getId(), theCodeSystemResourceTable.getId())) {
-				throw new UnprocessableEntityException(msg);
+				throw new UnprocessableEntityException(Msg.code(848) + msg);
 			}
 		}
 	}
@@ -781,7 +688,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 		theConcept.setCodeSystemVersion(theCodeSystemVersion);
 		if (theConceptsStack.contains(theConcept.getCode())) {
-			throw new InvalidRequestException("CodeSystem contains circular reference around code " + theConcept.getCode());
+			throw new InvalidRequestException(Msg.code(849) + "CodeSystem contains circular reference around code " + theConcept.getCode());
 		}
 		theConceptsStack.add(theConcept.getCode());
 

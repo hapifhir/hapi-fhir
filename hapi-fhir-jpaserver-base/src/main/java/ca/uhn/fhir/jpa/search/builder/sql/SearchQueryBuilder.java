@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search.builder.sql;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.search.builder.sql;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
@@ -74,6 +75,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -408,7 +410,7 @@ public class SearchQueryBuilder {
 				// The SQLServerDialect has a bunch of one-off processing to deal with rules on when
 				// a limit can be used, so we can't rely on the flags that the limithandler exposes since
 				// the exact structure of the query depends on the parameters
-				if (sql.contains("TOP(?)")) {
+				if (sql.contains("top(?)")) {
 					bindVariables.add(0, maxResultsToFetch);
 				}
 				if (sql.contains("offset 0 rows fetch next ? rows only")) {
@@ -418,7 +420,7 @@ public class SearchQueryBuilder {
 					bindVariables.add(theOffset);
 					bindVariables.add(maxResultsToFetch);
 				}
-				if (offset != null && sql.contains("__hibernate_row_nr__")) {
+				if (offset != null && sql.contains("__row__")) {
 					bindVariables.add(theOffset + 1);
 					bindVariables.add(theOffset + maxResultsToFetch + 1);
 				}
@@ -603,7 +605,7 @@ public class SearchQueryBuilder {
 			case GREATERTHAN_OR_EQUALS:
 				return BinaryCondition.greaterThanOrEq(theColumn, generatePlaceholder(theValue));
 			default:
-				throw new IllegalArgumentException();
+				throw new IllegalArgumentException(Msg.code(1263));
 		}
 	}
 

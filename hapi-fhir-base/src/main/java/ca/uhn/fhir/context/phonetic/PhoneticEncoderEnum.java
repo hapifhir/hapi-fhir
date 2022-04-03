@@ -4,7 +4,7 @@ package ca.uhn.fhir.context.phonetic;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.context.phonetic;
  * #L%
  */
 
+import ca.uhn.fhir.util.PhoneticEncoderUtil;
 import org.apache.commons.codec.language.Caverphone1;
 import org.apache.commons.codec.language.Caverphone2;
 import org.apache.commons.codec.language.ColognePhonetic;
@@ -38,16 +39,30 @@ public enum PhoneticEncoderEnum {
 	MATCH_RATING_APPROACH(new ApacheEncoder("MATCH_RATING_APPROACH", new MatchRatingApproachEncoder())),
 	METAPHONE(new ApacheEncoder("METAPHONE", new Metaphone())),
 	NYSIIS(new ApacheEncoder("NYSIIS", new Nysiis())),
+	NYSIIS_LONG(new ApacheEncoder("NYSIIS_LONG", new Nysiis(false))),
 	REFINED_SOUNDEX(new ApacheEncoder("REFINED_SOUNDEX", new RefinedSoundex())),
 	SOUNDEX(new ApacheEncoder("SOUNDEX", new Soundex())),
 	NUMERIC(new NumericEncoder());
 
 	private final IPhoneticEncoder myPhoneticEncoder;
 
+	/**
+	 * Do not construct this enum via constructor.
+	 *
+	 * Use {@link PhoneticEncoderUtil} instead.
+	 */
+	@Deprecated
 	PhoneticEncoderEnum(IPhoneticEncoder thePhoneticEncoder) {
 		myPhoneticEncoder = thePhoneticEncoder;
 	}
 
+	/**
+	 * Use PhoneticEncoderWrapper.getEncoderWrapper(PhoneticEncoderEnum.name())
+	 *
+	 * This is a deprecated method of getting the encoder (as they
+	 * are static across the server and non-configurable).
+	 */
+	@Deprecated
 	public IPhoneticEncoder getPhoneticEncoder() {
 		return myPhoneticEncoder;
 	}

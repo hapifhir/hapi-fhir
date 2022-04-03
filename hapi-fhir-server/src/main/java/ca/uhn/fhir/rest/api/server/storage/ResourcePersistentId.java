@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.api.server.storage;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ import java.util.Optional;
  * a Long, a String, or something else.
  */
 public class ResourcePersistentId {
-	private static final String RESOURCE_PID = "RESOURCE_PID";
 	private Object myId;
 	private Long myVersion;
 	private IIdType myAssociatedResourceId;
@@ -91,6 +90,9 @@ public class ResourcePersistentId {
 	}
 
 	public Long getIdAsLong() {
+		if (myId instanceof String) {
+			return Long.parseLong((String) myId);
+		}
 		return (Long) myId;
 	}
 

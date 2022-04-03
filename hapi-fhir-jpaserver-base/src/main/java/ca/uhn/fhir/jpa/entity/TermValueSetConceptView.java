@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.annotations.Immutable;
@@ -125,7 +126,7 @@ public class TermValueSetConceptView implements Serializable, ITermValueSetConce
 			try (Reader characterStream = mySourceConceptDirectParentPids.getCharacterStream()) {
 				return IOUtils.toString(characterStream);
 			} catch (IOException | SQLException e) {
-				throw new InternalErrorException(e);
+				throw new InternalErrorException(Msg.code(828) + e);
 			}
 		}
 		return null;

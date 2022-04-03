@@ -1,29 +1,25 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
-import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
@@ -92,7 +88,7 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 			myPatientDao.delete(pId);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertEquals("Resource deletion is not permitted on this server", e.getMessage());
+			assertEquals(Msg.code(966) + "Resource deletion is not permitted on this server", e.getMessage());
 		}
 	}
 
@@ -127,7 +123,7 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 			.setUrl("Organization");
 
 		Bundle createResponse = mySystemDao.transaction(mySrd, createTransaction);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(createResponse));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createResponse));
 
 		IdType orgId1 = new IdType(createResponse.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless();
 		IdType orgId2 = new IdType(createResponse.getEntry().get(1).getResponse().getLocation()).toUnqualifiedVersionless();
@@ -157,7 +153,7 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 			.getRequest()
 			.setMethod(Bundle.HTTPVerb.DELETE)
 			.setUrl(orgId2.getValue());
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(deleteTransaction));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(deleteTransaction));
 		mySystemDao.transaction(mySrd, deleteTransaction);
 
 		// Make sure they were deleted

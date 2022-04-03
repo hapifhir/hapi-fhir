@@ -4,9 +4,9 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -17,7 +17,7 @@ public class FhirResourceDaoCustomTypeDstu3Test extends BaseJpaDstu3Test {
 
 	@BeforeEach
 	public void before() {
-		myFhirCtx.setDefaultTypeForProfile(CustomObservationDstu3.PROFILE, CustomObservationDstu3.class);
+		myFhirContext.setDefaultTypeForProfile(CustomObservationDstu3.PROFILE, CustomObservationDstu3.class);
 	}
 	
 	@Test
@@ -39,6 +39,6 @@ public class FhirResourceDaoCustomTypeDstu3Test extends BaseJpaDstu3Test {
 	
 	@AfterEach
 	public void after() {
-		myFhirCtx.setDefaultTypeForProfile(CustomObservationDstu3.PROFILE, null);
+		myFhirContext.setDefaultTypeForProfile(CustomObservationDstu3.PROFILE, null);
 	}
 }

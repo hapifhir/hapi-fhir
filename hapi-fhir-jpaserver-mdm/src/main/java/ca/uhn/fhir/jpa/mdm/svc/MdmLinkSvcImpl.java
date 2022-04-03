@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,8 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
@@ -53,9 +54,7 @@ public class MdmLinkSvcImpl implements IMdmLinkSvc {
 	@Autowired
 	private MdmLinkDaoSvc myMdmLinkDaoSvc;
 	@Autowired
-	private IdHelperService myIdHelperService;
-	@Autowired
-	private IMdmModelConverterSvc myMdmModelConverterSvc;
+	private IJpaIdHelperService myIdHelperService;
 
 	@Override
 	@Transactional
@@ -104,11 +103,11 @@ public class MdmLinkSvcImpl implements IMdmLinkSvc {
 	private void validateRequestIsLegal(IAnyResource theGoldenResource, IAnyResource theResource, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource) {
 		Optional<MdmLink> oExistingLink = getMdmLinkForGoldenResourceSourceResourcePair(theGoldenResource, theResource);
 		if (oExistingLink.isPresent() && systemIsAttemptingToModifyManualLink(theLinkSource, oExistingLink.get())) {
-			throw new InternalErrorException("MDM system is not allowed to modify links on manually created links");
+			throw new InternalErrorException(Msg.code(760) + "MDM system is not allowed to modify links on manually created links");
 		}
 
 		if (systemIsAttemptingToAddNoMatch(theLinkSource, theMatchResult)) {
-			throw new InternalErrorException("MDM system is not allowed to automatically NO_MATCH a resource");
+			throw new InternalErrorException(Msg.code(761) + "MDM system is not allowed to automatically NO_MATCH a resource");
 		}
 	}
 

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate;
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.migrate;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import org.flywaydb.core.api.MigrationInfo;
@@ -87,14 +88,14 @@ public class SchemaMigrator {
 				if (migrationInfo.get().pending().length > 0) {
 
 					String url = connection.getMetaData().getURL();
-					throw new ConfigurationException("The database schema for " + url + " is out of date.  " +
+					throw new ConfigurationException(Msg.code(27) + "The database schema for " + url + " is out of date.  " +
 						"Current database schema version is " + getCurrentVersion(migrationInfo.get()) + ".  Schema version required by application is " +
 						getLastVersion(migrationInfo.get()) + ".  Please run the database migrator.");
 				}
 				ourLog.info("Database schema confirmed at expected version " + getCurrentVersion(migrationInfo.get()));
 			}
 		} catch (SQLException e) {
-			throw new ConfigurationException("Unable to connect to " + myDataSource, e);
+			throw new ConfigurationException(Msg.code(28) + "Unable to connect to " + myDataSource, e);
 		}
 	}
 

@@ -4,7 +4,7 @@ package ca.uhn.fhir.test.utilities;
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,9 @@ import java.net.URL;
 
 public class HtmlUtil {
 
+	private HtmlUtil() {
+	}
+
 	public static HtmlPage parseAsHtml(String theRespString, URL theUrl) throws IOException {
 		StringWebResponse response = new StringWebResponse(theRespString, theUrl);
 		WebClient client = new WebClient(BrowserVersion.BEST_SUPPORTED, false, null, -1);
@@ -42,7 +45,7 @@ public class HtmlUtil {
 
 		final HtmlPage page = new HtmlPage(response, client.getCurrentWindow());
 		HtmlUnitNekoHtmlParser htmlUnitNekoHtmlParser = new HtmlUnitNekoHtmlParser();
-		htmlUnitNekoHtmlParser.parse(response, page, false);
+		htmlUnitNekoHtmlParser.parse(response, page, false, false);
 		return page;
 	}
 

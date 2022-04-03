@@ -13,7 +13,7 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage;
-import org.hibernate.dialect.H2Dialect;
+import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import org.hibernate.search.backend.lucene.cfg.LuceneBackendSettings;
 import org.hibernate.search.backend.lucene.cfg.LuceneIndexSettings;
 import org.hibernate.search.engine.cfg.BackendSettings;
@@ -52,8 +52,6 @@ public class MdmEventIT extends BaseMdmR4Test {
 	@RegisterExtension
 	@Autowired
 	public MdmHelperR4 myMdmHelper;
-	@Autowired
-	private IdHelperService myIdHelperService;
 
 	@Test
 	public void testDuplicateLinkChangeEvent() throws InterruptedException {

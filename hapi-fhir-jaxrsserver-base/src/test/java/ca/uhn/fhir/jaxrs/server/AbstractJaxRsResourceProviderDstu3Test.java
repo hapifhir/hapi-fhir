@@ -14,7 +14,6 @@ import ca.uhn.fhir.rest.api.SearchStyleEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
-import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.test.utilities.JettyUtil;
@@ -36,6 +35,7 @@ import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,7 +46,6 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
 import org.mockito.ArgumentMatchers;
-import org.mockito.Matchers;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -69,12 +68,9 @@ import static org.mockito.Mockito.when;
 public class AbstractJaxRsResourceProviderDstu3Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(AbstractJaxRsResourceProviderDstu3Test.class);
-	private static IGenericClient client;
-	
-
-	private static FhirContext ourCtx = FhirContext.forDstu3();
 	private static final String PATIENT_NAME = "Van Houte";
-
+	private static IGenericClient client;
+	private static FhirContext ourCtx = FhirContext.forDstu3();
 	private static int ourPort;
 	private static String serverBase;
 	private static Server jettyServer;
@@ -86,12 +82,6 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 	private void compareResultId(int id, IBaseResource resource) {
 		assertEquals(id, Integer.parseInt(resource.getIdElement().getIdPart()));
 	}
-	
-	@AfterAll
-	public static void afterClassClearContext() throws Exception {
-        JettyUtil.closeServer(jettyServer);
-		TestUtil.randomizeLocaleAndTimezone();
-	}
 
 	private void compareResultUrl(String url, IBaseResource resource) {
 		assertEquals(url, resource.getIdElement().getValueAsString().substring(serverBase.length() - 1));
@@ -99,7 +89,7 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 
 	private Patient createPatient(long id) {
 		Patient theResource = new Patient();
-		theResource.setId(new IdType(id)); 
+		theResource.setId(new IdType(id));
 		return theResource;
 	}
 
@@ -111,7 +101,9 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 		return result;
 	}
 
-	/** Find By Id */
+	/**
+	 * Find By Id
+	 */
 	@Test
 	public void findUsingGenericClientById() {
 		when(mock.find(any(IdType.class))).thenReturn(createPatient(1));
@@ -130,7 +122,7 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 		for (long i = 0; i < size; i++) {
 			Patient patient = createPatient(i);
 			BundleEntryComponent entry = new BundleEntryComponent();
-	        entry.setResource(patient);
+			entry.setResource(patient);
 			result.addEntry(entry);
 		}
 		return result;
@@ -145,7 +137,9 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 		reset(mock);
 	}
 
-	/** Conditional Creates */
+	/**
+	 * Conditional Creates
+	 */
 	@Test
 	public void testConditionalCreate() throws Exception {
 		Patient toCreate = createPatient(1);
@@ -157,14 +151,16 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 		client.setEncoding(EncodingEnum.JSON);
 
 		MethodOutcome response = client.create().resource(toCreate).conditional()
-				.where(Patient.IDENTIFIER.exactly().identifier("2")).prefer(PreferReturnEnum.REPRESENTATION).execute();
+			.where(Patient.IDENTIFIER.exactly().identifier("2")).prefer(PreferReturnEnum.REPRESENTATION).execute();
 
 		assertEquals("myIdentifier", patientCaptor.getValue().getIdentifier().get(0).getValue());
 		IBaseResource resource = response.getResource();
 		compareResultId(1, resource);
 	}
 
-	/** Conformance - Server */
+	/**
+	 * Conformance - Server
+	 */
 	@Test
 	public void testConformance() {
 		final CapabilityStatement conf = client.fetchConformance().ofType(CapabilityStatement.class).execute();
@@ -178,10 +174,10 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 		toCreate.getIdentifier().add(new Identifier().setValue("myIdentifier"));
 		outcome.setResource(toCreate);
 
-		when(mock.create(patientCaptor.capture(), isNull(String.class))).thenReturn(outcome);
+		when(mock.create(patientCaptor.capture(), isNull())).thenReturn(outcome);
 		client.setEncoding(EncodingEnum.JSON);
 		final MethodOutcome response = client.create().resource(toCreate).prefer(PreferReturnEnum.REPRESENTATION)
-				.execute();
+			.execute();
 		IBaseResource resource = response.getResource();
 		compareResultId(1, resource);
 		assertEquals("myIdentifier", patientCaptor.getValue().getIdentifier().get(0).getValue());
@@ -193,15 +189,17 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 		final IBaseOperationOutcome results = client.delete().resourceById("Patient", "1").execute().getOperationOutcome();
 		assertEquals("1", idCaptor.getValue().getIdPart());
 	}
-	
-    @Test
-    public void testConditionalDelete() {
-        when(mock.delete(idCaptor.capture(), conditionalCaptor.capture())).thenReturn(new MethodOutcome());
-        client.delete().resourceConditionalByType("Patient").where(Patient.IDENTIFIER.exactly().identifier("2")).execute();
-        assertEquals("Patient?identifier=2&_format=json", conditionalCaptor.getValue());
-    }
 
-	/** Extended Operations */
+	@Test
+	public void testConditionalDelete() {
+		when(mock.delete(idCaptor.capture(), conditionalCaptor.capture())).thenReturn(new MethodOutcome());
+		client.delete().resourceConditionalByType("Patient").where(Patient.IDENTIFIER.exactly().identifier("2")).execute();
+		assertEquals("Patient?identifier=2&_format=json", conditionalCaptor.getValue());
+	}
+
+	/**
+	 * Extended Operations
+	 */
 	@Test
 	public void testExtendedOperations() {
 		// prepare mock
@@ -215,23 +213,9 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 		inParams.addParameter().setName("dummy").setValue(new StringType("myAwesomeDummyValue"));
 		//invoke
 		Parameters outParams = client.operation().onInstance(new IdType("Patient", "1")).named("$someCustomOperation")
-				.withParameters(inParams).execute();
+			.withParameters(inParams).execute();
 		//verify
-		assertEquals("outputValue", ((StringType)outParams.getParameter().get(0).getValue()).getValueAsString());
-	}
-	
-	class StringTypeMatcher implements ArgumentMatcher<StringType> {
-	    private StringType myStringType;
-	    
-	    public StringTypeMatcher(StringType stringType) {
-	        myStringType = stringType;
-	    }
-	    
-        @Override
-        public boolean matches(StringType argument) {
-            return myStringType.getValue().equals(argument.getValue());
-        }
-	    
+		assertEquals("outputValue", ((StringType) outParams.getParameter().get(0).getValue()).getValueAsString());
 	}
 
 	@Test
@@ -239,7 +223,7 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 		// prepare mock
 		Parameters resultParameters = new Parameters();
 		resultParameters.addParameter().setName("return").setResource(createPatient(1)).setValue(new StringType("outputValue"));
-		when(mock.someCustomOperation(any(IdType.class), argThat(new StringTypeMatcher(new StringType("myAwesomeDummyValue"))))).thenReturn(resultParameters);		
+		when(mock.someCustomOperation(any(IdType.class), argThat(new StringTypeMatcher(new StringType("myAwesomeDummyValue"))))).thenReturn(resultParameters);
 		// Create the input parameters to pass to the server
 		Parameters inParams = new Parameters();
 		inParams.addParameter().setName("start").setValue(new DateType("2001-01-01"));
@@ -256,7 +240,7 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 			.execute();
 
 		// verify
-		assertEquals("outputValue", ((StringType)outParams.getParameter().get(0).getValue()).getValueAsString());
+		assertEquals("outputValue", ((StringType) outParams.getParameter().get(0).getValue()).getValueAsString());
 	}
 
 	@Test
@@ -268,67 +252,77 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 		assertEquals("1", idCaptor.getValue().getIdPart());
 	}
 
-	/** Search - Compartments */
+	/**
+	 * Search - Compartments
+	 */
 	@Test
 	public void testSearchCompartments() {
 		when(mock.searchCompartment(any(IdType.class))).thenReturn(Arrays.asList((IBaseResource) createPatient(1)));
 		org.hl7.fhir.dstu3.model.Bundle response = client.search().forResource(Patient.class).withIdAndCompartment("1", "Condition")
-				.returnBundle(org.hl7.fhir.dstu3.model.Bundle.class).execute();
+			.returnBundle(org.hl7.fhir.dstu3.model.Bundle.class).execute();
 		Resource resource = response.getEntry().get(0).getResource();
 		compareResultId(1, resource);
 		compareResultUrl("/Patient/1", resource);
 	}
 
-	/** */
+	/**
+	 *
+	 */
 	@Test
 	public void testSearchPost() {
 		when(mock.search(ArgumentMatchers.isNull(), ArgumentMatchers.isNull()))
-				.thenReturn(createPatients(1, 13));
+			.thenReturn(createPatients(1, 13));
 		org.hl7.fhir.dstu3.model.Bundle result = client.search().forResource("Patient").usingStyle(SearchStyleEnum.POST)
-				.returnBundle(org.hl7.fhir.dstu3.model.Bundle.class).execute();
+			.returnBundle(org.hl7.fhir.dstu3.model.Bundle.class).execute();
 		Resource resource = result.getEntry().get(0).getResource();
 		compareResultId(1, resource);
 		compareResultUrl("/Patient/1", resource);
 	}
 
-	/** Search/Query - Type */
+	/**
+	 * Search/Query - Type
+	 */
 	@Test
 	public void testSearchUsingGenericClientBySearch() {
 		// Perform a search
-		when(mock.search(any(StringParam.class), Matchers.isNull(StringAndListParam.class)))
-				.thenReturn(Arrays.asList(createPatient(1)));
+		when(mock.search(any(StringParam.class), isNull()))
+			.thenReturn(Arrays.asList(createPatient(1)));
 		final Bundle results = client.search().forResource(Patient.class)
-				.where(Patient.NAME.matchesExactly().value(PATIENT_NAME)).returnBundle(Bundle.class).execute();
-		verify(mock).search(any(StringParam.class), Matchers.isNull(StringAndListParam.class));
+			.where(Patient.NAME.matchesExactly().value(PATIENT_NAME)).returnBundle(Bundle.class).execute();
+		verify(mock).search(any(StringParam.class), isNull());
 		IBaseResource resource = results.getEntry().get(0).getResource();
 
 		compareResultId(1, resource);
 		compareResultUrl("/Patient/1", resource);
 	}
 
-	/** Search - Multi-valued Parameters (ANY/OR) */
+	/**
+	 * Search - Multi-valued Parameters (ANY/OR)
+	 */
 	@Test
 	public void testSearchUsingGenericClientBySearchWithMultiValues() {
 		when(mock.search(any(StringParam.class), ArgumentMatchers.notNull()))
-				.thenReturn(Arrays.asList(createPatient(1)));
+			.thenReturn(Arrays.asList(createPatient(1)));
 		final Bundle results = client.search().forResource(Patient.class)
-				.where(Patient.ADDRESS.matches().values("Toronto")).and(Patient.ADDRESS.matches().values("Ontario"))
-				.and(Patient.ADDRESS.matches().values("Canada"))
-				.where(Patient.NAME.matches().value("SHORTNAME")).returnBundle(Bundle.class).execute();
+			.where(Patient.ADDRESS.matches().values("Toronto")).and(Patient.ADDRESS.matches().values("Ontario"))
+			.and(Patient.ADDRESS.matches().values("Canada"))
+			.where(Patient.NAME.matches().value("SHORTNAME")).returnBundle(Bundle.class).execute();
 		IBaseResource resource = results.getEntry().get(0).getResource();
 
 		compareResultId(1, resource);
 		compareResultUrl("/Patient/1", resource);
 	}
 
-	/** Search - Paging */
+	/**
+	 * Search - Paging
+	 */
 	@Test
 	public void testSearchWithPaging() {
 		// Perform a search
 		when(mock.search(ArgumentMatchers.isNull(), ArgumentMatchers.isNull()))
-				.thenReturn(createPatients(1, 13));
+			.thenReturn(createPatients(1, 13));
 		final org.hl7.fhir.dstu3.model.Bundle results = client.search().forResource(Patient.class).count(8).returnBundle(org.hl7.fhir.dstu3.model.Bundle.class)
-				.execute();
+			.execute();
 
 		assertEquals(results.getEntry().size(), 8);
 		IBaseResource resource = results.getEntry().get(0).getResource();
@@ -349,15 +343,19 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 		assertNull(nextPage.getLink(org.hl7.fhir.dstu3.model.Bundle.LINK_NEXT));
 	}
 
-	/** Search - Subsetting (_summary and _elements) */
+	/**
+	 * Search - Subsetting (_summary and _elements)
+	 */
 	@Test
 	@Disabled
 	public void testSummary() {
 		Object response = client.search().forResource(Patient.class)
-				.returnBundle(org.hl7.fhir.dstu3.model.Bundle.class).execute();
+			.returnBundle(org.hl7.fhir.dstu3.model.Bundle.class).execute();
 	}
 
-	/** Transaction - Server */
+	/**
+	 * Transaction - Server
+	 */
 //	@Disabled
 //	@Test
 //	public void testTransaction() {
@@ -372,7 +370,6 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 //		entry.setTransactionMethod(theTransactionOperation);
 //		ca.uhn.fhir.model.api.Bundle response = client.transaction().withBundle(bundle).execute();
 //	}
-	
 	@Test
 	public void testUpdateById() throws Exception {
 		when(mock.update(idCaptor.capture(), patientCaptor.capture(), conditionalCaptor.capture())).thenReturn(new MethodOutcome());
@@ -380,17 +377,17 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 		assertEquals("1", idCaptor.getValue().getIdPart());
 		compareResultId(1, patientCaptor.getValue());
 	}
-	
-    @Test
-    public void testConditionalUpdate() throws Exception {
-        when(mock.update(idCaptor.capture(), patientCaptor.capture(), conditionalCaptor.capture())).thenReturn(new MethodOutcome());
-        client.update().resource(createPatient(1)).conditional().where(Patient.IDENTIFIER.exactly().identifier("2")).execute();
 
-        assertEquals(null, patientCaptor.getValue().getIdElement().getIdPart());
-        assertEquals(null, patientCaptor.getValue().getIdElement().getVersionIdPart());
-        assertEquals("Patient?identifier=2&_format=json", conditionalCaptor.getValue());
-    }	
-	
+	@Test
+	public void testConditionalUpdate() throws Exception {
+		when(mock.update(idCaptor.capture(), patientCaptor.capture(), conditionalCaptor.capture())).thenReturn(new MethodOutcome());
+		client.update().resource(createPatient(1)).conditional().where(Patient.IDENTIFIER.exactly().identifier("2")).execute();
+
+		assertEquals(null, patientCaptor.getValue().getIdElement().getIdPart());
+		assertEquals(null, patientCaptor.getValue().getIdElement().getVersionIdPart());
+		assertEquals("Patient?identifier=2&_format=json", conditionalCaptor.getValue());
+	}
+
 	@SuppressWarnings("unchecked")
 	@Disabled
 	@Test
@@ -426,8 +423,8 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 			assertTrue(e.getMessage().contains("999955541264"));
 		}
 	}
-  
- 	@Test
+
+	@Test
 	public void testValidate() {
 		// prepare mock
 		final OperationOutcome oo = new OperationOutcome();
@@ -442,33 +439,53 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 		assertNotNull(mO.getOperationOutcome());
 	}
 
+	class StringTypeMatcher implements ArgumentMatcher<StringType> {
+		private StringType myStringType;
+
+		public StringTypeMatcher(StringType stringType) {
+			myStringType = stringType;
+		}
+
+		@Override
+		public boolean matches(StringType argument) {
+			return myStringType.getValue().equals(argument.getValue());
+		}
+
+	}
+
+	@AfterAll
+	public static void afterClassClearContext() throws Exception {
+		JettyUtil.closeServer(jettyServer);
+		TestUtil.randomizeLocaleAndTimezone();
+	}
+
 	@BeforeAll
 	public static void setUpClass() throws Exception {
 		ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
 		context.setContextPath("/");
 		jettyServer = new Server(0);
 		jettyServer.setHandler(context);
-		ServletHolder jerseyServlet = context.addServlet(org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher.class, "/*");
+		ServletHolder jerseyServlet = context.addServlet(HttpServletDispatcher.class, "/*");
 		jerseyServlet.setInitOrder(0);
 
 		//@formatter:off
 		jerseyServlet.setInitParameter("resteasy.resources",
-				StringUtils.join(Arrays.asList(
-					TestJaxRsMockPatientRestProviderDstu3.class.getCanonicalName(),
+			StringUtils.join(Arrays.asList(
+				TestJaxRsMockPatientRestProviderDstu3.class.getCanonicalName(),
 //					JaxRsExceptionInterceptor.class.getCanonicalName(),
-					TestJaxRsConformanceRestProviderDstu3.class.getCanonicalName(),
-					TestJaxRsMockPageProviderDstu3.class.getCanonicalName()
-						), ","));
+				TestJaxRsConformanceRestProviderDstu3.class.getCanonicalName(),
+				TestJaxRsMockPageProviderDstu3.class.getCanonicalName()
+			), ","));
 		//@formatter:on
-		
+
 		JettyUtil.startServer(jettyServer);
-        ourPort = JettyUtil.getPortForStartedServer(jettyServer);
+		ourPort = JettyUtil.getPortForStartedServer(jettyServer);
 
 		ourCtx.setRestfulClientFactory(new JaxRsRestfulClientFactory(ourCtx));
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		ourCtx.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
-        serverBase = "http://localhost:" + ourPort + "/";
-        client = ourCtx.newRestfulGenericClient(serverBase);
+		serverBase = "http://localhost:" + ourPort + "/";
+		client = ourCtx.newRestfulGenericClient(serverBase);
 		client.setEncoding(EncodingEnum.JSON);
 		client.registerInterceptor(new LoggingInterceptor(true));
 	}

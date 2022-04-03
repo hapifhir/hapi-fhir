@@ -1,0 +1,11 @@
+---
+- item:
+    type: "add"
+    title: "The version of a few dependencies have been bumped to the latest versions
+(dependent HAPI modules listed in brackets):
+<ul>
+<li>FlywayDB (JPA): 8.4.4 -> 8.5.0</li>
+<li>Postgresql (JPA): 42.3.2 -> 42.3.3 (Addresses WS-2022-0080)</li>
+</ul>
+"
+

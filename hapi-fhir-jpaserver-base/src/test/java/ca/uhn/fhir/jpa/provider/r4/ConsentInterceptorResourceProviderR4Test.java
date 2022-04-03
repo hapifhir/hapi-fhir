@@ -1,7 +1,8 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.config.BaseConfig;
+import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
@@ -91,7 +92,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 	private List<String> myObservationIdsEvenOnlyBackwards;
 	private ConsentInterceptor myConsentInterceptor;
 	@Autowired
-	@Qualifier(BaseConfig.GRAPHQL_PROVIDER_NAME)
+	@Qualifier(JpaConfig.GRAPHQL_PROVIDER_NAME)
 	private Object myGraphQlProvider;
 
 	@Override
@@ -129,7 +130,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 			.returnBundle(Bundle.class)
 			.count(15)
 			.execute();
-		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirCtx, result);
+		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirContext, result);
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertThat(returnedIdValues, hasSize(15));
 		assertEquals(myObservationIdsEvenOnly.subList(0, 15), returnedIdValues);
@@ -139,7 +140,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 			.loadPage()
 			.next(result)
 			.execute();
-		resources = BundleUtil.toListOfResources(myFhirCtx, result);
+		resources = BundleUtil.toListOfResources(myFhirContext, result);
 		returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertThat(returnedIdValues, hasSize(10));
 		assertEquals(myObservationIdsEvenOnly.subList(15, 25), returnedIdValues);
@@ -170,7 +171,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 			.returnBundle(Bundle.class)
 			.count(15)
 			.execute();
-		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirCtx, result);
+		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirContext, result);
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertEquals(myObservationIdsEvenOnly.subList(0, 15), returnedIdValues);
 		List<String> cacheOutcome = capture.getLastResponse().getHeaders(Constants.HEADER_X_CACHE);
@@ -186,7 +187,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 			.returnBundle(Bundle.class)
 			.count(15)
 			.execute();
-		resources = BundleUtil.toListOfResources(myFhirCtx, result);
+		resources = BundleUtil.toListOfResources(myFhirContext, result);
 		returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertEquals(myObservationIdsOddOnly.subList(0, 15), returnedIdValues);
 		cacheOutcome = capture.getLastResponse().getHeaders(Constants.HEADER_X_CACHE);
@@ -202,7 +203,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 			.returnBundle(Bundle.class)
 			.count(15)
 			.execute();
-		resources = BundleUtil.toListOfResources(myFhirCtx, result);
+		resources = BundleUtil.toListOfResources(myFhirContext, result);
 		returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertEquals(myObservationIds.subList(0, 15), returnedIdValues);
 		cacheOutcome = capture.getLastResponse().getHeaders(Constants.HEADER_X_CACHE);
@@ -218,7 +219,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 			.returnBundle(Bundle.class)
 			.count(15)
 			.execute();
-		resources = BundleUtil.toListOfResources(myFhirCtx, result);
+		resources = BundleUtil.toListOfResources(myFhirContext, result);
 		returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertEquals(myObservationIds.subList(0, 15), returnedIdValues);
 		cacheOutcome = capture.getLastResponse().getHeaders(Constants.HEADER_X_CACHE);
@@ -235,7 +236,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 			.returnBundle(Bundle.class)
 			.count(15)
 			.execute();
-		resources = BundleUtil.toListOfResources(myFhirCtx, result);
+		resources = BundleUtil.toListOfResources(myFhirContext, result);
 		returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertEquals(myObservationIds.subList(0, 15), returnedIdValues);
 		cacheOutcome = capture.getLastResponse().getHeaders(Constants.HEADER_X_CACHE);
@@ -261,7 +262,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 			.returnBundle(Bundle.class)
 			.count(15)
 			.execute();
-		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirCtx, result);
+		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirContext, result);
 		assertEquals(15, resources.size());
 		assertEquals(16, consentService.getSeeCount());
 		resources.forEach(t -> {
@@ -273,7 +274,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 			.loadPage()
 			.next(result)
 			.execute();
-		resources = BundleUtil.toListOfResources(myFhirCtx, result);
+		resources = BundleUtil.toListOfResources(myFhirContext, result);
 		assertEquals(15, resources.size());
 		assertEquals(32, consentService.getSeeCount());
 		resources.forEach(t -> {
@@ -296,7 +297,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 			.returnBundle(Bundle.class)
 			.count(10)
 			.execute();
-		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirCtx, result);
+		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirContext, result);
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertEquals(myObservationIdsEvenOnlyBackwards.subList(0, 5), returnedIdValues);
 
@@ -441,8 +442,8 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 			ourLog.info("Response: {}", responseString);
 			assertEquals(200, status.getStatusLine().getStatusCode());
 
-			Bundle result = myFhirCtx.newJsonParser().parseResource(Bundle.class, responseString);
-			List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirCtx, result);
+			Bundle result = myFhirContext.newJsonParser().parseResource(Bundle.class, responseString);
+			List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirContext, result);
 			List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 			assertEquals(myObservationIdsOddOnly.subList(0, 5), returnedIdValues);
 		}
@@ -501,8 +502,8 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 			assertThat(responseString, not(containsString("\"given\":[\"PATIENT_GIVEN1\",\"PATIENT_GIVEN2\"]")));
 			assertThat(responseString, not(containsString("\"name\":\"ORG_NAME\"")));
 
-			OperationOutcome oo = myFhirCtx.newJsonParser().parseResource(OperationOutcome.class, responseString);
-			assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesPattern("Unable to execute GraphQL Expression: HTTP 404 Resource Patient/[0-9]+ is not known"));
+			OperationOutcome oo = myFhirContext.newJsonParser().parseResource(OperationOutcome.class, responseString);
+			assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesPattern(Msg.code(1147) + "Unable to execute GraphQL Expression: HTTP 404 " + Msg.code(1995) + "Resource Patient/[0-9]+ is not known"));
 		}
 
 	}
@@ -540,8 +541,8 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 			assertThat(responseString, not(containsString("\"given\":[\"PATIENT_GIVEN1\",\"PATIENT_GIVEN2\"]")));
 			assertThat(responseString, not(containsString("\"name\":\"ORG_NAME\"")));
 
-			OperationOutcome oo = myFhirCtx.newJsonParser().parseResource(OperationOutcome.class, responseString);
-			assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesPattern("Unable to execute GraphQL Expression: HTTP 404 Resource Organization/[0-9]+ is not known"));
+			OperationOutcome oo = myFhirContext.newJsonParser().parseResource(OperationOutcome.class, responseString);
+			assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesPattern(Msg.code(1147) + "Unable to execute GraphQL Expression: HTTP 404 " + Msg.code(1995) + "Resource Organization/[0-9]+ is not known"));
 		}
 
 	}
@@ -560,7 +561,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		});
 
 		Bundle response = myClient.search().forResource(Patient.class).count(1).returnBundle(Bundle.class).execute();
-		String searchId = response.getId();
+		String searchId = response.getIdElement().getIdPart();
 
 		// 2 results returned, but no total since it's stripped
 		assertEquals(1, response.getEntry().size());
@@ -593,10 +594,10 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		});
 
 		// The paging should have ended now - but the last redacted female result is an empty existing page which should never have been there.
-		String next = BundleUtil.getLinkUrlOfType(myFhirCtx, response, "next");
+		String next = BundleUtil.getLinkUrlOfType(myFhirContext, response, "next");
 		if (next != null) {
 			response = myClient.loadPage().next(response).execute();
-			fail(myFhirCtx.newJsonParser().encodeResourceToString(response));
+			fail(myFhirContext.newJsonParser().encodeResourceToString(response));
 		}
 
 	}
@@ -615,7 +616,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		myClient.create().resource(new Patient().setGender(Enumerations.AdministrativeGender.FEMALE).addName(new HumanName().setFamily("3"))).execute();
 
 		Bundle response = myClient.search().forResource(Patient.class).count(1).returnBundle(Bundle.class).execute();
-		String searchId = response.getId();
+		String searchId = response.getIdElement().getIdPart();
 
 		assertEquals(1, response.getEntry().size());
 		assertNull(response.getTotalElement().getValue());
@@ -626,7 +627,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		assertNull(response.getTotalElement().getValue());
 
 		// The paging should have ended now - but the last redacted female result is an empty existing page which should never have been there.
-		assertNotNull(BundleUtil.getLinkUrlOfType(myFhirCtx, response, "next"));
+		assertNotNull(BundleUtil.getLinkUrlOfType(myFhirContext, response, "next"));
 
 		await()
 			.until(
@@ -746,7 +747,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 	}
 
 	private HttpEntity toEntity(Patient thePatient) {
-		String encoded = myFhirCtx.newJsonParser().encodeResourceToString(thePatient);
+		String encoded = myFhirContext.newJsonParser().encodeResourceToString(thePatient);
 		ContentType cs = ContentType.create(Constants.CT_FHIR_JSON, Constants.CHARSET_UTF8);
 		return new StringEntity(encoded, cs);
 	}

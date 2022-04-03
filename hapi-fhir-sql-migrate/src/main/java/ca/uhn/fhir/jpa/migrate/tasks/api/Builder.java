@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.tasks.api;
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.migrate.tasks.api;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddForeignKeyTask;
@@ -115,7 +116,6 @@ public class Builder {
 	 *
 	 * @param theVersion The version of the migration.
 	 * @param theDriverToSql Map of driver types to SQL statements.
-	 * @return
 	 */
 	public Builder executeRawSql(String theVersion, Map<DriverTypeEnum, String> theDriverToSql) {
 		Map<DriverTypeEnum, List<String>> singleSqlStatementMap = new HashMap<>();
@@ -133,7 +133,6 @@ public class Builder {
 	 *
 	 * @param theVersion The version of the migration.
 	 * @param theDriverToSqls Map of driver types to list of SQL statements.
-	 * @return
 	 */
 	public Builder executeRawSqls(String theVersion, Map<DriverTypeEnum, List<String>> theDriverToSqls) {
 		ExecuteRawSqlTask executeRawSqlTask = new ExecuteRawSqlTask(myRelease, theVersion);
@@ -187,6 +186,15 @@ public class Builder {
 
 		public BuilderCompleteTask dropIndex(String theVersion, String theIndexName) {
 			BaseTask task = dropIndexOptional(false, theVersion, theIndexName);
+			return new BuilderCompleteTask(task);
+		}
+
+		/**
+		 * Drop index without taking write lock on PG, Oracle, MSSQL.
+		 */
+		public BuilderCompleteTask dropIndexOnline(String theVersion, String theIndexName) {
+			DropIndexTask task = dropIndexOptional(false, theVersion, theIndexName);
+			task.setOnline(true);
 			return new BuilderCompleteTask(task);
 		}
 
@@ -321,6 +329,7 @@ public class Builder {
 				private final String myVersion;
 				private final boolean myUnique;
 				private String[] myIncludeColumns;
+				private boolean myOnline;
 
 				public BuilderAddIndexUnique(String theVersion, boolean theUnique) {
 					myVersion = theVersion;
@@ -343,6 +352,7 @@ public class Builder {
 					task.setUnique(myUnique);
 					task.setColumns(theColumnNames);
 					task.setDoNothing(theDoNothing);
+					task.setOnline(myOnline);
 					if (myIncludeColumns != null) {
 						task.setIncludeColumns(myIncludeColumns);
 					}
@@ -352,6 +362,14 @@ public class Builder {
 
 				public BuilderAddIndexUnique includeColumns(String... theIncludeColumns) {
 					myIncludeColumns = theIncludeColumns;
+					return this;
+				}
+
+				/**
+				 * Add the index without locking the table.
+				 */
+				public BuilderAddIndexUnique online(boolean theOnlineFlag) {
+					myOnline = theOnlineFlag;
 					return this;
 				}
 			}
@@ -395,11 +413,11 @@ public class Builder {
 				public void withType(ColumnTypeEnum theColumnType, Integer theLength) {
 					if (theColumnType == ColumnTypeEnum.STRING) {
 						if (theLength == null || theLength == 0) {
-							throw new IllegalArgumentException("Can not specify length 0 for column of type " + theColumnType);
+							throw new IllegalArgumentException(Msg.code(52) + "Can not specify length 0 for column of type " + theColumnType);
 						}
 					} else {
 						if (theLength != null) {
-							throw new IllegalArgumentException("Can not specify length for column of type " + theColumnType);
+							throw new IllegalArgumentException(Msg.code(53) + "Can not specify length for column of type " + theColumnType);
 						}
 					}
 
@@ -453,7 +471,7 @@ public class Builder {
 			}
 		}
 
-		public class BuilderAddColumnWithName {
+		public static class BuilderAddColumnWithName {
 			private final String myRelease;
 			private final String myVersion;
 			private final String myColumnName;

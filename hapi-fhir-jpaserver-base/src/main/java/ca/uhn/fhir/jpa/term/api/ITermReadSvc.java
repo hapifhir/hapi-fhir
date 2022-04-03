@@ -29,7 +29,7 @@ import java.util.Set;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,6 +73,8 @@ public interface ITermReadSvc extends IValidationSupport {
 	List<FhirVersionIndependentConcept> expandValueSetIntoConceptList(ValueSetExpansionOptions theExpansionOptions, String theValueSetCanonicalUrl);
 
 	Optional<TermConcept> findCode(String theCodeSystem, String theCode);
+
+	List<TermConcept> findCodes(String theCodeSystem, List<String> theCodes);
 
 	Set<TermConcept> findCodesAbove(Long theCodeSystemResourcePid, Long theCodeSystemResourceVersionPid, String theCode);
 
@@ -130,5 +132,11 @@ public interface ITermReadSvc extends IValidationSupport {
 	 * Version independent
 	 */
 	Optional<IBaseResource> readCodeSystemByForcedId(String theForcedId);
+
+	/**
+	 * Version independent
+	 * Recreates freetext indexes for TermConcept and nested TermConceptProperty
+	 */
+	ReindexTerminologyResult reindexTerminology() throws InterruptedException;
 
 }

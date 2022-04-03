@@ -4,7 +4,7 @@ package ca.uhn.fhir.parser.json.jackson;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.parser.json.jackson;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.json.JsonLikeArray;
 import ca.uhn.fhir.parser.json.JsonLikeObject;
@@ -31,6 +32,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.DecimalNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
@@ -46,9 +48,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 public class JacksonStructure implements JsonLikeStructure {
 
@@ -86,7 +85,7 @@ public class JacksonStructure implements JsonLikeStructure {
 			while (true) {
 				nextInt = pbr.read();
 				if (nextInt == -1) {
-					throw new DataFormatException("Did not find any content to parse");
+					throw new DataFormatException(Msg.code(1857) + "Did not find any content to parse");
 				}
 				if (nextInt == '{') {
 					pbr.unread(nextInt);
@@ -100,9 +99,9 @@ public class JacksonStructure implements JsonLikeStructure {
 						pbr.unread(nextInt);
 						break;
 					}
-					throw new DataFormatException("Content does not appear to be FHIR JSON, first non-whitespace character was: '" + (char) nextInt + "' (must be '{' or '[')");
+					throw new DataFormatException(Msg.code(1858) + "Content does not appear to be FHIR JSON, first non-whitespace character was: '" + (char) nextInt + "' (must be '{' or '[')");
 				}
-				throw new DataFormatException("Content does not appear to be FHIR JSON, first non-whitespace character was: '" + (char) nextInt + "' (must be '{')");
+				throw new DataFormatException(Msg.code(1859) + "Content does not appear to be FHIR JSON, first non-whitespace character was: '" + (char) nextInt + "' (must be '{')");
 			}
 
 			if (nextInt == '{') {
@@ -112,10 +111,10 @@ public class JacksonStructure implements JsonLikeStructure {
 			}
 		} catch (Exception e) {
 			if (e.getMessage().startsWith("Unexpected char 39")) {
-				throw new DataFormatException("Failed to parse JSON encoded FHIR content: " + e.getMessage() + " - " +
+				throw new DataFormatException(Msg.code(1860) + "Failed to parse JSON encoded FHIR content: " + e.getMessage() + " - " +
 					"This may indicate that single quotes are being used as JSON escapes where double quotes are required", e);
 			}
-			throw new DataFormatException("Failed to parse JSON encoded FHIR content: " + e.getMessage(), e);
+			throw new DataFormatException(Msg.code(1861) + "Failed to parse JSON encoded FHIR content: " + e.getMessage(), e);
 		}
 	}
 
@@ -146,15 +145,13 @@ public class JacksonStructure implements JsonLikeStructure {
 			return new JacksonJsonObject((ObjectNode) jsonLikeRoot);
 		}
 
-		throw new DataFormatException("Content must be a valid JSON Object. It must start with '{'.");
+		throw new DataFormatException(Msg.code(1862) + "Content must be a valid JSON Object. It must start with '{'.");
 	}
 
 	private enum ROOT_TYPE {OBJECT, ARRAY}
 
 	private static class JacksonJsonObject extends JsonLikeObject {
 		private final ObjectNode nativeObject;
-		private final Map<String, JsonLikeValue> jsonLikeMap = new LinkedHashMap<>();
-		private Set<String> keySet = null;
 
 		public JacksonJsonObject(ObjectNode json) {
 			this.nativeObject = json;
@@ -166,30 +163,17 @@ public class JacksonStructure implements JsonLikeStructure {
 		}
 
 		@Override
-		public Set<String> keySet() {
-			if (null == keySet) {
-				final Iterable<Map.Entry<String, JsonNode>> iterable = nativeObject::fields;
-				keySet = StreamSupport.stream(iterable.spliterator(), false)
-					.map(Map.Entry::getKey)
-					.collect(Collectors.toCollection(EntryOrderedSet::new));
-			}
-
-			return keySet;
+		public Iterator<String> keyIterator() {
+			return nativeObject.fieldNames();
 		}
 
 		@Override
 		public JsonLikeValue get(String key) {
-			JsonLikeValue result = null;
-			if (jsonLikeMap.containsKey(key)) {
-				result = jsonLikeMap.get(key);
-			} else {
-				JsonNode child = nativeObject.get(key);
-				if (child != null) {
-					result = new JacksonJsonValue(child);
-				}
-				jsonLikeMap.put(key, result);
+			JsonNode child = nativeObject.get(key);
+			if (child != null) {
+				return new JacksonJsonValue(child);
 			}
-			return result;
+			return null;
 		}
 	}
 
@@ -300,19 +284,28 @@ public class JacksonStructure implements JsonLikeStructure {
 
 		@Override
 		public ValueType getJsonType() {
-			if (null == nativeValue || nativeValue.isNull()) {
+			if (null == nativeValue) {
 				return ValueType.NULL;
 			}
-			if (nativeValue.isObject()) {
-				return ValueType.OBJECT;
+
+			switch (nativeValue.getNodeType()) {
+				case NULL:
+				case MISSING:
+					return ValueType.NULL;
+				case OBJECT:
+					return ValueType.OBJECT;
+				case ARRAY:
+					return ValueType.ARRAY;
+				case POJO:
+				case BINARY:
+				case STRING:
+				case NUMBER:
+				case BOOLEAN:
+				default:
+					break;
 			}
-			if (nativeValue.isArray()) {
-				return ValueType.ARRAY;
-			}
-			if (nativeValue.isValueNode()) {
-				return ValueType.SCALAR;
-			}
-			return null;
+
+			return ValueType.SCALAR;
 		}
 
 		@Override
@@ -378,7 +371,10 @@ public class JacksonStructure implements JsonLikeStructure {
 	}
 
 	private static ObjectMapper createObjectMapper() {
-		ObjectMapper retVal = new ObjectMapper();
+		ObjectMapper retVal =
+			JsonMapper
+				.builder()
+				.build();
 		retVal = retVal.setNodeFactory(new JsonNodeFactory(true));
 		retVal = retVal.enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
 		retVal = retVal.enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);

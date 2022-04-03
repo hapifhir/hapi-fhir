@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.base.composite;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,8 @@ package ca.uhn.fhir.model.base.composite;
  * #L%
  */
 
-import org.apache.commons.lang3.StringUtils;
-
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -30,6 +29,7 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.param.StringParam;
+import org.apache.commons.lang3.StringUtils;
 
 public abstract class BaseIdentifierDt extends BaseIdentifiableElement implements ICompositeDatatype, IQueryParameterType {
 
@@ -137,7 +137,7 @@ public abstract class BaseIdentifierDt extends BaseIdentifiableElement implement
 	@Deprecated
 	@Override
 	public IQueryParameterType setMissing(Boolean theMissing) {
-		throw new UnsupportedOperationException("get/setMissing is not supported in StringDt. Use {@link StringParam} instead if you need this functionality");
+		throw new UnsupportedOperationException(Msg.code(1907) + "get/setMissing is not supported in StringDt. Use {@link StringParam} instead if you need this functionality");
 	}
 
 }

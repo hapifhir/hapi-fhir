@@ -4,7 +4,7 @@ package ca.uhn.fhir.interceptor.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,4 +91,9 @@ public interface IBaseInterceptorService<POINTCUT extends IPointcut> extends IBa
 	 * Unregisters all interceptors that are indicated by the given callback function returning <code>true</code>
 	 */
 	void unregisterInterceptorsIf(Predicate<Object> theShouldUnregisterFunction);
+
+	/**
+	 * Unregisters all anonymous interceptors (i.e. all interceptors registered with <code>registerAnonymousInterceptor</code>)
+	 */
+	void unregisterAllAnonymousInterceptors();
 }

@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.method;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.method;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -67,10 +68,10 @@ public class PatchMethodBinding extends BaseOutcomeReturningMethodBindingWithRes
 		}
 
 		if (myPatchTypeParameterIndex == -1) {
-			throw new ConfigurationException("Method has no parameter of type " + PatchTypeEnum.class.getName() + " - " + theMethod.toString());
+			throw new ConfigurationException(Msg.code(370) + "Method has no parameter of type " + PatchTypeEnum.class.getName() + " - " + theMethod.toString());
 		}
 		if (myResourceParamIndex == -1) {
-			throw new ConfigurationException("Method has no parameter with @" + ResourceParam.class.getSimpleName() + " annotation - " + theMethod.toString());
+			throw new ConfigurationException(Msg.code(371) + "Method has no parameter with @" + ResourceParam.class.getSimpleName() + " annotation - " + theMethod.toString());
 		}
 	}
 

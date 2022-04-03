@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.searchparam.util;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.searchparam.util;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -67,7 +68,7 @@ public enum JpaParamUtil {
 		QueryParameterAndBinder binder;
 		switch (paramType) {
 			case COMPOSITE:
-				throw new UnsupportedOperationException();
+				throw new UnsupportedOperationException(Msg.code(496));
 			case DATE:
 				binder = new QueryParameterAndBinder(DateAndListParam.class,
 					Collections.emptyList());
@@ -105,7 +106,7 @@ public enum JpaParamUtil {
 					Collections.emptyList());
 				break;
 			default:
-				throw new IllegalArgumentException("Parameter '" + theUnqualifiedParamName + "' has type " + paramType + " which is currently not supported.");
+				throw new IllegalArgumentException(Msg.code(497) + "Parameter '" + theUnqualifiedParamName + "' has type " + paramType + " which is currently not supported.");
 		}
 
 		return binder.parse(theContext, theUnqualifiedParamName, theParameters);
@@ -124,7 +125,7 @@ public enum JpaParamUtil {
 			List<RuntimeSearchParam> compositeList = resolveComponentParameters(theSearchParamRegistry, theParamDef);
 
 			if (compositeList.size() != 2) {
-				throw new ConfigurationException("Search parameter of type " + theUnqualifiedParamName
+				throw new ConfigurationException(Msg.code(498) + "Search parameter of type " + theUnqualifiedParamName
 					+ " must have 2 composite types declared in parameter annotation, found "
 					+ compositeList.size());
 			}
@@ -152,7 +153,7 @@ public enum JpaParamUtil {
 			String url = next.getReference();
 			RuntimeSearchParam componentParam = theSearchParamRegistry.getActiveSearchParamByUrl(url);
 			if (componentParam == null) {
-				throw new InternalErrorException("Can not find SearchParameter: " + url);
+				throw new InternalErrorException(Msg.code(499) + "Can not find SearchParameter: " + url);
 			}
 			compositeList.add(componentParam);
 		}
@@ -187,7 +188,7 @@ public enum JpaParamUtil {
 
 			case COMPOSITE:
 			default:
-				throw new IllegalArgumentException("Parameter '" + theUnqualifiedParamName + "' has type " + paramType
+				throw new IllegalArgumentException(Msg.code(500) + "Parameter '" + theUnqualifiedParamName + "' has type " + paramType
 					+ " which is currently not supported.");
 		}
 	}

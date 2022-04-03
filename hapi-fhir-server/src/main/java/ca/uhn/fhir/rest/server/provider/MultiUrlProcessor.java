@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.provider;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.provider;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IMultiUrlJobSubmitter;
@@ -50,7 +51,7 @@ public class MultiUrlProcessor {
 			ParametersUtil.addParameterToParametersLong(myFhirContext, retval, ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, jobExecution.getJobId());
 			return retval;
 		} catch (JobParametersInvalidException e) {
-			throw new InvalidRequestException("Invalid job parameters: " + e.getMessage(), e);
+			throw new InvalidRequestException(Msg.code(309) + "Invalid job parameters: " + e.getMessage(), e);
 		}
 	}
 

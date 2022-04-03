@@ -6,6 +6,7 @@ import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.i18n.Msg;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
@@ -13,6 +14,8 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -130,7 +133,7 @@ public class InMemoryTerminologyServerValidationSupportTest {
 		outcome = myChain.validateCodeInValueSet(valCtx, options, "http://cs", "code99", null, vs);
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertEquals("Failed to expand ValueSet 'http://vs' (in-memory). Could not validate code http://cs#code99. Error was: Unable to expand ValueSet because CodeSystem could not be found: http://cs", outcome.getMessage());
+		assertEquals("Failed to expand ValueSet 'http://vs' (in-memory). Could not validate code http://cs#code99. Error was: " + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://cs", outcome.getMessage());
 		assertEquals(IValidationSupport.IssueSeverity.ERROR, outcome.getSeverity());
 
 	}
@@ -152,7 +155,7 @@ public class InMemoryTerminologyServerValidationSupportTest {
 		outcome = myChain.validateCodeInValueSet(valCtx, options, "http://cs", "code99", null, vs);
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertEquals("Failed to expand ValueSet 'http://vs' (in-memory). Could not validate code http://cs#code99. Error was: Unable to expand ValueSet because CodeSystem could not be found: http://cs", outcome.getMessage());
+		assertEquals("Failed to expand ValueSet 'http://vs' (in-memory). Could not validate code http://cs#code99. Error was: "+ Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://cs", outcome.getMessage());
 		assertEquals(IValidationSupport.IssueSeverity.ERROR, outcome.getSeverity());
 
 	}
@@ -422,8 +425,42 @@ public class InMemoryTerminologyServerValidationSupportTest {
 		assertEquals("MODERNA COVID-19 mRNA-1273", valueSet.getExpansion().getContains().get(0).getDisplay());
 	}
 
+    @ParameterizedTest
+	 @ValueSource(strings = {"http://terminology.hl7.org/CodeSystem/v2-0360|2.7","http://terminology.hl7.org/CodeSystem/v2-0360"})
+    void testValidateCodeInValueSet_VsExpandedWithIncludes(String theCodeSystemUri) {
+		 ConceptValidationOptions options = new ConceptValidationOptions();
+		 ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+		 String codeMD = "MD";
 
-	private static class PrePopulatedValidationSupportDstu2 extends PrePopulatedValidationSupport {
+		 CodeSystem cs = new CodeSystem();
+		 cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		 cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		 cs.setUrl(theCodeSystemUri);
+		 cs.addConcept()
+			 .setCode(codeMD)
+			 .setDisplay("Doctor of Medicine");
+		 myPrePopulated.addCodeSystem(cs);
+
+		 ValueSet theValueSet = new ValueSet();
+		 theValueSet.setUrl("http://someValueSetURL");
+		 theValueSet.setVersion("0360");
+		 theValueSet.getCompose().addInclude().setSystem(theCodeSystemUri);
+
+		 String theCodeToValidateCodeSystemUrl = theCodeSystemUri;
+		 String theCodeToValidate = codeMD;
+
+		 IValidationSupport.CodeValidationResult codeValidationResult = mySvc.validateCodeInValueSet(
+			 valCtx,
+			 options,
+			 theCodeToValidateCodeSystemUrl,
+			 theCodeToValidate,
+			 null,
+			 theValueSet);
+
+		 assertTrue(codeValidationResult.isOk());
+	 }
+
+    private static class PrePopulatedValidationSupportDstu2 extends PrePopulatedValidationSupport {
 		private final Map<String, IBaseResource> myDstu2ValueSets;
 
 		PrePopulatedValidationSupportDstu2(FhirContext theFhirContext) {

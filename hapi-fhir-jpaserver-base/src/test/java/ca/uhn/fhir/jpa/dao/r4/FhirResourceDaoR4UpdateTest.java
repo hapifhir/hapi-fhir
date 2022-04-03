@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -397,7 +398,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 				id = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 				fail();
 			} catch (UnprocessableEntityException e) {
-				assertEquals("Resource contains 4 meta entries (tag/profile/security label), maximum is 3", e.getMessage());
+				assertEquals(Msg.code(932) + "Resource contains 4 meta entries (tag/profile/security label), maximum is 3", e.getMessage());
 			}
 		}
 	}
@@ -423,7 +424,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 				myPatientDao.metaAddOperation(id, meta, null);
 				fail();
 			} catch (UnprocessableEntityException e) {
-				assertEquals("Resource contains 4 meta entries (tag/profile/security label), maximum is 3", e.getMessage());
+				assertEquals(Msg.code(932) + "Resource contains 4 meta entries (tag/profile/security label), maximum is 3", e.getMessage());
 			}
 
 		}
@@ -625,7 +626,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		try {
 			myPatientDao.update(p);
 		} catch (InvalidRequestException e) {
-			assertEquals("Can not update resource of type Patient as it has no ID", e.getMessage());
+			assertEquals(Msg.code(987) + "Can not update resource of type Patient as it has no ID", e.getMessage());
 		}
 	}
 
@@ -723,7 +724,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		p2.addName().setFamily("Tester").addGiven("testUpdateMaintainsSearchParamsDstu2BBB");
 		myPatientDao.create(p2, mySrd).getId();
 
-		Set<ResourcePersistentId> ids = myPatientDao.searchForIds(new SearchParameterMap(Patient.SP_GIVEN, new StringParam("testUpdateMaintainsSearchParamsDstu2AAA")), null);
+		List<ResourcePersistentId> ids = myPatientDao.searchForIds(new SearchParameterMap(Patient.SP_GIVEN, new StringParam("testUpdateMaintainsSearchParamsDstu2AAA")), null);
 		assertEquals(1, ids.size());
 		assertThat(ResourcePersistentId.toLongList(ids), contains(p1id.getIdPartAsLong()));
 
@@ -894,7 +895,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 			myPatientDao.update(p, mySrd);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Can not process entity with ID[123:456], this is not a valid FHIR ID", e.getMessage());
+			assertEquals(Msg.code(521) + "Can not process entity with ID[123:456], this is not a valid FHIR ID", e.getMessage());
 		}
 	}
 
@@ -1095,7 +1096,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 			myPatientDao.update(p);
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getMessage(), matchesPattern("No resource exists on this server resource with ID.*, and client-assigned IDs are not enabled."));
+			assertThat(e.getMessage(), matchesPattern(Msg.code(959) + "No resource exists on this server resource with ID.*, and client-assigned IDs are not enabled."));
 		}
 
 	}

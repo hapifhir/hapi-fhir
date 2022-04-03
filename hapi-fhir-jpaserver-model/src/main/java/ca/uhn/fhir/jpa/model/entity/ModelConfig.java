@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ParserOptions;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import com.google.common.annotations.VisibleForTesting;
@@ -28,8 +29,6 @@ import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.DateTimeType;
 
-import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -52,12 +51,7 @@ public class ModelConfig {
 	 * <li><code>"http://hl7.org/fhir/StructureDefinition/*"</code></li>
 	 * </ul>
 	 */
-	public static final Set<String> DEFAULT_LOGICAL_BASE_URLS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
-		"http://hl7.org/fhir/ValueSet/*",
-		"http://hl7.org/fhir/CodeSystem/*",
-		"http://hl7.org/fhir/valueset-*",
-		"http://hl7.org/fhir/codesystem-*",
-		"http://hl7.org/fhir/StructureDefinition/*")));
+	public static final Set<String> DEFAULT_LOGICAL_BASE_URLS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList("http://hl7.org/fhir/ValueSet/*", "http://hl7.org/fhir/CodeSystem/*", "http://hl7.org/fhir/valueset-*", "http://hl7.org/fhir/codesystem-*", "http://hl7.org/fhir/StructureDefinition/*")));
 
 	public static final String DEFAULT_WEBSOCKET_CONTEXT_PATH = "/websocket";
 
@@ -84,6 +78,7 @@ public class ModelConfig {
 	private Set<String> myTreatReferencesAsLogical = new HashSet<>(DEFAULT_LOGICAL_BASE_URLS);
 	private boolean myDefaultSearchParamsCanBeOverridden = true;
 	private Set<Subscription.SubscriptionChannelType> mySupportedSubscriptionTypes = new HashSet<>();
+	private boolean myCrossPartitionSubscription = false;
 	private String myEmailFromAddress = "noreply@unknown.com";
 	private String myWebsocketContextPath = DEFAULT_WEBSOCKET_CONTEXT_PATH;
 	/**
@@ -102,6 +97,8 @@ public class ModelConfig {
 	private boolean myIndexOnContainedResources = false;
 	private boolean myIndexOnContainedResourcesRecursively = false;
 	private boolean myAllowMdmExpansion = false;
+	private boolean myAutoSupportDefaultSearchParams = true;
+	private boolean myIndexIdentifierOfType = false;
 
 	/**
 	 * Constructor
@@ -110,6 +107,32 @@ public class ModelConfig {
 		setPeriodIndexStartOfTime(new DateTimeType(DEFAULT_PERIOD_INDEX_START_OF_TIME));
 		setPeriodIndexEndOfTime(new DateTimeType(DEFAULT_PERIOD_INDEX_END_OF_TIME));
 		setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
+	}
+
+	/**
+	 * If set to <code>true</code> (default is <code>false</code>) the
+	 * <code>:of-type</code> modifier on token search parameters for
+	 * identifiers will be supported. Enabling this causes additional
+	 * indexing overhead (although very minor) so it is disabled unless it is
+	 * actually needed.
+	 *
+	 * @since 5.7.0
+	 */
+	public boolean isIndexIdentifierOfType() {
+		return myIndexIdentifierOfType;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is <code>false</code>) the
+	 * <code>:of-type</code> modifier on token search parameters for
+	 * identifiers will be supported. Enabling this causes additional
+	 * indexing overhead (although very minor) so it is disabled unless it is
+	 * actually needed.
+	 *
+	 * @since 5.7.0
+	 */
+	public void setIndexIdentifierOfType(boolean theIndexIdentifierOfType) {
+		myIndexIdentifierOfType = theIndexIdentifierOfType;
 	}
 
 	/**
@@ -163,36 +186,6 @@ public class ModelConfig {
 	}
 
 	/**
-	 * If enabled, the server will support the use of :mdm search parameter qualifier on Reference Search Parameters.
-	 * This Parameter Qualifier is HAPI-specific, and not defined anywhere in the FHIR specification. Using this qualifier
-	 * will result in an MDM expansion being done on the reference, which will expand the search scope. For example, if Patient/1
-	 * is MDM-matched to Patient/2 and you execute the search:
-	 * Observation?subject:mdm=Patient/1 , you will receive observations for both Patient/1 and Patient/2.
-	 * <p>
-	 * Default is <code>false</code>
-	 * </p>
-	 * @since 5.4.0
-	 */
-	public boolean isAllowMdmExpansion() {
-		return myAllowMdmExpansion;
-	}
-
-	/**
-	 * If enabled, the server will support the use of :mdm search parameter qualifier on Reference Search Parameters.
-	 * This Parameter Qualifier is HAPI-specific, and not defined anywhere in the FHIR specification. Using this qualifier
-	 * will result in an MDM expansion being done on the reference, which will expand the search scope. For example, if Patient/1
-	 * is MDM-matched to Patient/2 and you execute the search:
-	 * Observation?subject:mdm=Patient/1 , you will receive observations for both Patient/1 and Patient/2.
-	 * <p>
-	 * Default is <code>false</code>
-	 * </p>
-	 * @since 5.4.0
-	 */
-	public void setAllowMdmExpansion(boolean theAllowMdmExpansion) {
-		myAllowMdmExpansion = theAllowMdmExpansion;
-	}
-
-	/**
 	 * If enabled, the server will support the use of :contains searches,
 	 * which are helpful but can have adverse effects on performance.
 	 * <p>
@@ -208,6 +201,38 @@ public class ModelConfig {
 	 */
 	public void setAllowContainsSearches(boolean theAllowContainsSearches) {
 		this.myAllowContainsSearches = theAllowContainsSearches;
+	}
+
+	/**
+	 * If enabled, the server will support the use of :mdm search parameter qualifier on Reference Search Parameters.
+	 * This Parameter Qualifier is HAPI-specific, and not defined anywhere in the FHIR specification. Using this qualifier
+	 * will result in an MDM expansion being done on the reference, which will expand the search scope. For example, if Patient/1
+	 * is MDM-matched to Patient/2 and you execute the search:
+	 * Observation?subject:mdm=Patient/1 , you will receive observations for both Patient/1 and Patient/2.
+	 * <p>
+	 * Default is <code>false</code>
+	 * </p>
+	 *
+	 * @since 5.4.0
+	 */
+	public boolean isAllowMdmExpansion() {
+		return myAllowMdmExpansion;
+	}
+
+	/**
+	 * If enabled, the server will support the use of :mdm search parameter qualifier on Reference Search Parameters.
+	 * This Parameter Qualifier is HAPI-specific, and not defined anywhere in the FHIR specification. Using this qualifier
+	 * will result in an MDM expansion being done on the reference, which will expand the search scope. For example, if Patient/1
+	 * is MDM-matched to Patient/2 and you execute the search:
+	 * Observation?subject:mdm=Patient/1 , you will receive observations for both Patient/1 and Patient/2.
+	 * <p>
+	 * Default is <code>false</code>
+	 * </p>
+	 *
+	 * @since 5.4.0
+	 */
+	public void setAllowMdmExpansion(boolean theAllowMdmExpansion) {
+		myAllowMdmExpansion = theAllowMdmExpansion;
 	}
 
 	/**
@@ -383,7 +408,6 @@ public class ModelConfig {
 		myTreatReferencesAsLogical = theTreatReferencesAsLogical;
 		return this;
 	}
-
 
 
 	/**
@@ -769,13 +793,13 @@ public class ModelConfig {
 	/**
 	 * Should indexing and searching on contained resources be enabled on this server.
 	 * This may have performance impacts, and should be enabled only if it is needed. Default is <code>false</code>.
-	 * 
+	 *
 	 * @since 5.4.0
 	 */
 	public boolean isIndexOnContainedResources() {
 		return myIndexOnContainedResources;
 	}
-	
+
 	/**
 	 * Should indexing and searching on contained resources be enabled on this server.
 	 * This may have performance impacts, and should be enabled only if it is needed. Default is <code>false</code>.
@@ -785,7 +809,7 @@ public class ModelConfig {
 	public void setIndexOnContainedResources(boolean theIndexOnContainedResources) {
 		myIndexOnContainedResources = theIndexOnContainedResources;
 	}
-	
+
 	/**
 	 * Should recursive indexing and searching on contained resources be enabled on this server.
 	 * This may have performance impacts, and should be enabled only if it is needed. Default is <code>false</code>.
@@ -806,16 +830,78 @@ public class ModelConfig {
 		myIndexOnContainedResourcesRecursively = theIndexOnContainedResourcesRecursively;
 	}
 
+	/**
+	 * If this is disabled by setting this to {@literal false} (default is {@literal true}),
+	 * the server will not automatically implement and support search parameters that
+	 * are not explcitly created in the repository.
+	 * <p>
+	 * Disabling this can have a dramatic improvement on performance (especially write performance)
+	 * in servers that only need to support a small number of search parameters, or no search parameters at all.
+	 * Disabling this obviously reduces the options for searching however.
+	 * </p>
+	 *
+	 * @since 5.7.0
+	 */
+	public boolean isAutoSupportDefaultSearchParams() {
+		return myAutoSupportDefaultSearchParams;
+	}
+
+	/**
+	 * If this is disabled by setting this to {@literal false} (default is {@literal true}),
+	 * the server will not automatically implement and support search parameters that
+	 * are not explcitly created in the repository.
+	 * <p>
+	 * Disabling this can have a dramatic improvement on performance (especially write performance)
+	 * in servers that only need to support a small number of search parameters, or no search parameters at all.
+	 * Disabling this obviously reduces the options for searching however.
+	 * </p>
+	 *
+	 * @since 5.7.0
+	 */
+	public void setAutoSupportDefaultSearchParams(boolean theAutoSupportDefaultSearchParams) {
+		myAutoSupportDefaultSearchParams = theAutoSupportDefaultSearchParams;
+	}
+
 	private static void validateTreatBaseUrlsAsLocal(String theUrl) {
 		Validate.notBlank(theUrl, "Base URL must not be null or empty");
 
 		int starIdx = theUrl.indexOf('*');
 		if (starIdx != -1) {
 			if (starIdx != theUrl.length() - 1) {
-				throw new IllegalArgumentException("Base URL wildcard character (*) can only appear at the end of the string: " + theUrl);
+				throw new IllegalArgumentException(Msg.code(1525) + "Base URL wildcard character (*) can only appear at the end of the string: " + theUrl);
 			}
 		}
 
+	}
+
+	/**
+	 * If enabled, the server will support cross-partition subscription.
+	 * This subscription will be the responsible for all the requests from all the partitions on this server.
+	 * For example, if the server has 3 partitions, P1, P2, P3
+	 * The subscription will live in the DEFAULT partition. Resource posted to DEFAULT, P1, P2, and P3 will trigger this subscription.
+	 * <p>
+	 * Default is <code>false</code>
+	 * </p>
+	 *
+	 * @since 7.5.0
+	 */
+	public boolean isCrossPartitionSubscription() {
+		return myCrossPartitionSubscription;
+	}
+
+	/**
+	 * If enabled, the server will support cross-partition subscription.
+	 * This subscription will be the responsible for all the requests from all the partitions on this server.
+	 * For example, if the server has 3 partitions, P1, P2, P3
+	 * The subscription will live in the DEFAULT partition. Resource posted to DEFAULT, P1, P2, and P3 will trigger this subscription.
+	 * <p>
+	 * Default is <code>false</code>
+	 * </p>
+	 *
+	 * @since 7.5.0
+	 */
+	public void setCrossPartitionSubscription(boolean theAllowCrossPartitionSubscription) {
+		myCrossPartitionSubscription = theAllowCrossPartitionSubscription;
 	}
 
 }

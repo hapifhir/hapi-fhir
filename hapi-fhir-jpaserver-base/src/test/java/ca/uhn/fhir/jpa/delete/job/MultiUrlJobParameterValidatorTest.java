@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.delete.job;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.batch.job.MultiUrlJobParameterUtil;
@@ -66,7 +67,7 @@ class MultiUrlJobParameterValidatorTest {
 			mySvc.validate(parameters);
 			fail();
 		} catch (JobParametersInvalidException e) {
-			assertEquals("The resource type Patient is not supported on this server.", e.getMessage());
+			assertEquals(Msg.code(1281) + "The resource type Patient is not supported on this server.", e.getMessage());
 		}
 	}
 }

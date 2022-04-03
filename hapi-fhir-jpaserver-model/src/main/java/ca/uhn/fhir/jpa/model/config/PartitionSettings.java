@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.config;
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -149,6 +149,14 @@ public class PartitionSettings {
 		 */
 		ALLOWED_UNQUALIFIED
 
+	}
+
+	/**
+	 * If enabled the JPA server will allow unqualified cross partition reference
+	 *
+	 */
+	public boolean isAllowUnqualifiedCrossPartitionReference() {
+		return myAllowReferencesAcrossPartitions.equals(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 	}
 
 }

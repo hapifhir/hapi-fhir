@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -60,11 +61,11 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 		try {
 			instance = theClass.getConstructor().newInstance();
 		} catch (Exception e) {
-			throw new ConfigurationException(myContext.getLocalizer().getMessage(getClass(), "nonInstantiableType", theClass.getName(), e.toString()), e);
+			throw new ConfigurationException(Msg.code(1730) + myContext.getLocalizer().getMessage(getClass(), "nonInstantiableType", theClass.getName(), e.toString()), e);
 		}
 		myStructureVersion = instance.getStructureFhirVersionEnum();
 		if (myStructureVersion != theContext.getVersion().getVersion()) {
-			throw new ConfigurationException(myContext.getLocalizer().getMessage(getClass(), "typeWrongVersion", theContext.getVersion().getVersion(), theClass.getName(), myStructureVersion));
+			throw new ConfigurationException(Msg.code(1731) + myContext.getLocalizer().getMessage(getClass(), "typeWrongVersion", theContext.getVersion().getVersion(), theClass.getName(), myStructureVersion));
 		}
 
 	}
@@ -106,7 +107,7 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 	@SuppressWarnings("unchecked")
 	public <T> Class<T> getImplementingClass(Class<T> theClass) {
 		if (!theClass.isAssignableFrom(getImplementingClass())) {
-			throw new ConfigurationException("Unable to convert " + getImplementingClass() + " to " + theClass);
+			throw new ConfigurationException(Msg.code(1732) + "Unable to convert " + getImplementingClass() + " to " + theClass);
 		}
 		return (Class<T>) getImplementingClass();
 	}
@@ -234,7 +235,7 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 		if (hasExtensions()) {
 			if (IAnyResource.class.isAssignableFrom(getImplementingClass())) {
 				if (!IDomainResource.class.isAssignableFrom(getImplementingClass())) {
-					throw new ConfigurationException("Class \"" + getImplementingClass() + "\" is invalid. This resource type is not a DomainResource, it must not have extensions");
+					throw new ConfigurationException(Msg.code(1733) + "Class \"" + getImplementingClass() + "\" is invalid. This resource type is not a DomainResource, it must not have extensions");
 				}
 			}
 		}

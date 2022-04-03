@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.tasks;
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.migrate.tasks;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.tasks.api.ISchemaInitializationProvider;
@@ -62,7 +63,7 @@ public class SchemaInitializationProvider implements ISchemaInitializationProvid
 		try {
 			InputStream sqlFileInputStream = SchemaInitializationProvider.class.getResourceAsStream(initScript);
 			if (sqlFileInputStream == null) {
-				throw new ConfigurationException("Schema initialization script " + initScript + " not found on classpath");
+				throw new ConfigurationException(Msg.code(49) + "Schema initialization script " + initScript + " not found on classpath");
 			}
 			// Assumes no escaped semicolons...
 			String sqlString = IOUtils.toString(sqlFileInputStream, Charsets.UTF_8);
@@ -75,7 +76,7 @@ public class SchemaInitializationProvider implements ISchemaInitializationProvid
 				}
 			}
 		} catch (IOException e) {
-			throw new ConfigurationException("Error reading schema initialization script " + initScript, e);
+			throw new ConfigurationException(Msg.code(50) + "Error reading schema initialization script " + initScript, e);
 		}
 		return retval;
 	}

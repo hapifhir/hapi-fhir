@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.mdm.config;
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,10 @@ package ca.uhn.fhir.jpa.mdm.config;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
@@ -44,16 +45,14 @@ import java.util.stream.Collectors;
 @Service
 public class MdmSubscriptionLoader {
 
-	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
-
 	public static final String MDM_SUBSCIPRION_ID_PREFIX = "mdm-";
-
+	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 	@Autowired
 	public FhirContext myFhirContext;
 	@Autowired
 	public DaoRegistry myDaoRegistry;
 	@Autowired
-	public IdHelperService myIdHelperService;
+	public IJpaIdHelperService myIdHelperService;
 	@Autowired
 	IChannelNamer myChannelNamer;
 	@Autowired
@@ -68,17 +67,17 @@ public class MdmSubscriptionLoader {
 			case DSTU3:
 				subscriptions = mdmResourceTypes
 					.stream()
-					.map(resourceType -> buildMdmSubscriptionDstu3(MDM_SUBSCIPRION_ID_PREFIX + resourceType, resourceType+"?"))
+					.map(resourceType -> buildMdmSubscriptionDstu3(MDM_SUBSCIPRION_ID_PREFIX + resourceType, resourceType + "?"))
 					.collect(Collectors.toList());
 				break;
 			case R4:
 				subscriptions = mdmResourceTypes
 					.stream()
-					.map(resourceType -> buildMdmSubscriptionR4(MDM_SUBSCIPRION_ID_PREFIX + resourceType, resourceType+"?"))
+					.map(resourceType -> buildMdmSubscriptionR4(MDM_SUBSCIPRION_ID_PREFIX + resourceType, resourceType + "?"))
 					.collect(Collectors.toList());
 				break;
 			default:
-				throw new ConfigurationException("MDM not supported for FHIR version " + myFhirContext.getVersion().getVersion());
+				throw new ConfigurationException(Msg.code(736) + "MDM not supported for FHIR version " + myFhirContext.getVersion().getVersion());
 		}
 
 		mySubscriptionDao = myDaoRegistry.getResourceDao("Subscription");

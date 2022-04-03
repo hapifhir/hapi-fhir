@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.patch;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -43,7 +44,7 @@ public class FhirPatchApplyR4Test {
 		try {
 			svc.apply(patient, patch);
 		} catch (InvalidRequestException e) {
-			assertEquals("Unknown patch operation type: foo", e.getMessage());
+			assertEquals(Msg.code(1267) + "Unknown patch operation type: foo", e.getMessage());
 		}
 	}
 
@@ -72,7 +73,7 @@ public class FhirPatchApplyR4Test {
 		try {
 			svc.apply(patient, patch);
 		} catch (InvalidRequestException e) {
-			assertEquals("Invalid insert index 2 for path Patient.identifier - Only have 0 existing entries", e.getMessage());
+			assertEquals(Msg.code(1270) + "Invalid insert index 2 for path Patient.identifier - Only have 0 existing entries", e.getMessage());
 		}
 	}
 
@@ -105,7 +106,7 @@ public class FhirPatchApplyR4Test {
 		try {
 			svc.apply(patient, patch);
 		} catch (InvalidRequestException e) {
-			assertEquals("Invalid move source index 2 for path Patient.identifier - Only have 0 existing entries", e.getMessage());
+			assertEquals(Msg.code(1268) + "Invalid move source index 2 for path Patient.identifier - Only have 0 existing entries", e.getMessage());
 		}
 	}
 
@@ -139,7 +140,7 @@ public class FhirPatchApplyR4Test {
 		try {
 			svc.apply(patient, patch);
 		} catch (InvalidRequestException e) {
-			assertEquals("Invalid move destination index 1 for path Patient.identifier - Only have 0 existing entries", e.getMessage());
+			assertEquals(Msg.code(1269) + "Invalid move destination index 1 for path Patient.identifier - Only have 0 existing entries", e.getMessage());
 		}
 	}
 

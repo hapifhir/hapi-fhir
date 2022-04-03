@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.bulk.export.job;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.bulk.export.job;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportJobDao;
 import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
@@ -48,7 +49,7 @@ public class BulkExportJobParameterValidator implements JobParametersValidator {
 	@Override
 	public void validate(JobParameters theJobParameters) throws JobParametersInvalidException {
 		if (theJobParameters == null) {
-			throw new JobParametersInvalidException("This job needs Parameters: [readChunkSize], [jobUUID], [filters], [outputFormat], [resourceTypes]");
+			throw new JobParametersInvalidException(Msg.code(793) + "This job needs Parameters: [readChunkSize], [jobUUID], [filters], [outputFormat], [resourceTypes]");
 		}
 
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
@@ -88,7 +89,7 @@ public class BulkExportJobParameterValidator implements JobParametersValidator {
 		});
 
 		if (!StringUtils.isEmpty(errorMessage)) {
-			throw new JobParametersInvalidException(errorMessage);
+			throw new JobParametersInvalidException(Msg.code(794) + errorMessage);
 		}
 	}
 }

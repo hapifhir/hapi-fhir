@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.method;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.client.method;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
@@ -49,7 +50,7 @@ public class TransactionParameter implements IParameter {
 	@Override
 	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
 		if (theOuterCollectionType != null) {
-			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName() + "' is annotated with @"
+			throw new ConfigurationException(Msg.code(1454) + "Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName() + "' is annotated with @"
 					+ TransactionParam.class.getName() + " but can not be a collection of collections");
 		}
 		if (Modifier.isInterface(theParameterType.getModifiers()) == false && IBaseResource.class.isAssignableFrom(theParameterType)) {
@@ -59,14 +60,14 @@ public class TransactionParameter implements IParameter {
 			if ("Bundle".equals(def.getName())) {
 				myParamStyle = ParamStyle.RESOURCE_BUNDLE;
 			} else {
-				throw new ConfigurationException(createParameterTypeError(theMethod));
+				throw new ConfigurationException(Msg.code(1455) + createParameterTypeError(theMethod));
 			}
 		} else {
 			if (theInnerCollectionType.equals(List.class) == false) {
-				throw new ConfigurationException(createParameterTypeError(theMethod));
+				throw new ConfigurationException(Msg.code(1456) + createParameterTypeError(theMethod));
 			}
 			if (theParameterType.equals(IResource.class) == false && theParameterType.equals(IBaseResource.class) == false) {
-				throw new ConfigurationException(createParameterTypeError(theMethod));
+				throw new ConfigurationException(Msg.code(1457) + createParameterTypeError(theMethod));
 			}
 			myParamStyle = ParamStyle.RESOURCE_LIST;
 		}

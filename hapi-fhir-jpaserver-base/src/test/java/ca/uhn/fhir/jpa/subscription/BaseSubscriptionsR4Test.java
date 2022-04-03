@@ -17,6 +17,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
@@ -91,7 +92,7 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 		// Delete all Subscriptions
 		if (myClient != null) {
 			Bundle allSubscriptions = myClient.search().forResource(Subscription.class).returnBundle(Bundle.class).execute();
-			for (IBaseResource next : BundleUtil.toListOfResources(myFhirCtx, allSubscriptions)) {
+			for (IBaseResource next : BundleUtil.toListOfResources(myFhirContext, allSubscriptions)) {
 				myClient.delete().resource(next).execute();
 			}
 			waitForActivatedSubscriptionCount(0);
@@ -109,7 +110,14 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 
 
 	protected Subscription createSubscription(String theCriteria, String thePayload) {
+		return createSubscription(theCriteria, thePayload, null);
+	}
+
+	protected Subscription createSubscription(String theCriteria, String thePayload, Extension theExtension) {
 		Subscription subscription = newSubscription(theCriteria, thePayload);
+		if (theExtension != null) {
+			subscription.getExtension().add(theExtension);
+		}
 
 		MethodOutcome methodOutcome = myClient.create().resource(subscription).execute();
 		subscription.setId(methodOutcome.getId().getIdPart());
@@ -142,20 +150,25 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 	}
 
 
-	protected Observation sendObservation(String code, String system) {
+	protected Observation sendObservation(String theCode, String theSystem) {
+		Observation observation = createBaseObservation(theCode, theSystem);
+
+		IIdType id = myObservationDao.create(observation).getId();
+		observation.setId(id);
+
+		return observation;
+	}
+
+	protected Observation createBaseObservation(String theCode, String theSystem) {
 		Observation observation = new Observation();
 		CodeableConcept codeableConcept = new CodeableConcept();
 		observation.setCode(codeableConcept);
 		observation.getIdentifierFirstRep().setSystem("foo").setValue("1");
 		Coding coding = codeableConcept.addCoding();
-		coding.setCode(code);
-		coding.setSystem(system);
+		coding.setCode(theCode);
+		coding.setSystem(theSystem);
 
 		observation.setStatus(Observation.ObservationStatus.FINAL);
-
-		IIdType id = myObservationDao.create(observation).getId();
-		observation.setId(id);
-
 		return observation;
 	}
 
