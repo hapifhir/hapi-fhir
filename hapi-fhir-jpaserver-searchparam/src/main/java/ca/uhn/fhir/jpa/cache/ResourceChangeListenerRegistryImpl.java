@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
@@ -29,13 +30,14 @@ import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
 import java.util.Iterator;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.stream.Collectors;
 
 /**
  * This component holds an in-memory list of all registered {@link IResourceChangeListener} instances along
@@ -48,25 +50,13 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class ResourceChangeListenerRegistryImpl implements IResourceChangeListenerRegistry {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceChangeListenerRegistryImpl.class);
 	private final Queue<ResourceChangeListenerCache> myListenerEntries = new ConcurrentLinkedQueue<>();
-	@Autowired
-	ResourceChangeListenerCacheFactory myResourceChangeListenerCacheFactory;
-	@Autowired
-	private FhirContext myFhirContext;
-	@Autowired
+	private final FhirContext myFhirContext;
+	private final ResourceChangeListenerCacheFactory myResourceChangeListenerCacheFactory;
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 
-	@VisibleForTesting
-	public void setResourceChangeListenerCacheFactory(ResourceChangeListenerCacheFactory theResourceChangeListenerCacheFactory) {
-		myResourceChangeListenerCacheFactory = theResourceChangeListenerCacheFactory;
-	}
-
-	@VisibleForTesting
-	public void setFhirContext(FhirContext theFhirContext) {
+	public ResourceChangeListenerRegistryImpl(FhirContext theFhirContext, ResourceChangeListenerCacheFactory theResourceChangeListenerCacheFactory, InMemoryResourceMatcher theInMemoryResourceMatcher) {
 		myFhirContext = theFhirContext;
-	}
-
-	@VisibleForTesting
-	public void setInMemoryResourceMatcher(InMemoryResourceMatcher theInMemoryResourceMatcher) {
+		myResourceChangeListenerCacheFactory = theResourceChangeListenerCacheFactory;
 		myInMemoryResourceMatcher = theInMemoryResourceMatcher;
 	}
 
@@ -90,7 +80,7 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theResourceName);
 		InMemoryMatchResult inMemoryMatchResult = myInMemoryResourceMatcher.canBeEvaluatedInMemory(theSearchParameterMap, resourceDef);
 		if (!inMemoryMatchResult.supported()) {
-			throw new IllegalArgumentException("SearchParameterMap " + theSearchParameterMap + " cannot be evaluated in-memory: " + inMemoryMatchResult.getUnsupportedReason() + ".  Only search parameter maps that can be evaluated in-memory may be registered.");
+			throw new IllegalArgumentException(Msg.code(482) + "SearchParameterMap " + theSearchParameterMap + " cannot be evaluated in-memory: " + inMemoryMatchResult.getUnsupportedReason() + ".  Only search parameter maps that can be evaluated in-memory may be registered.");
 		}
 		return add(theResourceName, theResourceChangeListener, theSearchParameterMap, theRemoteRefreshIntervalMs);
 	}
@@ -111,7 +101,7 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 	}
 
 	private IResourceChangeListenerCache add(String theResourceName, IResourceChangeListener theResourceChangeListener, SearchParameterMap theMap, long theRemoteRefreshIntervalMs) {
-		ResourceChangeListenerCache retval = myResourceChangeListenerCacheFactory.create(theResourceName, theMap, theResourceChangeListener, theRemoteRefreshIntervalMs);
+		ResourceChangeListenerCache retval = myResourceChangeListenerCacheFactory.newResourceChangeListenerCache(theResourceName, theMap, theResourceChangeListener, theRemoteRefreshIntervalMs);
 		myListenerEntries.add(retval);
 		return retval;
 	}
@@ -152,6 +142,13 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 				entry.requestRefreshIfWatching(theResource);
 			}
 		}
+	}
+
+	@Override
+	public Set<String> getWatchedResourceNames() {
+		return myListenerEntries.stream()
+			.map(ResourceChangeListenerCache::getResourceName)
+			.collect(Collectors.toSet());
 	}
 
 	@Override

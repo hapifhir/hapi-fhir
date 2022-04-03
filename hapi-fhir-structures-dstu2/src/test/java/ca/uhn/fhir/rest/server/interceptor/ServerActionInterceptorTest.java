@@ -46,8 +46,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -65,7 +65,7 @@ public class ServerActionInterceptorTest {
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
         JettyUtil.closeServer(ourServer);
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 

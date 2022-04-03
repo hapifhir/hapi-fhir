@@ -1,11 +1,13 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
 import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -13,15 +15,19 @@ import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
+import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hibernate.Session;
 import org.hibernate.internal.SessionImpl;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.MedicationKnowledge;
+import org.hl7.fhir.r4.model.Meta;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
@@ -46,6 +52,7 @@ import static org.mockito.Mockito.when;
 @ContextConfiguration(classes = TransactionProcessorTest.MyConfig.class)
 public class TransactionProcessorTest {
 
+	private static final Logger ourLog = LoggerFactory.getLogger(TransactionProcessorTest.class);
 	@Autowired
 	private TransactionProcessor myTransactionProcessor;
 	@MockBean
@@ -63,16 +70,21 @@ public class TransactionProcessorTest {
 	@MockBean
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 	@MockBean
-	private IdHelperService myIdHelperService;
+	private IIdHelperService myIdHelperService;
 	@MockBean
 	private PartitionSettings myPartitionSettings;
 	@MockBean
 	private MatchUrlService myMatchUrlService;
 	@MockBean
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
-
+	@MockBean
+	private IResourceVersionSvc myResourceVersionSvc;
+	@MockBean
+	private SearchParamMatcher mySearchParamMatcher;
 	@MockBean(answer = Answers.RETURNS_DEEP_STUBS)
 	private SessionImpl mySession;
+	@MockBean
+	private IFhirSystemDao<Bundle, Meta> mySystemDao;
 
 	@BeforeEach
 	public void before() {
@@ -85,6 +97,7 @@ public class TransactionProcessorTest {
 
 		when(myEntityManager.unwrap(eq(Session.class))).thenReturn(mySession);
 	}
+
 
 	@Test
 	public void testTransactionWithDisabledResourceType() {
@@ -105,7 +118,7 @@ public class TransactionProcessorTest {
 			myTransactionProcessor.transaction(null, input, false);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Resource MedicationKnowledge is not supported on this server. Supported resource types: []", e.getMessage());
+			assertEquals(Msg.code(544) + "Resource MedicationKnowledge is not supported on this server. Supported resource types: []", e.getMessage());
 		}
 	}
 
@@ -120,7 +133,7 @@ public class TransactionProcessorTest {
 
 		@Bean
 		public FhirContext fhirContext() {
-			return FhirContext.forCached(FhirVersionEnum.R4);
+			return FhirContext.forR4Cached();
 		}
 
 		@Bean
@@ -139,7 +152,7 @@ public class TransactionProcessorTest {
 		}
 
 		@Bean
-		public BaseTransactionProcessor.ITransactionProcessorVersionAdapter<Bundle, Bundle.BundleEntryComponent> versionAdapter() {
+		public ITransactionProcessorVersionAdapter<Bundle, Bundle.BundleEntryComponent> versionAdapter() {
 			return new TransactionProcessorVersionAdapterR4();
 		}
 

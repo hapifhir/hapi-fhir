@@ -20,12 +20,13 @@ package ca.uhn.fhir.jpa.delete.job;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.expunge.PartitionRunner;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceForeignKey;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.slf4j.Logger;
@@ -55,7 +56,7 @@ public class DeleteExpungeProcessor implements ItemProcessor<List<Long>, List<St
 	@Autowired
 	DaoConfig myDaoConfig;
 	@Autowired
-	IdHelperService myIdHelper;
+	IJpaIdHelperService myIdHelper;
 	@Autowired
 	IResourceLinkDao myResourceLinkDao;
 
@@ -100,7 +101,7 @@ public class DeleteExpungeProcessor implements ItemProcessor<List<Long>, List<St
 		String sourceResourceId = myIdHelper.resourceIdFromPidOrThrowException(firstConflict.getSourceResourcePid()).toVersionless().getValue();
 		String targetResourceId = myIdHelper.resourceIdFromPidOrThrowException(firstConflict.getTargetResourcePid()).toVersionless().getValue();
 
-		throw new InvalidRequestException("DELETE with _expunge=true failed.  Unable to delete " +
+		throw new InvalidRequestException(Msg.code(822) + "DELETE with _expunge=true failed.  Unable to delete " +
 			targetResourceId + " because " + sourceResourceId + " refers to it via the path " + firstConflict.getSourcePath());
 	}
 

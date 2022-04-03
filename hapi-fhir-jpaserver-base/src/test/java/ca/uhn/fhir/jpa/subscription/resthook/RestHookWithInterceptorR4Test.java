@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Interceptor;
@@ -61,7 +60,7 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 	private static boolean ourNextAfterRestHookDeliveryReturn;
 	private static boolean ourHitAfterRestHookDelivery;
 	private static boolean ourNextAddHeader;
-	private static FhirContext ourCtx = FhirContext.forCached(FhirVersionEnum.R4);
+	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 
 	@Autowired
 	StoppableSubscriptionDeliveringRestHookSubscriber myStoppableSubscriptionDeliveringRestHookSubscriber;
@@ -104,10 +103,11 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		sendObservation();
 		deliveryLatch.await(10, TimeUnit.SECONDS);
 
-		assertEquals(0, ourCreatedObservations.size());
-		assertEquals(1, ourUpdatedObservations.size());
-		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
-		assertEquals("Observation/A", ourUpdatedObservations.get(0).getId());
+
+		ourObservationProvider.waitForCreateCount(0);
+		ourObservationProvider.waitForUpdateCount(1);
+		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
+		assertEquals("Observation/A/_history/1", ourObservationProvider.getStoredResources().get(0).getId());
 		assertTrue(ourHitBeforeRestHookDelivery);
 		assertTrue(ourHitAfterRestHookDelivery);
 	}
@@ -126,12 +126,12 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		sendObservation();
 		deliveryLatch.await(10, TimeUnit.SECONDS);
 
-		assertEquals(0, ourCreatedObservations.size());
-		assertEquals(1, ourUpdatedObservations.size());
-		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
+		ourObservationProvider.waitForCreateCount(0);
+		ourObservationProvider.waitForUpdateCount(1);
+		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
 		assertTrue(ourHitBeforeRestHookDelivery);
 		assertTrue(ourHitAfterRestHookDelivery);
-		assertThat(ourHeaders, hasItem("X-Foo: Bar"));
+		assertThat(ourRestfulServer.getRequestHeaders().get(0), hasItem("X-Foo: Bar"));
 	}
 
 	@Test
@@ -175,7 +175,7 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		sendObservation();
 
 		Thread.sleep(1000);
-		assertEquals(0, ourUpdatedObservations.size());
+		ourObservationProvider.waitForUpdateCount(0);
 	}
 
 	@Test
@@ -243,11 +243,11 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 
 			// Should see 1 subscription notification
 			waitForQueueToDrain();
-			waitForSize(0, ourCreatedObservations);
-			waitForSize(1, ourUpdatedObservations);
-			assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
+			ourObservationProvider.waitForCreateCount(0);
+			ourObservationProvider.waitForUpdateCount(1);
+			assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
 
-			assertEquals("1", ourUpdatedObservations.get(0).getIdElement().getVersionIdPart());
+			assertEquals("1", ourObservationProvider.getStoredResources().get(0).getIdElement().getVersionIdPart());
 
 			Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
 			assertNotNull(subscriptionTemp);
@@ -260,8 +260,8 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 			waitForQueueToDrain();
 
 			// Should see two subscription notifications
-			waitForSize(0, ourCreatedObservations);
-			waitForSize(3, ourUpdatedObservations);
+			ourObservationProvider.waitForCreateCount(0);
+			ourObservationProvider.waitForUpdateCount(3);
 
 			ourLog.info("Messages:\n  " + messages.stream().collect(Collectors.joining("\n  ")));
 
@@ -277,7 +277,7 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 	public static class AttributeCarryingInterceptor {
 
 		private ResourceDeliveryMessage myLastDelivery;
-		private CountDownLatch myFinishedLatch = new CountDownLatch(1);
+		private final CountDownLatch myFinishedLatch = new CountDownLatch(1);
 
 		public CountDownLatch getFinishedLatch() {
 			return myFinishedLatch;

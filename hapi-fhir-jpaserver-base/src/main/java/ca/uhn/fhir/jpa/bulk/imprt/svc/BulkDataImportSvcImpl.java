@@ -21,10 +21,9 @@ package ca.uhn.fhir.jpa.bulk.imprt.svc;
  */
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
+import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.batch.log.Logs;
-import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.job.BulkImportJobConfig;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobFileJson;
@@ -79,7 +78,7 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 	@Autowired
 	private IBatchJobSubmitter myJobSubmitter;
 	@Autowired
-	@Qualifier(BatchJobsConfig.BULK_IMPORT_JOB_NAME)
+	@Qualifier(BatchConstants.BULK_IMPORT_JOB_NAME)
 	private org.springframework.batch.core.Job myBulkImportJob;
 	@Autowired
 	private DaoConfig myDaoConfig;
@@ -235,6 +234,15 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 		return job.toJson();
 	}
 
+        @Override
+        public JobInfo getJobStatus(String theJobId) {
+                BulkImportJobEntity theJob = findJobByJobId(theJobId);
+                return new JobInfo()
+                        .setStatus(theJob.getStatus())
+                        .setStatusMessage(theJob.getStatusMessage())
+                        .setStatusTime(theJob.getStatusTime());
+        }
+
 	@Transactional
 	@Override
 	public BulkImportJobFileJson fetchFile(String theJobId, int theFileIndex) {
@@ -271,11 +279,11 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 		ValidateUtil.isTrueOrThrowInvalidRequest(batchSize > 0, "Batch size must be positive");
 
 		JobParametersBuilder parameters = new JobParametersBuilder()
-			.addString(BulkExportJobConfig.JOB_UUID_PARAMETER, jobId)
+			.addString(BatchConstants.JOB_UUID_PARAMETER, jobId)
 			.addLong(BulkImportJobConfig.JOB_PARAM_COMMIT_INTERVAL, (long) batchSize);
 
 		if (isNotBlank(theBulkExportJobEntity.getJobDescription())) {
-			parameters.addString(BulkExportJobConfig.JOB_DESCRIPTION, theBulkExportJobEntity.getJobDescription());
+			parameters.addString(BatchConstants.JOB_DESCRIPTION, theBulkExportJobEntity.getJobDescription());
 		}
 
 		ourLog.info("Submitting bulk import job {} to job scheduler", jobId);
@@ -307,6 +315,4 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 			myTarget.activateNextReadyJob();
 		}
 	}
-
-
 }

@@ -40,8 +40,10 @@ public class BaseLoincTop2000LabResultsHandler extends BaseLoincHandler implemen
 	private String myValueSetUri;
 	private String myValueSetName;
 
-	public BaseLoincTop2000LabResultsHandler(Map<String, TermConcept> theCode2concept, List<ValueSet> theValueSets, String theValueSetId, String theValueSetUri, String theValueSetName, List<ConceptMap> theConceptMaps, Properties theUploadProperties) {
-		super(theCode2concept, theValueSets, theConceptMaps, theUploadProperties);
+	public BaseLoincTop2000LabResultsHandler(Map<String, TermConcept> theCode2concept, List<ValueSet> theValueSets,
+			String theValueSetId, String theValueSetUri, String theValueSetName, List<ConceptMap> theConceptMaps,
+			Properties theUploadProperties, String theCopyrightStatement) {
+		super(theCode2concept, theValueSets, theConceptMaps, theUploadProperties, theCopyrightStatement);
 		String versionId = myUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
 		if (versionId != null) {
 			myValueSetId = theValueSetId + "-" + versionId;

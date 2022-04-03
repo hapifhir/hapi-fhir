@@ -82,8 +82,8 @@ public class BasePredicateBuilder {
 		return mySearchSqlBuilder.createConditionForValueWithComparator(theComparator, theColumn, theValue);
 	}
 
-	protected BaseJoiningPredicateBuilder getOrCreateQueryRootTable() {
-		return mySearchSqlBuilder.getOrCreateFirstPredicateBuilder();
+	protected BaseJoiningPredicateBuilder getOrCreateQueryRootTable(boolean theIncludeResourceTypeAndNonDeletedFlag) {
+		return mySearchSqlBuilder.getOrCreateFirstPredicateBuilder(theIncludeResourceTypeAndNonDeletedFlag);
 	}
 
 	public void addJoin(DbTable theFromTable, DbTable theToTable, DbColumn theFromColumn, DbColumn theToColumn) {

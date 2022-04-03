@@ -1,0 +1,6 @@
+---
+type: add
+issue: 2841
+title: "The [:text](https://www.hl7.org/fhir/search.html#text) Search Parameter modifier now searches by word boundary of the text content
+   as opposed to only searching at the start of the text when using Lucene/Elasticsearch indexing.
+   Add * to match word prefixes (e.g. weig* will match weight)."

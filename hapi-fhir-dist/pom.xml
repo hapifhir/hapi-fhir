@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>5.5.7</version>
+		<version>6.0.0-PRE9-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -92,8 +92,6 @@
 					<classifier>javadoc</classifier>
 					<scope>provided</scope>
 				</dependency>
-
-
 				<dependency>
 					<groupId>ca.uhn.hapi.fhir</groupId>
 					<artifactId>hapi-fhir-structures-dstu2</artifactId>

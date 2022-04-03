@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -30,7 +31,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -69,6 +72,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 	private Collection<IIdType> myAppliesToInstances;
 	private boolean myAppliesToDeleteCascade;
 	private boolean myAppliesToDeleteExpunge;
+	private AdditionalCompartmentSearchParameters myAdditionalCompartmentSearchParamMap;
 
 	/**
 	 * Constructor
@@ -106,12 +110,12 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 							break;
 						case SEARCH_SYSTEM:
 						case HISTORY_SYSTEM:
-							if (theFlags.contains(AuthorizationFlagsEnum.NO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS)) {
+							if (theFlags.contains(AuthorizationFlagsEnum.DO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS)) {
 								return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
 							}
 							break;
 						case SEARCH_TYPE:
-							if (theFlags.contains(AuthorizationFlagsEnum.NO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS)) {
+							if (theFlags.contains(AuthorizationFlagsEnum.DO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS)) {
 								return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
 							}
 							target.resourceType = theRequestDetails.getResourceName();
@@ -126,13 +130,13 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 							}
 							break;
 						case HISTORY_TYPE:
-							if (theFlags.contains(AuthorizationFlagsEnum.NO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS)) {
+							if (theFlags.contains(AuthorizationFlagsEnum.DO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS)) {
 								return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
 							}
 							target.resourceType = theRequestDetails.getResourceName();
 							break;
 						case HISTORY_INSTANCE:
-							if (theFlags.contains(AuthorizationFlagsEnum.NO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS)) {
+							if (theFlags.contains(AuthorizationFlagsEnum.DO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS)) {
 								return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
 							}
 							target.resourceIds = Collections.singleton(theInputResourceId);
@@ -247,7 +251,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				return null;
 			default:
 				// Should not happen
-				throw new IllegalStateException("Unable to apply security to event of type " + theOperation);
+				throw new IllegalStateException(Msg.code(335) + "Unable to apply security to event of type " + theOperation);
 		}
 
 		switch (myAppliesTo) {
@@ -291,16 +295,26 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				}
 				break;
 			default:
-				throw new IllegalStateException("Unable to apply security to event of applies to type " + myAppliesTo);
+				throw new IllegalStateException(Msg.code(336) + "Unable to apply security to event of applies to type " + myAppliesTo);
 		}
 
+		return applyRuleLogic(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theFlags, ctx, target, theRuleApplier);
+	}
+
+	/**
+	 * Apply any special processing logic specific to this rule.
+	 * This is intended to be overridden.
+	 *
+	 * TODO: At this point {@link RuleImplOp} handles "any ID" and "in compartment" logic - It would be nice to split these into separate classes.
+	 */
+	protected Verdict applyRuleLogic(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, Set<AuthorizationFlagsEnum> theFlags, FhirContext theFhirContext, RuleTarget theRuleTarget, IRuleApplier theRuleApplier) {
 		switch (myClassifierType) {
 			case ANY_ID:
 				break;
 			case IN_COMPARTMENT:
-				return applyRuleToCompartment(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theFlags, ctx, target);
+				return applyRuleToCompartment(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theFlags, theFhirContext, theRuleTarget);
 			default:
-				throw new IllegalStateException("Unable to apply security to event of applies to type " + myAppliesTo);
+				throw new IllegalStateException(Msg.code(337) + "Unable to apply security to event of applies to type " + myAppliesTo);
 		}
 
 		return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
@@ -337,7 +351,12 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 
 		for (IIdType next : myClassifierCompartmentOwners) {
 			if (target.resource != null) {
-				if (t.isSourceInCompartmentForTarget(myClassifierCompartmentName, target.resource, next)) {
+
+				Set<String> additionalSearchParamNames = null;
+				if (myAdditionalCompartmentSearchParamMap != null) {
+					additionalSearchParamNames = myAdditionalCompartmentSearchParamMap.getSearchParamNamesForResourceType(ctx.getResourceType(target.resource));
+				}
+				if (t.isSourceInCompartmentForTarget(myClassifierCompartmentName, target.resource, next, additionalSearchParamNames)) {
 					foundMatch = true;
 					break;
 				}
@@ -371,7 +390,17 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				RuntimeResourceDefinition sourceDef = theRequestDetails.getFhirContext().getResourceDefinition(target.resourceType);
 				String compartmentOwnerResourceType = next.getResourceType();
 				if (!StringUtils.equals(target.resourceType, compartmentOwnerResourceType)) {
+
 					List<RuntimeSearchParam> params = sourceDef.getSearchParamsForCompartmentName(compartmentOwnerResourceType);
+
+					Set<String> additionalParamNames = myAdditionalCompartmentSearchParamMap.getSearchParamNamesForResourceType(sourceDef.getName());
+					List<RuntimeSearchParam> additionalParams = additionalParamNames.stream().map(sourceDef::getSearchParam).filter(Objects::nonNull).collect(Collectors.toList());
+					if (params == null || params.isEmpty()) {
+						params = additionalParams;
+					} else {
+						params.addAll(additionalParams);
+					}
+
 					if (!params.isEmpty()) {
 
 						/*
@@ -380,7 +409,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 						 * would match the given compartment. In this case, this
 						 * is a very effective mechanism.
 						 */
-						if (target.getSearchParams() != null && !theFlags.contains(AuthorizationFlagsEnum.NO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS)) {
+						if (target.getSearchParams() != null && !theFlags.contains(AuthorizationFlagsEnum.DO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS)) {
 							for (RuntimeSearchParam nextRuntimeSearchParam : params) {
 								String name = nextRuntimeSearchParam.getName();
 								Verdict verdict = checkForSearchParameterMatchingCompartmentAndReturnSuccessfulVerdictOrNull(target.getSearchParams(), next, name, theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
@@ -475,7 +504,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 					operation = RestOperationTypeEnum.PATCH;
 				} else {
 
-					throw new InvalidRequestException("Can not handle transaction with operation of type " + nextPart.getRequestType());
+					throw new InvalidRequestException(Msg.code(338) + "Can not handle transaction with operation of type " + nextPart.getRequestType());
 				}
 
 				/*
@@ -486,7 +515,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				if (nextPart.getResource() != null) {
 					RuntimeResourceDefinition resourceDef = ctx.getResourceDefinition(nextPart.getResource());
 					if ("Parameters".equals(resourceDef.getName()) || "Bundle".equals(resourceDef.getName())) {
-						throw new InvalidRequestException("Can not handle transaction with nested resource of type " + resourceDef.getName());
+						throw new InvalidRequestException(Msg.code(339) + "Can not handle transaction with nested resource of type " + resourceDef.getName());
 					}
 				}
 
@@ -603,7 +632,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				return true;
 			} else {
 				String msg = theContext.getLocalizer().getMessage(RuleImplOp.class, "invalidRequestBundleTypeForTransaction", '"' + bundleType + '"');
-				throw new UnprocessableEntityException(msg);
+				throw new UnprocessableEntityException(Msg.code(340) + msg);
 			}
 		}
 		return false;
@@ -681,4 +710,9 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				return false;
 		}
 	}
+
+	public void setAdditionalSearchParamsForCompartmentTypes(AdditionalCompartmentSearchParameters theAdditionalParameters) {
+		myAdditionalCompartmentSearchParamMap = theAdditionalParameters;
+	}
+
 }

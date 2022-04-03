@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2975
+title: "Two improvements have been made to the connection to Elasticsearch. First, null username and password values are now permitted. Second, multiple hosts are now permitted via the `setHosts()` method on the ElasticHibernatePropertiesBuilder, allowing you to
+ connect to multiple elasticsearch clusters at once. Thanks to Dušan Marković for the contribution!"

@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.term.loinc;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
@@ -43,8 +44,10 @@ public class LoincDocumentOntologyHandler extends BaseLoincHandler implements IZ
 	public static final String DOCUMENT_ONTOLOGY_CODES_VS_NAME = "LOINC Document Ontology Codes";
 	private final Map<String, TermConcept> myCode2Concept;
 
-	public LoincDocumentOntologyHandler(Map<String, TermConcept> theCode2concept, Map<String, CodeSystem.PropertyType> thePropertyNames, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps, Properties theUploadProperties) {
-		super(theCode2concept, theValueSets, theConceptMaps, theUploadProperties);
+	public LoincDocumentOntologyHandler(Map<String, TermConcept> theCode2concept, Map<String,
+			CodeSystem.PropertyType> thePropertyNames, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps,
+			Properties theUploadProperties, String theCopyrightStatement) {
+		super(theCode2concept, theValueSets, theConceptMaps, theUploadProperties, theCopyrightStatement);
 		myCode2Concept = theCode2concept;
 	}
 
@@ -87,7 +90,7 @@ public class LoincDocumentOntologyHandler extends BaseLoincHandler implements IZ
 				loincCodePropName = "document-type-of-service";
 				break;
 			default:
-				throw new InternalErrorException("Unknown PartTypeName: " + partTypeName);
+				throw new InternalErrorException(Msg.code(917) + "Unknown PartTypeName: " + partTypeName);
 		}
 
 		TermConcept code = myCode2Concept.get(loincNumber);

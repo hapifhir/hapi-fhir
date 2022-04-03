@@ -4,8 +4,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.api.server.storage.IReindexJobSubmitter;
 import ca.uhn.fhir.rest.server.BaseR4ServerTest;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.hapi.rest.server.helper.BatchHelperR4;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,8 +25,6 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class BatchProviderTest extends BaseR4ServerTest {
 	public static final long TEST_JOB_ID = 123L;
@@ -69,95 +66,13 @@ public class BatchProviderTest extends BaseR4ServerTest {
 			.execute();
 
 		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
-		DecimalType jobId = (DecimalType) response.getParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_RESPONSE_JOB_ID);
-		assertEquals(TEST_JOB_ID, jobId.getValue().longValue());
+		assertEquals(TEST_JOB_ID, BatchHelperR4.jobIdFromParameters(response));
 		assertThat(myDeleteExpungeJobSubmitter.calledWithUrls, hasSize(2));
 		assertEquals(url1, myDeleteExpungeJobSubmitter.calledWithUrls.get(0));
 		assertEquals(url2, myDeleteExpungeJobSubmitter.calledWithUrls.get(1));
 		assertEquals(batchSize, myDeleteExpungeJobSubmitter.calledWithBatchSize);
 		assertNotNull(myDeleteExpungeJobSubmitter.calledWithRequestDetails);
 		assertFalse(myDeleteExpungeJobSubmitter.everything);
-	}
-
-	@Test
-	public void testReindex() throws Exception {
-		// setup
-		Parameters input = new Parameters();
-		String url1 = "Observation?status=active";
-		String url2 = "Patient?active=false";
-		Integer batchSize = 2401;
-		input.addParameter(ProviderConstants.OPERATION_REINDEX_PARAM_URL, url1);
-		input.addParameter(ProviderConstants.OPERATION_REINDEX_PARAM_URL, url2);
-		input.addParameter(ProviderConstants.OPERATION_REINDEX_PARAM_BATCH_SIZE, new DecimalType(batchSize));
-
-		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
-
-		ReindexProvider provider = new ReindexProvider(myCtx, myReindexJobSubmitter);
-		startServer(provider);
-
-		Parameters response = myClient
-			.operation()
-			.onServer()
-			.named(ProviderConstants.OPERATION_REINDEX)
-			.withParameters(input)
-			.execute();
-
-		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
-		DecimalType jobId = (DecimalType) response.getParameter(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
-		assertEquals(TEST_JOB_ID, jobId.getValue().longValue());
-		assertThat(myReindexJobSubmitter.calledWithUrls, hasSize(2));
-		assertEquals(url1, myReindexJobSubmitter.calledWithUrls.get(0));
-		assertEquals(url2, myReindexJobSubmitter.calledWithUrls.get(1));
-		assertEquals(batchSize, myReindexJobSubmitter.calledWithBatchSize);
-		assertNotNull(myReindexJobSubmitter.calledWithRequestDetails);
-		assertFalse(myReindexJobSubmitter.everything);
-
-		// bad params
-		input = new Parameters();
-		batchSize = 2401;
-		input.addParameter(ProviderConstants.OPERATION_REINDEX_PARAM_BATCH_SIZE, new DecimalType(batchSize));
-
-		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
-		try {
-			response = myClient
-				.operation()
-				.onServer()
-				.named(ProviderConstants.OPERATION_REINDEX)
-				.withParameters(input)
-				.execute();
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: $reindex must specify either everything=true or provide at least one value for url", e.getMessage());
-		}
-	}
-
-	@Test
-	public void testReindexEverything() throws Exception {
-		// setup
-		Parameters input = new Parameters();
-		Integer batchSize = 2401;
-		input.addParameter(ProviderConstants.OPERATION_REINDEX_PARAM_BATCH_SIZE, new DecimalType(batchSize));
-		input.addParameter(ProviderConstants.OPERATION_REINDEX_PARAM_EVERYTHING, new BooleanType(true));
-
-		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
-
-		ReindexProvider provider = new ReindexProvider(myCtx, myReindexJobSubmitter);
-		startServer(provider);
-
-		Parameters response = myClient
-			.operation()
-			.onServer()
-			.named(ProviderConstants.OPERATION_REINDEX)
-			.withParameters(input)
-			.execute();
-
-		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
-		DecimalType jobId = (DecimalType) response.getParameter(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
-		assertEquals(TEST_JOB_ID, jobId.getValue().longValue());
-		assertThat(myReindexJobSubmitter.calledWithUrls, hasSize(0));
-		assertEquals(batchSize, myReindexJobSubmitter.calledWithBatchSize);
-		assertNotNull(myReindexJobSubmitter.calledWithRequestDetails);
-		assertTrue(myReindexJobSubmitter.everything);
 	}
 
 	private class MyMultiUrlJobSubmitter implements IReindexJobSubmitter, IDeleteExpungeJobSubmitter {

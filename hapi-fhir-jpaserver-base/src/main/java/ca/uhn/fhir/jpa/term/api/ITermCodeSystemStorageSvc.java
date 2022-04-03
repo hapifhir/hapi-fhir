@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.term.api;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -40,12 +39,16 @@ import java.util.List;
  */
 public interface ITermCodeSystemStorageSvc {
 
-	static final String MAKE_LOADING_VERSION_CURRENT = "make.loading.version.current";
+	String MAKE_LOADING_VERSION_CURRENT = "make.loading.version.current";
 
-	void deleteCodeSystem(TermCodeSystem theCodeSystem);
 
-	void deleteCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion);
-
+	/**
+	 * Defaults to true when parameter is null or entry is not present in requestDetails.myUserData
+	 */
+	static boolean isMakeVersionCurrent(RequestDetails theRequestDetails) {
+		return theRequestDetails == null ||
+			(boolean) theRequestDetails.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE);
+	}
 
 	void storeNewCodeSystemVersion(ResourcePersistentId theCodeSystemResourcePid, String theSystemUri, String theSystemName,
 		String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion, ResourceTable theCodeSystemResourceTable,
@@ -89,5 +92,4 @@ public interface ITermCodeSystemStorageSvc {
 
 	int saveConcept(TermConcept theNextConcept);
 
-	ResourcePersistentId getValueSetResourcePid(IIdType theIdElement);
 }

@@ -1,14 +1,25 @@
 package ca.uhn.fhir.narrative;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.util.TestUtil;
 import org.hamcrest.core.StringContains;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.DiagnosticReport.DiagnosticReportStatus;
+import org.hl7.fhir.r4.model.Medication;
+import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.MedicationRequest.MedicationRequestStatus;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
+import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.SimpleQuantity;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DefaultThymeleafNarrativeGeneratorR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DefaultThymeleafNarrativeGeneratorR4Test.class);
-	private final FhirContext myCtx = FhirContext.forCached(FhirVersionEnum.R4);
+	private final FhirContext myCtx = FhirContext.forR4Cached();
 	private DefaultThymeleafNarrativeGenerator myGen;
 
 	@BeforeEach
@@ -115,7 +126,7 @@ public class DefaultThymeleafNarrativeGeneratorR4Test {
 			Observation obs = new Observation();
 			obs.getCode().addCoding().setCode("1938HB").setDisplay("Hemoglobin");
 			obs.setValue(new Quantity(null, 2.223, null, null, "mg/L"));
-			obs.addReferenceRange().setLow((SimpleQuantity) new SimpleQuantity().setValue(2.20)).setHigh((SimpleQuantity) new SimpleQuantity().setValue(2.99));
+			obs.addReferenceRange().setLow(new SimpleQuantity().setValue(2.20)).setHigh(new SimpleQuantity().setValue(2.99));
 			obs.setStatus(ObservationStatus.FINAL);
 			obs.addNote().setText("This is a result comment");
 
@@ -239,7 +250,7 @@ public class DefaultThymeleafNarrativeGeneratorR4Test {
 
 	@AfterAll
 	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 }

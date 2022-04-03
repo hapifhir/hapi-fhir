@@ -20,10 +20,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * #L%
  */
 
-import ca.uhn.fhir.mdm.api.IMdmChannelSubmitterSvc;
-import ca.uhn.fhir.mdm.api.IMdmSettings;
-import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
-import ca.uhn.fhir.mdm.log.Logs;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -31,6 +28,10 @@ import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.mdm.api.IMdmChannelSubmitterSvc;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
+import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -69,6 +70,9 @@ public class MdmSubmitSvcImpl implements IMdmSubmitSvc {
 
 	private int myBufferSize = DEFAULT_BUFFER_SIZE;
 
+	public MdmSubmitSvcImpl() {
+	}
+
 	@Override
 	@Transactional
 	public long submitAllSourceTypesToMdm(@Nullable String theCriteria) {
@@ -106,7 +110,7 @@ public class MdmSubmitSvcImpl implements IMdmSubmitSvc {
 				total += loadPidsAndSubmitToMdmChannel(theSearchBuilder, pidBatch);
 			} while (query.hasNext());
 		} catch (IOException theE) {
-			throw new InternalErrorException("Failure while attempting to query resources for " + ProviderConstants.OPERATION_MDM_SUBMIT, theE);
+			throw new InternalErrorException(Msg.code(749) + "Failure while attempting to query resources for " + ProviderConstants.OPERATION_MDM_SUBMIT, theE);
 		}
 		ourLog.info("MDM Submit complete.  Submitted a total of {} resources.", total);
 		return total;
@@ -159,7 +163,7 @@ public class MdmSubmitSvcImpl implements IMdmSubmitSvc {
 
 	private void validateSourceType(String theResourceType) {
 		if(!myMdmSettings.getMdmRules().getMdmTypes().contains(theResourceType)) {
-			throw new InvalidRequestException(ProviderConstants.OPERATION_MDM_SUBMIT + " does not support resource type: " + theResourceType);
+			throw new InvalidRequestException(Msg.code(750) + ProviderConstants.OPERATION_MDM_SUBMIT + " does not support resource type: " + theResourceType);
 		}
 	}
 

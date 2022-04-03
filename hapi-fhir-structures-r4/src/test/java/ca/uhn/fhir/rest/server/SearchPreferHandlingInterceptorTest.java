@@ -1,7 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
@@ -39,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class SearchPreferHandlingInterceptorTest {
 
-	private final FhirContext myCtx = FhirContext.forCached(FhirVersionEnum.R4);
+	private final FhirContext myCtx = FhirContext.forR4Cached();
 	@RegisterExtension
 	public RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(myCtx)
 		.registerProvider(new DummyPatientResourceProvider())

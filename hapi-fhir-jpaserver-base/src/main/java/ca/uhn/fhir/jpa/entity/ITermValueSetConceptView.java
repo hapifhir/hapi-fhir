@@ -27,6 +27,8 @@ public interface ITermValueSetConceptView {
 
 	String getConceptDisplay();
 
+	String getConceptSystemVersion();
+
 	Long getSourceConceptPid();
 
 	String getSourceConceptDirectParentPids();

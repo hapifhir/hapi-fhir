@@ -20,6 +20,7 @@ package ca.uhn.hapi.fhir.docs;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
@@ -55,6 +56,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
 
+import javax.annotation.Nonnull;
 import javax.servlet.ServletException;
 import java.io.File;
 import java.io.FileReader;
@@ -293,13 +295,13 @@ public class ValidatorExamples {
 			}
 
 			@Override
-			public CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+			public CodeValidationResult validateCode(@Nonnull ValidationSupportContext theValidationSupportContext, @Nonnull ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 				// TODO: implement (or return null if your implementation does not support this function)
 				return null;
 			}
 
 			@Override
-			public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
+			public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode, String theDisplayLanguage) {
 				// TODO: implement (or return null if your implementation does not support this function)
 				return null;
 			}
@@ -432,7 +434,7 @@ public class ValidatorExamples {
          // validation failure
          ValidationResult result = validator.validateWithResult(resource);
          if (result.isSuccessful() == false) {
-            throw new Exception("We failed!");
+            throw new Exception(Msg.code(640) + "We failed!");
          }
          
       }

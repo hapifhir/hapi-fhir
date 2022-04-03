@@ -33,6 +33,7 @@ public enum LoincUploadPropertiesEnum {
 	 */
 
 	LOINC_UPLOAD_PROPERTIES_FILE("loincupload.properties"),
+	LOINC_XML_FILE("loinc.xml"),
 
 	/*
 	 * MANDATORY
@@ -123,7 +124,7 @@ public enum LoincUploadPropertiesEnum {
 	// Consumer Name
 	LOINC_CONSUMER_NAME_FILE("loinc.consumer.name.file"),
 	LOINC_CONSUMER_NAME_FILE_DEFAULT("AccessoryFiles/ConsumerName/ConsumerName.csv"),
-	
+
 	// Linguistic Variants
 	LOINC_LINGUISTIC_VARIANTS_FILE("loinc.linguistic.variants.file"),
 	LOINC_LINGUISTIC_VARIANTS_FILE_DEFAULT("AccessoryFiles/LinguisticVariants/LinguisticVariants.csv"),

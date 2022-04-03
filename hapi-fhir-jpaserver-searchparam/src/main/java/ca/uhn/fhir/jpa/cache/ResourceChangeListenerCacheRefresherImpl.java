@@ -173,8 +173,8 @@ public class ResourceChangeListenerCacheRefresherImpl implements IResourceChange
 		List<IIdType> updatedIds = new ArrayList<>();
 
 		for (IIdType id : theNewResourceVersionMap.keySet()) {
-			String previousValue = theOldResourceVersionCache.put(id, theNewResourceVersionMap.get(id));
-			IIdType newId = id.withVersion(theNewResourceVersionMap.get(id));
+			Long previousValue = theOldResourceVersionCache.put(id, theNewResourceVersionMap.get(id));
+			IIdType newId = id.withVersion(theNewResourceVersionMap.get(id).toString());
 			if (previousValue == null) {
 				createdIds.add(newId);
 			} else if (!theNewResourceVersionMap.get(id).equals(previousValue)) {

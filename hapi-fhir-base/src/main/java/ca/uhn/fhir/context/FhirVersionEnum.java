@@ -20,6 +20,7 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
@@ -46,6 +47,8 @@ public enum FhirVersionEnum {
 
 	R5("org.hl7.fhir.r5.hapi.ctx.FhirR5", null, true, new R5Version());
 
+	// If you add new constants, add to the various methods below too!
+
 	private final FhirVersionEnum myEquivalent;
 	private final boolean myIsRi;
 	private final String myVersionClass;
@@ -66,13 +69,13 @@ public enum FhirVersionEnum {
 
 	public IFhirVersion getVersionImplementation() {
 		if (!isPresentOnClasspath()) {
-			throw new IllegalStateException("Version " + name() + " is not present on classpath");
+			throw new IllegalStateException(Msg.code(1709) + "Version " + name() + " is not present on classpath");
 		}
 		if (myVersionImplementation == null) {
 			try {
 				myVersionImplementation = (IFhirVersion) Class.forName(myVersionClass).newInstance();
 			} catch (Exception e) {
-				throw new InternalErrorException("Failed to instantiate FHIR version " + name(), e);
+				throw new InternalErrorException(Msg.code(1710) + "Failed to instantiate FHIR version " + name(), e);
 			}
 		}
 		return myVersionImplementation;
@@ -139,11 +142,34 @@ public enum FhirVersionEnum {
 			case R5:
 				return FhirContext.forR5();
 		}
-		throw new IllegalStateException("Unknown version: " + this); // should not happen
+		throw new IllegalStateException(Msg.code(1711) + "Unknown version: " + this); // should not happen
 	}
 
 	private interface IVersionProvider {
 		String provideVersion();
+	}
+
+	/**
+	 * Given a FHIR model object type, determine which version of FHIR it is for
+	 */
+	public static FhirVersionEnum determineVersionForType(Class<?> theFhirType) {
+		switch (theFhirType.getName()) {
+			case "ca.uhn.fhir.model.api.BaseElement":
+				return DSTU2;
+			case "org.hl7.fhir.dstu2.model.Base":
+				return DSTU2_HL7ORG;
+			case "org.hl7.fhir.dstu3.model.Base":
+				return DSTU3;
+			case "org.hl7.fhir.r4.model.Base":
+				return R4;
+			case "org.hl7.fhir.r5.model.Base":
+				return R5;
+			case "java.lang.Object":
+				return null;
+			default:
+				return determineVersionForType(theFhirType.getSuperclass());
+		}
+
 	}
 
 	private static class Version implements IVersionProvider {

@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.search.warm;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -100,7 +101,7 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 	private String parseWarmUrlParamPart(String theNextUrl) {
 		int paramIndex = theNextUrl.indexOf('?');
 		if (paramIndex == -1) {
-			throw new ConfigurationException("Invalid warm cache URL (must have ? character)");
+			throw new ConfigurationException(Msg.code(1172) + "Invalid warm cache URL (must have ? character)");
 		}
 		return theNextUrl.substring(paramIndex);
 	}

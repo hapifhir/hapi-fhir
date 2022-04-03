@@ -20,27 +20,48 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
+import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
 import ca.uhn.fhir.jpa.model.search.ResourceTableRoutingBinder;
+import ca.uhn.fhir.jpa.model.search.SearchParamTextPropertyBinder;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.OptimisticLock;
 import org.hibernate.search.engine.backend.types.Projectable;
 import org.hibernate.search.engine.backend.types.Searchable;
+import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.PropertyBinderRef;
 import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.RoutingBinderRef;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexingDependency;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.ObjectPath;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyBinding;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyValue;
+import org.hl7.fhir.instance.model.api.IIdType;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.NamedEntityGraph;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+import javax.persistence.Version;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -49,15 +70,12 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-
 @Indexed(routingBinder= @RoutingBinderRef(type = ResourceTableRoutingBinder.class))
 @Entity
 @Table(name = "HFJ_RESOURCE", uniqueConstraints = {}, indexes = {
+	// Do not reuse previously used index name: IDX_INDEXSTATUS
 	@Index(name = "IDX_RES_DATE", columnList = "RES_UPDATED"),
-	@Index(name = "IDX_RES_LANG", columnList = "RES_TYPE,RES_LANGUAGE"),
 	@Index(name = "IDX_RES_TYPE", columnList = "RES_TYPE"),
-	@Index(name = "IDX_INDEXSTATUS", columnList = "SP_INDEX_STATUS")
 })
 @NamedEntityGraph(name = "Resource.noJoins")
 public class ResourceTable extends BaseHasResource implements Serializable, IBasePersistedResource, IResourceLookup {
@@ -100,6 +118,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@OptimisticLock(excluded = true)
 	private Long myIndexStatus;
 
+	// TODO: Removed in 5.5.0. Drop in a future release.
 	@Column(name = "RES_LANGUAGE", length = MAX_LANGUAGE_LENGTH, nullable = true)
 	@OptimisticLock(excluded = true)
 	private String myLanguage;
@@ -115,6 +134,11 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@OptimisticLock(excluded = true)
 	@IndexingDependency(derivedFrom = @ObjectPath(@PropertyValue(propertyName = "myVersion")))
 	private String myNarrativeText;
+
+	@Transient
+	@IndexingDependency(derivedFrom = @ObjectPath(@PropertyValue(propertyName = "myVersion")))
+	@PropertyBinding(binder = @PropertyBinderRef(type = SearchParamTextPropertyBinder.class))
+	private ExtendedLuceneIndexData myLuceneIndexData;
 
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	@OptimisticLock(excluded = true)
@@ -240,7 +264,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	@OneToMany(mappedBy = "myResource", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	@OptimisticLock(excluded = true)
-	private Collection<SearchParamPresent> mySearchParamPresents;
+	private Collection<SearchParamPresentEntity> mySearchParamPresents;
 
 	@OneToMany(mappedBy = "myResource", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	@OptimisticLock(excluded = true)
@@ -260,6 +284,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	private transient ResourceHistoryTable myCurrentVersionEntity;
 
 	@OneToOne(optional = true, fetch = FetchType.EAGER, cascade = {}, orphanRemoval = false, mappedBy = "myResource")
+	@OptimisticLock(excluded = true)
 	private ForcedId myForcedId;
 
 	@Transient
@@ -308,17 +333,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	public void setIndexStatus(Long theIndexStatus) {
 		myIndexStatus = theIndexStatus;
-	}
-
-	public String getLanguage() {
-		return myLanguage;
-	}
-
-	public void setLanguage(String theLanguage) {
-		if (defaultString(theLanguage).length() > MAX_LANGUAGE_LENGTH) {
-			throw new UnprocessableEntityException("Language exceeds maximum length of " + MAX_LANGUAGE_LENGTH + " chars: " + theLanguage);
-		}
-		myLanguage = theLanguage;
 	}
 
 	public Collection<ResourceIndexedComboStringUnique> getParamsComboStringUnique() {
@@ -639,8 +653,8 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		retVal.setVersion(myVersion);
 		retVal.setTransientForcedId(getTransientForcedId());
 
-		retVal.setPublished(getPublished());
-		retVal.setUpdated(getUpdated());
+		retVal.setPublished(getPublishedDate());
+		retVal.setUpdated(getUpdatedDate());
 		retVal.setFhirVersion(getFhirVersion());
 		retVal.setDeleted(getDeleted());
 		retVal.setResourceTable(this);
@@ -664,6 +678,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
 		b.append("pid", myId);
 		b.append("resourceType", myResourceType);
+		b.append("version", myVersion);
 		if (getPartitionId() != null) {
 			b.append("partitionId", getPartitionId().getPartitionId());
 		}
@@ -720,17 +735,32 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		myForcedId = theForcedId;
 	}
 
+
+
 	@Override
 	public IdDt getIdDt() {
+		IdDt retVal = new IdDt();
+		populateId(retVal);
+		return retVal;
+	}
+
+
+	public IIdType getIdType(FhirContext theContext) {
+		IIdType retVal = theContext.getVersion().newIdType();
+		populateId(retVal);
+		return retVal;
+	}
+
+	private void populateId(IIdType retVal) {
 		if (getTransientForcedId() != null) {
 			// Avoid a join query if possible
-			return new IdDt(getResourceType() + '/' + getTransientForcedId() + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+			retVal.setValue(getResourceType() + '/' + getTransientForcedId() + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
 		} else if (getForcedId() == null) {
 			Long id = this.getResourceId();
-			return new IdDt(getResourceType() + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+			retVal.setValue(getResourceType() + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
 		} else {
 			String forcedId = getForcedId().getForcedId();
-			return new IdDt(getResourceType() + '/' + forcedId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+			retVal.setValue(getResourceType() + '/' + forcedId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
 		}
 	}
 
@@ -740,5 +770,16 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	public String getCreatedByMatchUrl() {
 		return myCreatedByMatchUrl;
+	}
+
+	public void setLuceneIndexData(ExtendedLuceneIndexData theLuceneIndexData) {
+		myLuceneIndexData = theLuceneIndexData;
+	}
+
+	public Collection<SearchParamPresentEntity> getSearchParamPresents() {
+		if (mySearchParamPresents == null) {
+			mySearchParamPresents = new ArrayList<>();
+		}
+		return mySearchParamPresents;
 	}
 }

@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.searchparam;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
@@ -93,7 +94,7 @@ public class MatchUrlService {
 			if (Constants.PARAM_LASTUPDATED.equals(nextParamName)) {
 				if (paramList != null && paramList.size() > 0) {
 					if (paramList.size() > 2) {
-						throw new InvalidRequestException("Failed to parse match URL[" + theMatchUrl + "] - Can not have more than 2 " + Constants.PARAM_LASTUPDATED + " parameter repetitions");
+						throw new InvalidRequestException(Msg.code(484) + "Failed to parse match URL[" + theMatchUrl + "] - Can not have more than 2 " + Constants.PARAM_LASTUPDATED + " parameter repetitions");
 					} else {
 						DateRangeParam p1 = new DateRangeParam();
 						p1.setValuesAsQueryTokens(myFhirContext, nextParamName, paramList);
@@ -109,7 +110,7 @@ public class MatchUrlService {
 					try {
 						paramMap.setCount(Integer.parseInt(intString));
 					} catch (NumberFormatException e) {
-						throw new InvalidRequestException("Invalid " + Constants.PARAM_COUNT + " value: " + intString);
+						throw new InvalidRequestException(Msg.code(485) + "Invalid " + Constants.PARAM_COUNT + " value: " + intString);
 					}
 				}
 			} else if (Constants.PARAM_OFFSET.equals(nextParamName)) {
@@ -118,12 +119,12 @@ public class MatchUrlService {
 					try {
 						paramMap.setOffset(Integer.parseInt(intString));
 					} catch (NumberFormatException e) {
-						throw new InvalidRequestException("Invalid " + Constants.PARAM_OFFSET + " value: " + intString);
+						throw new InvalidRequestException(Msg.code(486) + "Invalid " + Constants.PARAM_OFFSET + " value: " + intString);
 					}
 				}
 			} else if (ResourceMetaParams.RESOURCE_META_PARAMS.containsKey(nextParamName)) {
 				if (isNotBlank(paramList.get(0).getQualifier()) && paramList.get(0).getQualifier().startsWith(".")) {
-					throw new InvalidRequestException("Invalid parameter chain: " + nextParamName + paramList.get(0).getQualifier());
+					throw new InvalidRequestException(Msg.code(487) + "Invalid parameter chain: " + nextParamName + paramList.get(0).getQualifier());
 				}
 				IQueryParameterAnd<?> type = newInstanceAnd(nextParamName);
 				type.setValuesAsQueryTokens(myFhirContext, nextParamName, (paramList));
@@ -141,8 +142,7 @@ public class MatchUrlService {
 			} else {
 				RuntimeSearchParam paramDef = mySearchParamRegistry.getActiveSearchParam(theResourceDefinition.getName(), nextParamName);
 				if (paramDef == null) {
-					throw new InvalidRequestException(
-						"Failed to parse match URL[" + theMatchUrl + "] - Resource type " + theResourceDefinition.getName() + " does not have a parameter with name: " + nextParamName);
+					throw new InvalidRequestException(Msg.code(488) + "Failed to parse match URL[" + theMatchUrl + "] - Resource type " + theResourceDefinition.getName() + " does not have a parameter with name: " + nextParamName);
 				}
 
 				IQueryParameterAnd<?> param = JpaParamUtil.parseQueryParams(mySearchParamRegistry, myFhirContext, paramDef, nextParamName, paramList);
@@ -203,7 +203,7 @@ public class MatchUrlService {
 				} else if (Constants.PARAM_REVINCLUDE.equals(theParamName)) {
 					for (QualifiedParamList nextQualifiedList : theValues) {
 						for (String nextValue : nextQualifiedList) {
-							theMapToPopulate.addInclude(new Include(nextValue, ParameterUtil.isIncludeIterate(nextQualifiedList.getQualifier())));
+							theMapToPopulate.addRevInclude(new Include(nextValue, ParameterUtil.isIncludeIterate(nextQualifiedList.getQualifier())));
 						}
 					}
 				}

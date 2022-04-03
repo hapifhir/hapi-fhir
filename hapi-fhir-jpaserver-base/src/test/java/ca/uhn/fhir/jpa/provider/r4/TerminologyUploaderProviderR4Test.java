@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -51,6 +52,7 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_TOP2000
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_XML_FILE;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -107,7 +109,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			.andParameter(TerminologyUploaderProvider.PARAM_FILE, new Attachment().setUrl("icd10cm_tabular_2021.xml").setData(packageBytes))
 			.execute();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertThat(((IntegerType) respParam.getParameter().get(1).getValue()).getValue(), greaterThan(1));
@@ -126,7 +128,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			.andParameter(TerminologyUploaderProvider.PARAM_FILE, new Attachment().setUrl("file.zip").setData(packageBytes))
 			.execute();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertThat(((IntegerType) respParam.getParameter().get(1).getValue()).getValue(), greaterThan(1));
@@ -144,7 +146,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			.andParameter(TerminologyUploaderProvider.PARAM_FILE, new Attachment().setUrl("file.zip").setData(packageBytes))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 	}
@@ -160,7 +162,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: No 'file' parameter, or package had no data", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1138) + "No 'file' parameter, or package had no data", e.getMessage());
 		}
 	}
 
@@ -194,7 +196,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			.andParameter(TerminologyUploaderProvider.PARAM_FILE, new Attachment().setUrl("file.zip").setData(packageBytes))
 			.execute();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertThat(((IntegerType) respParam.getParameter().get(1).getValue()).getValue(), greaterThan(1));
@@ -218,7 +220,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			.andParameter(TerminologyUploaderProvider.PARAM_FILE, new Attachment().setUrl("localfile:" + tempFile.getAbsolutePath()))
 			.execute();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertThat(((IntegerType) respParam.getParameter().get(1).getValue()).getValue(), greaterThan(1));
@@ -250,7 +252,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			.execute();
 		myClient.unregisterInterceptor(interceptor);
 
-		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
 		assertThat(encoded, stringContainsInOrder(
 			"\"name\": \"conceptCount\"",
@@ -291,7 +293,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			.execute();
 		myClient.unregisterInterceptor(interceptor);
 
-		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
 		assertThat(encoded, stringContainsInOrder(
 			"\"name\": \"conceptCount\"",
@@ -338,7 +340,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			.execute();
 		myClient.unregisterInterceptor(interceptor);
 
-		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
 		assertThat(encoded, stringContainsInOrder(
 			"\"name\": \"conceptCount\"",
@@ -378,7 +380,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			.execute();
 		myClient.unregisterInterceptor(interceptor);
 
-		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
 		assertThat(encoded, stringContainsInOrder(
 			"\"name\": \"conceptCount\"",
@@ -448,7 +450,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			myClient.unregisterInterceptor(interceptor);
 		}
 
-		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
 		assertThat(encoded, stringContainsInOrder(
 			"\"name\": \"conceptCount\"",
@@ -518,7 +520,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			myClient.unregisterInterceptor(interceptor);
 		}
 
-		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
 		assertThat(encoded, stringContainsInOrder(
 			"\"name\": \"conceptCount\"",
@@ -619,7 +621,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			.execute();
 		myClient.unregisterInterceptor(interceptor);
 
-		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
 		assertThat(encoded, containsString("\"valueInteger\": 5"));
 	}
@@ -634,6 +636,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		ZipOutputStream zos = new ZipOutputStream(bos);
 
+		addFile(zos, LOINC_XML_FILE.getCode());
 		addFile(zos, LOINC_UPLOAD_PROPERTIES_FILE.getCode());
 		addFile(zos, LOINC_PART_FILE_DEFAULT.getCode());
 		addFile(zos, LOINC_FILE_DEFAULT.getCode());

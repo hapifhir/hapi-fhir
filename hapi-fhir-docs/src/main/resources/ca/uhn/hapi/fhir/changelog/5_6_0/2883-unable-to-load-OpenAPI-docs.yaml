@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2883
+jira: SMILE-1107
+title: "Open API docs failed to load if a custom context path is set. This has been corrected."

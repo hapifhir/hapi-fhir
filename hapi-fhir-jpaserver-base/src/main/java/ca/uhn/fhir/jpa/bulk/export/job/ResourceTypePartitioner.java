@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.bulk.export.job;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.bulk.export.svc.BulkExportDaoSvc;
 import org.slf4j.Logger;
 import org.springframework.batch.core.partition.support.Partitioner;
@@ -36,7 +37,7 @@ public class ResourceTypePartitioner implements Partitioner {
 	private static final Logger ourLog = getLogger(ResourceTypePartitioner.class);
 
 
-	@Value("#{jobExecutionContext['jobUUID']}")
+	@Value("#{jobExecutionContext['" + BatchConstants.JOB_UUID_PARAMETER+ "']}")
 	private String myJobUUID;
 
 	@Autowired
@@ -56,12 +57,12 @@ public class ResourceTypePartitioner implements Partitioner {
 
 				ExecutionContext context = new ExecutionContext();
 				//The worker step needs to know what resource type it is looking for.
-				context.putString("resourceType", resourceType);
+				context.putString(BatchConstants.JOB_EXECUTION_RESOURCE_TYPE, resourceType);
 
 				// The worker step needs to know which parent job it is processing for, and which collection entity it will be
 				// attaching its results to.
-				context.putString(BulkExportJobConfig.JOB_UUID_PARAMETER, myJobUUID);
-				context.putLong("bulkExportCollectionEntityId", collectionEntityId);
+				context.putString(BatchConstants.JOB_UUID_PARAMETER, myJobUUID);
+				context.putLong(BatchConstants.JOB_COLLECTION_ENTITY_ID, collectionEntityId);
 
 				// Name the partition based on the resource type
 				partitionContextMap.put(resourceType, context);

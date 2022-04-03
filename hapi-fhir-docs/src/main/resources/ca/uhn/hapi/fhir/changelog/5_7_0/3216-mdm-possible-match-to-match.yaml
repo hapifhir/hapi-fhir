@@ -1,0 +1,4 @@
+---
+type: fix
+backport: 5.6.1
+title: "MDM was throwing a NullPointerException when upgrading a match from POSSIBLE_MATCH to MATCH.  This has been corrected."

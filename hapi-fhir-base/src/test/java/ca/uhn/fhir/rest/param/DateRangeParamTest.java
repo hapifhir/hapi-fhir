@@ -10,6 +10,7 @@ import org.mockito.Mockito;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -25,7 +26,7 @@ public class DateRangeParamTest {
 	 * Can happen e.g. when the query parameter for {@code _lastUpdated} is left empty.
 	 */
 	@Test
-	public void testParamWithoutPrefixAndWithoutValue() {
+	public void testParamWithoutPrefixAndWithoutValue_dateRangeParamRemainsEmpty() {
 		QualifiedParamList qualifiedParamList = new QualifiedParamList(1);
 		qualifiedParamList.add("");
 
@@ -41,7 +42,7 @@ public class DateRangeParamTest {
 	 * Can happen e.g. when the query parameter for {@code _lastUpdated} is given as {@code lt} without any value.
 	 */
 	@Test
-	public void testUpperBoundWithPrefixWithoutValue() {
+	public void testUpperBoundWithPrefixWithoutValue_throwsDateFormatException() {
 		QualifiedParamList qualifiedParamList = new QualifiedParamList(1);
 		qualifiedParamList.add("lt");
 
@@ -60,7 +61,7 @@ public class DateRangeParamTest {
 	 * Can happen e.g. when the query parameter for {@code _lastUpdated} is given as {@code gt} without any value.
 	 */
 	@Test
-	public void testLowerBoundWithPrefixWithoutValue() {
+	public void testLowerBoundWithPrefixWithoutValue_throwsDateFormatException() {
 		QualifiedParamList qualifiedParamList = new QualifiedParamList(1);
 		qualifiedParamList.add("gt");
 
@@ -73,5 +74,53 @@ public class DateRangeParamTest {
 		} catch (DataFormatException e) {
 			// good
 		}
+	}
+
+	@Test
+	public void testSetValueAsQueryTokens_neYear_setsUpperAndLowerBounds() {
+		QualifiedParamList qualifiedParamList = new QualifiedParamList(1);
+		qualifiedParamList.add("ne1965");
+
+		List<QualifiedParamList> params = new ArrayList<>(1);
+		params.add(qualifiedParamList);
+		DateRangeParam dateRangeParam = new DateRangeParam();
+
+		dateRangeParam.setValuesAsQueryTokens(fhirContext, "_lastUpdated", params);
+		assertEquals("1965", dateRangeParam.getLowerBound().getValueAsString());
+		assertEquals("1965", dateRangeParam.getUpperBound().getValueAsString());
+		assertEquals(ParamPrefixEnum.NOT_EQUAL, dateRangeParam.getLowerBound().getPrefix());
+		assertEquals(ParamPrefixEnum.NOT_EQUAL, dateRangeParam.getUpperBound().getPrefix());
+	}
+
+	@Test
+	public void testSetValueAsQueryTokens_neMonth_setsUpperAndLowerBounds() {
+		QualifiedParamList qualifiedParamList = new QualifiedParamList(1);
+		qualifiedParamList.add("ne1965-11");
+
+		List<QualifiedParamList> params = new ArrayList<>(1);
+		params.add(qualifiedParamList);
+		DateRangeParam dateRangeParam = new DateRangeParam();
+
+		dateRangeParam.setValuesAsQueryTokens(fhirContext, "_lastUpdated", params);
+		assertEquals("1965-11", dateRangeParam.getLowerBound().getValueAsString());
+		assertEquals("1965-11", dateRangeParam.getUpperBound().getValueAsString());
+		assertEquals(ParamPrefixEnum.NOT_EQUAL, dateRangeParam.getLowerBound().getPrefix());
+		assertEquals(ParamPrefixEnum.NOT_EQUAL, dateRangeParam.getUpperBound().getPrefix());
+	}
+
+	@Test
+	public void testSetValueAsQueryTokens_neDay_setsUpperAndLowerBounds() {
+		QualifiedParamList qualifiedParamList = new QualifiedParamList(1);
+		qualifiedParamList.add("ne1965-11-23");
+
+		List<QualifiedParamList> params = new ArrayList<>(1);
+		params.add(qualifiedParamList);
+		DateRangeParam dateRangeParam = new DateRangeParam();
+
+		dateRangeParam.setValuesAsQueryTokens(fhirContext, "_lastUpdated", params);
+		assertEquals("1965-11-23", dateRangeParam.getLowerBound().getValueAsString());
+		assertEquals("1965-11-23", dateRangeParam.getUpperBound().getValueAsString());
+		assertEquals(ParamPrefixEnum.NOT_EQUAL, dateRangeParam.getLowerBound().getPrefix());
+		assertEquals(ParamPrefixEnum.NOT_EQUAL, dateRangeParam.getUpperBound().getPrefix());
 	}
 }

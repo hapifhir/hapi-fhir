@@ -2,6 +2,7 @@ package org.hl7.fhir.dstu3.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -98,7 +99,7 @@ public class ResourceValidatorDstu3Test {
 			parser.parseResource(encoded);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("DataFormatException at [[row,col {unknown-source}]: [2,4]]: [element=\"birthDate\"] Invalid attribute value \"2000-15-31\": Invalid date/time format: \"2000-15-31\"", e.getMessage());
+			assertEquals(Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [2,4]]: " + Msg.code(1821) + "[element=\"birthDate\"] Invalid attribute value \"2000-15-31\": Invalid date/time format: \"2000-15-31\"", e.getMessage());
 		}
 	}
 
@@ -165,7 +166,7 @@ public class ResourceValidatorDstu3Test {
 		ValidationResult output = val.validateWithResult(p);
 		List<SingleValidationMessage> all = logResultsAndReturnNonInformationalOnes(output);
 
-		assertEquals("None of the codings provided are in the value set http://hl7.org/fhir/ValueSet/marital-status (http://hl7.org/fhir/ValueSet/marital-status), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://hl7.org/fhir/v3/MaritalStatus#FOO)", output.getMessages().get(0).getMessage());
+		assertEquals("None of the codings provided are in the value set 'Marital Status Codes' (http://hl7.org/fhir/ValueSet/marital-status), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://hl7.org/fhir/v3/MaritalStatus#FOO)", output.getMessages().get(0).getMessage());
 		assertEquals(ResultSeverityEnum.WARNING, output.getMessages().get(0).getSeverity());
 	}
 
@@ -481,7 +482,7 @@ public class ResourceValidatorDstu3Test {
 
 	@AfterAll
 	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 	@ResourceDef(name = "Patient")

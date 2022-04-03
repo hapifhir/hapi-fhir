@@ -6,18 +6,20 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
-import ca.uhn.fhir.jpa.config.TestR4ConfigWithElasticSearch;
+import ca.uhn.fhir.jpa.config.TestHibernateSearchAddInConfig;
+import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -50,7 +52,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 @RequiresDocker
-@ContextConfiguration(classes = {TestR4ConfigWithElasticSearch.class})
+@ContextConfiguration(classes = {TestR4Config.class, TestHibernateSearchAddInConfig.Elasticsearch.class})
 public class FhirResourceDaoR4TerminologyElasticsearchIT extends BaseJpaTest {
 
 	public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";
@@ -84,7 +86,7 @@ public class FhirResourceDaoR4TerminologyElasticsearchIT extends BaseJpaTest {
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
-	private IBulkDataExportSvc myBulkDataExportSvc;
+	private IBulkDataExportJobSchedulingHelper myBulkDataScheduleHelper;
 
 
 	@BeforeEach
@@ -146,7 +148,7 @@ public class FhirResourceDaoR4TerminologyElasticsearchIT extends BaseJpaTest {
 
 
 	@Override
-	protected FhirContext getContext() {
+	protected FhirContext getFhirContext() {
 		return myFhirContext;
 	}
 
@@ -157,12 +159,12 @@ public class FhirResourceDaoR4TerminologyElasticsearchIT extends BaseJpaTest {
 
 	@AfterEach
 	public void afterPurgeDatabase() {
-		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataExportSvc);
+		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
 	}
 
 	@AfterAll
 	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 }

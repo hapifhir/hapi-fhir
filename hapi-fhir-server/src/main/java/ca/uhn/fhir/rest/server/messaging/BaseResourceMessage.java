@@ -23,6 +23,7 @@ package ca.uhn.fhir.rest.server.messaging;
 
 
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.Validate;
 
@@ -45,6 +46,12 @@ public abstract class BaseResourceMessage implements IResourceMessage, IModelJso
 
 	@JsonProperty("mediaType")
 	private String myMediaType;
+
+	/**
+	 * This is used by any message going to kafka for topic partition selection purposes.
+	 */
+	@JsonProperty("messageKey")
+	private String myMessageKey;
 
 	/**
 	 * Returns an attribute stored in this message.
@@ -156,11 +163,30 @@ public abstract class BaseResourceMessage implements IResourceMessage, IModelJso
 		myMediaType = theMediaType;
 	}
 
+	@Nullable
+	public String getMessageKeyOrNull() {
+		return myMessageKey;
+	}
+
+	public void setMessageKey(String theMessageKey) {
+		myMessageKey = theMessageKey;
+	}
+
 	public enum OperationTypeEnum {
-		CREATE,
-		UPDATE,
-		DELETE,
-		MANUALLY_TRIGGERED,
-		TRANSACTION
+		CREATE(RestOperationTypeEnum.CREATE),
+		UPDATE(RestOperationTypeEnum.UPDATE),
+		DELETE(RestOperationTypeEnum.DELETE),
+		MANUALLY_TRIGGERED(RestOperationTypeEnum.UPDATE),
+		TRANSACTION(RestOperationTypeEnum.UPDATE);
+
+		private final RestOperationTypeEnum myRestOperationTypeEnum;
+
+		OperationTypeEnum(RestOperationTypeEnum theRestOperationTypeEnum) {
+			myRestOperationTypeEnum = theRestOperationTypeEnum;
+		}
+
+		public RestOperationTypeEnum asRestOperationType() {
+			return myRestOperationTypeEnum;
+		}
 	}
 }

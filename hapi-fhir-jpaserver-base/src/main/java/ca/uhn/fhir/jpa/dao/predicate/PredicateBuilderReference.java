@@ -27,6 +27,7 @@ import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -34,9 +35,9 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
@@ -48,9 +49,7 @@ import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.util.SourceParam;
-import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -75,6 +74,8 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -96,7 +97,6 @@ import javax.persistence.criteria.Subquery;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
@@ -114,7 +114,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderReference.class);
 	private final PredicateBuilder myPredicateBuilder;
 	@Autowired
-	IdHelperService myIdHelperService;
+	IIdHelperService myIdHelperService;
 	@Autowired
 	ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
@@ -148,7 +148,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		if ((operation != null) &&
 			(operation != SearchFilterParser.CompareOperation.eq) &&
 			(operation != SearchFilterParser.CompareOperation.ne)) {
-			throw new InvalidRequestException("Invalid operator specified for reference predicate.  Supported operators for reference predicate are \"eq\" and \"ne\".");
+			throw new InvalidRequestException(Msg.code(1008) + "Invalid operator specified for reference predicate.  Supported operators for reference predicate are \"eq\" and \"ne\".");
 		}
 
 		if (theList.get(0).getMissing() != null) {
@@ -197,7 +197,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 				}
 
 			} else {
-				throw new IllegalArgumentException("Invalid token type (expecting ReferenceParam): " + nextOr.getClass());
+				throw new IllegalArgumentException(Msg.code(1009) + "Invalid token type (expecting ReferenceParam): " + nextOr.getClass());
 			}
 
 		}
@@ -347,7 +347,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		}
 
 		if (!foundChainMatch) {
-			throw new InvalidRequestException(myContext.getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "invalidParameterChain", theParamName + '.' + theReferenceParam.getChain()));
+			throw new InvalidRequestException(Msg.code(1010) + myContext.getLocalizer().getMessage(BaseStorageDao.class, "invalidParameterChain", theParamName + '.' + theReferenceParam.getChain()));
 		}
 
 		if (candidateTargetTypes.size() > 1) {
@@ -399,7 +399,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 			if (resourceTypes.isEmpty()) {
 				RuntimeSearchParam searchParamByName = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
 				if (searchParamByName == null) {
-					throw new InternalErrorException("Could not find parameter " + theParamName);
+					throw new InternalErrorException(Msg.code(1011) + "Could not find parameter " + theParamName);
 				}
 				String paramPath = searchParamByName.getPath();
 				if (paramPath.endsWith(".as(Reference)")) {
@@ -423,11 +423,11 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 					resourceTypes.addAll(resDef.getResourceTypes());
 					if (resourceTypes.size() == 1) {
 						if (resourceTypes.get(0).isInterface()) {
-							throw new InvalidRequestException("Unable to perform search for unqualified chain '" + theParamName + "' as this SearchParameter does not declare any target types. Add a qualifier of the form '" + theParamName + ":[ResourceType]' to perform this search.");
+							throw new InvalidRequestException(Msg.code(1012) + "Unable to perform search for unqualified chain '" + theParamName + "' as this SearchParameter does not declare any target types. Add a qualifier of the form '" + theParamName + ":[ResourceType]' to perform this search.");
 						}
 					}
 				} else {
-					throw new ConfigurationException("Property " + paramPath + " of type " + myResourceName + " is not a resource: " + def.getClass());
+					throw new ConfigurationException(Msg.code(1013) + "Property " + paramPath + " of type " + myResourceName + " is not a resource: " + def.getClass());
 				}
 			}
 
@@ -559,11 +559,6 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 				myPredicateBuilder.addPredicateResourceId(theAndOrParams, theResourceName, theRequestPartitionId);
 				break;
 
-			case IAnyResource.SP_RES_LANGUAGE:
-				addPredicateLanguage(theAndOrParams,
-					null);
-				break;
-
 			case Constants.PARAM_HAS:
 				addPredicateHas(theResourceName, theAndOrParams, theRequest, theRequestPartitionId);
 				break;
@@ -585,7 +580,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 
 					if (myPartitionSettings.isPartitioningEnabled() && myPartitionSettings.isIncludePartitionInSearchHashes()) {
 						if (theRequestPartitionId.isAllPartitions()) {
-							throw new PreconditionFailedException("This server is not configured to support search against all partitions");
+							throw new PreconditionFailedException(Msg.code(1014) + "This server is not configured to support search against all partitions");
 						}
 					}
 
@@ -661,12 +656,12 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 							try {
 								filter = SearchFilterParser.parse(filterString);
 							} catch (SearchFilterParser.FilterSyntaxException theE) {
-								throw new InvalidRequestException("Error parsing _filter syntax: " + theE.getMessage());
+								throw new InvalidRequestException(Msg.code(1015) + "Error parsing _filter syntax: " + theE.getMessage());
 							}
 							if (filter != null) {
 
 								if (!myDaoConfig.isFilterParameterEnabled()) {
-									throw new InvalidRequestException(Constants.PARAM_FILTER + " parameter is disabled on this server");
+									throw new InvalidRequestException(Msg.code(1016) + Constants.PARAM_FILTER + " parameter is disabled on this server");
 								}
 
 								// TODO: we clear the predicates below because the filter builds up
@@ -689,8 +684,8 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 
 					} else {
 						Collection<String> validNames = mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(theResourceName);
-						String msg = myContext.getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "invalidSearchParameter", theParamName, theResourceName, validNames);
-						throw new InvalidRequestException(msg);
+						String msg = myContext.getLocalizer().getMessageSanitized(BaseStorageDao.class, "invalidSearchParameter", theParamName, theResourceName, validNames);
+						throw new InvalidRequestException(Msg.code(1017) + msg);
 					}
 				}
 				break;
@@ -733,15 +728,12 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 				null,
 				theFilter.getValue());
 			return myPredicateBuilder.addPredicateResourceId(Collections.singletonList(Collections.singletonList(param)), myResourceName, theFilter.getOperation(), theRequestPartitionId);
-		} else if (theFilter.getParamPath().getName().equals(IAnyResource.SP_RES_LANGUAGE)) {
-			return addPredicateLanguage(Collections.singletonList(Collections.singletonList(new StringParam(theFilter.getValue()))),
-				theFilter.getOperation());
 		}
 
 		RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(theResourceName, theFilter.getParamPath().getName());
 
 		if (searchParam == null) {
-			throw new InvalidRequestException("Invalid search parameter specified, " + theFilter.getParamPath().getName() + ", for resource type " + theResourceName);
+			throw new InvalidRequestException(Msg.code(1018) + "Invalid search parameter specified, " + theFilter.getParamPath().getName() + ", for resource type " + theResourceName);
 		}
 
 		RestSearchParameterTypeEnum typeEnum = searchParam.getParamType();
@@ -764,7 +756,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		} else if (typeEnum == RestSearchParameterTypeEnum.QUANTITY) {
 			return myPredicateBuilder.addPredicateQuantity(theResourceName, searchParam, Collections.singletonList(new QuantityParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
 		} else if (typeEnum == RestSearchParameterTypeEnum.COMPOSITE) {
-			throw new InvalidRequestException("Composite search parameters not currently supported with _filter clauses");
+			throw new InvalidRequestException(Msg.code(1019) + "Composite search parameters not currently supported with _filter clauses");
 		} else if (typeEnum == RestSearchParameterTypeEnum.TOKEN) {
 			TokenParam param = new TokenParam();
 			param.setValueAsQueryToken(null,
@@ -798,7 +790,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 			case COMPOSITE:
 				List<RuntimeSearchParam> compositeOf = JpaParamUtil.resolveComponentParameters(mySearchParamRegistry, theParam);
 				if (compositeOf.size() != 2) {
-					throw new InternalErrorException("Parameter " + theParam.getName() + " has " + compositeOf.size() + " composite parts. Don't know how handlt this.");
+					throw new InternalErrorException(Msg.code(1020) + "Parameter " + theParam.getName() + " has " + compositeOf.size() + " composite parts. Don't know how handlt this.");
 				}
 				IQueryParameterType leftParam = toParameterType(compositeOf.get(0));
 				IQueryParameterType rightParam = toParameterType(compositeOf.get(1));
@@ -812,11 +804,11 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 					qp = new SpecialParam();
 					break;
 				}
-				throw new InternalErrorException("Don't know how to convert param type: " + theParam.getParamType());
+				throw new InternalErrorException(Msg.code(1021) + "Don't know how to convert param type: " + theParam.getParamType());
 			case URI:
 			case HAS:
 			default:
-				throw new InternalErrorException("Don't know how to convert param type: " + theParam.getParamType());
+				throw new InternalErrorException(Msg.code(1022) + "Don't know how to convert param type: " + theParam.getParamType());
 		}
 		return qp;
 	}
@@ -826,45 +818,6 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 
 		qp.setValueAsQueryToken(myContext, theParam.getName(), theQualifier, theValueAsQueryToken);
 		return qp;
-	}
-
-	private Predicate addPredicateLanguage(List<List<IQueryParameterType>> theList,
-														SearchFilterParser.CompareOperation operation) {
-		for (List<? extends IQueryParameterType> nextList : theList) {
-
-			Set<String> values = new HashSet<>();
-			for (IQueryParameterType next : nextList) {
-				if (next instanceof StringParam) {
-					String nextValue = ((StringParam) next).getValue();
-					if (isBlank(nextValue)) {
-						continue;
-					}
-					values.add(nextValue);
-				} else {
-					throw new InternalErrorException("Language parameter must be of type " + StringParam.class.getCanonicalName() + " - Got " + next.getClass().getCanonicalName());
-				}
-			}
-
-			if (values.isEmpty()) {
-				continue;
-			}
-
-			Predicate predicate;
-			if ((operation == null) ||
-				(operation == SearchFilterParser.CompareOperation.eq)) {
-				predicate = myQueryStack.get("myLanguage").as(String.class).in(values);
-			} else if (operation == SearchFilterParser.CompareOperation.ne) {
-				predicate = myQueryStack.get("myLanguage").as(String.class).in(values).not();
-			} else {
-				throw new InvalidRequestException("Unsupported operator specified in language query, only \"eq\" and \"ne\" are supported");
-			}
-			myQueryStack.addPredicate(predicate);
-			if (operation != null) {
-				return predicate;
-			}
-		}
-
-		return null;
 	}
 
 	private void addPredicateSource(List<List<IQueryParameterType>> theAndOrParams, RequestDetails theRequest) {
@@ -879,7 +832,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 
 		if (myDaoConfig.getStoreMetaSourceInformation() == DaoConfig.StoreMetaSourceInformationEnum.NONE) {
 			String msg = myContext.getLocalizer().getMessage(LegacySearchBuilder.class, "sourceParamDisabled");
-			throw new InvalidRequestException(msg);
+			throw new InvalidRequestException(Msg.code(1023) + msg);
 		}
 
 		From<?, ResourceHistoryProvenanceEntity> join = myQueryStack.createJoin(SearchBuilderJoinEnum.PROVENANCE, Constants.PARAM_SOURCE);
@@ -933,7 +886,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 			try {
 				targetResourceDefinition = myContext.getResourceDefinition(targetResourceType);
 			} catch (DataFormatException e) {
-				throw new InvalidRequestException("Invalid resource type: " + targetResourceType);
+				throw new InvalidRequestException(Msg.code(1024) + "Invalid resource type: " + targetResourceType);
 			}
 
 			ArrayList<IQueryParameterType> orValues = Lists.newArrayList();
@@ -957,14 +910,14 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 				// exists on the target resource type.
 				RuntimeSearchParam owningParameterDef = mySearchParamRegistry.getActiveSearchParam(targetResourceType, paramName);
 				if (owningParameterDef == null) {
-					throw new InvalidRequestException("Unknown parameter name: " + targetResourceType + ':' + parameterName);
+					throw new InvalidRequestException(Msg.code(1025) + "Unknown parameter name: " + targetResourceType + ':' + parameterName);
 				}
 
 				//Ensure that the name of the back-referenced search param on the target (e.g. the `subject` in Patient?_has:Observation:subject:code=sys|val)
 				//exists on the target resource.
 				RuntimeSearchParam joiningParameterDef = mySearchParamRegistry.getActiveSearchParam(targetResourceType, paramReference);
 				if (joiningParameterDef == null) {
-					throw new InvalidRequestException("Unknown parameter name: " + targetResourceType + ':' + paramReference);
+					throw new InvalidRequestException(Msg.code(1026) + "Unknown parameter name: " + targetResourceType + ':' + paramReference);
 				}
 
 				IQueryParameterAnd<IQueryParameterOr<IQueryParameterType>> parsedParam = (IQueryParameterAnd<IQueryParameterOr<IQueryParameterType>>) JpaParamUtil.parseQueryParams(mySearchParamRegistry, myContext, owningParameterDef, paramName, parameters);
@@ -1004,7 +957,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 
 		IQueryParameterType or = theNextAnd.get(0);
 		if (!(or instanceof CompositeParam<?, ?>)) {
-			throw new InvalidRequestException("Invalid type for composite param (must be " + CompositeParam.class.getSimpleName() + ": " + or.getClass());
+			throw new InvalidRequestException(Msg.code(1027) + "Invalid type for composite param (must be " + CompositeParam.class.getSimpleName() + ": " + or.getClass());
 		}
 		CompositeParam<?, ?> cp = (CompositeParam<?, ?>) or;
 
@@ -1054,7 +1007,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		}
 
 		if (retVal == null) {
-			throw new InvalidRequestException("Don't know how to handle composite parameter with type of " + theParam.getParamType());
+			throw new InvalidRequestException(Msg.code(1028) + "Don't know how to handle composite parameter with type of " + theParam.getParamType());
 		}
 
 		return retVal;
@@ -1070,7 +1023,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 	@Nonnull
 	private InvalidRequestException newInvalidResourceTypeException(String theResourceType) {
 		String msg = myContext.getLocalizer().getMessageSanitized(PredicateBuilderReference.class, "invalidResourceType", theResourceType);
-		throw new InvalidRequestException(msg);
+		throw new InvalidRequestException(Msg.code(1029) + msg);
 	}
 
 }

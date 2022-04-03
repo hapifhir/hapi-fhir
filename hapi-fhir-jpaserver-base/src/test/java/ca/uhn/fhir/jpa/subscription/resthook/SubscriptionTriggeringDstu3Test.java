@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -46,6 +46,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.containsString;
@@ -64,12 +65,12 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 	private static RestfulServer ourListenerRestServer;
 	private static Server ourListenerServer;
 	private static String ourListenerServerBase;
-	private static List<Observation> ourCreatedObservations = Collections.synchronizedList(Lists.newArrayList());
-	private static List<Observation> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
-	private static List<Patient> ourCreatedPatients = Lists.newArrayList();
-	private static List<Patient> ourUpdatedPatients = Lists.newArrayList();
-	private static List<String> ourContentTypes = new ArrayList<>();
-	private List<IIdType> mySubscriptionIds = new ArrayList<>();
+	private static final List<Observation> ourCreatedObservations = Collections.synchronizedList(Lists.newArrayList());
+	private static final List<Observation> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
+	private static final List<Patient> ourCreatedPatients = Collections.synchronizedList(Lists.newArrayList());
+	private static final List<Patient> ourUpdatedPatients = Collections.synchronizedList(Lists.newArrayList());
+	private static final List<String> ourContentTypes = Collections.synchronizedList(Lists.newArrayList());
+	private final List<IIdType> mySubscriptionIds = Collections.synchronizedList(Lists.newArrayList());
 
 	@Autowired
 	private SubscriptionTestUtil mySubscriptionTestUtil;
@@ -261,7 +262,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(0, ourCreatedPatients);
 		waitForSize(50, ourUpdatedPatients);
-
+		ourLog.info("Updated patients: {}", ourUpdatedPatients.stream().map(t->t.getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList()));
 	}
 
 	@Test
@@ -411,7 +412,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: Search URL is not valid (must be in the form \"[resource type]?[optional params]\")", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(24) + "Search URL is not valid (must be in the form \"[resource type]?[optional params]\")", e.getMessage());
 		}
 	}
 
@@ -555,7 +556,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 
 	@BeforeAll
 	public static void startListenerServer() throws Exception {
-		ourListenerRestServer = new RestfulServer(FhirContext.forCached(FhirVersionEnum.DSTU3));
+		ourListenerRestServer = new RestfulServer(FhirContext.forDstu3Cached());
 
 		ObservationListener obsListener = new ObservationListener();
 		PatientListener ptListener = new PatientListener();

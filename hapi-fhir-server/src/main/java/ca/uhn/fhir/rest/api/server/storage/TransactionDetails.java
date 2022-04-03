@@ -117,7 +117,7 @@ public class TransactionDetails {
 	 */
 	@Nullable
 	public ResourcePersistentId getResolvedResourceId(IIdType theId) {
-		String idValue = theId.toVersionless().getValue();
+		String idValue = theId.toUnqualifiedVersionless().getValue();
 		return myResolvedResourceIds.get(idValue);
 	}
 
@@ -292,6 +292,10 @@ public class TransactionDetails {
 	public void clearResolvedItems() {
 		myResolvedResourceIds.clear();
 		myResolvedMatchUrls.clear();
+	}
+
+	public boolean hasResolvedResourceIds() {
+		return !myResolvedResourceIds.isEmpty();
 	}
 }
 

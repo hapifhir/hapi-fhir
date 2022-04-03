@@ -23,13 +23,12 @@ package ca.uhn.fhir.jpa.packages;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@ApiModel("Represents an NPM package search response")
+@Schema(description = "Represents an NPM package search response")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class NpmPackageSearchResultJson {
@@ -95,7 +94,7 @@ public class NpmPackageSearchResultJson {
 		private String myDescription;
 		@JsonProperty("fhirVersion")
 		private List<String> myFhirVersion;
-		@ApiModelProperty(value = "The size of this package in bytes", example = "1000")
+		@Schema(description = "The size of this package in bytes", example = "1000")
 		@JsonProperty("_bytes")
 		private long myBytes;
 

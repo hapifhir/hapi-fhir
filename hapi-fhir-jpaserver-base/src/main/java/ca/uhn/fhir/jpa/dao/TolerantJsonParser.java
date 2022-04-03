@@ -20,27 +20,26 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParserErrorHandler;
 import ca.uhn.fhir.parser.JsonParser;
-import ca.uhn.fhir.util.IModelVisitor2;
+import ca.uhn.fhir.parser.LenientErrorHandler;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.math.BigDecimal;
-import java.util.List;
+import java.util.Objects;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
-class TolerantJsonParser extends JsonParser {
+public class TolerantJsonParser extends JsonParser {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(TolerantJsonParser.class);
 	private final FhirContext myContext;
@@ -52,7 +51,7 @@ class TolerantJsonParser extends JsonParser {
 	 * @param theResourcePid The ID of the resource that will be parsed with this parser. It would be ok to change the
 	 *                       datatype for this param if we ever need to since it's only used for logging.
 	 */
-	TolerantJsonParser(FhirContext theContext, IParserErrorHandler theParserErrorHandler, Long theResourcePid) {
+	public TolerantJsonParser(FhirContext theContext, IParserErrorHandler theParserErrorHandler, Long theResourcePid) {
 		super(theContext, theParserErrorHandler);
 		myContext = theContext;
 		myResourcePid = theResourcePid;
@@ -80,7 +79,7 @@ class TolerantJsonParser extends JsonParser {
 			 * ParserState.Primitive state too.
 			 */
 
-			String msg = defaultString(e.getMessage());
+			String msg = defaultString(e.getMessage(), "");
 			if (msg.contains("Unexpected character ('.' (code 46))") || msg.contains("Invalid numeric value: Leading zeroes not allowed")) {
 				Gson gson = new Gson();
 
@@ -89,20 +88,19 @@ class TolerantJsonParser extends JsonParser {
 
 				T parsed = super.parseResource(theResourceType, corrected);
 
-				myContext.newTerser().visit(parsed, new IModelVisitor2() {
-					@Override
-					public boolean acceptElement(IBase theElement, List<IBase> theContainingElementPath, List<BaseRuntimeChildDefinition> theChildDefinitionPath, List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
+				myContext.newTerser().visit(parsed, (theElement, theContainingElementPath, theChildDefinitionPath, theElementDefinitionPath) -> {
 
-						BaseRuntimeElementDefinition<?> def = theElementDefinitionPath.get(theElementDefinitionPath.size() - 1);
-						if (def.getName().equals("decimal")) {
-							IPrimitiveType<BigDecimal> decimal = (IPrimitiveType<BigDecimal>) theElement;
-							String newPlainString = decimal.getValue().toPlainString();
-							ourLog.warn("Correcting invalid previously saved decimal number for Resource[pid={}] - Was {} and now is {}", myResourcePid, decimal.getValueAsString(), newPlainString);
-							decimal.setValueAsString(newPlainString);
-						}
-
-						return true;
+					BaseRuntimeElementDefinition<?> def = theElementDefinitionPath.get(theElementDefinitionPath.size() - 1);
+					if (def.getName().equals("decimal")) {
+						IPrimitiveType<BigDecimal> decimal = (IPrimitiveType<BigDecimal>) theElement;
+						String oldValue = decimal.getValueAsString();
+						String newValue = decimal.getValue().toPlainString();
+						ourLog.warn("Correcting invalid previously saved decimal number for Resource[pid={}] - Was {} and now is {}",
+							Objects.isNull(myResourcePid) ? "" : myResourcePid, oldValue, newValue);
+						decimal.setValueAsString(newValue);
 					}
+
+					return true;
 				});
 
 				return parsed;
@@ -110,5 +108,10 @@ class TolerantJsonParser extends JsonParser {
 
 			throw e;
 		}
+	}
+
+	public static TolerantJsonParser createWithLenientErrorHandling(FhirContext theContext, @Nullable Long theResourcePid) {
+		LenientErrorHandler errorHandler = new LenientErrorHandler(false).setErrorOnInvalidValue(false);
+		return new TolerantJsonParser(theContext, errorHandler, theResourcePid);
 	}
 }

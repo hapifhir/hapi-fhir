@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.matching;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
@@ -44,7 +45,7 @@ public class InMemorySubscriptionMatcher implements ISubscriptionMatcher {
 			return mySearchParamMatcher.match(theSubscription.getCriteriaString(), theMsg.getNewPayload(myContext), null);
 		} catch (Exception e) {
 			ourLog.error("Failure in in-memory matcher", e);
-			throw new InternalErrorException("Failure performing memory-match for resource ID[" + theMsg.getId(myContext) + "] for subscription ID[" + theSubscription.getIdElementString() + "]: " + e.getMessage(), e);
+			throw new InternalErrorException(Msg.code(1) + "Failure performing memory-match for resource ID[" + theMsg.getPayloadId(myContext) + "] for subscription ID[" + theSubscription.getIdElementString() + "]: " + e.getMessage(), e);
 		}
 	}
 

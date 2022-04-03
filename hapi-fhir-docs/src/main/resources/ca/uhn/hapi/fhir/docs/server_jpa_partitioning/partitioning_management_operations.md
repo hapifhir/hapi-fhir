@@ -186,3 +186,92 @@ The following request body could be used:
 }
 ```
 
+# Reading a Partition
+
+The `$partition-management-read-partition` operation can be used to read an existing partition. This operation takes the following parameters:
+
+<table class="table table-striped table-condensed">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Cardinality</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>id</td>
+            <td>Integer</td>
+            <td>1..1</td>
+            <td>
+                The numeric ID for the partition to update. This ID must already exist. 
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+## Example
+
+An HTTP POST to the following URL would be used to invoke this operation:
+
+```url
+http://example.com/DEFAULT/$partition-management-read-partition
+```
+
+The following request body could be used:
+
+```json
+{
+  "resourceType": "Parameters",
+  "parameter": [ {
+    "name": "id",
+    "valueInteger": 123
+  } ]
+}
+```
+
+# Listing all Partitions
+
+The `$partition-management-list-partitions` operation can be used to list all existing partitions.
+
+## Example
+
+An HTTP POST to the following URL would be used to invoke this operation:
+
+```url
+http://example.com/DEFAULT/$partition-management-list-partitions
+```
+
+This operation returns a `Parameters` resource that looks like the following:
+```json
+{
+    "resourceType": "Parameters",
+    "parameter": [ {
+       "name": "partition",
+       "part": [ {
+          "name": "id",
+          "valueInteger": 1
+        }, {
+          "name": "name",
+          "valueCode": "PARTITION-1"
+        }, {
+          "name": "description",
+          "valueString": "a description1"
+        } ]
+      }, {
+       "name": "partition",
+       "part": [ {
+          "name": "id",
+          "valueInteger": 2
+       }, {
+          "name": "name",
+          "valueCode": "PARTITION-2"
+       }, {
+          "name": "description",
+          "valueString": "a description2"
+       } ]
+    } ]
+}
+```
+

@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -27,6 +28,7 @@ import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.server.method.SearchParameter;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.HapiExtensions;
@@ -385,20 +387,22 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 				 * but also fill in any gaps using params from the server itself. This makes sure we include
 				 * global params like _lastUpdated
 				 */
-				Map<String, RuntimeSearchParam> searchParams;
+				ResourceSearchParams searchParams;
 				ISearchParamRegistry searchParamRegistry;
+				ResourceSearchParams serverConfigurationActiveSearchParams = serverConfiguration.getActiveSearchParams(resourceName);
 				if (mySearchParamRegistry != null) {
 					searchParamRegistry = mySearchParamRegistry;
-					searchParams = new HashMap<>(mySearchParamRegistry.getActiveSearchParams(resourceName));
-					for (Entry<String, RuntimeSearchParam> nextBuiltInSp : serverConfiguration.getActiveSearchParams(resourceName).entrySet()) {
-						String key = nextBuiltInSp.getKey();
-						if (key.startsWith("_") && !searchParams.containsKey(key) && searchParamEnabled(key)) {
-							searchParams.put(key, nextBuiltInSp.getValue());
+					searchParams = mySearchParamRegistry.getActiveSearchParams(resourceName).makeCopy();
+					for (String nextBuiltInSpName : serverConfigurationActiveSearchParams.getSearchParamNames()) {
+						if (nextBuiltInSpName.startsWith("_") &&
+							!searchParams.containsParamName(nextBuiltInSpName) &&
+							searchParamEnabled(nextBuiltInSpName)) {
+							searchParams.put(nextBuiltInSpName, serverConfigurationActiveSearchParams.get(nextBuiltInSpName));
 						}
 					}
 				} else {
 					searchParamRegistry = serverConfiguration;
-					searchParams = serverConfiguration.getActiveSearchParams(resourceName);
+					searchParams = serverConfigurationActiveSearchParams;
 				}
 
 
@@ -411,15 +415,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 					}
 
 					String spUri = next.getUri();
-					if (isBlank(spUri) && servletRequest != null) {
-						String id;
-						if (next.getId() != null) {
-							id = next.getId().toUnqualifiedVersionless().getValue();
-						} else {
-							id = resourceName + "-" + next.getName();
-						}
-						spUri = configuration.getServerAddressStrategy().determineServerBase(servletRequest.getServletContext(), servletRequest) + "/" + id;
-					}
+					
 					if (isNotBlank(spUri)) {
 						terser.addElement(searchParam, "definition", spUri);
 					}
@@ -633,7 +629,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 	@Read(typeName = "OperationDefinition")
 	public IBaseResource readOperationDefinition(@IdParam IIdType theId, RequestDetails theRequestDetails) {
 		if (theId == null || theId.hasIdPart() == false) {
-			throw new ResourceNotFoundException(theId);
+			throw new ResourceNotFoundException(Msg.code(1977) + theId);
 		}
 		RestfulServerConfiguration configuration = getServerConfiguration();
 		Bindings bindings = configuration.provideBindings();
@@ -647,7 +643,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		if (searchBindings != null && !searchBindings.isEmpty()) {
 			return readOperationDefinitionForNamedSearch(searchBindings);
 		}
-		throw new ResourceNotFoundException(theId);
+		throw new ResourceNotFoundException(Msg.code(1978) + theId);
 	}
 
 	private IBaseResource readOperationDefinitionForNamedSearch(List<SearchMethodBinding> bindings) {

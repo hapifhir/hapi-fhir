@@ -35,10 +35,6 @@ public class PatientResourceProvider implements IResourceProvider
 			@OptionalParam(name="_id")
 			StringAndListParam theId, 
 
-			@Description(shortDefinition="The resource language")
-			@OptionalParam(name="_language")
-			StringAndListParam theResourceLanguage, 
-
 			@Description(shortDefinition="Search the contents of the resource's data using a fulltext search")
 			@OptionalParam(name=Constants.PARAM_CONTENT)
 			StringAndListParam theFtContent, 

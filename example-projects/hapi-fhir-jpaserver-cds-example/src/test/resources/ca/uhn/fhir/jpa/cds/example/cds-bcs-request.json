@@ -1,9 +1,0 @@
-{
-  "hookInstance": "d1577c69-dfbe-44ad-ba6d-3e05e953b2ea",
-  "fhirServer": "XXXXX",
-  "hook": "patient-view",
-  "user": "Practitioner/example",
-  "context": {
-    "patientId": "Patient/Patient-6535"
-  }
-}

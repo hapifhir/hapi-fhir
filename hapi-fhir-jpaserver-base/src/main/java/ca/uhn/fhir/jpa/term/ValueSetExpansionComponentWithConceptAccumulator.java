@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.term;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
 import ca.uhn.fhir.jpa.term.ex.ExpansionTooCostlyException;
@@ -94,7 +95,7 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 	}
 
 	@Override
-	public void includeConcept(String theSystem, String theCode, String theDisplay, Long theSourceConceptPid, String theSourceConceptDirectParentPids) {
+	public void includeConcept(String theSystem, String theCode, String theDisplay, Long theSourceConceptPid, String theSourceConceptDirectParentPids, String theCodeSystemVersion) {
 		if (mySkipCountRemaining > 0) {
 			mySkipCountRemaining--;
 			return;
@@ -106,10 +107,11 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 		setSystemAndVersion(theSystem, contains);
 		contains.setCode(theCode);
 		contains.setDisplay(theDisplay);
+		contains.setVersion(theCodeSystemVersion);
 	}
 
 	@Override
-	public void includeConceptWithDesignations(String theSystem, String theCode, String theDisplay, Collection<TermConceptDesignation> theDesignations, Long theSourceConceptPid, String theSourceConceptDirectParentPids) {
+	public void includeConceptWithDesignations(String theSystem, String theCode, String theDisplay, Collection<TermConceptDesignation> theDesignations, Long theSourceConceptPid, String theSourceConceptDirectParentPids, String theCodeSystemVersion) {
 		if (mySkipCountRemaining > 0) {
 			mySkipCountRemaining--;
 			return;
@@ -129,6 +131,11 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 		setSystemAndVersion(theSystem, contains);
 		contains.setCode(theCode);
 		contains.setDisplay(theDisplay);
+
+		if (isNotBlank(theCodeSystemVersion)) {
+			contains.setVersion(theCodeSystemVersion);
+		}
+
 		if (theDesignations != null) {
 			for (TermConceptDesignation termConceptDesignation : theDesignations) {
 				contains
@@ -182,15 +189,23 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 		Integer capacityRemaining = getCapacityRemaining();
 		if (capacityRemaining == 0) {
 			String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "expansionTooLarge", myMaxCapacity);
-			throw new ExpansionTooCostlyException(msg);
+			msg = appendAccumulatorMessages(msg);
+			throw new ExpansionTooCostlyException(Msg.code(831) + msg);
 		}
 
 		if (myHardExpansionMaximumSize > 0 && myAddedConcepts > myHardExpansionMaximumSize) {
 			String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "expansionTooLarge", myHardExpansionMaximumSize);
-			throw new ExpansionTooCostlyException(msg);
+			msg = appendAccumulatorMessages(msg);
+			throw new ExpansionTooCostlyException(Msg.code(832) + msg);
 		}
 
 		myAddedConcepts++;
+	}
+
+	@Nonnull
+	private String appendAccumulatorMessages(String msg) {
+		msg += getMessages().stream().map(t->" - " + t).collect(Collectors.joining());
+		return msg;
 	}
 
 	public Integer getTotalConcepts() {

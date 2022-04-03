@@ -1,0 +1,10 @@
+LOINC #,Long Common Name,Short Name,CLASS,Rank
+2160-0,Creatinine [Mass/volume] in Serum or Plasma,Creat SerPl-mCnc,Chem,1
+718-7,Hemoglobin [Mass/volume] in Blood,Hgb Bld-mCnc,HEM/BC,2
+2823-3,Potassium [Moles/volume] in Serum or Plasma,Potassium SerPl-sCnc,Chem,3
+2345-7,Glucose [Mass/volume] in Serum or Plasma,Glucose SerPl-mCnc,Chem,4
+2951-2,Sodium [Moles/volume] in Serum or Plasma,Sodium SerPl-sCnc,Chem,5
+3094-0,Urea nitrogen [Mass/volume] in Serum or Plasma,BUN SerPl-mCnc,Chem,6
+2028-9,"Carbon dioxide, total [Moles/volume] in Serum or Plasma",CO2 SerPl-sCnc,Chem,7
+2075-0,Chloride [Moles/volume] in Serum or Plasma,Chloride SerPl-sCnc,Chem,8
+789-8,Erythrocytes [#/volume] in Blood by Automated count,RBC # Bld Auto,HEM/BC,9

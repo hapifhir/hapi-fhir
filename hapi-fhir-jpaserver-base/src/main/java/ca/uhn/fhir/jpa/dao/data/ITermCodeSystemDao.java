@@ -28,7 +28,7 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 
 import java.util.Optional;
 
-public interface ITermCodeSystemDao  extends JpaRepository<TermCodeSystem, Long> {
+public interface ITermCodeSystemDao  extends JpaRepository<TermCodeSystem, Long>, IHapiFhirJpaRepository {
 
 	@Query("SELECT cs FROM TermCodeSystem cs WHERE cs.myCodeSystemUri = :code_system_uri")
 	TermCodeSystem findByCodeSystemUri(@Param("code_system_uri") String theCodeSystemUri);

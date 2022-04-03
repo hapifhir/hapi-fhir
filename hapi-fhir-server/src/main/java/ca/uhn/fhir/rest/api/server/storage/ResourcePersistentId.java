@@ -90,6 +90,9 @@ public class ResourcePersistentId {
 	}
 
 	public Long getIdAsLong() {
+		if (myId instanceof String) {
+			return Long.parseLong((String) myId);
+		}
 		return (Long) myId;
 	}
 

@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.partition;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.data.IPartitionDao;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
@@ -42,6 +43,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
@@ -137,7 +139,7 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 		Optional<PartitionEntity> existingPartitionOpt = myPartitionDao.findById(thePartition.getId());
 		if (existingPartitionOpt.isPresent() == false) {
 			String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "unknownPartitionId", thePartition.getId());
-			throw new InvalidRequestException(msg);
+			throw new InvalidRequestException(Msg.code(1307) + msg);
 		}
 
 		PartitionEntity existingPartition = existingPartitionOpt.get();
@@ -161,7 +163,7 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 		Optional<PartitionEntity> partition = myPartitionDao.findById(thePartitionId);
 		if (!partition.isPresent()) {
 			String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "unknownPartitionId", thePartitionId);
-			throw new IllegalArgumentException(msg);
+			throw new IllegalArgumentException(Msg.code(1308) + msg);
 		}
 
 		myPartitionDao.delete(partition.get());
@@ -169,34 +171,40 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 		clearCaches();
 	}
 
+	@Override
+	public List<PartitionEntity> listPartitions() {
+		List<PartitionEntity> allPartitions =  myPartitionDao.findAll();
+		return allPartitions;
+	}
+
 	private void validatePartitionNameDoesntAlreadyExist(String theName) {
 		if (myPartitionDao.findForName(theName).isPresent()) {
 			String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "cantCreateDuplicatePartitionName", theName);
-			throw new InvalidRequestException(msg);
+			throw new InvalidRequestException(Msg.code(1309) + msg);
 		}
 	}
 
 	private void validateHaveValidPartitionIdAndName(PartitionEntity thePartition) {
 		if (thePartition.getId() == null || isBlank(thePartition.getName())) {
 			String msg = myFhirCtx.getLocalizer().getMessage(PartitionLookupSvcImpl.class, "missingPartitionIdOrName");
-			throw new InvalidRequestException(msg);
+			throw new InvalidRequestException(Msg.code(1310) + msg);
 		}
 
 		if (thePartition.getName().equals(JpaConstants.DEFAULT_PARTITION_NAME)) {
 			String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "cantCreateDefaultPartition");
-			throw new InvalidRequestException(msg);
+			throw new InvalidRequestException(Msg.code(1311) + msg);
 		}
 
 		if (!PARTITION_NAME_VALID_PATTERN.matcher(thePartition.getName()).matches()) {
 			String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "invalidName", thePartition.getName());
-			throw new InvalidRequestException(msg);
+			throw new InvalidRequestException(Msg.code(1312) + msg);
 		}
 
 	}
 
 	private void validateNotInUnnamedPartitionMode() {
 		if (myPartitionSettings.isUnnamedPartitionMode()) {
-			throw new MethodNotAllowedException("Can not invoke this operation in unnamed partition mode");
+			throw new MethodNotAllowedException(Msg.code(1313) + "Can not invoke this operation in unnamed partition mode");
 		}
 	}
 
@@ -229,7 +237,7 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 	public static void validatePartitionIdSupplied(FhirContext theFhirContext, Integer thePartitionId) {
 		if (thePartitionId == null) {
 			String msg = theFhirContext.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "noIdSupplied");
-			throw new InvalidRequestException(msg);
+			throw new InvalidRequestException(Msg.code(1314) + msg);
 		}
 	}
 }

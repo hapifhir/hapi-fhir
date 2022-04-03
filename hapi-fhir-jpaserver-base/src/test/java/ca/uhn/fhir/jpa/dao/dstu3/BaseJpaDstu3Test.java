@@ -13,6 +13,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
+import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.config.TestDstu3Config;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
@@ -33,7 +34,6 @@ import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
 import ca.uhn.fhir.jpa.dao.dstu2.FhirResourceDaoDstu2SearchNoFtTest;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
@@ -55,14 +55,13 @@ import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.IOUtils;
-import org.hibernate.search.mapper.orm.Search;
-import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_30_40;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.dstu3.model.AllergyIntolerance;
 import org.hl7.fhir.dstu3.model.Appointment;
 import org.hl7.fhir.dstu3.model.AuditEvent;
 import org.hl7.fhir.dstu3.model.Binary;
+import org.hl7.fhir.dstu3.model.BodySite;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CarePlan;
 import org.hl7.fhir.dstu3.model.CodeSystem;
@@ -95,6 +94,7 @@ import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.PractitionerRole;
+import org.hl7.fhir.dstu3.model.Procedure;
 import org.hl7.fhir.dstu3.model.ProcedureRequest;
 import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
@@ -106,7 +106,6 @@ import org.hl7.fhir.dstu3.model.Task;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -184,8 +183,6 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Qualifier("myConditionDaoDstu3")
 	protected IFhirResourceDao<Condition> myConditionDao;
 	@Autowired
-	protected DaoConfig myDaoConfig;
-	@Autowired
 	protected ModelConfig myModelConfig;
 	@Autowired
 	@Qualifier("myDeviceDaoDstu3")
@@ -199,11 +196,10 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myEncounterDaoDstu3")
 	protected IFhirResourceDao<Encounter> myEncounterDao;
-	// @PersistenceContext()
 	@Autowired
 	protected EntityManager myEntityManager;
 	@Autowired
-	protected FhirContext myFhirCtx;
+	protected FhirContext myFhirContext;
 	@Autowired
 	@Qualifier("myGroupDaoDstu3")
 	protected IFhirResourceDao<Group> myGroupDao;
@@ -317,6 +313,12 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Qualifier("myTaskDaoDstu3")
 	protected IFhirResourceDao<Task> myTaskDao;
 	@Autowired
+	@Qualifier("myBodySiteDaoDstu3")
+	protected IFhirResourceDao<BodySite> myBodySiteDao;
+	@Autowired
+	@Qualifier("myProcedureDaoDstu3")
+	protected IFhirResourceDao<Procedure> myProcedureDao;
+	@Autowired
 	protected ITermConceptDao myTermConceptDao;
 	@Autowired
 	protected ITermCodeSystemDao myTermCodeSystemDao;
@@ -343,9 +345,9 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Autowired
 	private IValidationSupport myJpaValidationSupportChainDstu3;
 	@Autowired
-	private IBulkDataExportSvc myBulkDataExportSvc;
-	@Autowired
 	protected ITermValueSetDao myTermValueSetDao;
+	@Autowired
+	private IBulkDataExportJobSchedulingHelper myBulkDataScheduleHelper;
 
 	@AfterEach()
 	public void afterCleanupDao() {
@@ -378,12 +380,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 
 	@BeforeEach
 	public void beforeFlushFT() {
-		runInTransaction(() -> {
-			SearchSession searchSession = Search.session(myEntityManager);
-			searchSession.workspace(ResourceTable.class).purge();
-//			searchSession.workspace(ResourceIndexedSearchParamString.class).purge();
-			searchSession.indexingPlan().execute();
-		});
+		purgeHibernateSearch(myEntityManager);
 
 		myDaoConfig.setSchedulingDisabled(true);
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
@@ -392,17 +389,17 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@BeforeEach
 	@Transactional()
 	public void beforePurgeDatabase() {
-		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataExportSvc);
+		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
 	}
 
 	@BeforeEach
 	public void beforeResetConfig() {
-		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
+		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
 	}
 
 	@Override
-	protected FhirContext getContext() {
-		return myFhirCtx;
+	public FhirContext getFhirContext() {
+		return myFhirContext;
 	}
 
 	@Override
@@ -416,7 +413,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 			fail("Unable to load resource: " + resourceName);
 		}
 		String string = IOUtils.toString(stream, StandardCharsets.UTF_8);
-		IParser newJsonParser = EncodingEnum.detectEncodingNoDefault(string).newParser(myFhirCtx);
+		IParser newJsonParser = EncodingEnum.detectEncodingNoDefault(string).newParser(myFhirContext);
 		return newJsonParser.parseResource(type, string);
 	}
 
@@ -428,14 +425,10 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 		return retVal;
 	}
 
-	@AfterAll
-	public static void afterClassClearContextBaseJpaDstu3Test() {
-		if (ourValueSetDao != null) {
-			ourValueSetDao.purgeCaches();
-		}
-		if (ourJpaValidationSupportChainDstu3 != null) {
-			ourJpaValidationSupportChainDstu3.invalidateCaches();
-		}
+	@AfterEach
+	public void afterEachClearCaches() {
+		myValueSetDao.purgeCaches();
+		myJpaValidationSupportChainDstu3.invalidateCaches();
 	}
 
 	/**

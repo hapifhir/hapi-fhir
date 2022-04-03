@@ -10,10 +10,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import java.util.Collections;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.times;
@@ -27,17 +32,31 @@ public class TermDeferredStorageSvcImplTest {
 	@Mock
 	private PlatformTransactionManager myTxManager;
 	@Mock
-	private ITermCodeSystemStorageSvc myTermConceptStorageSvc;
+	private TermConceptDaoSvc myTermConceptDaoSvc;
 	@Mock
 	private ITermConceptDao myConceptDao;
 	@Mock
 	private ITermCodeSystemVersionDao myTermCodeSystemVersionDao;
+
+	@Mock
+	private JobExecution myJobExecution;
 
 	@Test
 	public void testSaveDeferredWithExecutionSuspended() {
 		TermDeferredStorageSvcImpl svc = new TermDeferredStorageSvcImpl();
 		svc.setProcessDeferred(false);
 		svc.saveDeferred();
+	}
+
+
+	@Test
+	public void testStorageNotEmptyWhileJobsExecuting() {
+		TermDeferredStorageSvcImpl svc = new TermDeferredStorageSvcImpl();
+		ReflectionTestUtils.setField(svc, "myCurrentJobExecutions", Collections.singletonList(myJobExecution));
+
+		when(myJobExecution.isRunning()).thenReturn(true, false);
+		assertFalse(svc.isStorageQueueEmpty());
+		assertTrue(svc.isStorageQueueEmpty());
 	}
 
 
@@ -52,15 +71,15 @@ public class TermDeferredStorageSvcImplTest {
 
 		TermDeferredStorageSvcImpl svc = new TermDeferredStorageSvcImpl();
 		svc.setTransactionManagerForUnitTest(myTxManager);
-		svc.setCodeSystemStorageSvcForUnitTest(myTermConceptStorageSvc);
+		svc.setTermConceptDaoSvc(myTermConceptDaoSvc);
 
 		when(myTermCodeSystemVersionDao.findById(anyLong())).thenReturn(Optional.of(myTermCodeSystemVersion));
 		svc.setCodeSystemVersionDaoForUnitTest(myTermCodeSystemVersionDao);
 		svc.setProcessDeferred(true);
 		svc.addConceptToStorageQueue(concept);
 		svc.saveDeferred();
-		verify(myTermConceptStorageSvc, times(1)).saveConcept(same(concept));
-		verifyNoMoreInteractions(myTermConceptStorageSvc);
+		verify(myTermConceptDaoSvc, times(1)).saveConcept(same(concept));
+		verifyNoMoreInteractions(myTermConceptDaoSvc);
 
 	}
 
@@ -75,7 +94,7 @@ public class TermDeferredStorageSvcImplTest {
 
 		TermDeferredStorageSvcImpl svc = new TermDeferredStorageSvcImpl();
 		svc.setTransactionManagerForUnitTest(myTxManager);
-		svc.setCodeSystemStorageSvcForUnitTest(myTermConceptStorageSvc);
+		svc.setTermConceptDaoSvc(myTermConceptDaoSvc);
 
 		when(myTermCodeSystemVersionDao.findById(anyLong())).thenReturn(Optional.empty());
 		svc.setCodeSystemVersionDaoForUnitTest(myTermCodeSystemVersionDao);
@@ -83,8 +102,8 @@ public class TermDeferredStorageSvcImplTest {
 		svc.addConceptToStorageQueue(concept);
 		svc.saveDeferred();
 
-		verify(myTermConceptStorageSvc, times(0)).saveConcept(same(concept));
-		verifyNoMoreInteractions(myTermConceptStorageSvc);
+		verify(myTermConceptDaoSvc, times(0)).saveConcept(same(concept));
+		verifyNoMoreInteractions(myTermConceptDaoSvc);
 
 	}
 
@@ -100,18 +119,18 @@ public class TermDeferredStorageSvcImplTest {
 
 		TermDeferredStorageSvcImpl svc = new TermDeferredStorageSvcImpl();
 		svc.setTransactionManagerForUnitTest(myTxManager);
-		svc.setCodeSystemStorageSvcForUnitTest(myTermConceptStorageSvc);
+		svc.setTermConceptDaoSvc(myTermConceptDaoSvc);
 
 		// Simulate the case where an exception is thrown despite a valid code system version.
 		when(myTermCodeSystemVersionDao.findById(anyLong())).thenReturn(Optional.of(myTermCodeSystemVersion));
-		when(myTermConceptStorageSvc.saveConcept(concept)).thenThrow(new RuntimeException("Foreign Constraint Violation"));
+		when(myTermConceptDaoSvc.saveConcept(concept)).thenThrow(new RuntimeException("Foreign Constraint Violation"));
 		svc.setCodeSystemVersionDaoForUnitTest(myTermCodeSystemVersionDao);
 		svc.setProcessDeferred(true);
 		svc.addConceptToStorageQueue(concept);
 		svc.saveDeferred();
 
-		verify(myTermConceptStorageSvc, times(1)).saveConcept(same(concept));
-		verifyNoMoreInteractions(myTermConceptStorageSvc);
+		verify(myTermConceptDaoSvc, times(1)).saveConcept(same(concept));
+		verifyNoMoreInteractions(myTermConceptDaoSvc);
 
 	}
 
@@ -123,13 +142,13 @@ public class TermDeferredStorageSvcImplTest {
 
 		TermDeferredStorageSvcImpl svc = new TermDeferredStorageSvcImpl();
 		svc.setTransactionManagerForUnitTest(myTxManager);
-		svc.setCodeSystemStorageSvcForUnitTest(myTermConceptStorageSvc);
+		svc.setTermConceptDaoSvc(myTermConceptDaoSvc);
 		svc.setConceptDaoForUnitTest(myConceptDao);
 		svc.setProcessDeferred(true);
 		svc.addConceptLinkToStorageQueue(conceptLink);
 		svc.saveDeferred();
 
-		verifyNoMoreInteractions(myTermConceptStorageSvc);
+		verifyNoMoreInteractions(myTermConceptDaoSvc);
 	}
 
 }

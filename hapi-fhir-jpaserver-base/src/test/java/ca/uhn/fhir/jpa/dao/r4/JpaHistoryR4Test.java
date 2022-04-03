@@ -22,7 +22,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
+import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
@@ -272,7 +272,7 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 	}
 
 	private void create20Patients() {
-		BundleBuilder bb = new BundleBuilder(myFhirCtx);
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
 		int count = 20;
 		for (int i = 0; i < count; i++) {
 			Patient p = new Patient();

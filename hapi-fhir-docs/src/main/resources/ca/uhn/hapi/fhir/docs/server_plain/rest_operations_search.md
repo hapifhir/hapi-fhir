@@ -346,7 +346,7 @@ Sort specifications can be passed into handler methods by adding a parameter of 
 Example URL to invoke this method:
 
 ```url
-http://fhir.example.com/Patient?_identifier=urn:foo|123&_sort=given
+http://fhir.example.com/Patient?identifier=urn:foo|123&_sort=given
 ```
 
 <a name="limiting-results"/>
@@ -364,7 +364,7 @@ of resources fetched from the database.
 Example URL to invoke this method:
 
 ```url
-http://fhir.example.com/Patient?_identifier=urn:foo|123&_count=10
+http://fhir.example.com/Patient?identifier=urn:foo|123&_count=10
 ```
 
 # Paging
@@ -388,17 +388,17 @@ for more information.
 Example URL to invoke this method for the first page:
 
 ```url
-http://fhir.example.com/Patient?_identifier=urn:foo|123&_count=10&_offset=0
+http://fhir.example.com/Patient?identifier=urn:foo|123&_count=10&_offset=0
 ```
 or just
 ```url
-http://fhir.example.com/Patient?_identifier=urn:foo|123&_count=10
+http://fhir.example.com/Patient?identifier=urn:foo|123&_count=10
 ```
 
 Example URL to invoke this method for the second page:
 
 ```url
-http://fhir.example.com/Patient?_identifier=urn:foo|123&_count=10&_offset=10
+http://fhir.example.com/Patient?identifier=urn:foo|123&_count=10&_offset=10
 ```
 
 Note that if the paging provider is configured to be database backed, `_offset=0` behaves differently than no `_offset`. This 

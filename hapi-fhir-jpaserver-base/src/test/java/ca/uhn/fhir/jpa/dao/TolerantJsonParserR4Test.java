@@ -1,19 +1,18 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.LenientErrorHandler;
 import org.hl7.fhir.r4.model.Observation;
 import org.junit.jupiter.api.Test;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 public class TolerantJsonParserR4Test {
 
-	private FhirContext myFhirContext = FhirContext.forCached(FhirVersionEnum.R4);
+	private final FhirContext myFhirContext = FhirContext.forR4Cached();
 
 	@Test
 	public void testParseInvalidNumeric_LeadingDecimal() {

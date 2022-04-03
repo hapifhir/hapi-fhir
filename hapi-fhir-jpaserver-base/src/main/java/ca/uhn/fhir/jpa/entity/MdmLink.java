@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
+import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -45,9 +46,13 @@ import java.util.Date;
 
 @Entity
 @Table(name = "MPI_LINK", uniqueConstraints = {
+	// TODO GGG DROP this index, and instead use the below one
 	@UniqueConstraint(name = "IDX_EMPI_PERSON_TGT", columnNames = {"PERSON_PID", "TARGET_PID"}),
+	// v---- this one
+	//TODO GGG revisit adding this: @UniqueConstraint(name = "IDX_EMPI_GR_TGT", columnNames = {"GOLDEN_RESOURCE_PID", "TARGET_PID"}),
+	//TODO GGG Should i make individual indices for PERSON/TARGET?
 })
-public class MdmLink {
+public class MdmLink implements IMdmLink {
 	public static final int VERSION_LENGTH = 16;
 	private static final int MATCH_RESULT_LENGTH = 16;
 	private static final int LINK_SOURCE_LENGTH = 16;

@@ -27,6 +27,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -42,6 +43,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -53,6 +55,7 @@ import com.google.common.collect.Sets;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.text.StringTokenizer;
 import org.fhir.ucum.Pair;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -82,10 +85,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
@@ -93,8 +94,6 @@ import static org.apache.commons.lang3.StringUtils.trim;
 public abstract class BaseSearchParamExtractor implements ISearchParamExtractor {
 
 	public static final Set<String> COORDS_INDEX_PATHS;
-	private static final Pattern SPLIT = Pattern.compile("\\||( or )");
-	private static final Pattern SPLIT_R4 = Pattern.compile("\\s+\\|");
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseSearchParamExtractor.class);
 
 	static {
@@ -228,7 +227,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				break;
 			case COMPOSITE:
 			default:
-				throw new UnsupportedOperationException("Type " + theSearchParam.getParamType() + " not supported for extraction");
+				throw new UnsupportedOperationException(Msg.code(503) + "Type " + theSearchParam.getParamType() + " not supported for extraction");
 		}
 
 		return extractParamsAsQueryTokens(theSearchParam, theResource, extractor);
@@ -516,7 +515,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					allValues = allValuesFunc.get();
 				} catch (Exception e) {
 					String msg = getContext().getLocalizer().getMessage(BaseSearchParamExtractor.class, "failedToExtractPaths", nextPath, e.toString());
-					throw new InternalErrorException(msg, e);
+					throw new InternalErrorException(Msg.code(504) + msg, e);
 				}
 
 				values.addAll(allValues);
@@ -642,20 +641,35 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		high.ifPresent(theIBase -> addQuantity_QuantityNormalized(theResourceType, theParams, theSearchParam, theIBase));
 	}
 
+	@SuppressWarnings("unchecked")
 	private void addToken_Identifier(String theResourceType, Set<BaseResourceIndexedSearchParam> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
 		String system = extractValueAsString(myIdentifierSystemValueChild, theValue);
 		String value = extractValueAsString(myIdentifierValueValueChild, theValue);
 		if (isNotBlank(value)) {
-			createTokenIndexIfNotBlank(theResourceType, theParams, theSearchParam, system, value);
-		}
+			createTokenIndexIfNotBlankAndAdd(theResourceType, theParams, theSearchParam, system, value);
 
-		if (shouldIndexTextComponentOfToken(theSearchParam)) {
-			Optional<IBase> type = myIdentifierTypeValueChild.getAccessor().getFirstValueOrNull(theValue);
-			if (type.isPresent()) {
-				String text = extractValueAsString(myIdentifierTypeTextValueChild, type.get());
-				createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, text);
+			boolean indexIdentifierType = myModelConfig.isIndexIdentifierOfType();
+			if (indexIdentifierType) {
+				Optional<IBase> type = myIdentifierTypeValueChild.getAccessor().getFirstValueOrNull(theValue);
+				if (type.isPresent()) {
+					List<IBase> codings = myCodeableConceptCodingValueChild.getAccessor().getValues(type.get());
+					for (IBase nextCoding : codings) {
+
+						String typeSystem = myCodingSystemValueChild.getAccessor().getFirstValueOrNull(nextCoding).map(t -> ((IPrimitiveType<String>) t).getValue()).orElse(null);
+						String typeValue = myCodingCodeValueChild.getAccessor().getFirstValueOrNull(nextCoding).map(t -> ((IPrimitiveType<String>) t).getValue()).orElse(null);
+						if (isNotBlank(typeSystem) && isNotBlank(typeValue)) {
+							String paramName = theSearchParam.getName() + Constants.PARAMQUALIFIER_TOKEN_OF_TYPE;
+							ResourceIndexedSearchParamToken token = createTokenIndexIfNotBlank(theResourceType, typeSystem, typeValue + "|" + value, paramName);
+							if (token != null) {
+								theParams.add(token);
+							}
+						}
+
+					}
+				}
 			}
 		}
+
 	}
 
 	protected boolean shouldIndexTextComponentOfToken(RuntimeSearchParam theSearchParam) {
@@ -714,7 +728,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		if ("Coding".equals(nextType)) {
 			String system = extractValueAsString(myCodingSystemValueChild, theValue);
 			String code = extractValueAsString(myCodingCodeValueChild, theValue);
-			return createTokenIndexIfNotBlank(theResourceType, theSearchParam, system, code);
+			return createTokenIndexIfNotBlank(theResourceType, system, code, theSearchParam.getName());
 		} else {
 			return null;
 		}
@@ -733,7 +747,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	private void addToken_ContactPoint(String theResourceType, Set<BaseResourceIndexedSearchParam> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
 		String system = extractValueAsString(myContactPointSystemValueChild, theValue);
 		String value = extractValueAsString(myContactPointValueValueChild, theValue);
-		createTokenIndexIfNotBlank(theResourceType, theParams, theSearchParam, system, value);
+		createTokenIndexIfNotBlankAndAdd(theResourceType, theParams, theSearchParam, system, value);
 	}
 
 	private void addToken_PatientCommunication(String theResourceType, Set<BaseResourceIndexedSearchParam> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
@@ -974,7 +988,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			.filter(param -> param.getParamType() != theSearchParamType)
 			.map(RuntimeSearchParam::getPath)
 			.filter(Objects::nonNull)
-			.anyMatch(path-> path.contains("resolve"));
+			.anyMatch(path -> path.contains("resolve"));
 	}
 
 	/**
@@ -989,9 +1003,9 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	private void cleanUpContainedResourceReferences(IBaseResource theResource, RestSearchParameterTypeEnum theSearchParamType, Collection<RuntimeSearchParam> searchParams) {
 		boolean havePathWithResolveExpression =
 			myModelConfig.isIndexOnContainedResources()
-			|| anySearchParameterUsesResolve(searchParams, theSearchParamType);
+				|| anySearchParameterUsesResolve(searchParams, theSearchParamType);
 
-		if (havePathWithResolveExpression) {
+		if (havePathWithResolveExpression && myContext.getParserOptions().isAutoContainReferenceTargetsWithNoId()) {
 			//TODO GGG/JA: At this point, if the Task.basedOn.reference.resource does _not_ have an ID, we will attempt to contain it internally. Wild
 			myContext.newTerser().containResources(theResource, FhirTerser.OptionsEnum.MODIFY_RESOURCE, FhirTerser.OptionsEnum.STORE_AND_REUSE_RESULTS);
 		}
@@ -1062,8 +1076,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		}
 	}
 
-	private void createTokenIndexIfNotBlank(String theResourceType, Set<BaseResourceIndexedSearchParam> theParams, RuntimeSearchParam theSearchParam, String theSystem, String theValue) {
-		ResourceIndexedSearchParamToken nextEntity = createTokenIndexIfNotBlank(theResourceType, theSearchParam, theSystem, theValue);
+	private void createTokenIndexIfNotBlankAndAdd(String theResourceType, Set<BaseResourceIndexedSearchParam> theParams, RuntimeSearchParam theSearchParam, String theSystem, String theValue) {
+		ResourceIndexedSearchParamToken nextEntity = createTokenIndexIfNotBlank(theResourceType, theSystem, theValue, theSearchParam.getName());
 		if (nextEntity != null) {
 			theParams.add(nextEntity);
 		}
@@ -1074,7 +1088,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		myPartitionSettings = thePartitionSettings;
 	}
 
-	private ResourceIndexedSearchParamToken createTokenIndexIfNotBlank(String theResourceType, RuntimeSearchParam theSearchParam, String theSystem, String theValue) {
+	private ResourceIndexedSearchParamToken createTokenIndexIfNotBlank(String theResourceType, String theSystem, String theValue, String searchParamName) {
 		String system = theSystem;
 		String value = theValue;
 		ResourceIndexedSearchParamToken nextEntity = null;
@@ -1086,7 +1100,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				value = value.substring(0, ResourceIndexedSearchParamToken.MAX_LENGTH);
 			}
 
-			nextEntity = new ResourceIndexedSearchParamToken(myPartitionSettings, theResourceType, theSearchParam.getName(), system, value);
+			nextEntity = new ResourceIndexedSearchParamToken(myPartitionSettings, theResourceType, searchParamName, system, value);
 		}
 
 		return nextEntity;
@@ -1103,8 +1117,51 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			if (!thePaths.contains("|") && !thePaths.contains(" or ")) {
 				return new String[]{thePaths};
 			}
-			return SPLIT.split(thePaths);
+			return splitOutOfParensOrs(thePaths);
 		}
+	}
+
+	/**
+	 * Iteratively splits a string on any ` or ` or | that is ** not** contained inside a set of parentheses. e.g.
+	 *
+	 * "Patient.select(a or b)" -->  ["Patient.select(a or b)"]
+	 * "Patient.select(a or b) or Patient.select(c or d )" --> ["Patient.select(a or b)", "Patient.select(c or d)"]
+	 * "Patient.select(a|b) or Patient.select(c or d )" --> ["Patient.select(a|b)", "Patient.select(c or d)"]
+	 * "Patient.select(b) | Patient.select(c)" -->  ["Patient.select(b)", "Patient.select(c)"]
+	 *
+	 * @param thePaths The string to split
+	 * @return The split string
+
+	 */
+	private String[] splitOutOfParensOrs(String thePaths) {
+		List<String> topLevelOrExpressions = splitOutOfParensToken(thePaths, " or ");
+		List<String> retVal = topLevelOrExpressions.stream()
+			.flatMap(s -> splitOutOfParensToken(s, "|").stream())
+			.collect(Collectors.toList());
+		return retVal.toArray(new String[retVal.size()]);
+	}
+
+	private List<String> splitOutOfParensToken(String thePath, String theToken) {
+		int tokenLength = theToken.length();
+		int index = thePath.indexOf(theToken);
+		int rightIndex = 0;
+		List<String> retVal = new ArrayList<>();
+		while (index > -1 ) {
+			String left = thePath.substring(rightIndex, index);
+			if (allParensHaveBeenClosed(left)) {
+				retVal.add(left);
+				rightIndex = index + tokenLength;
+			}
+			index = thePath.indexOf(theToken, index + tokenLength);
+		}
+		retVal.add(thePath.substring(rightIndex));
+		return retVal;
+	}
+
+	private boolean allParensHaveBeenClosed(String thePaths) {
+		int open = StringUtils.countMatches(thePaths, "(");
+		int close = StringUtils.countMatches(thePaths, ")");
+		return open == close;
 	}
 
 	private BigDecimal normalizeQuantityContainingTimeUnitsIntoDaysForNumberParam(String theSystem, String theCode, BigDecimal theValue) {
@@ -1237,6 +1294,93 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 		void extract(SearchParamSet<T> theParams, RuntimeSearchParam theSearchParam, IBase theValue, String thePath, boolean theWantLocalReferences);
 
+	}
+
+	/**
+	 * Note that this should only be called for R4+ servers. Prior to
+	 * R4 the paths could be separated by the word "or" or by a "|"
+	 * character, so we used a slower splitting mechanism.
+	 */
+	@Nonnull
+	public static String[] splitPathsR4(@Nonnull String thePaths) {
+		StringTokenizer tok = new StringTokenizer(thePaths, " |");
+		tok.setTrimmerMatcher(new StringTrimmingTrimmerMatcher());
+		return tok.getTokenArray();
+	}
+
+	public static boolean tokenTextIndexingEnabledForSearchParam(ModelConfig theModelConfig, RuntimeSearchParam theSearchParam) {
+		Optional<Boolean> noSuppressForSearchParam = theSearchParam.getExtensions(HapiExtensions.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING).stream()
+			.map(IBaseExtension::getValue)
+			.map(val -> (IPrimitiveType<?>) val)
+			.map(IPrimitiveType::getValueAsString)
+			.map(Boolean::parseBoolean)
+			.findFirst();
+
+		//if the SP doesn't care, use the system default.
+		if (!noSuppressForSearchParam.isPresent()) {
+			return !theModelConfig.isSuppressStringIndexingInTokens();
+			//If the SP does care, use its value.
+		} else {
+			boolean suppressForSearchParam = noSuppressForSearchParam.get();
+			ourLog.trace("Text indexing for SearchParameter {}: {}", theSearchParam.getName(), suppressForSearchParam);
+			return !suppressForSearchParam;
+		}
+	}
+
+	private static void addIgnoredType(FhirContext theCtx, String theType, Set<String> theIgnoredTypes) {
+		BaseRuntimeElementDefinition<?> elementDefinition = theCtx.getElementDefinition(theType);
+		if (elementDefinition != null) {
+			theIgnoredTypes.add(elementDefinition.getName());
+		}
+	}
+
+	protected static String extractValueAsString(BaseRuntimeChildDefinition theChildDefinition, IBase theElement) {
+		return theChildDefinition
+			.getAccessor()
+			.<IPrimitiveType<?>>getFirstValueOrNull(theElement)
+			.map(IPrimitiveType::getValueAsString)
+			.orElse(null);
+	}
+
+	protected static Date extractValueAsDate(BaseRuntimeChildDefinition theChildDefinition, IBase theElement) {
+		return theChildDefinition
+			.getAccessor()
+			.<IPrimitiveType<Date>>getFirstValueOrNull(theElement)
+			.map(IPrimitiveType::getValue)
+			.orElse(null);
+	}
+
+	protected static BigDecimal extractValueAsBigDecimal(BaseRuntimeChildDefinition theChildDefinition, IBase theElement) {
+		return theChildDefinition
+			.getAccessor()
+			.<IPrimitiveType<BigDecimal>>getFirstValueOrNull(theElement)
+			.map(IPrimitiveType::getValue)
+			.orElse(null);
+	}
+
+	@SuppressWarnings("unchecked")
+	protected static List<IPrimitiveType<Date>> extractValuesAsFhirDates(BaseRuntimeChildDefinition theChildDefinition, IBase theElement) {
+		return (List) theChildDefinition
+			.getAccessor()
+			.getValues(theElement);
+	}
+
+	protected static List<String> extractValuesAsStrings(BaseRuntimeChildDefinition theChildDefinition, IBase theValue) {
+		return theChildDefinition
+			.getAccessor()
+			.getValues(theValue)
+			.stream()
+			.map(t -> (IPrimitiveType) t)
+			.map(IPrimitiveType::getValueAsString)
+			.filter(StringUtils::isNotBlank)
+			.collect(Collectors.toList());
+	}
+
+	protected static <T extends Enum<?>> String extractSystem(IBaseEnumeration<T> theBoundCode) {
+		if (theBoundCode.getValue() != null) {
+			return theBoundCode.getEnumFactory().toSystem(theBoundCode.getValue());
+		}
+		return null;
 	}
 
 	private class ResourceLinkExtractor implements IExtractor<PathAndRef> {
@@ -1454,7 +1598,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				IBaseEnumeration<?> obj = (IBaseEnumeration<?>) value;
 				String system = extractSystem(obj);
 				String code = obj.getValueAsString();
-				BaseSearchParamExtractor.this.createTokenIndexIfNotBlank(myResourceTypeName, params, searchParam, system, code);
+				BaseSearchParamExtractor.this.createTokenIndexIfNotBlankAndAdd(myResourceTypeName, params, searchParam, system, code);
 				return;
 			}
 
@@ -1468,7 +1612,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					system = boundCode.getBinder().toSystemString(valueAsEnum);
 				}
 				String code = boundCode.getValueAsString();
-				BaseSearchParamExtractor.this.createTokenIndexIfNotBlank(myResourceTypeName, params, searchParam, system, code);
+				BaseSearchParamExtractor.this.createTokenIndexIfNotBlankAndAdd(myResourceTypeName, params, searchParam, system, code);
 				return;
 			}
 
@@ -1486,7 +1630,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					valueAsString = ((IIdType) value).getIdPart();
 				}
 
-				BaseSearchParamExtractor.this.createTokenIndexIfNotBlank(myResourceTypeName, params, searchParam, systemAsString, valueAsString);
+				BaseSearchParamExtractor.this.createTokenIndexIfNotBlankAndAdd(myResourceTypeName, params, searchParam, systemAsString, valueAsString);
 				return;
 			}
 
@@ -1545,86 +1689,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			myExtractor0.extract(theParams, theSearchParam, theValue, thePath, theWantLocalReferences);
 			myExtractor1.extract(theParams, theSearchParam, theValue, thePath, theWantLocalReferences);
 		}
-	}
-
-	@Nonnull
-	public static String[] splitPathsR4(@Nonnull String thePaths) {
-		return SPLIT_R4.split(thePaths);
-	}
-
-	public static boolean tokenTextIndexingEnabledForSearchParam(ModelConfig theModelConfig, RuntimeSearchParam theSearchParam) {
-		Optional<Boolean> noSuppressForSearchParam = theSearchParam.getExtensions(HapiExtensions.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING).stream()
-			.map(IBaseExtension::getValue)
-			.map(val -> (IPrimitiveType<?>) val)
-			.map(IPrimitiveType::getValueAsString)
-			.map(Boolean::parseBoolean)
-			.findFirst();
-
-		//if the SP doesn't care, use the system default.
-		if (!noSuppressForSearchParam.isPresent()) {
-			return !theModelConfig.isSuppressStringIndexingInTokens();
-			//If the SP does care, use its value.
-		} else {
-			boolean suppressForSearchParam = noSuppressForSearchParam.get();
-			ourLog.trace("Text indexing for SearchParameter {}: {}", theSearchParam.getName(), suppressForSearchParam);
-			return !suppressForSearchParam;
-		}
-	}
-
-	private static void addIgnoredType(FhirContext theCtx, String theType, Set<String> theIgnoredTypes) {
-		BaseRuntimeElementDefinition<?> elementDefinition = theCtx.getElementDefinition(theType);
-		if (elementDefinition != null) {
-			theIgnoredTypes.add(elementDefinition.getName());
-		}
-	}
-
-	private static String extractValueAsString(BaseRuntimeChildDefinition theChildDefinition, IBase theElement) {
-		return theChildDefinition
-			.getAccessor()
-			.<IPrimitiveType<?>>getFirstValueOrNull(theElement)
-			.map(IPrimitiveType::getValueAsString)
-			.orElse(null);
-	}
-
-	private static Date extractValueAsDate(BaseRuntimeChildDefinition theChildDefinition, IBase theElement) {
-		return theChildDefinition
-			.getAccessor()
-			.<IPrimitiveType<Date>>getFirstValueOrNull(theElement)
-			.map(IPrimitiveType::getValue)
-			.orElse(null);
-	}
-
-	private static BigDecimal extractValueAsBigDecimal(BaseRuntimeChildDefinition theChildDefinition, IBase theElement) {
-		return theChildDefinition
-			.getAccessor()
-			.<IPrimitiveType<BigDecimal>>getFirstValueOrNull(theElement)
-			.map(IPrimitiveType::getValue)
-			.orElse(null);
-	}
-
-	@SuppressWarnings("unchecked")
-	private static List<IPrimitiveType<Date>> extractValuesAsFhirDates(BaseRuntimeChildDefinition theChildDefinition, IBase theElement) {
-		return (List) theChildDefinition
-			.getAccessor()
-			.getValues(theElement);
-	}
-
-	private static List<String> extractValuesAsStrings(BaseRuntimeChildDefinition theChildDefinition, IBase theValue) {
-		return theChildDefinition
-			.getAccessor()
-			.getValues(theValue)
-			.stream()
-			.map(t -> (IPrimitiveType) t)
-			.map(IPrimitiveType::getValueAsString)
-			.filter(StringUtils::isNotBlank)
-			.collect(Collectors.toList());
-	}
-
-	private static <T extends Enum<?>> String extractSystem(IBaseEnumeration<T> theBoundCode) {
-		if (theBoundCode.getValue() != null) {
-			return theBoundCode.getEnumFactory().toSystem(theBoundCode.getValue());
-		}
-		return null;
 	}
 
 }

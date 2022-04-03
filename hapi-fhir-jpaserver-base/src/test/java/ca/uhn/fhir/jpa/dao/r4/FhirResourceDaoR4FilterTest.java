@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.IResourceProvenanceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -57,7 +58,7 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 			myPatientDao.search(map);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Error parsing _filter syntax: Expression did not terminate at 13", e.getMessage());
+			assertEquals(Msg.code(1221) + "Error parsing _filter syntax: " + Msg.code(1056) + "Expression did not terminate at 13", e.getMessage());
 		}
 	}
 
@@ -212,7 +213,7 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		try {
 			myPatientDao.search(map);
 		} catch (InvalidRequestException e) {
-			assertEquals("_filter parameter is disabled on this server", e.getMessage());
+			assertEquals(Msg.code(1222) + "_filter parameter is disabled on this server", e.getMessage());
 		}
 	}
 
@@ -343,28 +344,6 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		map.add(Constants.PARAM_FILTER, new StringParam("(subject ne " + ptId.getIdPart() + ") and (performer ne " + ptId2.getValue() + ")"));
 		found = toUnqualifiedVersionlessIdValues(myCarePlanDao.search(map));
 		assertThat(found, empty());
-
-	}
-
-
-	@Test
-	public void testLanguageComparatorEq() {
-
-		Patient p = new Patient();
-		p.setLanguage("en");
-		p.addName().setFamily("Smith").addGiven("John");
-		p.setBirthDateElement(new DateType("1955-01-01"));
-		p.setActive(true);
-		String id1 = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
-
-		SearchParameterMap map;
-		List<String> found;
-
-		map = new SearchParameterMap();
-		map.setLoadSynchronous(true);
-		map.add(Constants.PARAM_FILTER, new StringParam("_language eq en"));
-		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, containsInAnyOrder(id1));
 
 	}
 
@@ -1254,7 +1233,7 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		try {
 			myPatientDao.search(map);
 		} catch (InvalidRequestException e) {
-			assertEquals("Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _language, _lastUpdated, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
+			assertEquals(Msg.code(1206) + "Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_content, _id, _lastUpdated, _profile, _security, _source, _tag, _text, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
 		}
 	}
 

@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
@@ -67,7 +66,7 @@ public class QuestionnaireResponseValidatorR5Test {
 	private static final String CODE_ICC_SCHOOLTYPE_PT = "PT";
 	private static final String ID_VS_SCHOOLTYPE = "ValueSet/schooltype";
 	private static final String SYSTEMURI_ICC_SCHOOLTYPE = "http://ehealthinnovation/icc/ns/schooltype";
-	private static FhirContext ourCtx = FhirContext.forR5();
+	private static final FhirContext ourCtx = FhirContext.forR5Cached();
 	private static DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport(ourCtx);
 	private FhirInstanceValidator myInstanceVal;
 	private FhirValidator myVal;
@@ -180,11 +179,13 @@ public class QuestionnaireResponseValidatorR5Test {
 
 			when(myValSupport.fetchResource(eq(Questionnaire.class),
 				eq(qa.getQuestionnaire()))).thenReturn(q);
+			when(myValSupport.validateCode(any(), any(), any(), any(), any(), nullable(String.class)))
+				.thenReturn(new IValidationSupport.CodeValidationResult().setCode("code0"));
 
 			ValidationResult errors = myVal.validateWithResult(qa);
 
 			ourLog.info(errors.toString());
-			assertThat("index[" + i + "]: " + errors.toString(), errors.getMessages(), empty());
+			assertThat("index[" + i + "]: " + errors, errors.getMessages(), empty());
 		}
 	}
 
@@ -386,9 +387,14 @@ public class QuestionnaireResponseValidatorR5Test {
 		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 		qa.setStatus(QuestionnaireResponseStatus.INPROGRESS);
 		qa.setQuestionnaire(questionnaireRef);
-		qa.addItem().setLinkId("link1")
+		qa.addItem()
+			.setLinkId("link1")
 			.addAnswer()
-			.addItem().setLinkId("link11");
+			.setValue(new Coding(codeSystemUrl, codeValue, null))
+			.addItem()
+			.setLinkId("link11")
+			.addAnswer()
+			.setValue(new StringType("foo"));
 
 		String rXml = xmlParser.encodeResourceToString(qa);
 		ourLog.info(rXml);
@@ -442,9 +448,14 @@ public class QuestionnaireResponseValidatorR5Test {
 		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 		qa.setStatus(QuestionnaireResponseStatus.INPROGRESS);
 		qa.setQuestionnaire(questionnaireRef);
-		qa.addItem().setLinkId("link1")
+		qa.addItem()
+			.setLinkId("link1")
 			.addAnswer()
-			.addItem().setLinkId("link11");
+			.setValue(new Coding(codeSystemUrl, codeValue, null))
+			.addItem()
+			.setLinkId("link11")
+			.addAnswer()
+			.setValue(new StringType("foo"));
 
 		String rXml = xmlParser.encodeResourceToString(qa);
 		ourLog.info(rXml);
@@ -483,7 +494,11 @@ public class QuestionnaireResponseValidatorR5Test {
 		qa.setQuestionnaire(questionnaireRef);
 		qa.addItem().setLinkId("link1")
 			.addAnswer()
-			.addItem().setLinkId("link11");
+			.setValue(new StringType("FOO"))
+			.addItem()
+			.setLinkId("link11")
+			.addAnswer()
+			.setValue(new StringType("BAR"));
 
 		String rXml = xmlParser.encodeResourceToString(qa);
 		ourLog.info(rXml);
@@ -715,7 +730,6 @@ public class QuestionnaireResponseValidatorR5Test {
 	public static void afterClassClearContext() {
 		myDefaultValidationSupport.flush();
 		myDefaultValidationSupport = null;
-		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 

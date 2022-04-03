@@ -38,14 +38,13 @@ import java.util.Set;
  * Basic Bulk Export implementation which simply reads all type filters and applies them, along with the _since param
  * on a given resource type.
  */
-public class BulkItemReader extends BaseBulkItemReader {
+public class BulkItemReader extends BaseJpaBulkItemReader {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	@Override
 	protected Iterator<ResourcePersistentId> getResourcePidIterator() {
 		ourLog.info("Bulk export assembling export of type {} for job {}", myResourceType, myJobUUID);
 		Set<ResourcePersistentId> myReadPids = new HashSet<>();
-
 
 		List<SearchParameterMap> map = createSearchParameterMapsForResourceType();
 		ISearchBuilder sb = getSearchBuilderForLocalResourceType();

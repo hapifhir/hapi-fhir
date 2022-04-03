@@ -78,8 +78,7 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		CodingDt coding = null;
 		CodeableConceptDt codeableConcept = null;
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
-		//TODO JA, from what I read, this _should_ pass, but this was flipped to false in a previous commit.
-		assertTrue(result.isOk());
+		assertFalse(result.isOk());
 	}
 
 	@Test
@@ -107,8 +106,8 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		CodeableConceptDt codeableConcept = null;
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertFalse(result.isOk());
+		assertEquals("Concept Display \"Systolic blood pressure at First encounterXXXX\" does not match expected \"Systolic blood pressure at First encounter\" for in-memory expansion of ValueSet: http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", result.getMessage());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
-		assertEquals("Concept Display \"Systolic blood pressure at First encounterXXXX\" does not match expected \"Systolic blood pressure at First encounter\"", result.getMessage());
 	}
 
 	@Test
@@ -158,7 +157,7 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		String resp;
 
 		ValueSet expanded = myValueSetDao.expand(myExtensionalVsId, null, mySrd);
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		// @formatter:off
 		assertThat(resp,
@@ -183,7 +182,7 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		 */
 
 		expanded = myValueSetDao.expand(myExtensionalVsId, new ValueSetExpansionOptions().setFilter("systolic"), mySrd);
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		//@formatter:off
 		assertThat(resp, stringContainsInOrder(
@@ -196,7 +195,7 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		 */
 
 		expanded = myValueSetDao.expand(myExtensionalVsId, new ValueSetExpansionOptions().setFilter("11378"), mySrd);
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		//@formatter:off
 		assertThat(resp, stringContainsInOrder(
@@ -208,7 +207,7 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 	@Test
 	public void testExpandByIdentifier() {
 		ValueSet expanded = myValueSetDao.expandByIdentifier("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", new ValueSetExpansionOptions().setFilter("11378"));
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		//@formatter:off
 		assertThat(resp, stringContainsInOrder(
@@ -223,7 +222,7 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 	public void testExpandByValueSet() throws IOException {
 		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-2.xml");
 		ValueSet expanded = myValueSetDao.expand(toExpand, new ValueSetExpansionOptions().setFilter("11378"));
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		//@formatter:off
 		assertThat(resp, stringContainsInOrder(

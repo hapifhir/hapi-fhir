@@ -1,10 +1,9 @@
 package ca.uhn.fhir.jpa.search.lastn;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.util.CodeSystemHash;
-import ca.uhn.fhir.jpa.search.lastn.config.TestElasticsearchContainerHelper;
+import ca.uhn.fhir.jpa.search.elastic.TestElasticsearchContainerHelper;
 import ca.uhn.fhir.jpa.search.lastn.json.CodeJson;
 import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -18,32 +17,51 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.IOException;
-import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
-import static java.time.temporal.ChronoUnit.SECONDS;
+import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.CATEGORYFIRSTCODINGSYSTEM;
+import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.CATEGORYSECONDCODINGSYSTEM;
+import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.CATEGORYTHIRDCODINGSYSTEM;
+import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.CODEFIRSTCODINGCODE;
+import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.CODEFIRSTCODINGDISPLAY;
+import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.CODEFIRSTCODINGSYSTEM;
+import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.FIRSTCATEGORYFIRSTCODINGCODE;
+import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.FIRSTCATEGORYFIRSTCODINGDISPLAY;
+import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.FIRSTCATEGORYSECONDCODINGCODE;
+import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.FIRSTCATEGORYSECONDCODINGDISPLAY;
+import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.FIRSTCATEGORYTEXT;
+import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.FIRSTCATEGORYTHIRDCODINGCODE;
+import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.FIRSTCATEGORYTHIRDCODINGDISPLAY;
+import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.OBSERVATIONSINGLECODEID;
+import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.OBSERVATION_CODE_CONCEPT_TEXT_1;
+import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.SECONDCATEGORYFIRSTCODINGCODE;
+import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.SECONDCATEGORYFIRSTCODINGDISPLAY;
+import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.SECONDCATEGORYSECONDCODINGCODE;
+import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.SECONDCATEGORYSECONDCODINGDISPLAY;
+import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.SECONDCATEGORYTEXT;
+import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.SECONDCATEGORYTHIRDCODINGCODE;
+import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.SECONDCATEGORYTHIRDCODINGDISPLAY;
+import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.SINGLE_OBSERVATION_RESOURCE_PID;
+import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.SINGLE_OBSERVATION_SUBJECT_ID;
+import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.TEST_BASELINE_TIMESTAMP;
+import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.THIRDCATEGORYFIRSTCODINGCODE;
+import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.THIRDCATEGORYFIRSTCODINGDISPLAY;
+import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.THIRDCATEGORYSECONDCODINGCODE;
+import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.THIRDCATEGORYSECONDCODINGDISPLAY;
+import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.THIRDCATEGORYTEXT;
+import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.THIRDCATEGORYTHIRDCODINGCODE;
+import static ca.uhn.fhir.jpa.search.lastn.LastNTestDataGenerator.THIRDCATEGORYTHIRDCODINGDISPLAY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -52,40 +70,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Testcontainers
 public class LastNElasticsearchSvcSingleObservationIT {
 
-	static ObjectMapper ourMapperNonPrettyPrint;
-	final String RESOURCEPID = "123";
-	final String SUBJECTID = "Patient/4567";
-	final Date EFFECTIVEDTM = new Date();
-	final String FIRSTCATEGORYTEXT = "Test Codeable Concept Field for first category";
-	final String CATEGORYFIRSTCODINGSYSTEM = "http://mycodes.org/fhir/observation-category";
-	final String CATEGORYSECONDCODINGSYSTEM = "http://myalternatecodes.org/fhir/observation-category";
-	final String CATEGORYTHIRDCODINGSYSTEM = "http://mysecondaltcodes.org/fhir/observation-category";
-	final String FIRSTCATEGORYFIRSTCODINGCODE = "test-heart-rate";
-	final String FIRSTCATEGORYFIRSTCODINGDISPLAY = "test-heart-rate display";
-	final String FIRSTCATEGORYSECONDCODINGCODE = "test-alt-heart-rate";
-	final String FIRSTCATEGORYSECONDCODINGDISPLAY = "test-alt-heart-rate display";
-	final String FIRSTCATEGORYTHIRDCODINGCODE = "test-2nd-alt-heart-rate";
-	final String FIRSTCATEGORYTHIRDCODINGDISPLAY = "test-2nd-alt-heart-rate display";
-	final String SECONDCATEGORYTEXT = "Test Codeable Concept Field for for second category";
-	final String SECONDCATEGORYFIRSTCODINGCODE = "test-vital-signs";
-	final String SECONDCATEGORYFIRSTCODINGDISPLAY = "test-vital-signs display";
-	final String SECONDCATEGORYSECONDCODINGCODE = "test-alt-vitals";
-	final String SECONDCATEGORYSECONDCODINGDISPLAY = "test-alt-vitals display";
-	final String SECONDCATEGORYTHIRDCODINGCODE = "test-2nd-alt-vitals";
-	final String SECONDCATEGORYTHIRDCODINGDISPLAY = "test-2nd-alt-vitals display";
-	final String THIRDCATEGORYTEXT = "Test Codeable Concept Field for third category";
-	final String THIRDCATEGORYFIRSTCODINGCODE = "test-vital-panel";
-	final String THIRDCATEGORYFIRSTCODINGDISPLAY = "test-vitals-panel display";
-	final String THIRDCATEGORYSECONDCODINGCODE = "test-alt-vitals-panel";
-	final String THIRDCATEGORYSECONDCODINGDISPLAY = "test-alt-vitals display";
-	final String THIRDCATEGORYTHIRDCODINGCODE = "test-2nd-alt-vitals-panel";
-	final String THIRDCATEGORYTHIRDCODINGDISPLAY = "test-2nd-alt-vitals-panel display";
-	final String OBSERVATIONSINGLECODEID = UUID.randomUUID().toString();
-	final String OBSERVATIONCODETEXT = "Test Codeable Concept Field for Code";
-	final String CODEFIRSTCODINGSYSTEM = "http://mycodes.org/fhir/observation-code";
-	final String CODEFIRSTCODINGCODE = "test-code";
-	final String CODEFIRSTCODINGDISPLAY = "test-code display";
-	final FhirContext myFhirContext = FhirContext.forCached(FhirVersionEnum.R4);
+	private final FhirContext myFhirContext = FhirContext.forR4Cached();
 
 	ElasticsearchSvcImpl elasticsearchSvc;
 
@@ -97,7 +82,7 @@ public class LastNElasticsearchSvcSingleObservationIT {
 	public void before() {
 		PartitionSettings partitionSettings = new PartitionSettings();
 		partitionSettings.setPartitioningEnabled(false);
-		elasticsearchSvc = new ElasticsearchSvcImpl(partitionSettings, elasticsearchContainer.getHost(), elasticsearchContainer.getMappedPort(9200), "", "");
+		elasticsearchSvc = new ElasticsearchSvcImpl(partitionSettings, "http", elasticsearchContainer.getHost() + ":" + elasticsearchContainer.getMappedPort(9200), "", "");
 	}
 
 	@AfterEach
@@ -111,16 +96,22 @@ public class LastNElasticsearchSvcSingleObservationIT {
 	@Test
 	public void testSingleObservationQuery() throws IOException {
 
-		createSingleObservation();
+		// Create test observation
+		ObservationJson indexedObservation = LastNTestDataGenerator.createSingleObservationJson();
+		assertTrue(elasticsearchSvc.createOrUpdateObservationIndex(SINGLE_OBSERVATION_RESOURCE_PID, indexedObservation));
+		assertTrue(elasticsearchSvc.createOrUpdateObservationCodeIndex(OBSERVATIONSINGLECODEID, indexedObservation.getCode()));
+
+		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
+		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
 
 		SearchParameterMap searchParameterMap = new SearchParameterMap();
-		ReferenceParam subjectParam = new ReferenceParam("Patient", "", SUBJECTID);
+		ReferenceParam subjectParam = new ReferenceParam("Patient", "", SINGLE_OBSERVATION_SUBJECT_ID);
 		searchParameterMap.add(Observation.SP_SUBJECT, new ReferenceAndListParam().addAnd(new ReferenceOrListParam().addOr(subjectParam)));
 		TokenParam categoryParam = new TokenParam(CATEGORYFIRSTCODINGSYSTEM, FIRSTCATEGORYFIRSTCODINGCODE);
 		searchParameterMap.add(Observation.SP_CATEGORY, new TokenAndListParam().addAnd(new TokenOrListParam().addOr(categoryParam)));
 		TokenParam codeParam = new TokenParam(CODEFIRSTCODINGSYSTEM, CODEFIRSTCODINGCODE);
 		searchParameterMap.add(Observation.SP_CODE, new TokenAndListParam().addAnd(new TokenOrListParam().addOr(codeParam)));
-		searchParameterMap.add(Observation.SP_DATE, new DateParam(ParamPrefixEnum.EQUAL, EFFECTIVEDTM));
+		searchParameterMap.add(Observation.SP_DATE, new DateParam(ParamPrefixEnum.EQUAL, new Date(TEST_BASELINE_TIMESTAMP)));
 
 		searchParameterMap.setLastNMax(3);
 
@@ -128,7 +119,7 @@ public class LastNElasticsearchSvcSingleObservationIT {
 		List<String> observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, myFhirContext, 100);
 
 		assertEquals(1, observationIdsOnly.size());
-		assertEquals(RESOURCEPID, observationIdsOnly.get(0));
+		assertEquals(SINGLE_OBSERVATION_RESOURCE_PID, observationIdsOnly.get(0));
 
 		// execute Observation search for all search fields
 		List<ObservationJson> observations = elasticsearchSvc.executeLastNWithAllFieldsForTest(searchParameterMap, myFhirContext);
@@ -140,11 +131,11 @@ public class LastNElasticsearchSvcSingleObservationIT {
 
 		assertEquals(1, observations.size());
 		ObservationJson observation = observations.get(0);
-		assertEquals(RESOURCEPID, observation.getIdentifier());
+		assertEquals(SINGLE_OBSERVATION_RESOURCE_PID, observation.getIdentifier());
 
-		assertEquals(SUBJECTID, observation.getSubject());
-		assertEquals(RESOURCEPID, observation.getIdentifier());
-		assertEquals(EFFECTIVEDTM, observation.getEffectiveDtm());
+		assertEquals(SINGLE_OBSERVATION_SUBJECT_ID, observation.getSubject());
+		assertEquals(SINGLE_OBSERVATION_RESOURCE_PID, observation.getIdentifier());
+		assertEquals(new Date(TEST_BASELINE_TIMESTAMP), observation.getEffectiveDtm());
 		assertEquals(OBSERVATIONSINGLECODEID, observation.getCode_concept_id());
 
 		List<String> category_concept_text_values = observation.getCategory_concept_text();
@@ -224,7 +215,7 @@ public class LastNElasticsearchSvcSingleObservationIT {
 		assertEquals(String.valueOf(CodeSystemHash.hashCodeSystem(CATEGORYTHIRDCODINGSYSTEM, THIRDCATEGORYTHIRDCODINGCODE)), category_coding_code_system_hashes.get(2));
 
 		String code_concept_text_values = observation.getCode_concept_text();
-		assertEquals(OBSERVATIONCODETEXT, code_concept_text_values);
+		assertEquals(OBSERVATION_CODE_CONCEPT_TEXT_1, code_concept_text_values);
 
 		String code_coding_systems = observation.getCode_coding_system();
 		assertEquals(CODEFIRSTCODINGSYSTEM, code_coding_systems);
@@ -246,7 +237,7 @@ public class LastNElasticsearchSvcSingleObservationIT {
 		String persistedCodeConceptID = persistedObservationCode.getCodeableConceptId();
 		assertEquals(OBSERVATIONSINGLECODEID, persistedCodeConceptID);
 		String persistedCodeConceptText = persistedObservationCode.getCodeableConceptText();
-		assertEquals(OBSERVATIONCODETEXT, persistedCodeConceptText);
+		assertEquals(OBSERVATION_CODE_CONCEPT_TEXT_1, persistedCodeConceptText);
 
 		List<String> persistedCodeCodingSystems = persistedObservationCode.getCoding_system();
 		assertEquals(1, persistedCodeCodingSystems.size());
@@ -264,63 +255,6 @@ public class LastNElasticsearchSvcSingleObservationIT {
 		assertEquals(1, persistedCodeCodingCodeSystemHashes.size());
 		assertEquals(String.valueOf(CodeSystemHash.hashCodeSystem(CODEFIRSTCODINGSYSTEM, CODEFIRSTCODINGCODE)), persistedCodeCodingCodeSystemHashes.get(0));
 
-
-	}
-
-	private void createSingleObservation() throws IOException {
-		ObservationJson indexedObservation = new ObservationJson();
-		indexedObservation.setIdentifier(RESOURCEPID);
-		indexedObservation.setSubject(SUBJECTID);
-		indexedObservation.setEffectiveDtm(EFFECTIVEDTM);
-
-		// Add three CodeableConcepts for category
-		List<CodeJson> categoryConcepts = new ArrayList<>();
-		// Create three codings and first category CodeableConcept
-		CodeJson categoryCodeableConcept1 = new CodeJson();
-		categoryCodeableConcept1.setCodeableConceptText(FIRSTCATEGORYTEXT);
-		categoryCodeableConcept1.addCoding(CATEGORYFIRSTCODINGSYSTEM, FIRSTCATEGORYFIRSTCODINGCODE, FIRSTCATEGORYFIRSTCODINGDISPLAY);
-		categoryCodeableConcept1.addCoding(CATEGORYSECONDCODINGSYSTEM, FIRSTCATEGORYSECONDCODINGCODE, FIRSTCATEGORYSECONDCODINGDISPLAY);
-		categoryCodeableConcept1.addCoding(CATEGORYTHIRDCODINGSYSTEM, FIRSTCATEGORYTHIRDCODINGCODE, FIRSTCATEGORYTHIRDCODINGDISPLAY);
-		categoryConcepts.add(categoryCodeableConcept1);
-		// Create three codings and second category CodeableConcept
-		CodeJson categoryCodeableConcept2 = new CodeJson();
-		categoryCodeableConcept2.setCodeableConceptText(SECONDCATEGORYTEXT);
-		categoryCodeableConcept2.addCoding(CATEGORYFIRSTCODINGSYSTEM, SECONDCATEGORYFIRSTCODINGCODE, SECONDCATEGORYFIRSTCODINGDISPLAY);
-		categoryCodeableConcept2.addCoding(CATEGORYSECONDCODINGSYSTEM, SECONDCATEGORYSECONDCODINGCODE, SECONDCATEGORYSECONDCODINGDISPLAY);
-		categoryCodeableConcept2.addCoding(CATEGORYTHIRDCODINGSYSTEM, SECONDCATEGORYTHIRDCODINGCODE, SECONDCATEGORYTHIRDCODINGDISPLAY);
-
-		categoryConcepts.add(categoryCodeableConcept2);
-		// Create three codings and third category CodeableConcept
-		CodeJson categoryCodeableConcept3 = new CodeJson();
-		categoryCodeableConcept3.setCodeableConceptText(THIRDCATEGORYTEXT);
-		categoryCodeableConcept3.addCoding(CATEGORYFIRSTCODINGSYSTEM, THIRDCATEGORYFIRSTCODINGCODE, THIRDCATEGORYFIRSTCODINGDISPLAY);
-		categoryCodeableConcept3.addCoding(CATEGORYSECONDCODINGSYSTEM, THIRDCATEGORYSECONDCODINGCODE, THIRDCATEGORYSECONDCODINGDISPLAY);
-		categoryCodeableConcept3.addCoding(CATEGORYTHIRDCODINGSYSTEM, THIRDCATEGORYTHIRDCODINGCODE, THIRDCATEGORYTHIRDCODINGDISPLAY);
-		categoryConcepts.add(categoryCodeableConcept3);
-		indexedObservation.setCategories(categoryConcepts);
-
-		// Create CodeableConcept for Code with three codings.
-		indexedObservation.setCode_concept_id(OBSERVATIONSINGLECODEID);
-		CodeJson codeableConceptField = new CodeJson();
-		codeableConceptField.setCodeableConceptText(OBSERVATIONCODETEXT);
-		codeableConceptField.addCoding(CODEFIRSTCODINGSYSTEM, CODEFIRSTCODINGCODE, CODEFIRSTCODINGDISPLAY);
-		indexedObservation.setCode(codeableConceptField);
-
-		assertTrue(elasticsearchSvc.createOrUpdateObservationIndex(RESOURCEPID, indexedObservation));
-
-		codeableConceptField.setCodeableConceptId(OBSERVATIONSINGLECODEID);
-		assertTrue(elasticsearchSvc.createOrUpdateObservationCodeIndex(OBSERVATIONSINGLECODEID, codeableConceptField));
-
-		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
-		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
-	}
-
-	@BeforeAll
-	public static void beforeClass() {
-		ourMapperNonPrettyPrint = new ObjectMapper();
-		ourMapperNonPrettyPrint.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-		ourMapperNonPrettyPrint.disable(SerializationFeature.INDENT_OUTPUT);
-		ourMapperNonPrettyPrint.disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
 
 	}
 

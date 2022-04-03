@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.ValueSet;
@@ -47,7 +48,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 			.andParameter("system", new UriDt("http://loinc.org"))
 			.execute();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals(new BooleanDt(true), respParam.getParameter().get(0).getValue());
@@ -63,7 +64,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 			.andParameter("system", new UriDt("http://loinc.org"))
 			.execute();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
@@ -85,7 +86,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 			.andParameter("system", new UriDt("http://hl7.org/fhir/v3/MaritalStatus"))
 			.execute();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
@@ -105,7 +106,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 			.withParameter(Parameters.class, "coding", new CodingDt("http://loinc.org", "8450-9"))
 			.execute();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
@@ -129,7 +130,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: $lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(950) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
 		}
 	}
 
@@ -145,7 +146,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: $lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(950) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
 		}
 	}
 
@@ -160,7 +161,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: No code, coding, or codeableConcept provided to validate", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(949) + "No code, coding, or codeableConcept provided to validate", e.getMessage());
 		}
 	}
 
@@ -174,7 +175,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp,
 			stringContainsInOrder("<ValueSet xmlns=\"http://hl7.org/fhir\">",
@@ -205,7 +206,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		expanded = myValueSetDao.expand(myExtensionalVsId, new ValueSetExpansionOptions().setFilter("systolic"), mySrd);
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, stringContainsInOrder(
 			"<code value=\"11378-7\"/>",
@@ -222,7 +223,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 			.withParameter(Parameters.class, "filter", new StringDt("11378"))
 			.execute();
 		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, stringContainsInOrder(
 			"<code value=\"11378-7\"/>",
@@ -240,7 +241,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, stringContainsInOrder(
 			"<code value=\"11378-7\"/>",
@@ -262,7 +263,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, stringContainsInOrder(
 			"<code value=\"11378-7\"/>",
@@ -282,7 +283,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: $expand operation at the type level (no ID specified) requires an identifier or a valueSet as a part of the request", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1130) + "$expand operation at the type level (no ID specified) requires an identifier or a valueSet as a part of the request", e.getMessage());
 		}
 
 		try {
@@ -296,7 +297,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: $expand must EITHER be invoked at the type level, or have an identifier specified, or have a ValueSet specified. Can not combine these options.", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1131) + "$expand must EITHER be invoked at the type level, or have an identifier specified, or have a ValueSet specified. Can not combine these options.", e.getMessage());
 		}
 
 		try {
@@ -310,7 +311,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: $expand must EITHER be invoked at the type level, or have an identifier specified, or have a ValueSet specified. Can not combine these options.", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1131) + "$expand must EITHER be invoked at the type level, or have an identifier specified, or have a ValueSet specified. Can not combine these options.", e.getMessage());
 		}
 
 	}

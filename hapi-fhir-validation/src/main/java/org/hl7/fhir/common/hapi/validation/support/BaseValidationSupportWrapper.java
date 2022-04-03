@@ -62,13 +62,18 @@ public class BaseValidationSupportWrapper extends BaseValidationSupport {
 	}
 
 	@Override
-	public CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public CodeValidationResult validateCode(@Nonnull ValidationSupportContext theValidationSupportContext, @Nonnull ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		return myWrap.validateCode(theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, theValueSetUrl);
 	}
 
 	@Override
-	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
-		return myWrap.lookupCode(theValidationSupportContext, theSystem, theCode);
+	public IValidationSupport.CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theValidationOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
+		return myWrap.validateCodeInValueSet(theValidationSupportContext, theValidationOptions, theCodeSystem, theCode, theDisplay, theValueSet);
+	}
+
+	@Override
+	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode, String theDisplayLanguage) {
+		return myWrap.lookupCode(theValidationSupportContext, theSystem, theCode, theDisplayLanguage);
 	}
 
 	@Override
@@ -100,11 +105,6 @@ public class BaseValidationSupportWrapper extends BaseValidationSupport {
 	@Override
 	public IBaseResource generateSnapshot(ValidationSupportContext theValidationSupportContext, IBaseResource theInput, String theUrl, String theWebUrl, String theProfileName) {
 		return myWrap.generateSnapshot(theValidationSupportContext, theInput, theUrl, theWebUrl, theProfileName);
-	}
-
-	@Override
-	public IValidationSupport.CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theValidationOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
-		return myWrap.validateCodeInValueSet(theValidationSupportContext, theValidationOptions, theCodeSystem, theCode, theDisplay, theValueSet);
 	}
 
 	@Override

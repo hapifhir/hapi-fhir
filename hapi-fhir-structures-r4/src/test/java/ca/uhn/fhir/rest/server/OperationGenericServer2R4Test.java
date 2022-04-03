@@ -2,6 +2,7 @@ package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -32,11 +33,11 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.servlet.ServletException;
 import java.nio.charset.StandardCharsets;
@@ -213,7 +214,7 @@ public class OperationGenericServer2R4Test {
 			fail();
 		} catch (ServletException e) {
 			ConfigurationException ce = (ConfigurationException) e.getCause();
-			assertThat(ce.getMessage(), containsString("Failure scanning class PatientProvider: Non assignable parameter typeName=\"code\" specified on method public org.hl7.fhir.r4.model.Parameters ca.uhn.fhir.rest.server.OperationGenericServer2R4Test"));
+			assertThat(ce.getMessage(), containsString("Failure scanning class PatientProvider: " + Msg.code(405) + "Non assignable parameter typeName=\"code\" specified on method public org.hl7.fhir.r4.model.Parameters ca.uhn.fhir.rest.server.OperationGenericServer2R4Test"));
 		}
 	}
 
@@ -273,7 +274,7 @@ public class OperationGenericServer2R4Test {
 			fail();
 		} catch (ServletException e) {
 			Throwable cause = e.getRootCause();
-			assertEquals("Failure scanning class PlainProvider: Failed to bind method public org.hl7.fhir.r4.model.Parameters ca.uhn.fhir.rest.server.OperationGenericServer2R4Test$2PlainProvider.opInstance() - Unknown resource name \"FOO\" (this name is not known in FHIR version \"R4\")", cause.getMessage());
+			assertEquals(Msg.code(288) + "Failure scanning class PlainProvider: " + Msg.code(423) +  "Failed to bind method public org.hl7.fhir.r4.model.Parameters ca.uhn.fhir.rest.server.OperationGenericServer2R4Test$2PlainProvider.opInstance() - " + Msg.code(1684) + "Unknown resource name \"FOO\" (this name is not known in FHIR version \"R4\")", cause.getMessage());
 		}
 	}
 
@@ -304,7 +305,7 @@ public class OperationGenericServer2R4Test {
 
 	@AfterAll
 	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 	@BeforeAll

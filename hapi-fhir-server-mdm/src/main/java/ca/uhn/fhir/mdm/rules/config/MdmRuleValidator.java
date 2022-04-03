@@ -20,6 +20,7 @@ package ca.uhn.fhir.mdm.rules.config;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -43,6 +44,7 @@ import org.springframework.stereotype.Service;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -73,14 +75,47 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 		validateMdmTypes(theMdmRules);
 		validateSearchParams(theMdmRules);
 		validateMatchFields(theMdmRules);
-		validateSystemIsUri(theMdmRules);
+		validateSystemsAreUris(theMdmRules);
+		validateEidSystemsMatchMdmTypes(theMdmRules);
+	}
+
+	private void validateEidSystemsMatchMdmTypes(MdmRulesJson theMdmRules) {
+		theMdmRules.getEnterpriseEIDSystems().keySet()
+			.forEach(key -> {
+				//Ensure each key is either * or a valid resource type.
+				if (!key.equalsIgnoreCase("*") && !theMdmRules.getMdmTypes().contains(key)) {
+					throw new ConfigurationException(Msg.code(1507) + String.format("There is an eidSystem set for [%s] but that is not one of the mdmTypes. Valid options are [%s].", key, buildValidEidKeysMessage(theMdmRules)));
+				}
+			});
+	}
+
+	private String buildValidEidKeysMessage(MdmRulesJson theMdmRulesJson) {
+		List<String> validTypes = new ArrayList<>(theMdmRulesJson.getMdmTypes());
+		validTypes.add("*");
+		return String.join(", ", validTypes);
+	}
+
+	private void validateSystemsAreUris(MdmRulesJson theMdmRules) {
+		theMdmRules.getEnterpriseEIDSystems().entrySet()
+			.forEach(entry -> {
+				String resourceType = entry.getKey();
+				String uri = entry.getValue();
+				if (!resourceType.equals("*")) {
+					try {
+						myFhirContext.getResourceType(resourceType);
+					}catch (DataFormatException e) {
+						throw new ConfigurationException(Msg.code(1508) + String.format("%s is not a valid resource type, but is set in the eidSystems field.", resourceType));
+					}
+				}
+				validateIsUri(uri);
+			});
 	}
 
 	public void validateMdmTypes(MdmRulesJson theMdmRulesJson) {
 		ourLog.info("Validating MDM types {}", theMdmRulesJson.getMdmTypes());
 
 		if (theMdmRulesJson.getMdmTypes() == null) {
-			throw new ConfigurationException("mdmTypes must be set to a list of resource types.");
+			throw new ConfigurationException(Msg.code(1509) + "mdmTypes must be set to a list of resource types.");
 		}
 		for (String resourceType: theMdmRulesJson.getMdmTypes()) {
 			validateTypeHasIdentifier(resourceType);
@@ -89,7 +124,7 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 
 	public void validateTypeHasIdentifier(String theResourceType) {
 		if (mySearchParamRetriever.getActiveSearchParam(theResourceType, "identifier") == null) {
-			throw new ConfigurationException("Resource Type " + theResourceType + " is not supported, as it does not have an 'identifier' field, which is necessary for MDM workflow.");
+			throw new ConfigurationException(Msg.code(1510) + "Resource Type " + theResourceType + " is not supported, as it does not have an 'identifier' field, which is necessary for MDM workflow.");
 		}
 	}
 
@@ -116,7 +151,7 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 
 	private void validateResourceSearchParam(String theFieldName, String theResourceType, String theSearchParam) {
 		if (mySearchParamRetriever.getActiveSearchParam(theResourceType, theSearchParam) == null) {
-			throw new ConfigurationException("Error in " + theFieldName + ": " + theResourceType + " does not have a search parameter called '" + theSearchParam + "'");
+			throw new ConfigurationException(Msg.code(1511) + "Error in " + theFieldName + ": " + theResourceType + " does not have a search parameter called '" + theSearchParam + "'");
 		}
 	}
 
@@ -126,13 +161,13 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 		Set<String> names = new HashSet<>();
 		for (MdmFieldMatchJson fieldMatch : theMdmRulesJson.getMatchFields()) {
 			if (names.contains(fieldMatch.getName())) {
-				throw new ConfigurationException("Two MatchFields have the same name '" + fieldMatch.getName() + "'");
+				throw new ConfigurationException(Msg.code(1512) + "Two MatchFields have the same name '" + fieldMatch.getName() + "'");
 			}
 			names.add(fieldMatch.getName());
 			if (fieldMatch.getSimilarity() != null) {
 				validateSimilarity(fieldMatch);
 			} else if (fieldMatch.getMatcher() == null) {
-				throw new ConfigurationException("MatchField " + fieldMatch.getName() + " has neither a similarity nor a matcher.  At least one must be present.");
+				throw new ConfigurationException(Msg.code(1513) + "MatchField " + fieldMatch.getName() + " has neither a similarity nor a matcher.  At least one must be present.");
 			}
 			validatePath(theMdmRulesJson.getMdmTypes(), fieldMatch);
 		}
@@ -141,7 +176,7 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 	private void validateSimilarity(MdmFieldMatchJson theFieldMatch) {
 		MdmSimilarityJson similarity = theFieldMatch.getSimilarity();
 		if (similarity.getMatchThreshold() == null) {
-			throw new ConfigurationException("MatchField " + theFieldMatch.getName() + " similarity " + similarity.getAlgorithm() + " requires a matchThreshold");
+			throw new ConfigurationException(Msg.code(1514) + "MatchField " + theFieldMatch.getName() + " similarity " + similarity.getAlgorithm() + " requires a matchThreshold");
 		}
 	}
 
@@ -166,7 +201,7 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 		ourLog.debug("Validating resource {} for {} ", theResourceType, theFieldMatch.getResourcePath());
 
 		if (theFieldMatch.getFhirPath() != null && theFieldMatch.getResourcePath() != null) {
-			throw new ConfigurationException("MatchField [" +
+			throw new ConfigurationException(Msg.code(1515) + "MatchField [" +
 				theFieldMatch.getName() +
 				"] resourceType [" +
 				theFieldMatch.getResourceType() +
@@ -174,7 +209,7 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 		}
 
 		if (theFieldMatch.getResourcePath() == null && theFieldMatch.getFhirPath() == null) {
-			throw new ConfigurationException("MatchField [" +
+			throw new ConfigurationException(Msg.code(1516) + "MatchField [" +
 				theFieldMatch.getName() +
 					"] resourceType [" +
 					theFieldMatch.getResourceType() +
@@ -189,7 +224,7 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 				myTerser.getDefinition(implementingClass, path);
 			} catch (DataFormatException | ConfigurationException | ClassCastException e) {
 				//Fallback to attempting to FHIRPath evaluate it.
-				throw new ConfigurationException("MatchField " +
+				throw new ConfigurationException(Msg.code(1517) + "MatchField " +
 					theFieldMatch.getName() +
 					" resourceType " +
 					theFieldMatch.getResourceType() +
@@ -203,7 +238,7 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 					ourLog.debug("Can't validate FHIRPath expression due to a lack of IFhirPath object.");
 				}
 			} catch (Exception e) {
-				throw new ConfigurationException("MatchField [" + theFieldMatch.getName() + "] resourceType [" + theFieldMatch.getResourceType() + "] has failed FHIRPath evaluation.  " + e.getMessage());
+				throw new ConfigurationException(Msg.code(1518) + "MatchField [" + theFieldMatch.getName() + "] resourceType [" + theFieldMatch.getResourceType() + "] has failed FHIRPath evaluation.  " + e.getMessage());
 			}
 		}
 	}
@@ -212,17 +247,12 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 		validateFieldPathForType(theFieldMatch.getResourceType(), theFieldMatch);
 	}
 
-	private void validateSystemIsUri(MdmRulesJson theMdmRulesJson) {
-		if (theMdmRulesJson.getEnterpriseEIDSystem() == null) {
-			return;
-		}
-
-		ourLog.info("Validating system URI {}", theMdmRulesJson.getEnterpriseEIDSystem());
-
+	private void validateIsUri(String theUri) {
+		ourLog.info("Validating system URI {}", theUri);
 		try {
-			new URI(theMdmRulesJson.getEnterpriseEIDSystem());
+			new URI(theUri);
 		} catch (URISyntaxException e) {
-			throw new ConfigurationException("Enterprise Identifier System (eidSystem) must be a valid URI");
+			throw new ConfigurationException(Msg.code(1519) + "Enterprise Identifier System (eidSystem) must be a valid URI");
 		}
 	}
 }

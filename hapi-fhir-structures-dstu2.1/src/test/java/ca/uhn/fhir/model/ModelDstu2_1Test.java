@@ -1,6 +1,7 @@
 package ca.uhn.fhir.model;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu2016may.model.CodeableConcept;
 import org.hl7.fhir.dstu2016may.model.Element;
@@ -46,7 +47,7 @@ public class ModelDstu2_1Test {
 
 	@AfterAll
 	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 
@@ -65,7 +66,7 @@ public class ModelDstu2_1Test {
 		try {
 			ourCtx.newXmlParser().encodeResourceToString(p);
 		} catch (ClassCastException e) {
-			assertEquals("Found instance of class java.lang.String - Did you set a field value to the incorrect type? Expected org.hl7.fhir.instance.model.api.IBase", e.getMessage());
+			assertEquals(Msg.code(1794) + "Found instance of class java.lang.String - Did you set a field value to the incorrect type? Expected org.hl7.fhir.instance.model.api.IBase", e.getMessage());
 		}
 	}
 	

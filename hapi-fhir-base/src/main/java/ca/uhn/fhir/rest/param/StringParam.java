@@ -38,6 +38,8 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 	private boolean myExact;
 	private String myValue;
 
+	private Boolean myMdmExpand;
+
 	/**
 	 * Constructor
 	 */
@@ -73,6 +75,15 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 	@Override
 	String doGetValueAsQueryToken(FhirContext theContext) {
 		return ParameterUtil.escape(myValue);
+	}
+
+	public boolean isMdmExpand() {
+		return myMdmExpand != null && myMdmExpand;
+	}
+
+	public StringParam setMdmExpand(boolean theMdmExpand) {
+		myMdmExpand = theMdmExpand;
+		return this;
 	}
 
 	@Override

@@ -20,11 +20,10 @@ package ca.uhn.fhir.jpa.delete.job;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.batch.job.MultiUrlProcessorJobConfig;
+import ca.uhn.fhir.jpa.batch.job.MultiUrlJobParameterValidator;
 import ca.uhn.fhir.jpa.batch.listener.PidReaderCounterListener;
+import ca.uhn.fhir.jpa.batch.reader.ReverseCronologicalBatchResourcePidReader;
 import ca.uhn.fhir.jpa.batch.writer.SqlExecutorWriter;
-import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
@@ -38,14 +37,14 @@ import org.springframework.context.annotation.Lazy;
 
 import java.util.List;
 
-import static ca.uhn.fhir.jpa.batch.BatchJobsConfig.DELETE_EXPUNGE_JOB_NAME;
+import static ca.uhn.fhir.jpa.batch.config.BatchConstants.DELETE_EXPUNGE_JOB_NAME;
 
 /**
  * Spring batch Job configuration file. Contains all necessary plumbing to run a
  * Delete Expunge job.
  */
 @Configuration
-public class DeleteExpungeJobConfig extends MultiUrlProcessorJobConfig {
+public class DeleteExpungeJobConfig {
 	public static final String DELETE_EXPUNGE_URL_LIST_STEP_NAME = "delete-expunge-url-list-step";
 
 	@Autowired
@@ -53,11 +52,23 @@ public class DeleteExpungeJobConfig extends MultiUrlProcessorJobConfig {
 	@Autowired
 	private JobBuilderFactory myJobBuilderFactory;
 
+	@Autowired
+	private MultiUrlJobParameterValidator myMultiUrlProcessorParameterValidator;
+
+	@Autowired
+	private PidReaderCounterListener myPidCountRecorderListener;
+
+	@Autowired
+	private ReverseCronologicalBatchResourcePidReader myReverseCronologicalBatchResourcePidReader;
+
+	@Autowired
+	private SqlExecutorWriter mySqlExecutorWriter;
+
 	@Bean(name = DELETE_EXPUNGE_JOB_NAME)
 	@Lazy
-	public Job deleteExpungeJob(MatchUrlService theMatchUrlService, DaoRegistry theDaoRegistry) {
+	public Job deleteExpungeJob() {
 		return myJobBuilderFactory.get(DELETE_EXPUNGE_JOB_NAME)
-			.validator(multiUrlProcessorParameterValidator(theMatchUrlService, theDaoRegistry))
+			.validator(myMultiUrlProcessorParameterValidator)
 			.start(deleteExpungeUrlListStep())
 			.build();
 	}
@@ -66,10 +77,10 @@ public class DeleteExpungeJobConfig extends MultiUrlProcessorJobConfig {
 	public Step deleteExpungeUrlListStep() {
 		return myStepBuilderFactory.get(DELETE_EXPUNGE_URL_LIST_STEP_NAME)
 			.<List<Long>, List<String>>chunk(1)
-			.reader(reverseCronologicalBatchResourcePidReader())
+			.reader(myReverseCronologicalBatchResourcePidReader)
 			.processor(deleteExpungeProcessor())
-			.writer(sqlExecutorWriter())
-			.listener(pidCountRecorderListener())
+			.writer(mySqlExecutorWriter)
+			.listener(myPidCountRecorderListener)
 			.listener(deleteExpungePromotionListener())
 			.build();
 	}

@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.test.concurrency.PointcutLatch;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Meta;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,6 +41,8 @@ public class ExpungeHookTest extends BaseJpaDstu3Test {
 	@BeforeEach
 	public void before() {
 		myDaoConfig.setExpungeEnabled(true);
+                myDaoConfig.setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.ALPHANUMERIC);
+                myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
 		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_EVERYTHING, myEverythingLatch);
 		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_RESOURCE, myExpungeResourceLatch);
 	}
@@ -64,6 +67,42 @@ public class ExpungeHookTest extends BaseJpaDstu3Test {
 
 		assertPatientGone(id);
 	}
+
+        @Test
+        public void expungeEverythingAndRecreate() throws InterruptedException {
+                // Create a patient.
+                Patient thePatient = new Patient();
+                thePatient.setId("ABC123");
+                Meta theMeta = new Meta();
+                theMeta.addProfile("http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient");
+                thePatient.setMeta(theMeta);
+
+                IIdType id = myPatientDao.update(thePatient, mySrd).getId();
+                assertNotNull(myPatientDao.read(id));
+
+                // Expunge it directly.
+                myPatientDao.delete(id);
+                ExpungeOptions options = new ExpungeOptions();
+                options.setExpungeEverything(true);
+                options.setExpungeDeletedResources(true);
+                options.setExpungeOldVersions(true);
+                myPatientDao.expunge(id.toUnqualifiedVersionless(), options, mySrd);
+                assertPatientGone(id);
+               
+                // Create it a second time.
+                myPatientDao.update(thePatient, mySrd);
+                assertNotNull(myPatientDao.read(id));
+
+                // Expunge everything with the service.
+                myEverythingLatch.setExpectedCount(1);
+                myExpungeService.expunge(null, null, null, options, mySrd);
+                myEverythingLatch.awaitExpected();
+                assertPatientGone(id);
+
+                // Create it a third time.
+                myPatientDao.update(thePatient, mySrd);
+                assertNotNull(myPatientDao.read(id));
+        }
 
 	private void assertPatientGone(IIdType theId) {
 		try {

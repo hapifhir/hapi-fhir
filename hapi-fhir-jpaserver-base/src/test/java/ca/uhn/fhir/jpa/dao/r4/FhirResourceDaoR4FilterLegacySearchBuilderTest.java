@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.IResourceProvenanceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -59,7 +60,7 @@ public class FhirResourceDaoR4FilterLegacySearchBuilderTest extends BaseJpaR4Tes
 			myPatientDao.search(map);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Error parsing _filter syntax: Expression did not terminate at 13", e.getMessage());
+			assertEquals(Msg.code(1015) + "Error parsing _filter syntax: " + Msg.code(1056) + "Expression did not terminate at 13", e.getMessage());
 		}
 	}
 
@@ -214,7 +215,7 @@ public class FhirResourceDaoR4FilterLegacySearchBuilderTest extends BaseJpaR4Tes
 		try {
 			myPatientDao.search(map);
 		} catch (InvalidRequestException e) {
-			assertEquals("_filter parameter is disabled on this server", e.getMessage());
+			assertEquals(Msg.code(1016) + "_filter parameter is disabled on this server", e.getMessage());
 		}
 	}
 
@@ -345,28 +346,6 @@ public class FhirResourceDaoR4FilterLegacySearchBuilderTest extends BaseJpaR4Tes
 		map.add(Constants.PARAM_FILTER, new StringParam("(subject ne " + ptId.getIdPart() + ") and (performer ne " + ptId2.getValue() + ")"));
 		found = toUnqualifiedVersionlessIdValues(myCarePlanDao.search(map));
 		assertThat(found, empty());
-
-	}
-
-
-	@Test
-	public void testLanguageComparatorEq() {
-
-		Patient p = new Patient();
-		p.setLanguage("en");
-		p.addName().setFamily("Smith").addGiven("John");
-		p.setBirthDateElement(new DateType("1955-01-01"));
-		p.setActive(true);
-		String id1 = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
-
-		SearchParameterMap map;
-		List<String> found;
-
-		map = new SearchParameterMap();
-		map.setLoadSynchronous(true);
-		map.add(Constants.PARAM_FILTER, new StringParam("_language eq en"));
-		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(found, containsInAnyOrder(id1));
 
 	}
 
@@ -1256,7 +1235,7 @@ public class FhirResourceDaoR4FilterLegacySearchBuilderTest extends BaseJpaR4Tes
 		try {
 			myPatientDao.search(map);
 		} catch (InvalidRequestException e) {
-			assertEquals("Invalid search parameter specified, foo, for resource type Patient", e.getMessage());
+			assertEquals(Msg.code(1018) + "Invalid search parameter specified, foo, for resource type Patient", e.getMessage());
 		}
 	}
 

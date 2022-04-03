@@ -69,7 +69,7 @@ class Chef
             recursive true
           end
 
-          # FIXME: support user supplied template
+          # TODO: support user supplied template
           template "#{prefix_dir}/etc/my.cnf" do
             if new_resource.parsed_template_source.nil?
               source "#{new_resource.parsed_version}/my.cnf.erb"

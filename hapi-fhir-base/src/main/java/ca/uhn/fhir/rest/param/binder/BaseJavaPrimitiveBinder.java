@@ -20,17 +20,19 @@ package ca.uhn.fhir.rest.param.binder;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.IQueryParameterOr;
+import ca.uhn.fhir.rest.api.QualifiedParamList;
+import ca.uhn.fhir.rest.param.ParameterUtil;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 import java.util.Collections;
 import java.util.List;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IQueryParameterOr;
-import ca.uhn.fhir.rest.api.QualifiedParamList;
-import ca.uhn.fhir.rest.param.*;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 abstract class BaseJavaPrimitiveBinder<T>implements IParamBinder<T> {
 
@@ -59,7 +61,7 @@ abstract class BaseJavaPrimitiveBinder<T>implements IParamBinder<T> {
 			return null;
 		}
 		if (theParams.size() > 1 || theParams.get(0).size() > 1) {
-			throw new InvalidRequestException("Multiple values detected for non-repeatable parameter '" + theName + "'. This server is not configured to allow multiple (AND) values for this param.");
+			throw new InvalidRequestException(Msg.code(1955) + "Multiple values detected for non-repeatable parameter '" + theName + "'. This server is not configured to allow multiple (AND) values for this param.");
 		}
 	
 		T value = doParse(theParams.get(0).get(0));

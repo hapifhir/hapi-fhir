@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3421
+title: "ValueSet pre-expansion was failing when number of concepts was larger than configured BooleanQuery.maxClauseCount
+   value (default is 1024). This is now fixed."

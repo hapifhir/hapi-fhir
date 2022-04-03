@@ -20,6 +20,7 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.api.Constants;
@@ -45,6 +46,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Base64Utils;
@@ -130,7 +132,7 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 			try {
 				retVal = reader.readLine();
 			} catch (IOException e) {
-				throw new ParseException("Failed to read input from user: " + e);
+				throw new ParseException(Msg.code(1566) + "Failed to read input from user: " + e);
 			}
 		} else {
 			retVal = new String(console.readPassword());
@@ -163,18 +165,18 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 
 		if (isNotBlank(theOpt)) {
 			if (theOptions.getOption(theOpt) != null) {
-				throw new IllegalStateException("Duplicate option: " + theOpt);
+				throw new IllegalStateException(Msg.code(1567) + "Duplicate option: " + theOpt);
 			}
 			if (theOptionGroup != null && theOptionGroup.getOptions().stream().anyMatch(t -> theOpt.equals(t.getOpt()))) {
-				throw new IllegalStateException("Duplicate option: " + theOpt);
+				throw new IllegalStateException(Msg.code(1568) + "Duplicate option: " + theOpt);
 			}
 		}
 		if (isNotBlank(theLongOpt)) {
 			if (theOptions.getOption(theLongOpt) != null) {
-				throw new IllegalStateException("Duplicate option: " + theLongOpt);
+				throw new IllegalStateException(Msg.code(1569) + "Duplicate option: " + theLongOpt);
 			}
 			if (theOptionGroup != null && theOptionGroup.getOptions().stream().anyMatch(t -> theLongOpt.equals(t.getLongOpt()))) {
-				throw new IllegalStateException("Duplicate option: " + theOpt);
+				throw new IllegalStateException(Msg.code(1570) + "Duplicate option: " + theOpt);
 			}
 		}
 
@@ -311,16 +313,16 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 		String errorMsg = "Parameter " + theParamName + " must be in the format: \"name:value\"";
 
 		if (! theParam.contains(separator)) {
-			throw new ParseException(errorMsg);
+			throw new ParseException(Msg.code(1571) + errorMsg);
 		}
 
 		String[] nameValue = theParam.split(separator);
 		if (nameValue.length != 2) {
-			throw new ParseException(errorMsg);
+			throw new ParseException(Msg.code(1572) + errorMsg);
 		}
 
 		if (StringUtils.isBlank(nameValue[0]) || StringUtils.isBlank(nameValue[1])) {
-			throw new ParseException(errorMsg);
+			throw new ParseException(Msg.code(1573) + errorMsg);
 		}
 
 		return Pair.of(nameValue[0], nameValue[1]);
@@ -331,18 +333,29 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 		String val = theCommandLine.getOptionValue(theOption);
 		if (isBlank(val)) {
 			if (theRequired && theDefault == null) {
-				throw new ParseException("Missing required option -" + theOption);
+				throw new ParseException(Msg.code(1574) + "Missing required option -" + theOption);
 			}
 			return theDefault;
 		}
 		try {
 			return (T) Enum.valueOf(theEnumClass, val);
 		} catch (Exception e) {
-			throw new ParseException("Invalid option \"" + val + "\" for option -" + theOption);
+			throw new ParseException(Msg.code(1575) + "Invalid option \"" + val + "\" for option -" + theOption);
 		}
 	}
 
+	public Integer getAndParseNonNegativeIntegerParam(CommandLine theCommandLine, String theName) throws ParseException {
+		int minimum = 0;
+		return doGetAndParseIntegerParam(theCommandLine, theName, minimum);
+	}
+
 	public Integer getAndParsePositiveIntegerParam(CommandLine theCommandLine, String theName) throws ParseException {
+		int minimum = 1;
+		return doGetAndParseIntegerParam(theCommandLine, theName, minimum);
+	}
+
+	@Nullable
+	private Integer doGetAndParseIntegerParam(CommandLine theCommandLine, String theName, int minimum) throws ParseException {
 		String value = theCommandLine.getOptionValue(theName);
 		value = trim(value);
 		if (isBlank(value)) {
@@ -351,12 +364,12 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 
 		try {
 			int valueInt = Integer.parseInt(value);
-			if (valueInt < 1) {
-				throw new ParseException("Value for argument " + theName + " must be a positive integer, got: " + value);
+			if (valueInt < minimum) {
+				throw new ParseException(Msg.code(1576) + "Value for argument " + theName + " must be an integer >= " + minimum + ", got: " + value);
 			}
 			return valueInt;
 		} catch (NumberFormatException e) {
-			throw new ParseException("Value for argument " + theName + " must be a positive integer, got: " + value);
+			throw new ParseException(Msg.code(1577) + "Value for argument " + theName + " must be an integer >= " + minimum + ", got: " + value);
 		}
 	}
 
@@ -420,7 +433,7 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 				CloseableHttpResponse result = client.execute(get);
 
 				if (result.getStatusLine().getStatusCode() != 200) {
-					throw new CommandFailureException("Got HTTP " + result.getStatusLine().getStatusCode() + " response code loading " + theSpecUrl);
+					throw new CommandFailureException(Msg.code(1578) + "Got HTTP " + result.getStatusLine().getStatusCode() + " response code loading " + theSpecUrl);
 				}
 
 				ourLog.info("Downloading from remote url: {}", theSpecUrl);
@@ -450,9 +463,9 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 	protected IGenericClient newClient(CommandLine theCommandLine, String theBaseUrlParamName, String theBasicAuthOptionName, String theBearerTokenOptionName) throws ParseException {
 		String baseUrl = theCommandLine.getOptionValue(theBaseUrlParamName);
 		if (isBlank(baseUrl)) {
-			throw new ParseException("No target server (-" + BASE_URL_PARAM + ") specified.");
+			throw new ParseException(Msg.code(1579) + "No target server (-" + BASE_URL_PARAM + ") specified.");
 		} else if (!baseUrl.startsWith("http") && !baseUrl.startsWith("file")) {
-			throw new ParseException("Invalid target server specified, must begin with 'http' or 'file'.");
+			throw new ParseException(Msg.code(1580) + "Invalid target server specified, must begin with 'http' or 'file'.");
 		}
 
 		return newClientWithBaseUrl(theCommandLine, baseUrl, theBasicAuthOptionName, theBearerTokenOptionName);
@@ -488,14 +501,14 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 	protected void parseFhirContext(CommandLine theCommandLine) throws ParseException {
 		String version = theCommandLine.getOptionValue(FHIR_VERSION_PARAM);
 		if (isBlank(version)) {
-			throw new ParseException("Missing required option: -" + FHIR_VERSION_PARAM);
+			throw new ParseException(Msg.code(1581) + "Missing required option: -" + FHIR_VERSION_PARAM);
 		}
 
 		try {
 			FhirVersionEnum versionEnum = FhirVersionEnum.valueOf(version.toUpperCase());
 			myFhirCtx = versionEnum.newContext();
 		} catch (Exception e) {
-			throw new ParseException("Invalid FHIR version string: " + version);
+			throw new ParseException(Msg.code(1582) + "Invalid FHIR version string: " + version);
 		}
 	}
 

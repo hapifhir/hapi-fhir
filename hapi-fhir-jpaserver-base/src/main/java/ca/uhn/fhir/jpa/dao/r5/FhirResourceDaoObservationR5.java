@@ -54,22 +54,22 @@ public class FhirResourceDaoObservationR5 extends BaseHapiFhirResourceDaoObserva
 
 	@Override
 	protected String getEffectiveParamName() {
-		return Observation.SP_DATE;
+		return org.hl7.fhir.r4.model.Observation.SP_DATE;
 	}
 
 	@Override
 	protected String getCodeParamName() {
-		return Observation.SP_CODE;
+		return org.hl7.fhir.r4.model.Observation.SP_CODE;
 	}
 
 	@Override
 	protected String getSubjectParamName() {
-		return Observation.SP_SUBJECT;
+		return org.hl7.fhir.r4.model.Observation.SP_SUBJECT;
 	}
 
 	@Override
 	protected String getPatientParamName() {
-		return Observation.SP_PATIENT;
+		return org.hl7.fhir.r4.model.Observation.SP_PATIENT;
 	}
 
 	@Override

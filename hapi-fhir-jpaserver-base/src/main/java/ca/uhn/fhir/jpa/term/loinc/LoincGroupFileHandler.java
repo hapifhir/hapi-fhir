@@ -37,8 +37,9 @@ public class LoincGroupFileHandler extends BaseLoincHandler implements IZipConte
 
 	public static final String VS_URI_PREFIX = "http://loinc.org/vs/";
 
-	public LoincGroupFileHandler(Map<String, TermConcept> theCode2concept, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps, Properties theUploadProperties) {
-		super(theCode2concept, theValueSets, theConceptMaps, theUploadProperties);
+	public LoincGroupFileHandler(Map<String, TermConcept> theCode2concept, List<ValueSet> theValueSets,
+			List<ConceptMap> theConceptMaps, Properties theUploadProperties, String theCopyrightStatement) {
+		super(theCode2concept, theValueSets, theConceptMaps, theUploadProperties, theCopyrightStatement);
 	}
 
 	@Override

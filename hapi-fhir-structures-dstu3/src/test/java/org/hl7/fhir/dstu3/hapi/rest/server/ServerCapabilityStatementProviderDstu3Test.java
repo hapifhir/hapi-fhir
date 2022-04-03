@@ -5,7 +5,21 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
+import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.Delete;
+import ca.uhn.fhir.rest.annotation.History;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.IncludeParam;
+import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
+import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.Update;
+import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
@@ -30,7 +44,8 @@ import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.collect.Lists;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestComponent;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestOperationComponent;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestResourceComponent;
@@ -38,10 +53,18 @@ import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestResou
 import org.hl7.fhir.dstu3.model.CapabilityStatement.ConditionalDeleteStatus;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.SystemRestfulInteraction;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.TypeRestfulInteraction;
+import org.hl7.fhir.dstu3.model.CodeType;
+import org.hl7.fhir.dstu3.model.DateType;
+import org.hl7.fhir.dstu3.model.DiagnosticReport;
+import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.OperationDefinition;
 import org.hl7.fhir.dstu3.model.OperationDefinition.OperationDefinitionParameterComponent;
 import org.hl7.fhir.dstu3.model.OperationDefinition.OperationKind;
 import org.hl7.fhir.dstu3.model.OperationDefinition.OperationParameterUse;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Disabled;
@@ -1157,7 +1180,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 
 	@AfterAll
 	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
   
   public static class ProfiledPatientProvider implements IResourceProvider {

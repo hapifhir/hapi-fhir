@@ -22,13 +22,10 @@ package ca.uhn.fhir.mdm.provider;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
-import ca.uhn.fhir.mdm.api.IMdmExpungeSvc;
-import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
-import ca.uhn.fhir.rest.server.IPagingProvider;
-import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
-import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,13 +39,13 @@ public class MdmProviderLoader {
 	@Autowired
 	private ResourceProviderFactory myResourceProviderFactory;
 	@Autowired
-	private IMdmMatchFinderSvc myMdmMatchFinderSvc;
+	private MdmControllerHelper myMdmControllerHelper;
 	@Autowired
 	private IMdmControllerSvc myMdmControllerSvc;
 	@Autowired
-	private IMdmExpungeSvc myMdmExpungeSvc;
-	@Autowired
 	private IMdmSubmitSvc myMdmSubmitSvc;
+	@Autowired
+	private IMdmSettings myMdmSettings;
 
 	private BaseMdmProvider myMdmProvider;
 
@@ -57,12 +54,16 @@ public class MdmProviderLoader {
 			case DSTU3:
 			case R4:
 				myResourceProviderFactory.addSupplier(() -> {
-					myMdmProvider = new MdmProviderDstu3Plus(myFhirContext, myMdmControllerSvc, myMdmMatchFinderSvc, myMdmExpungeSvc, myMdmSubmitSvc);
+					myMdmProvider = new MdmProviderDstu3Plus(myFhirContext,
+						myMdmControllerSvc,
+						myMdmControllerHelper,
+						myMdmSubmitSvc,
+						myMdmSettings);
 					return myMdmProvider;
 				});
 				break;
 			default:
-				throw new ConfigurationException("MDM not supported for FHIR version " + myFhirContext.getVersion().getVersion());
+				throw new ConfigurationException(Msg.code(1497) + "MDM not supported for FHIR version " + myFhirContext.getVersion().getVersion());
 		}
 	}
 

@@ -1,7 +1,6 @@
 package ca.uhn.fhir.narrative;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.dstu2.resource.Practitioner;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -13,7 +12,7 @@ public class CustomThymeleafNarrativeGeneratorDstu2Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CustomThymeleafNarrativeGeneratorDstu2Test.class);
 
-	private FhirContext myCtx = FhirContext.forCached(FhirVersionEnum.DSTU2);
+	private final FhirContext myCtx = FhirContext.forDstu2Cached();
 
 	@AfterEach
 	public void after() {

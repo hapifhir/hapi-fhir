@@ -66,7 +66,7 @@ public class RuleBulkExportImpl extends BaseRule {
 			}
 			for (String next : options.getResourceTypes()) {
 				if (!myResourceTypes.contains(next)) {
-					return null;
+					return new AuthorizationInterceptor.Verdict(PolicyEnum.DENY,this);
 				}
 			}
 		}
@@ -80,6 +80,8 @@ public class RuleBulkExportImpl extends BaseRule {
 			String actualGroupId = options.getGroupId().toUnqualifiedVersionless().getValue();
 			if (Objects.equals(expectedGroupId, actualGroupId)) {
 				return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+			} else {
+				return new AuthorizationInterceptor.Verdict(PolicyEnum.DENY,this);
 			}
 		}
 
@@ -106,5 +108,13 @@ public class RuleBulkExportImpl extends BaseRule {
 
 	public void setAppliesToAny() {
 		myWantAnyStyle = true;
+	}
+
+	String getGroupId() {
+		return myGroupId;
+	}
+
+	BulkDataExportOptions.ExportStyle getWantExportStyle() {
+		return myWantExportStyle;
 	}
 }

@@ -1,7 +1,6 @@
 package ca.uhn.fhir.rest.openapi;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -70,7 +69,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 public class OpenApiInterceptorTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(OpenApiInterceptorTest.class);
-	private FhirContext myFhirContext = FhirContext.forCached(FhirVersionEnum.R4);
+	private final FhirContext myFhirContext = FhirContext.forR4Cached();
 	@RegisterExtension
 	@Order(0)
 	protected RestfulServerExtension myServer = new RestfulServerExtension(myFhirContext)
@@ -193,6 +192,36 @@ public class OpenApiInterceptorTest {
 		String resp = fetchSwaggerUi(url);
 		List<String> buttonTexts = parsePageButtonTexts(resp, url);
 		assertThat(buttonTexts.toString(), buttonTexts, Matchers.contains("All", "System Level Operations", "OperationDefinition 1", "Observation", "Patient"));
+	}
+
+	@Test
+	public void testRemoveTrailingSlash() {
+		OpenApiInterceptor interceptor = new OpenApiInterceptor();
+		String url1 = interceptor.removeTrailingSlash("http://localhost:8000");
+		String url2 = interceptor.removeTrailingSlash("http://localhost:8000/");
+		String url3 = interceptor.removeTrailingSlash("http://localhost:8000//");
+		String expect = "http://localhost:8000";
+		assertEquals(expect, url1);
+		assertEquals(expect, url2);
+		assertEquals(expect, url3);
+	}
+
+	@Test
+	public void testRemoveTrailingSlashWithNullUrl() {
+		OpenApiInterceptor interceptor = new OpenApiInterceptor();
+		String url = interceptor.removeTrailingSlash(null);
+		assertEquals(null, url);
+	}
+
+	@Test
+	public void testStandardRedirectScriptIsAccessible() throws IOException {
+		myServer.getRestfulServer().registerInterceptor(new AddResourceCountsInterceptor());
+		myServer.getRestfulServer().registerInterceptor(new OpenApiInterceptor());
+
+		HttpGet get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/oauth2-redirect.html");
+		try (CloseableHttpResponse response = myClient.execute(get)) {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+		}
 	}
 
 	private String fetchSwaggerUi(String url) throws IOException {

@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -37,16 +38,17 @@ public interface IResourceLinkResolver {
 	 * <p>
 	 * This method returns an {@link IResourceLookup} so as to avoid needing to resolve the entire resource.
 	 *
-	 * @param theRequestPartitionId      The partition ID of the target resource
-	 * @param theSearchParam      The param that is being indexed
-	 * @param theSourcePath       The path within the resource where this reference was found
-	 * @param theSourceResourceId The ID of the resource containing the reference to the target being resolved
-	 * @param theTypeString       The type of the resource being resolved
-	 * @param theType             The resource type of the target
-	 * @param theReference        The reference being resolved
-	 * @param theRequest          The incoming request, if any
+	 * @param theRequestPartitionId The partition ID of the target resource
+	 * @param theSearchParam        The param that is being indexed
+	 * @param theSourcePath         The path within the resource where this reference was found
+	 * @param theSourceResourceId   The ID of the resource containing the reference to the target being resolved
+	 * @param theTypeString         The type of the resource being resolved
+	 * @param theType               The resource type of the target
+	 * @param theReference          The reference being resolved
+	 * @param theRequest            The incoming request, if any
+	 * @param theTransactionDetails
 	 */
-	IResourceLookup findTargetResource(RequestPartitionId theRequestPartitionId, RuntimeSearchParam theSearchParam, String theSourcePath, IIdType theSourceResourceId, String theTypeString, Class<? extends IBaseResource> theType, IBaseReference theReference, RequestDetails theRequest);
+	IResourceLookup findTargetResource(RequestPartitionId theRequestPartitionId, RuntimeSearchParam theSearchParam, String theSourcePath, IIdType theSourceResourceId, String theTypeString, Class<? extends IBaseResource> theType, IBaseReference theReference, RequestDetails theRequest, TransactionDetails theTransactionDetails);
 
 	void validateTypeOrThrowException(Class<? extends IBaseResource> theType);
 

@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoObservation;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
@@ -32,9 +33,11 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -77,8 +80,10 @@ public abstract class BaseHapiFhirResourceDaoObservation<T extends IBaseResource
 		theSearchParameterMap.setLastN(true);
 		SortSpec effectiveDtm = new SortSpec(getEffectiveParamName()).setOrder(SortOrderEnum.DESC);
 		SortSpec observationCode = new SortSpec(getCodeParamName()).setOrder(SortOrderEnum.ASC).setChain(effectiveDtm);
-		if(theSearchParameterMap.containsKey(getSubjectParamName()) || theSearchParameterMap.containsKey(getPatientParamName())) {
-			fixSubjectParamsOrderForLastn(theSearchParameterMap, theRequestDetails);
+		if (theSearchParameterMap.containsKey(getSubjectParamName()) || theSearchParameterMap.containsKey(getPatientParamName())) {
+
+			new TransactionTemplate(myPlatformTransactionManager).executeWithoutResult(tx -> fixSubjectParamsOrderForLastn(theSearchParameterMap, theRequestDetails));
+
 			theSearchParameterMap.setSort(new SortSpec(getSubjectParamName()).setOrder(SortOrderEnum.ASC).setChain(observationCode));
 		} else {
 			theSearchParameterMap.setSort(observationCode);
@@ -90,7 +95,7 @@ public abstract class BaseHapiFhirResourceDaoObservation<T extends IBaseResource
 		// the output. The reason for this is that observations are indexed by patient/subject forced ID, but then ordered in the
 		// final result set by subject/patient resource PID.
 		TreeMap<Long, IQueryParameterType> orderedSubjectReferenceMap = new TreeMap<>();
-		if(theSearchParameterMap.containsKey(getSubjectParamName())) {
+		if (theSearchParameterMap.containsKey(getSubjectParamName())) {
 
 			RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(theRequestDetails, getResourceName(), theSearchParameterMap, null);
 
@@ -109,23 +114,28 @@ public abstract class BaseHapiFhirResourceDaoObservation<T extends IBaseResource
 						ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(requestPartitionId, ref.getResourceType(), ref.getIdPart());
 						orderedSubjectReferenceMap.put(pid.getIdAsLong(), nextOr);
 					} else {
-						throw new IllegalArgumentException("Invalid token type (expecting ReferenceParam): " + nextOr.getClass());
+						throw new IllegalArgumentException(Msg.code(942) + "Invalid token type (expecting ReferenceParam): " + nextOr.getClass());
 					}
 				}
 			}
 
 			theSearchParameterMap.remove(getSubjectParamName());
 			theSearchParameterMap.remove(getPatientParamName());
-			for (Long subjectPid : orderedSubjectReferenceMap.keySet()) {
-				theSearchParameterMap.add(getSubjectParamName(), orderedSubjectReferenceMap.get(subjectPid));
-			}
+
+			// Subject PIDs ordered - so create 'OR' list of subjects for lastN operation
+			ReferenceOrListParam orList = new ReferenceOrListParam();
+			orderedSubjectReferenceMap.keySet().forEach(key -> orList.addOr((ReferenceParam) orderedSubjectReferenceMap.get(key)));
+			theSearchParameterMap.add(getSubjectParamName(), orList);
 		}
 
 	}
 
 	abstract protected String getEffectiveParamName();
+
 	abstract protected String getCodeParamName();
+
 	abstract protected String getSubjectParamName();
+
 	abstract protected String getPatientParamName();
 
 }

@@ -54,4 +54,8 @@ public class PartitionedUrl implements IModelJson {
 	public void setRequestPartitionId(RequestPartitionId theRequestPartitionId) {
 		myRequestPartitionId = theRequestPartitionId;
 	}
+
+	public boolean isPartitioned() {
+		return myRequestPartitionId != null && !myRequestPartitionId.isDefaultPartition();
+	}
 }

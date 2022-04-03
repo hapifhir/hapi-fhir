@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.method;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -59,7 +60,6 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	static {
 		HashSet<String> specialSearchParams = new HashSet<>();
 		specialSearchParams.add(IAnyResource.SP_RES_ID);
-		specialSearchParams.add(IAnyResource.SP_RES_LANGUAGE);
 		specialSearchParams.add(Constants.PARAM_INCLUDE);
 		specialSearchParams.add(Constants.PARAM_REVINCLUDE);
 		SPECIAL_SEARCH_PARAMS = Collections.unmodifiableSet(specialSearchParams);
@@ -88,7 +88,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		 */
 		if (isBlank(myCompartmentName) && myIdParamIndex != null) {
 			String msg = theContext.getLocalizer().getMessage(getClass().getName() + ".idWithoutCompartment", theMethod.getName(), theMethod.getDeclaringClass());
-			throw new ConfigurationException(msg);
+			throw new ConfigurationException(Msg.code(412) + msg);
 		}
 
 		if (theResourceProviderResourceType != null) {

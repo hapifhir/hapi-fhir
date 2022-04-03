@@ -3,14 +3,14 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>ca.uhn.hapi.fhir</groupId>
     <artifactId>hapi-fhir-bom</artifactId>
-    <version>5.5.7</version>
+    <version>6.0.0-PRE9-SNAPSHOT</version>
     <packaging>pom</packaging>
 	 <name>HAPI FHIR BOM</name>
 
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>5.5.7</version>
+		<version>6.0.0-PRE9-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
     
@@ -21,8 +21,13 @@
                 <artifactId>hapi-fhir-base</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
+			  <dependency>
+				  <groupId>${project.groupId}</groupId>
+				  <artifactId>hapi-fhir-checkstyle</artifactId>
+				  <version>${project.version}</version>
+			  </dependency>
+			  <dependency>
+				  <groupId>${project.groupId}</groupId>
                 <artifactId>hapi-fhir-utilities</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -133,7 +138,7 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>hapi-fhir-jpaserver-migrate</artifactId>
+					<artifactId>hapi-fhir-sql-migrate</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

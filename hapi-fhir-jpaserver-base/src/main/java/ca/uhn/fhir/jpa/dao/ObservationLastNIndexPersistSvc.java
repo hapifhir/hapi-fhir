@@ -21,7 +21,9 @@ package ca.uhn.fhir.jpa.dao;
  */
 
 import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
+import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.util.CodeSystemHash;
 import ca.uhn.fhir.jpa.search.lastn.IElasticsearchSvc;
@@ -29,6 +31,7 @@ import ca.uhn.fhir.jpa.search.lastn.json.CodeJson;
 import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.PathAndRef;
+import ca.uhn.fhir.parser.IParser;
 import org.hl7.fhir.instance.model.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -41,6 +44,12 @@ public class ObservationLastNIndexPersistSvc {
 
 	@Autowired(required = false)
 	private IElasticsearchSvc myElasticsearchSvc;
+
+	@Autowired
+	private DaoConfig myConfig;
+
+	@Autowired
+	private FhirContext myContext;
 
 	public void indexObservation(IBaseResource theResource) {
 
@@ -74,15 +83,14 @@ public class ObservationLastNIndexPersistSvc {
 
 		List<IBase> observationCategoryCodeableConcepts = mySearchParameterExtractor.extractValues("Observation.category", theResource);
 
-		String resourcePID = theResource.getIdElement().getIdPart();
-
-		createOrUpdateIndexedObservation(resourcePID, effectiveDtm, subjectId, observationCodeCodeableConcepts, observationCategoryCodeableConcepts);
+		createOrUpdateIndexedObservation(theResource, effectiveDtm, subjectId, observationCodeCodeableConcepts, observationCategoryCodeableConcepts);
 
 	}
 
-	private void createOrUpdateIndexedObservation(String resourcePID, Date theEffectiveDtm, String theSubjectId,
+	private void createOrUpdateIndexedObservation(IBaseResource theResource, Date theEffectiveDtm, String theSubjectId,
 																 List<IBase> theObservationCodeCodeableConcepts,
 																 List<IBase> theObservationCategoryCodeableConcepts) {
+		String resourcePID = theResource.getIdElement().getIdPart();
 
 		// Determine if an index already exists for Observation:
 		ObservationJson indexedObservation = null;
@@ -95,6 +103,9 @@ public class ObservationLastNIndexPersistSvc {
 
 		indexedObservation.setEffectiveDtm(theEffectiveDtm);
 		indexedObservation.setIdentifier(resourcePID);
+		if (myConfig.isStoreResourceInLuceneIndex()) {
+			indexedObservation.setResource(encodeResource(theResource));
+		}
 		indexedObservation.setSubject(theSubjectId);
 
 		addCodeToObservationIndex(theObservationCodeCodeableConcepts, indexedObservation);
@@ -103,6 +114,11 @@ public class ObservationLastNIndexPersistSvc {
 
 		myElasticsearchSvc.createOrUpdateObservationIndex(resourcePID, indexedObservation);
 
+	}
+
+	private String encodeResource(IBaseResource theResource) {
+		IParser parser = myContext.newJsonParser();
+		return parser.encodeResourceToString(theResource);
 	}
 
 	private void addCodeToObservationIndex(List<IBase> theObservationCodeCodeableConcepts,
@@ -118,7 +134,6 @@ public class ObservationLastNIndexPersistSvc {
 		myElasticsearchSvc.createOrUpdateObservationCodeIndex(codeableConceptField.getCodeableConceptId(), codeableConceptField);
 
 		theIndexedObservation.setCode(codeableConceptField);
-		theIndexedObservation.setCode_concept_id(codeableConceptField.getCodeableConceptId());
 	}
 
 	private void addCategoriesToObservationIndex(List<IBase> observationCategoryCodeableConcepts,
@@ -172,7 +187,7 @@ public class ObservationLastNIndexPersistSvc {
 				String code = param.getValue();
 				String text = mySearchParameterExtractor.getDisplayTextForCoding(nextCoding);
 
-					String codeSystemHash = String.valueOf(CodeSystemHash.hashCodeSystem(system, code));
+				String codeSystemHash = String.valueOf(CodeSystemHash.hashCodeSystem(system, code));
 				CodeJson codeCodeableConceptDocument = myElasticsearchSvc.getObservationCodeDocument(codeSystemHash, text);
 				if (codeCodeableConceptDocument != null) {
 					codeCodeableConceptIdOptional = Optional.of(codeCodeableConceptDocument.getCodeableConceptId());

@@ -29,14 +29,14 @@ import java.util.List;
  * #L%
  */
 
-public interface ITermCodeSystemVersionDao extends JpaRepository<TermCodeSystemVersion, Long> {
+public interface ITermCodeSystemVersionDao extends JpaRepository<TermCodeSystemVersion, Long>, IHapiFhirJpaRepository {
 
 	@Modifying
 	@Query("DELETE FROM TermCodeSystemVersion csv WHERE csv.myCodeSystem = :cs")
 	void deleteForCodeSystem(@Param("cs") TermCodeSystem theCodeSystem);
 
-	@Query("SELECT cs FROM TermCodeSystemVersion cs WHERE cs.myCodeSystemPid = :codesystem_pid")
-	List<TermCodeSystemVersion> findByCodeSystemPid(@Param("codesystem_pid") Long theCodeSystemPid);
+	@Query("SELECT myId FROM TermCodeSystemVersion WHERE myCodeSystemPid = :codesystem_pid order by myId")
+	List<Long> findSortedPidsByCodeSystemPid(@Param("codesystem_pid") Long theCodeSystemPid);
 
 	@Query("SELECT cs FROM TermCodeSystemVersion cs WHERE cs.myCodeSystemPid = :codesystem_pid AND cs.myCodeSystemVersionId = :codesystem_version_id")
 	TermCodeSystemVersion findByCodeSystemPidAndVersion(@Param("codesystem_pid") Long theCodeSystemPid, @Param("codesystem_version_id") String theCodeSystemVersionId);

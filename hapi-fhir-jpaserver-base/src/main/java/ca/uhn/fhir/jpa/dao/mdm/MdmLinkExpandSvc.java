@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.dao.mdm;
  */
 
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -43,11 +43,14 @@ public class MdmLinkExpandSvc {
 	@Autowired
 	private IMdmLinkDao myMdmLinkDao;
 	@Autowired
-	private IdHelperService myIdHelperService;
+	private IJpaIdHelperService myIdHelperService;
+
+	public MdmLinkExpandSvc() {
+	}
 
 	/**
-	 *  Given a source resource, perform MDM expansion and return all the resource IDs of all resources that are
-	 *  MDM-Matched to this resource.
+	 * Given a source resource, perform MDM expansion and return all the resource IDs of all resources that are
+	 * MDM-Matched to this resource.
 	 *
 	 * @param theResource The resource to MDM-Expand
 	 * @return A set of strings representing the FHIR IDs of the expanded resources.
@@ -109,6 +112,7 @@ public class MdmLinkExpandSvc {
 		List<IMdmLinkDao.MdmPidTuple> goldenPidSourcePidTuples = myMdmLinkDao.expandPidsByGoldenResourcePidAndMatchResult(theGoldenResourcePid, MdmMatchResultEnum.MATCH);
 		return flattenPidTuplesToSet(theGoldenResourcePid, goldenPidSourcePidTuples);
 	}
+
 	public Set<String> expandMdmByGoldenResourceId(IdDt theId) {
 		ourLog.debug("About to expand golden resource with golden resource id {}", theId);
 		Long pidOrThrowException = myIdHelperService.getPidOrThrowException(theId);

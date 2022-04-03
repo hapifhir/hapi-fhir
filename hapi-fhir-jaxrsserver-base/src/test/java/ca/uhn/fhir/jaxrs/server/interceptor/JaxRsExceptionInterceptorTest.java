@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jaxrs.server.interceptor;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.isNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 
 import java.net.URI;
@@ -10,7 +10,6 @@ import java.util.HashMap;
 
 import javax.interceptor.InvocationContext;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.*;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -57,10 +56,10 @@ public class JaxRsExceptionInterceptorTest {
 	}
 
 	@Test
-	public void testIntercepWithServletError() throws Throwable {
+	public void testInterceptorWithServletError() throws Throwable {
 		ExceptionHandlingInterceptor exceptionHandler = mock(ExceptionHandlingInterceptor.class);
 		when(exceptionHandler.preProcessOutgoingException(any(RequestDetails.class), any(Throwable.class),
-				isNull(HttpServletRequest.class))).thenThrow(new ServletException("someMessage"));
+				isNull())).thenThrow(new ServletException("someMessage"));
 		interceptor = new JaxRsExceptionInterceptor(exceptionHandler);
 		when(context.proceed()).thenThrow(new ServletException());
 		try {

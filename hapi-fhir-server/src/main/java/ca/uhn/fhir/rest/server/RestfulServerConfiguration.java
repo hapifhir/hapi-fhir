@@ -23,16 +23,17 @@ package ca.uhn.fhir.rest.server;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.OperationMethodBinding;
 import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.server.method.SearchParameter;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.VersionUtil;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -49,10 +50,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -428,10 +427,10 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 	}
 
 	@Override
-	public Map<String, RuntimeSearchParam> getActiveSearchParams(@Nonnull String theResourceName) {
+	public ResourceSearchParams getActiveSearchParams(@Nonnull String theResourceName) {
 		Validate.notBlank(theResourceName, "theResourceName must not be null or blank");
 
-		Map<String, RuntimeSearchParam> retVal = new LinkedHashMap<>();
+		ResourceSearchParams retval = new ResourceSearchParams(theResourceName);
 
 		collectMethodBindings()
 			.getOrDefault(theResourceName, Collections.emptyList())
@@ -440,18 +439,18 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 			.filter(t -> t instanceof SearchMethodBinding)
 			.map(t -> (SearchMethodBinding) t)
 			.filter(t -> t.getQueryName() == null)
-			.forEach(t -> createRuntimeBinding(retVal, t));
+			.forEach(t -> createRuntimeBinding(retval, t));
 
-		return retVal;
+		return retval;
 	}
 
 	@Nullable
 	@Override
 	public RuntimeSearchParam getActiveSearchParamByUrl(String theUrl) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(286));
 	}
 
-	private void createRuntimeBinding(Map<String, RuntimeSearchParam> theMapToPopulate, SearchMethodBinding theSearchMethodBinding) {
+	private void createRuntimeBinding(ResourceSearchParams theMapToPopulate, SearchMethodBinding theSearchMethodBinding) {
 
 		List<SearchParameter> parameters = theSearchMethodBinding
 			.getParameters()
@@ -483,7 +482,7 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 				}
 			}
 
-			if (theMapToPopulate.containsKey(nextParamUnchainedName)) {
+			if (theMapToPopulate.containsParamName(nextParamUnchainedName)) {
 				continue;
 			}
 

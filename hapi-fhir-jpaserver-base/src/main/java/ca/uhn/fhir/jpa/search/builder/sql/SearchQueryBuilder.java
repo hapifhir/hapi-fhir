@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.search.builder.sql;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
@@ -74,6 +75,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -408,7 +410,7 @@ public class SearchQueryBuilder {
 				// The SQLServerDialect has a bunch of one-off processing to deal with rules on when
 				// a limit can be used, so we can't rely on the flags that the limithandler exposes since
 				// the exact structure of the query depends on the parameters
-				if (sql.contains("TOP(?)")) {
+				if (sql.contains("top(?)")) {
 					bindVariables.add(0, maxResultsToFetch);
 				}
 				if (sql.contains("offset 0 rows fetch next ? rows only")) {
@@ -418,7 +420,7 @@ public class SearchQueryBuilder {
 					bindVariables.add(theOffset);
 					bindVariables.add(maxResultsToFetch);
 				}
-				if (offset != null && sql.contains("__hibernate_row_nr__")) {
+				if (offset != null && sql.contains("__row__")) {
 					bindVariables.add(theOffset + 1);
 					bindVariables.add(theOffset + maxResultsToFetch + 1);
 				}
@@ -469,18 +471,31 @@ public class SearchQueryBuilder {
 	 * If at least one predicate builder already exists, return the last one added to the chain. If none has been selected, create a builder on HFJ_RESOURCE, add it and return it.
 	 */
 	public BaseJoiningPredicateBuilder getOrCreateFirstPredicateBuilder() {
+		return getOrCreateFirstPredicateBuilder(true);
+	}
+
+	/**
+	 * If at least one predicate builder already exists, return the last one added to the chain. If none has been selected, create a builder on HFJ_RESOURCE, add it and return it.
+	 */
+	public BaseJoiningPredicateBuilder getOrCreateFirstPredicateBuilder(boolean theIncludeResourceTypeAndNonDeletedFlag) {
 		if (myFirstPredicateBuilder == null) {
-			getOrCreateResourceTablePredicateBuilder();
+			getOrCreateResourceTablePredicateBuilder(theIncludeResourceTypeAndNonDeletedFlag);
 		}
 		return myFirstPredicateBuilder;
 	}
 
 	public ResourceTablePredicateBuilder getOrCreateResourceTablePredicateBuilder() {
+		return getOrCreateResourceTablePredicateBuilder(true);
+	}
+
+	public ResourceTablePredicateBuilder getOrCreateResourceTablePredicateBuilder(boolean theIncludeResourceTypeAndNonDeletedFlag) {
 		if (myResourceTableRoot == null) {
 			ResourceTablePredicateBuilder resourceTable = mySqlBuilderFactory.resourceTable(this);
 			addTable(resourceTable, null);
-			Condition typeAndDeletionPredicate = resourceTable.createResourceTypeAndNonDeletedPredicates();
-			addPredicate(typeAndDeletionPredicate);
+			if (theIncludeResourceTypeAndNonDeletedFlag) {
+				Condition typeAndDeletionPredicate = resourceTable.createResourceTypeAndNonDeletedPredicates();
+				addPredicate(typeAndDeletionPredicate);
+			}
 			myResourceTableRoot = resourceTable;
 		}
 		return myResourceTableRoot;
@@ -502,6 +517,10 @@ public class SearchQueryBuilder {
 			.stream()
 			.map(t -> generatePlaceholder(t))
 			.collect(Collectors.toList());
+	}
+
+	public int countBindVariables() {
+		return myBindVariableValues.size();
 	}
 
 
@@ -536,7 +555,7 @@ public class SearchQueryBuilder {
 	}
 
 	public ComboCondition addPredicateLastUpdated(DateRangeParam theDateRange) {
-		ResourceTablePredicateBuilder resourceTableRoot = getOrCreateResourceTablePredicateBuilder();
+		ResourceTablePredicateBuilder resourceTableRoot = getOrCreateResourceTablePredicateBuilder(false);
 
 		List<Condition> conditions = new ArrayList<>(2);
 		if (theDateRange.getLowerBoundAsInstant() != null) {
@@ -586,7 +605,7 @@ public class SearchQueryBuilder {
 			case GREATERTHAN_OR_EQUALS:
 				return BinaryCondition.greaterThanOrEq(theColumn, generatePlaceholder(theValue));
 			default:
-				throw new IllegalArgumentException();
+				throw new IllegalArgumentException(Msg.code(1263));
 		}
 	}
 

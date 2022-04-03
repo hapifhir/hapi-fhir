@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -15,7 +16,6 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -29,6 +29,7 @@ import org.springframework.messaging.MessagingException;
 import javax.annotation.Nonnull;
 import java.util.Collection;
 
+import static ca.uhn.fhir.rest.server.messaging.BaseResourceMessage.OperationTypeEnum.DELETE;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -53,7 +54,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 
 public class SubscriptionMatchingSubscriber implements MessageHandler {
-	private Logger ourLog = LoggerFactory.getLogger(SubscriptionMatchingSubscriber.class);
+	private final Logger ourLog = LoggerFactory.getLogger(SubscriptionMatchingSubscriber.class);
 	public static final String SUBSCRIPTION_MATCHING_CHANNEL_NAME = "subscription-matching";
 
 	@Autowired
@@ -74,7 +75,6 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 		super();
 	}
 
-
 	@Override
 	public void handleMessage(@Nonnull Message<?> theMessage) throws MessagingException {
 		ourLog.trace("Handling resource modified message: {}", theMessage);
@@ -93,8 +93,8 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 			case CREATE:
 			case UPDATE:
 			case MANUALLY_TRIGGERED:
-				break;
 			case DELETE:
+				break;
 			default:
 				ourLog.trace("Not processing modified message for {}", theMsg.getOperationType());
 				// ignore anything else
@@ -117,7 +117,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 	}
 
 	private void doMatchActiveSubscriptionsAndDeliver(ResourceModifiedMessage theMsg) {
-		IIdType resourceId = theMsg.getId(myFhirContext);
+		IIdType resourceId = theMsg.getPayloadId(myFhirContext);
 
 		Collection<ActiveSubscription> subscriptions = mySubscriptionRegistry.getAll();
 
@@ -125,7 +125,13 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 		boolean resourceMatched = false;
 
 		for (ActiveSubscription nextActiveSubscription : subscriptions) {
-
+			// skip if the partitions don't match
+			CanonicalSubscription subscription = nextActiveSubscription.getSubscription();
+			if (subscription != null && subscription.getRequestPartitionId() != null && theMsg.getPartitionId() != null &&
+				theMsg.getPartitionId().hasPartitionIds() && !subscription.getCrossPartitionEnabled() &&
+				!theMsg.getPartitionId().hasPartitionId(subscription.getRequestPartitionId())) {
+				continue;
+			}
 			String nextSubscriptionId = getId(nextActiveSubscription);
 
 			if (isNotBlank(theMsg.getSubscriptionId())) {
@@ -136,31 +142,55 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 				}
 			}
 
-			if (!validCriteria(nextActiveSubscription, resourceId)) {
+			if (!resourceTypeIsAppropriateForSubscription(nextActiveSubscription, resourceId)) {
 				continue;
 			}
 
-			InMemoryMatchResult matchResult = mySubscriptionMatcher.match(nextActiveSubscription.getSubscription(), theMsg);
-			if (!matchResult.matched()) {
-				continue;
+			if (theMsg.getOperationType().equals(DELETE)) {
+				if (!nextActiveSubscription.getSubscription().getSendDeleteMessages()) {
+					ourLog.trace("Not processing modified message for {}", theMsg.getOperationType());
+					return;
+				}
 			}
-			ourLog.debug("Subscription {} was matched by resource {} {}",
-				nextActiveSubscription.getId(),
-				resourceId.toUnqualifiedVersionless().getValue(),
-				matchResult.isInMemory() ? "in-memory" : "by querying the repository");
+
+			InMemoryMatchResult matchResult;
+			if (nextActiveSubscription.getCriteria().getType() == SubscriptionCriteriaParser.TypeEnum.SEARCH_EXPRESSION) {
+				matchResult = mySubscriptionMatcher.match(nextActiveSubscription.getSubscription(), theMsg);
+				if (!matchResult.matched()) {
+					ourLog.trace("Subscription {} was not matched by resource {} {}",
+						nextActiveSubscription.getId(),
+						resourceId.toUnqualifiedVersionless().getValue(),
+						matchResult.isInMemory() ? "in-memory" : "by querying the repository");
+					continue;
+				}
+				ourLog.debug("Subscription {} was matched by resource {} {}",
+					nextActiveSubscription.getId(),
+					resourceId.toUnqualifiedVersionless().getValue(),
+					matchResult.isInMemory() ? "in-memory" : "by querying the repository");
+			} else {
+				ourLog.trace("Subscription {} was not matched by resource {} - No search expression",
+					nextActiveSubscription.getId(),
+					resourceId.toUnqualifiedVersionless().getValue());
+				matchResult = InMemoryMatchResult.successfulMatch();
+				matchResult.setInMemory(true);
+			}
 
 			IBaseResource payload = theMsg.getNewPayload(myFhirContext);
-			CanonicalSubscription subscription = nextActiveSubscription.getSubscription();
 
 			EncodingEnum encoding = null;
-			if (subscription.getPayloadString() != null && !subscription.getPayloadString().isEmpty()) {
+			if (subscription != null && subscription.getPayloadString() != null && !subscription.getPayloadString().isEmpty()) {
 				encoding = EncodingEnum.forContentType(subscription.getPayloadString());
 			}
 			encoding = defaultIfNull(encoding, EncodingEnum.JSON);
 
 			ResourceDeliveryMessage deliveryMsg = new ResourceDeliveryMessage();
+			deliveryMsg.setPartitionId(theMsg.getPartitionId());
 
-			deliveryMsg.setPayload(myFhirContext, payload, encoding);
+			if (payload != null) {
+				deliveryMsg.setPayload(myFhirContext, payload, encoding);
+			} else {
+				deliveryMsg.setPayloadId(theMsg.getPayloadId(myFhirContext));
+			}
 			deliveryMsg.setSubscription(subscription);
 			deliveryMsg.setOperationType(theMsg.getOperationType());
 			deliveryMsg.setTransactionId(theMsg.getTransactionId());
@@ -207,7 +237,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 			}
 		} catch (RuntimeException e) {
 			ourLog.error("Failed to send message to Delivery Channel", e);
-			throw new RuntimeException("Failed to send message to Delivery Channel", e);
+			throw new RuntimeException(Msg.code(7) + "Failed to send message to Delivery Channel", e);
 		}
 	}
 
@@ -215,28 +245,31 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 		return theActiveSubscription.getId();
 	}
 
-	private boolean validCriteria(ActiveSubscription theActiveSubscription, IIdType theResourceId) {
-		String criteriaString = theActiveSubscription.getCriteriaString();
+	private boolean resourceTypeIsAppropriateForSubscription(ActiveSubscription theActiveSubscription, IIdType theResourceId) {
+		SubscriptionCriteriaParser.SubscriptionCriteria criteria = theActiveSubscription.getCriteria();
 		String subscriptionId = getId(theActiveSubscription);
 		String resourceType = theResourceId.getResourceType();
 
-		if (StringUtils.isBlank(criteriaString)) {
-			return false;
-		}
-
 		// see if the criteria matches the created object
-		ourLog.trace("Checking subscription {} for {} with criteria {}", subscriptionId, resourceType, criteriaString);
-		String criteriaResource = criteriaString;
-		int index = criteriaResource.indexOf("?");
-		if (index != -1) {
-			criteriaResource = criteriaResource.substring(0, criteriaResource.indexOf("?"));
-		}
+		ourLog.trace("Checking subscription {} for {} with criteria {}", subscriptionId, resourceType, criteria);
 
-		if (resourceType != null && !criteriaResource.equals(resourceType)) {
-			ourLog.trace("Skipping subscription search for {} because it does not match the criteria {}", resourceType, criteriaString);
+		if (criteria == null) {
+			ourLog.trace("Subscription {} has no criteria - Not matching", subscriptionId);
 			return false;
 		}
 
-		return true;
+		switch (criteria.getType()) {
+			default:
+			case SEARCH_EXPRESSION:
+			case MULTITYPE_EXPRESSION:
+				boolean contains = criteria.getApplicableResourceTypes().contains(resourceType);
+				ourLog.trace("Subscription {} applicable resource type check: {}", subscriptionId, contains);
+				return contains;
+			case STARTYPE_EXPRESSION:
+				boolean match = !resourceType.equals("Subscription");
+				ourLog.trace("Subscription {} start resource type check: {}", subscriptionId, match);
+				return match;
+		}
+
 	}
 }

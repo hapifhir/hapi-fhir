@@ -1,15 +1,23 @@
 package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.dstu2.BaseJpaDstu2Test;
-import ca.uhn.fhir.jpa.rp.dstu2.*;
-import ca.uhn.fhir.model.dstu2.resource.*;
+import ca.uhn.fhir.jpa.rp.dstu2.BinaryResourceProvider;
+import ca.uhn.fhir.jpa.rp.dstu2.DiagnosticOrderResourceProvider;
+import ca.uhn.fhir.jpa.rp.dstu2.DiagnosticReportResourceProvider;
+import ca.uhn.fhir.jpa.rp.dstu2.LocationResourceProvider;
+import ca.uhn.fhir.jpa.rp.dstu2.ObservationResourceProvider;
+import ca.uhn.fhir.jpa.rp.dstu2.OrganizationResourceProvider;
+import ca.uhn.fhir.jpa.rp.dstu2.PatientResourceProvider;
+import ca.uhn.fhir.jpa.rp.dstu2.PractitionerResourceProvider;
+import ca.uhn.fhir.model.dstu2.resource.Bundle;
+import ca.uhn.fhir.model.dstu2.resource.OperationDefinition;
+import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
-import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
@@ -17,8 +25,8 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.BundleUtil;
-import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -30,14 +38,11 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,10 +50,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.*;
-
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 
@@ -104,7 +112,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 			servletHolder.setServlet(restServer);
 			proxyHandler.addServlet(servletHolder, "/fhir/context/*");
 
-			ourCtx = FhirContext.forCached(FhirVersionEnum.DSTU2);
+			ourCtx = FhirContext.forDstu2Cached();
 			restServer.setFhirContext(ourCtx);
 
 			ourServer.setHandler(proxyHandler);
@@ -209,7 +217,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		for (int i = 0; i < 10; i++) {
 			ourLog.info("** Beginning pass {}", i);
 
-			Bundle input = myFhirCtx.newJsonParser().parseResource(Bundle.class, IOUtils.toString(getClass().getResourceAsStream("/dstu2/createdeletebundle.json"), Charsets.UTF_8));
+			Bundle input = myFhirContext.newJsonParser().parseResource(Bundle.class, IOUtils.toString(getClass().getResourceAsStream("/dstu2/createdeletebundle.json"), Charsets.UTF_8));
 			ourClient.transaction().withBundle(input).execute();
 
 			myPatientDao.read(new IdType("Patient/Patient1063259"));
@@ -235,7 +243,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 	}
 
 	private void deleteAllOfType(String theType) {
-		BundleUtil.toListOfResources(myFhirCtx, ourClient.search().forResource(theType).execute())
+		BundleUtil.toListOfResources(myFhirContext, ourClient.search().forResource(theType).execute())
 			.forEach(t -> {
 				ourClient.delete().resourceById(t.getIdElement()).execute();
 			});
@@ -323,7 +331,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 			fail();
 		} catch (InvalidRequestException e) {
 			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
-			assertEquals("Invalid placeholder ID found: uri:uuid:bb0cd4bc-1839-4606-8c46-ba3069e69b1d - Must be of the form 'urn:uuid:[uuid]' or 'urn:oid:[oid]'", oo.getIssue().get(0).getDiagnostics());
+			assertEquals(Msg.code(533) + "Invalid placeholder ID found: uri:uuid:bb0cd4bc-1839-4606-8c46-ba3069e69b1d - Must be of the form 'urn:uuid:[uuid]' or 'urn:oid:[oid]'", oo.getIssue().get(0).getDiagnostics());
 			assertEquals("processing", oo.getIssue().get(0).getCode());
 		}
 	}
@@ -396,7 +404,6 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 			assertEquals(200, http.getStatusLine().getStatusCode());
 		} finally {
 			IOUtils.closeQuietly(http);
-			;
 		}
 	}
 

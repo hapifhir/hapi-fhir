@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.patch;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.XmlUtil;
@@ -51,10 +50,10 @@ public class FhirPatchCoreTest extends BaseTest {
 
 	public static List<Object[]> parameters() throws TransformerException, SAXException, IOException {
 		String testSpecR4 = "/org/hl7/fhir/testcases/r4/patch/fhir-path-tests.xml";
-		Collection<Object[]> retValR4 = loadTestSpec(FhirContext.forCached(FhirVersionEnum.R4), testSpecR4);
+		Collection<Object[]> retValR4 = loadTestSpec(FhirContext.forR4Cached(), testSpecR4);
 
 		String testSpecR5 = "/org/hl7/fhir/testcases/r5/patch/fhir-path-tests.xml";
-		Collection<Object[]> retValR5 = loadTestSpec(FhirContext.forCached(FhirVersionEnum.R5), testSpecR5);
+		Collection<Object[]> retValR5 = loadTestSpec(FhirContext.forR5Cached(), testSpecR5);
 
 		ArrayList<Object[]> retVal = new ArrayList<>();
 		retVal.addAll(retValR4);

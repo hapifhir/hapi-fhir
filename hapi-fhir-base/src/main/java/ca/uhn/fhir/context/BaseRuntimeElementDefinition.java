@@ -20,6 +20,7 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -28,7 +29,11 @@ import org.hl7.fhir.instance.model.api.IBase;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 
@@ -96,7 +101,7 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 				}
 			}
 			if (retVal == null) {
-				throw new ConfigurationException("Class " + getImplementingClass() + " has no constructor with a single argument of type " + argumentType);
+				throw new ConfigurationException(Msg.code(1695) + "Class " + getImplementingClass() + " has no constructor with a single argument of type " + argumentType);
 			}
 			myConstructors.put(argumentType, retVal);
 		}
@@ -169,7 +174,7 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 			return getConstructor(theArgument).newInstance(theArgument);
 
 		} catch (Exception e) {
-			throw new ConfigurationException("Failed to instantiate type:" + getImplementingClass().getName(), e);
+			throw new ConfigurationException(Msg.code(1696) + "Failed to instantiate type:" + getImplementingClass().getName(), e);
 		}
 	}
 
@@ -191,7 +196,7 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 		for (RuntimeChildDeclaredExtensionDefinition next : myExtensions) {
 			String extUrl = next.getExtensionUrl();
 			if (myUrlToExtension.containsKey(extUrl)) {
-				throw new ConfigurationException("Duplicate extension URL[" + extUrl + "] in Element[" + getName() + "]");
+				throw new ConfigurationException(Msg.code(1697) + "Duplicate extension URL[" + extUrl + "] in Element[" + getName() + "]");
 			}
 			myUrlToExtension.put(extUrl, next);
 			if (next.isModifier()) {
@@ -224,9 +229,8 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 		/*
 		 * this does nothing, but BaseRuntimeElementCompositeDefinition
 		 * overrides this method to provide functionality because that class
-		 * defers the dealing process
+		 * defers the sealing process
 		 */
-
 	}
 
 	public BaseRuntimeChildDefinition getChildByName(String theChildName) {

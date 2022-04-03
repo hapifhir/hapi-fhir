@@ -44,7 +44,7 @@
 			},
 			"request": {
 				"method": "PUT",
-				"url": "/Practitioner?identifier=http%253A%252F%252Facme.org%252Fclinicians%257C777"
+				"url": "/Practitioner?identifier=http%3A%2F%2Facme.org%2Fclinicians%7C777"
 			}
 		},
 		{
@@ -125,7 +125,7 @@
 			},
 			"request": {
 				"method": "PUT",
-				"url": "/Patient?identifier=http%253A%252F%252Facme.org%252Fmrns%257C7000135"
+				"url": "/Patient?identifier=http%3A%2F%2Facme.org%2Fmrns%7C7000135"
 			}
 		},
 		{
@@ -203,7 +203,7 @@
 			},
 			"request": {
 				"method": "PUT",
-				"url": "/Encounter?identifier=http%253A%252F%252Facme.org%252FvisitNumbers%257C4736455"
+				"url": "/Encounter?identifier=http%3A%2F%2Facme.org%2FvisitNumbers%7C4736455"
 			}
 		},
 		{
@@ -267,7 +267,7 @@
 			},
 			"request": {
 				"method": "PUT",
-				"url": "/Practitioner?identifier=http%253A%252F%252Facme.org%252Fclinicians%257C3622"
+				"url": "/Practitioner?identifier=http%3A%2F%2Facme.org%2Fclinicians%7C3622"
 			}
 		},
 		{
@@ -312,7 +312,7 @@
 			},
 			"request": {
 				"method": "PUT",
-				"url": "/Practitioner?identifier=http%253A%252F%252Facme.org%252Fclinicians%257C7452"
+				"url": "/Practitioner?identifier=http%3A%2F%2Facme.org%2Fclinicians%7C7452"
 			}
 		}
 	]

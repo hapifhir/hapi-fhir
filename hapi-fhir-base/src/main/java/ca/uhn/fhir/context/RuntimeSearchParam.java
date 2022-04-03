@@ -233,18 +233,7 @@ public class RuntimeSearchParam {
 	}
 
 	public List<String> getPathsSplit() {
-		String path = getPath();
-		if (path.indexOf('|') == -1) {
-			return Collections.singletonList(path);
-		}
-
-		List<String> retVal = new ArrayList<>();
-		StringTokenizer tok = new StringTokenizer(path, "|");
-		while (tok.hasMoreElements()) {
-			String nextPath = tok.nextToken().trim();
-			retVal.add(nextPath.trim());
-		}
-		return retVal;
+		return getPathsSplitForResourceType(null);
 	}
 
 	/**
@@ -264,6 +253,41 @@ public class RuntimeSearchParam {
 			return theString;
 		}
 		return myPhoneticEncoder.encode(theString);
+	}
+
+	public List<String> getPathsSplitForResourceType(@Nullable String theResourceName) {
+		String path = getPath();
+		if (path.indexOf('|') == -1) {
+			if (theResourceName != null && !pathMatchesResourceType(theResourceName, path)) {
+				return Collections.emptyList();
+			}
+			return Collections.singletonList(path);
+		}
+
+		List<String> retVal = new ArrayList<>();
+		StringTokenizer tok = new StringTokenizer(path, "|");
+		while (tok.hasMoreElements()) {
+			String nextPath = tok.nextToken().trim();
+			if (theResourceName != null && !pathMatchesResourceType(theResourceName, nextPath)) {
+				continue;
+			}
+			retVal.add(nextPath.trim());
+		}
+		return retVal;
+	}
+
+	private boolean pathMatchesResourceType(String theResourceName, String thePath) {
+		if (thePath.startsWith(theResourceName + ".")) {
+			return true;
+		}
+		if (thePath.startsWith("Resouce.") || thePath.startsWith("DomainResource.")) {
+			return true;
+		}
+		if (Character.isLowerCase(thePath.charAt(0))) {
+			return true;
+		}
+
+		return false;
 	}
 
 	public enum RuntimeSearchParamStatusEnum {

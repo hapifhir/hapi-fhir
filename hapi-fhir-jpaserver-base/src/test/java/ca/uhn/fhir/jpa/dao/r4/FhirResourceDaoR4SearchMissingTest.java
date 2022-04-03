@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -60,7 +61,7 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 		try {
 			myPatientDao.search(params);
 		} catch (MethodNotAllowedException e) {
-			assertEquals(":missing modifier is disabled on this server", e.getMessage());
+			assertEquals(Msg.code(985) + ":missing modifier is disabled on this server", e.getMessage());
 		}
 	}
 
@@ -73,7 +74,7 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 		try {
 			myPatientDao.search(params);
 		} catch (MethodNotAllowedException e) {
-			assertEquals(":missing modifier is disabled on this server", e.getMessage());
+			assertEquals(Msg.code(985) + ":missing modifier is disabled on this server", e.getMessage());
 		}
 	}
 
@@ -84,11 +85,13 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 		org.setActive(true);
 		myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
 
-		assertThat(mySearchParamPresentDao.findAll(), empty());
-		assertThat(myResourceIndexedSearchParamStringDao.findAll(), empty());
-		assertThat(myResourceIndexedSearchParamDateDao.findAll(), empty());
-		assertThat(myResourceIndexedSearchParamTokenDao.findAll(), hasSize(1));
-		assertThat(myResourceIndexedSearchParamQuantityDao.findAll(), empty());
+		runInTransaction(() -> {
+			assertThat(mySearchParamPresentDao.findAll(), empty());
+			assertThat(myResourceIndexedSearchParamStringDao.findAll(), empty());
+			assertThat(myResourceIndexedSearchParamDateDao.findAll(), empty());
+			assertThat(myResourceIndexedSearchParamTokenDao.findAll(), hasSize(1));
+			assertThat(myResourceIndexedSearchParamQuantityDao.findAll(), empty());
+		});
 
 	}
 
@@ -101,11 +104,13 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 		org.setActive(true);
 		myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
 
-		assertThat(mySearchParamPresentDao.findAll(), empty());
-		assertThat(myResourceIndexedSearchParamStringDao.findAll(), empty());
-		assertThat(myResourceIndexedSearchParamDateDao.findAll(), empty());
-		assertThat(myResourceIndexedSearchParamTokenDao.findAll(), hasSize(1));
-		assertThat(myResourceIndexedSearchParamQuantityDao.findAll(), empty());
+		runInTransaction(() -> {
+			assertThat(mySearchParamPresentDao.findAll(), empty());
+			assertThat(myResourceIndexedSearchParamStringDao.findAll(), empty());
+			assertThat(myResourceIndexedSearchParamDateDao.findAll(), empty());
+			assertThat(myResourceIndexedSearchParamTokenDao.findAll(), hasSize(1));
+			assertThat(myResourceIndexedSearchParamQuantityDao.findAll(), empty());
+		});
 
 	}
 
@@ -118,11 +123,13 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 		org.setActive(true);
 		myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
 
-		assertThat(mySearchParamPresentDao.findAll(), empty());
-		assertThat(myResourceIndexedSearchParamStringDao.findAll(), empty());
-		assertThat(myResourceIndexedSearchParamDateDao.findAll(), empty());
-		assertThat(myResourceIndexedSearchParamTokenDao.findAll(), hasSize(1));
-		assertThat(myResourceIndexedSearchParamQuantityDao.findAll(), empty());
+		runInTransaction(() -> {
+			assertThat(mySearchParamPresentDao.findAll(), empty());
+			assertThat(myResourceIndexedSearchParamStringDao.findAll(), empty());
+			assertThat(myResourceIndexedSearchParamDateDao.findAll(), empty());
+			assertThat(myResourceIndexedSearchParamTokenDao.findAll(), hasSize(1));
+			assertThat(myResourceIndexedSearchParamQuantityDao.findAll(), empty());
+		});
 
 	}
 

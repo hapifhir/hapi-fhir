@@ -1,16 +1,15 @@
 package ca.uhn.fhir.jpa.bulk;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
-import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
+import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
 import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -55,11 +54,8 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.times;
@@ -74,7 +70,7 @@ public class BulkDataExportProviderTest {
 	private static final String GROUP_ID = "Group/G2401";
 	private static final String G_JOB_ID = "0000000-GGGGGG";
 	private Server myServer;
-	private final FhirContext myCtx = FhirContext.forCached(FhirVersionEnum.R4);
+	private final FhirContext myCtx = FhirContext.forR4Cached();
 	private int myPort;
 	@Mock
 	private IBulkDataExportSvc myBulkDataExportSvc;
@@ -478,9 +474,9 @@ public class BulkDataExportProviderTest {
 		when(myBulkDataExportSvc.submitJob(any(), any(), nullable(RequestDetails.class))).thenReturn(jobInfo);
 
 		String url = "http://localhost:" + myPort + "/" + "Group/123/" +JpaConstants.OPERATION_EXPORT
-			+ "?" + JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT + "=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_NDJSON);;
+			+ "?" + JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT + "=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_NDJSON);
 
-		HttpGet get = new HttpGet(url);
+        HttpGet get = new HttpGet(url);
 		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		CloseableHttpResponse execute = myClient.execute(get);
 

@@ -1,12 +1,25 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
+import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.Delete;
+import ca.uhn.fhir.rest.annotation.History;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.IncludeParam;
+import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
+import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.Update;
+import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
@@ -28,7 +41,8 @@ import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r5.model.*;
+import org.hl7.fhir.r5.model.Bundle;
+import org.hl7.fhir.r5.model.CapabilityStatement;
 import org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestComponent;
 import org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestResourceComponent;
 import org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestResourceOperationComponent;
@@ -36,9 +50,18 @@ import org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestResource
 import org.hl7.fhir.r5.model.CapabilityStatement.ConditionalDeleteStatus;
 import org.hl7.fhir.r5.model.CapabilityStatement.SystemRestfulInteraction;
 import org.hl7.fhir.r5.model.CapabilityStatement.TypeRestfulInteraction;
+import org.hl7.fhir.r5.model.CodeType;
+import org.hl7.fhir.r5.model.DateType;
+import org.hl7.fhir.r5.model.DiagnosticReport;
+import org.hl7.fhir.r5.model.Encounter;
+import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r5.model.IdType;
+import org.hl7.fhir.r5.model.OperationDefinition;
 import org.hl7.fhir.r5.model.OperationDefinition.OperationDefinitionParameterComponent;
 import org.hl7.fhir.r5.model.OperationDefinition.OperationKind;
+import org.hl7.fhir.r5.model.Patient;
+import org.hl7.fhir.r5.model.StringType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -70,7 +93,7 @@ import static org.mockito.Mockito.when;
 
 public class ServerCapabilityStatementProviderR5Test {
 
-	private final FhirContext myCtx = FhirContext.forCached(FhirVersionEnum.R5);
+	private final FhirContext myCtx = FhirContext.forR5Cached();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerCapabilityStatementProviderR5Test.class);
 
 	private HttpServletRequest createHttpServletRequest() {
@@ -212,7 +235,7 @@ public class ServerCapabilityStatementProviderR5Test {
 		rs.init(createServletConfig());
 		CapabilityStatement serverConformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
-		List<String> formatCodes = serverConformance.getFormat().stream().map(c -> c.getCode()).collect(Collectors.toList());;
+		List<String> formatCodes = serverConformance.getFormat().stream().map(c -> c.getCode()).collect(Collectors.toList());
 
 		assertThat(formatCodes, hasItem(Constants.FORMAT_XML));
 		assertThat(formatCodes, hasItem(Constants.FORMAT_JSON));
@@ -373,9 +396,9 @@ public class ServerCapabilityStatementProviderR5Test {
 
 		assertEquals("subject.identifier", res.getSearchParam().get(0).getName());
 
-		assertEquals(DiagnosticReport.SP_CODE, res.getSearchParam().get(1).getName());
+		assertEquals("code", res.getSearchParam().get(1).getName());
 
-		assertEquals(DiagnosticReport.SP_DATE, res.getSearchParam().get(2).getName());
+		assertEquals("date", res.getSearchParam().get(2).getName());
 
 		assertEquals(1, res.getSearchInclude().size());
 		assertEquals("DiagnosticReport.result", res.getSearchInclude().get(0).getValue());
@@ -479,7 +502,8 @@ public class ServerCapabilityStatementProviderR5Test {
 				List<BaseMethodBinding<?>> methodBindings = resourceBinding.getMethodBindings();
 					SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 					SearchParameter param = (SearchParameter) binding.getParameters().get(25);
-					assertEquals("The organization at which this person is a patient", param.getDescription());
+					assertEquals("careprovider", param.getName());
+					assertEquals("Patient's nominated care provider, could be a care manager, not the organization that manages the record", param.getDescription());
 					found = true;
 			}
 		}
@@ -795,7 +819,7 @@ public class ServerCapabilityStatementProviderR5Test {
 
 	@AfterAll
 	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 	@SuppressWarnings("unused")
@@ -841,8 +865,8 @@ public class ServerCapabilityStatementProviderR5Test {
 	public static class MultiOptionalProvider {
 
 		@Search(type = Patient.class)
-		public Patient findPatient(@Description(shortDefinition = "The patient's identifier") @OptionalParam(name = Patient.SP_IDENTIFIER) TokenParam theIdentifier,
-				@Description(shortDefinition = "The patient's name") @OptionalParam(name = Patient.SP_NAME) StringParam theName) {
+		public Patient findPatient(@Description(shortDefinition = "The patient's identifier") @OptionalParam(name = "identifier") TokenParam theIdentifier,
+				@Description(shortDefinition = "The patient's name") @OptionalParam(name = "name") StringParam theName) {
 			return null;
 		}
 
@@ -947,8 +971,8 @@ public class ServerCapabilityStatementProviderR5Test {
 
 		@Description(shortDefinition = "This is a search for stuff!")
 		@Search
-		public List<DiagnosticReport> findDiagnosticReportsByPatient(@RequiredParam(name = DiagnosticReport.SP_SUBJECT + '.' + Patient.SP_IDENTIFIER) TokenParam thePatientId,
-				@OptionalParam(name = DiagnosticReport.SP_CODE) TokenOrListParam theNames, @OptionalParam(name = DiagnosticReport.SP_DATE) DateRangeParam theDateRange,
+		public List<DiagnosticReport> findDiagnosticReportsByPatient(@RequiredParam(name = "subject" + '.' + "identifier") TokenParam thePatientId,
+				@OptionalParam(name = "code") TokenOrListParam theNames, @OptionalParam(name = "date") DateRangeParam theDateRange,
 				@IncludeParam(allow = { "DiagnosticReport.result" }) Set<Include> theIncludes) throws Exception {
 			return null;
 		}
@@ -959,7 +983,7 @@ public class ServerCapabilityStatementProviderR5Test {
 	public static class ReadProvider {
 
 		@Search(type = Patient.class)
-		public Patient findPatient(@Description(shortDefinition = "The patient's identifier (MRN or other card number)") @RequiredParam(name = Patient.SP_IDENTIFIER) TokenParam theIdentifier) {
+		public Patient findPatient(@Description(shortDefinition = "The patient's identifier (MRN or other card number)") @RequiredParam(name = "identifier") TokenParam theIdentifier) {
 			return null;
 		}
 
@@ -974,7 +998,7 @@ public class ServerCapabilityStatementProviderR5Test {
 	public static class SearchProvider {
 
 		@Search(type = Patient.class)
-		public Patient findPatient1(@Description(shortDefinition = "The patient's identifier (MRN or other card number)") @RequiredParam(name = Patient.SP_IDENTIFIER) TokenParam theIdentifier) {
+		public Patient findPatient1(@Description(shortDefinition = "The patient's identifier (MRN or other card number)") @RequiredParam(name = "identifier") TokenParam theIdentifier) {
 			return null;
 		}
 
@@ -990,7 +1014,7 @@ public class ServerCapabilityStatementProviderR5Test {
 	public static class SearchProviderWithWhitelist {
 
 		@Search(type = Patient.class)
-		public Patient findPatient1(@Description(shortDefinition = "The organization at which this person is a patient") @RequiredParam(name = Patient.SP_ORGANIZATION, chainWhitelist = { "foo",
+		public Patient findPatient1(@Description(shortDefinition = "The organization at which this person is a patient") @RequiredParam(name = "organization", chainWhitelist = { "foo",
 				"bar" }) ReferenceAndListParam theIdentifier) {
 			return null;
 		}
@@ -1008,7 +1032,7 @@ public class ServerCapabilityStatementProviderR5Test {
 
 
 		@Search()
-		public List<Patient> findPatient1(@Description(shortDefinition = "The organization at which this person is a patient") @RequiredParam(name = Patient.SP_ORGANIZATION) ReferenceAndListParam theIdentifier) {
+		public List<Patient> findPatient1(@Description(shortDefinition = "The organization at which this person is a patient") @RequiredParam(name = "organization") ReferenceAndListParam theIdentifier) {
 			return null;
 		}
 
@@ -1025,7 +1049,7 @@ public class ServerCapabilityStatementProviderR5Test {
 
 
 		@Search(type=Patient.class)
-		public List<Patient> findPatient1(@Description(shortDefinition = "The organization at which this person is a patient") @RequiredParam(name = Patient.SP_ORGANIZATION) ReferenceAndListParam theIdentifier) {
+		public List<Patient> findPatient1(@Description(shortDefinition = "The organization at which this person is a patient") @RequiredParam(name = "organization") ReferenceAndListParam theIdentifier) {
 			return null;
 		}
 
@@ -1059,7 +1083,7 @@ public class ServerCapabilityStatementProviderR5Test {
 	public static class VreadProvider {
 
 		@Search(type = Patient.class)
-		public Patient findPatient(@Description(shortDefinition = "The patient's identifier (MRN or other card number)") @RequiredParam(name = Patient.SP_IDENTIFIER) TokenParam theIdentifier) {
+		public Patient findPatient(@Description(shortDefinition = "The patient's identifier (MRN or other card number)") @RequiredParam(name = "identifier") TokenParam theIdentifier) {
 			return null;
 		}
 

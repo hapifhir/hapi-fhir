@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
@@ -77,7 +78,7 @@ public class MdmResourceDaoSvc {
 
 	//TODO GGG MDM address this
 	public Optional<IAnyResource> searchGoldenResourceByEID(String theEid, String theResourceType) {
-		SearchParameterMap map = buildEidSearchParameterMap(theEid);
+		SearchParameterMap map = buildEidSearchParameterMap(theEid, theResourceType);
 
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResourceType);
 		IBundleProvider search = resourceDao.search(map);
@@ -86,7 +87,7 @@ public class MdmResourceDaoSvc {
 		if (resources.isEmpty()) {
 			return Optional.empty();
 		} else if (resources.size() > 1) {
-			throw new InternalErrorException("Found more than one active " +
+			throw new InternalErrorException(Msg.code(737) + "Found more than one active " +
 				MdmConstants.CODE_HAPI_MDM_MANAGED +
 				" Golden Resource with EID " +
 				theEid +
@@ -101,10 +102,10 @@ public class MdmResourceDaoSvc {
 	}
 
 	@Nonnull
-	private SearchParameterMap buildEidSearchParameterMap(String theTheEid) {
+	private SearchParameterMap buildEidSearchParameterMap(String theEid, String theResourceType) {
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
-		map.add("identifier", new TokenParam(myMdmSettings.getMdmRules().getEnterpriseEIDSystem(), theTheEid));
+		map.add("identifier", new TokenParam(myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType(theResourceType), theEid));
 		map.add("_tag", new TokenParam(MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_GOLDEN_RECORD));
 		return map;
 	}

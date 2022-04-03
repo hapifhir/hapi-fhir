@@ -15,9 +15,9 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
-import ca.uhn.fhir.jpa.binstore.BinaryAccessProvider;
-import ca.uhn.fhir.jpa.binstore.BinaryStorageInterceptor;
-import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
+import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
+import ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor;
+import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
@@ -51,7 +51,7 @@ import ca.uhn.fhir.jpa.dao.data.ITermConceptPropertyDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDesignationDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -60,7 +60,6 @@ import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.interceptor.PerformanceTracingLoggingInterceptor;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.packages.IPackageInstallerSvc;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
@@ -93,8 +92,6 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
-import org.hibernate.search.mapper.orm.Search;
-import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -103,6 +100,7 @@ import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.Appointment;
 import org.hl7.fhir.r4.model.AuditEvent;
 import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.BodyStructure;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.CarePlan;
@@ -153,14 +151,22 @@ import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.RiskAssessment;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.ServiceRequest;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Substance;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.hl7.fhir.r5.utils.IResourceValidator;
-import org.junit.jupiter.api.AfterAll;
+import org.hl7.fhir.r5.elementmodel.Element;
+import org.hl7.fhir.r5.model.ElementDefinition;
+import org.hl7.fhir.r5.utils.validation.IResourceValidator;
+import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
+import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
+import org.hl7.fhir.r5.utils.validation.constants.BindingKind;
+import org.hl7.fhir.r5.utils.validation.constants.CodedContentValidationPolicy;
+import org.hl7.fhir.r5.utils.validation.constants.ContainedReferenceValidationPolicy;
+import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -193,8 +199,7 @@ import static org.mockito.Mockito.mock;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestR4Config.class})
 public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuilder {
-	private static IValidationSupport ourJpaValidationSupportChainR4;
-	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
+	public static final String MY_VALUE_SET = "my-value-set";
 
 	@Autowired
 	protected IPackageInstallerSvc myPackageInstallerSvc;
@@ -291,8 +296,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Qualifier("myEpisodeOfCareDaoR4")
 	protected IFhirResourceDao<EpisodeOfCare> myEpisodeOfCareDao;
 	@Autowired
-	protected DaoConfig myDaoConfig;
-	@Autowired
 	protected PartitionSettings myPartitionSettings;
 	@Autowired
 	protected ModelConfig myModelConfig;
@@ -312,7 +315,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	protected EntityManager myEntityManager;
 	@Autowired
-	protected FhirContext myFhirCtx;
+	protected FhirContext myFhirContext;
 	@Autowired
 	@Qualifier("myGroupDaoR4")
 	protected IFhirResourceDao<Group> myGroupDao;
@@ -374,6 +377,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	@Qualifier("myBinaryDaoR4")
 	protected IFhirResourceDao<Binary> myBinaryDao;
+	@Autowired
+	@Qualifier("myBodyStructureDaoR4")
+	protected IFhirResourceDao<BodyStructure> myBodyStructureDao;
 	@Autowired
 	@Qualifier("myDocumentReferenceDaoR4")
 	protected IFhirResourceDao<DocumentReference> myDocumentReferenceDao;
@@ -463,7 +469,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	protected PlatformTransactionManager myTxManager;
 	@Autowired
-	@Qualifier("myJpaValidationSupportChain")
 	protected IValidationSupport myValidationSupport;
 	@Autowired
 	@Qualifier("myValueSetDaoR4")
@@ -486,18 +491,18 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	protected DaoRegistry myDaoRegistry;
 	@Autowired
-	private IValidationSupport myJpaValidationSupportChainR4;
-	private PerformanceTracingLoggingInterceptor myPerformanceTracingLoggingInterceptor;
-	@Autowired
-	private IBulkDataExportSvc myBulkDataExportSvc;
-	@Autowired
-	protected IdHelperService myIdHelperService;
+	protected IJpaIdHelperService myIdHelperService;
 	@Autowired
 	protected IBatchJobSubmitter myBatchJobSubmitter;
 	@Autowired
 	protected ValidationSettings myValidationSettings;
 	@Autowired
 	protected IMdmLinkDao myMdmLinkDao;
+	@Autowired
+	private IValidationSupport myJpaValidationSupportChainR4;
+	private PerformanceTracingLoggingInterceptor myPerformanceTracingLoggingInterceptor;
+	@Autowired
+	private IBulkDataExportJobSchedulingHelper myBulkDataScheduleHelper;
 
 	@AfterEach()
 	public void afterCleanupDao() {
@@ -507,6 +512,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
 		myDaoConfig.setSuppressUpdatesWithNoChange(new DaoConfig().isSuppressUpdatesWithNoChange());
 		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
+		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(new DaoConfig().isAutoCreatePlaceholderReferenceTargets());
 
 		myPagingProvider.setDefaultPageSize(BasePagingProvider.DEFAULT_DEFAULT_PAGE_SIZE);
 		myPagingProvider.setMaximumPageSize(BasePagingProvider.DEFAULT_MAX_PAGE_SIZE);
@@ -529,12 +535,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		termDeferredStorageSvc.clearDeferred();
 	}
 
-	@AfterEach()
-	public void afterGrabCaches() {
-		ourValueSetDao = myValueSetDao;
-		ourJpaValidationSupportChainR4 = myJpaValidationSupportChainR4;
-	}
-
 	@BeforeEach
 	public void beforeCreateInterceptor() {
 		myInterceptor = mock(IServerInterceptor.class);
@@ -550,11 +550,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 	@BeforeEach
 	public void beforeFlushFT() {
-		runInTransaction(() -> {
-			SearchSession searchSession = Search.session(myEntityManager);
-			searchSession.workspace(ResourceTable.class).purge();
-			searchSession.indexingPlan().execute();
-		});
+		purgeHibernateSearch(this.myEntityManager);
 
 		myDaoConfig.setSchedulingDisabled(true);
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
@@ -562,13 +558,15 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 	@AfterEach
 	public void afterPurgeDatabase() {
-		myMdmLinkDao.deleteAll();
-		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataExportSvc);
+		runInTransaction(() -> {
+			myMdmLinkDao.deleteAll();
+		});
+		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
 	}
 
 	@BeforeEach
 	public void beforeResetConfig() {
-		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
+		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
 		myValidationSettings.setLocalReferenceValidationDefaultPolicy(new ValidationSettings().getLocalReferenceValidationDefaultPolicy());
 	}
 
@@ -585,17 +583,12 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	}
 
 	protected String encode(IBaseResource theResource) {
-		return myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(theResource);
+		return myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(theResource);
 	}
 
 	@Override
 	public FhirContext getFhirContext() {
-		return myFhirCtx;
-	}
-
-	@Override
-	protected FhirContext getContext() {
-		return myFhirCtx;
+		return myFhirContext;
 	}
 
 	@Override
@@ -604,29 +597,29 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	}
 
 	protected <T extends IBaseResource> T loadResourceFromClasspath(Class<T> type, String resourceName) throws IOException {
-		return ClasspathUtil.loadResource(myFhirCtx, type, resourceName);
+		return ClasspathUtil.loadResource(myFhirContext, type, resourceName);
 	}
 
 	protected void validate(IBaseResource theResource) {
-		FhirValidator validatorModule = myFhirCtx.newValidator();
+		FhirValidator validatorModule = myFhirContext.newValidator();
 		FhirInstanceValidator instanceValidator = new FhirInstanceValidator(myValidationSupport);
-		instanceValidator.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Ignore);
+		instanceValidator.setBestPracticeWarningLevel(BestPracticeWarningLevel.Ignore);
+		instanceValidator.setValidatorPolicyAdvisor(new ValidationPolicyAdvisor());
 		validatorModule.registerValidatorModule(instanceValidator);
 		ValidationResult result = validatorModule.validateWithResult(theResource);
 		if (!result.isSuccessful()) {
-			fail(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
+			fail(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
 		}
 	}
 
 	@SuppressWarnings("unchecked")
 	protected void upload(String theClasspath) throws IOException {
 		String resource = loadResource(theClasspath);
-		IParser parser = EncodingEnum.detectEncoding(resource).newParser(myFhirCtx);
+		IParser parser = EncodingEnum.detectEncoding(resource).newParser(myFhirContext);
 		IBaseResource resourceParsed = parser.parseResource(resource);
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceParsed.getIdElement().getResourceType());
 		dao.update(resourceParsed);
 	}
-
 
 	protected void assertHierarchyContains(String... theStrings) {
 		List<String> hierarchy = runInTransaction(() -> {
@@ -643,6 +636,104 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		} else {
 			assertThat("\n" + String.join("\n", hierarchy), hierarchy, contains(theStrings));
 		}
+	}
+
+	protected ValueSet.ConceptReferenceDesignationComponent assertConceptContainsDesignation(ValueSet.ValueSetExpansionContainsComponent theConcept, String theLanguage, String theUseSystem, String theUseCode, String theUseDisplay, String theDesignationValue) {
+		Stream<ValueSet.ConceptReferenceDesignationComponent> stream = theConcept.getDesignation().stream();
+		if (theLanguage != null) {
+			stream = stream.filter(designation -> theLanguage.equalsIgnoreCase(designation.getLanguage()));
+		}
+		if (theUseSystem != null) {
+			stream = stream.filter(designation -> theUseSystem.equalsIgnoreCase(designation.getUse().getSystem()));
+		}
+		if (theUseCode != null) {
+			stream = stream.filter(designation -> theUseCode.equalsIgnoreCase(designation.getUse().getCode()));
+		}
+		if (theUseDisplay != null) {
+			stream = stream.filter(designation -> theUseDisplay.equalsIgnoreCase(designation.getUse().getDisplay()));
+		}
+		if (theDesignationValue != null) {
+			stream = stream.filter(designation -> theDesignationValue.equalsIgnoreCase(designation.getValue()));
+		}
+
+		Optional<ValueSet.ConceptReferenceDesignationComponent> first = stream.findFirst();
+		if (!first.isPresent()) {
+			String failureMessage = String.format("Concept %s did not contain designation [%s|%s|%s|%s|%s] ", theConcept, theLanguage, theUseSystem, theUseCode, theUseDisplay, theDesignationValue);
+			fail(failureMessage);
+			return null;
+		} else {
+			return first.get();
+		}
+	}
+
+	protected ValueSet.ValueSetExpansionContainsComponent assertExpandedValueSetContainsConcept(ValueSet theValueSet, String theSystem, String theCode, String theDisplay, Integer theDesignationCount) {
+		List<ValueSet.ValueSetExpansionContainsComponent> contains = theValueSet.getExpansion().getContains();
+
+		Stream<ValueSet.ValueSetExpansionContainsComponent> stream = contains.stream();
+		if (theSystem != null) {
+			stream = stream.filter(concept -> theSystem.equalsIgnoreCase(concept.getSystem()));
+		}
+		if (theCode != null) {
+			stream = stream.filter(concept -> theCode.equalsIgnoreCase(concept.getCode()));
+		}
+		if (theDisplay != null) {
+			stream = stream.filter(concept -> theDisplay.equalsIgnoreCase(concept.getDisplay()));
+		}
+		if (theDesignationCount != null) {
+			stream = stream.filter(concept -> concept.getDesignation().size() == theDesignationCount);
+		}
+
+		Optional<ValueSet.ValueSetExpansionContainsComponent> first = stream.findFirst();
+		if (!first.isPresent()) {
+			String expandedValueSetString = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(theValueSet);
+			String failureMessage = String.format("Expanded ValueSet %s did not contain concept [%s|%s|%s] with [%d] designations. Outcome:\n%s", theValueSet.getId(), theSystem, theCode, theDisplay, theDesignationCount, expandedValueSetString);
+			fail(failureMessage);
+			return null;
+		} else {
+			return first.get();
+		}
+	}
+
+	public List<String> getExpandedConceptsByValueSetUrl(String theValuesetUrl) {
+		return runInTransaction(() -> {
+			List<TermValueSet> valueSets = myTermValueSetDao.findTermValueSetByUrl(Pageable.unpaged(), theValuesetUrl);
+			assertEquals(1, valueSets.size());
+			TermValueSet valueSet = valueSets.get(0);
+			List<TermValueSetConcept> concepts = valueSet.getConcepts();
+			return concepts.stream().map(concept -> concept.getCode()).collect(Collectors.toList());
+		});
+	}
+
+	protected void createLocalCsAndVs() {
+		//@formatter:off
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl(FhirResourceDaoR4TerminologyTest.URL_MY_CODE_SYSTEM);
+		codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		codeSystem
+			.addConcept().setCode("A").setDisplay("Code A").addDesignation(
+				new CodeSystem.ConceptDefinitionDesignationComponent().setLanguage("en").setValue("CodeADesignation")).addProperty(
+				new CodeSystem.ConceptPropertyComponent().setCode("CodeAProperty").setValue(new StringType("CodeAPropertyValue"))
+			)
+			.addConcept(new CodeSystem.ConceptDefinitionComponent().setCode("AA").setDisplay("Code AA")
+				.addConcept(new CodeSystem.ConceptDefinitionComponent().setCode("AAA").setDisplay("Code AAA"))
+			)
+			.addConcept(new CodeSystem.ConceptDefinitionComponent().setCode("AB").setDisplay("Code AB"));
+		codeSystem
+			.addConcept().setCode("B").setDisplay("Code B")
+			.addConcept(new CodeSystem.ConceptDefinitionComponent().setCode("BA").setDisplay("Code BA"))
+			.addConcept(new CodeSystem.ConceptDefinitionComponent().setCode("BB").setDisplay("Code BB"));
+		//@formatter:on
+		myCodeSystemDao.create(codeSystem, mySrd);
+
+		createLocalVs(codeSystem);
+	}
+
+	protected void createLocalVs(CodeSystem codeSystem) {
+		ValueSet valueSet = new ValueSet();
+		valueSet.setId(MY_VALUE_SET);
+		valueSet.setUrl(FhirResourceDaoR4TerminologyTest.URL_MY_VALUE_SET);
+		valueSet.getCompose().addInclude().setSystem(codeSystem.getUrl());
+		myValueSetDao.update(valueSet, mySrd);
 	}
 
 	private static void flattenExpansionHierarchy(List<String> theFlattenedHierarchy, List<TermConcept> theCodes, String thePrefix) {
@@ -662,10 +753,10 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		}
 	}
 
-	@AfterAll
-	public static void afterClassClearContextBaseJpaR4Test() {
-		ourValueSetDao.purgeCaches();
-		ourJpaValidationSupportChainR4.invalidateCaches();
+	@AfterEach
+	public void afterEachClearCaches() {
+		myValueSetDao.purgeCaches();
+		myJpaValidationSupportChainR4.invalidateCaches();
 	}
 
 	/**
@@ -774,70 +865,20 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		return uuid;
 	}
 
-
-	protected ValueSet.ConceptReferenceDesignationComponent assertConceptContainsDesignation(ValueSet.ValueSetExpansionContainsComponent theConcept, String theLanguage, String theUseSystem, String theUseCode, String theUseDisplay, String theDesignationValue) {
-		Stream<ValueSet.ConceptReferenceDesignationComponent> stream = theConcept.getDesignation().stream();
-		if (theLanguage != null) {
-			stream = stream.filter(designation -> theLanguage.equalsIgnoreCase(designation.getLanguage()));
-		}
-		if (theUseSystem != null) {
-			stream = stream.filter(designation -> theUseSystem.equalsIgnoreCase(designation.getUse().getSystem()));
-		}
-		if (theUseCode != null) {
-			stream = stream.filter(designation -> theUseCode.equalsIgnoreCase(designation.getUse().getCode()));
-		}
-		if (theUseDisplay != null) {
-			stream = stream.filter(designation -> theUseDisplay.equalsIgnoreCase(designation.getUse().getDisplay()));
-		}
-		if (theDesignationValue != null) {
-			stream = stream.filter(designation -> theDesignationValue.equalsIgnoreCase(designation.getValue()));
+	public class ValidationPolicyAdvisor implements IValidationPolicyAdvisor {
+		@Override
+		public ReferenceValidationPolicy policyForReference(IResourceValidator validator, Object appContext, String path, String url) {
+			return ReferenceValidationPolicy.CHECK_VALID;
 		}
 
-		Optional<ValueSet.ConceptReferenceDesignationComponent> first = stream.findFirst();
-		if (!first.isPresent()) {
-			String failureMessage = String.format("Concept %s did not contain designation [%s|%s|%s|%s|%s] ", theConcept, theLanguage, theUseSystem, theUseCode, theUseDisplay, theDesignationValue);
-			fail(failureMessage);
-			return null;
-		} else {
-			return first.get();
-		}
-	}
-
-	protected ValueSet.ValueSetExpansionContainsComponent assertExpandedValueSetContainsConcept(ValueSet theValueSet, String theSystem, String theCode, String theDisplay, Integer theDesignationCount) {
-		List<ValueSet.ValueSetExpansionContainsComponent> contains = theValueSet.getExpansion().getContains();
-
-		Stream<ValueSet.ValueSetExpansionContainsComponent> stream = contains.stream();
-		if (theSystem != null) {
-			stream = stream.filter(concept -> theSystem.equalsIgnoreCase(concept.getSystem()));
-		}
-		if (theCode != null) {
-			stream = stream.filter(concept -> theCode.equalsIgnoreCase(concept.getCode()));
-		}
-		if (theDisplay != null) {
-			stream = stream.filter(concept -> theDisplay.equalsIgnoreCase(concept.getDisplay()));
-		}
-		if (theDesignationCount != null) {
-			stream = stream.filter(concept -> concept.getDesignation().size() == theDesignationCount);
+		@Override
+		public CodedContentValidationPolicy policyForCodedContent(IResourceValidator iResourceValidator, Object o, String s, ElementDefinition elementDefinition, org.hl7.fhir.r5.model.StructureDefinition structureDefinition, BindingKind bindingKind, org.hl7.fhir.r5.model.ValueSet valueSet, List<String> list) {
+			return CodedContentValidationPolicy.CODE;
 		}
 
-		Optional<ValueSet.ValueSetExpansionContainsComponent> first = stream.findFirst();
-		if (!first.isPresent()) {
-			String expandedValueSetString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(theValueSet);
-			String failureMessage = String.format("Expanded ValueSet %s did not contain concept [%s|%s|%s] with [%d] designations. Outcome:\n%s", theValueSet.getId(), theSystem, theCode, theDisplay, theDesignationCount, expandedValueSetString);
-			fail(failureMessage);
-			return null;
-		} else {
-			return first.get();
+		@Override
+		public ContainedReferenceValidationPolicy policyForContained(IResourceValidator validator, Object appContext, String containerType, String containerId, Element.SpecialElement containingResourceType, String path, String url) {
+			return ContainedReferenceValidationPolicy.CHECK_VALID;
 		}
-	}
-
-	public List<String> getExpandedConceptsByValueSetUrl(String theValuesetUrl) {
-		return runInTransaction(() -> {
-			List<TermValueSet> valueSets = myTermValueSetDao.findTermValueSetByUrl(Pageable.unpaged(), theValuesetUrl);
-			assertEquals(1, valueSets.size());
-			TermValueSet valueSet = valueSets.get(0);
-			List<TermValueSetConcept> concepts = valueSet.getConcepts();
-			return concepts.stream().map(concept -> concept.getCode()).collect(Collectors.toList());
-		});
 	}
 }

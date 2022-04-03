@@ -8,6 +8,7 @@ import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import ca.uhn.fhir.i18n.Msg;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.junit.jupiter.api.BeforeAll;
@@ -41,7 +42,7 @@ public class BuiltJarDstu2IT {
 			ctx.newXmlParser().encodeResourceToString(p);
 			fail();
 		} catch (ca.uhn.fhir.context.ConfigurationException e) {
-			assertEquals("Unable to initialize StAX - XML processing is disabled",e.getMessage());
+			assertEquals(Msg.code(1754) + "Unable to initialize StAX - XML processing is disabled",e.getMessage());
 		}
 	}
 

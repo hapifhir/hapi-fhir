@@ -4,7 +4,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoObservation;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
-import ca.uhn.fhir.jpa.config.TestR4ConfigWithElasticsearchClient;
+import ca.uhn.fhir.jpa.config.TestHibernateSearchAddInConfig;
+import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.search.lastn.ElasticsearchSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -33,6 +34,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -52,8 +54,8 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 @RequiresDocker
-@ContextConfiguration(classes = {TestR4ConfigWithElasticsearchClient.class})
-public class BaseR4SearchLastN extends BaseJpaTest {
+@ContextConfiguration(classes = {TestR4Config.class, TestHibernateSearchAddInConfig.Elasticsearch.class})
+abstract public class BaseR4SearchLastN extends BaseJpaTest {
 
 	private static final Map<String, String> observationPatientMap = new HashMap<>();
 	private static final Map<String, String> observationCategoryMap = new HashMap<>();
@@ -83,16 +85,16 @@ public class BaseR4SearchLastN extends BaseJpaTest {
 	@Qualifier("myObservationDaoR4")
 	protected IFhirResourceDaoObservation<Observation> myObservationDao;
 	@Autowired
-	protected DaoConfig myDaoConfig;
-	@Autowired
 	protected FhirContext myFhirCtx;
 	@Autowired
 	protected PlatformTransactionManager myPlatformTransactionManager;
+
+	@SpyBean
 	@Autowired
-	private ElasticsearchSvcImpl myElasticsearchSvc;
+	protected ElasticsearchSvcImpl myElasticsearchSvc;
 
 	@Override
-	protected FhirContext getContext() {
+	protected FhirContext getFhirContext() {
 		return myFhirCtx;
 	}
 
@@ -113,7 +115,9 @@ public class BaseR4SearchLastN extends BaseJpaTest {
 		// Using a static flag to ensure that test data and elasticsearch index is only created once.
 		// Creating this data and the index is time consuming and as such want to avoid having to repeat for each test.
 		// Normally would use a static @BeforeClass method for this purpose, but Autowired objects cannot be accessed in static methods.
-		if (!dataLoaded) {
+		if (!dataLoaded || patient0Id == null) {
+			// enabled to also create extended lucene index during creation of test data
+			myDaoConfig.setAdvancedLuceneIndexing(true);
 			Patient pt = new Patient();
 			pt.addName().setFamily("Lastn").addGiven("Arthur");
 			patient0Id = myPatientDao.create(pt, mockSrd()).getId().toUnqualifiedVersionless();
@@ -130,7 +134,8 @@ public class BaseR4SearchLastN extends BaseJpaTest {
 
 			myElasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
 			myElasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
-
+			// turn off the setting enabled earlier
+			myDaoConfig.setAdvancedLuceneIndexing(false);
 		}
 
 	}
@@ -145,8 +150,12 @@ public class BaseR4SearchLastN extends BaseJpaTest {
 		createFiveObservationsForPatientCodeCategory(thePatientId, observationCd3, categoryCd3, 5);
 	}
 
-	private void createFiveObservationsForPatientCodeCategory(IIdType thePatientId, String theObservationCode, String theCategoryCode,
-																				 Integer theTimeOffset) {
+	/**
+	 * Create and return observation ids
+	 */
+	protected List<IIdType> createFiveObservationsForPatientCodeCategory(IIdType thePatientId, String theObservationCode, String theCategoryCode,
+																								Integer theTimeOffset) {
+		List<IIdType> observerationIds = new ArrayList<>();
 
 		for (int idx = 0; idx < 5; idx++) {
 			Observation obs = new Observation();
@@ -156,12 +165,15 @@ public class BaseR4SearchLastN extends BaseJpaTest {
 			Date effectiveDtm = calculateObservationDateFromOffset(theTimeOffset, idx);
 			obs.setEffective(new DateTimeType(effectiveDtm));
 			obs.getCategoryFirstRep().addCoding().setCode(theCategoryCode).setSystem(categorySystem);
-			String observationId = myObservationDao.create(obs, mockSrd()).getId().toUnqualifiedVersionless().getValue();
-			observationPatientMap.put(observationId, thePatientId.getValue());
-			observationCategoryMap.put(observationId, theCategoryCode);
-			observationCodeMap.put(observationId, theObservationCode);
-			observationEffectiveMap.put(observationId, effectiveDtm);
+			IIdType observationId = myObservationDao.create(obs, mockSrd()).getId().toUnqualifiedVersionless();
+			String observationIdValue = observationId.getValue();
+			observationPatientMap.put(observationIdValue, thePatientId.getValue());
+			observationCategoryMap.put(observationIdValue, theCategoryCode);
+			observationCodeMap.put(observationIdValue, theObservationCode);
+			observationEffectiveMap.put(observationIdValue, effectiveDtm);
+			observerationIds.add(observationId);
 		}
+		return observerationIds;
 	}
 
 	private Date calculateObservationDateFromOffset(Integer theTimeOffset, Integer theObservationIndex) {
@@ -593,7 +605,7 @@ public class BaseR4SearchLastN extends BaseJpaTest {
 
 	@AfterAll
 	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 }

@@ -2,6 +2,8 @@ package ca.uhn.fhir.jpa.subscription.module.matcher;
 
 import ca.uhn.fhir.context.FhirContext;
 
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.config.TestHibernateSearchAddInConfig;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
@@ -35,7 +37,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.param.UriParam;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -84,7 +85,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TestR4Config.class})
+@ContextConfiguration(classes = {TestR4Config.class, TestHibernateSearchAddInConfig.NoFT.class})
 public class InMemorySubscriptionMatcherR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(InMemorySubscriptionMatcherR4Test.class);
 
@@ -339,18 +340,6 @@ public class InMemorySubscriptionMatcherR4Test {
 	}
 
 	@Test
-	public void testLanguageNotSupported() {
-		Patient patient = new Patient();
-		patient.getLanguageElement().setValue("en_CA");
-		patient.addIdentifier().setSystem("urn:system").setValue("001");
-		patient.addName().setFamily("testSearchLanguageParam").addGiven("Joe");
-		SearchParameterMap params;
-		params = new SearchParameterMap();
-		params.add(IAnyResource.SP_RES_LANGUAGE, new StringParam("en_CA"));
-		assertUnsupported(patient, params);
-	}
-
-	@Test
 	public void testLocationPositionNotSupported() {
 		Location loc = new Location();
 		double latitude = CoordCalculatorTest.LATITUDE_UHN;
@@ -567,7 +556,7 @@ public class InMemorySubscriptionMatcherR4Test {
 			InMemoryMatchResult result = myInMemorySubscriptionMatcher.match(subscription, msg);
 			fail();
 		} catch (AssertionError e) {
-			assertEquals("Reference at managingOrganization is invalid: urn:uuid:13720262-b392-465f-913e-54fb198ff954", e.getMessage());
+			assertEquals(Msg.code(320) + "Reference at managingOrganization is invalid: urn:uuid:13720262-b392-465f-913e-54fb198ff954", e.getMessage());
 		}
 	}
 

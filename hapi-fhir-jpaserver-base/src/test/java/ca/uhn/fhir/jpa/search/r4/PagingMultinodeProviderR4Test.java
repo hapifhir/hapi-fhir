@@ -1,18 +1,19 @@
 package ca.uhn.fhir.jpa.search.r4;
 
-import static org.apache.commons.lang3.StringUtils.leftPad;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.MatcherAssert.assertThat;
-
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.*; import static org.hamcrest.MatcherAssert.assertThat;
-import org.springframework.test.util.AopTestUtils;
-
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.parser.StrictErrorHandler;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Patient;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.test.util.AopTestUtils;
+
+import static org.apache.commons.lang3.StringUtils.leftPad;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 
 public class PagingMultinodeProviderR4Test extends BaseResourceProviderR4Test {
 
@@ -35,7 +36,7 @@ public class PagingMultinodeProviderR4Test extends BaseResourceProviderR4Test {
 	@Override
 	public void before() throws Exception {
 		super.before();
-		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
+		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
 
 		myDaoConfig.setAllowMultipleDelete(true);
 		

@@ -1,13 +1,16 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
-import ca.uhn.fhir.jpa.config.TestR4ConfigWithElasticSearch;
+import ca.uhn.fhir.jpa.config.TestHibernateSearchAddInConfig;
+import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
@@ -15,7 +18,6 @@ import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
@@ -23,6 +25,7 @@ import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -42,6 +45,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import static ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc.MAKE_LOADING_VERSION_CURRENT;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyCollection;
@@ -52,7 +57,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TestR4ConfigWithElasticSearch.class})
+@ContextConfiguration(classes = {TestR4Config.class, TestHibernateSearchAddInConfig.Elasticsearch.class})
 @RequiresDocker
 public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 
@@ -88,7 +93,7 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
-	private IBulkDataExportSvc myBulkDataExportSvc;
+	private IBulkDataExportJobSchedulingHelper myBulkDataExportJobSchedulingHelper;
 	@Mock
 	private IValueSetConceptAccumulator myValueSetCodeAccumulator;
 
@@ -106,7 +111,7 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 
 	@AfterEach
 	public void afterPurgeDatabase() {
-		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataExportSvc);
+		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataExportJobSchedulingHelper);
 	}
 
 	void createCodeSystem() {
@@ -182,7 +187,7 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 			myTermSvc.expandValueSet(null, vs);
 			fail();
 		} catch (InternalErrorException e) {
-			assertEquals("Expansion of ValueSet produced too many codes (maximum 50) - Operation aborted!", e.getMessage());
+			assertThat(e.getMessage(), containsString(Msg.code(832) + "Expansion of ValueSet produced too many codes (maximum 50) - Operation aborted!"));
 		}
 
 		// Increase the max so it won't exceed
@@ -206,12 +211,12 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 		include.setSystem(CS_URL);
 
 		myTermSvc.expandValueSet(null, vs, myValueSetCodeAccumulator);
-		verify(myValueSetCodeAccumulator, times(9)).includeConceptWithDesignations(anyString(), anyString(), nullable(String.class), anyCollection(), nullable(Long.class), nullable(String.class));
+		verify(myValueSetCodeAccumulator, times(9)).includeConceptWithDesignations(anyString(), anyString(), nullable(String.class), anyCollection(), nullable(Long.class), nullable(String.class), nullable(String.class));
 	}
 
 
 	@Override
-	protected FhirContext getContext() {
+	protected FhirContext getFhirContext() {
 		return myFhirContext;
 	}
 

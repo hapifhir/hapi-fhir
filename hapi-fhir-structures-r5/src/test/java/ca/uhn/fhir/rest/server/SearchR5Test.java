@@ -91,7 +91,7 @@ public class SearchR5Test {
 		@SuppressWarnings("rawtypes")
 		@Search()
 		public List search(
-			@RequiredParam(name = Patient.SP_IDENTIFIER) TokenAndListParam theIdentifiers) {
+			@RequiredParam(name = "identifier") TokenAndListParam theIdentifiers) {
 			ourLastMethod = "search";
 			ourIdentifiers = theIdentifiers;
 			ArrayList<Patient> retVal = new ArrayList<>();
@@ -113,7 +113,7 @@ public class SearchR5Test {
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 	@BeforeAll

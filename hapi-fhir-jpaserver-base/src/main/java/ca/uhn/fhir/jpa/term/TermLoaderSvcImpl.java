@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
@@ -40,7 +41,6 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.ValidateUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
@@ -62,7 +62,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.xml.sax.SAXException;
 
 import javax.annotation.Nonnull;
-import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -134,6 +133,7 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UNIVERS
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_ALL_VALUESET_ID;
 
 /*
  * #%L
@@ -227,7 +227,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 				uploadProperties.getProperty(LOINC_CODESYSTEM_MAKE_CURRENT.getCode(), "true"));
 
 			if (StringUtils.isBlank(codeSystemVersionId) && ! isMakeCurrentVersion) {
-				throw new InvalidRequestException("'" + LOINC_CODESYSTEM_VERSION.getCode() +
+				throw new InvalidRequestException(Msg.code(864) + "'" + LOINC_CODESYSTEM_VERSION.getCode() +
 					"' property is required when '" + LOINC_CODESYSTEM_MAKE_CURRENT.getCode() + "' property is 'false'");
 			}
 
@@ -325,7 +325,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 				}
 			}
 		} catch (IOException | SAXException e) {
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(865) + e);
 		}
 
 		cs.setVersion(codeSystemVersion.getCodeSystemVersionId());
@@ -413,14 +413,14 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 	}
 
 	@VisibleForTesting
-	@NotNull
+	@Nonnull
 	Properties getProperties(LoadedFileDescriptors theDescriptors, String thePropertiesFile) {
 		Properties retVal = new Properties();
 
-		try (InputStream propertyStream = TermLoaderSvcImpl.class.getResourceAsStream("/ca/uhn/fhir/jpa/term/loinc/loincupload.properties")) {
+		try (InputStream propertyStream = ca.uhn.fhir.jpa.term.TermLoaderSvcImpl.class.getResourceAsStream("/ca/uhn/fhir/jpa/term/loinc/loincupload.properties")) {
 			retVal.load(propertyStream);
 		} catch (IOException e) {
-			throw new InternalErrorException("Failed to process loinc.properties", e);
+			throw new InternalErrorException(Msg.code(866) + "Failed to process loinc.properties", e);
 		}
 
 		for (FileDescriptor next : theDescriptors.getUncompressedFileDescriptors()) {
@@ -430,7 +430,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 						retVal.load(inputStream);
 					}
 				} catch (IOException e) {
-					throw new InternalErrorException("Failed to read " + thePropertiesFile, e);
+					throw new InternalErrorException(Msg.code(867) + "Failed to read " + thePropertiesFile, e);
 				}
 			}
 		}
@@ -445,7 +445,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 						String contents = IOUtils.toString(next.getInputStream(), Charsets.UTF_8);
 						return Optional.of(contents);
 					} catch (IOException e) {
-						throw new InternalErrorException(e);
+						throw new InternalErrorException(Msg.code(868) + e);
 					}
 				}
 			}
@@ -463,7 +463,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 			String imgthlaCsString = IOUtils.toString(BaseTermReadSvcImpl.class.getResourceAsStream("/ca/uhn/fhir/jpa/term/imgthla/imgthla.xml"), Charsets.UTF_8);
 			imgthlaCs = FhirContext.forR4().newXmlParser().parseResource(CodeSystem.class, imgthlaCsString);
 		} catch (IOException e) {
-			throw new InternalErrorException("Failed to load imgthla.xml", e);
+			throw new InternalErrorException(Msg.code(869) + "Failed to load imgthla.xml", e);
 		}
 
 		boolean foundHlaNom = false;
@@ -494,7 +494,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 					ourLog.warn("Lines read from {}:  {}", nextFilename, lnr.getLineNumber());
 
 				} catch (IOException e) {
-					throw new InternalErrorException(e);
+					throw new InternalErrorException(Msg.code(870) + e);
 				} finally {
 					IOUtils.closeQuietly(reader);
 				}
@@ -519,7 +519,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 					ourLog.warn("Lines read from {}:  {}", nextFilename, lnr.getLineNumber());
 
 				} catch (IOException e) {
-					throw new InternalErrorException(e);
+					throw new InternalErrorException(Msg.code(871) + e);
 				} finally {
 					IOUtils.closeQuietly(reader);
 				}
@@ -530,11 +530,11 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		}
 
 		if (!foundHlaNom) {
-			throw new InvalidRequestException("Did not find file matching " + IMGTHLA_HLA_NOM_TXT);
+			throw new InvalidRequestException(Msg.code(872) + "Did not find file matching " + IMGTHLA_HLA_NOM_TXT);
 		}
 
 		if (!foundHlaXml) {
-			throw new InvalidRequestException("Did not find file matching " + IMGTHLA_HLA_XML);
+			throw new InvalidRequestException(Msg.code(873) + "Did not find file matching " + IMGTHLA_HLA_XML);
 		}
 
 		int valueSetCount = valueSets.size();
@@ -543,7 +543,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		ourLog.info("Have {} total concepts, {} root concepts, {} ValueSets", conceptCount, rootConceptCount, valueSetCount);
 
 		// remove this when fully implemented ...
-		throw new InternalErrorException("HLA nomenclature terminology upload not yet fully implemented.");
+		throw new InternalErrorException(Msg.code(874) + "HLA nomenclature terminology upload not yet fully implemented.");
 
 //		IIdType target = storeCodeSystem(theRequestDetails, codeSystemVersion, imgthlaCs, valueSets, conceptMaps);
 //
@@ -558,15 +558,19 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 
 		final List<LoincLinguisticVariantsHandler.LinguisticVariant> linguisticVariants = new ArrayList<>();
 
-		LoincXmlFileZipContentsHandler loincXmlHandler = new LoincXmlFileZipContentsHandler();
+		LoincXmlFileZipContentsHandler loincXmlHandler = getLoincXmlFileZipContentsHandler();
 		iterateOverZipFile(theDescriptors, "loinc.xml", false, false, loincXmlHandler);
 		String loincCsString = loincXmlHandler.getContents();
-
 		if (isBlank(loincCsString)) {
-			ourLog.warn("Did not find loinc.xml in the ZIP distribution. Using built-in copy");
-			loincCsString = ClasspathUtil.loadResource("/ca/uhn/fhir/jpa/term/loinc/loinc.xml");
+			throw new InvalidRequestException(Msg.code(875) + "Did not find loinc.xml in the ZIP distribution.");
 		}
+
 		CodeSystem loincCs = FhirContext.forR4().newXmlParser().parseResource(CodeSystem.class, loincCsString);
+		if (isNotBlank(loincCs.getVersion())) {
+			throw new InvalidRequestException(Msg.code(876) + "'loinc.xml' file must not have a version defined. To define a version use '" +
+				LOINC_CODESYSTEM_VERSION.getCode() + "' property of 'loincupload.properties' file");
+		}
+
 		String codeSystemVersionId = theUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
 		if (codeSystemVersionId != null) {
 			loincCs.setVersion(codeSystemVersionId);
@@ -605,7 +609,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		iterateOverZipFileCsv(theDescriptors, theUploadProperties.getProperty(LOINC_HIERARCHY_FILE.getCode(), LOINC_HIERARCHY_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// Answer lists (ValueSets of potential answers/values for LOINC "questions")
-		handler = new LoincAnswerListHandler(codeSystemVersion, code2concept, valueSets, conceptMaps, theUploadProperties);
+		handler = new LoincAnswerListHandler(codeSystemVersion, code2concept, valueSets, conceptMaps, theUploadProperties, loincCs.getCopyright());
 		iterateOverZipFileCsv(theDescriptors, theUploadProperties.getProperty(LOINC_ANSWERLIST_FILE.getCode(), LOINC_ANSWERLIST_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// Answer list links (connects LOINC observation codes to answer list codes)
@@ -616,23 +620,23 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		// Note that this should come before the "Part Related Code Mapping"
 		// file because there are some duplicate mappings between these
 		// two files, and the RSNA Playbook file has more metadata
-		handler = new LoincRsnaPlaybookHandler(code2concept, valueSets, conceptMaps, theUploadProperties);
+		handler = new LoincRsnaPlaybookHandler(code2concept, valueSets, conceptMaps, theUploadProperties, loincCs.getCopyright());
 		iterateOverZipFileCsv(theDescriptors, theUploadProperties.getProperty(LOINC_RSNA_PLAYBOOK_FILE.getCode(), LOINC_RSNA_PLAYBOOK_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// Part related code mapping
-		handler = new LoincPartRelatedCodeMappingHandler(code2concept, valueSets, conceptMaps, theUploadProperties);
+		handler = new LoincPartRelatedCodeMappingHandler(code2concept, valueSets, conceptMaps, theUploadProperties, loincCs.getCopyright());
 		iterateOverZipFileCsv(theDescriptors, theUploadProperties.getProperty(LOINC_PART_RELATED_CODE_MAPPING_FILE.getCode(), LOINC_PART_RELATED_CODE_MAPPING_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// Document ontology
-		handler = new LoincDocumentOntologyHandler(code2concept, propertyNamesToTypes, valueSets, conceptMaps, theUploadProperties);
+		handler = new LoincDocumentOntologyHandler(code2concept, propertyNamesToTypes, valueSets, conceptMaps, theUploadProperties, loincCs.getCopyright());
 		iterateOverZipFileCsv(theDescriptors, theUploadProperties.getProperty(LOINC_DOCUMENT_ONTOLOGY_FILE.getCode(), LOINC_DOCUMENT_ONTOLOGY_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// Top 2000 codes - US
-		handler = new LoincTop2000LabResultsUsHandler(code2concept, valueSets, conceptMaps, theUploadProperties);
+		handler = new LoincTop2000LabResultsUsHandler(code2concept, valueSets, conceptMaps, theUploadProperties, loincCs.getCopyright());
 		iterateOverZipFileCsvOptional(theDescriptors, theUploadProperties.getProperty(LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE.getCode(), LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// Top 2000 codes - SI
-		handler = new LoincTop2000LabResultsSiHandler(code2concept, valueSets, conceptMaps, theUploadProperties);
+		handler = new LoincTop2000LabResultsSiHandler(code2concept, valueSets, conceptMaps, theUploadProperties, loincCs.getCopyright());
 		iterateOverZipFileCsvOptional(theDescriptors, theUploadProperties.getProperty(LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE.getCode(), LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// Universal lab order ValueSet
@@ -640,7 +644,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		iterateOverZipFileCsv(theDescriptors, theUploadProperties.getProperty(LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE.getCode(), LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// IEEE medical device codes
-		handler = new LoincIeeeMedicalDeviceCodeHandler(code2concept, valueSets, conceptMaps, theUploadProperties);
+		handler = new LoincIeeeMedicalDeviceCodeHandler(code2concept, valueSets, conceptMaps, theUploadProperties, loincCs.getCopyright());
 		iterateOverZipFileCsv(theDescriptors, theUploadProperties.getProperty(LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE.getCode(), LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// Imaging document codes
@@ -648,7 +652,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		iterateOverZipFileCsv(theDescriptors, theUploadProperties.getProperty(LOINC_IMAGING_DOCUMENT_CODES_FILE.getCode(), LOINC_IMAGING_DOCUMENT_CODES_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// Group
-		handler = new LoincGroupFileHandler(code2concept, valueSets, conceptMaps, theUploadProperties);
+		handler = new LoincGroupFileHandler(code2concept, valueSets, conceptMaps, theUploadProperties, loincCs.getCopyright());
 		iterateOverZipFileCsv(theDescriptors, theUploadProperties.getProperty(LOINC_GROUP_FILE.getCode(), LOINC_GROUP_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// Group terms
@@ -684,7 +688,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 			IOUtils.closeQuietly(theDescriptors);
 		}
 
-		valueSets.add(getValueSetLoincAll(theUploadProperties));
+		valueSets.add(getValueSetLoincAll(theUploadProperties, loincCs.getCopyright()));
 
 		for (Entry<String, TermConcept> next : code2concept.entrySet()) {
 			TermConcept nextConcept = next.getValue();
@@ -703,16 +707,21 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		return new UploadStatistics(conceptCount, target);
 	}
 
-	private ValueSet getValueSetLoincAll(Properties theUploadProperties) {
+	@VisibleForTesting
+	protected LoincXmlFileZipContentsHandler getLoincXmlFileZipContentsHandler() {
+		return new LoincXmlFileZipContentsHandler();
+	}
+
+
+	private ValueSet getValueSetLoincAll(Properties theUploadProperties, String theCopyrightStatement) {
 		ValueSet retVal = new ValueSet();
 
 		String codeSystemVersionId = theUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
 		String valueSetId;
 		if (codeSystemVersionId != null) {
-			valueSetId = "loinc-all" + "-" + codeSystemVersionId;
+			valueSetId = LOINC_ALL_VALUESET_ID + "-" + codeSystemVersionId;
 		} else {
-			valueSetId = "loinc-all";
-			codeSystemVersionId = "1.0.0";
+			valueSetId = LOINC_ALL_VALUESET_ID;
 		}
 		retVal.setId(valueSetId);
 		retVal.setUrl("http://loinc.org/vs");
@@ -722,8 +731,8 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		retVal.setDate(new Date());
 		retVal.setPublisher("Regenstrief Institute, Inc.");
 		retVal.setDescription("A value set that includes all LOINC codes");
-		retVal.setCopyright("This content from LOINC® is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at https://loinc.org/license/");
-		retVal.getCompose().addInclude().setSystem(ITermLoaderSvc.LOINC_URI);
+		retVal.setCopyright(theCopyrightStatement);
+		retVal.getCompose().addInclude().setSystem(ITermLoaderSvc.LOINC_URI).setVersion(codeSystemVersionId);
 
 		return retVal;
 	}
@@ -846,14 +855,14 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 					theHandler.handle(reader, nextFilename);
 
 				} catch (IOException e) {
-					throw new InternalErrorException(e);
+					throw new InternalErrorException(Msg.code(877) + e);
 				}
 			}
 
 		}
 
 		if (!foundMatch && theRequireMatch) {
-			throw new InvalidRequestException("Did not find file matching " + theFileNamePart);
+			throw new InvalidRequestException(Msg.code(878) + "Did not find file matching " + theFileNamePart);
 		}
 	}
 

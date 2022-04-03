@@ -21,6 +21,7 @@ package ca.uhn.fhir.util;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.base.Charsets;
@@ -50,7 +51,12 @@ public class ClasspathUtil {
 		// nothing
 	}
 
-	public static String loadResource(String theClasspath) {
+	/**
+	 * Load a classpath resource, throw an {@link InternalErrorException} if not found
+	 *
+	 * @throws InternalErrorException If the resource can't be found
+	 */
+	public static String loadResource(String theClasspath) throws InternalErrorException {
 		return loadResource(theClasspath, Function.identity());
 	}
 
@@ -60,7 +66,7 @@ public class ClasspathUtil {
 	 * @throws InternalErrorException If the resource can't be found
 	 */
 	@Nonnull
-	public static InputStream loadResourceAsStream(String theClasspath) {
+	public static InputStream loadResourceAsStream(String theClasspath) throws InternalErrorException {
 		String classpath = theClasspath;
 		if (classpath.startsWith("classpath:")) {
 			classpath = classpath.substring("classpath:".length());
@@ -74,7 +80,7 @@ public class ClasspathUtil {
 				retVal = ClasspathUtil.class.getResourceAsStream("/" + classpath);
 			}
 			if (retVal == null) {
-				throw new InternalErrorException("Unable to find classpath resource: " + classpath);
+				throw new InternalErrorException(Msg.code(1758) + "Unable to find classpath resource: " + classpath);
 			}
 		}
 		return retVal;
@@ -89,7 +95,7 @@ public class ClasspathUtil {
 			InputStream newStream = theStreamTransform.apply(stream);
 			return IOUtils.toString(newStream, Charsets.UTF_8);
 		} catch (IOException e) {
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(1759) + e);
 		}
 	}
 
@@ -99,7 +105,7 @@ public class ClasspathUtil {
 			try {
 				return new GZIPInputStream(t);
 			} catch (IOException e) {
-				throw new InternalErrorException(e);
+				throw new InternalErrorException(Msg.code(1760) + e);
 			}
 		};
 		return loadResource(theClasspath, streamTransform);
@@ -130,7 +136,7 @@ public class ClasspathUtil {
 		try {
 			return IOUtils.toByteArray(stream);
 		} catch (IOException e) {
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(1761) + e);
 		} finally {
 			close(stream);
 		}

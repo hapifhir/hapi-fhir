@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
@@ -28,12 +29,11 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -95,7 +95,7 @@ public class SearchDstu3Test {
 
 			OperationOutcome oo = (OperationOutcome) ourCtx.newJsonParser().parseResource(responseContent);
 			assertEquals(
-					"Invalid search parameter \"identifier.chain\". Parameter contains a chain (.chain) and chains are not supported for this parameter (chaining is only allowed on reference parameters)",
+					Msg.code(1935) + "Invalid search parameter \"identifier.chain\". Parameter contains a chain (.chain) and chains are not supported for this parameter (chaining is only allowed on reference parameters)",
 					oo.getIssueFirstRep().getDiagnostics());
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
@@ -321,7 +321,7 @@ public class SearchDstu3Test {
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 	@BeforeAll

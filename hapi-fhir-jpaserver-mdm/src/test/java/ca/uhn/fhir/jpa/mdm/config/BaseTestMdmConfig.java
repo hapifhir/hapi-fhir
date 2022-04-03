@@ -1,13 +1,13 @@
 package ca.uhn.fhir.jpa.mdm.config;
 
+import ca.uhn.fhir.jpa.mdm.helper.MdmLinkHelper;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.rules.config.MdmRuleValidator;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
-import ca.uhn.fhir.jpa.mdm.helper.MdmLinkHelper;
-import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
-import ca.uhn.fhir.rest.server.IPagingProvider;
+import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
+import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,5 +40,10 @@ public abstract class BaseTestMdmConfig {
 	@Bean
 	MdmLinkHelper mdmLinkHelper() {
 		return new MdmLinkHelper();
+	}
+
+	@Bean
+	BatchJobHelper batchJobHelper(JobExplorer theJobExplorer) {
+		return new BatchJobHelper(theJobExplorer);
 	}
 }

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
@@ -13,11 +14,9 @@ import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.gclient.DateClientParam;
 import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.BundleUtil;
 import org.apache.commons.io.IOUtils;
@@ -121,7 +120,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 			myClient.create().resource(sp).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: SearchParameter.status is missing or invalid", e.getMessage());
+			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(1112) + "SearchParameter.status is missing or invalid", e.getMessage());
 		}
 	}
 
@@ -138,7 +137,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 			myClient.create().resource(sp).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: SearchParameter.expression value \"Patient\" is invalid", e.getMessage());
+			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(1120) + "SearchParameter.expression value \"Patient\" is invalid", e.getMessage());
 		}
 	}
 
@@ -222,10 +221,12 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		obs2.setStatus(ObservationStatus.FINAL);
 		IIdType obsId = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
 
-		ResourceTable res = myResourceTableDao.findById(patId.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-		assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, res.getIndexStatus().longValue());
-		res = myResourceTableDao.findById(obsId.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-		assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, res.getIndexStatus().longValue());
+		runInTransaction(() -> {
+			ResourceTable res = myResourceTableDao.findById(patId.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+			assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, res.getIndexStatus().longValue());
+			res = myResourceTableDao.findById(obsId.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+			assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, res.getIndexStatus().longValue());
+		});
 
 		SearchParameter fooSp = new SearchParameter();
 		fooSp.addBase("Patient");
@@ -302,7 +303,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		eyeColourSp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
 		eyeColourSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
 
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(eyeColourSp));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(eyeColourSp));
 
 		myClient
 			.create()
@@ -316,7 +317,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		p1.addExtension().setUrl("http://acme.org/eyecolour").setValue(new CodeType("blue"));
 		IIdType p1id = myPatientDao.create(p1).getId().toUnqualifiedVersionless();
 
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p1));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(p1));
 
 		Patient p2 = new Patient();
 		p2.setActive(true);
@@ -330,7 +331,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 			.returnBundle(Bundle.class)
 			.execute();
 
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		List<String> foundResources = toUnqualifiedVersionlessIdValues(bundle);
 		assertThat(foundResources, contains(p1id.getValue()));
@@ -459,8 +460,8 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 				.returnBundle(Bundle.class)
 				.execute();
 
-		} catch	(Exception e) {
-			assertThat(e.getMessage(), is(equalTo("HTTP 400 Bad Request: Invalid date/time format: \"01-01-2020\"")));
+		} catch (Exception e) {
+			assertThat(e.getMessage(), is(equalTo("HTTP 400 Bad Request: " + Msg.code(1882) + "Invalid date/time format: \"01-01-2020\"")));
 		}
 
 		//Now with custom SP
@@ -472,8 +473,8 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 				.returnBundle(Bundle.class)
 				.execute();
 
-		} catch	(Exception e) {
-			assertThat(e.getMessage(), is(equalTo("HTTP 400 Bad Request: Invalid date/time format: \"01-01-2020\"")));
+		} catch (Exception e) {
+			assertThat(e.getMessage(), is(equalTo("HTTP 400 Bad Request: " + Msg.code(1882) + "Invalid date/time format: \"01-01-2020\"")));
 		}
 	}
 
@@ -532,7 +533,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 						.next(bundle)
 						.execute();
 				}
-				List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirCtx, bundle);
+				List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirContext, bundle);
 				resources.forEach(t -> actualIds.add(t.getIdElement().getIdPartAsLong()));
 				foundCount += resources.size();
 
@@ -584,7 +585,6 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
 		}
 	}
-
 
 
 }

@@ -123,6 +123,24 @@ public class HapiExtensions {
 	public static final String EXT_OP_PARAMETER_EXAMPLE_VALUE = "http://hapifhir.io/fhir/StructureDefinition/op-parameter-example-value";
 
 	/**
+	 * This extension provides a way for subscribers to provide
+	 * a "retry-count".
+	 * If provided, subscriptions will be retried this many times
+	 * (to a total of retry-count + 1 (for original attempt)
+	 */
+	public static final String EX_RETRY_COUNT = "http://hapifhir.io/fhir/StructureDefinition/subscription-delivery-retry-count";
+
+	/**
+	 * This extension provides a way for subscribers to indicate if DELETE messages must be sent (default is ignoring them)
+	 */
+	public static final String EX_SEND_DELETE_MESSAGES = "http://hapifhir.io/fhir/StructureDefinition/subscription-send-delete-messages";
+
+	/**
+	 * This entension allows subscriptions to be marked as cross partition and with correct settings, listen to incoming resources from all partitions.
+	 */
+	public static final String EXTENSION_SUBSCRIPTION_CROSS_PARTITION = "https://smilecdr.com/fhir/ns/StructureDefinition/subscription-cross-partition";
+
+	/**
 	 * Non instantiable
 	 */
 	private HapiExtensions() {

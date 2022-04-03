@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.StringDt;
 import org.apache.commons.lang3.Validate;
@@ -38,7 +39,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,6 +56,11 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  */
 public class ParametersUtil {
 
+	public static Optional<String> getNamedParameterValueAsString(FhirContext theCtx, IBaseParameters theParameters, String theParameterName) {
+		Function<IPrimitiveType<?>, String> mapper = t -> defaultIfBlank(t.getValueAsString(), null);
+		return extractNamedParameters(theCtx, theParameters, theParameterName, mapper).stream().findFirst();
+	}
+
 	public static List<String> getNamedParameterValuesAsString(FhirContext theCtx, IBaseParameters theParameters, String theParameterName) {
 		Function<IPrimitiveType<?>, String> mapper = t -> defaultIfBlank(t.getValueAsString(), null);
 		return extractNamedParameters(theCtx, theParameters, theParameterName, mapper);
@@ -68,6 +73,10 @@ public class ParametersUtil {
 
 	public static Optional<Integer> getNamedParameterValueAsInteger(FhirContext theCtx, IBaseParameters theParameters, String theParameterName) {
 		return getNamedParameterValuesAsInteger(theCtx, theParameters, theParameterName).stream().findFirst();
+	}
+
+	public static Optional<IBase> getNamedParameter(FhirContext theCtx, IBaseResource theParameters, String theParameterName) {
+		return getNamedParameters(theCtx, theParameters, theParameterName).stream().findFirst();
 	}
 
 	public static List<IBase> getNamedParameters(FhirContext theCtx, IBaseResource theParameters, String theParameterName) {
@@ -156,7 +165,7 @@ public class ParametersUtil {
 				addClientParameter(theContext, next, theTargetResource, paramChild, paramChildElem, theName);
 			}
 		} else {
-			throw new IllegalArgumentException("Don't know how to handle value of type " + theValue.getClass() + " for parameter " + theName);
+			throw new IllegalArgumentException(Msg.code(1806) + "Don't know how to handle value of type " + theValue.getClass() + " for parameter " + theName);
 		}
 	}
 
@@ -307,6 +316,13 @@ public class ParametersUtil {
 	public static void addPartString(FhirContext theContext, IBase theParameter, String theName, String theValue) {
 		IPrimitiveType<String> value = (IPrimitiveType<String>) theContext.getElementDefinition("string").newInstance();
 		value.setValue(theValue);
+
+		addPart(theContext, theParameter, theName, value);
+	}
+
+	public static void addPartUrl(FhirContext theContext, IBase theParameter, String theName, String theCode) {
+		IPrimitiveType<String> value = (IPrimitiveType<String>) theContext.getElementDefinition("url").newInstance();
+		value.setValue(theCode);
 
 		addPart(theContext, theParameter, theName, value);
 	}

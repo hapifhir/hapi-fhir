@@ -1,11 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
-import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -18,10 +14,8 @@ import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.PathAndRef;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
-import ca.uhn.fhir.jpa.searchparam.registry.ReadOnlySearchParamCache;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.Sets;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -42,13 +36,9 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -61,14 +51,14 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class SearchParamExtractorR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamExtractorR4Test.class);
-	private static FhirContext ourCtx = FhirContext.forCached(FhirVersionEnum.R4);
-	private MySearchParamRegistry mySearchParamRegistry;
+	private static final FhirContext ourCtx = FhirContext.forR4Cached();
+	private FhirContextSearchParamRegistry mySearchParamRegistry;
 	private PartitionSettings myPartitionSettings;
 
 	@BeforeEach
 	public void before() {
 
-		mySearchParamRegistry = new MySearchParamRegistry();
+		mySearchParamRegistry = new FhirContextSearchParamRegistry(ourCtx);
 		myPartitionSettings = new PartitionSettings();
 
 	}
@@ -226,57 +216,6 @@ public class SearchParamExtractorR4Test {
 
 
 	@Test
-	public void testTokenText_Enabled_Identifier() {
-		Observation obs = new Observation();
-		obs.addIdentifier().setSystem("sys").setValue("val").getType().setText("Help Im a Bug");
-
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), myPartitionSettings, ourCtx, mySearchParamRegistry);
-
-		List<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(obs)
-			.stream()
-			.filter(t -> t.getParamName().equals("identifier"))
-			.sorted(comparing(o -> o.getClass().getName()).reversed())
-			.collect(Collectors.toList());
-		assertEquals(2, tokens.size());
-
-		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.get(0);
-		assertEquals("identifier", token.getParamName());
-		assertEquals("sys", token.getSystem());
-		assertEquals("val", token.getValue());
-
-		ResourceIndexedSearchParamString string = (ResourceIndexedSearchParamString) tokens.get(1);
-		assertEquals("identifier", string.getParamName());
-		assertEquals("Help Im a Bug", string.getValueExact());
-	}
-
-	@Test
-	public void testTokenText_DisabledInSearchParam_Identifier() {
-		RuntimeSearchParam existingCodeSp = mySearchParamRegistry.getActiveSearchParams("Observation").get("identifier");
-		RuntimeSearchParam codeSearchParam = new RuntimeSearchParam(existingCodeSp);
-		codeSearchParam.addExtension(HapiExtensions.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING, new Extension(HapiExtensions.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING, new BooleanType(true)));
-
-		mySearchParamRegistry.addSearchParam(codeSearchParam);
-
-		Observation obs = new Observation();
-		obs.addIdentifier().setSystem("sys").setValue("val").getType().setText("Help Im a Bug");
-
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), myPartitionSettings, ourCtx, mySearchParamRegistry);
-
-		List<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(obs)
-			.stream()
-			.filter(t -> t.getParamName().equals("identifier"))
-			.sorted(comparing(o -> o.getClass().getName()).reversed())
-			.collect(Collectors.toList());
-		assertEquals(1, tokens.size());
-
-		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.get(0);
-		assertEquals("identifier", token.getParamName());
-		assertEquals("sys", token.getSystem());
-		assertEquals("val", token.getValue());
-
-	}
-
-	@Test
 	public void testReferenceWithResolve() {
 		Encounter enc = new Encounter();
 		enc.addLocation().setLocation(new Reference("Location/123"));
@@ -395,75 +334,47 @@ public class SearchParamExtractorR4Test {
 		assertEquals(2, list.size());
 	}
 
-	private static class MySearchParamRegistry implements ISearchParamRegistry, ISearchParamRegistryController {
+	@Test
+	public void testExtractIdentifierOfType() {
 
+		ModelConfig modelConfig = new ModelConfig();
+		modelConfig.setIndexIdentifierOfType(true);
 
-		private List<RuntimeSearchParam> myExtraSearchParams = new ArrayList<>();
+		Patient patient = new Patient();
+		patient
+			.addIdentifier()
+			.setSystem("http://foo1")
+			.setValue("bar1")
+			.getType()
+			.addCoding()
+			.setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
+			.setCode("MR");
+		patient
+			.addIdentifier()
+			.setSystem("http://foo2")
+			.setValue("bar2")
+			.getType()
+			.addCoding()
+			.setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
+			.setCode("MR");
 
-		@Override
-		public void forceRefresh() {
-			// nothing
-		}
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(modelConfig, new PartitionSettings(), ourCtx, mySearchParamRegistry);
+		List<ResourceIndexedSearchParamToken> list = extractor
+			.extractSearchParamTokens(patient)
+			.stream()
+			.map(t->(ResourceIndexedSearchParamToken)t)
+			.collect(Collectors.toList());
+		list.forEach(t->t.calculateHashes());
+		ourLog.info("Found tokens:\n * {}", list.stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
 
-		@Override
-		public RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName) {
-			return getActiveSearchParams(theResourceName).get(theParamName);
-		}
+		assertThat(list, containsInAnyOrder(
+			new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "deceased", null, "false"),
+			new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "identifier", "http://foo1", "bar1"),
+			new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "identifier", "http://foo2", "bar2"),
+			new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "identifier:of-type", "http://terminology.hl7.org/CodeSystem/v2-0203", "MR|bar1"),
+			new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "identifier:of-type", "http://terminology.hl7.org/CodeSystem/v2-0203", "MR|bar2")
+		));
 
-		@Override
-		public ResourceChangeResult refreshCacheIfNecessary() {
-			// nothing
-			return new ResourceChangeResult();
-		}
-
-		public ReadOnlySearchParamCache getActiveSearchParams() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public Map<String, RuntimeSearchParam> getActiveSearchParams(String theResourceName) {
-			Map<String, RuntimeSearchParam> sps = new HashMap<>();
-			RuntimeResourceDefinition nextResDef = ourCtx.getResourceDefinition(theResourceName);
-			for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
-				sps.put(nextSp.getName(), nextSp);
-			}
-
-			for (RuntimeSearchParam next : myExtraSearchParams) {
-				sps.put(next.getName(), next);
-			}
-
-			return sps;
-		}
-
-		public void addSearchParam(RuntimeSearchParam theSearchParam) {
-			myExtraSearchParams.add(theSearchParam);
-		}
-
-		@Override
-		public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, Set<String> theParamNames) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Nullable
-		@Override
-		public RuntimeSearchParam getActiveSearchParamByUrl(String theUrl) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void requestRefresh() {
-			// nothing
-		}
-
-		@Override
-		public void setPhoneticEncoder(IPhoneticEncoder thePhoneticEncoder) {
-			// nothing
-		}
 	}
 
 }

@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.openapi;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -170,7 +171,7 @@ public class OpenApiInterceptor {
 			InputStream resourceAsStream = ClasspathUtil.loadResourceAsStream(resourceName);
 			props.load(resourceAsStream);
 		} catch (IOException e) {
-			throw new ConfigurationException("Failed to load resource: " + resourceName);
+			throw new ConfigurationException(Msg.code(239) + "Failed to load resource: " + resourceName);
 		}
 		mySwaggerUiVersion = props.getProperty("version");
 		return mySwaggerUiVersion;
@@ -262,14 +263,28 @@ public class OpenApiInterceptor {
 				return true;
 			}
 
+			if (resourcePath.endsWith(".html")) {
+				theResponse.setContentType(Constants.CT_HTML);
+				theResponse.setStatus(200);
+				IOUtils.copy(resource, theResponse.getOutputStream());
+				theResponse.getOutputStream().close();
+				return true;
+			}
 		}
 		return false;
+	}
+
+	public String removeTrailingSlash(String theUrl) {
+		while(theUrl != null && theUrl.endsWith("/")) {
+			theUrl = theUrl.substring(0, theUrl.length() - 1);
+		}
+		return theUrl;
 	}
 
 	@SuppressWarnings("unchecked")
 	private void serveSwaggerUiHtml(ServletRequestDetails theRequestDetails, HttpServletResponse theResponse) throws IOException {
 		CapabilityStatement cs = getCapabilityStatement(theRequestDetails);
-
+		String baseUrl = removeTrailingSlash(cs.getImplementation().getUrl());
 		theResponse.setStatus(200);
 		theResponse.setContentType(Constants.CT_HTML);
 
@@ -282,7 +297,7 @@ public class OpenApiInterceptor {
 		context.setVariable("SERVER_VERSION", cs.getSoftware().getVersion());
 		context.setVariable("BASE_URL", cs.getImplementation().getUrl());
 		context.setVariable("BANNER_IMAGE_URL", getBannerImage());
-		context.setVariable("OPENAPI_DOCS", cs.getImplementation().getUrl() + "/api-docs");
+		context.setVariable("OPENAPI_DOCS", baseUrl + "/api-docs");
 		context.setVariable("FHIR_VERSION", cs.getFhirVersion().toCode());
 		context.setVariable("FHIR_VERSION_CODENAME", FhirVersionEnum.forVersionString(cs.getFhirVersion().toCode()).name());
 
@@ -329,10 +344,16 @@ public class OpenApiInterceptor {
 		String page = extractPageName(theRequestDetails, PAGE_SYSTEM);
 		context.setVariable("PAGE", page);
 
+		populateOIDCVariables(theRequestDetails, context);
+
 		String outcome = myTemplateEngine.process("index.html", context);
 
 		theResponse.getWriter().write(outcome);
 		theResponse.getWriter().close();
+	}
+
+	protected void populateOIDCVariables(ServletRequestDetails theRequestDetails, WebContext theContext) {
+		theContext.setVariable("OAUTH2_REDIRECT_URL_PROPERTY", "");
 	}
 
 	private String extractPageName(ServletRequestDetails theRequestDetails, String theDefault) {
@@ -347,7 +368,7 @@ public class OpenApiInterceptor {
 		return page;
 	}
 
-	private OpenAPI generateOpenApi(ServletRequestDetails theRequestDetails) {
+	protected OpenAPI generateOpenApi(ServletRequestDetails theRequestDetails) {
 		String page = extractPageName(theRequestDetails, null);
 
 		CapabilityStatement cs = getCapabilityStatement(theRequestDetails);
@@ -378,6 +399,7 @@ public class OpenApiInterceptor {
 		Paths paths = new Paths();
 		openApi.setPaths(paths);
 
+
 		if (page == null || page.equals(PAGE_SYSTEM) || page.equals(PAGE_ALL)) {
 			Tag serverTag = new Tag();
 			serverTag.setName(PAGE_SYSTEM);
@@ -390,7 +412,6 @@ public class OpenApiInterceptor {
 			addFhirResourceResponse(ctx, openApi, capabilitiesOperation, "CapabilityStatement");
 
 			Set<CapabilityStatement.SystemRestfulInteraction> systemInteractions = cs.getRestFirstRep().getInteraction().stream().map(t -> t.getCode()).collect(Collectors.toSet());
-
 			// Transaction Operation
 			if (systemInteractions.contains(CapabilityStatement.SystemRestfulInteraction.TRANSACTION) || systemInteractions.contains(CapabilityStatement.SystemRestfulInteraction.BATCH)) {
 				Operation transaction = getPathItem(paths, "/", PathItem.HttpMethod.POST);
@@ -508,7 +529,7 @@ public class OpenApiInterceptor {
 				Operation operation = getPathItem(paths, "/" + resourceType, PathItem.HttpMethod.GET);
 				operation.addTagsItem(resourceType);
 				operation.setDescription("This is a search type");
-				operation.setSummary("search-type: Update an existing " + resourceType + " instance, or create using a client-assigned ID");
+				operation.setSummary("search-type: Search for " + resourceType + " instances");
 				addFhirResourceResponse(ctx, openApi, operation, null);
 
 				for (CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent nextSearchParam : nextResource.getSearchParam()) {
@@ -735,8 +756,9 @@ public class OpenApiInterceptor {
 		}
 	}
 
-	private Operation getPathItem(Paths thePaths, String thePath, PathItem.HttpMethod theMethod) {
+	protected Operation getPathItem(Paths thePaths, String thePath, PathItem.HttpMethod theMethod) {
 		PathItem pathItem;
+
 		if (thePaths.containsKey(thePath)) {
 			pathItem = thePaths.get(thePath);
 		} else {
@@ -764,7 +786,7 @@ public class OpenApiInterceptor {
 			case OPTIONS:
 			case TRACE:
 			default:
-				throw new IllegalStateException();
+				throw new IllegalStateException(Msg.code(240));
 		}
 	}
 

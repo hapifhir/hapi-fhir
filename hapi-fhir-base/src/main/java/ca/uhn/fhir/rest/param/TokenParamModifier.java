@@ -20,6 +20,8 @@ package ca.uhn.fhir.rest.param;
  * #L%
  */
 
+import ca.uhn.fhir.rest.api.Constants;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -55,12 +57,12 @@ public enum TokenParamModifier {
 	/** 
 	 * :text
 	 */
-	TEXT(":text"),
+	TEXT(Constants.PARAMQUALIFIER_TOKEN_TEXT),
 
 	/**
 	 * :of-type
 	 */
-	OF_TYPE(":of-type");
+	OF_TYPE(Constants.PARAMQUALIFIER_TOKEN_OF_TYPE);
 
 	private static final Map<String, TokenParamModifier> VALUE_TO_ENUM;
 
@@ -81,8 +83,16 @@ public enum TokenParamModifier {
 		return myValue;
 	}
 
+	/**
+	 * The modifier without the :
+	 * @return the string after the leading :
+	 */
+	public String getBareModifier() {
+		return myValue.substring(1);
+	}
+
 	public static TokenParamModifier forValue(String theValue) {
 		return VALUE_TO_ENUM.get(theValue);
 	}
-	
+
 }

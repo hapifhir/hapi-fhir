@@ -20,6 +20,7 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -97,7 +98,7 @@ public class ValidateCommand extends BaseCommand {
 		try {
 			input = IOUtils.toByteArray(new FileInputStream(new File(theFileName)));
 		} catch (IOException e) {
-			throw new ParseException("Failed to load file '" + theFileName + "' - Error: " + e.toString());
+			throw new ParseException(Msg.code(1615) + "Failed to load file '" + theFileName + "' - Error: " + e.toString());
 		}
 		return input;
 	}
@@ -109,10 +110,10 @@ public class ValidateCommand extends BaseCommand {
 		String fileName = theCommandLine.getOptionValue("n");
 		String contents = theCommandLine.getOptionValue("d");
 		if (isNotBlank(fileName) && isNotBlank(contents)) {
-			throw new ParseException("Can not supply both a file (-n) and data (-d)");
+			throw new ParseException(Msg.code(1616) + "Can not supply both a file (-n) and data (-d)");
 		}
 		if (isBlank(fileName) && isBlank(contents)) {
-			throw new ParseException("Must supply either a file (-n) or data (-d)");
+			throw new ParseException(Msg.code(1617) + "Must supply either a file (-n) or data (-d)");
 		}
 
 		if (isNotBlank(fileName)) {
@@ -122,14 +123,14 @@ public class ValidateCommand extends BaseCommand {
 			try {
 				contents = IOUtils.toString(new InputStreamReader(new FileInputStream(fileName), encoding));
 			} catch (IOException e) {
-				throw new CommandFailureException(e);
+				throw new CommandFailureException(Msg.code(1618) + e);
 			}
 			ourLog.info("Fully read - Size is {}", FileHelper.getFileSizeDisplay(contents.length()));
 		}
 
 		ca.uhn.fhir.rest.api.EncodingEnum enc = ca.uhn.fhir.rest.api.EncodingEnum.detectEncodingNoDefault(defaultString(contents));
 		if (enc == null) {
-			throw new ParseException("Could not detect encoding (json/xml) of contents");
+			throw new ParseException(Msg.code(1619) + "Could not detect encoding (json/xml) of contents");
 		}
 
 		FhirContext ctx = getFhirContext();
@@ -159,7 +160,8 @@ public class ValidateCommand extends BaseCommand {
 
 					break;
 				}
-				case DSTU3: {
+				case DSTU3:
+				case R4: {
 					FhirInstanceValidator instanceValidator = new FhirInstanceValidator(ctx);
 					val.registerValidatorModule(instanceValidator);
 					ValidationSupportChain validationSupport = new ValidationSupportChain(new DefaultProfileValidationSupport(ctx), new InMemoryTerminologyServerValidationSupport(ctx));
@@ -171,7 +173,7 @@ public class ValidateCommand extends BaseCommand {
 					break;
 				}
 				default:
-					throw new ParseException("Profile validation (-p) is not supported for this FHIR version");
+					throw new ParseException(Msg.code(1620) + "Profile validation (-p) is not supported for this FHIR version");
 			}
 		}
 
@@ -182,7 +184,7 @@ public class ValidateCommand extends BaseCommand {
 		try {
 			results = val.validateWithResult(contents);
 		} catch (DataFormatException e) {
-			throw new CommandFailureException(e.getMessage());
+			throw new CommandFailureException(Msg.code(1621) + e.getMessage());
 		}
 
 		StringBuilder b = new StringBuilder("Validation results:" + ansi().boldOff());
@@ -216,7 +218,7 @@ public class ValidateCommand extends BaseCommand {
 		if (results.isSuccessful()) {
 			ourLog.info("Validation successful!");
 		} else {
-			throw new CommandFailureException("Validation failed");
+			throw new CommandFailureException(Msg.code(1622) + "Validation failed");
 		}
 	}
 }

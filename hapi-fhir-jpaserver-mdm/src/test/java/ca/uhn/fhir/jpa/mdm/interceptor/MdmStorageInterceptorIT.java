@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.mdm.interceptor;
 
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperConfig;
@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -59,12 +60,18 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 	@Autowired
 	public MdmHelperR4 myMdmHelper;
 	@Autowired
-	private IdHelperService myIdHelperService;
+	private IJpaIdHelperService myIdHelperService;
 
 	@Test
 	public void testCreatePractitioner() throws InterruptedException {
 		myMdmHelper.createWithLatch(buildPractitionerWithNameAndId("somename", "some_id"));
 		assertLinkCount(1);
+	}
+
+	private MdmLink getLinkByTargetId(IBaseResource theResource) {
+		MdmLink example = new MdmLink();
+		example.setSourcePid(theResource.getIdElement().getIdPartAsLong());
+		return myMdmLinkDao.findAll(Example.of(example)).get(0);
 	}
 
 	@Test
@@ -201,7 +208,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		patient.setId(patientId);
 
 		// Updating a Golden Resource Patient who was created via MDM should fail.
-		MdmLink mdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(patient)).get();
+		MdmLink mdmLink = runInTransaction(() -> myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(patient)).orElseThrow(() -> new IllegalStateException()));
 		Long sourcePatientPid = mdmLink.getGoldenResourcePid();
 		Patient goldenResourcePatient = myPatientDao.readByPid(new ResourcePersistentId(sourcePatientPid));
 		goldenResourcePatient.setGender(Enumerations.AdministrativeGender.MALE);
@@ -235,7 +242,11 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		jane = addExternalEID(jane, "some_new_eid");
 
 		MdmHelperR4.OutcomeAndLogMessageWrapper outcomeWrapper = myMdmHelper.updateWithLatch(jane);
+
+
 		IAnyResource patient = getGoldenResourceFromTargetResource(jane);
+
+
 		List<CanonicalEID> externalEids = myEIDHelper.getExternalEid(patient);
 		assertThat(externalEids, hasSize(1));
 		assertThat("some_new_eid", is(equalTo(externalEids.get(0).getValue())));

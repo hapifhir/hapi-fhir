@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.rp.r4.MedicationRequestResourceProvider;
@@ -17,7 +16,6 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.test.utilities.JettyUtil;
-import ca.uhn.fhir.util.TestUtil;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -34,8 +32,8 @@ import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -44,10 +42,10 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.*;
-
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 
@@ -103,7 +101,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 			servletHolder.setServlet(restServer);
 			proxyHandler.addServlet(servletHolder, "/fhir/context/*");
 
-			ourCtx = FhirContext.forCached(FhirVersionEnum.R4);
+			ourCtx = FhirContext.forR4Cached();
 			restServer.setFhirContext(ourCtx);
 
 			ourServer.setHandler(proxyHandler);
@@ -159,7 +157,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 		myDaoConfig.setMaximumSearchResultCountInTransaction(100);
 
 		Bundle output = ourClient.transaction().withBundle(input).execute();
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		assertEquals(1, output.getEntry().size());
 		Bundle respBundle = (Bundle) output.getEntry().get(0).getResource();
@@ -182,7 +180,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 			.setUrl("Patient?_count=5&_sort=name");
 
 		Bundle output = ourClient.transaction().withBundle(input).execute();
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		assertEquals(1, output.getEntry().size());
 		Bundle respBundle = (Bundle) output.getEntry().get(0).getResource();
@@ -217,7 +215,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 		}
 
 		Bundle output = ourClient.transaction().withBundle(input).execute();
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		assertEquals(30, output.getEntry().size());
 		for (int i = 0; i < 30; i++) {
@@ -285,7 +283,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 			.setUrl("MedicationRequest?intent=plan,order&medication.code=50580-0449-23&patient=P3000254749");
 		Bundle resp = ourClient.transaction().withBundle(b).execute();
 
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 		b = (Bundle) resp.getEntry().get(0).getResource();
 		assertEquals(1, b.getEntry().size());
 		assertEquals("MedicationRequest/MR635079", b.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
@@ -306,7 +304,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 		myDaoConfig.setMaximumSearchResultCountInTransaction(100);
 
 		Bundle output = ourClient.transaction().withBundle(input).execute();
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		assertEquals(1, output.getEntry().size());
 		Bundle respBundle = (Bundle) output.getEntry().get(0).getResource();
@@ -329,7 +327,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 			.setUrl("Patient?_count=5&_sort=name");
 
 		Bundle output = ourClient.transaction().withBundle(input).execute();
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		assertEquals(1, output.getEntry().size());
 		Bundle respBundle = (Bundle) output.getEntry().get(0).getResource();
@@ -364,7 +362,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 		}
 
 		Bundle output = ourClient.transaction().withBundle(input).execute();
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		assertEquals(30, output.getEntry().size());
 		for (int i = 0; i < 30; i++) {

@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.util.jsonpatch;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.patch.JsonPatchUtils;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -14,11 +14,12 @@ import org.springframework.transaction.PlatformTransactionManager;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class JsonPatchUtilsTest extends BaseJpaTest {
 
-	private static final FhirContext ourCtx = FhirContext.forCached(FhirVersionEnum.R4);
+	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private static final Logger ourLog = LoggerFactory.getLogger(JsonPatchUtilsTest.class);
 
 	@SuppressWarnings("JsonStandardCompliance")
@@ -113,13 +114,13 @@ public class JsonPatchUtilsTest extends BaseJpaTest {
 			JsonPatchUtils.apply(ourCtx, toUpdate, patchText);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Failed to apply JSON patch to Observation: Unknown element 'derivedFromXXX' found during parse", e.getMessage());
+			assertEquals(Msg.code(1271) + "Failed to apply JSON patch to Observation: " + Msg.code(1825) + "Unknown element 'derivedFromXXX' found during parse", e.getMessage());
 		}
 
 	}
 
 	@Override
-	protected FhirContext getContext() {
+	protected FhirContext getFhirContext() {
 		return ourCtx;
 	}
 

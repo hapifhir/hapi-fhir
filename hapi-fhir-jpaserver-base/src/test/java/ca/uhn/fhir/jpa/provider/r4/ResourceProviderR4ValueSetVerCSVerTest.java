@@ -179,14 +179,15 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 	}
 
 	private void createExternalCsAndLocalVs() {
-		String codeSystemUrl = createExternalCs("1");
-		myLocalVs_v1 = createLocalVs(codeSystemUrl, "1");
-		myLocalValueSetId_v1 = persistLocalVs(myLocalVs_v1);
+		runInTransaction(()-> {
+			String codeSystemUrl = createExternalCs("1");
+			myLocalVs_v1 = createLocalVs(codeSystemUrl, "1");
+			myLocalValueSetId_v1 = persistLocalVs(myLocalVs_v1);
 
-		codeSystemUrl = createExternalCs("2");
-		myLocalVs_v2 = createLocalVs(codeSystemUrl, "2");
-		myLocalValueSetId_v2 = persistLocalVs(myLocalVs_v2);
-
+			codeSystemUrl = createExternalCs("2");
+			myLocalVs_v2 = createLocalVs(codeSystemUrl, "2");
+			myLocalValueSetId_v2 = persistLocalVs(myLocalVs_v2);
+		});
 	}
 
 	private ValueSet createLocalVs(String theCodeSystemUrl, String theValueSetVersion) {
@@ -218,7 +219,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, containsString("<ValueSet xmlns=\"http://hl7.org/fhir\">"));
 		assertThat(resp, containsString("<expansion>"));
@@ -243,7 +244,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.execute();
 		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, containsString("<ValueSet xmlns=\"http://hl7.org/fhir\">"));
 		assertThat(resp, containsString("<expansion>"));
@@ -268,8 +269,10 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		loadAndPersistCodeSystemAndValueSet();
 		await().until(() -> clearDeferredStorageQueue());
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
-		Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
-		assertEquals(2, page.getContent().size());
+		runInTransaction(()->{
+			Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
+			assertEquals(2, page.getContent().size());
+		});
 
 		// Verify v1 ValueSet
 		Parameters respParam = myClient
@@ -280,7 +283,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, containsString("<ValueSet xmlns=\"http://hl7.org/fhir\">"));
 		assertThat(resp, containsString("<expansion>"));
@@ -305,7 +308,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.execute();
 		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, containsString("<ValueSet xmlns=\"http://hl7.org/fhir\">"));
 		assertThat(resp, containsString("<expansion>"));
@@ -336,7 +339,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
 		assertThat(resp, not(containsString("\"Foo Code\"")));
@@ -350,7 +353,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.execute();
 		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter v2\"/>"));
 		assertThat(resp, not(containsString("\"Foo Code\"")));
@@ -365,8 +368,10 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		await().until(() -> clearDeferredStorageQueue());
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
-		assertEquals(2, page.getContent().size());
+		runInTransaction(()->{
+			Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
+			assertEquals(2, page.getContent().size());
+		});
 
 		// Validate ValueSet v1
 		Parameters respParam = myClient
@@ -377,7 +382,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
 
@@ -390,7 +395,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.execute();
 		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter v2\"/>"));
 		assertThat(resp, not(containsString("\"Foo Code\"")));
@@ -411,7 +416,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, stringContainsInOrder(
 			"<code value=\"11378-7\"/>",
@@ -427,7 +432,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		// Should return v2 as this was the last version loaded.
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, stringContainsInOrder(
 			"<code value=\"11378-7\"/>",
@@ -443,7 +448,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.execute();
 		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, stringContainsInOrder(
 			"<code value=\"11378-7\"/>",
@@ -466,7 +471,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, stringContainsInOrder(
 			"<code value=\"11378-7\"/>",
@@ -482,7 +487,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		// Should return v2 as this was the last version loaded.
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, stringContainsInOrder(
 			"<code value=\"11378-7\"/>",
@@ -498,7 +503,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.execute();
 		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, stringContainsInOrder(
 			"<code value=\"11378-7\"/>",
@@ -520,7 +525,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 				.execute();
 		} catch (ResourceNotFoundException e) {
 			assertEquals(404, e.getStatusCode());
-			assertEquals("HTTP 404 Not Found: Unknown ValueSet: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fextensional-case-2%7C3", e.getMessage());
+			assertEquals("HTTP 404 Not Found: HAPI-2024: Unknown ValueSet: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fextensional-case-2%7C3", e.getMessage());
 		}
 	}
 
@@ -532,8 +537,10 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		await().until(() -> clearDeferredStorageQueue());
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
-		assertEquals(2, page.getContent().size());
+		runInTransaction(()->{
+			Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
+			assertEquals(2, page.getContent().size());
+		});
 
 		// Check expansion of multi-versioned ValueSet with version 1
 		Parameters respParam = myClient
@@ -545,7 +552,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, stringContainsInOrder(
 			"<code value=\"11378-7\"/>",
@@ -561,7 +568,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		// Should return v2 as this was the last version loaded.
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, stringContainsInOrder(
 			"<code value=\"11378-7\"/>",
@@ -577,7 +584,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.execute();
 		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, stringContainsInOrder(
 			"<code value=\"11378-7\"/>",
@@ -602,7 +609,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 				.execute();
 		} catch (ResourceNotFoundException e) {
 			assertEquals(404, e.getStatusCode());
-			assertEquals("HTTP 404 Not Found: Unknown ValueSet: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fextensional-case-2%7C3", e.getMessage());
+			assertEquals("HTTP 404 Not Found: HAPI-2024: Unknown ValueSet: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fextensional-case-2%7C3", e.getMessage());
 		}
 	}
 
@@ -622,7 +629,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		// Should return v2 as this was the last updated.
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, stringContainsInOrder(
 			"<code value=\"11378-7\"/>",
@@ -643,7 +650,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		// Should return v1.
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, stringContainsInOrder(
 			"<code value=\"11378-7\"/>",
@@ -664,7 +671,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		// Should return v2.
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, stringContainsInOrder(
 			"<code value=\"11378-7\"/>",
@@ -691,7 +698,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		// Should return v2 as this was the last updated.
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, stringContainsInOrder(
 			"<code value=\"11378-7\"/>",
@@ -712,7 +719,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		// Should return v1.
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, stringContainsInOrder(
 			"<code value=\"11378-7\"/>",
@@ -733,7 +740,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		// Should return v2.
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, stringContainsInOrder(
 			"<code value=\"11378-7\"/>",
@@ -757,7 +764,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 
 		assertThat(resp, containsStringIgnoringCase("<display value=\"Child AAA1\"/>"));
@@ -773,7 +780,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.execute();
 		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 
 		assertThat(resp, containsStringIgnoringCase("<display value=\"Child AAA2\"/>"));
@@ -797,7 +804,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 
 		assertThat(resp, containsStringIgnoringCase("<display value=\"Child AAA1\"/>"));
@@ -813,7 +820,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.execute();
 		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 
 		assertThat(resp, containsStringIgnoringCase("<display value=\"Child AAA2\"/>"));
@@ -839,7 +846,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		assertEquals(1, respParam.getParameter().size());
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 
 		assertThat(resp, containsStringIgnoringCase("<display value=\"Child AAA2\"/>"));
@@ -872,7 +879,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.withNoParameters(Parameters.class)
 			.returnResourceType(ValueSet.class)
 			.execute();
-		ourLog.info("Expanded: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
+		ourLog.info("Expanded: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
 		assertEquals(1, expanded.getExpansion().getContains().size());
 
 		// Update the CodeSystem Version and Codes
@@ -897,7 +904,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.withNoParameters(Parameters.class)
 			.returnResourceType(ValueSet.class)
 			.execute();
-		ourLog.info("Expanded: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
+		ourLog.info("Expanded: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
 		assertEquals(1, expanded.getExpansion().getContains().size());
 	}
 
@@ -909,14 +916,14 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		loadAndPersistCodeSystemAndValueSetWithDesignations();
 
 		CodeSystem codeSystem_v1 = myCodeSystemDao.read(myExtensionalCsId_v1);
-		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem_v1));
+		ourLog.info("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem_v1));
 		CodeSystem codeSystem_v2 = myCodeSystemDao.read(myExtensionalCsId_v2);
-		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem_v2));
+		ourLog.info("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem_v2));
 
 		ValueSet valueSet_v1 = myValueSetDao.read(myExtensionalVsId_v1);
-		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet_v1));
+		ourLog.info("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet_v1));
 		ValueSet valueSet_v2 = myValueSetDao.read(myExtensionalVsId_v2);
-		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet_v2));
+		ourLog.info("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet_v2));
 
 		String initialValueSetName_v1 = valueSet_v1.getName();
 		validateTermValueSetNotExpanded(initialValueSetName_v1, "1", myExtensionalVsIdOnResourceTable_v1);
@@ -931,7 +938,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		updatedValueSet_v1.setName(valueSet_v1.getName().concat(" - MODIFIED"));
 		persistSingleValueSet(updatedValueSet_v1, HttpVerb.PUT);
 		updatedValueSet_v1 = myValueSetDao.read(myExtensionalVsId_v1);
-		ourLog.info("Updated ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedValueSet_v1));
+		ourLog.info("Updated ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedValueSet_v1));
 
 		String updatedValueSetName_v1 = valueSet_v1.getName();
 		validateTermValueSetNotExpanded(updatedValueSetName_v1, "1", myExtensionalVsIdOnResourceTable_v1);
@@ -940,7 +947,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		updatedValueSet_v2.setName(valueSet_v2.getName().concat(" - MODIFIED"));
 		persistSingleValueSet(updatedValueSet_v2, HttpVerb.PUT);
 		updatedValueSet_v2 = myValueSetDao.read(myExtensionalVsId_v2);
-		ourLog.info("Updated ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedValueSet_v2));
+		ourLog.info("Updated ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedValueSet_v2));
 
 		String updatedValueSetName_v2 = valueSet_v2.getName();
 		validateTermValueSetNotExpanded(updatedValueSetName_v2, "2", myExtensionalVsIdOnResourceTable_v2);
@@ -958,14 +965,14 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		loadAndPersistCodeSystemAndValueSetWithDesignations();
 
 		CodeSystem codeSystem_v1 = myCodeSystemDao.read(myExtensionalCsId_v1);
-		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem_v1));
+		ourLog.info("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem_v1));
 		CodeSystem codeSystem_v2 = myCodeSystemDao.read(myExtensionalCsId_v2);
-		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem_v2));
+		ourLog.info("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem_v2));
 
 		ValueSet valueSet_v1 = myValueSetDao.read(myExtensionalVsId_v1);
-		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet_v1));
+		ourLog.info("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet_v1));
 		ValueSet valueSet_v2 = myValueSetDao.read(myExtensionalVsId_v2);
-		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet_v2));
+		ourLog.info("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet_v2));
 
 		String initialValueSetName_v1 = valueSet_v1.getName();
 		validateTermValueSetNotExpanded(initialValueSetName_v1, "1", myExtensionalVsIdOnResourceTable_v1);
@@ -988,12 +995,12 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.setResource(updatedValueSet_v1)
 			.getRequest()
 			.setMethod(Bundle.HTTPVerb.PUT)
-			.setUrl(url);
-		ourLog.info("Transaction Bundle:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+			.setUrl(myExtensionalVsId_v1.getValueAsString());
+		ourLog.info("Transaction Bundle:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		myClient.transaction().withBundle(bundle).execute();
 
 		updatedValueSet_v1 = myValueSetDao.read(myExtensionalVsId_v1);
-		ourLog.info("Updated ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedValueSet_v1));
+		ourLog.info("Updated ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedValueSet_v1));
 
 		String updatedValueSetName_v1 = valueSet_v1.getName();
 		validateTermValueSetNotExpanded(updatedValueSetName_v1, "1", myExtensionalVsIdOnResourceTable_v1);
@@ -1010,12 +1017,12 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.setResource(updatedValueSet_v2)
 			.getRequest()
 			.setMethod(Bundle.HTTPVerb.PUT)
-			.setUrl(url);
-		ourLog.info("Transaction Bundle:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+			.setUrl(myExtensionalVsId_v2.getValueAsString());
+		ourLog.info("Transaction Bundle:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		myClient.transaction().withBundle(bundle).execute();
 
 		updatedValueSet_v2 = myValueSetDao.read(myExtensionalVsId_v2);
-		ourLog.info("Updated ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedValueSet_v2));
+		ourLog.info("Updated ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedValueSet_v2));
 
 		String updatedValueSetName_v2 = valueSet_v2.getName();
 		validateTermValueSetNotExpanded(updatedValueSetName_v2, "2", myExtensionalVsIdOnResourceTable_v2);
@@ -1138,7 +1145,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.andParameter("valueSetVersion", new StringType("1"))
 			.execute();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
@@ -1154,7 +1161,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.andParameter("valueSetVersion", new StringType("2"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
@@ -1170,7 +1177,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
@@ -1185,7 +1192,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
@@ -1202,7 +1209,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.andParameter("valueSetVersion", new StringType("2"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
@@ -1218,7 +1225,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.andParameter("valueSetVersion", new StringType("1"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
@@ -1234,7 +1241,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
@@ -1265,7 +1272,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.andParameter("systemVersion", new StringType("1"))
 			.execute();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
@@ -1279,7 +1286,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.andParameter("systemVersion", new StringType("2"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
@@ -1295,7 +1302,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.andParameter("system", new UriType("http://acme.org"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
@@ -1308,7 +1315,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.andParameter("system", new UriType("http://acme.org"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
@@ -1323,7 +1330,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.andParameter("systemVersion", new StringType("2"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
@@ -1337,7 +1344,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.andParameter("systemVersion", new StringType("1"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
@@ -1376,7 +1383,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.andParameter("valueSetVersion", new StringType("1"))
 			.execute();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
@@ -1390,7 +1397,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.andParameter("valueSetVersion", new StringType("2"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
@@ -1404,7 +1411,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
@@ -1419,7 +1426,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.andParameter("valueSetVersion", new StringType("2"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
@@ -1433,7 +1440,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.andParameter("valueSetVersion", new StringType("1"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
@@ -1447,7 +1454,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
@@ -1462,7 +1469,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.andParameter("valueSetVersion", new StringType("1"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
@@ -1476,7 +1483,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.andParameter("valueSetVersion", new StringType("2"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
@@ -1489,7 +1496,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
@@ -1532,7 +1539,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.andParameter("valueSetVersion", new StringType("1"))
 			.execute();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
@@ -1546,7 +1553,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.andParameter("valueSetVersion", new StringType("2"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
@@ -1560,7 +1567,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
@@ -1575,7 +1582,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.andParameter("valueSetVersion", new StringType("2"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
@@ -1589,7 +1596,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.andParameter("valueSetVersion", new StringType("1"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
@@ -1603,7 +1610,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
@@ -1618,7 +1625,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.andParameter("valueSetVersion", new StringType("1"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
@@ -1632,7 +1639,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.andParameter("valueSetVersion", new StringType("2"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
@@ -1645,7 +1652,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.andParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());

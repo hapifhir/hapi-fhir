@@ -1,0 +1,3 @@
+---
+type: perf
+title: "Improved validation performance by switching validation serialization from XML to JSON."

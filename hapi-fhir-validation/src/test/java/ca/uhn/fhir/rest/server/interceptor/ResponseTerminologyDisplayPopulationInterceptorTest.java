@@ -1,7 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -21,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class ResponseTerminologyDisplayPopulationInterceptorTest {
 
-	private final FhirContext myCtx = FhirContext.forCached(FhirVersionEnum.R4);
+	private final FhirContext myCtx = FhirContext.forR4Cached();
 	@Order(0)
 	@RegisterExtension
 	protected RestfulServerExtension myServerExtension = new RestfulServerExtension(myCtx);
@@ -141,8 +140,13 @@ public class ResponseTerminologyDisplayPopulationInterceptorTest {
 		}
 
 		@Override
-		public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
+		public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode, String theDisplayLanguage) {
 			return null;
+		}
+		
+		@Override
+		public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
+			return lookupCode(theValidationSupportContext, theSystem, theCode, null);
 		}
 	}
 

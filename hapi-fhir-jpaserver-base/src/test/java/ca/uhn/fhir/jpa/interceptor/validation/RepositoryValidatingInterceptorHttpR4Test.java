@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.interceptor.validation;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.rp.r4.ObservationResourceProvider;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -37,7 +36,7 @@ public class RepositoryValidatingInterceptorHttpR4Test extends BaseJpaR4Test {
 	@BeforeEach
 	public void before() {
 		myValInterceptor = new RepositoryValidatingInterceptor();
-		myValInterceptor.setFhirContext(myFhirCtx);
+		myValInterceptor.setFhirContext(myFhirContext);
 		myInterceptorRegistry.registerInterceptor(myValInterceptor);
 
 		myRestfulServerExtension.getRestfulServer().registerProvider(myObservationResourceProvider);
@@ -49,6 +48,30 @@ public class RepositoryValidatingInterceptorHttpR4Test extends BaseJpaR4Test {
 		myInterceptorRegistry.unregisterInterceptorsIf(t -> t instanceof RepositoryValidatingInterceptor);
 	}
 
+	@Test
+	public void testValidationIsSkippedOnAutoCreatedPlaceholderReferencesIfConfiguredToDoSo() {
+		List<IRepositoryValidatingRule> rules = newRuleBuilder()
+			.forResourcesOfType("Observation")
+			.requireValidationToDeclaredProfiles()
+			.build();
+		myValInterceptor.setRules(rules);
+
+		Observation obs = new Observation();
+		obs.getCode().addCoding().setSystem("http://foo").setCode("123").setDisplay("help im a bug");
+		obs.setStatus(Observation.ObservationStatus.AMENDED);
+
+		MethodOutcome outcome = myRestfulServerExtension
+			.getFhirClient()
+			.create()
+			.resource(obs)
+			.prefer(PreferReturnEnum.OPERATION_OUTCOME)
+			.execute();
+
+		String operationOutcomeEncoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
+		ourLog.info("Outcome: {}", operationOutcomeEncoded);
+		assertThat(operationOutcomeEncoded, containsString("All observations should have a subject"));
+
+	}
 	@Test
 	public void testValidationOutcomeAddedToRequestResponse() {
 		List<IRepositoryValidatingRule> rules = newRuleBuilder()
@@ -69,14 +92,14 @@ public class RepositoryValidatingInterceptorHttpR4Test extends BaseJpaR4Test {
 			.prefer(PreferReturnEnum.OPERATION_OUTCOME)
 			.execute();
 
-		String operationOutcomeEncoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
+		String operationOutcomeEncoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
 		ourLog.info("Outcome: {}", operationOutcomeEncoded);
 		assertThat(operationOutcomeEncoded, containsString("All observations should have a subject"));
 
 	}
 
 	private RepositoryValidatingRuleBuilder newRuleBuilder() {
-		return myApplicationContext.getBean(BaseConfig.REPOSITORY_VALIDATING_RULE_BUILDER, RepositoryValidatingRuleBuilder.class);
+		return myApplicationContext.getBean(RepositoryValidatingRuleBuilder.REPOSITORY_VALIDATING_RULE_BUILDER, RepositoryValidatingRuleBuilder.class);
 	}
 
 }

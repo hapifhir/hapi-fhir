@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.bulk.export.job;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.bulk.export.svc.BulkExportDaoSvc;
 import org.springframework.batch.core.ExitStatus;
@@ -49,9 +50,9 @@ public class BulkExportGenerateResourceFilesStepListener implements StepExecutio
 	public ExitStatus afterStep(StepExecution theStepExecution) {
 		if (theStepExecution.getExitStatus().getExitCode().equals(ExitStatus.FAILED.getExitCode())) {
 			//Try to fetch it from the parameters first, and if it doesn't exist, fetch it from the context.
-			String jobUuid = theStepExecution.getJobExecution().getJobParameters().getString(BulkExportJobConfig.JOB_UUID_PARAMETER);
+			String jobUuid = theStepExecution.getJobExecution().getJobParameters().getString(BatchConstants.JOB_UUID_PARAMETER);
 			if (jobUuid == null) {
-				jobUuid = theStepExecution.getJobExecution().getExecutionContext().getString(BulkExportJobConfig.JOB_UUID_PARAMETER);
+				jobUuid = theStepExecution.getJobExecution().getExecutionContext().getString(BatchConstants.JOB_UUID_PARAMETER);
 			}
 			assert isNotBlank(jobUuid);
 			String exitDescription = theStepExecution.getExitStatus().getExitDescription();

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -62,7 +63,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 	@BeforeEach
 	public void before() throws Exception {
-		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
+		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
 
 		myDaoConfig.setAllowMultipleDelete(true);
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
@@ -1466,8 +1467,12 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		String url = "/Observation?subject.organization.partof.name=HealthCo";
 
+		logAllStringIndexes();
+
 		// execute
+		myCaptureQueriesListener.clear();
 		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 		// validate
 		assertEquals(1L, oids.size());
@@ -1488,7 +1493,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			searchAndReturnUnqualifiedVersionlessIdValues(url);
 			fail("Expected an exception to be thrown");
 		} catch (InvalidRequestException e) {
-			assertEquals("The search chain subject.organization.partof.partof.name is too long. Only chains up to three references are supported.", e.getMessage());
+			assertEquals(Msg.code(2007) + "The search chain subject.organization.partof.partof.name is too long. Only chains up to three references are supported.", e.getMessage());
 		}
 	}
 

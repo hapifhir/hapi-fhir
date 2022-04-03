@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderDstu2Test;
 import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
@@ -28,17 +28,25 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.jupiter.api.*; import static org.hamcrest.MatcherAssert.assertThat;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.subscription.resthook.RestHookTestDstu3Test.logAllInterceptors;
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Test the rest-hook subscriptions
@@ -46,13 +54,13 @@ import static org.junit.jupiter.api.Assertions.*;
 public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestHookTestDstu2Test.class);
-	private static List<String> ourCreatedObservations = Lists.newArrayList();
+	private static final List<String> ourCreatedObservations = Lists.newArrayList();
 	private static int ourListenerPort;
 	private static RestfulServer ourListenerRestServer;
 	private static Server ourListenerServer;
 	private static String ourListenerServerBase;
-	private static List<String> ourUpdatedObservations = Lists.newArrayList();
-	private List<IIdType> mySubscriptionIds = new ArrayList<IIdType>();
+	private static final List<String> ourUpdatedObservations = Lists.newArrayList();
+	private final List<IIdType> mySubscriptionIds = new ArrayList<IIdType>();
 
 	@Autowired
 	private SubscriptionTestUtil mySubscriptionTestUtil;
@@ -102,7 +110,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		return subscription;
 	}
 
-	@NotNull
+	@Nonnull
 	private Subscription newSubscription(String criteria, String payload, String endpoint) {
 		Subscription subscription = new Subscription();
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
@@ -143,7 +151,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 			createSubscription(criteria1, payload, ourListenerServerBase);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: Invalid subscription criteria submitted: Observation?codeeeee=SNOMED-CT Failed to parse match URL[Observation?codeeeee=SNOMED-CT] - Resource type Observation does not have a parameter with name: codeeeee", e.getMessage());
+			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(9) + "Invalid subscription criteria submitted: Observation?codeeeee=SNOMED-CT " + Msg.code(488) + "Failed to parse match URL[Observation?codeeeee=SNOMED-CT] - Resource type Observation does not have a parameter with name: codeeeee", e.getMessage());
 		}
 	}
 
@@ -325,7 +333,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 
 	@BeforeAll
 	public static void startListenerServer() throws Exception {
-		ourListenerRestServer = new RestfulServer(FhirContext.forCached(FhirVersionEnum.DSTU2));
+		ourListenerRestServer = new RestfulServer(FhirContext.forDstu2Cached());
 
 		ObservationListener obsListener = new ObservationListener();
 		ourListenerRestServer.setResourceProviders(obsListener);

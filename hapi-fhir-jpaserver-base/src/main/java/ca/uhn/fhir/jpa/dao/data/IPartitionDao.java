@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
-import org.checkerframework.checker.nullness.Opt;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -28,7 +27,7 @@ import java.util.Optional;
  * #L%
  */
 
-public interface IPartitionDao extends JpaRepository<PartitionEntity, Integer> {
+public interface IPartitionDao extends JpaRepository<PartitionEntity, Integer>, IHapiFhirJpaRepository {
 
 	@Query("SELECT p FROM PartitionEntity p WHERE p.myName = :name")
 	Optional<PartitionEntity> findForName(@Param("name") String theName);

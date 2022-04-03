@@ -31,7 +31,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface ITermValueSetDao extends JpaRepository<TermValueSet, Long> {
+public interface ITermValueSetDao extends JpaRepository<TermValueSet, Long>, IHapiFhirJpaRepository {
 
 	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myResourcePid = :resource_pid")
 	Optional<TermValueSet> findByResourcePid(@Param("resource_pid") Long theResourcePid);
@@ -46,6 +46,13 @@ public interface ITermValueSetDao extends JpaRepository<TermValueSet, Long> {
 
 	@Query(value="SELECT vs FROM TermValueSet vs INNER JOIN ResourceTable r ON r.myId = vs.myResourcePid WHERE vs.myUrl = :url ORDER BY r.myUpdated DESC")
 	List<TermValueSet> findTermValueSetByUrl(Pageable thePage, @Param("url") String theUrl);
+
+	/**
+	 * The current TermValueSet is not necessarily the last uploaded anymore, but the current VS resource
+	 * is pointed by a specific ForcedId, so we locate current ValueSet as the one pointing to current VS resource
+	 */
+	@Query(value="SELECT vs FROM ForcedId f, TermValueSet vs where f.myForcedId = :forcedId and vs.myResource = f.myResource")
+	Optional<TermValueSet> findTermValueSetByForcedId(@Param("forcedId") String theForcedId);
 
 	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myUrl = :url AND vs.myVersion IS NULL")
 	Optional<TermValueSet> findTermValueSetByUrlAndNullVersion(@Param("url") String theUrl);

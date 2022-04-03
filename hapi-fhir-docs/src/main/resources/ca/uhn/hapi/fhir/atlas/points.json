@@ -392,6 +392,28 @@
 			"lat": 52.01804,
 			"lon": 4.354307,
 			"added": "2021-07-15"
+		},
+		{
+			"title": "Columna Cura",
+			"description": "The electronic care record that ensures efficient documentation and optimal task management of community care services.",
+			"company": "Systematic",
+			"contactName": "Columna Cura",
+			"link": "https://systematic.com/en-gb/industries/healthcare/community-care/columna-cura",
+			"city": "Aarhus, Denmark",
+			"lat": 56.15195,
+			"lon": 10.17705,
+			"added": "2021-10-06"
+		},
+				{
+			"title": "Burai L.L.C",
+			"description": "SaaS ERP for Healthcare Services, SMART ON FHIR compliance with 21st century cures act and HIPPA",
+			"company": "Burai LLC",
+			"contactName": "Tomomi Yamano",
+			"link": "https:burai.live",
+			"city": "Tokyo Japan, Florida USA",
+			"lat": 35.6762,
+			"lon": 139.6503,
+			"added": "2021-12-03"
 		}
 	]
 }

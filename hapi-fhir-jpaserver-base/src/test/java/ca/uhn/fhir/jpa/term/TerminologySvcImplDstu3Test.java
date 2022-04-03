@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
@@ -42,6 +43,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
+import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -345,7 +347,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.addFilter()
 			.setProperty("copyright")
 			.setOp(ValueSet.FilterOperator.EQUAL)
-			.setValue("3rdParty");
+			.setValue("3rdParty"); // mixed case
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4"));
@@ -362,7 +364,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.addFilter()
 			.setProperty("copyright")
 			.setOp(ValueSet.FilterOperator.EQUAL)
-			.setValue("3rdparty");
+			.setValue("3rdparty");  // lowercase
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4"));
@@ -406,7 +408,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.addFilter()
 			.setProperty("copyright")
 			.setOp(ValueSet.FilterOperator.EQUAL)
-			.setValue("loinc");
+			.setValue(LOINC_LOW);
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("47239-9"));
@@ -478,7 +480,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.addFilter()
 			.setProperty("copyright")
 			.setOp(ValueSet.FilterOperator.EQUAL)
-			.setValue("loinc");
+			.setValue(LOINC_LOW);
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4"));
@@ -505,7 +507,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			myTermSvc.expandValueSet(null, vs);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Don't know how to handle op=ISA on property copyright", e.getMessage());
+			assertEquals(Msg.code(897) + "Don't know how to handle op=ISA on property copyright", e.getMessage());
 		}
 	}
 
@@ -531,7 +533,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			myTermSvc.expandValueSet(null, vs);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Invalid filter, property copyright is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
+			assertEquals(Msg.code(895) + "Invalid filter, property copyright is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
 		}
 
 	}
@@ -557,7 +559,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			myTermSvc.expandValueSet(null, vs);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Don't know how to handle value=bogus on property copyright", e.getMessage());
+			assertEquals(Msg.code(898) + "Don't know how to handle value=bogus on property copyright", e.getMessage());
 		}
 
 	}
@@ -771,7 +773,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			myTermSvc.expandValueSet(null, vs);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Don't know how to handle op=ISA on property ancestor", e.getMessage());
+			assertEquals(Msg.code(892) + "Don't know how to handle op=ISA on property ancestor", e.getMessage());
 		}
 
 	}
@@ -798,7 +800,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			myTermSvc.expandValueSet(null, vs);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Invalid filter, property ancestor is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
+			assertEquals(Msg.code(895) + "Invalid filter, property ancestor is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
 		}
 
 	}
@@ -1013,7 +1015,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			myTermSvc.expandValueSet(null, vs);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Don't know how to handle op=ISA on property child", e.getMessage());
+			assertEquals(Msg.code(893) + "Don't know how to handle op=ISA on property child", e.getMessage());
 		}
 
 	}
@@ -1040,7 +1042,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			myTermSvc.expandValueSet(null, vs);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Invalid filter, property child is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
+			assertEquals(Msg.code(895) + "Invalid filter, property child is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
 		}
 
 	}
@@ -1256,7 +1258,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			myTermSvc.expandValueSet(null, vs);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Don't know how to handle op=ISA on property descendant", e.getMessage());
+			assertEquals(Msg.code(896) + "Don't know how to handle op=ISA on property descendant", e.getMessage());
 		}
 
 	}
@@ -1283,7 +1285,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			myTermSvc.expandValueSet(null, vs);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Invalid filter, property descendant is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
+			assertEquals(Msg.code(895) + "Invalid filter, property descendant is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
 		}
 
 	}
@@ -1497,7 +1499,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			myTermSvc.expandValueSet(null, vs);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Don't know how to handle op=ISA on property parent", e.getMessage());
+			assertEquals(Msg.code(893) + "Don't know how to handle op=ISA on property parent", e.getMessage());
 		}
 
 	}
@@ -1524,7 +1526,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			myTermSvc.expandValueSet(null, vs);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Invalid filter, property parent is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
+			assertEquals(Msg.code(895) + "Invalid filter, property parent is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
 		}
 
 	}
@@ -1843,7 +1845,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getPersistentId(), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("CodeSystem contains circular reference around code parent", e.getMessage());
+			assertEquals(Msg.code(849) + "CodeSystem contains circular reference around code parent", e.getMessage());
 		}
 	}
 
@@ -1851,7 +1853,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 	public void testStoreTermCodeSystemAndNestedChildren() {
 		IIdType codeSystemId = createCodeSystem();
 		CodeSystem codeSystemResource = myCodeSystemDao.read(codeSystemId);
-		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystemResource));
+		ourLog.info("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystemResource));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override

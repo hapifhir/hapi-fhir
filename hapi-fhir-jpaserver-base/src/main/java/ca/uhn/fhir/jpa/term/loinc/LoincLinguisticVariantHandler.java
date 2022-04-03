@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.term.loinc;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
+import static org.apache.commons.lang3.StringUtils.trimToEmpty;
 
 import java.util.Map;
 
@@ -54,18 +55,36 @@ public class LoincLinguisticVariantHandler implements IZipContentsHandlerCsv {
 			return;
 		}
 	
-		addDesignation(theRecord, concept, "COMPONENT");
-		addDesignation(theRecord, concept, "PROPERTY");
-		addDesignation(theRecord, concept, "TIME_ASPCT");
-		addDesignation(theRecord, concept, "SYSTEM");
-		addDesignation(theRecord, concept, "SCALE_TYP");
+		// The following should be created as designations for each term:
+        // COMPONENT:PROPERTY:TIME_ASPCT:SYSTEM:SCALE_TYP:METHOD_TYP (as colon-separated concatenation - FormalName)
+        // SHORTNAME
+        // LONG_COMMON_NAME
+        // LinguisticVariantDisplayName
+			
+		//-- add formalName designation
+		StringBuilder fullySpecifiedName = new StringBuilder();
+		fullySpecifiedName.append(trimToEmpty(theRecord.get("COMPONENT") + ":"));
+		fullySpecifiedName.append(trimToEmpty(theRecord.get("PROPERTY") + ":"));
+		fullySpecifiedName.append(trimToEmpty(theRecord.get("TIME_ASPCT") + ":"));
+		fullySpecifiedName.append(trimToEmpty(theRecord.get("SYSTEM") + ":"));
+		fullySpecifiedName.append(trimToEmpty(theRecord.get("SCALE_TYP") + ":"));
+		fullySpecifiedName.append(trimToEmpty(theRecord.get("METHOD_TYP")));
 		
-		addDesignation(theRecord, concept, "METHOD_TYP");
-		addDesignation(theRecord, concept, "CLASS");
+		String fullySpecifiedNameStr = fullySpecifiedName.toString();
+		
+		// skip if COMPONENT, PROPERTY, TIME_ASPCT, SYSTEM, SCALE_TYP and METHOD_TYP are all empty
+		if (!fullySpecifiedNameStr.equals(":::::")) {
+			concept.addDesignation()
+				.setLanguage(myLanguageCode)
+				.setUseSystem(ITermLoaderSvc.LOINC_URI)
+				.setUseCode("FullySpecifiedName")
+				.setUseDisplay("FullySpecifiedName")
+				.setValue(fullySpecifiedNameStr);
+		}
+		
+		//-- other designations
 		addDesignation(theRecord, concept, "SHORTNAME");
-		addDesignation(theRecord, concept, "LONG_COMMON_NAME");
-		addDesignation(theRecord, concept, "RELATEDNAMES2");
-		
+		addDesignation(theRecord, concept, "LONG_COMMON_NAME");		
 		addDesignation(theRecord, concept, "LinguisticVariantDisplayName");
 		
 	}

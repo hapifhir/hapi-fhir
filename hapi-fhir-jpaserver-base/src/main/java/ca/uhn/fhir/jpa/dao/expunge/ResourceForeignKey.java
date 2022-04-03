@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.dao.expunge;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 public class ResourceForeignKey {
 	public final String table;
@@ -57,7 +58,7 @@ public class ResourceForeignKey {
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this)
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
 			.append("table", table)
 			.append("key", key)
 			.toString();

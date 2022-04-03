@@ -1,0 +1,20 @@
+{
+	"resourceType": "ValueSet",
+	"id": "ndc-vs",
+	"url": "http://payer-to-payer-exchange/fhir/ValueSet/mental-health/ndc-canonical-valueset",
+	"version": "20220214",
+	"name": "NDC-Codes-Mental-Health-Canonical-VS",
+	"status": "draft",
+	"experimental": true,
+	"date": "2022-02-14",
+	"compose": {
+		"include": [ {
+			"system": "http://hl7.org/fhir/sid/ndc",
+			"version": "1.0",
+			"concept": [ {
+				"code": "0008-1222-30",
+				"display": "Pristiq Extended-Release, 30 TABLET, EXTENDED RELEASE in 1 BOTTLE, PLASTIC (0008-1222-30) (package)"
+			}]
+		}]
+	}
+}

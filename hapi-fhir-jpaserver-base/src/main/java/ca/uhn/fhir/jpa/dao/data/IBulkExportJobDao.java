@@ -32,7 +32,7 @@ import java.util.Optional;
  * #L%
  */
 
-public interface IBulkExportJobDao extends JpaRepository<BulkExportJobEntity, Long> {
+public interface IBulkExportJobDao extends JpaRepository<BulkExportJobEntity, Long>, IHapiFhirJpaRepository {
 
 	@Query("SELECT j FROM BulkExportJobEntity j WHERE j.myJobId = :jobid")
 	Optional<BulkExportJobEntity> findByJobId(@Param("jobid") String theUuid);

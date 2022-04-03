@@ -15,9 +15,9 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -77,24 +77,6 @@ public class HttpProxyTest {
         int port = JettyUtil.getPortForStartedServer(server);
 		try {
 
-//			final String authUser = "username";
-//			final String authPassword = "password";
-//			CredentialsProvider credsProvider = new BasicCredentialsProvider();
-//			credsProvider.setCredentials(new AuthScope("127.0.0.1", port), new UsernamePasswordCredentials(authUser, authPassword));
-//
-//			HttpHost myProxy = new HttpHost("127.0.0.1", port);
-//
-//			//@formatter:off
-//			HttpClientBuilder clientBuilder = HttpClientBuilder.create();
-//			clientBuilder
-//				.setProxy(myProxy)
-//				.setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy())
-//				.setDefaultCredentialsProvider(credsProvider)
-//				.disableCookieManagement();
-//			CloseableHttpClient httpClient = clientBuilder.build();
-//			//@formatter:on
-//			ourCtx.getRestfulClientFactory().setHttpClient(httpClient);
-
 			ourCtx.getRestfulClientFactory().setProxy("127.0.0.1", port);
 			ourCtx.getRestfulClientFactory().setProxyCredentials("username", "password");
 			
@@ -143,7 +125,7 @@ public class HttpProxyTest {
 
 	@AfterAll
 	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 }

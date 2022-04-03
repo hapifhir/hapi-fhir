@@ -28,7 +28,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface IResourceLinkDao extends JpaRepository<ResourceLink, Long> {
+public interface IResourceLinkDao extends JpaRepository<ResourceLink, Long>, IHapiFhirJpaRepository {
 
 	@Modifying
 	@Query("DELETE FROM ResourceLink t WHERE t.mySourceResourcePid = :resId")

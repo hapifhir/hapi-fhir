@@ -1,20 +1,28 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.ParametersUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.ValueSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,6 +36,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * operation in order to validate codes.
  */
 public class RemoteTerminologyServiceValidationSupport extends BaseValidationSupport implements IValidationSupport {
+	private static final Logger ourLog = LoggerFactory.getLogger(RemoteTerminologyServiceValidationSupport.class);
 
 	private String myBaseUrl;
 	private List<Object> myClientInterceptors = new ArrayList<>();
@@ -41,28 +50,78 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		super(theFhirContext);
 	}
 
+	public RemoteTerminologyServiceValidationSupport(FhirContext theFhirContext, String theBaseUrl) {
+		super(theFhirContext);
+		myBaseUrl = theBaseUrl;
+	}
+
 	@Override
-	public CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public CodeValidationResult validateCode(@Nonnull ValidationSupportContext theValidationSupportContext, @Nonnull ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		return invokeRemoteValidateCode(theCodeSystem, theCode, theDisplay, theValueSetUrl, null);
 	}
 
 	@Override
 	public CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
 
-		if (theOptions != null) {
-			if (theOptions.isInferSystem()) {
-				return null;
-			}
+		IBaseResource valueSet = theValueSet;
+
+		// some external validators require the system when the code is passed
+		// so let's try to get it from the VS if is is not present
+		String codeSystem = theCodeSystem;
+		if (isNotBlank(theCode) && isBlank(codeSystem)) {
+			codeSystem = extractCodeSystemForCode((ValueSet) theValueSet, theCode);
 		}
 
-		IBaseResource valueSet = theValueSet;
+	 	// Remote terminology services shouldn't be used to validate codes with an implied system
+		if (isBlank(codeSystem)) { return null; }
+
 		String valueSetUrl = DefaultProfileValidationSupport.getConformanceResourceUrl(myCtx, valueSet);
 		if (isNotBlank(valueSetUrl)) {
 			valueSet = null;
 		} else {
 			valueSetUrl = null;
 		}
-		return invokeRemoteValidateCode(theCodeSystem, theCode, theDisplay, valueSetUrl, valueSet);
+		return invokeRemoteValidateCode(codeSystem, theCode, theDisplay, valueSetUrl, valueSet);
+	}
+
+	/**
+	 * Try to obtain the codeSystem of the received code from the received ValueSet
+	 */
+	private String extractCodeSystemForCode(ValueSet theValueSet, String theCode) {
+		if (theValueSet.getCompose() == null || theValueSet.getCompose().getInclude() == null
+			|| theValueSet.getCompose().getInclude().isEmpty()) {
+			return null;
+		}
+
+		if (theValueSet.getCompose().getInclude().size() == 1) {
+			ValueSet.ConceptSetComponent include = theValueSet.getCompose().getInclude().iterator().next();
+			return getVersionedCodeSystem(include);
+		}
+
+		// when component has more than one include, their codeSystem(s) could be different, so we need to make sure
+		// that we are picking up the system for the include to which the code corresponds
+		for (ValueSet.ConceptSetComponent include: theValueSet.getCompose().getInclude()) {
+			if (include.hasSystem()) {
+				for (ValueSet.ConceptReferenceComponent concept : include.getConcept()) {
+					if (concept.hasCodeElement() && concept.getCode().equals(theCode)) {
+						return getVersionedCodeSystem(include);
+					}
+				}
+			}
+		}
+
+		// at this point codeSystem couldn't be extracted for a multi-include ValueSet. Just on case it was
+		// because the format was not well handled, let's allow to watch the VS by an easy logging change
+		ourLog.trace("CodeSystem couldn't be extracted for code: {} for ValueSet: {}", theCode, theValueSet.getId());
+		return null;
+	}
+
+	private String getVersionedCodeSystem(ValueSet.ConceptSetComponent theComponent) {
+			String codeSystem = theComponent.getSystem();
+			if ( ! codeSystem.contains("|") && theComponent.hasVersion()) {
+				codeSystem += "|" + theComponent.getVersion();
+			}
+			return codeSystem;
 	}
 
 	@Override
@@ -81,6 +140,167 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		}
 
 		return null;
+	}
+
+	@Override
+	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode, String theDisplayLanguage) {
+		Validate.notBlank(theCode, "theCode must be provided");
+
+		IGenericClient client = provideClient();
+		FhirContext fhirContext = client.getFhirContext();
+		FhirVersionEnum fhirVersion = fhirContext.getVersion().getVersion();
+
+		switch (fhirVersion) {
+			case DSTU3:
+			case R4:
+				IBaseParameters params = ParametersUtil.newInstance(fhirContext);
+				ParametersUtil.addParameterToParametersString(fhirContext, params, "code", theCode);
+				if (!StringUtils.isEmpty(theSystem)) {
+					ParametersUtil.addParameterToParametersString(fhirContext, params, "system", theSystem);
+				}
+				if (!StringUtils.isEmpty(theDisplayLanguage)) {
+					ParametersUtil.addParameterToParametersString(fhirContext, params, "language", theDisplayLanguage);
+				}
+				Class<?> codeSystemClass = myCtx.getResourceDefinition("CodeSystem").getImplementingClass();
+				IBaseParameters outcome = client
+					.operation()
+					.onType((Class<? extends IBaseResource>) codeSystemClass)
+					.named("$lookup")
+					.withParameters(params)
+					.useHttpGet()
+					.execute();
+				if (outcome != null && !outcome.isEmpty()) {
+					switch (fhirVersion) {
+						case DSTU3:
+							return generateLookupCodeResultDSTU3(theCode, theSystem, (org.hl7.fhir.dstu3.model.Parameters)outcome);
+						case R4:
+							return generateLookupCodeResultR4(theCode, theSystem, (org.hl7.fhir.r4.model.Parameters)outcome);
+					}
+				}
+				break;
+			default:
+				throw new UnsupportedOperationException(Msg.code(710) + "Unsupported FHIR version '" + fhirVersion.getFhirVersionString() +
+					"'. Only DSTU3 and R4 are supported.");
+		}
+		return null;
+	}
+
+	private LookupCodeResult generateLookupCodeResultDSTU3(String theCode, String theSystem, org.hl7.fhir.dstu3.model.Parameters outcomeDSTU3) {
+		// NOTE: I wanted to put all of this logic into the IValidationSupport Class, but it would've required adding
+		//       several new dependencies on version-specific libraries and that is explicitly forbidden (see comment in POM).
+		LookupCodeResult result = new LookupCodeResult();
+		result.setSearchedForCode(theCode);
+		result.setSearchedForSystem(theSystem);
+		result.setFound(true);
+		for (org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent parameterComponent : outcomeDSTU3.getParameter()) {
+			switch (parameterComponent.getName()) {
+				case "property":
+					org.hl7.fhir.dstu3.model.Property part = parameterComponent.getChildByName("part");
+					// The assumption here is that we may only have 2 elements in this part, and if so, these 2 will be saved
+					if (part != null && part.hasValues() && part.getValues().size() >= 2) {
+						String key = ((org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent) part.getValues().get(0)).getValue().toString();
+						String value = ((org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent) part.getValues().get(1)).getValue().toString();
+						if (!StringUtils.isEmpty(key) && !StringUtils.isEmpty(value)) {
+							result.getProperties().add(new StringConceptProperty(key, value));
+						}
+					}
+					break;
+				case "designation":
+					ConceptDesignation conceptDesignation = new ConceptDesignation();
+					for (org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent designationComponent : parameterComponent.getPart()) {
+						switch(designationComponent.getName()) {
+							case "language":
+								conceptDesignation.setLanguage(designationComponent.getValue().toString());
+								break;
+							case "use":
+								org.hl7.fhir.dstu3.model.Coding coding = (org.hl7.fhir.dstu3.model.Coding)designationComponent.getValue();
+								if (coding != null) {
+									conceptDesignation.setUseSystem(coding.getSystem());
+									conceptDesignation.setUseCode(coding.getCode());
+									conceptDesignation.setUseDisplay(coding.getDisplay());
+								}
+								break;
+							case "value":
+								conceptDesignation.setValue(((designationComponent.getValue() == null)?null:designationComponent.getValue().toString()));
+								break;
+						}
+					}
+					result.getDesignations().add(conceptDesignation);
+					break;
+				case "name":
+					result.setCodeSystemDisplayName(((parameterComponent.getValue() == null)?null:parameterComponent.getValue().toString()));
+					break;
+				case "version":
+					result.setCodeSystemVersion(((parameterComponent.getValue() == null)?null:parameterComponent.getValue().toString()));
+					break;
+				case "display":
+					result.setCodeDisplay(((parameterComponent.getValue() == null)?null:parameterComponent.getValue().toString()));
+					break;
+				case "abstract":
+					result.setCodeIsAbstract(((parameterComponent.getValue() == null)?false:Boolean.parseBoolean(parameterComponent.getValue().toString())));
+					break;
+			}
+		}
+		return result;
+	}
+
+	private LookupCodeResult generateLookupCodeResultR4(String theCode, String theSystem, org.hl7.fhir.r4.model.Parameters outcomeR4) {
+		// NOTE: I wanted to put all of this logic into the IValidationSupport Class, but it would've required adding
+		//       several new dependencies on version-specific libraries and that is explicitly forbidden (see comment in POM).
+		LookupCodeResult result = new LookupCodeResult();
+		result.setSearchedForCode(theCode);
+		result.setSearchedForSystem(theSystem);
+		result.setFound(true);
+		for (org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent parameterComponent : outcomeR4.getParameter()) {
+			switch (parameterComponent.getName()) {
+				case "property":
+					org.hl7.fhir.r4.model.Property part = parameterComponent.getChildByName("part");
+					// The assumption here is that we may only have 2 elements in this part, and if so, these 2 will be saved
+					if (part != null && part.hasValues() && part.getValues().size() >= 2) {
+						String key = ((org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent) part.getValues().get(0)).getValue().toString();
+						String value = ((org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent) part.getValues().get(1)).getValue().toString();
+						if (!StringUtils.isEmpty(key) && !StringUtils.isEmpty(value)) {
+							result.getProperties().add(new StringConceptProperty(key, value));
+						}
+					}
+					break;
+				case "designation":
+					ConceptDesignation conceptDesignation = new ConceptDesignation();
+					for (org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent designationComponent : parameterComponent.getPart()) {
+						switch(designationComponent.getName()) {
+							case "language":
+								conceptDesignation.setLanguage(designationComponent.getValue().toString());
+								break;
+							case "use":
+								org.hl7.fhir.r4.model.Coding coding = (org.hl7.fhir.r4.model.Coding)designationComponent.getValue();
+								if (coding != null) {
+									conceptDesignation.setUseSystem(coding.getSystem());
+									conceptDesignation.setUseCode(coding.getCode());
+									conceptDesignation.setUseDisplay(coding.getDisplay());
+								}
+								break;
+							case "value":
+								conceptDesignation.setValue(((designationComponent.getValue() == null)?null:designationComponent.getValue().toString()));
+								break;
+						}
+					}
+					result.getDesignations().add(conceptDesignation);
+					break;
+				case "name":
+					result.setCodeSystemDisplayName(((parameterComponent.getValue() == null)?null:parameterComponent.getValue().toString()));
+					break;
+				case "version":
+					result.setCodeSystemVersion(((parameterComponent.getValue() == null)?null:parameterComponent.getValue().toString()));
+					break;
+				case "display":
+					result.setCodeDisplay(((parameterComponent.getValue() == null)?null:parameterComponent.getValue().toString()));
+					break;
+				case "abstract":
+					result.setCodeIsAbstract(((parameterComponent.getValue() == null)?false:Boolean.parseBoolean(parameterComponent.getValue().toString())));
+					break;
+			}
+		}
+		return result;
 	}
 
 	@Override
@@ -126,36 +346,12 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 
 		IGenericClient client = provideClient();
 
-		IBaseParameters input = ParametersUtil.newInstance(getFhirContext());
+		IBaseParameters input = buildValidateCodeInputParameters(theCodeSystem, theCode, theDisplay, theValueSetUrl, theValueSet);
 
 		String resourceType = "ValueSet";
 		if (theValueSet == null && theValueSetUrl == null) {
 			resourceType = "CodeSystem";
-
-			ParametersUtil.addParameterToParametersUri(getFhirContext(), input, "url", theCodeSystem);
-			ParametersUtil.addParameterToParametersString(getFhirContext(), input, "code", theCode);
-			if (isNotBlank(theDisplay)) {
-				ParametersUtil.addParameterToParametersString(getFhirContext(), input, "display", theDisplay);
-			}
-
-		} else {
-
-			if (isNotBlank(theValueSetUrl)) {
-				ParametersUtil.addParameterToParametersUri(getFhirContext(), input, "url", theValueSetUrl);
-			}
-			ParametersUtil.addParameterToParametersString(getFhirContext(), input, "code", theCode);
-			if (isNotBlank(theCodeSystem)) {
-				ParametersUtil.addParameterToParametersUri(getFhirContext(), input, "system", theCodeSystem);
-			}
-			if (isNotBlank(theDisplay)) {
-				ParametersUtil.addParameterToParametersString(getFhirContext(), input, "display", theDisplay);
-			}
-			if (theValueSet != null) {
-				ParametersUtil.addParameterToParameters(getFhirContext(), input, "valueSet", theValueSet);
-			}
-
 		}
-
 
 		IBaseParameters output = client
 			.operation()
@@ -192,6 +388,35 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		}
 		return retVal;
 	}
+
+	protected IBaseParameters buildValidateCodeInputParameters(String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl, IBaseResource theValueSet) {
+		IBaseParameters params = ParametersUtil.newInstance(getFhirContext());
+
+		if (theValueSet == null && theValueSetUrl == null) {
+			ParametersUtil.addParameterToParametersUri(getFhirContext(), params, "url", theCodeSystem);
+			ParametersUtil.addParameterToParametersString(getFhirContext(), params, "code", theCode);
+			if (isNotBlank(theDisplay)) {
+				ParametersUtil.addParameterToParametersString(getFhirContext(), params, "display", theDisplay);
+			}
+			return params;
+		}
+
+		if (isNotBlank(theValueSetUrl)) {
+			ParametersUtil.addParameterToParametersUri(getFhirContext(), params, "url", theValueSetUrl);
+		}
+		ParametersUtil.addParameterToParametersString(getFhirContext(), params, "code", theCode);
+		if (isNotBlank(theCodeSystem)) {
+			ParametersUtil.addParameterToParametersUri(getFhirContext(), params, "system", theCodeSystem);
+		}
+		if (isNotBlank(theDisplay)) {
+			ParametersUtil.addParameterToParametersString(getFhirContext(), params, "display", theDisplay);
+		}
+		if (theValueSet != null) {
+			ParametersUtil.addParameterToParameters(getFhirContext(), params, "valueSet", theValueSet);
+		}
+		return params;
+	}
+
 
 	/**
 	 * Sets the FHIR Terminology Server base URL

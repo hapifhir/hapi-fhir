@@ -20,7 +20,8 @@ package ca.uhn.fhir.jpa.bulk.imprt.job;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.dao.data.IBulkImportJobDao;
 import ca.uhn.fhir.jpa.entity.BulkImportJobEntity;
 import org.apache.commons.lang3.StringUtils;
@@ -46,13 +47,13 @@ public class BulkImportJobParameterValidator implements JobParametersValidator {
 	@Override
 	public void validate(JobParameters theJobParameters) throws JobParametersInvalidException {
 		if (theJobParameters == null) {
-			throw new JobParametersInvalidException("This job needs Parameters: [jobUUID]");
+			throw new JobParametersInvalidException(Msg.code(784) + "This job needs Parameters: [jobUUID]");
 		}
 
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
 		String errorMessage = txTemplate.execute(tx -> {
 			StringBuilder errorBuilder = new StringBuilder();
-			String jobUUID = theJobParameters.getString(BulkExportJobConfig.JOB_UUID_PARAMETER);
+			String jobUUID = theJobParameters.getString(BatchConstants.JOB_UUID_PARAMETER);
 			Optional<BulkImportJobEntity> oJob = myBulkImportJobDao.findByJobId(jobUUID);
 			if (!StringUtils.isBlank(jobUUID) && !oJob.isPresent()) {
 				errorBuilder.append("There is no persisted job that exists with UUID: ");
@@ -64,7 +65,7 @@ public class BulkImportJobParameterValidator implements JobParametersValidator {
 		});
 
 		if (!StringUtils.isEmpty(errorMessage)) {
-			throw new JobParametersInvalidException(errorMessage);
+			throw new JobParametersInvalidException(Msg.code(785) + errorMessage);
 		}
 	}
 }

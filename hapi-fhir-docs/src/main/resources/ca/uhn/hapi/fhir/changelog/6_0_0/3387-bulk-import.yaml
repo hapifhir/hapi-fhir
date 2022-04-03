@@ -1,0 +1,5 @@
+---
+type: add
+issue: 3387
+title: "Support has now (finally!) been added for the FHIR Bulk Import ($import) operation. This operation
+  is the first operation to leverage the new Batch2 framework."

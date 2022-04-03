@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.delete.job;
 
-import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
+import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.batch.job.MultiUrlJobParameterUtil;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -23,7 +23,7 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 	@Autowired
 	private IBatchJobSubmitter myBatchJobSubmitter;
 	@Autowired
-	@Qualifier(BatchJobsConfig.DELETE_EXPUNGE_JOB_NAME)
+	@Qualifier(BatchConstants.DELETE_EXPUNGE_JOB_NAME)
 	private Job myDeleteExpungeJob;
 	@Autowired
 	private BatchJobHelper myBatchJobHelper;

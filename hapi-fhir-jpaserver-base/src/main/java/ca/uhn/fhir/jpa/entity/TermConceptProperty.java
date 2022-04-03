@@ -26,6 +26,10 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.search.engine.backend.types.Projectable;
+import org.hibernate.search.engine.backend.types.Searchable;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 import org.hibernate.validator.constraints.NotBlank;
 
 import javax.annotation.Nonnull;
@@ -36,6 +40,7 @@ import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
@@ -48,15 +53,19 @@ import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.length;
 
 @Entity
-@Table(name = "TRM_CONCEPT_PROPERTY", uniqueConstraints = {
+@Table(name = "TRM_CONCEPT_PROPERTY", uniqueConstraints = { }, indexes = {
+	// must have same name that indexed FK or SchemaMigrationTest complains because H2 sets this index automatically
+	@Index(name = "FK_CONCEPTPROP_CONCEPT",  columnList = "CONCEPT_PID", unique = false)
 })
 public class TermConceptProperty implements Serializable {
 	public static final int MAX_PROPTYPE_ENUM_LENGTH = 6;
 	private static final long serialVersionUID = 1L;
 	private static final int MAX_LENGTH = 500;
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "CONCEPT_PID", referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_CONCEPTPROP_CONCEPT"))
 	private TermConcept myConcept;
+
 	/**
 	 * TODO: Make this non-null
 	 *
@@ -65,30 +74,41 @@ public class TermConceptProperty implements Serializable {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "CS_VER_PID", nullable = true, referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_CONCEPTPROP_CSV"))
 	private TermCodeSystemVersion myCodeSystemVersion;
+
 	@Id()
 	@SequenceGenerator(name = "SEQ_CONCEPT_PROP_PID", sequenceName = "SEQ_CONCEPT_PROP_PID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CONCEPT_PROP_PID")
 	@Column(name = "PID")
 	private Long myId;
+
 	@Column(name = "PROP_KEY", nullable = false, length = MAX_LENGTH)
 	@NotBlank
+	@GenericField(searchable = Searchable.YES)
 	private String myKey;
+
 	@Column(name = "PROP_VAL", nullable = true, length = MAX_LENGTH)
+	@FullTextField(searchable = Searchable.YES, projectable = Projectable.YES, analyzer = "standardAnalyzer")
+	@GenericField(name = "myValueString", searchable = Searchable.YES)
 	private String myValue;
+
 	@Column(name = "PROP_VAL_LOB")
 	@Lob()
 	private byte[] myValueLob;
+
 	@Column(name = "PROP_TYPE", nullable = false, length = MAX_PROPTYPE_ENUM_LENGTH)
 	private TermConceptPropertyTypeEnum myType;
+
 	/**
 	 * Relevant only for properties of type {@link TermConceptPropertyTypeEnum#CODING}
 	 */
 	@Column(name = "PROP_CODESYSTEM", length = MAX_LENGTH, nullable = true)
 	private String myCodeSystem;
+
 	/**
 	 * Relevant only for properties of type {@link TermConceptPropertyTypeEnum#CODING}
 	 */
 	@Column(name = "PROP_DISPLAY", length = MAX_LENGTH, nullable = true)
+	@GenericField(name = "myDisplayString", searchable = Searchable.YES)
 	private String myDisplay;
 
 	/**
@@ -215,6 +235,7 @@ public class TermConceptProperty implements Serializable {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+			.append("conceptPid", myConcept.getId())
 			.append("key", myKey)
 			.append("value", getValue())
 			.toString();

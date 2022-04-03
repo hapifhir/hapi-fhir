@@ -1,0 +1,5 @@
+---
+type: perf
+issue: 3327
+jira: SMILE-3438
+title: "Improved performance of validating resources when skip contained resources is enabled."

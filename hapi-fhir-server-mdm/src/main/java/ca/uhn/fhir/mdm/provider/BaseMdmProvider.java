@@ -20,6 +20,7 @@ package ca.uhn.fhir.mdm.provider;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
@@ -38,6 +39,8 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.data.domain.Page;
 
+import javax.annotation.Nullable;
+
 
 public abstract class BaseMdmProvider {
 
@@ -51,13 +54,13 @@ public abstract class BaseMdmProvider {
 		validateNotNull(ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, theFromGoldenResourceId);
 		validateNotNull(ProviderConstants.MDM_MERGE_GR_TO_GOLDEN_RESOURCE_ID, theToGoldenResourceId);
 		if (theFromGoldenResourceId.getValue().equals(theToGoldenResourceId.getValue())) {
-			throw new InvalidRequestException("fromGoldenResourceId must be different from toGoldenResourceId");
+			throw new InvalidRequestException(Msg.code(1493) + "fromGoldenResourceId must be different from toGoldenResourceId");
 		}
 	}
 
 	private void validateNotNull(String theName, IPrimitiveType<String> theString) {
 		if (theString == null || theString.getValue() == null) {
-			throw new InvalidRequestException(theName + " cannot be null");
+			throw new InvalidRequestException(Msg.code(1494) + theName + " cannot be null");
 		}
 	}
 
@@ -71,7 +74,7 @@ public abstract class BaseMdmProvider {
 			case MATCH:
 				break;
 			default:
-				throw new InvalidRequestException(ProviderConstants.MDM_UPDATE_LINK + " illegal " + ProviderConstants.MDM_UPDATE_LINK_MATCH_RESULT +
+				throw new InvalidRequestException(Msg.code(1495) + ProviderConstants.MDM_UPDATE_LINK + " illegal " + ProviderConstants.MDM_UPDATE_LINK_MATCH_RESULT +
 					" value '" + matchResult + "'.  Must be " + MdmMatchResultEnum.NO_MATCH + " or " + MdmMatchResultEnum.MATCH);
 		}
 	}
@@ -81,6 +84,22 @@ public abstract class BaseMdmProvider {
 		validateNotNull(ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, theResourceId);
 	}
 
+	protected void validateCreateLinkParameters(IPrimitiveType<String> theGoldenResourceId, IPrimitiveType<String> theResourceId, @Nullable IPrimitiveType<String> theMatchResult) {
+		validateNotNull(ProviderConstants.MDM_CREATE_LINK_GOLDEN_RESOURCE_ID, theGoldenResourceId);
+		validateNotNull(ProviderConstants.MDM_CREATE_LINK_RESOURCE_ID, theResourceId);
+		if (theMatchResult != null) {
+			MdmMatchResultEnum matchResult = MdmMatchResultEnum.valueOf(theMatchResult.getValue());
+			switch (matchResult) {
+				case NO_MATCH:
+				case POSSIBLE_MATCH:
+				case MATCH:
+					break;
+				default:
+					throw new InvalidRequestException(Msg.code(1496) + ProviderConstants.MDM_CREATE_LINK + " illegal " + ProviderConstants.MDM_CREATE_LINK_MATCH_RESULT +
+						" value '" + matchResult + "'.  Must be " + MdmMatchResultEnum.NO_MATCH + ", " + MdmMatchResultEnum.MATCH + " or " + MdmMatchResultEnum.POSSIBLE_MATCH);
+			}
+		}
+	}
 
 	protected MdmTransactionContext createMdmContext(RequestDetails theRequestDetails, MdmTransactionContext.OperationType theOperationType, String theResourceType) {
 		TransactionLogMessages transactionLogMessages = TransactionLogMessages.createFromTransactionGuid(theRequestDetails.getTransactionGuid());

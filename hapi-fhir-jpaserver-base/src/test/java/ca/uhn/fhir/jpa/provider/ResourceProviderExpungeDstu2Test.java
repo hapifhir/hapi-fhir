@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
@@ -161,7 +162,7 @@ public class ResourceProviderExpungeDstu2Test extends BaseResourceProviderDstu2T
 				.setExpungeOldVersions(true), null);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertEquals("Can not perform version-specific expunge of resource Patient/PT-TWOVERSION/_history/2 as this is the current version", e.getMessage());
+			assertEquals(Msg.code(969) + "Can not perform version-specific expunge of resource Patient/PT-TWOVERSION/_history/2 as this is the current version", e.getMessage());
 		}
 	}
 

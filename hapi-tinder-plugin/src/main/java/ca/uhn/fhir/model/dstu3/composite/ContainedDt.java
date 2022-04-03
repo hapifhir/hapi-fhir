@@ -20,6 +20,7 @@ package ca.uhn.fhir.model.dstu3.composite;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
@@ -53,12 +54,12 @@ public class ContainedDt extends BaseContainedDt {
 
 	@Override
 	public Object getUserData(String theName) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(85));
 	}
 
 	@Override
 	public void setUserData(String theName, Object theValue) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(86));
 	}
 
 }

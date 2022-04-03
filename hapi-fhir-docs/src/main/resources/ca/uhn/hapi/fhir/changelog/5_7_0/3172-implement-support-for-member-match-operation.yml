@@ -1,0 +1,5 @@
+---
+type: add
+issue: 3172
+title: "Implement support for $member-match operation by coverage-id or coverage-identifier.
+   (Beneficiary demographic matching not supported)"

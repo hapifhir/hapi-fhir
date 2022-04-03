@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Patch;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -123,7 +124,7 @@ public class PatchDstu2_1Test {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
 			assertEquals(400, status.getStatusLine().getStatusCode());
-			assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"Invalid Content-Type for PATCH operation: text/plain\"/></issue></OperationOutcome>", responseContent);
+			assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"" + Msg.code(1965) + "Invalid Content-Type for PATCH operation: text/plain\"/></issue></OperationOutcome>", responseContent);
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
@@ -156,7 +157,7 @@ public class PatchDstu2_1Test {
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 	@BeforeAll

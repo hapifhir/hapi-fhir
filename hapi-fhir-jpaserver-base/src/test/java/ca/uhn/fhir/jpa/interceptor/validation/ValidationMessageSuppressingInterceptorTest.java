@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.interceptor.validation;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -16,14 +15,13 @@ import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r5.utils.IResourceValidator;
+import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -54,7 +52,7 @@ public class ValidationMessageSuppressingInterceptorTest extends BaseResourcePro
 		upload("/r4/uscore/StructureDefinition-us-core-pulse-oximetry.json");
 
 		String input = loadResource("/r4/uscore/observation-pulseox.json");
-		Observation inputObs = loadResource(myFhirCtx, Observation.class, "/r4/uscore/observation-pulseox.json");
+		Observation inputObs = loadResource(myFhirContext, Observation.class, "/r4/uscore/observation-pulseox.json");
 
 		try {
 			myObservationDao.validate(inputObs, null, input, null, null, null, null);
@@ -80,7 +78,7 @@ public class ValidationMessageSuppressingInterceptorTest extends BaseResourcePro
 		upload("/r4/uscore/CodeSystem-dummy-loinc.json");
 		upload("/r4/uscore/StructureDefinition-us-core-pulse-oximetry.json");
 
-		FhirValidator validator = myFhirCtx.newValidator();
+		FhirValidator validator = myFhirContext.newValidator();
 		validator.setInterceptorBroadcaster(myInterceptorRegistry);
 		validator.registerValidatorModule(new FhirInstanceValidator(myValidationSupport));
 
@@ -92,7 +90,7 @@ public class ValidationMessageSuppressingInterceptorTest extends BaseResourcePro
 
 		// Without suppression
 		{
-			Observation inputObs = loadResource(myFhirCtx, Observation.class, "/r4/uscore/observation-pulseox.json");
+			Observation inputObs = loadResource(myFhirContext, Observation.class, "/r4/uscore/observation-pulseox.json");
 			try {
 				myClient.create().resource(inputObs).execute().getId().toUnqualifiedVersionless().getValue();
 				fail();
@@ -108,7 +106,7 @@ public class ValidationMessageSuppressingInterceptorTest extends BaseResourcePro
 		interceptor.addMessageSuppressionPatterns("Unknown code 'http://loinc.org#59408-5'");
 		myInterceptorRegistry.registerInterceptor(interceptor);
 		{
-			Observation inputObs = loadResource(myFhirCtx, Observation.class, "/r4/uscore/observation-pulseox.json");
+			Observation inputObs = loadResource(myFhirContext, Observation.class, "/r4/uscore/observation-pulseox.json");
 			String id = myClient.create().resource(inputObs).execute().getId().toUnqualifiedVersionless().getValue();
 			assertThat(id, matchesPattern("Observation/[0-9]+"));
 		}
@@ -118,13 +116,13 @@ public class ValidationMessageSuppressingInterceptorTest extends BaseResourcePro
 	public void testRepositoryValidation() {
 		createPatient(withActiveTrue(), withId("A"));
 
-		List<IRepositoryValidatingRule> rules = myApplicationContext.getBean(BaseConfig.REPOSITORY_VALIDATING_RULE_BUILDER, RepositoryValidatingRuleBuilder.class)
+		List<IRepositoryValidatingRule> rules = myApplicationContext.getBean(RepositoryValidatingRuleBuilder.REPOSITORY_VALIDATING_RULE_BUILDER, RepositoryValidatingRuleBuilder.class)
 			.forResourcesOfType("Encounter")
-			.requireValidationToDeclaredProfiles().withBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Ignore)
+			.requireValidationToDeclaredProfiles().withBestPracticeWarningLevel(BestPracticeWarningLevel.Ignore)
 			.build();
 
 		RepositoryValidatingInterceptor repositoryValidatingInterceptor = new RepositoryValidatingInterceptor();
-		repositoryValidatingInterceptor.setFhirContext(myFhirCtx);
+		repositoryValidatingInterceptor.setFhirContext(myFhirContext);
 		repositoryValidatingInterceptor.setRules(rules);
 		myInterceptorRegistry.registerInterceptor(repositoryValidatingInterceptor);
 

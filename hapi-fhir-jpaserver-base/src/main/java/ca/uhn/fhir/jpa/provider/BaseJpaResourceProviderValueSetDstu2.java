@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.provider;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
@@ -65,11 +66,11 @@ public class BaseJpaResourceProviderValueSetDstu2 extends JpaResourceProviderDst
 		boolean haveValueSet = theValueSet != null && theValueSet.isEmpty() == false;
 
 		if (!haveId && !haveIdentifier && !haveValueSet) {
-			throw new InvalidRequestException("$expand operation at the type level (no ID specified) requires an identifier or a valueSet as a part of the request");
+			throw new InvalidRequestException(Msg.code(1130) + "$expand operation at the type level (no ID specified) requires an identifier or a valueSet as a part of the request");
 		}
 
 		if (moreThanOneTrue(haveId, haveIdentifier, haveValueSet)) {
-			throw new InvalidRequestException("$expand must EITHER be invoked at the type level, or have an identifier specified, or have a ValueSet specified. Can not combine these options.");
+			throw new InvalidRequestException(Msg.code(1131) + "$expand must EITHER be invoked at the type level, or have an identifier specified, or have a ValueSet specified. Can not combine these options.");
 		}
 
 		startRequest(theServletRequest);
@@ -112,9 +113,9 @@ public class BaseJpaResourceProviderValueSetDstu2 extends JpaResourceProviderDst
 		startRequest(theServletRequest);
 		try {
 			IFhirResourceDaoCodeSystem<ValueSet, CodingDt, CodeableConceptDt> dao = (IFhirResourceDaoCodeSystem<ValueSet, CodingDt, CodeableConceptDt>) getDao();
-			IValidationSupport.LookupCodeResult result = dao.lookupCode(theCode, theSystem, theCoding, theRequestDetails);
+			IValidationSupport.LookupCodeResult result = dao.lookupCode(theCode, theSystem, theCoding, null, theRequestDetails);
 			if (result.isFound() == false) {
-				throw new ResourceNotFoundException("Unable to find code[" + result.getSearchedForCode() + "] in system[" + result.getSearchedForSystem() + "]");
+				throw new ResourceNotFoundException(Msg.code(1132) + "Unable to find code[" + result.getSearchedForCode() + "] in system[" + result.getSearchedForSystem() + "]");
 			}
 			Parameters retVal = new Parameters();
 			retVal.addParameter().setName("name").setValue(new StringDt(result.getCodeSystemDisplayName()));

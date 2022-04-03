@@ -29,7 +29,7 @@ import java.util.Optional;
  * #L%
  */
 
-public interface INpmPackageVersionDao extends JpaRepository<NpmPackageVersionEntity, Long> {
+public interface INpmPackageVersionDao extends JpaRepository<NpmPackageVersionEntity, Long>, IHapiFhirJpaRepository {
 
 	@Query("SELECT p FROM NpmPackageVersionEntity p WHERE p.myPackageId = :id")
 	Collection<NpmPackageVersionEntity> findByPackageId(@Param("id") String thePackageId);

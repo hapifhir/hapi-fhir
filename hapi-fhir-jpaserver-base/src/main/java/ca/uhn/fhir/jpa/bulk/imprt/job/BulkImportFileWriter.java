@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.bulk.imprt.job;
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
+import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.bulk.imprt.model.JobFileRowProcessingModeEnum;
 import ca.uhn.fhir.jpa.bulk.imprt.model.ParsedBulkImportRecord;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
@@ -33,13 +33,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
 
 public class BulkImportFileWriter implements ItemWriter<ParsedBulkImportRecord> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkImportFileWriter.class);
-	@Value("#{stepExecutionContext['" + BulkExportJobConfig.JOB_UUID_PARAMETER + "']}")
+	@Value("#{stepExecutionContext['" + BatchConstants.JOB_UUID_PARAMETER + "']}")
 	private String myJobUuid;
 	@Value("#{stepExecutionContext['" + BulkImportPartitioner.FILE_INDEX + "']}")
 	private int myFileIndex;
@@ -51,6 +52,7 @@ public class BulkImportFileWriter implements ItemWriter<ParsedBulkImportRecord> 
 	@SuppressWarnings({"SwitchStatementWithTooFewBranches", "rawtypes", "unchecked"})
 	@Override
 	public void write(List<? extends ParsedBulkImportRecord> theItemLists) throws Exception {
+		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		String offsets = "unknown";
 		if (theItemLists.size() > 0) {

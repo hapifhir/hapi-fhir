@@ -6,11 +6,11 @@ import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -116,7 +116,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 		}
 		assertEquals(searchUuid1, searchUuid2);
 
-		TestUtil.sleepAtLeast(reuseCachedSearchResultsForMillis + 1);
+		ca.uhn.fhir.util.TestUtil.sleepAtLeast(reuseCachedSearchResultsForMillis + 1);
 
 		// We're now past reuseCachedSearchResultsForMillis so we shouldn't reuse the search
 
@@ -291,7 +291,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 		}
 		assertEquals(searchUuid1, searchUuid2);
 
-		TestUtil.sleepAtLeast(reuseCachedSearchResultsForMillis + 1);
+		ca.uhn.fhir.util.TestUtil.sleepAtLeast(reuseCachedSearchResultsForMillis + 1);
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 
 		// We're now past reuseCachedSearchResultsForMillis so we shouldn't reuse the search
@@ -376,7 +376,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 				}
 			});
 			if (search == null) {
-				TestUtil.sleepAtLeast(100);
+				ca.uhn.fhir.util.TestUtil.sleepAtLeast(100);
 			}
 		}
 		assertNotNull(search, "Search " + bundleProvider.getUuid() + " not found on disk after 10 seconds");

@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -94,7 +95,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 			myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Cycle detected around code Root", e.getMessage());
+			assertEquals(Msg.code(926) + "Cycle detected around code Root", e.getMessage());
 		}
 	}
 
@@ -369,7 +370,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		assertEquals("http://foo", outcome.getUrl());
 		assertEquals(CodeSystem.CodeSystemContentMode.NOTPRESENT, outcome.getContent());
 
-		IValidationSupport.LookupCodeResult lookup = myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport), "http://foo", "CBC");
+		IValidationSupport.LookupCodeResult lookup = myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport), "http://foo", "CBC", null);
 		assertEquals("Complete Blood Count", lookup.getCodeDisplay());
 	}
 
@@ -433,7 +434,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 
 		UploadStatistics outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
 		assertEquals(2, outcome.getUpdatedConceptCount());
-		assertEquals("CODEA0", myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport), "http://foo", "codea").getCodeDisplay());
+		assertEquals("CODEA0", myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport), "http://foo", "codea", null).getCodeDisplay());
 
 		// Add codes again with different display
 		delta = new CustomTerminologySet();
@@ -441,12 +442,12 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		delta.addRootConcept("codeb", "CODEB1");
 		outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
 		assertEquals(2, outcome.getUpdatedConceptCount());
-		assertEquals("CODEA1", myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport), "http://foo", "codea").getCodeDisplay());
+		assertEquals("CODEA1", myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport), "http://foo", "codea", null).getCodeDisplay());
 
 		// Add codes again with no changes
 		outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
 		assertEquals(2, outcome.getUpdatedConceptCount());
-		assertEquals("CODEA1", myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport), "http://foo", "codea").getCodeDisplay());
+		assertEquals("CODEA1", myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport), "http://foo", "codea", null).getCodeDisplay());
 	}
 
 	@Test
@@ -483,13 +484,13 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 			.setCode("useless_sct_code")
 			.setValue(new Coding("http://snomed.info", "1234567", "Choked on large meal (finding)"));
 
-		IValidationSupport.LookupCodeResult result = myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport), "http://foo/cs", "lunch");
+		IValidationSupport.LookupCodeResult result = myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport), "http://foo/cs", "lunch", null);
 		assertEquals(true, result.isFound());
 		assertEquals("lunch", result.getSearchedForCode());
 		assertEquals("http://foo/cs", result.getSearchedForSystem());
 
-		Parameters output = (Parameters) result.toParameters(myFhirCtx, null);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		Parameters output = (Parameters) result.toParameters(myFhirContext, null);
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		assertEquals("Description of my life", ((StringType) output.getParameter("name")).getValue());
 		assertEquals("1.2.3", ((StringType) output.getParameter("version")).getValue());
@@ -602,7 +603,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		vs.setUrl("http://foo/vs");
 		vs.getCompose().addInclude().setSystem("http://foo/cs");
 		vs = myValueSetDao.expand(vs, null);
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(vs));
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(vs));
 		return vs;
 	}
 

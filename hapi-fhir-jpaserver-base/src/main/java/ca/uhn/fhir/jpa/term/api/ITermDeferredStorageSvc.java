@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.term.api;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
@@ -53,8 +52,6 @@ public interface ITermDeferredStorageSvc {
 	void addConceptMapsToStorageQueue(List<ConceptMap> theConceptMaps);
 
 	void addValueSetsToStorageQueue(List<ValueSet> theValueSets);
-
-	void deleteCodeSystem(TermCodeSystem theCodeSystem);
 
 	void deleteCodeSystemForResource(ResourceTable theCodeSystemResourceToDelete);
 

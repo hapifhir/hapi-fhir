@@ -11,7 +11,6 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.CustomResource364R4.CustomResource364CustomDate;
 import ca.uhn.fhir.util.ElementUtil;
 import ca.uhn.fhir.util.TestUtil;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Medication;
@@ -21,9 +20,9 @@ import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +46,7 @@ public class CustomTypeR4Test {
 
 	@AfterAll
 	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 	@ResourceDef

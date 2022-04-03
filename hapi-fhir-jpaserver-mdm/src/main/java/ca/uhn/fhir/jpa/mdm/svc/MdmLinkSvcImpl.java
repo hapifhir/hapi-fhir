@@ -20,7 +20,8 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
@@ -36,6 +37,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nonnull;
 import javax.transaction.Transactional;
 import java.util.Optional;
 
@@ -52,7 +54,7 @@ public class MdmLinkSvcImpl implements IMdmLinkSvc {
 	@Autowired
 	private MdmLinkDaoSvc myMdmLinkDaoSvc;
 	@Autowired
-	private IdHelperService myIdHelperService;
+	private IJpaIdHelperService myIdHelperService;
 
 	@Override
 	@Transactional
@@ -69,7 +71,8 @@ public class MdmLinkSvcImpl implements IMdmLinkSvc {
 		validateRequestIsLegal(theGoldenResource, theSourceResource, matchResultEnum, theLinkSource);
 
 		myMdmResourceDaoSvc.upsertGoldenResource(theGoldenResource, theMdmTransactionContext.getResourceType());
-		createOrUpdateLinkEntity(theGoldenResource, theSourceResource, theMatchOutcome, theLinkSource, theMdmTransactionContext);
+		MdmLink link = createOrUpdateLinkEntity(theGoldenResource, theSourceResource, theMatchOutcome, theLinkSource, theMdmTransactionContext);
+		theMdmTransactionContext.addMdmLink(link);
 	}
 
 	private boolean goldenResourceLinkedAsNoMatch(IAnyResource theGoldenResource, IAnyResource theSourceResource) {
@@ -82,11 +85,15 @@ public class MdmLinkSvcImpl implements IMdmLinkSvc {
 
 	@Override
 	public void deleteLink(IAnyResource theGoldenResource, IAnyResource theSourceResource, MdmTransactionContext theMdmTransactionContext) {
+		if (theGoldenResource == null) {
+			return;
+		}
 		Optional<MdmLink> optionalMdmLink = getMdmLinkForGoldenResourceSourceResourcePair(theGoldenResource, theSourceResource);
 		if (optionalMdmLink.isPresent()) {
 			MdmLink mdmLink = optionalMdmLink.get();
 			log(theMdmTransactionContext, "Deleting MdmLink [" + theGoldenResource.getIdElement().toVersionless() + " -> " + theSourceResource.getIdElement().toVersionless() + "] with result: " + mdmLink.getMatchResult());
 			myMdmLinkDaoSvc.deleteLink(mdmLink);
+			theMdmTransactionContext.addMdmLink(mdmLink);
 		}
 	}
 
@@ -96,11 +103,11 @@ public class MdmLinkSvcImpl implements IMdmLinkSvc {
 	private void validateRequestIsLegal(IAnyResource theGoldenResource, IAnyResource theResource, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource) {
 		Optional<MdmLink> oExistingLink = getMdmLinkForGoldenResourceSourceResourcePair(theGoldenResource, theResource);
 		if (oExistingLink.isPresent() && systemIsAttemptingToModifyManualLink(theLinkSource, oExistingLink.get())) {
-			throw new InternalErrorException("MDM system is not allowed to modify links on manually created links");
+			throw new InternalErrorException(Msg.code(760) + "MDM system is not allowed to modify links on manually created links");
 		}
 
 		if (systemIsAttemptingToAddNoMatch(theLinkSource, theMatchResult)) {
-			throw new InternalErrorException("MDM system is not allowed to automatically NO_MATCH a resource");
+			throw new InternalErrorException(Msg.code(761) + "MDM system is not allowed to automatically NO_MATCH a resource");
 		}
 	}
 
@@ -118,7 +125,7 @@ public class MdmLinkSvcImpl implements IMdmLinkSvc {
 		return theIncomingSource == MdmLinkSourceEnum.AUTO && theExistingSource.isManual();
 	}
 
-	private Optional<MdmLink> getMdmLinkForGoldenResourceSourceResourcePair(IAnyResource theGoldenResource, IAnyResource theCandidate) {
+	private Optional<MdmLink> getMdmLinkForGoldenResourceSourceResourcePair(@Nonnull IAnyResource theGoldenResource, @Nonnull IAnyResource theCandidate) {
 		if (theGoldenResource.getIdElement().getIdPart() == null || theCandidate.getIdElement().getIdPart() == null) {
 			return Optional.empty();
 		} else {
@@ -129,8 +136,8 @@ public class MdmLinkSvcImpl implements IMdmLinkSvc {
 		}
 	}
 
-	private void createOrUpdateLinkEntity(IBaseResource theGoldenResource, IBaseResource theSourceResource, MdmMatchOutcome theMatchOutcome, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmTransactionContext) {
-		myMdmLinkDaoSvc.createOrUpdateLinkEntity(theGoldenResource, theSourceResource, theMatchOutcome, theLinkSource, theMdmTransactionContext);
+	private MdmLink createOrUpdateLinkEntity(IBaseResource theGoldenResource, IBaseResource theSourceResource, MdmMatchOutcome theMatchOutcome, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmTransactionContext) {
+		return myMdmLinkDaoSvc.createOrUpdateLinkEntity(theGoldenResource, theSourceResource, theMatchOutcome, theLinkSource, theMdmTransactionContext);
 	}
 
 	private void log(MdmTransactionContext theMdmTransactionContext, String theMessage) {

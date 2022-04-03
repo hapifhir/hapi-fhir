@@ -20,11 +20,11 @@ package ca.uhn.fhir.jpa.search.builder;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilderToken;
@@ -115,11 +115,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -307,7 +304,7 @@ public class QueryStack {
 		for (IQueryParameterType next : theNextAnd) {
 
 			if (!(next instanceof CompositeParam<?, ?>)) {
-				throw new InvalidRequestException("Invalid type for composite param (must be " + CompositeParam.class.getSimpleName() + ": " + next.getClass());
+				throw new InvalidRequestException(Msg.code(1203) + "Invalid type for composite param (must be " + CompositeParam.class.getSimpleName() + ": " + next.getClass());
 			}
 			CompositeParam<?, ?> cp = (CompositeParam<?, ?>) next;
 
@@ -358,7 +355,7 @@ public class QueryStack {
 			case HAS:
 			case SPECIAL:
 			default:
-				throw new InvalidRequestException("Don't know how to handle composite parameter with type of " + theParam.getParamType());
+				throw new InvalidRequestException(Msg.code(1204) + "Don't know how to handle composite parameter with type of " + theParam.getParamType());
 		}
 
 	}
@@ -407,7 +404,7 @@ public class QueryStack {
 		List<Condition> codePredicates = new ArrayList<>();
 
 		for (IQueryParameterType nextOr : theList) {
-			Condition p = predicateBuilder.createPredicateDateWithoutIdentityPredicate(nextOr, predicateBuilder, theOperation);
+			Condition p = predicateBuilder.createPredicateDateWithoutIdentityPredicate(nextOr, theOperation);
 			codePredicates.add(p);
 		}
 
@@ -439,7 +436,7 @@ public class QueryStack {
 				return ComboCondition.or(xPredicate, yPredicate);
 			} else {
 				// Shouldn't happen
-				throw new InvalidRequestException("Don't know how to handle operation " + ((SearchFilterParser.FilterLogical) theFilter).getOperation());
+				throw new InvalidRequestException(Msg.code(1205) + "Don't know how to handle operation " + ((SearchFilterParser.FilterLogical) theFilter).getOperation());
 			}
 		} else {
 			return createPredicateFilter(theQueryStack3, ((SearchFilterParser.FilterParameterGroup) theFilter).getContained(), theResourceName, theRequest, theRequestPartitionId);
@@ -456,9 +453,6 @@ public class QueryStack {
 				param.setValueAsQueryToken(null, null, null, theFilter.getValue());
 				return theQueryStack3.createPredicateResourceId(null, Collections.singletonList(Collections.singletonList(param)), theResourceName, theFilter.getOperation(), theRequestPartitionId);
 			}
-			case IAnyResource.SP_RES_LANGUAGE: {
-				return theQueryStack3.createPredicateLanguage(Collections.singletonList(Collections.singletonList(new StringParam(theFilter.getValue()))), theFilter.getOperation());
-			}
 			case Constants.PARAM_SOURCE: {
 				TokenParam param = new TokenParam();
 				param.setValueAsQueryToken(null, null, null, theFilter.getValue());
@@ -468,8 +462,8 @@ public class QueryStack {
 				RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(theResourceName, paramName);
 				if (searchParam == null) {
 					Collection<String> validNames = mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(theResourceName);
-					String msg = myFhirContext.getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "invalidSearchParameter", paramName, theResourceName, validNames);
-					throw new InvalidRequestException(msg);
+					String msg = myFhirContext.getLocalizer().getMessageSanitized(BaseStorageDao.class, "invalidSearchParameter", paramName, theResourceName, validNames);
+					throw new InvalidRequestException(Msg.code(1206) + msg);
 				}
 				RestSearchParameterTypeEnum typeEnum = searchParam.getParamType();
 				if (typeEnum == RestSearchParameterTypeEnum.URI) {
@@ -490,7 +484,7 @@ public class QueryStack {
 				} else if (typeEnum == RestSearchParameterTypeEnum.QUANTITY) {
 					return theQueryStack3.createPredicateQuantity(null, theResourceName, null, searchParam, Collections.singletonList(new QuantityParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
 				} else if (typeEnum == RestSearchParameterTypeEnum.COMPOSITE) {
-					throw new InvalidRequestException("Composite search parameters not currently supported with _filter clauses");
+					throw new InvalidRequestException(Msg.code(1207) + "Composite search parameters not currently supported with _filter clauses");
 				} else if (typeEnum == RestSearchParameterTypeEnum.TOKEN) {
 					TokenParam param = new TokenParam();
 					param.setValueAsQueryToken(null,
@@ -531,7 +525,7 @@ public class QueryStack {
 			try {
 				myFhirContext.getResourceDefinition(targetResourceType);
 			} catch (DataFormatException e) {
-				throw new InvalidRequestException("Invalid resource type: " + targetResourceType);
+				throw new InvalidRequestException(Msg.code(1208) + "Invalid resource type: " + targetResourceType);
 			}
 
 			ArrayList<IQueryParameterType> orValues = Lists.newArrayList();
@@ -554,14 +548,14 @@ public class QueryStack {
 				// exists on the target resource type.
 				RuntimeSearchParam owningParameterDef = mySearchParamRegistry.getActiveSearchParam(targetResourceType, paramName);
 				if (owningParameterDef == null) {
-					throw new InvalidRequestException("Unknown parameter name: " + targetResourceType + ':' + parameterName);
+					throw new InvalidRequestException(Msg.code(1209) + "Unknown parameter name: " + targetResourceType + ':' + parameterName);
 				}
 
 				//Ensure that the name of the back-referenced search param on the target (e.g. the `subject` in Patient?_has:Observation:subject:code=sys|val)
 				//exists on the target resource.
 				RuntimeSearchParam joiningParameterDef = mySearchParamRegistry.getActiveSearchParam(targetResourceType, paramReference);
 				if (joiningParameterDef == null) {
-					throw new InvalidRequestException("Unknown parameter name: " + targetResourceType + ':' + paramReference);
+					throw new InvalidRequestException(Msg.code(1210) + "Unknown parameter name: " + targetResourceType + ':' + paramReference);
 				}
 
 				IQueryParameterAnd<?> parsedParam = JpaParamUtil.parseQueryParams(mySearchParamRegistry, myFhirContext, owningParameterDef, paramName, parameters);
@@ -599,44 +593,6 @@ public class QueryStack {
 		}
 
 		return toAndPredicate(andPredicates);
-	}
-
-	public Condition createPredicateLanguage(List<List<IQueryParameterType>> theList, Object theOperation) {
-
-		ResourceTablePredicateBuilder rootTable = mySqlBuilder.getOrCreateResourceTablePredicateBuilder();
-
-		List<Condition> predicates = new ArrayList<>();
-		for (List<? extends IQueryParameterType> nextList : theList) {
-
-			Set<String> values = new HashSet<>();
-			for (IQueryParameterType next : nextList) {
-				if (next instanceof StringParam) {
-					String nextValue = ((StringParam) next).getValue();
-					if (isBlank(nextValue)) {
-						continue;
-					}
-					values.add(nextValue);
-				} else {
-					throw new InternalErrorException("Language parameter must be of type " + StringParam.class.getCanonicalName() + " - Got " + next.getClass().getCanonicalName());
-				}
-			}
-
-			if (values.isEmpty()) {
-				continue;
-			}
-
-			if ((theOperation == null) ||
-				(theOperation == SearchFilterParser.CompareOperation.eq)) {
-				predicates.add(rootTable.createLanguagePredicate(values, false));
-			} else if (theOperation == SearchFilterParser.CompareOperation.ne) {
-				predicates.add(rootTable.createLanguagePredicate(values, true));
-			} else {
-				throw new InvalidRequestException("Unsupported operator specified in language query, only \"eq\" and \"ne\" are supported");
-			}
-
-		}
-
-		return toAndPredicate(predicates);
 	}
 
 	public Condition createPredicateNumber(@Nullable DbColumn theSourceJoinColumn, String theResourceName,
@@ -678,7 +634,7 @@ public class QueryStack {
 				codePredicates.add(predicate);
 
 			} else {
-				throw new IllegalArgumentException("Invalid token type: " + nextOr.getClass());
+				throw new IllegalArgumentException(Msg.code(1211) + "Invalid token type: " + nextOr.getClass());
 			}
 
 		}
@@ -759,7 +715,7 @@ public class QueryStack {
 		if ((theOperation != null) &&
 			(theOperation != SearchFilterParser.CompareOperation.eq) &&
 			(theOperation != SearchFilterParser.CompareOperation.ne)) {
-			throw new InvalidRequestException("Invalid operator specified for reference predicate.  Supported operators for reference predicate are \"eq\" and \"ne\".");
+			throw new InvalidRequestException(Msg.code(1212) + "Invalid operator specified for reference predicate.  Supported operators for reference predicate are \"eq\" and \"ne\".");
 		}
 
 		if (theList.get(0).getMissing() != null) {
@@ -837,7 +793,7 @@ public class QueryStack {
 						ReferenceParam referenceParam = (ReferenceParam) nextOr;
 
 						if (!isReferenceParamValid(referenceParam)) {
-							throw new InvalidRequestException(
+							throw new InvalidRequestException(Msg.code(2007) +
 								"The search chain " + theSearchParam.getName() + "." + referenceParam.getChain() +
 								" is too long. Only chains up to three references are supported.");
 						}
@@ -914,7 +870,7 @@ public class QueryStack {
 				}
 			}
 			if (!searchParamFound) {
-				throw new InvalidRequestException(myFhirContext.getLocalizer().getMessage(BaseStorageDao.class, "invalidParameterChain", thePreviousSearchParam.getName() + '.' + theChain));
+				throw new InvalidRequestException(Msg.code(1214) + myFhirContext.getLocalizer().getMessage(BaseStorageDao.class, "invalidParameterChain", thePreviousSearchParam.getName() + '.' + theChain));
 			}
 		}
 	}
@@ -1034,7 +990,7 @@ public class QueryStack {
 
 		InCondition inCondition;
 		if (theSourceJoinColumn == null) {
-			inCondition = new InCondition(mySqlBuilder.getOrCreateFirstPredicateBuilder().getResourceIdColumn(), union);
+			inCondition = new InCondition(mySqlBuilder.getOrCreateFirstPredicateBuilder(false).getResourceIdColumn(), union);
 		} else {
 			//-- for the resource link, need join with target_resource_id
 			inCondition = new InCondition(theSourceJoinColumn, union);
@@ -1114,7 +1070,7 @@ public class QueryStack {
 			}
 		} else {
 			// TODO: the chain is too long, it isn't practical to hard-code all the possible patterns. If anyone ever needs this, we should revisit the approach
-			throw new InvalidRequestException(
+			throw new InvalidRequestException(Msg.code(2011) +
 				"The search chain is too long. Only chains of up to three references are supported.");
 		}
 	}
@@ -1181,7 +1137,7 @@ public class QueryStack {
 			case SPECIAL:
 			default:
 				throw new InvalidRequestException(
-					"The search type:" + theParamDefinition.getParamType() + " is not supported.");
+					Msg.code(1215) + "The search type:" + theParamDefinition.getParamType() + " is not supported.");
 		}
 		return containedCondition;
 	}
@@ -1203,7 +1159,7 @@ public class QueryStack {
 	private Condition createPredicateSource(@Nullable DbColumn theSourceJoinColumn, List<? extends IQueryParameterType> theList) {
 		if (myDaoConfig.getStoreMetaSourceInformation() == DaoConfig.StoreMetaSourceInformationEnum.NONE) {
 			String msg = myFhirContext.getLocalizer().getMessage(LegacySearchBuilder.class, "sourceParamDisabled");
-			throw new InvalidRequestException(msg);
+			throw new InvalidRequestException(Msg.code(1216) + msg);
 		}
 
 		SourcePredicateBuilder join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.SOURCE, theSourceJoinColumn, Constants.PARAM_SOURCE, () -> mySqlBuilder.addSourcePredicateBuilder(theSourceJoinColumn)).getResult();
@@ -1265,7 +1221,7 @@ public class QueryStack {
 		} else if (Constants.PARAM_SECURITY.equals(theParamName)) {
 			tagType = TagTypeEnum.SECURITY_LABEL;
 		} else {
-			throw new IllegalArgumentException("Param name: " + theParamName); // shouldn't happen
+			throw new IllegalArgumentException(Msg.code(1217) + "Param name: " + theParamName); // shouldn't happen
 		}
 
 		List<Condition> andPredicates = new ArrayList<>();
@@ -1277,7 +1233,7 @@ public class QueryStack {
 					if (isNotBlank(nextParam.getValue())) {
 						haveTags = true;
 					} else if (isNotBlank(nextParam.getSystem())) {
-						throw new InvalidRequestException("Invalid " + theParamName + " parameter (must supply a value/code and not just a system): " + nextParam.getValueAsQueryToken(myFhirContext));
+						throw new InvalidRequestException(Msg.code(1218) + "Invalid " + theParamName + " parameter (must supply a value/code and not just a system): " + nextParam.getValueAsQueryToken(myFhirContext));
 					}
 				} else {
 					UriParam nextParam = (UriParam) nextParamUncasted;
@@ -1375,7 +1331,7 @@ public class QueryStack {
 							} else {
 								msg = myFhirContext.getLocalizer().getMessage(PredicateBuilderToken.class, "textModifierDisabledForSearchParam");
 							}
-							throw new MethodNotAllowedException(msg);
+							throw new MethodNotAllowedException(Msg.code(1219) + msg);
 						}
 
 						return createPredicateString(theSourceJoinColumn, theResourceName, theSpnamePrefix, theSearchParam, theList, null, theRequestPartitionId, theSqlBuilder);
@@ -1390,12 +1346,9 @@ public class QueryStack {
 						tokens.add(nextOr);
 					}
 				}
-
 			} else {
-
 				tokens.add(nextOr);
 			}
-
 		}
 
 		if (tokens.isEmpty()) {
@@ -1412,18 +1365,18 @@ public class QueryStack {
 			sqlBuilder.addPredicate(tokenSelector.createPredicateToken(tokens, theResourceName, theSpnamePrefix, theSearchParam, theRequestPartitionId));
 			SelectQuery sql = sqlBuilder.getSelect();
 			Expression subSelect = new Subquery(sql);
-
+			
 			join = theSqlBuilder.getOrCreateFirstPredicateBuilder();
-
+			
 			if (theSourceJoinColumn == null) {
 				predicate = new InCondition(join.getResourceIdColumn(), subSelect).setNegate(true);
 			} else {
 				//-- for the resource link, need join with target_resource_id
 			    predicate = new InCondition(theSourceJoinColumn, subSelect).setNegate(true);
 			}
-
+						
 		} else {
-
+		
 			TokenPredicateBuilder tokenJoin = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.TOKEN, theSourceJoinColumn, paramName, () -> theSqlBuilder.addTokenPredicateBuilder(theSourceJoinColumn)).getResult();
 
 			if (theList.get(0).getMissing() != null) {
@@ -1476,9 +1429,6 @@ public class QueryStack {
 			case IAnyResource.SP_RES_ID:
 				return createPredicateResourceId(theSourceJoinColumn, theAndOrParams, theResourceName, null, theRequestPartitionId);
 
-			case IAnyResource.SP_RES_LANGUAGE:
-				return createPredicateLanguage(theAndOrParams, null);
-
 			case Constants.PARAM_HAS:
 				return createPredicateHas(theSourceJoinColumn, theResourceName, theAndOrParams, theRequest, theRequestPartitionId);
 
@@ -1509,7 +1459,7 @@ public class QueryStack {
 
 			if (myPartitionSettings.isPartitioningEnabled() && myPartitionSettings.isIncludePartitionInSearchHashes()) {
 				if (theRequestPartitionId.isAllPartitions()) {
-					throw new PreconditionFailedException("This server is not configured to support search against all partitions");
+					throw new PreconditionFailedException(Msg.code(1220) + "This server is not configured to support search against all partitions");
 				}
 			}
 
@@ -1596,12 +1546,12 @@ public class QueryStack {
 						try {
 							filter = SearchFilterParser.parse(filterString);
 						} catch (SearchFilterParser.FilterSyntaxException theE) {
-							throw new InvalidRequestException("Error parsing _filter syntax: " + theE.getMessage());
+							throw new InvalidRequestException(Msg.code(1221) + "Error parsing _filter syntax: " + theE.getMessage());
 						}
 						if (filter != null) {
 
 							if (!myDaoConfig.isFilterParameterEnabled()) {
-								throw new InvalidRequestException(Constants.PARAM_FILTER + " parameter is disabled on this server");
+								throw new InvalidRequestException(Msg.code(1222) + Constants.PARAM_FILTER + " parameter is disabled on this server");
 							}
 
 							Condition predicate = createPredicateFilter(this, filter, theResourceName, theRequest, theRequestPartitionId);
@@ -1612,8 +1562,8 @@ public class QueryStack {
 					}
 
 				} else {
-					String msg = myFhirContext.getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "invalidSearchParameter", theParamName, theResourceName, mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(theResourceName));
-					throw new InvalidRequestException(msg);
+					String msg = myFhirContext.getLocalizer().getMessageSanitized(BaseStorageDao.class, "invalidSearchParameter", theParamName, theResourceName, mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(theResourceName));
+					throw new InvalidRequestException(Msg.code(1223) + msg);
 				}
 			}
 		}
@@ -1642,9 +1592,10 @@ public class QueryStack {
 	}
 
 
-	public void addPredicateEverythingOperation(String theResourceName, Long theTargetPid) {
+	// expand out the pids
+	public void addPredicateEverythingOperation(String theResourceName, Long... theTargetPids) {
 		ResourceLinkPredicateBuilder table = mySqlBuilder.addReferencePredicateBuilder(this, null);
-		Condition predicate = table.createEverythingPredicate(theResourceName, theTargetPid);
+		Condition predicate = table.createEverythingPredicate(theResourceName, theTargetPids);
 		mySqlBuilder.addPredicate(predicate);
 	}
 
@@ -1670,7 +1621,7 @@ public class QueryStack {
 			case COMPOSITE:
 				List<RuntimeSearchParam> compositeOf = JpaParamUtil.resolveComponentParameters(mySearchParamRegistry, theParam);
 				if (compositeOf.size() != 2) {
-					throw new InternalErrorException("Parameter " + theParam.getName() + " has " + compositeOf.size() + " composite parts. Don't know how handlt this.");
+					throw new InternalErrorException(Msg.code(1224) + "Parameter " + theParam.getName() + " has " + compositeOf.size() + " composite parts. Don't know how handlt this.");
 				}
 				IQueryParameterType leftParam = toParameterType(compositeOf.get(0));
 				IQueryParameterType rightParam = toParameterType(compositeOf.get(1));
@@ -1683,7 +1634,7 @@ public class QueryStack {
 			case REFERENCE:
 			case SPECIAL:
 			default:
-				throw new InvalidRequestException("The search type: " + theParam.getParamType() + " is not supported.");
+				throw new InvalidRequestException(Msg.code(1225) + "The search type: " + theParam.getParamType() + " is not supported.");
 		}
 		return qp;
 	}

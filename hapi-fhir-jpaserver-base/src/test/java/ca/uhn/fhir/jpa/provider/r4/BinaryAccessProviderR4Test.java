@@ -4,15 +4,18 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.binstore.IBinaryStorageSvc;
+import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.interceptor.UserRequestRetryVersionConflictsInterceptor;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.HapiExtensions;
+import ca.uhn.test.concurrency.PointcutLatch;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -40,7 +43,10 @@ import java.io.IOException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.matchesPattern;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -83,17 +89,19 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testRead() throws IOException {
+	public void testRead() throws IOException, InterruptedException {
 		IIdType id = createDocumentReference(true);
 
 		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESHOW_RESOURCES, interceptor);
+
 		doAnswer(t -> {
 			Pointcut pointcut = t.getArgument(0, Pointcut.class);
 			HookParams params = t.getArgument(1, HookParams.class);
 			ourLog.info("Interceptor invoked with pointcut {} and params {}", pointcut, params);
 			return null;
 		}).when(interceptor).invoke(any(), any());
+
 
 		// Read it back using the operation
 
@@ -102,18 +110,18 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			JpaConstants.OPERATION_BINARY_ACCESS_READ +
 			"?path=DocumentReference.content.attachment";
 		HttpGet get = new HttpGet(path);
-		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
 
+		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
 			assertEquals(200, resp.getStatusLine().getStatusCode());
 			assertEquals("image/png", resp.getEntity().getContentType().getValue());
 			assertEquals(SOME_BYTES.length, resp.getEntity().getContentLength());
 
 			byte[] actualBytes = IOUtils.toByteArray(resp.getEntity().getContent());
 			assertArrayEquals(SOME_BYTES, actualBytes);
+
 		}
 
 		verify(interceptor, times(1)).invoke(eq(Pointcut.STORAGE_PRESHOW_RESOURCES), any());
-
 	}
 
 
@@ -125,7 +133,6 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESHOW_RESOURCES, interceptor);
 
 		// Read it back using the operation
-
 		String path = ourServerBase +
 			"/DocumentReference/" + id.getIdPart() + "/" +
 			JpaConstants.OPERATION_BINARY_ACCESS_READ +
@@ -163,7 +170,6 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 
 	}
 
-
 	@Test
 	public void testReadNoData() throws IOException {
 		IIdType id = createDocumentReference(false);
@@ -181,9 +187,37 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			assertThat(response, matchesPattern(".*The resource with ID DocumentReference/[0-9]+ has no data at path.*"));
 
 		}
-
 	}
 
+
+	@Test
+	public void testManualResponseOperationsInvokeServerOutgoingResponsePointcut() throws IOException, InterruptedException {
+		IIdType id = createDocumentReference(true);
+
+		PointcutLatch latch = new PointcutLatch(Pointcut.SERVER_OUTGOING_RESPONSE);
+		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_OUTGOING_RESPONSE, latch);
+
+
+		String path = ourServerBase +
+			"/DocumentReference/" + id.getIdPart() + "/" +
+			JpaConstants.OPERATION_BINARY_ACCESS_READ +
+			"?path=DocumentReference.content.attachment";
+		HttpGet get = new HttpGet(path);
+
+		latch.setExpectedCount(1);
+		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+			latch.awaitExpected();
+
+			RequestDetails requestDetails = latch.getLatchInvocationParameterOfType(RequestDetails.class);
+			ResponseDetails responseDetails= latch.getLatchInvocationParameterOfType(ResponseDetails.class);
+
+			assertThat(responseDetails, is(notNullValue()));
+			assertThat(requestDetails, is(notNullValue()));
+
+			assertThat(requestDetails.getId().toString(), is(equalTo(id.toString())));
+		}
+	}
 	@Test
 	public void testReadUnknownBlobId() throws IOException {
 		IIdType id = createDocumentReference(false);
@@ -205,7 +239,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			String response = IOUtils.toString(resp.getEntity().getContent(), Constants.CHARSET_UTF8);
 			ourLog.info("Response: {}", response);
 
-			DocumentReference ref = myFhirCtx.newJsonParser().parseResource(DocumentReference.class, response);
+			DocumentReference ref = myFhirContext.newJsonParser().parseResource(DocumentReference.class, response);
 
 			Attachment attachment = ref.getContentFirstRep().getAttachment();
 			assertEquals(ContentType.IMAGE_JPEG.getMimeType(), attachment.getContentType());
@@ -263,7 +297,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			String response = IOUtils.toString(resp.getEntity().getContent(), Constants.CHARSET_UTF8);
 			ourLog.info("Response: {}", response);
 
-			DocumentReference ref = myFhirCtx.newJsonParser().parseResource(DocumentReference.class, response);
+			DocumentReference ref = myFhirContext.newJsonParser().parseResource(DocumentReference.class, response);
 
 			Attachment attachment = ref.getContentFirstRep().getAttachment();
 			assertEquals(ContentType.IMAGE_JPEG.getMimeType(), attachment.getContentType());
@@ -344,7 +378,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			String response = IOUtils.toString(resp.getEntity().getContent(), Constants.CHARSET_UTF8);
 			ourLog.info("Response: {}", response);
 
-			DocumentReference ref = myFhirCtx.newJsonParser().parseResource(DocumentReference.class, response);
+			DocumentReference ref = myFhirContext.newJsonParser().parseResource(DocumentReference.class, response);
 
 			Attachment attachment = ref.getContentFirstRep().getAttachment();
 			assertEquals(ContentType.IMAGE_JPEG.getMimeType(), attachment.getContentType());
@@ -370,7 +404,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		Binary binary = new Binary();
 		binary.setContentType("image/png");
 
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(binary));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(binary));
 
 		IIdType id = myClient.create().resource(binary).execute().getId().toUnqualifiedVersionless();
 
@@ -396,7 +430,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			String response = IOUtils.toString(resp.getEntity().getContent(), Constants.CHARSET_UTF8);
 			ourLog.info("Response: {}", response);
 
-			Binary target = myFhirCtx.newJsonParser().parseResource(Binary.class, response);
+			Binary target = myFhirContext.newJsonParser().parseResource(Binary.class, response);
 
 			assertEquals(ContentType.IMAGE_JPEG.getMimeType(), target.getContentType());
 			assertEquals(null, target.getData());
@@ -439,7 +473,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		Binary binary = new Binary();
 		binary.setContentType("image/png");
 
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(binary));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(binary));
 
 		IIdType id = myClient.create().resource(binary).execute().getId().toUnqualifiedVersionless();
 
@@ -459,7 +493,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			String response = IOUtils.toString(resp.getEntity().getContent(), Constants.CHARSET_UTF8);
 			ourLog.info("Response: {}", response);
 
-			Binary target = myFhirCtx.newJsonParser().parseResource(Binary.class, response);
+			Binary target = myFhirContext.newJsonParser().parseResource(Binary.class, response);
 
 			assertEquals(ContentType.IMAGE_JPEG.getMimeType(), target.getContentType());
 			assertEquals(null, target.getData());
@@ -525,7 +559,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			String response = IOUtils.toString(resp.getEntity().getContent(), Constants.CHARSET_UTF8);
 			ourLog.info("Response: {}", response);
 
-			DocumentReference target = myFhirCtx.newJsonParser().parseResource(DocumentReference.class, response);
+			DocumentReference target = myFhirContext.newJsonParser().parseResource(DocumentReference.class, response);
 
 			assertEquals(null, target.getContentFirstRep().getAttachment().getData());
 			assertEquals("2", target.getMeta().getVersionId());
@@ -575,7 +609,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			attachment.setData(SOME_BYTES_2);
 		}
 
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(documentReference));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(documentReference));
 
 		return myClient.create().resource(documentReference).execute().getId().toUnqualifiedVersionless();
 	}
@@ -597,7 +631,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			assertEquals(200, resp.getStatusLine().getStatusCode());
 			assertThat(resp.getEntity().getContentType().getValue(), containsString("application/fhir+json"));
 			String response = IOUtils.toString(resp.getEntity().getContent(), Constants.CHARSET_UTF8);
-			DocumentReference ref = myFhirCtx.newJsonParser().parseResource(DocumentReference.class, response);
+			DocumentReference ref = myFhirContext.newJsonParser().parseResource(DocumentReference.class, response);
 			Attachment attachment = ref.getContentFirstRep().getAttachment();
 			attachmentId = attachment.getDataElement().getExtensionString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
 			assertThat(attachmentId, matchesPattern("[a-zA-Z0-9]{100}"));
@@ -660,7 +694,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 
 				assertEquals(200, resp.getStatusLine().getStatusCode());
 				assertThat(resp.getEntity().getContentType().getValue(), containsString("application/fhir+json"));
-				DocumentReference ref = myFhirCtx.newJsonParser().parseResource(DocumentReference.class, response);
+				DocumentReference ref = myFhirContext.newJsonParser().parseResource(DocumentReference.class, response);
 				Attachment attachment = ref.getContentFirstRep().getAttachment();
 				attachmentId = attachment.getDataElement().getExtensionString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
 				assertThat(attachmentId, matchesPattern("[a-zA-Z0-9]{100}"));

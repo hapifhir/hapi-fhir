@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.expunge;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.batch.listener.PidReaderCounterListener;
@@ -7,6 +8,8 @@ import ca.uhn.fhir.jpa.batch.writer.SqlExecutorWriter;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import ca.uhn.fhir.util.BundleBuilder;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -27,6 +30,8 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
 
 class DeleteExpungeDaoTest extends BaseJpaR4Test {
 	@Autowired
@@ -50,6 +55,41 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 		myDaoConfig.setDeleteExpungeEnabled(defaultDaoConfig.isDeleteExpungeEnabled());
 		myDaoConfig.setExpungeBatchSize(defaultDaoConfig.getExpungeBatchSize());
 	}
+
+	@Test
+	public void testDeleteCascadeExpungeReturns400() {
+		// Create new organization
+		Organization organization = new Organization();
+		organization.setName("FOO");
+		IIdType organizationId = myOrganizationDao.create(organization).getId().toUnqualifiedVersionless();
+
+		Patient patient = new Patient();
+		patient.setManagingOrganization(new Reference(organizationId));
+		IIdType patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+
+		// Try to delete _cascade and _expunge on the organization
+		BaseServerResponseException e = assertThrows(BaseServerResponseException.class, () -> {
+			myOrganizationDao
+				.deleteByUrl("Organization?" + "_cascade=delete&" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);
+		});
+
+		// Get not implemented HTTP 400 error
+		assertEquals(Constants.STATUS_HTTP_400_BAD_REQUEST, e.getStatusCode());
+		assertEquals(Msg.code(964) + "_expunge cannot be used with _cascade", e.getMessage());
+
+
+		// Try to delete with header 'X-Cascade' = delete
+		when(mySrd.getHeader(Constants.HEADER_CASCADE)).thenReturn(Constants.CASCADE_DELETE);
+		e = assertThrows(BaseServerResponseException.class, () -> {
+			myOrganizationDao
+				.deleteByUrl("Organization?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);
+		});
+
+		// Get not implemented HTTP 400 error
+		assertEquals(Constants.STATUS_HTTP_400_BAD_REQUEST, e.getStatusCode());
+		assertEquals(Msg.code(964) + "_expunge cannot be used with _cascade", e.getMessage());
+	}
+
 
 	@Test
 	public void testDeleteExpungeThrowExceptionIfForeignKeyLinksExists() {
@@ -84,7 +124,7 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 		//See https://github.com/hapifhir/hapi-fhir/issues/2661
 
 		// setup
-		BundleBuilder builder = new BundleBuilder(myFhirCtx);
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
 		for (int i = 0; i < 20; i++) {
 			Organization o = new Organization();
 			o.setId("Organization/O-" + i);

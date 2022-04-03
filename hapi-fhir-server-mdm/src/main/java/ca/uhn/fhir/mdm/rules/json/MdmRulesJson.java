@@ -26,6 +26,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.util.StdConverter;
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
 import java.util.ArrayList;
@@ -33,6 +34,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static ca.uhn.fhir.mdm.api.MdmConstants.ALL_RESOURCE_SEARCH_PARAM_TYPE;
 
 @JsonDeserialize(converter = MdmRulesJson.MdmRulesJsonConverter.class)
 public class MdmRulesJson implements IModelJson {
@@ -47,10 +50,16 @@ public class MdmRulesJson implements IModelJson {
 	List<MdmFieldMatchJson> myMatchFieldJsonList = new ArrayList<>();
 	@JsonProperty(value = "matchResultMap", required = true)
 	Map<String, MdmMatchResultEnum> myMatchResultMap = new HashMap<>();
+
+	/**
+	 * This field is deprecated, use eidSystems instead.
+	 */
+	@Deprecated
 	@JsonProperty(value = "eidSystem")
 	String myEnterpriseEIDSystem;
 
-
+	@JsonProperty(value = "eidSystems")
+	Map<String, String> myEnterpriseEidSystems = new HashMap<>();
 	@JsonProperty(value = "mdmTypes")
 	List<String> myMdmTypes;
 
@@ -112,12 +121,55 @@ public class MdmRulesJson implements IModelJson {
 		return Collections.unmodifiableList(myCandidateFilterSearchParams);
 	}
 
+	/**
+	 * Use {@link this#getEnterpriseEIDSystemForResourceType(String)} instead.
+	 */
+	@Deprecated
 	public String getEnterpriseEIDSystem() {
 		return myEnterpriseEIDSystem;
 	}
 
+	/**
+	 * Use {@link this#setEnterpriseEIDSystems(Map)} (String)} or {@link this#addEnterpriseEIDSystem(String, String)} instead.
+	 */
+	@Deprecated
 	public void setEnterpriseEIDSystem(String theEnterpriseEIDSystem) {
 		myEnterpriseEIDSystem = theEnterpriseEIDSystem;
+	}
+
+	public void setEnterpriseEIDSystems(Map<String, String> theEnterpriseEIDSystems) {
+		myEnterpriseEidSystems = theEnterpriseEIDSystems;
+	}
+
+	public void addEnterpriseEIDSystem(String theResourceType, String theEidSystem) {
+		if (myEnterpriseEidSystems == null) {
+			myEnterpriseEidSystems = new HashMap<>();
+		}
+		myEnterpriseEidSystems.put(theResourceType, theEidSystem);
+	}
+
+	public Map<String, String> getEnterpriseEIDSystems() {
+		//First try the new property.
+		if (myEnterpriseEidSystems != null && !myEnterpriseEidSystems.isEmpty()) {
+			return myEnterpriseEidSystems;
+		//If that fails, fall back to our deprecated property.
+		} else if (!StringUtils.isBlank(myEnterpriseEIDSystem)) {
+			HashMap<String , String> retVal = new HashMap<>();
+			retVal.put(ALL_RESOURCE_SEARCH_PARAM_TYPE, myEnterpriseEIDSystem);
+			return retVal;
+		//Otherwise, return an empty map.
+		} else {
+			return Collections.emptyMap();
+		}
+	}
+
+	public String getEnterpriseEIDSystemForResourceType(String theResourceType) {
+		Map<String, String> enterpriseEIDSystems = getEnterpriseEIDSystems();
+		if (enterpriseEIDSystems.containsKey(ALL_RESOURCE_SEARCH_PARAM_TYPE)) {
+			return enterpriseEIDSystems.get(ALL_RESOURCE_SEARCH_PARAM_TYPE);
+		} else {
+			return enterpriseEIDSystems.get(theResourceType);
+		}
 	}
 
 	public String getVersion() {
@@ -131,6 +183,14 @@ public class MdmRulesJson implements IModelJson {
 
 	private void validate() {
 		Validate.notBlank(myVersion, "version may not be blank");
+
+		Map<String, String> enterpriseEIDSystems = getEnterpriseEIDSystems();
+
+		//If we have a * eid system, there should only be one.
+		if (enterpriseEIDSystems.containsKey(ALL_RESOURCE_SEARCH_PARAM_TYPE)) {
+			Validate.isTrue(enterpriseEIDSystems.size() == 1);
+		}
+
 	}
 
 	public String getSummary() {

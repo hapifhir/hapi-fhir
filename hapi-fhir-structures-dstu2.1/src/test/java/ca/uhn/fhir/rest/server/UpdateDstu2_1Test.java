@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -24,10 +25,10 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.dstu2016may.model.IdType;
 import org.hl7.fhir.dstu2016may.model.OperationOutcome;
 import org.hl7.fhir.dstu2016may.model.Patient;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
@@ -95,7 +96,7 @@ public class UpdateDstu2_1Test {
 		assertEquals(400, status.getStatusLine().getStatusCode());
 		
 		OperationOutcome oo = ourCtx.newXmlParser().parseResource(OperationOutcome.class, responseContent);
-		assertEquals("Can not update resource, resource body must contain an ID element for update (PUT) operation", oo.getIssue().get(0).getDiagnostics());
+		assertEquals(Msg.code(419) + "Can not update resource, resource body must contain an ID element for update (PUT) operation", oo.getIssue().get(0).getDiagnostics());
 	}
 
 	@Test
@@ -146,7 +147,7 @@ public class UpdateDstu2_1Test {
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 	@BeforeAll

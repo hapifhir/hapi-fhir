@@ -1,28 +1,35 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.QuantityParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.BundleBuilder;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Encounter;
@@ -35,6 +42,7 @@ import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SampledData;
 import org.hl7.fhir.r4.model.SearchParameter;
+import org.hl7.fhir.r4.model.StructureDefinition;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -43,9 +51,14 @@ import org.springframework.data.domain.PageRequest;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -69,6 +82,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 		myModelConfig.setIndexOnContainedResources(new ModelConfig().isIndexOnContainedResources());
 		myModelConfig.setIndexOnContainedResourcesRecursively(new ModelConfig().isIndexOnContainedResourcesRecursively());
+		myDaoConfig.setInlineResourceTextBelowSize(new DaoConfig().getInlineResourceTextBelowSize());
 	}
 
 
@@ -83,7 +97,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		obs.setSubject(new Reference("Patient/A"));
 		myObservationDao.create(obs, mySrd);
 
-		runInTransaction(() ->{
+		runInTransaction(() -> {
 			List<ResourceLink> allLinks = myResourceLinkDao.findAll();
 			List<String> paths = allLinks
 				.stream()
@@ -92,6 +106,10 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 				.collect(Collectors.toList());
 			assertThat(paths.toString(), paths, contains("Observation.subject", "Observation.subject.where(resolve() is Patient)"));
 		});
+
+		myCaptureQueriesListener.clear();
+		assertEquals(1, myObservationDao.search(SearchParameterMap.newSynchronous("patient", new ReferenceParam("Patient/A"))).sizeOrThrowNpe());
+		myCaptureQueriesListener.logSelectQueries();
 	}
 
 	@Test
@@ -112,7 +130,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		enc.addReasonReference(new Reference("#cont"));
 		myEncounterDao.create(enc, mySrd);
 
-		runInTransaction(() ->{
+		runInTransaction(() -> {
 			List<ResourceLink> allLinks = myResourceLinkDao.findAll();
 			Optional<ResourceLink> link = allLinks
 				.stream()
@@ -144,7 +162,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		enc.addReasonReference(new Reference("#obs"));
 		myEncounterDao.create(enc, mySrd);
 
-		runInTransaction(() ->{
+		runInTransaction(() -> {
 			List<ResourceIndexedSearchParamString> allParams = myResourceIndexedSearchParamStringDao.findAll();
 			Optional<ResourceIndexedSearchParamString> link = allParams
 				.stream()
@@ -182,7 +200,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		enc.addReasonReference(new Reference("#obs"));
 		myEncounterDao.create(enc, mySrd);
 
-		runInTransaction(() ->{
+		runInTransaction(() -> {
 			List<ResourceIndexedSearchParamString> allParams = myResourceIndexedSearchParamStringDao.findAll();
 			Optional<ResourceIndexedSearchParamString> firstOrg = allParams
 				.stream()
@@ -230,7 +248,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		enc.addReasonReference(new Reference("#cont"));
 		myEncounterDao.create(enc, mySrd);
 
-		runInTransaction(() ->{
+		runInTransaction(() -> {
 			List<ResourceLink> allLinks = myResourceLinkDao.findAll();
 			Optional<ResourceLink> link = allLinks
 				.stream()
@@ -272,7 +290,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		enc.addReasonReference(new Reference("#obs2"));
 		myEncounterDao.create(enc, mySrd);
 
-		runInTransaction(() ->{
+		runInTransaction(() -> {
 			List<ResourceLink> allLinks = myResourceLinkDao.findAll();
 			Optional<ResourceLink> link = allLinks
 				.stream()
@@ -317,7 +335,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			myObservationDao.create(obs, "identifier=A%20B", new SystemRequestDetails());
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Failed to process conditional create. The supplied resource did not satisfy the conditional URL.", e.getMessage());
+			assertEquals(Msg.code(929) + "Failed to process conditional create. The supplied resource did not satisfy the conditional URL.", e.getMessage());
 		}
 	}
 
@@ -326,7 +344,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	 */
 	@Test
 	public void testConditionalCreateFailsIfMatchUrlDoesntMatch_InTransaction() {
-		BundleBuilder bb = new BundleBuilder(myFhirCtx);
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
 
 		Patient patient = new Patient();
 		patient.setId(IdType.newRandomUuid());
@@ -342,14 +360,14 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			mySystemDao.transaction(new SystemRequestDetails(), (Bundle) bb.getBundle());
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Failed to process conditional create. The supplied resource did not satisfy the conditional URL.", e.getMessage());
+			assertEquals(Msg.code(929) + "Failed to process conditional create. The supplied resource did not satisfy the conditional URL.", e.getMessage());
 		}
 	}
 
 	@Test
 	public void testCreateResourceWithKoreanText() throws IOException {
 		String input = loadClasspath("/r4/bug832-korean-text.xml");
-		Patient p = myFhirCtx.newXmlParser().parseResource(Patient.class, input);
+		Patient p = myFhirContext.newXmlParser().parseResource(Patient.class, input);
 		String id = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
 
 		SearchParameterMap map = new SearchParameterMap();
@@ -428,7 +446,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			myPatientDao.update(p);
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertEquals("No resource exists on this server resource with ID[AAA], and client-assigned IDs are not enabled.", e.getMessage());
+			assertEquals(Msg.code(959) + "No resource exists on this server resource with ID[AAA], and client-assigned IDs are not enabled.", e.getMessage());
 		}
 	}
 
@@ -544,6 +562,38 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		ourLog.info("ID2: {}", id2);
 	}
 
+	@Test
+	public void testCreateAndSearchWithUuidResourceStrategy() {
+		myDaoConfig.setResourceServerIdStrategy(DaoConfig.IdStrategyEnum.UUID);
+		myDaoConfig.setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.ANY);
+
+		StructureDefinition sd = new StructureDefinition();
+		sd.setUrl("http://foo.com");
+		DaoMethodOutcome result = myStructureDefinitionDao.create(sd);
+		assertTrue(result.getCreated());
+		StructureDefinition readSd = myStructureDefinitionDao.read(result.getId());
+		assertEquals("http://foo.com", readSd.getUrl());
+
+		logAllResources();
+		logAllResourceVersions();
+
+		runInTransaction(()->{
+			List<ResourceTable> resources = myResourceTableDao.findAll();
+			assertEquals(1, resources.size());
+			assertEquals(1, resources.get(0).getVersion());
+
+			List<ResourceHistoryTable> resourceVersions = myResourceHistoryTableDao.findAll();
+			assertEquals(1, resourceVersions.size());
+			assertEquals(1, resourceVersions.get(0).getVersion());
+		});
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+
+		myCaptureQueriesListener.clear();
+		IBundleProvider bundle = myStructureDefinitionDao.search(map);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(1, bundle.size());
+	}
 
 	@Test
 	public void testTransactionCreateWithUuidResourceStrategy() {
@@ -573,11 +623,11 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			.getRequest()
 			.setMethod(Bundle.HTTPVerb.POST);
 
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(input));
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		Bundle output = mySystemDao.transaction(mySrd, input);
 
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		assertThat(output.getEntry().get(0).getResponse().getLocation(), matchesPattern("Organization/[a-z0-9]{8}-.*"));
 		assertThat(output.getEntry().get(1).getResponse().getLocation(), matchesPattern("Patient/[a-z0-9]{8}-.*"));
@@ -594,7 +644,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		o.getMeta().addTag("http://foo", "bar", "FOOBAR");
 		p.getManagingOrganization().setResource(o);
 
-		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
+		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info("Input: {}", encoded);
 		assertThat(encoded, containsString("#1"));
 
@@ -602,7 +652,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		p = myPatientDao.read(id);
 
-		encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
+		encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info("Output: {}", encoded);
 		assertThat(encoded, containsString("#1"));
 
@@ -627,7 +677,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			mySearchParameterDao.update(sp);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Can not override built-in search parameter Patient:birthdate because overriding is disabled on this server", e.getMessage());
+			assertEquals(Msg.code(1111) + "Can not override built-in search parameter Patient:birthdate because overriding is disabled on this server", e.getMessage());
 		}
 
 	}
@@ -645,19 +695,19 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		q.setCode("cm");
 		obs.setValue(q);
 
-		ourLog.info("Observation1: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		ourLog.info("Observation1: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
 		assertTrue(myObservationDao.create(obs).getCreated());
 
 		// Same value should be placed in both quantity tables
-		runInTransaction(()->{
-			List<ResourceIndexedSearchParamQuantity> quantityIndexes = myResourceIndexedSearchParamQuantityDao.findAll().stream().filter(t->t.getParamName().equals("value-quantity")).collect(Collectors.toList());
+		runInTransaction(() -> {
+			List<ResourceIndexedSearchParamQuantity> quantityIndexes = myResourceIndexedSearchParamQuantityDao.findAll().stream().filter(t -> t.getParamName().equals("value-quantity")).collect(Collectors.toList());
 			assertEquals(1, quantityIndexes.size());
 			assertEquals("1.2", Double.toString(quantityIndexes.get(0).getValue().doubleValue()));
 			assertEquals("http://unitsofmeasure.org", quantityIndexes.get(0).getSystem());
 			assertEquals("cm", quantityIndexes.get(0).getUnits());
 
-			List<ResourceIndexedSearchParamQuantityNormalized> normalizedQuantityIndexes = myResourceIndexedSearchParamQuantityNormalizedDao.findAll().stream().filter(t->t.getParamName().equals("value-quantity")).collect(Collectors.toList());
+			List<ResourceIndexedSearchParamQuantityNormalized> normalizedQuantityIndexes = myResourceIndexedSearchParamQuantityNormalizedDao.findAll().stream().filter(t -> t.getParamName().equals("value-quantity")).collect(Collectors.toList());
 			assertEquals(1, normalizedQuantityIndexes.size());
 			assertEquals("0.012", Double.toString(normalizedQuantityIndexes.get(0).getValue()));
 			assertEquals("http://unitsofmeasure.org", normalizedQuantityIndexes.get(0).getSystem());
@@ -685,22 +735,22 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		q.setCode("mm");
 		obs.setValue(q);
 
-		ourLog.info("Observation1: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		ourLog.info("Observation1: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
 		myCaptureQueriesListener.clear();
 		assertTrue(myObservationDao.create(obs).getCreated());
 		myCaptureQueriesListener.logInsertQueries();
 
 		// Original value should be in Quantity index, normalized should be in normalized table
-		runInTransaction(()->{
-			List<ResourceIndexedSearchParamQuantity> quantityIndexes = myResourceIndexedSearchParamQuantityDao.findAll().stream().filter(t->t.getParamName().equals("value-quantity")).collect(Collectors.toList());
+		runInTransaction(() -> {
+			List<ResourceIndexedSearchParamQuantity> quantityIndexes = myResourceIndexedSearchParamQuantityDao.findAll().stream().filter(t -> t.getParamName().equals("value-quantity")).collect(Collectors.toList());
 			assertEquals(1, quantityIndexes.size());
 			double d = quantityIndexes.get(0).getValue().doubleValue();
 			assertEquals("1.2E-6", Double.toString(d));
 			assertEquals("http://unitsofmeasure.org", quantityIndexes.get(0).getSystem());
 			assertEquals("mm", quantityIndexes.get(0).getUnits());
 
-			List<ResourceIndexedSearchParamQuantityNormalized> normalizedQuantityIndexes = myResourceIndexedSearchParamQuantityNormalizedDao.findAll().stream().filter(t->t.getParamName().equals("value-quantity")).collect(Collectors.toList());
+			List<ResourceIndexedSearchParamQuantityNormalized> normalizedQuantityIndexes = myResourceIndexedSearchParamQuantityNormalizedDao.findAll().stream().filter(t -> t.getParamName().equals("value-quantity")).collect(Collectors.toList());
 			assertEquals(1, normalizedQuantityIndexes.size());
 			assertEquals("1.2E-9", Double.toString(normalizedQuantityIndexes.get(0).getValue()));
 			assertEquals("http://unitsofmeasure.org", normalizedQuantityIndexes.get(0).getSystem());
@@ -719,7 +769,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			.setUnits("m")
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
-		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true,true);
+		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY_NRML t0"));
 		assertThat(searchSql, containsString("t0.SP_VALUE = '1.2E-9'"));
 		assertEquals(1, ids.size());
@@ -732,7 +782,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			.setUnits("mm")
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
-		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true,true);
+		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY_NRML t0"));
 		assertThat(searchSql, containsString("t0.SP_VALUE = '1.2E-9'"));
 		assertEquals(1, ids.size());
@@ -743,7 +793,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			.setValue(new BigDecimal("0.0000012"))
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
-		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true,true);
+		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
 		assertThat(searchSql, containsString("t0.SP_VALUE = '0.0000012'"));
 		assertEquals(1, ids.size());
@@ -762,19 +812,19 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		q.setCode("mm");
 		obs.setValue(q);
 
-		ourLog.info("Observation1: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		ourLog.info("Observation1: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
 		assertTrue(myObservationDao.create(obs).getCreated());
 
 		// Original value should be in Quantity index, normalized should be in normalized table
-		runInTransaction(()->{
-			List<ResourceIndexedSearchParamQuantity> quantityIndexes = myResourceIndexedSearchParamQuantityDao.findAll().stream().filter(t->t.getParamName().equals("value-quantity")).collect(Collectors.toList());
+		runInTransaction(() -> {
+			List<ResourceIndexedSearchParamQuantity> quantityIndexes = myResourceIndexedSearchParamQuantityDao.findAll().stream().filter(t -> t.getParamName().equals("value-quantity")).collect(Collectors.toList());
 			assertEquals(1, quantityIndexes.size());
 			assertEquals("149597.870691", Double.toString(quantityIndexes.get(0).getValue().doubleValue()));
 			assertEquals("http://unitsofmeasure.org", quantityIndexes.get(0).getSystem());
 			assertEquals("mm", quantityIndexes.get(0).getUnits());
 
-			List<ResourceIndexedSearchParamQuantityNormalized> normalizedQuantityIndexes = myResourceIndexedSearchParamQuantityNormalizedDao.findAll().stream().filter(t->t.getParamName().equals("value-quantity")).collect(Collectors.toList());
+			List<ResourceIndexedSearchParamQuantityNormalized> normalizedQuantityIndexes = myResourceIndexedSearchParamQuantityNormalizedDao.findAll().stream().filter(t -> t.getParamName().equals("value-quantity")).collect(Collectors.toList());
 			assertEquals(1, normalizedQuantityIndexes.size());
 			assertEquals("149.597870691", Double.toString(normalizedQuantityIndexes.get(0).getValue()));
 			assertEquals("http://unitsofmeasure.org", normalizedQuantityIndexes.get(0).getSystem());
@@ -797,7 +847,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		assertEquals(1, ids.size());
 
-		ourLog.info("Observation2: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resources.get(0)));
+		ourLog.info("Observation2: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resources.get(0)));
 
 	}
 
@@ -814,19 +864,19 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		q.setCode("kg/dL");
 		obs.setValue(q);
 
-		ourLog.info("Observation1: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		ourLog.info("Observation1: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
 		assertTrue(myObservationDao.create(obs).getCreated());
 
 		// Original value should be in Quantity index, normalized should be in normalized table
-		runInTransaction(()->{
-			List<ResourceIndexedSearchParamQuantity> quantityIndexes = myResourceIndexedSearchParamQuantityDao.findAll().stream().filter(t->t.getParamName().equals("value-quantity")).collect(Collectors.toList());
+		runInTransaction(() -> {
+			List<ResourceIndexedSearchParamQuantity> quantityIndexes = myResourceIndexedSearchParamQuantityDao.findAll().stream().filter(t -> t.getParamName().equals("value-quantity")).collect(Collectors.toList());
 			assertEquals(1, quantityIndexes.size());
 			assertEquals("95.7412345", Double.toString(quantityIndexes.get(0).getValue().doubleValue()));
 			assertEquals("http://unitsofmeasure.org", quantityIndexes.get(0).getSystem());
 			assertEquals("kg/dL", quantityIndexes.get(0).getUnits());
 
-			List<ResourceIndexedSearchParamQuantityNormalized> normalizedQuantityIndexes = myResourceIndexedSearchParamQuantityNormalizedDao.findAll().stream().filter(t->t.getParamName().equals("value-quantity")).collect(Collectors.toList());
+			List<ResourceIndexedSearchParamQuantityNormalized> normalizedQuantityIndexes = myResourceIndexedSearchParamQuantityNormalizedDao.findAll().stream().filter(t -> t.getParamName().equals("value-quantity")).collect(Collectors.toList());
 			assertEquals(1, normalizedQuantityIndexes.size());
 			assertEquals("9.57412345E8", Double.toString(normalizedQuantityIndexes.get(0).getValue()));
 			assertEquals("http://unitsofmeasure.org", normalizedQuantityIndexes.get(0).getSystem());
@@ -854,7 +904,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		q.setCode("kg/dL");
 		obs.setValue(q);
 
-		ourLog.info("Observation1: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		ourLog.info("Observation1: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
 		assertTrue(myObservationDao.create(obs).getCreated());
 
@@ -880,7 +930,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			.setUnits("kg/dL")
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
-		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true,true);
+		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
 		assertThat(searchSql, containsString("t0.SP_VALUE = '95.7412345'"));
 		assertEquals(1, ids.size());
@@ -901,22 +951,22 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		q.setCode("mm");
 		obs.setValue(q);
 
-		ourLog.info("Observation1: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		ourLog.info("Observation1: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
 		myCaptureQueriesListener.clear();
 		assertTrue(myObservationDao.create(obs).getCreated());
 		myCaptureQueriesListener.logInsertQueries();
 
 		// Original value should be in Quantity index, normalized should be in normalized table
-		runInTransaction(()->{
-			List<ResourceIndexedSearchParamQuantity> quantityIndexes = myResourceIndexedSearchParamQuantityDao.findAll().stream().filter(t->t.getParamName().equals("value-quantity")).collect(Collectors.toList());
+		runInTransaction(() -> {
+			List<ResourceIndexedSearchParamQuantity> quantityIndexes = myResourceIndexedSearchParamQuantityDao.findAll().stream().filter(t -> t.getParamName().equals("value-quantity")).collect(Collectors.toList());
 			assertEquals(1, quantityIndexes.size());
 			double d = quantityIndexes.get(0).getValue().doubleValue();
 			assertEquals("1.2E-6", Double.toString(d));
 			assertEquals("http://unitsofmeasure.org", quantityIndexes.get(0).getSystem());
 			assertEquals("mm", quantityIndexes.get(0).getUnits());
 
-			List<ResourceIndexedSearchParamQuantityNormalized> normalizedQuantityIndexes = myResourceIndexedSearchParamQuantityNormalizedDao.findAll().stream().filter(t->t.getParamName().equals("value-quantity")).collect(Collectors.toList());
+			List<ResourceIndexedSearchParamQuantityNormalized> normalizedQuantityIndexes = myResourceIndexedSearchParamQuantityNormalizedDao.findAll().stream().filter(t -> t.getParamName().equals("value-quantity")).collect(Collectors.toList());
 			assertEquals(1, normalizedQuantityIndexes.size());
 			assertEquals("1.2E-9", Double.toString(normalizedQuantityIndexes.get(0).getValue()));
 			assertEquals("http://unitsofmeasure.org", normalizedQuantityIndexes.get(0).getSystem());
@@ -935,7 +985,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			.setUnits("m")
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
-		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true,true);
+		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
 		assertThat(searchSql, containsString("t0.SP_VALUE = '1.2E-9'"));
 		assertEquals(0, ids.size());
@@ -948,7 +998,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			.setUnits("mm")
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
-		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true,true);
+		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
 		assertThat(searchSql, containsString("t0.SP_VALUE = '0.0000012'"));
 		assertEquals(1, ids.size());
@@ -959,10 +1009,66 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			.setValue(new BigDecimal("0.0000012"))
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
-		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true,true);
+		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
 		assertThat(searchSql, containsString("t0.SP_VALUE = '0.0000012'"));
 		assertEquals(1, ids.size());
+	}
+
+	@Test
+	public void testResourceWithTagCreationNoFailures() throws ExecutionException, InterruptedException {
+		// we need to leave at least one free thread
+		// due to a REQUIRED_NEW transaction internally
+		int maxThreadsUsed = TestR4Config.ourMaxThreads - 1;
+		ExecutorService pool = Executors.newFixedThreadPool(Math.min(maxThreadsUsed, 5));
+		try {
+			Coding tag = new Coding();
+			tag.setCode("code123");
+			tag.setDisplay("Display Name");
+			tag.setSystem("System123");
+
+			Patient p = new Patient();
+			IIdType id = myPatientDao.create(p).getId();
+
+			List<Future<String>> futures = new ArrayList<>();
+			for (int i = 0; i < 50; i++) {
+				Patient updatePatient = new Patient();
+				updatePatient.setId(id.toUnqualifiedVersionless());
+				updatePatient.addIdentifier().setSystem("" + i);
+				updatePatient.setActive(true);
+				updatePatient.getMeta().addTag(tag);
+
+				int finalI = i;
+				Future<String> future = pool.submit(() -> {
+					ourLog.info("Starting update {}", finalI);
+					try {
+						try {
+							myPatientDao.update(updatePatient);
+						} catch (ResourceVersionConflictException e) {
+							assertTrue(e.getMessage().contains(
+								"The operation has failed with a version constraint failure. This generally means that two clients/threads were trying to update the same resource at the same time, and this request was chosen as the failing request."
+							));
+						}
+					} catch (Exception e) {
+						ourLog.error("Failure", e);
+						return e.toString();
+					}
+					ourLog.info("Finished update {}", finalI);
+					return null;
+				});
+				futures.add(future);
+			}
+
+			for (Future<String> next : futures) {
+				String nextError = next.get();
+				if (StringUtils.isNotBlank(nextError)) {
+					fail(nextError);
+				}
+			}
+
+		} finally {
+			pool.shutdown();
+		}
 	}
 
 	@Test
@@ -978,22 +1084,22 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		q.setCode("mm");
 		obs.setValue(q);
 
-		ourLog.info("Observation1: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		ourLog.info("Observation1: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
 		myCaptureQueriesListener.clear();
 		assertTrue(myObservationDao.create(obs).getCreated());
 		myCaptureQueriesListener.logInsertQueries();
 
 		// Original value should be in Quantity index, no normalized should be in normalized table
-		runInTransaction(()->{
-			List<ResourceIndexedSearchParamQuantity> quantityIndexes = myResourceIndexedSearchParamQuantityDao.findAll().stream().filter(t->t.getParamName().equals("value-quantity")).collect(Collectors.toList());
+		runInTransaction(() -> {
+			List<ResourceIndexedSearchParamQuantity> quantityIndexes = myResourceIndexedSearchParamQuantityDao.findAll().stream().filter(t -> t.getParamName().equals("value-quantity")).collect(Collectors.toList());
 			assertEquals(1, quantityIndexes.size());
 			double d = quantityIndexes.get(0).getValue().doubleValue();
 			assertEquals("1.2E-6", Double.toString(d));
 			assertEquals("http://unitsofmeasure.org", quantityIndexes.get(0).getSystem());
 			assertEquals("mm", quantityIndexes.get(0).getUnits());
 
-			List<ResourceIndexedSearchParamQuantityNormalized> normalizedQuantityIndexes = myResourceIndexedSearchParamQuantityNormalizedDao.findAll().stream().filter(t->t.getParamName().equals("value-quantity")).collect(Collectors.toList());
+			List<ResourceIndexedSearchParamQuantityNormalized> normalizedQuantityIndexes = myResourceIndexedSearchParamQuantityNormalizedDao.findAll().stream().filter(t -> t.getParamName().equals("value-quantity")).collect(Collectors.toList());
 			assertEquals(0, normalizedQuantityIndexes.size());
 		});
 
@@ -1009,7 +1115,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			.setUnits("m")
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
-		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true,true);
+		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
 		assertThat(searchSql, containsString("t0.SP_VALUE = '1.2E-9'"));
 		assertEquals(0, ids.size());
@@ -1022,7 +1128,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			.setUnits("mm")
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
-		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true,true);
+		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
 		assertThat(searchSql, containsString("t0.SP_VALUE = '0.0000012'"));
 		assertEquals(1, ids.size());
@@ -1033,7 +1139,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			.setValue(new BigDecimal("0.0000012"))
 		);
 		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
-		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true,true);
+		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
 		assertThat(searchSql, containsString("t0.SP_VALUE = '0.0000012'"));
 		assertEquals(1, ids.size());

@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>5.5.7</version>
+		<version>6.0.0-PRE9-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -15,33 +15,10 @@
 	<name>HAPI FHIR JPA Server</name>
 
 	<dependencies>
-		<!--
-				<dependency>
-					<groupId>com.fasterxml.jackson.jaxrs</groupId>
-					<artifactId>jackson-jaxrs-json-provider</artifactId>
-					<version>${jackson.version}</version>
-				</dependency>
-				<dependency>
-					<groupId>com.fasterxml.jackson.datatype</groupId>
-					<artifactId>jackson-datatype-hibernate4</artifactId>
-					<version>${jackson.version}</version>
-				</dependency>
-
-				<dependency>
-					<groupId>org.apache.commons</groupId>
-					<artifactId>commons-lang3</artifactId>
-					<version>3.5</version>
-				</dependency>
-		-->
 
 		<dependency>
 			<groupId>com.fasterxml.woodstox</groupId>
 			<artifactId>woodstox-core</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>net.sf.saxon</groupId>
-			<artifactId>Saxon-HE</artifactId>
 		</dependency>
 
 		<dependency>
@@ -88,6 +65,11 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-jpaserver-searchparam</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-sql-migrate</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -147,12 +129,38 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-jpaserver-batch</artifactId>
+			<artifactId>hapi-fhir-batch</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>net.ttddyy</groupId>
-			<artifactId>datasource-proxy</artifactId>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-storage-batch2</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-storage-batch2-jobs</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-dbcp2</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-storage</artifactId>
+			<version>${project.version}</version>
+			<classifier>tests</classifier>
+			<type>test-jar</type>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>
@@ -168,6 +176,12 @@
 		<dependency>
 			<groupId>org.javassist</groupId>
 			<artifactId>javassist</artifactId>
+		</dependency>
+
+		<!-- GraphQL -->
+		<dependency>
+			<groupId>com.graphql-java</groupId>
+			<artifactId>graphql-java</artifactId>
 		</dependency>
 
 		<!-- SQL Builder -->
@@ -187,20 +201,14 @@
 			<artifactId>jackson-databind</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>io.swagger</groupId>
-			<artifactId>swagger-annotations</artifactId>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-ui</artifactId>
 		</dependency>
 
 		<dependency>
 			<groupId>com.helger</groupId>
 			<artifactId>ph-schematron</artifactId>
 			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<artifactId>Saxon-HE</artifactId>
-					<groupId>net.sf.saxon</groupId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.helger</groupId>
@@ -277,17 +285,6 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-dbcp2</artifactId>
-			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>commons-logging</groupId>
-					<artifactId>commons-logging</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-test-utilities</artifactId>
 			<version>${project.version}</version>
@@ -307,12 +304,6 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>org.quartz-scheduler</groupId>
-			<artifactId>quartz</artifactId>
-		</dependency>
-
-
 		<!-- Spring -->
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -323,24 +314,6 @@
 					<groupId>commons-logging</groupId>
 				</exclusion>
 			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-orm</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-context</artifactId>
-			<exclusions>
-				<exclusion>
-					<artifactId>xml-apis</artifactId>
-					<groupId>xml-apis</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-beans</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.data</groupId>
@@ -376,56 +349,6 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-websocket</artifactId>
 		</dependency>
-
-		<!-- Hibernate -->
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-entitymanager</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-java8</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-ehcache</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>net.sf.ehcache</groupId>
-					<artifactId>ehcache-core</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.hibernate.validator</groupId>
-			<artifactId>hibernate-validator</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>com.fasterxml</groupId>
-					<artifactId>classmate</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.jboss.logging</groupId>
-					<artifactId>jboss-logging</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>javax.mail</groupId>
-			<artifactId>javax.mail-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.sun.mail</groupId>
-			<artifactId>javax.mail</artifactId>
-			<scope>provided</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>javax.activation</groupId>
-					<artifactId>activation</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
 		<dependency>
 			<groupId>javax.el</groupId>
 			<artifactId>javax.el-api</artifactId>
@@ -442,16 +365,6 @@
 			<artifactId>log4j-to-slf4j</artifactId>
 		</dependency>
 		<!-- Hibernate Search -->
-		<dependency>
-			<groupId>org.hibernate.search</groupId>
-			<artifactId>hibernate-search-mapper-orm</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>org.apache.logging.log4j</groupId>
-					<artifactId>log4j-api</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
 		<dependency>
 			<groupId>org.elasticsearch.client</groupId>
 			<artifactId>elasticsearch-rest-high-level-client</artifactId>
@@ -482,10 +395,6 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-collections4</artifactId>
 		</dependency>
 
 		<dependency>
@@ -533,25 +442,19 @@
 			<artifactId>spring-boot-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>com.icegreen</groupId>
 			<artifactId>greenmail</artifactId>
 			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>com.sun.mail</groupId>
-					<artifactId>javax.mail</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>junit</groupId>
-					<artifactId>junit</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.icegreen</groupId>
-			<artifactId>greenmail-spring</artifactId>
+			<artifactId>greenmail-junit5</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -616,8 +519,21 @@
 		<dependency>
 			<groupId>org.apache.jena</groupId>
 			<artifactId>jena-arq</artifactId>
-			<version>3.17.0</version>
 			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-core</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.jayway.jsonpath</groupId>
+			<artifactId>json-path-assert</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.jayway.jsonpath</groupId>
+			<artifactId>json-path</artifactId>
 		</dependency>
 	</dependencies>
 
@@ -639,6 +555,18 @@
 			</plugins>
 		</pluginManagement>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.2.0</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>test-jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
@@ -668,12 +596,14 @@
 					<dialects>
 						<param>h2</param>
 						<param>derby_10_7</param>
-						<param>postgresql92</param>
 						<param>mysql57</param>
 						<param>mariadb</param>
 						<param>oracle12c</param>
 						<param>sqlserver2012</param>
 					</dialects>
+					<customDialects>
+						<customDialect>ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect</customDialect>
+					</customDialects>
 					<outputDirectory>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database</outputDirectory>
 					<packages>
 						<param>ca.uhn.fhir.jpa.entity</param>
@@ -697,6 +627,11 @@
 						<groupId>org.glassfish.jaxb</groupId>
 						<artifactId>jaxb-runtime</artifactId>
 						<version>${jaxb_runtime_version}</version>
+					</dependency>
+					<dependency>
+						<groupId>ca.uhn.hapi.fhir</groupId>
+						<artifactId>hapi-fhir-jpaserver-model</artifactId>
+						<version>${project.version}</version>
 					</dependency>
 				</dependencies>
 			</plugin>

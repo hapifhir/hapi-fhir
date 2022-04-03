@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -28,7 +30,14 @@ import org.springframework.data.repository.query.Param;
  * #L%
  */
 
-public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryTable, Long> {
+public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryTable, Long>, IHapiFhirJpaRepository {
+
+	/**
+	 * This is really only intended for unit tests - There can be many versions of resources in
+	 * the real world, use a pageable query for real uses.
+	 */
+	@Query("SELECT t FROM ResourceHistoryTable t WHERE t.myResourceId = :resId ORDER BY t.myResourceVersion ASC")
+	List<ResourceHistoryTable> findAllVersionsForResourceIdInOrder(@Param("resId") Long theId);
 
 
 	@Query("SELECT t FROM ResourceHistoryTable t LEFT OUTER JOIN FETCH t.myProvenance WHERE t.myResourceId = :id AND t.myResourceVersion = :version")

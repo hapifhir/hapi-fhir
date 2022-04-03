@@ -1,0 +1,6 @@
+---
+type: perf
+issue: 3153
+jira: SMILE-3502
+title: "Significantly improved $delete-expunge performance by adding database indexes, and filtering needed foreign keys to delete by resource type."
+

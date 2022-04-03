@@ -28,7 +28,6 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -42,6 +41,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -51,7 +51,9 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -87,10 +89,10 @@ public class InterceptorUserDataMapDstu2Test {
 	public void testException() throws Exception {
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=foo");
-		HttpResponse status = ourClient.execute(httpGet);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+			assertEquals(400, status.getStatusLine().getStatusCode());
+		}
 
-		ourLog.info(myMapCheckMethods.toString());
 		await().until(() -> myMapCheckMethods, contains("incomingRequestPostProcessed", "incomingRequestPreHandled", "preProcessOutgoingException", "handleException", "processingCompleted"));
 	}
 
@@ -98,17 +100,14 @@ public class InterceptorUserDataMapDstu2Test {
 	public void testRead() throws Exception {
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 
-			for (int i = 0; i < 10; i++) {
-				if (!myMapCheckMethods.contains("processingCompletedNormally")) {
-					Thread.sleep(100);
-				}
-			}
-
-		}
-
+			String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			assertThat(response, containsString("\"id\":\"1\""));
 		await().until(() -> myMapCheckMethods, contains("incomingRequestPostProcessed", "incomingRequestPreHandled", "outgoingResponse", "processingCompletedNormally", "processingCompleted"));
+	}
+
 	}
 
 	private void updateMapUsing(Map<Object, Object> theUserData, String theMethod) {
@@ -272,7 +271,7 @@ public class InterceptorUserDataMapDstu2Test {
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 	@BeforeAll

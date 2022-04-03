@@ -3,22 +3,20 @@ package ca.uhn.fhir.jpa.subscription;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCacheRefresher;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
-import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionSubmitInterceptorLoader;
-import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
-import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelWithHandlers;
-import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
-import ca.uhn.fhir.jpa.subscription.match.deliver.email.JavaMailEmailSender;
+import ca.uhn.fhir.jpa.subscription.match.deliver.email.EmailSenderImpl;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.SubscriptionDeliveringEmailSubscriber;
+import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
+import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionSubmitInterceptorLoader;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class SubscriptionTestUtil {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionTestUtil.class);
-
-	private JavaMailEmailSender myEmailSender;
 
 	@Autowired
 	private DaoConfig myDaoConfig;
@@ -77,21 +75,15 @@ public class SubscriptionTestUtil {
 		return getExecutorQueueSize();
 	}
 
-	public void initEmailSender(int theListenerPort) {
-		myEmailSender = new JavaMailEmailSender();
-		myEmailSender.setSmtpServerHostname("localhost");
-		myEmailSender.setSmtpServerPort(theListenerPort);
-		myEmailSender.start();
-	}
-
-	public void setEmailSender(IIdType theIdElement) {
+	public void setEmailSender(IIdType theIdElement, EmailSenderImpl theEmailSender) {
 		ActiveSubscription activeSubscription = mySubscriptionRegistry.get(theIdElement.getIdPart());
 		SubscriptionChannelWithHandlers subscriptionChannelWithHandlers = mySubscriptionChannelRegistry.getDeliveryReceiverChannel(activeSubscription.getChannelName());
 		SubscriptionDeliveringEmailSubscriber subscriber = (SubscriptionDeliveringEmailSubscriber) subscriptionChannelWithHandlers.getDeliveryHandlerForUnitTest();
-		subscriber.setEmailSender(myEmailSender);
+		subscriber.setEmailSender(theEmailSender);
 	}
 
 	public int getActiveSubscriptionCount() {
 		return mySubscriptionRegistry.size();
 	}
+
 }

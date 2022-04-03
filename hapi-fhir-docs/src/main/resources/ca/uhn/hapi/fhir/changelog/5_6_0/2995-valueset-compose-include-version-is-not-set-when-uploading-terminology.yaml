@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2995
+title: "CodeSystem version is copied to ValueSet.compose.include.version on loinc terminology upload
+  to support versioned ValueSet expansion."

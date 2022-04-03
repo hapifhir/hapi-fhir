@@ -99,7 +99,7 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 		mdmLink.setCreated(new Date());
 		mdmLink.setUpdated(new Date());
 		mdmLink.setGoldenResourcePid(thePatientPid);
-		mdmLink.setSourcePid(myIdHelperService.getPidOrNull(patient));
+		mdmLink.setSourcePid(runInTransaction(()->myIdHelperService.getPidOrNull(patient)));
 		MdmLink saved= myMdmLinkDao.save(mdmLink);
 		return saved;
 	}

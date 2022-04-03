@@ -1,9 +1,20 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-
+import ca.uhn.fhir.context.support.ConceptValidationOptions;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
+import ca.uhn.fhir.jpa.config.JpaConfig;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.provider.BaseJpaResourceProviderValueSetDstu2;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
@@ -13,6 +24,11 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /*
  * #%L
@@ -34,16 +50,14 @@ import org.hl7.fhir.r4.model.UriType;
  * #L%
  */
 
-import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.provider.BaseJpaResourceProviderValueSetDstu2;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.Operation;
-import ca.uhn.fhir.rest.annotation.OperationParam;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-
 public class BaseJpaResourceProviderCodeSystemR4 extends JpaResourceProviderR4<CodeSystem> {
+
+	@Autowired
+	@Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT_CHAIN)
+	private ValidationSupportChain myValidationSupportChain;
+
+	@Autowired
+	protected ITermReadSvcR4 myTermSvc;
 
 	/**
 	 * $lookup operation
@@ -61,7 +75,8 @@ public class BaseJpaResourceProviderCodeSystemR4 extends JpaResourceProviderR4<C
 			@OperationParam(name="system", min=0, max=1) UriType theSystem,
 			@OperationParam(name="coding", min=0, max=1) Coding theCoding,
 			@OperationParam(name="version", min=0, max=1) StringType theVersion,
-			@OperationParam(name = "property", min = 0, max = OperationParam.MAX_UNLIMITED) List<CodeType> theProperties,
+			@OperationParam(name="displayLanguage", min=0, max=1) CodeType theDisplayLanguage,
+			@OperationParam(name="property", min = 0, max = OperationParam.MAX_UNLIMITED) List<CodeType> theProperties,
 			RequestDetails theRequestDetails
 			) {
 
@@ -70,9 +85,9 @@ public class BaseJpaResourceProviderCodeSystemR4 extends JpaResourceProviderR4<C
 			IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> dao = (IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept>) getDao();
 			IValidationSupport.LookupCodeResult result;
 			if (theVersion != null) {
-				result = dao.lookupCode(theCode, new UriType(theSystem.getValue() + "|" + theVersion), theCoding, theRequestDetails);
+				result = dao.lookupCode(theCode, new UriType(theSystem.getValue() + "|" + theVersion), theCoding, theDisplayLanguage, theRequestDetails);
 			} else {
-				result = dao.lookupCode(theCode, theSystem, theCoding, theRequestDetails);
+				result = dao.lookupCode(theCode, theSystem, theCoding, theDisplayLanguage, theRequestDetails);
 			}
 			result.throwNotFoundIfAppropriate();
 			return (Parameters) result.toParameters(theRequestDetails.getFhirContext(), theProperties);
@@ -134,11 +149,35 @@ public class BaseJpaResourceProviderCodeSystemR4 extends JpaResourceProviderR4<C
 		RequestDetails theRequestDetails
 	) {
 
+		IValidationSupport.CodeValidationResult result = null;
 		startRequest(theServletRequest);
 		try {
-			IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> dao = (IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept>) getDao();
-				
-			IValidationSupport.CodeValidationResult result = dao.validateCode(theId, theCodeSystemUrl, theVersion, theCode, theDisplay, theCoding, theCodeableConcept, theRequestDetails);
+			// If a Remote Terminology Server has been configured, use it
+			if (myValidationSupportChain.isRemoteTerminologyServiceConfigured()) {
+				String codeSystemUrl = (theCodeSystemUrl != null && theCodeSystemUrl.hasValue()) ?
+					theCodeSystemUrl.asStringValue() : null;
+				String code = (theCode != null && theCode.hasValue()) ? theCode.asStringValue() : null;
+				String display = (theDisplay != null && theDisplay.hasValue()) ? theDisplay.asStringValue() : null;
+
+				if (theCoding != null) {
+					if (theCoding.hasSystem()) {
+						if (codeSystemUrl != null && !codeSystemUrl.equalsIgnoreCase(theCoding.getSystem())) {
+							throw new InvalidRequestException(Msg.code(1160) + "Coding.system '" + theCoding.getSystem() + "' does not equal param url '" + theCodeSystemUrl + "'. Unable to validate-code.");
+						}
+						codeSystemUrl = theCoding.getSystem();
+						code = theCoding.getCode();
+						display = theCoding.getDisplay();
+
+						result = myValidationSupportChain.validateCode(
+							new ValidationSupportContext(myValidationSupportChain), new ConceptValidationOptions(),
+							codeSystemUrl, code, display, null);
+					}
+				}
+			} else {
+				// Otherwise, use the local DAO layer to validate the code
+				IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> dao = (IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept>) getDao();
+				result = dao.validateCode(theId, theCodeSystemUrl, theVersion, theCode, theDisplay, theCoding, theCodeableConcept, theRequestDetails);
+			}
 			return (Parameters) BaseJpaResourceProviderValueSetDstu2.toValidateCodeResult(getContext(), result);
 		} finally {
 			endRequest(theServletRequest);

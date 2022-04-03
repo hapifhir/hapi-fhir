@@ -1,28 +1,42 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoDstu3TerminologyTest;
 import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.hl7.fhir.dstu3.model.*;
+import ca.uhn.fhir.test.utilities.BatchJobHelper;
+import org.hl7.fhir.dstu3.model.BooleanType;
+import org.hl7.fhir.dstu3.model.CodeSystem;
+import org.hl7.fhir.dstu3.model.CodeType;
+import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.Questionnaire;
+import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
+import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.UriType;
+import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.batch.config.BatchConstants.TERM_CODE_SYSTEM_DELETE_JOB_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDstu3Test {
 
+	@Autowired private BatchJobHelper myBatchJobHelper;
+
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderDstu3CodeSystemTest.class);
-	public static FhirContext ourCtx = FhirContext.forCached(FhirVersionEnum.DSTU3);
+	public static FhirContext ourCtx = FhirContext.forDstu3Cached();
 
 	@BeforeEach
 	@Transactional
@@ -50,7 +64,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 			.andParameter("system", new UriType(FhirResourceDaoDstu3TerminologyTest.URL_MY_CODE_SYSTEM))
 			.execute();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
@@ -72,7 +86,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 			.useHttpGet()
 			.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
@@ -116,7 +130,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 			"}";
 
 		// Create the code system
-		CodeSystem cs = (CodeSystem) myFhirCtx.newJsonParser().parseResource(input);
+		CodeSystem cs = (CodeSystem) myFhirContext.newJsonParser().parseResource(input);
 		ourClient.update().resource(cs).execute();
 		runInTransaction(() -> assertEquals(26L, myConceptDao.count()));
 
@@ -125,6 +139,8 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 		runInTransaction(() -> assertEquals(26L, myConceptDao.count()));
 
 		myTerminologyDeferredStorageSvc.saveDeferred();
+		myBatchJobHelper.awaitAllBulkJobCompletions(TERM_CODE_SYSTEM_DELETE_JOB_NAME);
+
 		runInTransaction(() -> assertEquals(24L, myConceptDao.count()));
 
 	}
@@ -140,7 +156,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 			.andParameter("system", new UriType("http://hl7.org/fhir/v2/0203"))
 			.execute();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
@@ -181,7 +197,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 			.andParameter("system", new UriType("http://acme.org"))
 			.execute();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
@@ -219,7 +235,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 			.withParameter(Parameters.class, "coding", new Coding().setSystem("http://acme.org").setCode("8450-9"))
 			.execute();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
@@ -244,7 +260,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: $lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1076) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
 		}
 		//@formatter:on
 	}
@@ -262,7 +278,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: $lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1076) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
 		}
 		//@formatter:on
 	}
@@ -279,7 +295,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: No code, coding, or codeableConcept provided to validate", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1075) + "No code, coding, or codeableConcept provided to validate", e.getMessage());
 		}
 		//@formatter:on
 	}
@@ -294,7 +310,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 			.andParameter("system", new UriType("http://hl7.org/fhir/v3/MaritalStatus"))
 			.execute();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());

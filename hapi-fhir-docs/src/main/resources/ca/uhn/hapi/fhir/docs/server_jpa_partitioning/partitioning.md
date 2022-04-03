@@ -53,9 +53,12 @@ In a partitioned repository, it is important to understand that only a single po
 
 This fact can have security implications:
 
-* A client might be blocked from creating `Patient/ABC` in the partition they have access to because this ID is already in use in another partition.
+* A client might be blocked from creating `Patient/ABC` in the partition they have access to because this ID is already
+  in use in another partition.
 
-* In a server using the default configuration of SEQUENTIAL_NUMERIC [Server ID Strategy](/hapi-fhir/apidocs/hapi-fhir-jpaserver-api/ca/uhn/fhir/jpa/api/config/DaoConfig.html#setResourceServerIdStrategy(ca.uhn.fhir.jpa.api.config.DaoConfig.IdStrategyEnum)) a client may be able to infer the IDs of resources in other partitions based on the ID they were assigned.
+* In a server using the default configuration of
+  SEQUENTIAL_NUMERIC [Server ID Strategy](/hapi-fhir/apidocs/hapi-fhir-storage/ca/uhn/fhir/jpa/api/config/DaoConfig.html#setResourceServerIdStrategy(ca.uhn.fhir.jpa.api.config.DaoConfig.IdStrategyEnum))
+  a client may be able to infer the IDs of resources in other partitions based on the ID they were assigned.
 
 These considerations can be addressed by using UUID Server ID Strategy, and disallowing client-assigned IDs.  
 
@@ -92,13 +95,13 @@ The following resource types may not be placed in any partition except the defau
 * CodeSystem
 * CompartmentDefinition
 * ConceptMap
+* Library
 * NamingSystem
 * OperationDefinition
 * Questionnaire
 * SearchParameter
 * StructureDefinition
 * StructureMap
-* Subscription
 * ValueSet
 
 ## Examples
@@ -147,18 +150,16 @@ None of the limitations listed here are considered permanent. Over time the HAPI
    * CodeSystem
    * CompartmentDefinition
    * ConceptMap
+   * Library
    * NamingSystem
    * OperationDefinition
    * Questionnaire
    * SearchParameter
    * StructureDefinition
    * StructureMap
-   * Subscription
    * ValueSet
 
-* **Server Capability Statement is not partition aware**: The server creates and exposes a single server capability statement, covering all partitions. This can be misleading when partitioning us used as a multitenancy strategy. 
-
-* **Subscriptions may not be partitioned**: All subscriptions must be placed in the default partition, and subscribers will receive deliveries for any matching resources from all partitions.
+* **Server Capability Statement is not partition aware**: The server creates and exposes a single server capability statement, covering all partitions. This can be misleading when partitioning us used as a multitenancy strategy.
 
 * **Conformance resources may not be partitioned**: Conformance resources must be placed in the default partition, and will be shared for any validation activities across all partitions.
 
@@ -169,3 +170,7 @@ None of the limitations listed here are considered permanent. Over time the HAPI
 * **Bulk Operations are not partition aware**: Bulk export operations will export data across all partitions.
 
 * **Package Operations are not partition aware**: Package operations will only create, update and query resources in the default partition.
+
+* **Advanced Elasticsearch indexing is not partition optimized**: The results are correctly partitioned, but the extended indexing is not optimized to account for partitions. 
+
+* **Subscriptions are partition aware**: Subscriptions can be placed on any partition and will deliver matching resources from the same partition. A subscription on the default can deliver resource from all partition if it is placed in the default partition with the cross-partition extension and the server allows cross-partition subscriptions.

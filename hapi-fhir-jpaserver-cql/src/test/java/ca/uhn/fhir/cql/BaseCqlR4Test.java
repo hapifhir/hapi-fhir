@@ -5,14 +5,19 @@ import ca.uhn.fhir.cql.common.helper.PartitionHelper;
 import ca.uhn.fhir.cql.common.provider.CqlProviderTestBase;
 import ca.uhn.fhir.cql.config.CqlR4Config;
 import ca.uhn.fhir.cql.config.TestCqlConfig;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
-import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.test.utilities.RequestDetailsHelper;
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Meta;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
@@ -42,10 +47,21 @@ public class BaseCqlR4Test extends BaseJpaR4Test implements CqlProviderTestBase 
 	protected
 	DaoRegistry myDaoRegistry;
 	@Autowired
-	protected
-	FhirContext myFhirContext;
+	IFhirSystemDao<Bundle, Meta> mySystemDao;
 	@Autowired
-	IFhirSystemDao mySystemDao;
+	DaoConfig myDaoConfig;
+
+	@BeforeEach
+	public void beforeEach() {
+		myDaoConfig.setMaximumExpansionSize(5000);
+		// We load some dstu3 resources using a R4 FhirContext.  Disable strict handling so this doesn't throw errors.
+		myFhirContext.setParserErrorHandler(new LenientErrorHandler());
+	}
+
+	@AfterEach
+	public void afterEach() {
+		myDaoConfig.setMaximumExpansionSize(new DaoConfig().getMaximumExpansionSize());
+	}
 
 	protected int loadDataFromDirectory(String theDirectoryName) throws IOException {
 		int count = 0;
@@ -74,11 +90,6 @@ public class BaseCqlR4Test extends BaseJpaR4Test implements CqlProviderTestBase 
 	}
 
 	@Override
-	public FhirContext getFhirContext() {
-		return myFhirContext;
-	}
-
-	@Override
 	public DaoRegistry getDaoRegistry() {
 		return myDaoRegistry;
 	}
@@ -104,5 +115,10 @@ public class BaseCqlR4Test extends BaseJpaR4Test implements CqlProviderTestBase 
 		public PartitionHelper myPartitionHelper() {
 			return new PartitionHelper();
 		}
+	}
+
+	@Override
+	public FhirContext getTestFhirContext() {
+		return myFhirContext;
 	}
 }

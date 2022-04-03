@@ -20,6 +20,7 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +59,7 @@ public class AsyncUtil {
 			return theInitialCollectionLatch.await(theTime, theTimeUnit);
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(1805) + e);
 		}
 	}
 

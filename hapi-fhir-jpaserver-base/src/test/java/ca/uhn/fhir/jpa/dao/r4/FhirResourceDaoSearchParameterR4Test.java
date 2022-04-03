@@ -1,9 +1,9 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -32,7 +32,7 @@ public class FhirResourceDaoSearchParameterR4Test {
 
 	@BeforeEach
 	public void before() {
-		myCtx = FhirContext.forCached(FhirVersionEnum.R4);
+		myCtx = FhirContext.forR4Cached();
 
 		myDao = new FhirResourceDaoSearchParameterR4();
 		myDao.setContext(myCtx);
@@ -48,9 +48,6 @@ public class FhirResourceDaoSearchParameterR4Test {
 			RuntimeResourceDefinition nextResDef = myCtx.getResourceDefinition(nextResource);
 			for (RuntimeSearchParam nextp : nextResDef.getSearchParams()) {
 				if (nextp.getName().equals("_id")) {
-					continue;
-				}
-				if (nextp.getName().equals("_language")) {
 					continue;
 				}
 				if (isBlank(nextp.getPath())) {
@@ -84,7 +81,7 @@ public class FhirResourceDaoSearchParameterR4Test {
 			myDao.validateResourceForStorage(nextSearchParameter, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Invalid SearchParameter.expression value \"Patient.ex[[[\": Error in ?? at 1, 1: Found [ expecting a token name", e.getMessage());
+			assertEquals(Msg.code(1121) + "Invalid SearchParameter.expression value \"Patient.ex[[[\": Error in ?? at 1, 1: Found [ expecting a token name", e.getMessage());
 		}
 	}
 

@@ -20,6 +20,7 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
@@ -39,8 +40,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.CountingInputStream;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.hl7.fhir.r4.model.CodeSystem;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -89,17 +90,17 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 		try {
 			mode = ModeEnum.valueOf(modeString);
 		} catch (IllegalArgumentException e) {
-			throw new ParseException("Invalid mode: " + modeString);
+			throw new ParseException(Msg.code(1538) + "Invalid mode: " + modeString);
 		}
 
 		String termUrl = theCommandLine.getOptionValue("u");
 		if (isBlank(termUrl)) {
-			throw new ParseException("No URL provided");
+			throw new ParseException(Msg.code(1539) + "No URL provided");
 		}
 
 		String[] datafile = theCommandLine.getOptionValues("d");
 		if (datafile == null || datafile.length == 0) {
-			throw new ParseException("No data file provided");
+			throw new ParseException(Msg.code(1540) + "No data file provided");
 		}
 
 		IGenericClient client = newClient(theCommandLine);
@@ -151,10 +152,10 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 							String contents = IOUtils.toString(fileInputStream, Charsets.UTF_8);
 							EncodingEnum encoding = EncodingEnum.detectEncodingNoDefault(contents);
 							if (encoding == null) {
-								throw new ParseException("Could not detect FHIR encoding for file: " + nextDataFile);
+								throw new ParseException(Msg.code(1541) + "Could not detect FHIR encoding for file: " + nextDataFile);
 							}
 
-							CodeSystem resource = encoding.newParser(myFhirCtx).parseResource(CodeSystem.class, contents);
+							IBaseResource resource = encoding.newParser(myFhirCtx).parseResource(contents);
 							ParametersUtil.addParameterToParameters(myFhirCtx, inputParameters, TerminologyUploaderProvider.PARAM_CODESYSTEM, resource);
 
 						} else {
@@ -181,7 +182,7 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 
 					} else {
 
-						throw new ParseException("Don't know how to handle file: " + nextDataFile);
+						throw new ParseException(Msg.code(1542) + "Don't know how to handle file: " + nextDataFile);
 
 					}
 				}
@@ -190,7 +191,7 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 			zipOutputStream.flush();
 			zipOutputStream.close();
 		} catch (IOException e) {
-			throw new ParseException(e.toString());
+			throw new ParseException(Msg.code(1543) + e.toString());
 		}
 
 		if (haveCompressedContents) {
@@ -244,7 +245,7 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 					fileName = "localfile:" + tempFile.getAbsolutePath();
 				}
 			} catch (IOException e) {
-				throw new CommandFailureException(e);
+				throw new CommandFailureException(Msg.code(1544) + e);
 			}
 		}
 

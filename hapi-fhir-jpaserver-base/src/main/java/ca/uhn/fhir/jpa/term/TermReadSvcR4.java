@@ -92,8 +92,8 @@ public class TermReadSvcR4 extends BaseTermReadSvcImpl implements ITermReadSvcR4
 	}
 
 	@Override
-	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
-		return super.lookupCode(theSystem, theCode);
+	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode, String theDisplayLanguage) {
+		return super.lookupCode(theSystem, theCode, theDisplayLanguage);
 	}
 
 	@Override

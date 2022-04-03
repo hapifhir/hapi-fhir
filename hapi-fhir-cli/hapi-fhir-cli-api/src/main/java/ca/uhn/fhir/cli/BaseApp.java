@@ -20,6 +20,7 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.VersionUtil;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
@@ -186,6 +187,8 @@ public abstract class BaseApp {
 		commands.add(new ImportCsvToConceptMapCommand());
 		commands.add(new HapiFlywayMigrateDatabaseCommand());
 		commands.add(new CreatePackageCommand());
+		commands.add(new BulkImportCommand());
+		commands.add(new ReindexTerminologyCommand());
 		return commands;
 	}
 
@@ -241,7 +244,7 @@ public abstract class BaseApp {
 			String[] args = Arrays.copyOfRange(theArgs, 1, theArgs.length);
 			parsedOptions = parser.parse(options, args, true);
 			if (!parsedOptions.getArgList().isEmpty()) {
-				throw new ParseException("Unrecognized argument: " + parsedOptions.getArgList().get(0));
+				throw new ParseException(Msg.code(1555) + "Unrecognized argument: " + parsedOptions.getArgList().get(0));
 			}
 
 			if (parsedOptions.hasOption("debug")) {
@@ -282,7 +285,7 @@ public abstract class BaseApp {
 	}
 
 	private Optional<BaseCommand> parseCommand(String[] theArgs) {
-		Optional<BaseCommand> commandOpt = getNextCommand(theArgs);
+		Optional<BaseCommand> commandOpt = getNextCommand(theArgs, 0);
 
 		if (! commandOpt.isPresent()) {
 			String message = "Unrecognized command: " + ansi().bold().fg(Ansi.Color.RED) + theArgs[0] + ansi().boldOff().fg(Ansi.Color.WHITE);
@@ -294,8 +297,8 @@ public abstract class BaseApp {
 		return commandOpt;
 	}
 
-	private Optional<BaseCommand> getNextCommand(String[] theArgs) {
-		return ourCommands.stream().filter(cmd -> cmd.getCommandName().equals(theArgs[0])).findFirst();
+	private Optional<BaseCommand> getNextCommand(String[] theArgs, int thePosition) {
+		return ourCommands.stream().filter(cmd -> cmd.getCommandName().equals(theArgs[thePosition])).findFirst();
 	}
 
 	private void processHelp(String[] theArgs) {
@@ -303,7 +306,7 @@ public abstract class BaseApp {
 			logUsage();
 			return;
 		}
-		Optional<BaseCommand> commandOpt = getNextCommand(theArgs);
+		Optional<BaseCommand> commandOpt = getNextCommand(theArgs, 1);
 		if (! commandOpt.isPresent()) {
 			String message = "Unknown command: " + theArgs[1];
 			System.err.println(message);
@@ -316,7 +319,7 @@ public abstract class BaseApp {
 
 	private void exitDueToProblem(String theDescription) {
 		if ("true".equals(System.getProperty("test"))) {
-			throw new Error(theDescription);
+			throw new Error(Msg.code(1556) + theDescription);
 		} else {
 			System.exit(1);
 		}
@@ -327,7 +330,7 @@ public abstract class BaseApp {
 			if (e instanceof CommandFailureException) {
 				throw (CommandFailureException) e;
 			}
-			throw new Error(e);
+			throw new Error(Msg.code(1557) + e);
 		} else {
 			System.exit(1);
 		}

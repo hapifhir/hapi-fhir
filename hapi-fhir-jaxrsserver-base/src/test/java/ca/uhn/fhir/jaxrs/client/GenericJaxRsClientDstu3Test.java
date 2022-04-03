@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jaxrs.client;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.parser.IParser;
@@ -253,7 +254,7 @@ public class GenericJaxRsClientDstu3Test {
 			ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
 			fail();
 		} catch (IllegalStateException e) {
-			assertEquals("JaxRsRestfulClientFactory does not have FhirContext defined. This must be set via JaxRsRestfulClientFactory#setFhirContext(FhirContext)", e.getMessage());
+			assertEquals(Msg.code(1355) + "JaxRsRestfulClientFactory does not have FhirContext defined. This must be set via JaxRsRestfulClientFactory#setFhirContext(FhirContext)", e.getMessage());
 		}
 	}
 
@@ -790,7 +791,7 @@ public class GenericJaxRsClientDstu3Test {
 		org.hl7.fhir.dstu3.model.Bundle responseBundle = (org.hl7.fhir.dstu3.model.Bundle) outParams.getParameter().get(0).getResource();
 
 		// Print the response bundle
-		assertEquals("8cef5f2a-0ba9-43a5-be26-c8dde9ff0e19", responseBundle.getId());
+		assertEquals("Bundle/8cef5f2a-0ba9-43a5-be26-c8dde9ff0e19", responseBundle.getId());
 	}
 
 	@Test
@@ -1489,7 +1490,7 @@ public class GenericJaxRsClientDstu3Test {
 		try {
 			client.search().byUrl("foo/bar?test=1");
 		} catch (IllegalArgumentException e) {
-			assertEquals("Search URL must be either a complete URL starting with http: or https:, or a relative FHIR URL in the form [ResourceType]?[Params]", e.getMessage());
+			assertEquals(Msg.code(1393) + "Search URL must be either a complete URL starting with http: or https:, or a relative FHIR URL in the form [ResourceType]?[Params]", e.getMessage());
 		}
 	}
 

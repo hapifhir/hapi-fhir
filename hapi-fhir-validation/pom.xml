@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>5.5.7</version>
+		<version>6.0.0-PRE9-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -261,6 +261,13 @@
             <scope>test</scope>
         </dependency>
 
+		<dependency>
+			<artifactId>commons-lang</artifactId>
+			<groupId>commons-lang</groupId>
+			<version>2.5</version>
+			<scope>test</scope>
+		</dependency>
+
 		<!-- Dependencies for Schematron -->
 		<dependency>
 			<groupId>com.helger</groupId>
@@ -303,12 +310,12 @@
 			<artifactId>jena-arq</artifactId>
 			<scope>test</scope>
 		</dependency>
-        <dependency>
-            <groupId>ca.uhn.hapi.fhir</groupId>
-            <artifactId>hapi-fhir-jpaserver-model</artifactId>
-            <version>5.4.0-PRE8-SNAPSHOT</version>
-            <scope>test</scope>
-        </dependency>
+	  <dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-jpaserver-model</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+	  </dependency>
 
     </dependencies>
 

@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>5.5.7</version>
+		<version>6.0.0-PRE9-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -27,6 +27,13 @@
 			<groupId>org.opencds.cqf.cql</groupId>
 			<artifactId>evaluator.engine</artifactId>
 			<version>${cql-evaluator.version}</version>
+			<exclusions>
+				<!-- we exclude this because we don't want javax.mail and will use jakarta.mail instead -->
+				<exclusion>
+					<groupId>com.sun.mail</groupId>
+					<artifactId>javax.mail</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.opencds.cqf.cql</groupId>
@@ -88,6 +95,12 @@
 			<groupId>javax.xml.bind</groupId>
 			<artifactId>jaxb-api</artifactId>
 			<version>${jaxb_api_version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>javax.activation</groupId>
+					<artifactId>javax.activation-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.jamesmurty.utils</groupId>
@@ -131,6 +144,14 @@
 			</exclusions>
 		</dependency>
 		<!-- test -->
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-jpaserver-base</artifactId>
+			<version>${project.version}</version>
+			<classifier>tests</classifier>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>

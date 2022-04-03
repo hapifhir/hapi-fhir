@@ -1,12 +1,9 @@
 package ca.uhn.fhir.narrative;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.StringType;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -21,7 +18,7 @@ public class CustomThymeleafNarrativeGeneratorR4Test {
 	/**
 	 * Don't use cached here since we modify the context
 	 */
-	private final FhirContext myCtx = FhirContext.forCached(FhirVersionEnum.R4);
+	private final FhirContext myCtx = FhirContext.forR4Cached();
 
 	@AfterEach
 	public void after() {

@@ -23,6 +23,7 @@ package ca.uhn.fhir.context.support;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.BundleUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -45,6 +46,16 @@ import java.util.Properties;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+/**
+ * This class returns the vocabulary that is shipped with the base FHIR
+ * specification.
+ *
+ * Note that this class is version aware. For example, a request for
+ * <code>http://foo-codesystem|123</code> will only return a value if
+ * the built in resource if the version matches. Unversioned URLs
+ * should generally be used, and will return whatever version is
+ * present.
+ */
 public class DefaultProfileValidationSupport implements IValidationSupport {
 
 	private static final String URL_PREFIX_STRUCTURE_DEFINITION = "http://hl7.org/fhir/StructureDefinition/";
@@ -89,7 +100,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 						structureDefinitionResources.add("/org/hl7/fhir/instance/model/profile/" + nextKey);
 					}
 				} catch (IOException e) {
-					throw new ConfigurationException(e);
+					throw new ConfigurationException(Msg.code(1740) + e);
 				}
 				break;
 			case DSTU2_1:
@@ -179,18 +190,27 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 
 			// System can take the form "http://url|version"
 			String system = theSystem;
-			if (system.contains("|")) {
-				String version = system.substring(system.indexOf('|') + 1);
-				if (version.matches("^[0-9.]+$")) {
-					system = system.substring(0, system.indexOf('|'));
+			String version = null;
+			int pipeIdx = system.indexOf('|');
+			if (pipeIdx > 0) {
+				version = system.substring(pipeIdx + 1);
+				system = system.substring(0, pipeIdx);
+			}
+
+			IBaseResource candidate;
+			if (codeSystem) {
+				candidate = codeSystems.get(system);
+			} else {
+				candidate = valueSets.get(system);
+			}
+
+			if (candidate != null && isNotBlank(version) && !system.startsWith("http://hl7.org") && !system.startsWith("http://terminology.hl7.org")) {
+				if (!StringUtils.equals(version, myCtx.newTerser().getSinglePrimitiveValueOrNull(candidate, "version"))) {
+					candidate = null;
 				}
 			}
 
-			if (codeSystem) {
-				return codeSystems.get(system);
-			} else {
-				return valueSets.get(system);
-			}
+			return candidate;
 		}
 	}
 
@@ -205,8 +225,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 			url = URL_PREFIX_STRUCTURE_DEFINITION_BASE + url;
 		}
 		Map<String, IBaseResource> structureDefinitionMap = provideStructureDefinitionMap();
-		IBaseResource retVal = structureDefinitionMap.get(url);
-		return retVal;
+		return structureDefinitionMap.get(url);
 	}
 
 	@Override
@@ -362,5 +381,4 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 		ArrayList<IBaseResource> retVal = new ArrayList<>(theMap.values());
 		return (List<T>) Collections.unmodifiableList(retVal);
 	}
-
 }

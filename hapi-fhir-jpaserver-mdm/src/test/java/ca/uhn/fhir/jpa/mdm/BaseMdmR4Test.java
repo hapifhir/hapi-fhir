@@ -1,14 +1,13 @@
 package ca.uhn.fhir.jpa.mdm;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.api.AddProfileTagEnum;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.config.MdmConsumerConfig;
 import ca.uhn.fhir.jpa.mdm.config.MdmSubmitterConfig;
@@ -24,7 +23,6 @@ import ca.uhn.fhir.jpa.mdm.svc.MdmMatchLinkSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
-import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
@@ -34,21 +32,12 @@ import ca.uhn.fhir.mdm.rules.svc.MdmResourceMatcherSvc;
 import ca.uhn.fhir.mdm.util.EIDHelper;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.BasePagingProvider;
-import ca.uhn.fhir.rest.server.ETagSupportEnum;
-import ca.uhn.fhir.rest.server.ElementsSupportEnum;
-import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
-import ca.uhn.fhir.rest.server.IPagingProvider;
-import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.apache.commons.lang3.StringUtils;
+import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -61,15 +50,11 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
-import org.jetbrains.annotations.NotNull;
-import javax.annotation.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -80,6 +65,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -88,24 +74,19 @@ import static org.slf4j.LoggerFactory.getLogger;
 @ContextConfiguration(classes = {MdmSubmitterConfig.class, MdmConsumerConfig.class, TestMdmConfigR4.class, SubscriptionProcessorConfig.class})
 abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 
-
-	private static final Logger ourLog = getLogger(BaseMdmR4Test.class);
-
 	public static final String NAME_GIVEN_JANE = "Jane";
 	public static final String NAME_GIVEN_PAUL = "Paul";
 	public static final String TEST_NAME_FAMILY = "Doe";
 	protected static final String TEST_ID_SYSTEM = "http://a.tv/";
 	protected static final String JANE_ID = "ID.JANE.123";
 	protected static final String PAUL_ID = "ID.PAUL.456";
+	protected static final String FRANK_ID = "ID.FRANK.789";
+	protected static final String DUMMY_ORG_ID = "Organization/mfr";
+	private static final Logger ourLog = getLogger(BaseMdmR4Test.class);
 	private static final ContactPoint TEST_TELECOM = new ContactPoint()
 		.setSystem(ContactPoint.ContactPointSystem.PHONE)
 		.setValue("555-555-5555");
 	private static final String NAME_GIVEN_FRANK = "Frank";
-	protected static final String FRANK_ID = "ID.FRANK.789";
-	protected static final String DUMMY_ORG_ID = "Organization/mfr";
-
-	@Autowired
-	protected FhirContext myFhirContext;
 	@Autowired
 	protected IFhirResourceDao<Patient> myPatientDao;
 	@Autowired
@@ -123,20 +104,18 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 	@Autowired
 	protected MdmLinkDaoSvc myMdmLinkDaoSvc;
 	@Autowired
-	protected IdHelperService myIdHelperService;
+	protected IJpaIdHelperService myIdHelperService;
 	@Autowired
 	protected IMdmSettings myMdmSettings;
 	@Autowired
 	protected MdmMatchLinkSvc myMdmMatchLinkSvc;
 	@Autowired
 	protected EIDHelper myEIDHelper;
+	protected ServletRequestDetails myRequestDetails;
 	@Autowired
 	SearchParamRegistryImpl mySearchParamRegistry;
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
-
-	protected ServletRequestDetails myRequestDetails;
-
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
@@ -145,12 +124,10 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		myRequestDetails = new ServletRequestDetails(myInterceptorBroadcaster);
 	}
 
-	@Override
 	@AfterEach
 	public void after() throws IOException {
 		myMdmLinkDao.deleteAll();
 		assertEquals(0, myMdmLinkDao.count());
-		super.after();
 	}
 
 	protected void saveLink(MdmLink theMdmLink) {
@@ -171,7 +148,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 	protected Patient createGoldenPatient(Patient thePatient) {
 		return createPatient(thePatient, true, false);
 	}
-	
+
 	@Nonnull
 	protected Patient createRedirectedGoldenPatient(Patient thePatient) {
 		return createPatient(thePatient, true, true);
@@ -326,14 +303,14 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		assertEquals(theExpectedCount, myMdmLinkDao.count());
 	}
 
-	protected IAnyResource getGoldenResourceFromTargetResource(IAnyResource theBaseResource) {
+	protected <T extends IAnyResource> T getGoldenResourceFromTargetResource(T theBaseResource) {
 		String resourceType = theBaseResource.getIdElement().getResourceType();
 		IFhirResourceDao relevantDao = myDaoRegistry.getResourceDao(resourceType);
 
-		Optional<MdmLink> matchedLinkForTargetPid = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(theBaseResource));
+		Optional<MdmLink> matchedLinkForTargetPid = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(runInTransaction(()->myIdHelperService.getPidOrNull(theBaseResource)));
 		if (matchedLinkForTargetPid.isPresent()) {
 			Long goldenResourcePid = matchedLinkForTargetPid.get().getGoldenResourcePid();
-			return (IAnyResource) relevantDao.readByPid(new ResourcePersistentId(goldenResourcePid));
+			return (T) relevantDao.readByPid(new ResourcePersistentId(goldenResourcePid));
 		} else {
 			return null;
 		}
@@ -345,12 +322,12 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 	}
 
 	protected Patient addExternalEID(Patient thePatient, String theEID) {
-		thePatient.addIdentifier().setSystem(myMdmSettings.getMdmRules().getEnterpriseEIDSystem()).setValue(theEID);
+		thePatient.addIdentifier().setSystem(myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType("Patient")).setValue(theEID);
 		return thePatient;
 	}
 
 	protected Patient clearExternalEIDs(Patient thePatient) {
-		thePatient.getIdentifier().removeIf(theIdentifier -> theIdentifier.getSystem().equalsIgnoreCase(myMdmSettings.getMdmRules().getEnterpriseEIDSystem()));
+		thePatient.getIdentifier().removeIf(theIdentifier -> theIdentifier.getSystem().equalsIgnoreCase(myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType("Patient")));
 		return thePatient;
 	}
 
@@ -397,6 +374,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 
 	protected Patient updatePatientAndUpdateLinks(Patient thePatient) {
 		thePatient = (Patient) myPatientDao.update(thePatient).getResource();
+		ourLog.info("About to update links...");
 		myMdmMatchLinkSvc.updateMdmLinksForMdmSource(thePatient, createContextForUpdate(thePatient.getIdElement().getResourceType()));
 		return thePatient;
 	}
@@ -409,28 +387,52 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		return thePractitioner;
 	}
 
+	private Matcher<IAnyResource> wrapMatcherInTransaction(Supplier<Matcher<IAnyResource>> theFunction) {
+		return new Matcher<IAnyResource>() {
+			@Override
+			public boolean matches(Object actual) {
+				return runInTransaction(()->theFunction.get().matches(actual));
+			}
+
+			@Override
+			public void describeMismatch(Object actual, Description mismatchDescription) {
+				runInTransaction(()->theFunction.get().describeMismatch(actual, mismatchDescription));
+			}
+
+			@Override
+			public void _dont_implement_Matcher___instead_extend_BaseMatcher_() {
+
+			}
+
+			@Override
+			public void describeTo(Description description) {
+				runInTransaction(()->theFunction.get().describeTo(description));
+			}
+		};
+	}
+
 	protected Matcher<IAnyResource> sameGoldenResourceAs(IAnyResource... theBaseResource) {
-		return IsSameGoldenResourceAs.sameGoldenResourceAs(myIdHelperService, myMdmLinkDaoSvc, theBaseResource);
+		return wrapMatcherInTransaction(()->IsSameGoldenResourceAs.sameGoldenResourceAs(myIdHelperService, myMdmLinkDaoSvc, theBaseResource));
 	}
 
 	protected Matcher<IAnyResource> linkedTo(IAnyResource... theBaseResource) {
-		return IsLinkedTo.linkedTo(myIdHelperService, myMdmLinkDaoSvc, theBaseResource);
+		return wrapMatcherInTransaction(()->IsLinkedTo.linkedTo(myIdHelperService, myMdmLinkDaoSvc, theBaseResource));
 	}
 
 	protected Matcher<IAnyResource> possibleLinkedTo(IAnyResource... theBaseResource) {
-		return IsPossibleLinkedTo.possibleLinkedTo(myIdHelperService, myMdmLinkDaoSvc, theBaseResource);
+		return wrapMatcherInTransaction(()->IsPossibleLinkedTo.possibleLinkedTo(myIdHelperService, myMdmLinkDaoSvc, theBaseResource));
 	}
 
 	protected Matcher<IAnyResource> possibleMatchWith(IAnyResource... theBaseResource) {
-		return IsPossibleMatchWith.possibleMatchWith(myIdHelperService, myMdmLinkDaoSvc, theBaseResource);
+		return wrapMatcherInTransaction(()->IsPossibleMatchWith.possibleMatchWith(myIdHelperService, myMdmLinkDaoSvc, theBaseResource));
 	}
 
 	protected Matcher<IAnyResource> possibleDuplicateOf(IAnyResource... theBaseResource) {
-		return IsPossibleDuplicateOf.possibleDuplicateOf(myIdHelperService, myMdmLinkDaoSvc, theBaseResource);
+		return wrapMatcherInTransaction(()->IsPossibleDuplicateOf.possibleDuplicateOf(myIdHelperService, myMdmLinkDaoSvc, theBaseResource));
 	}
 
 	protected Matcher<IAnyResource> matchedToAGoldenResource() {
-		return IsMatchedToAGoldenResource.matchedToAGoldenResource(myIdHelperService, myMdmLinkDaoSvc);
+		return wrapMatcherInTransaction(()->IsMatchedToAGoldenResource.matchedToAGoldenResource(myIdHelperService, myMdmLinkDaoSvc));
 	}
 
 	protected Patient getOnlyGoldenPatient() {
@@ -469,8 +471,8 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		MdmLink mdmLink = myMdmLinkDaoSvc.newMdmLink();
 		mdmLink.setLinkSource(MdmLinkSourceEnum.MANUAL);
 		mdmLink.setMatchResult(MdmMatchResultEnum.MATCH);
-		mdmLink.setGoldenResourcePid(myIdHelperService.getPidOrNull(sourcePatient));
-		mdmLink.setSourcePid(myIdHelperService.getPidOrNull(patient));
+		mdmLink.setGoldenResourcePid(runInTransaction(() -> myIdHelperService.getPidOrNull(sourcePatient)));
+		mdmLink.setSourcePid(runInTransaction(() -> myIdHelperService.getPidOrNull(patient)));
 		return mdmLink;
 	}
 
@@ -498,6 +500,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 	protected void assertLinksMatchedByEid(Boolean... theExpectedValues) {
 		assertFields(MdmLink::getEidMatch, theExpectedValues);
 	}
+
 	public SearchParameterMap buildGoldenResourceSearchParameterMap() {
 		SearchParameterMap spMap = new SearchParameterMap();
 		spMap.setLoadSynchronous(true);
@@ -514,7 +517,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 	}
 
 
-	protected void print(String message, IBaseResource ... theResource) {
+	protected void print(String message, IBaseResource... theResource) {
 		if (StringUtils.isNotEmpty(message)) {
 			ourLog.info(message);
 		}
@@ -524,18 +527,8 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		}
 	}
 
-	protected void print(IBaseResource ... theResource) {
+	protected void print(IBaseResource... theResource) {
 		print(null, theResource);
-	}
-
-
-
-	protected void printResources(String theResourceType) {
-		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResourceType);
-		IBundleProvider search = dao.search(new SearchParameterMap());
-		search.getResources(0, search.size()).forEach(r -> {
-			print(r);
-		});
 	}
 
 

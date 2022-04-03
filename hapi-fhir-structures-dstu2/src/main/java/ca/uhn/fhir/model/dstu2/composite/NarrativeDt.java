@@ -1,19 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 package ca.uhn.fhir.model.dstu2.composite;
 
 /*

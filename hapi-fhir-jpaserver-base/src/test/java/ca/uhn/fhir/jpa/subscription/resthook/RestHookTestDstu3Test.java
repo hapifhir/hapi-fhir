@@ -1,14 +1,14 @@
 package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
 import ca.uhn.fhir.jpa.subscription.NotificationServlet;
 import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
-import ca.uhn.fhir.jpa.subscription.util.SubscriptionDebugLogInterceptor;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
+import ca.uhn.fhir.jpa.subscription.util.SubscriptionDebugLogInterceptor;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Update;
@@ -24,14 +24,26 @@ import com.google.common.collect.Lists;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.CommunicationRequest;
+import org.hl7.fhir.dstu3.model.DateTimeType;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.Organization;
+import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.Subscription;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.jupiter.api.*; import static org.hamcrest.MatcherAssert.assertThat;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -40,8 +52,15 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.awaitility.Awaitility.await;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Test the rest-hook subscriptions
@@ -49,18 +68,18 @@ import static org.junit.jupiter.api.Assertions.*;
 public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestHookTestDstu3Test.class);
-	private static List<Observation> ourCreatedObservations = Collections.synchronizedList(Lists.newArrayList());
+	private static final List<Observation> ourCreatedObservations = Collections.synchronizedList(Lists.newArrayList());
 	private static int ourListenerPort;
 	private static RestfulServer ourListenerRestServer;
 	private static Server ourListenerServer;
 	private static String ourListenerServerBase;
-	private static List<Observation> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
-	private static List<String> ourContentTypes = Collections.synchronizedList(new ArrayList<>());
+	private static final List<Observation> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
+	private static final List<String> ourContentTypes = Collections.synchronizedList(new ArrayList<>());
 	private static NotificationServlet ourNotificationServlet;
 	private static String ourNotificationListenerServer;
 	private static CountDownLatch communicationRequestListenerLatch;
-	private static SubscriptionDebugLogInterceptor ourSubscriptionDebugLogInterceptor = new SubscriptionDebugLogInterceptor();
-	private List<IIdType> mySubscriptionIds = Collections.synchronizedList(new ArrayList<>());
+	private static final SubscriptionDebugLogInterceptor ourSubscriptionDebugLogInterceptor = new SubscriptionDebugLogInterceptor();
+	private final List<IIdType> mySubscriptionIds = Collections.synchronizedList(new ArrayList<>());
 	@Autowired
 	private SubscriptionTestUtil mySubscriptionTestUtil;
 
@@ -118,7 +137,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		return (Subscription) methodOutcome.getResource();
 	}
 
-	@NotNull
+	@Nonnull
 	private Subscription newSubscription(String theCriteria, String thePayload, String theEndpoint, List<StringType> headers) {
 		Subscription subscription = new Subscription();
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
@@ -167,7 +186,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testMemoryStrategyMeta() throws InterruptedException {
 		String inMemoryCriteria = "Observation?code=17861-6";
 		Subscription subscription = createSubscription(inMemoryCriteria, null, ourNotificationListenerServer);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(subscription));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(subscription));
 		List<Coding> tag = subscription.getMeta().getTag();
 		assertEquals(HapiExtensions.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.get(0).getSystem());
 		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY.toString(), tag.get(0).getCode());
@@ -261,7 +280,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		waitForQueueToDrain();
 
 		Observation observation = new Observation();
-		MetaUtil.setSource(myFhirCtx, observation, source);
+		MetaUtil.setSource(myFhirContext, observation, source);
 		ourClient.create().resource(observation).execute();
 
 		// Should see 1 subscription notification
@@ -476,7 +495,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 			createSubscription(criteria1, payload, ourListenerServerBase);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: Invalid subscription criteria submitted: Observation?codeeeee=SNOMED-CT Failed to parse match URL[Observation?codeeeee=SNOMED-CT] - Resource type Observation does not have a parameter with name: codeeeee", e.getMessage());
+			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(9) + "Invalid subscription criteria submitted: Observation?codeeeee=SNOMED-CT " + Msg.code(488) + "Failed to parse match URL[Observation?codeeeee=SNOMED-CT] - Resource type Observation does not have a parameter with name: codeeeee", e.getMessage());
 		}
 	}
 
@@ -638,7 +657,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@BeforeAll
 	public static void startListenerServer() throws Exception {
-		ourListenerRestServer = new RestfulServer(FhirContext.forCached(FhirVersionEnum.DSTU3));
+		ourListenerRestServer = new RestfulServer(FhirContext.forDstu3Cached());
 
 		ObservationListener obsListener = new ObservationListener();
 		CommunicationRequestListener crListener = new CommunicationRequestListener();

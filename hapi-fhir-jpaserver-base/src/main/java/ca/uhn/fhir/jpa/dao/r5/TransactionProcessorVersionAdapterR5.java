@@ -20,8 +20,9 @@ package ca.uhn.fhir.jpa.dao.r5;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.TransactionProcessor;
+import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -34,7 +35,7 @@ import org.hl7.fhir.r5.model.Resource;
 import java.util.Date;
 import java.util.List;
 
-public class TransactionProcessorVersionAdapterR5 implements TransactionProcessor.ITransactionProcessorVersionAdapter<Bundle, Bundle.BundleEntryComponent> {
+public class TransactionProcessorVersionAdapterR5 implements ITransactionProcessorVersionAdapter<Bundle, Bundle.BundleEntryComponent> {
 	@Override
 	public void setResponseStatus(Bundle.BundleEntryComponent theBundleEntry, String theStatus) {
 		theBundleEntry.getResponse().setStatus(theStatus);
@@ -79,7 +80,7 @@ public class TransactionProcessorVersionAdapterR5 implements TransactionProcesso
 		try {
 			resp.setType(Bundle.BundleType.fromCode(theBundleType));
 		} catch (FHIRException theE) {
-			throw new InternalErrorException("Unknown bundle type: " + theBundleType);
+			throw new InternalErrorException(Msg.code(1125) + "Unknown bundle type: " + theBundleType);
 		}
 		return resp;
 	}
@@ -112,6 +113,12 @@ public class TransactionProcessorVersionAdapterR5 implements TransactionProcesso
 	@Override
 	public String getFullUrl(Bundle.BundleEntryComponent theEntry) {
 		return theEntry.getFullUrl();
+	}
+
+
+	@Override
+	public void setFullUrl(Bundle.BundleEntryComponent theEntry, String theFullUrl) {
+		theEntry.setFullUrl(theFullUrl);
 	}
 
 	@Override

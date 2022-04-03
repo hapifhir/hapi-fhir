@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.param;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import ca.uhn.fhir.model.primitive.UriDt;
@@ -39,6 +40,8 @@ public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 	private TokenParamModifier myModifier;
 	private String mySystem;
 	private String myValue;
+
+	private Boolean myMdmExpand;
 
 	/**
 	 * Constructor
@@ -85,7 +88,7 @@ public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 
 	public TokenParam(String theSystem, String theValue, boolean theText) {
 		if (theText && isNotBlank(theSystem)) {
-			throw new IllegalArgumentException("theSystem can not be non-blank if theText is true (:text searches do not include a system). In other words, set the first parameter to null for a text search");
+			throw new IllegalArgumentException(Msg.code(1938) + "theSystem can not be non-blank if theText is true (:text searches do not include a system). In other words, set the first parameter to null for a text search");
 		}
 		setSystem(theSystem);
 		setValue(theValue);
@@ -97,6 +100,15 @@ public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 	 */
 	public TokenParam(String theCode) {
 		this(null, theCode);
+	}
+
+	public boolean isMdmExpand() {
+		return myMdmExpand != null && myMdmExpand;
+	}
+
+	public TokenParam setMdmExpand(boolean theMdmExpand) {
+		myMdmExpand = theMdmExpand;
+		return this;
 	}
 
 	@Override

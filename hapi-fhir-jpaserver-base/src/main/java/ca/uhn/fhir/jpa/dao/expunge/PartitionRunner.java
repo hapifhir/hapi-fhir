@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.expunge;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.collect.Lists;
@@ -70,7 +71,7 @@ public class PartitionRunner {
 				return;
 			} catch (Exception e) {
 				ourLog.error("Error while " + myProcessName, e);
-				throw new InternalErrorException(e);
+				throw new InternalErrorException(Msg.code(1084) + e);
 			}
 		}
 
@@ -86,7 +87,7 @@ public class PartitionRunner {
 			Thread.currentThread().interrupt();
 		} catch (ExecutionException e) {
 			ourLog.error("Error while " + myProcessName, e);
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(1085) + e);
 		} finally {
 			executorService.shutdown();
 		}
@@ -95,7 +96,11 @@ public class PartitionRunner {
 	private List<Callable<Void>> buildCallableTasks(Slice<Long> theResourceIds, Consumer<List<Long>> partitionConsumer) {
 		List<Callable<Void>> retval = new ArrayList<>();
 
-		ourLog.info("Splitting batch job of {} entries into chunks of {}", theResourceIds.getContent().size(), myBatchSize);
+		if (myBatchSize > theResourceIds.getContent().size()) {
+			ourLog.info("Splitting batch job of {} entries into chunks of {}", theResourceIds.getContent().size(), myBatchSize);
+		} else {
+			ourLog.info("Creating batch job of {} entries", theResourceIds.getContent().size());
+		}
 		List<List<Long>> partitions = Lists.partition(theResourceIds.getContent(), myBatchSize);
 
 		for (List<Long> nextPartition : partitions) {
@@ -129,7 +134,7 @@ public class PartitionRunner {
 			try {
 				executorQueue.put(theRunnable);
 			} catch (InterruptedException e) {
-				throw new RejectedExecutionException("Task " + theRunnable.toString() +
+				throw new RejectedExecutionException(Msg.code(1086) + "Task " + theRunnable.toString() +
 					" rejected from " + e);
 			}
 			ourLog.info("Slot become available after {}ms", sw.getMillis());

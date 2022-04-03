@@ -1,7 +1,6 @@
 package ca.uhn.fhir.narrative;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
@@ -37,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DefaultThymeleafNarrativeGeneratorDstu2Test.class);
-	private final FhirContext myCtx = FhirContext.forCached(FhirVersionEnum.DSTU2);
+	private final FhirContext myCtx = FhirContext.forDstu2Cached();
 	private DefaultThymeleafNarrativeGenerator myGen;
 
 	@BeforeEach
@@ -183,7 +182,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 
 	@AfterAll
 	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 }

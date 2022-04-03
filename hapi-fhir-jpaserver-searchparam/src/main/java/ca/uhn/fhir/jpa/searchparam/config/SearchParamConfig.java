@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.searchparam.config;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCacheRefresher;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
@@ -39,9 +40,9 @@ import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.searchparam.matcher.IndexedSearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParameterCanonicalizer;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -69,7 +70,7 @@ public class SearchParamConfig {
 			case DSTU2_HL7ORG:
 			case DSTU2_1:
 			default:
-				throw new IllegalStateException("Can not handle version: " + myFhirContext.getVersion().getVersion());
+				throw new IllegalStateException(Msg.code(501) + "Can not handle version: " + myFhirContext.getVersion().getVersion());
 		}
 	}
 
@@ -85,7 +86,7 @@ public class SearchParamConfig {
 
 	@Bean
 	@Lazy
-	public SearchParamExtractorService searchParamExtractorService(){
+	public SearchParamExtractorService searchParamExtractorService() {
 		return new SearchParamExtractorService();
 	}
 
@@ -111,8 +112,8 @@ public class SearchParamConfig {
 	}
 
 	@Bean
-	IResourceChangeListenerRegistry resourceChangeListenerRegistry() {
-		return new ResourceChangeListenerRegistryImpl();
+	IResourceChangeListenerRegistry resourceChangeListenerRegistry(FhirContext theFhirContext, ResourceChangeListenerCacheFactory theResourceChangeListenerCacheFactory, InMemoryResourceMatcher theInMemoryResourceMatcher) {
+		return new ResourceChangeListenerRegistryImpl(theFhirContext, theResourceChangeListenerCacheFactory, theInMemoryResourceMatcher);
 	}
 
 	@Bean
@@ -121,9 +122,10 @@ public class SearchParamConfig {
 	}
 
 	@Bean
-    ResourceChangeListenerCacheFactory registeredResourceListenerFactory() {
+	ResourceChangeListenerCacheFactory registeredResourceListenerFactory() {
 		return new ResourceChangeListenerCacheFactory();
 	}
+
 	@Bean
 	@Scope("prototype")
 	ResourceChangeListenerCache registeredResourceChangeListener(String theResourceName, IResourceChangeListener theResourceChangeListener, SearchParameterMap theSearchParameterMap, long theRemoteRefreshIntervalMs) {

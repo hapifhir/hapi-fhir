@@ -32,10 +32,14 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.ScaledNumb
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import java.math.BigDecimal;
@@ -45,9 +49,8 @@ import java.util.Objects;
 @Entity
 @Table(name = "HFJ_SPIDX_NUMBER", indexes = {
 //	We used to have an index with name IDX_SP_NUMBER - Dont reuse
-	@Index(name = "IDX_SP_NUMBER_HASH_VAL", columnList = "HASH_IDENTITY,SP_VALUE"),
-	@Index(name = "IDX_SP_NUMBER_UPDATED", columnList = "SP_UPDATED"),
-	@Index(name = "IDX_SP_NUMBER_RESID", columnList = "RES_ID")
+	@Index(name = "IDX_SP_NUMBER_HASH_VAL_V2", columnList = "HASH_IDENTITY,SP_VALUE,RES_ID,PARTITION_ID"),
+	@Index(name = "IDX_SP_NUMBER_RESID_V2", columnList = "RES_ID, HASH_IDENTITY, SP_VALUE, PARTITION_ID")
 })
 public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchParam {
 
@@ -66,6 +69,11 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 	 */
 	@Column(name = "HASH_IDENTITY", nullable = true)
 	private Long myHashIdentity;
+
+	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = {})
+	@JoinColumn(foreignKey = @ForeignKey(name = "FK_SP_NUMBER_RES"),
+		name = "RES_ID", referencedColumnName = "RES_ID", nullable = false)
+	private ResourceTable myResource;
 
 	public ResourceIndexedSearchParamNumber() {
 	}
@@ -86,9 +94,16 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 		myHashIdentity = source.myHashIdentity;
 	}
 
+	@Override
+	public void clearHashes() {
+		myHashIdentity = null;
+	}
 
 	@Override
 	public void calculateHashes() {
+		if (myHashIdentity != null) {
+			return;
+		}
 		String resourceType = getResourceType();
 		String paramName = getParamName();
 		setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
@@ -173,4 +188,15 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 		return Objects.equals(getValue(), number.getValue());
 	}
 
+	@Override
+	public ResourceTable getResource() {
+		return myResource;
+	}
+
+	@Override
+	public BaseResourceIndexedSearchParam setResource(ResourceTable theResource) {
+		myResource = theResource;
+		setResourceType(theResource.getResourceType());
+		return this;
+	}
 }

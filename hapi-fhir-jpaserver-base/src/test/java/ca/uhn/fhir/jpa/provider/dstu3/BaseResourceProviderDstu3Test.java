@@ -3,9 +3,10 @@ package ca.uhn.fhir.jpa.provider.dstu3;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
-import ca.uhn.fhir.jpa.provider.GraphQLProvider;
+import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
+import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.subscription.match.config.WebsocketDispatcherConfig;
@@ -18,7 +19,6 @@ import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
 import ca.uhn.fhir.test.utilities.JettyUtil;
-import ca.uhn.fhir.util.TestUtil;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -30,8 +30,8 @@ import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
@@ -70,7 +70,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 
 	@AfterEach
 	public void after() throws Exception {
-		myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
+		myFhirContext.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
 		myResourceCountsCache.clear();
 		ourRestServer.getInterceptorService().unregisterAllInterceptors();
 	}
@@ -79,12 +79,12 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 	@BeforeEach
 	public void before() throws Exception {
 		myResourceCountsCache.clear();
-		myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-		myFhirCtx.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
-		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
+		myFhirContext.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+		myFhirContext.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
+		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
 
 		if (ourServer == null) {
-			ourRestServer = new RestfulServer(myFhirCtx);
+			ourRestServer = new RestfulServer(myFhirContext);
 			ourRestServer.registerProviders(myResourceProviders.createProviders());
 			ourRestServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 			ourRestServer.setDefaultResponseEncoding(EncodingEnum.XML);
@@ -96,6 +96,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 			ourRestServer.registerProvider(subscriptionTriggeringProvider);
 
 			ourRestServer.registerProvider(myAppCtx.getBean(GraphQLProvider.class));
+			ourRestServer.registerProvider(myAppCtx.getBean(ValueSetOperationProvider.class));
 
 			JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(ourRestServer, mySystemDao, myDaoConfig, ourSearchParamRegistry);
 			confProvider.setImplementationDescription("THIS IS THE DESC");
@@ -158,8 +159,8 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 
 			confProvider.setSearchParamRegistry(ourSearchParamRegistry);
 
-			myFhirCtx.getRestfulClientFactory().setSocketTimeout(5000000);
-			ourClient = myFhirCtx.newRestfulGenericClient(ourServerBase);
+			myFhirContext.getRestfulClientFactory().setSocketTimeout(5000000);
+			ourClient = myFhirContext.newRestfulGenericClient(ourServerBase);
 			if (shouldLogClient()) {
 				ourClient.registerInterceptor(new LoggingInterceptor());
 			}

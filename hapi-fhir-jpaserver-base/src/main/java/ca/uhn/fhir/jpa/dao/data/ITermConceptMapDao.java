@@ -31,7 +31,7 @@ import ca.uhn.fhir.jpa.entity.TermConceptMap;
  * #L%
  */
 
-public interface ITermConceptMapDao extends JpaRepository<TermConceptMap, Long> {
+public interface ITermConceptMapDao extends JpaRepository<TermConceptMap, Long>, IHapiFhirJpaRepository {
 	@Query("DELETE FROM TermConceptMap cm WHERE cm.myId = :pid")
 	@Modifying
 	void deleteTermConceptMapById(@Param("pid") Long theId);

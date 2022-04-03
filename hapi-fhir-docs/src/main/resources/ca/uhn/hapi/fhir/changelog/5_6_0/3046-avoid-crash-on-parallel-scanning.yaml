@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 3046
+title: When using deferred model scanning in highly parallelized environments, a crash could sometimes occur during parse/serialize operations.

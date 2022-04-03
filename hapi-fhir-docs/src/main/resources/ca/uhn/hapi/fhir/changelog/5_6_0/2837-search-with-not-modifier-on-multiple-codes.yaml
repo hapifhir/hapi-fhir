@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 2837
+title: "The :not modifier does not currently work for observations with multiple codes for the search. This is fixed."
