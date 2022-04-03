@@ -1,0 +1,7 @@
+---
+type: perf
+issue: 3482
+title: "When updating or reindexing a resource on a JPA server where indexing search param presence is
+  enabled (i.e. support for the `:missing` modifier), updates will try to reuse existing database rows
+  where possible instead of deleting one row and adding another. This should cause a slight performance
+  boost systems with this feature enabled."

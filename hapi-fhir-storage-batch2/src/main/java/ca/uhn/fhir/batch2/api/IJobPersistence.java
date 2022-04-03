@@ -20,6 +20,7 @@ package ca.uhn.fhir.batch2.api;
  * #L%
  */
 
+import ca.uhn.fhir.batch2.impl.BatchWorkChunk;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 
@@ -34,20 +35,16 @@ public interface IJobPersistence {
 	 * <p>
 	 * Chunk should be stored with a status of {@link ca.uhn.fhir.batch2.model.StatusEnum#QUEUED}
 	 *
-	 * @param theJobDefinitionId      The job definition ID
-	 * @param theJobDefinitionVersion The job definition version
-	 * @param theTargetStepId         The step ID that will be responsible for consuming this chunk
-	 * @param theInstanceId           The instance ID associated with this chunk
-	 * @param theDataSerialized       The data. This will be in the form of a map where the values may be strings, lists, and other maps (i.e. JSON)
-	 * @return Returns a globally unique identifier for this chunk. This should be a sequentially generated ID, a UUID, or something like that which is guaranteed to never overlap across jobs or instances.
+	 * @param theBatchWorkChunk the batch work chunk to be stored
+	 * @return a globally unique identifier for this chunk. This should be a sequentially generated ID, a UUID, or something like that which is guaranteed to never overlap across jobs or instances.
 	 */
-	String storeWorkChunk(String theJobDefinitionId, int theJobDefinitionVersion, String theTargetStepId, String theInstanceId, int theSequence, String theDataSerialized);
+	String storeWorkChunk(BatchWorkChunk theBatchWorkChunk);
 
 	/**
 	 * Fetches a chunk of work from storage, and update the stored status
 	 * to {@link ca.uhn.fhir.batch2.model.StatusEnum#IN_PROGRESS}
 	 *
-	 * @param theChunkId The ID, as returned by {@link #storeWorkChunk(String, int, String, String, int, String)}
+	 * @param theChunkId The ID, as returned by {@link #storeWorkChunk(BatchWorkChunk theBatchWorkChunk)}
 	 * @return The chunk of work
 	 */
 	Optional<WorkChunk> fetchWorkChunkSetStartTimeAndMarkInProgress(String theChunkId);
@@ -102,6 +99,14 @@ public interface IJobPersistence {
 	void markWorkChunkAsCompletedAndClearData(String theChunkId, int theRecordsProcessed);
 
 	/**
+	 * Increments the work chunk error count by the given amount
+	 *
+	 * @param theChunkId The chunk ID
+	 * @param theIncrementBy The number to increment the error count by
+	 */
+	void incrementWorkChunkErrorCount(String theChunkId, int theIncrementBy);
+
+	/**
 	 * Fetches all chunks for a given instance, without loading the data
 	 *
 	 * @param theInstanceId The instance ID
@@ -144,4 +149,5 @@ public interface IJobPersistence {
 	 * @param theInstanceId The instance ID
 	 */
 	void cancelInstance(String theInstanceId);
+
 }

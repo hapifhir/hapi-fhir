@@ -26,6 +26,7 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.ReaderInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +35,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -46,8 +51,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class BulkImportFileServlet extends HttpServlet {
 
-	private static final long serialVersionUID = 8302513561762436076L;
 	public static final String INDEX_PARAM = "index";
+	private static final long serialVersionUID = 8302513561762436076L;
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkImportFileServlet.class);
 	private final Map<String, IFileSupplier> myFileIds = new HashMap<>();
 
@@ -93,8 +98,17 @@ public class BulkImportFileServlet extends HttpServlet {
 		theResponse.addHeader(Constants.HEADER_CONTENT_TYPE, CT_FHIR_NDJSON + CHARSET_UTF8_CTSUFFIX);
 
 		IFileSupplier supplier = myFileIds.get(indexParam);
-		try (Reader reader = supplier.get()) {
-			IOUtils.copy(reader, theResponse.getWriter());
+		if (supplier.isGzip()) {
+			theResponse.addHeader(Constants.HEADER_CONTENT_ENCODING, Constants.ENCODING_GZIP);
+		}
+
+		try (Reader reader = new InputStreamReader(supplier.get())) {
+			String string = IOUtils.toString(reader);
+			ourLog.info(string);
+		}
+
+		try (InputStream reader = supplier.get()) {
+			IOUtils.copy(reader, theResponse.getOutputStream());
 		}
 
 	}
@@ -112,10 +126,29 @@ public class BulkImportFileServlet extends HttpServlet {
 		return index;
 	}
 
-	@FunctionalInterface
+	/**
+	 * Mostly intended for unit tests, registers a file
+	 * using raw file contents.
+	 */
+	public String registerFileByContents(String theFileContents) {
+		return registerFile(new IFileSupplier() {
+			@Override
+			public boolean isGzip() {
+				return false;
+			}
+
+			@Override
+			public InputStream get() {
+				return new ReaderInputStream(new StringReader(theFileContents), StandardCharsets.UTF_8);
+			}
+		});
+	}
+
 	public interface IFileSupplier {
 
-		Reader get() throws IOException;
+		boolean isGzip();
+
+		InputStream get() throws IOException;
 
 	}
 

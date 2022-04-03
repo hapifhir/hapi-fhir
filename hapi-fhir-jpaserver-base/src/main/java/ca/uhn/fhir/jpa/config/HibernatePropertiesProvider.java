@@ -29,6 +29,8 @@ import org.hibernate.search.engine.cfg.BackendSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 
+import javax.sql.DataSource;
+
 public class HibernatePropertiesProvider {
 
 	@Autowired
@@ -60,5 +62,10 @@ public class HibernatePropertiesProvider {
 			myHibernateSearchBackend = hibernateSearchBackend;
 		}
 		return myHibernateSearchBackend;
+	}
+
+
+	public DataSource getDataSource() {
+		return myEntityManagerFactory.getDataSource();
 	}
 }

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
@@ -191,6 +192,11 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 				if (entityIds.size() > 0) {
 					myResourceTagDao.findByResourceIds(entityIds);
 					preFetchIndexes(entityIds, "tags", "myTags", null);
+				}
+
+				entityIds = loadedResourceTableEntries.stream().map(t->t.getId()).collect(Collectors.toList());
+				if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.ENABLED) {
+					preFetchIndexes(entityIds, "searchParamPresence", "mySearchParamPresents", null);
 				}
 
 				new QueryChunker<ResourceTable>().chunk(loadedResourceTableEntries, SearchBuilder.getMaximumPageSize() / 2, entries -> {

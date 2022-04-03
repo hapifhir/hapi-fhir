@@ -20,14 +20,16 @@ package ca.uhn.fhir.batch2.jobs.config;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.jobs.imprt.BulkImport2AppCtx;
+import ca.uhn.fhir.batch2.jobs.imprt.BulkImportAppCtx;
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 //When you define a new batch job, add it here.
 @Configuration
 @Import({
-	BulkImport2AppCtx.class
+	BulkImportAppCtx.class,
+	ReindexAppCtx.class
 })
 public class Batch2JobsConfig {
 	// nothing

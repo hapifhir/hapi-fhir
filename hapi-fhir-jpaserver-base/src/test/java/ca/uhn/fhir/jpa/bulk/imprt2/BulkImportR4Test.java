@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.bulk.imprt2;
 
 import ca.uhn.fhir.batch2.api.IJobCleanerService;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
-import ca.uhn.fhir.batch2.jobs.imprt.BulkImport2AppCtx;
+import ca.uhn.fhir.batch2.jobs.imprt.BulkImportAppCtx;
 import ca.uhn.fhir.batch2.jobs.imprt.BulkImportFileServlet;
 import ca.uhn.fhir.batch2.jobs.imprt.BulkImportJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -87,7 +87,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		}
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
-		request.setJobDefinitionId(BulkImport2AppCtx.JOB_BULK_IMPORT_PULL);
+		request.setJobDefinitionId(BulkImportAppCtx.JOB_BULK_IMPORT_PULL);
 		request.setParameters(parameters);
 
 		// Execute
@@ -134,7 +134,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		}
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
-		request.setJobDefinitionId(BulkImport2AppCtx.JOB_BULK_IMPORT_PULL);
+		request.setJobDefinitionId(BulkImportAppCtx.JOB_BULK_IMPORT_PULL);
 		request.setParameters(parameters);
 
 		IAnonymousInterceptor anonymousInterceptor = (thePointcut, theArgs) -> {
@@ -203,7 +203,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 
 		int fileCount = 3;
 		List<String> indexes = addFiles(fileCount - 1);
-		indexes.add(myBulkImportFileServlet.registerFile(() -> new StringReader("{\"resourceType\":\"Foo\"}")));
+		indexes.add(myBulkImportFileServlet.registerFileByContents("{\"resourceType\":\"Foo\"}"));
 
 		BulkImportJobParameters parameters = new BulkImportJobParameters();
 		for (String next : indexes) {
@@ -212,7 +212,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		}
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
-		request.setJobDefinitionId(BulkImport2AppCtx.JOB_BULK_IMPORT_PULL);
+		request.setJobDefinitionId(BulkImportAppCtx.JOB_BULK_IMPORT_PULL);
 		request.setParameters(parameters);
 
 		// Execute
@@ -249,7 +249,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		parameters.addNdJsonUrl(url);
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
-		request.setJobDefinitionId(BulkImport2AppCtx.JOB_BULK_IMPORT_PULL);
+		request.setJobDefinitionId(BulkImportAppCtx.JOB_BULK_IMPORT_PULL);
 		request.setParameters(parameters);
 
 		IAnonymousInterceptor anonymousInterceptor = (thePointcut, theArgs) -> {
@@ -294,7 +294,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		// Setup
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
-		request.setJobDefinitionId(BulkImport2AppCtx.JOB_BULK_IMPORT_PULL);
+		request.setJobDefinitionId(BulkImportAppCtx.JOB_BULK_IMPORT_PULL);
 
 		// Execute
 
@@ -314,7 +314,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		// Setup
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
-		request.setJobDefinitionId(BulkImport2AppCtx.JOB_BULK_IMPORT_PULL);
+		request.setJobDefinitionId(BulkImportAppCtx.JOB_BULK_IMPORT_PULL);
 		request.setParameters(new BulkImportJobParameters());
 
 		// Execute
@@ -325,7 +325,10 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		} catch (InvalidRequestException e) {
 
 			// Verify
-			assertEquals("HAPI-2039: Failed to validate parameters for job of type BULK_IMPORT_PULL: [myNdJsonUrls At least one NDJSON URL must be provided]", e.getMessage());
+			String expected = """
+				HAPI-2039: Failed to validate parameters for job of type BULK_IMPORT_PULL:\s
+				 * myNdJsonUrls - At least one NDJSON URL must be provided""";
+			assertEquals(expected, e.getMessage());
 
 		}
 	}
@@ -338,7 +341,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		parameters.addNdJsonUrl("foo");
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
-		request.setJobDefinitionId(BulkImport2AppCtx.JOB_BULK_IMPORT_PULL);
+		request.setJobDefinitionId(BulkImportAppCtx.JOB_BULK_IMPORT_PULL);
 		request.setParameters(parameters);
 
 		// Execute
@@ -349,7 +352,10 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		} catch (InvalidRequestException e) {
 
 			// Verify
-			assertEquals("HAPI-2039: Failed to validate parameters for job of type BULK_IMPORT_PULL: [myNdJsonUrls[0].<list element> Must be a valid URL]", e.getMessage());
+			String expected = """
+				HAPI-2039: Failed to validate parameters for job of type BULK_IMPORT_PULL:\s
+				 * myNdJsonUrls[0].<list element> - Must be a valid URL""";
+			assertEquals(expected, e.getMessage());
 
 		}
 	}
@@ -372,7 +378,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 			builder.append("\n");
 			builder.append("\n");
 
-			String index = myBulkImportFileServlet.registerFile(() -> new StringReader(builder.toString()));
+			String index = myBulkImportFileServlet.registerFileByContents(builder.toString());
 			retVal.add(index);
 		}
 		return retVal;

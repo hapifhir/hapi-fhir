@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.config;
 import ca.uhn.fhir.batch2.jobs.config.Batch2JobsConfig;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.batch2.JpaBatch2Config;
-import ca.uhn.fhir.jpa.binstore.IBinaryStorageSvc;
+import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.config.r4.JpaR4Config;
 import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
@@ -155,7 +155,7 @@ public class TestR4Config {
 //			.logQueryBySlf4j(level)
 			.logSlowQueryBySlf4j(10, TimeUnit.SECONDS, level)
 			.beforeQuery(new BlockLargeNumbersOfParamsListener())
-			.beforeQuery(new MandatoryTransactionListener())
+			.beforeQuery( getMandatoryTransactionListener() )
 			.afterQuery(captureQueriesListener())
 			.afterQuery(new CurrentThreadCaptureQueriesListener())
 			.countQuery(singleQueryCountHolder())
@@ -169,6 +169,12 @@ public class TestR4Config {
 	public SingleQueryCountHolder singleQueryCountHolder() {
 		return new SingleQueryCountHolder();
 	}
+
+	@Bean
+	public ProxyDataSourceBuilder.SingleQueryExecution getMandatoryTransactionListener() {
+		return new MandatoryTransactionListener();
+	}
+
 
 	@Bean
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext) {

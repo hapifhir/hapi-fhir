@@ -22,6 +22,8 @@ package ca.uhn.fhir.jpa.binstore;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.binary.svc.BaseBinaryStorageSvcImpl;
+import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import ca.uhn.fhir.jpa.dao.data.IBinaryStorageEntityDao;
 import ca.uhn.fhir.jpa.model.entity.BinaryStorageEntity;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -33,8 +35,6 @@ import org.hibernate.Session;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
