@@ -238,16 +238,17 @@ public class TermValueSetConcept implements Serializable {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("myId", myId)
-			.append(myValueSet != null ? ("myValueSet - id=" + myValueSet.getId()) : ("myValueSet=(null)"))
-			.append("myValueSetPid", myValueSetPid)
-			.append("myOrder", myOrder)
-			.append("myValueSetUrl", this.getValueSetUrl())
-			.append("myValueSetName", this.getValueSetName())
-			.append("mySystem", mySystem)
-			.append("myCode", myCode)
-			.append("myDisplay", myDisplay)
-			.append(myDesignations != null ? ("myDesignations - size=" + myDesignations.size()) : ("myDesignations=(null)"))
+			.append("id", myId)
+			.append("order", myOrder)
+			.append("system", mySystem)
+			.append("code", myCode)
+			.append("valueSet", myValueSet != null ? myValueSet.getId() : "(null)")
+			.append("valueSetPid", myValueSetPid)
+			.append("valueSetUrl", this.getValueSetUrl())
+			.append("valueSetName", this.getValueSetName())
+			.append("display", myDisplay)
+			.append("designationCount", myDesignations != null ? myDesignations.size() : "(null)")
+			.append("parentPids", mySourceConceptDirectParentPids)
 			.toString();
 	}
 

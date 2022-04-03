@@ -26,7 +26,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.expunge.PartitionRunner;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceForeignKey;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.slf4j.Logger;
@@ -56,7 +56,7 @@ public class DeleteExpungeProcessor implements ItemProcessor<List<Long>, List<St
 	@Autowired
 	DaoConfig myDaoConfig;
 	@Autowired
-	IdHelperService myIdHelper;
+	IJpaIdHelperService myIdHelper;
 	@Autowired
 	IResourceLinkDao myResourceLinkDao;
 

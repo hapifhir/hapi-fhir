@@ -1,0 +1,6 @@
+---
+type: perf
+issue: 3478
+title: "When using JPA persistence with Hibernate Search (Lucene or Elasticsearch), simple FHIR queries that can be 
+ satisfied completely by Hibernate Search no longer query the database.  Before, every search involved the database,
+ even when not needed.  This is faster when there are many results."

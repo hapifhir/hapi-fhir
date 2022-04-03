@@ -1,10 +1,6 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -24,7 +20,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
-import ca.uhn.fhir.rest.api.MethodOutcome;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDstu3Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceProviderDstu3ConceptMapTest.class);
@@ -73,14 +72,14 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 	public void testTranslateByCodeSystemsAndSourceCodeOneToMany() {
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		Parameters inParams = new Parameters();
 		inParams.addParameter().setName("system").setValue(new UriType(CS_URL));
 		inParams.addParameter().setName("targetsystem").setValue(new UriType(CS_URL_3));
 		inParams.addParameter().setName("code").setValue(new CodeType("12345"));
 
-		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
+		ourLog.info("Request Parameters:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
 		Parameters respParams = ourClient
 			.operation()
@@ -89,7 +88,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 			.withParameters(inParams)
 			.execute();
 
-		ourLog.info("Response Parameters\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
+		ourLog.info("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
 
 		ParametersParameterComponent param = getParameterByName(respParams, "result");
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
@@ -141,7 +140,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		inParams.addParameter().setName("targetsystem").setValue(new UriType(CS_URL_2));
 		inParams.addParameter().setName("code").setValue(new CodeType("11111"));
 
-		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
+		ourLog.info("Request Parameters:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
 		Parameters respParams = ourClient
 			.operation()
@@ -150,7 +149,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 			.withParameters(inParams)
 			.execute();
 
-		ourLog.info("Response Parameters\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
+		ourLog.info("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
 		
 		ParametersParameterComponent param = getParameterByName(respParams, "result");
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
@@ -189,7 +188,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		inParams.addParameter().setName("targetsystem").setValue(new UriType(CS_URL_2));
 		inParams.addParameter().setName("code").setValue(new CodeType("11111"));
 
-		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
+		ourLog.info("Request Parameters:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
 		Parameters respParams = ourClient
 			.operation()
@@ -198,7 +197,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 			.withParameters(inParams)
 			.execute();
 
-		ourLog.info("Response Parameters\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
+		ourLog.info("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
 
 		// Should return v2 since v2 specified.
 		ParametersParameterComponent param = getParameterByName(respParams, "result");
@@ -239,7 +238,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		inParams.addParameter().setName("targetsystem").setValue(new UriType(CS_URL_2));
 		inParams.addParameter().setName("code").setValue(new CodeType("11111"));
 
-		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
+		ourLog.info("Request Parameters:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
 		Parameters respParams = ourClient
 			.operation()
@@ -248,7 +247,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 			.withParameters(inParams)
 			.execute();
 
-		ourLog.info("Response Parameters\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
+		ourLog.info("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
 
 		// Should return v1 since v1 specified.
 		ParametersParameterComponent param = getParameterByName(respParams, "result");
@@ -288,7 +287,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		inParams.addParameter().setName("targetsystem").setValue(new UriType(CS_URL_2));
 		inParams.addParameter().setName("code").setValue(new CodeType("11111"));
 
-		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
+		ourLog.info("Request Parameters:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
 		Parameters respParams = ourClient
 			.operation()
@@ -297,7 +296,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 			.withParameters(inParams)
 			.execute();
 
-		ourLog.info("Response Parameters\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
+		ourLog.info("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
 
 		// Should return v2 since v2 is the most recently updated version.
 		ParametersParameterComponent param = getParameterByName(respParams, "result");
@@ -336,7 +335,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		inParams.addParameter().setName("targetsystem").setValue(new UriType(CS_URL_2));
 		inParams.addParameter().setName("code").setValue(new CodeType("11111"));
 
-		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
+		ourLog.info("Request Parameters:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
 		Parameters respParams = ourClient
 			.operation()
@@ -345,7 +344,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 			.withParameters(inParams)
 			.execute();
 
-		ourLog.info("Response Parameters\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
+		ourLog.info("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
 
 		// Should return v2 since v2 is the most recently updated version.
 		ParametersParameterComponent param = getParameterByName(respParams, "result");
@@ -384,7 +383,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		inParams.addParameter().setName("targetsystem").setValue(new UriType(CS_URL_2));
 		inParams.addParameter().setName("code").setValue(new CodeType("11111"));
 
-		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
+		ourLog.info("Request Parameters:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
 		Parameters respParams = ourClient
 			.operation()
@@ -393,7 +392,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 			.withParameters(inParams)
 			.execute();
 
-		ourLog.info("Response Parameters\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
+		ourLog.info("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
 
 		// Should return v2 since v2 is the most recently updated version.
 		ParametersParameterComponent param = getParameterByName(respParams, "result");
@@ -431,7 +430,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		inParams.addParameter().setName("targetsystem").setValue(new UriType(CS_URL_2));
 		inParams.addParameter().setName("code").setValue(new CodeType("11111"));
 
-		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
+		ourLog.info("Request Parameters:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
 		Parameters respParams = ourClient
 			.operation()
@@ -440,7 +439,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 			.withParameters(inParams)
 			.execute();
 
-		ourLog.info("Response Parameters\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
+		ourLog.info("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
 		
 		ParametersParameterComponent param = getParameterByName(respParams, "result");
 		assertFalse(((BooleanType) param.getValue()).booleanValue());
@@ -463,7 +462,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		inParams.addParameter().setName("code").setValue(new CodeType("11111"));
 		inParams.addParameter().setName("reverse").setValue(new BooleanType(true));
 
-		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
+		ourLog.info("Request Parameters:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
 		
 		Parameters respParams = ourClient
@@ -473,7 +472,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 			.withParameters(inParams)
 			.execute();
 
-		ourLog.info("Response Parameters\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
+		ourLog.info("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
 		
 		
 		ParametersParameterComponent param = getParameterByName(respParams, "result");
@@ -508,7 +507,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		inParams.addParameter().setName("code").setValue(new CodeType("11111"));
 		inParams.addParameter().setName("reverse").setValue(new BooleanType(true));
 
-		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
+		ourLog.info("Request Parameters:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
 		
 		Parameters respParams = ourClient
@@ -518,7 +517,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 			.withParameters(inParams)
 			.execute();
 
-		ourLog.info("Response Parameters\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
+		ourLog.info("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
 		
 		
 		ParametersParameterComponent param = getParameterByName(respParams, "result");
@@ -553,7 +552,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		inParams.addParameter().setName("code").setValue(new CodeType("11111"));
 		inParams.addParameter().setName("reverse").setValue(new BooleanType(true));
 
-		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
+		ourLog.info("Request Parameters:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
 		
 		Parameters respParams = ourClient
@@ -563,7 +562,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 			.withParameters(inParams)
 			.execute();
 
-		ourLog.info("Response Parameters\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
+		ourLog.info("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
 		
 		
 		ParametersParameterComponent param = getParameterByName(respParams, "result");
@@ -598,7 +597,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		inParams.addParameter().setName("code").setValue(new CodeType("11111"));
 		inParams.addParameter().setName("reverse").setValue(new BooleanType(true));
 
-		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
+		ourLog.info("Request Parameters:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
 		
 		Parameters respParams = ourClient
@@ -608,7 +607,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 			.withParameters(inParams)
 			.execute();
 
-		ourLog.info("Response Parameters\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
+		ourLog.info("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
 		
 		
 		ParametersParameterComponent param = getParameterByName(respParams, "result");
@@ -648,7 +647,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		IIdType conceptMapId = myConceptMapDao.create(conceptMap, mySrd).getId().toUnqualifiedVersionless();
 		conceptMap = myConceptMapDao.read(conceptMapId);
 		
-		ourLog.info("ConceptMap: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.info("ConceptMap: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 	}
 	
 	private void createReverseConceptMap(String url, String version, String sourceCode, String sourceDisplay) {
@@ -669,7 +668,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		IIdType conceptMapId = myConceptMapDao.create(conceptMap, mySrd).getId().toUnqualifiedVersionless();
 		ConceptMap conceptMap1 = myConceptMapDao.read(conceptMapId);
 		
-		ourLog.info("ConceptMap : \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap1));
+		ourLog.info("ConceptMap : \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap1));
 	
 	}
 }

@@ -11,7 +11,14 @@ import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Composition;
+import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.ListResource;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,15 +32,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 
 public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 
@@ -64,7 +73,7 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
-		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
+		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
 
 		myDaoConfig.setAllowMultipleDelete(true);
 
@@ -186,7 +195,7 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 
 		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
 			String resourceString = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
-			bundle = theEncoding.newParser(myFhirCtx).parseResource(Bundle.class, resourceString);
+			bundle = theEncoding.newParser(myFhirContext).parseResource(Bundle.class, resourceString);
 		}
 		return bundle;
 	}

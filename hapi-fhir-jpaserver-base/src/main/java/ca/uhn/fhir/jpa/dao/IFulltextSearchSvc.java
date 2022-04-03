@@ -20,15 +20,16 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import java.util.List;
-
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
+import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteOptions;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import java.util.Collection;
+import java.util.List;
 
 public interface IFulltextSearchSvc {
 
@@ -38,18 +39,25 @@ public interface IFulltextSearchSvc {
 	 * consuming entries from theParams when used to query.
 	 *
 	 * @param theResourceName the resource name to restrict the query.
-	 * @param theParams the full query - modified to return only params unused by the index.
+	 * @param theParams       the full query - modified to return only params unused by the index.
 	 * @return the pid list for the matchign resources.
 	 */
 	List<ResourcePersistentId> search(String theResourceName, SearchParameterMap theParams);
 
-	List<ResourcePersistentId> everything(String theResourceName, SearchParameterMap theParams, RequestDetails theRequest);
+	/**
+	 * Autocomplete search for NIH $expand contextDirection=existing
+	 * @param theOptions operation options
+	 * @return a ValueSet with the search hits as the expansion.
+	 */
+	IBaseResource tokenAutocompleteValueSetSearch(ValueSetAutocompleteOptions theOptions);
+
+	List<ResourcePersistentId> everything(String theResourceName, SearchParameterMap theParams, ResourcePersistentId theReferencingPid);
 
 	boolean isDisabled();
 
 	ExtendedLuceneIndexData extractLuceneIndexData(IBaseResource theResource, ResourceIndexedSearchParams theNewParams);
 
-    boolean supportsSomeOf(SearchParameterMap myParams);
+	boolean supportsSomeOf(SearchParameterMap myParams);
 
 	/**
 	 * Re-publish the resource to the full-text index.
@@ -60,4 +68,15 @@ public interface IFulltextSearchSvc {
 	 * @param theEntity the fully populated ResourceTable entity
 	 */
 	 void reindex(ResourceTable theEntity);
+
+	List<ResourcePersistentId> lastN(SearchParameterMap theParams, Integer theMaximumResults);
+
+	/**
+	 * Returns inlined resource stored along with index mappings for matched identifiers
+	 *
+	 * @param thePids raw pids - we dont support versioned references
+	 * @return Resources list or empty if nothing found
+	 */
+	List<IBaseResource> getResources(Collection<Long> thePids);
+
 }

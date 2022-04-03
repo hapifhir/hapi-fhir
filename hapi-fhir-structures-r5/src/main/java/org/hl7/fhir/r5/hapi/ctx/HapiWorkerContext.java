@@ -281,8 +281,9 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
-	public ValueSetExpander.ValueSetExpansionOutcome expandVS(ConceptSetComponent theInc, boolean theHierarchical) throws TerminologyServiceException {
+	public ValueSetExpander.ValueSetExpansionOutcome expandVS(ConceptSetComponent theInc, boolean theHierarchical, boolean theNoInactive) throws TerminologyServiceException {
 		ValueSet input = new ValueSet();
+		input.getCompose().setInactive(!theNoInactive); //TODO GGG/DO is this valid?
 		input.getCompose().addInclude(theInc);
 		IValidationSupport.ValueSetExpansionOutcome output = myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), null, input);
 		return new ValueSetExpander.ValueSetExpansionOutcome((ValueSet) output.getValueSet(), output.getError(), null);
@@ -442,6 +443,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	public ValueSetExpander.ValueSetExpansionOutcome expandVS(ElementDefinitionBindingComponent theBinding, boolean theCacheOk, boolean theHierarchical) throws FHIRException {
 		throw new UnsupportedOperationException(Msg.code(230));
 	}
+
 
 	@Override
 	public String getLinkForUrl(String corePath, String url) {

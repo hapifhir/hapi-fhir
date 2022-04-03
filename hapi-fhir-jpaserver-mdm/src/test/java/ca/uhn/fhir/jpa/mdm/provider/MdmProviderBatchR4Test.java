@@ -61,6 +61,7 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 		myInterceptorService.registerAnonymousInterceptor(Pointcut.MDM_AFTER_PERSISTED_RESOURCE_CHECKED, afterMdmLatch);
 	}
 
+	@Override
 	@AfterEach
 	public void after() throws IOException {
 		myInterceptorService.unregisterInterceptor(afterMdmLatch);

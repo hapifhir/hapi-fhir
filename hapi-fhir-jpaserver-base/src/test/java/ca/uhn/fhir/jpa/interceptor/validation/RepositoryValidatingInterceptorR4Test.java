@@ -47,7 +47,7 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 	@BeforeEach
 	public void before() {
 		myValInterceptor = new RepositoryValidatingInterceptor();
-		myValInterceptor.setFhirContext(myFhirCtx);
+		myValInterceptor.setFhirContext(myFhirContext);
 		myInterceptorRegistry.registerInterceptor(myValInterceptor);
 	}
 
@@ -268,7 +268,7 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 			assertEquals("1", id.getVersionIdPart());
 		} catch (PreconditionFailedException e) {
 			// should not happen
-			fail(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+			fail(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 		}
 	}
 
@@ -320,7 +320,7 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 			assertEquals("1", id.getVersionIdPart());
 		} catch (PreconditionFailedException e) {
 			// should not happen
-			fail(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+			fail(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 		}
 	}
 
@@ -347,7 +347,7 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 			assertEquals("1", id.getVersionIdPart());
 		} catch (PreconditionFailedException e) {
 			// should not happen
-			fail(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+			fail(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 		}
 	}
 

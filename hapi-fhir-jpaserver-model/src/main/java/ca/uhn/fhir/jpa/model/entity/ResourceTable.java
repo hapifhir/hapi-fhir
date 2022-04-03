@@ -73,9 +73,9 @@ import java.util.stream.Collectors;
 @Indexed(routingBinder= @RoutingBinderRef(type = ResourceTableRoutingBinder.class))
 @Entity
 @Table(name = "HFJ_RESOURCE", uniqueConstraints = {}, indexes = {
+	// Do not reuse previously used index name: IDX_INDEXSTATUS
 	@Index(name = "IDX_RES_DATE", columnList = "RES_UPDATED"),
 	@Index(name = "IDX_RES_TYPE", columnList = "RES_TYPE"),
-	@Index(name = "IDX_INDEXSTATUS", columnList = "SP_INDEX_STATUS")
 })
 @NamedEntityGraph(name = "Resource.noJoins")
 public class ResourceTable extends BaseHasResource implements Serializable, IBasePersistedResource, IResourceLookup {
@@ -264,7 +264,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	@OneToMany(mappedBy = "myResource", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	@OptimisticLock(excluded = true)
-	private Collection<SearchParamPresent> mySearchParamPresents;
+	private Collection<SearchParamPresentEntity> mySearchParamPresents;
 
 	@OneToMany(mappedBy = "myResource", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	@OptimisticLock(excluded = true)
@@ -774,5 +774,12 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	public void setLuceneIndexData(ExtendedLuceneIndexData theLuceneIndexData) {
 		myLuceneIndexData = theLuceneIndexData;
+	}
+
+	public Collection<SearchParamPresentEntity> getSearchParamPresents() {
+		if (mySearchParamPresents == null) {
+			mySearchParamPresents = new ArrayList<>();
+		}
+		return mySearchParamPresents;
 	}
 }

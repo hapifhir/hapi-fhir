@@ -36,7 +36,7 @@ public class PagingMultinodeProviderDstu3Test extends BaseResourceProviderDstu3T
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
-		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
+		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
 
 		myDaoConfig.setAllowMultipleDelete(true);
 

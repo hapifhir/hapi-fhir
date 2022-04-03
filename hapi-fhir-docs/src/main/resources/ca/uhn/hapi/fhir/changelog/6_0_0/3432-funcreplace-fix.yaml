@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3418
+jira: SMILE-3850
+title: "Updated the FHIR core libs to 5.6.36 to support fix for funcReplace in FHIRPathEngine."

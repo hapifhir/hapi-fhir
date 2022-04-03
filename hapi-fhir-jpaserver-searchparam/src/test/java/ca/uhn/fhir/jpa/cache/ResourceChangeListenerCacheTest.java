@@ -44,7 +44,7 @@ class ResourceChangeListenerCacheTest {
 
 	@Test
 	public void doNotRefreshIfNotMatches() {
-		ResourceChangeListenerCache cache = myResourceChangeListenerCacheFactory.create(TEST_RESOURCE_NAME, ourMap, mock(IResourceChangeListener.class), TEST_REFRESH_INTERVAL);
+		ResourceChangeListenerCache cache = myResourceChangeListenerCacheFactory.newResourceChangeListenerCache(TEST_RESOURCE_NAME, ourMap, mock(IResourceChangeListener.class), TEST_REFRESH_INTERVAL);
 		cache.forceRefresh();
 		assertNotEquals(Instant.MIN, cache.getNextRefreshTimeForUnitTest());
 
@@ -65,7 +65,7 @@ class ResourceChangeListenerCacheTest {
 
 	@Test
 	public void testSchedule() {
-		ResourceChangeListenerCache cache = myResourceChangeListenerCacheFactory.create(TEST_RESOURCE_NAME, ourMap, ourListener, TEST_REFRESH_INTERVAL);
+		ResourceChangeListenerCache cache = myResourceChangeListenerCacheFactory.newResourceChangeListenerCache(TEST_RESOURCE_NAME, ourMap, ourListener, TEST_REFRESH_INTERVAL);
 		ResourceChangeListenerCache.setNowForUnitTests("08:00:00");
 		cache.refreshCacheIfNecessary();
 		verify(myResourceChangeListenerCacheRefresher, times(1)).refreshCacheAndNotifyListener(any());

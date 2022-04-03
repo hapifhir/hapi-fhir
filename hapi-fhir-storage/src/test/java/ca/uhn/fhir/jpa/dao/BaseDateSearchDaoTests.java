@@ -16,7 +16,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
@@ -33,6 +35,8 @@ public abstract class BaseDateSearchDaoTests {
 	 */
 	IIdType myObservationId;
 
+	Fixture myFixture;
+
 	//time zone set to EST
 	@BeforeEach
 	public void setTimeZoneEST() {
@@ -43,6 +47,15 @@ public abstract class BaseDateSearchDaoTests {
 	@AfterEach
 	public void resetTimeZone() {
 		TimeZone.setDefault(null);
+	}
+
+	@BeforeEach
+	public void setupFixture() {
+		myFixture = constructFixture();
+	}
+	@AfterEach
+	public void cleanup() {
+		myFixture.cleanup();
 	}
 
 	/**
@@ -65,15 +78,14 @@ public abstract class BaseDateSearchDaoTests {
 	//@CsvSource("2019-12-31T08:00:00,eq2020,false,inline,1")
 	@MethodSource("dateSearchCases")
 	public void testDateSearchMatching(String theResourceDate, String theQuery, boolean theExpectedMatch, String theFileName, int theLineNumber) {
-		Fixture fixture = getFixture();
 		if (isShouldSkip(theResourceDate, theQuery)) {
 			return;
 		}
 		// setup
-		myObservationId = fixture.createObservationWithEffectiveDate(theResourceDate);
+		myObservationId = myFixture.createObservationWithEffectiveDate(theResourceDate);
 
 		// run the query
-		boolean matched = fixture.isObservationSearchMatch(theQuery, myObservationId);
+		boolean matched = myFixture.isObservationSearchMatch(theQuery, myObservationId);
 
 		assertExpectedMatch(theResourceDate, theQuery, theExpectedMatch, matched, theFileName, theLineNumber);
 	}
@@ -106,7 +118,7 @@ public abstract class BaseDateSearchDaoTests {
 	 *
 	 * Use an abstract method instead of a constructor because JUnit has a such a funky lifecycle.
 	 */
-	protected abstract Fixture getFixture();
+	protected abstract Fixture constructFixture();
 
 	public interface Fixture {
 		/**
@@ -119,11 +131,13 @@ public abstract class BaseDateSearchDaoTests {
 		 */
 		boolean isObservationSearchMatch(String theQuery, IIdType theObservationId);
 
+		void cleanup();
 	}
 
 	public static class TestDataBuilderFixture<O extends IBaseResource> implements Fixture {
 		final ITestDataBuilder myTestDataBuilder;
 		final IFhirResourceDao<O> myObservationDao;
+		final Set<IIdType> myCreatedIds = new HashSet<>();
 
 		public TestDataBuilderFixture(ITestDataBuilder theTestDataBuilder, IFhirResourceDao<O> theObservationDao) {
 			myTestDataBuilder = theTestDataBuilder;
@@ -132,7 +146,9 @@ public abstract class BaseDateSearchDaoTests {
 
 		@Override
 		public IIdType createObservationWithEffectiveDate(String theResourceDate) {
-			return myTestDataBuilder.createObservation(myTestDataBuilder.withEffectiveDate(theResourceDate));
+			IIdType id = myTestDataBuilder.createObservation(myTestDataBuilder.withEffectiveDate(theResourceDate));
+			myCreatedIds.add(id);
+			return id;
 		}
 
 		@Override
@@ -145,6 +161,12 @@ public abstract class BaseDateSearchDaoTests {
 
 			boolean matched = results.getAllResourceIds().contains(theObservationId.getIdPart());
 			return matched;
+		}
+
+		@Override
+		public void cleanup() {
+			myCreatedIds.forEach(myObservationDao::delete);
+			myCreatedIds.clear();
 		}
 	}
 }

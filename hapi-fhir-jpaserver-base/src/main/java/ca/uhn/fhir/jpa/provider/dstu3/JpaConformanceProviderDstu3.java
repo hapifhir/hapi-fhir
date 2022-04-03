@@ -27,6 +27,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ExtensionConstants;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -116,7 +117,7 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 
 				nextResource.getSearchParam().clear();
 				String resourceName = nextResource.getType();
-				Map<String, RuntimeSearchParam> searchParams = mySearchParamRegistry.getActiveSearchParams(resourceName);
+				ResourceSearchParams searchParams = mySearchParamRegistry.getActiveSearchParams(resourceName);
 				for (RuntimeSearchParam runtimeSp : searchParams.values()) {
 					CapabilityStatementRestResourceSearchParamComponent confSp = nextResource.addSearchParam();
 

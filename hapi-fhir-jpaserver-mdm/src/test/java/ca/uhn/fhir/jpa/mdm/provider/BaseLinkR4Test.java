@@ -55,6 +55,7 @@ public abstract class BaseLinkR4Test extends BaseProviderR4Test {
 		myDaoConfig.setDeleteExpungeEnabled(true);
 	}
 
+	@Override
 	@AfterEach
 	public void after() throws IOException {
 		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());

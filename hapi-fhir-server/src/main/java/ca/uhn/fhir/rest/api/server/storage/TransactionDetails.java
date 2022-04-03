@@ -293,5 +293,9 @@ public class TransactionDetails {
 		myResolvedResourceIds.clear();
 		myResolvedMatchUrls.clear();
 	}
+
+	public boolean hasResolvedResourceIds() {
+		return !myResolvedResourceIds.isEmpty();
+	}
 }
 

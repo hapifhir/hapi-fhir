@@ -39,10 +39,12 @@ import java.util.Set;
 public class AddIndexTask extends BaseTableTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(AddIndexTask.class);
+
 	private String myIndexName;
 	private List<String> myColumns;
 	private Boolean myUnique;
 	private List<String> myIncludeColumns = Collections.emptyList();
+	private boolean myOnline;
 
 	public AddIndexTask(String theProductVersion, String theSchemaVersion) {
 		super(theProductVersion, theSchemaVersion);
@@ -126,31 +128,34 @@ public class AddIndexTask extends BaseTableTask {
 			}
 			mssqlWhereClause += ")";
 		}
-		String sql = "create " + unique + "index " + myIndexName + " on " + getTableName() + "(" + columns + ")" + includeClause + mssqlWhereClause;
+		String postgresOnline = "";
+		String oracleOnlineDeferred = "";
+		if (myOnline) {
+			switch (getDriverType()) {
+				case POSTGRES_9_4:
+					postgresOnline = "CONCURRENTLY ";
+					// This runs without a lock, and can't be done transactionally.
+					setTransactional(false);
+					break;
+				case ORACLE_12C:
+					oracleOnlineDeferred = " ONLINE DEFERRED INVALIDATION";
+					break;
+				case MSSQL_2012:
+					oracleOnlineDeferred = " WITH (ONLINE = ON)";
+					break;
+				default:
+			}
+		}
+
+
+		String sql =
+			"create " + unique + "index " + postgresOnline + myIndexName +
+			" on " + getTableName() + "(" + columns + ")" + includeClause +  mssqlWhereClause + oracleOnlineDeferred;
 		return sql;
 	}
 
 	public void setColumns(String... theColumns) {
 		setColumns(Arrays.asList(theColumns));
-	}
-
-	@Override
-	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
-		super.generateEquals(theBuilder, theOtherObject);
-
-		AddIndexTask otherObject = (AddIndexTask) theOtherObject;
-		theBuilder.append(myIndexName, otherObject.myIndexName);
-		theBuilder.append(myColumns, otherObject.myColumns);
-		theBuilder.append(myUnique, otherObject.myUnique);
-
-	}
-
-	@Override
-	protected void generateHashCode(HashCodeBuilder theBuilder) {
-		super.generateHashCode(theBuilder);
-		theBuilder.append(myIndexName);
-		theBuilder.append(myColumns);
-		theBuilder.append(myUnique);
 	}
 
 	public void setIncludeColumns(String... theIncludeColumns) {
@@ -161,4 +166,33 @@ public class AddIndexTask extends BaseTableTask {
 		Validate.notNull(theIncludeColumns);
 		myIncludeColumns = theIncludeColumns;
 	}
+
+	/**
+	 * Add Index without locking the table.
+	 */
+	public void setOnline(boolean theFlag) {
+		myOnline = theFlag;
+	}
+	@Override
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
+		super.generateEquals(theBuilder, theOtherObject);
+
+		AddIndexTask otherObject = (AddIndexTask) theOtherObject;
+		theBuilder.append(myIndexName, otherObject.myIndexName);
+		theBuilder.append(myColumns, otherObject.myColumns);
+		theBuilder.append(myUnique, otherObject.myUnique);
+		theBuilder.append(myIncludeColumns, otherObject.myIncludeColumns);
+		theBuilder.append(myOnline, otherObject.myOnline);
+
+	}
+
+	@Override
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+		super.generateHashCode(theBuilder);
+		theBuilder.append(myIndexName);
+		theBuilder.append(myColumns);
+		theBuilder.append(myUnique);
+		theBuilder.append(myOnline);
+	}
+
 }

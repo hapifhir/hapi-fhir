@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.dao;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
@@ -8,7 +7,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -17,6 +16,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.dao.IJpaDao;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
@@ -25,7 +25,6 @@ import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
 import ca.uhn.fhir.jpa.dao.index.DaoSearchParamSynchronizer;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.index.SearchParamWithInlineReferencesExtractor;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
@@ -76,7 +75,6 @@ import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
@@ -87,6 +85,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
+import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.MetaUtil;
@@ -112,6 +111,7 @@ import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -150,7 +150,6 @@ import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.UUID;
@@ -187,21 +186,19 @@ import static org.apache.commons.lang3.StringUtils.trim;
 @Repository
 public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStorageDao implements IDao, IJpaDao<T>, ApplicationContextAware {
 
-	// total attempts to do a tag transaction
-	private static final int TOTAL_TAG_READ_ATTEMPTS = 10;
-
 	public static final long INDEX_STATUS_INDEXED = 1L;
 	public static final long INDEX_STATUS_INDEXING_FAILED = 2L;
 	public static final String NS_JPA_PROFILE = "https://github.com/hapifhir/hapi-fhir/ns/jpa/profile";
+	// total attempts to do a tag transaction
+	private static final int TOTAL_TAG_READ_ATTEMPTS = 10;
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseHapiFhirDao.class);
-	private static final Map<FhirVersionEnum, FhirContext> ourRetrievalContexts = new HashMap<>();
 	private static boolean ourValidationDisabledForUnitTest;
 	private static boolean ourDisableIncrementOnUpdateForUnitTest = false;
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
 	@Autowired
-	protected IdHelperService myIdHelperService;
+	protected IIdHelperService myIdHelperService;
 	@Autowired
 	protected IForcedIdDao myForcedIdDao;
 	@Autowired
@@ -391,14 +388,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	public FhirContext getContext(FhirVersionEnum theVersion) {
 		Validate.notNull(theVersion, "theVersion must not be null");
-		synchronized (ourRetrievalContexts) {
-			FhirContext retVal = ourRetrievalContexts.get(theVersion);
-			if (retVal == null) {
-				retVal = new FhirContext(theVersion);
-				ourRetrievalContexts.put(theVersion, retVal);
-			}
-			return retVal;
+		if (theVersion == myFhirContext.getVersion().getVersion()) {
+			return myFhirContext;
 		}
+		return FhirContext.forCached(theVersion);
 	}
 
 	/**
@@ -434,7 +427,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	/**
 	 * Gets the tag defined by the fed in values, or saves it if it does not
 	 * exist.
-	 *
+	 * <p>
 	 * Can also throw an InternalErrorException if something bad happens.
 	 */
 	private TagDefinition getOrCreateTag(TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel) {
@@ -1040,18 +1033,24 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			}
 		} else if (theEntity instanceof ResourceTable) {
 			ResourceTable resource = (ResourceTable) theEntity;
-			version = theEntity.getVersion();
-			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(theEntity.getId(), version);
-			((ResourceTable) theEntity).setCurrentVersionEntity(history);
+			ResourceHistoryTable history;
+			if (resource.getCurrentVersionEntity() != null) {
+				history = resource.getCurrentVersionEntity();
+			} else {
+				version = theEntity.getVersion();
+				history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(theEntity.getId(), version);
+				((ResourceTable) theEntity).setCurrentVersionEntity(history);
 
-			while (history == null) {
-				if (version > 1L) {
-					version--;
-					history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(theEntity.getId(), version);
-				} else {
-					return null;
+				while (history == null) {
+					if (version > 1L) {
+						version--;
+						history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(theEntity.getId(), version);
+					} else {
+						return null;
+					}
 				}
 			}
+
 			resourceBytes = history.getResource();
 			resourceEncoding = history.getEncoding();
 			resourceText = history.getResourceTextVc();
@@ -1140,7 +1139,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			} catch (Exception e) {
 				StringBuilder b = new StringBuilder();
 				b.append("Failed to parse database resource[");
-				b.append(resourceType);
+				b.append(myFhirContext.getResourceType(resourceType));
 				b.append("/");
 				b.append(theEntity.getIdDt().getIdPart());
 				b.append(" (pid ");
@@ -1357,7 +1356,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 
 		if (theUpdateVersion) {
-			entity.setVersion(entity.getVersion() + 1);
+			long newVersion = entity.getVersion() + 1;
+			entity.setVersion(newVersion);
 		}
 
 		/*
@@ -1398,19 +1398,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		 * those by path and not by parameter name.
 		 */
 		if (thePerformIndexing && newParams != null) {
-			Map<String, Boolean> presentSearchParams = new HashMap<>();
-			for (String nextKey : newParams.getPopulatedResourceLinkParameters()) {
-				presentSearchParams.put(nextKey, Boolean.TRUE);
-			}
-			Set<Entry<String, RuntimeSearchParam>> activeSearchParams = mySearchParamRegistry.getActiveSearchParams(entity.getResourceType()).entrySet();
-			for (Entry<String, RuntimeSearchParam> nextSpEntry : activeSearchParams) {
-				if (nextSpEntry.getValue().getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
-					if (!presentSearchParams.containsKey(nextSpEntry.getKey())) {
-						presentSearchParams.put(nextSpEntry.getKey(), Boolean.FALSE);
-					}
-				}
-			}
-			AddRemoveCount presenceCount = mySearchParamPresenceSvc.updatePresence(entity, presentSearchParams);
+			Map<String, Boolean> searchParamPresenceMap = getSearchParamPresenceMap(entity, newParams);
+
+			AddRemoveCount presenceCount = mySearchParamPresenceSvc.updatePresence(entity, searchParamPresenceMap);
 
 			// Interceptor broadcast: JPA_PERFTRACE_INFO
 			if (!presenceCount.isEmpty()) {
@@ -1466,6 +1456,23 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		return entity;
 	}
 
+	@NotNull
+	private Map<String, Boolean> getSearchParamPresenceMap(ResourceTable entity, ResourceIndexedSearchParams newParams) {
+		Map<String, Boolean> retval = new HashMap<>();
+
+		for (String nextKey : newParams.getPopulatedResourceLinkParameters()) {
+			retval.put(nextKey, Boolean.TRUE);
+		}
+
+		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(entity.getResourceType());
+		activeSearchParams.getReferenceSearchParamNames().forEach(key -> {
+			if (!retval.containsKey(key)) {
+				retval.put(key, Boolean.FALSE);
+			}
+		});
+		return retval;
+	}
+
 	private void createHistoryEntry(RequestDetails theRequest, IBaseResource theResource, ResourceTable theEntity, EncodedResource theChanged) {
 		boolean versionedTags = getConfig().getTagStorageMode() == DaoConfig.TagStorageModeEnum.VERSIONED;
 		final ResourceHistoryTable historyEntry = theEntity.toHistory(versionedTags);
@@ -1475,6 +1482,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		ourLog.debug("Saving history entry {}", historyEntry.getIdDt());
 		myResourceHistoryTableDao.save(historyEntry);
+		theEntity.setCurrentVersionEntity(historyEntry);
 
 		// Save resource source
 		String source = null;

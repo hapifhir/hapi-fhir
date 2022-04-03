@@ -5,8 +5,8 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.dao.data.IPartitionDao;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
-import ca.uhn.fhir.jpa.provider.DiffProvider;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
+import ca.uhn.fhir.jpa.provider.DiffProvider;
 import ca.uhn.fhir.jpa.provider.JpaCapabilityStatementProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
@@ -25,7 +25,7 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhir.rest.server.provider.DeleteExpungeProvider;
-import ca.uhn.fhir.rest.server.provider.ReindexProvider;
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexProvider;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -91,19 +91,19 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 
 	@AfterEach
 	public void after() throws Exception {
-		myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
+		myFhirContext.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
 		ourRestServer.getInterceptorService().unregisterAllInterceptors();
 	}
 
 	@BeforeEach
 	public void before() throws Exception {
-		myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-		myFhirCtx.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
-		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
+		myFhirContext.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+		myFhirContext.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
+		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
 		myResourceCountsCache = (ResourceCountCache) myAppCtx.getBean("myResourceCountsCache");
 
 		if (ourServer == null) {
-			ourRestServer = new RestfulServer(myFhirCtx);
+			ourRestServer = new RestfulServer(myFhirContext);
 			ourRestServer.registerProviders(myResourceProviders.createProviders());
 			ourRestServer.registerProvider(myBinaryAccessProvider);
 			ourRestServer.getInterceptorService().registerInterceptor(myBinaryStorageInterceptor);
@@ -176,8 +176,8 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			myValidationSupport = wac.getBean(IValidationSupport.class);
 			mySearchCoordinatorSvc = wac.getBean(ISearchCoordinatorSvc.class);
 
-			myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-			myFhirCtx.getRestfulClientFactory().setSocketTimeout(400000);
+			myFhirContext.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+			myFhirContext.getRestfulClientFactory().setSocketTimeout(400000);
 
 			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 			connectionManager.setMaxTotal(10);
@@ -194,7 +194,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 		ourRestServer.setPagingProvider(ourPagingProvider);
 		ourRestServer.registerInterceptor(new ResponseHighlighterInterceptor());
 
-		myClient = myFhirCtx.newRestfulGenericClient(ourServerBase);
+		myClient = myFhirContext.newRestfulGenericClient(ourServerBase);
 		if (shouldLogClient()) {
 			myClient.registerInterceptor(new LoggingInterceptor());
 		}

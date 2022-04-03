@@ -3,8 +3,8 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
-import ca.uhn.fhir.jpa.binstore.BinaryStorageInterceptor;
-import ca.uhn.fhir.jpa.binstore.IBinaryStorageSvc;
+import ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor;
+import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.HapiExtensions;
@@ -21,8 +21,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.Matchers.blankOrNullString;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 
@@ -68,7 +73,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 
 		// Make sure it was externalized
 		IIdType id = outcome.getId().toUnqualifiedVersionless();
-		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
+		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
 		ourLog.info("Encoded: {}", encoded);
 		assertThat(encoded, containsString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID));
 		assertThat(encoded, not(containsString("\"data\"")));
@@ -92,7 +97,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 
 		// Make sure it was externalized
 		IIdType id = outcome.getId().toUnqualifiedVersionless();
-		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
+		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
 		ourLog.info("Encoded: {}", encoded);
 		assertThat(encoded, containsString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID));
 		assertThat(encoded, not(containsString("\"data\"")));
@@ -116,7 +121,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 
 		// Make sure it was externalized
 		IIdType id = outcome.getId().toUnqualifiedVersionless();
-		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
+		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
 		ourLog.info("Encoded: {}", encoded);
 		assertThat(encoded, containsString("\"data\": \"BAMCAQ==\""));
 		assertThat(encoded, not(containsString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID)));
@@ -140,7 +145,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 
 		// Make sure it was externalized
 		IIdType id = outcome.getId().toUnqualifiedVersionless();
-		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
+		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
 		ourLog.info("Encoded: {}", encoded);
 		assertThat(encoded, containsString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID));
 		assertThat(encoded, not(containsString("\"data\"")));
@@ -165,7 +170,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 
 		// Make sure it was externalized
 		IIdType id = outcome.getId().toUnqualifiedVersionless();
-		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
+		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
 		ourLog.info("Encoded: {}", encoded);
 		assertThat(encoded, containsString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID));
 		assertThat(encoded, not(containsString("\"data\"")));
@@ -206,7 +211,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 
 		// Make sure it was externalized
 		IIdType id = outcome.getId().toUnqualifiedVersionless();
-		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
+		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
 		ourLog.info("Encoded: {}", encoded);
 		assertThat(encoded, containsString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID));
 		assertThat(encoded, not(containsString("\"data\"")));
@@ -253,7 +258,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 
 		// Make sure it was externalized
 		IIdType id = outcome.getId().toUnqualifiedVersionless();
-		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
+		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
 		ourLog.info("Encoded: {}", encoded);
 		assertThat(encoded, containsString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID));
 		assertThat(encoded, not(containsString("\"data\"")));
@@ -299,7 +304,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 
 		// Make sure it was externalized
 		IIdType id = outcome.getId().toUnqualifiedVersionless();
-		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
+		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
 		ourLog.info("Encoded: {}", encoded);
 		assertThat(encoded, containsString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID));
 		assertThat(encoded, not(containsString("\"data\"")));

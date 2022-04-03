@@ -363,7 +363,7 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 		p.addParameter()
 			.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES)
 			.setValue(new BooleanType(true));
-		ourLog.info(myFhirCtx.newJsonParser().encodeResourceToString(p));
+		ourLog.info(myFhirContext.newJsonParser().encodeResourceToString(p));
 	}
 
 

@@ -347,7 +347,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.addFilter()
 			.setProperty("copyright")
 			.setOp(ValueSet.FilterOperator.EQUAL)
-			.setValue("3rdParty");
+			.setValue("3rdParty"); // mixed case
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4"));
@@ -364,7 +364,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.addFilter()
 			.setProperty("copyright")
 			.setOp(ValueSet.FilterOperator.EQUAL)
-			.setValue("3rdparty");
+			.setValue("3rdparty");  // lowercase
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4"));
@@ -1853,7 +1853,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 	public void testStoreTermCodeSystemAndNestedChildren() {
 		IIdType codeSystemId = createCodeSystem();
 		CodeSystem codeSystemResource = myCodeSystemDao.read(codeSystemId);
-		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystemResource));
+		ourLog.info("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystemResource));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override

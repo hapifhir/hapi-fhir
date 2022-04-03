@@ -201,6 +201,10 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService, Sma
 		if (isSchedulingDisabled()) {
 			return;
 		}
+
+		assert theJobDefinition.getId() != null;
+		assert theJobDefinition.getJobClass() != null;
+
 		ourLog.info("Scheduling {} job {} with interval {}", theInstanceName, theJobDefinition.getId(), StopWatch.formatMillis(theIntervalMillis));
 		if (theJobDefinition.getGroup() == null) {
 			theJobDefinition.setGroup(myDefaultGroup);
