@@ -317,8 +317,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	protected FhirContext myFhirContext;
 	@Autowired
-	protected FhirContext myFhirContext;
-	@Autowired
 	@Qualifier("myGroupDaoR4")
 	protected IFhirResourceDao<Group> myGroupDao;
 	@Autowired
