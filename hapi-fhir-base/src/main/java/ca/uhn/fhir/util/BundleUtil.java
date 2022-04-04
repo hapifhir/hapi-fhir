@@ -551,17 +551,17 @@ public class BundleUtil {
 		return isPatch;
 	}
 
+
 	/**
-	 * Add a new bundle entry to a given bundle with the value provided
+	 * create a new bundle entry and set a value for a single field
 	 * @param theContext     Context holding resource definition
-	 * @param theFieldName   Child field name of the resource to set
-	 * @param theBundle      The bundle to add the new entry
-	 * @param theValues      The values to set on the resource child field name
+	 * @param theFieldName   Child field name of the bundle entry to set
+	 * @param theValues      The values to set on the bundle entry child field name
+	 * @return the new bundle entry
 	 */
-	public static void addBundleEntry(FhirContext theContext, IBaseBundle theBundle, String theFieldName, IBase... theValues) {
+	public static IBase createNewBundleEntryWithSingleField(FhirContext theContext, String theFieldName, IBase... theValues) {
 		IBaseBundle newBundle = TerserUtil.newResource(theContext, "Bundle");
 		BaseRuntimeChildDefinition entryChildDef = theContext.getResourceDefinition(newBundle).getChildByName("entry");
-		List<IBase> entries = entryChildDef.getAccessor().getValues(theBundle);
 
 		BaseRuntimeElementCompositeDefinition<?> entryChildElem = (BaseRuntimeElementCompositeDefinition<?>) entryChildDef.getChildByName("entry");
 		BaseRuntimeChildDefinition resourceChild = entryChildElem.getChildByName(theFieldName);
@@ -575,8 +575,7 @@ public class BundleUtil {
 				break;
 			}
 		}
-		entries.add(bundleEntry);
-		TerserUtil.setField(theContext, "entry", theBundle, entries.toArray(new IBase[0]));
+		return bundleEntry;
 	}
 
 	private static class SortLegality {

@@ -5,8 +5,7 @@ import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.TestUtil;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Medication;
@@ -15,10 +14,10 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.UriType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
@@ -402,15 +401,15 @@ public class BundleUtilTest {
 	}
 
 	@Test
-	public void testAddBundleEntry() {
-		Bundle bundle = new Bundle();
-		bundle.addEntry(new Bundle.BundleEntryComponent().setResource(new Patient()));
-		bundle.addEntry(new Bundle.BundleEntryComponent().setResource(new Observation()));
-		//before
-		assertThat(bundle.getEntry(), hasSize(2));
-		//after
-		BundleUtil.addBundleEntry(ourCtx, bundle, "resource", new Patient());
-		assertThat(bundle.getEntry(), hasSize(3));
+	public void testCreateNewBundleEntryWithSingleField() {
+		Patient pat1 = new Patient();
+		pat1.setId("Patient/P1");
+		IBase bundleEntry = BundleUtil.createNewBundleEntryWithSingleField(ourCtx,"resource", pat1);
+		assertThat(((Bundle.BundleEntryComponent)bundleEntry).getResource().getIdElement().getValue(), is(equalTo(pat1.getId())));
+
+		UriType testUri = new UriType("http://foo");
+		bundleEntry = BundleUtil.createNewBundleEntryWithSingleField(ourCtx,"fullUrl", testUri);
+		assertThat(((Bundle.BundleEntryComponent)bundleEntry).getFullUrl(), is(equalTo(testUri.getValue())));
 	}
 
 	private int getIndexOfEntryWithId(String theResourceId, Bundle theBundle) {
