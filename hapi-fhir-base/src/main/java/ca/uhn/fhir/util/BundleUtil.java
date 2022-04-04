@@ -551,6 +551,34 @@ public class BundleUtil {
 		return isPatch;
 	}
 
+	/**
+	 * Add a new bundle entry to a given bundle with the value provided
+	 * @param theContext     Context holding resource definition
+	 * @param theFieldName   Child field name of the resource to set
+	 * @param theBundle      The bundle to add the new entry
+	 * @param theValues      The values to set on the resource child field name
+	 */
+	public static void addBundleEntry(FhirContext theContext, IBaseBundle theBundle, String theFieldName, IBase... theValues) {
+		IBaseBundle newBundle = TerserUtil.newResource(theContext, "Bundle");
+		BaseRuntimeChildDefinition entryChildDef = theContext.getResourceDefinition(newBundle).getChildByName("entry");
+		List<IBase> entries = entryChildDef.getAccessor().getValues(theBundle);
+
+		BaseRuntimeElementCompositeDefinition<?> entryChildElem = (BaseRuntimeElementCompositeDefinition<?>) entryChildDef.getChildByName("entry");
+		BaseRuntimeChildDefinition resourceChild = entryChildElem.getChildByName(theFieldName);
+		IBase bundleEntry = entryChildElem.newInstance();
+		for (IBase value : theValues) {
+			try {
+				resourceChild.getMutator().addValue(bundleEntry, value);
+			} catch (UnsupportedOperationException e) {
+				ourLog.warn("Resource {} does not support multiple values, but an attempt to set {} was made. Setting the first item only", bundleEntry, theValues);
+				resourceChild.getMutator().setValue(bundleEntry, value);
+				break;
+			}
+		}
+		entries.add(bundleEntry);
+		TerserUtil.setField(theContext, "entry", theBundle, entries.toArray(new IBase[0]));
+	}
+
 	private static class SortLegality {
 		private boolean myIsLegal;
 

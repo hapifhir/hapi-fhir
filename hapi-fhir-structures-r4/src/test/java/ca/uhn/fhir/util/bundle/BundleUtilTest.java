@@ -5,6 +5,7 @@ import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.TestUtil;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -17,6 +18,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
@@ -397,6 +399,18 @@ public class BundleUtilTest {
 
 		assertTrue(patientIndex < organizationIndex);
 		assertTrue(observationIndex < patientIndex);
+	}
+
+	@Test
+	public void testAddBundleEntry() {
+		Bundle bundle = new Bundle();
+		bundle.addEntry(new Bundle.BundleEntryComponent().setResource(new Patient()));
+		bundle.addEntry(new Bundle.BundleEntryComponent().setResource(new Observation()));
+		//before
+		assertThat(bundle.getEntry(), hasSize(2));
+		//after
+		BundleUtil.addBundleEntry(ourCtx, bundle, "resource", new Patient());
+		assertThat(bundle.getEntry(), hasSize(3));
 	}
 
 	private int getIndexOfEntryWithId(String theResourceId, Bundle theBundle) {
