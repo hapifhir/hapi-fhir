@@ -1,0 +1,6 @@
+---
+type: security
+issue: 3510
+title: "The Spring Framework library was upgraded to version 5.3.18 in order to avoid depending 
+   on a version known to be vulnerable to CVE-2022-22965, known as Spring4Shell. HAPI FHIR is not
+   believed to be vulnerable to this issue, but the library has been bumped as a precaution."

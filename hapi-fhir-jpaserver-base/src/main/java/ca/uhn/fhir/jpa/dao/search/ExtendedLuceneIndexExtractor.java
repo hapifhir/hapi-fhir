@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
+import com.google.common.base.Strings;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -41,6 +42,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Extract search params for advanced lucene indexing.
@@ -112,7 +114,15 @@ public class ExtendedLuceneIndexExtractor {
 				String insensitivePath = nextLink.getSourcePath().toLowerCase(Locale.ROOT);
 				List<String> paramNames = linkPathToParamName.getOrDefault(insensitivePath, Collections.emptyList());
 				for (String nextParamName : paramNames) {
-					String qualifiedTargetResourceId = nextLink.getTargetResourceType() + "/" + nextLink.getTargetResourceId();
+					String qualifiedTargetResourceId = "";
+					// Consider 2 cases for references
+					// Case 1: Resource Type and Resource ID is known
+					// Case 2: Resource is unknown and referred by canonical url reference
+					if(!Strings.isNullOrEmpty(nextLink.getTargetResourceId())) {
+						qualifiedTargetResourceId = nextLink.getTargetResourceType() + "/" + nextLink.getTargetResourceId();
+					} else if(!Strings.isNullOrEmpty(nextLink.getTargetResourceUrl())) {
+						qualifiedTargetResourceId = nextLink.getTargetResourceUrl();
+					}
 					retVal.addResourceLinkIndexData(nextParamName, qualifiedTargetResourceId);
 				}
 			}

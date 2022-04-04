@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
@@ -44,7 +45,6 @@ import ca.uhn.fhir.test.utilities.LogbackLevelOverrideExtension;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
-import ch.qos.logback.classic.Level;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -60,6 +60,8 @@ import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -164,8 +166,15 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	ITestDataBuilder myTestDataBuilder;
 	@Autowired
 	TestDaoSearch myTestDaoSearch;
+	@Autowired
+	@Qualifier("myQuestionnaireDaoR4")
+	private IFhirResourceDao<Questionnaire> myQuestionnaireDao;
+	@Autowired
+	@Qualifier("myQuestionnaireResponseDaoR4")
+	private IFhirResourceDao<QuestionnaireResponse> myQuestionnaireResponseDao;
 	@RegisterExtension
 	LogbackLevelOverrideExtension myLogbackLevelOverrideExtension = new LogbackLevelOverrideExtension();
+
 
 	@BeforeEach
 	public void beforePurgeDatabase() {
@@ -461,6 +470,31 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		{
 			assertObservationSearchMatches("empty params finds everything", "Observation?", id1, id2, id3, id4);
 		}
+	}
+
+	@Test
+	public void testResourceReferenceSearchForCanonicalReferences() {
+		String questionnaireCanonicalUrl = "https://test.fhir.org/R4/Questionnaire/xl-5000-q";
+
+		Questionnaire questionnaire = new Questionnaire();
+		questionnaire.setId("xl-5000-q");
+		questionnaire.setUrl(questionnaireCanonicalUrl);
+		IIdType questionnaireId = myQuestionnaireDao.update(questionnaire).getId();
+
+		QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse();
+		questionnaireResponse.setId("xl-5000-qr");
+		questionnaireResponse.setQuestionnaire(questionnaireCanonicalUrl);
+		IIdType questionnaireResponseId = myQuestionnaireResponseDao.update(questionnaireResponse).getId();
+
+		// Search Questionnaire Response using questionnaire canonical url
+		SearchParameterMap map = new SearchParameterMap()
+			.setLoadSynchronous(true)
+			.add(QuestionnaireResponse.SP_QUESTIONNAIRE, new ReferenceParam(questionnaireCanonicalUrl));
+
+		IBundleProvider bundle = myQuestionnaireResponseDao.search(map);
+		List<IBaseResource> result = bundle.getResources(0, bundle.sizeOrThrowNpe());
+		assertEquals(1, result.size());
+		assertEquals(questionnaireResponseId, result.get(0).getIdElement());
 	}
 
 	@Test
@@ -923,7 +957,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 //			assertThat(newMeta.getSecurity(), hasSize(1));
 //			assertThat(newMeta.getTag(), hasSize(2));
 		}
-
 
 	}
 
