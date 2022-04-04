@@ -120,19 +120,16 @@ public class HibernateSearchIndexWriter {
 
 
 	public void writeQuantityIndex(String theSearchParam, Collection<QuantitySearchIndexData> theValueCollection) {
-		DocumentElement nestedRoot = myNodeCache.getObjectElement(SEARCH_PARAM_ROOT);
-		DocumentElement nestedSpNode = nestedRoot.addObject(theSearchParam);
+		DocumentElement nestedRoot = myNodeCache.getObjectElement(NESTED_SEARCH_PARAM_ROOT);
 
 		for (QuantitySearchIndexData theValue : theValueCollection) {
+			DocumentElement nestedSpNode = nestedRoot.addObject(theSearchParam);
 			DocumentElement nestedQtyNode = nestedSpNode.addObject(QTY_PARAM_NAME);
 
 			ourLog.trace("Adding Search Param Quantity: {} -- {}", theSearchParam, theValue);
 			nestedQtyNode.addValue(QTY_CODE, theValue.getCode());
 			nestedQtyNode.addValue(QTY_SYSTEM, theValue.getSystem());
 			nestedQtyNode.addValue(QTY_VALUE, theValue.getValue());
-
-			// need to add this only once, so we do it for only one quantity parameter
-			if ( ! theSearchParam.equals(SP_VALUE_QUANTITY) ) { return; }
 
 			if ( ! myModelConfig.getNormalizedQuantitySearchLevel().storageOrSearchSupported()) { return; }
 

@@ -177,12 +177,12 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 
 			//quantity
 			String quantityPathGlob = "*.quantity";
-			spfield.objectFieldTemplate("quantityTemplate", ObjectStructure.NESTED).matchingPathGlob(quantityPathGlob);
-			spfield.fieldTemplate(QTY_SYSTEM, keywordFieldType).matchingPathGlob(quantityPathGlob + "." + QTY_SYSTEM);
-			spfield.fieldTemplate(QTY_CODE, keywordFieldType).matchingPathGlob(quantityPathGlob + "." + QTY_CODE);
-			spfield.fieldTemplate(QTY_VALUE, bigDecimalFieldType).matchingPathGlob(quantityPathGlob + "." + QTY_VALUE);
-			spfield.fieldTemplate(QTY_CODE_NORM, keywordFieldType).matchingPathGlob(quantityPathGlob + "." + QTY_CODE_NORM);
-			spfield.fieldTemplate(QTY_VALUE_NORM, bigDecimalFieldType).matchingPathGlob(quantityPathGlob + "." + QTY_VALUE_NORM);
+			nestedSpField.objectFieldTemplate("quantityTemplate", ObjectStructure.FLATTENED).matchingPathGlob(quantityPathGlob);
+			nestedSpField.fieldTemplate(QTY_SYSTEM, keywordFieldType).matchingPathGlob(quantityPathGlob + "." + QTY_SYSTEM);
+			nestedSpField.fieldTemplate(QTY_CODE, keywordFieldType).matchingPathGlob(quantityPathGlob + "." + QTY_CODE);
+			nestedSpField.fieldTemplate(QTY_VALUE, bigDecimalFieldType).matchingPathGlob(quantityPathGlob + "." + QTY_VALUE);
+			nestedSpField.fieldTemplate(QTY_CODE_NORM, keywordFieldType).matchingPathGlob(quantityPathGlob + "." + QTY_CODE_NORM);
+			nestedSpField.fieldTemplate(QTY_VALUE_NORM, bigDecimalFieldType).matchingPathGlob(quantityPathGlob + "." + QTY_VALUE_NORM);
 
 			// date
 			String dateTimePathGlob = "*.dt";
