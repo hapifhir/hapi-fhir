@@ -1188,15 +1188,16 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 				@Test
 				public void multipleSearchParamsAreSeparate() {
-					// todo - just for debugging
-					myLogbackLevelOverrideExtension.setLogLevel(DaoTestDataBuilder.class, Level.DEBUG);
+					// for debugging
+					//	myLogbackLevelOverrideExtension.setLogLevel(DaoTestDataBuilder.class, Level.DEBUG);
 
+					// this configuration must generate a combo-value-quantity entry with both quantity objects
 					myResourceId = myTestDataBuilder.createObservation(
 						myTestDataBuilder.withQuantityAtPath("valueQuantity", 0.02, UCUM_CODESYSTEM_URL, "10*6/L"),
 						myTestDataBuilder.withQuantityAtPath("component.valueQuantity", 0.06, UCUM_CODESYSTEM_URL, "10*6/L")
 					);
 
-					myLogbackLevelOverrideExtension.resetLevel(DaoTestDataBuilder.class);
+					//	myLogbackLevelOverrideExtension.resetLevel(DaoTestDataBuilder.class);
 
 					assertFind("by value", "Observation?value-quantity=0.02|" + UCUM_CODESYSTEM_URL + "|10*6/L");
 					assertFind("by component value", "Observation?component-value-quantity=0.06|" + UCUM_CODESYSTEM_URL + "|10*6/L");
