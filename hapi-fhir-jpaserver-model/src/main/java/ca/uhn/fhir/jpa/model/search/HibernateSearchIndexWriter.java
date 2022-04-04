@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
+import java.util.Collection;
 
 import static org.hl7.fhir.r4.model.Observation.SP_VALUE_QUANTITY;
 
@@ -43,10 +44,11 @@ public class HibernateSearchIndexWriter {
 	public static final String SEARCH_PARAM_ROOT = "sp";
 
 	public static final String QTY_PARAM_NAME = "quantity";
-	public static final String QTY_NORM_INDEX_NAME = "normalized-value-quantity";
 	public static final String QTY_CODE = "code";
 	public static final String QTY_SYSTEM = "system";
 	public static final String QTY_VALUE = "value";
+	public static final String QTY_CODE_NORM = "code-norm";
+	public static final String QTY_VALUE_NORM = "value-norm";
 
 
 
@@ -117,33 +119,39 @@ public class HibernateSearchIndexWriter {
 	}
 
 
-	public void writeQuantityIndex(String theSearchParam, QuantitySearchIndexData theValue) {
-		DocumentElement qtyIndexNode = getSearchParamIndexNode(theSearchParam, QTY_PARAM_NAME);
-		qtyIndexNode.addValue(QTY_CODE, theValue.getCode());
-		qtyIndexNode.addValue(QTY_SYSTEM, theValue.getSystem());
-		qtyIndexNode.addValue(QTY_VALUE, theValue.getValue());
-		ourLog.trace("Adding Search Param Quantity: {} -- {}", theSearchParam, theValue);
+	public void writeQuantityIndex(String theSearchParam, Collection<QuantitySearchIndexData> theValueCollection) {
+		DocumentElement nestedRoot = myNodeCache.getObjectElement(SEARCH_PARAM_ROOT);
+		DocumentElement nestedSpNode = nestedRoot.addObject(theSearchParam);
 
-		// need to add this only once, so we do it for only one quantity parameter
-		if ( ! theSearchParam.equals(SP_VALUE_QUANTITY) ) { return; }
+		for (QuantitySearchIndexData theValue : theValueCollection) {
+			DocumentElement nestedQtyNode = nestedSpNode.addObject(QTY_PARAM_NAME);
 
-		if ( ! myModelConfig.getNormalizedQuantitySearchLevel().storageOrSearchSupported()) { return; }
+			ourLog.trace("Adding Search Param Quantity: {} -- {}", theSearchParam, theValue);
+			nestedQtyNode.addValue(QTY_CODE, theValue.getCode());
+			nestedQtyNode.addValue(QTY_SYSTEM, theValue.getSystem());
+			nestedQtyNode.addValue(QTY_VALUE, theValue.getValue());
 
-		//-- convert the value/unit to the canonical form if any
-		Pair canonicalForm = UcumServiceUtil.getCanonicalForm(theValue.getSystem(),
-			BigDecimal.valueOf(theValue.getValue()), theValue.getCode());
-		if (canonicalForm == null) { return; }
+			// need to add this only once, so we do it for only one quantity parameter
+			if ( ! theSearchParam.equals(SP_VALUE_QUANTITY) ) { return; }
 
-		ourLog.trace("Adding search param quantity normalized: {} -- {}", theSearchParam, theValue);
-		BigDecimal canonicalValue = BigDecimal.valueOf(Double.parseDouble(canonicalForm.getValue().asDecimal()));
-		String canonicalUnits = canonicalForm.getCode();
+			if ( ! myModelConfig.getNormalizedQuantitySearchLevel().storageOrSearchSupported()) { return; }
 
-		DocumentElement qtyNormIndexNode = getSearchParamIndexNode(QTY_NORM_INDEX_NAME, QTY_PARAM_NAME);
-		qtyNormIndexNode.addValue(QTY_CODE, canonicalUnits);
-		qtyNormIndexNode.addValue(QTY_SYSTEM, theValue.getSystem());
-		qtyNormIndexNode.addValue(QTY_VALUE, canonicalValue.doubleValue());
+			//-- convert the value/unit to the canonical form if any
+			Pair canonicalForm = UcumServiceUtil.getCanonicalForm(theValue.getSystem(),
+				BigDecimal.valueOf(theValue.getValue()), theValue.getCode());
+			if (canonicalForm == null) { return; }
+
+			BigDecimal canonicalValue = BigDecimal.valueOf(Double.parseDouble(canonicalForm.getValue().asDecimal()));
+			String canonicalUnits = canonicalForm.getCode();
+			ourLog.trace("Adding search param normalized code and value: {} -- code:{}, value:{}",
+				theSearchParam, canonicalUnits, canonicalValue);
+
+			nestedQtyNode.addValue(QTY_CODE_NORM, canonicalUnits);
+			nestedQtyNode.addValue(QTY_VALUE_NORM, canonicalValue.doubleValue());
+		}
 
 	}
+
 
 
 }

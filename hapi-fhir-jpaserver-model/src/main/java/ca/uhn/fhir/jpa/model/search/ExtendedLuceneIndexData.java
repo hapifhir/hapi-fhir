@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
 import org.hibernate.search.engine.backend.document.DocumentElement;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -89,7 +90,8 @@ public class ExtendedLuceneIndexData {
 		mySearchParamStrings.forEach(ifNotContained(indexWriter::writeStringIndex));
 		mySearchParamTokens.forEach(ifNotContained(indexWriter::writeTokenIndex));
 		mySearchParamLinks.forEach(ifNotContained(indexWriter::writeReferenceIndex));
-		mySearchParamQuantities.forEach(ifNotContained(indexWriter::writeQuantityIndex));
+//		mySearchParamQuantities.forEach(ifNotContained(indexWriter::writeQuantityIndex));
+		Multimaps.asMap(mySearchParamQuantities).forEach(ifNotContained(indexWriter::writeQuantityIndex));
 		// TODO MB Use RestSearchParameterTypeEnum to define templates.
 		mySearchParamDates.forEach(ifNotContained(indexWriter::writeDateIndex));
 	}

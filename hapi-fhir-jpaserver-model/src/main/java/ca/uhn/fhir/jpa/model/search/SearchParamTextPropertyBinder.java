@@ -43,6 +43,11 @@ import java.time.Instant;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_EXACT;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_NORMALIZED;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_TEXT;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_CODE;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_CODE_NORM;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_SYSTEM;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_VALUE;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_VALUE_NORM;
 
 /**
  * Allows hibernate search to index
@@ -172,10 +177,12 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 
 			//quantity
 			String quantityPathGlob = "*.quantity";
-			spfield.objectFieldTemplate("quantityIndex", ObjectStructure.FLATTENED).matchingPathGlob(quantityPathGlob);
-			spfield.fieldTemplate("quantity-code", keywordFieldType).matchingPathGlob(quantityPathGlob + ".code");
-			spfield.fieldTemplate("quantity-system", keywordFieldType).matchingPathGlob(quantityPathGlob + ".system");
-			spfield.fieldTemplate("quantity-value", bigDecimalFieldType).matchingPathGlob(quantityPathGlob + ".value");
+			spfield.objectFieldTemplate("quantityTemplate", ObjectStructure.NESTED).matchingPathGlob(quantityPathGlob);
+			spfield.fieldTemplate(QTY_SYSTEM, keywordFieldType).matchingPathGlob(quantityPathGlob + "." + QTY_SYSTEM);
+			spfield.fieldTemplate(QTY_CODE, keywordFieldType).matchingPathGlob(quantityPathGlob + "." + QTY_CODE);
+			spfield.fieldTemplate(QTY_VALUE, bigDecimalFieldType).matchingPathGlob(quantityPathGlob + "." + QTY_VALUE);
+			spfield.fieldTemplate(QTY_CODE_NORM, keywordFieldType).matchingPathGlob(quantityPathGlob + "." + QTY_CODE_NORM);
+			spfield.fieldTemplate(QTY_VALUE_NORM, bigDecimalFieldType).matchingPathGlob(quantityPathGlob + "." + QTY_VALUE_NORM);
 
 			// date
 			String dateTimePathGlob = "*.dt";

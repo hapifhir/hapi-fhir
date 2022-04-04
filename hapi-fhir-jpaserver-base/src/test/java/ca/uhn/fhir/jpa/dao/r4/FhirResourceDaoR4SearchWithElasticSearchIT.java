@@ -23,7 +23,6 @@ import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -87,10 +86,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.model.util.UcumServiceUtil.UCUM_CODESYSTEM_URL;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
@@ -1079,75 +1078,77 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			public class SimpleQueries {
 
 				@Test
-				public void eq() {
-					withObservationWithQuantity(0.06, UcumServiceUtil.UCUM_CODESYSTEM_URL, "10*6/L" );
+				public void ne() {
+					withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L" );
 
-					assertFind("when eq UCUM 10*3/L ", "/Observation?value-quantity=60|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|10*3/L");
-					assertFind("when eq UCUM 10*9/L", "/Observation?value-quantity=0.000060|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|10*9/L");
-					assertFind("when gt UCUM 10*3/L", "/Observation?value-quantity=eq58|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|10*3/L");
-					assertFind("when le UCUM 10*3/L", "/Observation?value-quantity=eq63|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|10*3/L");
-
-					assertNotFind("when ne UCUM 10*3/L", "/Observation?value-quantity=80|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|10*3/L");
-					assertNotFind("when gt UCUM 10*3/L", "/Observation?value-quantity=50|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|10*3/L");
-					assertNotFind("when lt UCUM 10*3/L", "/Observation?value-quantity=70|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|10*3/L");
-
-					assertNotFind("Units required to match", "/Observation?value-quantity=60000000|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|g");
+					assertFind("when lt UCUM", "/Observation?value-quantity=ne70|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+					assertFind("when gt UCUM", "/Observation?value-quantity=ne50|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+					assertNotFind("when eq UCUM", "/Observation?value-quantity=ne60|" + UCUM_CODESYSTEM_URL + "|10*3/L");
 				}
 
 				@Test
-				public void ne() {
-					withObservationWithQuantity(0.06, UcumServiceUtil.UCUM_CODESYSTEM_URL, "10*6/L" );
+				public void eq() {
+					withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L" );
 
-					assertFind("when lt UCUM", "/Observation?value-quantity=ne70|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|10*3/L");
-					assertFind("when gt UCUM", "/Observation?value-quantity=ne50|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|10*3/L");
-					assertNotFind("when eq UCUM", "/Observation?value-quantity=ne60|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|10*3/L");
+					assertFind("when eq UCUM 10*3/L ", "/Observation?value-quantity=60|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+					assertFind("when eq UCUM 10*9/L", "/Observation?value-quantity=0.000060|" + UCUM_CODESYSTEM_URL + "|10*9/L");
+					assertFind("when gt UCUM 10*3/L", "/Observation?value-quantity=eq58|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+					assertFind("when le UCUM 10*3/L", "/Observation?value-quantity=eq63|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+
+					assertNotFind("when ne UCUM 10*3/L", "/Observation?value-quantity=80|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+					assertNotFind("when gt UCUM 10*3/L", "/Observation?value-quantity=50|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+					assertNotFind("when lt UCUM 10*3/L", "/Observation?value-quantity=70|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+
+					assertFind("Units required to match and do", "/Observation?value-quantity=60000|" + UCUM_CODESYSTEM_URL + "|/L");
+					// request generates a quantity which value matches the "value-norm", but not the "code-norm"
+					assertNotFind("Units required to match and don't",  "/Observation?value-quantity=6000000000|" + UCUM_CODESYSTEM_URL + "|cm");
 				}
 
 				@Test
 				public void ap() {
-					withObservationWithQuantity(0.06, UcumServiceUtil.UCUM_CODESYSTEM_URL, "10*6/L" );
+					withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L" );
 
-					assertNotFind("when gt UCUM", "/Observation?value-quantity=ap50|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|10*3/L");
-					assertFind("when little gt UCUM", "/Observation?value-quantity=ap58|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|10*3/L");
-					assertFind("when eq UCUM", "/Observation?value-quantity=ap60|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|10*3/L");
-					assertFind("when a little lt UCUM", "/Observation?value-quantity=ap63|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|10*3/L");
-					assertNotFind("when lt UCUM", "/Observation?value-quantity=ap71|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|10*3/L");
+					assertNotFind("when gt UCUM", "/Observation?value-quantity=ap50|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+					assertFind("when little gt UCUM", "/Observation?value-quantity=ap58|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+					assertFind("when eq UCUM", "/Observation?value-quantity=ap60|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+					assertFind("when a little lt UCUM", "/Observation?value-quantity=ap63|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+					assertNotFind("when lt UCUM", "/Observation?value-quantity=ap71|" + UCUM_CODESYSTEM_URL + "|10*3/L");
 				}
 
 				@Test
 				public void gt() {
-					withObservationWithQuantity(0.06, UcumServiceUtil.UCUM_CODESYSTEM_URL, "10*6/L" );
+					withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L" );
 
-					assertFind("when gt UCUM", "/Observation?value-quantity=gt50|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|10*3/L");
-					assertNotFind("when eq UCUM", "/Observation?value-quantity=gt60|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|10*3/L");
-					assertNotFind("when lt UCUM", "/Observation?value-quantity=gt71|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|10*3/L");
+					assertFind("when gt UCUM", "/Observation?value-quantity=gt50|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+					assertNotFind("when eq UCUM", "/Observation?value-quantity=gt60|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+					assertNotFind("when lt UCUM", "/Observation?value-quantity=gt71|" + UCUM_CODESYSTEM_URL + "|10*3/L");
 				}
 
 				@Test
 				public void ge() {
-					withObservationWithQuantity(0.06, UcumServiceUtil.UCUM_CODESYSTEM_URL, "10*6/L" );
+					withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L" );
 
-					assertFind("when gt UCUM", "/Observation?value-quantity=ge50|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|10*3/L");
-					assertFind("when eq UCUM", "/Observation?value-quantity=ge60|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|10*3/L");
-					assertNotFind("when lt UCUM", "/Observation?value-quantity=ge62|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|10*3/L");
+					assertFind("when gt UCUM", "/Observation?value-quantity=ge50|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+					assertFind("when eq UCUM", "/Observation?value-quantity=ge60|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+					assertNotFind("when lt UCUM", "/Observation?value-quantity=ge62|" + UCUM_CODESYSTEM_URL + "|10*3/L");
 				}
 
 				@Test
 				public void lt() {
-					withObservationWithQuantity(0.06, UcumServiceUtil.UCUM_CODESYSTEM_URL, "10*6/L" );
+					withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L" );
 
-					assertNotFind("when gt", "/Observation?value-quantity=lt50|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|10*3/L");
-					assertNotFind("when eq", "/Observation?value-quantity=lt60|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|10*3/L");
-					assertFind("when lt", "/Observation?value-quantity=lt70|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|10*3/L");
+					assertNotFind("when gt", "/Observation?value-quantity=lt50|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+					assertNotFind("when eq", "/Observation?value-quantity=lt60|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+					assertFind("when lt", "/Observation?value-quantity=lt70|" + UCUM_CODESYSTEM_URL + "|10*3/L");
 				}
 
 				@Test
 				public void le() {
-					withObservationWithQuantity(0.06, UcumServiceUtil.UCUM_CODESYSTEM_URL, "10*6/L" );
+					withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L" );
 
-					assertNotFind("when gt", "/Observation?value-quantity=le50|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|10*3/L");
-					assertFind("when eq", "/Observation?value-quantity=le60|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|10*3/L");
-					assertFind("when lt", "/Observation?value-quantity=le70|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|10*3/L");
+					assertNotFind("when gt", "/Observation?value-quantity=le50|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+					assertFind("when eq", "/Observation?value-quantity=le60|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+					assertFind("when lt", "/Observation?value-quantity=le70|" + UCUM_CODESYSTEM_URL + "|10*3/L");
 				}
 
 			}
@@ -1157,32 +1158,32 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 				@Test
 				void gtAndLt() {
-					withObservationWithQuantity(0.06, UcumServiceUtil.UCUM_CODESYSTEM_URL, "10*6/L" );
+					withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L" );
 
 					assertFind("when gt 50 and lt 70", "/Observation" +
-						"?value-quantity=gt50|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|10*3/L" +
-						"&value-quantity=lt70|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|10*3/L");
+						"?value-quantity=gt50|" + UCUM_CODESYSTEM_URL + "|10*3/L" +
+						"&value-quantity=lt70|" + UCUM_CODESYSTEM_URL + "|10*3/L");
 
 					assertNotFind("when gt50 and lt60", "/Observation" +
-						"?value-quantity=gt50|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|10*3/L" +
-						"&value-quantity=lt60|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|10*3/L");
+						"?value-quantity=gt50|" + UCUM_CODESYSTEM_URL + "|10*3/L" +
+						"&value-quantity=lt60|" + UCUM_CODESYSTEM_URL + "|10*3/L");
 
 					assertNotFind("when gt65 and lt70", "/Observation" +
-						"?value-quantity=gt65|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|10*3/L" +
-						"&value-quantity=lt70|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|10*3/L");
+						"?value-quantity=gt65|" + UCUM_CODESYSTEM_URL + "|10*3/L" +
+						"&value-quantity=lt70|" + UCUM_CODESYSTEM_URL + "|10*3/L");
 
 					assertNotFind("when gt 70 and lt 50", "/Observation" +
-						"?value-quantity=gt70|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|10*3/L" +
-						"&value-quantity=lt50|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|10*3/L");
+						"?value-quantity=gt70|" + UCUM_CODESYSTEM_URL + "|10*3/L" +
+						"&value-quantity=lt50|" + UCUM_CODESYSTEM_URL + "|10*3/L");
 				}
 
 				@Test
 				void gtAndLtWithMixedUnits() {
-					withObservationWithQuantity(0.06, UcumServiceUtil.UCUM_CODESYSTEM_URL, "10*6/L" );
+					withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L" );
 
 					assertFind("when gt 50|10*3/L and lt 70|10*9/L", "/Observation" +
-						"?value-quantity=gt50|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|10*3/L" +
-						"&value-quantity=lt0.000070|" + UcumServiceUtil.UCUM_CODESYSTEM_URL + "|10*9/L");
+						"?value-quantity=gt50|" + UCUM_CODESYSTEM_URL + "|10*3/L" +
+						"&value-quantity=lt0.000070|" + UCUM_CODESYSTEM_URL + "|10*9/L");
 				}
 
 				@Test
@@ -1191,18 +1192,17 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 					myLogbackLevelOverrideExtension.setLogLevel(DaoTestDataBuilder.class, Level.DEBUG);
 
 					myResourceId = myTestDataBuilder.createObservation(
-						myTestDataBuilder.withQuantityAtPath("valueQuantity", 0.02, UcumServiceUtil.UCUM_CODESYSTEM_URL, "10*6/L"),
-						myTestDataBuilder.withQuantityAtPath("component.valueQuantity", 0.06, UcumServiceUtil.UCUM_CODESYSTEM_URL, "10*6/L")
+						myTestDataBuilder.withQuantityAtPath("valueQuantity", 0.02, UCUM_CODESYSTEM_URL, "10*6/L"),
+						myTestDataBuilder.withQuantityAtPath("component.valueQuantity", 0.06, UCUM_CODESYSTEM_URL, "10*6/L")
 					);
 
 					myLogbackLevelOverrideExtension.resetLevel(DaoTestDataBuilder.class);
 
-					assertFind("by value", "Observation?value=0.02|http://unitsofmeasure.org|10*6/L");
-					assertFind("by component value", "Observation?value=0.06|http://unitsofmeasure.org|10*6/L");
+					assertFind("by value", "Observation?value-quantity=0.02|" + UCUM_CODESYSTEM_URL + "|10*6/L");
+					assertFind("by component value", "Observation?component-value-quantity=0.06|" + UCUM_CODESYSTEM_URL + "|10*6/L");
 
-					assertNotFind("by value", "Observation?value=0.06|http://unitsofmeasure.org|10*6/L");
-					assertNotFind("by component value", "Observation?value=0.02|http://unitsofmeasure.org|10*6/L");
-
+					assertNotFind("by value", "Observation?value-quantity=0.06|" + UCUM_CODESYSTEM_URL + "|10*6/L");
+					assertNotFind("by component value", "Observation?component-value-quantity=0.02|" + UCUM_CODESYSTEM_URL + "|10*6/L");
 				}
 			}
 
@@ -1215,9 +1215,9 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 				@Test
 				public void sortByNumeric() {
-					String idAlpha6 = withObservationWithQuantity(0.06, UcumServiceUtil.UCUM_CODESYSTEM_URL, "10*6/L" ).getIdPart();
-					String idAlpha5 = withObservationWithQuantity(50, UcumServiceUtil.UCUM_CODESYSTEM_URL, "10*3/L" ).getIdPart();
-					String idAlpha7 = withObservationWithQuantity(0.000070, UcumServiceUtil.UCUM_CODESYSTEM_URL, "10*9/L" ).getIdPart();
+					String idAlpha6 = withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L" ).getIdPart();
+					String idAlpha5 = withObservationWithQuantity(50, UCUM_CODESYSTEM_URL, "10*3/L" ).getIdPart();
+					String idAlpha7 = withObservationWithQuantity(0.000070, UCUM_CODESYSTEM_URL, "10*9/L" ).getIdPart();
 
 					// this search is not freetext because there is no freetext-known parameter name
 					List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_sort=value-quantity");
@@ -1230,20 +1230,12 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 
 		private void assertFind(String theMessage, String theUrl) {
-			myCaptureQueriesListener.clear();
 			List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-
-			// only DB query for resources should be present as query for resource IDs should be freetext, not DB
-			assertThat(myCaptureQueriesListener.getSelectQueries(), hasSize(1));
 			assertThat(theMessage, resourceIds, hasItem(equalTo(myResourceId.getIdPart())));
 		}
 
 		private void assertNotFind(String theMessage, String theUrl) {
-			myCaptureQueriesListener.clear();
 			List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-
-			// no DB query should be present as query for resource IDs should be freetext, not DB
-			assertThat(myCaptureQueriesListener.getSelectQueries(), empty());
 			assertThat(theMessage, resourceIds, not(hasItem(equalTo(myResourceId.getIdPart()))));
 		}
 
@@ -1257,7 +1249,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		private IIdType withObservationWithValueQuantity(double theValue) {
 			myResourceId = myTestDataBuilder.createObservation(myTestDataBuilder.withElementAt("valueQuantity",
 				myTestDataBuilder.withPrimitiveAttribute("value", theValue),
-				myTestDataBuilder.withPrimitiveAttribute("system", UcumServiceUtil.UCUM_CODESYSTEM_URL),
+				myTestDataBuilder.withPrimitiveAttribute("system", UCUM_CODESYSTEM_URL),
 				myTestDataBuilder.withPrimitiveAttribute("code", "mm[Hg]")
 			));
 			return myResourceId;

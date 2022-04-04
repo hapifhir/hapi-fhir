@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.dao.search;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -41,6 +40,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.search.engine.search.common.BooleanOperator;
 import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
+import org.hibernate.search.engine.search.predicate.dsl.MatchPredicateFieldStep;
 import org.hibernate.search.engine.search.predicate.dsl.PredicateFinalStep;
 import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
 import org.slf4j.Logger;
@@ -60,9 +60,11 @@ import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_NORMALIZED;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_TEXT;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_CODE;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_NORM_INDEX_NAME;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_CODE_NORM;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_PARAM_NAME;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_SYSTEM;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_VALUE;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_VALUE_NORM;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.SEARCH_PARAM_ROOT;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -70,7 +72,7 @@ public class ExtendedLuceneClauseBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(ExtendedLuceneClauseBuilder.class);
 
 	private static final double QTY_APPROX_TOLERANCE_PERCENT = .10;
-	private static final double QTY_TOLERANCE_PERCENT = .10;
+	private static final double QTY_TOLERANCE_PERCENT = .05;
 
 	final FhirContext myFhirContext;
 	public final SearchPredicateFactory myPredicateFactory;
@@ -480,18 +482,22 @@ public class ExtendedLuceneClauseBuilder {
 
 				QuantityParam qtyParam = QuantityParam.toQuantityParam(paramType);
 				ParamPrefixEnum activePrefix = qtyParam.getPrefix() == null ? ParamPrefixEnum.EQUAL : qtyParam.getPrefix();
+
+				String fieldPath = SEARCH_PARAM_ROOT + "." + theSearchParamName + "." + QTY_PARAM_NAME;
 				BooleanPredicateClausesStep<?> quantityTerms = myPredicateFactory.bool();
 
 				QuantityParam canonicalQty = UcumServiceUtil.toCanonicalQuantityOrNull(qtyParam);
 				if (canonicalQty != null) {
-					String fieldPath = SEARCH_PARAM_ROOT + "." + QTY_NORM_INDEX_NAME + "." + HibernateSearchIndexWriter.QTY_PARAM_NAME;
-					setPrefixedQuantityPredicate(quantityTerms, activePrefix,
-						canonicalQty.getValue().doubleValue(), fieldPath + "." + QTY_VALUE);
+					String valueFieldPath = fieldPath + "." + QTY_VALUE_NORM;
+					setPrefixedQuantityPredicate(quantityTerms, activePrefix, canonicalQty, valueFieldPath);
+					quantityTerms.must(myPredicateFactory.match()
+						.field(fieldPath + "." + QTY_CODE_NORM)
+						.matching(canonicalQty.getUnits()));
+
 				} else {
 				// non-canonicalizable parameter
-					String fieldPath = SEARCH_PARAM_ROOT + "." + theSearchParamName + "." + HibernateSearchIndexWriter.QTY_PARAM_NAME;
-					setPrefixedQuantityPredicate(quantityTerms, activePrefix,
-						qtyParam.getValue().doubleValue(), fieldPath + "." + QTY_VALUE);
+					String valueFieldPath = fieldPath + "." + QTY_VALUE;
+					setPrefixedQuantityPredicate(quantityTerms, activePrefix, qtyParam, valueFieldPath);
 
 					if ( isNotBlank(qtyParam.getSystem()) ) {
 						quantityTerms.must(
@@ -506,33 +512,34 @@ public class ExtendedLuceneClauseBuilder {
 					}
 				}
 
-				myRootClause.must(quantityTerms);
+				myRootClause.must(myPredicateFactory.nested().objectField(fieldPath).nest(quantityTerms));
 			}
 		}
 	}
 
 
 	private void setPrefixedQuantityPredicate(BooleanPredicateClausesStep<?> theQuantityTerms,
-			ParamPrefixEnum thePrefix, double theValue, String theFieldName) {
+			ParamPrefixEnum thePrefix, QuantityParam theQuantity, String valueFieldPath) {
 
-		double approxTolerance = theValue * QTY_APPROX_TOLERANCE_PERCENT;
-		double defaultTolerance = theValue * QTY_TOLERANCE_PERCENT;
+		double value = theQuantity.getValue().doubleValue();
+		double approxTolerance = value * QTY_APPROX_TOLERANCE_PERCENT;
+		double defaultTolerance = value * QTY_TOLERANCE_PERCENT;
 
 		switch (thePrefix) {
 			//	searches for resource quantity between passed param value +/- 10%
 			case APPROXIMATE:
 				theQuantityTerms.must(
 					myPredicateFactory.range()
-						.field(theFieldName)
-						.between(theValue-approxTolerance, theValue+approxTolerance));
+						.field(valueFieldPath)
+						.between(value-approxTolerance, value+approxTolerance));
 				break;
 
 			// searches for resource quantity between passed param value +/- 5%
 			case EQUAL:
 				theQuantityTerms.must(
 					myPredicateFactory.range()
-						.field(theFieldName)
-						.between(theValue-defaultTolerance, theValue+defaultTolerance));
+						.field(valueFieldPath)
+						.between(value-defaultTolerance, value+defaultTolerance));
 				break;
 
 			// searches for resource quantity > param value
@@ -540,16 +547,16 @@ public class ExtendedLuceneClauseBuilder {
 			case STARTS_AFTER:  // treated as GREATERTHAN because search doesn't handle ranges
 				theQuantityTerms.must(
 					myPredicateFactory.range()
-						.field(theFieldName)
-						.greaterThan(theValue));
+						.field(valueFieldPath)
+						.greaterThan(value));
 				break;
 
 			// searches for resource quantity not < param value
 			case GREATERTHAN_OR_EQUALS:
 				theQuantityTerms.mustNot(
 					myPredicateFactory.range()
-						.field(theFieldName)
-						.lessThan(theValue));
+						.field(valueFieldPath)
+						.lessThan(value));
 				break;
 
 			// searches for resource quantity < param value
@@ -557,24 +564,24 @@ public class ExtendedLuceneClauseBuilder {
 			case ENDS_BEFORE:  // treated as LESSTHAN because search doesn't handle ranges
 				theQuantityTerms.must(
 					myPredicateFactory.range()
-						.field(theFieldName)
-						.lessThan(theValue));
+						.field(valueFieldPath)
+						.lessThan(value));
 				break;
 
 				// searches for resource quantity not > param value
 			case LESSTHAN_OR_EQUALS:
 				theQuantityTerms.mustNot(
 					myPredicateFactory.range()
-						.field(theFieldName)
-						.greaterThan(theValue));
+						.field(valueFieldPath)
+						.greaterThan(value));
 				break;
 
 				// NOT_EQUAL: searches for resource quantity not between passed param value +/- 5%
 			case NOT_EQUAL:
 				theQuantityTerms.mustNot(
 					myPredicateFactory.range()
-						.field(theFieldName)
-						.between(theValue-defaultTolerance, theValue+defaultTolerance));
+						.field(valueFieldPath)
+						.between(value-defaultTolerance, value+defaultTolerance));
 				break;
 		}
 	}
