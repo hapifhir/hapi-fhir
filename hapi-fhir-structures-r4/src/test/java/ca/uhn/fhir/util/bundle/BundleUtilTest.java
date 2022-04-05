@@ -5,7 +5,7 @@ import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.TestUtil;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Medication;
@@ -14,6 +14,7 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.UriType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
@@ -397,6 +398,18 @@ public class BundleUtilTest {
 
 		assertTrue(patientIndex < organizationIndex);
 		assertTrue(observationIndex < patientIndex);
+	}
+
+	@Test
+	public void testCreateNewBundleEntryWithSingleField() {
+		Patient pat1 = new Patient();
+		pat1.setId("Patient/P1");
+		IBase bundleEntry = BundleUtil.createNewBundleEntryWithSingleField(ourCtx,"resource", pat1);
+		assertThat(((Bundle.BundleEntryComponent)bundleEntry).getResource().getIdElement().getValue(), is(equalTo(pat1.getId())));
+
+		UriType testUri = new UriType("http://foo");
+		bundleEntry = BundleUtil.createNewBundleEntryWithSingleField(ourCtx,"fullUrl", testUri);
+		assertThat(((Bundle.BundleEntryComponent)bundleEntry).getFullUrl(), is(equalTo(testUri.getValue())));
 	}
 
 	private int getIndexOfEntryWithId(String theResourceId, Bundle theBundle) {

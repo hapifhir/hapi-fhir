@@ -1,0 +1,4 @@
+---
+type: security
+issue: 3514
+title: "Bump Spring Core dependency to remove Spring4Shell vulnerability."
