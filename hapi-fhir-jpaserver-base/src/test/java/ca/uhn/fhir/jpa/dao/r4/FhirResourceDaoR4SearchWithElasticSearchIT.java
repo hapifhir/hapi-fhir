@@ -1184,7 +1184,26 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 					assertFind("when lt", "/Observation?value-quantity=le70|" + UCUM_CODESYSTEM_URL + "|10*3/L");
 				}
 
+
+				/**
+				 * "value-quantity" data is stored in a nested object, so if not queried  properly
+				 * it could return false positives. For instance: two Observations for following
+				 * combinations of code and value:
+				 *  Obs 1   code AAA1  value: 123
+				 *  Obs 2   code BBB2  value: 456
+				 *  A search for code: AAA1 and value: 456 would bring both observations instead of the expected empty reply,
+				 *  unless both predicates are enclosed in a "nested"
+				 * */
+				@Test
+				void nestedMustCorrelate() {
+					withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L" );
+					withObservationWithQuantity(0.02, UCUM_CODESYSTEM_URL, "10*3/L" );
+
+					assertNotFind("when one predicate matches each object", "/Observation" +
+						"?value-quantity=0.06|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+				}
 			}
+
 
 			@Nested
 			public class MultipleQueries {
