@@ -469,7 +469,7 @@ public class ExtendedLuceneClauseBuilder {
 
 	/**
 	 * Differences with DB search:
-	 *  _ is no all-normalized-or-all-not. Each parameter is applied on quantity or  normalized quantity depending on UCUM fitness
+	 *  _ is not all-normalized-or-all-not. Each parameter is applied on quantity or normalized quantity depending on UCUM fitness
 	 *  _ respects ranges for equal and approximate qualifiers
 	 *
 	 * Strategy: For each parameter, if it can be canonicalized, it is, and used against 'normalized-value-quantity' index
