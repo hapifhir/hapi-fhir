@@ -46,6 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import javax.persistence.criteria.Root;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -478,41 +479,51 @@ public class ExtendedLuceneClauseBuilder {
 	public void addQuantityUnmodifiedSearch(String theSearchParamName, List<List<IQueryParameterType>> theQuantityAndOrTerms) {
 
 		for (List<IQueryParameterType> nextAnd : theQuantityAndOrTerms) {
+			BooleanPredicateClausesStep<?> quantityTerms = myPredicateFactory.bool();
+			quantityTerms.minimumShouldMatchNumber(1);
+
 			for (IQueryParameterType paramType : nextAnd) {
+				BooleanPredicateClausesStep<?> orQuantityTerms = myPredicateFactory.bool();
+				addQuantityOrClauses(theSearchParamName, paramType, orQuantityTerms);
+				quantityTerms.should(orQuantityTerms);
+			}
 
-				QuantityParam qtyParam = QuantityParam.toQuantityParam(paramType);
-				ParamPrefixEnum activePrefix = qtyParam.getPrefix() == null ? ParamPrefixEnum.EQUAL : qtyParam.getPrefix();
+			myRootClause.must(quantityTerms);
+		}
+	}
 
-				String fieldPath = NESTED_SEARCH_PARAM_ROOT + "." + theSearchParamName + "." + QTY_PARAM_NAME;
-				BooleanPredicateClausesStep<?> quantityTerms = myPredicateFactory.bool();
 
-				QuantityParam canonicalQty = UcumServiceUtil.toCanonicalQuantityOrNull(qtyParam);
-				if (canonicalQty != null) {
-					String valueFieldPath = fieldPath + "." + QTY_VALUE_NORM;
-					setPrefixedQuantityPredicate(quantityTerms, activePrefix, canonicalQty, valueFieldPath);
-					quantityTerms.must(myPredicateFactory.match()
-						.field(fieldPath + "." + QTY_CODE_NORM)
-						.matching(canonicalQty.getUnits()));
+	private void addQuantityOrClauses(String theSearchParamName,
+			IQueryParameterType theParamType, BooleanPredicateClausesStep<?> theQuantityTerms) {
 
-				} else {
-				// non-canonicalizable parameter
-					String valueFieldPath = fieldPath + "." + QTY_VALUE;
-					setPrefixedQuantityPredicate(quantityTerms, activePrefix, qtyParam, valueFieldPath);
+		QuantityParam qtyParam = QuantityParam.toQuantityParam(theParamType);
+		ParamPrefixEnum activePrefix = qtyParam.getPrefix() == null ? ParamPrefixEnum.EQUAL : qtyParam.getPrefix();
 
-					if ( isNotBlank(qtyParam.getSystem()) ) {
-						quantityTerms.must(
-							myPredicateFactory.match()
-								.field(fieldPath + "." + QTY_SYSTEM).matching(qtyParam.getSystem()) );
-					}
+		String fieldPath = NESTED_SEARCH_PARAM_ROOT + "." + theSearchParamName + "." + QTY_PARAM_NAME;
 
-					if ( isNotBlank(qtyParam.getUnits()) ) {
-						quantityTerms.must(
-							myPredicateFactory.match()
-								.field(fieldPath + "." + QTY_CODE).matching(qtyParam.getUnits()) );
-					}
-				}
+		QuantityParam canonicalQty = UcumServiceUtil.toCanonicalQuantityOrNull(qtyParam);
+		if (canonicalQty != null) {
+			String valueFieldPath = fieldPath + "." + QTY_VALUE_NORM;
+			setPrefixedQuantityPredicate(theQuantityTerms, activePrefix, canonicalQty, valueFieldPath);
+			theQuantityTerms.must(myPredicateFactory.match()
+				.field(fieldPath + "." + QTY_CODE_NORM)
+				.matching(canonicalQty.getUnits()));
 
-				myRootClause.must(quantityTerms);
+		} else {
+			// non-canonicalizable parameter
+			String valueFieldPath = fieldPath + "." + QTY_VALUE;
+			setPrefixedQuantityPredicate(theQuantityTerms, activePrefix, qtyParam, valueFieldPath);
+
+			if ( isNotBlank(qtyParam.getSystem()) ) {
+				theQuantityTerms.must(
+					myPredicateFactory.match()
+						.field(fieldPath + "." + QTY_SYSTEM).matching(qtyParam.getSystem()) );
+			}
+
+			if ( isNotBlank(qtyParam.getUnits()) ) {
+				theQuantityTerms.must(
+					myPredicateFactory.match()
+						.field(fieldPath + "." + QTY_CODE).matching(qtyParam.getUnits()) );
 			}
 		}
 	}

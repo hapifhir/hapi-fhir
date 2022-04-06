@@ -1068,7 +1068,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 
 			@Nested
-			public class MultipleQueries {
+			public class CombinedQueries {
 
 				@Test
 				void gtAndLt() {
@@ -1078,6 +1078,15 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 					assertNotFind("when gt0.5 and lt0.6", "/Observation?value-quantity=gt0.5&value-quantity=lt0.6");
 					assertNotFind("when gt6.5 and lt0.7", "/Observation?value-quantity=gt6.5&value-quantity=lt0.7");
 					assertNotFind("impossible matching", "/Observation?value-quantity=gt0.7&value-quantity=lt0.5");
+				}
+
+				@Test
+				void orClauses() {
+					withObservationWithValueQuantity(0.6);
+
+					assertFind("when gt0.5 and lt0.7", "/Observation?value-quantity=0.5,0.6");
+					// make sure it doesn't find everything when using or clauses
+					assertNotFind("when gt0.5 and lt0.7", "/Observation?value-quantity=0.5,0.7");
 				}
 			}
 
@@ -1206,7 +1215,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 
 			@Nested
-			public class MultipleQueries {
+			public class CombinedQueries {
 
 				@Test
 				void gtAndLt() {
