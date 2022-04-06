@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,16 +45,16 @@ import java.net.URISyntaxException;
 
 @Scope("prototype")
 public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDeliverySubscriber {
-	private static Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringMessageSubscriber.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringMessageSubscriber.class);
 
-	@Autowired
-	private IChannelFactory myChannelFactory;
+	private final IChannelFactory myChannelFactory;
 
 	/**
 	 * Constructor
 	 */
-	public SubscriptionDeliveringMessageSubscriber() {
+	public SubscriptionDeliveringMessageSubscriber(IChannelFactory theChannelFactory) {
 		super();
+		myChannelFactory = theChannelFactory;
 	}
 
 	protected void deliverPayload(ResourceDeliveryMessage theMsg, CanonicalSubscription theSubscription, IChannelProducer theChannelProducer) {
@@ -67,6 +68,7 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 		ResourceModifiedMessage payload = new ResourceModifiedMessage(myFhirContext, thePayloadResource, theMsg.getOperationType());
 		payload.setMessageKey(theMsg.getMessageKeyOrNull());
 		payload.setTransactionId(theMsg.getTransactionId());
+		payload.setPartitionId(theMsg.getRequestPartitionId());
 		ResourceModifiedJsonMessage message = new ResourceModifiedJsonMessage(payload);
 		theChannelProducer.send(message);
 		ourLog.debug("Delivering {} message payload {} for {}", theMsg.getOperationType(), theMsg.getPayloadId(), theSubscription.getIdElement(myFhirContext).toUnqualifiedVersionless().getValue());

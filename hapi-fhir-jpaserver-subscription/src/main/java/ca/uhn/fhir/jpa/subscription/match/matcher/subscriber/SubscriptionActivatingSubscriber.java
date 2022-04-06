@@ -118,13 +118,13 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscript
 	@SuppressWarnings("unchecked")
 	private boolean activateSubscription(final IBaseResource theSubscription) {
 		IFhirResourceDao subscriptionDao = myDaoRegistry.getSubscriptionDao();
-		SystemRequestDetails srd = SystemRequestDetails.forAllPartition();
+		SystemRequestDetails srd = SystemRequestDetails.forAllPartitions();
 
 		IBaseResource subscription = null;
 		try {
 			// read can throw ResourceGoneException
 			// if this happens, we will treat this as a failure to activate
-			subscription =  subscriptionDao.read(theSubscription.getIdElement(), SystemRequestDetails.forAllPartition());
+			subscription =  subscriptionDao.read(theSubscription.getIdElement(), SystemRequestDetails.forAllPartitions());
 			subscription.setId(subscription.getIdElement().toVersionless());
 
 			ourLog.info("Activating subscription {} from status {} to {}", subscription.getIdElement().toUnqualified().getValue(), SubscriptionConstants.REQUESTED_STATUS, SubscriptionConstants.ACTIVE_STATUS);

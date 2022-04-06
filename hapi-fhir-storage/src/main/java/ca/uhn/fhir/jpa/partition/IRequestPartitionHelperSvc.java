@@ -35,7 +35,7 @@ import java.util.Set;
 public interface IRequestPartitionHelperSvc {
 
 	@Nonnull
-	RequestPartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, String theResourceType, @Nonnull ReadPartitionIdRequestDetails theDetails);
+	RequestPartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, String theResourceType, ReadPartitionIdRequestDetails theDetails);
 
 	@Nonnull
 	default RequestPartitionId determineReadPartitionForRequestForRead(RequestDetails theRequest, String theResourceType, IIdType theId) {
@@ -54,6 +54,9 @@ public interface IRequestPartitionHelperSvc {
 		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forHistory(theResourceType, theIdType);
 		return determineReadPartitionForRequest(theRequest, theResourceType, details);
 	}
+
+	@Nonnull
+	default void validateHasPartitionPermissions(RequestDetails theRequest, String theResourceType, RequestPartitionId theRequestPartitionId){}
 
 	@Nonnull
 	RequestPartitionId determineCreatePartitionForRequest(@Nullable RequestDetails theRequest, @Nonnull IBaseResource theResource, @Nonnull String theResourceType);
