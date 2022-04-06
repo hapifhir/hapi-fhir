@@ -57,6 +57,7 @@ import static org.apache.commons.lang3.StringUtils.length;
 public class TermCodeSystemVersion implements Serializable {
 	public static final String IDX_CODESYSTEM_AND_VER = "IDX_CODESYSTEM_AND_VER";
 	public static final int MAX_VERSION_LENGTH = 200;
+	public static final int MAX_URL_LENGTH = 200;
 	private static final long serialVersionUID = 1L;
 
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "myCodeSystem")
@@ -95,6 +96,9 @@ public class TermCodeSystemVersion implements Serializable {
 
 	@Column(name = "CS_DISPLAY", nullable = true, updatable = true, length = MAX_VERSION_LENGTH)
 	private String myCodeSystemDisplayName;
+
+	@Column(name = "CS_VS_URL", nullable = true, updatable = true, length = MAX_URL_LENGTH)
+	private String myCodeSystemValueSet;
 
 	/**
 	 * Constructor
@@ -150,6 +154,13 @@ public class TermCodeSystemVersion implements Serializable {
 		return this;
 	}
 
+	public String getCodeSystemValueSet() { return myCodeSystemValueSet; }
+
+	public TermCodeSystemVersion setCodeSystemValueSet(String codeSystemValueSet) {
+		myCodeSystemValueSet = codeSystemValueSet;
+		return this;
+	}
+
 	@Override
 	public boolean equals(Object theO) {
 		if (this == theO) {
@@ -202,6 +213,7 @@ public class TermCodeSystemVersion implements Serializable {
 		b.append("codeSystemResourcePid", myResourcePid);
 		b.append("codeSystemPid", myCodeSystemPid);
 		b.append("codeSystemVersionId", myCodeSystemVersionId);
+		b.append("codeSystemValueSet", myCodeSystemValueSet);
 		return b.toString();
 	}
 
