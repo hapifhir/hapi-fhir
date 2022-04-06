@@ -24,6 +24,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
+import ca.uhn.fhir.jpa.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
@@ -32,6 +33,7 @@ import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
+import ca.uhn.fhir.mdm.util.MessageHelper;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
@@ -58,6 +60,10 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 	IJpaIdHelperService myIdHelperService;
 	@Autowired
 	MdmResourceDaoSvc myMdmResourceDaoSvc;
+	@Autowired
+	MessageHelper myMessageHelper;
+	@Autowired
+	MdmPartitionHelper myMdmPartitionHelper;
 
 	@Override
 	@Transactional
@@ -81,6 +87,9 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 			//Save changes to the golden resource
 			myMdmResourceDaoSvc.upsertGoldenResource(theToGoldenResource, resourceType);
 		}
+
+		// check if the golden resource and the source resource are in the same partition, throw error if not
+		myMdmPartitionHelper.validateResourcesInSamePartition(theFromGoldenResource, theToGoldenResource);
 
 		//Merge the links from the FROM to the TO resource. Clean up dangling links.
 		mergeGoldenResourceLinks(theFromGoldenResource, theToGoldenResource, toGoldenResourcePid, theMdmTransactionContext);
