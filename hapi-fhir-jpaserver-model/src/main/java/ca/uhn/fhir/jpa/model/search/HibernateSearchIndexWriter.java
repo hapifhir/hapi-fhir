@@ -138,13 +138,13 @@ public class HibernateSearchIndexWriter {
 				BigDecimal.valueOf(theValue.getValue()), theValue.getCode());
 			if (canonicalForm == null) { return; }
 
-			BigDecimal canonicalValue = BigDecimal.valueOf(Double.parseDouble(canonicalForm.getValue().asDecimal()));
+			double canonicalValue = Double.parseDouble(canonicalForm.getValue().asDecimal());
 			String canonicalUnits = canonicalForm.getCode();
 			ourLog.trace("Adding search param normalized code and value: {} -- code:{}, value:{}",
 				theSearchParam, canonicalUnits, canonicalValue);
 
 			nestedQtyNode.addValue(QTY_CODE_NORM, canonicalUnits);
-			nestedQtyNode.addValue(QTY_VALUE_NORM, canonicalValue.doubleValue());
+			nestedQtyNode.addValue(QTY_VALUE_NORM, canonicalValue);
 		}
 
 	}
