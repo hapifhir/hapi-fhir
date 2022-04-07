@@ -564,10 +564,10 @@ public class ExtendedLuceneClauseBuilder {
 
 			// searches for resource quantity not < param value
 			case GREATERTHAN_OR_EQUALS:
-				theQuantityTerms.mustNot(
+				theQuantityTerms.must(
 					myPredicateFactory.range()
 						.field(valueFieldPath)
-						.lessThan(value));
+						.atLeast(value));
 				break;
 
 			// searches for resource quantity < param value
@@ -581,10 +581,10 @@ public class ExtendedLuceneClauseBuilder {
 
 				// searches for resource quantity not > param value
 			case LESSTHAN_OR_EQUALS:
-				theQuantityTerms.mustNot(
+				theQuantityTerms.must(
 					myPredicateFactory.range()
 						.field(valueFieldPath)
-						.greaterThan(value));
+						.atMost(value));
 				break;
 
 				// NOT_EQUAL: searches for resource quantity not between passed param value +/- 5%
