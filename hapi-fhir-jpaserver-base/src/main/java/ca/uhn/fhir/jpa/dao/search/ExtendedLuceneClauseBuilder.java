@@ -22,6 +22,8 @@ package ca.uhn.fhir.jpa.dao.search;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -46,7 +48,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import javax.persistence.criteria.Root;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -78,11 +79,14 @@ public class ExtendedLuceneClauseBuilder {
 	final FhirContext myFhirContext;
 	public final SearchPredicateFactory myPredicateFactory;
 	public final BooleanPredicateClausesStep<?> myRootClause;
+	public final ModelConfig myModelConfig;
 
 	final List<TemporalPrecisionEnum> ordinalSearchPrecisions = Arrays.asList(TemporalPrecisionEnum.YEAR, TemporalPrecisionEnum.MONTH, TemporalPrecisionEnum.DAY);
 
-	public ExtendedLuceneClauseBuilder(FhirContext myFhirContext, BooleanPredicateClausesStep<?> myRootClause, SearchPredicateFactory myPredicateFactory) {
+	public ExtendedLuceneClauseBuilder(FhirContext myFhirContext, ModelConfig theModelConfig,
+			BooleanPredicateClausesStep<?> myRootClause, SearchPredicateFactory myPredicateFactory) {
 		this.myFhirContext = myFhirContext;
+		this.myModelConfig = theModelConfig;
 		this.myRootClause = myRootClause;
 		this.myPredicateFactory = myPredicateFactory;
 	}
@@ -498,33 +502,34 @@ public class ExtendedLuceneClauseBuilder {
 
 		QuantityParam qtyParam = QuantityParam.toQuantityParam(theParamType);
 		ParamPrefixEnum activePrefix = qtyParam.getPrefix() == null ? ParamPrefixEnum.EQUAL : qtyParam.getPrefix();
-
 		String fieldPath = NESTED_SEARCH_PARAM_ROOT + "." + theSearchParamName + "." + QTY_PARAM_NAME;
 
-		QuantityParam canonicalQty = UcumServiceUtil.toCanonicalQuantityOrNull(qtyParam);
-		if (canonicalQty != null) {
-			String valueFieldPath = fieldPath + "." + QTY_VALUE_NORM;
-			setPrefixedQuantityPredicate(theQuantityTerms, activePrefix, canonicalQty, valueFieldPath);
-			theQuantityTerms.must(myPredicateFactory.match()
-				.field(fieldPath + "." + QTY_CODE_NORM)
-				.matching(canonicalQty.getUnits()));
-
-		} else {
-			// non-canonicalizable parameter
-			String valueFieldPath = fieldPath + "." + QTY_VALUE;
-			setPrefixedQuantityPredicate(theQuantityTerms, activePrefix, qtyParam, valueFieldPath);
-
-			if ( isNotBlank(qtyParam.getSystem()) ) {
-				theQuantityTerms.must(
-					myPredicateFactory.match()
-						.field(fieldPath + "." + QTY_SYSTEM).matching(qtyParam.getSystem()) );
+		if (myModelConfig.getNormalizedQuantitySearchLevel() == NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED) {
+			QuantityParam canonicalQty = UcumServiceUtil.toCanonicalQuantityOrNull(qtyParam);
+			if (canonicalQty != null) {
+				String valueFieldPath = fieldPath + "." + QTY_VALUE_NORM;
+				setPrefixedQuantityPredicate(theQuantityTerms, activePrefix, canonicalQty, valueFieldPath);
+				theQuantityTerms.must(myPredicateFactory.match()
+					.field(fieldPath + "." + QTY_CODE_NORM)
+					.matching(canonicalQty.getUnits()));
+				return;
 			}
+		}
 
-			if ( isNotBlank(qtyParam.getUnits()) ) {
-				theQuantityTerms.must(
-					myPredicateFactory.match()
-						.field(fieldPath + "." + QTY_CODE).matching(qtyParam.getUnits()) );
-			}
+		// not NORMALIZED_QUANTITY_SEARCH_SUPPORTED or non-canonicalizable parameter
+		String valueFieldPath = fieldPath + "." + QTY_VALUE;
+		setPrefixedQuantityPredicate(theQuantityTerms, activePrefix, qtyParam, valueFieldPath);
+
+		if ( isNotBlank(qtyParam.getSystem()) ) {
+			theQuantityTerms.must(
+				myPredicateFactory.match()
+					.field(fieldPath + "." + QTY_SYSTEM).matching(qtyParam.getSystem()) );
+		}
+
+		if ( isNotBlank(qtyParam.getUnits()) ) {
+			theQuantityTerms.must(
+				myPredicateFactory.match()
+					.field(fieldPath + "." + QTY_CODE).matching(qtyParam.getUnits()) );
 		}
 	}
 
