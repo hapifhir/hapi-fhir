@@ -330,6 +330,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 			CONCEPT_MAP_VERSION,
 			SOURCE_VALUE_SET_URL,
 			TARGET_VALUE_SET_URL,
+			null,
 			REVERSE);
 
 		TranslateConceptResults results = mySvc.translateConcept(request);

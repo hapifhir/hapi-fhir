@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.r4;
  * #L%
  */
 
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
 import ca.uhn.fhir.jpa.api.model.TranslationRequest;
@@ -30,6 +31,8 @@ import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -41,11 +44,23 @@ public class FhirResourceDaoConceptMapR4 extends BaseHapiFhirResourceDao<Concept
 
 	@Override
 	public TranslateConceptResults translate(TranslationRequest theTranslationRequest, RequestDetails theRequestDetails) {
-		if (theTranslationRequest.hasReverse() && theTranslationRequest.getReverseAsBoolean()) {
-			return myTermConceptMappingSvc.translateWithReverse(theTranslationRequest);
-		}
+		// Translate operation only accepts a single code to translate
+		Coding sourceCoding = theTranslationRequest.getCodeableConcept().getCoding().get(0);
 
-		return myTermConceptMappingSvc.translate(theTranslationRequest);
+		IValidationSupport.TranslateCodeRequest translateCodeRequest = new IValidationSupport.TranslateCodeRequest(
+			sourceCoding.getSystem(),
+			sourceCoding.getVersion(),
+			sourceCoding.getCode(),
+			theTranslationRequest.getTargetSystem().asStringValue(),
+			theTranslationRequest.getUrl().asStringValue(),
+			theTranslationRequest.getConceptMapVersion().asStringValue(),
+			theTranslationRequest.getSource().asStringValue(),
+			theTranslationRequest.getTarget().asStringValue(),
+			theTranslationRequest.getResourceId(),
+			theTranslationRequest.getReverseAsBoolean()
+		);
+
+		return myTerminologySvc.translateConcept(translateCodeRequest);
 	}
 
 	@Override

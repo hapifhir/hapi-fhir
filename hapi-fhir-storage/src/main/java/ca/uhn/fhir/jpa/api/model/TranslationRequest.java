@@ -29,6 +29,7 @@ import org.hl7.fhir.r4.model.UriType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class TranslationRequest {
 	private CodeableConcept myCodeableConcept;

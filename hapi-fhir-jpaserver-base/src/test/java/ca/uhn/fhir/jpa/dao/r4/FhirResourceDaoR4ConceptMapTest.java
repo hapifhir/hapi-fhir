@@ -1284,9 +1284,4 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 			assertNull(theExpSecondOne.get(0).getVersion());
 		});
 	}
-
-	@Test
-	testTranslateAndRemoteTerminologySupport() {
-
-	}
 }

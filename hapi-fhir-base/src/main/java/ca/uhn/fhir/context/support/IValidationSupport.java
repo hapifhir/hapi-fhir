@@ -814,6 +814,7 @@ public interface IValidationSupport {
 		private final String myConceptMapVersion;
 		private final String mySourceValueSetUrl;
 		private final String myTargetValueSetUrl;
+		private final Long myResourcePid;
 		private final boolean myReverse;
 
 		public TranslateCodeRequest(String theSourceSystemUrl, String theSourceCode, String theTargetSystemUrl) {
@@ -825,6 +826,7 @@ public interface IValidationSupport {
 			myConceptMapVersion = null;
 			mySourceValueSetUrl = null;
 			myTargetValueSetUrl = null;
+			myResourcePid = null;
 			myReverse = false;
 		}
 
@@ -837,6 +839,7 @@ public interface IValidationSupport {
 				String theConceptMapVersion,
 				String theSourceValueSetUrl,
 				String theTargetValueSetUrl,
+				Long theResourcePid,
 				boolean theReverse) {
 			mySourceSystemUrl = theSourceSystemUrl;
 			mySourceSystemVersion = theSourceSystemVersion;
@@ -846,6 +849,7 @@ public interface IValidationSupport {
 			myConceptMapVersion = theConceptMapVersion;
 			mySourceValueSetUrl = theSourceValueSetUrl;
 			myTargetValueSetUrl = theTargetValueSetUrl;
+			myResourcePid = theResourcePid;
 			myReverse = theReverse;
 		}
 
@@ -870,6 +874,7 @@ public interface IValidationSupport {
 				.append(myConceptMapVersion, that.myConceptMapVersion)
 				.append(mySourceValueSetUrl, that.mySourceValueSetUrl)
 				.append(myTargetValueSetUrl, that.myTargetValueSetUrl)
+				.append(myResourcePid, that.myResourcePid)
 				.append(myReverse, that.myReverse)
 				.isEquals();
 		}
@@ -885,6 +890,7 @@ public interface IValidationSupport {
 				.append(myConceptMapVersion)
 				.append(mySourceValueSetUrl)
 				.append(myTargetValueSetUrl)
+				.append(myResourcePid)
 				.append(myReverse)
 				.toHashCode();
 		}
@@ -919,6 +925,10 @@ public interface IValidationSupport {
 
 		public String getTargetValueSetUrl() {
 			return myTargetValueSetUrl;
+		}
+
+		public Long getResourcePid() {
+			return myResourcePid;
 		}
 
 		public boolean isReverse() {

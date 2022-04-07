@@ -123,11 +123,22 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 		sourceCodeableConcept
 			.addCoding()
 			.setSystem(theRequest.getSourceSystemUrl())
-			.setCode(theRequest.getSourceCode());
+			.setCode(theRequest.getSourceCode())
+			.setVersion(theRequest.getSourceSystemVersion());
 
 		TranslationRequest request = new TranslationRequest();
 		request.setCodeableConcept(sourceCodeableConcept);
+		request.setConceptMapVersion(new StringType(theRequest.getConceptMapVersion()));
+		request.setUrl(new UriType(theRequest.getConceptMapUrl()));
+		request.setSource(new UriType(theRequest.getSourceValueSetUrl()));
+		request.setTarget(new UriType(theRequest.getTargetValueSetUrl()));
 		request.setTargetSystem(new UriType(theRequest.getTargetSystemUrl()));
+		request.setResourceId(theRequest.getResourcePid());
+		request.setReverse(theRequest.isReverse());
+
+		if (request.hasReverse() && request.getReverseAsBoolean()) {
+			return translateWithReverse(request);
+		}
 
 		return translate(request);
 	}
