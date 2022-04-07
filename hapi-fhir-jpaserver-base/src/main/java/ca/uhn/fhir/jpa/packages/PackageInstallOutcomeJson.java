@@ -20,8 +20,7 @@ package ca.uhn.fhir.jpa.packages;
  * #L%
  */
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonInclude;
+import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -33,9 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 @Schema(description = "Represents an NPM package installation response")
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
-public class PackageInstallOutcomeJson {
+public class PackageInstallOutcomeJson implements IModelJson {
 
 	@JsonProperty("messages")
 	private List<String> myMessage;

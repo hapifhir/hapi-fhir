@@ -21,10 +21,9 @@ package ca.uhn.fhir.jpa.packages;
  */
 
 
+import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.model.api.annotation.ExampleSupplier;
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -42,9 +41,7 @@ import java.util.function.Supplier;
 	"name", "version", "packageUrl", "installMode", "installResourceTypes", "validationMode"
 })
 @ExampleSupplier({PackageInstallationSpec.ExampleSupplier.class, PackageInstallationSpec.ExampleSupplier2.class})
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
-public class PackageInstallationSpec {
+public class PackageInstallationSpec implements IModelJson {
 
 	@Schema(description = "The direct package URL")
 	@JsonProperty("packageUrl")
