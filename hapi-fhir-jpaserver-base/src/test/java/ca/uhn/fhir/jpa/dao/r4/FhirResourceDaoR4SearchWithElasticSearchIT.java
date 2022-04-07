@@ -1088,6 +1088,103 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 					// make sure it doesn't find everything when using or clauses
 					assertNotFind("when gt0.5 and lt0.7", "/Observation?value-quantity=0.5,0.7");
 				}
+
+				@Nested
+				public class CombinedAndPlusOr {
+
+					@Test
+					void ltAndOrClauses() {
+						withObservationWithValueQuantity(0.6);
+
+						assertFind("when lt0.7 and eq (0.5 or 0.6)", "/Observation?value-quantity=lt0.7&value-quantity=0.5,0.6");
+						// make sure it doesn't find everything when using or clauses
+						assertNotFind("when lt0.4 and eq (0.5 or 0.6)", "/Observation?value-quantity=lt0.4&value-quantity=0.5,0.6");
+						assertNotFind("when lt0.7 and eq (0.4 or 0.5)", "/Observation?value-quantity=lt0.7&value-quantity=0.4,0.5");
+					}
+
+					@Test
+					void gtAndOrClauses() {
+						withObservationWithValueQuantity(0.6);
+
+						assertFind("when gt0.4 and eq (0.5 or 0.6)", "/Observation?value-quantity=gt0.4&value-quantity=0.5,0.6");
+						assertNotFind("when gt0.7 and eq (0.5 or 0.7)", "/Observation?value-quantity=gt0.7&value-quantity=0.5,0.7");
+						assertNotFind("when gt0.3 and eq (0.4 or 0.5)", "/Observation?value-quantity=gt0.3&value-quantity=0.4,0.5");
+					}
+				}
+
+
+				@Nested
+				public class QualifiedOrClauses {
+
+					@Test
+					void gtOrLt() {
+						withObservationWithValueQuantity(0.6);
+
+						assertFind("when gt0.5 or lt0.3", "/Observation?value-quantity=gt0.5,lt0.3");
+						assertNotFind("when gt0.6 or lt0.55", "/Observation?value-quantity=gt0.6,lt0.55");
+					}
+
+					@Test
+					void gtOrLe() {
+						withObservationWithValueQuantity(0.6);
+
+						assertFind("when gt0.5 or le0.3", "/Observation?value-quantity=gt0.5,le0.3");
+						assertNotFind("when gt0.6 or le0.55", "/Observation?value-quantity=gt0.6,le0.55");
+					}
+
+					@Test
+					void ltOrGt() {
+						withObservationWithValueQuantity(0.6);
+
+						assertFind("when lt0.7 or gt0.9", "/Observation?value-quantity=lt0.7,gt0.9");
+						// make sure it doesn't find everything when using or clauses
+						assertNotFind("when lt0.6 or gt0.6", "/Observation?value-quantity=lt0.6,gt0.6");
+						assertNotFind("when lt0.3 or gt0.9", "/Observation?value-quantity=lt0.3,gt0.9");
+					}
+
+					@Test
+					void ltOrGe() {
+						withObservationWithValueQuantity(0.6);
+
+						assertFind("when lt0.7 or ge0.2", "/Observation?value-quantity=lt0.7,ge0.2");
+						assertNotFind("when lt0.6 or ge0.8", "/Observation?value-quantity=lt0.6,ge0.8");
+					}
+
+					@Test
+					void gtOrGt() {
+						withObservationWithValueQuantity(0.6);
+
+						assertFind("when gt0.5 or gt0.8", "/Observation?value-quantity=gt0.5,gt0.8");
+						assertNotFind("when gt0.6 or gt0.8", "/Observation?value-quantity=gt0.6,gt0.8");
+					}
+
+					@Test
+					void geOrGe() {
+						withObservationWithValueQuantity(0.6);
+
+						assertFind("when ge0.5 or ge0.7", "/Observation?value-quantity=ge0.5,ge0.7");
+						assertNotFind("when ge0.65 or ge0.7", "/Observation?value-quantity=ge0.65,ge0.7");
+					}
+
+					@Test
+					void ltOrLt() {
+						withObservationWithValueQuantity(0.6);
+
+						assertFind("when lt0.5 or lt0.7", "/Observation?value-quantity=lt0.5,lt0.7");
+						assertNotFind("when lt0.55 or lt0.3", "/Observation?value-quantity=lt0.55,lt0.3");
+					}
+
+					@Test
+					void leOrLe() {
+						withObservationWithValueQuantity(0.6);
+
+						assertFind("when le0.5 or le0.6", "/Observation?value-quantity=le0.5,le0.6");
+						assertNotFind("when le0.5 or le0.59", "/Observation?value-quantity=le0.5,le0.59");
+					}
+
+				}
+
+
 			}
 
 			@Nested
