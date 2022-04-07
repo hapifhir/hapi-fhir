@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
 import ca.uhn.test.concurrency.PointcutLatch;
 import org.apache.commons.lang3.time.DateUtils;
@@ -56,7 +57,7 @@ class MdmBatchSvcImplIT extends BaseMdmR4Test {
 		assertLinkCount(0);
 
 		//SUT
-		afterMdmLatch.runWithExpectedCount(30, () -> myMdmSubmitSvc.submitAllSourceTypesToMdm(null));
+		afterMdmLatch.runWithExpectedCount(30, () -> myMdmSubmitSvc.submitAllSourceTypesToMdm(null, SystemRequestDetails.forAllPartitions()));
 
 		assertLinkCount(30);
 	}
@@ -72,7 +73,7 @@ class MdmBatchSvcImplIT extends BaseMdmR4Test {
 
 		//SUT
 		myMdmSubmitSvc.setBufferSize(5);
-		afterMdmLatch.runWithExpectedCount(10, () -> myMdmSubmitSvc.submitSourceResourceTypeToMdm("Patient", null));
+		afterMdmLatch.runWithExpectedCount(10, () -> myMdmSubmitSvc.submitSourceResourceTypeToMdm("Patient", null, SystemRequestDetails.newSystemRequestAllPartitions()));
 
 		assertLinkCount(10);
 	}
@@ -89,7 +90,7 @@ class MdmBatchSvcImplIT extends BaseMdmR4Test {
 		assertLinkCount(0);
 
 		//SUT
-		afterMdmLatch.runWithExpectedCount(10, () -> myMdmSubmitSvc.submitSourceResourceTypeToMdm("Medication", null));
+		afterMdmLatch.runWithExpectedCount(10, () -> myMdmSubmitSvc.submitSourceResourceTypeToMdm("Medication", null, SystemRequestDetails.newSystemRequestAllPartitions()));
 
 		assertLinkCount(10);
 	}
@@ -104,7 +105,7 @@ class MdmBatchSvcImplIT extends BaseMdmR4Test {
 		assertLinkCount(0);
 
 		//SUT
-		afterMdmLatch.runWithExpectedCount(10, () -> myMdmSubmitSvc.submitAllSourceTypesToMdm(null));
+		afterMdmLatch.runWithExpectedCount(10, () -> myMdmSubmitSvc.submitAllSourceTypesToMdm(null, SystemRequestDetails.newSystemRequestAllPartitions()));
 
 		assertLinkCount(10);
 	}
@@ -117,7 +118,7 @@ class MdmBatchSvcImplIT extends BaseMdmR4Test {
 		assertLinkCount(0);
 
 		//SUT
-		afterMdmLatch.runWithExpectedCount(1, () -> myMdmSubmitSvc.submitSourceResourceTypeToMdm("Patient", "Patient?name=gary"));
+		afterMdmLatch.runWithExpectedCount(1, () -> myMdmSubmitSvc.submitSourceResourceTypeToMdm("Patient", "Patient?name=gary", SystemRequestDetails.newSystemRequestAllPartitions()));
 
 		assertLinkCount(1);
 	}

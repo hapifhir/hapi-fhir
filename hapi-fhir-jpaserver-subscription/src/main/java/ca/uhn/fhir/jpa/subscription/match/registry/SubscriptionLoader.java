@@ -90,7 +90,7 @@ public class SubscriptionLoader implements IResourceChangeListener {
 	@PostConstruct
 	public void registerListener() {
 		mySearchParameterMap = getSearchParameterMap();
-		mySystemRequestDetails = SystemRequestDetails.forAllPartition();
+		mySystemRequestDetails = SystemRequestDetails.forAllPartitions();
 
 		IResourceChangeListenerCache subscriptionCache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener("Subscription", mySearchParameterMap, this, REFRESH_INTERVAL);
 		subscriptionCache.forceRefresh();
@@ -252,7 +252,7 @@ public class SubscriptionLoader implements IResourceChangeListener {
 			return;
 		}
 		IFhirResourceDao<?> subscriptionDao = getSubscriptionDao();
-		SystemRequestDetails systemRequestDetails = SystemRequestDetails.forAllPartition();
+		SystemRequestDetails systemRequestDetails = SystemRequestDetails.forAllPartitions();
 		List<IBaseResource> resourceList = theResourceIds.stream().map(n -> subscriptionDao.read(n, systemRequestDetails)).collect(Collectors.toList());
 		updateSubscriptionRegistry(resourceList);
 	}
