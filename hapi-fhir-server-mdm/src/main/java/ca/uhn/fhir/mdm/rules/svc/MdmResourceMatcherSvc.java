@@ -136,6 +136,9 @@ public class MdmResourceMatcherSvc {
 			MdmMatchEvaluation matchEvaluation = fieldComparator.match(theLeftResource, theRightResource);
 			if (matchEvaluation.match) {
 				vector |= (1 << i);
+				ourLog.debug("Match: Successfully matched Matcher {}.", fieldComparator.getName());
+			} else {
+				ourLog.debug("No Match: Matcher {} did not match.", fieldComparator.getName());
 			}
 			score += matchEvaluation.score;
 			appliedRuleCount += 1;

@@ -2,7 +2,6 @@ package ca.uhn.fhir.mdm.rules.svc;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
-import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.log.Logs;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -37,10 +36,14 @@ public class MdmResourceMatcherSvcLoggingTest extends BaseMdmRulesR4Test {
 
 		myJohn = buildJohn();
 		myJohny = buildJohny();
+
+		myJohn.addName().setFamily("LastName");
+		myJohny.addName().setFamily("DifferentLastName");
+
 	}
 
 	@Test
-	public void testMatchWillProvideLogsOnTraceLevel(){
+	public void testMatchWillProvideLogsAboutSuccessOnDebugLevel(){
 		Logger logger = (Logger) Logs.getMdmTroubleshootingLog();
 
 		MemoryAppender memoryAppender = createAndAssignMemoryAppender(logger);
@@ -49,8 +52,11 @@ public class MdmResourceMatcherSvcLoggingTest extends BaseMdmRulesR4Test {
 		assertNotNull(result);
 
 		assertTrue(memoryAppender.contains("Evaluating match", Level.DEBUG));
-
+		assertTrue(memoryAppender.contains("No Match: Matcher patient-last did not match.", Level.DEBUG));
+		assertTrue(memoryAppender.contains("Match: Successfully matched Matcher patient-given.", Level.DEBUG));
 	}
+
+	
 
 	protected MemoryAppender createAndAssignMemoryAppender(Logger theLogger){
 
