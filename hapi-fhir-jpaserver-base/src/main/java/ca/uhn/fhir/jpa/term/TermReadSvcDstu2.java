@@ -96,6 +96,11 @@ public class TermReadSvcDstu2 extends BaseTermReadSvcImpl {
 		throw new UnsupportedOperationException(Msg.code(856));
 	}
 
+	@Override
+	public IBaseResource expandValueSetFromCodeSystem(String theValueSetUri) {
+		throw new UnsupportedOperationException(Msg.code(2074));
+	}
+
 	private void findCodesAbove(ca.uhn.fhir.model.dstu2.resource.ValueSet theSystem, String theSystemString, String theCode, List<FhirVersionIndependentConcept> theListToPopulate) {
 		List<ca.uhn.fhir.model.dstu2.resource.ValueSet.CodeSystemConcept> conceptList = theSystem.getCodeSystem().getConcept();
 		for (ca.uhn.fhir.model.dstu2.resource.ValueSet.CodeSystemConcept next : conceptList) {

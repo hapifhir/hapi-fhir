@@ -70,6 +70,8 @@ public interface ITermReadSvc extends IValidationSupport {
 
 	void expandValueSet(@Nullable ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator);
 
+	IBaseResource expandValueSetFromCodeSystem(String theValueSetUri);
+
 	List<FhirVersionIndependentConcept> expandValueSetIntoConceptList(ValueSetExpansionOptions theExpansionOptions, String theValueSetCanonicalUrl);
 
 	Optional<TermConcept> findCode(String theCodeSystem, String theCode);

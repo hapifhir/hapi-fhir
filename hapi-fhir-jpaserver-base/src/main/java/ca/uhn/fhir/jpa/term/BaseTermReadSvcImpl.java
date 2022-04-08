@@ -249,7 +249,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
 	@Autowired
-	private ITermCodeSystemVersionDao myCodeSystemVersionDao;
+	protected ITermCodeSystemVersionDao myCodeSystemVersionDao;
 	@Autowired
 	private DaoConfig myDaoConfig;
 	private TransactionTemplate myTxTemplate;
@@ -490,6 +490,13 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	private void expandValueSetIntoAccumulator(ValueSet theValueSetToExpand, ValueSetExpansionOptions theExpansionOptions, IValueSetConceptAccumulator theAccumulator, ExpansionFilter theFilter, boolean theAdd) {
 		Optional<TermValueSet> optionalTermValueSet;
 		if (theValueSetToExpand.hasUrl()) {
+			if (theValueSetToExpand.hasExpansion() && theValueSetToExpand.hasUrl() && getTermCodeSystemByValueSetUrl(theValueSetToExpand.getUrl()) != null) {
+				Set<String> theCodes = new HashSet<>();
+				for (ValueSet.ValueSetExpansionContainsComponent contain : theValueSetToExpand.getExpansion().getContains()) {
+					addOrRemoveCode(theAccumulator, theCodes, theAdd, contain.getSystem(), contain.getCode(), contain.getDisplay(), contain.getVersion());
+				}
+				return;
+			}
 			if (theValueSetToExpand.hasVersion()) {
 				optionalTermValueSet = myTermValueSetDao.findTermValueSetByUrlAndVersion(theValueSetToExpand.getUrl(), theValueSetToExpand.getVersion());
 			} else {
@@ -528,6 +535,12 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "valueSetExpandedUsingPreExpansion", expansionTimestamp);
 		theAccumulator.addMessage(msg);
 		expandConcepts(theAccumulator, termValueSet, theFilter, theAdd, isOracleDialect());
+	}
+
+	private TermCodeSystem getTermCodeSystemByValueSetUrl(String theValueSetUrl) {
+		List<TermCodeSystemVersion> byCodeSystemValueset = myCodeSystemVersionDao.findByCodeSystemValueset(theValueSetUrl);
+		if (byCodeSystemValueset.size() == 1) return byCodeSystemValueset.get(0).getCodeSystem();
+		return null;
 	}
 
 	@Nonnull

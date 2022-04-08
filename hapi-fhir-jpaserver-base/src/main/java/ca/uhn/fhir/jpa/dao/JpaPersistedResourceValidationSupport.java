@@ -133,8 +133,12 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 			Optional<IBaseResource> currentVSOpt = getValueSetCurrentVersion(new UriType(theSystem));
 			return currentVSOpt.orElse(null);
 		}
-
-		return fetchResource(myValueSetType, theSystem);
+		IBaseResource returnVs = fetchResource(myValueSetType, theSystem);
+		if (returnVs == null) {
+			ourLog.debug("Did not find an explicit ValueSet resource from the URL {}; trying CodeSystem.valueSet", theSystem);
+			return myTermReadSvc.expandValueSetFromCodeSystem(theSystem);
+		}
+		return returnVs;
 	}
 
 	/**

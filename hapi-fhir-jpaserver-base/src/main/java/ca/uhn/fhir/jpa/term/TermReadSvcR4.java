@@ -5,9 +5,14 @@ import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.entity.TermCodeSystem;
+import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
+import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
 import ca.uhn.fhir.jpa.term.ex.ExpansionTooCostlyException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -20,6 +25,9 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.annotation.Nonnull;
 import javax.transaction.Transactional;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /*
  * #%L
@@ -56,6 +64,33 @@ public class TermReadSvcR4 extends BaseTermReadSvcImpl implements ITermReadSvcR4
 	public void expandValueSet(ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator) {
 		ValueSet valueSetToExpand = (ValueSet) theValueSetToExpand;
 		super.expandValueSet(theExpansionOptions, valueSetToExpand, theValueSetCodeAccumulator);
+	}
+
+	@Override
+	public IBaseResource expandValueSetFromCodeSystem(String theValueSetUri) {
+		List<TermCodeSystemVersion> matchingValueSets = super.myCodeSystemVersionDao.findByCodeSystemValueset(theValueSetUri);
+		if (matchingValueSets.size() == 0) return null; //nothing was found, continue
+		if (matchingValueSets.size() > 1) {
+			String message = Msg.code(2075) + "More than one CodeSystem resource was found matching the provided implicit ValueSet URI: " +
+				matchingValueSets.stream().map(v -> v.getCodeSystem().getCodeSystemUri()).sorted().collect(Collectors.joining("; "));
+			throw new UnprocessableEntityException(message);
+		}
+		// we have exactly one CS
+		TermCodeSystem ourCodeSystem = matchingValueSets.get(0).getCodeSystem();
+		Collection<TermConcept> ourConcepts = matchingValueSets.get(0).getConcepts();
+		ValueSet toReturn = new ValueSet();
+		toReturn.setUrl(theValueSetUri);
+		toReturn.getCompose().addInclude()
+			.setSystem(ourCodeSystem.getCodeSystemUri())
+			.setVersion(ourCodeSystem.getCurrentVersion().getCodeSystemVersionId());
+
+		for (TermConcept ourConcept : ourConcepts) {
+			toReturn.getExpansion().addContains()
+				.setSystem(ourCodeSystem.getCodeSystemUri())
+				.setCode(ourConcept.getCode())
+				.setDisplay(ourConcept.getDisplay());
+		}
+		return toReturn;
 	}
 
 	@Transactional(dontRollbackOn = {ExpansionTooCostlyException.class})

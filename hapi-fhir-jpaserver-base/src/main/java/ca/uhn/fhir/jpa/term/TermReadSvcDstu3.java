@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcDstu3;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.ValidateUtil;
+import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_30_40;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.dstu3.model.CodeSystem;
@@ -129,6 +130,12 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 		} catch (FHIRException e) {
 			throw new InternalErrorException(Msg.code(835) + e);
 		}
+	}
+
+	@Override
+	public IBaseResource expandValueSetFromCodeSystem(String theValueSetUri) {
+		// TODO: 08/04/22 NYI
+		throw new NotImplementedException("expansion for DSTU3 from CodeSystem is not yet implemented");
 	}
 
 	@Override
