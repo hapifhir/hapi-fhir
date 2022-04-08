@@ -105,6 +105,15 @@ public class BulkDataExportProvider {
 		return StringUtils.removeEnd(theRequestDetails.getServerBaseForRequest(), "/");
 	}
 
+	private String getDefaultPartitionServerBase(ServletRequestDetails theRequestDetails) {
+		if (theRequestDetails.getTenantId() == null || theRequestDetails.getTenantId().equals(JpaConstants.DEFAULT_PARTITION_NAME)) {
+			return getServerBase(theRequestDetails);
+		}
+		else {
+			return StringUtils.removeEnd(theRequestDetails.getServerBaseForRequest().replace(theRequestDetails.getTenantId(), JpaConstants.DEFAULT_PARTITION_NAME), "/");
+		}
+	}
+
 	/**
 	 * Group/Id/$export
 	 */
@@ -195,7 +204,7 @@ public class BulkDataExportProvider {
 				bulkResponseDocument.setTransactionTime(status.getStatusTime());
 				bulkResponseDocument.setRequest(status.getRequest());
 				for (IBulkDataExportSvc.FileEntry nextFile : status.getFiles()) {
-					String serverBase = getServerBase(theRequestDetails);
+					String serverBase = getDefaultPartitionServerBase(theRequestDetails);
 					String nextUrl = serverBase + "/" + nextFile.getResourceId().toUnqualifiedVersionless().getValue();
 					bulkResponseDocument
 						.addOutput()

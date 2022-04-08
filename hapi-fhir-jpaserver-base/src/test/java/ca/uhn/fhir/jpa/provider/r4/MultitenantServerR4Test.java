@@ -1,15 +1,27 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.batch.config.BatchConstants;
+import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
+import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
+import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
+import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
+import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
+import ca.uhn.fhir.util.JsonUtil;
+import com.google.common.collect.Sets;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -20,21 +32,32 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @SuppressWarnings("Duplicates")
 public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Test implements ITestDataBuilder {
+
+	@Autowired
+	private IBulkDataExportSvc myBulkDataExportSvc;
+	@Autowired
+	private IBulkDataExportJobSchedulingHelper myBulkDataExportJobSchedulingHelper;
 
 	@Override
 	@AfterEach
@@ -369,6 +392,68 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		Bundle response = myClient.search().byUrl(myClient.getServerBase() + "/" + TENANT_A + "/Condition?subject=Patient/" + idA.getIdPart() + "&_include=Condition:subject").returnBundle(Bundle.class).execute();
 		assertThat(response.getEntry(), hasSize(2));
 	}
+
+	@Test
+	public void testBulkExport() throws IOException {
+		setBulkDataExportProvider();
+
+		// Create patients
+		IBaseResource patientA = buildPatient(withActiveTrue());
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setTenantId(TENANT_A);
+		IIdType idA = myPatientDao.create((Patient) patientA, requestDetails).getId();
+
+		// Create a bulk job
+		BulkDataExportOptions options = new BulkDataExportOptions();
+		options.setResourceTypes(Sets.newHashSet("Patient"));
+		options.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
+
+		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(options, true, requestDetails);
+		assertNotNull(jobDetails.getJobId());
+
+		// Check the status
+		IBulkDataExportSvc.JobInfo status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
+		assertEquals(BulkExportJobStatusEnum.SUBMITTED, status.getStatus());
+
+		// Run a scheduled pass to build the export and wait for completion
+		myBulkDataExportJobSchedulingHelper.startSubmittedJobs();
+		myBatchJobHelper.awaitAllBulkJobCompletions(
+			BatchConstants.BULK_EXPORT_JOB_NAME
+		);
+
+		// Fetch the job again and check the completed status
+		status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
+		assertEquals(BulkExportJobStatusEnum.COMPLETE, status.getStatus());
+
+		//perform export-poll-status
+		String patientUrl;
+		HttpGet get = new HttpGet(myClient.getServerBase() + "/" + TENANT_A + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?"
+			+ JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + jobDetails.getJobId());
+		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
+			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			BulkExportResponseJson responseJson = JsonUtil.deserialize(responseString, BulkExportResponseJson.class);
+			assertThat(responseJson.getOutput(), hasSize(1));
+			assertThat(responseJson.getOutput().get(0).getType(), is(equalTo("Patient")));
+			assertThat(responseJson.getOutput().get(0).getUrl(), containsString(JpaConstants.DEFAULT_PARTITION_NAME + "/Binary/"));
+			patientUrl = responseJson.getOutput().get(0).getUrl();
+		}
+		get = new HttpGet(patientUrl);
+		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
+			String responseString = IOUtils.toString(response.getEntity().getContent(),StandardCharsets.UTF_8);
+			IBaseResource patient = myFhirContext.newJsonParser().parseResource(responseString);
+			assertThat(patient.getIdElement(), is(equalTo(idA)));
+		}
+	}
+
+	private void setBulkDataExportProvider() {
+		BulkDataExportProvider provider = new BulkDataExportProvider();
+		provider.setBulkDataExportSvcForUnitTests(myBulkDataExportSvc);
+		provider.setFhirContextForUnitTest(myFhirContext);
+		ourRestServer.registerProvider(provider);
+	}
+
+
+
 
 	private void createConditionWithAllowedUnqualified(IIdType idA) {
 		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
