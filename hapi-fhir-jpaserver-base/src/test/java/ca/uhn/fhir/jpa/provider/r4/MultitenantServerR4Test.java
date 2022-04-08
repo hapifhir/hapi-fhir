@@ -40,7 +40,6 @@ import java.util.Date;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -397,6 +396,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 	public void testBulkExportForDifferentPartitions() throws IOException {
 		setBulkDataExportProvider();
 		testBulkExport(TENANT_A);
+		testBulkExport(TENANT_B);
 		testBulkExport(JpaConstants.DEFAULT_PARTITION_NAME);
 	}
 
@@ -404,8 +404,9 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		// Create patients
 		IBaseResource patientA = buildPatient(withActiveTrue());
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		IIdType idA;
 		requestDetails.setTenantId(createInPartition);
-		IIdType idA = myPatientDao.create((Patient) patientA, requestDetails).getId();
+		idA = myPatientDao.create((Patient) patientA, requestDetails).getId();
 
 		// Create a bulk job
 		BulkDataExportOptions options = new BulkDataExportOptions();
