@@ -116,7 +116,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			if (!subscriptionId.hasResourceType()) {
 				subscriptionId = subscriptionId.withResourceType(ResourceTypeEnum.SUBSCRIPTION.getCode());
 			}
-			subscriptionDao.read(subscriptionId, SystemRequestDetails.forAllPartition());
+			subscriptionDao.read(subscriptionId, SystemRequestDetails.forAllPartitions());
 		}
 
 		List<IPrimitiveType<String>> resourceIds = ObjectUtils.defaultIfNull(theResourceIds, Collections.emptyList());
@@ -300,7 +300,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 	private Future<Void> submitResource(String theSubscriptionId, String theResourceIdToTrigger) {
 		org.hl7.fhir.r4.model.IdType resourceId = new org.hl7.fhir.r4.model.IdType(theResourceIdToTrigger);
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceId.getResourceType());
-		IBaseResource resourceToTrigger = dao.read(resourceId, SystemRequestDetails.forAllPartition());
+		IBaseResource resourceToTrigger = dao.read(resourceId, SystemRequestDetails.forAllPartitions());
 
 		return submitResource(theSubscriptionId, resourceToTrigger);
 	}

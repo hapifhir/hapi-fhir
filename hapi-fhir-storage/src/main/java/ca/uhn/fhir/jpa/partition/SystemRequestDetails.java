@@ -57,7 +57,7 @@ public class SystemRequestDetails extends RequestDetails {
 		super(new MyInterceptorBroadcaster());
 	}
 
-	public static SystemRequestDetails forAllPartition(){
+	public static SystemRequestDetails forAllPartitions(){
 		return new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.allPartitions());
 	}
 
