@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
 import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteOptions;
 import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteSearch;
+import ca.uhn.fhir.jpa.search.builder.ISearchQueryExecutor;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
@@ -60,6 +61,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -118,6 +120,37 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	public void reindex(ResourceTable theEntity) {
 		SearchIndexingPlan plan = getSearchSession().indexingPlan();
 		plan.addOrUpdate(theEntity);
+	}
+
+
+	public static class FulltextAsyncSearchResult implements ISearchQueryExecutor {
+		private final List<Long> myResults;
+		private final Iterator<Long> myIterator;
+
+		public FulltextAsyncSearchResult(List<ResourcePersistentId> theResults) {
+			myResults = theResults.stream().map(i->i.getIdAsLong()).collect(Collectors.toList());
+			myIterator = myResults.iterator();
+		}
+
+		@Override
+		public void close() {
+
+		}
+
+		@Override
+		public boolean hasNext() {
+			return myIterator.hasNext();
+		}
+
+		@Override
+		public Long next() {
+			return myIterator.next();
+		}
+	}
+
+	@Override
+	public FulltextAsyncSearchResult searchAsync(String theResourceName, SearchParameterMap theParams) {
+		return new FulltextAsyncSearchResult(doSearch(theResourceName, theParams, null));
 	}
 
 	private List<ResourcePersistentId> doSearch(String theResourceType, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {

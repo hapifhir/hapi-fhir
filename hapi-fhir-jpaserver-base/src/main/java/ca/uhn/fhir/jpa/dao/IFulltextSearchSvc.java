@@ -44,6 +44,8 @@ public interface IFulltextSearchSvc {
 	 */
 	List<ResourcePersistentId> search(String theResourceName, SearchParameterMap theParams);
 
+	FulltextSearchSvcImpl.FulltextAsyncSearchResult searchAsync(String theResourceName, SearchParameterMap theParams);
+
 	/**
 	 * Autocomplete search for NIH $expand contextDirection=existing
 	 * @param theOptions operation options

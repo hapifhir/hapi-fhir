@@ -93,6 +93,7 @@ import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Streams;
 import com.healthmarketscience.sqlbuilder.Condition;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -328,7 +329,7 @@ public class SearchBuilder implements ISearchBuilder {
 			} else if (myParams.getEverythingMode() != null) {
 				fulltextMatchIds = queryHibernateSearchForEverythingPids();
 			} else {
-				fulltextMatchIds = myFulltextSearchSvc.search(myResourceName, myParams);
+				fulltextMatchIds = Streams.stream(myFulltextSearchSvc.searchAsync(myResourceName, myParams)).map(l->new ResourcePersistentId(l)).collect(Collectors.toList());
 			}
 
 			if (theSearchRuntimeDetails != null) {
