@@ -29,6 +29,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -806,9 +807,7 @@ public interface IValidationSupport {
 
 
 	class TranslateCodeRequest {
-		private final String mySourceSystemUrl;
-		private final String mySourceSystemVersion;
-		private final String mySourceCode;
+		private List<IBaseCoding> myCodings;
 		private final String myTargetSystemUrl;
 		private final String myConceptMapUrl;
 		private final String myConceptMapVersion;
@@ -817,10 +816,8 @@ public interface IValidationSupport {
 		private final Long myResourcePid;
 		private final boolean myReverse;
 
-		public TranslateCodeRequest(String theSourceSystemUrl, String theSourceCode, String theTargetSystemUrl) {
-			mySourceSystemUrl = theSourceSystemUrl;
-			mySourceSystemVersion = null;
-			mySourceCode = theSourceCode;
+		public TranslateCodeRequest(List<IBaseCoding> theCodings, String theTargetSystemUrl) {
+			myCodings = theCodings;
 			myTargetSystemUrl = theTargetSystemUrl;
 			myConceptMapUrl = null;
 			myConceptMapVersion = null;
@@ -831,9 +828,7 @@ public interface IValidationSupport {
 		}
 
 		public TranslateCodeRequest(
-				String theSourceSystemUrl,
-				String theSourceSystemVersion,
-				String theSourceCode,
+				List<IBaseCoding> theCodings,
 				String theTargetSystemUrl,
 				String theConceptMapUrl,
 				String theConceptMapVersion,
@@ -841,9 +836,7 @@ public interface IValidationSupport {
 				String theTargetValueSetUrl,
 				Long theResourcePid,
 				boolean theReverse) {
-			mySourceSystemUrl = theSourceSystemUrl;
-			mySourceSystemVersion = theSourceSystemVersion;
-			mySourceCode = theSourceCode;
+			myCodings = theCodings;
 			myTargetSystemUrl = theTargetSystemUrl;
 			myConceptMapUrl = theConceptMapUrl;
 			myConceptMapVersion = theConceptMapVersion;
@@ -866,9 +859,7 @@ public interface IValidationSupport {
 			TranslateCodeRequest that = (TranslateCodeRequest) theO;
 
 			return new EqualsBuilder()
-				.append(mySourceSystemUrl, that.mySourceSystemUrl)
-				.append(mySourceSystemVersion, that.mySourceSystemVersion)
-				.append(mySourceCode, that.mySourceCode)
+				.append(myCodings, that.myCodings)
 				.append(myTargetSystemUrl, that.myTargetSystemUrl)
 				.append(myConceptMapUrl, that.myConceptMapUrl)
 				.append(myConceptMapVersion, that.myConceptMapVersion)
@@ -882,9 +873,7 @@ public interface IValidationSupport {
 		@Override
 		public int hashCode() {
 			return new HashCodeBuilder(17, 37)
-				.append(mySourceSystemUrl)
-				.append(mySourceSystemVersion)
-				.append(mySourceCode)
+				.append(myCodings)
 				.append(myTargetSystemUrl)
 				.append(myConceptMapUrl)
 				.append(myConceptMapVersion)
@@ -895,16 +884,8 @@ public interface IValidationSupport {
 				.toHashCode();
 		}
 
-		public String getSourceSystemUrl() {
-			return mySourceSystemUrl;
-		}
-
-		public String getSourceSystemVersion() {
-			return mySourceSystemVersion;
-		}
-
-		public String getSourceCode() {
-			return mySourceCode;
+		public List<IBaseCoding> getCodings() {
+			return myCodings;
 		}
 
 		public String getTargetSystemUrl() {

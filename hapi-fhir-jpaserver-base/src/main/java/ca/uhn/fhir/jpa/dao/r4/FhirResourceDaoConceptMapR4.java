@@ -30,37 +30,38 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 public class FhirResourceDaoConceptMapR4 extends BaseHapiFhirResourceDao<ConceptMap> implements IFhirResourceDaoConceptMap<ConceptMap> {
 	@Autowired
 	private ITermConceptMappingSvc myTermConceptMappingSvc;
+	@Autowired
+	private IValidationSupport myValidationSupport;
 
 	@Override
 	public TranslateConceptResults translate(TranslationRequest theTranslationRequest, RequestDetails theRequestDetails) {
-		// Translate operation only accepts a single code to translate
-		Coding sourceCoding = theTranslationRequest.getCodeableConcept().getCoding().get(0);
-
 		IValidationSupport.TranslateCodeRequest translateCodeRequest = new IValidationSupport.TranslateCodeRequest(
-			sourceCoding.getSystem(),
-			sourceCoding.getVersion(),
-			sourceCoding.getCode(),
-			theTranslationRequest.getTargetSystem().asStringValue(),
-			theTranslationRequest.getUrl().asStringValue(),
-			theTranslationRequest.getConceptMapVersion().asStringValue(),
-			theTranslationRequest.getSource().asStringValue(),
-			theTranslationRequest.getTarget().asStringValue(),
+			Collections.unmodifiableList(theTranslationRequest.getCodeableConcept().getCoding()),
+			theTranslationRequest.getTargetSystem() != null ? theTranslationRequest.getTargetSystem().asStringValue() : null,
+			theTranslationRequest.getUrl() != null ? theTranslationRequest.getUrl().asStringValue() : null,
+			theTranslationRequest.getConceptMapVersion() != null ? theTranslationRequest.getConceptMapVersion().asStringValue() : null,
+			theTranslationRequest.getSource() != null ? theTranslationRequest.getSource().asStringValue() : null,
+			theTranslationRequest.getTarget() != null ? theTranslationRequest.getTarget().asStringValue() : null,
 			theTranslationRequest.getResourceId(),
 			theTranslationRequest.getReverseAsBoolean()
 		);
 
-		return myTerminologySvc.translateConcept(translateCodeRequest);
+		return myValidationSupport.translateConcept(translateCodeRequest);
 	}
 
 	@Override

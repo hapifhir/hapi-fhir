@@ -14,6 +14,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.StringType;
@@ -30,6 +31,7 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -1559,10 +1561,12 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 	@Test
 	public void testTranslateCodeRequestToTranslationRequestMapping() {
+		CodeableConcept codeableConcept = new CodeableConcept();
+		Coding coding = new Coding("theSourceSystemUrl", "theSourceCode", null);
+		codeableConcept.addCoding(coding);
+
 		IValidationSupport.TranslateCodeRequest theRequest = new IValidationSupport.TranslateCodeRequest(
-			"theSourceSystemUrl",
-			"theSourceSystemVersion",
-			"theSourceCode",
+			Collections.unmodifiableList(codeableConcept.getCoding()),
 			"theTargetSystemUrl",
 			"theConceptMapUrl",
 			"theConceptMapVersion",
@@ -1575,9 +1579,8 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		CodeableConcept sourceCodeableConcept = new CodeableConcept();
 		sourceCodeableConcept
 			.addCoding()
-			.setSystem(theRequest.getSourceSystemUrl())
-			.setCode(theRequest.getSourceCode())
-			.setVersion(theRequest.getSourceSystemVersion());
+			.setSystem(coding.getSystem())
+			.setCode(coding.getCode());
 
 		TranslationRequest expected = new TranslationRequest();
 		expected.setCodeableConcept(sourceCodeableConcept);
@@ -1607,10 +1610,12 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 	@Test
 	public void testTranslateCodeRequestWithReverseToTranslationRequestMapping() {
+		CodeableConcept codeableConcept = new CodeableConcept();
+		Coding coding = new Coding("theSourceSystemUrl", "theSourceCode", null);
+		codeableConcept.addCoding(coding);
+
 		IValidationSupport.TranslateCodeRequest theRequest = new IValidationSupport.TranslateCodeRequest(
-			"theSourceSystemUrl",
-			"theSourceSystemVersion",
-			"theSourceCode",
+			Collections.unmodifiableList(codeableConcept.getCoding()),
 			"theTargetSystemUrl",
 			"theConceptMapUrl",
 			"theConceptMapVersion",
@@ -1623,9 +1628,8 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		CodeableConcept sourceCodeableConcept = new CodeableConcept();
 		sourceCodeableConcept
 			.addCoding()
-			.setSystem(theRequest.getSourceSystemUrl())
-			.setCode(theRequest.getSourceCode())
-			.setVersion(theRequest.getSourceSystemVersion());
+			.setSystem(coding.getSystem())
+			.setCode(coding.getCode());
 
 		TranslationRequest expected = new TranslationRequest();
 		expected.setCodeableConcept(sourceCodeableConcept);

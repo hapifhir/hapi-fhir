@@ -22,6 +22,7 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.ParametersUtil;
 import com.google.common.collect.Lists;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -321,10 +322,11 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		translateResults.add(singleResult);
 		expectedResults.setResults(translateResults);
 
+		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.addCoding(new Coding(CODE_SYSTEM, CODE, null));
+
 		IValidationSupport.TranslateCodeRequest request = new IValidationSupport.TranslateCodeRequest(
-			CODE_SYSTEM,
-			CODE_SYSTEM_VERSION,
-			CODE,
+			Collections.unmodifiableList(codeableConcept.getCoding()),
 			TARGET_SYSTEM,
 			CONCEPT_MAP_URL,
 			CONCEPT_MAP_VERSION,
@@ -356,7 +358,9 @@ public class RemoteTerminologyServiceValidationSupportTest {
 	public void testTranslateCode_NoInParams_NoOutParams() {
 		myConceptMapProvider.myNextReturnParams = new Parameters();
 
-		IValidationSupport.TranslateCodeRequest request = new IValidationSupport.TranslateCodeRequest(null, null, null);
+		List<IBaseCoding> codings = new ArrayList<>();
+		codings.add(new Coding(null, null, null));
+		IValidationSupport.TranslateCodeRequest request = new IValidationSupport.TranslateCodeRequest(codings, null);
 
 		TranslateConceptResults results = mySvc.translateConcept(request);
 

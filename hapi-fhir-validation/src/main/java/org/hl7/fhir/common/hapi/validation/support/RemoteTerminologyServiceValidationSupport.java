@@ -1,5 +1,9 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 import ca.uhn.fhir.context.support.TranslateConceptResult;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.i18n.Msg;
@@ -21,6 +25,7 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Parameters;
@@ -33,6 +38,7 @@ import java.io.IOException;
 import java.sql.Array;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -352,14 +358,29 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		if (!StringUtils.isEmpty(theRequest.getConceptMapVersion())) {
 			ParametersUtil.addParameterToParametersString(fhirContext, params, "conceptMapVersion", theRequest.getConceptMapVersion());
 		}
-		if (!StringUtils.isEmpty(theRequest.getSourceCode())) {
-			ParametersUtil.addParameterToParametersString(fhirContext, params, "code", theRequest.getSourceCode());
-		}
-		if (!StringUtils.isEmpty(theRequest.getSourceSystemUrl())) {
-			ParametersUtil.addParameterToParametersUri(fhirContext, params, "system", theRequest.getSourceSystemUrl());
-		}
-		if (!StringUtils.isEmpty(theRequest.getSourceSystemVersion())) {
-			ParametersUtil.addParameterToParametersString(fhirContext, params, "version", theRequest.getSourceSystemVersion());
+		if (theRequest.getCodings() != null) {
+			BaseRuntimeElementCompositeDefinition<?> codeableConceptDef = (BaseRuntimeElementCompositeDefinition<?>) Objects.requireNonNull(fhirContext.getElementDefinition("CodeableConcept"));
+			BaseRuntimeChildDefinition codings = codeableConceptDef.getChildByName("coding");
+			BaseRuntimeElementCompositeDefinition<?> codingDef = (BaseRuntimeElementCompositeDefinition<?>) Objects.requireNonNull(fhirContext.getElementDefinition("Coding"));
+			BaseRuntimeChildDefinition codingSystemChild = codingDef.getChildByName("system");
+			BaseRuntimeChildDefinition codingCodeChild = codingDef.getChildByName("code");
+			BaseRuntimeElementDefinition<IPrimitiveType<?>> systemDef = (RuntimePrimitiveDatatypeDefinition) fhirContext.getElementDefinition("uri");
+			BaseRuntimeElementDefinition<IPrimitiveType<?>> codeDef = (RuntimePrimitiveDatatypeDefinition) fhirContext.getElementDefinition("code");
+
+			IBase codeableConcept = codeableConceptDef.newInstance();
+
+			for (IBaseCoding aCoding : theRequest.getCodings()) {
+				IBaseCoding newCoding = (IBaseCoding) codingDef.newInstance();
+
+				IPrimitiveType<?> newSystem = systemDef.newInstance(aCoding.getSystem());
+				codingSystemChild.getMutator().addValue(newCoding, newSystem);
+				IPrimitiveType<?> newCode = codeDef.newInstance(aCoding.getCode());
+				codingCodeChild.getMutator().addValue(newCoding, newCode);
+
+				codings.getMutator().addValue(codeableConcept, newCoding);
+			}
+
+			ParametersUtil.addParameterToParameters(fhirContext, params, "codeableConcept", codeableConcept);
 		}
 		if (!StringUtils.isEmpty(theRequest.getSourceValueSetUrl())) {
 			ParametersUtil.addParameterToParametersUri(fhirContext, params, "source", theRequest.getSourceValueSetUrl());
