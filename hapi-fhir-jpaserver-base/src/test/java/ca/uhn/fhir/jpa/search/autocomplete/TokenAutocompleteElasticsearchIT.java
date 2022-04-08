@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.config.TestHibernateSearchAddInConfig;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.dao.DaoTestDataBuilder;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -80,6 +81,9 @@ public class TokenAutocompleteElasticsearchIT extends BaseJpaTest{
 	private IBulkDataExportJobSchedulingHelper myBulkDataScheduleHelper;
 	@Autowired
 	ITestDataBuilder myDataBuilder;
+
+	@Autowired
+	private ModelConfig myModelConfig;
 
 	// a few different codes
 	static final Coding mean_blood_pressure = new Coding("http://loinc.org", "8478-0", "Mean blood pressure");
@@ -180,7 +184,7 @@ public class TokenAutocompleteElasticsearchIT extends BaseJpaTest{
 
 	List<TokenAutocompleteHit> autocompleteSearch(String theResourceType, String theSPName, String theModifier, String theSearchText) {
 		return new TransactionTemplate(myTxManager).execute(s -> {
-			TokenAutocompleteSearch tokenAutocompleteSearch = new TokenAutocompleteSearch(myFhirCtx, Search.session(myEntityManager));
+			TokenAutocompleteSearch tokenAutocompleteSearch = new TokenAutocompleteSearch(myFhirCtx, myModelConfig, Search.session(myEntityManager));
 			return  tokenAutocompleteSearch.search(theResourceType, theSPName, theSearchText, theModifier,30);
 		});
 	}

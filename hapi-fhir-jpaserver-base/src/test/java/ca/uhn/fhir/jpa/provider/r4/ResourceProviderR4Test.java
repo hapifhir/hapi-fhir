@@ -164,6 +164,7 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.config.r4.FhirContextR4Config.DEFAULT_PRESERVE_VERSION_REFS;
 import static ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick;
+import static ca.uhn.fhir.rest.param.BaseParamWithPrefix.MSG_PREFIX_INVALID_FORMAT;
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -366,21 +367,21 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		HttpGet get = new HttpGet(ourServerBase + "/Condition?onset-date=junk");
 		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
 			String output = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
-			assertThat(output, containsString("Invalid date/time format: &quot;junk&quot;"));
+			assertThat(output, containsString(MSG_PREFIX_INVALID_FORMAT + "&quot;junk&quot;"));
 			assertEquals(400, resp.getStatusLine().getStatusCode());
 		}
 
 		 get = new HttpGet(ourServerBase + "/Condition?onset-date=ge");
 		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
 			String output = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
-			assertThat(output, containsString("Invalid date/time format: &quot;ge&quot;"));
+			assertThat(output, containsString(MSG_PREFIX_INVALID_FORMAT + "&quot;ge&quot;"));
 			assertEquals(400, resp.getStatusLine().getStatusCode());
 		}
 
 		 get = new HttpGet(ourServerBase + "/Condition?onset-date=" + UrlUtil.escapeUrlParam(">"));
 		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
 			String output = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
-			assertThat(output, containsString("Invalid date/time format: &quot;&gt;&quot;"));
+			assertThat(output, containsString(MSG_PREFIX_INVALID_FORMAT + "&quot;&gt;&quot;"));
 			assertEquals(400, resp.getStatusLine().getStatusCode());
 		}
 

@@ -21,8 +21,10 @@ package ca.uhn.fhir.jpa.model.search;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
 import org.hibernate.search.engine.backend.document.DocumentElement;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -41,15 +43,19 @@ public class ExtendedLuceneIndexData {
 	private static final Logger ourLog = LoggerFactory.getLogger(ExtendedLuceneIndexData.class);
 
 	final FhirContext myFhirContext;
+	final ModelConfig myModelConfig;
+
 	final SetMultimap<String, String> mySearchParamStrings = HashMultimap.create();
 	final SetMultimap<String, IBaseCoding> mySearchParamTokens = HashMultimap.create();
 	final SetMultimap<String, String> mySearchParamLinks = HashMultimap.create();
 	final SetMultimap<String, DateSearchIndexData> mySearchParamDates = HashMultimap.create();
+	final SetMultimap<String, QuantitySearchIndexData> mySearchParamQuantities = HashMultimap.create();
 	private String myForcedId;
 	private String myResourceJSON;
 
-	public ExtendedLuceneIndexData(FhirContext theFhirContext) {
+	public ExtendedLuceneIndexData(FhirContext theFhirContext, ModelConfig theModelConfig) {
 		this.myFhirContext = theFhirContext;
+		this.myModelConfig = theModelConfig;
 	}
 
 	private <V> BiConsumer<String, V> ifNotContained(BiConsumer<String, V> theIndexWriter) {
@@ -70,7 +76,7 @@ public class ExtendedLuceneIndexData {
 	 * @param theDocument the Hibernate Search document for ResourceTable
 	 */
 	public void writeIndexElements(DocumentElement theDocument) {
-		HibernateSearchIndexWriter indexWriter = HibernateSearchIndexWriter.forRoot(myFhirContext, theDocument);
+		HibernateSearchIndexWriter indexWriter = HibernateSearchIndexWriter.forRoot(myFhirContext, myModelConfig, theDocument);
 
 		ourLog.debug("Writing JPA index to Hibernate Search");
 
@@ -84,6 +90,8 @@ public class ExtendedLuceneIndexData {
 		mySearchParamStrings.forEach(ifNotContained(indexWriter::writeStringIndex));
 		mySearchParamTokens.forEach(ifNotContained(indexWriter::writeTokenIndex));
 		mySearchParamLinks.forEach(ifNotContained(indexWriter::writeReferenceIndex));
+		// we want to receive the whole entry collection for each invocation
+		Multimaps.asMap(mySearchParamQuantities).forEach(ifNotContained(indexWriter::writeQuantityIndex));
 		// TODO MB Use RestSearchParameterTypeEnum to define templates.
 		mySearchParamDates.forEach(ifNotContained(indexWriter::writeDateIndex));
 	}
@@ -113,6 +121,10 @@ public class ExtendedLuceneIndexData {
 
 	public void addDateIndexData(String theSpName, Date theLowerBound, int theLowerBoundOrdinal, Date theUpperBound, int theUpperBoundOrdinal) {
 		mySearchParamDates.put(theSpName, new DateSearchIndexData(theLowerBound, theLowerBoundOrdinal, theUpperBound, theUpperBoundOrdinal));
+	}
+
+	public void addQuantityIndexData(String theSpName, String theUnits, String theSystem, double theValue) {
+		mySearchParamQuantities.put(theSpName, new QuantitySearchIndexData(theUnits, theSystem, theValue));
 	}
 
 	public void setForcedId(String theForcedId) {

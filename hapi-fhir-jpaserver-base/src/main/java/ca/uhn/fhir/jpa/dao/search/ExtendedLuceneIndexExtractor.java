@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao.search;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
@@ -54,17 +55,20 @@ public class ExtendedLuceneIndexExtractor {
 	private final FhirContext myContext;
 	private final ResourceSearchParams myParams;
 	private final ISearchParamExtractor mySearchParamExtractor;
+	private final ModelConfig myModelConfig;
 
-	public ExtendedLuceneIndexExtractor(DaoConfig theDaoConfig, FhirContext theContext, ResourceSearchParams theActiveParams, ISearchParamExtractor theSearchParamExtractor) {
+	public ExtendedLuceneIndexExtractor(DaoConfig theDaoConfig, FhirContext theContext, ResourceSearchParams theActiveParams,
+			ISearchParamExtractor theSearchParamExtractor, ModelConfig theModelConfig) {
 		myDaoConfig = theDaoConfig;
 		myContext = theContext;
 		myParams = theActiveParams;
 		mySearchParamExtractor = theSearchParamExtractor;
+		myModelConfig = theModelConfig;
 	}
 
 	@NotNull
 	public ExtendedLuceneIndexData extract(IBaseResource theResource, ResourceIndexedSearchParams theNewParams) {
-		ExtendedLuceneIndexData retVal = new ExtendedLuceneIndexData(myContext);
+		ExtendedLuceneIndexData retVal = new ExtendedLuceneIndexData(myContext, myModelConfig);
 
 		if(myDaoConfig.isStoreResourceInLuceneIndex()) {
 			retVal.setRawResourceData(myContext.newJsonParser().encodeResourceToString(theResource));
@@ -83,6 +87,10 @@ public class ExtendedLuceneIndexExtractor {
 		theNewParams.myDateParams.forEach(nextParam ->
 			retVal.addDateIndexData(nextParam.getParamName(), nextParam.getValueLow(), nextParam.getValueLowDateOrdinal(),
 				nextParam.getValueHigh(), nextParam.getValueHighDateOrdinal()));
+
+		theNewParams.myQuantityParams.forEach(nextParam ->
+			retVal.addQuantityIndexData(nextParam.getParamName(), nextParam.getUnits(), nextParam.getSystem(), nextParam.getValue().doubleValue()));
+
 
 		if (!theNewParams.myLinks.isEmpty()) {
 
