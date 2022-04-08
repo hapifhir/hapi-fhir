@@ -29,7 +29,10 @@ public abstract class BaseParamWithPrefix<T extends BaseParam> extends BaseParam
 
 	private static final long serialVersionUID = 1L;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseParamWithPrefix.class);
-	
+
+
+	public static final String MSG_PREFIX_INVALID_FORMAT = "Invalid date/time/quantity format: ";
+
 	private ParamPrefixEnum myPrefix;
 
 	/**
@@ -58,7 +61,7 @@ public abstract class BaseParamWithPrefix<T extends BaseParam> extends BaseParam
 		}
 
 		if (offset > 0 && theString.length() == offset) {
-			throw new DataFormatException(Msg.code(1940) + "Invalid date/time format: \"" + theString + "\"");
+			throw new DataFormatException(Msg.code(1940) + MSG_PREFIX_INVALID_FORMAT + "\"" + theString + "\"");
 		}
 
 		String prefix = theString.substring(0, offset);
