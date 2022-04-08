@@ -138,8 +138,6 @@ public class MdmMatchLinkSvc {
 	}
 
 	private void handleMdmCreate(IAnyResource theTargetResource, MatchedGoldenResourceCandidate theGoldenResourceCandidate, MdmTransactionContext theMdmTransactionContext) {
-		// FIXME Anna PART3: Let's rework this log and move it to '//MOVE_HERE
-		log(theMdmTransactionContext, "MDM has narrowed down to one candidate for matching.");
 		IAnyResource goldenResource = myMdmGoldenResourceFindingSvc.getGoldenResourceFromMatchedGoldenResourceCandidate(theGoldenResourceCandidate, theMdmTransactionContext.getResourceType());
 
 		if (myGoldenResourceHelper.isPotentialDuplicate(goldenResource, theTargetResource)) {
@@ -149,7 +147,8 @@ public class MdmMatchLinkSvc {
 			myMdmLinkSvc.updateLink(newGoldenResource, theTargetResource, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 			myMdmLinkSvc.updateLink(newGoldenResource, goldenResource, MdmMatchOutcome.POSSIBLE_DUPLICATE, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 		} else {
-			//MOVE_HERE
+			log(theMdmTransactionContext, "MDM has narrowed down to one candidate for matching.");
+
 			if (theGoldenResourceCandidate.isMatch()) {
 				myGoldenResourceHelper.handleExternalEidAddition(goldenResource, theTargetResource, theMdmTransactionContext);
 				myEidUpdateService.applySurvivorshipRulesAndSaveGoldenResource(theTargetResource, goldenResource, theMdmTransactionContext);
