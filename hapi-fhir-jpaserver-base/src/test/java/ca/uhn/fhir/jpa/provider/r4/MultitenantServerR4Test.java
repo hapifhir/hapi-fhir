@@ -394,13 +394,17 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 	}
 
 	@Test
-	public void testBulkExport() throws IOException {
+	public void testBulkExportForDifferentPartitions() throws IOException {
 		setBulkDataExportProvider();
+		testBulkExport(TENANT_A);
+		testBulkExport(JpaConstants.DEFAULT_PARTITION_NAME);
+	}
 
+	private void testBulkExport(String createInPartition) throws IOException {
 		// Create patients
 		IBaseResource patientA = buildPatient(withActiveTrue());
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
-		requestDetails.setTenantId(TENANT_A);
+		requestDetails.setTenantId(createInPartition);
 		IIdType idA = myPatientDao.create((Patient) patientA, requestDetails).getId();
 
 		// Create a bulk job
@@ -408,7 +412,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		options.setResourceTypes(Sets.newHashSet("Patient"));
 		options.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
 
-		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(options, true, requestDetails);
+		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(options, false, requestDetails);
 		assertNotNull(jobDetails.getJobId());
 
 		// Check the status
@@ -427,7 +431,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		//perform export-poll-status
 		String patientUrl;
-		HttpGet get = new HttpGet(myClient.getServerBase() + "/" + TENANT_A + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?"
+		HttpGet get = new HttpGet(myClient.getServerBase() + "/" + createInPartition + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?"
 			+ JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + jobDetails.getJobId());
 		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -443,6 +447,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			IBaseResource patient = myFhirContext.newJsonParser().parseResource(responseString);
 			assertThat(patient.getIdElement(), is(equalTo(idA)));
 		}
+		myPatientDao.delete(idA, requestDetails);
 	}
 
 	private void setBulkDataExportProvider() {
@@ -451,9 +456,6 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		provider.setFhirContextForUnitTest(myFhirContext);
 		ourRestServer.registerProvider(provider);
 	}
-
-
-
 
 	private void createConditionWithAllowedUnqualified(IIdType idA) {
 		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
