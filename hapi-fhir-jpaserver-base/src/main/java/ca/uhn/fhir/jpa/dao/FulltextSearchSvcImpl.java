@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneIndexExtractor;
 import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneResourceProjection;
 import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneSearchBuilder;
 import ca.uhn.fhir.jpa.dao.search.LastNOperation;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
 import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteOptions;
@@ -81,6 +82,9 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	@Autowired
 	IIdHelperService myIdHelperService;
 
+	@Autowired
+	ModelConfig myModelConfig;
+
 	final private ExtendedLuceneSearchBuilder myAdvancedIndexQueryBuilder = new ExtendedLuceneSearchBuilder();
 
 	private Boolean ourDisabled;
@@ -95,7 +99,8 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	public ExtendedLuceneIndexData extractLuceneIndexData(IBaseResource theResource, ResourceIndexedSearchParams theNewParams) {
 		String resourceType = myFhirContext.getResourceType(theResource);
 		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(resourceType);
-		ExtendedLuceneIndexExtractor extractor = new ExtendedLuceneIndexExtractor(myDaoConfig, myFhirContext, activeSearchParams, mySearchParamExtractor);
+		ExtendedLuceneIndexExtractor extractor = new ExtendedLuceneIndexExtractor(
+			myDaoConfig, myFhirContext, activeSearchParams, mySearchParamExtractor, myModelConfig);
 		return extractor.extract(theResource,theNewParams);
 	}
 
@@ -126,7 +131,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			)
 			.where(
 				f -> f.bool(b -> {
-					ExtendedLuceneClauseBuilder builder = new ExtendedLuceneClauseBuilder(myFhirContext, b, f);
+					ExtendedLuceneClauseBuilder builder = new ExtendedLuceneClauseBuilder(myFhirContext, myModelConfig, b, f);
 
 					/*
 					 * Handle _content parameter (resource body content)
@@ -226,7 +231,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	public IBaseResource tokenAutocompleteValueSetSearch(ValueSetAutocompleteOptions theOptions) {
 		ensureElastic();
 
-		ValueSetAutocompleteSearch autocomplete = new ValueSetAutocompleteSearch(myFhirContext, getSearchSession());
+		ValueSetAutocompleteSearch autocomplete = new ValueSetAutocompleteSearch(myFhirContext, myModelConfig, getSearchSession());
 
 		return autocomplete.search(theOptions);
 	}
@@ -253,7 +258,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	@Override
 	public List<ResourcePersistentId> lastN(SearchParameterMap theParams, Integer theMaximumResults) {
 		ensureElastic();
-		List<Long> pidList = new LastNOperation(getSearchSession(), myFhirContext, mySearchParamRegistry)
+		List<Long> pidList = new LastNOperation(getSearchSession(), myFhirContext, myModelConfig, mySearchParamRegistry)
 			.executeLastN(theParams, theMaximumResults);
 		return convertLongsToResourcePersistentIds(pidList);
 	}

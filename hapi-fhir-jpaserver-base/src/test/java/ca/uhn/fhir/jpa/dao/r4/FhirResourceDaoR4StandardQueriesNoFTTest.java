@@ -386,7 +386,7 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 //				myDataBuilder.withPrimitiveAttribute("value", theValue),
 //				myDataBuilder.withPrimitiveAttribute("unit", "mmHg"),
 //				myDataBuilder.withPrimitiveAttribute("system", "http://unitsofmeasure.org"));
-			myResourceId = myDataBuilder.createObservation(myDataBuilder.withAttribute("valueQuantity",
+			myResourceId = myDataBuilder.createObservation(myDataBuilder.withElementAt("valueQuantity",
 				myDataBuilder.withPrimitiveAttribute("value", theValue),
 				myDataBuilder.withPrimitiveAttribute("unit", "mmHg"),
 				myDataBuilder.withPrimitiveAttribute("system", "http://unitsofmeasure.org"),

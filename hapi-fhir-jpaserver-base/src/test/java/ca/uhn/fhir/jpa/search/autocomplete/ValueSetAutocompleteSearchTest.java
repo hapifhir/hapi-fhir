@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.search.autocomplete;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -13,7 +14,8 @@ import static org.hamcrest.Matchers.nullValue;
 
 class ValueSetAutocompleteSearchTest {
 	FhirContext myFhirContext = FhirContext.forR4();
-	ValueSetAutocompleteSearch myValueSetAutocompleteSearch = new ValueSetAutocompleteSearch(myFhirContext, null);
+	private ModelConfig myModelConfig;
+	ValueSetAutocompleteSearch myValueSetAutocompleteSearch = new ValueSetAutocompleteSearch(myFhirContext, myModelConfig, null);
 
 	@Nested
 	public class HitToValueSetConversion {

@@ -33,6 +33,9 @@ public class DaoTestDataBuilder implements ITestDataBuilder, AfterEachCallback {
 
 	@Override
 	public IIdType doCreateResource(IBaseResource theResource) {
+		if (ourLog.isDebugEnabled()) {
+			ourLog.debug("create resource {}", myFhirCtx.newJsonParser().encodeResourceToString(theResource));
+		}
 		//noinspection rawtypes
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
 		//noinspection unchecked
@@ -74,12 +77,11 @@ public class DaoTestDataBuilder implements ITestDataBuilder, AfterEachCallback {
 
 	@Configuration
 	public static class Config {
+		@Autowired FhirContext myFhirContext;
+		@Autowired DaoRegistry myDaoRegistry;
 
 		@Bean
-		DaoTestDataBuilder testDataBuilder(
-			@Autowired FhirContext myFhirContext,
-			@Autowired DaoRegistry myDaoRegistry
-		) {
+		DaoTestDataBuilder testDataBuilder() {
 			return new DaoTestDataBuilder(myFhirContext, myDaoRegistry, new SystemRequestDetails());
 		}
 	}
