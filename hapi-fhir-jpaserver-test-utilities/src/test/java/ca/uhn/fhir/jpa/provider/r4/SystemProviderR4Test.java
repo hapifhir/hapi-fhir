@@ -508,8 +508,11 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 	}
 
+	/**
+	 * Ensure that the interceptor is called an appropriate number of times
+	 */
 	@Test
-	public void testTransactionWithMultipleConditionalRefs() throws IOException {
+	public void testBatchWithMultipleConditionalCreates() {
 
 		AtomicInteger counter0 = new AtomicInteger(0);
 		AtomicInteger counter1 = new AtomicInteger(0);

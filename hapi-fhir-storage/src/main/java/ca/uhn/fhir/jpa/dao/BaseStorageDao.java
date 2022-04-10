@@ -464,14 +464,15 @@ public abstract class BaseStorageDao {
 	}
 
 	public void notifyInterceptors(RestOperationTypeEnum theOperationType, IServerInterceptor.ActionRequestDetails theRequestDetails) {
-		if (theRequestDetails.getId() != null && theRequestDetails.getId().hasResourceType() && isNotBlank(theRequestDetails.getResourceType())) {
-			if (theRequestDetails.getId().getResourceType().equals(theRequestDetails.getResourceType()) == false) {
-				throw new InternalErrorException(Msg.code(525) + "Inconsistent server state - Resource types don't match: " + theRequestDetails.getId().getResourceType() + " / " + theRequestDetails.getResourceType());
-			}
-		}
-
-		if (theRequestDetails.getUserData().get(PROCESSING_SUB_REQUEST) == Boolean.TRUE) {
-			theRequestDetails.notifyIncomingRequestPreHandled(theOperationType);
-		}
+		// FIXME: remove
+//		if (theRequestDetails.getId() != null && theRequestDetails.getId().hasResourceType() && isNotBlank(theRequestDetails.getResourceType())) {
+//			if (theRequestDetails.getId().getResourceType().equals(theRequestDetails.getResourceType()) == false) {
+//				throw new InternalErrorException(Msg.code(525) + "Inconsistent server state - Resource types don't match: " + theRequestDetails.getId().getResourceType() + " / " + theRequestDetails.getResourceType());
+//			}
+//		}
+//
+//		if (theRequestDetails.getUserData().get(PROCESSING_SUB_REQUEST) == Boolean.TRUE) {
+//			theRequestDetails.notifyIncomingRequestPreHandled(theOperationType);
+//		}
 	}
 }
