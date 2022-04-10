@@ -121,8 +121,8 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 	}
 
 	@Override
-	protected void populateActionRequestDetailsForInterceptor(RequestDetails theRequestDetails, RequestDetails theDetails, Object[] theMethodParams) {
-		super.populateActionRequestDetailsForInterceptor(theRequestDetails, theDetails, theMethodParams);
+	protected void populateActionRequestDetailsForInterceptor(RequestDetails theRequestDetails, Object[] theMethodParams) {
+		super.populateActionRequestDetailsForInterceptor(theRequestDetails, theMethodParams);
 
 		/*
 		 * If the method has no parsed resource parameter, we parse here in order to have something for the interceptor.

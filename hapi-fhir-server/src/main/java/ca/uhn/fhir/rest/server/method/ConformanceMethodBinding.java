@@ -152,7 +152,7 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 			RestOperationTypeEnum operationType = getRestOperationType(theRequest);
 			if (operationType != null) {
 
-				populateActionRequestDetailsForInterceptor(theRequest, null, theMethodParams);
+				populateActionRequestDetailsForInterceptor(theRequest, theMethodParams);
 
 				// Interceptor hook: SERVER_INCOMING_REQUEST_PRE_HANDLED
 				if (theRequest.getInterceptorBroadcaster() != null) {
