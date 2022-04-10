@@ -1653,13 +1653,13 @@
 				<artifactId>javassist</artifactId>
 				<version>3.22.0-GA</version>
 			</dependency>
-			<!--<dependency>
+			<dependency>
 				<groupId>org.junit</groupId>
 				<artifactId>junit-bom</artifactId>
 				<version>${junit_version}</version>
 				<type>pom</type>
 				<scope>import</scope>
-			</dependency>-->
+			</dependency>
 			<dependency>
 				<groupId>org.junit.jupiter</groupId>
 				<artifactId>junit-jupiter</artifactId>
