@@ -192,7 +192,8 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		return new ArrayList<>();
 	}
 
-	private OperationExamineDirection determineOperationDirection(RestOperationTypeEnum theOperation, IBaseResource theRequestResource) {
+	private OperationExamineDirection determineOperationDirection(RestOperationTypeEnum theOperation) {
+
 		switch (theOperation) {
 			case ADD_TAGS:
 			case DELETE_TAGS:
@@ -216,13 +217,6 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			case CREATE:
 			case UPDATE:
 			case PATCH:
-				// if (theRequestResource != null) {
-				// if (theRequestResource.getIdElement() != null) {
-				// if (theRequestResource.getIdElement().hasIdPart() == false) {
-				// return OperationExamineDirection.IN_UNCATEGORIZED;
-				// }
-				// }
-				// }
 				return OperationExamineDirection.IN;
 
 			case META:
@@ -347,7 +341,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		IBaseResource inputResource = null;
 		IIdType inputResourceId = null;
 
-		switch (determineOperationDirection(theRequest.getRestOperationType(), theRequest.getResource())) {
+		switch (determineOperationDirection(theRequest.getRestOperationType())) {
 			case IN:
 			case BOTH:
 				inputResource = theRequest.getResource();
@@ -406,7 +400,8 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	}
 
 	private void checkOutgoingResourceAndFailIfDeny(RequestDetails theRequestDetails, IBaseResource theResponseObject, Pointcut thePointcut) {
-		switch (determineOperationDirection(theRequestDetails.getRestOperationType(), null)) {
+
+		switch (determineOperationDirection(theRequestDetails.getRestOperationType())) {
 			case IN:
 			case NONE:
 				return;

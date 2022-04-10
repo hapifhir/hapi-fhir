@@ -90,7 +90,7 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 
 		// Interceptor invoke: SERVER_INCOMING_REQUEST_PRE_HANDLED
-		populateActionRequestDetailsForInterceptor(theRequest, ReflectionUtil.EMPTY_OBJECT_ARRAY);
+		populateRequestDetailsForInterceptor(theRequest, ReflectionUtil.EMPTY_OBJECT_ARRAY);
 		HookParams preHandledParams = new HookParams();
 		preHandledParams.add(RestOperationTypeEnum.class, theRequest.getRestOperationType());
 		preHandledParams.add(RequestDetails.class, theRequest);

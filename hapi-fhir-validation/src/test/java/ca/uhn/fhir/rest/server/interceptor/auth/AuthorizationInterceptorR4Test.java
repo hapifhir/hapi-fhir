@@ -31,7 +31,9 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
+import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SimplePreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -100,6 +102,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
@@ -4413,6 +4416,30 @@ public class AuthorizationInterceptorR4Test {
 		public MethodOutcome update(@IdParam IdType theId, @ResourceParam Observation theResource, @ConditionalUrlParam String theConditionalUrl, RequestDetails theRequestDetails) {
 			ourHitMethod = true;
 
+			if (isNotBlank(theConditionalUrl)) {
+				IdType actual = new IdType("Observation", ourConditionalCreateId);
+				theResource.setId(actual);
+			} else {
+				theResource.setId(theId.withVersion("2"));
+			}
+
+			{
+				HookParams params = new HookParams();
+				params.add(IBaseResource.class, theResource);
+				params.add(RequestDetails.class, theRequestDetails);
+				params.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+				params.add(TransactionDetails.class, new TransactionDetails());
+				ourServlet.getInterceptorService().callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, params);
+			}
+
+			{
+				HookParams params = new HookParams();
+				params.add(RequestDetails.class, theRequestDetails);
+				params.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+				params.add(IPreResourceShowDetails.class, new SimplePreResourceShowDetails(theResource));
+				ourServlet.getInterceptorService().callHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, params);
+			}
+
 			MethodOutcome retVal = new MethodOutcome();
 			retVal.setResource(theResource);
 			return retVal;
@@ -4457,11 +4484,19 @@ public class AuthorizationInterceptorR4Test {
 
 		@Create()
 		public MethodOutcome create(@ResourceParam Patient theResource, @ConditionalUrlParam String theConditionalUrl, RequestDetails theRequestDetails) {
+
 			ourHitMethod = true;
 			theResource.setId("Patient/1/_history/1");
 			MethodOutcome retVal = new MethodOutcome();
 			retVal.setCreated(true);
 			retVal.setResource(theResource);
+
+			HookParams params = new HookParams();
+			params.add(RequestDetails.class, theRequestDetails);
+			params.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+			params.add(IPreResourceShowDetails.class, new SimplePreResourceShowDetails(theResource));
+			ourServlet.getInterceptorService().callHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, params);
+
 			return retVal;
 		}
 
@@ -4538,8 +4573,7 @@ public class AuthorizationInterceptorR4Test {
 		public MethodOutcome patch(@IdParam IdType theId, @ResourceParam String theResource, PatchTypeEnum thePatchType) {
 			ourHitMethod = true;
 
-			MethodOutcome retVal = new MethodOutcome();
-			return retVal;
+			return new MethodOutcome();
 		}
 
 		@Read(version = true)
@@ -4561,6 +4595,29 @@ public class AuthorizationInterceptorR4Test {
 		public MethodOutcome update(@IdParam IdType theId, @ResourceParam Patient theResource, @ConditionalUrlParam String theConditionalUrl, RequestDetails theRequestDetails) {
 			ourHitMethod = true;
 
+			if (isNotBlank(theConditionalUrl)) {
+				IdType actual = new IdType("Patient", ourConditionalCreateId);
+				theResource.setId(actual);
+			} else {
+				theResource.setId(theId.withVersion("2"));
+			}
+
+			{
+				HookParams params = new HookParams();
+				params.add(IBaseResource.class, theResource);
+				params.add(RequestDetails.class, theRequestDetails);
+				params.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+				params.add(TransactionDetails.class, new TransactionDetails());
+				ourServlet.getInterceptorService().callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, params);
+			}
+			{
+				HookParams params = new HookParams();
+				params.add(RequestDetails.class, theRequestDetails);
+				params.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+				params.add(IPreResourceShowDetails.class, new SimplePreResourceShowDetails(theResource));
+				ourServlet.getInterceptorService().callHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, params);
+			}
+			
 			MethodOutcome retVal = new MethodOutcome();
 			retVal.setResource(theResource);
 			return retVal;
