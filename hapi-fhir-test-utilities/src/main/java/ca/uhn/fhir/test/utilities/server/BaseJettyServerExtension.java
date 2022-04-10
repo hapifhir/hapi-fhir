@@ -26,7 +26,12 @@ import org.apache.commons.lang3.Validate;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.eclipse.jetty.io.Connection;
+import org.eclipse.jetty.io.Connection.Listener;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -52,26 +57,40 @@ import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtension<?>> implements BeforeEachCallback, AfterEachCallback, AfterAllCallback {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseJettyServerExtension.class);
-
+	private final List<List<String>> myRequestHeaders = new ArrayList<>();
+	private final List<String> myRequestContentTypes = new ArrayList<>();
 	private String myServletPath = "/*";
 	private Server myServer;
 	private CloseableHttpClient myHttpClient;
 	private int myPort = 0;
 	private boolean myKeepAliveBetweenTests;
 	private String myContextPath = "";
-	private final List<List<String>> myRequestHeaders = new ArrayList<>();
-	private final List<String> myRequestContentTypes = new ArrayList<>();
+	private AtomicLong myConnectionsOpenedCounter;
 
 	@SuppressWarnings("unchecked")
 	public T withContextPath(String theContextPath) {
 		myContextPath = defaultString(theContextPath);
 		return (T) this;
+	}
+
+	/**
+	 * Returns the total number of connections that this server has received. This
+	 * is not the current number of open connections, it's the number of new
+	 * connections that have been opened at any point.
+	 */
+	public long getConnectionsOpenedCount() {
+		return myConnectionsOpenedCounter.get();
+	}
+
+	public void resetConnectionsOpenedCount() {
+		myConnectionsOpenedCounter.set(0);
 	}
 
 	public CloseableHttpClient getHttpClient() {
@@ -102,7 +121,25 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 			return;
 		}
 
-		myServer = new Server(myPort);
+		myServer = new Server();
+		myConnectionsOpenedCounter = new AtomicLong(0);
+
+		ServerConnector connector = new ServerConnector(myServer);
+		connector.setPort(myPort);
+		myServer.setConnectors(new Connector[]{connector});
+
+		HttpConnectionFactory connectionFactory = (HttpConnectionFactory) connector.getConnectionFactories().iterator().next();
+		connectionFactory.addBean(new Listener(){
+			@Override
+			public void onOpened(Connection connection) {
+				myConnectionsOpenedCounter.incrementAndGet();
+			}
+
+			@Override
+			public void onClosed(Connection connection) {
+				// nothing
+			}
+		});
 
 		ServletHolder servletHolder = new ServletHolder(provideServlet());
 
@@ -111,8 +148,11 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 		contextHandler.addServlet(servletHolder, myServletPath);
 		contextHandler.addFilter(new FilterHolder(requestCapturingFilter()), "/*", EnumSet.allOf(DispatcherType.class));
 
+//		myServer.setConnectors();
+
 		myServer.setHandler(contextHandler);
 		myServer.start();
+
 		myPort = JettyUtil.getPortForStartedServer(myServer);
 		ourLog.info("Server has started on port {}", myPort);
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
