@@ -18,6 +18,7 @@ import ca.uhn.fhir.jpa.rp.r4.ObservationResourceProvider;
 import ca.uhn.fhir.jpa.rp.r4.OrganizationResourceProvider;
 import ca.uhn.fhir.jpa.rp.r4.PatientResourceProvider;
 import ca.uhn.fhir.jpa.rp.r4.PractitionerResourceProvider;
+import ca.uhn.fhir.jpa.rp.r4.PractitionerRoleResourceProvider;
 import ca.uhn.fhir.jpa.rp.r4.ServiceRequestResourceProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
@@ -76,12 +77,15 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
@@ -154,11 +158,15 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			diagnosticReportRp.setDao(myDiagnosticReportDao);
 			ServiceRequestResourceProvider diagnosticOrderRp = new ServiceRequestResourceProvider();
 			diagnosticOrderRp.setDao(myServiceRequestDao);
+
 			PractitionerResourceProvider practitionerRp = new PractitionerResourceProvider();
 			practitionerRp.setDao(myPractitionerDao);
 
+			PractitionerRoleResourceProvider practitionerRoleRp = new PractitionerRoleResourceProvider();
+			practitionerRoleRp.setDao(myPractitionerRoleDao);
+
 			RestfulServer restServer = new RestfulServer(ourCtx);
-			restServer.setResourceProviders(patientRp, questionnaireRp, observationRp, organizationRp, locationRp, binaryRp, diagnosticReportRp, diagnosticOrderRp, practitionerRp);
+			restServer.setResourceProviders(patientRp, questionnaireRp, observationRp, organizationRp, locationRp, binaryRp, diagnosticReportRp, diagnosticOrderRp, practitionerRp, practitionerRoleRp);
 
 			restServer.registerProviders(mySystemProvider, myDeleteExpungeProvider);
 
@@ -502,23 +510,67 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testTransactionWithMultipleConditionalRefs() throws IOException {
-		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
-		myDaoConfig.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
 
-		Bundle input = loadResourceFromClasspath(Bundle.class, "r4/synthea-bundle.json");
+		AtomicInteger counter0 = new AtomicInteger(0);
+		AtomicInteger counter1 = new AtomicInteger(0);
+		AtomicInteger counter2 = new AtomicInteger(0);
 
-		AtomicInteger counter = new AtomicInteger();
-		IAnonymousInterceptor anon = new IAnonymousInterceptor() {
+		class MyAnonymousInterceptor0 implements IAnonymousInterceptor {
+
 			@Override
 			public void invoke(IPointcut thePointcut, HookParams theArgs) {
-				counter.incrementAndGet();
-				ourLog.info("Building authorized list");
+				int count = counter0.incrementAndGet();
+				ourLog.info("Have been called {} times", count);
 			}
-		};
-		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, anon);
+		}
 
-		myClient.transaction().withBundle(input).execute();
-		assertEquals(999999, counter.get());
+		class MyAnonymousInterceptor1 implements IAnonymousInterceptor {
+
+			@Override
+			public void invoke(IPointcut thePointcut, HookParams theArgs) {
+				int count = counter1.incrementAndGet();
+				ourLog.info("Have been called {} times", count);
+			}
+		}
+
+		class MySearchNarrowingInterceptor extends SearchNarrowingInterceptor {
+			private static final Logger ourLog = LoggerFactory.getLogger(MySearchNarrowingInterceptor.class);
+
+
+			@Override
+			protected AuthorizedList buildAuthorizedList(RequestDetails theRequestDetails) {
+				int count = counter2.incrementAndGet();
+				ourLog.info("Have been called {} times", count);
+				return super.buildAuthorizedList(theRequestDetails);
+			}
+		}
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.setType("batch");
+
+		for (int i = 0; i < 5; i++) {
+			Practitioner p0 = new Practitioner();
+			p0.addIdentifier().setSystem("sys").setValue("p" + i);
+			bb.addTransactionCreateEntry(p0).conditional("Practitioner?identifier=sys|p" + i);
+		}
+
+		Bundle input = (Bundle) bb.getBundle();
+
+		MyAnonymousInterceptor0 interceptor0 = new MyAnonymousInterceptor0();
+		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, interceptor0);
+		MyAnonymousInterceptor1 interceptor1 = new MyAnonymousInterceptor1();
+		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED, interceptor1);
+		MySearchNarrowingInterceptor interceptor2 = new MySearchNarrowingInterceptor();
+		ourRestServer.getInterceptorService().registerInterceptor(interceptor2);
+		try {
+			myClient.transaction().withBundle(input).execute();
+			assertEquals(2, counter0.get());
+			assertEquals(2, counter1.get());
+			assertEquals(7, counter2.get());
+
+		} finally {
+			ourRestServer.getInterceptorService().unregisterInterceptor(interceptor1);
+		}
 	}
 
 

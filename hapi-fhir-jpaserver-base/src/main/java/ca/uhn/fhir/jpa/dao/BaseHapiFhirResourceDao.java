@@ -304,11 +304,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 
+		// FIXME: remove
 		// Notify interceptors
-		if (theRequest != null) {
-			ActionRequestDetails requestDetails = new ActionRequestDetails(theRequest, getContext(), theResource);
-			notifyInterceptors(RestOperationTypeEnum.CREATE, requestDetails);
-		}
+//		if (theRequest != null) {
+//			ActionRequestDetails requestDetails = new ActionRequestDetails(theRequest, getContext(), theResource);
+//			notifyInterceptors(RestOperationTypeEnum.CREATE, requestDetails);
+//		}
 
 		// Interceptor call: STORAGE_PRESTORAGE_RESOURCE_CREATED
 		HookParams hookParams = new HookParams()
