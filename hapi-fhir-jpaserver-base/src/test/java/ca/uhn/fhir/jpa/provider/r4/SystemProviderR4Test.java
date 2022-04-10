@@ -3,6 +3,9 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
+import ca.uhn.fhir.interceptor.api.IPointcut;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.batch.config.BatchConstants;
@@ -22,6 +25,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
@@ -32,6 +36,8 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizedList;
+import ca.uhn.fhir.rest.server.interceptor.auth.SearchNarrowingInterceptor;
 import ca.uhn.fhir.rest.server.provider.DeleteExpungeProvider;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.test.utilities.BatchJobHelper;
@@ -84,6 +90,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -118,6 +125,8 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
 		myDaoConfig.setDeleteExpungeEnabled(new DaoConfig().isDeleteExpungeEnabled());
+		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(new DaoConfig().isAutoCreatePlaceholderReferenceTargets());
+		myDaoConfig.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(new DaoConfig().isPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets());
 	}
 
 	@BeforeEach
@@ -490,6 +499,28 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		}
 
 	}
+
+	@Test
+	public void testTransactionWithMultipleConditionalRefs() throws IOException {
+		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+		myDaoConfig.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+
+		Bundle input = loadResourceFromClasspath(Bundle.class, "r4/synthea-bundle.json");
+
+		AtomicInteger counter = new AtomicInteger();
+		IAnonymousInterceptor anon = new IAnonymousInterceptor() {
+			@Override
+			public void invoke(IPointcut thePointcut, HookParams theArgs) {
+				counter.incrementAndGet();
+				ourLog.info("Building authorized list");
+			}
+		};
+		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, anon);
+
+		myClient.transaction().withBundle(input).execute();
+		assertEquals(999999, counter.get());
+	}
+
 
 	@Test
 	public void testTransactionFromBundle() throws Exception {
