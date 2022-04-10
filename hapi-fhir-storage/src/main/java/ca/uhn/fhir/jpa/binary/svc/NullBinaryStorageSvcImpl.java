@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.binary.svc;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR Storage api
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
