@@ -4676,7 +4676,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		}
 		myClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
 
-		myDaoConfig.setReuseCachedSearchResultsForMillis(1000L);
+		myDaoConfig.setReuseCachedSearchResultsForMillis(10000L);
 
 		Bundle result1 = myClient
 			.search()
