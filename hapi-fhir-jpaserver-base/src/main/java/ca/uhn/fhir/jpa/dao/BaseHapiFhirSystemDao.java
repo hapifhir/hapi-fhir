@@ -9,11 +9,9 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -60,8 +58,8 @@ import java.util.stream.Collectors;
 
 public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends BaseHapiFhirDao<IBaseResource> implements IFhirSystemDao<T, MT> {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiFhirSystemDao.class);
 	public static final Predicate[] EMPTY_PREDICATE_ARRAY = new Predicate[0];
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiFhirSystemDao.class);
 	public ResourceCountCache myResourceCountsCache;
 	@Autowired
 	private TransactionProcessor myTransactionProcessor;
@@ -112,12 +110,6 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 
 	@Override
 	public IBundleProvider history(Date theSince, Date theUntil, Integer theOffset, RequestDetails theRequestDetails) {
-		if (theRequestDetails != null) {
-			// Notify interceptors
-			ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails);
-			notifyInterceptors(RestOperationTypeEnum.HISTORY_SYSTEM, requestDetails);
-		}
-
 		StopWatch w = new StopWatch();
 		IBundleProvider retVal = super.history(theRequestDetails, null, null, theSince, theUntil, theOffset);
 		ourLog.info("Processed global history in {}ms", w.getMillisAndRestart());
@@ -144,7 +136,7 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 			.map(t -> t.getIdAsLong())
 			.collect(Collectors.toList());
 
-		new QueryChunker<Long>().chunk(pids, ids->{
+		new QueryChunker<Long>().chunk(pids, ids -> {
 
 			/*
 			 * Pre-fetch the resources we're touching in this transaction in mass - this reduced the
@@ -163,38 +155,38 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 
 				List<Long> entityIds;
 
-				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isParamsStringPopulated()).map(t->t.getId()).collect(Collectors.toList());
+				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isParamsStringPopulated()).map(t -> t.getId()).collect(Collectors.toList());
 				if (entityIds.size() > 0) {
 					preFetchIndexes(entityIds, "string", "myParamsString", null);
 				}
 
-				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isParamsTokenPopulated()).map(t->t.getId()).collect(Collectors.toList());
+				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isParamsTokenPopulated()).map(t -> t.getId()).collect(Collectors.toList());
 				if (entityIds.size() > 0) {
 					preFetchIndexes(entityIds, "token", "myParamsToken", null);
 				}
 
-				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isParamsDatePopulated()).map(t->t.getId()).collect(Collectors.toList());
+				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isParamsDatePopulated()).map(t -> t.getId()).collect(Collectors.toList());
 				if (entityIds.size() > 0) {
 					preFetchIndexes(entityIds, "date", "myParamsDate", null);
 				}
 
-				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isParamsQuantityPopulated()).map(t->t.getId()).collect(Collectors.toList());
+				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isParamsQuantityPopulated()).map(t -> t.getId()).collect(Collectors.toList());
 				if (entityIds.size() > 0) {
 					preFetchIndexes(entityIds, "quantity", "myParamsQuantity", null);
 				}
 
-				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isHasLinks()).map(t->t.getId()).collect(Collectors.toList());
+				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isHasLinks()).map(t -> t.getId()).collect(Collectors.toList());
 				if (entityIds.size() > 0) {
 					preFetchIndexes(entityIds, "resourceLinks", "myResourceLinks", null);
 				}
 
-				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isHasTags()).map(t->t.getId()).collect(Collectors.toList());
+				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isHasTags()).map(t -> t.getId()).collect(Collectors.toList());
 				if (entityIds.size() > 0) {
 					myResourceTagDao.findByResourceIds(entityIds);
 					preFetchIndexes(entityIds, "tags", "myTags", null);
 				}
 
-				entityIds = loadedResourceTableEntries.stream().map(t->t.getId()).collect(Collectors.toList());
+				entityIds = loadedResourceTableEntries.stream().map(t -> t.getId()).collect(Collectors.toList());
 				if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.ENABLED) {
 					preFetchIndexes(entityIds, "searchParamPresence", "mySearchParamPresents", null);
 				}
@@ -229,8 +221,6 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 				});
 
 
-
-
 			}
 
 
@@ -238,7 +228,7 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 	}
 
 	private void preFetchIndexes(List<Long> theIds, String typeDesc, String fieldName, @Nullable List<ResourceTable> theEntityListToPopulate) {
-		new QueryChunker<Long>().chunk(theIds, ids->{
+		new QueryChunker<Long>().chunk(theIds, ids -> {
 			TypedQuery<ResourceTable> query = myEntityManager.createQuery("FROM ResourceTable r LEFT JOIN FETCH r." + fieldName + " WHERE r.myId IN ( :IDS )", ResourceTable.class);
 			query.setParameter("IDS", ids);
 			List<ResourceTable> indexFetchOutcome = query.getResultList();

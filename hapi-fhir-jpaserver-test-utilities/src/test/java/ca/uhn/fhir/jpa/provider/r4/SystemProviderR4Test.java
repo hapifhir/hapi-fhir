@@ -67,6 +67,7 @@ import org.hl7.fhir.r4.hapi.rest.server.helper.BatchHelperR4;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
+import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
@@ -523,7 +524,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			@Override
 			public void invoke(IPointcut thePointcut, HookParams theArgs) {
 				int count = counter0.incrementAndGet();
-				ourLog.info("Have been called {} times", count);
+				ourLog.info("counter0 have been called {} times", count);
 			}
 		}
 
@@ -532,7 +533,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			@Override
 			public void invoke(IPointcut thePointcut, HookParams theArgs) {
 				int count = counter1.incrementAndGet();
-				ourLog.info("Have been called {} times", count);
+				ourLog.info("counter1 have been called {} times", count);
 			}
 		}
 
@@ -557,6 +558,9 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			bb.addTransactionCreateEntry(p0).conditional("Practitioner?identifier=sys|p" + i);
 		}
 
+		// Avoid the auto-CS fetching affecting counts
+		myClient.capabilities().ofType(CapabilityStatement.class).execute();
+
 		Bundle input = (Bundle) bb.getBundle();
 
 		MyAnonymousInterceptor0 interceptor0 = new MyAnonymousInterceptor0();
@@ -567,9 +571,9 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		ourRestServer.getInterceptorService().registerInterceptor(interceptor2);
 		try {
 			myClient.transaction().withBundle(input).execute();
-			assertEquals(2, counter0.get());
-			assertEquals(2, counter1.get());
-			assertEquals(7, counter2.get());
+			assertEquals(1, counter0.get());
+			assertEquals(1, counter1.get());
+			assertEquals(6, counter2.get());
 
 		} finally {
 			ourRestServer.getInterceptorService().unregisterInterceptor(interceptor1);

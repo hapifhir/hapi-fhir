@@ -39,7 +39,6 @@ import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.tenant.UrlBaseTenantIdentificationStrategy;
 import ca.uhn.fhir.test.utilities.JettyUtil;
@@ -101,7 +100,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
@@ -112,15 +110,14 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.Mockito.mock;
 
 public class AuthorizationInterceptorR4Test {
 
-	private static final String ERR403 = "{\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"error\",\"code\":\"processing\",\"diagnostics\":\""+ Msg.code(334) + "Access denied by default policy (no applicable rules)\"}]}";
+	private static final String ERR403 = "{\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"error\",\"code\":\"processing\",\"diagnostics\":\"" + Msg.code(334) + "Access denied by default policy (no applicable rules)\"}]}";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(AuthorizationInterceptorR4Test.class);
 	private static CloseableHttpClient ourClient;
 	private static String ourConditionalCreateId;
-	private static FhirContext ourCtx = FhirContext.forR4();
+	private static final FhirContext ourCtx = FhirContext.forR4();
 	private static boolean ourHitMethod;
 	private static int ourPort;
 	private static List<Resource> ourReturn;
@@ -1173,7 +1170,7 @@ public class AuthorizationInterceptorR4Test {
 	}
 
 
-		@Test
+	@Test
 	public void testCodeIn_TransactionCreate() throws IOException {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
@@ -2540,7 +2537,7 @@ public class AuthorizationInterceptorR4Test {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-					.allow("Rule 1").operation().named("everything").onInstancesOfType(Patient.class).andRequireExplicitResponseAuthorization().withTester(null /* null should be ignored */ ).withTester(new IAuthRuleTester() {
+					.allow("Rule 1").operation().named("everything").onInstancesOfType(Patient.class).andRequireExplicitResponseAuthorization().withTester(null /* null should be ignored */).withTester(new IAuthRuleTester() {
 						@Override
 						public boolean matches(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IIdType theInputResourceId, IBaseResource theInputResource) {
 							return theInputResourceId.getIdPart().equals("1");
@@ -4202,6 +4199,47 @@ public class AuthorizationInterceptorR4Test {
 		assertTrue(ourHitMethod);
 	}
 
+	@AfterAll
+	public static void afterClassClearContext() throws Exception {
+		JettyUtil.closeServer(ourServer);
+		TestUtil.randomizeLocaleAndTimezone();
+	}
+
+	@BeforeAll
+	public static void beforeClass() throws Exception {
+		ourServer = new Server(0);
+
+		DummyPatientResourceProvider patProvider = new DummyPatientResourceProvider();
+		DummyObservationResourceProvider obsProv = new DummyObservationResourceProvider();
+		DummyOrganizationResourceProvider orgProv = new DummyOrganizationResourceProvider();
+		DummyEncounterResourceProvider encProv = new DummyEncounterResourceProvider();
+		DummyCarePlanResourceProvider cpProv = new DummyCarePlanResourceProvider();
+		DummyDiagnosticReportResourceProvider drProv = new DummyDiagnosticReportResourceProvider();
+		DummyDeviceResourceProvider devProv = new DummyDeviceResourceProvider();
+		PlainProvider plainProvider = new PlainProvider();
+
+		ServletHandler proxyHandler = new ServletHandler();
+		ourServlet = new RestfulServer(ourCtx);
+		ourServlet.setFhirContext(ourCtx);
+		ourServlet.registerProviders(patProvider, obsProv, encProv, cpProv, orgProv, drProv, devProv);
+		ourServlet.registerProvider(new DummyServiceRequestResourceProvider());
+		ourServlet.registerProvider(new DummyConsentResourceProvider());
+		ourServlet.setPlainProviders(plainProvider);
+		ourServlet.setPagingProvider(new FifoMemoryPagingProvider(100));
+		ourServlet.setDefaultResponseEncoding(EncodingEnum.JSON);
+		ServletHolder servletHolder = new ServletHolder(ourServlet);
+		proxyHandler.addServletWithMapping(servletHolder, "/*");
+		ourServer.setHandler(proxyHandler);
+		JettyUtil.startServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
+
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		HttpClientBuilder builder = HttpClientBuilder.create();
+		builder.setConnectionManager(connectionManager);
+		ourClient = builder.build();
+
+	}
+
 	public static class DummyCarePlanResourceProvider implements IResourceProvider {
 
 		@Override
@@ -4263,7 +4301,6 @@ public class AuthorizationInterceptorR4Test {
 
 	}
 
-
 	public static class DummyDiagnosticReportResourceProvider implements IResourceProvider {
 
 
@@ -4297,6 +4334,7 @@ public class AuthorizationInterceptorR4Test {
 			}
 			return (Device) ourReturn.get(0);
 		}
+
 		@Search()
 		public List<Resource> search(
 			@OptionalParam(name = "patient") ReferenceParam thePatient
@@ -4375,17 +4413,6 @@ public class AuthorizationInterceptorR4Test {
 		public MethodOutcome update(@IdParam IdType theId, @ResourceParam Observation theResource, @ConditionalUrlParam String theConditionalUrl, RequestDetails theRequestDetails) {
 			ourHitMethod = true;
 
-			if (isNotBlank(theConditionalUrl)) {
-				IdType actual = new IdType("Observation", ourConditionalCreateId);
-				ActionRequestDetails subRequest = new ActionRequestDetails(theRequestDetails, actual);
-				subRequest.notifyIncomingRequestPreHandled(RestOperationTypeEnum.UPDATE);
-				theResource.setId(actual);
-			} else {
-				ActionRequestDetails subRequest = new ActionRequestDetails(theRequestDetails, theResource);
-				subRequest.notifyIncomingRequestPreHandled(RestOperationTypeEnum.UPDATE);
-				theResource.setId(theId.withVersion("2"));
-			}
-
 			MethodOutcome retVal = new MethodOutcome();
 			retVal.setResource(theResource);
 			return retVal;
@@ -4430,16 +4457,6 @@ public class AuthorizationInterceptorR4Test {
 
 		@Create()
 		public MethodOutcome create(@ResourceParam Patient theResource, @ConditionalUrlParam String theConditionalUrl, RequestDetails theRequestDetails) {
-
-			if (isNotBlank(theConditionalUrl)) {
-				IdType actual = new IdType("Patient", ourConditionalCreateId);
-				ActionRequestDetails subRequest = new ActionRequestDetails(theRequestDetails, actual);
-				subRequest.notifyIncomingRequestPreHandled(RestOperationTypeEnum.CREATE);
-			} else {
-				ActionRequestDetails subRequest = new ActionRequestDetails(theRequestDetails, theResource);
-				subRequest.notifyIncomingRequestPreHandled(RestOperationTypeEnum.CREATE);
-			}
-
 			ourHitMethod = true;
 			theResource.setId("Patient/1/_history/1");
 			MethodOutcome retVal = new MethodOutcome();
@@ -4544,17 +4561,6 @@ public class AuthorizationInterceptorR4Test {
 		public MethodOutcome update(@IdParam IdType theId, @ResourceParam Patient theResource, @ConditionalUrlParam String theConditionalUrl, RequestDetails theRequestDetails) {
 			ourHitMethod = true;
 
-			if (isNotBlank(theConditionalUrl)) {
-				IdType actual = new IdType("Patient", ourConditionalCreateId);
-				ActionRequestDetails subRequest = new ActionRequestDetails(theRequestDetails, actual);
-				subRequest.notifyIncomingRequestPreHandled(RestOperationTypeEnum.UPDATE);
-				theResource.setId(actual);
-			} else {
-				ActionRequestDetails subRequest = new ActionRequestDetails(theRequestDetails, theResource);
-				subRequest.notifyIncomingRequestPreHandled(RestOperationTypeEnum.UPDATE);
-				theResource.setId(theId.withVersion("2"));
-			}
-
 			MethodOutcome retVal = new MethodOutcome();
 			retVal.setResource(theResource);
 			return retVal;
@@ -4621,47 +4627,6 @@ public class AuthorizationInterceptorR4Test {
 			}
 			return (Bundle) ourReturn.get(0);
 		}
-
-	}
-
-	@AfterAll
-	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
-		TestUtil.randomizeLocaleAndTimezone();
-	}
-
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
-
-		DummyPatientResourceProvider patProvider = new DummyPatientResourceProvider();
-		DummyObservationResourceProvider obsProv = new DummyObservationResourceProvider();
-		DummyOrganizationResourceProvider orgProv = new DummyOrganizationResourceProvider();
-		DummyEncounterResourceProvider encProv = new DummyEncounterResourceProvider();
-		DummyCarePlanResourceProvider cpProv = new DummyCarePlanResourceProvider();
-		DummyDiagnosticReportResourceProvider drProv = new DummyDiagnosticReportResourceProvider();
-		DummyDeviceResourceProvider devProv = new DummyDeviceResourceProvider();
-		PlainProvider plainProvider = new PlainProvider();
-
-		ServletHandler proxyHandler = new ServletHandler();
-		ourServlet = new RestfulServer(ourCtx);
-		ourServlet.setFhirContext(ourCtx);
-		ourServlet.registerProviders(patProvider, obsProv, encProv, cpProv, orgProv, drProv, devProv);
-		ourServlet.registerProvider(new DummyServiceRequestResourceProvider());
-		ourServlet.registerProvider(new DummyConsentResourceProvider());
-		ourServlet.setPlainProviders(plainProvider);
-		ourServlet.setPagingProvider(new FifoMemoryPagingProvider(100));
-		ourServlet.setDefaultResponseEncoding(EncodingEnum.JSON);
-		ServletHolder servletHolder = new ServletHolder(ourServlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
 
 	}
 
