@@ -3,11 +3,11 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.test.config.TestR4Config;
-import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.test.config.TestHibernateSearchAddInConfig;
+import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.storage.test.BaseDateSearchDaoTests;
 import ca.uhn.fhir.storage.test.DaoTestDataBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -73,7 +73,7 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 	@Nested
 	public class DateSearchTests extends BaseDateSearchDaoTests {
 		@Override
-		protected BaseDateSearchDaoTests.Fixture constructFixture() {
+		protected Fixture constructFixture() {
 			return new TestDataBuilderFixture<>(myDataBuilder, myObservationDao);
 		}
 	}
@@ -297,7 +297,7 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 //				myDataBuilder.withPrimitiveAttribute("value", theValue),
 //				myDataBuilder.withPrimitiveAttribute("unit", "mmHg"),
 //				myDataBuilder.withPrimitiveAttribute("system", "http://unitsofmeasure.org"));
-			myResourceId = myDataBuilder.createObservation(myDataBuilder.withAttribute("valueQuantity",
+			myResourceId = myDataBuilder.createObservation(myDataBuilder.withElementAt("valueQuantity",
 				myDataBuilder.withPrimitiveAttribute("value", theValue),
 				myDataBuilder.withPrimitiveAttribute("unit", "mmHg"),
 				myDataBuilder.withPrimitiveAttribute("system", "http://unitsofmeasure.org"),

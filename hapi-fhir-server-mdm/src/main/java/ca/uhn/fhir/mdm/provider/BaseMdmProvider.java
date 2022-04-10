@@ -118,7 +118,7 @@ public abstract class BaseMdmProvider {
 	protected IBaseParameters parametersFromMdmLinks(Page<MdmLinkJson> theMdmLinkStream, boolean includeResultAndSource, ServletRequestDetails theServletRequestDetails, MdmPageRequest thePageRequest) {
 		IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
 		addPagingParameters(retval, theMdmLinkStream, theServletRequestDetails, thePageRequest);
-		theMdmLinkStream.forEach(mdmLink -> {
+		theMdmLinkStream.getContent().forEach(mdmLink -> {
 			IBase resultPart = ParametersUtil.addParameterToParameters(myFhirContext, retval, "link");
 			ParametersUtil.addPartString(myFhirContext, resultPart, "goldenResourceId", mdmLink.getGoldenResourceId());
 			ParametersUtil.addPartString(myFhirContext, resultPart, "sourceResourceId", mdmLink.getSourceId());

@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.search.autocomplete;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -34,12 +35,14 @@ import java.util.List;
  */
 public class ValueSetAutocompleteSearch {
 	private final FhirContext myFhirContext;
+	private final ModelConfig myModelConfig;
 	private final TokenAutocompleteSearch myAutocompleteSearch;
 	static final int DEFAULT_SIZE = 30;
 
-	public ValueSetAutocompleteSearch(FhirContext theFhirContext, SearchSession theSession) {
+	public ValueSetAutocompleteSearch(FhirContext theFhirContext, ModelConfig theModelConfig, SearchSession theSession) {
 		myFhirContext = theFhirContext;
-		myAutocompleteSearch = new TokenAutocompleteSearch(myFhirContext, theSession);
+		myModelConfig = theModelConfig;
+		myAutocompleteSearch = new TokenAutocompleteSearch(myFhirContext, myModelConfig, theSession);
 	}
 
 	public IBaseResource search(ValueSetAutocompleteOptions theOptions) {

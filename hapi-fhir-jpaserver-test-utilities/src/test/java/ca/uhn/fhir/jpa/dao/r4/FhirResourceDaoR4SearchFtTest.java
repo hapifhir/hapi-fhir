@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteOptions;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -31,6 +32,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
+import static org.hl7.fhir.r4.model.Observation.SP_VALUE_QUANTITY;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
@@ -126,8 +128,8 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 		IIdType id1 = myObservationDao.create(obs1, mockSrd()).getId().toUnqualifiedVersionless();
 
 		Observation obs2 = new Observation();
-		obs1.getCode().setText("AAAAA");
-		obs1.setValue(new StringType("Diastolic Blood Pressure"));
+		obs2.getCode().setText("AAAAA");
+		obs2.setValue(new StringType("Diastolic Blood Pressure"));
 		obs2.setStatus(ObservationStatus.FINAL);
 		IIdType id2 = myObservationDao.create(obs2, mockSrd()).getId().toUnqualifiedVersionless();
 
@@ -482,6 +484,43 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 		} catch (IllegalStateException e) {
 			assertThat(e.getMessage(), startsWith(Msg.code(2070)));
 		}
+	}
+
+
+	@Test
+	public void testResourceQuantitySearch() {
+		Observation obs1 = new Observation();
+		obs1.getCode().setText("Systolic Blood Pressure");
+		obs1.setStatus(ObservationStatus.FINAL);
+		obs1.setValue(new Quantity(123));
+		obs1.getNoteFirstRep().setText("obs1");
+		IIdType id1 = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
+
+		Observation obs2 = new Observation();
+		obs2.getCode().setText("Diastolic Blood Pressure");
+		obs2.setStatus(ObservationStatus.FINAL);
+		obs2.setValue(new Quantity(81));
+		IIdType id2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap map;
+
+		map = new SearchParameterMap();
+		map.add(SP_VALUE_QUANTITY, new QuantityParam("ap122"));
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), contains(toValues(id1)));
+
+		map = new SearchParameterMap();
+		map.add(SP_VALUE_QUANTITY, new QuantityParam("le90"));
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), contains(toValues(id2)));
+
+		map = new SearchParameterMap();
+		map.add(SP_VALUE_QUANTITY, new QuantityParam("gt80"));
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id1, id2)));
+
+		map = new SearchParameterMap();
+		map.add(SP_VALUE_QUANTITY, new QuantityParam("gt80"));
+		map.add(SP_VALUE_QUANTITY, new QuantityParam("lt90"));
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), contains(toValues(id2)));
+
 	}
 
 }

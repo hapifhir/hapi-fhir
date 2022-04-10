@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import com.google.common.collect.Ordering;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -40,7 +41,7 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 		Patient createdJane = createPatient(jane);
 		Patient newJane = buildJanePatient();
 
-		Bundle result = (Bundle) myMdmProvider.match(newJane);
+		Bundle result = (Bundle) myMdmProvider.match(newJane, new SystemRequestDetails());
 		assertEquals(1, result.getEntry().size());
 
 		Bundle.BundleEntryComponent entry0 = result.getEntry().get(0);
@@ -64,7 +65,7 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 		Medication createdMedication = createMedication(medication);
 		Medication newMedication = buildMedication("Organization/mfr");
 
-		Bundle result = (Bundle) myMdmProvider.serverMatch(newMedication, new StringType("Medication"));
+		Bundle result = (Bundle) myMdmProvider.serverMatch(newMedication, new StringType("Medication"), new SystemRequestDetails());
 		assertEquals(1, result.getEntry().size());
 
 		Bundle.BundleEntryComponent entry0 = result.getEntry().get(0);
@@ -89,7 +90,7 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 		Patient createdJane = createPatient(jane);
 		Patient newJane = buildJanePatient();
 
-		Bundle result = (Bundle) myMdmProvider.serverMatch(newJane, new StringType("Patient"));
+		Bundle result = (Bundle) myMdmProvider.serverMatch(newJane, new StringType("Patient"), new SystemRequestDetails());
 		assertEquals(1, result.getEntry().size());
 
 		Bundle.BundleEntryComponent entry0 = result.getEntry().get(0);
@@ -115,7 +116,7 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 
 		Patient newJane = buildJanePatient();
 
-		Bundle result = (Bundle) myMdmProvider.match(newJane);
+		Bundle result = (Bundle) myMdmProvider.match(newJane, new SystemRequestDetails());
 		assertEquals(2, result.getEntry().size());
 
 		Bundle.BundleEntryComponent entry0 = result.getEntry().get(0);
@@ -139,7 +140,7 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 		Patient paul = buildPaulPatient();
 		paul.setActive(true);
 
-		Bundle result = (Bundle) myMdmProvider.match(paul);
+		Bundle result = (Bundle) myMdmProvider.match(paul, new SystemRequestDetails());
 		assertEquals(0, result.getEntry().size());
 	}
 
@@ -151,7 +152,7 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 		Patient createdJane = createPatient(jane);
 		Patient newJane = buildJanePatient();
 
-		Bundle result = (Bundle) myMdmProvider.match(newJane);
+		Bundle result = (Bundle) myMdmProvider.match(newJane, new SystemRequestDetails());
 		assertEquals(1, result.getEntry().size());
 		assertEquals(createdJane.getId(), result.getEntryFirstRep().getResource().getId());
 	}
@@ -221,7 +222,7 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 			"}";
 
 		IBaseResource coarseResource = myFhirContext.newJsonParser().parseResource(coarsePatient);
-		Bundle result = (Bundle) myMdmProvider.match((Patient) coarseResource);
+		Bundle result = (Bundle) myMdmProvider.match((Patient) coarseResource, new SystemRequestDetails());
 		assertEquals(1, result.getEntry().size());
 	}
 }

@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
 import ca.uhn.fhir.mdm.api.MatchedTarget;
 import ca.uhn.fhir.mdm.log.Logs;
@@ -49,8 +50,8 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 	@Override
 	@Nonnull
 	@Transactional
-	public List<MatchedTarget> getMatchedTargets(String theResourceType, IAnyResource theResource) {
-		Collection<IAnyResource> targetCandidates = myMdmCandidateSearchSvc.findCandidates(theResourceType, theResource);
+	public List<MatchedTarget> getMatchedTargets(String theResourceType, IAnyResource theResource, RequestPartitionId theRequestPartitionId) {
+		Collection<IAnyResource> targetCandidates = myMdmCandidateSearchSvc.findCandidates(theResourceType, theResource, theRequestPartitionId);
 
 		List<MatchedTarget> matches = targetCandidates.stream()
 			.map(candidate -> new MatchedTarget(candidate, myMdmResourceMatcherSvc.getMatchResult(theResource, candidate)))

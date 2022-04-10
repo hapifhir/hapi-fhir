@@ -21,26 +21,42 @@ package ca.uhn.fhir.jpa.mdm.dao;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
 import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.rest.api.Constants;
+import org.apache.commons.collections4.CollectionUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -58,6 +74,8 @@ public class MdmLinkDaoSvc {
 	private IJpaIdHelperService myJpaIdHelperService;
 	@Autowired
 	private FhirContext myFhirContext;
+	@Autowired
+	protected EntityManager myEntityManager;
 
 	@Transactional
 	public MdmLink createOrUpdateLinkEntity(IBaseResource theGoldenResource, IBaseResource theSourceResource, MdmMatchOutcome theMatchOutcome, MdmLinkSourceEnum theLinkSource, @Nullable MdmTransactionContext theMdmTransactionContext) {
@@ -75,6 +93,11 @@ public class MdmLinkDaoSvc {
 			mdmLink.setScore(Math.max(theMatchOutcome.score, mdmLink.getScore()));
 		} else {
 			mdmLink.setScore(theMatchOutcome.score);
+		}
+		// Add partition for the mdm link if it's available in the source resource
+		RequestPartitionId partitionId = (RequestPartitionId) theSourceResource.getUserData(Constants.RESOURCE_PARTITION_ID);
+		if (partitionId != null && partitionId.getFirstPartitionIdOrNull() != null) {
+			mdmLink.setPartitionId(new PartitionablePartitionId(partitionId.getFirstPartitionIdOrNull(), partitionId.getPartitionDate()));
 		}
 
 		String message = String.format("Creating MdmLink from %s to %s -> %s", theGoldenResource.getIdElement().toUnqualifiedVersionless(), theSourceResource.getIdElement().toUnqualifiedVersionless(), theMatchOutcome);
@@ -253,13 +276,57 @@ public class MdmLinkDaoSvc {
 
 
 	/**
-	 * Given an example {@link MdmLink}, return all links from the database which match the example.
+	 * Given a list of criteria, return all links from the database which fits the criteria provided
 	 *
-	 * @param theExampleLink The MDM link containing the data we would like to search for.
+	 * @param theGoldenResourceId The resource ID of the golden resource being searched.
+	 * @param theSourceId The resource ID of the source resource being searched.
+	 * @param theMatchResult the {@link MdmMatchResultEnum} being searched.
+	 * @param theLinkSource the {@link MdmLinkSourceEnum} being searched.
+	 * @param thePageRequest the {@link MdmPageRequest} paging information
+	 * @param thePartitionId List of partitions ID being searched, where the link's partition must be in the list.
 	 * @return a list of {@link MdmLink} entities which match the example.
 	 */
-	public Page<MdmLink> findMdmLinkByExample(Example<MdmLink> theExampleLink, MdmPageRequest thePageRequest) {
-		return myMdmLinkDao.findAll(theExampleLink, thePageRequest.toPageRequest());
+	public PageImpl<MdmLink> executeTypedQuery(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmPageRequest thePageRequest, List<Integer> thePartitionId) {
+		CriteriaBuilder criteriaBuilder = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<MdmLink> criteriaQuery = criteriaBuilder.createQuery(MdmLink.class);
+		Root<MdmLink> from = criteriaQuery.from(MdmLink.class);
+
+		List<Predicate> andPredicates = new ArrayList<>();
+
+		if (theGoldenResourceId != null) {
+			Predicate goldenResourcePredicate = criteriaBuilder.equal(from.get("myGoldenResourcePid").as(Long.class), myJpaIdHelperService.getPidOrThrowException(theGoldenResourceId));
+			andPredicates.add(goldenResourcePredicate);
+		}
+		if (theSourceId != null) {
+			Predicate sourceIdPredicate = criteriaBuilder.equal(from.get("mySourcePid").as(Long.class), myJpaIdHelperService.getPidOrThrowException(theSourceId));
+			andPredicates.add(sourceIdPredicate);
+		}
+		if (theMatchResult != null) {
+			Predicate matchResultPredicate = criteriaBuilder.equal(from.get("myMatchResult").as(MdmMatchResultEnum.class), theMatchResult);
+			andPredicates.add(matchResultPredicate);
+		}
+		if (theLinkSource != null) {
+			Predicate linkSourcePredicate = criteriaBuilder.equal(from.get("myLinkSource").as(MdmLinkSourceEnum.class), theLinkSource);
+			andPredicates.add(linkSourcePredicate);
+		}
+		if (!CollectionUtils.isEmpty(thePartitionId)) {
+			Expression<Integer> exp = from.get("myPartitionId").get("myPartitionId").as(Integer.class);
+			Predicate linkSourcePredicate = exp.in(thePartitionId);
+			andPredicates.add(linkSourcePredicate);
+		}
+
+		Predicate finalQuery = criteriaBuilder.and(andPredicates.toArray(new Predicate[0]));
+		TypedQuery<MdmLink> typedQuery = myEntityManager.createQuery(criteriaQuery.where(finalQuery));
+
+		CriteriaQuery<Long> countQuery = criteriaBuilder.createQuery(Long.class);
+		countQuery.select(criteriaBuilder.count(countQuery.from(MdmLink.class)))
+			.where(finalQuery);
+
+		Long totalResults = myEntityManager.createQuery(countQuery).getSingleResult();
+
+		return new PageImpl<>(typedQuery.setFirstResult(thePageRequest.getOffset()).setMaxResults(thePageRequest.getCount()).getResultList(),
+			PageRequest.of(thePageRequest.getPage(), thePageRequest.getCount()),
+			totalResults);
 	}
 
 	/**

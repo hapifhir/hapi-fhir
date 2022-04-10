@@ -16,6 +16,7 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
@@ -26,8 +27,10 @@ import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.test.config.TestHibernateSearchAddInConfig;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
@@ -38,6 +41,7 @@ import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.storage.test.BaseDateSearchDaoTests;
 import ca.uhn.fhir.storage.test.DaoTestDataBuilder;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
+import ca.uhn.fhir.test.utilities.LogbackLevelOverrideExtension;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
@@ -56,6 +60,8 @@ import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -64,11 +70,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestContext;
+import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
+import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.persistence.EntityManager;
@@ -77,14 +88,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.model.util.UcumServiceUtil.UCUM_CODESYSTEM_URL;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 @RequiresDocker
@@ -95,6 +110,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 	TestDaoSearch.Config.class
 })
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@TestExecutionListeners(listeners = {
+	DependencyInjectionTestExecutionListener.class
+	,FhirResourceDaoR4SearchWithElasticSearchIT.TestDirtiesContextTestExecutionListener.class
+	})
 public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";
 	public static final String URL_MY_VALUE_SET = "http://example.com/my_value_set";
@@ -118,10 +137,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	protected ITermReadSvcR4 myTermSvc;
 	@Autowired
 	protected IResourceTableDao myResourceTableDao;
-	@Autowired
-	ITestDataBuilder myTestDataBuilder;
-	@Autowired
-	TestDaoSearch myTestDaoSearch;
 	@Autowired
 	@Qualifier("myCodeSystemDaoR4")
 	private IFhirResourceDao<CodeSystem> myCodeSystemDao;
@@ -147,6 +162,19 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+	@Autowired
+	ITestDataBuilder myTestDataBuilder;
+	@Autowired
+	TestDaoSearch myTestDaoSearch;
+	@Autowired
+	@Qualifier("myQuestionnaireDaoR4")
+	private IFhirResourceDao<Questionnaire> myQuestionnaireDao;
+	@Autowired
+	@Qualifier("myQuestionnaireResponseDaoR4")
+	private IFhirResourceDao<QuestionnaireResponse> myQuestionnaireResponseDao;
+	@RegisterExtension
+	LogbackLevelOverrideExtension myLogbackLevelOverrideExtension = new LogbackLevelOverrideExtension();
+
 
 	@BeforeEach
 	public void beforePurgeDatabase() {
@@ -445,6 +473,31 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	}
 
 	@Test
+	public void testResourceReferenceSearchForCanonicalReferences() {
+		String questionnaireCanonicalUrl = "https://test.fhir.org/R4/Questionnaire/xl-5000-q";
+
+		Questionnaire questionnaire = new Questionnaire();
+		questionnaire.setId("xl-5000-q");
+		questionnaire.setUrl(questionnaireCanonicalUrl);
+		IIdType questionnaireId = myQuestionnaireDao.update(questionnaire).getId();
+
+		QuestionnaireResponse questionnaireResponse = new QuestionnaireResponse();
+		questionnaireResponse.setId("xl-5000-qr");
+		questionnaireResponse.setQuestionnaire(questionnaireCanonicalUrl);
+		IIdType questionnaireResponseId = myQuestionnaireResponseDao.update(questionnaireResponse).getId();
+
+		// Search Questionnaire Response using questionnaire canonical url
+		SearchParameterMap map = new SearchParameterMap()
+			.setLoadSynchronous(true)
+			.add(QuestionnaireResponse.SP_QUESTIONNAIRE, new ReferenceParam(questionnaireCanonicalUrl));
+
+		IBundleProvider bundle = myQuestionnaireResponseDao.search(map);
+		List<IBaseResource> result = bundle.getResources(0, bundle.sizeOrThrowNpe());
+		assertEquals(1, result.size());
+		assertEquals(questionnaireResponseId, result.get(0).getIdElement());
+	}
+
+	@Test
 	public void testStringSearch() {
 		IIdType id1, id2, id3, id4, id5, id6;
 
@@ -526,6 +579,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	}
 
 
+
 	private void assertObservationSearchMatchesNothing(String message, SearchParameterMap map) {
 		assertObservationSearchMatches(message, map);
 	}
@@ -538,6 +592,48 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		SearchParameterMap map = myTestDaoSearch.toSearchParameters(theSearch);
 		assertObservationSearchMatches(theMessage, map, theIds);
 	}
+
+	@Nested
+	public class WithContainedIndexingIT {
+		@BeforeEach
+		public void enableContains() {
+			// we don't support chained or contained yet, but turn it on to test we don't blow up.
+			myDaoConfig.getModelConfig().setIndexOnContainedResources(true);
+			myDaoConfig.getModelConfig().setIndexOnContainedResourcesRecursively(true);
+		}
+
+		@AfterEach
+		public void restoreContains() {
+			ModelConfig defaultModelConfig = new ModelConfig();
+			myDaoConfig.getModelConfig().setIndexOnContainedResources(defaultModelConfig.isIndexOnContainedResources());
+			myDaoConfig.getModelConfig().setIndexOnContainedResourcesRecursively(defaultModelConfig.isIndexOnContainedResourcesRecursively());
+		}
+		/**
+		 * We were throwing when indexing contained.
+		 * https://github.com/hapifhir/hapi-fhir/issues/3371
+		 */
+		@Test
+		public void ignoreContainedResources_noError() {
+			// given
+			String json =
+				"{" +
+					"\"resourceType\": \"Observation\"," +
+					"\"contained\": [{" +
+					"\"resourceType\": \"Patient\"," +
+					"\"id\": \"contained-patient\"," +
+					"\"name\": [{ \"family\": \"Smith\"}]" +
+					"}]," +
+					"\"subject\": { \"reference\": \"#contained-patient\" }" +
+					"}";
+			Observation o = myFhirCtx.newJsonParser().parseResource(Observation.class, json);
+
+			myObservationDao.create(o, mySrd).getId().toUnqualifiedVersionless();
+
+			// no error.
+		}
+	}
+
+
 
 	@Test
 	public void testExpandWithIsAInExternalValueSet() {
@@ -624,11 +720,12 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			.getExpansion()
 			.getContains()
 			.stream()
-			.map(t -> t.getCode())
+			.map(ValueSet.ValueSetExpansionContainsComponent::getCode)
 			.sorted()
 			.collect(Collectors.toList());
 		assertThat(codes.toString(), codes, Matchers.contains("advice", "message", "note", "notification"));
 	}
+
 
 	@Test
 	public void testExpandVsWithMultiInclude_Some() throws IOException {
@@ -648,7 +745,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			.getExpansion()
 			.getContains()
 			.stream()
-			.map(t -> t.getCode())
+			.map(ValueSet.ValueSetExpansionContainsComponent::getCode)
 			.sorted()
 			.collect(Collectors.toList());
 		assertThat(codes.toString(), codes, Matchers.contains("advice", "note"));
@@ -731,47 +828,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 		assertEquals(0, result.getMessages().size());
 
-	}
-
-	@Nested
-	public class WithContainedIndexingIT {
-		@BeforeEach
-		public void enableContains() {
-			// we don't support chained or contained yet, but turn it on to test we don't blow up.
-			myDaoConfig.getModelConfig().setIndexOnContainedResources(true);
-			myDaoConfig.getModelConfig().setIndexOnContainedResourcesRecursively(true);
-		}
-
-		@AfterEach
-		public void restoreContains() {
-			ModelConfig defaultModelConfig = new ModelConfig();
-			myDaoConfig.getModelConfig().setIndexOnContainedResources(defaultModelConfig.isIndexOnContainedResources());
-			myDaoConfig.getModelConfig().setIndexOnContainedResourcesRecursively(defaultModelConfig.isIndexOnContainedResourcesRecursively());
-		}
-
-		/**
-		 * We were throwing when indexing contained.
-		 * https://github.com/hapifhir/hapi-fhir/issues/3371
-		 */
-		@Test
-		public void ignoreContainedResources_noError() {
-			// given
-			String json =
-				"{" +
-					"\"resourceType\": \"Observation\"," +
-					"\"contained\": [{" +
-					"\"resourceType\": \"Patient\"," +
-					"\"id\": \"contained-patient\"," +
-					"\"name\": [{ \"family\": \"Smith\"}]" +
-					"}]," +
-					"\"subject\": { \"reference\": \"#contained-patient\" }" +
-					"}";
-			Observation o = myFhirCtx.newJsonParser().parseResource(Observation.class, json);
-
-			myObservationDao.create(o, mySrd).getId().toUnqualifiedVersionless();
-
-			// no error.
-		}
 	}
 
 	@Nested
@@ -865,7 +921,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 		/**
 		 * A paranoid test to make sure tags stay with the resource.
-		 * <p>
+		 *
 		 * Tags live outside the resource, and can be modified by
 		 * Since we lost the id, also check tags in case someone changes metadata processing during ingestion.
 		 */
@@ -902,7 +958,477 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 //			assertThat(newMeta.getTag(), hasSize(2));
 		}
 
+	}
+
+
+	@Nested
+	public class QuantityAndNormalizedQuantitySearch {
+
+		private IIdType myResourceId;
+
+
+		@Nested
+		public class QuantitySearch {
+
+			@Nested
+			public class SimpleQueries {
+
+				@Test
+				public void noQuantityThrows() {
+					String invalidQtyParam = "|http://another.org";
+					DataFormatException thrown = assertThrows(DataFormatException.class,
+						() -> myTestDaoSearch.searchForIds("/Observation?value-quantity=" + invalidQtyParam));
+
+					assertTrue(thrown.getMessage().startsWith("HAPI-1940: Invalid"));
+					assertTrue(thrown.getMessage().contains(invalidQtyParam));
+				}
+
+				@Test
+				public void invalidPrefixThrows() {
+					DataFormatException thrown = assertThrows(DataFormatException.class,
+						() -> myTestDaoSearch.searchForIds("/Observation?value-quantity=st5.35"));
+
+					assertEquals("HAPI-1941: Invalid prefix: \"st\"", thrown.getMessage());
+				}
+
+				@Test
+				public void eq() {
+					withObservationWithValueQuantity(0.6);
+
+					assertNotFind("when lt unitless", "/Observation?value-quantity=0.5");
+					assertNotFind("when wrong system", "/Observation?value-quantity=0.6|http://another.org");
+					assertNotFind("when wrong units", "/Observation?value-quantity=0.6||mmHg");
+					assertNotFind("when gt unitless", "/Observation?value-quantity=0.7");
+					assertNotFind("when gt", "/Observation?value-quantity=0.7||mmHg");
+
+					assertFind("when a little gt - default is approx", "/Observation?value-quantity=0.599");
+					assertFind("when a little lt - default is approx", "/Observation?value-quantity=0.601");
+
+					assertFind("when eq unitless", "/Observation?value-quantity=0.6");
+					assertFind("when eq with units", "/Observation?value-quantity=0.6||mm[Hg]");
+				}
+
+				@Test
+				public void ne() {
+					withObservationWithValueQuantity(0.6);
+
+					assertFind("when gt", "/Observation?value-quantity=ne0.5");
+					assertNotFind("when eq", "/Observation?value-quantity=ne0.6");
+					assertFind("when lt", "/Observation?value-quantity=ne0.7");
+				}
+
+				@Test
+				public void ap() {
+					withObservationWithValueQuantity(0.6);
+
+					assertNotFind("when gt", "/Observation?value-quantity=ap0.5");
+					assertFind("when a little gt", "/Observation?value-quantity=ap0.58");
+					assertFind("when eq", "/Observation?value-quantity=ap0.6");
+					assertFind("when a little lt", "/Observation?value-quantity=ap0.62");
+					assertNotFind("when lt", "/Observation?value-quantity=ap0.7");
+				}
+
+				@Test
+				public void gt() {
+					withObservationWithValueQuantity(0.6);
+
+					assertFind("when gt", "/Observation?value-quantity=gt0.5");
+					assertNotFind("when eq", "/Observation?value-quantity=gt0.6");
+					assertNotFind("when lt", "/Observation?value-quantity=gt0.7");
+
+				}
+
+				@Test
+				public void ge() {
+					withObservationWithValueQuantity(0.6);
+
+					assertFind("when gt", "/Observation?value-quantity=ge0.5");
+					assertFind("when eq", "/Observation?value-quantity=ge0.6");
+					assertNotFind("when lt", "/Observation?value-quantity=ge0.7");
+				}
+
+				@Test
+				public void lt() {
+					withObservationWithValueQuantity(0.6);
+
+					assertNotFind("when gt", "/Observation?value-quantity=lt0.5");
+					assertNotFind("when eq", "/Observation?value-quantity=lt0.6");
+					assertFind("when lt", "/Observation?value-quantity=lt0.7");
+				}
+
+				@Test
+				public void le() {
+					withObservationWithValueQuantity(0.6);
+
+					assertNotFind("when gt", "/Observation?value-quantity=le0.5");
+					assertFind("when eq", "/Observation?value-quantity=le0.6");
+					assertFind("when lt", "/Observation?value-quantity=le0.7");
+				}
+			}
+
+
+			@Nested
+			public class CombinedQueries {
+
+				@Test
+				void gtAndLt() {
+					withObservationWithValueQuantity(0.6);
+
+					assertFind("when gt0.5 and lt0.7", "/Observation?value-quantity=gt0.5&value-quantity=lt0.7");
+					assertNotFind("when gt0.5 and lt0.6", "/Observation?value-quantity=gt0.5&value-quantity=lt0.6");
+					assertNotFind("when gt6.5 and lt0.7", "/Observation?value-quantity=gt6.5&value-quantity=lt0.7");
+					assertNotFind("impossible matching", "/Observation?value-quantity=gt0.7&value-quantity=lt0.5");
+				}
+
+				@Test
+				void orClauses() {
+					withObservationWithValueQuantity(0.6);
+
+					assertFind("when gt0.5 and lt0.7", "/Observation?value-quantity=0.5,0.6");
+					// make sure it doesn't find everything when using or clauses
+					assertNotFind("when gt0.5 and lt0.7", "/Observation?value-quantity=0.5,0.7");
+				}
+
+				@Nested
+				public class CombinedAndPlusOr {
+
+					@Test
+					void ltAndOrClauses() {
+						withObservationWithValueQuantity(0.6);
+
+						assertFind("when lt0.7 and eq (0.5 or 0.6)", "/Observation?value-quantity=lt0.7&value-quantity=0.5,0.6");
+						// make sure it doesn't find everything when using or clauses
+						assertNotFind("when lt0.4 and eq (0.5 or 0.6)", "/Observation?value-quantity=lt0.4&value-quantity=0.5,0.6");
+						assertNotFind("when lt0.7 and eq (0.4 or 0.5)", "/Observation?value-quantity=lt0.7&value-quantity=0.4,0.5");
+					}
+
+					@Test
+					void gtAndOrClauses() {
+						withObservationWithValueQuantity(0.6);
+
+						assertFind("when gt0.4 and eq (0.5 or 0.6)", "/Observation?value-quantity=gt0.4&value-quantity=0.5,0.6");
+						assertNotFind("when gt0.7 and eq (0.5 or 0.7)", "/Observation?value-quantity=gt0.7&value-quantity=0.5,0.7");
+						assertNotFind("when gt0.3 and eq (0.4 or 0.5)", "/Observation?value-quantity=gt0.3&value-quantity=0.4,0.5");
+					}
+				}
+
+
+				@Nested
+				public class QualifiedOrClauses {
+
+					@Test
+					void gtOrLt() {
+						withObservationWithValueQuantity(0.6);
+
+						assertFind("when gt0.5 or lt0.3", "/Observation?value-quantity=gt0.5,lt0.3");
+						assertNotFind("when gt0.6 or lt0.55", "/Observation?value-quantity=gt0.6,lt0.55");
+					}
+
+					@Test
+					void gtOrLe() {
+						withObservationWithValueQuantity(0.6);
+
+						assertFind("when gt0.5 or le0.3", "/Observation?value-quantity=gt0.5,le0.3");
+						assertNotFind("when gt0.6 or le0.55", "/Observation?value-quantity=gt0.6,le0.55");
+					}
+
+					@Test
+					void ltOrGt() {
+						withObservationWithValueQuantity(0.6);
+
+						assertFind("when lt0.7 or gt0.9", "/Observation?value-quantity=lt0.7,gt0.9");
+						// make sure it doesn't find everything when using or clauses
+						assertNotFind("when lt0.6 or gt0.6", "/Observation?value-quantity=lt0.6,gt0.6");
+						assertNotFind("when lt0.3 or gt0.9", "/Observation?value-quantity=lt0.3,gt0.9");
+					}
+
+					@Test
+					void ltOrGe() {
+						withObservationWithValueQuantity(0.6);
+
+						assertFind("when lt0.7 or ge0.2", "/Observation?value-quantity=lt0.7,ge0.2");
+						assertNotFind("when lt0.6 or ge0.8", "/Observation?value-quantity=lt0.6,ge0.8");
+					}
+
+					@Test
+					void gtOrGt() {
+						withObservationWithValueQuantity(0.6);
+
+						assertFind("when gt0.5 or gt0.8", "/Observation?value-quantity=gt0.5,gt0.8");
+						assertNotFind("when gt0.6 or gt0.8", "/Observation?value-quantity=gt0.6,gt0.8");
+					}
+
+					@Test
+					void geOrGe() {
+						withObservationWithValueQuantity(0.6);
+
+						assertFind("when ge0.5 or ge0.7", "/Observation?value-quantity=ge0.5,ge0.7");
+						assertNotFind("when ge0.65 or ge0.7", "/Observation?value-quantity=ge0.65,ge0.7");
+					}
+
+					@Test
+					void ltOrLt() {
+						withObservationWithValueQuantity(0.6);
+
+						assertFind("when lt0.5 or lt0.7", "/Observation?value-quantity=lt0.5,lt0.7");
+						assertNotFind("when lt0.55 or lt0.3", "/Observation?value-quantity=lt0.55,lt0.3");
+					}
+
+					@Test
+					void leOrLe() {
+						withObservationWithValueQuantity(0.6);
+
+						assertFind("when le0.5 or le0.6", "/Observation?value-quantity=le0.5,le0.6");
+						assertNotFind("when le0.5 or le0.59", "/Observation?value-quantity=le0.5,le0.59");
+					}
+
+				}
+
+
+			}
+
+			@Nested
+			public class Sorting {
+
+				@Test
+				public void sortByNumeric() {
+					String idAlpha7 = withObservationWithValueQuantity(0.7).getIdPart();
+					String idAlpha2 = withObservationWithValueQuantity(0.2).getIdPart();
+					String idAlpha5 = withObservationWithValueQuantity(0.5).getIdPart();
+
+					List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_sort=value-quantity");
+					assertThat(allIds, contains(idAlpha2, idAlpha5, idAlpha7));
+				}
+			}
+
+		}
+
+
+		@Nested
+		public class QuantityNormalizedSearch {
+
+			@BeforeEach
+			void setUp() {
+				myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(
+					NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+			}
+
+			@Nested
+			public class SimpleQueries {
+
+				@Test
+				public void ne() {
+					withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L" );
+
+					assertFind("when lt UCUM", "/Observation?value-quantity=ne70|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+					assertFind("when gt UCUM", "/Observation?value-quantity=ne50|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+					assertNotFind("when eq UCUM", "/Observation?value-quantity=ne60|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+				}
+
+				@Test
+				public void eq() {
+					withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L" );
+
+					assertFind("when eq UCUM 10*3/L ", "/Observation?value-quantity=60|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+					assertFind("when eq UCUM 10*9/L", "/Observation?value-quantity=0.000060|" + UCUM_CODESYSTEM_URL + "|10*9/L");
+					assertFind("when gt UCUM 10*3/L", "/Observation?value-quantity=eq58|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+					assertFind("when le UCUM 10*3/L", "/Observation?value-quantity=eq63|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+
+					assertNotFind("when ne UCUM 10*3/L", "/Observation?value-quantity=80|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+					assertNotFind("when gt UCUM 10*3/L", "/Observation?value-quantity=50|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+					assertNotFind("when lt UCUM 10*3/L", "/Observation?value-quantity=70|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+
+					assertFind("Units required to match and do", "/Observation?value-quantity=60000|" + UCUM_CODESYSTEM_URL + "|/L");
+					// request generates a quantity which value matches the "value-norm", but not the "code-norm"
+					assertNotFind("Units required to match and don't",  "/Observation?value-quantity=6000000000|" + UCUM_CODESYSTEM_URL + "|cm");
+				}
+
+				@Test
+				public void ap() {
+					withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L" );
+
+					assertNotFind("when gt UCUM", "/Observation?value-quantity=ap50|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+					assertFind("when little gt UCUM", "/Observation?value-quantity=ap58|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+					assertFind("when eq UCUM", "/Observation?value-quantity=ap60|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+					assertFind("when a little lt UCUM", "/Observation?value-quantity=ap63|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+					assertNotFind("when lt UCUM", "/Observation?value-quantity=ap71|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+				}
+
+				@Test
+				public void gt() {
+					withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L" );
+
+					assertFind("when gt UCUM", "/Observation?value-quantity=gt50|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+					assertNotFind("when eq UCUM", "/Observation?value-quantity=gt60|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+					assertNotFind("when lt UCUM", "/Observation?value-quantity=gt71|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+				}
+
+				@Test
+				public void ge() {
+					withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L" );
+
+					assertFind("when gt UCUM", "/Observation?value-quantity=ge50|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+					assertFind("when eq UCUM", "/Observation?value-quantity=ge60|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+					assertNotFind("when lt UCUM", "/Observation?value-quantity=ge62|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+				}
+
+				@Test
+				public void lt() {
+					withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L" );
+
+					assertNotFind("when gt", "/Observation?value-quantity=lt50|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+					assertNotFind("when eq", "/Observation?value-quantity=lt60|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+					assertFind("when lt", "/Observation?value-quantity=lt70|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+				}
+
+				@Test
+				public void le() {
+					withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L" );
+
+					assertNotFind("when gt", "/Observation?value-quantity=le50|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+					assertFind("when eq", "/Observation?value-quantity=le60|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+					assertFind("when lt", "/Observation?value-quantity=le70|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+				}
+
+
+				/**
+				 * "value-quantity" data is stored in a nested object, so if not queried  properly
+				 * it could return false positives. For instance: two Observations for following
+				 * combinations of code and value:
+				 *  Obs 1   code AAA1  value: 123
+				 *  Obs 2   code BBB2  value: 456
+				 *  A search for code: AAA1 and value: 456 would bring both observations instead of the expected empty reply,
+				 *  unless both predicates are enclosed in a "nested"
+				 * */
+				@Test
+				void nestedMustCorrelate() {
+					withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L" );
+					withObservationWithQuantity(0.02, UCUM_CODESYSTEM_URL, "10*3/L" );
+
+					assertNotFind("when one predicate matches each object", "/Observation" +
+						"?value-quantity=0.06|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+				}
+			}
+
+
+			@Nested
+			public class CombinedQueries {
+
+				@Test
+				void gtAndLt() {
+					withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L" );
+
+					assertFind("when gt 50 and lt 70", "/Observation" +
+						"?value-quantity=gt50|" + UCUM_CODESYSTEM_URL + "|10*3/L" +
+						"&value-quantity=lt70|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+
+					assertNotFind("when gt50 and lt60", "/Observation" +
+						"?value-quantity=gt50|" + UCUM_CODESYSTEM_URL + "|10*3/L" +
+						"&value-quantity=lt60|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+
+					assertNotFind("when gt65 and lt70", "/Observation" +
+						"?value-quantity=gt65|" + UCUM_CODESYSTEM_URL + "|10*3/L" +
+						"&value-quantity=lt70|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+
+					assertNotFind("when gt 70 and lt 50", "/Observation" +
+						"?value-quantity=gt70|" + UCUM_CODESYSTEM_URL + "|10*3/L" +
+						"&value-quantity=lt50|" + UCUM_CODESYSTEM_URL + "|10*3/L");
+				}
+
+				@Test
+				void gtAndLtWithMixedUnits() {
+					withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L" );
+
+					assertFind("when gt 50|10*3/L and lt 70|10*9/L", "/Observation" +
+						"?value-quantity=gt50|" + UCUM_CODESYSTEM_URL + "|10*3/L" +
+						"&value-quantity=lt0.000070|" + UCUM_CODESYSTEM_URL + "|10*9/L");
+				}
+
+				@Test
+				public void multipleSearchParamsAreSeparate() {
+					// for debugging
+					//	myLogbackLevelOverrideExtension.setLogLevel(DaoTestDataBuilder.class, Level.DEBUG);
+
+					// this configuration must generate a combo-value-quantity entry with both quantity objects
+					myResourceId = myTestDataBuilder.createObservation(
+						myTestDataBuilder.withQuantityAtPath("valueQuantity", 0.02, UCUM_CODESYSTEM_URL, "10*6/L"),
+						myTestDataBuilder.withQuantityAtPath("component.valueQuantity", 0.06, UCUM_CODESYSTEM_URL, "10*6/L")
+					);
+
+					//	myLogbackLevelOverrideExtension.resetLevel(DaoTestDataBuilder.class);
+
+					assertFind("by value", "Observation?value-quantity=0.02|" + UCUM_CODESYSTEM_URL + "|10*6/L");
+					assertFind("by component value", "Observation?component-value-quantity=0.06|" + UCUM_CODESYSTEM_URL + "|10*6/L");
+
+					assertNotFind("by value", "Observation?value-quantity=0.06|" + UCUM_CODESYSTEM_URL + "|10*6/L");
+					assertNotFind("by component value", "Observation?component-value-quantity=0.02|" + UCUM_CODESYSTEM_URL + "|10*6/L");
+				}
+			}
+
+			/**
+			 * Sorting is not implemented for normalized quantities, so quantities will be sorted
+			 * by their absolute values (with no unit conversions)
+			 */
+			@Nested
+			public class Sorting {
+
+				@Test
+				public void sortByNumeric() {
+					String idAlpha6 = withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L" ).getIdPart();
+					String idAlpha5 = withObservationWithQuantity(50, UCUM_CODESYSTEM_URL, "10*3/L" ).getIdPart();
+					String idAlpha7 = withObservationWithQuantity(0.000070, UCUM_CODESYSTEM_URL, "10*9/L" ).getIdPart();
+
+					// this search is not freetext because there is no freetext-known parameter name
+					List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_sort=value-quantity");
+					assertThat(allIds, contains(idAlpha7, idAlpha6, idAlpha5));
+				}
+			}
+
+		}
+
+
+
+		private void assertFind(String theMessage, String theUrl) {
+			List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
+			assertThat(theMessage, resourceIds, hasItem(equalTo(myResourceId.getIdPart())));
+		}
+
+		private void assertNotFind(String theMessage, String theUrl) {
+			List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
+			assertThat(theMessage, resourceIds, not(hasItem(equalTo(myResourceId.getIdPart()))));
+		}
+
+		private IIdType withObservationWithQuantity(double theValue, String theSystem, String theCode) {
+			myResourceId = myTestDataBuilder.createObservation(
+				myTestDataBuilder.withQuantityAtPath("valueQuantity", theValue, theSystem, theCode)
+			);
+			return myResourceId;
+		}
+
+		private IIdType withObservationWithValueQuantity(double theValue) {
+			myResourceId = myTestDataBuilder.createObservation(myTestDataBuilder.withElementAt("valueQuantity",
+				myTestDataBuilder.withPrimitiveAttribute("value", theValue),
+				myTestDataBuilder.withPrimitiveAttribute("system", UCUM_CODESYSTEM_URL),
+				myTestDataBuilder.withPrimitiveAttribute("code", "mm[Hg]")
+			));
+			return myResourceId;
+		}
 
 	}
+
+
+	/**
+	 * Disallow context dirtying for nested classes
+	 */
+	public static final class TestDirtiesContextTestExecutionListener extends DirtiesContextTestExecutionListener {
+
+		@Override
+		protected void beforeOrAfterTestClass(TestContext testContext, DirtiesContext.ClassMode requiredClassMode) throws Exception {
+			if ( ! testContext.getTestClass().getName().contains("$")) {
+				super.beforeOrAfterTestClass(testContext, requiredClassMode);
+			}
+		}
+	}
+
 
 }
