@@ -1,0 +1,3 @@
+Tests for this module can be found in the path:
+
+   hapi-fhir-jpaserver-test-utilities/src/test/java
