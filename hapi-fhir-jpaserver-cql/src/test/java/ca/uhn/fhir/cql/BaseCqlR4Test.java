@@ -8,8 +8,8 @@ import ca.uhn.fhir.cql.config.TestCqlConfig;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
+import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.test.utilities.RequestDetailsHelper;
@@ -109,16 +109,16 @@ public class BaseCqlR4Test extends BaseJpaR4Test implements CqlProviderTestBase 
 		return (Bundle) mySystemDao.transaction(theRequestDetails, bundle);
 	}
 
+	@Override
+	public FhirContext getTestFhirContext() {
+		return myFhirContext;
+	}
+
 	@Configuration
 	static class Config {
 		@Bean
 		public PartitionHelper myPartitionHelper() {
 			return new PartitionHelper();
 		}
-	}
-
-	@Override
-	public FhirContext getTestFhirContext() {
-		return myFhirContext;
 	}
 }
