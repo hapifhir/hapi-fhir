@@ -128,22 +128,22 @@ public class ResourceExpungeService implements IResourceExpungeService {
 	public List<Long> findHistoricalVersionsOfNonDeletedResources(String theResourceName, Long theResourceId, Long theVersion, int theRemainingCount) {
 		Pageable page = PageRequest.of(0, theRemainingCount);
 
-		Slice<Long> queryResult;
+		Slice<Long> ids;
 		if (theResourceId != null) {
 			if (theVersion != null) {
-				queryResult = toSlice(myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(theResourceId, theVersion));
+				ids = toSlice(myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(theResourceId, theVersion));
 			} else {
-				queryResult = myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResourceId(page, theResourceId);
+				ids = myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResourceId(page, theResourceId);
 			}
 		} else {
 			if (theResourceName != null) {
-				queryResult = myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResources(page, theResourceName);
+				ids = myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResources(page, theResourceName);
 			} else {
-				queryResult = myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResources(page);
+				ids = myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResources(page);
 			}
 		}
 
-		return queryResult.getContent();
+		return ids.getContent();
 	}
 
 	@Override
