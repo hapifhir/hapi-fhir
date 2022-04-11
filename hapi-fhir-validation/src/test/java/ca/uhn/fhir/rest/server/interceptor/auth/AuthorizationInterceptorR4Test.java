@@ -4617,7 +4617,7 @@ public class AuthorizationInterceptorR4Test {
 				params.add(IPreResourceShowDetails.class, new SimplePreResourceShowDetails(theResource));
 				ourServlet.getInterceptorService().callHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, params);
 			}
-			
+
 			MethodOutcome retVal = new MethodOutcome();
 			retVal.setResource(theResource);
 			return retVal;

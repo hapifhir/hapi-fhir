@@ -62,43 +62,21 @@ public class UrlUtil {
 	private static final String URL_FORM_PARAMETER_OTHER_SAFE_CHARS = "-_.*";
 	private static final Escaper PARAMETER_ESCAPER = new PercentEscaper(URL_FORM_PARAMETER_OTHER_SAFE_CHARS, false);
 
-	public static class UrlParts {
-		private String myParams;
-		private String myResourceId;
-		private String myResourceType;
-		private String myVersionId;
+	/**
+	 * Non instantiable
+	 */
+	private UrlUtil() {
+	}
 
-		public String getParams() {
-			return myParams;
-		}
-
-		public void setParams(String theParams) {
-			myParams = theParams;
-		}
-
-		public String getResourceId() {
-			return myResourceId;
-		}
-
-		public void setResourceId(String theResourceId) {
-			myResourceId = theResourceId;
-		}
-
-		public String getResourceType() {
-			return myResourceType;
-		}
-
-		public void setResourceType(String theResourceType) {
-			myResourceType = theResourceType;
-		}
-
-		public String getVersionId() {
-			return myVersionId;
-		}
-
-		public void setVersionId(String theVersionId) {
-			myVersionId = theVersionId;
-		}
+	/**
+	 * Cleans up a value that will be serialized as an HTTP header. This method:
+	 *
+	 * - Strips any newline characters
+	 *
+	 * @since 6.0.0
+	 */
+	public static String sanitizeHeaderValue(String thePollLocation) {
+		return thePollLocation.replace("\n", "");
 	}
 
 	/**
@@ -181,7 +159,6 @@ public class UrlUtil {
 			.map(t -> PARAMETER_ESCAPER.escape(t))
 			.collect(Collectors.toList());
 	}
-
 
 	public static boolean isAbsolute(String theValue) {
 		String value = theValue.toLowerCase();
@@ -565,5 +542,44 @@ public class UrlUtil {
 		}
 
 		return parameters;
+	}
+
+	public static class UrlParts {
+		private String myParams;
+		private String myResourceId;
+		private String myResourceType;
+		private String myVersionId;
+
+		public String getParams() {
+			return myParams;
+		}
+
+		public void setParams(String theParams) {
+			myParams = theParams;
+		}
+
+		public String getResourceId() {
+			return myResourceId;
+		}
+
+		public void setResourceId(String theResourceId) {
+			myResourceId = theResourceId;
+		}
+
+		public String getResourceType() {
+			return myResourceType;
+		}
+
+		public void setResourceType(String theResourceType) {
+			myResourceType = theResourceType;
+		}
+
+		public String getVersionId() {
+			return myVersionId;
+		}
+
+		public void setVersionId(String theVersionId) {
+			myVersionId = theVersionId;
+		}
 	}
 }

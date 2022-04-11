@@ -34,6 +34,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.ParametersUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.ValidateUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -254,6 +255,8 @@ public class BulkDataImportProvider {
 
 	public void writePollingLocationToResponseHeaders(ServletRequestDetails theRequestDetails, String theJobId) {
 		String pollLocation = createPollLocationLink(theRequestDetails, theJobId);
+		pollLocation = UrlUtil.sanitizeHeaderValue(pollLocation);
+
 		HttpServletResponse response = theRequestDetails.getServletResponse();
 		// Add standard headers
 		theRequestDetails.getServer().addHeadersToResponse(response);
