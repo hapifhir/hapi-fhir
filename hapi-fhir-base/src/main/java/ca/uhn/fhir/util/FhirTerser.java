@@ -748,7 +748,7 @@ public class FhirTerser {
 
 		List<RuntimeSearchParam> params = sourceDef.getSearchParamsForCompartmentName(theCompartmentName);
 
-		//If passed an additional set of searchparameter names, add them for comparison purposes.
+		// If passed an additional set of searchparameter names, add them for comparison purposes.
 		if (theAdditionalCompartmentParamNames != null) {
 			List<RuntimeSearchParam> additionalParams = theAdditionalCompartmentParamNames.stream().map(sourceDef::getSearchParam)
 				.filter(Objects::nonNull)
