@@ -35,12 +35,7 @@ import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
-import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
-import ca.uhn.fhir.jpa.dao.expunge.ExpungeOperation;
-import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
-import ca.uhn.fhir.jpa.dao.expunge.IResourceExpungeService;
-import ca.uhn.fhir.jpa.dao.expunge.ResourceExpungeService;
-import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;
+import ca.uhn.fhir.jpa.dao.expunge.*;
 import ca.uhn.fhir.jpa.dao.index.DaoResourceLinkResolver;
 import ca.uhn.fhir.jpa.dao.index.DaoSearchParamSynchronizer;
 import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
@@ -758,7 +753,7 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public ExpungeEverythingService expungeEverythingService() {
+	public IExpungeEverythingService expungeEverythingService() {
 		return new ExpungeEverythingService();
 	}
 

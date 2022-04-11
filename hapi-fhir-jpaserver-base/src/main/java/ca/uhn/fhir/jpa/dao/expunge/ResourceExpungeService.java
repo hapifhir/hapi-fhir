@@ -45,7 +45,6 @@ import ca.uhn.fhir.jpa.dao.data.IResourceProvenanceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -126,42 +125,45 @@ public class ResourceExpungeService implements IResourceExpungeService {
 
 	@Override
 	@Transactional
-	public Slice<Long> findHistoricalVersionsOfNonDeletedResources(String theResourceName, Long theResourceId, Long theVersion, int theRemainingCount) {
+	public List<Long> findHistoricalVersionsOfNonDeletedResources(String theResourceName, Long theResourceId, Long theVersion, int theRemainingCount) {
 		Pageable page = PageRequest.of(0, theRemainingCount);
+
+		Slice<Long> queryResult;
 		if (theResourceId != null) {
 			if (theVersion != null) {
-				return toSlice(myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(theResourceId, theVersion));
+				queryResult = toSlice(myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(theResourceId, theVersion));
 			} else {
-				return myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResourceId(page, theResourceId);
+				queryResult = myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResourceId(page, theResourceId);
 			}
 		} else {
 			if (theResourceName != null) {
-				return myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResources(page, theResourceName);
+				queryResult = myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResources(page, theResourceName);
 			} else {
-				return myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResources(page);
+				queryResult = myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResources(page);
 			}
 		}
+
+		return queryResult.getContent();
 	}
 
 	@Override
 	@Transactional
-	public Slice<Long> findHistoricalVersionsOfDeletedResources(String theResourceName, Long theResourceId, int theRemainingCount) {
+	public List<Long> findHistoricalVersionsOfDeletedResources(String theResourceName, Long theResourceId, int theRemainingCount) {
 		Pageable page = PageRequest.of(0, theRemainingCount);
+		Slice<Long> ids;
 		if (theResourceId != null) {
-			Slice<Long> ids = myResourceTableDao.findIdsOfDeletedResourcesOfType(page, theResourceId, theResourceName);
+			ids = myResourceTableDao.findIdsOfDeletedResourcesOfType(page, theResourceId, theResourceName);
 			ourLog.info("Expunging {} deleted resources of type[{}] and ID[{}]", ids.getNumberOfElements(), theResourceName, theResourceId);
-			return ids;
 		} else {
 			if (theResourceName != null) {
-				Slice<Long> ids = myResourceTableDao.findIdsOfDeletedResourcesOfType(page, theResourceName);
+				ids = myResourceTableDao.findIdsOfDeletedResourcesOfType(page, theResourceName);
 				ourLog.info("Expunging {} deleted resources of type[{}]", ids.getNumberOfElements(), theResourceName);
-				return ids;
 			} else {
-				Slice<Long> ids = myResourceTableDao.findIdsOfDeletedResources(page);
+				ids = myResourceTableDao.findIdsOfDeletedResources(page);
 				ourLog.info("Expunging {} deleted resources (all types)", ids.getNumberOfElements());
-				return ids;
 			}
 		}
+		return ids.getContent();
 	}
 
 	@Override
