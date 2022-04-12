@@ -20,7 +20,12 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
-import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Triple;
@@ -526,7 +531,7 @@ public final class TerserUtil {
 	 * name
 	 *
 	 *
-	 * @param theFhirContext
+	 * @param theFhirTerser
 	 * @param theChildDefinition  Child to create a new instance for
 	 * @param theFromFieldValue   The base parent field
 	 * @param theConstructorParam Optional constructor param
@@ -542,8 +547,7 @@ public final class TerserUtil {
 		if ("contained".equals(runtimeElementDefinition.getName())) {
 			IBaseResource sourceResource = (IBaseResource) theFromFieldValue;
 			return theFhirTerser.clone(sourceResource);
-		}
-		if (theConstructorParam == null) {
+		} else if (theConstructorParam == null) {
 			return runtimeElementDefinition.newInstance();
 		} else {
 			return runtimeElementDefinition.newInstance(theConstructorParam);
