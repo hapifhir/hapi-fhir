@@ -17,78 +17,98 @@ import java.util.Date;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TerserUtilTest {
 
 	private FhirContext ourFhirContext = FhirContext.forR4();
-	private static final String SAMPLE_PERSON = "{\n" +
-		"        \"resourceType\": \"Patient\",\n" +
-		"        \"extension\": [\n" +
-		"          {\n" +
-		"            \"url\": \"http://hl7.org/fhir/us/core/StructureDefinition/us-core-race\",\n" +
-		"            \"valueCoding\": {\n" +
-		"              \"system\": \"MyInternalRace\",\n" +
-		"              \"code\": \"X\",\n" +
-		"              \"display\": \"Eks\"\n" +
-		"            }\n" +
-		"          },\n" +
-		"          {\n" +
-		"            \"url\": \"http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity'\",\n" +
-		"            \"valueCoding\": {\n" +
-		"              \"system\": \"MyInternalEthnicity\",\n" +
-		"              \"display\": \"NNN\"\n" +
-		"            }\n" +
-		"          }\n" +
-		"        ],\n" +
-		"        \"identifier\": [\n" +
-		"          {\n" +
-		"            \"system\": \"http://example.org/member_id\",\n" +
-		"            \"value\": \"123123\"\n" +
-		"          },\n" +
-		"          {\n" +
-		"            \"system\": \"http://example.org/medicaid_id\",\n" +
-		"            \"value\": \"12312323123Z\"\n" +
-		"          },\n" +
-		"          {\n" +
-		"            \"system\": \"http://example.org/CDNS_id\",\n" +
-		"            \"value\": \"123123123E\"\n" +
-		"          },\n" +
-		"          {\n" +
-		"            \"system\": \"http://example.org/SSN\"\n" +
-		"          }\n" +
-		"        ],\n" +
-		"        \"active\": true,\n" +
-		"        \"name\": [\n" +
-		"          {\n" +
-		"            \"family\": \"TestFamily\",\n" +
-		"            \"given\": [\n" +
-		"              \"Given\"\n" +
-		"            ]\n" +
-		"          }\n" +
-		"        ],\n" +
-		"        \"telecom\": [\n" +
-		"          {\n" +
-		"            \"system\": \"email\",\n" +
-		"            \"value\": \"email@email.io\"\n" +
-		"          },\n" +
-		"          {\n" +
-		"            \"system\": \"phone\",\n" +
-		"            \"value\": \"123123231\"\n" +
-		"          },\n" +
-		"          {\n" +
-		"            \"system\": \"phone\",\n" +
-		"            \"value\": \"1231232312\"\n" +
-		"          },\n" +
-		"          {\n" +
-		"            \"system\": \"phone\",\n" +
-		"            \"value\": \"1231232314\"\n" +
-		"          }\n" +
-		"        ],\n" +
-		"        \"gender\": \"male\",\n" +
-		"        \"birthDate\": \"1900-01-01\",\n" +
-		"        \"deceasedBoolean\": true\n" +
-		"      }";
+	private static final String SAMPLE_PERSON =
+		"""
+			{
+			      "resourceType": "Patient",
+			      "extension": [
+			        {
+			          "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+			          "valueCoding": {
+			            "system": "MyInternalRace",
+			            "code": "X",
+			            "display": "Eks"
+			          }
+			        },
+			        {
+			          "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity'",
+			          "valueCoding": {
+			            "system": "MyInternalEthnicity",
+			            "display": "NNN"
+			          }
+			        }
+			      ],
+			      "identifier": [
+			        {
+			          "system": "http://example.org/member_id",
+			          "value": "123123"
+			        },
+			        {
+			          "system": "http://example.org/medicaid_id",
+			          "value": "12312323123Z"
+			        },
+			        {
+			          "system": "http://example.org/CDNS_id",
+			          "value": "123123123E"
+			        },
+			        {
+			          "system": "http://example.org/SSN"
+			        }
+			      ],
+			      "active": true,
+			      "name": [
+			        {
+			          "family": "TestFamily",
+			          "given": [
+			            "Given"
+			          ]
+			        }
+			      ],
+			      "telecom": [
+			        {
+			          "system": "email",
+			          "value": "email@email.io"
+			        },
+			        {
+			          "system": "phone",
+			          "value": "123123231"
+			        },
+			        {
+			          "system": "phone",
+			          "value": "1231232312"
+			        },
+			        {
+			          "system": "phone",
+			          "value": "1231232314"
+			        }
+			      ],
+			      "gender": "male",
+			      "birthDate": "1900-01-01",
+			      "deceasedBoolean": true,
+			       "contained": [
+			              {
+			                  "id": "1",
+			                  "identifier": [
+			                      {
+			                          "system": "urn:hssc:srhs:contact:organizationId",
+			                          "value": "1000"
+			                      }
+			                  ],
+			                  "name": "BUILDERS FIRST SOURCE",
+			                  "resourceType": "Organization"
+			              }
+			          ]
+			    }
+				""";
 
 	@Test
 	void testCloneEidIntoResource() {
