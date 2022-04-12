@@ -22,6 +22,8 @@ package ca.uhn.fhir.mdm.provider;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MatchedTarget;
@@ -29,6 +31,7 @@ import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.mdm.util.MessageHelper;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
@@ -60,18 +63,21 @@ public class MdmControllerHelper {
 	private final IMdmSettings myMdmSettings;
 	private final MessageHelper myMessageHelper;
 	private final IMdmMatchFinderSvc myMdmMatchFinderSvc;
+	private final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	@Autowired
 	public MdmControllerHelper(FhirContext theFhirContext,
 										IResourceLoader theResourceLoader,
 										IMdmMatchFinderSvc theMdmMatchFinderSvc,
 										IMdmSettings theMdmSettings,
-										MessageHelper theMessageHelper) {
+										MessageHelper theMessageHelper,
+										IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
 		myFhirContext = theFhirContext;
 		myResourceLoader = theResourceLoader;
 		myMdmSettings = theMdmSettings;
 		myMdmMatchFinderSvc = theMdmMatchFinderSvc;
 		myMessageHelper = theMessageHelper;
+		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
 	}
 
 	public void validateSameVersion(IAnyResource theResource, String theResourceId) {
@@ -130,8 +136,9 @@ public class MdmControllerHelper {
 	/**
 	 * Helper method which will return a bundle of all Matches and Possible Matches.
 	 */
-	public IBaseBundle getMatchesAndPossibleMatchesForResource(IAnyResource theResource, String theResourceType) {
-		List<MatchedTarget> matches = myMdmMatchFinderSvc.getMatchedTargets(theResourceType, theResource);
+	public IBaseBundle getMatchesAndPossibleMatchesForResource(IAnyResource theResource, String theResourceType, RequestDetails theRequestDetails) {
+		RequestPartitionId requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, theResourceType, null);
+		List<MatchedTarget> matches = myMdmMatchFinderSvc.getMatchedTargets(theResourceType, theResource, requestPartitionId);
 		matches.sort(Comparator.comparing((MatchedTarget m) -> m.getMatchResult().getNormalizedScore()).reversed());
 
 		BundleBuilder builder = new BundleBuilder(myFhirContext);

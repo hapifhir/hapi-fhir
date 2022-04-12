@@ -14,7 +14,6 @@ import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.model.api.IModelJson;
@@ -43,7 +42,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -70,7 +68,7 @@ public class JobCoordinatorImplTest {
 	private final IChannelReceiver myWorkChannelReceiver = LinkedBlockingChannel.newSynchronous("receiver");
 	private JobCoordinatorImpl mySvc;
 	@Mock
-	private IChannelProducer myWorkChannelProducer;
+	private BatchJobSender myBatchJobSender;
 	@Mock
 	private IJobPersistence myJobInstancePersister;
 	@Mock
@@ -88,7 +86,7 @@ public class JobCoordinatorImplTest {
 	@Captor
 	private ArgumentCaptor<StepExecutionDetails<TestJobParameters, TestJobStep3InputType>> myStep3ExecutionDetailsCaptor;
 	@Captor
-	private ArgumentCaptor<JobWorkNotificationJsonMessage> myMessageCaptor;
+	private ArgumentCaptor<JobWorkNotification> myJobWorkNotificationCaptor;
 	@Captor
 	private ArgumentCaptor<JobInstance> myJobInstanceCaptor;
 	@Captor
@@ -96,7 +94,7 @@ public class JobCoordinatorImplTest {
 
 	@BeforeEach
 	public void beforeEach() {
-		mySvc = new JobCoordinatorImpl(myWorkChannelProducer, myWorkChannelReceiver, myJobInstancePersister, myJobDefinitionRegistry);
+		mySvc = new JobCoordinatorImpl(myBatchJobSender, myWorkChannelReceiver, myJobInstancePersister, myJobDefinitionRegistry);
 	}
 
 	@Test
@@ -427,13 +425,14 @@ public class JobCoordinatorImplTest {
 		assertEquals(PASSWORD_VALUE, myJobInstanceCaptor.getValue().getParameters(TestJobParameters.class).getPassword());
 		assertEquals(StatusEnum.QUEUED, myJobInstanceCaptor.getValue().getStatus());
 
-		verify(myWorkChannelProducer, times(1)).send(myMessageCaptor.capture());
-		assertNull(myMessageCaptor.getAllValues().get(0).getPayload().getChunkId());
-		assertEquals(JOB_DEFINITION_ID, myMessageCaptor.getAllValues().get(0).getPayload().getJobDefinitionId());
-		assertEquals(1, myMessageCaptor.getAllValues().get(0).getPayload().getJobDefinitionVersion());
-		assertEquals(STEP_1, myMessageCaptor.getAllValues().get(0).getPayload().getTargetStepId());
+		verify(myBatchJobSender, times(1)).sendWorkChannelMessage(myJobWorkNotificationCaptor.capture());
+		assertNull(myJobWorkNotificationCaptor.getAllValues().get(0).getChunkId());
+		assertEquals(JOB_DEFINITION_ID, myJobWorkNotificationCaptor.getAllValues().get(0).getJobDefinitionId());
+		assertEquals(1, myJobWorkNotificationCaptor.getAllValues().get(0).getJobDefinitionVersion());
+		assertEquals(STEP_1, myJobWorkNotificationCaptor.getAllValues().get(0).getTargetStepId());
 
-		verify(myJobInstancePersister, times(1)).storeWorkChunk(eq(JOB_DEFINITION_ID), eq(1), eq(STEP_1), eq(INSTANCE_ID), eq(0), isNull());
+		BatchWorkChunk expectedWorkChunk = new BatchWorkChunk(JOB_DEFINITION_ID, 1, STEP_1, INSTANCE_ID, 0, null);
+		verify(myJobInstancePersister, times(1)).storeWorkChunk(eq(expectedWorkChunk));
 
 		verifyNoMoreInteractions(myJobInstancePersister);
 		verifyNoMoreInteractions(myStep1Worker);

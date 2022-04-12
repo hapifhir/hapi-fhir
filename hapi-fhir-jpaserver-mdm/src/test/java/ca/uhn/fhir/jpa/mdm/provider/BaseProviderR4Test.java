@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class BaseProviderR4Test extends BaseMdmR4Test {
-	MdmProviderDstu3Plus myMdmProvider;
+	protected MdmProviderDstu3Plus myMdmProvider;
 	@Autowired
 	private IMdmControllerSvc myMdmControllerSvc;
 	@Autowired

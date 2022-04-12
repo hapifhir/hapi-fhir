@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao.search;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
@@ -29,6 +30,7 @@ import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
+import com.google.common.base.Strings;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -40,6 +42,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Extract search params for advanced lucene indexing.
@@ -52,17 +55,20 @@ public class ExtendedLuceneIndexExtractor {
 	private final FhirContext myContext;
 	private final ResourceSearchParams myParams;
 	private final ISearchParamExtractor mySearchParamExtractor;
+	private final ModelConfig myModelConfig;
 
-	public ExtendedLuceneIndexExtractor(DaoConfig theDaoConfig, FhirContext theContext, ResourceSearchParams theActiveParams, ISearchParamExtractor theSearchParamExtractor) {
+	public ExtendedLuceneIndexExtractor(DaoConfig theDaoConfig, FhirContext theContext, ResourceSearchParams theActiveParams,
+			ISearchParamExtractor theSearchParamExtractor, ModelConfig theModelConfig) {
 		myDaoConfig = theDaoConfig;
 		myContext = theContext;
 		myParams = theActiveParams;
 		mySearchParamExtractor = theSearchParamExtractor;
+		myModelConfig = theModelConfig;
 	}
 
 	@NotNull
 	public ExtendedLuceneIndexData extract(IBaseResource theResource, ResourceIndexedSearchParams theNewParams) {
-		ExtendedLuceneIndexData retVal = new ExtendedLuceneIndexData(myContext);
+		ExtendedLuceneIndexData retVal = new ExtendedLuceneIndexData(myContext, myModelConfig);
 
 		if(myDaoConfig.isStoreResourceInLuceneIndex()) {
 			retVal.setRawResourceData(myContext.newJsonParser().encodeResourceToString(theResource));
@@ -81,6 +87,10 @@ public class ExtendedLuceneIndexExtractor {
 		theNewParams.myDateParams.forEach(nextParam ->
 			retVal.addDateIndexData(nextParam.getParamName(), nextParam.getValueLow(), nextParam.getValueLowDateOrdinal(),
 				nextParam.getValueHigh(), nextParam.getValueHighDateOrdinal()));
+
+		theNewParams.myQuantityParams.forEach(nextParam ->
+			retVal.addQuantityIndexData(nextParam.getParamName(), nextParam.getUnits(), nextParam.getSystem(), nextParam.getValue().doubleValue()));
+
 
 		if (!theNewParams.myLinks.isEmpty()) {
 
@@ -104,7 +114,15 @@ public class ExtendedLuceneIndexExtractor {
 				String insensitivePath = nextLink.getSourcePath().toLowerCase(Locale.ROOT);
 				List<String> paramNames = linkPathToParamName.getOrDefault(insensitivePath, Collections.emptyList());
 				for (String nextParamName : paramNames) {
-					String qualifiedTargetResourceId = nextLink.getTargetResourceType() + "/" + nextLink.getTargetResourceId();
+					String qualifiedTargetResourceId = "";
+					// Consider 2 cases for references
+					// Case 1: Resource Type and Resource ID is known
+					// Case 2: Resource is unknown and referred by canonical url reference
+					if(!Strings.isNullOrEmpty(nextLink.getTargetResourceId())) {
+						qualifiedTargetResourceId = nextLink.getTargetResourceType() + "/" + nextLink.getTargetResourceId();
+					} else if(!Strings.isNullOrEmpty(nextLink.getTargetResourceUrl())) {
+						qualifiedTargetResourceId = nextLink.getTargetResourceUrl();
+					}
 					retVal.addResourceLinkIndexData(nextParamName, qualifiedTargetResourceId);
 				}
 			}

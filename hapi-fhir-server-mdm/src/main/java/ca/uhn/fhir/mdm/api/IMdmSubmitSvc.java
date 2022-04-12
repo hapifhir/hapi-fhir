@@ -20,6 +20,7 @@ package ca.uhn.fhir.mdm.api;
  * #L%
  */
 
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.annotation.Nullable;
@@ -37,7 +38,7 @@ public interface IMdmSubmitSvc {
 	 *
 	 * @return
 	 */
-	long submitAllSourceTypesToMdm(@Nullable String theCriteria);
+	long submitAllSourceTypesToMdm(@Nullable String theCriteria, RequestDetails theRequestDetails);
 
 	/**
 	 * Given a type and a search criteria, submit all found resources for MDM processing.
@@ -46,7 +47,7 @@ public interface IMdmSubmitSvc {
 	 * @param theCriteria The FHIR search critieria for filtering the resources to be submitted for MDM processing..
 	 * @return the number of resources submitted for MDM processing.
 	 */
-	long submitSourceResourceTypeToMdm(String theSourceResourceType, String theCriteria);
+	long submitSourceResourceTypeToMdm(String theSourceResourceType, String theCriteria, RequestDetails theRequestDetails);
 
 	/**
 	 * Convenience method that calls {@link #submitSourceResourceTypeToMdm(String, String)} with the type pre-populated.
@@ -54,7 +55,7 @@ public interface IMdmSubmitSvc {
 	 * @param theCriteria The FHIR search critieria for filtering the resources to be submitted for MDM processing.
 	 * @return the number of resources submitted for MDM processing.
 	 */
-	long submitPractitionerTypeToMdm(String theCriteria);
+	long submitPractitionerTypeToMdm(String theCriteria, RequestDetails theRequestDetails);
 
 	/**
 	 * Convenience method that calls {@link #submitSourceResourceTypeToMdm(String, String)} with the type pre-populated.
@@ -62,7 +63,7 @@ public interface IMdmSubmitSvc {
 	 * @param theCriteria The FHIR search critieria for filtering the resources to be submitted for MDM processing.
 	 * @return the number of resources submitted for MDM processing.
 	 */
-	long submitPatientTypeToMdm(String theCriteria);
+	long submitPatientTypeToMdm(String theCriteria, RequestDetails theRequestDetails);
 
 	/**
 	 * Given an ID and a source resource type valid for MDM, manually submit the given ID for MDM processing.
@@ -70,7 +71,7 @@ public interface IMdmSubmitSvc {
 	 * @param theId the ID of the resource to process for MDM.
 	 * @return the constant `1`, as if this function returns successfully, it will have processed one resource for MDM.
 	 */
-	long submitSourceResourceToMdm(IIdType theId);
+	long submitSourceResourceToMdm(IIdType theId, RequestDetails theRequestDetails);
 
 	/**
 	 * This setter exists to allow imported modules to override settings.

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmCandidateSearchSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.TooManyCandidatesException;
@@ -38,7 +39,7 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 		createActivePatient();
 		Patient newJane = buildJanePatient();
 
-		Collection<IAnyResource> result = myMdmCandidateSearchSvc.findCandidates("Patient", newJane);
+		Collection<IAnyResource> result = myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions());
 		assertEquals(1, result.size());
 	}
 
@@ -53,7 +54,7 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 
 		Patient newJane = buildJaneWithBirthday(today);
 
-		Collection<IAnyResource> result = myMdmCandidateSearchSvc.findCandidates("Patient", newJane);
+		Collection<IAnyResource> result = myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions());
 		assertEquals(1, result.size());
 	}
 
@@ -71,7 +72,7 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 		incomingPatient.setActive(true);
 		incomingPatient.setGeneralPractitioner(Collections.singletonList(new Reference(practitionerAndUpdateLinks.getId())));
 
-		Collection<IAnyResource> patient = myMdmCandidateSearchSvc.findCandidates("Patient", incomingPatient);
+		Collection<IAnyResource> patient = myMdmCandidateSearchSvc.findCandidates("Patient", incomingPatient, RequestPartitionId.allPartitions());
 		assertThat(patient, hasSize(1));
 	}
 
@@ -82,13 +83,13 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 		Patient newJane = buildJanePatient();
 
 		createActivePatient();
-		assertEquals(1, runInTransaction(()->myMdmCandidateSearchSvc.findCandidates("Patient", newJane).size()));
+		assertEquals(1, runInTransaction(()->myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions()).size()));
 		createActivePatient();
-		assertEquals(2, runInTransaction(()->myMdmCandidateSearchSvc.findCandidates("Patient", newJane).size()));
+		assertEquals(2, runInTransaction(()->myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions()).size()));
 
 		try {
 			createActivePatient();
-			myMdmCandidateSearchSvc.findCandidates("Patient", newJane);
+			myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions());
 			fail();
 		} catch (TooManyCandidatesException e) {
 			assertEquals("More than 3 candidate matches found for Patient?identifier=http%3A%2F%2Fa.tv%2F%7CID.JANE.123&active=true.  Aborting mdm matching.", e.getMessage());

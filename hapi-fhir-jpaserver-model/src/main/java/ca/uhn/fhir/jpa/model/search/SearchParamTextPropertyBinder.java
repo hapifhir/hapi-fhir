@@ -43,6 +43,11 @@ import java.time.Instant;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_EXACT;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_NORMALIZED;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_TEXT;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_CODE;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_CODE_NORM;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_SYSTEM;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_VALUE;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_VALUE_NORM;
 
 /**
  * Allows hibernate search to index
@@ -60,7 +65,9 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 	public void bind(PropertyBindingContext thePropertyBindingContext) {
 		// TODO Is it safe to use object identity of the Map to track dirty?
 		// N.B. GGG I would hazard that it is not, we could potentially use Version of the resource.
-		thePropertyBindingContext.dependencies().use("mySearchParamStrings");
+		thePropertyBindingContext.dependencies()
+			.use("mySearchParamStrings")
+			.use("mySearchParamQuantities");
 
 		defineIndexingTemplate(thePropertyBindingContext);
 
@@ -98,6 +105,10 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 			.sortable(Sortable.YES);
 
 		StandardIndexFieldTypeOptionsStep<?, Integer> dateTimeOrdinalFieldType = indexFieldTypeFactory.asInteger()
+			.projectable(Projectable.NO)
+			.sortable(Sortable.YES);
+
+		StandardIndexFieldTypeOptionsStep<?, Double> bigDecimalFieldType = indexFieldTypeFactory.asDouble()
 			.projectable(Projectable.NO)
 			.sortable(Sortable.YES);
 
@@ -162,9 +173,16 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 			nestedSpField.fieldTemplate("token-system", keywordFieldType).matchingPathGlob(tokenPathGlob + ".system").multiValued();
 
 			// reference
-
-			// reference
 			spfield.fieldTemplate("reference-value", keywordFieldType).matchingPathGlob("*.reference.value").multiValued();
+
+			//quantity
+			String quantityPathGlob = "*.quantity";
+			nestedSpField.objectFieldTemplate("quantityTemplate", ObjectStructure.FLATTENED).matchingPathGlob(quantityPathGlob);
+			nestedSpField.fieldTemplate(QTY_SYSTEM, keywordFieldType).matchingPathGlob(quantityPathGlob + "." + QTY_SYSTEM);
+			nestedSpField.fieldTemplate(QTY_CODE, keywordFieldType).matchingPathGlob(quantityPathGlob + "." + QTY_CODE);
+			nestedSpField.fieldTemplate(QTY_VALUE, bigDecimalFieldType).matchingPathGlob(quantityPathGlob + "." + QTY_VALUE);
+			nestedSpField.fieldTemplate(QTY_CODE_NORM, keywordFieldType).matchingPathGlob(quantityPathGlob + "." + QTY_CODE_NORM);
+			nestedSpField.fieldTemplate(QTY_VALUE_NORM, bigDecimalFieldType).matchingPathGlob(quantityPathGlob + "." + QTY_VALUE_NORM);
 
 			// date
 			String dateTimePathGlob = "*.dt";
