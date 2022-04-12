@@ -418,13 +418,15 @@ public class IdHelperService implements IIdHelperService {
 		Map<String, List<IResourceLookup>> retVal = new HashMap<>();
 		RequestPartitionId requestPartitionId = replaceDefault(theRequestPartitionId);
 
-		List<Long> pids = theId
-			.stream()
-			.filter(t -> isValidPid(t))
-			.map(t -> t.getIdPartAsLong())
-			.collect(Collectors.toList());
-		if (!pids.isEmpty()) {
-			resolvePids(requestPartitionId, pids, retVal);
+		if (myDaoConfig.getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ANY) {
+			List<Long> pids = theId
+				.stream()
+				.filter(t -> isValidPid(t))
+				.map(t -> t.getIdPartAsLong())
+				.collect(Collectors.toList());
+			if (!pids.isEmpty()) {
+				resolvePids(requestPartitionId, pids, retVal);
+			}
 		}
 
 		// returns a map of resourcetype->id
