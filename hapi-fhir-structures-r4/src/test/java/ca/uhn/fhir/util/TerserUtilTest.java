@@ -9,6 +9,7 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.PrimitiveType;
 import org.junit.jupiter.api.Test;
@@ -19,6 +20,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -148,6 +150,20 @@ class TerserUtilTest {
 		assertTrue(p2.hasDeceased());
 		assertTrue("true".equals(p2.getDeceased().primitiveValue()));
 		assertEquals(2, p2.getExtension().size());
+	}
+
+	@Test
+	void testCloneContainedResource() {
+		Patient p1 = ourFhirContext.newJsonParser().parseResource(Patient.class, SAMPLE_PERSON);
+
+		Patient p2 = new Patient();
+		TerserUtil.mergeAllFields(ourFhirContext, p1, p2);
+
+		Organization org1 = (Organization) p1.getContained().get(0);
+		Organization org2 = (Organization) p2.getContained().get(0);
+		assertNotEquals(org1, org2);
+		assertEquals("BUILDERS FIRST SOURCE", org1.getName());
+		assertEquals("BUILDERS FIRST SOURCE", org2.getName());
 	}
 
 	@Test

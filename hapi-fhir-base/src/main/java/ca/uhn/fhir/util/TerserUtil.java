@@ -20,12 +20,7 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.i18n.Msg;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Triple;
@@ -180,7 +175,7 @@ public final class TerserUtil {
 				continue;
 			}
 
-			IBase newFieldValue = newElement(childDefinition, theFromFieldValue, null);
+			IBase newFieldValue = newElement(terser, childDefinition, theFromFieldValue, null);
 			terser.cloneInto(theFromFieldValue, newFieldValue, true);
 
 			try {
@@ -316,7 +311,8 @@ public final class TerserUtil {
 
 	/**
 	 * Clears the specified field on the resource provided
-	 *  @param theFhirContext Context holding resource definition
+	 *
+	 * @param theFhirContext Context holding resource definition
 	 * @param theResource
 	 * @param theFieldName
 	 */
@@ -529,19 +525,29 @@ public final class TerserUtil {
 	 * Creates a new element taking into consideration elements with choice that are not directly retrievable by element
 	 * name
 	 *
+	 *
+	 * @param theFhirContext
 	 * @param theChildDefinition  Child to create a new instance for
 	 * @param theFromFieldValue   The base parent field
 	 * @param theConstructorParam Optional constructor param
 	 * @return Returns the new element with the given value if configured
 	 */
-	private static IBase newElement(BaseRuntimeChildDefinition theChildDefinition, IBase theFromFieldValue, Object theConstructorParam) {
+	private static IBase newElement(FhirTerser theFhirTerser, BaseRuntimeChildDefinition theChildDefinition, IBase theFromFieldValue, Object theConstructorParam) {
 		BaseRuntimeElementDefinition runtimeElementDefinition;
 		if (theChildDefinition instanceof RuntimeChildChoiceDefinition) {
 			runtimeElementDefinition = theChildDefinition.getChildElementDefinitionByDatatype(theFromFieldValue.getClass());
 		} else {
 			runtimeElementDefinition = theChildDefinition.getChildByName(theChildDefinition.getElementName());
 		}
-		return (theConstructorParam == null) ? runtimeElementDefinition.newInstance() : runtimeElementDefinition.newInstance(theConstructorParam);
+		if ("contained".equals(runtimeElementDefinition.getName())) {
+			IBaseResource sourceResource = (IBaseResource) theFromFieldValue;
+			return theFhirTerser.clone(sourceResource);
+		}
+		if (theConstructorParam == null) {
+			return runtimeElementDefinition.newInstance();
+		} else {
+			return runtimeElementDefinition.newInstance(theConstructorParam);
+		}
 	}
 
 	private static void mergeFields(FhirTerser theTerser, IBaseResource theTo, BaseRuntimeChildDefinition childDefinition, List<IBase> theFromFieldValues, List<IBase> theToFieldValues) {
@@ -550,7 +556,7 @@ public final class TerserUtil {
 				continue;
 			}
 
-			IBase newFieldValue = newElement(childDefinition, theFromFieldValue, null);
+			IBase newFieldValue = newElement(theTerser, childDefinition, theFromFieldValue, null);
 			if (theFromFieldValue instanceof IPrimitiveType) {
 				try {
 					Method copyMethod = getMethod(theFromFieldValue, "copy");
