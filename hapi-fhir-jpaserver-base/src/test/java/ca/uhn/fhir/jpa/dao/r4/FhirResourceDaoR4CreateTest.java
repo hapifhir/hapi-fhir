@@ -429,9 +429,18 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		myDaoConfig.setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.ANY);
 
 		CodeSystem cs = new CodeSystem();
+
+		// alphanumeric ID
 		cs.setId("123a");
+		cs.setUrl("http://foo");
+		IIdType id = myCodeSystemDao.create(cs).getId();
+		cs = myCodeSystemDao.read(id);
+		assertEquals("http://foo", cs.getUrl());
+
+		// purely numeric ID
+		cs.setId("123");
 		cs.setUrl("http://fooCS");
-		IIdType id = myCodeSystemDao.update(cs).getId();
+		id = myCodeSystemDao.update(cs).getId();
 		cs = myCodeSystemDao.read(id);
 		assertEquals("http://fooCS", cs.getUrl());
 	}
