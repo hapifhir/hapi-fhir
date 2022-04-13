@@ -88,6 +88,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.dao.index.IdHelperService.RESOURCE_PID;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
@@ -277,8 +278,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			if (theCodeSystem.getContent() == CodeSystem.CodeSystemContentMode.COMPLETE || theCodeSystem.getContent() == null || theCodeSystem.getContent() == CodeSystem.CodeSystemContentMode.NOTPRESENT) {
 				ourLog.info("CodeSystem {} has a status of {}, going to store concepts in terminology tables", theResourceEntity.getIdDt().getValue(), theCodeSystem.getContentElement().getValueAsString());
 
-				ResourcePersistentId codeSystemResourcePid = new ResourcePersistentId(theCodeSystem.getUserData("RESOURCE_PID"));
-
+				ResourcePersistentId codeSystemResourcePid = new ResourcePersistentId(theCodeSystem.getUserData(RESOURCE_PID));
 				/*
 				 * If this is a not-present codesystem and codesystem version already exists, we don't want to
 				 * overwrite the existing version since that will wipe out the existing concepts. We do create
@@ -320,7 +320,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		// Note that this creates the TermCodeSystem and TermCodeSystemVersion entities if needed
 		IIdType csId = myTerminologyVersionAdapterSvc.createOrUpdateCodeSystem(theCodeSystemResource, theRequest);
 
-		ResourcePersistentId codeSystemResourcePid = myIdHelperService.resolveResourcePersistentIds(RequestPartitionId.allPartitions(), csId.getResourceType(), csId.getIdPart());
+		ResourcePersistentId codeSystemResourcePid = new ResourcePersistentId(theCodeSystemResource.getUserData(RESOURCE_PID));
 		ResourceTable resource = myResourceTableDao.getOne(codeSystemResourcePid.getIdAsLong());
 
 		ourLog.info("CodeSystem resource has ID: {}", csId.getValue());
@@ -557,10 +557,6 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			childIndex++;
 		}
 
-	}
-
-	private ResourcePersistentId getCodeSystemResourcePid(IIdType theIdType) {
-		return myIdHelperService.resolveResourcePersistentIds(RequestPartitionId.allPartitions(), theIdType.getResourceType(), theIdType.getIdPart());
 	}
 
 	private void persistChildren(TermConcept theConcept, TermCodeSystemVersion theCodeSystem, IdentityHashMap<TermConcept, Object> theConceptsStack, int theTotalConcepts) {
