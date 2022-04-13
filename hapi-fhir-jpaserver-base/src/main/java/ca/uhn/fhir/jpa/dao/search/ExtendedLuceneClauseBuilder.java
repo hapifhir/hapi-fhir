@@ -485,9 +485,6 @@ public class ExtendedLuceneClauseBuilder {
 	 * Differences with DB search:
 	 *  _ is not all-normalized-or-all-not. Each parameter is applied on quantity or normalized quantity depending on UCUM fitness
 	 *  _ respects ranges for equal and approximate qualifiers
-	 *
-	 * Strategy: For each parameter, if it can be canonicalized, it is, and used against 'normalized-value-quantity' index
-	 * 	otherwise it is applied as-is to 'value-quantity'
 	 */
 	public void addQuantityUnmodifiedSearch(String theSearchParamName, List<List<IQueryParameterType>> theQuantityAndOrTerms) {
 		addAndOrSearchClauses(theSearchParamName, theQuantityAndOrTerms, this::addQuantityOrClauses);
@@ -499,7 +496,7 @@ public class ExtendedLuceneClauseBuilder {
 	}
 
 	/**
-	 * Handles "and" clauses (outer) loop and "or" (inner) loop generically using the received specific function as parameter
+	 * Handles "and" clauses (outer loop)  and "or" (inner loop) generically using the received param-type specific function
 	 */
 	private void addAndOrSearchClauses(String theSearchParamName, List<List<IQueryParameterType>> theAndOrTerms,
 			BiFunction<String, IQueryParameterType, BooleanPredicateClausesStep<?>> theAddClausesFunction) {
