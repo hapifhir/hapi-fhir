@@ -417,13 +417,47 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 		}
 
-		List<IPrimitiveType> statusTypes = myFhirContext.newFhirPath().evaluate(theResource, "status", IPrimitiveType.class);
-		if (statusTypes.size() > 0 && !statusTypes.get(0).getValueAsString().equals("active")) {
-			ourLog.warn("Failed to validate resource of type {} with ID {} - Error: Resource status not equal to \"active\"", theResource.fhirType(), theResource.getIdElement().getValue());
+		if (!isValidResourceStatusForPackageUpload(theResource)) {
+			ourLog.warn("Failed to validate resource of type {} with ID {} - Error: Resource status not accepted value.",
+				theResource.fhirType(), theResource.getIdElement().getValue());
 			return false;
 		}
 
 		return true;
+	}
+
+	/**
+	 * For resources like {@link org.hl7.fhir.r4.model.Subscription}, {@link org.hl7.fhir.r4.model.DocumentReference},
+	 * and {@link org.hl7.fhir.r4.model.Communication}, the status field doesn't necessarily need to be set to 'active'
+	 * for that resource to be eligible for upload via packages. For example, all {@link org.hl7.fhir.r4.model.Subscription}
+	 * have a status of {@link org.hl7.fhir.r4.model.Subscription.SubscriptionStatus#REQUESTED} when they are originally
+	 * inserted into the database, so we accept that value for {@link org.hl7.fhir.r4.model.Subscription} isntead.
+	 * Furthermore, {@link org.hl7.fhir.r4.model.DocumentReference} and {@link org.hl7.fhir.r4.model.Communication} can
+	 * exist with a wide variety of values for status that include ones such as
+	 * {@link org.hl7.fhir.r4.model.Communication.CommunicationStatus#ENTEREDINERROR},
+	 * {@link org.hl7.fhir.r4.model.Communication.CommunicationStatus#UNKNOWN},
+	 * {@link org.hl7.fhir.r4.model.DocumentReference.ReferredDocumentStatus#ENTEREDINERROR},
+	 * {@link org.hl7.fhir.r4.model.DocumentReference.ReferredDocumentStatus#PRELIMINARY}, and others, which while not considered
+	 * 'final' values, should still be uploaded for reference.
+	 *
+	 * @return {@link Boolean#TRUE} if the status value of this resource is acceptable for package upload.
+	 */
+	private boolean isValidResourceStatusForPackageUpload(IBaseResource theResource) {
+		List<IPrimitiveType> statusTypes = myFhirContext.newFhirPath().evaluate(theResource, "status", IPrimitiveType.class);
+		// Resource does not have a status field
+		if (statusTypes.isEmpty()) return true;
+		// Resource has a null status field
+		if (statusTypes.get(0).getValue() == null) return false;
+		// Resource has a status, and we need to check based on type
+		switch (theResource.fhirType()) {
+			case "Subscription":
+				return (statusTypes.get(0).getValueAsString().equals("requested"));
+			case "DocumentReference":
+			case "Communication":
+				return (!statusTypes.get(0).getValueAsString().equals("?"));
+			default:
+				return (statusTypes.get(0).getValueAsString().equals("active"));
+		}
 	}
 
 	private boolean isStructureDefinitionWithoutSnapshot(IBaseResource r) {

@@ -91,7 +91,8 @@ public class ExtendedLuceneSearchBuilder {
 					return false;
 			}
 		} else if (param instanceof QuantityParam) {
-			return false;
+			return modifier.equals(EMPTY_MODIFIER);
+
 		} else if (param instanceof ReferenceParam) {
 			//We cannot search by chain.
 			if (((ReferenceParam) param).getChain() != null) {
@@ -152,6 +153,8 @@ public class ExtendedLuceneSearchBuilder {
 					break;
 
 				case QUANTITY:
+					List<List<IQueryParameterType>> quantityAndOrTerms = theParams.removeByNameUnmodified(nextParam);
+					builder.addQuantityUnmodifiedSearch(nextParam, quantityAndOrTerms);
 					break;
 
 				case REFERENCE:

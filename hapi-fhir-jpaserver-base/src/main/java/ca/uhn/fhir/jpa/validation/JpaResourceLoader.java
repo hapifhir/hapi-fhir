@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.validation;
  */
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.validation.IResourceLoader;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -35,6 +36,7 @@ public class JpaResourceLoader implements IResourceLoader {
 
 	@Override
 	public <T extends IBaseResource> T load(Class<T> theType, IIdType theId) throws ResourceNotFoundException {
-		return myDaoRegistry.getResourceDao(theType).read(theId);
+		SystemRequestDetails systemRequestDetails = SystemRequestDetails.forAllPartitions();
+		return myDaoRegistry.getResourceDao(theType).read(theId, systemRequestDetails);
 	}
 }

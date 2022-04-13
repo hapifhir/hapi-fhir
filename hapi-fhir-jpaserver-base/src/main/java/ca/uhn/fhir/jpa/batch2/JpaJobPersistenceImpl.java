@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.batch2;
  */
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.impl.BatchWorkChunk;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
@@ -28,7 +29,6 @@ import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
-import ca.uhn.fhir.util.JsonUtil;
 import org.apache.commons.lang3.Validate;
 import org.springframework.data.domain.PageRequest;
 
@@ -59,15 +59,15 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	public String storeWorkChunk(String theJobDefinitionId, int theJobDefinitionVersion, String theTargetStepId, String theInstanceId, int theSequence, String theDataSerialized) {
+	public String storeWorkChunk(BatchWorkChunk theBatchWorkChunk) {
 		Batch2WorkChunkEntity entity = new Batch2WorkChunkEntity();
 		entity.setId(UUID.randomUUID().toString());
-		entity.setSequence(theSequence);
-		entity.setJobDefinitionId(theJobDefinitionId);
-		entity.setJobDefinitionVersion(theJobDefinitionVersion);
-		entity.setTargetStepId(theTargetStepId);
-		entity.setInstanceId(theInstanceId);
-		entity.setSerializedData(theDataSerialized);
+		entity.setSequence(theBatchWorkChunk.sequence);
+		entity.setJobDefinitionId(theBatchWorkChunk.jobDefinitionId);
+		entity.setJobDefinitionVersion(theBatchWorkChunk.jobDefinitionVersion);
+		entity.setTargetStepId(theBatchWorkChunk.targetStepId);
+		entity.setInstanceId(theBatchWorkChunk.instanceId);
+		entity.setSerializedData(theBatchWorkChunk.serializedData);
 		entity.setCreateTime(new Date());
 		entity.setStatus(StatusEnum.QUEUED);
 		myWorkChunkRepository.save(entity);

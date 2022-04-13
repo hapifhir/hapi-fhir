@@ -43,6 +43,9 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SearchParamExtractorDstu3Test {
@@ -103,6 +106,24 @@ public class SearchParamExtractorDstu3Test {
 		assertEquals(1, params.size());
 		// Normalized to days
 		assertEquals("2", params.iterator().next().getValue().toPlainString());
+	}
+
+	@Test
+	public void testPathSplitOnSpsWorks() {
+		ISearchParamRegistry searchParamRegistry = new MySearchParamRegistry();
+		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), new PartitionSettings(), ourCtx, searchParamRegistry);
+		String threeSegmentPath = "Patient.telecom.where(system='phone' or system='email') | Patient.telecom.where(system='email') or Patient.telecom.where(system='mail' | system='phone')";
+
+		String[] expressions = extractor.split(threeSegmentPath);
+		assertThat(expressions.length, is(equalTo(3)));
+		assertThat(expressions[0], containsString("Patient.telecom.where(system='phone' or system='email')"));
+		assertThat(expressions[1], containsString("Patient.telecom.where(system='email')"));
+		assertThat(expressions[2], containsString("Patient.telecom.where(system='mail' | system='phone')"));
+
+		String zeroPathSplit = "Patient.telecom.where(system='phone' or system='email')";
+		String[] singularExpression = extractor.split(zeroPathSplit);
+		assertThat(singularExpression.length, is(equalTo(1)));
+		assertThat(singularExpression[0], containsString("Patient.telecom.where(system='phone' or system='email')"));
 	}
 
 	@Test

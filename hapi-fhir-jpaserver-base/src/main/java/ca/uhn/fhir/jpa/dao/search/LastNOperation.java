@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.dao.search;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.util.LastNParameterHelper;
@@ -38,12 +39,15 @@ public class LastNOperation {
 	public static final String OBSERVATION_RES_TYPE = "Observation";
 	private final SearchSession mySession;
 	private final FhirContext myFhirContext;
+	private final ModelConfig myModelConfig;
 	private final ISearchParamRegistry mySearchParamRegistry;
 	private final ExtendedLuceneSearchBuilder myExtendedLuceneSearchBuilder = new ExtendedLuceneSearchBuilder();
 
-	public LastNOperation(SearchSession theSession, FhirContext theFhirContext, ISearchParamRegistry theSearchParamRegistry) {
+	public LastNOperation(SearchSession theSession, FhirContext theFhirContext, ModelConfig theModelConfig,
+			ISearchParamRegistry theSearchParamRegistry) {
 		mySession = theSession;
 		myFhirContext = theFhirContext;
+		myModelConfig = theModelConfig;
 		mySearchParamRegistry = theSearchParamRegistry;
 	}
 
@@ -57,7 +61,7 @@ public class LastNOperation {
 			.where(f -> f.bool(b -> {
 				// Must match observation type
 				b.must(f.match().field("myResourceType").matching(OBSERVATION_RES_TYPE));
-				ExtendedLuceneClauseBuilder builder = new ExtendedLuceneClauseBuilder(myFhirContext, b, f);
+				ExtendedLuceneClauseBuilder builder = new ExtendedLuceneClauseBuilder(myFhirContext, myModelConfig, b, f);
 				myExtendedLuceneSearchBuilder.addAndConsumeAdvancedQueryClauses(builder, OBSERVATION_RES_TYPE, theParams.clone(), mySearchParamRegistry);
 			}))
 			.aggregation(observationsByCodeKey, f -> f.fromJson(lastNAggregation.toAggregation()))
