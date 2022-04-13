@@ -278,6 +278,19 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
         version
         .onTable("HFJ_RESOURCE")
         .dropIndex("20220314.1", "IDX_INDEXSTATUS");
+
+        // New Index on HFJ_RESOURCE for $reindex Operation - hapi-fhir #3534
+		{
+			version.onTable("HFJ_RESOURCE")
+				.addIndex("20220413.1", "IDX_RES_TYPE_DEL_UPDATED")
+				.unique(false)
+				.withColumns("RES_TYPE", "RES_DELETED_AT", "RES_UPDATED", "RES_ID");
+
+			// Drop existing Index on HFJ_RESOURCE.RES_TYPE since the new Index will meet the overall Index Demand
+			version
+				.onTable("HFJ_RESOURCE")
+				.dropIndex("20220413.2", "IDX_RES_TYPE");
+		}
 	}
 
 	/**
