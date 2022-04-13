@@ -50,6 +50,7 @@ public class ExtendedLuceneIndexData {
 	final SetMultimap<String, String> mySearchParamLinks = HashMultimap.create();
 	final SetMultimap<String, DateSearchIndexData> mySearchParamDates = HashMultimap.create();
 	final SetMultimap<String, QuantitySearchIndexData> mySearchParamQuantities = HashMultimap.create();
+	final SetMultimap<String, CompositeTokenQuantitySearchIndexData> mySearchParamCompositeTokenQuantity = HashMultimap.create();
 	private String myForcedId;
 	private String myResourceJSON;
 
@@ -92,6 +93,7 @@ public class ExtendedLuceneIndexData {
 		mySearchParamLinks.forEach(ifNotContained(indexWriter::writeReferenceIndex));
 		// we want to receive the whole entry collection for each invocation
 		Multimaps.asMap(mySearchParamQuantities).forEach(ifNotContained(indexWriter::writeQuantityIndex));
+		Multimaps.asMap(mySearchParamCompositeTokenQuantity).forEach(ifNotContained(indexWriter::writeCompositeIndex));
 		// TODO MB Use RestSearchParameterTypeEnum to define templates.
 		mySearchParamDates.forEach(ifNotContained(indexWriter::writeDateIndex));
 	}

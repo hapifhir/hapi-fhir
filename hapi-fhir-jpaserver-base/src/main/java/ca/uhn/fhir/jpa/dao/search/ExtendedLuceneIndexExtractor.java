@@ -91,6 +91,7 @@ public class ExtendedLuceneIndexExtractor {
 		theNewParams.myQuantityParams.forEach(nextParam ->
 			retVal.addQuantityIndexData(nextParam.getParamName(), nextParam.getUnits(), nextParam.getSystem(), nextParam.getValue().doubleValue()));
 
+//		fixme jm: add CopositeIndexData
 
 		if (!theNewParams.myLinks.isEmpty()) {
 

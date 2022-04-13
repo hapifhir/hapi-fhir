@@ -65,6 +65,8 @@ public final class ResourceIndexedSearchParams {
 	final public Collection<ResourceIndexedSearchParamNumber> myNumberParams = new ArrayList<>();
 	final public Collection<ResourceIndexedSearchParamQuantity> myQuantityParams = new ArrayList<>();
 	final public Collection<ResourceIndexedSearchParamQuantityNormalized> myQuantityNormalizedParams = new ArrayList<>();
+//	fixme jm: how do we do this?
+//	final public Collection<ResourceIndexedSearchParamComposite> myCompositeParams = new ArrayList<>();
 	final public Collection<ResourceIndexedSearchParamDate> myDateParams = new ArrayList<>();
 	final public Collection<ResourceIndexedSearchParamUri> myUriParams = new ArrayList<>();
 	final public Collection<ResourceIndexedSearchParamCoords> myCoordsParams = new ArrayList<>();

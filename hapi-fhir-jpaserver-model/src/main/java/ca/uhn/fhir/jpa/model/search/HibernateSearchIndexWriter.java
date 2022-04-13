@@ -33,8 +33,6 @@ import org.slf4j.LoggerFactory;
 import java.math.BigDecimal;
 import java.util.Collection;
 
-import static org.hl7.fhir.r4.model.Observation.SP_VALUE_QUANTITY;
-
 public class HibernateSearchIndexWriter {
 	private static final Logger ourLog = LoggerFactory.getLogger(HibernateSearchIndexWriter.class);
 	public static final String IDX_STRING_NORMALIZED = "norm";
@@ -44,13 +42,18 @@ public class HibernateSearchIndexWriter {
 	public static final String SEARCH_PARAM_ROOT = "sp";
 
 	public static final String QTY_PARAM_NAME = "quantity";
-	public static final String QTY_CODE = "code";
-	public static final String QTY_SYSTEM = "system";
-	public static final String QTY_VALUE = "value";
+	public static final String CODE = "code";
+	public static final String SYSTEM = "system";
+	public static final String VALUE = "value";
 	public static final String QTY_CODE_NORM = "code-norm";
 	public static final String QTY_VALUE_NORM = "value-norm";
 
-
+	public static final String COMP_CODE_VALUE_QTY_PARAM_NAME = "comp-code-value-quantity";
+	public static final String COMP_CODE_SYSTEM 	= "code-system";
+	public static final String COMP_CODE_VALUE 	= "code-value";
+	public static final String COMP_QTY_CODE 		= "qty-code";
+	public static final String COMP_QTY_SYSTEM 	= "qty-system";
+	public static final String COMP_QTY_VALUE 	= "qty-value";
 
 	final HibernateSearchElementCache myNodeCache;
 	final FhirContext myFhirContext;
@@ -127,9 +130,9 @@ public class HibernateSearchIndexWriter {
 			DocumentElement nestedQtyNode = nestedSpNode.addObject(QTY_PARAM_NAME);
 
 			ourLog.trace("Adding Search Param Quantity: {} -- {}", theSearchParam, theValue);
-			nestedQtyNode.addValue(QTY_CODE, theValue.getCode());
-			nestedQtyNode.addValue(QTY_SYSTEM, theValue.getSystem());
-			nestedQtyNode.addValue(QTY_VALUE, theValue.getValue());
+			nestedQtyNode.addValue(CODE, theValue.getCode());
+			nestedQtyNode.addValue(SYSTEM, theValue.getSystem());
+			nestedQtyNode.addValue(VALUE, theValue.getValue());
 
 			if ( ! myModelConfig.getNormalizedQuantitySearchLevel().storageOrSearchSupported()) { return; }
 
@@ -150,5 +153,20 @@ public class HibernateSearchIndexWriter {
 	}
 
 
+	public void writeCompositeIndex(String theSearchParam, Collection<CompositeTokenQuantitySearchIndexData> theValueCollection) {
+		DocumentElement nestedRoot = myNodeCache.getObjectElement(NESTED_SEARCH_PARAM_ROOT);
 
-}
+		for (CompositeTokenQuantitySearchIndexData theValue : theValueCollection) {
+			DocumentElement nestedSpNode = nestedRoot.addObject(theSearchParam);
+			DocumentElement nestedCompNode = nestedSpNode.addObject(COMP_CODE_VALUE_QTY_PARAM_NAME);
+
+			ourLog.trace("Adding Search Param CompositeTokenQuantity: {} -- {}", theSearchParam, theValue);
+			nestedCompNode.addValue(COMP_CODE_SYSTEM, theValue.getTokenSearchIndexData().getSystem());
+			nestedCompNode.addValue(COMP_CODE_VALUE, theValue.getTokenSearchIndexData().getValue());
+			nestedCompNode.addValue(COMP_QTY_SYSTEM, theValue.getQtySearchIndexData().getSystem());
+			nestedCompNode.addValue(COMP_QTY_CODE, theValue.getQtySearchIndexData().getCode());
+			nestedCompNode.addValue(COMP_QTY_VALUE, theValue.getQtySearchIndexData().getValue());
+		}
+	}
+
+	}

@@ -32,6 +32,9 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.param.CompositeParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -92,6 +95,7 @@ import static ca.uhn.fhir.jpa.model.util.UcumServiceUtil.UCUM_CODESYSTEM_URL;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
@@ -174,6 +178,8 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	private IFhirResourceDao<QuestionnaireResponse> myQuestionnaireResponseDao;
 	@RegisterExtension
 	LogbackLevelOverrideExtension myLogbackLevelOverrideExtension = new LogbackLevelOverrideExtension();
+
+	private IIdType myResourceId;
 
 
 	@BeforeEach
@@ -964,9 +970,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	@Nested
 	public class QuantityAndNormalizedQuantitySearch {
 
-		private IIdType myResourceId;
-
-
 		@Nested
 		public class QuantitySearch {
 
@@ -1386,34 +1389,90 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 		}
 
+	}
 
 
-		private void assertFind(String theMessage, String theUrl) {
-			List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-			assertThat(theMessage, resourceIds, hasItem(equalTo(myResourceId.getIdPart())));
+	@Nested
+	public class CompositeParamsSearch {
+
+//		fixm jm: do
+		@Test
+		public void undefinedParamThrows() {
+			DataFormatException thrown = assertThrows(DataFormatException.class,
+				() -> myTestDaoSearch.searchForIds("/Observation?value-quantity=st5.35"));
+
+			assertEquals("HAPI-1941: Invalid prefix: \"st\"", thrown.getMessage());
 		}
 
-		private void assertNotFind(String theMessage, String theUrl) {
-			List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-			assertThat(theMessage, resourceIds, not(hasItem(equalTo(myResourceId.getIdPart()))));
+
+		@Test
+		public void eq() {
+			Observation o1 = new Observation();
+			o1.addComponent()
+				.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://loinc.org").setCode("8480-6")))
+				.setValue(new Quantity().setValue(60.0));
+			IIdType id1 = myObservationDao.create(o1, mySrd).getId().toUnqualifiedVersionless();
+
+			Observation o2 = new Observation();
+			o1.addComponent()
+				.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://loinc.org").setCode("3421-5")))
+				.setValue(new Quantity().setValue(100.0));
+			IIdType id2 = myObservationDao.create(o2, mySrd).getId().toUnqualifiedVersionless();
+
+			{
+				TokenParam v0 = new TokenParam("http://loinc.org", "8480-6");
+				QuantityParam v1 = new QuantityParam(ParamPrefixEnum.LESSTHAN, 90, null, null);
+				CompositeParam<TokenParam, QuantityParam> val = new CompositeParam<>(v0, v1);
+				SearchParameterMap map = new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_COMPONENT_CODE_VALUE_QUANTITY, val);
+				myCaptureQueriesListener.clear();
+				IBundleProvider result = myObservationDao.search(map);
+				myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
+				assertThat("Got: " + toUnqualifiedVersionlessIdValues(result), toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(id1.getValue()));
+			}
+			{
+				TokenParam v0 = new TokenParam("http://other.system.org", "7835-3");
+				QuantityParam v1 = new QuantityParam(ParamPrefixEnum.EQUAL, 60.0, null, null);
+				CompositeParam<TokenParam, QuantityParam> val = new CompositeParam<>(v0, v1);
+				SearchParameterMap map = new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_COMPONENT_CODE_VALUE_QUANTITY, val);
+				myCaptureQueriesListener.clear();
+				IBundleProvider result = myObservationDao.search(map);
+				myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
+				assertThat(toUnqualifiedVersionlessIdValues(result), empty());
+			}
+
+//			assertFind("/Observation?component-code-value-quantity=http://loinc.org|8480-6$lt60",
+//				"component-code-value-quantity=" + codeSystem + "|" + codeValue + "$" + qtyComparator + qtyValue);
 		}
 
-		private IIdType withObservationWithQuantity(double theValue, String theSystem, String theCode) {
-			myResourceId = myTestDataBuilder.createObservation(
-				myTestDataBuilder.withQuantityAtPath("valueQuantity", theValue, theSystem, theCode)
-			);
-			return myResourceId;
-		}
 
-		private IIdType withObservationWithValueQuantity(double theValue) {
-			myResourceId = myTestDataBuilder.createObservation(myTestDataBuilder.withElementAt("valueQuantity",
-				myTestDataBuilder.withPrimitiveAttribute("value", theValue),
-				myTestDataBuilder.withPrimitiveAttribute("system", UCUM_CODESYSTEM_URL),
-				myTestDataBuilder.withPrimitiveAttribute("code", "mm[Hg]")
-			));
-			return myResourceId;
-		}
+	}
 
+	private void assertFind(String theMessage, String theUrl) {
+		List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
+		assertThat(theMessage, resourceIds, hasItem(equalTo(myResourceId.getIdPart())));
+	}
+
+	private void assertNotFind(String theMessage, String theUrl) {
+		List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
+		assertThat(theMessage, resourceIds, not(hasItem(equalTo(myResourceId.getIdPart()))));
+	}
+
+
+	private IIdType withObservationWithQuantity(double theValue, String theSystem, String theCode) {
+		myResourceId = myTestDataBuilder.createObservation(
+			myTestDataBuilder.withQuantityAtPath("valueQuantity", theValue, theSystem, theCode)
+		);
+		return myResourceId;
+	}
+
+
+	private IIdType withObservationWithValueQuantity(double theValue) {
+		myResourceId = myTestDataBuilder.createObservation(myTestDataBuilder.withElementAt("valueQuantity",
+			myTestDataBuilder.withPrimitiveAttribute("value", theValue),
+			myTestDataBuilder.withPrimitiveAttribute("system", UCUM_CODESYSTEM_URL),
+			myTestDataBuilder.withPrimitiveAttribute("code", "mm[Hg]")
+		));
+		return myResourceId;
 	}
 
 
