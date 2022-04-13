@@ -36,7 +36,7 @@ public class ExpungeService {
 	private static final Logger ourLog = LoggerFactory.getLogger(ExpungeService.class);
 
 	@Autowired
-	private ExpungeEverythingService myExpungeEverythingService;
+	private IExpungeEverythingService myExpungeEverythingService;
 	@Autowired
 	private IResourceExpungeService myExpungeDaoService;
 	@Autowired

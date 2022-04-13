@@ -21,15 +21,14 @@ package ca.uhn.fhir.jpa.dao.expunge;
  */
 
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import org.springframework.data.domain.Slice;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public interface IResourceExpungeService {
-	Slice<Long> findHistoricalVersionsOfDeletedResources(String theResourceName, Long theResourceId, int theI);
+	List<Long> findHistoricalVersionsOfDeletedResources(String theResourceName, Long theResourceId, int theI);
 
-	Slice<Long> findHistoricalVersionsOfNonDeletedResources(String theResourceName, Long theResourceId, Long theVersion, int theI);
+	List<Long> findHistoricalVersionsOfNonDeletedResources(String theResourceName, Long theResourceId, Long theVersion, int theI);
 
 	void expungeHistoricalVersions(RequestDetails theRequestDetails, List<Long> thePartition, AtomicInteger theRemainingCount);
 
