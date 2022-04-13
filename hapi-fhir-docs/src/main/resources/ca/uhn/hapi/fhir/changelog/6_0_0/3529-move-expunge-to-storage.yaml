@@ -1,0 +1,4 @@
+type: change
+issue: 3529
+title: "Several classes and interfaces related to the `$expunge` operation have moved from the hapi-fhir-jpaserver-base
+project to the hapi-fhir-storage project."

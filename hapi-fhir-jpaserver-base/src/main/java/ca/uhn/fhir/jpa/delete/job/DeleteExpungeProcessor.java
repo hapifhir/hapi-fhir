@@ -33,8 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.SliceImpl;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -62,7 +60,7 @@ public class DeleteExpungeProcessor implements ItemProcessor<List<Long>, List<St
 
 	@Override
 	public List<String> process(List<Long> thePids) throws Exception {
-		validateOkToDeleteAndExpunge(new SliceImpl<>(thePids));
+		validateOkToDeleteAndExpunge(thePids);
 
 		List<String> retval = new ArrayList<>();
 
@@ -79,7 +77,7 @@ public class DeleteExpungeProcessor implements ItemProcessor<List<Long>, List<St
 		return retval;
 	}
 
-	public void validateOkToDeleteAndExpunge(Slice<Long> thePids) {
+	public void validateOkToDeleteAndExpunge(List<Long> thePids) {
 		if (!myDaoConfig.isEnforceReferentialIntegrityOnDelete()) {
 			ourLog.info("Referential integrity on delete disabled.  Skipping referential integrity check.");
 			return;
@@ -87,7 +85,7 @@ public class DeleteExpungeProcessor implements ItemProcessor<List<Long>, List<St
 
 		List<ResourceLink> conflictResourceLinks = Collections.synchronizedList(new ArrayList<>());
 		PartitionRunner partitionRunner = new PartitionRunner(PROCESS_NAME, THREAD_PREFIX, myDaoConfig.getExpungeBatchSize(), myDaoConfig.getExpungeThreadCount());
-		partitionRunner.runInPartitionedThreads(thePids, someTargetPids -> findResourceLinksWithTargetPidIn(thePids.getContent(), someTargetPids, conflictResourceLinks));
+		partitionRunner.runInPartitionedThreads(thePids, someTargetPids -> findResourceLinksWithTargetPidIn(thePids, someTargetPids, conflictResourceLinks));
 
 		if (conflictResourceLinks.isEmpty()) {
 			return;

@@ -180,7 +180,7 @@ public final class TerserUtil {
 				continue;
 			}
 
-			IBase newFieldValue = newElement(childDefinition, theFromFieldValue, null);
+			IBase newFieldValue = newElement(terser, childDefinition, theFromFieldValue, null);
 			terser.cloneInto(theFromFieldValue, newFieldValue, true);
 
 			try {
@@ -316,7 +316,8 @@ public final class TerserUtil {
 
 	/**
 	 * Clears the specified field on the resource provided
-	 *  @param theFhirContext Context holding resource definition
+	 *
+	 * @param theFhirContext Context holding resource definition
 	 * @param theResource
 	 * @param theFieldName
 	 */
@@ -529,19 +530,28 @@ public final class TerserUtil {
 	 * Creates a new element taking into consideration elements with choice that are not directly retrievable by element
 	 * name
 	 *
+	 *
+	 * @param theFhirTerser
 	 * @param theChildDefinition  Child to create a new instance for
 	 * @param theFromFieldValue   The base parent field
 	 * @param theConstructorParam Optional constructor param
 	 * @return Returns the new element with the given value if configured
 	 */
-	private static IBase newElement(BaseRuntimeChildDefinition theChildDefinition, IBase theFromFieldValue, Object theConstructorParam) {
+	private static IBase newElement(FhirTerser theFhirTerser, BaseRuntimeChildDefinition theChildDefinition, IBase theFromFieldValue, Object theConstructorParam) {
 		BaseRuntimeElementDefinition runtimeElementDefinition;
 		if (theChildDefinition instanceof RuntimeChildChoiceDefinition) {
 			runtimeElementDefinition = theChildDefinition.getChildElementDefinitionByDatatype(theFromFieldValue.getClass());
 		} else {
 			runtimeElementDefinition = theChildDefinition.getChildByName(theChildDefinition.getElementName());
 		}
-		return (theConstructorParam == null) ? runtimeElementDefinition.newInstance() : runtimeElementDefinition.newInstance(theConstructorParam);
+		if ("contained".equals(runtimeElementDefinition.getName())) {
+			IBaseResource sourceResource = (IBaseResource) theFromFieldValue;
+			return theFhirTerser.clone(sourceResource);
+		} else if (theConstructorParam == null) {
+			return runtimeElementDefinition.newInstance();
+		} else {
+			return runtimeElementDefinition.newInstance(theConstructorParam);
+		}
 	}
 
 	private static void mergeFields(FhirTerser theTerser, IBaseResource theTo, BaseRuntimeChildDefinition childDefinition, List<IBase> theFromFieldValues, List<IBase> theToFieldValues) {
@@ -550,7 +560,7 @@ public final class TerserUtil {
 				continue;
 			}
 
-			IBase newFieldValue = newElement(childDefinition, theFromFieldValue, null);
+			IBase newFieldValue = newElement(theTerser, childDefinition, theFromFieldValue, null);
 			if (theFromFieldValue instanceof IPrimitiveType) {
 				try {
 					Method copyMethod = getMethod(theFromFieldValue, "copy");
