@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
 import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteOptions;
+import ca.uhn.fhir.jpa.search.builder.ISearchQueryExecutor;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -44,7 +45,7 @@ public interface IFulltextSearchSvc {
 	 */
 	List<ResourcePersistentId> search(String theResourceName, SearchParameterMap theParams);
 
-	FulltextSearchSvcImpl.FulltextAsyncSearchResult searchAsync(String theResourceName, SearchParameterMap theParams);
+	ISearchQueryExecutor searchAsync(String theResourceName, SearchParameterMap theParams);
 
 	/**
 	 * Autocomplete search for NIH $expand contextDirection=existing
