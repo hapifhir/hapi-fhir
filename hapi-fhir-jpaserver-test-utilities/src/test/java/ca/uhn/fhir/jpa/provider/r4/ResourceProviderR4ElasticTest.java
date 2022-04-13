@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.provider.BaseJpaResourceProvider;
 import ca.uhn.fhir.jpa.test.config.TestHibernateSearchAddInConfig;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
@@ -11,8 +12,13 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,6 +32,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -35,6 +43,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 @RequiresDocker
@@ -43,16 +52,22 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceProviderR4ElasticTest.class);
 
 	@Autowired
-	DaoConfig myDaoConfig;
+	private DaoConfig myDaoConfig;
+
+	private BaseJpaResourceProvider<Observation> myObservationResourceProvider;
 
 	@BeforeEach
 	public void beforeEach() {
+		myDaoConfig.setLastNEnabled(true);
 		myDaoConfig.setAdvancedLuceneIndexing(true);
+		myDaoConfig.setStoreResourceInLuceneIndex(true);
 	}
 
 	@AfterEach
 	public void afterEach() {
+		myDaoConfig.setLastNEnabled(new DaoConfig().isLastNEnabled());
 		myDaoConfig.setAdvancedLuceneIndexing(new DaoConfig().isAdvancedLuceneIndexing());
+		myDaoConfig.setStoreResourceInLuceneIndex(new DaoConfig().isStoreResourceInLuceneIndex());
 	}
 
 
@@ -88,8 +103,14 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 	}
 
 	private void createObservationWithCode(Coding c) {
+		Patient patient = new Patient();
+		patient.setId("Patient/p-123");
+		patient.setActive(true);
+		myPatientDao.update(patient);
 		Observation observation = new Observation();
+		observation.getSubject().setReference("Patient/p-123");
 		observation.getCode().addCoding(c);
+		observation.setEffective(new DateTimeType(Date.from(Instant.now())));
 		myObservationDao.create(observation, mySrd).getId().toUnqualifiedVersionless();
 	}
 
@@ -106,6 +127,34 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 					Objects.equals(theItem.getCode(), theTarget.getCode());
 			}
 		};
+	}
+
+	@Test
+	public void testObservationLastNAllParamsPopulated() {
+		Coding blood_count = new Coding("http://loinc.org", "789-8", "Erythrocytes [#/volume] in Blood by Automated count");
+		Coding vital_signs = new Coding("http://loinc.org", "123-45", "Vital Signs");
+
+		createObservationWithCode(blood_count);
+		createObservationWithCode(vital_signs);
+
+		// subject: is declared param on lastN operation
+		// combo-code: is general Observation param and not a necessary param for lastN
+		Parameters respParam = myClient
+			.operation()
+			.onType(Observation.class)
+			.named("lastn")
+			.withParameter(Parameters.class, "subject", new StringType("Patient/p-123"))
+			.andParameter("combo-code:text", new StringType("Erythrocytes"))
+			.useHttpGet()
+			.execute();
+
+		assertEquals( 1, respParam.getParameter().size(), "Expected only 1 observation for blood count code");
+		Bundle bundle = (Bundle) respParam.getParameter().get(0).getResource();
+		Observation observation = (Observation) bundle.getEntryFirstRep().getResource();
+
+		assertEquals("Patient/p-123", observation.getSubject().getReference());
+		assertTrue(observation.getCode().getCodingFirstRep().getDisplay().contains("Erythrocytes"));
+
 	}
 
 }
