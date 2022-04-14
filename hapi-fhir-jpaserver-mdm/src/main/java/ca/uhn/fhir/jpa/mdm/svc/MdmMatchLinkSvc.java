@@ -133,7 +133,6 @@ public class MdmMatchLinkSvc {
 		// 2. Create source resource for the MDM source
 		// 3. UPDATE MDM LINK TABLE
 
-		// FIXME Anna PART1: it is within this call that we will be generating the comment with the with the NULL/NULL values.
 		myMdmLinkSvc.updateLink(newGoldenResource, theResource, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 	}
 

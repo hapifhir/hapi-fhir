@@ -43,20 +43,44 @@ public class MdmResourceMatcherSvcLoggingTest extends BaseMdmRulesR4Test {
 	}
 
 	@Test
-	public void testMatchWillProvideLogsAboutSuccessOnDebugLevel(){
+	public void testMatchWillProvideLogsAboutSuccessOnTraceLevel(){
 		Logger logger = (Logger) Logs.getMdmTroubleshootingLog();
+		logger.setLevel(Level.TRACE);
 
 		MemoryAppender memoryAppender = createAndAssignMemoryAppender(logger);
 
 		MdmMatchOutcome result = myMdmResourceMatcherSvc.match(myJohn, myJohny);
 		assertNotNull(result);
 
-		assertTrue(memoryAppender.contains("Evaluating match", Level.DEBUG));
-		assertTrue(memoryAppender.contains("No Match: Matcher patient-last did not match.", Level.DEBUG));
-		assertTrue(memoryAppender.contains("Match: Successfully matched Matcher patient-given.", Level.DEBUG));
+		//this test assumes, that the defined algorithm for calculating scores doesn't change
+		assertTrue(memoryAppender.contains("No match: Matcher patient-last did not match (score: 0.4", Level.TRACE));
+		assertTrue(memoryAppender.contains("Match: Successfully matched matcher patient-given with score 0.8", Level.TRACE));
 	}
 
-	
+	//problem not in matcher service!
+	@Test
+	public void testMatchWillProvideSummaryOnMatchinSuccessForEachField(){
+		Patient someoneElse = buildSomeoneElse();
+		Logger logger = (Logger) Logs.getMdmTroubleshootingLog();
+		logger.setLevel(Level.TRACE);
+
+		MemoryAppender memoryAppender = createAndAssignMemoryAppender(logger);
+
+		MdmMatchOutcome result = myMdmResourceMatcherSvc.match(myJohn, someoneElse);
+		assertNotNull(result);
+
+		assertTrue(memoryAppender.contains("Field matcher results: patient-given: NO\n" +
+			"patient-last: YES", Level.TRACE));
+	}
+
+	protected Patient buildSomeoneElse() {
+		Patient patient = new Patient();
+		patient.addName().addGiven("SomeOneElse");
+		patient.addName().setFamily("LastName");
+		patient.setId("Patient/3");
+		return patient;
+	}
+
 
 	protected MemoryAppender createAndAssignMemoryAppender(Logger theLogger){
 
