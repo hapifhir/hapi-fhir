@@ -316,38 +316,6 @@ public class SearchBuilder implements ISearchBuilder {
 		myRequestPartitionId = theRequestPartitionId;
 	}
 
-	// fixme move and name
-	public static class ResourcePersistentIdQueryAdaptor implements ISearchQueryExecutor {
-		final Iterator<ResourcePersistentId> myIterator;
-
-		ResourcePersistentIdQueryAdaptor(Iterator<ResourcePersistentId> theIterator) {
-			myIterator = theIterator;
-		}
-
-		@Override
-		public void close() {
-		}
-
-		@Override
-		public boolean hasNext() {
-			return myIterator.hasNext();
-		}
-
-		@Override
-		public Long next() {
-			ResourcePersistentId next = myIterator.next();
-			return next==null?null:next.getIdAsLong();
-		}
-
-		static public ResourcePersistentIdQueryAdaptor from(Iterator<ResourcePersistentId> theIterator) {
-			return new ResourcePersistentIdQueryAdaptor(theIterator);
-		}
-
-		static public ResourcePersistentIdQueryAdaptor from(Iterable<ResourcePersistentId> theIterable) {
-			return new ResourcePersistentIdQueryAdaptor(theIterable.iterator());
-		}
-	}
-
 	private List<ISearchQueryExecutor> createQuery(SearchParameterMap theParams, SortSpec sort, Integer theOffset, Integer theMaximumResults, boolean theCount, RequestDetails theRequest,
 																		 SearchRuntimeDetails theSearchRuntimeDetails) {
 
@@ -357,9 +325,9 @@ public class SearchBuilder implements ISearchBuilder {
 			// we're going to run at least part of the search against the Fulltext service.
 			ISearchQueryExecutor fulltextMatchIds;
 			if (myParams.isLastN()) {
-				fulltextMatchIds = ResourcePersistentIdQueryAdaptor.from(executeLastNAgainstIndex(theMaximumResults));
+				fulltextMatchIds = SearchQueryExecutors.from(executeLastNAgainstIndex(theMaximumResults));
 			} else if (myParams.getEverythingMode() != null) {
-				fulltextMatchIds = ResourcePersistentIdQueryAdaptor.from(queryHibernateSearchForEverythingPids());
+				fulltextMatchIds = SearchQueryExecutors.from(queryHibernateSearchForEverythingPids());
 			} else {
 				fulltextMatchIds = myFulltextSearchSvc.searchAsync(myResourceName, myParams);
 			}
@@ -395,11 +363,11 @@ public class SearchBuilder implements ISearchBuilder {
 					);
 
 			if (canSkipDatabase) {
-				queries.add(fulltextMatchIds);
+				queries.add(SearchQueryExecutors.limited(fulltextMatchIds, theMaximumResults));
 			} else {
 				// Finish the query in the database for the rest of the search parameters, sorting, partitioning, etc.
 				// We break the pids into chunks that fit in the 1k limit for jdbc bind params.
-				// fixme change chunk to take iterator
+				// wipmb change chunk to take iterator
 				new QueryChunker<Long>()
 					.chunk(Streams.stream(fulltextMatchIds).collect(Collectors.toList()), t -> doCreateChunkedQueries(theParams, t, theOffset, sort, theCount, theRequest, queries));
 			}
@@ -1415,41 +1383,6 @@ public class SearchBuilder implements ISearchBuilder {
 	@VisibleForTesting
 	public void setDaoConfigForUnitTest(DaoConfig theDaoConfig) {
 		myDaoConfig = theDaoConfig;
-	}
-
-	/**
-	 * Adapt bare Iterator to our internal query interface.
-	 */
-	static class ResolvedSearchQueryExecutor implements ISearchQueryExecutor {
-		private final Iterator<Long> myIterator;
-
-		ResolvedSearchQueryExecutor(Iterable<Long> theIterable) {
-			this(theIterable.iterator());
-		}
-
-		ResolvedSearchQueryExecutor(Iterator<Long> theIterator) {
-			myIterator = theIterator;
-		}
-
-		@Nonnull
-		public static ResolvedSearchQueryExecutor from(List<Long> rawPids) {
-			return new ResolvedSearchQueryExecutor(rawPids);
-		}
-
-		@Override
-		public boolean hasNext() {
-			return myIterator.hasNext();
-		}
-
-		@Override
-		public Long next() {
-			return myIterator.next();
-		}
-
-		@Override
-		public void close() {
-			// empty
-		}
 	}
 
 	public class IncludesIterator extends BaseIterator<ResourcePersistentId> implements Iterator<ResourcePersistentId> {

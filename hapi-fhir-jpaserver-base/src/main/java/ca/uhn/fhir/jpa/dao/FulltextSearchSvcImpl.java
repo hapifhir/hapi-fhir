@@ -45,7 +45,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
-import com.google.common.collect.Streams;
 import org.hibernate.search.backend.elasticsearch.ElasticsearchExtension;
 import org.hibernate.search.engine.search.query.SearchScroll;
 import org.hibernate.search.mapper.orm.Search;
@@ -62,12 +61,12 @@ import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Spliterators;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -126,32 +125,6 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		plan.addOrUpdate(theEntity);
 	}
 
-
-	public static class FulltextAsyncSearchResult implements ISearchQueryExecutor {
-		private final List<Long> myResults;
-		private final Iterator<Long> myIterator;
-
-		public FulltextAsyncSearchResult(List<ResourcePersistentId> theResults) {
-			myResults = theResults.stream().map(i->i.getIdAsLong()).collect(Collectors.toList());
-			myIterator = myResults.iterator();
-		}
-
-		@Override
-		public void close() {
-
-		}
-
-		@Override
-		public boolean hasNext() {
-			return myIterator.hasNext();
-		}
-
-		@Override
-		public Long next() {
-			return myIterator.next();
-		}
-	}
-
 	@Override
 	public ISearchQueryExecutor searchAsync(String theResourceName, SearchParameterMap theParams) {
 		return doSearch(theResourceName, theParams, null);
@@ -161,10 +134,18 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		// keep this in sync with supportsSomeOf();
 		SearchSession session = getSearchSession();
 
+		int scrollSize = 10;
+		if (theParams.getCount()!=null) {
+			scrollSize = theParams.getCount();
+		}
+
 		SearchScroll<Long> esResult = session.search(ResourceTable.class)
-			// Selects are replacements for projection and convert more cleanly than the old implementation.
+			// The document id is the PK which is pid.  We use this instead of _myId to avoid fetching the doc body.
 			.select(
-				f -> f.field("myId", Long.class)
+				// adapt the String docRef.id() to the Long that it really is.
+				f -> f.composite(
+					docRef -> Long.valueOf(docRef.id()),
+					f.documentReference())
 			)
 			.where(
 				f -> f.bool(b -> {
@@ -207,8 +188,8 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 					//DROP EARLY HERE IF BOOL IS EMPTY?
 
 				})
-				// fixme look at _count maybe.
-			).scroll(100);
+			).scroll(scrollSize);
+
 		return new SearchScrollQueryExecutorAdaptor(esResult);
 	}
 
@@ -227,7 +208,8 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	public List<ResourcePersistentId> everything(String theResourceName, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
 
 
-		List<ResourcePersistentId> retVal = toList(doSearch(null, theParams, theReferencingPid));
+		// wipmb what about max results here?
+		List<ResourcePersistentId> retVal = toList(doSearch(null, theParams, theReferencingPid), 10000);
 		if (theReferencingPid != null) {
 			retVal.add(theReferencingPid);
 		}
@@ -260,12 +242,17 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	@Transactional()
 	@Override
 	public List<ResourcePersistentId> search(String theResourceName, SearchParameterMap theParams) {
-		return toList(doSearch(theResourceName, theParams, null));
+		return toList(doSearch(theResourceName, theParams, null), 500);
 	}
 
-	private List<ResourcePersistentId> toList(ISearchQueryExecutor theDoSearch) {
-		// fixme nuke this
-		return Streams.stream(theDoSearch).map(pid->new ResourcePersistentId(pid)).collect(Collectors.toList());
+	/**
+	 * Adapt our async interface to the legacy concrete List
+	 */
+	private List<ResourcePersistentId> toList(ISearchQueryExecutor theSearchResultStream, long theMaxSize) {
+		return StreamSupport.stream(Spliterators.spliteratorUnknownSize(theSearchResultStream, 0), false)
+			.map(ResourcePersistentId::new)
+			.limit(theMaxSize)
+			.collect(Collectors.toList());
 	}
 
 	@Transactional()
@@ -314,7 +301,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		List<ExtendedLuceneResourceProjection> rawResourceDataList = session.search(ResourceTable.class)
 			.select(
 				f -> f.composite(
-					(pid, forcedId, resource)-> new ExtendedLuceneResourceProjection(pid, forcedId, resource),
+					ExtendedLuceneResourceProjection::new,
 					f.field("myId", Long.class),
 					f.field("myForcedId", String.class),
 					f.field("myRawResource", String.class))

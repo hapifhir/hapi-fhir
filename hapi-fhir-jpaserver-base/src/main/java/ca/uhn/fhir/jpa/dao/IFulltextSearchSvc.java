@@ -45,6 +45,12 @@ public interface IFulltextSearchSvc {
 	 */
 	List<ResourcePersistentId> search(String theResourceName, SearchParameterMap theParams);
 
+	/**
+	 *
+	 * @param theResourceName e.g. Patient
+	 * @param theParams The search query
+	 * @return Iterable of results
+	 */
 	ISearchQueryExecutor searchAsync(String theResourceName, SearchParameterMap theParams);
 
 	/**
