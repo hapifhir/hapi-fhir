@@ -133,6 +133,7 @@ import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -438,7 +439,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		DaoConfig.ClientIdStrategyEnum strategy = getConfig().getResourceClientIdStrategy();
 
 		if (strategy == DaoConfig.ClientIdStrategyEnum.NOT_ALLOWED) {
-			if (!isSystemRequest(theRequest)) {
+			if (!shouldCreateResourceIdForNotAllowed(theRequest)) {
 				throw new ResourceNotFoundException(Msg.code(959) + getMessageSanitized("failedToCreateWithClientAssignedIdNotAllowed", theResource.getIdElement().getIdPart()));
 			}
 		}
@@ -452,6 +453,19 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	protected String getMessageSanitized(String theKey, String theIdPart) {
 		return getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, theKey, theIdPart);
+	}
+
+	private boolean shouldCreateResourceIdForNotAllowed(RequestDetails theRequest) {
+		return isSystemRequest(theRequest) || (isServletRequest(theRequest) && isPostRequest(theRequest));
+	}
+
+	private boolean isPostRequest(RequestDetails theRequest) {
+		HttpServletRequest servletRequest = ((ServletRequestDetails) theRequest).getServletRequest();
+		return servletRequest != null && servletRequest.getMethod().equals("POST");
+	}
+
+	private boolean isServletRequest(RequestDetails theRequest) {
+		return theRequest instanceof ServletRequestDetails;
 	}
 
 	private boolean isSystemRequest(RequestDetails theRequest) {

@@ -28,8 +28,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockHttpServletRequest;
 
 import javax.persistence.EntityManager;
+import javax.servlet.http.HttpServletRequest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -89,6 +91,33 @@ class BaseHapiFhirResourceDaoTest {
 	public void validateResourceIdCreation_asUser() {
 		Patient patient = new Patient();
 		RequestDetails sysRequest = new ServletRequestDetails();
+		mySvc.getConfig().setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.NOT_ALLOWED);
+		try {
+			mySvc.validateResourceIdCreation(patient, sysRequest);
+			fail();
+		} catch (ResourceNotFoundException e) {
+			assertEquals(Msg.code(959) + "failedToCreateWithClientAssignedIdNotAllowed", e.getMessage());
+		}
+	}
+
+	@Test
+	public void validateResourceIdCreation_asUserSendingPostRequest() {
+		Patient patient = new Patient();
+		MockHttpServletRequest httpRequest = new MockHttpServletRequest();
+		httpRequest.setMethod("POST");
+		ServletRequestDetails sysRequest = new ServletRequestDetails();
+		sysRequest.setServletRequest(httpRequest);
+		mySvc.getConfig().setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.NOT_ALLOWED);
+		mySvc.validateResourceIdCreation(patient, sysRequest);
+	}
+
+	@Test
+	public void validateResourceIdCreation_asUserSendingUpdateRequest() {
+		Patient patient = new Patient();
+		MockHttpServletRequest httpRequest = new MockHttpServletRequest();
+		httpRequest.setMethod("PUT");
+		ServletRequestDetails sysRequest = new ServletRequestDetails();
+		sysRequest.setServletRequest(httpRequest);
 		mySvc.getConfig().setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.NOT_ALLOWED);
 		try {
 			mySvc.validateResourceIdCreation(patient, sysRequest);
