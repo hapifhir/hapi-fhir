@@ -1,0 +1,5 @@
+type: fix
+issue: 3537
+jira: SMILE-3670
+title: "Fixed a bug where if Client Id Mode is set to `NOT_ALLOWED` and a Code System is trying to be uploaded with a 
+`POST` request, an error message would be returned instead of creating the resources."
