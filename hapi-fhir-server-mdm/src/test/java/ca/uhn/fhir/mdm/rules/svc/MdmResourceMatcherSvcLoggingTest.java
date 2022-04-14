@@ -58,7 +58,7 @@ public class MdmResourceMatcherSvcLoggingTest extends BaseMdmRulesR4Test {
 	}
 
 	@Test
-	public void testMatchWillProvideSummaryOnMatchinSuccessForEachField() {
+	public void testMatchWillProvideSummaryOnMatchingSuccessForEachField() {
 		Patient someoneElse = buildSomeoneElse();
 		Logger logger = (Logger) Logs.getMdmTroubleshootingLog();
 		logger.setLevel(Level.TRACE);
