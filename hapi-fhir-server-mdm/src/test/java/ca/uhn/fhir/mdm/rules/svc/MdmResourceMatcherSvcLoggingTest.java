@@ -43,7 +43,7 @@ public class MdmResourceMatcherSvcLoggingTest extends BaseMdmRulesR4Test {
 	}
 
 	@Test
-	public void testMatchWillProvideLogsAboutSuccessOnTraceLevel(){
+	public void testMatchWillProvideLogsAboutSuccessOnTraceLevel() {
 		Logger logger = (Logger) Logs.getMdmTroubleshootingLog();
 		logger.setLevel(Level.TRACE);
 
@@ -57,9 +57,8 @@ public class MdmResourceMatcherSvcLoggingTest extends BaseMdmRulesR4Test {
 		assertTrue(memoryAppender.contains("Match: Successfully matched matcher patient-given with score 0.8", Level.TRACE));
 	}
 
-	//problem not in matcher service!
 	@Test
-	public void testMatchWillProvideSummaryOnMatchinSuccessForEachField(){
+	public void testMatchWillProvideSummaryOnMatchinSuccessForEachField() {
 		Patient someoneElse = buildSomeoneElse();
 		Logger logger = (Logger) Logs.getMdmTroubleshootingLog();
 		logger.setLevel(Level.TRACE);
@@ -82,7 +81,7 @@ public class MdmResourceMatcherSvcLoggingTest extends BaseMdmRulesR4Test {
 	}
 
 
-	protected MemoryAppender createAndAssignMemoryAppender(Logger theLogger){
+	protected MemoryAppender createAndAssignMemoryAppender(Logger theLogger) {
 
 		MemoryAppender memoryAppender = new MemoryAppender();
 		memoryAppender.setContext(theLogger.getLoggerContext());
@@ -92,7 +91,7 @@ public class MdmResourceMatcherSvcLoggingTest extends BaseMdmRulesR4Test {
 		return memoryAppender;
 	}
 
-	public static class MemoryAppender extends ListAppender<ILoggingEvent>{
+	public static class MemoryAppender extends ListAppender<ILoggingEvent> {
 		public void reset() {
 			this.list.clear();
 		}
