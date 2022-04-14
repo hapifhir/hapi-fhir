@@ -134,7 +134,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		// keep this in sync with supportsSomeOf();
 		SearchSession session = getSearchSession();
 
-		int scrollSize = 10;
+		int scrollSize = 50;
 		if (theParams.getCount()!=null) {
 			scrollSize = theParams.getCount();
 		}
