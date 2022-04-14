@@ -284,7 +284,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			version.onTable("HFJ_RESOURCE")
 				.addIndex("20220413.1", "IDX_RES_TYPE_DEL_UPDATED")
 				.unique(false)
-				.withColumns("RES_TYPE", "RES_DELETED_AT", "RES_UPDATED", "RES_ID");
+				.withColumns("RES_TYPE", "RES_DELETED_AT", "RES_UPDATED", "PARTITION_ID", "RES_ID");
 
 			// Drop existing Index on HFJ_RESOURCE.RES_TYPE since the new Index will meet the overall Index Demand
 			version
