@@ -131,14 +131,13 @@ public class MdmResourceMatcherSvc {
 				ourLog.debug("Matcher {} is not valid for resource type: {}. Skipping it.", fieldComparator.getName(), resourceType);
 				continue;
 			}
-			// FIXME Part2: this is where we will determine what we want to log
 			ourLog.debug("Matcher {} is valid for resource type: {}. Evaluating match.", fieldComparator.getName(), resourceType);
 			MdmMatchEvaluation matchEvaluation = fieldComparator.match(theLeftResource, theRightResource);
 			if (matchEvaluation.match) {
 				vector |= (1 << i);
-				ourLog.debug("Match: Successfully matched Matcher {}.", fieldComparator.getName());
+				ourLog.trace("Match: Successfully matched matcher {} with score {}.", fieldComparator.getName(), matchEvaluation.score);
 			} else {
-				ourLog.debug("No Match: Matcher {} did not match.", fieldComparator.getName());
+				ourLog.trace("No match: Matcher {} did not match (score: {}).", fieldComparator.getName(), matchEvaluation.score);
 			}
 			score += matchEvaluation.score;
 			appliedRuleCount += 1;

@@ -56,7 +56,7 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 			.map(candidate -> new MatchedTarget(candidate, myMdmResourceMatcherSvc.getMatchResult(theResource, candidate)))
 			.collect(Collectors.toList());
 
-		ourLog.info("Found {} matched targets for {}", matches.size(), theResourceType);
+		ourLog.info("Found {} matched targets for {}.", matches.size(), theResourceType);
 		return matches;
 	}
 

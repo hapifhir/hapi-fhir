@@ -77,8 +77,7 @@ public class MdmLinkDaoSvc {
 			mdmLink.setScore(theMatchOutcome.score);
 		}
 
-		// FIXME Anna: NULL properties in theMatchOutcome is the issue here
-		String message = String.format("Creating MdmLink from %s to %s -> %s", theGoldenResource.getIdElement().toUnqualifiedVersionless(), theSourceResource.getIdElement().toUnqualifiedVersionless(), theMatchOutcome);
+		String message = String.format("Creating MdmLink from %s to %s.", theGoldenResource.getIdElement().toUnqualifiedVersionless(), theSourceResource.getIdElement().toUnqualifiedVersionless());
 		theMdmTransactionContext.addTransactionLogMessage(message);
 		ourLog.debug(message);
 		save(mdmLink);
