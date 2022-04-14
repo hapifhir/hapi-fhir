@@ -400,7 +400,6 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 			.onType("ConceptMap")
 			.named("$translate")
 			.withParameters(params)
-			.useHttpGet()
 			.execute();
 
 		Optional<String> result = ParametersUtil.getNamedParameterValueAsString(fhirContext, outcome, "result");

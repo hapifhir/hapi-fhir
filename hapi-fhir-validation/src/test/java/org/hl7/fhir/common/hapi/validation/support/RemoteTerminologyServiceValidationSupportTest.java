@@ -343,9 +343,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 			assertEquals(singleResult, result);
 		}
 
-		assertEquals(CODE_SYSTEM, myConceptMapProvider.myLastSourceCodeSystem.getValue());
-		assertEquals(CODE_SYSTEM_VERSION, myConceptMapProvider.myLastSourceCodeSystemVersion.getValue());
-		assertEquals(CODE, myConceptMapProvider.myLastSourceCode.getCode());
+		assertTrue(codeableConcept.equalsDeep(myConceptMapProvider.myLastCodeableConcept));
 		assertEquals(TARGET_SYSTEM, myConceptMapProvider.myLastTargetCodeSystem.getValue());
 		assertEquals(CONCEPT_MAP_URL, myConceptMapProvider.myLastConceptMapUrl.getValue());
 		assertEquals(CONCEPT_MAP_VERSION, myConceptMapProvider.myLastConceptMapVersion.getValue());
@@ -367,9 +365,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		assertEquals(results.getResult(), false);
 		assertEquals(results.getResults().size(), 0);
 
-		assertNull(myConceptMapProvider.myLastSourceCodeSystem);
-		assertNull(myConceptMapProvider.myLastSourceCodeSystemVersion);
-		assertNull(myConceptMapProvider.myLastSourceCode);
+		assertNull(myConceptMapProvider.myLastCodeableConcept);
 		assertNull(myConceptMapProvider.myLastTargetCodeSystem);
 		assertNull(myConceptMapProvider.myLastConceptMapUrl);
 		assertNull(myConceptMapProvider.myLastConceptMapVersion);
@@ -748,9 +744,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 	private static class MyConceptMapProvider implements IResourceProvider {
 		private UriType myLastConceptMapUrl;
 		private StringType myLastConceptMapVersion;
-		private CodeType myLastSourceCode;
-		private UriType myLastSourceCodeSystem;
-		private StringType myLastSourceCodeSystemVersion;
+		private CodeableConcept myLastCodeableConcept;
 		private UriType myLastSourceValueSet;
 		private UriType myLastTargetValueSet;
 		private UriType myLastTargetCodeSystem;
@@ -768,9 +762,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 			@IdParam(optional = true) IdType theId,
 			@OperationParam(name = "url", min = 0, max = 1) UriType theConceptMapUrl,
 			@OperationParam(name = "conceptMapVersion", min = 0, max = 1) StringType theConceptMapVersion,
-			@OperationParam(name = "code", min = 0, max = 1) CodeType theSourceCode,
-			@OperationParam(name = "system", min = 0, max = 1) UriType theSourceCodeSystem,
-			@OperationParam(name = "version", min = 0, max = 1) StringType theSourceCodeSystemVersion,
+			@OperationParam(name = "codeableConcept", min = 0, max = 1) CodeableConcept theSourceCodeableConcept,
 			@OperationParam(name = "source", min = 0, max = 1) UriType theSourceValueSet,
 			@OperationParam(name = "target", min = 0, max = 1) UriType theTargetValueSet,
 			@OperationParam(name = "targetsystem", min = 0, max = 1) UriType theTargetCodeSystem,
@@ -780,9 +772,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 			myInvocationCount++;
 			myLastConceptMapUrl = theConceptMapUrl;
 			myLastConceptMapVersion = theConceptMapVersion;
-			myLastSourceCode = theSourceCode;
-			myLastSourceCodeSystem = theSourceCodeSystem;
-			myLastSourceCodeSystemVersion = theSourceCodeSystemVersion;
+			myLastCodeableConcept = theSourceCodeableConcept;
 			myLastSourceValueSet = theSourceValueSet;
 			myLastTargetValueSet = theTargetValueSet;
 			myLastTargetCodeSystem = theTargetCodeSystem;

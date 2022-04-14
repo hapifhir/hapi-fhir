@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * #L%
  */
 
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
@@ -38,19 +39,29 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Collections;
 import java.util.Date;
 
 public class FhirResourceDaoConceptMapDstu3 extends BaseHapiFhirResourceDao<ConceptMap> implements IFhirResourceDaoConceptMap<ConceptMap> {
 	@Autowired
 	private ITermConceptMappingSvc myTermConceptMappingSvc;
+	@Autowired
+	private IValidationSupport myValidationSupport;
 
 	@Override
 	public TranslateConceptResults translate(TranslationRequest theTranslationRequest, RequestDetails theRequestDetails) {
-		if (theTranslationRequest.hasReverse() && theTranslationRequest.getReverseAsBoolean()) {
-			return myTermConceptMappingSvc.translateWithReverse(theTranslationRequest);
-		}
+		IValidationSupport.TranslateCodeRequest translateCodeRequest = new IValidationSupport.TranslateCodeRequest(
+			Collections.unmodifiableList(theTranslationRequest.getCodeableConcept().getCoding()),
+			theTranslationRequest.getTargetSystem() != null ? theTranslationRequest.getTargetSystem().asStringValue() : null,
+			theTranslationRequest.getUrl() != null ? theTranslationRequest.getUrl().asStringValue() : null,
+			theTranslationRequest.getConceptMapVersion() != null ? theTranslationRequest.getConceptMapVersion().asStringValue() : null,
+			theTranslationRequest.getSource() != null ? theTranslationRequest.getSource().asStringValue() : null,
+			theTranslationRequest.getTarget() != null ? theTranslationRequest.getTarget().asStringValue() : null,
+			theTranslationRequest.getResourceId(),
+			theTranslationRequest.getReverseAsBoolean()
+		);
 
-		return myTermConceptMappingSvc.translate(theTranslationRequest);
+		return myValidationSupport.translateConcept(translateCodeRequest);
 	}
 
 
