@@ -55,17 +55,18 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.CODE;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_EXACT;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_NORMALIZED;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_TEXT;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.NESTED_SEARCH_PARAM_ROOT;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_CODE;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_CODE_NORM;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_PARAM_NAME;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_SYSTEM;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_VALUE;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.SYSTEM;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.VALUE;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_VALUE_NORM;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.SEARCH_PARAM_ROOT;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -110,12 +111,12 @@ public class ExtendedLuceneClauseBuilder {
 			} else if (nextOr instanceof TokenParam) {
 				TokenParam nextOrToken = (TokenParam) nextOr;
 				nextValueTrimmed = nextOrToken.getValue();
-			} else if (nextOr instanceof ReferenceParam) {
-				ReferenceParam referenceParam = (ReferenceParam) nextOr;
-				nextValueTrimmed = referenceParam.getValue();
-				if (nextValueTrimmed.contains("/_history")) {
-					nextValueTrimmed = nextValueTrimmed.substring(0, nextValueTrimmed.indexOf("/_history"));
-				}
+//			} else if (nextOr instanceof ReferenceParam) {
+//				ReferenceParam referenceParam = (ReferenceParam) nextOr;
+//				nextValueTrimmed = referenceParam.getValue();
+//				if (nextValueTrimmed.contains("/_history")) {
+//					nextValueTrimmed = nextValueTrimmed.substring(0, nextValueTrimmed.indexOf("/_history"));
+//				}
 			} else {
 				throw new IllegalArgumentException(Msg.code(1088) + "Unsupported full-text param type: " + nextOr.getClass());
 			}
@@ -271,18 +272,9 @@ public class ExtendedLuceneClauseBuilder {
 		}
 	}
 
+
 	public void addReferenceUnchainedSearch(String theSearchParamName, List<List<IQueryParameterType>> theReferenceAndOrTerms) {
-		String fieldPath = SEARCH_PARAM_ROOT + "." + theSearchParamName + ".reference.value";
-		for (List<? extends IQueryParameterType> nextAnd : theReferenceAndOrTerms) {
-			Set<String> terms = extractOrStringParams(nextAnd);
-			ourLog.trace("reference unchained search {}", terms);
-
-			List<? extends PredicateFinalStep> orTerms = terms.stream()
-				.map(s -> myPredicateFactory.match().field(fieldPath).matching(s))
-				.collect(Collectors.toList());
-
-			myRootClause.must(orPredicateOrSingle(orTerms));
-		}
+		addAndOrSearchClauses(theSearchParamName, theReferenceAndOrTerms, this::addReferenceOrClauses);
 	}
 
 	/**
@@ -476,29 +468,52 @@ public class ExtendedLuceneClauseBuilder {
 	 * Differences with DB search:
 	 *  _ is not all-normalized-or-all-not. Each parameter is applied on quantity or normalized quantity depending on UCUM fitness
 	 *  _ respects ranges for equal and approximate qualifiers
-	 *
-	 * Strategy: For each parameter, if it can be canonicalized, it is, and used against 'normalized-value-quantity' index
-	 * 	otherwise it is applied as-is to 'value-quantity'
 	 */
 	public void addQuantityUnmodifiedSearch(String theSearchParamName, List<List<IQueryParameterType>> theQuantityAndOrTerms) {
+		addAndOrSearchClauses(theSearchParamName, theQuantityAndOrTerms, this::addQuantityOrClauses);
+	}
 
-		for (List<IQueryParameterType> nextAnd : theQuantityAndOrTerms) {
-			BooleanPredicateClausesStep<?> quantityTerms = myPredicateFactory.bool();
-			quantityTerms.minimumShouldMatchNumber(1);
+
+	private BooleanPredicateClausesStep<?> addReferenceOrClauses(String theSearchParamName, IQueryParameterType theParamType) {
+		BooleanPredicateClausesStep<?> orTerms = myPredicateFactory.bool();
+
+		String fieldPath = SEARCH_PARAM_ROOT + "." + theSearchParamName + ".reference.value";
+
+		ReferenceParam referenceParam = (ReferenceParam) theParamType;
+		String nextValueTrimmed = referenceParam.getValue();
+		if (nextValueTrimmed.contains("/_history")) {
+			nextValueTrimmed = nextValueTrimmed.substring(0, nextValueTrimmed.indexOf("/_history"));
+		}
+		if (isNotBlank(nextValueTrimmed)) {
+			orTerms.must(myPredicateFactory.match().field(fieldPath).matching(nextValueTrimmed));
+		}
+
+		return orTerms;
+	}
+
+
+	/**
+	 * Handles "and" clauses (outer loop)  and "or" (inner loop) generically using the received param-type specific function
+	 */
+	private void addAndOrSearchClauses(String theSearchParamName, List<List<IQueryParameterType>> theAndOrTerms,
+			BiFunction<String, IQueryParameterType, BooleanPredicateClausesStep<?>> theAddOrClausesFunction) {
+
+		for (List<IQueryParameterType> nextAnd : theAndOrTerms) {
+			BooleanPredicateClausesStep<?> terms = myPredicateFactory.bool();
+			terms.minimumShouldMatchNumber(1);
 
 			for (IQueryParameterType paramType : nextAnd) {
-				BooleanPredicateClausesStep<?> orQuantityTerms = myPredicateFactory.bool();
-				addQuantityOrClauses(theSearchParamName, paramType, orQuantityTerms);
-				quantityTerms.should(orQuantityTerms);
+				BooleanPredicateClausesStep<?> orTerms = theAddOrClausesFunction.apply(theSearchParamName, paramType);
+				terms.should(orTerms);
 			}
 
-			myRootClause.must(quantityTerms);
+			myRootClause.must(terms);
 		}
 	}
 
 
-	private void addQuantityOrClauses(String theSearchParamName,
-			IQueryParameterType theParamType, BooleanPredicateClausesStep<?> theQuantityTerms) {
+	private BooleanPredicateClausesStep<?> addQuantityOrClauses(String theSearchParamName, IQueryParameterType theParamType) {
+		BooleanPredicateClausesStep<?> orQuantityTerms = myPredicateFactory.bool();
 
 		QuantityParam qtyParam = QuantityParam.toQuantityParam(theParamType);
 		ParamPrefixEnum activePrefix = qtyParam.getPrefix() == null ? ParamPrefixEnum.EQUAL : qtyParam.getPrefix();
@@ -508,28 +523,36 @@ public class ExtendedLuceneClauseBuilder {
 			QuantityParam canonicalQty = UcumServiceUtil.toCanonicalQuantityOrNull(qtyParam);
 			if (canonicalQty != null) {
 				String valueFieldPath = fieldPath + "." + QTY_VALUE_NORM;
-				setPrefixedQuantityPredicate(theQuantityTerms, activePrefix, canonicalQty, valueFieldPath);
-				theQuantityTerms.must(myPredicateFactory.match()
+				setPrefixedQuantityPredicate(orQuantityTerms, activePrefix, canonicalQty, valueFieldPath);
+				orQuantityTerms.must(myPredicateFactory.match()
 					.field(fieldPath + "." + QTY_CODE_NORM)
 					.matching(canonicalQty.getUnits()));
-				return;
+				return orQuantityTerms;
 			}
 		}
 
 		// not NORMALIZED_QUANTITY_SEARCH_SUPPORTED or non-canonicalizable parameter
-		String valueFieldPath = fieldPath + "." + QTY_VALUE;
-		setPrefixedQuantityPredicate(theQuantityTerms, activePrefix, qtyParam, valueFieldPath);
+		addQuantityTerms(orQuantityTerms, activePrefix, qtyParam, fieldPath);
+		return orQuantityTerms;
+	}
 
-		if ( isNotBlank(qtyParam.getSystem()) ) {
+
+	private void addQuantityTerms(BooleanPredicateClausesStep<?> theQuantityTerms,
+			ParamPrefixEnum theActivePrefix, QuantityParam theQtyParam, String theFieldPath) {
+
+		String valueFieldPath = theFieldPath + "." + VALUE;
+		setPrefixedQuantityPredicate(theQuantityTerms, theActivePrefix, theQtyParam, valueFieldPath);
+
+		if ( isNotBlank(theQtyParam.getSystem()) ) {
 			theQuantityTerms.must(
 				myPredicateFactory.match()
-					.field(fieldPath + "." + QTY_SYSTEM).matching(qtyParam.getSystem()) );
+					.field(theFieldPath + "." + SYSTEM).matching(theQtyParam.getSystem()) );
 		}
 
-		if ( isNotBlank(qtyParam.getUnits()) ) {
+		if ( isNotBlank(theQtyParam.getUnits()) ) {
 			theQuantityTerms.must(
 				myPredicateFactory.match()
-					.field(fieldPath + "." + QTY_CODE).matching(qtyParam.getUnits()) );
+					.field(theFieldPath + "." + CODE).matching(theQtyParam.getUnits()) );
 		}
 	}
 

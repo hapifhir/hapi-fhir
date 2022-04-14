@@ -33,8 +33,6 @@ import org.slf4j.LoggerFactory;
 import java.math.BigDecimal;
 import java.util.Collection;
 
-import static org.hl7.fhir.r4.model.Observation.SP_VALUE_QUANTITY;
-
 public class HibernateSearchIndexWriter {
 	private static final Logger ourLog = LoggerFactory.getLogger(HibernateSearchIndexWriter.class);
 	public static final String IDX_STRING_NORMALIZED = "norm";
@@ -44,9 +42,9 @@ public class HibernateSearchIndexWriter {
 	public static final String SEARCH_PARAM_ROOT = "sp";
 
 	public static final String QTY_PARAM_NAME = "quantity";
-	public static final String QTY_CODE = "code";
-	public static final String QTY_SYSTEM = "system";
-	public static final String QTY_VALUE = "value";
+	public static final String CODE = "code";
+	public static final String SYSTEM = "system";
+	public static final String VALUE = "value";
 	public static final String QTY_CODE_NORM = "code-norm";
 	public static final String QTY_VALUE_NORM = "value-norm";
 
@@ -127,9 +125,9 @@ public class HibernateSearchIndexWriter {
 			DocumentElement nestedQtyNode = nestedSpNode.addObject(QTY_PARAM_NAME);
 
 			ourLog.trace("Adding Search Param Quantity: {} -- {}", theSearchParam, theValue);
-			nestedQtyNode.addValue(QTY_CODE, theValue.getCode());
-			nestedQtyNode.addValue(QTY_SYSTEM, theValue.getSystem());
-			nestedQtyNode.addValue(QTY_VALUE, theValue.getValue());
+			nestedQtyNode.addValue(CODE, theValue.getCode());
+			nestedQtyNode.addValue(SYSTEM, theValue.getSystem());
+			nestedQtyNode.addValue(VALUE, theValue.getValue());
 
 			if ( ! myModelConfig.getNormalizedQuantitySearchLevel().storageOrSearchSupported()) { return; }
 
