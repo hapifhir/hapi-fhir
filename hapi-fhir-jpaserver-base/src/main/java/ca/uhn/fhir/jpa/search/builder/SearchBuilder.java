@@ -323,18 +323,28 @@ public class SearchBuilder implements ISearchBuilder {
 
 		if (checkUseHibernateSearch()) {
 			// we're going to run at least part of the search against the Fulltext service.
-			ISearchQueryExecutor fulltextMatchIds;
+
+			// Ugh - we have two different return types for now
+			ISearchQueryExecutor fulltextExecutor = null;
+			List<ResourcePersistentId> fulltextMatchIds = null;
+			int resultCount = 0;
 			if (myParams.isLastN()) {
-				fulltextMatchIds = SearchQueryExecutors.from(executeLastNAgainstIndex(theMaximumResults));
+				fulltextMatchIds = executeLastNAgainstIndex(theMaximumResults);
+				resultCount = fulltextMatchIds.size();
 			} else if (myParams.getEverythingMode() != null) {
-				fulltextMatchIds = SearchQueryExecutors.from(queryHibernateSearchForEverythingPids());
+				fulltextMatchIds = queryHibernateSearchForEverythingPids();
+				resultCount = fulltextMatchIds.size();
 			} else {
-				fulltextMatchIds = myFulltextSearchSvc.searchAsync(myResourceName, myParams);
+				fulltextExecutor = myFulltextSearchSvc.searchAsync(myResourceName, myParams);
+			}
+
+			if (fulltextExecutor == null) {
+				fulltextExecutor = SearchQueryExecutors.from(fulltextMatchIds);
 			}
 
 			if (theSearchRuntimeDetails != null) {
 				// wipmb we no longer have full size.
-				theSearchRuntimeDetails.setFoundIndexMatchesCount(0);
+				theSearchRuntimeDetails.setFoundIndexMatchesCount(resultCount);
 				HookParams params = new HookParams()
 					.add(RequestDetails.class, theRequest)
 					.addIfMatchesType(ServletRequestDetails.class, theRequest)
@@ -346,7 +356,7 @@ public class SearchBuilder implements ISearchBuilder {
 			// can we skip the database entirely and return the pid list from here?
 			boolean canSkipDatabase =
 				// if we processed an AND clause, and it returned nothing, then nothing can match.
-				!fulltextMatchIds.hasNext() ||
+				!fulltextExecutor.hasNext() ||
 					// Our hibernate search query doesn't respect partitions yet
 					(!myPartitionSettings.isPartitioningEnabled() &&
 						// we don't support _count=0 yet.
@@ -364,15 +374,15 @@ public class SearchBuilder implements ISearchBuilder {
 
 			if (canSkipDatabase) {
 				if (theMaximumResults != null) {
-					fulltextMatchIds = SearchQueryExecutors.limited(fulltextMatchIds, theMaximumResults);
+					fulltextExecutor = SearchQueryExecutors.limited(fulltextExecutor, theMaximumResults);
 				}
-				queries.add(fulltextMatchIds);
+				queries.add(fulltextExecutor);
 			} else {
 				// Finish the query in the database for the rest of the search parameters, sorting, partitioning, etc.
 				// We break the pids into chunks that fit in the 1k limit for jdbc bind params.
 				// wipmb change chunk to take iterator
 				new QueryChunker<Long>()
-					.chunk(Streams.stream(fulltextMatchIds).collect(Collectors.toList()), t -> doCreateChunkedQueries(theParams, t, theOffset, sort, theCount, theRequest, queries));
+					.chunk(Streams.stream(fulltextExecutor).collect(Collectors.toList()), t -> doCreateChunkedQueries(theParams, t, theOffset, sort, theCount, theRequest, queries));
 			}
 		} else {
 			// do everything in the database.

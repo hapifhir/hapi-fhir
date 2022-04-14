@@ -46,10 +46,12 @@ public interface IFulltextSearchSvc {
 	List<ResourcePersistentId> search(String theResourceName, SearchParameterMap theParams);
 
 	/**
+	 * Query the index for a scrollable iterator of results.
+	 * No max size to the result iterator.
 	 *
 	 * @param theResourceName e.g. Patient
 	 * @param theParams The search query
-	 * @return Iterable of results
+	 * @return Iterator of result PIDs
 	 */
 	ISearchQueryExecutor searchAsync(String theResourceName, SearchParameterMap theParams);
 
