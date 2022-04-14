@@ -363,7 +363,10 @@ public class SearchBuilder implements ISearchBuilder {
 					);
 
 			if (canSkipDatabase) {
-				queries.add(SearchQueryExecutors.limited(fulltextMatchIds, theMaximumResults));
+				if (theMaximumResults != null) {
+					fulltextMatchIds = SearchQueryExecutors.limited(fulltextMatchIds, theMaximumResults);
+				}
+				queries.add(fulltextMatchIds);
 			} else {
 				// Finish the query in the database for the rest of the search parameters, sorting, partitioning, etc.
 				// We break the pids into chunks that fit in the 1k limit for jdbc bind params.
