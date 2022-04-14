@@ -279,6 +279,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 				ourLog.info("CodeSystem {} has a status of {}, going to store concepts in terminology tables", theResourceEntity.getIdDt().getValue(), theCodeSystem.getContentElement().getValueAsString());
 
 				ResourcePersistentId codeSystemResourcePid = new ResourcePersistentId(theCodeSystem.getUserData(RESOURCE_PID_KEY));
+
 				/*
 				 * If this is a not-present codesystem and codesystem version already exists, we don't want to
 				 * overwrite the existing version since that will wipe out the existing concepts. We do create
