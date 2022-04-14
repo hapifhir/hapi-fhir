@@ -143,6 +143,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_MDM).append("=").append(theBulkDataExportOptions.isExpandMdm());
 		}
 
+		// do we really need a stringified request in the db?
 		String request = requestBuilder.toString();
 
 		//If we are using the cache, then attempt to retrieve a matching job based on the Request String, otherwise just make a new one.
@@ -201,6 +202,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 		ourLog.info("Bulk export job submitted: {}", jobEntity.toString());
 
+		// TODO - wire in new steps (kick off batch job)
 		return toSubmittedJobInfo(jobEntity);
 	}
 

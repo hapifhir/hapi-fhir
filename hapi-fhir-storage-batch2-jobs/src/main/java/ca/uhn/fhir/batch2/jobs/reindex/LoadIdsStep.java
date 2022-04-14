@@ -25,6 +25,7 @@ import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.batch2.jobs.models.Id;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IResourceReindexSvc;
 import org.slf4j.Logger;
@@ -60,7 +61,7 @@ public class LoadIdsStep implements IJobStepWorker<ReindexJobParameters, Reindex
 
 		Date nextStart = start;
 		RequestPartitionId requestPartitionId = theStepExecutionDetails.getParameters().getRequestPartitionId();
-		Set<ReindexChunkIds.Id> idBuffer = new LinkedHashSet<>();
+		Set<Id> idBuffer = new LinkedHashSet<>();
 		long previousLastTime = 0L;
 		int totalIdsFound = 0;
 		int chunkCount = 0;
@@ -78,7 +79,7 @@ public class LoadIdsStep implements IJobStepWorker<ReindexJobParameters, Reindex
 			ourLog.info("Found {} IDs from {} to {}", nextChunk.getIds().size(), nextStart, nextChunk.getLastDate());
 
 			for (int i = 0; i < nextChunk.getIds().size(); i++) {
-				ReindexChunkIds.Id nextId = new ReindexChunkIds.Id();
+				Id nextId = new Id();
 				nextId.setResourceType(nextChunk.getResourceTypes().get(i));
 				nextId.setId(nextChunk.getIds().get(i).getId().toString());
 				idBuffer.add(nextId);
@@ -95,8 +96,8 @@ public class LoadIdsStep implements IJobStepWorker<ReindexJobParameters, Reindex
 
 			while (idBuffer.size() >= 1000) {
 
-				List<ReindexChunkIds.Id> submissionIds = new ArrayList<>();
-				for (Iterator<ReindexChunkIds.Id> iter = idBuffer.iterator(); iter.hasNext(); ) {
+				List<Id> submissionIds = new ArrayList<>();
+				for (Iterator<Id> iter = idBuffer.iterator(); iter.hasNext(); ) {
 					submissionIds.add(iter.next());
 					iter.remove();
 					if (submissionIds.size() >= 1000) {
@@ -118,7 +119,7 @@ public class LoadIdsStep implements IJobStepWorker<ReindexJobParameters, Reindex
 		return RunOutcome.SUCCESS;
 	}
 
-	private void submitWorkChunk(Collection<ReindexChunkIds.Id> theIdBuffer, IJobDataSink<ReindexChunkIds> theDataSink) {
+	private void submitWorkChunk(Collection<Id> theIdBuffer, IJobDataSink<ReindexChunkIds> theDataSink) {
 		if (theIdBuffer.isEmpty()) {
 			return;
 		}

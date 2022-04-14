@@ -2,6 +2,7 @@ package ca.uhn.fhir.batch2.jobs.reindex;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.batch2.jobs.models.Id;
 import ca.uhn.fhir.jpa.api.svc.IResourceReindexSvc;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.r4.model.InstantType;
@@ -78,7 +79,7 @@ public class LoadIdsStepTest {
 	private ReindexChunkIds createIdChunk(int theLow, int theHigh) {
 		ReindexChunkIds retVal = new ReindexChunkIds();
 		for (int i = theLow; i < theHigh; i++) {
-			retVal.getIds().add(new ReindexChunkIds.Id().setResourceType("Patient").setId(Integer.toString(i)));
+			retVal.getIds().add(new Id().setResourceType("Patient").setId(Integer.toString(i)));
 		}
 		return retVal;
 	}

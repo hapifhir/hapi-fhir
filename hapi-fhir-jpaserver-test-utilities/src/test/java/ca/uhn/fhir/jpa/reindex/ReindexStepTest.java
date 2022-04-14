@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.reindex;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.batch2.jobs.models.Id;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexChunkIds;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexStep;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
@@ -51,8 +52,8 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		Long id1 = createPatient(withActiveTrue(), withFamily("FLANDERS")).getIdPartAsLong();
 
 		ReindexChunkIds data = new ReindexChunkIds();
-		data.getIds().add(new ReindexChunkIds.Id().setResourceType("Patient").setId(id0.toString()));
-		data.getIds().add(new ReindexChunkIds.Id().setResourceType("Patient").setId(id1.toString()));
+		data.getIds().add(new Id().setResourceType("Patient").setId(id0.toString()));
+		data.getIds().add(new Id().setResourceType("Patient").setId(id1.toString()));
 
 		// Execute
 
@@ -81,8 +82,8 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		Long id1 = createPatient(withActiveTrue(), withFamily("FLANDERS")).getIdPartAsLong();
 
 		ReindexChunkIds data = new ReindexChunkIds();
-		data.getIds().add(new ReindexChunkIds.Id().setResourceType("Patient").setId(id0.toString()));
-		data.getIds().add(new ReindexChunkIds.Id().setResourceType("Patient").setId(id1.toString()));
+		data.getIds().add(new Id().setResourceType("Patient").setId(id0.toString()));
+		data.getIds().add(new Id().setResourceType("Patient").setId(id1.toString()));
 
 		// Execute
 
@@ -109,8 +110,8 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		Long id1 = createPatient(withActiveTrue(), withFamily("FLANDERS")).getIdPartAsLong();
 
 		ReindexChunkIds data = new ReindexChunkIds();
-		data.getIds().add(new ReindexChunkIds.Id().setResourceType("Patient").setId(id0.toString()));
-		data.getIds().add(new ReindexChunkIds.Id().setResourceType("Patient").setId(id1.toString()));
+		data.getIds().add(new Id().setResourceType("Patient").setId(id0.toString()));
+		data.getIds().add(new Id().setResourceType("Patient").setId(id1.toString()));
 
 		runInTransaction(() -> {
 			myResourceIndexedSearchParamStringDao.deleteByResourceId(id0);
@@ -146,8 +147,8 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		Long id1 = createPatient(withActiveTrue(), withFamily("FLANDERS"), withOrganization(orgId)).getIdPartAsLong();
 
 		ReindexChunkIds data = new ReindexChunkIds();
-		data.getIds().add(new ReindexChunkIds.Id().setResourceType("Patient").setId(id0.toString()));
-		data.getIds().add(new ReindexChunkIds.Id().setResourceType("Patient").setId(id1.toString()));
+		data.getIds().add(new Id().setResourceType("Patient").setId(id0.toString()));
+		data.getIds().add(new Id().setResourceType("Patient").setId(id1.toString()));
 
 		SearchParameter sp = new SearchParameter();
 		sp.setType(Enumerations.SearchParamType.STRING);
@@ -209,10 +210,10 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		Long idObservation = createObservation(withSubject(new IdType("Patient/" + idPatientToInvalidate))).getIdPartAsLong();
 
 		ReindexChunkIds data = new ReindexChunkIds();
-		data.getIds().add(new ReindexChunkIds.Id().setResourceType("Patient").setId(id0.toString()));
-		data.getIds().add(new ReindexChunkIds.Id().setResourceType("Patient").setId(id1.toString()));
-		data.getIds().add(new ReindexChunkIds.Id().setResourceType("Patient").setId(idPatientToInvalidate.toString()));
-		data.getIds().add(new ReindexChunkIds.Id().setResourceType("Observation").setId(idObservation.toString()));
+		data.getIds().add(new Id().setResourceType("Patient").setId(id0.toString()));
+		data.getIds().add(new Id().setResourceType("Patient").setId(id1.toString()));
+		data.getIds().add(new Id().setResourceType("Patient").setId(idPatientToInvalidate.toString()));
+		data.getIds().add(new Id().setResourceType("Observation").setId(idObservation.toString()));
 
 		runInTransaction(() -> {
 			// Swap in some invalid text, which will cause an error when we go to reindex

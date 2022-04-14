@@ -113,6 +113,7 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 	public void start() {
 		myTxTemplate = new TransactionTemplate(myTxManager);
 
+		// TODO - remove this scheduled job
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(Job.class.getName());
 		jobDetail.setJobClass(Job.class);
@@ -247,6 +248,7 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 		return retVal;
 	}
 
+	// TODO - processes the bulk export job
 	private void processJob(BulkExportJobEntity theBulkExportJobEntity) {
 		String theJobUuid = theBulkExportJobEntity.getJobId();
 		JobParametersBuilder parameters = new JobParametersBuilder()
