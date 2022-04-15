@@ -18,6 +18,7 @@ import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Enumeration;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.MarkdownType;
 import org.hl7.fhir.r4.model.Medication;
@@ -50,6 +51,10 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -1425,6 +1430,40 @@ public class FhirTerserR4Test {
 		assertEquals("cid:patient@bundle", elems.get(0).getReferenceElement().getValue());
 		assertEquals("cid:device@bundle", elems.get(1).getReferenceElement().getValue());
 	}
+
+	@Test
+	public void testConcurrentTerserCalls() throws ExecutionException, InterruptedException {
+		ExecutorService executor = Executors.newFixedThreadPool(10);
+		try {
+
+			FhirContext ctx = FhirContext.forR4();
+
+			List<Future<?>> futures = new ArrayList<>();
+			for (int i = 0; i < 10; i++) {
+
+				Runnable runnable = () -> {
+
+					Observation observation = new Observation();
+					observation.setSubject(new Reference("Patient/123"));
+					HashSet<String> additionalCompartmentParamNames = new HashSet<>();
+					additionalCompartmentParamNames.add("test");
+					boolean outcome = ctx.newTerser().isSourceInCompartmentForTarget("Patient", observation, new IdType("Patient/123"), additionalCompartmentParamNames);
+					assertTrue(outcome);
+
+				};
+				Future<?> future = executor.submit(runnable);
+				futures.add(future);
+			}
+
+			for (var next : futures) {
+				next.get();
+			}
+
+		}finally {
+			executor.shutdown();
+		}
+	}
+
 
 
 	private List<String> toStrings(List<StringType> theStrings) {

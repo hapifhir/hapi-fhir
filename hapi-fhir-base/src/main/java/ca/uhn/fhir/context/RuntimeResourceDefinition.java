@@ -216,6 +216,12 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 				}
 			}
 		}
+
+		// Make the map of lists completely unmodifiable
+		for (String nextKey : new ArrayList<>(compartmentNameToSearchParams.keySet())) {
+			List<RuntimeSearchParam> nextList = compartmentNameToSearchParams.get(nextKey);
+			compartmentNameToSearchParams.put(nextKey, Collections.unmodifiableList(nextList));
+		}
 		myCompartmentNameToSearchParams = Collections.unmodifiableMap(compartmentNameToSearchParams);
 
 		Class<?> target = getImplementingClass();
