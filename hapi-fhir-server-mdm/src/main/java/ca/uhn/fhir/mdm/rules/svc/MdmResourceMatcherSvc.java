@@ -92,10 +92,9 @@ public class MdmResourceMatcherSvc {
 		MdmMatchResultEnum matchResultEnum = myMdmRulesJson.getMatchResult(matchResult.vector);
 		matchResult.setMatchResultEnum(matchResultEnum);
 		if (ourLog.isDebugEnabled()) {
-			if (matchResult.isMatch() || matchResult.isPossibleMatch()) {
-				ourLog.debug("{} {} with field matchers {}", matchResult, theRightResource.getIdElement().toUnqualifiedVersionless(), myMdmRulesJson.getFieldMatchNamesForVector(matchResult.vector));
-			} else if (ourLog.isTraceEnabled()) {
-				ourLog.trace("{} {}.  Field matcher results: {}", matchResult, theRightResource.getIdElement().toUnqualifiedVersionless(), myMdmRulesJson.getDetailedFieldMatchResultForUnmatchedVector(matchResult.vector));
+				ourLog.debug("{} {}: {}", matchResult.getMatchResultEnum(), theRightResource.getIdElement().toUnqualifiedVersionless(), matchResult);
+			 if (ourLog.isTraceEnabled()) {
+				ourLog.trace("Field matcher results: \n{}", myMdmRulesJson.getDetailedFieldMatchResultWithSuccessInformation(matchResult.vector));
 			}
 		}
 		return matchResult;

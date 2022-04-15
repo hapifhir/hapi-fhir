@@ -158,13 +158,10 @@ public class MdmMatchLinkSvc {
 	}
 
 	private void handleMdmWithSingleCandidate(IAnyResource theResource, MatchedGoldenResourceCandidate theGoldenResourceCandidate, MdmTransactionContext theMdmTransactionContext) {
-		// FIXME Anna PART3: this log should be moved within the if statement to mark that we will be updating. there is a log
-		log(theMdmTransactionContext, "MDM has narrowed down to one candidate for matching.");
-
 		if (theMdmTransactionContext.getRestOperation().equals(MdmTransactionContext.OperationType.UPDATE_RESOURCE)) {
+			log(theMdmTransactionContext, "MDM has narrowed down to one candidate for matching.");
 			myEidUpdateService.handleMdmUpdate(theResource, theGoldenResourceCandidate, theMdmTransactionContext);
 		} else {
-			// FIXME Anna PART3: move the logging from above here and enhance it
 			handleMdmCreate(theResource, theGoldenResourceCandidate, theMdmTransactionContext);
 		}
 	}
