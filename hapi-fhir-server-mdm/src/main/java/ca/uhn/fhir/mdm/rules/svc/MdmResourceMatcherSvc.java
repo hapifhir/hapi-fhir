@@ -94,7 +94,7 @@ public class MdmResourceMatcherSvc {
 		if (ourLog.isDebugEnabled()) {
 				ourLog.debug("{} {}: {}", matchResult.getMatchResultEnum(), theRightResource.getIdElement().toUnqualifiedVersionless(), matchResult);
 			 if (ourLog.isTraceEnabled()) {
-				ourLog.trace("Field matcher results: \n{}", myMdmRulesJson.getDetailedFieldMatchResultWithSuccessInformation(matchResult.vector));
+				ourLog.trace("Field matcher results:\n{}", myMdmRulesJson.getDetailedFieldMatchResultWithSuccessInformation(matchResult.vector));
 			}
 		}
 		return matchResult;
