@@ -35,6 +35,7 @@ import org.springframework.data.domain.PageRequest;
 import javax.annotation.Nonnull;
 import javax.transaction.Transactional;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -182,6 +183,12 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	public List<WorkChunk> fetchWorkChunksWithoutData(String theInstanceId, int thePageSize, int thePageIndex) {
 		List<Batch2WorkChunkEntity> chunks = myWorkChunkRepository.fetchChunks(PageRequest.of(thePageIndex, thePageSize), theInstanceId);
+		return chunks.stream().map(t -> toChunk(t, false)).collect(Collectors.toList());
+	}
+
+	@Override
+	public List<WorkChunk> fetchWorkChunksWithoutData(String theInstanceId, String theStepId, EnumSet<StatusEnum> theStatuses, int thePageSize, int thePageIndex) {
+		List<Batch2WorkChunkEntity> chunks = myWorkChunkRepository.fetchChunks(PageRequest.of(thePageIndex, thePageSize), theInstanceId, theStepId, theStatuses);
 		return chunks.stream().map(t -> toChunk(t, false)).collect(Collectors.toList());
 	}
 

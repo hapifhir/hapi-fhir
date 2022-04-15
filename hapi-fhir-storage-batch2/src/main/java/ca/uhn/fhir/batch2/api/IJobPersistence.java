@@ -22,8 +22,10 @@ package ca.uhn.fhir.batch2.api;
 
 import ca.uhn.fhir.batch2.impl.BatchWorkChunk;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -101,7 +103,7 @@ public interface IJobPersistence {
 	/**
 	 * Increments the work chunk error count by the given amount
 	 *
-	 * @param theChunkId The chunk ID
+	 * @param theChunkId     The chunk ID
 	 * @param theIncrementBy The number to increment the error count by
 	 */
 	void incrementWorkChunkErrorCount(String theChunkId, int theIncrementBy);
@@ -114,6 +116,16 @@ public interface IJobPersistence {
 	 * @param thePageIndex  The page index
 	 */
 	List<WorkChunk> fetchWorkChunksWithoutData(String theInstanceId, int thePageSize, int thePageIndex);
+
+	/**
+	 * Fetches all chunks for a given step within a given instance, without loading the data
+	 *
+	 * @param theInstanceId The instance ID
+	 * @param theStepId     The step ID
+	 * @param thePageSize   The page size
+	 * @param thePageIndex  The page index
+	 */
+	List<WorkChunk> fetchWorkChunksWithoutData(String theInstanceId, String theStepId, EnumSet<StatusEnum> theStatuses, int thePageSize, int thePageIndex);
 
 	/**
 	 * Update the stored instance

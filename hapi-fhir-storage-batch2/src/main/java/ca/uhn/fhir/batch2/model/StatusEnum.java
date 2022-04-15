@@ -20,6 +20,8 @@ package ca.uhn.fhir.batch2.model;
  * #L%
  */
 
+import java.util.EnumSet;
+
 public enum StatusEnum {
 
 	/**
@@ -47,6 +49,17 @@ public enum StatusEnum {
 	 * Task has failed and is known to be unrecoverable. There is no reason to believe that retrying will
 	 * result in a different outcome.
 	 */
-	FAILED
+	FAILED;
+
+	/**
+	 * Statuses that represent a job that has not yet completed. I.e.
+	 * all statuses except {@link #COMPLETED}
+	 */
+	public static final EnumSet<StatusEnum> INCOMPLETE_STATUSES = EnumSet.of(
+		QUEUED,
+		IN_PROGRESS,
+		ERRORED,
+		FAILED
+	);
 
 }

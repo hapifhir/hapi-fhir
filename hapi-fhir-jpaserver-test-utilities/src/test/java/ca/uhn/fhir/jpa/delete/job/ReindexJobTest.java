@@ -10,13 +10,19 @@ import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.core.joran.util.ConfigurationWatchListUtil;
+import ch.qos.logback.core.util.StatusPrinter;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
+import java.net.URL;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -24,6 +30,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ReindexJobTest extends BaseJpaR4Test {
+
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
 

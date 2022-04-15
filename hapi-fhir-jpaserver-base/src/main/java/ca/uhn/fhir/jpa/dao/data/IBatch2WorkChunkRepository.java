@@ -28,6 +28,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -35,6 +36,9 @@ public interface IBatch2WorkChunkRepository extends JpaRepository<Batch2WorkChun
 
 	@Query("SELECT e FROM Batch2WorkChunkEntity e WHERE e.myInstanceId = :instanceId ORDER BY e.mySequence ASC")
 	List<Batch2WorkChunkEntity> fetchChunks(Pageable thePageRequest, @Param("instanceId") String theInstanceId);
+
+	@Query("SELECT e FROM Batch2WorkChunkEntity e WHERE e.myInstanceId = :instanceId AND e.myTargetStepId = :step_id AND e.myStatus IN (:statuses) ORDER BY e.mySequence ASC")
+	List<Batch2WorkChunkEntity> fetchChunks(Pageable thePageRequest, @Param("instanceId") String theInstanceId, @Param("step_id") String theTargetStepId, @Param("statuses") Collection<StatusEnum> theStatuses);
 
 	@Modifying
 	@Query("UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myEndTime = :et, e.myRecordsProcessed = :rp, e.mySerializedData = null WHERE e.myId = :id")

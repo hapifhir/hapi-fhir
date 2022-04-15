@@ -18,8 +18,6 @@ import java.util.Date;
 
 import static ca.uhn.fhir.batch2.impl.JobCoordinatorImplTest.INSTANCE_ID;
 import static ca.uhn.fhir.batch2.impl.JobCoordinatorImplTest.STEP_1;
-import static ca.uhn.fhir.batch2.impl.JobCoordinatorImplTest.STEP_2;
-import static ca.uhn.fhir.batch2.impl.JobCoordinatorImplTest.STEP_3;
 import static ca.uhn.fhir.batch2.impl.JobCoordinatorImplTest.createInstance;
 import static ca.uhn.fhir.batch2.impl.JobCoordinatorImplTest.createWorkChunk;
 import static ca.uhn.fhir.batch2.impl.JobCoordinatorImplTest.createWorkChunkStep1;

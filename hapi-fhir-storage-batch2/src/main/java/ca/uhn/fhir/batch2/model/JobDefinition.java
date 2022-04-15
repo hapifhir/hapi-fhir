@@ -42,11 +42,12 @@ public class JobDefinition<PT extends IModelJson> {
 	private final List<JobDefinitionStep<PT, ?, ?>> mySteps;
 	private final String myJobDescription;
 	private final IJobParametersValidator<PT> myParametersValidator;
+	private final boolean myGatedExecution;
 
 	/**
 	 * Constructor
 	 */
-	private JobDefinition(String theJobDefinitionId, int theJobDefinitionVersion, String theJobDescription, Class<PT> theParametersType, List<JobDefinitionStep<PT, ?, ?>> theSteps, IJobParametersValidator<PT> theParametersValidator) {
+	private JobDefinition(String theJobDefinitionId, int theJobDefinitionVersion, String theJobDescription, Class<PT> theParametersType, List<JobDefinitionStep<PT, ?, ?>> theSteps, IJobParametersValidator<PT> theParametersValidator, boolean theGatedExecution) {
 		Validate.isTrue(theJobDefinitionId.length() <= ID_MAX_LENGTH, "Maximum ID length is %d", ID_MAX_LENGTH);
 		Validate.notBlank(theJobDefinitionId, "No job definition ID supplied");
 		Validate.notBlank(theJobDescription, "No job description supplied");
@@ -58,6 +59,7 @@ public class JobDefinition<PT extends IModelJson> {
 		mySteps = theSteps;
 		myParametersType = theParametersType;
 		myParametersValidator = theParametersValidator;
+		myGatedExecution = theGatedExecution;
 	}
 
 	@Nullable
@@ -97,6 +99,10 @@ public class JobDefinition<PT extends IModelJson> {
 		return mySteps;
 	}
 
+	public boolean isGatedExecution() {
+		return myGatedExecution;
+	}
+
 	public static Builder<IModelJson, VoidModel> newBuilder() {
 		return new Builder<>();
 	}
@@ -111,12 +117,13 @@ public class JobDefinition<PT extends IModelJson> {
 		private Class<NIT> myNextInputType;
 		@Nullable
 		private IJobParametersValidator<PT> myParametersValidator;
+		private boolean myGatedExecution;
 
 		Builder() {
 			mySteps = new ArrayList<>();
 		}
 
-		Builder(List<JobDefinitionStep<PT, ?, ?>> theSteps, String theJobDefinitionId, int theJobDefinitionVersion, String theJobDescription, Class<PT> theJobParametersType, Class<NIT> theNextInputType, IJobParametersValidator<PT> theParametersValidator) {
+		Builder(List<JobDefinitionStep<PT, ?, ?>> theSteps, String theJobDefinitionId, int theJobDefinitionVersion, String theJobDescription, Class<PT> theJobParametersType, Class<NIT> theNextInputType, IJobParametersValidator<PT> theParametersValidator, boolean theGatedExecution) {
 			mySteps = theSteps;
 			myJobDefinitionId = theJobDefinitionId;
 			myJobDefinitionVersion = theJobDefinitionVersion;
@@ -124,6 +131,7 @@ public class JobDefinition<PT extends IModelJson> {
 			myJobParametersType = theJobParametersType;
 			myNextInputType = theNextInputType;
 			myParametersValidator = theParametersValidator;
+			myGatedExecution = theGatedExecution;
 		}
 
 		/**
@@ -154,7 +162,7 @@ public class JobDefinition<PT extends IModelJson> {
 		 */
 		public <OT extends IModelJson> Builder<PT, OT> addFirstStep(String theStepId, String theStepDescription, Class<OT> theOutputType, IJobStepWorker<PT, VoidModel, OT> theStepWorker) {
 			mySteps.add(new JobDefinitionStep<>(theStepId, theStepDescription, theStepWorker, VoidModel.class, theOutputType));
-			return new Builder<>(mySteps, myJobDefinitionId, myJobDefinitionVersion, myJobDescription, myJobParametersType, theOutputType, myParametersValidator);
+			return new Builder<>(mySteps, myJobDefinitionId, myJobDefinitionVersion, myJobDescription, myJobParametersType, theOutputType, myParametersValidator, myGatedExecution);
 		}
 
 		/**
@@ -168,7 +176,7 @@ public class JobDefinition<PT extends IModelJson> {
 		 */
 		public <OT extends IModelJson> Builder<PT, OT> addIntermediateStep(String theStepId, String theStepDescription, Class<OT> theOutputType, IJobStepWorker<PT, NIT, OT> theStepWorker) {
 			mySteps.add(new JobDefinitionStep<>(theStepId, theStepDescription, theStepWorker, myNextInputType, theOutputType));
-			return new Builder<>(mySteps, myJobDefinitionId, myJobDefinitionVersion, myJobDescription, myJobParametersType, theOutputType, myParametersValidator);
+			return new Builder<>(mySteps, myJobDefinitionId, myJobDefinitionVersion, myJobDescription, myJobParametersType, theOutputType, myParametersValidator, myGatedExecution);
 		}
 
 		/**
@@ -182,12 +190,12 @@ public class JobDefinition<PT extends IModelJson> {
 		 */
 		public Builder<PT, VoidModel> addLastStep(String theStepId, String theStepDescription, IJobStepWorker<PT, NIT, VoidModel> theStepWorker) {
 			mySteps.add(new JobDefinitionStep<>(theStepId, theStepDescription, theStepWorker, myNextInputType, VoidModel.class));
-			return new Builder<>(mySteps, myJobDefinitionId, myJobDefinitionVersion, myJobDescription, myJobParametersType, VoidModel.class, myParametersValidator);
+			return new Builder<>(mySteps, myJobDefinitionId, myJobDefinitionVersion, myJobDescription, myJobParametersType, VoidModel.class, myParametersValidator, myGatedExecution);
 		}
 
 		public JobDefinition<PT> build() {
 			Validate.notNull(myJobParametersType, "No job parameters type was supplied");
-			return new JobDefinition<>(myJobDefinitionId, myJobDefinitionVersion, myJobDescription, myJobParametersType, Collections.unmodifiableList(mySteps), myParametersValidator);
+			return new JobDefinition<>(myJobDefinitionId, myJobDefinitionVersion, myJobDescription, myJobParametersType, Collections.unmodifiableList(mySteps), myParametersValidator, myGatedExecution);
 		}
 
 		public Builder<PT, NIT> setJobDescription(String theJobDescription) {
@@ -233,11 +241,22 @@ public class JobDefinition<PT extends IModelJson> {
 		 * @param theParametersValidator The validator (must not be null. Do not call this method at all if you do not want a parameters validator).
 		 */
 		@SuppressWarnings("unchecked")
-		public <NPT extends IModelJson> Builder<PT, NIT> setParametersValidator(@Nonnull IJobParametersValidator<PT> theParametersValidator) {
+		public Builder<PT, NIT> setParametersValidator(@Nonnull IJobParametersValidator<PT> theParametersValidator) {
 			Validate.notNull(theParametersValidator, "theParametersValidator must not be null");
 			Validate.isTrue(myParametersValidator == null, "Can not supply multiple parameters validators. Already have: %s", myParametersValidator);
 			myParametersValidator = theParametersValidator;
-			return (Builder<PT, NIT>) this;
+			return this;
+		}
+
+		/**
+		 * If this is set, the framework will wait for all work chunks to be
+		 * processed for an individual step before moving on to beginning
+		 * processing on the next step. Otherwise, processing on subsequent
+		 * steps may begin as soon as any data has been produced.
+		 */
+		public Builder<PT, NIT> gatedExecution() {
+			myGatedExecution = true;
+			return this;
 		}
 	}
 

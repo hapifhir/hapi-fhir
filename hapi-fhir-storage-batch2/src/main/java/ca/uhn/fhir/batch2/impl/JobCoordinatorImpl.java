@@ -62,6 +62,7 @@ import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 import java.lang.reflect.Field;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -195,7 +196,7 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 		return retVal;
 	}
 
-	private <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> boolean executeStep(@Nonnull WorkChunk theWorkChunk, String jobDefinitionId, String targetStepId, Class<IT> theInputType, PT parameters, IJobStepWorker<PT, IT, OT> worker, BaseDataSink<OT> dataSink) {
+	private <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> boolean executeStep(@Nonnull WorkChunk theWorkChunk, String theJobDefinitionId, String theTargetStepId, Class<IT> theInputType, PT theParameters, IJobStepWorker<PT, IT, OT> theWorker, BaseDataSink<OT> theDataSink) {
 		IT data = null;
 		if (!theInputType.equals(VoidModel.class)) {
 			data = theWorkChunk.getData(theInputType);
@@ -204,21 +205,21 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 		String instanceId = theWorkChunk.getInstanceId();
 		String chunkId = theWorkChunk.getId();
 
-		StepExecutionDetails<PT, IT> stepExecutionDetails = new StepExecutionDetails<>(parameters, data, instanceId, chunkId);
+		StepExecutionDetails<PT, IT> stepExecutionDetails = new StepExecutionDetails<>(theParameters, data, instanceId, chunkId);
 		RunOutcome outcome;
 		try {
-			outcome = worker.run(stepExecutionDetails, dataSink);
-			Validate.notNull(outcome, "Step worker returned null: %s", worker.getClass());
+			outcome = theWorker.run(stepExecutionDetails, theDataSink);
+			Validate.notNull(outcome, "Step theWorker returned null: %s", theWorker.getClass());
 		} catch (JobExecutionFailedException e) {
-			ourLog.error("Unrecoverable failure executing job {} step {}", jobDefinitionId, targetStepId, e);
+			ourLog.error("Unrecoverable failure executing job {} step {}", theJobDefinitionId, theTargetStepId, e);
 			myJobPersistence.markWorkChunkAsFailed(chunkId, e.toString());
 			return false;
 		} catch (Exception e) {
-			ourLog.error("Failure executing job {} step {}", jobDefinitionId, targetStepId, e);
+			ourLog.error("Failure executing job {} step {}", theJobDefinitionId, theTargetStepId, e);
 			myJobPersistence.markWorkChunkAsErroredAndIncrementErrorCount(chunkId, e.toString());
 			throw new JobExecutionFailedException(Msg.code(2041) + e.getMessage(), e);
 		} catch (Throwable t) {
-			ourLog.error("Unexpected failure executing job {} step {}", jobDefinitionId, targetStepId, t);
+			ourLog.error("Unexpected failure executing job {} step {}", theJobDefinitionId, theTargetStepId, t);
 			myJobPersistence.markWorkChunkAsFailed(chunkId, t.toString());
 			return false;
 		}
@@ -226,7 +227,7 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 		int recordsProcessed = outcome.getRecordsProcessed();
 		myJobPersistence.markWorkChunkAsCompletedAndClearData(chunkId, recordsProcessed);
 
-		int recoveredErrorCount = dataSink.getRecoveredErrorCount();
+		int recoveredErrorCount = theDataSink.getRecoveredErrorCount();
 		if (recoveredErrorCount > 0) {
 			myJobPersistence.incrementWorkChunkErrorCount(chunkId, recoveredErrorCount);
 		}
@@ -296,30 +297,49 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 			return;
 		}
 
-		executeStep(chunk, jobDefinitionId, jobDefinitionVersion, definition, targetStep, nextStep, targetStepId, firstStep, instance, instanceId);
+		executeStep(chunk, jobDefinitionId, jobDefinitionVersion, definition, targetStep, nextStep, targetStepId, firstStep, instance);
 	}
 
 	@SuppressWarnings("unchecked")
-	private <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> void executeStep(WorkChunk chunk, String jobDefinitionId, int jobDefinitionVersion, JobDefinition<PT> definition, JobDefinitionStep<PT, IT, OT> theStep, JobDefinitionStep<PT, OT, ?> theSubsequentStep, String targetStepId, boolean firstStep, JobInstance instance, String instanceId) {
-		PT parameters = (PT) instance.getParameters(definition.getParametersType());
+	private <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> void executeStep(WorkChunk theWorkChunk, String theJobDefinitionId, int theJobDefinitionVersion, JobDefinition<PT> theDefinition, JobDefinitionStep<PT, IT, OT> theStep, JobDefinitionStep<PT, OT, ?> theSubsequentStep, String theTargetStepId, boolean theFirstStep, JobInstance theInstance) {
+		String instanceId = theInstance.getInstanceId();
+		PT parameters = theInstance.getParameters(theDefinition.getParametersType());
 		IJobStepWorker<PT, IT, OT> worker = theStep.getJobStepWorker();
 
 		BaseDataSink<OT> dataSink;
-		if (theSubsequentStep != null) {
-			dataSink = new JobDataSink<>(myBatchJobSender, myJobPersistence, jobDefinitionId, jobDefinitionVersion, theSubsequentStep, instanceId, theStep.getStepId());
+		boolean finalStep = theSubsequentStep == null;
+		if (!finalStep) {
+			dataSink = new JobDataSink<>(myBatchJobSender, myJobPersistence, theJobDefinitionId, theJobDefinitionVersion, theSubsequentStep, instanceId, theStep.getStepId(), theDefinition.isGatedExecution());
 		} else {
-			dataSink = (BaseDataSink<OT>) new FinalStepDataSink(jobDefinitionId, instanceId, theStep.getStepId());
+			dataSink = (BaseDataSink<OT>) new FinalStepDataSink(theJobDefinitionId, instanceId, theStep.getStepId());
 		}
 
 		Class<IT> inputType = theStep.getInputType();
-		boolean success = executeStep(chunk, jobDefinitionId, targetStepId, inputType, parameters, worker, dataSink);
+		boolean success = executeStep(theWorkChunk, theJobDefinitionId, theTargetStepId, inputType, parameters, worker, dataSink);
 		if (!success) {
 			return;
 		}
 
+		if (theDefinition.isGatedExecution() && !finalStep) {
+			List<WorkChunk> incompleteChunks = myJobPersistence.fetchWorkChunksWithoutData(instanceId, theStep.getStepId(), StatusEnum.INCOMPLETE_STATUSES, 1, 0);
+			if (incompleteChunks.isEmpty()) {
+				ourLog.info("All processing is complete for gated execution of instance {} step {}", instanceId, theStep.getStepId());
+				for (int i = 0; ; i++) {
+					List<WorkChunk> chunksForNextStep = myJobPersistence.fetchWorkChunksWithoutData(instanceId, theSubsequentStep.getStepId(), EnumSet.of(StatusEnum.QUEUED), 100, i);
+					if (chunksForNextStep.isEmpty()) {
+						break;
+					}
+					for (WorkChunk nextChunk : chunksForNextStep) {
+						JobWorkNotification workNotification = new JobWorkNotification(theJobDefinitionId, theJobDefinitionVersion, instanceId, theSubsequentStep.getStepId(), nextChunk.getId());
+						myBatchJobSender.sendWorkChannelMessage(workNotification);
+					}
+				}
+			}
+		}
+
 		int workChunkCount = dataSink.getWorkChunkCount();
-		if (firstStep && workChunkCount == 0) {
-			ourLog.info("First step of job instance {} produced no work chunks, marking as completed", instanceId);
+		if (theFirstStep && workChunkCount == 0) {
+			ourLog.info("First step of job theInstance {} produced no work chunks, marking as completed", instanceId);
 			myJobPersistence.markInstanceAsCompleted(instanceId);
 		}
 	}
