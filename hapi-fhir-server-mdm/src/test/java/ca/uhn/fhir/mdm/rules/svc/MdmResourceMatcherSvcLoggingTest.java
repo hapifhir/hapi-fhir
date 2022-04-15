@@ -68,8 +68,8 @@ public class MdmResourceMatcherSvcLoggingTest extends BaseMdmRulesR4Test {
 		MdmMatchOutcome result = myMdmResourceMatcherSvc.match(myJohn, someoneElse);
 		assertNotNull(result);
 
-		assertTrue(memoryAppender.contains("Field matcher results: patient-given: NO\n" +
-			"patient-last: YES", Level.TRACE));
+		assertTrue(memoryAppender.contains("NO_MATCH Patient/", Level.DEBUG));
+		assertTrue(memoryAppender.contains("Field matcher results:\npatient-given: NO\npatient-last: YES", Level.TRACE));
 	}
 
 	protected Patient buildSomeoneElse() {
