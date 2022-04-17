@@ -59,7 +59,7 @@ public class JobDefinition<PT extends IModelJson> {
 		myJobDefinitionVersion = theJobDefinitionVersion;
 		myJobDescription = theJobDescription;
 		mySteps = theSteps;
-		myStepIds = mySteps.stream().map(t->t.getStepId()).collect(Collectors.toList());
+		myStepIds = mySteps.stream().map(t -> t.getStepId()).collect(Collectors.toList());
 		myParametersType = theParametersType;
 		myParametersValidator = theParametersValidator;
 		myGatedExecution = theGatedExecution;
@@ -266,6 +266,26 @@ public class JobDefinition<PT extends IModelJson> {
 		 * processed for an individual step before moving on to beginning
 		 * processing on the next step. Otherwise, processing on subsequent
 		 * steps may begin as soon as any data has been produced.
+		 * <p>
+		 * This is useful in a few cases:
+		 * <ul>
+		 *    <li>
+		 *       If there are potential constraint issues, e.g. data being
+		 *    	written by the third step depends on all data from the
+		 *    	second step already being written
+		 *    </li>
+		 *    <li>
+		 *       If multiple steps require expensive database queries, it may
+		 *       reduce the chances of timeouts to ensure that they are run
+		 *       discretely.
+		 *    </li>
+		 * </ul>
+		 * </p>
+		 * <p>
+		 * Setting this mode means the job may take longer, since it will
+		 * rely on a polling mechanism to determine that one step is
+		 * complete before beginning any processing for the next step.
+		 * </p>
 		 */
 		public Builder<PT, NIT> gatedExecution() {
 			myGatedExecution = true;
