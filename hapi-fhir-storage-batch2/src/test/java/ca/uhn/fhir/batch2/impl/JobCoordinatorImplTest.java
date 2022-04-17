@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.messaging.MessageDeliveryException;
 
 import javax.annotation.Nonnull;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -160,7 +159,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		assertEquals(PASSWORD_VALUE, params.getPassword());
 
 		verify(myJobInstancePersister, times(1)).markWorkChunkAsCompletedAndClearData(any(), eq(50));
-		verify(myJobInstancePersister, times(0)).fetchWorkChunksWithoutData(any(), any(), any(), anyInt(), anyInt());
+		verify(myJobInstancePersister, times(0)).fetchWorkChunksWithoutData(any(), anyInt(), anyInt());
 		verify(myBatchJobSender, times(2)).sendWorkChannelMessage(any());
 	}
 

@@ -91,11 +91,6 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	}
 
 	@Override
-	public synchronized List<WorkChunk> fetchWorkChunksWithoutData(String theInstanceId, String theStepId, EnumSet<StatusEnum> theStatuses, int thePageSize, int thePageIndex) {
-		return myWrap.fetchWorkChunksWithoutData(theInstanceId, theStepId, theStatuses, thePageSize, thePageIndex);
-	}
-
-	@Override
 	public synchronized List<WorkChunk> fetchWorkChunksWithoutData(String theInstanceId, int thePageSize, int thePageIndex) {
 		return myWrap.fetchWorkChunksWithoutData(theInstanceId, thePageSize, thePageIndex);
 	}

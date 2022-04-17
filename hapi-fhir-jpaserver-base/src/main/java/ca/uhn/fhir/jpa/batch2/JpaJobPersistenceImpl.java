@@ -189,12 +189,6 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	public List<WorkChunk> fetchWorkChunksWithoutData(String theInstanceId, String theStepId, EnumSet<StatusEnum> theStatuses, int thePageSize, int thePageIndex) {
-		List<Batch2WorkChunkEntity> chunks = myWorkChunkRepository.fetchChunks(PageRequest.of(thePageIndex, thePageSize), theInstanceId, theStepId, theStatuses);
-		return chunks.stream().map(t -> toChunk(t, false)).collect(Collectors.toList());
-	}
-
-	@Override
 	public void updateInstance(JobInstance theInstance) {
 		Optional<Batch2JobInstanceEntity> instanceOpt = myJobInstanceRepository.findById(theInstance.getInstanceId());
 		Batch2JobInstanceEntity instance = instanceOpt.orElseThrow(() -> new IllegalArgumentException("Unknown instance ID: " + theInstance.getInstanceId()));

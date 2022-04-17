@@ -142,12 +142,7 @@ public class JobCleanerServiceImplTest extends BaseBatch2Test {
 	public void testInProgress_GatedExecution_FirstStepComplete() {
 		// Setup
 		myJobDefinitionRegistry.addJobDefinition(createJobDefinition(t->t.gatedExecution()));
-		when(myJobPersistence.fetchWorkChunksWithoutData(eq(INSTANCE_ID), anyInt(), eq(0))).thenReturn(Lists.newArrayList(
-			createWorkChunkStep2().setStatus(StatusEnum.QUEUED).setId(CHUNK_ID),
-			createWorkChunkStep2().setStatus(StatusEnum.QUEUED).setId(CHUNK_ID_2)
-		));
-		when(myJobPersistence.fetchWorkChunksWithoutData(eq(INSTANCE_ID), eq(STEP_1), eq(StatusEnum.INCOMPLETE_STATUSES), eq(1), eq(0))).thenReturn(Lists.newArrayList());
-		when(myJobPersistence.fetchWorkChunksWithoutData(eq(INSTANCE_ID), eq(STEP_2), eq(EnumSet.of(StatusEnum.QUEUED)), eq(100), eq(0))).thenReturn(Lists.newArrayList(
+		when(myJobPersistence.fetchWorkChunksWithoutData(eq(INSTANCE_ID), eq(100), eq(0))).thenReturn(Lists.newArrayList(
 			createWorkChunkStep2().setStatus(StatusEnum.QUEUED).setId(CHUNK_ID),
 			createWorkChunkStep2().setStatus(StatusEnum.QUEUED).setId(CHUNK_ID_2)
 		));
