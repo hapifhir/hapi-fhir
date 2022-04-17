@@ -31,6 +31,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class JobDefinition<PT extends IModelJson> {
 
@@ -43,6 +44,7 @@ public class JobDefinition<PT extends IModelJson> {
 	private final String myJobDescription;
 	private final IJobParametersValidator<PT> myParametersValidator;
 	private final boolean myGatedExecution;
+	private final List<String> myStepIds;
 
 	/**
 	 * Constructor
@@ -57,6 +59,7 @@ public class JobDefinition<PT extends IModelJson> {
 		myJobDefinitionVersion = theJobDefinitionVersion;
 		myJobDescription = theJobDescription;
 		mySteps = theSteps;
+		myStepIds = mySteps.stream().map(t->t.getStepId()).collect(Collectors.toList());
 		myParametersType = theParametersType;
 		myParametersValidator = theParametersValidator;
 		myGatedExecution = theGatedExecution;
@@ -101,6 +104,16 @@ public class JobDefinition<PT extends IModelJson> {
 
 	public boolean isGatedExecution() {
 		return myGatedExecution;
+	}
+
+	public int getStepIndex(String theStepId) {
+		int retVal = myStepIds.indexOf(theStepId);
+		Validate.isTrue(retVal != -1);
+		return retVal;
+	}
+
+	public boolean isLastStep(String theStepId) {
+		return getStepIndex(theStepId) == (myStepIds.size() - 1);
 	}
 
 	public static Builder<IModelJson, VoidModel> newBuilder() {

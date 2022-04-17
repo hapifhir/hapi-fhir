@@ -3,7 +3,6 @@ package ca.uhn.fhir.batch2.impl;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
-import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
@@ -36,7 +35,6 @@ import javax.annotation.Nonnull;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -51,22 +49,8 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @TestMethodOrder(MethodOrderer.MethodName.class)
-public class JobCoordinatorImplTest {
+public class JobCoordinatorImplTest extends BaseBatch2Test {
 
-	public static final String JOB_DEFINITION_ID = "JOB_DEFINITION_ID";
-	public static final String PARAM_1_VALUE = "PARAM 1 VALUE";
-	public static final String PARAM_2_VALUE = "PARAM 2 VALUE";
-	public static final String PASSWORD_VALUE = "PASSWORD VALUE";
-	public static final String STEP_1 = "STEP_1";
-	public static final String STEP_2 = "STEP_2";
-	public static final String STEP_3 = "STEP_3";
-	public static final String INSTANCE_ID = "INSTANCE-ID";
-	public static final String CHUNK_ID = "CHUNK-ID";
-	public static final String CHUNK_ID_2 = "CHUNK-ID-2";
-	public static final String DATA_1_VALUE = "data 1 value";
-	public static final String DATA_2_VALUE = "data 2 value";
-	public static final String DATA_3_VALUE = "data 3 value";
-	public static final String DATA_4_VALUE = "data 4 value";
 	private static final Logger ourLog = LoggerFactory.getLogger(JobCoordinatorImplTest.class);
 	private final IChannelReceiver myWorkChannelReceiver = LinkedBlockingChannel.newSynchronous("receiver");
 	private JobCoordinatorImpl mySvc;
@@ -76,12 +60,6 @@ public class JobCoordinatorImplTest {
 	private IJobPersistence myJobInstancePersister;
 	@Mock
 	private JobDefinitionRegistry myJobDefinitionRegistry;
-	@Mock
-	private IJobStepWorker<TestJobParameters, VoidModel, TestJobStep2InputType> myStep1Worker;
-	@Mock
-	private IJobStepWorker<TestJobParameters, TestJobStep2InputType, TestJobStep3InputType> myStep2Worker;
-	@Mock
-	private IJobStepWorker<TestJobParameters, TestJobStep3InputType, VoidModel> myStep3Worker;
 	@Captor
 	private ArgumentCaptor<StepExecutionDetails<TestJobParameters, VoidModel>> myStep1ExecutionDetailsCaptor;
 	@Captor
@@ -117,7 +95,7 @@ public class JobCoordinatorImplTest {
 
 		// Setup
 
-		JobDefinition definition = createJobDefinition();
+		JobDefinition<?> definition = createJobDefinition();
 		JobInstance instance = createInstance();
 
 		when(myJobDefinitionRegistry.getJobDefinition(eq(JOB_DEFINITION_ID), eq(1))).thenReturn(Optional.of(definition));
@@ -182,7 +160,7 @@ public class JobCoordinatorImplTest {
 		assertEquals(PASSWORD_VALUE, params.getPassword());
 
 		verify(myJobInstancePersister, times(1)).markWorkChunkAsCompletedAndClearData(any(), eq(50));
-		verify(myJobInstancePersister, times(0)).fetchWorkChunksWithoutData(any(), any(),any(), anyInt(), anyInt());
+		verify(myJobInstancePersister, times(0)).fetchWorkChunksWithoutData(any(), any(), any(), anyInt(), anyInt());
 		verify(myBatchJobSender, times(2)).sendWorkChannelMessage(any());
 	}
 
@@ -233,12 +211,6 @@ public class JobCoordinatorImplTest {
 			sink.accept(new TestJobStep2InputType("data value 1b", "data value 2b"));
 			return new RunOutcome(50);
 		});
-		when(myJobInstancePersister.fetchWorkChunksWithoutData(eq(INSTANCE_ID), eq(STEP_1), eq(StatusEnum.INCOMPLETE_STATUSES), anyInt(), anyInt())).thenReturn(Lists.newArrayList());
-		when(myJobInstancePersister.fetchWorkChunksWithoutData(eq(INSTANCE_ID), eq(STEP_2), eq(EnumSet.of(StatusEnum.QUEUED)), eq(100), eq(0))).thenReturn(Lists.newArrayList(
-			createWorkChunkStep2().setStatus(StatusEnum.QUEUED).setId(CHUNK_ID),
-			createWorkChunkStep2().setStatus(StatusEnum.QUEUED).setId(CHUNK_ID_2)
-		));
-		when(myJobInstancePersister.fetchWorkChunksWithoutData(eq(INSTANCE_ID), eq(STEP_2), eq(EnumSet.of(StatusEnum.QUEUED)), eq(100), eq(1))).thenReturn(Lists.newArrayList());
 		mySvc.start();
 
 		// Execute
@@ -254,7 +226,7 @@ public class JobCoordinatorImplTest {
 		assertEquals(PASSWORD_VALUE, params.getPassword());
 
 		verify(myJobInstancePersister, times(1)).markWorkChunkAsCompletedAndClearData(any(), eq(50));
-		verify(myBatchJobSender, times(2)).sendWorkChannelMessage(any());
+		verify(myBatchJobSender, times(0)).sendWorkChannelMessage(any());
 	}
 
 	@Test
@@ -551,49 +523,15 @@ public class JobCoordinatorImplTest {
 		}
 	}
 
-	@SafeVarargs
-	private JobDefinition<TestJobParameters> createJobDefinition(Consumer<JobDefinition.Builder<TestJobParameters, ?>>... theModifiers) {
-		JobDefinition.Builder<TestJobParameters, VoidModel> builder = JobDefinition
-			.newBuilder()
-			.setJobDefinitionId(JOB_DEFINITION_ID)
-			.setJobDescription("This is a job description")
-			.setJobDefinitionVersion(1)
-			.setParametersType(TestJobParameters.class)
-			.addFirstStep(STEP_1, "Step 1", TestJobStep2InputType.class, myStep1Worker)
-			.addIntermediateStep(STEP_2, "Step 2", TestJobStep3InputType.class, myStep2Worker)
-			.addLastStep(STEP_3, "Step 3", myStep3Worker);
-
-		for (Consumer<JobDefinition.Builder<TestJobParameters, ?>> next : theModifiers) {
-			next.accept(builder);
-		}
-
-		return builder.build();
-	}
-
 	@Nonnull
 	private JobWorkNotification createWorkNotification(String theStepId) {
 		JobWorkNotification payload = new JobWorkNotification();
 		payload.setJobDefinitionId(JOB_DEFINITION_ID);
 		payload.setJobDefinitionVersion(1);
 		payload.setInstanceId(INSTANCE_ID);
-		payload.setChunkId(JobCoordinatorImplTest.CHUNK_ID);
+		payload.setChunkId(BaseBatch2Test.CHUNK_ID);
 		payload.setTargetStepId(theStepId);
 		return payload;
-	}
-
-	@Nonnull
-	static JobInstance createInstance() {
-		JobInstance instance = new JobInstance();
-		instance.setInstanceId(INSTANCE_ID);
-		instance.setStatus(StatusEnum.IN_PROGRESS);
-		instance.setJobDefinitionId(JOB_DEFINITION_ID);
-		instance.setJobDefinitionVersion(1);
-		instance.setParameters(new TestJobParameters()
-			.setParam1(PARAM_1_VALUE)
-			.setParam2(PARAM_2_VALUE)
-			.setPassword(PASSWORD_VALUE)
-		);
-		return instance;
 	}
 
 	@Nonnull

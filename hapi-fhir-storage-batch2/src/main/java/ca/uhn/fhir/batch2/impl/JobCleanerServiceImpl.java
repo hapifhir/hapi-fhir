@@ -22,7 +22,9 @@ package ca.uhn.fhir.batch2.impl;
 
 import ca.uhn.fhir.batch2.api.IJobCleanerService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
@@ -38,10 +40,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * This class performs regular polls of the stored jobs in order to
@@ -62,16 +67,22 @@ public class JobCleanerServiceImpl extends BaseJobService implements IJobCleaner
 	public static final long PURGE_THRESHOLD = 7L * DateUtils.MILLIS_PER_DAY;
 	private static final Logger ourLog = LoggerFactory.getLogger(JobCleanerServiceImpl.class);
 	private final ISchedulerService mySchedulerService;
+	private final JobDefinitionRegistry myJobDefinitionRegistry;
+	private final BatchJobSender myBatchJobSender;
 
 
 	/**
 	 * Constructor
 	 */
-	public JobCleanerServiceImpl(ISchedulerService theSchedulerService, IJobPersistence theJobPersistence) {
+	public JobCleanerServiceImpl(ISchedulerService theSchedulerService, IJobPersistence theJobPersistence, JobDefinitionRegistry theJobDefinitionRegistry, BatchJobSender theBatchJobSender) {
 		super(theJobPersistence);
 		Validate.notNull(theSchedulerService);
+		Validate.notNull(theJobDefinitionRegistry);
+		Validate.notNull(theBatchJobSender);
 
 		mySchedulerService = theSchedulerService;
+		myJobDefinitionRegistry = theJobDefinitionRegistry;
+		myBatchJobSender = theBatchJobSender;
 	}
 
 	@PostConstruct
@@ -83,7 +94,7 @@ public class JobCleanerServiceImpl extends BaseJobService implements IJobCleaner
 	}
 
 	@Override
-	public void runCleanupPass() {
+	public void runMaintenancePass() {
 
 		// NB: If you add any new logic, update the class javadoc
 
@@ -94,6 +105,7 @@ public class JobCleanerServiceImpl extends BaseJobService implements IJobCleaner
 			for (JobInstance instance : instances) {
 				if (processedInstanceIds.add(instance.getInstanceId())) {
 					cleanupInstance(instance);
+					triggerGatedExecutions(instance);
 				}
 			}
 
@@ -255,6 +267,53 @@ public class JobCleanerServiceImpl extends BaseJobService implements IJobCleaner
 		return false;
 	}
 
+	private void triggerGatedExecutions(JobInstance theInstance) {
+		if (theInstance.getStatus() != StatusEnum.IN_PROGRESS || theInstance.isCancelled()) {
+			return;
+		}
+
+		String jobDefinitionId = theInstance.getJobDefinitionId();
+		int jobDefinitionVersion = theInstance.getJobDefinitionVersion();
+		String instanceId = theInstance.getInstanceId();
+
+		JobDefinition<?> definition = myJobDefinitionRegistry.getJobDefinition(jobDefinitionId, jobDefinitionVersion).orElseThrow(() -> new IllegalStateException("Unknown job definition: " + jobDefinitionId + " " + jobDefinitionVersion));
+		if (!definition.isGatedExecution()) {
+			return;
+		}
+
+		String currentStepId = theInstance.getCurrentGatedStepId();
+		if (isBlank(currentStepId)) {
+			return;
+		}
+
+		if (definition.isLastStep(currentStepId)) {
+			return;
+		}
+
+		List<WorkChunk> incompleteChunks = myJobPersistence.fetchWorkChunksWithoutData(instanceId, currentStepId, StatusEnum.INCOMPLETE_STATUSES, 1, 0);
+		if (incompleteChunks.isEmpty()) {
+
+			int currentStepIndex = definition.getStepIndex(currentStepId);
+			String nextStepId = definition.getSteps().get(currentStepIndex + 1).getStepId();
+
+			ourLog.info("All processing is complete for gated execution of instance {} step {}. Proceeding to step {}", instanceId, currentStepId, nextStepId);
+			for (int i = 0; ; i++) {
+				List<WorkChunk> chunksForNextStep = myJobPersistence.fetchWorkChunksWithoutData(instanceId, nextStepId, EnumSet.of(StatusEnum.QUEUED), 100, i);
+				if (chunksForNextStep.isEmpty()) {
+					break;
+				}
+				for (WorkChunk nextChunk : chunksForNextStep) {
+					JobWorkNotification workNotification = new JobWorkNotification(jobDefinitionId, jobDefinitionVersion, instanceId, nextStepId, nextChunk.getId());
+					myBatchJobSender.sendWorkChannelMessage(workNotification);
+				}
+			}
+
+			theInstance.setCurrentGatedStepId(nextStepId);
+			myJobPersistence.updateInstance(theInstance);
+		}
+
+	}
+
 
 	public static class JobCleanerScheduledJob implements HapiJob {
 		@Autowired
@@ -262,7 +321,7 @@ public class JobCleanerServiceImpl extends BaseJobService implements IJobCleaner
 
 		@Override
 		public void execute(JobExecutionContext theContext) {
-			myTarget.runCleanupPass();
+			myTarget.runMaintenancePass();
 		}
 	}
 

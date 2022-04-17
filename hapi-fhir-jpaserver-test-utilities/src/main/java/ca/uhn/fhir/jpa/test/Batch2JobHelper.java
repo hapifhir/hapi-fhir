@@ -40,14 +40,14 @@ public class Batch2JobHelper {
 
 	public void awaitJobCompletion(String theId) {
 		await().until(() -> {
-			myJobCleanerService.runCleanupPass();
+			myJobCleanerService.runMaintenancePass();
 			return myJobCoordinator.getInstance(theId).getStatus();
 		}, equalTo(StatusEnum.COMPLETED));
 	}
 
 	public JobInstance awaitJobFailure(String theId) {
 		await().until(() -> {
-			myJobCleanerService.runCleanupPass();
+			myJobCleanerService.runMaintenancePass();
 			return myJobCoordinator.getInstance(theId).getStatus();
 		}, Matchers.anyOf(equalTo(StatusEnum.ERRORED),equalTo(StatusEnum.FAILED)));
 		return myJobCoordinator.getInstance(theId);

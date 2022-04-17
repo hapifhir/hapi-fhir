@@ -74,13 +74,12 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 
 	@JsonProperty(value = "progress", access = JsonProperty.Access.READ_ONLY)
 	private double myProgress;
-
+	@JsonProperty(value = "currentGatedStepId", access = JsonProperty.Access.READ_ONLY)
+	private String myCurrentGatedStepId;
 	@JsonProperty(value = "errorMessage", access = JsonProperty.Access.READ_ONLY)
 	private String myErrorMessage;
-
 	@JsonProperty(value = "errorCount", access = JsonProperty.Access.READ_ONLY)
 	private int myErrorCount;
-
 	@JsonProperty(value = "estimatedCompletion", access = JsonProperty.Access.READ_ONLY)
 	private String myEstimatedTimeRemaining;
 
@@ -111,6 +110,15 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		setStatus(theJobInstance.getStatus());
 		setTotalElapsedMillis(theJobInstance.getTotalElapsedMillis());
 		setWorkChunksPurged(theJobInstance.isWorkChunksPurged());
+		setCurrentGatedStepId(theJobInstance.getCurrentGatedStepId());
+	}
+
+	public String getCurrentGatedStepId() {
+		return myCurrentGatedStepId;
+	}
+
+	public void setCurrentGatedStepId(String theCurrentGatedStepId) {
+		myCurrentGatedStepId = theCurrentGatedStepId;
 	}
 
 	public int getErrorCount() {

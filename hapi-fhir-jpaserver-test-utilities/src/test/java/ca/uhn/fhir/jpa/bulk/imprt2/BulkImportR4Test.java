@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -99,7 +98,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		// Verify
 
 		await().until(() -> {
-			myJobCleanerService.runCleanupPass();
+			myJobCleanerService.runMaintenancePass();
 			JobInstance instance = myJobCoordinator.getInstance(instanceId);
 			return instance.getStatus();
 		}, equalTo(StatusEnum.COMPLETED));
@@ -152,7 +151,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 			// Verify
 
 			await().until(() -> {
-				myJobCleanerService.runCleanupPass();
+				myJobCleanerService.runMaintenancePass();
 				JobInstance instance = myJobCoordinator.getInstance(instanceId);
 				return instance.getStatus();
 			}, equalTo(StatusEnum.ERRORED));
@@ -174,7 +173,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 			});
 
 			await().until(() -> {
-				myJobCleanerService.runCleanupPass();
+				myJobCleanerService.runMaintenancePass();
 				JobInstance instance = myJobCoordinator.getInstance(instanceId);
 				return instance.getErrorCount();
 			}, equalTo(3));
@@ -224,7 +223,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		// Verify
 
 		await().until(() -> {
-			myJobCleanerService.runCleanupPass();
+			myJobCleanerService.runMaintenancePass();
 			JobInstance instance = myJobCoordinator.getInstance(instanceId);
 			return instance.getStatus();
 		}, equalTo(StatusEnum.FAILED));
@@ -267,7 +266,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 			// Verify
 
 			await().until(() -> {
-				myJobCleanerService.runCleanupPass();
+				myJobCleanerService.runMaintenancePass();
 				JobInstance instance = myJobCoordinator.getInstance(instanceId);
 				return instance.getStatus();
 			}, equalTo(StatusEnum.FAILED));

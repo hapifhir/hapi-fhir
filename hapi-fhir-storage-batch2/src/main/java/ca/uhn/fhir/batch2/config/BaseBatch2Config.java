@@ -48,9 +48,14 @@ public abstract class BaseBatch2Config {
 	}
 
 	@Bean
-	public IJobCoordinator batch2JobCoordinator(IChannelFactory theChannelFactory, IJobPersistence theJobInstancePersister, JobDefinitionRegistry theJobDefinitionRegistry) {
+	public BatchJobSender batchJobSender(IChannelFactory theChannelFactory) {
+		return new BatchJobSender(batch2ProcessingChannelProducer(theChannelFactory));
+	}
+
+	@Bean
+	public IJobCoordinator batch2JobCoordinator(IChannelFactory theChannelFactory, IJobPersistence theJobInstancePersister, JobDefinitionRegistry theJobDefinitionRegistry, BatchJobSender theBatchJobSender) {
 		return new JobCoordinatorImpl(
-			new BatchJobSender(batch2ProcessingChannelProducer(theChannelFactory)),
+			theBatchJobSender,
 			batch2ProcessingChannelReceiver(theChannelFactory),
 			theJobInstancePersister,
 			theJobDefinitionRegistry
@@ -58,8 +63,8 @@ public abstract class BaseBatch2Config {
 	}
 
 	@Bean
-	public IJobCleanerService batch2JobCleaner(ISchedulerService theSchedulerService, IJobPersistence theJobPersistence) {
-		return new JobCleanerServiceImpl(theSchedulerService, theJobPersistence);
+	public IJobCleanerService batch2JobCleaner(ISchedulerService theSchedulerService, IJobPersistence theJobPersistence, JobDefinitionRegistry theJobDefinitionRegistry, BatchJobSender theBatchJobSender) {
+		return new JobCleanerServiceImpl(theSchedulerService, theJobPersistence, theJobDefinitionRegistry, theBatchJobSender);
 	}
 
 	@Bean

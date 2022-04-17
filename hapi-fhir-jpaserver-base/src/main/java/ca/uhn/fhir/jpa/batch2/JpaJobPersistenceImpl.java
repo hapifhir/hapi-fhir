@@ -92,6 +92,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		entity.setDefinitionVersion(theInstance.getJobDefinitionVersion());
 		entity.setStatus(theInstance.getStatus());
 		entity.setParams(theInstance.getParameters());
+		entity.setCurrentGatedStepId(theInstance.getCurrentGatedStepId());
 		entity.setCreateTime(new Date());
 
 		entity = myJobInstanceRepository.save(entity);
@@ -157,6 +158,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		retVal.setErrorCount(theEntity.getErrorCount());
 		retVal.setEstimatedTimeRemaining(theEntity.getEstimatedTimeRemaining());
 		retVal.setParameters(theEntity.getParams());
+		retVal.setCurrentGatedStepId(theEntity.getCurrentGatedStepId());
 		return retVal;
 	}
 
@@ -209,6 +211,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		instance.setErrorMessage(theInstance.getErrorMessage());
 		instance.setErrorCount(theInstance.getErrorCount());
 		instance.setEstimatedTimeRemaining(theInstance.getEstimatedTimeRemaining());
+		instance.setCurrentGatedStepId(theInstance.getCurrentGatedStepId());
 
 		myJobInstanceRepository.save(instance);
 	}

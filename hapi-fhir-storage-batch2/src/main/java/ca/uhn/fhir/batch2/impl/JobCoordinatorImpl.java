@@ -37,6 +37,7 @@ import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.model.api.annotation.PasswordField;
@@ -49,6 +50,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
@@ -62,7 +64,6 @@ import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 import java.lang.reflect.Field;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -79,15 +80,13 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final MessageHandler myReceiverHandler = new WorkChannelMessageHandler();
 	private final ValidatorFactory myValidatorFactory = Validation.buildDefaultValidatorFactory();
+	@Autowired
+	private ISchedulerService mySchedulerService;
 
 	/**
 	 * Constructor
 	 */
-	public JobCoordinatorImpl(
-		@Nonnull BatchJobSender theBatchJobSender,
-		@Nonnull IChannelReceiver theWorkChannelReceiver,
-		@Nonnull IJobPersistence theJobPersistence,
-		@Nonnull JobDefinitionRegistry theJobDefinitionRegistry) {
+	public JobCoordinatorImpl(@Nonnull BatchJobSender theBatchJobSender, @Nonnull IChannelReceiver theWorkChannelReceiver, @Nonnull IJobPersistence theJobPersistence, @Nonnull JobDefinitionRegistry theJobDefinitionRegistry) {
 		super(theJobPersistence);
 		myBatchJobSender = theBatchJobSender;
 		myWorkChannelReceiver = theWorkChannelReceiver;
@@ -96,9 +95,7 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 
 	@Override
 	public String startInstance(JobInstanceStartRequest theStartRequest) {
-		JobDefinition<?> jobDefinition = myJobDefinitionRegistry
-			.getLatestJobDefinition(theStartRequest.getJobDefinitionId())
-			.orElseThrow(() -> new IllegalArgumentException(Msg.code(2063) + "Unknown job definition ID: " + theStartRequest.getJobDefinitionId()));
+		JobDefinition<?> jobDefinition = myJobDefinitionRegistry.getLatestJobDefinition(theStartRequest.getJobDefinitionId()).orElseThrow(() -> new IllegalArgumentException(Msg.code(2063) + "Unknown job definition ID: " + theStartRequest.getJobDefinitionId()));
 
 		if (isBlank(theStartRequest.getParameters())) {
 			throw new InvalidRequestException(Msg.code(2065) + "No parameters supplied");
@@ -115,6 +112,10 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 		instance.setJobDefinitionVersion(jobDefinitionVersion);
 		instance.setStatus(StatusEnum.QUEUED);
 		instance.setParameters(theStartRequest.getParameters());
+
+		if (jobDefinition.isGatedExecution()) {
+			instance.setCurrentGatedStepId(firstStepId);
+		}
 
 		String instanceId = myJobPersistence.storeNewInstance(instance);
 
@@ -133,11 +134,7 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 		Validator validator = myValidatorFactory.getValidator();
 		PT parameters = theStartRequest.getParameters(theJobDefinition.getParametersType());
 		Set<ConstraintViolation<IModelJson>> constraintErrors = validator.validate(parameters);
-		List<String> errorStrings = constraintErrors
-			.stream()
-			.map(t -> t.getPropertyPath() + " - " + t.getMessage())
-			.sorted()
-			.collect(Collectors.toList());
+		List<String> errorStrings = constraintErrors.stream().map(t -> t.getPropertyPath() + " - " + t.getMessage()).sorted().collect(Collectors.toList());
 
 		// Programmatic Validator
 		IJobParametersValidator<PT> parametersValidator = theJobDefinition.getParametersValidator();
@@ -148,13 +145,7 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 		}
 
 		if (!errorStrings.isEmpty()) {
-			String message = "Failed to validate parameters for job of type " +
-				theJobDefinition.getJobDefinitionId() +
-				": " +
-				errorStrings
-					.stream()
-					.map(t -> "\n * " + t)
-					.collect(Collectors.joining());
+			String message = "Failed to validate parameters for job of type " + theJobDefinition.getJobDefinitionId() + ": " + errorStrings.stream().map(t -> "\n * " + t).collect(Collectors.joining());
 
 			throw new InvalidRequestException(Msg.code(2039) + message);
 		}
@@ -162,19 +153,12 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 
 	@Override
 	public JobInstance getInstance(String theInstanceId) {
-		return myJobPersistence
-			.fetchInstance(theInstanceId)
-			.map(t -> massageInstanceForUserAccess(t))
-			.orElseThrow(() -> new ResourceNotFoundException(Msg.code(2040) + "Unknown instance ID: " + UrlUtil.escapeUrlParam(theInstanceId)));
+		return myJobPersistence.fetchInstance(theInstanceId).map(t -> massageInstanceForUserAccess(t)).orElseThrow(() -> new ResourceNotFoundException(Msg.code(2040) + "Unknown instance ID: " + UrlUtil.escapeUrlParam(theInstanceId)));
 	}
 
 	@Override
 	public List<JobInstance> getInstances(int thePageSize, int thePageIndex) {
-		return myJobPersistence
-			.fetchInstances(thePageSize, thePageIndex)
-			.stream()
-			.map(t -> massageInstanceForUserAccess(t))
-			.collect(Collectors.toList());
+		return myJobPersistence.fetchInstances(thePageSize, thePageIndex).stream().map(t -> massageInstanceForUserAccess(t)).collect(Collectors.toList());
 	}
 
 	@Override
@@ -320,28 +304,17 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 			return;
 		}
 
-		if (theDefinition.isGatedExecution() && !finalStep) {
-			List<WorkChunk> incompleteChunks = myJobPersistence.fetchWorkChunksWithoutData(instanceId, theStep.getStepId(), StatusEnum.INCOMPLETE_STATUSES, 1, 0);
-			if (incompleteChunks.isEmpty()) {
-				ourLog.info("All processing is complete for gated execution of instance {} step {}", instanceId, theStep.getStepId());
-				for (int i = 0; ; i++) {
-					List<WorkChunk> chunksForNextStep = myJobPersistence.fetchWorkChunksWithoutData(instanceId, theSubsequentStep.getStepId(), EnumSet.of(StatusEnum.QUEUED), 100, i);
-					if (chunksForNextStep.isEmpty()) {
-						break;
-					}
-					for (WorkChunk nextChunk : chunksForNextStep) {
-						JobWorkNotification workNotification = new JobWorkNotification(theJobDefinitionId, theJobDefinitionVersion, instanceId, theSubsequentStep.getStepId(), nextChunk.getId());
-						myBatchJobSender.sendWorkChannelMessage(workNotification);
-					}
-				}
-			}
-		}
-
 		int workChunkCount = dataSink.getWorkChunkCount();
 		if (theFirstStep && workChunkCount == 0) {
 			ourLog.info("First step of job theInstance {} produced no work chunks, marking as completed", instanceId);
 			myJobPersistence.markInstanceAsCompleted(instanceId);
 		}
+
+		if (theDefinition.isGatedExecution() && theFirstStep) {
+			theInstance.setCurrentGatedStepId(theTargetStepId);
+			myJobPersistence.updateInstance(theInstance);
+		}
+
 	}
 
 	private JobDefinition<?> getDefinitionOrThrowException(String jobDefinitionId, int jobDefinitionVersion) {
