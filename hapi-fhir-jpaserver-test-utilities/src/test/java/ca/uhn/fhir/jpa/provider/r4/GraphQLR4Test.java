@@ -10,7 +10,10 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -32,10 +35,12 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 	public static final String INTROSPECTION_QUERY = "{\"query\":\"\\n    query IntrospectionQuery {\\n      __schema {\\n        queryType { name }\\n        mutationType { name }\\n        subscriptionType { name }\\n        types {\\n          ...FullType\\n        }\\n        directives {\\n          name\\n          description\\n          locations\\n          args {\\n            ...InputValue\\n          }\\n        }\\n      }\\n    }\\n\\n    fragment FullType on __Type {\\n      kind\\n      name\\n      description\\n      fields(includeDeprecated: true) {\\n        name\\n        description\\n        args {\\n          ...InputValue\\n        }\\n        type {\\n          ...TypeRef\\n        }\\n        isDeprecated\\n        deprecationReason\\n      }\\n      inputFields {\\n        ...InputValue\\n      }\\n      interfaces {\\n        ...TypeRef\\n      }\\n      enumValues(includeDeprecated: true) {\\n        name\\n        description\\n        isDeprecated\\n        deprecationReason\\n      }\\n      possibleTypes {\\n        ...TypeRef\\n      }\\n    }\\n\\n    fragment InputValue on __InputValue {\\n      name\\n      description\\n      type { ...TypeRef }\\n      defaultValue\\n    }\\n\\n    fragment TypeRef on __Type {\\n      kind\\n      name\\n      ofType {\\n        kind\\n        name\\n        ofType {\\n          kind\\n          name\\n          ofType {\\n            kind\\n            name\\n            ofType {\\n              kind\\n              name\\n              ofType {\\n                kind\\n                name\\n                ofType {\\n                  kind\\n                  name\\n                  ofType {\\n                    kind\\n                    name\\n                  }\\n                }\\n              }\\n            }\\n          }\\n        }\\n      }\\n    }\\n  \",\"operationName\":\"IntrospectionQuery\"}";
 	private Logger ourLog = LoggerFactory.getLogger(GraphQLR4Test.class);
 	private IIdType myPatientId0;
+	private IIdType myOrganizationId0;
+	private IIdType myConditionId0;
 
 	@Test
 	public void testInstance_Read_Patient() throws IOException {
-		initTestPatients();
+		initTestData();
 
 		String query = "{name{family,given}}";
 		HttpGet httpGet = new HttpGet(ourServerBase + "/Patient/" + myPatientId0.getIdPart() + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
@@ -57,7 +62,7 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testType_Introspect_Patient() throws IOException {
-		initTestPatients();
+		initTestData();
 
 		String uri = ourServerBase + "/Patient/$graphql";
 		HttpPost httpGet = new HttpPost(uri);
@@ -82,8 +87,28 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void testIncludesAndRevincludes() throws IOException {
+		initTestData();
+
+		String query = "{ \n" +
+			"  id\n" +
+			"  ConditionList(_reference: patient) {\n" +
+			"    id\n" +
+			"  }\n" +
+			"}";
+		HttpGet httpGet = new HttpGet(ourServerBase + "/Patient/" + myPatientId0.getIdPart() + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
+
+		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
+			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(resp);
+			assertThat(resp, containsString("\"id\":\"" + myConditionId0.toVersionless() + "\""));
+		}
+
+	}
+
+	@Test
 	public void testType_Introspect_Observation() throws IOException {
-		initTestPatients();
+		initTestData();
 
 		String uri = ourServerBase + "/Observation/$graphql";
 		HttpPost httpGet = new HttpPost(uri);
@@ -110,7 +135,7 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testRoot_Introspect() throws IOException {
-		initTestPatients();
+		initTestData();
 
 		String uri = ourServerBase + "/$graphql";
 		HttpPost httpGet = new HttpPost(uri);
@@ -136,7 +161,7 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testRoot_Read_Patient() throws IOException {
-		initTestPatients();
+		initTestData();
 
 		String query = "{Patient(id:\"" + myPatientId0.getIdPart() + "\"){name{family,given}}}";
 		HttpGet httpGet = new HttpGet(ourServerBase + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
@@ -164,7 +189,7 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testRoot_Search_Patient() throws IOException {
-		initTestPatients();
+		initTestData();
 
 		String query = "{PatientList(given:\"given\"){name{family,given}}}";
 		HttpGet httpGet = new HttpGet(ourServerBase + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
@@ -192,7 +217,7 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testRoot_Search_Observation() throws IOException {
-		initTestPatients();
+		initTestData();
 
 		String query = "{ObservationList(date: \"2022\") {id}}";
 		HttpGet httpGet = new HttpGet(ourServerBase + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
@@ -205,7 +230,16 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 		myCaptureQueriesListener.logSelectQueries();
 	}
 
-	private void initTestPatients() {
+	/**
+	 * Setup Sample Patients, Organizations, and Conditions for evaluation.
+	 *
+	 * Organization <-- Patient <-- Condition
+	 */
+	private void initTestData() {
+		Organization org = new Organization();
+		org.setName("ORG1");
+		myOrganizationId0 = myClient.create().resource(org).execute().getId().toUnqualifiedVersionless();
+
 		Patient p = new Patient();
 		p.addName()
 			.setFamily("FAM")
@@ -214,6 +248,7 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 		p.addName()
 			.addGiven("GivenOnly1")
 			.addGiven("GivenOnly2");
+		p.setManagingOrganization(new Reference(myOrganizationId0));
 		myPatientId0 = myClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
 		p = new Patient();
@@ -221,6 +256,10 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 			.addGiven("GivenOnlyB1")
 			.addGiven("GivenOnlyB2");
 		myClient.create().resource(p).execute();
+
+		Condition condition = new Condition();
+		condition.setSubject(new Reference(myPatientId0));
+		myConditionId0 = myClient.create().resource(condition).execute().getId().toUnqualifiedVersionless();
 	}
 
 

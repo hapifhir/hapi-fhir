@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
@@ -96,6 +97,7 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Group;
+import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ImagingStudy;
 import org.hl7.fhir.r4.model.InstantType;
@@ -2820,6 +2822,30 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		String uri = ourServerBase + "/Patient?_has:Observation:subject:identifier=" + UrlUtil.escapeUrlParam("urn:system|FOO");
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 		assertThat(ids, contains(pid0.getValue()));
+	}
+
+	@Test
+	public void testHasWithIdParameter() throws IOException {
+		Organization organization = new Organization();
+		organization.setName("ORG");
+		IIdType orgId = myOrganizationDao.create(organization, mySrd).getId();
+
+		Patient patient = new Patient();
+		patient.setManagingOrganization(new Reference(orgId));
+		patient.addName().setFamily("FAM");
+		IIdType id = myPatientDao.create(patient, mySrd).getId();
+
+		String uri = ourServerBase + "/Organization?_has:Patient:organization:_id=" + id.toUnqualifiedVersionless();
+		HttpGet get = new HttpGet(uri);
+
+		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
+			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(resp);
+			Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, resp);
+			List<String> strings = toUnqualifiedVersionlessIdValues(bundle);
+			assertThat(strings, contains(orgId.toVersionless().toString()));
+			ourLog.info("results : \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		}
 	}
 
 	@Test
