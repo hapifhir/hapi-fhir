@@ -54,6 +54,7 @@ import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -424,6 +425,12 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 	@Override
 	public RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName) {
 		return getActiveSearchParams(theResourceName).get(theParamName);
+	}
+
+	@Override
+	public boolean isSupportedForSearch(String theResourceName, String theParamName) {
+		RuntimeSearchParam activeSearchParam = getActiveSearchParam(theResourceName, theParamName);
+		return activeSearchParam != null || getActiveSearchParam("Resource", theParamName) != null;
 	}
 
 	@Override
