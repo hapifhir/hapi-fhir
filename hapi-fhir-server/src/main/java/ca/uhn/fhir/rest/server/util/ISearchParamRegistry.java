@@ -40,16 +40,6 @@ public interface ISearchParamRegistry {
 	 */
 	RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName);
 
-	/**
-	 * indicates if the search parameter can be used for the given resource.
-	 *
-	 * @param theResourceName the resource name, e.g. Patient
-	 * @param theParamName The name of the search parameter, e.g. given, _id, _text, name.
-	 *
-	 * @return a boolean indicating if the search parameter can be used for the given resource.
-	 */
-	boolean isSupportedForSearch(String theResourceName, String theParamName);
-
 
 	/**
 	 * @return Returns all active search params for the given resource
@@ -67,7 +57,6 @@ public interface ISearchParamRegistry {
 	 */
 	default void requestRefresh() {
 	}
-
 
 	/**
 	 * When indexing a HumanName, if a StringEncoder is set in the context, then the "phonetic" search parameter will normalize

@@ -428,12 +428,6 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 	}
 
 	@Override
-	public boolean isSupportedForSearch(String theResourceName, String theParamName) {
-		RuntimeSearchParam activeSearchParam = getActiveSearchParam(theResourceName, theParamName);
-		return activeSearchParam != null || getActiveSearchParam("Resource", theParamName) != null;
-	}
-
-	@Override
 	public ResourceSearchParams getActiveSearchParams(@Nonnull String theResourceName) {
 		Validate.notBlank(theResourceName, "theResourceName must not be null or blank");
 
