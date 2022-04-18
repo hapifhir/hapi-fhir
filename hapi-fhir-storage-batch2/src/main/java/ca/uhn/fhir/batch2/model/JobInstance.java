@@ -266,4 +266,11 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 			.append("estimatedTimeRemaining", myEstimatedTimeRemaining)
 			.toString();
 	}
+
+	/**
+	 * Returns true if the job instance is in {@link StatusEnum#IN_PROGRESS} and is not cancelled
+	 */
+	public boolean isRunning() {
+		return getStatus() == StatusEnum.IN_PROGRESS && !isCancelled();
+	}
 }

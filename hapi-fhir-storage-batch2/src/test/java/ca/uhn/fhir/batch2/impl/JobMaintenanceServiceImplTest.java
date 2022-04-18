@@ -1,12 +1,13 @@
 package ca.uhn.fhir.batch2.impl;
 
+import ca.uhn.fhir.batch2.api.IJobCompletionHandler;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.JobCompletionDetails;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
-import ca.uhn.fhir.rest.server.interceptor.ResponseSizeCapturingInterceptor;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,11 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.Message;
 
 import java.util.Date;
-import java.util.EnumSet;
 
-import static ca.uhn.fhir.batch2.impl.JobCoordinatorImplTest.INSTANCE_ID;
-import static ca.uhn.fhir.batch2.impl.JobCoordinatorImplTest.STEP_1;
-import static ca.uhn.fhir.batch2.impl.JobCoordinatorImplTest.createInstance;
 import static ca.uhn.fhir.batch2.impl.JobCoordinatorImplTest.createWorkChunk;
 import static ca.uhn.fhir.batch2.impl.JobCoordinatorImplTest.createWorkChunkStep1;
 import static ca.uhn.fhir.batch2.impl.JobCoordinatorImplTest.createWorkChunkStep2;
@@ -41,27 +38,30 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class JobCleanerServiceImplTest extends BaseBatch2Test {
+public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 
+	@Mock
+	IJobCompletionHandler<TestJobParameters> myCompletionHandler;
 	@Mock
 	private ISchedulerService mySchedulerService;
 	@Mock
 	private IJobPersistence myJobPersistence;
-	private JobCleanerServiceImpl mySvc;
+	private JobMaintenanceServiceImpl mySvc;
 	@Captor
 	private ArgumentCaptor<JobInstance> myInstanceCaptor;
 	private JobDefinitionRegistry myJobDefinitionRegistry;
-	private BatchJobSender myBatchJobSender;
 	@Mock
 	private IChannelProducer myWorkChannelProducer;
 	@Captor
 	private ArgumentCaptor<Message<JobWorkNotification>> myMessageCaptor;
+	@Captor
+	private ArgumentCaptor<JobCompletionDetails<TestJobParameters>> myJobCompletionCaptor;
 
 	@BeforeEach
 	public void beforeEach() {
 		myJobDefinitionRegistry = new JobDefinitionRegistry();
-		myBatchJobSender = new BatchJobSender(myWorkChannelProducer);
-		mySvc = new JobCleanerServiceImpl(mySchedulerService, myJobPersistence, myJobDefinitionRegistry, myBatchJobSender);
+		BatchJobSender batchJobSender = new BatchJobSender(myWorkChannelProducer);
+		mySvc = new JobMaintenanceServiceImpl(mySchedulerService, myJobPersistence, myJobDefinitionRegistry, batchJobSender);
 	}
 
 	@Test
@@ -100,7 +100,7 @@ public class JobCleanerServiceImplTest extends BaseBatch2Test {
 		assertEquals(0.08333333333333333, instance.getCombinedRecordsProcessedPerSecond());
 		assertNotNull(instance.getStartTime());
 		assertEquals(parseTime("2022-02-12T14:00:00-04:00"), instance.getStartTime());
-		assertEquals(null, instance.getEndTime());
+		assertNull(instance.getEndTime());
 		assertEquals("00:10:00", instance.getEstimatedTimeRemaining());
 
 		verifyNoMoreInteractions(myJobPersistence);
@@ -141,7 +141,7 @@ public class JobCleanerServiceImplTest extends BaseBatch2Test {
 	@Test
 	public void testInProgress_GatedExecution_FirstStepComplete() {
 		// Setup
-		myJobDefinitionRegistry.addJobDefinition(createJobDefinition(t->t.gatedExecution()));
+		myJobDefinitionRegistry.addJobDefinition(createJobDefinition(t -> t.gatedExecution()));
 		when(myJobPersistence.fetchWorkChunksWithoutData(eq(INSTANCE_ID), eq(100), eq(0))).thenReturn(Lists.newArrayList(
 			createWorkChunkStep2().setStatus(StatusEnum.QUEUED).setId(CHUNK_ID),
 			createWorkChunkStep2().setStatus(StatusEnum.QUEUED).setId(CHUNK_ID_2)
@@ -163,7 +163,6 @@ public class JobCleanerServiceImplTest extends BaseBatch2Test {
 		assertEquals(CHUNK_ID_2, payload1.getChunkId());
 	}
 
-
 	@Test
 	public void testFailed_PurgeOldInstance() {
 		JobInstance instance = createInstance();
@@ -179,6 +178,9 @@ public class JobCleanerServiceImplTest extends BaseBatch2Test {
 
 	@Test
 	public void testInProgress_CalculateProgress_AllStepsComplete() {
+		// Setup
+
+		myJobDefinitionRegistry.addJobDefinition(createJobDefinition(t -> t.completionHandler(myCompletionHandler)));
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(createInstance()));
 		when(myJobPersistence.fetchWorkChunksWithoutData(eq(INSTANCE_ID), anyInt(), eq(0))).thenReturn(Lists.newArrayList(
 			createWorkChunkStep1().setStatus(StatusEnum.COMPLETED).setStartTime(parseTime("2022-02-12T14:00:00-04:00")).setEndTime(parseTime("2022-02-12T14:01:00-04:00")).setRecordsProcessed(25),
@@ -189,7 +191,11 @@ public class JobCleanerServiceImplTest extends BaseBatch2Test {
 			createWorkChunkStep3().setStatus(StatusEnum.COMPLETED).setStartTime(parseTime("2022-02-12T14:01:00-04:00")).setEndTime(parseTime("2022-02-12T14:10:00-04:00")).setRecordsProcessed(25)
 		));
 
+		// Execute
+
 		mySvc.runMaintenancePass();
+
+		// Verify
 
 		verify(myJobPersistence, times(2)).updateInstance(myInstanceCaptor.capture());
 		JobInstance instance = myInstanceCaptor.getAllValues().get(0);
@@ -201,8 +207,12 @@ public class JobCleanerServiceImplTest extends BaseBatch2Test {
 		assertEquals(parseTime("2022-02-12T14:10:00-04:00"), instance.getEndTime());
 
 		verify(myJobPersistence, times(1)).deleteChunks(eq(INSTANCE_ID));
+		verify(myCompletionHandler, times(1)).jobComplete(myJobCompletionCaptor.capture());
 
 		verifyNoMoreInteractions(myJobPersistence);
+
+		assertEquals(INSTANCE_ID, myJobCompletionCaptor.getValue().getInstanceId());
+		assertEquals(PARAM_1_VALUE, myJobCompletionCaptor.getValue().getParameters().getParam1());
 	}
 
 	@Test

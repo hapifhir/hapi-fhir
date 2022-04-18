@@ -20,46 +20,63 @@ package ca.uhn.fhir.batch2.model;
  * #L%
  */
 
+import java.util.Collections;
 import java.util.EnumSet;
+import java.util.Set;
 
 public enum StatusEnum {
 
 	/**
 	 * Task is waiting to execute and should begin with no intervention required.
 	 */
-	QUEUED,
+	QUEUED(true),
 
 	/**
 	 * Task is current executing
 	 */
-	IN_PROGRESS,
+	IN_PROGRESS(true),
 
 	/**
 	 * Task completed successfully
 	 */
-	COMPLETED,
+	COMPLETED(false),
 
 	/**
 	 * Task execution resulted in an error but the error may be transient (or transient status is unknown).
 	 * Retrying may result in success.
 	 */
-	ERRORED,
+	ERRORED(true),
 
 	/**
 	 * Task has failed and is known to be unrecoverable. There is no reason to believe that retrying will
 	 * result in a different outcome.
 	 */
-	FAILED;
+	FAILED(true);
+
+	private final boolean myIncomplete;
+	private static Set<StatusEnum> ourIncompleteStatuses;
+
+	StatusEnum(boolean theIncomplete) {
+		myIncomplete = theIncomplete;
+	}
 
 	/**
 	 * Statuses that represent a job that has not yet completed. I.e.
 	 * all statuses except {@link #COMPLETED}
 	 */
-	public static final EnumSet<StatusEnum> INCOMPLETE_STATUSES = EnumSet.of(
-		QUEUED,
-		IN_PROGRESS,
-		ERRORED,
-		FAILED
-	);
+	public static Set<StatusEnum> getIncompleteStatuses() {
+		Set<StatusEnum> retVal = ourIncompleteStatuses;
+		if (retVal == null) {
+			EnumSet<StatusEnum> set = EnumSet.noneOf(StatusEnum.class);
+			for (StatusEnum next : values()) {
+				if (next.myIncomplete) {
+					set.add(next);
+				}
+			}
+			ourIncompleteStatuses = Collections.unmodifiableSet(set);
+			retVal = ourIncompleteStatuses;
+		}
+		return retVal;
+	}
 
 }

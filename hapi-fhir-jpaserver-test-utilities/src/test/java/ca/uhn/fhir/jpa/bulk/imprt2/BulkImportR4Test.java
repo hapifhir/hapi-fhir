@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.bulk.imprt2;
 
-import ca.uhn.fhir.batch2.api.IJobCleanerService;
+import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.imprt.BulkImportAppCtx;
 import ca.uhn.fhir.batch2.jobs.imprt.BulkImportFileServlet;
@@ -55,7 +55,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
 	@Autowired
-	private IJobCleanerService myJobCleanerService;
+	private IJobMaintenanceService myJobCleanerService;
 	@Autowired
 	private IBatch2JobInstanceRepository myJobInstanceRepository;
 	@Autowired
