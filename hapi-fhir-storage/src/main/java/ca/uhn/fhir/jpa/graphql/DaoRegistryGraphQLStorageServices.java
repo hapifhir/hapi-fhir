@@ -32,8 +32,10 @@ import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.api.BundleLinks;
+import ca.uhn.fhir.rest.api.CacheControlDirective;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateOrListParam;
@@ -294,8 +296,11 @@ public class DaoRegistryGraphQLStorageServices implements IGraphQLStorageService
 			SearchParameterMap params = buildSearchParams(theType, theSearchParams);
 			params.setCount(pageSize);
 
+			CacheControlDirective cacheControlDirective = new CacheControlDirective();
+			cacheControlDirective.parse(requestDetails.getHeaders(Constants.HEADER_CACHE_CONTROL));
+
 			RequestPartitionId requestPartitionId = myPartitionHelperSvc.determineReadPartitionForRequestForSearchType(requestDetails, theType, params, null);
-			response = mySearchCoordinatorSvc.registerSearch(getDao(theType), params, theType, null, null, requestPartitionId);
+			response = mySearchCoordinatorSvc.registerSearch(getDao(theType), params, theType, cacheControlDirective, requestDetails, requestPartitionId);
 
 			searchOffset = 0;
 			searchId = pagingProvider.storeResultList(null, response);
