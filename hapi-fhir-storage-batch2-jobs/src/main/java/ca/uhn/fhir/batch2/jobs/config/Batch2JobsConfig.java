@@ -23,6 +23,9 @@ package ca.uhn.fhir.batch2.jobs.config;
 import ca.uhn.fhir.batch2.jobs.export.BulkExportAppCtx;
 import ca.uhn.fhir.batch2.jobs.imprt.BulkImportAppCtx;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
+import ca.uhn.fhir.batch2.jobs.services.Batch2JobRunnerImpl;
+import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
@@ -34,5 +37,10 @@ import org.springframework.context.annotation.Import;
 	BulkExportAppCtx.class
 })
 public class Batch2JobsConfig {
-	// nothing
+
+	// our batch2 job runner bean
+	@Bean
+	public IBatch2JobRunner batch2JobRunner() {
+		return new Batch2JobRunnerImpl();
+	}
 }

@@ -115,9 +115,9 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 
 		// TODO - remove this scheduled job
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
-		jobDetail.setId(Job.class.getName());
-		jobDetail.setJobClass(Job.class);
-		mySchedulerService.scheduleClusteredJob(10 * DateUtils.MILLIS_PER_SECOND, jobDetail);
+//		jobDetail.setId(Job.class.getName());
+//		jobDetail.setJobClass(Job.class);
+//		mySchedulerService.scheduleClusteredJob(10 * DateUtils.MILLIS_PER_SECOND, jobDetail);
 
 		jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(PurgeExpiredFilesJob.class.getName());
@@ -169,10 +169,6 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 		}
 
 	}
-
-
-
-
 
 	@Override
 	@Transactional(Transactional.TxType.NEVER)

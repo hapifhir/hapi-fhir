@@ -49,6 +49,7 @@ public class BulkItemReader extends BaseJpaBulkItemReader {
 		List<SearchParameterMap> map = createSearchParameterMapsForResourceType();
 		ISearchBuilder sb = getSearchBuilderForLocalResourceType();
 
+		// TODO - move to new class that implements IBulkExportIdProcessor
 		for (SearchParameterMap spMap: map) {
 			ourLog.debug("About to evaluate query {}", spMap.toNormalizedQueryString(myContext));
 			IResultIterator myResultIterator = sb.createQuery(spMap, new SearchRuntimeDetails(null, myJobUUID), null, RequestPartitionId.allPartitions());

@@ -5,6 +5,7 @@ import ca.uhn.fhir.batch2.jobs.export.models.BulkExportExpandedResources;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportIdList;
 import ca.uhn.fhir.batch2.model.JobDefinition;
+import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.model.api.IModelJson;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,12 +13,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class BulkExportAppCtx {
 
-	public static final String BULK_EXPORT = "BULK_EXPORT";
-
 	@Bean
 	public JobDefinition bulkExportJobDefinition() {
 		JobDefinition.Builder<IModelJson, VoidModel> builder = JobDefinition.newBuilder();
-		builder.setJobDefinitionId(BULK_EXPORT);
+		builder.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
 		builder.setJobDescription("FHIR Bulk Export");
 		builder.setJobDefinitionVersion(1);
 
@@ -43,6 +42,10 @@ public class BulkExportAppCtx {
 			"Writes the expanded resources to the binaries and saves",
 			writeBinaryStep()
 		);
+
+		// TODO - we will want a new last step that
+		// actually depends on all previous steps and will fire only
+		// to update the process as finished or errored out
 
 		return builder.build();
 	}

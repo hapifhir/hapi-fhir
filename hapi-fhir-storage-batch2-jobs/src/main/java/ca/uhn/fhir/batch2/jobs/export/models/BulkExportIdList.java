@@ -13,11 +13,22 @@ public class BulkExportIdList extends BulkExportJobBase {
 	@JsonProperty("ids")
 	private List<Id> myIds;
 
+	@JsonProperty("resourceType")
+	private String myResourceType;
+
 	public List<Id> getIds() {
 		return myIds;
 	}
 
 	public void setIds(List<Id> theIds) {
 		myIds = theIds;
+	}
+
+	public String getResourceType() {
+		return myResourceType;
+	}
+
+	public void setResourceType(String theResourceType) {
+		myResourceType = theResourceType;
 	}
 }

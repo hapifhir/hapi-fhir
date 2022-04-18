@@ -86,16 +86,16 @@ public class BulkExportJobConfig {
 	}
 
 
-	@Bean
-	@Lazy
-	public Job bulkExportJob() {
-		return myJobBuilderFactory.get(BatchConstants.BULK_EXPORT_JOB_NAME)
-			.validator(bulkExportJobParameterValidator())
-			.start(createBulkExportEntityStep())
-			.next(bulkExportPartitionStep())
-			.next(closeJobStep())
-			.build();
-	}
+//	@Bean
+//	@Lazy
+//	public Job bulkExportJob() {
+//		return myJobBuilderFactory.get(BatchConstants.BULK_EXPORT_JOB_NAME)
+//			.validator(bulkExportJobParameterValidator())
+//			.start(createBulkExportEntityStep())
+//			.next(bulkExportPartitionStep())
+//			.next(closeJobStep())
+//			.build();
+//	}
 
 	@Bean
 	@Lazy
@@ -109,46 +109,46 @@ public class BulkExportJobConfig {
 		return processor;
 	}
 
-	@Bean
-	@Lazy
-	public Job groupBulkExportJob() {
-		return myJobBuilderFactory.get(BatchConstants.GROUP_BULK_EXPORT_JOB_NAME)
-			.validator(groupBulkJobParameterValidator())
-			.validator(bulkExportJobParameterValidator())
-			.start(createBulkExportEntityStep())
-			.next(groupPartitionStep())
-			.next(closeJobStep())
-			.build();
-	}
+//	@Bean
+//	@Lazy
+//	public Job groupBulkExportJob() {
+//		return myJobBuilderFactory.get(BatchConstants.GROUP_BULK_EXPORT_JOB_NAME)
+//			.validator(groupBulkJobParameterValidator())
+//			.validator(bulkExportJobParameterValidator())
+//			.start(createBulkExportEntityStep())
+//			.next(groupPartitionStep())
+//			.next(closeJobStep())
+//			.build();
+//	}
 
-	@Bean
-	@Lazy
-	public Job patientBulkExportJob() {
-		return myJobBuilderFactory.get(BatchConstants.PATIENT_BULK_EXPORT_JOB_NAME)
-			.validator(bulkExportJobParameterValidator())
-			.start(createBulkExportEntityStep())
-			.next(patientPartitionStep())
-			.next(closeJobStep())
-			.build();
-	}
+//	@Bean
+//	@Lazy
+//	public Job patientBulkExportJob() {
+//		return myJobBuilderFactory.get(BatchConstants.PATIENT_BULK_EXPORT_JOB_NAME)
+//			.validator(bulkExportJobParameterValidator())
+//			.start(createBulkExportEntityStep())
+//			.next(patientPartitionStep())
+//			.next(closeJobStep())
+//			.build();
+//	}
 
 	@Bean
 	public GroupIdPresentValidator groupBulkJobParameterValidator() {
 		return new GroupIdPresentValidator();
 	}
 
-	@Bean
-	public Step createBulkExportEntityStep() {
-		return myStepBuilderFactory.get("createBulkExportEntityStep")
-			.tasklet(createBulkExportEntityTasklet())
-			.listener(bulkExportCreateEntityStepListener())
-			.build();
-	}
+//	@Bean
+//	public Step createBulkExportEntityStep() {
+//		return myStepBuilderFactory.get("createBulkExportEntityStep")
+//			.tasklet(createBulkExportEntityTasklet())
+//			.listener(bulkExportCreateEntityStepListener())
+//			.build();
+//	}
 
-	@Bean
-	public CreateBulkExportEntityTasklet createBulkExportEntityTasklet() {
-		return new CreateBulkExportEntityTasklet();
-	}
+//	@Bean
+//	public CreateBulkExportEntityTasklet createBulkExportEntityTasklet() {
+//		return new CreateBulkExportEntityTasklet();
+//	}
 
 
 	@Bean
@@ -157,51 +157,51 @@ public class BulkExportJobConfig {
 	}
 
 	//Writers
-	@Bean
-	public Step groupBulkExportGenerateResourceFilesStep() {
-		return myStepBuilderFactory.get("groupBulkExportGenerateResourceFilesStep")
-			.<List<ResourcePersistentId>, List<IBaseResource>>chunk(CHUNK_SIZE) //1000 resources per generated file, as the reader returns 10 resources at a time.
-			.reader(groupBulkItemReader())
-			.processor(inflateResourceThenAnnotateWithGoldenResourceProcessor())
-			.writer(resourceToFileWriter())
-			.listener(bulkExportGenerateResourceFilesStepListener())
-			.build();
-	}
+//	@Bean
+//	public Step groupBulkExportGenerateResourceFilesStep() {
+//		return myStepBuilderFactory.get("groupBulkExportGenerateResourceFilesStep")
+//			.<List<ResourcePersistentId>, List<IBaseResource>>chunk(CHUNK_SIZE) //1000 resources per generated file, as the reader returns 10 resources at a time.
+//			.reader(groupBulkItemReader())
+//			.processor(inflateResourceThenAnnotateWithGoldenResourceProcessor())
+//			.writer(resourceToFileWriter())
+//			.listener(bulkExportGenerateResourceFilesStepListener())
+//			.build();
+//	}
 
-	@Bean
-	public Step bulkExportGenerateResourceFilesStep() {
-		return myStepBuilderFactory.get(BatchConstants.BULK_EXPORT_GENERATE_RESOURCE_FILES_STEP)
-			.<List<ResourcePersistentId>, List<IBaseResource>>chunk(CHUNK_SIZE) //1000 resources per generated file, as the reader returns 10 resources at a time.
-			.reader(bulkItemReader())
-			.processor(myPidToIBaseResourceProcessor)
-			.writer(resourceToFileWriter())
-			.listener(bulkExportGenerateResourceFilesStepListener())
-			.build();
-	}
+//	@Bean
+//	public Step bulkExportGenerateResourceFilesStep() {
+//		return myStepBuilderFactory.get(BatchConstants.BULK_EXPORT_GENERATE_RESOURCE_FILES_STEP)
+//			.<List<ResourcePersistentId>, List<IBaseResource>>chunk(CHUNK_SIZE) //1000 resources per generated file, as the reader returns 10 resources at a time.
+//			.reader(bulkItemReader())
+//			.processor(myPidToIBaseResourceProcessor)
+//			.writer(resourceToFileWriter())
+//			.listener(bulkExportGenerateResourceFilesStepListener())
+//			.build();
+//	}
 
-	@Bean
-	public Step patientBulkExportGenerateResourceFilesStep() {
-		return myStepBuilderFactory.get("patientBulkExportGenerateResourceFilesStep")
-			.<List<ResourcePersistentId>, List<IBaseResource>>chunk(CHUNK_SIZE) //1000 resources per generated file, as the reader returns 10 resources at a time.
-			.reader(patientBulkItemReader())
-			.processor(myPidToIBaseResourceProcessor)
-			.writer(resourceToFileWriter())
-			.listener(bulkExportGenerateResourceFilesStepListener())
-			.build();
-	}
+//	@Bean
+//	public Step patientBulkExportGenerateResourceFilesStep() {
+//		return myStepBuilderFactory.get("patientBulkExportGenerateResourceFilesStep")
+//			.<List<ResourcePersistentId>, List<IBaseResource>>chunk(CHUNK_SIZE) //1000 resources per generated file, as the reader returns 10 resources at a time.
+//			.reader(patientBulkItemReader())
+//			.processor(myPidToIBaseResourceProcessor)
+//			.writer(resourceToFileWriter())
+//			.listener(bulkExportGenerateResourceFilesStepListener())
+//			.build();
+//	}
 
-	@Bean
-	@JobScope
-	public BulkExportJobCloser bulkExportJobCloser() {
-		return new BulkExportJobCloser();
-	}
+//	@Bean
+//	@JobScope
+//	public BulkExportJobCloser bulkExportJobCloser() {
+//		return new BulkExportJobCloser();
+//	}
 
-	@Bean
-	public Step closeJobStep() {
-		return myStepBuilderFactory.get("closeJobStep")
-			.tasklet(bulkExportJobCloser())
-			.build();
-	}
+//	@Bean
+//	public Step closeJobStep() {
+//		return myStepBuilderFactory.get("closeJobStep")
+//			.tasklet(bulkExportJobCloser())
+//			.build();
+//	}
 
 	@Bean
 	@JobScope
@@ -215,29 +215,29 @@ public class BulkExportJobConfig {
 		return new BulkExportGenerateResourceFilesStepListener();
 	}
 
-	@Bean
-	public Step bulkExportPartitionStep() {
-		return myStepBuilderFactory.get("partitionStep")
-			.partitioner(BatchConstants.BULK_EXPORT_GENERATE_RESOURCE_FILES_STEP, bulkExportResourceTypePartitioner())
-			.step(bulkExportGenerateResourceFilesStep())
-			.build();
-	}
+//	@Bean
+//	public Step bulkExportPartitionStep() {
+//		return myStepBuilderFactory.get("partitionStep")
+//			.partitioner(BatchConstants.BULK_EXPORT_GENERATE_RESOURCE_FILES_STEP, bulkExportResourceTypePartitioner())
+//			.step(bulkExportGenerateResourceFilesStep())
+//			.build();
+//	}
 
-	@Bean
-	public Step groupPartitionStep() {
-		return myStepBuilderFactory.get("partitionStep")
-			.partitioner("groupBulkExportGenerateResourceFilesStep", bulkExportResourceTypePartitioner())
-			.step(groupBulkExportGenerateResourceFilesStep())
-			.build();
-	}
+//	@Bean
+//	public Step groupPartitionStep() {
+//		return myStepBuilderFactory.get("partitionStep")
+//			.partitioner("groupBulkExportGenerateResourceFilesStep", bulkExportResourceTypePartitioner())
+//			.step(groupBulkExportGenerateResourceFilesStep())
+//			.build();
+//	}
 
-	@Bean
-	public Step patientPartitionStep() {
-		return myStepBuilderFactory.get("partitionStep")
-			.partitioner("patientBulkExportGenerateResourceFilesStep", bulkExportResourceTypePartitioner())
-			.step(patientBulkExportGenerateResourceFilesStep())
-			.build();
-	}
+//	@Bean
+//	public Step patientPartitionStep() {
+//		return myStepBuilderFactory.get("partitionStep")
+//			.partitioner("patientBulkExportGenerateResourceFilesStep", bulkExportResourceTypePartitioner())
+//			.step(patientBulkExportGenerateResourceFilesStep())
+//			.build();
+//	}
 
 
 	@Bean

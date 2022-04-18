@@ -20,8 +20,10 @@ package ca.uhn.fhir.jpa.bulk.export.provider;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.model.BulkExportParameters;
+import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -36,6 +38,7 @@ import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ArrayUtil;
+import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -68,6 +71,9 @@ public class BulkDataExportProvider {
 	@Autowired
 	private FhirContext myFhirContext;
 
+	@Autowired
+	private IBatch2JobRunner myJobRunner;
+
 	@VisibleForTesting
 	public void setFhirContextForUnitTest(FhirContext theFhirContext) {
 		myFhirContext = theFhirContext;
@@ -94,7 +100,10 @@ public class BulkDataExportProvider {
 		BulkDataExportOptions bulkDataExportOptions = buildSystemBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter);
 		Boolean useCache = shouldUseCache(theRequestDetails);
 		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(bulkDataExportOptions, useCache, theRequestDetails);
+		// Do we want to return the jobinfo object?
 		writePollingLocationToResponseHeaders(theRequestDetails, outcome);
+
+		myJobRunner.startJob(getBulkExportJobParameters(bulkDataExportOptions, outcome.getJobId()));
 	}
 
 	private boolean shouldUseCache(ServletRequestDetails theRequestDetails) {
@@ -131,6 +140,8 @@ public class BulkDataExportProvider {
 		validateResourceTypesAllContainPatientSearchParams(bulkDataExportOptions.getResourceTypes());
 		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(bulkDataExportOptions, shouldUseCache(theRequestDetails), theRequestDetails);
 		writePollingLocationToResponseHeaders(theRequestDetails, outcome);
+
+		myJobRunner.startJob(getBulkExportJobParameters(bulkDataExportOptions, outcome.getJobId()));
 	}
 
 	private void validateResourceTypesAllContainPatientSearchParams(Set<String> theResourceTypes) {
@@ -161,6 +172,8 @@ public class BulkDataExportProvider {
 		validateResourceTypesAllContainPatientSearchParams(bulkDataExportOptions.getResourceTypes());
 		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(bulkDataExportOptions, shouldUseCache(theRequestDetails), theRequestDetails);
 		writePollingLocationToResponseHeaders(theRequestDetails, outcome);
+
+		myJobRunner.startJob(getBulkExportJobParameters(bulkDataExportOptions, outcome.getJobId()));
 	}
 
 	/**
@@ -305,4 +318,19 @@ public class BulkDataExportProvider {
 		return retVal;
 	}
 
+	/**
+	 * Converts the BulkDataExportOptions -> BulkExportParameters
+	 */
+	private BulkExportParameters getBulkExportJobParameters(BulkDataExportOptions theOptions, String theJobId) {
+		BulkExportParameters parameters = new BulkExportParameters(Batch2JobDefinitionConstants.BULK_EXPORT);
+		parameters.setJobId(theJobId);
+		parameters.setStartDate(theOptions.getSince());
+		parameters.setOutputFormat(theOptions.getOutputFormat());
+		parameters.setExportStyle(theOptions.getExportStyle());
+		parameters.setFilters(theOptions.getFilters().stream().toList());
+		parameters.setGroupId(theOptions.getGroupId().getValue());
+		parameters.setResourceTypes(theOptions.getResourceTypes().stream().toList());
+
+		return parameters;
+	}
 }
