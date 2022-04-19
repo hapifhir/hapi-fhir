@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.dao.expunge.ResourceForeignKey;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;
 import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,9 +84,10 @@ public class DeleteExpungeProcessor implements ItemProcessor<List<Long>, List<St
 			return;
 		}
 
+		List<ResourcePersistentId> targetPidsAsResourceIds = ResourcePersistentId.fromLongList(thePids);
 		List<ResourceLink> conflictResourceLinks = Collections.synchronizedList(new ArrayList<>());
 		PartitionRunner partitionRunner = new PartitionRunner(PROCESS_NAME, THREAD_PREFIX, myDaoConfig.getExpungeBatchSize(), myDaoConfig.getExpungeThreadCount());
-		partitionRunner.runInPartitionedThreads(thePids, someTargetPids -> findResourceLinksWithTargetPidIn(thePids, someTargetPids, conflictResourceLinks));
+		partitionRunner.runInPartitionedThreads(targetPidsAsResourceIds, someTargetPids -> findResourceLinksWithTargetPidIn(targetPidsAsResourceIds, someTargetPids, conflictResourceLinks));
 
 		if (conflictResourceLinks.isEmpty()) {
 			return;
@@ -103,14 +105,16 @@ public class DeleteExpungeProcessor implements ItemProcessor<List<Long>, List<St
 			targetResourceId + " because " + sourceResourceId + " refers to it via the path " + firstConflict.getSourcePath());
 	}
 
-	public void findResourceLinksWithTargetPidIn(List<Long> theAllTargetPids, List<Long> theSomeTargetPids, List<ResourceLink> theConflictResourceLinks) {
+	public void findResourceLinksWithTargetPidIn(List<ResourcePersistentId> theAllTargetPids, List<ResourcePersistentId> theSomeTargetPids, List<ResourceLink> theConflictResourceLinks) {
+		List<Long> allTargetPidsAsLongs = ResourcePersistentId.toLongList(theAllTargetPids);
+		List<Long> someTargetPidsAsLongs = ResourcePersistentId.toLongList(theSomeTargetPids);
 		// We only need to find one conflict, so if we found one already in an earlier partition run, we can skip the rest of the searches
 		if (theConflictResourceLinks.isEmpty()) {
-			List<ResourceLink> conflictResourceLinks = myResourceLinkDao.findWithTargetPidIn(theSomeTargetPids).stream()
+			List<ResourceLink> conflictResourceLinks = myResourceLinkDao.findWithTargetPidIn(someTargetPidsAsLongs).stream()
 				// Filter out resource links for which we are planning to delete the source.
 				// theAllTargetPids contains a list of all the pids we are planning to delete.  So we only want
 				// to consider a link to be a conflict if the source of that link is not in theAllTargetPids.
-				.filter(link -> !theAllTargetPids.contains(link.getSourceResourcePid()))
+				.filter(link -> !allTargetPidsAsLongs.contains(link.getSourceResourcePid()))
 				.collect(Collectors.toList());
 
 			// We do this in two steps to avoid lock contention on this synchronized list
