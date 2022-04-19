@@ -9,6 +9,7 @@ import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.validation.FhirValidator;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
@@ -297,6 +298,15 @@ public class DaoConfig {
 	 * @since 5.7.0
 	 */
 	private boolean myConcurrentBundleValidation;
+
+	/**
+	 * Since 6.0.0
+	 */
+	private boolean myAllowAutoDeExternalizingBinaries = true;
+	/**
+	 * Since 6.0.0
+	 */
+	private long myAutoDeExternalizeMaximumBytes = 10 * FileUtils.ONE_MB;
 
 	/**
 	 * Constructor
@@ -2793,10 +2803,59 @@ public class DaoConfig {
 	 * This setting indicates if a cross-partition subscription can be made.
 	 *
 	 * @see ModelConfig#setCrossPartitionSubscription(boolean)
-	 * @since 7.5.0
+	 * @since 5.7.0
 	 */
 	public void setCrossPartitionSubscription(boolean theAllowCrossPartitionSubscription) {
 		this.myModelConfig.setCrossPartitionSubscription(theAllowCrossPartitionSubscription);
+	}
+
+
+	/**
+	 *
+	 * This setting indicates whether binaries are allowed to be de-externalized automatically during requests.
+	 * Default is true.
+	 *
+	 * @since 6.0.0
+	 * @return whether binaries are allowed to be de-externalized automatically during requests.
+	 */
+	public boolean isAllowAutoDeExternalizingBinaries() {
+		return myAllowAutoDeExternalizingBinaries;
+	}
+
+
+	/**
+	 * This setting indicates whether binaries are allowed to be de-externalized automatically during requests.
+	 * Default is true.
+	 *
+	 * @since 6.0.0
+	 * @param theAllowAutoDeExternalizingBinaries the value to set.
+	 */
+	public void setAllowAutoDeExternalizingBinaries(boolean theAllowAutoDeExternalizingBinaries) {
+		myAllowAutoDeExternalizingBinaries = theAllowAutoDeExternalizingBinaries;
+	}
+
+	/**
+	 * This setting controls how many bytes of binaries will be de-externalized automatically when you query resources
+	 * which contain binary data.
+	 * Default is 10MB
+	 *
+	 * @since 6.0.0
+	 * @param theAutoDeExternalizeMaximumBytes the maximum number of bytes to de-externalize.
+	 */
+	public void setAutoDeExternalizeMaximumBytes(long theAutoDeExternalizeMaximumBytes) {
+		myAutoDeExternalizeMaximumBytes = theAutoDeExternalizeMaximumBytes;
+	}
+
+	/**
+	 * This setting controls how many bytes of binaries will be de-externalized automatically when you query resources
+	 * which contain binary data.
+	 * Default is 10MB
+	 *
+	 * @since 6.0.0
+	 * @return the number of bytes to de-externalize during requests.
+	 */
+	public long getAutoDeExternalizeMaximumBytes() {
+		return myAutoDeExternalizeMaximumBytes;
 	}
 
 	public enum StoreMetaSourceInformationEnum {
