@@ -273,6 +273,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		replaceNumericSPIndices(version);
 		replaceQuantitySPIndices(version);
 
+		version.onTable("NPM_PACKAGE_VER")
+			.modifyColumn("20220329.1","FHIR_VERSION_ID").nonNullable().withType(ColumnTypeEnum.STRING, 20);
+
+		version.onTable("NPM_PACKAGE_VER_RES")
+			.modifyColumn("20220329.2","FHIR_VERSION_ID").nonNullable().withType(ColumnTypeEnum.STRING, 20);
+
 		// Drop Index on HFJ_RESOURCE.INDEX_STATUS
 		version
 			.onTable("HFJ_RESOURCE")
