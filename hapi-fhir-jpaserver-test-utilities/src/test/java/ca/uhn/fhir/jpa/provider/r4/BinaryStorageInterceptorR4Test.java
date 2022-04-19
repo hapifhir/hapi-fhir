@@ -20,6 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.blankOrNullString;
 import static org.hamcrest.Matchers.containsString;
@@ -109,6 +111,30 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 
 	}
 
+	@Test
+	public void testCreateAndRetrieveBinary_ServerAssignedId_ExternalizedBinary_DoNotRehydrate() {
+
+		myBinaryStorageInterceptor.setAllowAutoDeExternalizingBinaries(false);
+
+		// Create a resource with a big enough binary
+		Binary binary = new Binary();
+		binary.setContentType("application/octet-stream");
+		binary.setData(SOME_BYTES);
+		DaoMethodOutcome outcome = myBinaryDao.create(binary);
+
+		// Make sure it was externalized
+		IIdType id = outcome.getId().toUnqualifiedVersionless();
+		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
+		ourLog.info("Encoded: {}", encoded);
+		assertThat(encoded, containsString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID));
+		assertThat(encoded, not(containsString("\"data\"")));
+
+		// Now read it back and make sure it was de-externalized
+		Binary output = myBinaryDao.read(id, mySrd);
+		assertEquals("application/octet-stream", output.getContentType());
+		assertArrayEquals(null, output.getData());
+		assertThat(output.getDataElement().getExtensionByUrl(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID), is(notNullValue()));
+	}
 
 	@Test
 	public void testCreateAndRetrieveBinary_ServerAssignedId_NonExternalizedBinary() {

@@ -77,6 +77,7 @@ public class BinaryStorageInterceptor {
 	private Class<? extends IPrimitiveType<byte[]>> myBinaryType;
 	private String myDeferredListKey;
 	private long myAutoDeExternalizeMaximumBytes = 10 * FileUtils.ONE_MB;
+	private boolean myAllowAutoDeExternalizingBinaries = true;
 
 	/**
 	 * Any externalized binaries will be rehydrated if their size is below this thhreshold when
@@ -248,6 +249,10 @@ public class BinaryStorageInterceptor {
 
 	@Hook(Pointcut.STORAGE_PRESHOW_RESOURCES)
 	public void preShow(IPreResourceShowDetails theDetails) throws IOException {
+		if (!isAllowAutoDeExternalizingBinaries()) {
+			return;
+		}
+
 		long unmarshalledByteCount = 0;
 
 		for (IBaseResource nextResource : theDetails) {
@@ -293,6 +298,14 @@ public class BinaryStorageInterceptor {
 			}
 		});
 		return binaryTargets;
+	}
+
+	public void setAllowAutoDeExternalizingBinaries(boolean theAllowAutoDeExternalizingBinaries) {
+		myAllowAutoDeExternalizingBinaries = theAllowAutoDeExternalizingBinaries;
+	}
+
+	public boolean isAllowAutoDeExternalizingBinaries() {
+		return myAllowAutoDeExternalizingBinaries;
 	}
 
 	private static class DeferredBinaryTarget {
