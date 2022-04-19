@@ -49,6 +49,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		super.before();
 		myStorageSvc.setMinimumBinarySize(10);
 		myDaoConfig.setExpungeEnabled(true);
+
 		myInterceptorRegistry.registerInterceptor(myBinaryStorageInterceptor);
 	}
 
@@ -59,6 +60,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		myStorageSvc.setMinimumBinarySize(0);
 		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
 		myBinaryStorageInterceptor.setAutoDeExternalizeMaximumBytes(new BinaryStorageInterceptor().getAutoDeExternalizeMaximumBytes());
+		myBinaryStorageInterceptor.setAllowAutoDeExternalizingBinaries(new BinaryStorageInterceptor().isAllowAutoDeExternalizingBinaries());
 
 		MemoryBinaryStorageSvcImpl binaryStorageSvc = (MemoryBinaryStorageSvcImpl) myBinaryStorageSvc;
 		binaryStorageSvc.clear();
@@ -113,7 +115,6 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testCreateAndRetrieveBinary_ServerAssignedId_ExternalizedBinary_DoNotRehydrate() {
-
 		myBinaryStorageInterceptor.setAllowAutoDeExternalizingBinaries(false);
 
 		// Create a resource with a big enough binary
@@ -129,7 +130,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		assertThat(encoded, containsString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID));
 		assertThat(encoded, not(containsString("\"data\"")));
 
-		// Now read it back and make sure it was de-externalized
+		// Now read it back and make sure it was not  de-externalized
 		Binary output = myBinaryDao.read(id, mySrd);
 		assertEquals("application/octet-stream", output.getContentType());
 		assertArrayEquals(null, output.getData());
