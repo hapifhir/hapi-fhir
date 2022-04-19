@@ -93,6 +93,7 @@ import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Streams;
 import com.healthmarketscience.sqlbuilder.Condition;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -322,17 +323,28 @@ public class SearchBuilder implements ISearchBuilder {
 
 		if (checkUseHibernateSearch()) {
 			// we're going to run at least part of the search against the Fulltext service.
-			List<ResourcePersistentId> fulltextMatchIds;
+
+			// Ugh - we have two different return types for now
+			ISearchQueryExecutor fulltextExecutor = null;
+			List<ResourcePersistentId> fulltextMatchIds = null;
+			int resultCount = 0;
 			if (myParams.isLastN()) {
 				fulltextMatchIds = executeLastNAgainstIndex(theMaximumResults);
+				resultCount = fulltextMatchIds.size();
 			} else if (myParams.getEverythingMode() != null) {
 				fulltextMatchIds = queryHibernateSearchForEverythingPids();
+				resultCount = fulltextMatchIds.size();
 			} else {
-				fulltextMatchIds = myFulltextSearchSvc.search(myResourceName, myParams);
+				fulltextExecutor = myFulltextSearchSvc.searchAsync(myResourceName, myParams);
+			}
+
+			if (fulltextExecutor == null) {
+				fulltextExecutor = SearchQueryExecutors.from(fulltextMatchIds);
 			}
 
 			if (theSearchRuntimeDetails != null) {
-				theSearchRuntimeDetails.setFoundIndexMatchesCount(fulltextMatchIds.size());
+				// wipmb we no longer have full size.
+				theSearchRuntimeDetails.setFoundIndexMatchesCount(resultCount);
 				HookParams params = new HookParams()
 					.add(RequestDetails.class, theRequest)
 					.addIfMatchesType(ServletRequestDetails.class, theRequest)
@@ -340,13 +352,11 @@ public class SearchBuilder implements ISearchBuilder {
 				CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INDEXSEARCH_QUERY_COMPLETE, params);
 			}
 
-			List<Long> rawPids = ResourcePersistentId.toLongList(fulltextMatchIds);
-
 			// wipmb extract
 			// can we skip the database entirely and return the pid list from here?
 			boolean canSkipDatabase =
 				// if we processed an AND clause, and it returned nothing, then nothing can match.
-				rawPids.isEmpty() ||
+				!fulltextExecutor.hasNext() ||
 					// Our hibernate search query doesn't respect partitions yet
 					(!myPartitionSettings.isPartitioningEnabled() &&
 						// we don't support _count=0 yet.
@@ -363,12 +373,16 @@ public class SearchBuilder implements ISearchBuilder {
 					);
 
 			if (canSkipDatabase) {
-				queries.add(ResolvedSearchQueryExecutor.from(rawPids));
+				if (theMaximumResults != null) {
+					fulltextExecutor = SearchQueryExecutors.limited(fulltextExecutor, theMaximumResults);
+				}
+				queries.add(fulltextExecutor);
 			} else {
 				// Finish the query in the database for the rest of the search parameters, sorting, partitioning, etc.
 				// We break the pids into chunks that fit in the 1k limit for jdbc bind params.
+				// wipmb change chunk to take iterator
 				new QueryChunker<Long>()
-					.chunk(rawPids, t -> doCreateChunkedQueries(theParams, t, theOffset, sort, theCount, theRequest, queries));
+					.chunk(Streams.stream(fulltextExecutor).collect(Collectors.toList()), t -> doCreateChunkedQueries(theParams, t, theOffset, sort, theCount, theRequest, queries));
 			}
 		} else {
 			// do everything in the database.
@@ -1384,41 +1398,6 @@ public class SearchBuilder implements ISearchBuilder {
 		myDaoConfig = theDaoConfig;
 	}
 
-	/**
-	 * Adapt bare Iterator to our internal query interface.
-	 */
-	static class ResolvedSearchQueryExecutor implements ISearchQueryExecutor {
-		private final Iterator<Long> myIterator;
-
-		ResolvedSearchQueryExecutor(Iterable<Long> theIterable) {
-			this(theIterable.iterator());
-		}
-
-		ResolvedSearchQueryExecutor(Iterator<Long> theIterator) {
-			myIterator = theIterator;
-		}
-
-		@Nonnull
-		public static ResolvedSearchQueryExecutor from(List<Long> rawPids) {
-			return new ResolvedSearchQueryExecutor(rawPids);
-		}
-
-		@Override
-		public boolean hasNext() {
-			return myIterator.hasNext();
-		}
-
-		@Override
-		public Long next() {
-			return myIterator.next();
-		}
-
-		@Override
-		public void close() {
-			// empty
-		}
-	}
-
 	public class IncludesIterator extends BaseIterator<ResourcePersistentId> implements Iterator<ResourcePersistentId> {
 
 		private final RequestDetails myRequest;
@@ -1643,6 +1622,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 		private void initializeIteratorQuery(Integer theOffset, Integer theMaxResultsToFetch) {
 			if (myQueryList.isEmpty()) {
+				// wipmb what is this?
 				// Capture times for Lucene/Elasticsearch queries as well
 				mySearchRuntimeDetails.setQueryStopwatch(new StopWatch());
 				myQueryList = createQuery(myParams, mySort, theOffset, theMaxResultsToFetch, false, myRequest, mySearchRuntimeDetails);

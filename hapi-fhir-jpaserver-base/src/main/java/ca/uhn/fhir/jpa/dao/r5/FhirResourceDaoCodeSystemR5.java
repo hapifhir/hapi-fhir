@@ -160,10 +160,12 @@ public class FhirResourceDaoCodeSystemR5 extends BaseHapiFhirResourceDao<CodeSys
 		ResourceTable retVal = super.updateEntity(theRequest, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theTransactionDetails, theForceUpdate, theCreateNewHistoryEntry);
 		if (!retVal.isUnchangedInCurrentOperation()) {
 
-			CodeSystem cs = (CodeSystem) theResource;
-			addPidToResource(theEntity, theResource);
+			CodeSystem csR5 = (CodeSystem) theResource;
 
-			myTerminologyCodeSystemStorageSvc.storeNewCodeSystemVersionIfNeeded((org.hl7.fhir.r4.model.CodeSystem) VersionConvertorFactory_40_50.convertResource(cs, new BaseAdvisor_40_50(false)), (ResourceTable) theEntity);
+			org.hl7.fhir.r4.model.CodeSystem cs = (org.hl7.fhir.r4.model.CodeSystem) VersionConvertorFactory_40_50.convertResource(csR5, new BaseAdvisor_40_50(false));
+			addPidToResource(theEntity, cs);
+
+			myTerminologyCodeSystemStorageSvc.storeNewCodeSystemVersionIfNeeded(cs, (ResourceTable) theEntity);
 		}
 
 		return retVal;

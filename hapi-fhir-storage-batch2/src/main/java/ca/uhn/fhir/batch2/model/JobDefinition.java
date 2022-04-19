@@ -20,6 +20,7 @@ package ca.uhn.fhir.batch2.model;
  * #L%
  */
 
+import ca.uhn.fhir.batch2.api.IJobCompletionHandler;
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.VoidModel;
@@ -31,6 +32,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class JobDefinition<PT extends IModelJson> {
 
@@ -42,11 +44,14 @@ public class JobDefinition<PT extends IModelJson> {
 	private final List<JobDefinitionStep<PT, ?, ?>> mySteps;
 	private final String myJobDescription;
 	private final IJobParametersValidator<PT> myParametersValidator;
+	private final boolean myGatedExecution;
+	private final List<String> myStepIds;
+	private final IJobCompletionHandler<PT> myCompletionHandler;
 
 	/**
 	 * Constructor
 	 */
-	private JobDefinition(String theJobDefinitionId, int theJobDefinitionVersion, String theJobDescription, Class<PT> theParametersType, List<JobDefinitionStep<PT, ?, ?>> theSteps, IJobParametersValidator<PT> theParametersValidator) {
+	private JobDefinition(String theJobDefinitionId, int theJobDefinitionVersion, String theJobDescription, Class<PT> theParametersType, List<JobDefinitionStep<PT, ?, ?>> theSteps, IJobParametersValidator<PT> theParametersValidator, boolean theGatedExecution, IJobCompletionHandler<PT> theCompletionHandler) {
 		Validate.isTrue(theJobDefinitionId.length() <= ID_MAX_LENGTH, "Maximum ID length is %d", ID_MAX_LENGTH);
 		Validate.notBlank(theJobDefinitionId, "No job definition ID supplied");
 		Validate.notBlank(theJobDescription, "No job description supplied");
@@ -56,8 +61,16 @@ public class JobDefinition<PT extends IModelJson> {
 		myJobDefinitionVersion = theJobDefinitionVersion;
 		myJobDescription = theJobDescription;
 		mySteps = theSteps;
+		myStepIds = mySteps.stream().map(t -> t.getStepId()).collect(Collectors.toList());
 		myParametersType = theParametersType;
 		myParametersValidator = theParametersValidator;
+		myGatedExecution = theGatedExecution;
+		myCompletionHandler = theCompletionHandler;
+	}
+
+	@Nullable
+	public IJobCompletionHandler<PT> getCompletionHandler() {
+		return myCompletionHandler;
 	}
 
 	@Nullable
@@ -97,8 +110,18 @@ public class JobDefinition<PT extends IModelJson> {
 		return mySteps;
 	}
 
-	public static Builder<IModelJson, VoidModel> newBuilder() {
-		return new Builder<>();
+	public boolean isGatedExecution() {
+		return myGatedExecution;
+	}
+
+	public int getStepIndex(String theStepId) {
+		int retVal = myStepIds.indexOf(theStepId);
+		Validate.isTrue(retVal != -1);
+		return retVal;
+	}
+
+	public boolean isLastStep(String theStepId) {
+		return getStepIndex(theStepId) == (myStepIds.size() - 1);
 	}
 
 	public static class Builder<PT extends IModelJson, NIT extends IModelJson> {
@@ -111,12 +134,14 @@ public class JobDefinition<PT extends IModelJson> {
 		private Class<NIT> myNextInputType;
 		@Nullable
 		private IJobParametersValidator<PT> myParametersValidator;
+		private boolean myGatedExecution;
+		private IJobCompletionHandler<PT> myCompletionHandler;
 
 		Builder() {
 			mySteps = new ArrayList<>();
 		}
 
-		Builder(List<JobDefinitionStep<PT, ?, ?>> theSteps, String theJobDefinitionId, int theJobDefinitionVersion, String theJobDescription, Class<PT> theJobParametersType, Class<NIT> theNextInputType, IJobParametersValidator<PT> theParametersValidator) {
+		Builder(List<JobDefinitionStep<PT, ?, ?>> theSteps, String theJobDefinitionId, int theJobDefinitionVersion, String theJobDescription, Class<PT> theJobParametersType, Class<NIT> theNextInputType, IJobParametersValidator<PT> theParametersValidator, boolean theGatedExecution, IJobCompletionHandler<PT> theCompletionHandler) {
 			mySteps = theSteps;
 			myJobDefinitionId = theJobDefinitionId;
 			myJobDefinitionVersion = theJobDefinitionVersion;
@@ -124,6 +149,8 @@ public class JobDefinition<PT extends IModelJson> {
 			myJobParametersType = theJobParametersType;
 			myNextInputType = theNextInputType;
 			myParametersValidator = theParametersValidator;
+			myGatedExecution = theGatedExecution;
+			myCompletionHandler = theCompletionHandler;
 		}
 
 		/**
@@ -154,7 +181,7 @@ public class JobDefinition<PT extends IModelJson> {
 		 */
 		public <OT extends IModelJson> Builder<PT, OT> addFirstStep(String theStepId, String theStepDescription, Class<OT> theOutputType, IJobStepWorker<PT, VoidModel, OT> theStepWorker) {
 			mySteps.add(new JobDefinitionStep<>(theStepId, theStepDescription, theStepWorker, VoidModel.class, theOutputType));
-			return new Builder<>(mySteps, myJobDefinitionId, myJobDefinitionVersion, myJobDescription, myJobParametersType, theOutputType, myParametersValidator);
+			return new Builder<>(mySteps, myJobDefinitionId, myJobDefinitionVersion, myJobDescription, myJobParametersType, theOutputType, myParametersValidator, myGatedExecution, myCompletionHandler);
 		}
 
 		/**
@@ -168,7 +195,7 @@ public class JobDefinition<PT extends IModelJson> {
 		 */
 		public <OT extends IModelJson> Builder<PT, OT> addIntermediateStep(String theStepId, String theStepDescription, Class<OT> theOutputType, IJobStepWorker<PT, NIT, OT> theStepWorker) {
 			mySteps.add(new JobDefinitionStep<>(theStepId, theStepDescription, theStepWorker, myNextInputType, theOutputType));
-			return new Builder<>(mySteps, myJobDefinitionId, myJobDefinitionVersion, myJobDescription, myJobParametersType, theOutputType, myParametersValidator);
+			return new Builder<>(mySteps, myJobDefinitionId, myJobDefinitionVersion, myJobDescription, myJobParametersType, theOutputType, myParametersValidator, myGatedExecution, myCompletionHandler);
 		}
 
 		/**
@@ -182,12 +209,12 @@ public class JobDefinition<PT extends IModelJson> {
 		 */
 		public Builder<PT, VoidModel> addLastStep(String theStepId, String theStepDescription, IJobStepWorker<PT, NIT, VoidModel> theStepWorker) {
 			mySteps.add(new JobDefinitionStep<>(theStepId, theStepDescription, theStepWorker, myNextInputType, VoidModel.class));
-			return new Builder<>(mySteps, myJobDefinitionId, myJobDefinitionVersion, myJobDescription, myJobParametersType, VoidModel.class, myParametersValidator);
+			return new Builder<>(mySteps, myJobDefinitionId, myJobDefinitionVersion, myJobDescription, myJobParametersType, VoidModel.class, myParametersValidator, myGatedExecution, myCompletionHandler);
 		}
 
 		public JobDefinition<PT> build() {
 			Validate.notNull(myJobParametersType, "No job parameters type was supplied");
-			return new JobDefinition<>(myJobDefinitionId, myJobDefinitionVersion, myJobDescription, myJobParametersType, Collections.unmodifiableList(mySteps), myParametersValidator);
+			return new JobDefinition<>(myJobDefinitionId, myJobDefinitionVersion, myJobDescription, myJobParametersType, Collections.unmodifiableList(mySteps), myParametersValidator, myGatedExecution, myCompletionHandler);
 		}
 
 		public Builder<PT, NIT> setJobDescription(String theJobDescription) {
@@ -233,12 +260,58 @@ public class JobDefinition<PT extends IModelJson> {
 		 * @param theParametersValidator The validator (must not be null. Do not call this method at all if you do not want a parameters validator).
 		 */
 		@SuppressWarnings("unchecked")
-		public <NPT extends IModelJson> Builder<PT, NIT> setParametersValidator(@Nonnull IJobParametersValidator<PT> theParametersValidator) {
+		public Builder<PT, NIT> setParametersValidator(@Nonnull IJobParametersValidator<PT> theParametersValidator) {
 			Validate.notNull(theParametersValidator, "theParametersValidator must not be null");
 			Validate.isTrue(myParametersValidator == null, "Can not supply multiple parameters validators. Already have: %s", myParametersValidator);
 			myParametersValidator = theParametersValidator;
-			return (Builder<PT, NIT>) this;
+			return this;
 		}
+
+		/**
+		 * If this is set, the framework will wait for all work chunks to be
+		 * processed for an individual step before moving on to beginning
+		 * processing on the next step. Otherwise, processing on subsequent
+		 * steps may begin as soon as any data has been produced.
+		 * <p>
+		 * This is useful in a few cases:
+		 * <ul>
+		 *    <li>
+		 *       If there are potential constraint issues, e.g. data being
+		 *    	written by the third step depends on all data from the
+		 *    	second step already being written
+		 *    </li>
+		 *    <li>
+		 *       If multiple steps require expensive database queries, it may
+		 *       reduce the chances of timeouts to ensure that they are run
+		 *       discretely.
+		 *    </li>
+		 * </ul>
+		 * </p>
+		 * <p>
+		 * Setting this mode means the job may take longer, since it will
+		 * rely on a polling mechanism to determine that one step is
+		 * complete before beginning any processing for the next step.
+		 * </p>
+		 */
+		public Builder<PT, NIT> gatedExecution() {
+			myGatedExecution = true;
+			return this;
+		}
+
+		/**
+		 * Supplies an optional callback that will be invoked when the job is complete
+		 */
+		public Builder<PT, NIT> completionHandler(IJobCompletionHandler<PT> theCompletionHandler) {
+			Validate.isTrue(myCompletionHandler == null, "Can not supply multiple completion handlers");
+			myCompletionHandler = theCompletionHandler;
+			return this;
+		}
+
+
+	}
+
+	public static Builder<IModelJson, VoidModel> newBuilder() {
+		return new Builder<>();
 	}
 
 }

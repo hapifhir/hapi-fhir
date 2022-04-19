@@ -24,6 +24,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ReindexJobTest extends BaseJpaR4Test {
+
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
 
