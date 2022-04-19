@@ -284,7 +284,7 @@ public class DaoRegistryGraphQLStorageServices implements IGraphQLStorageService
 
 			response = Optional.ofNullable(myPagingProvider.retrieveResultList(requestDetails, searchId)).orElseThrow(()->{
 				String msg = myContext.getLocalizer().getMessageSanitized(DaoRegistryGraphQLStorageServices.class, "invalidGraphqlCursorArgument", searchId);
-				return new InvalidRequestException(msg);
+				return new InvalidRequestException(Msg.code(2076) + msg);
 			});
 
 			pageSize = Optional.ofNullable(response.preferredPageSize())
