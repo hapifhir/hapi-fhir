@@ -20,11 +20,11 @@ package ca.uhn.fhir.batch2.config;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.api.IJobCleanerService;
+import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.impl.BatchJobSender;
-import ca.uhn.fhir.batch2.impl.JobCleanerServiceImpl;
+import ca.uhn.fhir.batch2.impl.JobMaintenanceServiceImpl;
 import ca.uhn.fhir.batch2.impl.JobCoordinatorImpl;
 import ca.uhn.fhir.batch2.impl.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
@@ -48,9 +48,14 @@ public abstract class BaseBatch2Config {
 	}
 
 	@Bean
-	public IJobCoordinator batch2JobCoordinator(IChannelFactory theChannelFactory, IJobPersistence theJobInstancePersister, JobDefinitionRegistry theJobDefinitionRegistry) {
+	public BatchJobSender batchJobSender(IChannelFactory theChannelFactory) {
+		return new BatchJobSender(batch2ProcessingChannelProducer(theChannelFactory));
+	}
+
+	@Bean
+	public IJobCoordinator batch2JobCoordinator(IChannelFactory theChannelFactory, IJobPersistence theJobInstancePersister, JobDefinitionRegistry theJobDefinitionRegistry, BatchJobSender theBatchJobSender) {
 		return new JobCoordinatorImpl(
-			new BatchJobSender(batch2ProcessingChannelProducer(theChannelFactory)),
+			theBatchJobSender,
 			batch2ProcessingChannelReceiver(theChannelFactory),
 			theJobInstancePersister,
 			theJobDefinitionRegistry
@@ -58,8 +63,8 @@ public abstract class BaseBatch2Config {
 	}
 
 	@Bean
-	public IJobCleanerService batch2JobCleaner(ISchedulerService theSchedulerService, IJobPersistence theJobPersistence) {
-		return new JobCleanerServiceImpl(theSchedulerService, theJobPersistence);
+	public IJobMaintenanceService batch2JobMaintenanceService(ISchedulerService theSchedulerService, IJobPersistence theJobPersistence, JobDefinitionRegistry theJobDefinitionRegistry, BatchJobSender theBatchJobSender) {
+		return new JobMaintenanceServiceImpl(theSchedulerService, theJobPersistence, theJobDefinitionRegistry, theBatchJobSender);
 	}
 
 	@Bean
