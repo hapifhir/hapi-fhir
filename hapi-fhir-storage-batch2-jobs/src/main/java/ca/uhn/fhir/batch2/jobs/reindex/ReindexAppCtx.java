@@ -41,6 +41,7 @@ public class ReindexAppCtx {
 			.setJobDefinitionVersion(1)
 			.setParametersType(ReindexJobParameters.class)
 			.setParametersValidator(reindexJobParametersValidator())
+			.gatedExecution()
 			.addFirstStep(
 				"generate-ranges",
 				"Generate data ranges to reindex",

@@ -36,14 +36,16 @@ class JobDataSink<OT extends IModelJson> extends BaseDataSink<OT> {
 	private final int myJobDefinitionVersion;
 	private final JobDefinitionStep<?, ?, ?> myTargetStep;
 	private final AtomicInteger myChunkCounter = new AtomicInteger(0);
+	private final boolean myGatedExecution;
 
-	JobDataSink(BatchJobSender theBatchJobSender, IJobPersistence theJobPersistence, String theJobDefinitionId, int theJobDefinitionVersion, JobDefinitionStep<?, ?, ?> theTargetStep, String theInstanceId, String theCurrentStepId) {
+	JobDataSink(BatchJobSender theBatchJobSender, IJobPersistence theJobPersistence, String theJobDefinitionId, int theJobDefinitionVersion, JobDefinitionStep<?, ?, ?> theTargetStep, String theInstanceId, String theCurrentStepId, boolean theGatedExecution) {
 		super(theInstanceId, theCurrentStepId);
 		myBatchJobSender = theBatchJobSender;
 		myJobPersistence = theJobPersistence;
 		myJobDefinitionId = theJobDefinitionId;
 		myJobDefinitionVersion = theJobDefinitionVersion;
 		myTargetStep = theTargetStep;
+		myGatedExecution = theGatedExecution;
 	}
 
 	@Override
@@ -59,8 +61,10 @@ class JobDataSink<OT extends IModelJson> extends BaseDataSink<OT> {
 		BatchWorkChunk batchWorkChunk = new BatchWorkChunk(jobDefinitionId, jobDefinitionVersion, targetStepId, instanceId, sequence, dataValueString);
 		String chunkId = myJobPersistence.storeWorkChunk(batchWorkChunk);
 
-		JobWorkNotification workNotification = new JobWorkNotification(jobDefinitionId, jobDefinitionVersion, instanceId, targetStepId, chunkId);
-		myBatchJobSender.sendWorkChannelMessage(workNotification);
+		if (!myGatedExecution) {
+			JobWorkNotification workNotification = new JobWorkNotification(jobDefinitionId, jobDefinitionVersion, instanceId, targetStepId, chunkId);
+			myBatchJobSender.sendWorkChannelMessage(workNotification);
+		}
 	}
 
 	@Override

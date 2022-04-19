@@ -54,5 +54,4 @@ public interface IJobCoordinator {
 
 	void cancelInstance(String theInstanceId) throws ResourceNotFoundException;
 
-
 }
