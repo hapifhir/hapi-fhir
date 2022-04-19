@@ -14,6 +14,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
+import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.BinaryUtil;
@@ -49,27 +50,36 @@ public class WriteBinaryStep implements IJobStepWorker<BulkExportJobParameters, 
 								 @Nonnull IJobDataSink<VoidModel> theDataSink) throws JobExecutionFailedException {
 
 		BulkExportExpandedResources expandedResources = theStepExecutionDetails.getData();
+		@SuppressWarnings("unchecked")
 		IFhirResourceDao<IBaseBinary> binaryDao = myDaoRegistry.getResourceDao("Binary");
-
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-		OutputStreamWriter streamWriter = new OutputStreamWriter(outputStream, Constants.CHARSET_UTF8);
-
-		List<String> errors = new ArrayList<>();
-		for (String stringified : expandedResources.getStringifiedResources()) {
-			try {
-				streamWriter.append(stringified);
-				streamWriter.append("\n");
-			} catch (IOException ex) {
-				ourLog.error("Failure to process resource of type {} : {}",
-					expandedResources.getResourceType(),
-					ex.getMessage());
-				errors.add(ex.getMessage());
-			}
-		}
 
 		IBaseBinary binary = BinaryUtil.newBinary(myFhirContext);
 		binary.setContentType(Constants.CT_FHIR_NDJSON);
-		binary.setContent(outputStream.toByteArray());
+
+		List<String> errors = new ArrayList<>();
+		try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+			try (OutputStreamWriter streamWriter = new OutputStreamWriter(outputStream, Constants.CHARSET_UTF8)) {
+				for (String stringified : expandedResources.getStringifiedResources()) {
+					streamWriter.append(stringified);
+					streamWriter.append("\n");
+				}
+				streamWriter.flush();
+				outputStream.flush();
+			}
+			binary.setContent(outputStream.toByteArray());
+		}
+		catch (IOException ex) {
+			ourLog.error("Failure to process resource of type {} : {}",
+				expandedResources.getResourceType(),
+				ex.getMessage());
+			errors.add(ex.getMessage());
+
+			// processing will continue
+			// but we'll set the job to error so user knows why it's incomplete
+			myBulkExportProcessor.setJobStatus(expandedResources.getJobId(),
+				BulkExportJobStatusEnum.ERROR);
+		}
+
 		DaoMethodOutcome outcome = binaryDao.create(binary,
 			new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.defaultPartition()));
 		IIdType id = outcome.getId();
@@ -77,7 +87,6 @@ public class WriteBinaryStep implements IJobStepWorker<BulkExportJobParameters, 
 		String jobId = expandedResources.getJobId();
 
 		// save the binary to the file collection
-		// TODO - should we set to error if there are errors?
 		myBulkExportProcessor.addFileToCollection(jobId,
 			expandedResources.getResourceType(),
 			id);

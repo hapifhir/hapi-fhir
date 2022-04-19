@@ -24,6 +24,13 @@ public interface IBulkExportProcessor {
 	void setJobStatus(String theJobId, BulkExportJobStatusEnum theStatus);
 
 	/**
+	 * Returns the current job status.
+	 * @param theJobId
+	 * @return
+	 */
+	BulkExportJobStatusEnum getJobStatus(String theJobId);
+
+	/**
 	 * Adds binary to job for resource type
 	 * @param theJobId
 	 * @param theBinaryId

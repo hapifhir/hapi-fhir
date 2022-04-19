@@ -25,10 +25,10 @@ import java.util.List;
 public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobParameters, BulkExportIdList> {
 	private static final Logger ourLog = LoggerFactory.getLogger(FetchResourceIdsStep.class);
 
-	private static final int MAX_IDS_TO_BATCH = 1000;
+	public static final int MAX_IDS_TO_BATCH = 1000;
 
 	@Autowired
-	private IBulkExportProcessor myBulkIdProcessor;
+	private IBulkExportProcessor myBulkExportProcessor;
 
 	@Nonnull
 	@Override
@@ -38,7 +38,7 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 		ourLog.info("Starting BatchExport job");
 
 		// set job status to building
-		myBulkIdProcessor.setJobStatus(params.getJobId(), BulkExportJobStatusEnum.BUILDING);
+		myBulkExportProcessor.setJobStatus(params.getJobId(), BulkExportJobStatusEnum.BUILDING);
 
 		ExportPIDIteratorParameters providerParams = new ExportPIDIteratorParameters();
 		providerParams.setFilters(params.getFilters());
@@ -49,16 +49,19 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 			providerParams.setResourceType(resourceType);
 
 			// TODO - implementation - see BulkItemReader
-			Iterator<ResourcePersistentId> pidIterator = myBulkIdProcessor.getResourcePidIterator(providerParams);
+			Iterator<ResourcePersistentId> pidIterator = myBulkExportProcessor.getResourcePidIterator(providerParams);
 			List<Id> idsToSubmit = new ArrayList<>();
 			while (pidIterator.hasNext()) {
 				ResourcePersistentId pid = pidIterator.next();
 
 				idsToSubmit.add(Id.getIdFromPID(pid, resourceType));
-				if (idsToSubmit.size() > MAX_IDS_TO_BATCH) {
+
+				// >= so that we know (with confidence)
+				// that every batch is <= 1000 items
+				if (idsToSubmit.size() >= MAX_IDS_TO_BATCH) {
 					submitWorkChunk(idsToSubmit, resourceType, params, theDataSink);
 					submissionCount++;
-					idsToSubmit.clear(); // clear to refile
+					idsToSubmit = new ArrayList<>();
 				}
 			}
 
@@ -66,7 +69,7 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 			if (!idsToSubmit.isEmpty()) {
 				submitWorkChunk(idsToSubmit, resourceType, params, theDataSink);
 				submissionCount++;
-				idsToSubmit.clear();
+				idsToSubmit = new ArrayList<>();
 			}
 		}
 

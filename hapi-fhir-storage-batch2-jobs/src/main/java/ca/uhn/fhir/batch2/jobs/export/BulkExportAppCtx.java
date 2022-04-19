@@ -2,11 +2,11 @@ package ca.uhn.fhir.batch2.jobs.export;
 
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportExpandedResources;
-import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportIdList;
+import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.model.JobDefinition;
-import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -41,7 +41,9 @@ public class BulkExportAppCtx {
 			"write-to-binaries",
 			"Writes the expanded resources to the binaries and saves",
 			writeBinaryStep()
-		);
+		)
+			.completionHandler(finalizeJobCallback())
+		;
 
 		// TODO - we will want a new last step that
 		// actually depends on all previous steps and will fire only
@@ -63,5 +65,10 @@ public class BulkExportAppCtx {
 	@Bean
 	public WriteBinaryStep writeBinaryStep() {
 		return new WriteBinaryStep();
+	}
+
+	@Bean
+	public FinalBatchExportCallback finalizeJobCallback() {
+		return new FinalBatchExportCallback();
 	}
 }

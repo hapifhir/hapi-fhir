@@ -42,13 +42,14 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 	public RunOutcome run(@Nonnull StepExecutionDetails<BulkExportJobParameters, BulkExportIdList> theStepExecutionDetails,
 								 @Nonnull IJobDataSink<BulkExportExpandedResources> theDataSink) throws JobExecutionFailedException {
 		BulkExportIdList idList = theStepExecutionDetails.getData();
+		BulkExportJobParameters jobParameters = theStepExecutionDetails.getParameters();
 
 		// search the resources
 		IBundleProvider bundle = fetchAllResources(idList);
 
 		// encode them
 		// TODO - should we just call a writer here and let the rest of the work be done?
-		List<String> resources = encodeToString(bundle.getAllResources());
+		List<String> resources = encodeToString(bundle.getAllResources(), jobParameters);
 
 		// set to datasink
 		BulkExportExpandedResources output = new BulkExportExpandedResources();
@@ -76,8 +77,8 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 		return dao.search(map);
 	}
 
-	private List<String> encodeToString(List<IBaseResource> theResources) {
-		IParser parser = myFhirContext.newJsonParser().setPrettyPrint(false);
+	private List<String> encodeToString(List<IBaseResource> theResources, BulkExportJobParameters theParameters) {
+		IParser parser = getParser(theParameters);
 
 		List<String> resources = new ArrayList<>();
 		for (IBaseResource resource : theResources) {
@@ -85,5 +86,9 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 			resources.add(jsonResource);
 		}
 		return resources;
+	}
+
+	private IParser getParser(BulkExportJobParameters theParameters) {
+		return myFhirContext.newJsonParser().setPrettyPrint(false);
 	}
 }

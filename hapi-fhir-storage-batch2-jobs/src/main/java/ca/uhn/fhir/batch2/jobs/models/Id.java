@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hl7.fhir.r4.model.IdType;
 
 public class Id implements IModelJson {
 
@@ -62,6 +63,8 @@ public class Id implements IModelJson {
 	}
 
 	public ResourcePersistentId toPID() {
-		return new ResourcePersistentId(myId);
+		ResourcePersistentId pid = new ResourcePersistentId(myId);
+		pid.setAssociatedResourceId(new IdType(myId));
+		return pid;
 	}
 }
