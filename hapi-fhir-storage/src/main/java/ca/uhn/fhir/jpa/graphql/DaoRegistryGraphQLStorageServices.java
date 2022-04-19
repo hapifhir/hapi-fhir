@@ -55,7 +55,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import org.apache.commons.lang3.Validate;
@@ -67,24 +66,26 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.utilities.graphql.Argument;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.hl7.fhir.utilities.graphql.Value;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_COUNT;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_FILTER;
 
 public class DaoRegistryGraphQLStorageServices implements IGraphQLStorageServices {
+
+	// the constant hasn't already been defined in org.hl7.fhir.core so we define it here
+	static final String SEARCH_ID_PARAM = "search-id";
+	static final String SEARCH_OFFSET_PARAM = "search-offset";
 
 	private static final int MAX_SEARCH_SIZE = 500;
 	@Autowired
@@ -97,8 +98,8 @@ public class DaoRegistryGraphQLStorageServices implements IGraphQLStorageService
 	protected ISearchCoordinatorSvc mySearchCoordinatorSvc;
 	@Autowired
 	private IRequestPartitionHelperSvc myPartitionHelperSvc;
-
-	private static final Logger ourLog = LoggerFactory.getLogger(DaoRegistryGraphQLStorageServices.class);
+	@Autowired
+	private IPagingProvider myPagingProvider;
 
 	private IFhirResourceDao<? extends IBaseResource> getDao(String theResourceType) {
 		RuntimeResourceDefinition typeDef = myContext.getResourceDefinition(theResourceType);
@@ -268,10 +269,9 @@ public class DaoRegistryGraphQLStorageServices implements IGraphQLStorageService
 	@Override
 	public IBaseBundle search(Object theAppInfo, String theType, List<Argument> theSearchParams) throws FHIRException {
 		RequestDetails requestDetails = (RequestDetails) theAppInfo;
-		IPagingProvider pagingProvider = requestDetails.getServer().getPagingProvider();
 
-		Optional<String> searchIdArgument = getArgument(theSearchParams, "search-id");
-		Optional<String> searchOffsetArgument = getArgument(theSearchParams, "search-offset");
+		Optional<String> searchIdArgument = getArgument(theSearchParams, SEARCH_ID_PARAM);
+		Optional<String> searchOffsetArgument = getArgument(theSearchParams, SEARCH_OFFSET_PARAM);
 
 		String searchId;
 		int searchOffset;
@@ -282,16 +282,16 @@ public class DaoRegistryGraphQLStorageServices implements IGraphQLStorageService
 			searchId = searchIdArgument.get();
 			searchOffset = Integer.parseInt(searchOffsetArgument.get());
 
-			response = Optional.ofNullable(pagingProvider.retrieveResultList(requestDetails, searchId)).orElseThrow(()->{
+			response = Optional.ofNullable(myPagingProvider.retrieveResultList(requestDetails, searchId)).orElseThrow(()->{
 				String msg = myContext.getLocalizer().getMessageSanitized(DaoRegistryGraphQLStorageServices.class, "invalidGraphqlCursorArgument", searchId);
 				return new InvalidRequestException(msg);
 			});
 
 			pageSize = Optional.ofNullable(response.preferredPageSize())
-				.orElseGet(pagingProvider::getDefaultPageSize);
+				.orElseGet(myPagingProvider::getDefaultPageSize);
 		} else {
 			pageSize = getArgument(theSearchParams, "_count").map(Integer::parseInt)
-				.orElseGet(pagingProvider::getDefaultPageSize);
+				.orElseGet(myPagingProvider::getDefaultPageSize);
 
 			SearchParameterMap params = buildSearchParams(theType, theSearchParams);
 			params.setCount(pageSize);
@@ -303,31 +303,43 @@ public class DaoRegistryGraphQLStorageServices implements IGraphQLStorageService
 			response = mySearchCoordinatorSvc.registerSearch(getDao(theType), params, theType, cacheControlDirective, requestDetails, requestPartitionId);
 
 			searchOffset = 0;
-			searchId = pagingProvider.storeResultList(null, response);
+			searchId = myPagingProvider.storeResultList(requestDetails, response);
 		}
 
+
+		// response.size() may return {@literal null}, in that case use pageSize
 		String serverBase = requestDetails.getFhirServerBase();
 		Optional<Integer> numTotalResults = Optional.ofNullable(response.size());
 		int numToReturn = numTotalResults.map(integer -> Math.min(pageSize, integer - searchOffset)).orElse(pageSize);
 
 		BundleLinks links = new BundleLinks(requestDetails.getServerBaseForRequest(), null, RestfulServerUtils.prettyPrintResponse(requestDetails.getServer(), requestDetails), BundleTypeEnum.SEARCHSET);
-		links.setSelf(RestfulServerUtils.createLinkSelf(requestDetails.getFhirServerBase(), requestDetails));
+
+		// RestfulServerUtils.createLinkSelf not suitable here
+		String linkFormat = "%s/%s?_format=application/json&search-id=%s&search-offset=%d&_count=%d";
+
+		String linkSelf = String.format(linkFormat, serverBase, theType, searchId, searchOffset, pageSize);
+		links.setSelf(linkSelf);
 
 		boolean hasNext = numTotalResults.map(total -> (searchOffset + numToReturn) < total).orElse(true);
+
 		if (hasNext) {
-			links.setNext(RestfulServerUtils.createOffsetPagingLink(links, requestDetails.getRequestPath(), requestDetails.getTenantId(), searchOffset + numToReturn, numToReturn, requestDetails.getParameters()));
+			String linkNext = String.format(linkFormat, serverBase, theType, searchId, searchOffset+numToReturn, pageSize);
+			links.setNext(linkNext);
 		}
 
 		if (searchOffset > 0) {
-			links.setPrev(RestfulServerUtils.createOffsetPagingLink(links, requestDetails.getRequestPath(), requestDetails.getTenantId(), Math.max(0, searchOffset-pageSize), numToReturn, requestDetails.getParameters()));
+			String linkPrev = String.format(linkFormat, serverBase, theType, searchId, Math.max(0, searchOffset-pageSize), pageSize);
+			links.setPrev(linkPrev);
 		}
 
 		List<IBaseResource> resourceList = response.getResources(searchOffset, numToReturn + searchOffset);
-		IVersionSpecificBundleFactory bundleFactory = requestDetails.getFhirContext().newBundleFactory();
+
+		IVersionSpecificBundleFactory bundleFactory = myContext.newBundleFactory();
 		bundleFactory.addRootPropertiesToBundle(response.getUuid(), links, response.size(), response.getPublished());
 		bundleFactory.addResourcesToBundle(resourceList, BundleTypeEnum.SEARCHSET, serverBase, null, null);
 
-		return (IBaseBundle) bundleFactory.getResourceBundle();
+		IBaseResource result = bundleFactory.getResourceBundle();
+		return (IBaseBundle) result;
 	}
 
 }
