@@ -22,8 +22,10 @@ package ca.uhn.fhir.batch2.impl;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 

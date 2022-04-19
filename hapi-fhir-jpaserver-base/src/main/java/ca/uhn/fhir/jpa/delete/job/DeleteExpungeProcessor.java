@@ -37,6 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -85,7 +86,8 @@ public class DeleteExpungeProcessor implements ItemProcessor<List<Long>, List<St
 
 		List<ResourceLink> conflictResourceLinks = Collections.synchronizedList(new ArrayList<>());
 		PartitionRunner partitionRunner = new PartitionRunner(PROCESS_NAME, THREAD_PREFIX, myDaoConfig.getExpungeBatchSize(), myDaoConfig.getExpungeThreadCount());
-		partitionRunner.runInPartitionedThreads(thePids, someTargetPids -> findResourceLinksWithTargetPidIn(thePids, someTargetPids, conflictResourceLinks));
+		Consumer<List<Long>> listConsumer = someTargetPids -> findResourceLinksWithTargetPidIn(thePids, someTargetPids, conflictResourceLinks);
+		partitionRunner.runInPartitionedThreads(thePids, listConsumer);
 
 		if (conflictResourceLinks.isEmpty()) {
 			return;

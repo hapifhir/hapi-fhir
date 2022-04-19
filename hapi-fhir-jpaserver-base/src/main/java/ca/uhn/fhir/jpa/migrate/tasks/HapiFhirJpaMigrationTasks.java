@@ -49,11 +49,10 @@ import java.util.stream.Collectors;
 @SuppressWarnings({"SqlNoDataSourceInspection", "SpellCheckingInspection"})
 public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
-	private final Set<FlagEnum> myFlags;
-
 	// H2, Derby, MariaDB, and MySql automatically add indexes to foreign keys
 	public static final DriverTypeEnum[] NON_AUTOMATIC_FK_INDEX_PLATFORMS = new DriverTypeEnum[]{
 		DriverTypeEnum.POSTGRES_9_4, DriverTypeEnum.ORACLE_12C, DriverTypeEnum.MSSQL_2012};
+	private final Set<FlagEnum> myFlags;
 
 
 	/**
@@ -284,10 +283,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		version.onTable("NPM_PACKAGE_VER_RES")
 			.modifyColumn("20220329.2","FHIR_VERSION_ID").nonNullable().withType(ColumnTypeEnum.STRING, 20);
+
 	}
 
 	/**
 	 * new numeric search indexing
+	 *
 	 * @see ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder
 	 * @see ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber
 	 */
@@ -326,6 +327,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 	/**
 	 * new quantity search indexing
+	 *
 	 * @see ca.uhn.fhir.jpa.search.builder.predicate.QuantityPredicateBuilder
 	 * @see ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity
 	 * @see ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized

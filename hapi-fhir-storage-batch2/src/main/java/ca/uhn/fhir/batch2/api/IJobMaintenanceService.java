@@ -20,8 +20,8 @@ package ca.uhn.fhir.batch2.api;
  * #L%
  */
 
-public interface IJobCleanerService {
+public interface IJobMaintenanceService {
 
-	void runCleanupPass();
+	void runMaintenancePass();
 
 }
