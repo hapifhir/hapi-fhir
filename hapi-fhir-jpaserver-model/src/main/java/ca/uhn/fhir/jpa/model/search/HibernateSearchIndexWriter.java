@@ -129,12 +129,12 @@ public class HibernateSearchIndexWriter {
 			nestedQtyNode.addValue(SYSTEM, theValue.getSystem());
 			nestedQtyNode.addValue(VALUE, theValue.getValue());
 
-			if ( ! myModelConfig.getNormalizedQuantitySearchLevel().storageOrSearchSupported()) { return; }
+			if ( ! myModelConfig.getNormalizedQuantitySearchLevel().storageOrSearchSupported()) { continue; }
 
 			//-- convert the value/unit to the canonical form if any
 			Pair canonicalForm = UcumServiceUtil.getCanonicalForm(theValue.getSystem(),
 				BigDecimal.valueOf(theValue.getValue()), theValue.getCode());
-			if (canonicalForm == null) { return; }
+			if (canonicalForm == null) { continue; }
 
 			double canonicalValue = Double.parseDouble(canonicalForm.getValue().asDecimal());
 			String canonicalUnits = canonicalForm.getCode();
