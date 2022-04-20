@@ -46,11 +46,11 @@ import javax.persistence.EntityManager;
 import java.util.Collections;
 import java.util.List;
 
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.CODE;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.NESTED_SEARCH_PARAM_ROOT;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_CODE;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_PARAM_NAME;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.SYSTEM;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.VALUE;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_SYSTEM;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_VALUE;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
@@ -496,16 +496,16 @@ public class HibernateSearchSandboxTest extends BaseJpaTest {
 		private void addQuantityTerms(BooleanPredicateClausesStep<?> theTopBool, boolean theIsMust,
 				ParamPrefixEnum theActivePrefix, QuantityParam theQtyParam, String theFieldPath) {
 
-			String valueFieldPath = theFieldPath + "." + VALUE;
+			String valueFieldPath = theFieldPath + "." + QTY_VALUE;
 			PredicateFinalStep rangePred = getPrefixedRangePredicate(theActivePrefix, theQtyParam, valueFieldPath);
 			addMustOrShould(theIsMust, theTopBool, rangePred);
 
 			if (isNotBlank(theQtyParam.getSystem())) {
-				addFieldPredicate(theIsMust, theTopBool, theFieldPath + "." + SYSTEM, theQtyParam.getSystem());
+				addFieldPredicate(theIsMust, theTopBool, theFieldPath + "." + QTY_SYSTEM, theQtyParam.getSystem());
 			}
 
 			if (isNotBlank(theQtyParam.getUnits())) {
-				addFieldPredicate(theIsMust, theTopBool, theFieldPath + "." + CODE, theQtyParam.getUnits());
+				addFieldPredicate(theIsMust, theTopBool, theFieldPath + "." + QTY_CODE, theQtyParam.getUnits());
 			}
 		}
 
