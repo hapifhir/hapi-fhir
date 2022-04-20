@@ -106,8 +106,8 @@ public interface ISearchParamRegistry {
 	/**
 	 * Find a search param for a resource. First, check the resource itself, then check the top-level `Resource` resource.
 	 *
-	 * @param theResourceType
-	 * @param theParamName
+	 * @param theResourceType the resource type.
+	 * @param theParamName the search parameter name.
 	 *
 	 * @return the {@link RuntimeSearchParam} that is found.
 	 */
