@@ -89,6 +89,10 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 	}
 
 	private IParser getParser(BulkExportJobParameters theParameters) {
+		// The parser depends on the
+		// output format
+		// (but for now, only ndjson is supported
+		// see WriteBinaryStep as well
 		return myFhirContext.newJsonParser().setPrettyPrint(false);
 	}
 }

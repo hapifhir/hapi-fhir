@@ -49,6 +49,7 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 			providerParams.setResourceType(resourceType);
 
 			// TODO - implementation - see BulkItemReader
+			// filters are the filters for searching
 			Iterator<ResourcePersistentId> pidIterator = myBulkExportProcessor.getResourcePidIterator(providerParams);
 			List<Id> idsToSubmit = new ArrayList<>();
 			while (pidIterator.hasNext()) {

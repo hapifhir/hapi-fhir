@@ -27,8 +27,6 @@ import javax.annotation.Nonnull;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -54,30 +52,35 @@ public class WriteBinaryStep implements IJobStepWorker<BulkExportJobParameters, 
 		IFhirResourceDao<IBaseBinary> binaryDao = myDaoRegistry.getResourceDao("Binary");
 
 		IBaseBinary binary = BinaryUtil.newBinary(myFhirContext);
+		// should be dependent on the
+		// output format in parameters
+		// but for now, only NDJSON is supported
 		binary.setContentType(Constants.CT_FHIR_NDJSON);
 
-		List<String> errors = new ArrayList<>();
+		int processedRecordsCount = 0;
 		try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-			try (OutputStreamWriter streamWriter = new OutputStreamWriter(outputStream, Constants.CHARSET_UTF8)) {
+			try (OutputStreamWriter streamWriter = getStreamWriter(outputStream)) {
 				for (String stringified : expandedResources.getStringifiedResources()) {
 					streamWriter.append(stringified);
 					streamWriter.append("\n");
+					processedRecordsCount++;
 				}
 				streamWriter.flush();
 				outputStream.flush();
 			}
 			binary.setContent(outputStream.toByteArray());
-		}
-		catch (IOException ex) {
+		} catch (IOException ex) {
 			ourLog.error("Failure to process resource of type {} : {}",
 				expandedResources.getResourceType(),
 				ex.getMessage());
-			errors.add(ex.getMessage());
 
 			// processing will continue
 			// but we'll set the job to error so user knows why it's incomplete
 			myBulkExportProcessor.setJobStatus(expandedResources.getJobId(),
 				BulkExportJobStatusEnum.ERROR);
+
+			// failure - return -1?
+			return new RunOutcome(-1);
 		}
 
 		DaoMethodOutcome outcome = binaryDao.create(binary,
@@ -91,13 +94,18 @@ public class WriteBinaryStep implements IJobStepWorker<BulkExportJobParameters, 
 			expandedResources.getResourceType(),
 			id);
 
-		int errorCount = errors.size();
-		int totalProcessed = expandedResources.getStringifiedResources().size();
-		ourLog.trace("Binary writing complete for {} resources of type {}. {} errors.",
-			totalProcessed - errorCount,
-			expandedResources.getResourceType(),
-			errorCount);
+		ourLog.trace("Binary writing complete for {} resources of type {}.",
+			processedRecordsCount,
+			expandedResources.getResourceType());
 
 		return RunOutcome.SUCCESS;
+	}
+
+	/**
+	 * Returns an output stream writer
+	 * (exposed for testing)
+	 */
+	protected OutputStreamWriter getStreamWriter(ByteArrayOutputStream theOutputStream) {
+		return new OutputStreamWriter(theOutputStream, Constants.CHARSET_UTF8);
 	}
 }
