@@ -20,7 +20,7 @@ public class FinalBatchExportCallback implements IJobCompletionHandler<BulkExpor
 		BulkExportJobStatusEnum status = myBulkIdProcessor.getJobStatus(jobId);
 
 		// we don't want to set it if it's in ERROR
-		if (status == BulkExportJobStatusEnum.BUILDING) {
+		if (status != BulkExportJobStatusEnum.ERROR) {
 			myBulkIdProcessor.setJobStatus(jobId, BulkExportJobStatusEnum.COMPLETE);
 		}
 	}
