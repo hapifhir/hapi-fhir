@@ -43,10 +43,10 @@ import java.time.Instant;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_EXACT;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_NORMALIZED;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_TEXT;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.CODE;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_CODE;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_CODE_NORM;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.SYSTEM;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.VALUE;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_SYSTEM;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_VALUE;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_VALUE_NORM;
 
 /**
@@ -178,9 +178,9 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 			//quantity
 			String quantityPathGlob = "*.quantity";
 			nestedSpField.objectFieldTemplate("quantityTemplate", ObjectStructure.FLATTENED).matchingPathGlob(quantityPathGlob);
-			nestedSpField.fieldTemplate(SYSTEM, keywordFieldType).matchingPathGlob(quantityPathGlob + "." + SYSTEM);
-			nestedSpField.fieldTemplate(CODE, keywordFieldType).matchingPathGlob(quantityPathGlob + "." + CODE);
-			nestedSpField.fieldTemplate(VALUE, bigDecimalFieldType).matchingPathGlob(quantityPathGlob + "." + VALUE);
+			nestedSpField.fieldTemplate(QTY_SYSTEM, keywordFieldType).matchingPathGlob(quantityPathGlob + "." + QTY_SYSTEM);
+			nestedSpField.fieldTemplate(QTY_CODE, keywordFieldType).matchingPathGlob(quantityPathGlob + "." + QTY_CODE);
+			nestedSpField.fieldTemplate(QTY_VALUE, bigDecimalFieldType).matchingPathGlob(quantityPathGlob + "." + QTY_VALUE);
 			nestedSpField.fieldTemplate(QTY_CODE_NORM, keywordFieldType).matchingPathGlob(quantityPathGlob + "." + QTY_CODE_NORM);
 			nestedSpField.fieldTemplate(QTY_VALUE_NORM, bigDecimalFieldType).matchingPathGlob(quantityPathGlob + "." + QTY_VALUE_NORM);
 
