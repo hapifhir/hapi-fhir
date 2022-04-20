@@ -59,8 +59,8 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		super.after();
 		myStorageSvc.setMinimumBinarySize(0);
 		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
-		myBinaryStorageInterceptor.setAutoDeExternalizeMaximumBytes(new BinaryStorageInterceptor().getAutoDeExternalizeMaximumBytes());
-		myBinaryStorageInterceptor.setAllowAutoDeExternalizingBinaries(new BinaryStorageInterceptor().isAllowAutoDeExternalizingBinaries());
+		myBinaryStorageInterceptor.setAutoInflateBinariesMaximumSize(new BinaryStorageInterceptor().getAutoInflateBinariesMaximumSize());
+		myBinaryStorageInterceptor.setAllowAutoInflateBinaries(new BinaryStorageInterceptor().isAllowAutoInflateBinaries());
 
 		MemoryBinaryStorageSvcImpl binaryStorageSvc = (MemoryBinaryStorageSvcImpl) myBinaryStorageSvc;
 		binaryStorageSvc.clear();
@@ -115,7 +115,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testCreateAndRetrieveBinary_ServerAssignedId_ExternalizedBinary_DoNotRehydrate() {
-		myBinaryStorageInterceptor.setAllowAutoDeExternalizingBinaries(false);
+		myBinaryStorageInterceptor.setAllowAutoInflateBinaries(false);
 
 		// Create a resource with a big enough binary
 		Binary binary = new Binary();
@@ -321,7 +321,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testRetrieveBinaryAboveRetrievalThreshold() {
-		myBinaryStorageInterceptor.setAutoDeExternalizeMaximumBytes(5);
+		myBinaryStorageInterceptor.setAutoInflateBinariesMaximumSize(5);
 
 		// Create a resource with a big enough binary
 		Binary binary = new Binary();

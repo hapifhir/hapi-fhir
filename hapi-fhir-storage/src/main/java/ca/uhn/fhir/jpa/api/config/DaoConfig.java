@@ -302,11 +302,11 @@ public class DaoConfig {
 	/**
 	 * Since 6.0.0
 	 */
-	private boolean myAllowAutoDeExternalizingBinaries = true;
+	private boolean myAllowAutoInflateBinaries = true;
 	/**
 	 * Since 6.0.0
 	 */
-	private long myAutoDeExternalizeMaximumBytes = 10 * FileUtils.ONE_MB;
+	private long myAutoInflateBinariesMaximumBytes = 10 * FileUtils.ONE_MB;
 
 	/**
 	 * Constructor
@@ -2812,50 +2812,50 @@ public class DaoConfig {
 
 	/**
 	 *
-	 * This setting indicates whether binaries are allowed to be de-externalized automatically during requests.
+	 * This setting indicates whether binaries are allowed to be automatically inflated from external storage during requests.
 	 * Default is true.
 	 *
 	 * @since 6.0.0
-	 * @return whether binaries are allowed to be de-externalized automatically during requests.
+	 * @return whether binaries are allowed to be automatically inflated from external storage during requests.
 	 */
-	public boolean isAllowAutoDeExternalizingBinaries() {
-		return myAllowAutoDeExternalizingBinaries;
+	public boolean isAllowAutoInflateBinaries() {
+		return myAllowAutoInflateBinaries;
 	}
 
 
 	/**
-	 * This setting indicates whether binaries are allowed to be de-externalized automatically during requests.
+	 * This setting indicates whether binaries are allowed to be automatically inflated from external storage during requests.
 	 * Default is true.
 	 *
 	 * @since 6.0.0
 	 * @param theAllowAutoDeExternalizingBinaries the value to set.
 	 */
-	public void setAllowAutoDeExternalizingBinaries(boolean theAllowAutoDeExternalizingBinaries) {
-		myAllowAutoDeExternalizingBinaries = theAllowAutoDeExternalizingBinaries;
+	public void setAllowAutoInflateBinaries(boolean theAllowAutoDeExternalizingBinaries) {
+		myAllowAutoInflateBinaries = theAllowAutoDeExternalizingBinaries;
 	}
 
 	/**
-	 * This setting controls how many bytes of binaries will be de-externalized automatically when you query resources
+	 * This setting controls how many bytes of binaries will be automatically inflated from external storage during requests.
 	 * which contain binary data.
 	 * Default is 10MB
 	 *
 	 * @since 6.0.0
-	 * @param theAutoDeExternalizeMaximumBytes the maximum number of bytes to de-externalize.
+	 * @param theAutoInflateBinariesMaximumBytes the maximum number of bytes to de-externalize.
 	 */
-	public void setAutoDeExternalizeMaximumBytes(long theAutoDeExternalizeMaximumBytes) {
-		myAutoDeExternalizeMaximumBytes = theAutoDeExternalizeMaximumBytes;
+	public void setAutoInflateBinariesMaximumBytes(long theAutoInflateBinariesMaximumBytes) {
+		myAutoInflateBinariesMaximumBytes = theAutoInflateBinariesMaximumBytes;
 	}
 
 	/**
-	 * This setting controls how many bytes of binaries will be de-externalized automatically when you query resources
+	 * This setting controls how many bytes of binaries will be automatically inflated from external storage during requests.
 	 * which contain binary data.
 	 * Default is 10MB
 	 *
 	 * @since 6.0.0
 	 * @return the number of bytes to de-externalize during requests.
 	 */
-	public long getAutoDeExternalizeMaximumBytes() {
-		return myAutoDeExternalizeMaximumBytes;
+	public long getAutoInflateBinariesMaximumBytes() {
+		return myAutoInflateBinariesMaximumBytes;
 	}
 
 	public enum StoreMetaSourceInformationEnum {

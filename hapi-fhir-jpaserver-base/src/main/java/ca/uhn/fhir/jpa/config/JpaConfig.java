@@ -263,8 +263,8 @@ public class JpaConfig {
 	@Lazy
 	public BinaryStorageInterceptor binaryStorageInterceptor(DaoConfig theDaoConfig) {
 		BinaryStorageInterceptor interceptor = new BinaryStorageInterceptor();
-		interceptor.setAllowAutoDeExternalizingBinaries(theDaoConfig.isAllowAutoDeExternalizingBinaries());
-		interceptor.setAutoDeExternalizeMaximumBytes(theDaoConfig.getAutoDeExternalizeMaximumBytes());
+		interceptor.setAllowAutoInflateBinaries(theDaoConfig.isAllowAutoInflateBinaries());
+		interceptor.setAutoInflateBinariesMaximumSize(theDaoConfig.getAutoInflateBinariesMaximumBytes());
 		return interceptor;
 	}
 
