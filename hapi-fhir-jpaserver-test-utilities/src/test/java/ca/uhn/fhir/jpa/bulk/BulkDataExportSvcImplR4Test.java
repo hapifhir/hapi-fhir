@@ -49,7 +49,9 @@ import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Immunization;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -63,6 +65,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -728,6 +731,42 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testGroupBatchJobFindsForwardReferencesIfNeeded() {
+		createResources();
+
+		// Create a bulk job
+		BulkDataExportOptions bulkDataExportOptions = new BulkDataExportOptions();
+		bulkDataExportOptions.setOutputFormat(null);
+		bulkDataExportOptions.setResourceTypes(Sets.newHashSet("Immunization"));
+		bulkDataExportOptions.setSince(null);
+		bulkDataExportOptions.setFilters(null);
+		bulkDataExportOptions.setGroupId(myPatientGroupId);
+		bulkDataExportOptions.setExpandMdm(true);
+		bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
+		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(bulkDataExportOptions);
+
+
+		myBulkDataExportJobSchedulingHelper.startSubmittedJobs();
+		awaitAllBulkJobCompletions();
+
+		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
+
+		assertThat(jobInfo.getStatus(), equalTo(BulkExportJobStatusEnum.COMPLETE));
+		assertThat(jobInfo.getFiles().size(), equalTo(1));
+		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
+
+		// Iterate over the files
+		String nextContents = getBinaryContents(jobInfo, 0);
+
+		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Immunization")));
+		assertThat(nextContents, is(containsString("IMM0")));
+		assertThat(nextContents, is(containsString("IMM2")));
+		assertThat(nextContents, is(containsString("IMM4")));
+		assertThat(nextContents, is(containsString("IMM6")));
+		assertThat(nextContents, is(containsString("IMM8")));
+	}
+
+	@Test
 	public void testGroupBatchJobMdmExpansionIdentifiesGoldenResources() {
 		createResources();
 
@@ -1212,9 +1251,19 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		Group group = new Group();
 		group.setId("G0");
 
+		//Manually create a Practitioner
+		IIdType goldenPractId = createPractitionerWithIndex(999);
+
+		//Manually create an Organization
+		IIdType goldenOrgId = createOrganizationWithIndex(999);
+
 		//Manually create a golden record
 		Patient goldenPatient = new Patient();
+
 		goldenPatient.setId("PAT999");
+		goldenPatient.setGeneralPractitioner(Collections.singletonList(new Reference(goldenPractId.toVersionless())));
+		goldenPatient.setManagingOrganization(new Reference(goldenOrgId.toVersionless()));
+
 		SystemRequestDetails srd = SystemRequestDetails.newSystemRequestAllPartitions();
 		DaoMethodOutcome g1Outcome = myPatientDao.update(goldenPatient, srd);
 		Long goldenPid = runInTransaction(() -> myIdHelperService.getPidOrNull(g1Outcome.getResource()));
@@ -1225,7 +1274,9 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		createCareTeamWithIndex(999, g1Outcome.getId());
 
 		for (int i = 0; i < 10; i++) {
-			DaoMethodOutcome patientOutcome = createPatientWithIndex(i);
+			IIdType orgId = createOrganizationWithIndex(i);
+			IIdType practId = createPractitionerWithIndex(i);
+			DaoMethodOutcome patientOutcome = createPatientWithIndexAndGPAndManagingOrganization(i, practId, orgId);
 			IIdType patId = patientOutcome.getId().toUnqualifiedVersionless();
 			Long sourcePid = runInTransaction(() -> myIdHelperService.getPidOrNull(patientOutcome.getResource()));
 
@@ -1254,7 +1305,9 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		//Create some nongroup patients MDM linked to a different golden resource. They shouldnt be included in the query.
 		for (int i = 0; i < 5; i++) {
 			int index = 1000 + i;
-			DaoMethodOutcome patientOutcome = createPatientWithIndex(index);
+			IIdType orgId = createOrganizationWithIndex(i);
+			IIdType practId = createPractitionerWithIndex(i);
+			DaoMethodOutcome patientOutcome = createPatientWithIndexAndGPAndManagingOrganization(index, practId, orgId);
 			IIdType patId = patientOutcome.getId().toUnqualifiedVersionless();
 			Long sourcePid = runInTransaction(() -> myIdHelperService.getPidOrNull(patientOutcome.getResource()));
 			linkToGoldenResource(goldenPid2, sourcePid);
@@ -1271,12 +1324,26 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		}
 	}
 
-	private DaoMethodOutcome createPatientWithIndex(int i) {
+	private IIdType createPractitionerWithIndex(int theIndex) {
+		Practitioner pract = new Practitioner();
+		pract.setId("PRACT" + theIndex);
+		return myPractitionerDao.update(pract).getId();
+	}
+
+	private IIdType createOrganizationWithIndex(int theIndex) {
+		Organization org = new Organization();
+		org.setId("ORG" + theIndex);
+		return myOrganizationDao.update(org).getId();
+	}
+
+	private DaoMethodOutcome createPatientWithIndexAndGPAndManagingOrganization(int theIndex, IIdType thePractId, IIdType theOrgId) {
 		Patient patient = new Patient();
-		patient.setId("PAT" + i);
-		patient.setGender(i % 2 == 0 ? Enumerations.AdministrativeGender.MALE : Enumerations.AdministrativeGender.FEMALE);
-		patient.addName().setFamily("FAM" + i);
-		patient.addIdentifier().setSystem("http://mrns").setValue("PAT" + i);
+		patient.setId("PAT" + theIndex);
+		patient.setGender(theIndex % 2 == 0 ? Enumerations.AdministrativeGender.MALE : Enumerations.AdministrativeGender.FEMALE);
+		patient.addName().setFamily("FAM" + theIndex);
+		patient.addIdentifier().setSystem("http://mrns").setValue("PAT" + theIndex);
+		patient.setManagingOrganization(new Reference(theOrgId.toVersionless()));
+		patient.setGeneralPractitioner(Collections.singletonList(new Reference(thePractId.toVersionless())));
 		return myPatientDao.update(patient, new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.defaultPartition()));
 	}
 
