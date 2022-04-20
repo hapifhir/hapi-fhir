@@ -101,7 +101,7 @@ public interface IJobPersistence {
 	/**
 	 * Increments the work chunk error count by the given amount
 	 *
-	 * @param theChunkId The chunk ID
+	 * @param theChunkId     The chunk ID
 	 * @param theIncrementBy The number to increment the error count by
 	 */
 	void incrementWorkChunkErrorCount(String theChunkId, int theIncrementBy);

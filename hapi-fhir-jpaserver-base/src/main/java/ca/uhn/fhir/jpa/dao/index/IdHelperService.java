@@ -120,7 +120,7 @@ public class IdHelperService implements IIdHelperService {
 	}
 
 	/**
-	 * Given a forced ID, convert it to it's Long value. Since you are allowed to use string IDs for resources, we need to
+	 * Given a forced ID, convert it to its Long value. Since you are allowed to use string IDs for resources, we need to
 	 * convert those to the underlying Long values that are stored, for lookup and comparison purposes.
 	 *
 	 * @throws ResourceNotFoundException If the ID can not be found

@@ -9,6 +9,7 @@ import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.validation.FhirValidator;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
@@ -297,6 +298,15 @@ public class DaoConfig {
 	 * @since 5.7.0
 	 */
 	private boolean myConcurrentBundleValidation;
+
+	/**
+	 * Since 6.0.0
+	 */
+	private boolean myAllowAutoInflateBinaries = true;
+	/**
+	 * Since 6.0.0
+	 */
+	private long myAutoInflateBinariesMaximumBytes = 10 * FileUtils.ONE_MB;
 
 	/**
 	 * Constructor
@@ -2793,10 +2803,59 @@ public class DaoConfig {
 	 * This setting indicates if a cross-partition subscription can be made.
 	 *
 	 * @see ModelConfig#setCrossPartitionSubscription(boolean)
-	 * @since 7.5.0
+	 * @since 5.7.0
 	 */
 	public void setCrossPartitionSubscription(boolean theAllowCrossPartitionSubscription) {
 		this.myModelConfig.setCrossPartitionSubscription(theAllowCrossPartitionSubscription);
+	}
+
+
+	/**
+	 *
+	 * This setting indicates whether binaries are allowed to be automatically inflated from external storage during requests.
+	 * Default is true.
+	 *
+	 * @since 6.0.0
+	 * @return whether binaries are allowed to be automatically inflated from external storage during requests.
+	 */
+	public boolean isAllowAutoInflateBinaries() {
+		return myAllowAutoInflateBinaries;
+	}
+
+
+	/**
+	 * This setting indicates whether binaries are allowed to be automatically inflated from external storage during requests.
+	 * Default is true.
+	 *
+	 * @since 6.0.0
+	 * @param theAllowAutoDeExternalizingBinaries the value to set.
+	 */
+	public void setAllowAutoInflateBinaries(boolean theAllowAutoDeExternalizingBinaries) {
+		myAllowAutoInflateBinaries = theAllowAutoDeExternalizingBinaries;
+	}
+
+	/**
+	 * This setting controls how many bytes of binaries will be automatically inflated from external storage during requests.
+	 * which contain binary data.
+	 * Default is 10MB
+	 *
+	 * @since 6.0.0
+	 * @param theAutoInflateBinariesMaximumBytes the maximum number of bytes to de-externalize.
+	 */
+	public void setAutoInflateBinariesMaximumBytes(long theAutoInflateBinariesMaximumBytes) {
+		myAutoInflateBinariesMaximumBytes = theAutoInflateBinariesMaximumBytes;
+	}
+
+	/**
+	 * This setting controls how many bytes of binaries will be automatically inflated from external storage during requests.
+	 * which contain binary data.
+	 * Default is 10MB
+	 *
+	 * @since 6.0.0
+	 * @return the number of bytes to de-externalize during requests.
+	 */
+	public long getAutoInflateBinariesMaximumBytes() {
+		return myAutoInflateBinariesMaximumBytes;
 	}
 
 	public enum StoreMetaSourceInformationEnum {
