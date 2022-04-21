@@ -24,6 +24,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,28 +43,28 @@ public class ExpungeService {
 	@Autowired
 	private ApplicationContext myApplicationContext;
 
-	protected ExpungeOperation getExpungeOperation(String theResourceName, Long theResourceId, Long theVersion, ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails) {
-		return myApplicationContext.getBean(ExpungeOperation.class, theResourceName, theResourceId, theVersion, theExpungeOptions, theRequestDetails);
+	protected ExpungeOperation getExpungeOperation(String theResourceName, ResourcePersistentId theResourceId, ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails) {
+		return myApplicationContext.getBean(ExpungeOperation.class, theResourceName, theResourceId, theExpungeOptions, theRequestDetails);
 	}
 
-	public ExpungeOutcome expunge(String theResourceName, Long theResourceId, Long theVersion, ExpungeOptions theExpungeOptions, RequestDetails theRequest) {
-		ourLog.info("Expunge: ResourceName[{}] Id[{}] Version[{}] Options[{}]", theResourceName, theResourceId, theVersion, theExpungeOptions);
+	public ExpungeOutcome expunge(String theResourceName, ResourcePersistentId theResourceId, ExpungeOptions theExpungeOptions, RequestDetails theRequest) {
+		ourLog.info("Expunge: ResourceName[{}] Id[{}] Version[{}] Options[{}]", theResourceName, theResourceId != null ? theResourceId.getId() : null, theResourceId != null ? theResourceId.getVersion() : null, theExpungeOptions);
 
 		if (theExpungeOptions.getLimit() < 1) {
 			throw new InvalidRequestException(Msg.code(1087) + "Expunge limit may not be less than 1.  Received expunge limit " + theExpungeOptions.getLimit() + ".");
 		}
 
-		if (theResourceName == null && theResourceId == null && theVersion == null) {
+		if (theResourceName == null && (theResourceId == null || (theResourceId.getId() == null && theResourceId.getVersion() == null))) {
 			if (theExpungeOptions.isExpungeEverything()) {
 				myExpungeEverythingService.expungeEverything(theRequest);
 			}
 		}
 
-		ExpungeOperation expungeOperation = getExpungeOperation(theResourceName, theResourceId, theVersion, theExpungeOptions, theRequest);
+		ExpungeOperation expungeOperation = getExpungeOperation(theResourceName, theResourceId, theExpungeOptions, theRequest);
 		return expungeOperation.call();
 	}
 
-	public void deleteAllSearchParams(Long theResourceId) {
+	public void deleteAllSearchParams(ResourcePersistentId theResourceId) {
 		myExpungeDaoService.deleteAllSearchParams(theResourceId);
 	}
 }
