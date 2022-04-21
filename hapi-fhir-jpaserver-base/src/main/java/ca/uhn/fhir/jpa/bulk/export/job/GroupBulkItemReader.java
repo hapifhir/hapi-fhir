@@ -304,7 +304,7 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 	}
 
 	private RuntimeSearchParam validateSearchParameters(SearchParameterMap expandedSpMap) {
-		if (myPatientForwardReferenceResourcesTypes.contains(myResourceType)) {
+		if (PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES.contains(myResourceType)) {
 			return null;
 			//TODO GGG what should this actually do?
 		} else {
