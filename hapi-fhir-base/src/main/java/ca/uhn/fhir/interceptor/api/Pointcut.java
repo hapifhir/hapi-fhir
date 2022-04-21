@@ -1346,6 +1346,14 @@ public enum Pointcut implements IPointcut {
 	),
 
 	/**
+	 *
+	 */
+	STORAGE_ACCEPT_CLIENT_ASSIGNED_ID(void.class,
+		"org.hl7.fhir.instance.model.api.IBaseResource",
+		"ca.uhn.fhir.rest.api.server.RequestDetails"
+	),
+
+	/**
 	 * <b>Storage Hook:</b>
 	 * Invoked before a resource will be updated, immediately before the resource
 	 * is persisted to the database.
