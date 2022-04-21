@@ -639,7 +639,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 			myPatientDao.search(params);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1210) + "Unknown parameter name: Observation:soooooobject", e.getMessage());
+			assertEquals(Msg.code(1209) + "Unknown parameter name: Observation:soooooobject", e.getMessage());
 		}
 	}
 
