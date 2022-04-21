@@ -32,6 +32,9 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.param.CompositeParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -1555,6 +1558,192 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 	}
 
+
+	/**
+	 * Strategy is to test many common combined parameters use cases on the code-value-quantity
+	 * parameter and a simple equality use case with the rest of the composite parameters
+	 */
+	@Nested
+	public class CompositeParameters {
+
+		@Nested
+		public class ForComponent {
+
+			@Nested
+			public class ForComponentValueQuantity {
+
+				@Test
+				public void eqQuantityValueOnly() {
+					Observation o1 = new Observation();
+					o1.addComponent()
+						.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://loinc.org").setCode("8480-6")))
+						.setValue(new Quantity().setValue(60.0));
+					IIdType id1 = myObservationDao.create(o1, mySrd).getId().toUnqualifiedVersionless();
+
+					Observation o2 = new Observation();
+					o1.addComponent()
+						.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://loinc.org").setCode("3421-5")))
+						.setValue(new Quantity().setValue(100.0));
+					myObservationDao.create(o2, mySrd);
+
+					// search for Observations with component with token and quantity (in same component)
+					{
+						TokenParam v0 = new TokenParam("http://loinc.org", "8480-6");
+						QuantityParam v1 = new QuantityParam(ParamPrefixEnum.LESSTHAN, 90, null, null);
+						CompositeParam<TokenParam, QuantityParam> val = new CompositeParam<>(v0, v1);
+						SearchParameterMap map = new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_COMPONENT_CODE_VALUE_QUANTITY, val);
+						myCaptureQueriesListener.clear();
+						IBundleProvider result = myObservationDao.search(map);
+						myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
+						assertThat("Got: " + toUnqualifiedVersionlessIdValues(result), toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(id1.getValue()));
+					}
+					{
+						// search for token of one component and quantity of the other
+						TokenParam v0 = new TokenParam("http://other.system.org", "3421-5");
+						QuantityParam v1 = new QuantityParam(ParamPrefixEnum.EQUAL, 60.0, null, null);
+						CompositeParam<TokenParam, QuantityParam> val = new CompositeParam<>(v0, v1);
+						SearchParameterMap map = new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_COMPONENT_CODE_VALUE_QUANTITY, val);
+						myCaptureQueriesListener.clear();
+						IBundleProvider result = myObservationDao.search(map);
+						myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
+						assertThat(toUnqualifiedVersionlessIdValues(result), empty());
+					}
+
+//			assertFind("/Observation?component-code-value-quantity=http://loinc.org|8480-6$lt60",
+//				"component-code-value-quantity=" + codeSystem + "|" + codeValue + "$" + qtyComparator + qtyValue);
+				}
+
+				//			fixme jm: enable
+				@Disabled
+				@Test
+				public void eqOnlyValueQuantityMultipleAndClauses() {
+
+				}
+
+				//			fixme jm: enable
+				@Disabled
+				@Test
+				public void eqCompleteQuantity() {
+
+				}
+
+
+				//			fixme jm: enable
+				@Disabled
+				@Test
+				public void ltCompleteQuantity() {
+
+				}
+
+
+				//			fixme jm: enable
+				@Disabled
+				@Test
+				public void eqOnlyValueQuantityMultipleComposites() {
+
+				}
+
+
+			}
+
+			@Nested
+			public class ForComponentValueConcept {
+
+				//			fixme jm: enable
+				@Disabled
+				@Test
+				public void eqOnlyValueQuantity() {
+				}
+
+			}
+
+		}
+
+		//			fixme jm: enable
+		@Disabled
+		@Test
+		public void invalidThrows() {
+//				String invalidQtyParam = "|http://another.org";
+//				DataFormatException thrown = assertThrows(DataFormatException.class,
+//					() -> myTestDaoSearch.searchForIds("/Observation?value-quantity=" + invalidQtyParam));
+//
+//				assertTrue(thrown.getMessage().startsWith("HAPI-1940: Invalid"));
+//				assertTrue(thrown.getMessage().contains(invalidQtyParam));
+		}
+
+		@Nested
+		public class CodeValueQuantity {
+
+//			fixme jm: complete. Must use Observation data (two fields) as end criteria of another resource
+			@Disabled
+			@Test
+			public void eq() {
+
+//			assertFind("/Observation?component-code-value-quantity=http://loinc.org|8480-6$lt60",
+//				"component-code-value-quantity=" + codeSystem + "|" + codeValue + "$" + qtyComparator + qtyValue);
+			}
+		}
+
+
+		//	fixme jm: complete.
+		@Disabled
+		@Test
+		public void codeValueString() {
+
+		}
+
+		//	fixme jm: complete.
+		@Disabled
+		@Test
+		public void codeValueDate() {
+
+		}
+
+		//	fixme jm: complete.
+		@Disabled
+		@Test
+		public void codeValueConcept() {
+
+		}
+
+
+		//	fixme jm: complete.
+		@Disabled
+		@Test
+		public void comboCodeValueConcept() {
+
+		}
+
+
+		//	fixme jm: complete.
+		@Disabled
+		@Test
+		public void comboCodeValueQuantity() {
+
+		}
+
+		@Nested
+		public class ContextTypeQuantity {
+
+		}
+
+		@Nested
+		public class ContextTypeValue {
+
+		}
+
+
+		/**
+		 * fixme jm: test remaining composite parameters:
+		 *
+		 * MolecularSequence-chromosome-variant-coordinate
+		 * MolecularSequence-chromosome-window-coordinate
+		 * MolecularSequence-referenceseqid-variant-coordinate
+		 * MolecularSequence-referenceseqid-window-coordinate
+		 */
+
+
+	}
 
 	/**
 	 * Disallow context dirtying for nested classes
