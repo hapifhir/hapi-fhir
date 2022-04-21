@@ -46,9 +46,6 @@ import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 import org.hamcrest.Matchers;
-import org.hibernate.search.engine.search.query.SearchResult;
-import org.hibernate.search.mapper.orm.Search;
-import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -70,7 +67,6 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -84,7 +80,6 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
-import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.persistence.EntityManager;
@@ -1190,139 +1185,78 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 				}
 
-				@Nested
-				public class MultipleComponentCases {
+				@Test
+				void testMultipleComponentsHandlesAndOr() {
+					Observation obs1 = getObservation();
+					addComponentWithCodeAndQuantity(obs1, "8480-6", 107);
+					addComponentWithCodeAndQuantity(obs1, "8462-4", 60);
 
-					@Test
-					void andClauses() {
-						Observation obs1 = getObservation();
-						// obs1.component1
-						Observation.ObservationComponentComponent comp1_1 = getObservationComponent(obs1, "8480-6", 107);
-						obs1.getComponent().add(comp1_1);
-						// obs1.component2
-						Observation.ObservationComponentComponent comp1_2 = getObservationComponent(obs1, "8462-4", 60);
-						obs1.getComponent().add(comp1_2);
+					IIdType obs1Id = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
 
-						IIdType obs1Id = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
+					Observation obs2 = getObservation();
+					addComponentWithCodeAndQuantity(obs2, "8480-6",307);
+					addComponentWithCodeAndQuantity(obs2, "8462-4",260);
 
+					myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
 
-						Observation obs2 = getObservation();
-						// obs2.component1
-						Observation.ObservationComponentComponent comp2_1 = getObservationComponent(obs1, "8480-6",307);
-						obs2.getComponent().add(comp2_1);
-						// obs2.component2
-						Observation.ObservationComponentComponent comp2_2 = getObservationComponent(obs1, "8462-4",260);
-						obs2.getComponent().add(comp2_2);
-
-						myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
-
-						{
-							String theUrl = "/Observation?component-value-quantity=107&component-value-quantity=60";
-							List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-							assertThat("when same component with qtys 107 and 60", resourceIds, hasItem(equalTo(obs1Id.getIdPart())));
-						}
-						{
-							String theUrl = "/Observation?component-value-quantity=107&component-value-quantity=260";
-							List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-							assertThat("when same component with qtys 107 and 260", resourceIds, empty());
-						}
+					// andClauses
+					{
+						String theUrl = "/Observation?component-value-quantity=107&component-value-quantity=60";
+						List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
+						assertThat("when same component with qtys 107 and 60", resourceIds, hasItem(equalTo(obs1Id.getIdPart())));
+					}
+					{
+						String theUrl = "/Observation?component-value-quantity=107&component-value-quantity=260";
+						List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
+						assertThat("when same component with qtys 107 and 260", resourceIds, empty());
 					}
 
-
-					@Test
-					void andAndOrClauses() {
-						Observation obs1 = getObservation();
-						// obs1.component1
-						Observation.ObservationComponentComponent comp1_1 = getObservationComponent(obs1, "8480-6", 107);
-						obs1.getComponent().add(comp1_1);
-						// obs1.component2
-						Observation.ObservationComponentComponent comp1_2 = getObservationComponent(obs1, "8462-4", 60);
-						obs1.getComponent().add(comp1_2);
-
-						IIdType obs1Id = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
-
-
-						Observation obs2 = getObservation();
-						// obs2.component1
-						Observation.ObservationComponentComponent comp2_1 = getObservationComponent(obs1, "8480-6", 307);
-						obs2.getComponent().add(comp2_1);
-						// obs2.component2
-						Observation.ObservationComponentComponent comp2_2 = getObservationComponent(obs1, "8462-4", 260);
-						obs2.getComponent().add(comp2_2);
-
-						myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
-
-						{
-							String theUrl = "/Observation?component-value-quantity=107&component-value-quantity=gt50,lt70";
-							List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-							assertThat("when same component with qtys 107 and lt70,gt80", resourceIds, hasItem(equalTo(obs1Id.getIdPart())));
-						}
-						{
-							String theUrl = "/Observation?component-value-quantity=50,70&component-value-quantity=260";
-							List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-							assertThat("when same component with qtys 50,70 and 260", resourceIds, empty());
-						}
+					//andAndOrClauses
+					{
+						String theUrl = "/Observation?component-value-quantity=107&component-value-quantity=gt50,lt70";
+						List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
+						assertThat("when same component with qtys 107 and lt70,gt80", resourceIds, hasItem(equalTo(obs1Id.getIdPart())));
+					}
+					{
+						String theUrl = "/Observation?component-value-quantity=50,70&component-value-quantity=260";
+						List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
+						assertThat("when same component with qtys 50,70 and 260", resourceIds, empty());
 					}
 
-
-					@Test
-					void multipleAndsWithMultipleOrsEach() {
-						Observation obs1 = getObservation();
-						// obs1.component1
-						Observation.ObservationComponentComponent comp1_1 = getObservationComponent(obs1, "8480-6", 107);
-						obs1.getComponent().add(comp1_1);
-						// obs1.component2
-						Observation.ObservationComponentComponent comp1_2 = getObservationComponent(obs1, "8462-4", 60);
-						obs1.getComponent().add(comp1_2);
-
-						IIdType obs1Id = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
-
-
-						Observation obs2 = getObservation();
-						// obs2.component1
-						Observation.ObservationComponentComponent comp2_1 = getObservationComponent(obs1, "8480-6", 307);
-						obs2.getComponent().add(comp2_1);
-						// obs2.component2
-						Observation.ObservationComponentComponent comp2_2 = getObservationComponent(obs1, "8462-4", 260);
-						obs2.getComponent().add(comp2_2);
-
-						myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
-
-						{
-							String theUrl = "/Observation?component-value-quantity=50,60&component-value-quantity=105,107";
-							List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-							assertThat("when same component with qtys 50,60 and 105,107", resourceIds, hasItem(equalTo(obs1Id.getIdPart())));
-						}
-						{
-							String theUrl = "/Observation?component-value-quantity=50,60&component-value-quantity=250,260";
-							List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-							assertThat("when same component with qtys 50,60 and 250,260", resourceIds, empty());
-						}
+					// multipleAndsWithMultipleOrsEach
+					{
+						String theUrl = "/Observation?component-value-quantity=50,60&component-value-quantity=105,107";
+						List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
+						assertThat("when same component with qtys 50,60 and 105,107", resourceIds, hasItem(equalTo(obs1Id.getIdPart())));
 					}
-
-
-					private Observation getObservation() {
-						Observation obs = new Observation();
-						obs.getCode().addCoding().setCode("85354-9").setSystem("http://loinc.org");
-						obs.setStatus(Observation.ObservationStatus.FINAL);
-						return obs;
+					{
+						String theUrl = "/Observation?component-value-quantity=50,60&component-value-quantity=250,260";
+						List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
+						assertThat("when same component with qtys 50,60 and 250,260", resourceIds, empty());
 					}
-
-					private Quantity getQuantity(double theValue) {
-						return new Quantity().setValue(theValue).setUnit("mmHg").setSystem("http://unitsofmeasure.org").setCode("mm[Hg]");
-					}
-
-					private Observation.ObservationComponentComponent getObservationComponent(Observation theObservation, String theConceptCode, double theQuantityValue) {
-						Observation.ObservationComponentComponent comp = theObservation.addComponent();
-						CodeableConcept cc1_1 = new CodeableConcept();
-						cc1_1.addCoding().setCode(theConceptCode).setSystem("http://loinc.org");
-						comp.setCode(cc1_1);
-						comp.setValue(getQuantity(theQuantityValue));
-						return comp;
-					}
-
-
 				}
+
+
+				private Observation getObservation() {
+					Observation obs = new Observation();
+					obs.getCode().addCoding().setCode("85354-9").setSystem("http://loinc.org");
+					obs.setStatus(Observation.ObservationStatus.FINAL);
+					return obs;
+				}
+
+				private Quantity getQuantity(double theValue) {
+					return new Quantity().setValue(theValue).setUnit("mmHg").setSystem("http://unitsofmeasure.org").setCode("mm[Hg]");
+				}
+
+				private Observation.ObservationComponentComponent addComponentWithCodeAndQuantity(Observation theObservation, String theConceptCode, double theQuantityValue) {
+					Observation.ObservationComponentComponent comp = theObservation.addComponent();
+					CodeableConcept cc1_1 = new CodeableConcept();
+					cc1_1.addCoding().setCode(theConceptCode).setSystem("http://loinc.org");
+					comp.setCode(cc1_1);
+					comp.setValue(getQuantity(theQuantityValue));
+					return comp;
+				}
+
 
 			}
 
