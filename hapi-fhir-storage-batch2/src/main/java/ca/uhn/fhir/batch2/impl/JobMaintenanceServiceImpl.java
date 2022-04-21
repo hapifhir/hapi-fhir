@@ -20,15 +20,22 @@ package ca.uhn.fhir.batch2.impl;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.api.IJobCleanerService;
+import ca.uhn.fhir.batch2.api.IJobCompletionHandler;
+import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.JobCompletionDetails;
+import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
+import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.StopWatch;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.quartz.JobExecutionContext;
@@ -36,16 +43,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
+import java.util.Collection;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import static java.util.Collections.emptyList;
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * This class performs regular polls of the stored jobs in order to
- * calculate statistics and delete expired tasks. This class does
+ * perform maintenance. This includes two major functions.
+ *
+ * <p>
+ * First, we calculate statistics and delete expired tasks. This class does
  * the following things:
  * <ul>
  *    <li>For instances that are IN_PROGRESS, calculates throughput and percent complete</li>
@@ -55,45 +73,60 @@ import java.util.concurrent.TimeUnit;
  *    <li>For instances that are IN_PROGRESS with an error message set where no chunks are ERRORED or FAILED, clears the error message in the instance (meaning presumably there was an error but it cleared)</li>
  *    <li>For instances that are COMPLETE or FAILED and are old, delete them entirely</li>
  * </ul>
+ * 	</p>
+ *
+ * 	<p>
+ * Second, we check for any job instances where the job is configured to
+ * have gated execution. For these instances, we check if the current step
+ * is complete (all chunks are in COMPLETE status) and trigger the next step.
+ * </p>
  */
-public class JobCleanerServiceImpl extends BaseJobService implements IJobCleanerService {
+public class JobMaintenanceServiceImpl extends BaseJobService implements IJobMaintenanceService {
 
 	public static final int INSTANCES_PER_PASS = 100;
 	public static final long PURGE_THRESHOLD = 7L * DateUtils.MILLIS_PER_DAY;
-	private static final Logger ourLog = LoggerFactory.getLogger(JobCleanerServiceImpl.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(JobMaintenanceServiceImpl.class);
 	private final ISchedulerService mySchedulerService;
+	private final JobDefinitionRegistry myJobDefinitionRegistry;
+	private final BatchJobSender myBatchJobSender;
 
 
 	/**
 	 * Constructor
 	 */
-	public JobCleanerServiceImpl(ISchedulerService theSchedulerService, IJobPersistence theJobPersistence) {
+	public JobMaintenanceServiceImpl(ISchedulerService theSchedulerService, IJobPersistence theJobPersistence, JobDefinitionRegistry theJobDefinitionRegistry, BatchJobSender theBatchJobSender) {
 		super(theJobPersistence);
 		Validate.notNull(theSchedulerService);
+		Validate.notNull(theJobDefinitionRegistry);
+		Validate.notNull(theBatchJobSender);
 
 		mySchedulerService = theSchedulerService;
+		myJobDefinitionRegistry = theJobDefinitionRegistry;
+		myBatchJobSender = theBatchJobSender;
 	}
 
 	@PostConstruct
 	public void start() {
 		ScheduledJobDefinition jobDefinition = new ScheduledJobDefinition();
-		jobDefinition.setId(JobCleanerScheduledJob.class.getName());
-		jobDefinition.setJobClass(JobCleanerScheduledJob.class);
+		jobDefinition.setId(JobMaintenanceScheduledJob.class.getName());
+		jobDefinition.setJobClass(JobMaintenanceScheduledJob.class);
 		mySchedulerService.scheduleClusteredJob(DateUtils.MILLIS_PER_MINUTE, jobDefinition);
 	}
 
 	@Override
-	public void runCleanupPass() {
+	public void runMaintenancePass() {
 
 		// NB: If you add any new logic, update the class javadoc
 
 		Set<String> processedInstanceIds = new HashSet<>();
+		JobChunkProgressAccumulator progressAccumulator = new JobChunkProgressAccumulator();
 		for (int page = 0; ; page++) {
 			List<JobInstance> instances = myJobPersistence.fetchInstances(INSTANCES_PER_PASS, page);
 
 			for (JobInstance instance : instances) {
 				if (processedInstanceIds.add(instance.getInstanceId())) {
-					cleanupInstance(instance);
+					cleanupInstance(instance, progressAccumulator);
+					triggerGatedExecutions(instance, progressAccumulator);
 				}
 			}
 
@@ -103,13 +136,13 @@ public class JobCleanerServiceImpl extends BaseJobService implements IJobCleaner
 		}
 	}
 
-	private void cleanupInstance(JobInstance theInstance) {
+	private void cleanupInstance(JobInstance theInstance, JobChunkProgressAccumulator theProgressAccumulator) {
 		switch (theInstance.getStatus()) {
 			case QUEUED:
 				break;
 			case IN_PROGRESS:
 			case ERRORED:
-				calculateInstanceProgress(theInstance);
+				calculateInstanceProgress(theInstance, theProgressAccumulator);
 				break;
 			case COMPLETED:
 			case FAILED:
@@ -132,7 +165,7 @@ public class JobCleanerServiceImpl extends BaseJobService implements IJobCleaner
 
 	}
 
-	private void calculateInstanceProgress(JobInstance theInstance) {
+	private void calculateInstanceProgress(JobInstance theInstance, JobChunkProgressAccumulator theProgressAccumulator) {
 		int resourcesProcessed = 0;
 		int incompleteChunkCount = 0;
 		int completeChunkCount = 0;
@@ -146,6 +179,8 @@ public class JobCleanerServiceImpl extends BaseJobService implements IJobCleaner
 			List<WorkChunk> chunks = myJobPersistence.fetchWorkChunksWithoutData(theInstance.getInstanceId(), INSTANCES_PER_PASS, page);
 
 			for (WorkChunk chunk : chunks) {
+				theProgressAccumulator.addChunk(chunk.getInstanceId(), chunk.getId(), chunk.getTargetStepId(), chunk.getStatus());
+
 				errorCountForAllStatuses += chunk.getErrorCount();
 
 				if (chunk.getRecordsProcessed() != null) {
@@ -201,7 +236,12 @@ public class JobCleanerServiceImpl extends BaseJobService implements IJobCleaner
 
 			changedStatus = false;
 			if (incompleteChunkCount == 0 && erroredChunkCount == 0 && failedChunkCount == 0) {
-				changedStatus |= updateInstanceStatus(theInstance, StatusEnum.COMPLETED);
+				boolean completed = updateInstanceStatus(theInstance, StatusEnum.COMPLETED);
+				if (completed) {
+					JobDefinition<?> definition = myJobDefinitionRegistry.getJobDefinition(theInstance.getJobDefinitionId(), theInstance.getJobDefinitionVersion()).orElseThrow(() -> new IllegalStateException("Unknown job " + theInstance.getJobDefinitionId() + "/" + theInstance.getJobDefinitionVersion()));
+					invokeJobCompletionHandler(theInstance, definition);
+				}
+				changedStatus |= completed;
 			}
 			if (erroredChunkCount > 0) {
 				changedStatus |= updateInstanceStatus(theInstance, StatusEnum.ERRORED);
@@ -246,6 +286,17 @@ public class JobCleanerServiceImpl extends BaseJobService implements IJobCleaner
 
 	}
 
+	private <PT extends IModelJson> void invokeJobCompletionHandler(JobInstance theInstance, JobDefinition<PT> definition) {
+		IJobCompletionHandler<PT> completionHandler = definition.getCompletionHandler();
+		if (completionHandler != null) {
+
+			String instanceId = theInstance.getInstanceId();
+			PT jobParameters = theInstance.getParameters(definition.getParametersType());
+			JobCompletionDetails<PT> completionDetails = new JobCompletionDetails<>(jobParameters, instanceId);
+			completionHandler.jobComplete(completionDetails);
+		}
+	}
+
 	private boolean updateInstanceStatus(JobInstance theInstance, StatusEnum newStatus) {
 		if (theInstance.getStatus() != newStatus) {
 			ourLog.info("Marking job instance {} of type {} as {}", theInstance.getInstanceId(), theInstance.getJobDefinitionId(), newStatus);
@@ -255,15 +306,108 @@ public class JobCleanerServiceImpl extends BaseJobService implements IJobCleaner
 		return false;
 	}
 
+	private void triggerGatedExecutions(JobInstance theInstance, JobChunkProgressAccumulator theProgressAccumulator) {
+		if (!theInstance.isRunning()) {
+			return;
+		}
 
-	public static class JobCleanerScheduledJob implements HapiJob {
+		String jobDefinitionId = theInstance.getJobDefinitionId();
+		int jobDefinitionVersion = theInstance.getJobDefinitionVersion();
+		String instanceId = theInstance.getInstanceId();
+
+		JobDefinition<?> definition = myJobDefinitionRegistry.getJobDefinition(jobDefinitionId, jobDefinitionVersion).orElseThrow(() -> new IllegalStateException("Unknown job definition: " + jobDefinitionId + " " + jobDefinitionVersion));
+		if (!definition.isGatedExecution()) {
+			return;
+		}
+
+		String currentStepId = theInstance.getCurrentGatedStepId();
+		if (isBlank(currentStepId)) {
+			return;
+		}
+
+		if (definition.isLastStep(currentStepId)) {
+			return;
+		}
+
+		int incompleteChunks = theProgressAccumulator.countChunksWithStatus(instanceId, currentStepId, StatusEnum.getIncompleteStatuses());
+		if (incompleteChunks == 0) {
+
+			int currentStepIndex = definition.getStepIndex(currentStepId);
+			String nextStepId = definition.getSteps().get(currentStepIndex + 1).getStepId();
+
+			ourLog.info("All processing is complete for gated execution of instance {} step {}. Proceeding to step {}", instanceId, currentStepId, nextStepId);
+			List<String> chunksForNextStep = theProgressAccumulator.getChunkIdsWithStatus(instanceId, nextStepId, EnumSet.of(StatusEnum.QUEUED));
+			for (String nextChunkId : chunksForNextStep) {
+				JobWorkNotification workNotification = new JobWorkNotification(jobDefinitionId, jobDefinitionVersion, instanceId, nextStepId, nextChunkId);
+				myBatchJobSender.sendWorkChannelMessage(workNotification);
+			}
+
+			theInstance.setCurrentGatedStepId(nextStepId);
+			myJobPersistence.updateInstance(theInstance);
+		}
+
+	}
+
+
+	public static class JobMaintenanceScheduledJob implements HapiJob {
 		@Autowired
-		private IJobCleanerService myTarget;
+		private IJobMaintenanceService myTarget;
 
 		@Override
 		public void execute(JobExecutionContext theContext) {
-			myTarget.runCleanupPass();
+			myTarget.runMaintenancePass();
 		}
+	}
+
+
+	/**
+	 * While performing cleanup, the cleanup job loads all of the known
+	 * work chunks to examine their status. This bean collects the counts that
+	 * are found, so that they can be reused for maintenance jobs without
+	 * needing to hit the database a second time.
+	 */
+	private static class JobChunkProgressAccumulator {
+
+		private final Set<String> myConsumedInstanceAndChunkIds = new HashSet<>();
+		private final Multimap<String, ChunkStatusCountKey> myInstanceIdToChunkStatuses = ArrayListMultimap.create();
+
+		public void addChunk(String theInstanceId, String theChunkId, String theStepId, StatusEnum theStatus) {
+			// Note: If chunks are being written while we're executing, we may see the same chunk twice. This
+			// check avoids adding it twice.
+			if (myConsumedInstanceAndChunkIds.add(theInstanceId + " " + theChunkId)) {
+				myInstanceIdToChunkStatuses.put(theInstanceId, new ChunkStatusCountKey(theChunkId, theStepId, theStatus));
+			}
+		}
+
+		public int countChunksWithStatus(String theInstanceId, String theStepId, Set<StatusEnum> theStatuses) {
+			return getChunkIdsWithStatus(theInstanceId, theStepId, theStatuses).size();
+		}
+
+		public List<String> getChunkIdsWithStatus(String theInstanceId, String theStepId, Set<StatusEnum> theStatuses) {
+			return getChunkStatuses(theInstanceId).stream().filter(t -> t.myStepId.equals(theStepId)).filter(t -> theStatuses.contains(t.myStatus)).map(t -> t.myChunkId).collect(Collectors.toList());
+		}
+
+		@Nonnull
+		private Collection<ChunkStatusCountKey> getChunkStatuses(String theInstanceId) {
+			Collection<ChunkStatusCountKey> chunkStatuses = myInstanceIdToChunkStatuses.get(theInstanceId);
+			chunkStatuses = defaultIfNull(chunkStatuses, emptyList());
+			return chunkStatuses;
+		}
+
+
+		private static class ChunkStatusCountKey {
+			public final String myChunkId;
+			public final String myStepId;
+			public final StatusEnum myStatus;
+
+			private ChunkStatusCountKey(String theChunkId, String theStepId, StatusEnum theStatus) {
+				myChunkId = theChunkId;
+				myStepId = theStepId;
+				myStatus = theStatus;
+			}
+		}
+
+
 	}
 
 

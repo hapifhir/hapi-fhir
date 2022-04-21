@@ -27,7 +27,6 @@ import com.google.common.collect.Lists;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Slice;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +57,7 @@ public class PartitionRunner {
 		myThreadCount = theThreadCount;
 	}
 
-	public void runInPartitionedThreads(Slice<Long> theResourceIds, Consumer<List<Long>> partitionConsumer) {
+	public void runInPartitionedThreads(List<Long> theResourceIds, Consumer<List<Long>> partitionConsumer) {
 
 		List<Callable<Void>> callableTasks = buildCallableTasks(theResourceIds, partitionConsumer);
 		if (callableTasks.size() == 0) {
@@ -93,15 +92,15 @@ public class PartitionRunner {
 		}
 	}
 
-	private List<Callable<Void>> buildCallableTasks(Slice<Long> theResourceIds, Consumer<List<Long>> partitionConsumer) {
+	private List<Callable<Void>> buildCallableTasks(List<Long> theResourceIds, Consumer<List<Long>> partitionConsumer) {
 		List<Callable<Void>> retval = new ArrayList<>();
 
-		if (myBatchSize > theResourceIds.getContent().size()) {
-			ourLog.info("Splitting batch job of {} entries into chunks of {}", theResourceIds.getContent().size(), myBatchSize);
+		if (myBatchSize > theResourceIds.size()) {
+			ourLog.info("Splitting batch job of {} entries into chunks of {}", theResourceIds.size(), myBatchSize);
 		} else {
-			ourLog.info("Creating batch job of {} entries", theResourceIds.getContent().size());
+			ourLog.info("Creating batch job of {} entries", theResourceIds.size());
 		}
-		List<List<Long>> partitions = Lists.partition(theResourceIds.getContent(), myBatchSize);
+		List<List<Long>> partitions = Lists.partition(theResourceIds, myBatchSize);
 
 		for (List<Long> nextPartition : partitions) {
 			if (nextPartition.size() > 0) {

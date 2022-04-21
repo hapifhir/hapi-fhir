@@ -28,9 +28,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
-import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -82,7 +82,7 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 	}
 
 	private void expungeDeletedResources() {
-		Slice<Long> resourceIds = findHistoricalVersionsOfDeletedResources();
+		List<Long> resourceIds = findHistoricalVersionsOfDeletedResources();
 
 		deleteHistoricalVersions(resourceIds);
 		if (expungeLimitReached()) {
@@ -92,13 +92,13 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 		deleteCurrentVersionsOfDeletedResources(resourceIds);
 	}
 
-	private Slice<Long> findHistoricalVersionsOfDeletedResources() {
-		Slice<Long> retVal = myExpungeDaoService.findHistoricalVersionsOfDeletedResources(myResourceName, myResourceId, myRemainingCount.get());
-		ourLog.debug("Found {} historical versions", retVal.getSize());
+	private List<Long> findHistoricalVersionsOfDeletedResources() {
+		List<Long> retVal = myExpungeDaoService.findHistoricalVersionsOfDeletedResources(myResourceName, myResourceId, myRemainingCount.get());
+		ourLog.debug("Found {} historical versions", retVal.size());
 		return retVal;
 	}
 
-	private Slice<Long> findHistoricalVersionsOfNonDeletedResources() {
+	private List<Long> findHistoricalVersionsOfNonDeletedResources() {
 		return myExpungeDaoService.findHistoricalVersionsOfNonDeletedResources(myResourceName, myResourceId, myVersion, myRemainingCount.get());
 	}
 
@@ -111,7 +111,7 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 	}
 
 	private void expungeOldVersions() {
-		Slice<Long> historicalIds = findHistoricalVersionsOfNonDeletedResources();
+		List<Long> historicalIds = findHistoricalVersionsOfNonDeletedResources();
 
 		getPartitionRunner().runInPartitionedThreads(historicalIds, partition -> myExpungeDaoService.expungeHistoricalVersions(myRequestDetails, partition, myRemainingCount));
 	}
@@ -120,11 +120,11 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 		return new PartitionRunner(PROCESS_NAME, THREAD_PREFIX, myDaoConfig.getExpungeBatchSize(), myDaoConfig.getExpungeThreadCount());
 	}
 
-	private void deleteCurrentVersionsOfDeletedResources(Slice<Long> theResourceIds) {
+	private void deleteCurrentVersionsOfDeletedResources(List<Long> theResourceIds) {
 		getPartitionRunner().runInPartitionedThreads(theResourceIds, partition -> myExpungeDaoService.expungeCurrentVersionOfResources(myRequestDetails, partition, myRemainingCount));
 	}
 
-	private void deleteHistoricalVersions(Slice<Long> theResourceIds) {
+	private void deleteHistoricalVersions(List<Long> theResourceIds) {
 		getPartitionRunner().runInPartitionedThreads(theResourceIds, partition -> myExpungeDaoService.expungeHistoricalVersionsOfIds(myRequestDetails, partition, myRemainingCount));
 	}
 

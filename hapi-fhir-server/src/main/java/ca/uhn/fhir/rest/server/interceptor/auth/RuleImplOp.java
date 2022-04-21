@@ -398,6 +398,9 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 					if (params == null || params.isEmpty()) {
 						params = additionalParams;
 					} else {
+						List<RuntimeSearchParam> existingParams = params;
+						params = new ArrayList<>(existingParams.size() + additionalParams.size());
+						params.addAll(existingParams);
 						params.addAll(additionalParams);
 					}
 

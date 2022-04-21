@@ -9,8 +9,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.SliceImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +34,7 @@ public class PartitionRunnerTest {
 
 	@Test
 	public void emptyList() {
-		Slice<Long> resourceIds = buildSlice(0);
+		List<Long> resourceIds = buildPidList(0);
 		Consumer<List<Long>> partitionConsumer = buildPartitionConsumer(myLatch);
 		myLatch.setExpectedCount(0);
 
@@ -56,17 +54,17 @@ public class PartitionRunnerTest {
 		return new PartitionRunner("TEST", "test", theBatchSize, theThreadCount);
 	}
 
-	private Slice<Long> buildSlice(int size) {
+	private List<Long> buildPidList(int size) {
 		List<Long> list = new ArrayList<>();
 		for (long i = 0; i < size; ++i) {
 			list.add(i + 1);
 		}
-		return new SliceImpl(list);
+		return list;
 	}
 
 	@Test
 	public void oneItem() throws InterruptedException {
-		Slice<Long> resourceIds = buildSlice(1);
+		List<Long> resourceIds = buildPidList(1);
 
 		Consumer<List<Long>> partitionConsumer = buildPartitionConsumer(myLatch);
 		myLatch.setExpectedCount(1);
@@ -79,7 +77,7 @@ public class PartitionRunnerTest {
 
 	@Test
 	public void twoItems() throws InterruptedException {
-		Slice<Long> resourceIds = buildSlice(2);
+		List<Long> resourceIds = buildPidList(2);
 
 		Consumer<List<Long>> partitionConsumer = buildPartitionConsumer(myLatch);
 		myLatch.setExpectedCount(1);
@@ -91,7 +89,7 @@ public class PartitionRunnerTest {
 
 	@Test
 	public void tenItemsBatch5() throws InterruptedException {
-		Slice<Long> resourceIds = buildSlice(10);
+		List<Long> resourceIds = buildPidList(10);
 
 		Consumer<List<Long>> partitionConsumer = buildPartitionConsumer(myLatch);
 		myLatch.setExpectedCount(2);
@@ -108,7 +106,7 @@ public class PartitionRunnerTest {
 
 	@Test
 	public void nineItemsBatch5() throws InterruptedException {
-		Slice<Long> resourceIds = buildSlice(9);
+		List<Long> resourceIds = buildPidList(9);
 
 		// We don't care in which order, but one partition size should be
 		// 5 and one should be 4
@@ -129,7 +127,7 @@ public class PartitionRunnerTest {
 
 	@Test
 	public void tenItemsOneThread() throws InterruptedException {
-		Slice<Long> resourceIds = buildSlice(10);
+		List<Long> resourceIds = buildPidList(10);
 
 		Consumer<List<Long>> partitionConsumer = buildPartitionConsumer(myLatch);
 		myLatch.setExpectedCount(2);
