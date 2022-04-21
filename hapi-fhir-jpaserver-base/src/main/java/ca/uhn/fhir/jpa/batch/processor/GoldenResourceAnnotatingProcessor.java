@@ -34,10 +34,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.lang.NonNull;
 
 import java.util.List;
 import java.util.Optional;
@@ -48,6 +50,8 @@ import java.util.Optional;
  */
 public class GoldenResourceAnnotatingProcessor implements ItemProcessor<List<IBaseResource>, List<IBaseResource>> {
 	 private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
+
+	private List<String> myPatientForwardReferenceResourcesTypes = List.of("Practitioner", "Organization");
 
 	@Value("#{stepExecutionContext['resourceType']}")
 	private String myResourceType;
@@ -79,21 +83,34 @@ public class GoldenResourceAnnotatingProcessor implements ItemProcessor<List<IBa
 	}
 
 	@Override
-	public List<IBaseResource> process(List<IBaseResource> theIBaseResources) throws Exception {
-		//If MDM expansion is enabled, add this magic new extension, otherwise, return the resource as is.
-		if (myMdmEnabled) {
-			if (myRuntimeSearchParam == null) {
-				populateRuntimeSearchParam();
-			}
-			if (myPatientFhirPath == null) {
-				populatePatientFhirPath();
-			}
-			theIBaseResources.forEach(this::annotateClinicalResourceWithRelatedGoldenResourcePatient);
+	public List<IBaseResource> process(@NonNull List<IBaseResource> theIBaseResources) throws Exception {
+		if (shouldAnnotateResource()) {
+			lazyLoadSearchParamsAndFhirPath();
+			theIBaseResources.forEach(this::annotateBackwardsReferences);
 		}
 		return theIBaseResources;
 	}
 
-	private void annotateClinicalResourceWithRelatedGoldenResourcePatient(IBaseResource iBaseResource) {
+	private void lazyLoadSearchParamsAndFhirPath() {
+		if (myRuntimeSearchParam == null) {
+			populateRuntimeSearchParam();
+		}
+		if (myPatientFhirPath == null) {
+			populatePatientFhirPath();
+		}
+	}
+
+	/**
+	 * If the resource is added via a forward-reference from a patient, e.g. Patient.managingOrganization, we have no way to fetch the patient at this point in time. 
+	 * This is a shortcoming of including the forward reference types in a Group/Patient bulk export.
+	 * 
+	 * @return true if the resource should be annotated with the golden resource patient reference
+	 */
+	private boolean shouldAnnotateResource() {
+		return myMdmEnabled && !myPatientForwardReferenceResourcesTypes.contains(myResourceType);
+	}
+
+	private void annotateBackwardsReferences(IBaseResource iBaseResource) {
 		Optional<String> patientReference = getPatientReference(iBaseResource);
 		if (patientReference.isPresent()) {
 			addGoldenResourceExtension(iBaseResource, patientReference.get());
@@ -104,13 +121,15 @@ public class GoldenResourceAnnotatingProcessor implements ItemProcessor<List<IBa
 	}
 
 	private Optional<String> getPatientReference(IBaseResource iBaseResource) {
-		//In the case of patient, we will just use the raw ID.
 		if (myResourceType.equalsIgnoreCase("Patient")) {
 			return Optional.of(iBaseResource.getIdElement().getIdPart());
-		//Otherwise, we will perform evaluation of the fhirPath.
 		} else {
 			Optional<IBaseReference> optionalReference = getFhirParser().evaluateFirst(iBaseResource, myPatientFhirPath, IBaseReference.class);
-			return optionalReference.map(theIBaseReference -> theIBaseReference.getReferenceElement().getIdPart());
+			if (optionalReference.isPresent()) {
+				return optionalReference.map(theIBaseReference -> theIBaseReference.getReferenceElement().getIdPart());
+			} else {
+				return Optional.empty();
+			}
 		}
 	}
 

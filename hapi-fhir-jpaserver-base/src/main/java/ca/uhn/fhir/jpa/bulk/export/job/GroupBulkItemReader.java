@@ -38,6 +38,8 @@ import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.param.HasOrListParam;
+import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -84,15 +86,17 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 	private MdmExpansionCacheSvc myMdmExpansionCacheSvc;
 	@Autowired
 	private IJpaIdHelperService myJpaIdHelperService;
+	private List<String> myPatientForwardReferenceResourcesTypes = List.of("Practitioner", "Organization");
 
 	@Override
 	protected Iterator<ResourcePersistentId> getResourcePidIterator() {
-		Set<ResourcePersistentId> myReadPids = new HashSet<>();
 
 		//Short circuit out if we detect we are attempting to extract patients
 		if (myResourceType.equalsIgnoreCase("Patient")) {
 			return getExpandedPatientIterator();
 		}
+
+
 
 		//First lets expand the group so we get a list of all patient IDs of the group, and MDM-matched patient IDs of the group.
 		Set<String> expandedMemberResourceIds = expandAllPatientPidsFromGroup();
@@ -102,15 +106,16 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 
 		//Next, let's search for the target resources, with their correct patient references, chunked.
 		//The results will be jammed into myReadPids
+		Set<ResourcePersistentId> myExpandedMemberPids = new HashSet<>();
 		QueryChunker<String> queryChunker = new QueryChunker<>();
 		queryChunker.chunk(new ArrayList<>(expandedMemberResourceIds), QUERY_CHUNK_SIZE, (idChunk) -> {
-			queryResourceTypeWithReferencesToPatients(myReadPids, idChunk);
+			queryResourceTypeWithReferencesToPatients(myExpandedMemberPids, idChunk);
 		});
 
 		if (ourLog.isDebugEnabled()) {
-			ourLog.debug("Resource PIDs to be Bulk Exported: [{}]", myReadPids.stream().map(ResourcePersistentId::toString).collect(Collectors.joining(",")));
+			ourLog.debug("Resource PIDs to be Bulk Exported: [{}]", myExpandedMemberPids.stream().map(ResourcePersistentId::toString).collect(Collectors.joining(",")));
 		}
-		return myReadPids.iterator();
+		return myExpandedMemberPids.iterator();
 	}
 
 	/**
@@ -243,6 +248,7 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 	}
 
 	private void queryResourceTypeWithReferencesToPatients(Set<ResourcePersistentId> myReadPids, List<String> idChunk) {
+
 		//Build SP map
 		//First, inject the _typeFilters and _since from the export job
 		List<SearchParameterMap> expandedSpMaps = createSearchParameterMapsForResourceType();
@@ -251,17 +257,42 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 			//Since we are in a bulk job, we have to ensure the user didn't jam in a patient search param, since we need to manually set that.
 			validateSearchParameters(expandedSpMap);
 
-			// Now, further filter the query with patient references defined by the chunk of IDs we have.
-			filterSearchByResourceIds(idChunk, expandedSpMap);
-
 			// Fetch and cache a search builder for this resource type
 			ISearchBuilder searchBuilder = getSearchBuilderForLocalResourceType();
+
+			// Now, further filter the query with patient references defined by the chunk of IDs we have.
+			if (myPatientForwardReferenceResourcesTypes.contains(myResourceType)) {
+				filterSearchByHasParam(idChunk, expandedSpMap);
+			} else {
+				filterSearchByResourceIds(idChunk, expandedSpMap);
+			}
 
 			//Execute query and all found pids to our local iterator.
 			IResultIterator resultIterator = searchBuilder.createQuery(expandedSpMap, new SearchRuntimeDetails(null, myJobUUID), null, RequestPartitionId.allPartitions());
 			while (resultIterator.hasNext()) {
 				myReadPids.add(resultIterator.next());
 			}
+		}
+	}
+
+	/**
+	 *
+	 * @param idChunk
+	 * @param expandedSpMap
+	 */
+	private void filterSearchByHasParam(List<String> idChunk, SearchParameterMap expandedSpMap) {
+		HasOrListParam hasOrListParam = new HasOrListParam();
+		idChunk.stream().forEach(id -> hasOrListParam.addOr(buildHasParam(id)));
+		expandedSpMap.add("_has", hasOrListParam);
+	}
+
+	private HasParam buildHasParam(String theId) {
+		if ("Practitioner".equalsIgnoreCase(myResourceType)) {
+			return new HasParam("Patient", "general-practitioner", "_id", theId);
+		} else if ("Organization".equalsIgnoreCase(myResourceType)) {
+			return new HasParam("Patient", "organization", "_id", theId);
+		} else {
+			throw new IllegalArgumentException("We can't handle forward references onto type " + myResourceType);
 		}
 	}
 
@@ -272,10 +303,15 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 	}
 
 	private RuntimeSearchParam validateSearchParameters(SearchParameterMap expandedSpMap) {
-		RuntimeSearchParam runtimeSearchParam = getPatientSearchParamForCurrentResourceType();
-		if (expandedSpMap.get(runtimeSearchParam.getName()) != null) {
-			throw new IllegalArgumentException(Msg.code(792) + String.format("Group Bulk Export manually modifies the Search Parameter called [%s], so you may not include this search parameter in your _typeFilter!", runtimeSearchParam.getName()));
+		if (myPatientForwardReferenceResourcesTypes.contains(myResourceType)) {
+			return null;
+			//TODO GGG what should this actually do?
+		} else {
+			RuntimeSearchParam runtimeSearchParam = getPatientSearchParamForCurrentResourceType();
+			if (expandedSpMap.get(runtimeSearchParam.getName()) != null) {
+				throw new IllegalArgumentException(Msg.code(792) + String.format("Group Bulk Export manually modifies the Search Parameter called [%s], so you may not include this search parameter in your _typeFilter!", runtimeSearchParam.getName()));
+			}
+			return runtimeSearchParam;
 		}
-		return runtimeSearchParam;
 	}
 }
