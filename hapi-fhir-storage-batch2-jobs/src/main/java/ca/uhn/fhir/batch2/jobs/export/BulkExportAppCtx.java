@@ -21,8 +21,9 @@ public class BulkExportAppCtx {
 		builder.setJobDefinitionVersion(1);
 
 		builder.setParametersType(BulkExportJobParameters.class)
-		// validator?
-		// first step - load in (all) ids and create id chunks of 1000 each
+			// validator
+			.setParametersValidator(bulkExportJobParametersValidator())
+			// first step - load in (all) ids and create id chunks of 1000 each
 			.addFirstStep(
 			"fetch-resources",
 			"Fetches resource PIDs for exporting",
@@ -45,11 +46,12 @@ public class BulkExportAppCtx {
 			.completionHandler(finalizeJobCallback())
 		;
 
-		// TODO - we will want a new last step that
-		// actually depends on all previous steps and will fire only
-		// to update the process as finished or errored out
-
 		return builder.build();
+	}
+
+	@Bean
+	public BulkExportJobParametersValidator bulkExportJobParametersValidator() {
+		return new BulkExportJobParametersValidator();
 	}
 
 	@Bean

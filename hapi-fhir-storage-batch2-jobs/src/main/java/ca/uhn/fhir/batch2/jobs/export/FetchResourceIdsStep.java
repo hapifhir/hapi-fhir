@@ -43,6 +43,7 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 		ExportPIDIteratorParameters providerParams = new ExportPIDIteratorParameters();
 		providerParams.setFilters(params.getFilters());
 		providerParams.setStartDate(params.getStartDate());
+		providerParams.setJobId(params.getJobId());
 
 		int submissionCount = 0;
 		for (String resourceType : params.getResourceTypes()) {

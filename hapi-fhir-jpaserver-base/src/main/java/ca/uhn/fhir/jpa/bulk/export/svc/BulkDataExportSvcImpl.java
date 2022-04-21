@@ -54,6 +54,8 @@ import org.springframework.data.domain.Slice;
 
 import javax.transaction.Transactional;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -191,6 +193,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		updateExpiry(jobEntity);
 		myBulkExportJobDao.save(jobEntity);
 
+		Map<String, Long> map = new HashMap<>();
 		for (String nextType : resourceTypes) {
 
 			BulkExportCollectionEntity collection = new BulkExportCollectionEntity();

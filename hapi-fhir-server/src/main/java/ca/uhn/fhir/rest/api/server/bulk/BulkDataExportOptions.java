@@ -43,8 +43,6 @@ public class BulkDataExportOptions {
 	private boolean myExpandMdm;
 	private IIdType myGroupId;
 
-
-
 	public void setOutputFormat(String theOutputFormat) {
 		myOutputFormat = theOutputFormat;
 	}

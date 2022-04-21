@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.bulk.export.api;
 
+import ca.uhn.fhir.jpa.api.model.BulkExportJobInfo;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -15,6 +16,13 @@ public interface IBulkExportProcessor {
 	 * @return
 	 */
 	Iterator<ResourcePersistentId> getResourcePidIterator(ExportPIDIteratorParameters theParams);
+
+	/**
+	 * Returns the basics of a started (and persisted) job.
+	 * @param theJobId - the id of the job
+	 * @return - job info
+	 */
+	BulkExportJobInfo getJobInfo(String theJobId);
 
 	/**
 	 * Sets the job status

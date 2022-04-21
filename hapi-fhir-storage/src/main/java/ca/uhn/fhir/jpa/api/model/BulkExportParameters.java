@@ -9,20 +9,45 @@ import java.util.List;
 
 public class BulkExportParameters extends RunJobParameters {
 
+	/**
+	 * List of resource types to export.
+	 */
 	private List<String> myResourceTypes;
 
+	/**
+	 * The earliest date from which to export resources.
+	 */
 	private Date myStartDate;
 
+	/**
+	 * Filters are used to narrow down the resources to export.
+	 * Eg:
+	 * Patient/123?group=a
+	 * "group=a" is a filter
+	 */
 	private List<String> myFilters;
 
+	/**
+	 * Export style - Patient, Group or Everything
+	 */
 	private BulkDataExportOptions.ExportStyle myExportStyle;
 
+	/**
+	 * Group id
+	 */
 	private String myGroupId;
 
+	/**
+	 * Output format.
+	 * Currently unsupported (all outputs are ndjson)
+	 */
 	private String myOutputFormat;
 
-	// This is the ID of the db resource that tracks
-	// the bulkexportjob. See BulkExportJobEntity
+	/**
+	 * The bulk export job id.
+	 * Job ID is used to track export work/status
+	 * (including where to find the resulting binaries)
+	 */
 	private String myJobId;
 
 	public BulkExportParameters(@Nonnull String theJobDefinitionId) {
