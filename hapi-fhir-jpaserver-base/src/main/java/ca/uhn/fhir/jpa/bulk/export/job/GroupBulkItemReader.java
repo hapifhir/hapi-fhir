@@ -293,7 +293,7 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 		} else if ("Organization".equalsIgnoreCase(myResourceType)) {
 			return new HasParam("Patient", "organization", "_id", theId);
 		} else {
-			throw new IllegalArgumentException("We can't handle forward references onto type " + myResourceType);
+			throw new IllegalArgumentException(Msg.code(2077) + " We can't handle forward references onto type " + myResourceType);
 		}
 	}
 
