@@ -316,7 +316,7 @@ public class SearchBuilder implements ISearchBuilder {
 		myRequestPartitionId = theRequestPartitionId;
 	}
 
-	private List<ISearchQueryExecutor> createQuery(SearchParameterMap theParams, SortSpec sort, Integer theOffset, Integer theMaximumResults, boolean theCount, RequestDetails theRequest,
+	private List<ISearchQueryExecutor> createQuery(SearchParameterMap theParams, SortSpec sort, Integer theOffset, Integer theMaximumResults, boolean theCountOnlyFlag, RequestDetails theRequest,
 																		 SearchRuntimeDetails theSearchRuntimeDetails) {
 
 		ArrayList<ISearchQueryExecutor> queries = new ArrayList<>();
@@ -335,6 +335,7 @@ public class SearchBuilder implements ISearchBuilder {
 				fulltextMatchIds = queryHibernateSearchForEverythingPids();
 				resultCount = fulltextMatchIds.size();
 			} else {
+				// fixme add a branch here ,and if theCountOnlyFlag is set, run a count query.
 				fulltextExecutor = myFulltextSearchSvc.searchAsync(myResourceName, myParams);
 			}
 
@@ -360,7 +361,7 @@ public class SearchBuilder implements ISearchBuilder {
 					// Our hibernate search query doesn't respect partitions yet
 					(!myPartitionSettings.isPartitioningEnabled() &&
 						// we don't support _count=0 yet.
-						!theCount &&
+						!theCountOnlyFlag &&
 					// were there AND terms left?  Then we still need the db.
 						theParams.isEmpty() &&
 						// not every param is a param. :-(
@@ -382,11 +383,11 @@ public class SearchBuilder implements ISearchBuilder {
 				// We break the pids into chunks that fit in the 1k limit for jdbc bind params.
 				// wipmb change chunk to take iterator
 				new QueryChunker<Long>()
-					.chunk(Streams.stream(fulltextExecutor).collect(Collectors.toList()), t -> doCreateChunkedQueries(theParams, t, theOffset, sort, theCount, theRequest, queries));
+					.chunk(Streams.stream(fulltextExecutor).collect(Collectors.toList()), t -> doCreateChunkedQueries(theParams, t, theOffset, sort, theCountOnlyFlag, theRequest, queries));
 			}
 		} else {
 			// do everything in the database.
-			Optional<SearchQueryExecutor> query = createChunkedQuery(theParams, sort, theOffset, theMaximumResults, theCount, theRequest, null);
+			Optional<SearchQueryExecutor> query = createChunkedQuery(theParams, sort, theOffset, theMaximumResults, theCountOnlyFlag, theRequest, null);
 			query.ifPresent(queries::add);
 		}
 
@@ -506,9 +507,9 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 	}
 
-	private Optional<SearchQueryExecutor> createChunkedQuery(SearchParameterMap theParams, SortSpec sort, Integer theOffset, Integer theMaximumResults, boolean theCount, RequestDetails theRequest, List<Long> thePidList) {
+	private Optional<SearchQueryExecutor> createChunkedQuery(SearchParameterMap theParams, SortSpec sort, Integer theOffset, Integer theMaximumResults, boolean theCountOnlyFlag, RequestDetails theRequest, List<Long> thePidList) {
 		String sqlBuilderResourceName = myParams.getEverythingMode() == null ? myResourceName : null;
-		SearchQueryBuilder sqlBuilder = new SearchQueryBuilder(myContext, myDaoConfig.getModelConfig(), myPartitionSettings, myRequestPartitionId, sqlBuilderResourceName, mySqlBuilderFactory, myDialectProvider, theCount);
+		SearchQueryBuilder sqlBuilder = new SearchQueryBuilder(myContext, myDaoConfig.getModelConfig(), myPartitionSettings, myRequestPartitionId, sqlBuilderResourceName, mySqlBuilderFactory, myDialectProvider, theCountOnlyFlag);
 		QueryStack queryStack3 = new QueryStack(theParams, myDaoConfig, myDaoConfig.getModelConfig(), myContext, sqlBuilder, mySearchParamRegistry, myPartitionSettings);
 
 		if (theParams.keySet().size() > 1 || theParams.getSort() != null || theParams.keySet().contains(Constants.PARAM_HAS) || isPotentiallyContainedReferenceParameterExistsAtRoot(theParams)) {
@@ -533,7 +534,7 @@ public class SearchBuilder implements ISearchBuilder {
 				// is basically a reverse-include search. For type/Everything (as opposed to instance/Everything)
 				// the one problem with this approach is that it doesn't catch Patients that have absolutely
 				// nothing linked to them. So we do one additional query to make sure we catch those too.
-				SearchQueryBuilder fetchPidsSqlBuilder = new SearchQueryBuilder(myContext, myDaoConfig.getModelConfig(), myPartitionSettings, myRequestPartitionId, myResourceName, mySqlBuilderFactory, myDialectProvider, theCount);
+				SearchQueryBuilder fetchPidsSqlBuilder = new SearchQueryBuilder(myContext, myDaoConfig.getModelConfig(), myPartitionSettings, myRequestPartitionId, myResourceName, mySqlBuilderFactory, myDialectProvider, theCountOnlyFlag);
 				GeneratedSql allTargetsSql = fetchPidsSqlBuilder.generate(theOffset, myMaxResultsToFetch);
 				String sql = allTargetsSql.getSql();
 				Object[] args = allTargetsSql.getBindVariables().toArray(new Object[0]);
@@ -613,7 +614,7 @@ public class SearchBuilder implements ISearchBuilder {
 		 * finds the appropriate resources) in an outer search which is then sorted
 		 */
 		if (sort != null) {
-			assert !theCount;
+			assert !theCountOnlyFlag;
 
 			createSort(queryStack3, sort);
 		}
