@@ -60,6 +60,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.batch.config.BatchConstants.PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES;
+
 /**
  * Bulk Item reader for the Group Bulk Export job.
  * Instead of performing a normal query on the resource type using type filters, we instead
@@ -86,7 +88,6 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 	private MdmExpansionCacheSvc myMdmExpansionCacheSvc;
 	@Autowired
 	private IJpaIdHelperService myJpaIdHelperService;
-	private List<String> myPatientForwardReferenceResourcesTypes = List.of("Practitioner", "Organization");
 
 	@Override
 	protected Iterator<ResourcePersistentId> getResourcePidIterator() {
@@ -261,7 +262,7 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 			ISearchBuilder searchBuilder = getSearchBuilderForLocalResourceType();
 
 			// Now, further filter the query with patient references defined by the chunk of IDs we have.
-			if (myPatientForwardReferenceResourcesTypes.contains(myResourceType)) {
+			if (PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES.contains(myResourceType)) {
 				filterSearchByHasParam(idChunk, expandedSpMap);
 			} else {
 				filterSearchByResourceIds(idChunk, expandedSpMap);

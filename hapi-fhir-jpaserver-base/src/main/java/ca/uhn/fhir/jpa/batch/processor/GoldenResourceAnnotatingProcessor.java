@@ -44,6 +44,8 @@ import org.springframework.lang.NonNull;
 import java.util.List;
 import java.util.Optional;
 
+import static ca.uhn.fhir.jpa.batch.config.BatchConstants.PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES;
+
 /**
  * Reusable Item Processor which attaches an extension to any outgoing resource. This extension will contain a resource
  * reference to the golden resource patient of the given resources' patient. (e.g. Observation.subject, Immunization.patient, etc)
@@ -51,7 +53,6 @@ import java.util.Optional;
 public class GoldenResourceAnnotatingProcessor implements ItemProcessor<List<IBaseResource>, List<IBaseResource>> {
 	 private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
-	private List<String> myPatientForwardReferenceResourcesTypes = List.of("Practitioner", "Organization");
 
 	@Value("#{stepExecutionContext['resourceType']}")
 	private String myResourceType;
@@ -107,7 +108,7 @@ public class GoldenResourceAnnotatingProcessor implements ItemProcessor<List<IBa
 	 * @return true if the resource should be annotated with the golden resource patient reference
 	 */
 	private boolean shouldAnnotateResource() {
-		return myMdmEnabled && !myPatientForwardReferenceResourcesTypes.contains(myResourceType);
+		return myMdmEnabled && !PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES.contains(myResourceType);
 	}
 
 	private void annotateBackwardsReferences(IBaseResource iBaseResource) {
