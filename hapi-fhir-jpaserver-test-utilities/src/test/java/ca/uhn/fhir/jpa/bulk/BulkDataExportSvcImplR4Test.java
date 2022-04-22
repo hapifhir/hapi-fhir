@@ -49,7 +49,9 @@ import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Immunization;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -63,6 +65,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -423,7 +426,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		// Fetch the job again
 		status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
 		assertEquals(BulkExportJobStatusEnum.COMPLETE, status.getStatus());
-		assertEquals(5, status.getFiles().size());
+		assertEquals(7, status.getFiles().size());
 
 		// Iterate over the files
 		for (IBulkDataExportSvc.FileEntry next : status.getFiles()) {
@@ -443,6 +446,12 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			} else if ("CareTeam".equals(next.getResourceType())) {
 				assertThat(nextContents, containsString("\"id\":\"CT0\""));
 				assertEquals(16, nextContents.split("\n").length);
+			} else if ("Practitioner".equals(next.getResourceType())) {
+				assertThat(nextContents, containsString("\"id\":\"PRACT0\""));
+				assertEquals(11, nextContents.split("\n").length);
+			} else if ("Organization".equals(next.getResourceType())) {
+				assertThat(nextContents, containsString("\"id\":\"ORG0\""));
+				assertEquals(11, nextContents.split("\n").length);
 			} else if ("Group".equals(next.getResourceType())) {
 				assertThat(nextContents, containsString("\"id\":\"G0\""));
 				assertEquals(1, nextContents.split("\n").length);
@@ -702,7 +711,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		bulkDataExportOptions.setSince(null);
 		bulkDataExportOptions.setFilters(null);
 		bulkDataExportOptions.setGroupId(myPatientGroupId);
-		bulkDataExportOptions.setExpandMdm(true);
+		bulkDataExportOptions.setExpandMdm(false);
 		bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
 		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(bulkDataExportOptions);
 
@@ -725,6 +734,58 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		assertThat(nextContents, is(containsString("IMM4")));
 		assertThat(nextContents, is(containsString("IMM6")));
 		assertThat(nextContents, is(containsString("IMM8")));
+	}
+
+	@Test
+	public void testGroupBatchJobFindsForwardReferencesIfNeeded() {
+		createResources();
+
+		// Create a bulk job
+		BulkDataExportOptions bulkDataExportOptions = new BulkDataExportOptions();
+		bulkDataExportOptions.setOutputFormat(null);
+		bulkDataExportOptions.setResourceTypes(Sets.newHashSet("Practitioner","Organization", "Observation"));
+		bulkDataExportOptions.setSince(null);
+		bulkDataExportOptions.setFilters(null);
+		bulkDataExportOptions.setGroupId(myPatientGroupId);
+		bulkDataExportOptions.setExpandMdm(false);
+		//FIXME GGG Make sure this works with MDM Enabled as well.
+		bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
+		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(bulkDataExportOptions);
+
+		myBulkDataExportJobSchedulingHelper.startSubmittedJobs();
+		awaitAllBulkJobCompletions();
+
+		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
+
+		assertThat(jobInfo.getStatus(), equalTo(BulkExportJobStatusEnum.COMPLETE));
+		assertThat(jobInfo.getFiles().size(), equalTo(3));
+
+		// Iterate over the files
+		String nextContents = getBinaryContents(jobInfo, 0);
+
+		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Practitioner")));
+		assertThat(nextContents, is(containsString("PRACT0")));
+		assertThat(nextContents, is(containsString("PRACT2")));
+		assertThat(nextContents, is(containsString("PRACT4")));
+		assertThat(nextContents, is(containsString("PRACT6")));
+		assertThat(nextContents, is(containsString("PRACT8")));
+
+		nextContents = getBinaryContents(jobInfo, 1);
+		assertThat(jobInfo.getFiles().get(1).getResourceType(), is(equalTo("Organization")));
+		assertThat(nextContents, is(containsString("ORG0")));
+		assertThat(nextContents, is(containsString("ORG2")));
+		assertThat(nextContents, is(containsString("ORG4")));
+		assertThat(nextContents, is(containsString("ORG6")));
+		assertThat(nextContents, is(containsString("ORG8")));
+
+		//Ensure _backwards_ references still work
+		nextContents = getBinaryContents(jobInfo, 2);
+		assertThat(jobInfo.getFiles().get(2).getResourceType(), is(equalTo("Observation")));
+		assertThat(nextContents, is(containsString("OBS0")));
+		assertThat(nextContents, is(containsString("OBS2")));
+		assertThat(nextContents, is(containsString("OBS4")));
+		assertThat(nextContents, is(containsString("OBS6")));
+		assertThat(nextContents, is(containsString("OBS8")));
 	}
 
 	@Test
@@ -867,6 +928,14 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		assertThat(nextContents, is(containsString("CT4")));
 		assertThat(nextContents, is(containsString("CT6")));
 		assertThat(nextContents, is(containsString("CT8")));
+
+		//These should be brought in via MDM.
+		assertThat(nextContents, is(containsString("CT1")));
+		assertThat(nextContents, is(containsString("CT3")));
+		assertThat(nextContents, is(containsString("CT5")));
+		assertThat(nextContents, is(containsString("CT7")));
+		assertThat(nextContents, is(containsString("CT9")));
+
 	}
 
 
@@ -1209,13 +1278,23 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	}
 
 	private void createResources() {
+		SystemRequestDetails srd = SystemRequestDetails.newSystemRequestAllPartitions();
 		Group group = new Group();
 		group.setId("G0");
 
+		//Manually create a Practitioner
+		IIdType goldenPractId = createPractitionerWithIndex(999);
+
+		//Manually create an Organization
+		IIdType goldenOrgId = createOrganizationWithIndex(999);
+
 		//Manually create a golden record
 		Patient goldenPatient = new Patient();
+
 		goldenPatient.setId("PAT999");
-		SystemRequestDetails srd = SystemRequestDetails.newSystemRequestAllPartitions();
+		goldenPatient.setGeneralPractitioner(Collections.singletonList(new Reference(goldenPractId.toVersionless())));
+		goldenPatient.setManagingOrganization(new Reference(goldenOrgId.toVersionless()));
+
 		DaoMethodOutcome g1Outcome = myPatientDao.update(goldenPatient, srd);
 		Long goldenPid = runInTransaction(() -> myIdHelperService.getPidOrNull(g1Outcome.getResource()));
 
@@ -1225,7 +1304,9 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		createCareTeamWithIndex(999, g1Outcome.getId());
 
 		for (int i = 0; i < 10; i++) {
-			DaoMethodOutcome patientOutcome = createPatientWithIndex(i);
+			IIdType orgId = createOrganizationWithIndex(i);
+			IIdType practId = createPractitionerWithIndex(i);
+			DaoMethodOutcome patientOutcome = createPatientWithIndexAndGPAndManagingOrganization(i, practId, orgId);
 			IIdType patId = patientOutcome.getId().toUnqualifiedVersionless();
 			Long sourcePid = runInTransaction(() -> myIdHelperService.getPidOrNull(patientOutcome.getResource()));
 
@@ -1254,7 +1335,9 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		//Create some nongroup patients MDM linked to a different golden resource. They shouldnt be included in the query.
 		for (int i = 0; i < 5; i++) {
 			int index = 1000 + i;
-			DaoMethodOutcome patientOutcome = createPatientWithIndex(index);
+			IIdType orgId = createOrganizationWithIndex(i);
+			IIdType practId = createPractitionerWithIndex(i);
+			DaoMethodOutcome patientOutcome = createPatientWithIndexAndGPAndManagingOrganization(index, practId, orgId);
 			IIdType patId = patientOutcome.getId().toUnqualifiedVersionless();
 			Long sourcePid = runInTransaction(() -> myIdHelperService.getPidOrNull(patientOutcome.getResource()));
 			linkToGoldenResource(goldenPid2, sourcePid);
@@ -1271,12 +1354,26 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		}
 	}
 
-	private DaoMethodOutcome createPatientWithIndex(int i) {
+	private IIdType createPractitionerWithIndex(int theIndex) {
+		Practitioner pract = new Practitioner();
+		pract.setId("PRACT" + theIndex);
+		return myPractitionerDao.update(pract, new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.defaultPartition())).getId();
+	}
+
+	private IIdType createOrganizationWithIndex(int theIndex) {
+		Organization org = new Organization();
+		org.setId("ORG" + theIndex);
+		return myOrganizationDao.update(org, new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.defaultPartition())).getId();
+	}
+
+	private DaoMethodOutcome createPatientWithIndexAndGPAndManagingOrganization(int theIndex, IIdType thePractId, IIdType theOrgId) {
 		Patient patient = new Patient();
-		patient.setId("PAT" + i);
-		patient.setGender(i % 2 == 0 ? Enumerations.AdministrativeGender.MALE : Enumerations.AdministrativeGender.FEMALE);
-		patient.addName().setFamily("FAM" + i);
-		patient.addIdentifier().setSystem("http://mrns").setValue("PAT" + i);
+		patient.setId("PAT" + theIndex);
+		patient.setGender(theIndex % 2 == 0 ? Enumerations.AdministrativeGender.MALE : Enumerations.AdministrativeGender.FEMALE);
+		patient.addName().setFamily("FAM" + theIndex);
+		patient.addIdentifier().setSystem("http://mrns").setValue("PAT" + theIndex);
+		patient.setManagingOrganization(new Reference(theOrgId.toVersionless()));
+		patient.setGeneralPractitioner(Collections.singletonList(new Reference(thePractId.toVersionless())));
 		return myPatientDao.update(patient, new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.defaultPartition()));
 	}
 
