@@ -30,6 +30,7 @@ import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -401,12 +402,11 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 	}
 
 	private void testBulkExport(String createInPartition) throws IOException {
-		// Create patients
+		// Create a patient
 		IBaseResource patientA = buildPatient(withActiveTrue());
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
-		IIdType idA;
 		requestDetails.setTenantId(createInPartition);
-		idA = myPatientDao.create((Patient) patientA, requestDetails).getId();
+		myPatientDao.create((Patient) patientA, requestDetails);
 
 		// Create a bulk job
 		BulkDataExportOptions options = new BulkDataExportOptions();
@@ -416,39 +416,19 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(options, false, requestDetails);
 		assertNotNull(jobDetails.getJobId());
 
-		// Check the status
-		IBulkDataExportSvc.JobInfo status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
-		assertEquals(BulkExportJobStatusEnum.SUBMITTED, status.getStatus());
-
 		// Run a scheduled pass to build the export and wait for completion
 		myBulkDataExportJobSchedulingHelper.startSubmittedJobs();
 		myBatchJobHelper.awaitAllBulkJobCompletions(
 			BatchConstants.BULK_EXPORT_JOB_NAME
 		);
 
-		// Fetch the job again and check the completed status
-		status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
-		assertEquals(BulkExportJobStatusEnum.COMPLETE, status.getStatus());
-
 		//perform export-poll-status
-		String patientUrl;
-		HttpGet get = new HttpGet(myClient.getServerBase() + "/" + createInPartition + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?"
-			+ JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + jobDetails.getJobId());
+		HttpGet get = new HttpGet(buildExportUrl(createInPartition, jobDetails.getJobId()));
 		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			BulkExportResponseJson responseJson = JsonUtil.deserialize(responseString, BulkExportResponseJson.class);
-			assertThat(responseJson.getOutput(), hasSize(1));
-			assertThat(responseJson.getOutput().get(0).getType(), is(equalTo("Patient")));
 			assertThat(responseJson.getOutput().get(0).getUrl(), containsString(JpaConstants.DEFAULT_PARTITION_NAME + "/Binary/"));
-			patientUrl = responseJson.getOutput().get(0).getUrl();
 		}
-		get = new HttpGet(patientUrl);
-		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
-			String responseString = IOUtils.toString(response.getEntity().getContent(),StandardCharsets.UTF_8);
-			IBaseResource patient = myFhirContext.newJsonParser().parseResource(responseString);
-			assertThat(patient.getIdElement(), is(equalTo(idA)));
-		}
-		myPatientDao.delete(idA, requestDetails);
 	}
 
 	private void setBulkDataExportProvider() {
@@ -456,6 +436,11 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		provider.setBulkDataExportSvcForUnitTests(myBulkDataExportSvc);
 		provider.setFhirContextForUnitTest(myFhirContext);
 		ourRestServer.registerProvider(provider);
+	}
+
+	private String buildExportUrl(String createInPartition, String jobId) {
+		return myClient.getServerBase() + "/" + createInPartition + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?"
+			+ JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + jobId;
 	}
 
 	private void createConditionWithAllowedUnqualified(IIdType idA) {

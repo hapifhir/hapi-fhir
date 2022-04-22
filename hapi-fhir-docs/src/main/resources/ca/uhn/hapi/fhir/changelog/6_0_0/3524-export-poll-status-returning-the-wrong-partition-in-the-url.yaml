@@ -1,4 +1,4 @@
 type: fix
 issue: 3524
 jira: SMILE-3672
-title: "Previously for the multiple partitions, the URL returned from the export-poll-status is the wrong partition value. This has been fixed and will return the DEFAULT partition value in the URL whenever export-poll-status is invoked. The reason for this change is that the bulk export data is always stored in the DEFAULT partition."
+title: "Previously  if partitioning was enabled, the URL returned from  `$export-poll-status` provided a location in the wrong partition. This has been fixed and all Bulk Exports will be stored in the  `DEFAULT` partition."
