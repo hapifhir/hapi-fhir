@@ -1,5 +1,5 @@
 type: add
 issue: 3547
 jira: SMILE-4141
-title: "Added a pointcut just before the client assigned id is created. This allows interceptors to allow/deny the 
+title: "Added a pointcut just before the client assigned id is created. This allows interceptors to allow or deny the 
 client assigned id based on ResourceDetails and RequestDetails."
