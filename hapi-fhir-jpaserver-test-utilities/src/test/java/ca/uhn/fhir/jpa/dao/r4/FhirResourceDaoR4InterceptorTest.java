@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.IServerOperationInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -26,6 +27,7 @@ import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -511,10 +513,45 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 
 		Patient p = new Patient();
 		p.setActive(false);
+
 		IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		p = myPatientDao.read(id);
 		assertEquals(true, p.getActive());
+
+	}
+
+	@Test
+	public void testChangeNameLaterJDJD() {
+		Object interceptor = new Object() {
+			@Hook(Pointcut.STORAGE_ACCEPT_CLIENT_ASSIGNED_ID)
+			public void renameLaterJDJD(IBaseResource theResource, RequestDetails theRequest) throws Exception {
+				if (!theResource.getIdElement().isEmpty()) {
+					IBaseResource resource = myPatientDao.read(theResource.getIdElement());
+					if (!resource.isEmpty()) {
+						throw new Exception();
+					}
+				}
+			}
+		};
+		mySrdInterceptorService.registerInterceptor(interceptor);
+
+		Patient p = new Patient();
+		IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+
+		p.setId("Patient/1");
+		myPatientDao.create(p, mySrd).setId(id);
+
+		try {
+			p = myPatientDao.read(id);
+		} catch (ResourceNotFoundException e) {
+			//good
+		}
+
+		id.setValue("123");
+
+		p = myPatientDao.read(id);
+
 
 	}
 
