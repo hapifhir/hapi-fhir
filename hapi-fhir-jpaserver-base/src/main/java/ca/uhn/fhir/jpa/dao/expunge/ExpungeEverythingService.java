@@ -92,7 +92,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
-public class ExpungeEverythingService {
+public class ExpungeEverythingService implements IExpungeEverythingService {
 	private static final Logger ourLog = LoggerFactory.getLogger(ExpungeEverythingService.class);
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
@@ -111,6 +111,7 @@ public class ExpungeEverythingService {
 		myTxTemplate = new TransactionTemplate(myPlatformTransactionManager);
 	}
 
+	@Override
 	public void expungeEverything(@Nullable RequestDetails theRequest) {
 
 		final AtomicInteger counter = new AtomicInteger();
@@ -224,6 +225,7 @@ public class ExpungeEverythingService {
                 return outcome;
         }
 
+	@Override
 	public int expungeEverythingByType(Class<?> theEntityType) {
                 int result = expungeEverythingByTypeWithoutPurging(theEntityType);
                 purgeAllCaches();

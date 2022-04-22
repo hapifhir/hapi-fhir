@@ -62,6 +62,10 @@ public class UrlUtil {
 	private static final String URL_FORM_PARAMETER_OTHER_SAFE_CHARS = "-_.*";
 	private static final Escaper PARAMETER_ESCAPER = new PercentEscaper(URL_FORM_PARAMETER_OTHER_SAFE_CHARS, false);
 
+	public static String sanitizeBaseUrl(String theBaseUrl) {
+		return theBaseUrl.replaceAll("[^a-zA-Z0-9:/._-]", "");
+	}
+
 	public static class UrlParts {
 		private String myParams;
 		private String myResourceId;

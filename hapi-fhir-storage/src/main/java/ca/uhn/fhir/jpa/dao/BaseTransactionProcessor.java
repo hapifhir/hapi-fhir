@@ -1882,7 +1882,7 @@ public abstract class BaseTransactionProcessor {
 	 * @param theMatchUrl
 	 * @return
 	 */
-	static String performIdSubstitutionsInMatchUrl(IdSubstitutionMap theIdSubstitutions, String theMatchUrl) {
+	public static String performIdSubstitutionsInMatchUrl(IdSubstitutionMap theIdSubstitutions, String theMatchUrl) {
 		String matchUrl = theMatchUrl;
 		if (isNotBlank(matchUrl) && !theIdSubstitutions.isEmpty()) {
 

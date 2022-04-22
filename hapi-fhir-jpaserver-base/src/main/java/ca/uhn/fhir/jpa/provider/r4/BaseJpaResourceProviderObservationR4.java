@@ -7,6 +7,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.annotation.RawParam;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateAndListParam;
@@ -15,6 +16,9 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.UnsignedIntType;
+
+import java.util.List;
+import java.util.Map;
 
 /*
  * #%L
@@ -75,8 +79,10 @@ public class BaseJpaResourceProviderObservationR4 extends JpaResourceProviderR4<
 
 		@Description(shortDefinition="The maximum number of observations to return for each observation code")
 		@OperationParam(name = "max", typeName = "integer", min = 0, max = 1)
-			IPrimitiveType<Integer> theMax
+			IPrimitiveType<Integer> theMax,
 
+		@RawParam
+			Map<String, List<String>> theAdditionalRawParams
 		) {
 		startRequest(theServletRequest);
 		try {
@@ -96,6 +102,8 @@ public class BaseJpaResourceProviderObservationR4 extends JpaResourceProviderR4<
 			if (theCount != null) {
 				paramMap.setCount(theCount.getValue());
 			}
+
+			getDao().translateRawParameters(theAdditionalRawParams, paramMap);
 
 			return ((IFhirResourceDaoObservation<Observation>) getDao()).observationsLastN(paramMap, theRequestDetails, theServletResponse);
 		} finally {

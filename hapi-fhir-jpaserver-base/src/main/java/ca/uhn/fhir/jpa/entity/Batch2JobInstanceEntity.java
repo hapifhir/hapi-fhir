@@ -38,6 +38,7 @@ import javax.persistence.TemporalType;
 import java.io.Serializable;
 import java.util.Date;
 
+import static ca.uhn.fhir.batch2.model.JobDefinition.ID_MAX_LENGTH;
 import static ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity.ERROR_MSG_MAX_LENGTH;
 import static org.apache.commons.lang3.StringUtils.left;
 
@@ -101,6 +102,16 @@ public class Batch2JobInstanceEntity implements Serializable {
 	private int myErrorCount;
 	@Column(name = "EST_REMAINING", length = TIME_REMAINING_LENGTH, nullable = true)
 	private String myEstimatedTimeRemaining;
+	@Column(name = "CUR_GATED_STEP_ID", length = ID_MAX_LENGTH, nullable = true)
+	private String myCurrentGatedStepId;
+
+	public String getCurrentGatedStepId() {
+		return myCurrentGatedStepId;
+	}
+
+	public void setCurrentGatedStepId(String theCurrentGatedStepId) {
+		myCurrentGatedStepId = theCurrentGatedStepId;
+	}
 
 	public boolean isCancelled() {
 		return myCancelled;

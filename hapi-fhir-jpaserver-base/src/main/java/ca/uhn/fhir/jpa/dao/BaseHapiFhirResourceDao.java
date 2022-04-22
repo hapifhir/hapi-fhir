@@ -887,10 +887,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				throw new PreconditionFailedException(Msg.code(969) + "Can not perform version-specific expunge of resource " + theId.toUnqualified().getValue() + " as this is the current version");
 			}
 
-			return myExpungeService.expunge(getResourceName(), entity.getResourceId(), entity.getVersion(), theExpungeOptions, theRequest);
+			return myExpungeService.expunge(getResourceName(), new ResourcePersistentId(entity.getResourceId(), entity.getVersion()), theExpungeOptions, theRequest);
 		}
 
-		return myExpungeService.expunge(getResourceName(), entity.getResourceId(), null, theExpungeOptions, theRequest);
+		return myExpungeService.expunge(getResourceName(), new ResourcePersistentId(entity.getResourceId()), theExpungeOptions, theRequest);
 	}
 
 	@Override
@@ -898,7 +898,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	public ExpungeOutcome expunge(ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails) {
 		ourLog.info("Beginning TYPE[{}] expunge operation", getResourceName());
 
-		return myExpungeService.expunge(getResourceName(), null, null, theExpungeOptions, theRequestDetails);
+		return myExpungeService.expunge(getResourceName(), null, theExpungeOptions, theRequestDetails);
 	}
 
 	@Override

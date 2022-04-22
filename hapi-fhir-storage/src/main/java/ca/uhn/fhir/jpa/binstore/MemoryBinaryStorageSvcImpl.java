@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.binstore;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR Storage api
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
@@ -20,9 +20,9 @@ package ca.uhn.fhir.jpa.binstore;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.binary.svc.BaseBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binary.api.StoredDetails;
+import ca.uhn.fhir.jpa.binary.svc.BaseBinaryStorageSvcImpl;
 import com.google.common.hash.HashingInputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.CountingInputStream;

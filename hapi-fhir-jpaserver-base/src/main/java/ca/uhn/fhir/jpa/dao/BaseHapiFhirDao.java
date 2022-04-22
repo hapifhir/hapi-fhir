@@ -77,6 +77,7 @@ import ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -1422,7 +1423,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		 */
 		if (thePerformIndexing) {
 			if (newParams == null) {
-				myExpungeService.deleteAllSearchParams(entity.getId());
+				myExpungeService.deleteAllSearchParams(new ResourcePersistentId(entity.getId()));
 			} else {
 
 				// Synchronize search param indexes

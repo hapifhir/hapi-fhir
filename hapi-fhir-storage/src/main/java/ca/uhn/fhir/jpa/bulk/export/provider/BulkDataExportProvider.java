@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.batch.config.BatchConstants.PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES;
 import static org.slf4j.LoggerFactory.getLogger;
 
 
@@ -144,6 +145,7 @@ public class BulkDataExportProvider {
 	private void validateResourceTypesAllContainPatientSearchParams(Set<String> theResourceTypes) {
 		if (theResourceTypes != null) {
 			List<String> badResourceTypes = theResourceTypes.stream()
+				.filter(resourceType -> !PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES.contains(resourceType))
 				.filter(resourceType -> !myBulkDataExportSvc.getPatientCompartmentResources().contains(resourceType))
 				.collect(Collectors.toList());
 
