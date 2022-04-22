@@ -317,7 +317,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		HookParams hookParams;
 
 		// Notify interceptor for accepting/rejecting client assigned ids
-		if (!isSystemRequest(theRequest)) {
+		if (!resourceIdWasServerAssigned) {
 			hookParams = new HookParams()
 				.add(IBaseResource.class, theResource)
 				.add(RequestDetails.class, theRequest);
