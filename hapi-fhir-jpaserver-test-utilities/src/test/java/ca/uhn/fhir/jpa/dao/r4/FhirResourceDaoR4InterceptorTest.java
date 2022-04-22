@@ -532,9 +532,9 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		mySrdInterceptorService.registerInterceptor(interceptor);
 
 		{//Ensure interceptor is not invoked on create.
-			Patient p = new Patient();
+			Patient serverAssignedPatient = new Patient();
 			try {
-				myPatientDao.create(p, mySrd);
+				myPatientDao.create(serverAssignedPatient, mySrd);
 			} catch (ForbiddenOperationException e) {
 				fail("Interceptor was invoked, and should not have been!");
 			}
