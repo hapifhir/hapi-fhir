@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.IServerOperationInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -27,13 +28,13 @@ import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.inOrder;
@@ -522,37 +523,22 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testChangeNameLaterJDJD() {
+	public void testPrestorageClientAssignedIdInterceptorCanDenyClientAssignedIds() {
 		Object interceptor = new Object() {
-			@Hook(Pointcut.STORAGE_ACCEPT_CLIENT_ASSIGNED_ID)
-			public void renameLaterJDJD(IBaseResource theResource, RequestDetails theRequest) throws Exception {
-				if (!theResource.getIdElement().isEmpty()) {
-					IBaseResource resource = myPatientDao.read(theResource.getIdElement());
-					if (!resource.isEmpty()) {
-						throw new Exception();
-					}
-				}
+			@Hook(Pointcut.STORAGE_PRESTORAGE_ACCEPT_CLIENT_ASSIGNED_ID)
+			public void prestorageClientAssignedId(IBaseResource theResource, RequestDetails theRequest) {
+				throw new ForbiddenOperationException("Client assigned id rejected.");
 			}
 		};
 		mySrdInterceptorService.registerInterceptor(interceptor);
 
 		Patient p = new Patient();
-		IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
-
-		p.setId("Patient/1");
-		myPatientDao.create(p, mySrd).setId(id);
-
 		try {
-			p = myPatientDao.read(id);
-		} catch (ResourceNotFoundException e) {
-			//good
+			myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+			fail();
+		} catch (ForbiddenOperationException e) {
+			assertEquals("Client assigned id rejected.", e.getMessage());
 		}
-
-		id.setValue("123");
-
-		p = myPatientDao.read(id);
-
-
 	}
 
 	/**

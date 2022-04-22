@@ -310,25 +310,28 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			notifyInterceptors(RestOperationTypeEnum.CREATE, requestDetails);
 		}
 
-		// Interceptor call: STORAGE_PRESTORAGE_RESOURCE_CREATED
-		HookParams hookParams = new HookParams()
-			.add(IBaseResource.class, theResource)
-			.add(RequestDetails.class, theRequest)
-			.addIfMatchesType(ServletRequestDetails.class, theRequest)
-			.add(TransactionDetails.class, theTransactionDetails);
-		doCallHooks(theTransactionDetails, theRequest, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, hookParams);
+		String resourceIdBeforeStorage = theResource.getIdElement().getIdPart();
+		boolean resourceHadIdBeforeStorage = isNotBlank(resourceIdBeforeStorage);
+		boolean resourceIdWasServerAssigned = theResource.getUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED) == Boolean.TRUE;
+
+		HookParams hookParams;
 
 		// Notify interceptor for accepting/rejecting client assigned ids
 		if (!isSystemRequest(theRequest)) {
 			hookParams = new HookParams()
 				.add(IBaseResource.class, theResource)
 				.add(RequestDetails.class, theRequest);
-			doCallHooks(theTransactionDetails, theRequest, Pointcut.STORAGE_ACCEPT_CLIENT_ASSIGNED_ID, hookParams);
+			doCallHooks(theTransactionDetails, theRequest, Pointcut.STORAGE_PRESTORAGE_ACCEPT_CLIENT_ASSIGNED_ID, hookParams);
 		}
 
-		String resourceIdBeforeStorage = theResource.getIdElement().getIdPart();
-		boolean resourceHadIdBeforeStorage = isNotBlank(resourceIdBeforeStorage);
-		boolean resourceIdWasServerAssigned = theResource.getUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED) == Boolean.TRUE;
+		// Interceptor call: STORAGE_PRESTORAGE_RESOURCE_CREATED
+		hookParams = new HookParams()
+			.add(IBaseResource.class, theResource)
+			.add(RequestDetails.class, theRequest)
+			.addIfMatchesType(ServletRequestDetails.class, theRequest)
+			.add(TransactionDetails.class, theTransactionDetails);
+		doCallHooks(theTransactionDetails, theRequest, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, hookParams);
+
 		if (resourceHadIdBeforeStorage && !resourceIdWasServerAssigned) {
 			validateResourceIdCreation(theResource, theRequest);
 		}

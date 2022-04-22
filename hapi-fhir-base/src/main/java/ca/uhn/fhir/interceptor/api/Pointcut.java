@@ -1368,7 +1368,7 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	STORAGE_ACCEPT_CLIENT_ASSIGNED_ID(void.class,
+	STORAGE_PRESTORAGE_ACCEPT_CLIENT_ASSIGNED_ID(void.class,
 		"org.hl7.fhir.instance.model.api.IBaseResource",
 		"ca.uhn.fhir.rest.api.server.RequestDetails"
 	),
