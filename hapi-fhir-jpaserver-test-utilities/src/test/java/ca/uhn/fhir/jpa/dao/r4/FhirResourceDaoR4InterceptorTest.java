@@ -7,7 +7,6 @@ import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.IServerOperationInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -525,7 +524,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 	@Test
 	public void testPrestorageClientAssignedIdInterceptorCanDenyClientAssignedIds() {
 		Object interceptor = new Object() {
-			@Hook(Pointcut.STORAGE_PRESTORAGE_ACCEPT_CLIENT_ASSIGNED_ID)
+			@Hook(Pointcut.STORAGE_PRESTORAGE_CLIENT_ASSIGNED_ID)
 			public void prestorageClientAssignedId(IBaseResource theResource, RequestDetails theRequest) {
 				throw new ForbiddenOperationException("Client assigned id rejected.");
 			}

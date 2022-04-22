@@ -321,7 +321,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			hookParams = new HookParams()
 				.add(IBaseResource.class, theResource)
 				.add(RequestDetails.class, theRequest);
-			doCallHooks(theTransactionDetails, theRequest, Pointcut.STORAGE_PRESTORAGE_ACCEPT_CLIENT_ASSIGNED_ID, hookParams);
+			doCallHooks(theTransactionDetails, theRequest, Pointcut.STORAGE_PRESTORAGE_CLIENT_ASSIGNED_ID, hookParams);
 		}
 
 		// Interceptor call: STORAGE_PRESTORAGE_RESOURCE_CREATED
