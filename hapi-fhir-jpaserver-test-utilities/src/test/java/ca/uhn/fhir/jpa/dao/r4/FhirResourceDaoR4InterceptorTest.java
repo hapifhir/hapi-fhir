@@ -532,12 +532,24 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		};
 		mySrdInterceptorService.registerInterceptor(interceptor);
 
-		Patient p = new Patient();
-		try {
-			myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
-			fail();
-		} catch (ForbiddenOperationException e) {
-			assertEquals("Client assigned id rejected.", e.getMessage());
+		{//Ensure interceptor is not invoked on create.
+			Patient p = new Patient();
+			try {
+				myPatientDao.create(p, mySrd);
+			} catch (ForbiddenOperationException e) {
+				fail("Interceptor was invoked, and should not have been!");
+			}
+		}
+
+		{//Ensure attempting to set a client assigned id is rejected by our interceptor.
+			try {
+				Patient clientAssignedPatient = new Patient();
+				clientAssignedPatient.setId("Patient/custom-id");
+				myPatientDao.update(clientAssignedPatient, mySrd);
+				fail();
+			} catch (ForbiddenOperationException e) {
+				assertEquals("Client assigned id rejected.", e.getMessage());
+			}
 		}
 	}
 
