@@ -70,6 +70,7 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
@@ -317,7 +318,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		HookParams hookParams;
 
 		// Notify interceptor for accepting/rejecting client assigned ids
-		if (!resourceIdWasServerAssigned) {
+		if (!resourceIdWasServerAssigned && resourceHadIdBeforeStorage) {
 			hookParams = new HookParams()
 				.add(IBaseResource.class, theResource)
 				.add(RequestDetails.class, theRequest);
