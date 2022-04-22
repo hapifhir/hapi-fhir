@@ -758,7 +758,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
 
 		assertThat(jobInfo.getStatus(), equalTo(BulkExportJobStatusEnum.COMPLETE));
-		assertThat(jobInfo.getFiles().size(), equalTo(2));
+		assertThat(jobInfo.getFiles().size(), equalTo(3));
 
 		// Iterate over the files
 		String nextContents = getBinaryContents(jobInfo, 0);
