@@ -47,17 +47,7 @@ public class FhirResourceDaoConceptMapR5 extends BaseHapiFhirResourceDao<Concept
 
 	@Override
 	public TranslateConceptResults translate(TranslationRequest theTranslationRequest, RequestDetails theRequestDetails) {
-		IValidationSupport.TranslateCodeRequest translateCodeRequest = new IValidationSupport.TranslateCodeRequest(
-			Collections.unmodifiableList(theTranslationRequest.getCodeableConcept().getCoding()),
-			theTranslationRequest.getTargetSystem() != null ? theTranslationRequest.getTargetSystem().asStringValue() : null,
-			theTranslationRequest.getUrl() != null ? theTranslationRequest.getUrl().asStringValue() : null,
-			theTranslationRequest.getConceptMapVersion() != null ? theTranslationRequest.getConceptMapVersion().asStringValue() : null,
-			theTranslationRequest.getSource() != null ? theTranslationRequest.getSource().asStringValue() : null,
-			theTranslationRequest.getTarget() != null ? theTranslationRequest.getTarget().asStringValue() : null,
-			theTranslationRequest.getResourceId(),
-			theTranslationRequest.getReverseAsBoolean()
-		);
-
+		IValidationSupport.TranslateCodeRequest translateCodeRequest = theTranslationRequest.asTranslateCodeRequest();
 		return myValidationSupport.translateConcept(translateCodeRequest);
 	}
 

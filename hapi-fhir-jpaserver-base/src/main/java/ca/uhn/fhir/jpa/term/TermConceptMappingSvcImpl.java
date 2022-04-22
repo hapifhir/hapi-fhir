@@ -120,26 +120,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 	@Override
 	@Transactional
 	public TranslateConceptResults translateConcept(TranslateCodeRequest theRequest) {
-
-		CodeableConcept sourceCodeableConcept = new CodeableConcept();
-		for (IBaseCoding aCoding : theRequest.getCodings()) {
-			sourceCodeableConcept
-				.addCoding()
-				.setSystem(aCoding.getSystem())
-				.setCode(aCoding.getCode())
-				.setVersion(((Coding) aCoding).getVersion());
-		}
-
-		TranslationRequest request = new TranslationRequest();
-		request.setCodeableConcept(sourceCodeableConcept);
-		request.setConceptMapVersion(new StringType(theRequest.getConceptMapVersion()));
-		request.setUrl(new UriType(theRequest.getConceptMapUrl()));
-		request.setSource(new UriType(theRequest.getSourceValueSetUrl()));
-		request.setTarget(new UriType(theRequest.getTargetValueSetUrl()));
-		request.setTargetSystem(new UriType(theRequest.getTargetSystemUrl()));
-		request.setResourceId(theRequest.getResourcePid());
-		request.setReverse(theRequest.isReverse());
-
+		TranslationRequest request = TranslationRequest.fromTranslateCodeRequest(theRequest);
 		if (request.hasReverse() && request.getReverseAsBoolean()) {
 			return translateWithReverse(request);
 		}
