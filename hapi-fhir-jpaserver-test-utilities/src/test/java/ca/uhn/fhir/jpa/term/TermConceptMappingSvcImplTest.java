@@ -1598,14 +1598,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		when(mock.translateConcept(theRequest)).thenCallRealMethod();
 		mock.translateConcept(theRequest);
 		verify(mock).translate(argument.capture());
-		assertTrue(expected.getCodeableConcept().equalsDeep(argument.getValue().getCodeableConcept()));
-		assertEquals(expected.getConceptMapVersion().asStringValue(), argument.getValue().getConceptMapVersion().asStringValue());
-		assertEquals(expected.getUrl().asStringValue(), argument.getValue().getUrl().asStringValue());
-		assertEquals(expected.getSource().asStringValue(), argument.getValue().getSource().asStringValue());
-		assertEquals(expected.getTarget().asStringValue(), argument.getValue().getTarget().asStringValue());
-		assertEquals(expected.getTargetSystem().asStringValue(), argument.getValue().getTargetSystem().asStringValue());
-		assertEquals(expected.getResourceId(), argument.getValue().getResourceId());
-		assertEquals(expected.getReverseAsBoolean(), argument.getValue().getReverseAsBoolean());
+		assertSameTranslationRequest(expected, argument.getValue());
 	}
 
 	@Test
@@ -1647,16 +1640,19 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		when(mock.translateConcept(theRequest)).thenCallRealMethod();
 		mock.translateConcept(theRequest);
 		verify(mock).translateWithReverse(argument.capture());
-		assertTrue(expected.getCodeableConcept().equalsDeep(argument.getValue().getCodeableConcept()));
-		assertEquals(expected.getConceptMapVersion().asStringValue(), argument.getValue().getConceptMapVersion().asStringValue());
-		assertEquals(expected.getUrl().asStringValue(), argument.getValue().getUrl().asStringValue());
-		assertEquals(expected.getSource().asStringValue(), argument.getValue().getSource().asStringValue());
-		assertEquals(expected.getTarget().asStringValue(), argument.getValue().getTarget().asStringValue());
-		assertEquals(expected.getTargetSystem().asStringValue(), argument.getValue().getTargetSystem().asStringValue());
-		assertEquals(expected.getResourceId(), argument.getValue().getResourceId());
-		assertEquals(expected.getReverseAsBoolean(), argument.getValue().getReverseAsBoolean());
+		assertSameTranslationRequest(expected, argument.getValue());
 	}
 
+	private static void assertSameTranslationRequest(TranslationRequest expected, TranslationRequest actual) {
+		assertTrue(expected.getCodeableConcept().equalsDeep(actual.getCodeableConcept()));
+		assertEquals(expected.getConceptMapVersion().asStringValue(), actual.getConceptMapVersion().asStringValue());
+		assertEquals(expected.getUrl().asStringValue(), actual.getUrl().asStringValue());
+		assertEquals(expected.getSource().asStringValue(), actual.getSource().asStringValue());
+		assertEquals(expected.getTarget().asStringValue(), actual.getTarget().asStringValue());
+		assertEquals(expected.getTargetSystem().asStringValue(), actual.getTargetSystem().asStringValue());
+		assertEquals(expected.getResourceId(), actual.getResourceId());
+		assertEquals(expected.getReverseAsBoolean(), actual.getReverseAsBoolean());
+	}
 
 	private void createAndPersistConceptMap() {
 		ConceptMap conceptMap = createConceptMap();
