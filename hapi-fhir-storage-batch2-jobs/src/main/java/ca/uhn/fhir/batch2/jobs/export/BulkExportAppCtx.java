@@ -43,6 +43,7 @@ public class BulkExportAppCtx {
 			"Writes the expanded resources to the binaries and saves",
 			writeBinaryStep()
 		)
+			// finalize the job (set to complete)
 			.completionHandler(finalizeJobCallback())
 		;
 

@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Deprecated
 public class CreateBulkExportEntityTasklet implements Tasklet {
 
 	@Autowired private IBulkDataExportSvc myBulkDataExportSvc;

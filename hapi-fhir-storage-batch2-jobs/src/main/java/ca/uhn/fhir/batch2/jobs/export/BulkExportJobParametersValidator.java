@@ -5,6 +5,7 @@ import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobInfo;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
@@ -59,6 +60,25 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 		// validate the output format
 		if (!Constants.CT_FHIR_NDJSON.equalsIgnoreCase(theParameters.getOutputFormat())) {
 			errorMsgs.add("The only allowed format for Bulk Export is currently " + Constants.CT_FHIR_NDJSON);
+		}
+
+		// validate for group
+		BulkDataExportOptions.ExportStyle style = theParameters.getExportStyle();
+		if (style == null) {
+			errorMsgs.add("Export style is required");
+		}
+		else {
+			switch (style) {
+				case GROUP:
+					if (theParameters.getGroupId() == null || theParameters.getGroupId().isEmpty()) {
+						errorMsgs.add("Group export requires a group id, but none provided for job " + jobUUID);
+					}
+					break;
+				case SYSTEM:
+				case PATIENT:
+				default:
+					break;
+			}
 		}
 
 		return errorMsgs;

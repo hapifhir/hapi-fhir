@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.api.model;
 
-import ca.uhn.fhir.jpa.api.model.RunJobParameters;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 
 import javax.annotation.Nonnull;
@@ -49,6 +48,20 @@ public class BulkExportParameters extends RunJobParameters {
 	 * (including where to find the resulting binaries)
 	 */
 	private String myJobId;
+
+	/**
+	 * For group export;
+	 * whether or not to expand mdm
+	 */
+	private boolean myExpandMdm;
+
+	public boolean isExpandMdm() {
+		return myExpandMdm;
+	}
+
+	public void setExpandMdm(boolean theExpandMdm) {
+		myExpandMdm = theExpandMdm;
+	}
 
 	public BulkExportParameters(@Nonnull String theJobDefinitionId) {
 		super(theJobDefinitionId);

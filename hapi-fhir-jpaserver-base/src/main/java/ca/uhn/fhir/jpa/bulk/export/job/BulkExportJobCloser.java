@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Value;
 /**
  * Will run before and after a job to set the status to whatever is appropriate.
  */
+@Deprecated
 public class BulkExportJobCloser implements Tasklet {
 
 	@Value("#{jobExecutionContext['jobUUID']}")

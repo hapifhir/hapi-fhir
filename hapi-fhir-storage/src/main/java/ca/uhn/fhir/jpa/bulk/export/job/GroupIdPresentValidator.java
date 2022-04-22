@@ -29,6 +29,7 @@ import org.springframework.batch.core.JobParametersValidator;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
+@Deprecated
 public class GroupIdPresentValidator implements JobParametersValidator {
 	private static final Logger ourLog = getLogger(GroupIdPresentValidator.class);
 

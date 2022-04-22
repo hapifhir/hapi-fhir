@@ -4,6 +4,7 @@ import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobInfo;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -31,14 +32,20 @@ public class BulkExportJobParametersValidatorTest {
 	@InjectMocks
 	private BulkExportJobParametersValidator myValidator;
 
-	@Test
-	public void validate_validParameters_returnsEmptyList() {
-		// setup
-		String jobId = "jobId";
+	private BulkExportJobParameters createSystemExportParameters(String theJobId) {
 		BulkExportJobParameters parameters = new BulkExportJobParameters();
-		parameters.setJobId(jobId);
+		parameters.setJobId(theJobId);
 		parameters.setResourceTypes(Arrays.asList("Patient", "Observation"));
 		parameters.setOutputFormat(Constants.CT_FHIR_NDJSON);
+		parameters.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
+		return parameters;
+	}
+
+	@Test
+	public void validate_validParametersForSystem_returnsEmptyList() {
+		// setup
+		String jobId = "jobId";
+		BulkExportJobParameters parameters = createSystemExportParameters(jobId);
 
 		// when
 		when(myProcessor.getJobInfo(eq(jobId)))
@@ -50,6 +57,66 @@ public class BulkExportJobParametersValidatorTest {
 		// verify
 		assertNotNull(result);
 		assertTrue(result.isEmpty());
+	}
+
+	@Test
+	public void validate_validParametersForPatient_returnsEmptyList() {
+		// setup
+		String jobId = "jobid";
+		BulkExportJobParameters parameters = createSystemExportParameters(jobId);
+		parameters.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
+
+		// when
+		when(myProcessor.getJobInfo(eq(jobId)))
+			.thenReturn(getJobInfoForParameters(parameters));
+
+		// test
+		List<String> result = myValidator.validate(parameters);
+
+		// verify
+		assertNotNull(result);
+		assertTrue(result.isEmpty());
+	}
+
+	@Test
+	public void validate_validateParametersForGroup_returnsEmptyList() {
+		// setup
+		String jobId = "jobid";
+		BulkExportJobParameters parameters = createSystemExportParameters(jobId);
+		parameters.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
+		parameters.setGroupId("groupId");
+		parameters.setExpandMdm(true);
+
+		// when
+		when(myProcessor.getJobInfo(eq(jobId)))
+			.thenReturn(getJobInfoForParameters(parameters));
+
+		// test
+		List<String> result = myValidator.validate(parameters);
+
+		// verify
+		assertNotNull(result);
+		assertTrue(result.isEmpty());
+	}
+
+	@Test
+	public void validate_groupParametersWithoutGroupId_returnsError() {
+		// setup
+		String jobId = "jobid";
+		BulkExportJobParameters parameters = createSystemExportParameters(jobId);
+		parameters.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
+
+		// when
+		when(myProcessor.getJobInfo(eq(jobId)))
+			.thenReturn(getJobInfoForParameters(parameters));
+
+		// test
+		List<String> result = myValidator.validate(parameters);
+
+		// verify
+		assertNotNull(result);
+		assertFalse(result.isEmpty());
+		assertTrue(result.contains("Group export requires a group id, but none provided for job " + jobId));
 	}
 
 	@Test

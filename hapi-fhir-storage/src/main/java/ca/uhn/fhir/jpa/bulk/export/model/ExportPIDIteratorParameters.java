@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.bulk.export.model;
 
+import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
+
 import java.util.Date;
 import java.util.List;
 
@@ -28,6 +30,21 @@ public class ExportPIDIteratorParameters {
 	 * of results/status).
 	 */
 	private String myJobId;
+
+	/**
+	 * The export style
+	 */
+	private BulkDataExportOptions.ExportStyle myExportStyle;
+
+	/**
+	 * the group id
+	 */
+	private String myGroupId;
+
+	/**
+	 * For group export - whether or not to expand mdm
+	 */
+	private boolean myExpandMdm;
 
 	public String getResourceType() {
 		return myResourceType;
@@ -60,4 +77,29 @@ public class ExportPIDIteratorParameters {
 	public void setJobId(String theJobId) {
 		myJobId = theJobId;
 	}
+
+	public BulkDataExportOptions.ExportStyle getExportStyle() {
+		return myExportStyle;
+	}
+
+	public void setExportStyle(BulkDataExportOptions.ExportStyle theExportStyle) {
+		myExportStyle = theExportStyle;
+	}
+
+	public String getGroupId() {
+		return myGroupId;
+	}
+
+	public void setGroupId(String theGroupId) {
+		myGroupId = theGroupId;
+	}
+
+	public boolean isExpandMdm() {
+		return myExpandMdm;
+	}
+
+	public void setExpandMdm(boolean theExpandMdm) {
+		myExpandMdm = theExpandMdm;
+	}
+
 }

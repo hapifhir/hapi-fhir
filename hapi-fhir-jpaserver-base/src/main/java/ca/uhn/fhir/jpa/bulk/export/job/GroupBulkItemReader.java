@@ -67,6 +67,7 @@ import java.util.stream.Collectors;
  * 3. Optionally further expand that into all MDM-matched Patients (including golden resources)
  * 4. Then perform normal bulk export, filtered so that only results that refer to members are returned.
  */
+@Deprecated
 public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemReader<List<ResourcePersistentId>> {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	public static final int QUERY_CHUNK_SIZE = 100;
@@ -85,6 +86,7 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 	@Autowired
 	private IJpaIdHelperService myJpaIdHelperService;
 
+	// TODO - for JpaBulkExportProcessor
 	@Override
 	protected Iterator<ResourcePersistentId> getResourcePidIterator() {
 		Set<ResourcePersistentId> myReadPids = new HashSet<>();
@@ -120,7 +122,7 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 	private Iterator<ResourcePersistentId> getExpandedPatientIterator() {
 		List<String> members = getMembers();
 		List<IIdType> ids = members.stream().map(member -> new IdDt("Patient/" + member)).collect(Collectors.toList());
-		List<Long> pidsOrThrowException =myJpaIdHelperService.getPidsOrThrowException(ids);
+		List<Long> pidsOrThrowException = myJpaIdHelperService.getPidsOrThrowException(ids);
 		Set<Long> patientPidsToExport = new HashSet<>(pidsOrThrowException);
 
 		if (myMdmEnabled) {
@@ -242,6 +244,7 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 		}
 	}
 
+	// TODO - need to fix up JpaBulkExport
 	private void queryResourceTypeWithReferencesToPatients(Set<ResourcePersistentId> myReadPids, List<String> idChunk) {
 		//Build SP map
 		//First, inject the _typeFilters and _since from the export job

@@ -43,6 +43,7 @@ import java.io.OutputStreamWriter;
 import java.util.List;
 import java.util.Optional;
 
+@Deprecated
 public abstract class BaseResourceToFileWriter implements ItemWriter<List<IBaseResource>> {
 	protected static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 

@@ -77,7 +77,6 @@ public class BulkExportJobConfig {
 		return new BulkExportDaoSvc();
 	}
 
-
 	@Bean
 	@Lazy
 	@JobScope
@@ -132,10 +131,10 @@ public class BulkExportJobConfig {
 //			.build();
 //	}
 
-	@Bean
-	public GroupIdPresentValidator groupBulkJobParameterValidator() {
-		return new GroupIdPresentValidator();
-	}
+//	@Bean
+//	public GroupIdPresentValidator groupBulkJobParameterValidator() {
+//		return new GroupIdPresentValidator();
+//	}
 
 //	@Bean
 //	public Step createBulkExportEntityStep() {
@@ -151,10 +150,10 @@ public class BulkExportJobConfig {
 //	}
 
 
-	@Bean
-	public JobParametersValidator bulkExportJobParameterValidator() {
-		return new BulkExportJobParameterValidator();
-	}
+//	@Bean
+//	public JobParametersValidator bulkExportJobParameterValidator() {
+//		return new BulkExportJobParameterValidator();
+//	}
 
 	//Writers
 //	@Bean
@@ -203,17 +202,17 @@ public class BulkExportJobConfig {
 //			.build();
 //	}
 
-	@Bean
-	@JobScope
-	public BulkExportCreateEntityStepListener bulkExportCreateEntityStepListener() {
-		return new BulkExportCreateEntityStepListener();
-	}
-
-	@Bean
-	@JobScope
-	public BulkExportGenerateResourceFilesStepListener bulkExportGenerateResourceFilesStepListener() {
-		return new BulkExportGenerateResourceFilesStepListener();
-	}
+//	@Bean
+//	@JobScope
+//	public BulkExportCreateEntityStepListener bulkExportCreateEntityStepListener() {
+//		return new BulkExportCreateEntityStepListener();
+//	}
+//
+//	@Bean
+//	@JobScope
+//	public BulkExportGenerateResourceFilesStepListener bulkExportGenerateResourceFilesStepListener() {
+//		return new BulkExportGenerateResourceFilesStepListener();
+//	}
 
 //	@Bean
 //	public Step bulkExportPartitionStep() {
@@ -240,23 +239,23 @@ public class BulkExportJobConfig {
 //	}
 
 
-	@Bean
-	@StepScope
-	public GroupBulkItemReader groupBulkItemReader() {
-		return new GroupBulkItemReader();
-	}
+//	@Bean
+//	@StepScope
+//	public GroupBulkItemReader groupBulkItemReader() {
+//		return new GroupBulkItemReader();
+//	}
+//
+//	@Bean
+//	@StepScope
+//	public PatientBulkItemReader patientBulkItemReader() {
+//		return new PatientBulkItemReader();
+//	}
 
-	@Bean
-	@StepScope
-	public PatientBulkItemReader patientBulkItemReader() {
-		return new PatientBulkItemReader();
-	}
-
-	@Bean
-	@StepScope
-	public BulkItemReader bulkItemReader() {
-		return new BulkItemReader();
-	}
+//	@Bean
+//	@StepScope
+//	public BulkItemReader bulkItemReader() {
+//		return new BulkItemReader();
+//	}
 
 	@Bean
 	@JobScope
@@ -264,10 +263,10 @@ public class BulkExportJobConfig {
 		return new ResourceTypePartitioner();
 	}
 
-	@Bean
-	@StepScope
-	public ResourceToFileWriter resourceToFileWriter() {
-		return new ResourceToFileWriter(myFhirContext, myDaoRegistry);
-	}
+//	@Bean
+//	@StepScope
+//	public ResourceToFileWriter resourceToFileWriter() {
+//		return new ResourceToFileWriter(myFhirContext, myDaoRegistry);
+//	}
 
 }

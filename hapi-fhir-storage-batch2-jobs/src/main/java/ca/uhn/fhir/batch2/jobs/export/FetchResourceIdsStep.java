@@ -44,12 +44,14 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 		providerParams.setFilters(params.getFilters());
 		providerParams.setStartDate(params.getStartDate());
 		providerParams.setJobId(params.getJobId());
+		providerParams.setExportStyle(params.getExportStyle());
+		providerParams.setGroupId(params.getGroupId());
+		providerParams.setExpandMdm(params.isExpandMdm());
 
 		int submissionCount = 0;
 		for (String resourceType : params.getResourceTypes()) {
 			providerParams.setResourceType(resourceType);
 
-			// TODO - implementation - see BulkItemReader
 			// filters are the filters for searching
 			Iterator<ResourcePersistentId> pidIterator = myBulkExportProcessor.getResourcePidIterator(providerParams);
 			List<Id> idsToSubmit = new ArrayList<>();

@@ -330,6 +330,7 @@ public class BulkDataExportProvider {
 		parameters.setFilters(theOptions.getFilters().stream().toList());
 		parameters.setGroupId(theOptions.getGroupId().getValue());
 		parameters.setResourceTypes(theOptions.getResourceTypes().stream().toList());
+		parameters.setExpandMdm(theOptions.isExpandMdm());
 
 		return parameters;
 	}

@@ -36,9 +36,16 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 	@JsonProperty("exportStyle")
 	private BulkDataExportOptions.ExportStyle myExportStyle;
 
-	// could be null
+	// Stuff for group export only
+
+	/**
+	 * The group id
+	 */
 	@JsonProperty("groupId")
 	private String myGroupId;
+
+	@JsonProperty("expandMdm")
+	private boolean myExpandMdm;
 
 	public List<String> getResourceTypes() {
 		return myResourceTypes;
@@ -88,6 +95,14 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 		myGroupId = theGroupId;
 	}
 
+	public boolean isExpandMdm() {
+		return myExpandMdm;
+	}
+
+	public void setExpandMdm(boolean theExpandMdm) {
+		myExpandMdm = theExpandMdm;
+	}
+
 	public static BulkExportJobParameters createFromExportJobParameters(BulkExportParameters theParameters) {
 		BulkExportJobParameters params = new BulkExportJobParameters();
 		params.setResourceTypes(params.getResourceTypes());
@@ -97,6 +112,7 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 		params.setJobId(theParameters.getJobId());
 		params.setOutputFormat(theParameters.getOutputFormat());
 		params.setStartDate(theParameters.getStartDate());
+		params.setExpandMdm(theParameters.isExpandMdm());
 		return params;
 	}
 }

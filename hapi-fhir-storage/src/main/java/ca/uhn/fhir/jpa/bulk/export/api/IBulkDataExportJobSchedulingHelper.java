@@ -40,6 +40,6 @@ public interface IBulkDataExportJobSchedulingHelper {
 	 * Given all Bulk Export jobs that have been created since the last scheduled run, this method will
 	 * start them all. This is invoked primarily via a scheduler.
 	 */
-	@Transactional(value = Transactional.TxType.NEVER)
-	void startSubmittedJobs();
+//	@Transactional(value = Transactional.TxType.NEVER)
+//	void startSubmittedJobs();
 }
