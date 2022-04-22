@@ -743,7 +743,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		// Create a bulk job
 		BulkDataExportOptions bulkDataExportOptions = new BulkDataExportOptions();
 		bulkDataExportOptions.setOutputFormat(null);
-		bulkDataExportOptions.setResourceTypes(Sets.newHashSet("Practitioner","Organization"));
+		bulkDataExportOptions.setResourceTypes(Sets.newHashSet("Practitioner","Organization", "Observation"));
 		bulkDataExportOptions.setSince(null);
 		bulkDataExportOptions.setFilters(null);
 		bulkDataExportOptions.setGroupId(myPatientGroupId);
@@ -777,6 +777,15 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		assertThat(nextContents, is(containsString("ORG4")));
 		assertThat(nextContents, is(containsString("ORG6")));
 		assertThat(nextContents, is(containsString("ORG8")));
+
+		//Ensure _backwards_ references still work
+		nextContents = getBinaryContents(jobInfo, 2);
+		assertThat(jobInfo.getFiles().get(2).getResourceType(), is(equalTo("Observation")));
+		assertThat(nextContents, is(containsString("OBS0")));
+		assertThat(nextContents, is(containsString("OBS2")));
+		assertThat(nextContents, is(containsString("OBS4")));
+		assertThat(nextContents, is(containsString("OBS6")));
+		assertThat(nextContents, is(containsString("OBS8")));
 	}
 
 	@Test

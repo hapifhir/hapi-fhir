@@ -114,7 +114,7 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 		});
 
 		if (ourLog.isDebugEnabled()) {
-			ourLog.debug("Resource PIDs to be Bulk Exported: [{}]", myExpandedMemberPids.stream().map(ResourcePersistentId::toString).collect(Collectors.joining(",")));
+			ourLog.debug("Resource PIDs to be Bulk Exported: {}", myExpandedMemberPids);
 		}
 		return myExpandedMemberPids.iterator();
 	}
@@ -303,16 +303,14 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 		expandedSpMap.add(getPatientSearchParamForCurrentResourceType().getName(), orList);
 	}
 
-	private RuntimeSearchParam validateSearchParameters(SearchParameterMap expandedSpMap) {
+	private void validateSearchParameters(SearchParameterMap expandedSpMap) {
 		if (PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES.contains(myResourceType)) {
-			return null;
-			//TODO GGG what should this actually do?
+			return;
 		} else {
 			RuntimeSearchParam runtimeSearchParam = getPatientSearchParamForCurrentResourceType();
 			if (expandedSpMap.get(runtimeSearchParam.getName()) != null) {
 				throw new IllegalArgumentException(Msg.code(792) + String.format("Group Bulk Export manually modifies the Search Parameter called [%s], so you may not include this search parameter in your _typeFilter!", runtimeSearchParam.getName()));
 			}
-			return runtimeSearchParam;
 		}
 	}
 }
