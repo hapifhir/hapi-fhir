@@ -54,6 +54,9 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,6 +80,7 @@ import java.util.stream.Stream;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -130,10 +134,40 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 	}
 
-	@Test
-	public void testPurgeExpiredJobs() {
 
-		// Create an expired job
+	/**
+	 * Returns parameters in format of:
+	 *
+	 * 1. Bulk Job status
+	 * 2. Expiry Date that should be set on the job
+	 * 3. How many jobs should be left after running a purge pass.
+	 */
+	static Stream<Arguments> bulkExpiryStatusProvider() {
+		Date previousTime = DateUtils.addHours(new Date(), -1);
+		Date futureTime = DateUtils.addHours(new Date(), 50);
+
+		return Stream.of(
+			//Finished jobs with standard expiries.
+			Arguments.of(BulkExportJobStatusEnum.COMPLETE, previousTime, 0),
+			Arguments.of(BulkExportJobStatusEnum.COMPLETE, futureTime, 1),
+
+			//Finished job with null expiry
+			Arguments.of(BulkExportJobStatusEnum.COMPLETE, null, 1),
+
+			//Expired errored job.
+			Arguments.of(BulkExportJobStatusEnum.ERROR, previousTime, 0),
+
+			//Unexpired errored job.
+			Arguments.of(BulkExportJobStatusEnum.ERROR, futureTime, 1),
+
+			//Expired job but currently still running.
+			Arguments.of(BulkExportJobStatusEnum.BUILDING, previousTime, 1)
+		);
+	}
+	@ParameterizedTest
+	@MethodSource("bulkExpiryStatusProvider")
+	public void testBulkExportExpiryRules(BulkExportJobStatusEnum theStatus, Date theExpiry, int theExpectedCountAfterPurge) {
+
 		runInTransaction(() -> {
 
 			Binary b = new Binary();
@@ -141,8 +175,8 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			String binaryId = myBinaryDao.create(b, new SystemRequestDetails()).getId().toUnqualifiedVersionless().getValue();
 
 			BulkExportJobEntity job = new BulkExportJobEntity();
-			job.setStatus(BulkExportJobStatusEnum.COMPLETE);
-			job.setExpiry(DateUtils.addHours(new Date(), -1));
+			job.setStatus(theStatus);
+			job.setExpiry(theExpiry);
 			job.setJobId(UUID.randomUUID().toString());
 			job.setCreated(new Date());
 			job.setRequest("$export");
@@ -159,7 +193,6 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			file.setCollection(collection);
 			file.setResource(binaryId);
 			myBulkExportCollectionFileDao.save(file);
-
 		});
 
 		// Check that things were created
@@ -173,14 +206,13 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		// Run a purge pass
 		myBulkDataExportJobSchedulingHelper.purgeExpiredFiles();
 
-		// Check that things were deleted
+		// Check for correct remaining resources based on inputted rules from method provider.
 		runInTransaction(() -> {
-			assertEquals(0, myResourceTableDao.count());
-			assertThat(myBulkExportJobDao.findAll(), Matchers.empty());
-			assertEquals(0, myBulkExportCollectionDao.count());
-			assertEquals(0, myBulkExportCollectionFileDao.count());
+			assertEquals(theExpectedCountAfterPurge, myResourceTableDao.count());
+			assertEquals(theExpectedCountAfterPurge, myBulkExportJobDao.findAll().size());
+			assertEquals(theExpectedCountAfterPurge, myBulkExportCollectionDao.count());
+			assertEquals(theExpectedCountAfterPurge, myBulkExportCollectionFileDao.count());
 		});
-
 	}
 
 	@Test
