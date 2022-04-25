@@ -24,6 +24,6 @@ class NicknameSvcTest {
 
 	@Test
 	public void testReadfile() {
-		assertEquals(10, myNicknameSvc.size());
+		assertEquals(1082, myNicknameSvc.size());
 	}
 }
