@@ -288,11 +288,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version
 			.onTable("HFJ_BLK_EXPORT_JOB").modifyColumn("20220423.1", "EXP_TIME").nullable().withType(ColumnTypeEnum.DATE_TIMESTAMP);
 
-			// Drop Index on HFJ_RESOURCE.INDEX_STATUS
-			version
-        .onTable("HFJ_RESOURCE")
-			.dropIndex("20220325.1", "IDX_INDEXSTATUS");
-
 		// New Index on HFJ_RESOURCE for $reindex Operation - hapi-fhir #3534
 		{
 			version.onTable("HFJ_RESOURCE")
