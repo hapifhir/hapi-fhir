@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
@@ -10,6 +11,7 @@ import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.test.utilities.BatchJobHelper;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -35,6 +37,9 @@ import java.util.Set;
 import static ca.uhn.fhir.jpa.batch.config.BatchConstants.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.iterableWithSize;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -504,5 +509,45 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			Optional<TermConcept> termConcept = myTermSvc.findCode("http://InvalidSystem", "mycode");
 			assertFalse(termConcept.isPresent());
 		});
+	}
+
+	@Test
+	public void testExpandCodeSystemByValueSetUrl() {
+		String vsUrlExpandable = CS_URL + "?vs";
+		CodeSystem expandableCodeSystem = new CodeSystem();
+		expandableCodeSystem.setUrl(CS_URL).setValueSet(vsUrlExpandable).setContent(CodeSystem.CodeSystemContentMode.COMPLETE).setVersion("1");
+		expandableCodeSystem.addConcept().setCode("A").setDisplay("Code A");
+		expandableCodeSystem.addConcept().setCode("B").setDisplay("Code B");
+
+		runInTransaction(() -> {
+			ValueSetExpansionOptions options = ValueSetExpansionOptions.forOffsetAndCount(0, 1000);
+			myCodeSystemDao.create(expandableCodeSystem);
+			assertThat("explicit expansion of implicit URL", myTermSvc.expandValueSetFromCodeSystem(vsUrlExpandable), notNullValue());
+			ValueSet expanded = myTermSvc.expandValueSet(options, vsUrlExpandable);
+			assertThat("expansion via $expand operation", expanded, notNullValue());
+			assertThat("all concepts present in expansion", expanded.getExpansion().getContains(), iterableWithSize(2));
+			assertThat("correct CS referenced in expansion", expanded.getExpansion().getContainsFirstRep().getSystem(), equalTo(CS_URL));
+		});
+
+		String vsUrlConflict = CS_URL_2 + "?vs";
+		CodeSystem conflictingCodeSystem1 = new CodeSystem();
+		conflictingCodeSystem1.setUrl(CS_URL_2).setValueSet(vsUrlConflict).setContent(CodeSystem.CodeSystemContentMode.COMPLETE).setVersion("1");
+		conflictingCodeSystem1.addConcept().setCode("C").setDisplay("Code C1");
+		CodeSystem conflictingCodeSystem2 = new CodeSystem();
+		conflictingCodeSystem2.setUrl(CS_URL_2 + "-2").setValueSet(vsUrlConflict).setContent(CodeSystem.CodeSystemContentMode.COMPLETE).setVersion("2");
+		conflictingCodeSystem2.addConcept().setCode("C").setDisplay("Code C2");
+		runInTransaction(() -> {
+			myCodeSystemDao.create(conflictingCodeSystem1);
+			myCodeSystemDao.create(conflictingCodeSystem2);
+			try {
+				myTermSvc.expandValueSetFromCodeSystem(vsUrlConflict);
+				fail("Conflicting implicit VS URLs did not throw");
+			} catch (UnprocessableEntityException e) {
+				assertThat("conflicting VS url throws", e.getMessage(), Matchers.startsWith(Msg.code(2079) + "More than one CodeSystem resource was found matching the provided implicit ValueSet URI"));
+			} catch (Exception e) {
+				fail("Conflicting implicit VS URLs did throw wrong exception type", e);
+			}
+		});
+
 	}
 }
