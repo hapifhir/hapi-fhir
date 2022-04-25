@@ -23,6 +23,9 @@ package ca.uhn.fhir.jpa.bulk.export.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.batch.core.BatchStatus;
 
+/**
+ * This may be in a "jpa" package, but it is not a jpa model!
+ */
 @JsonFormat(shape = JsonFormat.Shape.STRING)
 public enum BulkExportJobStatusEnum {
 

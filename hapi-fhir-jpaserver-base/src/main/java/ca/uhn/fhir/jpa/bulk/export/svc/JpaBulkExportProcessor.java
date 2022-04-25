@@ -26,14 +26,12 @@ import ca.uhn.fhir.jpa.entity.BulkExportCollectionFileEntity;
 import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
-import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
-import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -47,9 +45,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -67,10 +62,10 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 	private FhirContext myContext;
 
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private BulkExportHelperService myBulkExportHelperSvc;
 
 	@Autowired
-	private MatchUrlService myMatchUrlService;
+	private DaoConfig myDaoConfig;
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
@@ -87,6 +82,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 	@Autowired
 	private IBulkExportCollectionDao myCollectionDao;
 
+	@Autowired
 	private IIdHelperService myIdHelperService;
 	@Autowired
 	private IMdmLinkDao myMdmLinkDao;
@@ -113,7 +109,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 				throw new IllegalStateException(Msg.code(797) + errorMessage);
 			}
 
-			List<SearchParameterMap> maps = createSearchParameterMapsForResourceType(def, theParams);
+			List<SearchParameterMap> maps = myBulkExportHelperSvc.createSearchParameterMapsForResourceType(def, theParams);
 			String patientSearchParam = getPatientSearchParamForCurrentResourceType(theParams.getResourceType()).getName();
 
 			for (SearchParameterMap map : maps) {
@@ -155,7 +151,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 		}
 		else {
 			// System
-			List<SearchParameterMap> maps = createSearchParameterMapsForResourceType(def, theParams);
+			List<SearchParameterMap> maps = myBulkExportHelperSvc.createSearchParameterMapsForResourceType(def, theParams);
 			ISearchBuilder searchBuilder = getSearchBuilderForLocalResourceType(theParams);
 
 			for (SearchParameterMap map : maps) {
@@ -196,25 +192,6 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 		return searchParam;
 	}
 
-	private List<SearchParameterMap> createSearchParameterMapsForResourceType(RuntimeResourceDefinition theDef, ExportPIDIteratorParameters theParams) {
-		String resourceType = theDef.getName();
-		String[] typeFilters = theParams.getFilters().toArray(new String[0]); // lame...
-		List<SearchParameterMap> spMaps = null;
-		spMaps = Arrays.stream(typeFilters)
-			.filter(typeFilter -> typeFilter.startsWith(resourceType + "?"))
-			.map(filter -> buildSearchParameterMapForTypeFilter(filter, theDef, theParams.getStartDate()))
-			.collect(Collectors.toList());
-
-		//None of the _typeFilters applied to the current resource type, so just make a simple one.
-		if (spMaps.isEmpty()) {
-			SearchParameterMap defaultMap = new SearchParameterMap();
-			enhanceSearchParameterMapWithCommonParameters(defaultMap, theParams.getStartDate());
-			spMaps = Collections.singletonList(defaultMap);
-		}
-
-		return spMaps;
-	}
-
 	@Override
 	public BulkExportJobInfo getJobInfo(String theJobId) {
 		Optional<BulkExportJobEntity> jobOp = myBulkExportJobDao.findByJobId(theJobId);
@@ -236,18 +213,6 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 		}
 	}
 
-	private SearchParameterMap buildSearchParameterMapForTypeFilter(String theFilter, RuntimeResourceDefinition theDef, Date theSinceDate) {
-		SearchParameterMap searchParameterMap = myMatchUrlService.translateMatchUrl(theFilter, theDef);
-		enhanceSearchParameterMapWithCommonParameters(searchParameterMap, theSinceDate);
-		return searchParameterMap;
-	}
-
-	private void enhanceSearchParameterMapWithCommonParameters(SearchParameterMap map, Date theSinceDate) {
-		map.setLoadSynchronous(true);
-		if (theSinceDate != null) {
-			map.setLastUpdated(new DateRangeParam(theSinceDate, null));
-		}
-	}
 
 	@Override
 	public void setJobStatus(String theJobId, BulkExportJobStatusEnum theStatus) {
@@ -409,7 +374,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 																			 RuntimeResourceDefinition theDef) {
 		//Build SP map
 		//First, inject the _typeFilters and _since from the export job
-		List<SearchParameterMap> expandedSpMaps = createSearchParameterMapsForResourceType(theDef, theParams);
+		List<SearchParameterMap> expandedSpMaps = myBulkExportHelperSvc.createSearchParameterMapsForResourceType(theDef, theParams);
 		for (SearchParameterMap expandedSpMap: expandedSpMaps) {
 
 			//Since we are in a bulk job, we have to ensure the user didn't jam in a patient search param, since we need to manually set that.
