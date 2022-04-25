@@ -33,6 +33,7 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -111,6 +112,16 @@ public class MatchUrlService {
 						paramMap.setCount(Integer.parseInt(intString));
 					} catch (NumberFormatException e) {
 						throw new InvalidRequestException(Msg.code(485) + "Invalid " + Constants.PARAM_COUNT + " value: " + intString);
+					}
+				}
+			} else if (Constants.PARAM_SEARCH_TOTAL_MODE.equals(nextParamName)) {
+				if (paramList != null && ! paramList.isEmpty() && ! paramList.get(0).isEmpty()) {
+					String totalModeEnumStr = paramList.get(0).get(0);
+					try {
+						paramMap.setSearchTotalMode(SearchTotalModeEnum.valueOf(totalModeEnumStr));
+					} catch (IllegalArgumentException e) {
+//						fixme jm: new code
+						throw new InvalidRequestException(Msg.code(0) + "Invalid " + Constants.PARAM_SEARCH_TOTAL_MODE + " value: " + totalModeEnumStr);
 					}
 				}
 			} else if (Constants.PARAM_OFFSET.equals(nextParamName)) {
