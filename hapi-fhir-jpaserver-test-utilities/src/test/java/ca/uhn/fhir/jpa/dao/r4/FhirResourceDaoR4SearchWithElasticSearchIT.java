@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -45,6 +46,7 @@ import ca.uhn.fhir.test.utilities.LogbackLevelOverrideExtension;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
+import com.google.common.collect.Lists;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -71,6 +73,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.annotation.DirtiesContext;
@@ -84,14 +88,18 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.persistence.EntityManager;
 import java.io.IOException;
+import java.time.Month;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.model.util.UcumServiceUtil.UCUM_CODESYSTEM_URL;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
@@ -1184,6 +1192,78 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 				}
 
+				@Test
+				void testMultipleComponentsHandlesAndOr() {
+					Observation obs1 = getObservation();
+					addComponentWithCodeAndQuantity(obs1, "8480-6", 107);
+					addComponentWithCodeAndQuantity(obs1, "8462-4", 60);
+
+					IIdType obs1Id = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
+
+					Observation obs2 = getObservation();
+					addComponentWithCodeAndQuantity(obs2, "8480-6",307);
+					addComponentWithCodeAndQuantity(obs2, "8462-4",260);
+
+					myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
+
+					// andClauses
+					{
+						String theUrl = "/Observation?component-value-quantity=107&component-value-quantity=60";
+						List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
+						assertThat("when same component with qtys 107 and 60", resourceIds, hasItem(equalTo(obs1Id.getIdPart())));
+					}
+					{
+						String theUrl = "/Observation?component-value-quantity=107&component-value-quantity=260";
+						List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
+						assertThat("when same component with qtys 107 and 260", resourceIds, empty());
+					}
+
+					//andAndOrClauses
+					{
+						String theUrl = "/Observation?component-value-quantity=107&component-value-quantity=gt50,lt70";
+						List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
+						assertThat("when same component with qtys 107 and lt70,gt80", resourceIds, hasItem(equalTo(obs1Id.getIdPart())));
+					}
+					{
+						String theUrl = "/Observation?component-value-quantity=50,70&component-value-quantity=260";
+						List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
+						assertThat("when same component with qtys 50,70 and 260", resourceIds, empty());
+					}
+
+					// multipleAndsWithMultipleOrsEach
+					{
+						String theUrl = "/Observation?component-value-quantity=50,60&component-value-quantity=105,107";
+						List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
+						assertThat("when same component with qtys 50,60 and 105,107", resourceIds, hasItem(equalTo(obs1Id.getIdPart())));
+					}
+					{
+						String theUrl = "/Observation?component-value-quantity=50,60&component-value-quantity=250,260";
+						List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
+						assertThat("when same component with qtys 50,60 and 250,260", resourceIds, empty());
+					}
+				}
+
+
+				private Observation getObservation() {
+					Observation obs = new Observation();
+					obs.getCode().addCoding().setCode("85354-9").setSystem("http://loinc.org");
+					obs.setStatus(Observation.ObservationStatus.FINAL);
+					return obs;
+				}
+
+				private Quantity getQuantity(double theValue) {
+					return new Quantity().setValue(theValue).setUnit("mmHg").setSystem("http://unitsofmeasure.org").setCode("mm[Hg]");
+				}
+
+				private Observation.ObservationComponentComponent addComponentWithCodeAndQuantity(Observation theObservation, String theConceptCode, double theQuantityValue) {
+					Observation.ObservationComponentComponent comp = theObservation.addComponent();
+					CodeableConcept cc1_1 = new CodeableConcept();
+					cc1_1.addCoding().setCode(theConceptCode).setSystem("http://loinc.org");
+					comp.setCode(cc1_1);
+					comp.setValue(getQuantity(theQuantityValue));
+					return comp;
+				}
+
 
 			}
 
@@ -1399,9 +1479,9 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		}
 
 		private IIdType withObservationWithQuantity(double theValue, String theSystem, String theCode) {
-			myResourceId = myTestDataBuilder.createObservation(
+			myResourceId = myTestDataBuilder.createObservation(asArray(
 				myTestDataBuilder.withQuantityAtPath("valueQuantity", theValue, theSystem, theCode)
-			);
+			));
 			return myResourceId;
 		}
 
@@ -1415,6 +1495,62 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		}
 
 	}
+
+
+
+	@Nested
+	public class TotalParameter {
+
+		@ParameterizedTest
+		@EnumSource(SearchTotalModeEnum.class)
+		public void totalParamSkipsSql(SearchTotalModeEnum theTotalModeEnum) {
+			myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "theCode")));
+
+			myCaptureQueriesListener.clear();
+			myTestDaoSearch.searchForIds("Observation?code=theCode&_total=" + theTotalModeEnum);
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "bundle was built with no sql");
+		}
+
+
+		@Test
+		public void totalIsCorrect() {
+			myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-1")));
+			myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-2")));
+			myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-3")));
+
+			IBundleProvider resultBundle = myTestDaoSearch.searchForBundleProvider("Observation?_total=" + SearchTotalModeEnum.ACCURATE);
+			assertEquals(3, resultBundle.size());
+		}
+
+
+		@Test
+		public void totalNoneReturnsEmptyTotal() {
+			myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-1")));
+
+			IBundleProvider resultBundle = myTestDaoSearch.searchForBundleProvider("Observation?_total=" + SearchTotalModeEnum.NONE);
+
+			boolean thrown = false;
+			try {
+				resultBundle.sizeOrThrowNpe();
+			} catch (NullPointerException theE) {
+				thrown = true;
+			}
+			assertTrue(thrown);
+		}
+
+
+	}
+
+
+	private Consumer<IBaseResource>[] asArray(Consumer<IBaseResource> theIBaseResourceConsumer) {
+		@SuppressWarnings("unchecked")
+		Consumer<IBaseResource>[] array = (Consumer<IBaseResource>[]) new Consumer[]{theIBaseResourceConsumer};
+		return array;
+	}
+
+
+
 
 
 	/**
