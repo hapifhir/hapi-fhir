@@ -9,11 +9,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class NicknameMap {
+class NicknameMap {
 	private final Map<String, List<String>> myFormalToNick = new HashMap<>();
 	private final Map<String, List<String>> myNicknameToFormal = new HashMap<>();
 
-	public void load(Reader theReader) throws IOException {
+	void load(Reader theReader) throws IOException {
 		try (BufferedReader reader = new BufferedReader(theReader)) {
 			String line;
 			while ((line = reader.readLine()) != null) {
@@ -33,15 +33,15 @@ public class NicknameMap {
 		}
 	}
 
-	public int size() {
+	int size() {
 		return myFormalToNick.size();
 	}
 
-	public List<String> getNicknamesFromFormalName(String theName) {
+	List<String> getNicknamesFromFormalNameOrNull(String theName) {
 		return myFormalToNick.get(theName);
 	}
 
-	public List<String> getFormalNamesFromNickname(String theNickname) {
+	List<String> getFormalNamesFromNicknameOrNull(String theNickname) {
 		return myNicknameToFormal.get(theNickname);
 	}
 }

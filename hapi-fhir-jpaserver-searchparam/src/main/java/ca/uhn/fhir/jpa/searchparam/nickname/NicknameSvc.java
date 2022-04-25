@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.List;
 
 @Service
 public class NicknameSvc {
@@ -29,4 +30,13 @@ public class NicknameSvc {
 	public int size() {
 		return myNicknameMap.size();
 	}
+
+	public List<String> getNicknamesFromFormalNameOrNull(String theName) {
+		return myNicknameMap.getNicknamesFromFormalNameOrNull(theName);
+	}
+
+	public List<String> getFormalNamesFromNicknameOrNull(String theNickname) {
+		return myNicknameMap.getFormalNamesFromNicknameOrNull(theNickname);
+	}
+
 }

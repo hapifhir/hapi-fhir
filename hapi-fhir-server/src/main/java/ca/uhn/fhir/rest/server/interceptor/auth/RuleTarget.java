@@ -48,11 +48,24 @@ public class RuleTarget {
 		for (Map.Entry<String, String[]> entry : theParameters.entrySet()) {
 			String key = entry.getKey();
 			String[] value = entry.getValue();
-			if (key.endsWith(Constants.PARAMQUALIFIER_MDM)) {
-				key = key.split(Constants.PARAMQUALIFIER_MDM)[0];
-			}
+			key = stripMdmQualifier(key);
+			key = stripNicknameQualifier(key);
 			retval.put(key, value);
 		}
 		return retval;
+	}
+
+	private String stripMdmQualifier(String key) {
+		if (key.endsWith(Constants.PARAMQUALIFIER_MDM)) {
+			key = key.split(Constants.PARAMQUALIFIER_MDM)[0];
+		}
+		return key;
+	}
+
+	private String stripNicknameQualifier(String key) {
+		if (key.endsWith(Constants.PARAMQUALIFIER_NICKNAME)) {
+			key = key.split(Constants.PARAMQUALIFIER_NICKNAME)[0];
+		}
+		return key;
 	}
 }

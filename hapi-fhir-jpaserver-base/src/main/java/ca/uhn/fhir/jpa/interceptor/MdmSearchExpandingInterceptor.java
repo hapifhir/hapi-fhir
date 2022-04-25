@@ -30,13 +30,11 @@ import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -92,7 +90,7 @@ public class MdmSearchExpandingInterceptor {
 
 					// If we failed, attempt to expand as a golden resource
 					if (expandedResourceIds.isEmpty()) {
-							expandedResourceIds =  myMdmLinkExpandSvc.expandMdmByGoldenResourceId(new IdDt(refParam.getValue()));
+						expandedResourceIds = myMdmLinkExpandSvc.expandMdmByGoldenResourceId(new IdDt(refParam.getValue()));
 					}
 
 					//Rebuild the search param list.
@@ -104,8 +102,7 @@ public class MdmSearchExpandingInterceptor {
 							.forEach(toAdd::add);
 					}
 				}
-			}
-			else if (theParamName.equalsIgnoreCase("_id")) {
+			} else if (theParamName.equalsIgnoreCase("_id")) {
 				expandIdParameter(iQueryParameterType, toAdd, toRemove);
 			}
 		}
@@ -117,6 +114,7 @@ public class MdmSearchExpandingInterceptor {
 	/**
 	 * Expands out the provided _id parameter into all the various
 	 * ids of linked resources.
+	 *
 	 * @param theIdParameter
 	 * @param theAddList
 	 * @param theRemoveList
@@ -130,29 +128,21 @@ public class MdmSearchExpandingInterceptor {
 		IIdType id;
 		Creator<? extends IQueryParameterType> creator;
 		boolean mdmExpand = false;
-		if (theIdParameter instanceof StringParam) {
-			StringParam param = (StringParam) theIdParameter;
-			mdmExpand = param.isMdmExpand();
-			id = new IdDt(param.getValue());
-			creator = StringParam::new;
-		}
-		else if (theIdParameter instanceof TokenParam) {
+		if (theIdParameter instanceof TokenParam) {
 			TokenParam param = (TokenParam) theIdParameter;
 			mdmExpand = param.isMdmExpand();
 			id = new IdDt(param.getValue());
 			creator = TokenParam::new;
-		}
-		else {
+		} else {
 			creator = null;
 			id = null;
 		}
 
-		if (id == null || creator == null) {
+		if (id == null) {
 			// in case the _id paramter type is different from the above
 			ourLog.warn("_id parameter of incorrect type. Expected StringParam or TokenParam, but got {}. No expansion will be done!",
 				theIdParameter.getClass().getSimpleName());
-		}
-		else if (mdmExpand) {
+		} else if (mdmExpand) {
 			ourLog.debug("_id parameter must be expanded out from: {}", id.getValue());
 
 			Set<String> expandedResourceIds = myMdmLinkExpandSvc.expandMdmBySourceResourceId(id);
