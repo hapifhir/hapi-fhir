@@ -1,0 +1,5 @@
+---
+type: change
+issue: 3550
+title: "Method signatures on several interfaces and classes related to the `$expunge` operation have changed to support 
+the case where the primary identifier of a resource is not necessarily a `Long`."
