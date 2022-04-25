@@ -78,7 +78,7 @@ public class BulkExportJobEntity implements Serializable {
 	@Column(name = "STATUS_TIME", nullable = false)
 	private Date myStatusTime;
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "EXP_TIME", nullable = false)
+	@Column(name = "EXP_TIME", nullable = true)
 	private Date myExpiry;
 	@Column(name = "REQUEST", nullable = false, length = REQUEST_LENGTH)
 	private String myRequest;
@@ -146,7 +146,7 @@ public class BulkExportJobEntity implements Serializable {
 		if (myStatus != null) {
 			b.append("status", myStatus + " " + new InstantType(myStatusTime).getValueAsString());
 		}
-		b.append("created", new InstantType(myExpiry).getValueAsString());
+		b.append("created", new InstantType(myCreated).getValueAsString());
 		b.append("expiry", new InstantType(myExpiry).getValueAsString());
 		b.append("request", myRequest);
 		b.append("since", mySince);

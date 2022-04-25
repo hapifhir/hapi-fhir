@@ -1068,8 +1068,10 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 					doSaveSearch();
 
+					ourLog.trace("saveUnsynced() - pre-commit");
 				}
 			});
+			ourLog.trace("saveUnsynced() - post-commit");
 
 		}
 

@@ -49,11 +49,10 @@ import java.util.stream.Collectors;
 @SuppressWarnings({"SqlNoDataSourceInspection", "SpellCheckingInspection"})
 public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
-	private final Set<FlagEnum> myFlags;
-
 	// H2, Derby, MariaDB, and MySql automatically add indexes to foreign keys
 	public static final DriverTypeEnum[] NON_AUTOMATIC_FK_INDEX_PLATFORMS = new DriverTypeEnum[]{
 		DriverTypeEnum.POSTGRES_9_4, DriverTypeEnum.ORACLE_12C, DriverTypeEnum.MSSQL_2012};
+	private final Set<FlagEnum> myFlags;
 
 
 	/**
@@ -273,28 +272,44 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		replaceNumericSPIndices(version);
 		replaceQuantitySPIndices(version);
-        
-        // Drop Index on HFJ_RESOURCE.INDEX_STATUS
-        version
-        .onTable("HFJ_RESOURCE")
-        .dropIndex("20220314.1", "IDX_INDEXSTATUS");
 
-        // New Index on HFJ_RESOURCE for $reindex Operation - hapi-fhir #3534
+		// Drop Index on HFJ_RESOURCE.INDEX_STATUS
+		version
+			.onTable("HFJ_RESOURCE")
+			.dropIndex("20220314.1", "IDX_INDEXSTATUS");
+
+		version
+			.onTable("BT2_JOB_INSTANCE")
+			.addColumn("20220416.1", "CUR_GATED_STEP_ID")
+			.nullable()
+			.type(ColumnTypeEnum.STRING, 100);
+
+		//Make Job expiry nullable so that we can prevent job expiry by using a null value.
+		version
+			.onTable("HFJ_BLK_EXPORT_JOB").modifyColumn("20220423.1", "EXP_TIME").nullable().withType(ColumnTypeEnum.DATE_TIMESTAMP);
+
+			// Drop Index on HFJ_RESOURCE.INDEX_STATUS
+			version
+        .onTable("HFJ_RESOURCE")
+			.dropIndex("20220325.1", "IDX_INDEXSTATUS");
+
+		// New Index on HFJ_RESOURCE for $reindex Operation - hapi-fhir #3534
 		{
 			version.onTable("HFJ_RESOURCE")
-				.addIndex("20220413.1", "IDX_RES_TYPE_DEL_UPDATED")
+				.addIndex("20220425.1", "IDX_RES_TYPE_DEL_UPDATED")
 				.unique(false)
 				.withColumns("RES_TYPE", "RES_DELETED_AT", "RES_UPDATED", "PARTITION_ID", "RES_ID");
 
 			// Drop existing Index on HFJ_RESOURCE.RES_TYPE since the new Index will meet the overall Index Demand
 			version
 				.onTable("HFJ_RESOURCE")
-				.dropIndex("20220413.2", "IDX_RES_TYPE");
+				.dropIndex("20220425.2", "IDX_RES_TYPE");
 		}
 	}
 
 	/**
 	 * new numeric search indexing
+	 *
 	 * @see ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder
 	 * @see ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber
 	 */
@@ -333,6 +348,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 	/**
 	 * new quantity search indexing
+	 *
 	 * @see ca.uhn.fhir.jpa.search.builder.predicate.QuantityPredicateBuilder
 	 * @see ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity
 	 * @see ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized

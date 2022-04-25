@@ -139,6 +139,7 @@ import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.mdm.api.IMdmClearJobSubmitter;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
@@ -261,8 +262,11 @@ public class JpaConfig {
 
 	@Bean(name = "myBinaryStorageInterceptor")
 	@Lazy
-	public BinaryStorageInterceptor binaryStorageInterceptor() {
-		return new BinaryStorageInterceptor();
+	public BinaryStorageInterceptor binaryStorageInterceptor(DaoConfig theDaoConfig) {
+		BinaryStorageInterceptor interceptor = new BinaryStorageInterceptor();
+		interceptor.setAllowAutoInflateBinaries(theDaoConfig.isAllowAutoInflateBinaries());
+		interceptor.setAutoInflateBinariesMaximumSize(theDaoConfig.getAutoInflateBinariesMaximumBytes());
+		return interceptor;
 	}
 
 	@Bean
@@ -754,8 +758,8 @@ public class JpaConfig {
 
 	@Bean
 	@Scope("prototype")
-	public ExpungeOperation expungeOperation(String theResourceName, Long theResourceId, Long theVersion, ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails) {
-		return new ExpungeOperation(theResourceName, theResourceId, theVersion, theExpungeOptions, theRequestDetails);
+	public ExpungeOperation expungeOperation(String theResourceName, ResourcePersistentId theResourceId, ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails) {
+		return new ExpungeOperation(theResourceName, theResourceId, theExpungeOptions, theRequestDetails);
 	}
 
 	@Bean

@@ -20,8 +20,10 @@ package ca.uhn.fhir.batch2.api;
  * #L%
  */
 
-public interface IJobCleanerService {
+import ca.uhn.fhir.model.api.IModelJson;
 
-	void runCleanupPass();
+public interface IJobCompletionHandler<PT extends IModelJson> {
+
+	void jobComplete(JobCompletionDetails<PT> theDetails);
 
 }

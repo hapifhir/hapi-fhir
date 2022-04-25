@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.dao.expunge;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR Storage api
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
@@ -21,20 +21,21 @@ package ca.uhn.fhir.jpa.dao.expunge;
  */
 
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public interface IResourceExpungeService {
-	List<Long> findHistoricalVersionsOfDeletedResources(String theResourceName, Long theResourceId, int theI);
+	List<ResourcePersistentId> findHistoricalVersionsOfDeletedResources(String theResourceName, ResourcePersistentId theResourceId, int theI);
 
-	List<Long> findHistoricalVersionsOfNonDeletedResources(String theResourceName, Long theResourceId, Long theVersion, int theI);
+	List<ResourcePersistentId> findHistoricalVersionsOfNonDeletedResources(String theResourceName, ResourcePersistentId theResourceId, int theI);
 
-	void expungeHistoricalVersions(RequestDetails theRequestDetails, List<Long> thePartition, AtomicInteger theRemainingCount);
+	void expungeHistoricalVersions(RequestDetails theRequestDetails, List<ResourcePersistentId> thePartition, AtomicInteger theRemainingCount);
 
-	void expungeCurrentVersionOfResources(RequestDetails theRequestDetails, List<Long> theResourceIds, AtomicInteger theRemainingCount);
+	void expungeCurrentVersionOfResources(RequestDetails theRequestDetails, List<ResourcePersistentId> theResourceIds, AtomicInteger theRemainingCount);
 
-	void expungeHistoricalVersionsOfIds(RequestDetails theRequestDetails, List<Long> theResourceIds, AtomicInteger theRemainingCount);
+	void expungeHistoricalVersionsOfIds(RequestDetails theRequestDetails, List<ResourcePersistentId> theResourceIds, AtomicInteger theRemainingCount);
 
-	void deleteAllSearchParams(Long theResourceId);
+	void deleteAllSearchParams(ResourcePersistentId theResourceId);
 }

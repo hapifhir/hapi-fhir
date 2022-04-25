@@ -70,6 +70,7 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
@@ -310,17 +311,28 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			notifyInterceptors(RestOperationTypeEnum.CREATE, requestDetails);
 		}
 
+		String resourceIdBeforeStorage = theResource.getIdElement().getIdPart();
+		boolean resourceHadIdBeforeStorage = isNotBlank(resourceIdBeforeStorage);
+		boolean resourceIdWasServerAssigned = theResource.getUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED) == Boolean.TRUE;
+
+		HookParams hookParams;
+
+		// Notify interceptor for accepting/rejecting client assigned ids
+		if (!resourceIdWasServerAssigned && resourceHadIdBeforeStorage) {
+			hookParams = new HookParams()
+				.add(IBaseResource.class, theResource)
+				.add(RequestDetails.class, theRequest);
+			doCallHooks(theTransactionDetails, theRequest, Pointcut.STORAGE_PRESTORAGE_CLIENT_ASSIGNED_ID, hookParams);
+		}
+
 		// Interceptor call: STORAGE_PRESTORAGE_RESOURCE_CREATED
-		HookParams hookParams = new HookParams()
+		hookParams = new HookParams()
 			.add(IBaseResource.class, theResource)
 			.add(RequestDetails.class, theRequest)
 			.addIfMatchesType(ServletRequestDetails.class, theRequest)
 			.add(TransactionDetails.class, theTransactionDetails);
 		doCallHooks(theTransactionDetails, theRequest, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, hookParams);
 
-		String resourceIdBeforeStorage = theResource.getIdElement().getIdPart();
-		boolean resourceHadIdBeforeStorage = isNotBlank(resourceIdBeforeStorage);
-		boolean resourceIdWasServerAssigned = theResource.getUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED) == Boolean.TRUE;
 		if (resourceHadIdBeforeStorage && !resourceIdWasServerAssigned) {
 			validateResourceIdCreation(theResource, theRequest);
 		}
@@ -887,10 +899,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				throw new PreconditionFailedException(Msg.code(969) + "Can not perform version-specific expunge of resource " + theId.toUnqualified().getValue() + " as this is the current version");
 			}
 
-			return myExpungeService.expunge(getResourceName(), entity.getResourceId(), entity.getVersion(), theExpungeOptions, theRequest);
+			return myExpungeService.expunge(getResourceName(), new ResourcePersistentId(entity.getResourceId(), entity.getVersion()), theExpungeOptions, theRequest);
 		}
 
-		return myExpungeService.expunge(getResourceName(), entity.getResourceId(), null, theExpungeOptions, theRequest);
+		return myExpungeService.expunge(getResourceName(), new ResourcePersistentId(entity.getResourceId()), theExpungeOptions, theRequest);
 	}
 
 	@Override
@@ -898,7 +910,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	public ExpungeOutcome expunge(ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails) {
 		ourLog.info("Beginning TYPE[{}] expunge operation", getResourceName());
 
-		return myExpungeService.expunge(getResourceName(), null, null, theExpungeOptions, theRequestDetails);
+		return myExpungeService.expunge(getResourceName(), null, theExpungeOptions, theRequestDetails);
 	}
 
 	@Override

@@ -6,7 +6,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>6.0.0-PRE10-SNAPSHOT</version>
+	<version>6.0.0-PRE11-SNAPSHOT</version>
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
 	<url>https://hapifhir.io</url>
@@ -822,7 +822,7 @@
         <swagger_version>2.1.12</swagger_version>
         <slf4j_version>1.7.33</slf4j_version>
         <log4j_to_slf4j_version>2.17.1</log4j_to_slf4j_version>
-        <spring_version>5.3.18</spring_version>
+        <spring_version>5.3.19</spring_version>
         <spring_data_version>2.6.1</spring_data_version>
         <spring_batch_version>4.3.3</spring_batch_version>
         <spring_boot_version>2.6.2</spring_boot_version>
@@ -1713,6 +1713,20 @@
 				<groupId>org.quartz-scheduler</groupId>
 				<artifactId>quartz</artifactId>
 				<version>2.3.2</version>
+				<exclusions>
+					<exclusion>
+						<groupId>com.zaxxer</groupId>
+						<artifactId>HikariCP-java7</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>com.mchange</groupId>
+						<artifactId>c3p0</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>com.mchange</groupId>
+						<artifactId>mchange-commons-java</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
@@ -2001,7 +2015,7 @@
                             <groupId>ca.uhn.hapi.fhir</groupId>
                             <artifactId>hapi-fhir-checkstyle</artifactId>
 									<!-- Remember to bump this when you upgrade the version -->
-                            <version>6.0.0-PRE10-SNAPSHOT</version>
+                            <version>6.0.0-PRE11-SNAPSHOT</version>
                         </dependency>
 					</dependencies>
 				</plugin>
