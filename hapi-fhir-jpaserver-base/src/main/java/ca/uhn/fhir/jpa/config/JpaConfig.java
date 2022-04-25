@@ -128,6 +128,8 @@ import ca.uhn.fhir.jpa.search.warm.CacheWarmingSvcImpl;
 import ca.uhn.fhir.jpa.search.warm.ICacheWarmingSvc;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
 import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
+import ca.uhn.fhir.jpa.searchparam.nickname.NicknameInterceptor;
+import ca.uhn.fhir.jpa.searchparam.nickname.NicknameSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.sp.SearchParamPresenceSvcImpl;
@@ -826,5 +828,17 @@ public class JpaConfig {
 	@Bean
 	public MemberMatcherR4Helper memberMatcherR4Helper(FhirContext theFhirContext) {
 		return new MemberMatcherR4Helper(theFhirContext);
+	}
+
+	@Lazy
+	@Bean
+	public NicknameSvc nicknameSvc() {
+		return new NicknameSvc();
+	}
+
+	@Lazy
+	@Bean
+	public NicknameInterceptor nicknameInterceptor(NicknameSvc theNicknameSvc) {
+		return new NicknameInterceptor(theNicknameSvc);
 	}
 }
