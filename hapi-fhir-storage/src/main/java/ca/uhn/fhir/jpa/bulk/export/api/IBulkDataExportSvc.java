@@ -25,18 +25,12 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
 public interface IBulkDataExportSvc {
-	/**
-	 * Deprecated - Use {@link #submitJob(BulkDataExportOptions, Boolean, RequestDetails)} instead
-	 */
-	@Deprecated
-	JobInfo submitJob(BulkDataExportOptions theBulkDataExportOptions);
 
 	JobInfo submitJob(BulkDataExportOptions theBulkDataExportOptions, Boolean useCache, RequestDetails theRequestDetails);
 

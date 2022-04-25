@@ -109,6 +109,9 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 	@Autowired
 	private FhirContext myContext;
 
+	@Autowired
+	private BulkExportHelperService myBulkExportHelperSvc;
+
 	@PostConstruct
 	public void start() {
 		myTxTemplate = new TransactionTemplate(myTxManager);
@@ -119,51 +122,6 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 		jobDetail.setJobClass(PurgeExpiredFilesJob.class);
 		mySchedulerService.scheduleClusteredJob(DateUtils.MILLIS_PER_HOUR, jobDetail);
 	}
-
-	/**
-	 * This method is called by the scheduler to run a pass of the
-	 * generator
-	 */
-//	@Transactional(value = Transactional.TxType.NEVER)
-//	@Override
-//	public synchronized void startSubmittedJobs() {
-//		if (!myDaoConfig.isEnableTaskBulkExportJobExecution()) {
-//			return;
-//		}
-//
-//		Optional<BulkExportJobEntity> jobToProcessOpt = myTxTemplate.execute(t -> {
-//			Pageable page = PageRequest.of(0, 1);
-//			Slice<BulkExportJobEntity> submittedJobs = myBulkExportJobDao.findByStatus(page, BulkExportJobStatusEnum.SUBMITTED);
-//			if (submittedJobs.isEmpty()) {
-//				return Optional.empty();
-//			}
-//			return Optional.of(submittedJobs.getContent().get(0));
-//		});
-//
-//		if (!jobToProcessOpt.isPresent()) {
-//			return;
-//		}
-//
-//		BulkExportJobEntity bulkExportJobEntity = jobToProcessOpt.get();
-//
-//		String jobUuid = bulkExportJobEntity.getJobId();
-//		try {
-//			processJob(bulkExportJobEntity);
-//		} catch (Exception e) {
-//			ourLog.error("Failure while preparing bulk export extract", e);
-//			myTxTemplate.execute(t -> {
-//				Optional<BulkExportJobEntity> submittedJobs = myBulkExportJobDao.findByJobId(jobUuid);
-//				if (submittedJobs.isPresent()) {
-//					BulkExportJobEntity jobEntity = submittedJobs.get();
-//					jobEntity.setStatus(BulkExportJobStatusEnum.ERROR);
-//					jobEntity.setStatusMessage(e.getMessage());
-//					myBulkExportJobDao.save(jobEntity);
-//				}
-//				return null;
-//			});
-//		}
-//
-//	}
 
 	@Override
 	@Transactional(Transactional.TxType.NEVER)
@@ -208,8 +166,9 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 					for (BulkExportCollectionFileEntity nextFile : nextCollection.getFiles()) {
 
 						ourLog.info("Purging bulk data file: {}", nextFile.getResourceId());
-						getBinaryDao().delete(toId(nextFile.getResourceId()), new SystemRequestDetails());
-						getBinaryDao().forceExpungeInExistingTransaction(toId(nextFile.getResourceId()), new ExpungeOptions().setExpungeDeletedResources(true).setExpungeOldVersions(true), new SystemRequestDetails());
+						IIdType id = myBulkExportHelperSvc.toId(nextFile.getResourceId());
+						getBinaryDao().delete(id, new SystemRequestDetails());
+						getBinaryDao().forceExpungeInExistingTransaction(id, new ExpungeOptions().setExpungeDeletedResources(true).setExpungeOldVersions(true), new SystemRequestDetails());
 						myBulkExportCollectionFileDao.deleteByPid(nextFile.getId());
 
 					}
@@ -230,72 +189,6 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 	private IFhirResourceDao<IBaseBinary> getBinaryDao() {
 		return myDaoRegistry.getResourceDao("Binary");
 	}
-
-	private IIdType toId(String theResourceId) {
-		IIdType retVal = myContext.getVersion().newIdType();
-		retVal.setValue(theResourceId);
-		return retVal;
-	}
-//
-//	// TODO - processes the bulk export job
-//	private void processJob(BulkExportJobEntity theBulkExportJobEntity) {
-//		String theJobUuid = theBulkExportJobEntity.getJobId();
-//		JobParametersBuilder parameters = new JobParametersBuilder()
-//			.addString(BatchConstants.JOB_UUID_PARAMETER, theJobUuid)
-//			.addLong(BatchConstants.READ_CHUNK_PARAMETER, READ_CHUNK_SIZE);
-//
-//		ourLog.info("Submitting bulk export job {} to job scheduler", theJobUuid);
-//
-//		try {
-//			if (isGroupBulkJob(theBulkExportJobEntity)) {
-//				enhanceBulkParametersWithGroupParameters(theBulkExportJobEntity, parameters);
-//				myJobSubmitter.runJob(myGroupBulkExportJob, parameters.toJobParameters());
-//			} else if (isPatientBulkJob(theBulkExportJobEntity)) {
-//				myJobSubmitter.runJob(myPatientBulkExportJob, parameters.toJobParameters());
-//			} else {
-//				myJobSubmitter.runJob(myBulkExportJob, parameters.toJobParameters());
-//			}
-//		} catch (JobParametersInvalidException theE) {
-//			ourLog.error("Unable to start job with UUID: {}, the parameters are invalid. {}", theJobUuid, theE.getMessage());
-//		}
-//	}
-
-//	private String getQueryParameterIfPresent(String theRequestString, String theParameter) {
-//		Map<String, String[]> stringMap = UrlUtil.parseQueryString(theRequestString);
-//		if (stringMap != null) {
-//			String[] strings = stringMap.get(theParameter);
-//			if (strings != null) {
-//				return String.join(",", strings);
-//			}
-//		}
-//		return null;
-//
-//	}
-
-//	private boolean isPatientBulkJob(BulkExportJobEntity theBulkExportJobEntity) {
-//		return theBulkExportJobEntity.getRequest().startsWith("/Patient/");
-//	}
-//
-//	private boolean isGroupBulkJob(BulkExportJobEntity theBulkExportJobEntity) {
-//		return theBulkExportJobEntity.getRequest().startsWith("/Group/");
-//	}
-
-//	private void enhanceBulkParametersWithGroupParameters(BulkExportJobEntity theBulkExportJobEntity, JobParametersBuilder theParameters) {
-//		String theGroupId = getQueryParameterIfPresent(theBulkExportJobEntity.getRequest(), JpaConstants.PARAM_EXPORT_GROUP_ID);
-//		String expandMdm = getQueryParameterIfPresent(theBulkExportJobEntity.getRequest(), JpaConstants.PARAM_EXPORT_MDM);
-//		theParameters.addString(BatchConstants.GROUP_ID_PARAMETER, theGroupId);
-//		theParameters.addString(BatchConstants.EXPAND_MDM_PARAMETER, expandMdm);
-//	}
-
-//	public static class Job implements HapiJob {
-//		@Autowired
-//		private IBulkDataExportJobSchedulingHelper myTarget;
-//
-//		@Override
-//		public void execute(JobExecutionContext theContext) {
-//			myTarget.startSubmittedJobs();
-//		}
-//	}
 
 	public static class PurgeExpiredFilesJob implements HapiJob {
 		@Autowired

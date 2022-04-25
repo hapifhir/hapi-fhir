@@ -36,7 +36,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.util.Arrays;
 import java.util.Optional;
 
-//TODO - delete
 /**
  * This class will prevent a job from running if the UUID does not exist or is invalid.
  */

@@ -83,13 +83,6 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 	private final int myRetentionPeriod = (int) (2 * DateUtils.MILLIS_PER_HOUR);
 
-	@Transactional
-	@Override
-	@Deprecated
-	public JobInfo submitJob(BulkDataExportOptions theBulkDataExportOptions) {
-		return submitJob(theBulkDataExportOptions, true, null);
-	}
-
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 

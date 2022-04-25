@@ -13,6 +13,7 @@ public class JpaBulkExportConfig {
 		return new JpaBulkExportProcessor();
 	}
 
+	// see BulkExportMongoConfig
 	@Bean
 	public BulkExportHelperService bulkExportHelperService() {
 		return new BulkExportHelperService();

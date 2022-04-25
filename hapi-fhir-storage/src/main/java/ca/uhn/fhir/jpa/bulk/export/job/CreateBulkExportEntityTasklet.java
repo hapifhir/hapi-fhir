@@ -91,7 +91,7 @@ public class CreateBulkExportEntityTasklet implements Tasklet {
 			String groupId = (String)jobParameters.get("groupId");
 			bulkDataExportOptions.setGroupId(new IdDt(groupId));
 
-			IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.submitJob(bulkDataExportOptions);
+			IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.submitJob(bulkDataExportOptions, true, null);
 
 			addUUIDToJobContext(theChunkContext, jobInfo.getJobId());
 			return RepeatStatus.FINISHED;
