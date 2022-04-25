@@ -543,6 +543,33 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		return null;
 	}
 
+	@Override
+	public IBaseResource expandValueSetFromCodeSystem(String theValueSetUri) {
+		List<TermCodeSystemVersion> matchingValueSets = myCodeSystemVersionDao.findByCodeSystemValueset(theValueSetUri);
+		if (matchingValueSets.size() == 0) return null; //nothing was found, continue
+		if (matchingValueSets.size() > 1) {
+			String message = Msg.code(2075) + "More than one CodeSystem resource was found matching the provided implicit ValueSet URI: " +
+				matchingValueSets.stream().map(v -> v.getCodeSystem().getCodeSystemUri()).sorted().collect(Collectors.joining("; "));
+			throw new UnprocessableEntityException(message);
+		}
+		// we have exactly one CS
+		TermCodeSystem ourCodeSystem = matchingValueSets.get(0).getCodeSystem();
+		Collection<TermConcept> ourConcepts = matchingValueSets.get(0).getConcepts();
+		ValueSet toReturn = new ValueSet();
+		toReturn.setUrl(theValueSetUri);
+		toReturn.getCompose().addInclude()
+			.setSystem(ourCodeSystem.getCodeSystemUri())
+			.setVersion(ourCodeSystem.getCurrentVersion().getCodeSystemVersionId());
+
+		for (TermConcept ourConcept : ourConcepts) {
+			toReturn.getExpansion().addContains()
+				.setSystem(ourCodeSystem.getCodeSystemUri())
+				.setCode(ourConcept.getCode())
+				.setDisplay(ourConcept.getDisplay());
+		}
+		return toReturn;
+	}
+
 	@Nonnull
 	private String toHumanReadableExpansionTimestamp(TermValueSet termValueSet) {
 		String expansionTimestamp = "(unknown)";

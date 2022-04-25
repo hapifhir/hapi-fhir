@@ -134,8 +134,8 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 
 	@Override
 	public IBaseResource expandValueSetFromCodeSystem(String theValueSetUri) {
-		// TODO: 08/04/22 NYI
-		throw new NotImplementedException("expansion for DSTU3 from CodeSystem is not yet implemented");
+		org.hl7.fhir.r4.model.ValueSet expandedR4 = (org.hl7.fhir.r4.model.ValueSet) super.expandValueSetFromCodeSystem(theValueSetUri);
+		return VersionConvertorFactory_30_40.convertResource(expandedR4, new BaseAdvisor_30_40(false));
 	}
 
 	@Override

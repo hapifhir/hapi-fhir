@@ -78,8 +78,8 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IValidationSup
 
 	@Override
 	public IBaseResource expandValueSetFromCodeSystem(String theValueSetUri) {
-		// TODO: 08/04/22 NYI
-		throw new NotImplementedException("expansion for R5 from CodeSystem is not yet implemented");
+		org.hl7.fhir.r4.model.ValueSet valueSetR4 = (org.hl7.fhir.r4.model.ValueSet) super.expandValueSetFromCodeSystem(theValueSetUri);
+		return VersionConvertorFactory_40_50.convertResource(valueSetR4, new BaseAdvisor_40_50(false));
 	}
 
 	@Override
