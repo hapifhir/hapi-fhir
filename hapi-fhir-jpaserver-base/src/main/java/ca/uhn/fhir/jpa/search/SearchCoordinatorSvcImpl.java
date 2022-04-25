@@ -540,7 +540,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				List<List<IQueryParameterType>> contentAndTerms = theParams.get(Constants.PARAM_CONTENT);
 				List<List<IQueryParameterType>> textAndTerms = theParams.get(Constants.PARAM_TEXT);
 
-				Iterator<Long> countIterator = theSb.createCountQuery(theParams, theSearchUuid, theRequestDetails, theRequestPartitionId);
+				Iterator<Long> countIterator = theSb.createCountQuery(theResourceType, theParams, theSearchUuid, theRequestDetails, theRequestPartitionId);
 
 				if (contentAndTerms != null) theParams.put(Constants.PARAM_CONTENT, contentAndTerms);
 				if (textAndTerms != null) theParams.put(Constants.PARAM_TEXT, textAndTerms);
@@ -1241,7 +1241,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				 * we will have to clone those parameters here so that
 				 * the "correct" params are used in createQuery below
 				 */
-				Iterator<Long> countIterator = sb.createCountQuery(myParams.clone(), mySearch.getUuid(), myRequest, myRequestPartitionId);
+				Iterator<Long> countIterator = sb.createCountQuery(
+					mySearch.getResourceType(), myParams.clone(), mySearch.getUuid(), myRequest, myRequestPartitionId);
 				Long count = countIterator.hasNext() ? countIterator.next() : 0L;
 				ourLog.trace("Got count {}", count);
 

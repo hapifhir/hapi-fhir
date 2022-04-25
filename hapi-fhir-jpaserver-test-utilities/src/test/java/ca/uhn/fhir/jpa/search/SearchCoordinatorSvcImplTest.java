@@ -561,7 +561,8 @@ public class SearchCoordinatorSvcImplTest {
 		params.setSearchTotalMode(SearchTotalModeEnum.ACCURATE);
 
 		List<ResourcePersistentId> pids = createPidSequence(30);
-		when(mySearchBuilder.createCountQuery(same(params), any(String.class), nullable(RequestDetails.class), nullable(RequestPartitionId.class))).thenReturn(Lists.newArrayList(Long.valueOf(20L)).iterator());
+		when(mySearchBuilder.createCountQuery(mySearchBuilder.getResourceName(), same(params), any(String.class),
+			nullable(RequestDetails.class), nullable(RequestPartitionId.class))).thenReturn(Lists.newArrayList(Long.valueOf(20L)).iterator());
 		when(mySearchBuilder.createQuery(same(params), any(), nullable(RequestDetails.class), nullable(RequestPartitionId.class))).thenReturn(new ResultIterator(pids.subList(10, 20).iterator()));
 
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());

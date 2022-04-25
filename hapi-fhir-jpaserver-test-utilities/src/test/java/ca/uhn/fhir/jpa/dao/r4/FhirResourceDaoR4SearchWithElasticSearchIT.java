@@ -106,6 +106,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -1509,7 +1510,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			myCaptureQueriesListener.clear();
 			myTestDaoSearch.searchForIds("Observation?code=theCode&_total=" + theTotalModeEnum);
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "bundle was built with no sql");
+			assertEquals(1, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "bundle was built with no sql");
 		}
 
 
@@ -1524,8 +1525,11 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		}
 
 
+		/**
+		 *
+		 */
 		@Test
-		public void totalNoneReturnsEmptyTotal() {
+		public void totalNoneReturnsTotal() {
 			myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-1")));
 
 			IBundleProvider resultBundle = myTestDaoSearch.searchForBundleProvider("Observation?_total=" + SearchTotalModeEnum.NONE);
@@ -1536,7 +1540,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			} catch (NullPointerException theE) {
 				thrown = true;
 			}
-			assertTrue(thrown);
+			assertFalse(thrown);
 		}
 
 

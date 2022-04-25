@@ -47,7 +47,9 @@ import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import org.hibernate.search.backend.elasticsearch.ElasticsearchExtension;
 import org.hibernate.search.engine.search.query.SearchScroll;
+import org.hibernate.search.engine.search.query.dsl.SearchQueryOptionsStep;
 import org.hibernate.search.mapper.orm.Search;
+import org.hibernate.search.mapper.orm.search.loading.dsl.SearchLoadingOptionsStep;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hibernate.search.mapper.orm.work.SearchIndexingPlan;
 import org.hibernate.search.util.common.SearchException;
@@ -132,14 +134,22 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 	private ISearchQueryExecutor doSearch(String theResourceType, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
 		// keep this in sync with supportsSomeOf();
-		SearchSession session = getSearchSession();
 
 		int scrollSize = 50;
 		if (theParams.getCount()!=null) {
 			scrollSize = theParams.getCount();
 		}
 
-		SearchScroll<Long> esResult = session.search(ResourceTable.class)
+		SearchScroll<Long> esResult = getSearchQueryOptionsStep(theResourceType, theParams, theReferencingPid).scroll(scrollSize);
+
+		return new SearchScrollQueryExecutorAdaptor(esResult);
+	}
+
+
+	private SearchQueryOptionsStep<?, Long, SearchLoadingOptionsStep, ?, ?> getSearchQueryOptionsStep(
+			String theResourceType, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
+
+		return getSearchSession().search(ResourceTable.class)
 			// The document id is the PK which is pid.  We use this instead of _myId to avoid fetching the doc body.
 			.select(
 				// adapt the String docRef.id() to the Long that it really is.
@@ -188,10 +198,10 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 					//DROP EARLY HERE IF BOOL IS EMPTY?
 
 				})
-			).scroll(scrollSize);
-
-		return new SearchScrollQueryExecutorAdaptor(esResult);
+			);
 	}
+
+
 
 	@Nonnull
 	private SearchSession getSearchSession() {
@@ -313,5 +323,15 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		return rawResourceDataList.stream()
 			.map(p -> p.toResource(parser))
 			.collect(Collectors.toList());
+	}
+
+
+
+	@Override
+	public long count(String theResourceName, SearchParameterMap theParams) {
+		SearchQueryOptionsStep<?, Long, SearchLoadingOptionsStep, ?, ?> queryOptionsStep =
+			getSearchQueryOptionsStep(theResourceName, theParams, null);
+
+		return queryOptionsStep.fetch(0).total().hitCount();
 	}
 }

@@ -90,4 +90,8 @@ public interface IFulltextSearchSvc {
 	 */
 	List<IBaseResource> getResources(Collection<Long> thePids);
 
+	/**
+	 * Returns accurate hit count
+	 */
+	long count(String theResourceName, SearchParameterMap theParams);
 }

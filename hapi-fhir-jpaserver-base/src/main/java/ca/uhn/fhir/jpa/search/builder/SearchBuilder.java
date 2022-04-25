@@ -271,11 +271,18 @@ public class SearchBuilder implements ISearchBuilder {
 
 	@SuppressWarnings("ConstantConditions")
 	@Override
-	public Iterator<Long> createCountQuery(SearchParameterMap theParams, String theSearchUuid, RequestDetails theRequest, @Nonnull RequestPartitionId theRequestPartitionId) {
+	public Iterator<Long> createCountQuery(String theResourceType, SearchParameterMap theParams, String theSearchUuid,
+				RequestDetails theRequest, @Nonnull RequestPartitionId theRequestPartitionId) {
+
 		assert theRequestPartitionId != null;
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		init(theParams, theSearchUuid, theRequestPartitionId);
+
+		if (checkUseHibernateSearch()) {
+			long count = myFulltextSearchSvc.count(theResourceType, theParams);
+			return Collections.singletonList(count).iterator();
+		}
 
 		List<ISearchQueryExecutor> queries = createQuery(myParams, null, null, null, true, theRequest, null);
 		if (queries.isEmpty()) {
