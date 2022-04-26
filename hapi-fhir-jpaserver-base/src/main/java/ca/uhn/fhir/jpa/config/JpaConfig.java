@@ -129,7 +129,6 @@ import ca.uhn.fhir.jpa.search.warm.ICacheWarmingSvc;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
 import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
 import ca.uhn.fhir.jpa.searchparam.nickname.NicknameInterceptor;
-import ca.uhn.fhir.jpa.searchparam.nickname.NicknameSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.sp.SearchParamPresenceSvcImpl;
@@ -166,6 +165,7 @@ import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean;
 
 import javax.annotation.Nullable;
+import java.io.IOException;
 import java.util.Date;
 
 /*
@@ -832,13 +832,7 @@ public class JpaConfig {
 
 	@Lazy
 	@Bean
-	public NicknameSvc nicknameSvc() {
-		return new NicknameSvc();
-	}
-
-	@Lazy
-	@Bean
-	public NicknameInterceptor nicknameInterceptor(NicknameSvc theNicknameSvc) {
-		return new NicknameInterceptor(theNicknameSvc);
+	public NicknameInterceptor nicknameInterceptor() throws IOException {
+		return new NicknameInterceptor();
 	}
 }

@@ -4,27 +4,21 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.StringParam;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
+import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class NicknameInterceptorTest {
-	@Mock
-	NicknameSvc myNicknameSvc;
-
 	@Test
-	public void testExpandForward() {
+	public void testExpandForward() throws IOException {
 		// setup
 		String formalName = "kenneth";
-		when(myNicknameSvc.getNicknamesFromFormalNameOrNull(formalName)).thenReturn(List.of("ken","kenny","kendrick"));
 		SearchParameterMap sp = new SearchParameterMap();
 		sp.add("name", new StringParam(formalName).setNicknameExpand(true));
-		NicknameInterceptor svc = new NicknameInterceptor(myNicknameSvc);
+		NicknameInterceptor svc = new NicknameInterceptor();
 
 		// execute
 		svc.expandNicknames(sp);
@@ -35,14 +29,12 @@ class NicknameInterceptorTest {
 	}
 
 	@Test
-	public void testExpandBackward() {
+	public void testExpandBackward() throws IOException {
 		// setup
 		String nickname = "ken";
-		when(myNicknameSvc.getNicknamesFromFormalNameOrNull(nickname)).thenReturn(null);
-		when(myNicknameSvc.getFormalNamesFromNicknameOrNull(nickname)).thenReturn(List.of("kendall", "kendrick", "kendrik", "kenneth", "kenny", "kent"));
 		SearchParameterMap sp = new SearchParameterMap();
 		sp.add("name", new StringParam(nickname).setNicknameExpand(true));
-		NicknameInterceptor svc = new NicknameInterceptor(myNicknameSvc);
+		NicknameInterceptor svc = new NicknameInterceptor();
 
 		// execute
 		svc.expandNicknames(sp);
@@ -53,14 +45,12 @@ class NicknameInterceptorTest {
 	}
 
 	@Test
-	public void testNothingToExpand() {
+	public void testNothingToExpand() throws IOException {
 		// setup
 		String unusualName = "X Æ A-12";
-		when(myNicknameSvc.getNicknamesFromFormalNameOrNull(unusualName)).thenReturn(null);
-		when(myNicknameSvc.getFormalNamesFromNicknameOrNull(unusualName)).thenReturn(null);
 		SearchParameterMap sp = new SearchParameterMap();
 		sp.add("name", new StringParam(unusualName).setNicknameExpand(true));
-		NicknameInterceptor svc = new NicknameInterceptor(myNicknameSvc);
+		NicknameInterceptor svc = new NicknameInterceptor();
 
 		// execute
 		svc.expandNicknames(sp);

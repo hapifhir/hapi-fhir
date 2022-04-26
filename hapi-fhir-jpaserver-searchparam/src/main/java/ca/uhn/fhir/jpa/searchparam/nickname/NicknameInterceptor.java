@@ -8,6 +8,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -17,8 +18,8 @@ public class NicknameInterceptor {
 
 	private final NicknameSvc myNicknameSvc;
 
-	public NicknameInterceptor(NicknameSvc theNicknameSvc) {
-		myNicknameSvc = theNicknameSvc;
+	public NicknameInterceptor() throws IOException {
+		myNicknameSvc = new NicknameSvc();
 	}
 
 	@Hook(Pointcut.STORAGE_PRESEARCH_REGISTERED)
@@ -46,10 +47,7 @@ public class NicknameInterceptor {
 					ourLog.debug("Found a nickname parameter to expand: {}", stringParam);
 					//First, attempt to expand as a formal name
 					String name = stringParam.getValue();
-					List<String> expansions = myNicknameSvc.getNicknamesFromFormalNameOrNull(name);
-					if (expansions == null) {
-						expansions = myNicknameSvc.getFormalNamesFromNicknameOrNull(name);
-					}
+					List<String> expansions = myNicknameSvc.getEquivalentNames(name);
 					if (expansions == null) {
 						continue;
 					}

@@ -40,6 +40,7 @@ public enum MdmMatcherEnum {
 	NYSIIS(new HapiStringMatcher(new PhoneticEncoderMatcher(PhoneticEncoderEnum.NYSIIS))),
 	REFINED_SOUNDEX(new HapiStringMatcher(new PhoneticEncoderMatcher(PhoneticEncoderEnum.REFINED_SOUNDEX))),
 	SOUNDEX(new HapiStringMatcher(new PhoneticEncoderMatcher(PhoneticEncoderEnum.SOUNDEX))),
+	NICKNAME(new HapiStringMatcher(new NicknameMatcher())),
 
 	STRING(new HapiStringMatcher()),
 	SUBSTRING(new HapiStringMatcher(new SubstringStringMatcher())),
