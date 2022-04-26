@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
-import ca.uhn.fhir.mdm.rules.json.MdmResourceSearchParamJson;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmCandidateSearchCriteriaBuilderSvc;
+import ca.uhn.fhir.mdm.rules.json.MdmResourceSearchParamJson;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
@@ -42,6 +42,11 @@ public class MdmCandidateSearchCriteriaBuilderSvcTest extends BaseMdmR4Test {
 		Optional<String> result = myMdmCandidateSearchCriteriaBuilderSvc.buildResourceQueryString("Patient", patient, Collections.emptyList(), searchParamJson);
 		assertTrue(result.isPresent());
 		assertEquals("Patient?family=Fernandez", result.get());
+	}
+
+	@Test
+	public void testNickname() {
+
 	}
 
 	@Test

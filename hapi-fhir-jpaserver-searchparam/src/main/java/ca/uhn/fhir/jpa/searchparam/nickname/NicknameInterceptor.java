@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class NicknameInterceptor {
@@ -40,13 +41,15 @@ public class NicknameInterceptor {
 	 */
 	private void expandAnyNicknameParameters(String theParamName, List<IQueryParameterType> orList) {
 		List<IQueryParameterType> toAdd = new ArrayList<>();
+		List<IQueryParameterType> toRemove = new ArrayList<>();
 		for (IQueryParameterType iQueryParameterType : orList) {
 			if (iQueryParameterType instanceof StringParam) {
 				StringParam stringParam = (StringParam) iQueryParameterType;
 				if (stringParam.isNicknameExpand()) {
 					ourLog.debug("Found a nickname parameter to expand: {}", stringParam);
+					toRemove.add(stringParam);
 					//First, attempt to expand as a formal name
-					String name = stringParam.getValue();
+					String name = stringParam.getValue().toLowerCase(Locale.ROOT);
 					List<String> expansions = myNicknameSvc.getEquivalentNames(name);
 					if (expansions == null) {
 						continue;
@@ -58,7 +61,7 @@ public class NicknameInterceptor {
 				}
 			}
 		}
-
+		orList.removeAll(toRemove);
 		orList.addAll(toAdd);
 	}
 }
