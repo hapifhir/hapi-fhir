@@ -23,12 +23,10 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
 import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteOptions;
-import ca.uhn.fhir.jpa.search.builder.FreetextQueryIteratorScrollAdapter;
 import ca.uhn.fhir.jpa.search.builder.ISearchQueryExecutor;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
-import org.hibernate.search.engine.search.query.SearchScroll;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Collection;
@@ -46,9 +44,6 @@ public interface IFulltextSearchSvc {
 	 * @return the pid list for the matchign resources.
 	 */
 	List<ResourcePersistentId> search(String theResourceName, SearchParameterMap theParams);
-
-	SearchScroll<Long> searchForScroll(
-		String theResourceType, SearchParameterMap theParams, ResourcePersistentId theReferencingPid);
 
 
 	/**

@@ -309,10 +309,10 @@ public class SearchBuilder implements ISearchBuilder {
 		assert theRequestPartitionId != null;
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
-		if (checkUseHibernateSearch()) {
-			return new FreetextQueryIteratorScrollAdapter(
-				myFulltextSearchSvc.searchForScroll(theRequest.getResourceName(), theParams.clone(), null));
-		}
+//		if (checkUseHibernateSearch()) {
+//			return new FreetextQueryIteratorScrollAdapter(
+//				myFulltextSearchSvc.searchForScroll(theRequest.getResourceName(), theParams.clone(), null));
+//		}
 
 		init(theParams, theSearchRuntimeDetails.getSearchUuid(), theRequestPartitionId);
 

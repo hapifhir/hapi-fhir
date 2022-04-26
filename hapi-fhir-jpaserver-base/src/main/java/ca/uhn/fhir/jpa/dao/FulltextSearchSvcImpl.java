@@ -139,14 +139,6 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		return new SearchScrollQueryExecutorAdaptor(esResult);
 	}
 
-	@Override
-	public SearchScroll<Long> searchForScroll(
-		String theResourceType, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
-
-		return getSearchScroll(theResourceType, theParams, theReferencingPid);
-	}
-
-
 	private SearchScroll<Long> getSearchScroll(String theResourceType, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
 		int scrollSize = 50;
 		if (theParams.getCount()!=null) {
@@ -343,6 +335,6 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		SearchQueryOptionsStep<?, Long, SearchLoadingOptionsStep, ?, ?> queryOptionsStep =
 			getSearchQueryOptionsStep(theResourceName, theParams, null);
 
-		return queryOptionsStep.fetch(0).total().hitCount();
+		return queryOptionsStep.fetchTotalHitCount();
 	}
 }
