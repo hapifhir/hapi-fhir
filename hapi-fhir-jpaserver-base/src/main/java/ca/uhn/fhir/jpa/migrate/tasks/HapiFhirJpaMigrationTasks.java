@@ -288,17 +288,29 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version
 			.onTable("HFJ_BLK_EXPORT_JOB").modifyColumn("20220423.1", "EXP_TIME").nullable().withType(ColumnTypeEnum.DATE_TIMESTAMP);
 
-		// New Index on HFJ_RESOURCE for $reindex Operation - hapi-fhir #3534
+		// New Indexes on HFJ_RESOURCE for $reindex Operation - hapi-fhir #3534
 		{
 			version.onTable("HFJ_RESOURCE")
 				.addIndex("20220425.1", "IDX_RES_TYPE_DEL_UPDATED")
 				.unique(false)
+				.online(true)
 				.withColumns("RES_TYPE", "RES_DELETED_AT", "RES_UPDATED", "PARTITION_ID", "RES_ID");
 
 			// Drop existing Index on HFJ_RESOURCE.RES_TYPE since the new Index will meet the overall Index Demand
 			version
 				.onTable("HFJ_RESOURCE")
-				.dropIndex("20220425.2", "IDX_RES_TYPE");
+				.dropIndexOnline("20220425.2", "IDX_RES_TYPE");
+
+			version.onTable("HFJ_RESOURCE")
+				.addIndex("20220425.3", "IDX_RES_UPDATED_V2")
+				.unique(false)
+				.online(true)
+				.withColumns("RES_UPDATED", "RES_ID", "PARTITION_ID");
+
+			// Drop existing Index on HFJ_RESOURCE.RES_UPDATED since the new Index will meet the overall Index Demand
+			version
+				.onTable("HFJ_RESOURCE")
+				.dropIndexOnline("20220425.4", "IDX_RES_DATE");
 		}
 	}
 
