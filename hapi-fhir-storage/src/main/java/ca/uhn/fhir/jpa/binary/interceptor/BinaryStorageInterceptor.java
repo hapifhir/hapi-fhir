@@ -76,22 +76,23 @@ public class BinaryStorageInterceptor {
 	private BinaryAccessProvider myBinaryAccessProvider;
 	private Class<? extends IPrimitiveType<byte[]>> myBinaryType;
 	private String myDeferredListKey;
-	private long myAutoDeExternalizeMaximumBytes = 10 * FileUtils.ONE_MB;
+	private long myAutoInflateBinariesMaximumBytes = 10 * FileUtils.ONE_MB;
+	private boolean myAllowAutoInflateBinaries = true;
 
 	/**
 	 * Any externalized binaries will be rehydrated if their size is below this thhreshold when
 	 * reading the resource back. Default is 10MB.
 	 */
-	public long getAutoDeExternalizeMaximumBytes() {
-		return myAutoDeExternalizeMaximumBytes;
+	public long getAutoInflateBinariesMaximumSize() {
+		return myAutoInflateBinariesMaximumBytes;
 	}
 
 	/**
 	 * Any externalized binaries will be rehydrated if their size is below this thhreshold when
 	 * reading the resource back. Default is 10MB.
 	 */
-	public void setAutoDeExternalizeMaximumBytes(long theAutoDeExternalizeMaximumBytes) {
-		myAutoDeExternalizeMaximumBytes = theAutoDeExternalizeMaximumBytes;
+	public void setAutoInflateBinariesMaximumSize(long theAutoInflateBinariesMaximumBytes) {
+		myAutoInflateBinariesMaximumBytes = theAutoInflateBinariesMaximumBytes;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -248,6 +249,10 @@ public class BinaryStorageInterceptor {
 
 	@Hook(Pointcut.STORAGE_PRESHOW_RESOURCES)
 	public void preShow(IPreResourceShowDetails theDetails) throws IOException {
+		if (!isAllowAutoInflateBinaries()) {
+			return;
+		}
+
 		long unmarshalledByteCount = 0;
 
 		for (IBaseResource nextResource : theDetails) {
@@ -265,7 +270,7 @@ public class BinaryStorageInterceptor {
 						throw new InvalidRequestException(Msg.code(1330) + msg);
 					}
 
-					if ((unmarshalledByteCount + blobDetails.getBytes()) < myAutoDeExternalizeMaximumBytes) {
+					if ((unmarshalledByteCount + blobDetails.getBytes()) < myAutoInflateBinariesMaximumBytes) {
 
 						byte[] bytes = myBinaryStorageSvc.fetchBlob(resourceId, attachmentId.get());
 						nextTarget.setData(bytes);
@@ -293,6 +298,14 @@ public class BinaryStorageInterceptor {
 			}
 		});
 		return binaryTargets;
+	}
+
+	public void setAllowAutoInflateBinaries(boolean theAllowAutoInflateBinaries) {
+		myAllowAutoInflateBinaries = theAllowAutoInflateBinaries;
+	}
+
+	public boolean isAllowAutoInflateBinaries() {
+		return myAllowAutoInflateBinaries;
 	}
 
 	private static class DeferredBinaryTarget {

@@ -283,6 +283,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.addColumn("20220416.1", "CUR_GATED_STEP_ID")
 			.nullable()
 			.type(ColumnTypeEnum.STRING, 100);
+
+		//Make Job expiry nullable so that we can prevent job expiry by using a null value.
+		version
+			.onTable("HFJ_BLK_EXPORT_JOB").modifyColumn("20220423.1", "EXP_TIME").nullable().withType(ColumnTypeEnum.DATE_TIMESTAMP);
+
 	}
 
 	/**

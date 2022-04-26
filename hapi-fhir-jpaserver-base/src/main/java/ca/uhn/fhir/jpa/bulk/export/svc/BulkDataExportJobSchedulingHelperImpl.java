@@ -150,7 +150,7 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 
 		Optional<BulkExportJobEntity> jobToDelete = myTxTemplate.execute(t -> {
 			Pageable page = PageRequest.of(0, 1);
-			Slice<BulkExportJobEntity> submittedJobs = myBulkExportJobDao.findByExpiry(page, new Date());
+			Slice<BulkExportJobEntity> submittedJobs = myBulkExportJobDao.findNotRunningByExpiry(page, new Date());
 			if (submittedJobs.isEmpty()) {
 				return Optional.empty();
 			}
