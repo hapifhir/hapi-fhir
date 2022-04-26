@@ -1524,26 +1524,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			assertEquals(3, resultBundle.size());
 		}
 
-
-		/**
-		 *
-		 */
-		@Test
-		public void totalNoneReturnsTotal() {
-			myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-1")));
-
-			IBundleProvider resultBundle = myTestDaoSearch.searchForBundleProvider("Observation?_total=" + SearchTotalModeEnum.NONE);
-
-			boolean thrown = false;
-			try {
-				resultBundle.sizeOrThrowNpe();
-			} catch (NullPointerException theE) {
-				thrown = true;
-			}
-			assertFalse(thrown);
-		}
-
-
 	}
 
 

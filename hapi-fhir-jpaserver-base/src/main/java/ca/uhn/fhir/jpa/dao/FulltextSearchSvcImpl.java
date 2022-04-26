@@ -135,14 +135,25 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	private ISearchQueryExecutor doSearch(String theResourceType, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
 		// keep this in sync with supportsSomeOf();
 
+		SearchScroll<Long> esResult = getSearchScroll(theResourceType, theParams, theReferencingPid);
+		return new SearchScrollQueryExecutorAdaptor(esResult);
+	}
+
+	@Override
+	public SearchScroll<Long> searchForScroll(
+		String theResourceType, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
+
+		return getSearchScroll(theResourceType, theParams, theReferencingPid);
+	}
+
+
+	private SearchScroll<Long> getSearchScroll(String theResourceType, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
 		int scrollSize = 50;
 		if (theParams.getCount()!=null) {
 			scrollSize = theParams.getCount();
 		}
 
-		SearchScroll<Long> esResult = getSearchQueryOptionsStep(theResourceType, theParams, theReferencingPid).scroll(scrollSize);
-
-		return new SearchScrollQueryExecutorAdaptor(esResult);
+		return getSearchQueryOptionsStep(theResourceType, theParams, theReferencingPid).scroll(scrollSize);
 	}
 
 

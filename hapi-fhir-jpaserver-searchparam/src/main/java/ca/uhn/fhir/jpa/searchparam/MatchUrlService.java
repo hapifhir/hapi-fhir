@@ -120,8 +120,7 @@ public class MatchUrlService {
 					try {
 						paramMap.setSearchTotalMode(SearchTotalModeEnum.valueOf(totalModeEnumStr));
 					} catch (IllegalArgumentException e) {
-//						fixme jm: new code
-						throw new InvalidRequestException(Msg.code(0) + "Invalid " + Constants.PARAM_SEARCH_TOTAL_MODE + " value: " + totalModeEnumStr);
+						throw new InvalidRequestException(Msg.code(2077) + "Invalid " + Constants.PARAM_SEARCH_TOTAL_MODE + " value: " + totalModeEnumStr);
 					}
 				}
 			} else if (Constants.PARAM_OFFSET.equals(nextParamName)) {

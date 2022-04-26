@@ -75,6 +75,7 @@ import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
+import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
@@ -271,7 +272,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 	@SuppressWarnings("ConstantConditions")
 	@Override
-	public Iterator<Long> createCountQuery(String theResourceType, SearchParameterMap theParams, String theSearchUuid,
+	public Iterator<Long> createCountQuery(SearchParameterMap theParams, String theSearchUuid,
 				RequestDetails theRequest, @Nonnull RequestPartitionId theRequestPartitionId) {
 
 		assert theRequestPartitionId != null;
@@ -280,7 +281,8 @@ public class SearchBuilder implements ISearchBuilder {
 		init(theParams, theSearchUuid, theRequestPartitionId);
 
 		if (checkUseHibernateSearch()) {
-			long count = myFulltextSearchSvc.count(theResourceType, theParams);
+			long count = theParams.getSearchTotalMode() == SearchTotalModeEnum.NONE
+				? 0L : myFulltextSearchSvc.count(theRequest.getResourceName(), theParams.clone());
 			return Collections.singletonList(count).iterator();
 		}
 
@@ -307,6 +309,11 @@ public class SearchBuilder implements ISearchBuilder {
 		assert theRequestPartitionId != null;
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
+		if (checkUseHibernateSearch()) {
+			return new FreetextQueryIteratorScrollAdapter(
+				myFulltextSearchSvc.searchForScroll(theRequest.getResourceName(), theParams.clone(), null));
+		}
+
 		init(theParams, theSearchRuntimeDetails.getSearchUuid(), theRequestPartitionId);
 
 		if (myPidSet == null) {
@@ -315,6 +322,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 		return new QueryIterator(theSearchRuntimeDetails, theRequest);
 	}
+
 
 	private void init(SearchParameterMap theParams, String theSearchUuid, RequestPartitionId theRequestPartitionId) {
 		myCriteriaBuilder = myEntityManager.getCriteriaBuilder();
@@ -342,7 +350,6 @@ public class SearchBuilder implements ISearchBuilder {
 				fulltextMatchIds = queryHibernateSearchForEverythingPids();
 				resultCount = fulltextMatchIds.size();
 			} else {
-				// fixme add a branch here ,and if theCountOnlyFlag is set, run a count query.
 				fulltextExecutor = myFulltextSearchSvc.searchAsync(myResourceName, myParams);
 			}
 
@@ -416,7 +423,7 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		// TODO MB someday we'll want a query planner to figure out if we _should_ or _must_ use the ft index, not just if we can.
-		return fulltextEnabled &&
+		return fulltextEnabled && myParams != null &&
 			myParams.getSearchContainedMode() == SearchContainedModeEnum.FALSE &&
 			myFulltextSearchSvc.supportsSomeOf(myParams);
 	}

@@ -311,7 +311,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		return new ResourceGoneException(msg);
 	}
 
-	// fixme main entry point for search
 	@Override
 	public IBundleProvider registerSearch(final IFhirResourceDao<?> theCallingDao, final SearchParameterMap theParams, String theResourceType, CacheControlDirective theCacheControlDirective, RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId) {
 		final String searchUuid = UUID.randomUUID().toString();
@@ -339,7 +338,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		final Integer loadSynchronousUpTo = getLoadSynchronousUpToOrNull(theCacheControlDirective);
 		boolean isOffsetQuery = theParams.isOffsetQuery();
 
-		// fixme synchronous path
 		if (theParams.isLoadSynchronous() || loadSynchronousUpTo != null || isOffsetQuery) {
 			ourLog.debug("Search {} is loading in synchronous mode", searchUuid);
 			return executeQuery(theResourceType, theParams, theRequestDetails, searchUuid, sb, loadSynchronousUpTo, theRequestPartitionId);
@@ -360,14 +358,12 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					PersistedJpaBundleProvider foundSearchProvider = findCachedQuery(theParams, theResourceType, theRequestDetails, queryString, theRequestPartitionId);
 					if (foundSearchProvider != null) {
 						foundSearchProvider.setCacheStatus(SearchCacheStatusEnum.HIT);
-						// fixme cached result path
 						return foundSearchProvider;
 					}
 				}
 			}
 		}
 
-		// fixme fresh cached query path (aka async path, but it is syncronous now)
 		PersistedJpaSearchFirstPageBundleProvider retVal = submitSearch(theCallingDao, theParams, theResourceType, theRequestDetails, searchUuid, sb, queryString, theRequestPartitionId, search);
 		retVal.setCacheStatus(cacheStatus);
 		return retVal;
@@ -513,12 +509,10 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	}
 
 
-	// fixme synchronous path
 	private IBundleProvider executeQuery(String theResourceType, SearchParameterMap theParams, RequestDetails theRequestDetails, String theSearchUuid, ISearchBuilder theSb, Integer theLoadSynchronousUpTo, RequestPartitionId theRequestPartitionId) {
 		SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(theRequestDetails, theSearchUuid);
 		searchRuntimeDetails.setLoadSynchronous(true);
 
-		// fixme _summary=count
 		boolean wantOnlyCount = isWantOnlyCount(theParams);
 		boolean wantCount = isWantCount(theParams, wantOnlyCount);
 
@@ -540,7 +534,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				List<List<IQueryParameterType>> contentAndTerms = theParams.get(Constants.PARAM_CONTENT);
 				List<List<IQueryParameterType>> textAndTerms = theParams.get(Constants.PARAM_TEXT);
 
-				Iterator<Long> countIterator = theSb.createCountQuery(theResourceType, theParams, theSearchUuid, theRequestDetails, theRequestPartitionId);
+				Iterator<Long> countIterator = theSb.createCountQuery(theParams, theSearchUuid, theRequestDetails, theRequestPartitionId);
 
 				if (contentAndTerms != null) theParams.put(Constants.PARAM_CONTENT, contentAndTerms);
 				if (textAndTerms != null) theParams.put(Constants.PARAM_TEXT, textAndTerms);
@@ -1213,7 +1207,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			}
 		}
 
-		// fixme meat of async search path
 		/**
 		 * This method actually creates the database query to perform the
 		 * search, and starts it.
@@ -1241,8 +1234,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				 * we will have to clone those parameters here so that
 				 * the "correct" params are used in createQuery below
 				 */
-				Iterator<Long> countIterator = sb.createCountQuery(
-					mySearch.getResourceType(), myParams.clone(), mySearch.getUuid(), myRequest, myRequestPartitionId);
+				Iterator<Long> countIterator = sb.createCountQuery(myParams.clone(), mySearch.getUuid(), myRequest, myRequestPartitionId);
 				Long count = countIterator.hasNext() ? countIterator.next() : 0L;
 				ourLog.trace("Got count {}", count);
 
