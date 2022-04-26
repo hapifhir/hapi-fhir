@@ -3,14 +3,11 @@ package ca.uhn.fhir.jpa.searchparam.nickname;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.StringParam;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@ExtendWith(MockitoExtension.class)
 class NicknameInterceptorTest {
 	@Test
 	public void testExpandForward() throws IOException {
@@ -41,7 +38,7 @@ class NicknameInterceptorTest {
 
 		// verify
 		String newSearch = sp.toNormalizedQueryString(null);
-		assertEquals("?name=ken,kendall,kendrick,kendrik,kenneth,kenny,kent", newSearch);
+		assertEquals("?name=ken,kendall,kendrick,kendrik,kenneth,kenny,kent,mckenna", newSearch);
 	}
 
 	@Test
@@ -57,6 +54,6 @@ class NicknameInterceptorTest {
 
 		// verify
 		String newSearch = sp.toNormalizedQueryString(null);
-		assertEquals("?name=X%20%C3%86%20A-12", newSearch);
+		assertEquals("?name=x%20%C3%A6%20a-12", newSearch);
 	}
 }
