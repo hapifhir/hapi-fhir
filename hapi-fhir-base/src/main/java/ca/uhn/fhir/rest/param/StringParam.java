@@ -105,8 +105,7 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 				myNicknameExpand = true;
 				theQualifier = "";
 			} else {
-				// FIXME KHS test
-				throw new InvalidRequestException("Modifier " + Constants.PARAMQUALIFIER_NICKNAME + " may only be used with 'name' and 'given' search parameter");
+				throw new InvalidRequestException("Modifier " + Constants.PARAMQUALIFIER_NICKNAME + " may only be used with 'name' and 'given' search parameters");
 			}
 		}
 
