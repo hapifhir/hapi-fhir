@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.param;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.api.Constants;
@@ -105,7 +106,7 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 				myNicknameExpand = true;
 				theQualifier = "";
 			} else {
-				throw new InvalidRequestException("Modifier " + Constants.PARAMQUALIFIER_NICKNAME + " may only be used with 'name' and 'given' search parameters");
+				throw new InvalidRequestException(Msg.code(2077) + "Modifier " + Constants.PARAMQUALIFIER_NICKNAME + " may only be used with 'name' and 'given' search parameters");
 			}
 		}
 
