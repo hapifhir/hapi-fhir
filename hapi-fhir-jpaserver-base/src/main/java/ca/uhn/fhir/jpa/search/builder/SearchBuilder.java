@@ -369,8 +369,6 @@ public class SearchBuilder implements ISearchBuilder {
 				!fulltextExecutor.hasNext() ||
 					// Our hibernate search query doesn't respect partitions yet
 					(!myPartitionSettings.isPartitioningEnabled() &&
-						// we don't support _count=0 yet.
-						!theCountOnlyFlag &&
 					// were there AND terms left?  Then we still need the db.
 						theParams.isEmpty() &&
 						// not every param is a param. :-(
