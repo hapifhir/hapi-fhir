@@ -98,6 +98,7 @@ import com.google.common.collect.Streams;
 import com.healthmarketscience.sqlbuilder.Condition;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.jena.sparql.engine.QueryIterator;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -120,6 +121,7 @@ import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -272,7 +274,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 	@SuppressWarnings("ConstantConditions")
 	@Override
-	public Iterator<Long> createCountQuery(SearchParameterMap theParams, String theSearchUuid,
+	public Long createCountQuery(SearchParameterMap theParams, String theSearchUuid,
 				RequestDetails theRequest, @Nonnull RequestPartitionId theRequestPartitionId) {
 
 		assert theRequestPartitionId != null;
@@ -281,17 +283,15 @@ public class SearchBuilder implements ISearchBuilder {
 		init(theParams, theSearchUuid, theRequestPartitionId);
 
 		if (checkUseHibernateSearch()) {
-			long count = theParams.getSearchTotalMode() == SearchTotalModeEnum.NONE
-				? 0L : myFulltextSearchSvc.count(theRequest.getResourceName(), theParams.clone());
-			return Collections.singletonList(count).iterator();
+			long count = myFulltextSearchSvc.count(theRequest.getResourceName(), theParams.clone());
+			return count;
 		}
 
-		List<ISearchQueryExecutor> queries = createQuery(myParams, null, null, null, true, theRequest, null);
+		List<ISearchQueryExecutor> queries = createQuery(theParams.clone(), null, null, null, true, theRequest, null);
 		if (queries.isEmpty()) {
-			return Collections.emptyIterator();
-		}
-		try (ISearchQueryExecutor queryExecutor = queries.get(0)) {
-			return Lists.newArrayList(queryExecutor.next()).iterator();
+			return 0L;
+		} else {
+			return queries.get(0).next();
 		}
 	}
 
