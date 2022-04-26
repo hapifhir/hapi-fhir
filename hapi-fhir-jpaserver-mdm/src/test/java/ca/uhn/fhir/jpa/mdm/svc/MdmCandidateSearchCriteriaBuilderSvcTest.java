@@ -45,11 +45,6 @@ public class MdmCandidateSearchCriteriaBuilderSvcTest extends BaseMdmR4Test {
 	}
 
 	@Test
-	public void testNickname() {
-
-	}
-
-	@Test
 	public void testComplexCase() {
 		Patient patient = new Patient();
 		HumanName humanName = patient.addName();
