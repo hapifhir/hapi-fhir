@@ -74,7 +74,7 @@ import java.util.stream.Collectors;
 @Entity
 @Table(name = "HFJ_RESOURCE", uniqueConstraints = {}, indexes = {
 	// Do not reuse previously used index name: IDX_INDEXSTATUS, IDX_RES_TYPE
-	@Index(name = "IDX_RES_UPDATED_V2", columnList = "RES_UPDATED,RES_ID,PARTITION_ID"),
+	@Index(name = "IDX_RES_DATE", columnList = "RES_UPDATED"),
 	@Index(name = "IDX_RES_TYPE_DEL_UPDATED", columnList = "RES_TYPE,RES_DELETED_AT,RES_UPDATED,PARTITION_ID,RES_ID"),
 })
 @NamedEntityGraph(name = "Resource.noJoins")
