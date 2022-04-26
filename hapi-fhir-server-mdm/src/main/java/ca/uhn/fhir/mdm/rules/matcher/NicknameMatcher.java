@@ -1,6 +1,7 @@
 package ca.uhn.fhir.mdm.rules.matcher;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.searchparam.nickname.NicknameSvc;
 
 import java.io.IOException;
@@ -14,7 +15,7 @@ public class NicknameMatcher implements IMdmStringMatcher {
 		try {
 			myNicknameSvc = new NicknameSvc();
 		} catch (IOException e) {
-			throw new ConfigurationException("Unable to load nicknames", e);
+			throw new ConfigurationException(Msg.code(2078) + "Unable to load nicknames", e);
 		}
 	}
 
