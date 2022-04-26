@@ -393,43 +393,43 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		assertThat(response.getEntry(), hasSize(2));
 	}
 
-	@Test
-	public void testBulkExportForDifferentPartitions() throws IOException {
-		setBulkDataExportProvider();
-		testBulkExport(TENANT_A);
-		testBulkExport(TENANT_B);
-		testBulkExport(JpaConstants.DEFAULT_PARTITION_NAME);
-	}
+//	@Test
+//	public void testBulkExportForDifferentPartitions() throws IOException {
+//		setBulkDataExportProvider();
+//		testBulkExport(TENANT_A);
+//		testBulkExport(TENANT_B);
+//		testBulkExport(JpaConstants.DEFAULT_PARTITION_NAME);
+//	}
 
-	private void testBulkExport(String createInPartition) throws IOException {
-		// Create a patient
-		IBaseResource patientA = buildPatient(withActiveTrue());
-		SystemRequestDetails requestDetails = new SystemRequestDetails();
-		requestDetails.setTenantId(createInPartition);
-		myPatientDao.create((Patient) patientA, requestDetails);
-
-		// Create a bulk job
-		BulkDataExportOptions options = new BulkDataExportOptions();
-		options.setResourceTypes(Sets.newHashSet("Patient"));
-		options.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
-
-		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(options, false, requestDetails);
-		assertNotNull(jobDetails.getJobId());
-
-		// Run a scheduled pass to build the export and wait for completion
-		myBulkDataExportJobSchedulingHelper.startSubmittedJobs();
-		myBatchJobHelper.awaitAllBulkJobCompletions(
-			BatchConstants.BULK_EXPORT_JOB_NAME
-		);
-
-		//perform export-poll-status
-		HttpGet get = new HttpGet(buildExportUrl(createInPartition, jobDetails.getJobId()));
-		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
-			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			BulkExportResponseJson responseJson = JsonUtil.deserialize(responseString, BulkExportResponseJson.class);
-			assertThat(responseJson.getOutput().get(0).getUrl(), containsString(JpaConstants.DEFAULT_PARTITION_NAME + "/Binary/"));
-		}
-	}
+//	private void testBulkExport(String createInPartition) throws IOException {
+//		// Create a patient
+//		IBaseResource patientA = buildPatient(withActiveTrue());
+//		SystemRequestDetails requestDetails = new SystemRequestDetails();
+//		requestDetails.setTenantId(createInPartition);
+//		myPatientDao.create((Patient) patientA, requestDetails);
+//
+//		// Create a bulk job
+//		BulkDataExportOptions options = new BulkDataExportOptions();
+//		options.setResourceTypes(Sets.newHashSet("Patient"));
+//		options.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
+//
+//		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(options, false, requestDetails);
+//		assertNotNull(jobDetails.getJobId());
+//
+//		// Run a scheduled pass to build the export and wait for completion
+//		myBulkDataExportJobSchedulingHelper.startSubmittedJobs();
+//		myBatchJobHelper.awaitAllBulkJobCompletions(
+//			BatchConstants.BULK_EXPORT_JOB_NAME
+//		);
+//
+//		//perform export-poll-status
+//		HttpGet get = new HttpGet(buildExportUrl(createInPartition, jobDetails.getJobId()));
+//		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
+//			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+//			BulkExportResponseJson responseJson = JsonUtil.deserialize(responseString, BulkExportResponseJson.class);
+//			assertThat(responseJson.getOutput().get(0).getUrl(), containsString(JpaConstants.DEFAULT_PARTITION_NAME + "/Binary/"));
+//		}
+//	}
 
 	private void setBulkDataExportProvider() {
 		BulkDataExportProvider provider = new BulkDataExportProvider();

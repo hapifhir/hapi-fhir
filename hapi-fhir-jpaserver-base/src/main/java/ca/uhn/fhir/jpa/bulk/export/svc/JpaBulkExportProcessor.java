@@ -43,6 +43,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -192,6 +193,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 		return searchParam;
 	}
 
+	@Transactional
 	@Override
 	public BulkExportJobInfo getJobInfo(String theJobId) {
 		Optional<BulkExportJobEntity> jobOp = myBulkExportJobDao.findByJobId(theJobId);

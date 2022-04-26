@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.api.model;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -84,6 +85,9 @@ public class BulkExportParameters extends RunJobParameters {
 	}
 
 	public List<String> getFilters() {
+		if (myFilters == null) {
+			myFilters = new ArrayList<>();
+		}
 		return myFilters;
 	}
 

@@ -67,8 +67,6 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJobSchedulingHelper {
 	private static final Logger ourLog = getLogger(BulkDataExportJobSchedulingHelperImpl.class);
 
-	private static final Long READ_CHUNK_SIZE = 10L;
-
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
@@ -87,18 +85,6 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 
 	@Autowired
 	private ISchedulerService mySchedulerService;
-
-	@Autowired
-	@Qualifier(BatchConstants.BULK_EXPORT_JOB_NAME)
-	private org.springframework.batch.core.Job myBulkExportJob;
-
-	@Autowired
-	@Qualifier(BatchConstants.GROUP_BULK_EXPORT_JOB_NAME)
-	private org.springframework.batch.core.Job myGroupBulkExportJob;
-
-	@Autowired
-	@Qualifier(BatchConstants.PATIENT_BULK_EXPORT_JOB_NAME)
-	private org.springframework.batch.core.Job myPatientBulkExportJob;
 
 	@Autowired
 	private IBulkExportJobDao myBulkExportJobDao;

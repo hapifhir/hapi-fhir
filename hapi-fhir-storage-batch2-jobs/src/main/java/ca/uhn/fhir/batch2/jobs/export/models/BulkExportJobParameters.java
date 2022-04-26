@@ -105,7 +105,7 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 
 	public static BulkExportJobParameters createFromExportJobParameters(BulkExportParameters theParameters) {
 		BulkExportJobParameters params = new BulkExportJobParameters();
-		params.setResourceTypes(params.getResourceTypes());
+		params.setResourceTypes(theParameters.getResourceTypes());
 		params.setExportStyle(theParameters.getExportStyle());
 		params.setFilters(theParameters.getFilters());
 		params.setGroupId(theParameters.getGroupId());

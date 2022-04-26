@@ -416,7 +416,7 @@ public class BulkDataExportProviderTest {
 	public void testInitiateWithGetAndMultipleTypeFilters() throws IOException {
 		IBulkDataExportSvc.JobInfo jobInfo = new IBulkDataExportSvc.JobInfo()
 			.setJobId(A_JOB_ID);
-		when(myBulkDataExportSvc.submitJob(any())).thenReturn(jobInfo);
+		when(myBulkDataExportSvc.submitJob(any(), anyBoolean(), any())).thenReturn(jobInfo);
 
 		InstantType now = InstantType.now();
 
