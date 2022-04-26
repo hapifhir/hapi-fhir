@@ -19,7 +19,6 @@ public class NicknameMatcher implements IMdmStringMatcher {
 
 	@Override
 	public boolean matches(String theLeftString, String theRightString) {
-		// FIXME KHS test
 		List<String> leftNames = myNicknameSvc.getEquivalentNames(theLeftString);
 		return leftNames.contains(theRightString);
 	}
