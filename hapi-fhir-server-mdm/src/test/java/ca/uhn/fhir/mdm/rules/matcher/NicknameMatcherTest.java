@@ -10,12 +10,16 @@ class NicknameMatcherTest {
 
 	@Test
 	public void testMatches() {
-		assertTrue(matcher.matches("ken", "ken"));
-		assertTrue(matcher.matches("kenneth", "ken"));
-		assertTrue(matcher.matches("ken", "kenneth"));
+		assertTrue(matcher.matches("Ken", "ken"));
+		assertTrue(matcher.matches("ken", "Ken"));
+		assertTrue(matcher.matches("Ken", "Ken"));
+		assertTrue(matcher.matches("Kenneth", "Ken"));
+		assertTrue(matcher.matches("Kenneth", "Kenny"));
+		assertTrue(matcher.matches("Ken", "Kenneth"));
+		assertTrue(matcher.matches("Kenny", "Kenneth"));
 
-		assertFalse(matcher.matches("ken", "bob"));
+		assertFalse(matcher.matches("Ken", "Bob"));
 		// These aren't nickname matches.  If you want matches like these use a phonetic matcher
-		assertFalse(matcher.matches("allen", "allan"));
+		assertFalse(matcher.matches("Allen", "Allan"));
 	}
 }

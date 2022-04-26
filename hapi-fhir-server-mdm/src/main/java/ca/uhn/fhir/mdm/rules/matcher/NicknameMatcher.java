@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.searchparam.nickname.NicknameSvc;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 
 public class NicknameMatcher implements IMdmStringMatcher {
 	private final NicknameSvc myNicknameSvc;
@@ -19,7 +20,10 @@ public class NicknameMatcher implements IMdmStringMatcher {
 
 	@Override
 	public boolean matches(String theLeftString, String theRightString) {
-		List<String> leftNames = myNicknameSvc.getEquivalentNames(theLeftString);
-		return leftNames.contains(theRightString);
+		String leftString = theLeftString.toLowerCase(Locale.ROOT);
+		String rightString = theRightString.toLowerCase(Locale.ROOT);
+
+		List<String> leftNames = myNicknameSvc.getEquivalentNames(leftString);
+		return leftNames.contains(rightString);
 	}
 }
