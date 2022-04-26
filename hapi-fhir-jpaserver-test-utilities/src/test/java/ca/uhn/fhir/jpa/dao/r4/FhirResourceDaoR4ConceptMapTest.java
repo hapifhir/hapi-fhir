@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
@@ -30,6 +31,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -1139,7 +1141,9 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 
 		});
 
-		List<TranslateConceptResult> translationResults = myValidationSupport.translateConcept(new IValidationSupport.TranslateCodeRequest("http://source", "source1", "http://target")).getResults();
+		CodeableConcept sourceCodeableConcept = new CodeableConcept();
+		sourceCodeableConcept.addCoding(new Coding("http://source", "source1", null));
+		List<TranslateConceptResult> translationResults = myValidationSupport.translateConcept(new IValidationSupport.TranslateCodeRequest(Collections.unmodifiableList(sourceCodeableConcept.getCoding()), "http://target")).getResults();
 		assertThat(translationResults.toString(), translationResults, hasItem(
 			new TranslateConceptResult()
 				.setSystem("http://target")
