@@ -74,7 +74,7 @@ public class TokenParamTest {
 			param.setValueAsQueryToken(ourCtx, "family", Constants.PARAMQUALIFIER_NICKNAME, "kenny");
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Modifier :nickname may only be used with 'name' and 'given' search parameters", e.getMessage());
+			assertEquals("HAPI-2077: Modifier :nickname may only be used with 'name' and 'given' search parameters", e.getMessage());
 		}
 	}
 
