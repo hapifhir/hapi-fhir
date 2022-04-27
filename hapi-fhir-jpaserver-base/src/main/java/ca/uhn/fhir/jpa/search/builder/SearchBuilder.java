@@ -283,7 +283,7 @@ public class SearchBuilder implements ISearchBuilder {
 		init(theParams, theSearchUuid, theRequestPartitionId);
 
 		if (checkUseHibernateSearch()) {
-			long count = myFulltextSearchSvc.count(theRequest.getResourceName(), theParams.clone());
+			long count = myFulltextSearchSvc.count(myResourceName, theParams.clone());
 			return count;
 		}
 
