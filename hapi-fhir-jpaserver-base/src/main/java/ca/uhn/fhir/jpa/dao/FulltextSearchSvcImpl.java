@@ -36,6 +36,8 @@ import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
 import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteOptions;
 import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteSearch;
 import ca.uhn.fhir.jpa.search.builder.ISearchQueryExecutor;
+import ca.uhn.fhir.jpa.search.builder.SearchQueryExecutors;
+import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryExecutor;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
@@ -134,10 +136,19 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 	private ISearchQueryExecutor doSearch(String theResourceType, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
 		// keep this in sync with supportsSomeOf();
+		if (theParams.getOffset() != null && theParams.getOffset() != 0) {
+			// perform an offset search instead of a scroll one, which doesn't allow for offset
+			List<Long> queryFetchResult = getSearchQueryOptionsStep(
+				theResourceType, theParams, theReferencingPid).fetchHits(theParams.getOffset(), theParams.getCount());
+			// indicate param was already processed, otherwise queries DB to process it
+			theParams.setOffset(null);
+			return SearchQueryExecutors.from(queryFetchResult);
+		}
 
 		SearchScroll<Long> esResult = getSearchScroll(theResourceType, theParams, theReferencingPid);
 		return new SearchScrollQueryExecutorAdaptor(esResult);
 	}
+
 
 	private SearchScroll<Long> getSearchScroll(String theResourceType, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
 		int scrollSize = 50;

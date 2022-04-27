@@ -1527,6 +1527,42 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	}
 
 
+	@Nested
+	public class OffsetParameter {
+
+		@Test
+		public void offsetNoCount() {
+			myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-1")));
+			IIdType idCode2 = myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-2")));
+			IIdType idCode3 = myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-3")));
+
+			myCaptureQueriesListener.clear();
+			IBundleProvider resultBundle = myTestDaoSearch.searchForBundleProvider("Observation?code=code-1,code-2,code-3&_offset=1");
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+			assertThat(resultBundle.getAllResourceIds(), containsInAnyOrder(idCode2.getIdPart(), idCode3.getIdPart()));
+			// make also sure no extra SQL queries were executed
+			assertEquals(1, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "bundle was built with no sql");
+		}
+
+
+		@Test
+		public void offsetAndCount() {
+			myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-1")));
+			IIdType idCode2 = myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-2")));
+			myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-3")));
+
+			myCaptureQueriesListener.clear();
+			IBundleProvider resultBundle = myTestDaoSearch.searchForBundleProvider("Observation?code=code-1,code-2,code-3&_offset=1&_count=1");
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+			assertThat(resultBundle.getAllResourceIds(), containsInAnyOrder(idCode2.getIdPart()));
+			// also validate no extra SQL queries were executed
+			assertEquals(1, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "bundle was built with no sql");
+		}
+	}
+
+
 	private Consumer<IBaseResource>[] asArray(Consumer<IBaseResource> theIBaseResourceConsumer) {
 		@SuppressWarnings("unchecked")
 		Consumer<IBaseResource>[] array = (Consumer<IBaseResource>[]) new Consumer[]{theIBaseResourceConsumer};
