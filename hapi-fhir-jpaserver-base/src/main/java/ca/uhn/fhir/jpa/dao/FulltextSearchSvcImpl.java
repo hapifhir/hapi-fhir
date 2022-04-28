@@ -36,6 +36,8 @@ import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
 import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteOptions;
 import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteSearch;
 import ca.uhn.fhir.jpa.search.builder.ISearchQueryExecutor;
+import ca.uhn.fhir.jpa.search.builder.SearchQueryExecutors;
+import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryExecutor;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
@@ -47,7 +49,9 @@ import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import org.hibernate.search.backend.elasticsearch.ElasticsearchExtension;
 import org.hibernate.search.engine.search.query.SearchScroll;
+import org.hibernate.search.engine.search.query.dsl.SearchQueryOptionsStep;
 import org.hibernate.search.mapper.orm.Search;
+import org.hibernate.search.mapper.orm.search.loading.dsl.SearchLoadingOptionsStep;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hibernate.search.mapper.orm.work.SearchIndexingPlan;
 import org.hibernate.search.util.common.SearchException;
@@ -132,14 +136,34 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 	private ISearchQueryExecutor doSearch(String theResourceType, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
 		// keep this in sync with supportsSomeOf();
-		SearchSession session = getSearchSession();
+		if (theParams.getOffset() != null && theParams.getOffset() != 0) {
+			// perform an offset search instead of a scroll one, which doesn't allow for offset
+			List<Long> queryFetchResult = getSearchQueryOptionsStep(
+				theResourceType, theParams, theReferencingPid).fetchHits(theParams.getOffset(), theParams.getCount());
+			// indicate param was already processed, otherwise queries DB to process it
+			theParams.setOffset(null);
+			return SearchQueryExecutors.from(queryFetchResult);
+		}
 
+		SearchScroll<Long> esResult = getSearchScroll(theResourceType, theParams, theReferencingPid);
+		return new SearchScrollQueryExecutorAdaptor(esResult);
+	}
+
+
+	private SearchScroll<Long> getSearchScroll(String theResourceType, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
 		int scrollSize = 50;
 		if (theParams.getCount()!=null) {
 			scrollSize = theParams.getCount();
 		}
 
-		SearchScroll<Long> esResult = session.search(ResourceTable.class)
+		return getSearchQueryOptionsStep(theResourceType, theParams, theReferencingPid).scroll(scrollSize);
+	}
+
+
+	private SearchQueryOptionsStep<?, Long, SearchLoadingOptionsStep, ?, ?> getSearchQueryOptionsStep(
+			String theResourceType, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
+
+		return getSearchSession().search(ResourceTable.class)
 			// The document id is the PK which is pid.  We use this instead of _myId to avoid fetching the doc body.
 			.select(
 				// adapt the String docRef.id() to the Long that it really is.
@@ -188,10 +212,10 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 					//DROP EARLY HERE IF BOOL IS EMPTY?
 
 				})
-			).scroll(scrollSize);
-
-		return new SearchScrollQueryExecutorAdaptor(esResult);
+			);
 	}
+
+
 
 	@Nonnull
 	private SearchSession getSearchSession() {
@@ -313,5 +337,15 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		return rawResourceDataList.stream()
 			.map(p -> p.toResource(parser))
 			.collect(Collectors.toList());
+	}
+
+
+
+	@Override
+	public long count(String theResourceName, SearchParameterMap theParams) {
+		SearchQueryOptionsStep<?, Long, SearchLoadingOptionsStep, ?, ?> queryOptionsStep =
+			getSearchQueryOptionsStep(theResourceName, theParams, null);
+
+		return queryOptionsStep.fetchTotalHitCount();
 	}
 }

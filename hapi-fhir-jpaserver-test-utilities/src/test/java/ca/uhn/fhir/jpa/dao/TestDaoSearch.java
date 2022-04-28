@@ -19,6 +19,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Simplistic implementation of FHIR queries.
@@ -51,11 +52,13 @@ public class TestDaoSearch {
 		return result.getAllResources();
 	}
 
-	public List<String> searchForIds(String theQueryUrl) {
+	public List<String>  searchForIds(String theQueryUrl) {
 		// fake out the server url parsing
 		IBundleProvider result = searchForBundleProvider(theQueryUrl);
 
-		List<String> resourceIds = result.getAllResourceIds();
+		// getAllResources is not safe as size is not always set
+		List<String> resourceIds = result.getResources(0, Integer.MAX_VALUE)
+					.stream().map(resource -> resource.getIdElement().getIdPart()).collect(Collectors.toList());
 		return resourceIds;
 	}
 
