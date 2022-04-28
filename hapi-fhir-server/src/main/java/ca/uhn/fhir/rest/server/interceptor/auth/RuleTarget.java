@@ -55,17 +55,17 @@ public class RuleTarget {
 		return retval;
 	}
 
-	private String stripMdmQualifier(String key) {
-		if (key.endsWith(Constants.PARAMQUALIFIER_MDM)) {
-			key = key.split(Constants.PARAMQUALIFIER_MDM)[0];
+	private String stripMdmQualifier(String theKey) {
+		if (theKey.endsWith(Constants.PARAMQUALIFIER_MDM)) {
+			theKey = theKey.split(Constants.PARAMQUALIFIER_MDM)[0];
 		}
-		return key;
+		return theKey;
 	}
 
-	private String stripNicknameQualifier(String key) {
-		if (key.endsWith(Constants.PARAMQUALIFIER_NICKNAME)) {
-			key = key.split(Constants.PARAMQUALIFIER_NICKNAME)[0];
+	private String stripNicknameQualifier(String theKey) {
+		if (theKey.endsWith(Constants.PARAMQUALIFIER_NICKNAME)) {
+			theKey = theKey.split(Constants.PARAMQUALIFIER_NICKNAME)[0];
 		}
-		return key;
+		return theKey;
 	}
 }

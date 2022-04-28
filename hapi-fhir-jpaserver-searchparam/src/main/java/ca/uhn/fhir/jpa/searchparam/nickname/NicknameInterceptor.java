@@ -46,7 +46,7 @@ public class NicknameInterceptor {
 			if (iQueryParameterType instanceof StringParam) {
 				StringParam stringParam = (StringParam) iQueryParameterType;
 				if (stringParam.isNicknameExpand()) {
-					ourLog.debug("Found a nickname parameter to expand: {}", stringParam);
+					ourLog.debug("Found a nickname parameter to expand: {} {}", theParamName, stringParam);
 					toRemove.add(stringParam);
 					//First, attempt to expand as a formal name
 					String name = stringParam.getValue().toLowerCase(Locale.ROOT);
@@ -54,7 +54,7 @@ public class NicknameInterceptor {
 					if (expansions == null) {
 						continue;
 					}
-					ourLog.debug("Parameter has been expanded to: {}", String.join(", ", expansions));
+					ourLog.debug("Parameter has been expanded to: {} {}", theParamName, String.join(", ", expansions));
 					expansions.stream()
 						.map(StringParam::new)
 						.forEach(toAdd::add);
