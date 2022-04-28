@@ -1530,6 +1530,12 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	@Nested
 	public class OffsetParameter {
 
+		@BeforeEach
+		public void enableResourceStorage() {
+			myDaoConfig.setStoreResourceInLuceneIndex(true);
+		}
+
+
 		@Test
 		public void offsetNoCount() {
 			myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-1")));
@@ -1542,7 +1548,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 			assertThat(resultBundle.getAllResourceIds(), containsInAnyOrder(idCode2.getIdPart(), idCode3.getIdPart()));
 			// make also sure no extra SQL queries were executed
-			assertEquals(1, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "bundle was built with no sql");
+			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "bundle was built with no sql");
 		}
 
 
@@ -1558,7 +1564,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 			assertThat(resultBundle.getAllResourceIds(), containsInAnyOrder(idCode2.getIdPart()));
 			// also validate no extra SQL queries were executed
-			assertEquals(1, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "bundle was built with no sql");
+			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "bundle was built with no sql");
 		}
 	}
 
