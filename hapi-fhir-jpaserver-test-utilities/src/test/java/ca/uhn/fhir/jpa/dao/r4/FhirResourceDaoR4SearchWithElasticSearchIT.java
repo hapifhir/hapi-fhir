@@ -1543,10 +1543,10 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			IIdType idCode3 = myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-3")));
 
 			myCaptureQueriesListener.clear();
-			IBundleProvider resultBundle = myTestDaoSearch.searchForBundleProvider("Observation?code=code-1,code-2,code-3&_offset=1");
+			List<String> resultIds = myTestDaoSearch.searchForIds("Observation?code=code-1,code-2,code-3&_offset=1");
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
-			assertThat(resultBundle.getAllResourceIds(), containsInAnyOrder(idCode2.getIdPart(), idCode3.getIdPart()));
+			assertThat(resultIds, containsInAnyOrder(idCode2.getIdPart(), idCode3.getIdPart()));
 			// make also sure no extra SQL queries were executed
 			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "bundle was built with no sql");
 		}
@@ -1559,10 +1559,10 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-3")));
 
 			myCaptureQueriesListener.clear();
-			IBundleProvider resultBundle = myTestDaoSearch.searchForBundleProvider("Observation?code=code-1,code-2,code-3&_offset=1&_count=1");
+			List<String> resultIds = myTestDaoSearch.searchForIds("Observation?code=code-1,code-2,code-3&_offset=1&_count=1");
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
-			assertThat(resultBundle.getAllResourceIds(), containsInAnyOrder(idCode2.getIdPart()));
+			assertThat(resultIds, containsInAnyOrder(idCode2.getIdPart()));
 			// also validate no extra SQL queries were executed
 			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "bundle was built with no sql");
 		}

@@ -331,8 +331,6 @@ public class SearchBuilder implements ISearchBuilder {
 
 		ArrayList<ISearchQueryExecutor> queries = new ArrayList<>();
 
-		Integer maximumResults = theMaximumResults == null ? null : Integer.valueOf(theMaximumResults);
-
 		if (checkUseHibernateSearch()) {
 			// we're going to run at least part of the search against the Fulltext service.
 
@@ -341,15 +339,13 @@ public class SearchBuilder implements ISearchBuilder {
 			List<ResourcePersistentId> fulltextMatchIds = null;
 			int resultCount = 0;
 			if (myParams.isLastN()) {
-				fulltextMatchIds = executeLastNAgainstIndex(maximumResults);
+				fulltextMatchIds = executeLastNAgainstIndex(theMaximumResults);
 				resultCount = fulltextMatchIds.size();
 			} else if (myParams.getEverythingMode() != null) {
 				fulltextMatchIds = queryHibernateSearchForEverythingPids();
 				resultCount = fulltextMatchIds.size();
 			} else {
 				fulltextExecutor = myFulltextSearchSvc.searchAsync(myResourceName, myParams);
-				// already considered by the HS query
-				maximumResults = null;
 			}
 
 			if (fulltextExecutor == null) {
@@ -385,8 +381,8 @@ public class SearchBuilder implements ISearchBuilder {
 					);
 
 			if (canSkipDatabase) {
-				if (maximumResults != null) {
-					fulltextExecutor = SearchQueryExecutors.limited(fulltextExecutor, maximumResults);
+				if (theMaximumResults != null) {
+					fulltextExecutor = SearchQueryExecutors.limited(fulltextExecutor, theMaximumResults);
 				}
 				queries.add(fulltextExecutor);
 			} else {
@@ -398,7 +394,7 @@ public class SearchBuilder implements ISearchBuilder {
 			}
 		} else {
 			// do everything in the database.
-			Optional<SearchQueryExecutor> query = createChunkedQuery(theParams, sort, theOffset, maximumResults, theCountOnlyFlag, theRequest, null);
+			Optional<SearchQueryExecutor> query = createChunkedQuery(theParams, sort, theOffset, theMaximumResults, theCountOnlyFlag, theRequest, null);
 			query.ifPresent(queries::add);
 		}
 
