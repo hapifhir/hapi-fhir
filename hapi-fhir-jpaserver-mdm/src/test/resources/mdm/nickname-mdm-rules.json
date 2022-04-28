@@ -1,0 +1,44 @@
+{
+	"version":"1",
+	"mdmTypes": ["Patient", "Practitioner"],
+	"candidateSearchParams":[
+		{
+			"resourceType": "*",
+			"searchParams": [
+				"given:nickname",
+				"family"
+			]
+		}
+	],
+	"candidateFilterSearchParams":[],
+	"matchFields":[
+		{
+			"name":"gender",
+			"resourceType":"Patient",
+			"resourcePath":"gender",
+			"matcher":{
+				"algorithm":"STRING"
+			}
+		},
+		{
+			"name":"nickname",
+			"resourceType":"*",
+			"resourcePath":"name.given",
+			"matcher":{
+				"algorithm":"NICKNAME"
+			}
+		},
+		{
+			"name":"lastname",
+			"resourceType":"*",
+			"resourcePath":"name.family",
+			"matcher":{
+				"algorithm":"STRING",
+				"exact": true
+			}
+		}
+	],
+	"matchResultMap":{
+		"nickname,lastname": "MATCH"
+	}
+}
