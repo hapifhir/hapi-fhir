@@ -621,6 +621,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				if (queryCount == null || queryCount > resources.size()) {
 					// No limit, last page or everything was fetched within the limit
 					bundleProvider.setSize(getTotalCount(queryCount, theParams.getOffset(), resources.size()));
+				} else {
+					bundleProvider.setSize(null);
 				}
 			}
 			bundleProvider.setPreferredPageSize(theParams.getCount());
