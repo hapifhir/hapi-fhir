@@ -32,18 +32,26 @@ import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import java.io.Serial;
 
 @Entity
-@Table(name = "HFJ_RES_TAG", uniqueConstraints = {
-	@UniqueConstraint(name = "IDX_RESTAG_TAGID", columnNames = {"RES_ID", "TAG_ID"})
+@Table(
+	name = "HFJ_RES_TAG",
+   indexes = {
+		@Index(name = "IDX_RES_TAG_RES_TAG", columnList = "RES_ID, TAG_ID, PARTITION_ID"),
+		@Index(name = "IDX_RES_TAG_TAG_RES", columnList = "TAG_ID, RES_ID, PARTITION_ID")
+	},
+	uniqueConstraints = { @UniqueConstraint(name = "IDX_RESTAG_TAGID", columnNames = {"RES_ID", "TAG_ID"})
 })
 public class ResourceTag extends BaseTag {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@SequenceGenerator(name = "SEQ_RESTAG_ID", sequenceName = "SEQ_RESTAG_ID")
