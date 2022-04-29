@@ -1,0 +1,4 @@
+---
+type: change
+issue: 3570
+title: "The tag indexes have been changed to provide faster tag searches."

@@ -38,7 +38,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import java.io.Serial;
 
 @Entity
 @Table(
@@ -51,7 +50,6 @@ import java.io.Serial;
 })
 public class ResourceTag extends BaseTag {
 
-	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@SequenceGenerator(name = "SEQ_RESTAG_ID", sequenceName = "SEQ_RESTAG_ID")
