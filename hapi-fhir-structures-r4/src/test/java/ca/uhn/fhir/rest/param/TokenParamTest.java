@@ -2,12 +2,14 @@ package ca.uhn.fhir.rest.param;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class TokenParamTest {
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
@@ -46,6 +48,34 @@ public class TokenParamTest {
 		assertEquals(TokenParamModifier.OF_TYPE, param.getModifier());
 		assertEquals("http://type-system", param.getSystem());
 		assertEquals("type-value|identifier-value", param.getValue());
+	}
+
+	@Test
+	public void testNameNickname() {
+		StringParam param = new StringParam();
+		assertFalse(param.isNicknameExpand());
+		param.setValueAsQueryToken(ourCtx, "name", Constants.PARAMQUALIFIER_NICKNAME, "kenny");
+		assertTrue(param.isNicknameExpand());
+	}
+
+	@Test
+	public void testGivenNickname() {
+		StringParam param = new StringParam();
+		assertFalse(param.isNicknameExpand());
+		param.setValueAsQueryToken(ourCtx, "given", Constants.PARAMQUALIFIER_NICKNAME, "kenny");
+		assertTrue(param.isNicknameExpand());
+	}
+
+	@Test
+	public void testInvalidNickname() {
+		StringParam param = new StringParam();
+		assertFalse(param.isNicknameExpand());
+		try {
+			param.setValueAsQueryToken(ourCtx, "family", Constants.PARAMQUALIFIER_NICKNAME, "kenny");
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("HAPI-2077: Modifier :nickname may only be used with 'name' and 'given' search parameters", e.getMessage());
+		}
 	}
 
 }

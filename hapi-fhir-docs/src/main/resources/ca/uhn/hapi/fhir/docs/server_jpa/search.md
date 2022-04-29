@@ -1,5 +1,7 @@
 # JPA Server Search
 
+## Limitations
+
 The HAPI FHIR JPA Server fully implements most [FHIR search](https://www.hl7.org/fhir/search.html) operations for most versions of FHIR.  However, there are some known limitations of the current implementation.  Here is a partial list of search functionality that is not currently supported in HAPI FHIR:
 
 ### Chains within _has

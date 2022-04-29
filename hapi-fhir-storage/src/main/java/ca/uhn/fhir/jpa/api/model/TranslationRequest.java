@@ -20,7 +20,9 @@ package ca.uhn.fhir.jpa.api.model;
  * #L%
  */
 
+import ca.uhn.fhir.context.support.IValidationSupport;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -28,6 +30,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class TranslationRequest {
@@ -207,5 +210,41 @@ public class TranslationRequest {
 
 	public boolean hasTargetSystem() {
 		return myTargetSystem != null && myTargetSystem.hasValue();
+	}
+
+	public IValidationSupport.TranslateCodeRequest asTranslateCodeRequest() {
+		return new IValidationSupport.TranslateCodeRequest(
+			Collections.unmodifiableList(this.getCodeableConcept().getCoding()),
+			this.getTargetSystem() != null ? this.getTargetSystem().asStringValue() : null,
+			this.getUrl() != null ? this.getUrl().asStringValue() : null,
+			this.getConceptMapVersion() != null ? this.getConceptMapVersion().asStringValue() : null,
+			this.getSource() != null ? this.getSource().asStringValue() : null,
+			this.getTarget() != null ? this.getTarget().asStringValue() : null,
+			this.getResourceId(),
+			this.getReverseAsBoolean()
+		);
+	}
+
+	public static TranslationRequest fromTranslateCodeRequest(IValidationSupport.TranslateCodeRequest theRequest) {
+		CodeableConcept sourceCodeableConcept = new CodeableConcept();
+		for (IBaseCoding aCoding : theRequest.getCodings()) {
+			sourceCodeableConcept
+				.addCoding()
+				.setSystem(aCoding.getSystem())
+				.setCode(aCoding.getCode())
+				.setVersion(((Coding) aCoding).getVersion());
+		}
+
+		TranslationRequest translationRequest = new TranslationRequest();
+		translationRequest.setCodeableConcept(sourceCodeableConcept);
+		translationRequest.setConceptMapVersion(new StringType(theRequest.getConceptMapVersion()));
+		translationRequest.setUrl(new UriType(theRequest.getConceptMapUrl()));
+		translationRequest.setSource(new UriType(theRequest.getSourceValueSetUrl()));
+		translationRequest.setTarget(new UriType(theRequest.getTargetValueSetUrl()));
+		translationRequest.setTargetSystem(new UriType(theRequest.getTargetSystemUrl()));
+		translationRequest.setResourceId(theRequest.getResourcePid());
+		translationRequest.setReverse(theRequest.isReverse());
+		return translationRequest;
+
 	}
 }

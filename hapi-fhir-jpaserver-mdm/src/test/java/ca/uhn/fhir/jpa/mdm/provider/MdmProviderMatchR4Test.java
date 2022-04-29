@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -161,68 +162,134 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 	public void testMatchWithCoarseDateGranularity() throws Exception {
 		setMdmRuleJson("mdm/coarse-birthdate-mdm-rules.json");
 
-		String granularPatient = "{\n" +
-			"    \"resourceType\": \"Patient\",\n" +
-			"    \"active\": true,\n" +
-			"    \"name\": [\n" +
-			"        {\n" +
-			"            \"family\": \"PETERSON\",\n" +
-			"            \"given\": [\n" +
-			"                \"GARY\",\n" +
-			"                \"D\"\n" +
-			"            ]\n" +
-			"        }\n" +
-			"    ],\n" +
-			"    \"telecom\": [\n" +
-			"        {\n" +
-			"            \"system\": \"phone\",\n" +
-			"            \"value\": \"100100100\",\n" +
-			"            \"use\": \"home\"\n" +
-			"        }\n" +
-			"    ],\n" +
-			"    \"gender\": \"male\",\n" +
-			"    \"birthDate\": \"1991-10-10\",\n" +
-			"    \"address\": [\n" +
-			"        {\n" +
-			"            \"state\": \"NY\",\n" +
-			"            \"postalCode\": \"12313\"\n" +
-			"        }\n" +
-			"    ]\n" +
-			"}";
+		String granularPatient = """
+			{
+			    "resourceType": "Patient",
+			    "active": true,
+			    "name": [
+			        {
+			            "family": "PETERSON",
+			            "given": [
+			                "GARY",
+			                "D"
+			            ]
+			        }
+			    ],
+			    "telecom": [
+			        {
+			            "system": "phone",
+			            "value": "100100100",
+			            "use": "home"
+			        }
+			    ],
+			    "gender": "male",
+			    "birthDate": "1991-10-10",
+			    "address": [
+			        {
+			            "state": "NY",
+			            "postalCode": "12313"
+			        }
+			    ]
+			}""";
 		IBaseResource iBaseResource = myFhirContext.newJsonParser().parseResource(granularPatient);
 		createPatient((Patient) iBaseResource);
 
-		String coarsePatient = "{\n" +
-			"    \"resourceType\": \"Patient\",\n" +
-			"    \"active\": true,\n" +
-			"    \"name\": [\n" +
-			"        {\n" +
-			"            \"family\": \"PETERSON\",\n" +
-			"            \"given\": [\n" +
-			"                \"GARY\",\n" +
-			"                \"D\"\n" +
-			"            ]\n" +
-			"        }\n" +
-			"    ],\n" +
-			"    \"telecom\": [\n" +
-			"        {\n" +
-			"            \"system\": \"phone\",\n" +
-			"            \"value\": \"100100100\",\n" +
-			"            \"use\": \"home\"\n" +
-			"        }\n" +
-			"    ],\n" +
-			"    \"gender\": \"male\",\n" +
-			"    \"birthDate\": \"1991-10\",\n" +
-			"    \"address\": [\n" +
-			"        {\n" +
-			"            \"state\": \"NY\",\n" +
-			"            \"postalCode\": \"12313\"\n" +
-			"        }\n" +
-			"    ]\n" +
-			"}";
+		String coarsePatient = """
+			{
+			    "resourceType": "Patient",
+			    "active": true,
+			    "name": [
+			        {
+			            "family": "PETERSON",
+			            "given": [
+			                "GARY",
+			                "D"
+			            ]
+			        }
+			    ],
+			    "telecom": [
+			        {
+			            "system": "phone",
+			            "value": "100100100",
+			            "use": "home"
+			        }
+			    ],
+			    "gender": "male",
+			    "birthDate": "1991-10",
+			    "address": [
+			        {
+			            "state": "NY",
+			            "postalCode": "12313"
+			        }
+			    ]
+			}""";
 
 		IBaseResource coarseResource = myFhirContext.newJsonParser().parseResource(coarsePatient);
 		Bundle result = (Bundle) myMdmProvider.match((Patient) coarseResource, new SystemRequestDetails());
 		assertEquals(1, result.getEntry().size());
+	}
+
+	@Test
+	public void testNicknameMatch() throws IOException {
+		setMdmRuleJson("mdm/nickname-mdm-rules.json");
+
+		String formalPatientJson = """
+			{
+			    "resourceType": "Patient",
+			    "active": true,
+			    "name": [
+			        {
+			            "family": "PETERSON",
+			            "given": [
+			                "Gregory"
+			            ]
+			        }
+			    ],
+			    "gender": "male"
+			}""";
+		Patient formalPatient = (Patient) myFhirContext.newJsonParser().parseResource(formalPatientJson);
+		createPatient(formalPatient);
+
+		String noMatchPatientJson = """
+			{
+			    "resourceType": "Patient",
+			    "active": true,
+			    "name": [
+			        {
+			            "family": "PETERSON",
+			            "given": [
+			                "Bob"
+			            ]
+			        }
+			    ],
+			    "gender": "male"
+			}""";
+		Patient noMatchPatient = (Patient) myFhirContext.newJsonParser().parseResource(noMatchPatientJson);
+		createPatient(noMatchPatient);
+		{
+			Bundle result = (Bundle) myMdmProvider.match(noMatchPatient, new SystemRequestDetails());
+			assertEquals(0, result.getEntry().size());
+		}
+
+		String nickPatientJson = """
+			{
+			    "resourceType": "Patient",
+			    "active": true,
+			    "name": [
+			        {
+			            "family": "PETERSON",
+			            "given": [
+			                "Greg"
+			            ]
+			        }
+			    ],
+			    "gender": "male"
+			}""";
+
+		{
+			Patient nickPatient = (Patient) myFhirContext.newJsonParser().parseResource(nickPatientJson);
+			Bundle result = (Bundle) myMdmProvider.match(nickPatient, new SystemRequestDetails());
+			assertEquals(1, result.getEntry().size());
+		}
 	}
 }

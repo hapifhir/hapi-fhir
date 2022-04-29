@@ -295,6 +295,46 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version
 			.onTable("HFJ_BLK_EXPORT_JOB").modifyColumn("20220423.1", "EXP_TIME").nullable().withType(ColumnTypeEnum.DATE_TIMESTAMP);
 
+		// New Index on HFJ_RESOURCE for $reindex Operation - hapi-fhir #3534
+		{
+			version.onTable("HFJ_RESOURCE")
+				.addIndex("20220425.1", "IDX_RES_TYPE_DEL_UPDATED")
+				.unique(false)
+				.online(true)
+				.withColumns("RES_TYPE", "RES_DELETED_AT", "RES_UPDATED", "PARTITION_ID", "RES_ID");
+
+			// Drop existing Index on HFJ_RESOURCE.RES_TYPE since the new Index will meet the overall Index Demand
+			version
+				.onTable("HFJ_RESOURCE")
+				.dropIndexOnline("20220425.2", "IDX_RES_TYPE");
+		}
+
+		/**
+		 * Update string indexing
+		 * @see ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder
+		 * @see ResourceIndexedSearchParamString
+		 */
+		{
+			Builder.BuilderWithTableName tokenTable = version.onTable("HFJ_SPIDX_STRING");
+
+			// add res_id, and partition_id so queries are covered without row-reads.
+			tokenTable
+				.addIndex("20220428.1", "IDX_SP_STRING_HASH_NRM_V2")
+				.unique(false)
+				.online(true)
+				.withColumns("HASH_NORM_PREFIX", "SP_VALUE_NORMALIZED", "RES_ID", "PARTITION_ID");
+			tokenTable.dropIndexOnline("20220428.2", "IDX_SP_STRING_HASH_NRM");
+
+			tokenTable
+				.addIndex("20220428.3", "IDX_SP_STRING_HASH_EXCT_V2")
+				.unique(false)
+				.online(true)
+				.withColumns("HASH_EXACT", "RES_ID", "PARTITION_ID");
+			tokenTable.dropIndexOnline("20220428.4", "IDX_SP_STRING_HASH_EXCT");
+
+			// we will drop the updated column.  Start with the index.
+			tokenTable.dropIndexOnline("20220428.5", "IDX_SP_STRING_UPDATED");
+		}
 	}
 
 	/**
