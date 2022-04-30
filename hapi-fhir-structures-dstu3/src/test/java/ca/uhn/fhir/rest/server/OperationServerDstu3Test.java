@@ -559,7 +559,7 @@ public class OperationServerDstu3Test {
 		
 		servlet.setFhirContext(ourCtx);
 		servlet.setResourceProviders(new PatientProvider());
-		servlet.setPlainProviders(new PlainProvider());
+		servlet.registerProvider(new PlainProvider());
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
@@ -676,7 +676,7 @@ public class OperationServerDstu3Test {
 				) {
 			//@formatter:on
 
-			ourLastMethod = "$OP_TYPE";
+			ourLastMethod = "$OP_TYPE_ONLY_STRING";
 			ourLastParam1 = theParam1;
 
 			Parameters retVal = new Parameters();

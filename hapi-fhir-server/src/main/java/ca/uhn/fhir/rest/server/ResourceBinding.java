@@ -20,12 +20,12 @@ package ca.uhn.fhir.rest.server;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.List;
-
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.MethodMatchEnum;
+
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Holds all method bindings for an individual resource type
@@ -35,21 +35,13 @@ public class ResourceBinding {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceBinding.class);
 
 	private String resourceName;
-	private List<BaseMethodBinding<?>> myMethodBindings = new ArrayList<>();
+	private LinkedList<BaseMethodBinding<?>> myMethodBindings = new LinkedList<>();
 
 	/**
 	 * Constructor
 	 */
 	public ResourceBinding() {
 		super();
-	}
-
-	/**
-	 * Constructor
-	 */
-	public ResourceBinding(String resourceName, List<BaseMethodBinding<?>> methods) {
-		this.resourceName = resourceName;
-		this.myMethodBindings = methods;
 	}
 
 	public BaseMethodBinding<?> getMethod(RequestDetails theRequest) {
@@ -95,12 +87,8 @@ public class ResourceBinding {
 		return myMethodBindings;
 	}
 
-	public void setMethods(List<BaseMethodBinding<?>> methods) {
-		this.myMethodBindings = methods;
-	}
-
 	public void addMethod(BaseMethodBinding<?> method) {
-		this.myMethodBindings.add(method);
+		this.myMethodBindings.push(method);
 	}
 
 	@Override
