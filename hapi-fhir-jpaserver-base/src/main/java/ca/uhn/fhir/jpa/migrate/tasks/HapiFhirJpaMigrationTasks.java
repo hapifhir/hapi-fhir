@@ -272,6 +272,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		replaceNumericSPIndices(version);
 		replaceQuantitySPIndices(version);
+
+		// Drop Index on HFJ_RESOURCE.INDEX_STATUS
+		version
+			.onTable("HFJ_RESOURCE")
+			.dropIndex("20220314.1", "IDX_INDEXSTATUS");
 		
 		// Fix for https://github.com/hapifhir/hapi-fhir-jpaserver-starter/issues/328
 		version.onTable("NPM_PACKAGE_VER")
@@ -330,12 +335,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			// we will drop the updated column.  Start with the index.
 			tokenTable.dropIndexOnline("20220428.5", "IDX_SP_STRING_UPDATED");
 		}
-		
-		
-		// Drop Index on HFJ_RESOURCE.INDEX_STATUS
-		version
-			.onTable("HFJ_RESOURCE")
-			.dropIndex("20220501.1", "IDX_INDEXSTATUS");
 	}
 
 	/**
