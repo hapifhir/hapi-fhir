@@ -799,9 +799,9 @@
         <flexmark_version>0.50.40</flexmark_version>
         <flyway_version>8.5.0</flyway_version>
         <hibernate_version>5.6.2.Final</hibernate_version>
-        <hibernate_search_version>6.0.3.Final</hibernate_search_version>
+        <hibernate_search_version>6.1.4.Final</hibernate_search_version>
         <!-- Update lucene version when you update hibernate-search version -->
-        <lucene_version>8.7.0</lucene_version>
+        <lucene_version>8.11.1</lucene_version>
         <hamcrest_version>2.2</hamcrest_version>
         <hibernate_validator_version>6.1.5.Final</hibernate_validator_version>
         <httpcore_version>4.4.13</httpcore_version>
@@ -1613,7 +1613,7 @@
 				-->
 				<groupId>org.elasticsearch.client</groupId>
 				<artifactId>elasticsearch-rest-high-level-client</artifactId>
-				<version>7.10.2</version>
+				<version>7.16.3</version>
 				<exclusions>
 					<exclusion>
 						<groupId>com.fasterxml.jackson.dataformat</groupId>
