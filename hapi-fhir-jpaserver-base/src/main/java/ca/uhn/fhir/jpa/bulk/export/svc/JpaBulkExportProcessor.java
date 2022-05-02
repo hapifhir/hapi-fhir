@@ -218,12 +218,13 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 		}
 	}
 
-
+	@Transactional
 	@Override
 	public void setJobStatus(String theJobId, BulkExportJobStatusEnum theStatus) {
 		myBulkExportDaoSvc.setJobToStatus(theJobId, theStatus, null);
 	}
 
+	@Transactional
 	@Override
 	public BulkExportJobStatusEnum getJobStatus(String theJobId) {
 		Optional<BulkExportJobEntity> jobOp = myBulkExportJobDao.findByJobId(theJobId);

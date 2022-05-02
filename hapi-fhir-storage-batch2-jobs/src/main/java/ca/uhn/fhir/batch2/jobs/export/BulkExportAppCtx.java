@@ -20,7 +20,8 @@ public class BulkExportAppCtx {
 		builder.setJobDescription("FHIR Bulk Export");
 		builder.setJobDefinitionVersion(1);
 
-		builder.setParametersType(BulkExportJobParameters.class)
+		// :(
+		JobDefinition def =  builder.setParametersType(BulkExportJobParameters.class)
 			// validator
 			.setParametersValidator(bulkExportJobParametersValidator())
 			// first step - load in (all) ids and create id chunks of 1000 each
@@ -44,10 +45,10 @@ public class BulkExportAppCtx {
 			writeBinaryStep()
 		)
 			// finalize the job (set to complete)
-			.completionHandler(finalizeJobCallback())
-		;
+			.completionHandler(finalBatchExportCallback())
+			.build();
 
-		return builder.build();
+		return def;
 	}
 
 	@Bean
@@ -71,7 +72,7 @@ public class BulkExportAppCtx {
 	}
 
 	@Bean
-	public FinalBatchExportCallback finalizeJobCallback() {
+	public FinalBatchExportCallback finalBatchExportCallback() {
 		return new FinalBatchExportCallback();
 	}
 }
