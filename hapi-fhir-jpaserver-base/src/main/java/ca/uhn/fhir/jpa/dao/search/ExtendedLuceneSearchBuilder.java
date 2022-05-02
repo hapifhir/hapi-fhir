@@ -102,6 +102,7 @@ public class ExtendedLuceneSearchBuilder {
 				case EMPTY_MODIFIER:
 					return true;
 				case Constants.PARAMQUALIFIER_MDM:
+				case Constants.PARAMQUALIFIER_NICKNAME:
 				default:
 					return false;
 			}

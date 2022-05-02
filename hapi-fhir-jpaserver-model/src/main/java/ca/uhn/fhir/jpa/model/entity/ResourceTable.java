@@ -73,9 +73,9 @@ import java.util.stream.Collectors;
 @Indexed(routingBinder= @RoutingBinderRef(type = ResourceTableRoutingBinder.class))
 @Entity
 @Table(name = "HFJ_RESOURCE", uniqueConstraints = {}, indexes = {
-	// Do not reuse previously used index name: IDX_INDEXSTATUS
+	// Do not reuse previously used index name: IDX_INDEXSTATUS, IDX_RES_TYPE
 	@Index(name = "IDX_RES_DATE", columnList = "RES_UPDATED"),
-	@Index(name = "IDX_RES_TYPE", columnList = "RES_TYPE"),
+	@Index(name = "IDX_RES_TYPE_DEL_UPDATED", columnList = "RES_TYPE,RES_DELETED_AT,RES_UPDATED,PARTITION_ID,RES_ID"),
 })
 @NamedEntityGraph(name = "Resource.noJoins")
 public class ResourceTable extends BaseHasResource implements Serializable, IBasePersistedResource, IResourceLookup {

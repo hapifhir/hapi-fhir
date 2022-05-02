@@ -41,7 +41,9 @@ import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.util.VersionEnum;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -288,6 +290,93 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version
 			.onTable("HFJ_BLK_EXPORT_JOB").modifyColumn("20220423.1", "EXP_TIME").nullable().withType(ColumnTypeEnum.DATE_TIMESTAMP);
 
+		// New Index on HFJ_RESOURCE for $reindex Operation - hapi-fhir #3534
+		{
+			version.onTable("HFJ_RESOURCE")
+				.addIndex("20220425.1", "IDX_RES_TYPE_DEL_UPDATED")
+				.unique(false)
+				.online(true)
+				.withColumns("RES_TYPE", "RES_DELETED_AT", "RES_UPDATED", "PARTITION_ID", "RES_ID");
+
+			// Drop existing Index on HFJ_RESOURCE.RES_TYPE since the new Index will meet the overall Index Demand
+			version
+				.onTable("HFJ_RESOURCE")
+				.dropIndexOnline("20220425.2", "IDX_RES_TYPE");
+		}
+
+		/**
+		 * Update string indexing
+		 * @see ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder
+		 * @see ResourceIndexedSearchParamString
+		 */
+		{
+			Builder.BuilderWithTableName tokenTable = version.onTable("HFJ_SPIDX_STRING");
+
+			// add res_id, and partition_id so queries are covered without row-reads.
+			tokenTable
+				.addIndex("20220428.1", "IDX_SP_STRING_HASH_NRM_V2")
+				.unique(false)
+				.online(true)
+				.withColumns("HASH_NORM_PREFIX", "SP_VALUE_NORMALIZED", "RES_ID", "PARTITION_ID");
+			tokenTable.dropIndexOnline("20220428.2", "IDX_SP_STRING_HASH_NRM");
+
+			tokenTable
+				.addIndex("20220428.3", "IDX_SP_STRING_HASH_EXCT_V2")
+				.unique(false)
+				.online(true)
+				.withColumns("HASH_EXACT", "RES_ID", "PARTITION_ID");
+			tokenTable.dropIndexOnline("20220428.4", "IDX_SP_STRING_HASH_EXCT");
+
+			// we will drop the updated column.  Start with the index.
+			tokenTable.dropIndexOnline("20220428.5", "IDX_SP_STRING_UPDATED");
+		}
+
+		// Update tag indexing
+		{
+			Builder.BuilderWithTableName resTagTable = version.onTable("HFJ_RES_TAG");
+
+			// add res_id, and partition_id so queries are covered without row-reads.
+			resTagTable
+				.addIndex("20220429.1", "IDX_RES_TAG_RES_TAG")
+				.unique(false)
+				.online(true)
+				.withColumns("RES_ID", "TAG_ID", "PARTITION_ID");
+			resTagTable
+				.addIndex("20220429.2", "IDX_RES_TAG_TAG_RES")
+				.unique(false)
+				.online(true)
+				.withColumns("RES_ID", "TAG_ID", "PARTITION_ID");
+
+			resTagTable.dropIndexOnline("20220429.4", "IDX_RESTAG_TAGID");
+			// Weird that we don't have addConstraint.  No time to do it today.
+			Map<DriverTypeEnum, String> addResTagConstraint = new HashMap<>();
+			addResTagConstraint.put(DriverTypeEnum.H2_EMBEDDED, "ALTER TABLE HFJ_RES_TAG ADD CONSTRAINT IDX_RESTAG_TAGID UNIQUE (RES_ID, TAG_ID)");
+			addResTagConstraint.put(DriverTypeEnum.MARIADB_10_1, "ALTER TABLE HFJ_RES_TAG ADD CONSTRAINT IDX_RESTAG_TAGID UNIQUE (RES_ID, TAG_ID)");
+			addResTagConstraint.put(DriverTypeEnum.MSSQL_2012, "ALTER TABLE HFJ_RES_TAG ADD CONSTRAINT IDX_RESTAG_TAGID UNIQUE (RES_ID, TAG_ID)");
+			addResTagConstraint.put(DriverTypeEnum.MYSQL_5_7, "ALTER TABLE HFJ_RES_TAG ADD CONSTRAINT IDX_RESTAG_TAGID UNIQUE (RES_ID, TAG_ID)");
+			addResTagConstraint.put(DriverTypeEnum.ORACLE_12C, "ALTER TABLE HFJ_RES_TAG ADD CONSTRAINT IDX_RESTAG_TAGID UNIQUE (RES_ID, TAG_ID)");
+			addResTagConstraint.put(DriverTypeEnum.POSTGRES_9_4, "ALTER TABLE HFJ_RES_TAG ADD CONSTRAINT IDX_RESTAG_TAGID UNIQUE (RES_ID, TAG_ID)");
+			version.executeRawSql("20220429.5", addResTagConstraint);
+
+			Builder.BuilderWithTableName tagTable = version.onTable("HFJ_TAG_DEF");
+			tagTable
+				.addIndex("20220429.6", "IDX_TAG_DEF_TP_CD_SYS")
+				.unique(false)
+				.online(false)
+				.withColumns("TAG_TYPE", "TAG_CODE", "TAG_SYSTEM", "TAG_ID");
+			// move constraint to new index
+			// note the constraint has fewer columns than the index.  But these engines can enforce a constraint narrower than the index.
+			tagTable.dropIndexOnline("20220429.8", "IDX_TAGDEF_TYPESYSCODE");
+			Map<DriverTypeEnum, String> addTagDefConstraint = new HashMap<>();
+			addTagDefConstraint.put(DriverTypeEnum.H2_EMBEDDED, "ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM)");
+			addTagDefConstraint.put(DriverTypeEnum.MARIADB_10_1, "ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM)");
+			addTagDefConstraint.put(DriverTypeEnum.MSSQL_2012, "ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM)");
+			addTagDefConstraint.put(DriverTypeEnum.MYSQL_5_7, "ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM)");
+			addTagDefConstraint.put(DriverTypeEnum.ORACLE_12C, "ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM)");
+			addTagDefConstraint.put(DriverTypeEnum.POSTGRES_9_4, "ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM)");
+			version.executeRawSql("20220429.9", addTagDefConstraint);
+
+		}
 	}
 
 	/**

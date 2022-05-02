@@ -45,6 +45,7 @@ public interface IFulltextSearchSvc {
 	 */
 	List<ResourcePersistentId> search(String theResourceName, SearchParameterMap theParams);
 
+
 	/**
 	 * Query the index for a scrollable iterator of results.
 	 * No max size to the result iterator.
@@ -90,4 +91,8 @@ public interface IFulltextSearchSvc {
 	 */
 	List<IBaseResource> getResources(Collection<Long> thePids);
 
+	/**
+	 * Returns accurate hit count
+	 */
+	long count(String theResourceName, SearchParameterMap theParams);
 }
