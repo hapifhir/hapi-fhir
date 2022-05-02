@@ -48,6 +48,10 @@ public class WriteBinaryStep implements IJobStepWorker<BulkExportJobParameters, 
 								 @Nonnull IJobDataSink<VoidModel> theDataSink) throws JobExecutionFailedException {
 
 		BulkExportExpandedResources expandedResources = theStepExecutionDetails.getData();
+		String jobId = expandedResources.getJobId();
+
+		ourLog.info(jobId + " final step started");
+
 		@SuppressWarnings("unchecked")
 		IFhirResourceDao<IBaseBinary> binaryDao = myDaoRegistry.getResourceDao("Binary");
 
@@ -86,8 +90,6 @@ public class WriteBinaryStep implements IJobStepWorker<BulkExportJobParameters, 
 		DaoMethodOutcome outcome = binaryDao.create(binary,
 			new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.defaultPartition()));
 		IIdType id = outcome.getId();
-
-		String jobId = expandedResources.getJobId();
 
 		// save the binary to the file collection
 		myBulkExportProcessor.addFileToCollection(jobId,

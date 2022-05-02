@@ -19,11 +19,11 @@ public class Batch2JobRunnerImpl implements IBatch2JobRunner {
 	private IJobCoordinator myJobCoordinator;
 
 	@Override
-	public void startJob(RunJobParameters theParameters) {
+	public String startJob(RunJobParameters theParameters) {
 		switch (theParameters.getJobDefinitionId()) {
 			case Batch2JobDefinitionConstants.BULK_EXPORT:
 				if (theParameters instanceof BulkExportParameters) {
-					startBatch2BulkExportJob((BulkExportParameters) theParameters);
+					return startBatch2BulkExportJob((BulkExportParameters) theParameters);
 				}
 				else {
 					ourLog.error("Invalid parameters for " + Batch2JobDefinitionConstants.BULK_EXPORT);
@@ -34,13 +34,14 @@ public class Batch2JobRunnerImpl implements IBatch2JobRunner {
 				ourLog.error("Invalid JobDefinitionId " + theParameters.getJobDefinitionId());
 				break;
 		}
+		return null;
 	}
 
-	private void startBatch2BulkExportJob(BulkExportParameters theParameters) {
+	private String startBatch2BulkExportJob(BulkExportParameters theParameters) {
 		JobInstanceStartRequest request = createStartRequest(theParameters);
 		request.setParameters(BulkExportJobParameters.createFromExportJobParameters(theParameters));
 
-		myJobCoordinator.startInstance(request);
+		return myJobCoordinator.startInstance(request);
 	}
 
 	private JobInstanceStartRequest createStartRequest(RunJobParameters theParameters) {

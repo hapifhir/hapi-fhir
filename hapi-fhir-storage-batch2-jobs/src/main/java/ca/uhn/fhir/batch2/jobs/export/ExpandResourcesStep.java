@@ -44,6 +44,8 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 		BulkExportIdList idList = theStepExecutionDetails.getData();
 		BulkExportJobParameters jobParameters = theStepExecutionDetails.getParameters();
 
+		ourLog.info(jobParameters.getJobId() + " step 2 started");
+
 		// search the resources
 		IBundleProvider bundle = fetchAllResources(idList);
 

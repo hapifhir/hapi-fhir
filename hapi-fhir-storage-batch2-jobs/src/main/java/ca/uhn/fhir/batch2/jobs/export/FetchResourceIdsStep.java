@@ -49,32 +49,40 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 		providerParams.setExpandMdm(params.isExpandMdm());
 
 		int submissionCount = 0;
-		for (String resourceType : params.getResourceTypes()) {
-			providerParams.setResourceType(resourceType);
+		try {
+			for (String resourceType : params.getResourceTypes()) {
+				providerParams.setResourceType(resourceType);
 
-			// filters are the filters for searching
-			Iterator<ResourcePersistentId> pidIterator = myBulkExportProcessor.getResourcePidIterator(providerParams);
-			List<Id> idsToSubmit = new ArrayList<>();
-			while (pidIterator.hasNext()) {
-				ResourcePersistentId pid = pidIterator.next();
+				// filters are the filters for searching
+				Iterator<ResourcePersistentId> pidIterator = myBulkExportProcessor.getResourcePidIterator(providerParams);
+				List<Id> idsToSubmit = new ArrayList<>();
+				while (pidIterator.hasNext()) {
+					ResourcePersistentId pid = pidIterator.next();
 
-				idsToSubmit.add(Id.getIdFromPID(pid, resourceType));
+					idsToSubmit.add(Id.getIdFromPID(pid, resourceType));
 
-				// >= so that we know (with confidence)
-				// that every batch is <= 1000 items
-				if (idsToSubmit.size() >= MAX_IDS_TO_BATCH) {
+					// >= so that we know (with confidence)
+					// that every batch is <= 1000 items
+					if (idsToSubmit.size() >= MAX_IDS_TO_BATCH) {
+						submitWorkChunk(idsToSubmit, resourceType, params, theDataSink);
+						submissionCount++;
+						idsToSubmit = new ArrayList<>();
+					}
+				}
+
+				// if we have any other Ids left, submit them now
+				if (!idsToSubmit.isEmpty()) {
 					submitWorkChunk(idsToSubmit, resourceType, params, theDataSink);
 					submissionCount++;
 					idsToSubmit = new ArrayList<>();
 				}
 			}
-
-			// if we have any other Ids left, submit them now
-			if (!idsToSubmit.isEmpty()) {
-				submitWorkChunk(idsToSubmit, resourceType, params, theDataSink);
-				submissionCount++;
-				idsToSubmit = new ArrayList<>();
-			}
+		} catch (Exception ex) {
+			ourLog.error(ex.getMessage());
+			// TODO - how to mark this as failed?
+//			myBulkExportProcessor.setJobStatus(params.getJobId(), BulkExportJobStatusEnum.ERROR);
+//			theDataSink.recoveredError(ex.getMessage());
+			return new RunOutcome(-1);
 		}
 
 		ourLog.info("Submitted {} groups of ids for processing", submissionCount);

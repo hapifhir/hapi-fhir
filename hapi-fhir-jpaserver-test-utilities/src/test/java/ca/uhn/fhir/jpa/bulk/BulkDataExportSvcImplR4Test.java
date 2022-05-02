@@ -1,5 +1,9 @@
 package ca.uhn.fhir.jpa.bulk;
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
+import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
@@ -10,11 +14,8 @@ import ca.uhn.fhir.jpa.api.model.BulkExportParameters;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
-import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
-import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobParametersBuilder;
-import ca.uhn.fhir.jpa.bulk.export.job.GroupBulkExportJobParametersBuilder;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionFileDao;
@@ -25,6 +26,7 @@ import ca.uhn.fhir.jpa.entity.BulkExportCollectionFileEntity;
 import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.jpa.util.BulkExportUtils;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
@@ -33,24 +35,17 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.test.utilities.BatchJobHelper;
-import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.UrlUtil;
-import com.google.common.base.Charsets;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.time.DateUtils;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.CareTeam;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Enumerations;
-import org.hl7.fhir.r4.model.EpisodeOfCare;
-import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Immunization;
-import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
@@ -63,12 +58,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobParametersBuilder;
-import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -80,6 +70,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -114,8 +105,10 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 	@Autowired
 	private IBatchJobSubmitter myBatchJobSubmitter;
-	@Autowired
-	private BatchJobHelper myBatchJobHelper;
+//	@Autowired
+//	private BatchJobHelper myBatchJobHelper;
+	@Autowired(required = false)
+	protected Batch2JobHelper myBatch2JobHelper;
 
 	@Autowired
 	private IBatch2JobRunner myJobRunner;
@@ -351,85 +344,96 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 //			myBulkDataExportJobSchedulingHelper.startSubmittedJobs();
 			BulkExportParameters params = BulkExportUtils.getBulkExportJobParametersFromExportOptions(bulkDataExportOptions,
 				jobDetails.getJobId());
-			myJobRunner.startJob(params);
+			String batchJobId = myJobRunner.startJob(params);
 
-			awaitAllBulkJobCompletions();
+//			awaitAllBulkJobCompletions();
+			JobInstance instance = myBatch2JobHelper.awaitJobFailure(batchJobId);
 
 			// Fetch the job again
 			status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
 			assertEquals(BulkExportJobStatusEnum.ERROR, status.getStatus());
 			assertThat(status.getStatusMessage(), containsString("help i'm a bug"));
-
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-			fail();
-		}
-		finally {
+		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
 		}
 	}
 
-	private void awaitAllBulkJobCompletions() {
-		myBatchJobHelper.awaitAllBulkJobCompletions(
-			BatchConstants.BULK_EXPORT_JOB_NAME,
-			BatchConstants.PATIENT_BULK_EXPORT_JOB_NAME,
-			BatchConstants.GROUP_BULK_EXPORT_JOB_NAME,
-			BatchConstants.DELETE_EXPUNGE_JOB_NAME,
-			BatchConstants.MDM_CLEAR_JOB_NAME
-		);
-	}
+//	private void awaitAllBulkJobCompletions() {
+//		// TODO - look up how james test's work to
+//		// see how he waits for batch jobs to finish
+//		myBatchJobHelper.awaitAllBulkJobCompletions(
+//			BatchConstants.BULK_EXPORT_JOB_NAME,
+//			BatchConstants.PATIENT_BULK_EXPORT_JOB_NAME,
+//			BatchConstants.GROUP_BULK_EXPORT_JOB_NAME,
+//			BatchConstants.DELETE_EXPUNGE_JOB_NAME,
+//			BatchConstants.MDM_CLEAR_JOB_NAME
+//		);
+//	}
 
+	@Test
+	public void testGenerateBulkExport_SpecificResources() {
+		// Create some resources to load
+		createResources();
 
-	// TODO - fix
-//	@Test
-//	public void testGenerateBulkExport_SpecificResources() {
-//
-//		// Create some resources to load
-//		createResources();
-//
-//		// Create a bulk job
-//		BulkDataExportOptions options = new BulkDataExportOptions();
-//		options.setResourceTypes(Sets.newHashSet("Patient", "Observation"));
-//		options.setFilters(Sets.newHashSet(TEST_FILTER));
-//		options.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
-//
-//		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(options);
-//		assertNotNull(jobDetails.getJobId());
-//
-//		// Check the status
-//		IBulkDataExportSvc.JobInfo status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
-//		assertEquals(BulkExportJobStatusEnum.SUBMITTED, status.getStatus());
-//		assertEquals("/$export?_outputFormat=application%2Ffhir%2Bndjson&_type=Observation,Patient&_typeFilter=" + UrlUtil.escapeUrlParam(TEST_FILTER), status.getRequest());
-//
-//		// Run a scheduled pass to build the export
+		// Create a bulk job
+		BulkDataExportOptions options = new BulkDataExportOptions();
+		options.setResourceTypes(Sets.newHashSet("Patient", "Observation"));
+		options.setFilters(Sets.newHashSet(TEST_FILTER));
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+		options.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
+
+		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(options, true, null);
+		assertNotNull(jobDetails.getJobId());
+
+		// Check the status
+		IBulkDataExportSvc.JobInfo status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
+		assertEquals(BulkExportJobStatusEnum.SUBMITTED, status.getStatus());
+		assertEquals("/$export?_outputFormat=application%2Ffhir%2Bndjson&_type=Observation,Patient&_typeFilter=" + UrlUtil.escapeUrlParam(TEST_FILTER), status.getRequest());
+
+		// Run a scheduled pass to build the export
+		BulkExportParameters params = BulkExportUtils.getBulkExportJobParametersFromExportOptions(options,
+			jobDetails.getJobId());
+		String batchJobId = myJobRunner.startJob(params);
+
+		//myBatch2JobHelper.awaitJobCompletion(batchJobId);
 //		myBulkDataExportJobSchedulingHelper.startSubmittedJobs();
 //		awaitAllBulkJobCompletions();
-//
-//		// Fetch the job again
-//		status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
-//		assertEquals(BulkExportJobStatusEnum.COMPLETE, status.getStatus());
-//
-//		// Iterate over the files
-//		for (IBulkDataExportSvc.FileEntry next : status.getFiles()) {
-//			Binary nextBinary = myBinaryDao.read(next.getResourceId());
-//			assertEquals(Constants.CT_FHIR_NDJSON, nextBinary.getContentType());
-//			String nextContents = new String(nextBinary.getContent(), Constants.CHARSET_UTF8);
-//			ourLog.info("Next contents for type {}:\n{}", next.getResourceType(), nextContents);
-//
-//			if ("Patient".equals(next.getResourceType())) {
-//				assertThat(nextContents, containsString("\"value\":\"PAT1\"}"));
-//				assertEquals(7, nextContents.split("\n").length); // Only female patients
-//			} else if ("Observation".equals(next.getResourceType())) {
-//				assertThat(nextContents, containsString("\"subject\":{\"reference\":\"Patient/PAT0\"}}\n"));
-//				assertEquals(26, nextContents.split("\n").length);
-//			} else {
-//				fail(next.getResourceType());
-//			}
-//
-//		}
-//
-//		assertEquals(2, status.getFiles().size());
-//	}
+
+		// Fetch the job again
+		await().until(() -> {
+			myJobCleanerService.runMaintenancePass();
+			JobInstance instance = myJobCoordinator.getInstance(batchJobId);
+			return instance.getStatus();
+		}, equalTo(StatusEnum.COMPLETED));
+		status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
+		assertEquals(BulkExportJobStatusEnum.COMPLETE, status.getStatus());
+
+		// Iterate over the files
+		for (IBulkDataExportSvc.FileEntry next : status.getFiles()) {
+			Binary nextBinary = myBinaryDao.read(next.getResourceId());
+			assertEquals(Constants.CT_FHIR_NDJSON, nextBinary.getContentType());
+			String nextContents = new String(nextBinary.getContent(), Constants.CHARSET_UTF8);
+			ourLog.info("Next contents for type {}:\n{}", next.getResourceType(), nextContents);
+
+			if ("Patient".equals(next.getResourceType())) {
+				assertThat(nextContents, containsString("\"value\":\"PAT1\"}"));
+				assertEquals(7, nextContents.split("\n").length); // Only female patients
+			} else if ("Observation".equals(next.getResourceType())) {
+				assertThat(nextContents, containsString("\"subject\":{\"reference\":\"Patient/PAT0\"}}\n"));
+				assertEquals(26, nextContents.split("\n").length);
+			} else {
+				fail(next.getResourceType());
+			}
+
+		}
+
+		assertEquals(2, status.getFiles().size());
+	}
+
+	@Autowired
+	private IJobCoordinator myJobCoordinator;
+	@Autowired
+	private IJobMaintenanceService myJobCleanerService;
 
 //	@Test
 //	public void testGenerateBulkExport_WithoutSpecificResources() {

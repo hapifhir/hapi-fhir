@@ -7,6 +7,7 @@ public interface IBatch2JobRunner {
 	/**
 	 * Start the job with the given parameters
 	 * @param theParameters
+	 * @return  returns the job id
 	 */
-	void startJob(RunJobParameters theParameters);
+	String startJob(RunJobParameters theParameters);
 }

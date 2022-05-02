@@ -44,6 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -94,6 +95,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 
 	private final HashMap<String, ISearchBuilder> myResourceTypeToSearchBuilder = new HashMap<>();
 
+	@Transactional
 	@Override
 	public Iterator<ResourcePersistentId> getResourcePidIterator(ExportPIDIteratorParameters theParams) {
 		String resourceType = theParams.getResourceType();
@@ -156,6 +158,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 			ISearchBuilder searchBuilder = getSearchBuilderForLocalResourceType(theParams);
 
 			for (SearchParameterMap map : maps) {
+				// requires a transaction
 				IResultIterator resultIterator = searchBuilder.createQuery(map,
 					new SearchRuntimeDetails(null, jobId),
 					null,
