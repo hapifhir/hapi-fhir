@@ -37,7 +37,6 @@ import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteOptions;
 import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteSearch;
 import ca.uhn.fhir.jpa.search.builder.ISearchQueryExecutor;
 import ca.uhn.fhir.jpa.search.builder.SearchQueryExecutors;
-import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryExecutor;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
@@ -151,7 +150,8 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 
 	private SearchScroll<Long> getSearchScroll(String theResourceType, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
-		int scrollSize = 50;
+		// disallow scroll size lees than 50 until we fix scrolling performance
+		int scrollSize = theParams.getCount() == null ? 50 : Math.max(50, theParams.getCount());
 		if (theParams.getCount()!=null) {
 			scrollSize = theParams.getCount();
 		}
