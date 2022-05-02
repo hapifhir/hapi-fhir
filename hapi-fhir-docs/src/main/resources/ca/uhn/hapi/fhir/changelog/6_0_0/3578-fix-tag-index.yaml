@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 3578
+title: "The tag index migration failed on Postres and Oracle.  These have been fixed."
