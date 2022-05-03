@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 3579
+title: "Mdm would produce an error when a Patient eid is changed after that patient's link was updated to NO_MATCH."
