@@ -15,7 +15,6 @@ import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
@@ -35,7 +34,13 @@ import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.NO_MATCH;
 import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.POSSIBLE_DUPLICATE;
 import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.POSSIBLE_MATCH;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.blankOrNullString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.equalToIgnoringCase;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.in;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -543,6 +548,34 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		addExternalEID(paul, EID_2);
 		updatePatientAndUpdateLinks(paul);
 
+		assertThat(originalJanePatient, is(possibleDuplicateOf(originalPaulPatient)));
+		assertThat(jane, is(sameGoldenResourceAs(paul)));
+	}
+
+	@Test
+	// Test Case #3a
+	public void originalLinkIsNoMatch() {
+		// setup
+		String EID_1 = "123";
+		String EID_2 = "456";
+
+		Patient paul = createPatientAndUpdateLinks(addExternalEID(buildPaulPatient(), EID_1));
+		Patient originalPaulPatient = getGoldenResourceFromTargetResource(paul);
+
+		Patient jane = createPatientAndUpdateLinks(addExternalEID(buildJanePatient(), EID_2));
+		Patient originalJanePatient = getGoldenResourceFromTargetResource(jane);
+
+		MdmTransactionContext mdmCtx = new MdmTransactionContext();
+		mdmCtx.setResourceType("Patient");
+		myMdmLinkSvc.updateLink(originalPaulPatient, paul, MdmMatchOutcome.NO_MATCH, MdmLinkSourceEnum.MANUAL, mdmCtx);
+
+		clearExternalEIDs(paul);
+		addExternalEID(paul, EID_2);
+
+		// execute
+		updatePatientAndUpdateLinks(paul);
+
+		// verify
 		assertThat(originalJanePatient, is(possibleDuplicateOf(originalPaulPatient)));
 		assertThat(jane, is(sameGoldenResourceAs(paul)));
 	}
