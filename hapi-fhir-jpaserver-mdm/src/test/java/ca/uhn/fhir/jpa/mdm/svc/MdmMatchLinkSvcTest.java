@@ -576,7 +576,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		updatePatientAndUpdateLinks(paul);
 
 		// verify
-		assertThat(originalJanePatient, is(possibleDuplicateOf(originalPaulPatient)));
+		assertThat(originalJanePatient, is(not(possibleDuplicateOf(originalPaulPatient))));
 		assertThat(jane, is(sameGoldenResourceAs(paul)));
 	}
 
