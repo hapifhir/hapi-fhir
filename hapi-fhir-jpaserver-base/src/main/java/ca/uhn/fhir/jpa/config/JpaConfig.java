@@ -135,6 +135,7 @@ import ca.uhn.fhir.jpa.sp.SearchParamPresenceSvcImpl;
 import ca.uhn.fhir.jpa.term.TermConceptMappingSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
+import ca.uhn.fhir.jpa.util.SqlQueryUtil;
 import ca.uhn.fhir.jpa.validation.JpaResourceLoader;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.mdm.api.IMdmClearJobSubmitter;
@@ -499,6 +500,11 @@ public class JpaConfig {
 	@Bean
 	public HibernatePropertiesProvider HibernatePropertiesProvider() {
 		return new HibernatePropertiesProvider();
+	}
+
+	@Bean
+	public SqlQueryUtil sqlQueryUtil() {
+		return new SqlQueryUtil(HibernatePropertiesProvider());
 	}
 
 	@Bean
