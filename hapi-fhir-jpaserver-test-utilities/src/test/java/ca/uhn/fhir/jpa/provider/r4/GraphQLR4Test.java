@@ -10,7 +10,9 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Patient;
+import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -43,14 +45,37 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
-			assertEquals(TestUtil.stripWhitespace(DATA_PREFIX + "{\n" +
-				"  \"name\":[{\n" +
-				"    \"family\":\"FAM\",\n" +
-				"    \"given\":[\"GIVEN1\",\"GIVEN2\"]\n" +
-				"  },{\n" +
-				"    \"given\":[\"GivenOnly1\",\"GivenOnly2\"]\n" +
-				"  }]\n" +
-				"}" + DATA_SUFFIX), TestUtil.stripWhitespace(resp));
+			@Language("json")
+			String expected = """
+				{
+				  "name":[{
+				    "family":"FAM",
+				    "given":["GIVEN1","GIVEN2"]
+				  },{
+				    "given":["GivenOnly1","GivenOnly2"]
+				  }]
+				}""";
+			assertEquals(TestUtil.stripWhitespace(DATA_PREFIX + expected + DATA_SUFFIX), TestUtil.stripWhitespace(resp));
+		}
+
+	}
+
+	@Test
+	public void testInstance_Patient_Birthdate() throws IOException {
+		initTestPatients();
+
+		String query = "{birthDate}";
+		HttpGet httpGet = new HttpGet(ourServerBase + "/Patient/" + myPatientId0.getIdPart() + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
+
+		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
+			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(resp);
+			@Language("json")
+			String expected = """
+            {
+			    "birthDate": "1965-08-09"
+				}""";
+			assertEquals(TestUtil.stripWhitespace(DATA_PREFIX + expected + DATA_SUFFIX), TestUtil.stripWhitespace(resp));
 		}
 
 	}
@@ -144,22 +169,25 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
+
+			@Language("json")
+			String expected = """
+				{
+				"Patient":{
+				"name":[{
+				"family":"FAM",
+				"given":["GIVEN1","GIVEN2"]
+				},{
+				"given":["GivenOnly1","GivenOnly2"]
+				}]
+				}
+				}""";
 			assertEquals(TestUtil.stripWhitespace(DATA_PREFIX +
-				"{\n" +
-				"\"Patient\":{\n" +
-				"\"name\":[{\n" +
-				"\"family\":\"FAM\",\n" +
-				"\"given\":[\"GIVEN1\",\"GIVEN2\"]\n" +
-				"},{\n" +
-				"\"given\":[\"GivenOnly1\",\"GivenOnly2\"]\n" +
-				"}]\n" +
-				"}\n" +
-				"}" +
+				expected +
 				DATA_SUFFIX), TestUtil.stripWhitespace(resp));
 		}
 
 	}
-
 
 
 	@Test
@@ -172,20 +200,23 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
-			assertEquals(TestUtil.stripWhitespace(DATA_PREFIX + "{\n" +
-				"  \"PatientList\":[{\n" +
-				"    \"name\":[{\n" +
-				"      \"family\":\"FAM\",\n" +
-				"      \"given\":[\"GIVEN1\",\"GIVEN2\"]\n" +
-				"    },{\n" +
-				"      \"given\":[\"GivenOnly1\",\"GivenOnly2\"]\n" +
-				"    }]\n" +
-				"  },{\n" +
-				"    \"name\":[{\n" +
-				"      \"given\":[\"GivenOnlyB1\",\"GivenOnlyB2\"]\n" +
-				"    }]\n" +
-				"  }]\n" +
-				"}" + DATA_SUFFIX), TestUtil.stripWhitespace(resp));
+			@Language("json")
+			String exoected = """
+				{
+				  "PatientList":[{
+				    "name":[{
+				      "family":"FAM",
+				      "given":["GIVEN1","GIVEN2"]
+				    },{
+				      "given":["GivenOnly1","GivenOnly2"]
+				    }]
+				  },{
+				    "name":[{
+				      "given":["GivenOnlyB1","GivenOnlyB2"]
+				    }]
+				  }]
+				}""";
+			assertEquals(TestUtil.stripWhitespace(DATA_PREFIX + exoected + DATA_SUFFIX), TestUtil.stripWhitespace(resp));
 		}
 
 	}
@@ -214,6 +245,7 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 		p.addName()
 			.addGiven("GivenOnly1")
 			.addGiven("GivenOnly2");
+		p.setBirthDateElement(new DateType("1965-08-09"));
 		myPatientId0 = myClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
 		p = new Patient();
