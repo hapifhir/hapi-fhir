@@ -5,6 +5,8 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
@@ -50,7 +52,18 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
 		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(false, false);
 		assertEquals("SELECT t0.RES_ID FROM HFJ_SPIDX_STRING t0 WHERE ((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?))", sql);
+	}
 
+	@Test
+	public void testOrdinalDateParamsOnlyCreateSingleClause() {
+		myCaptureQueriesListener.clear();
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Patient.SP_BIRTHDATE, new DateParam(ParamPrefixEnum.EQUAL, "2020-01-01"));
+		myPatientDao.search(map);
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
+		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(false, false);
+		ourLog.info(sql);
+		assertEquals("SELECT t0.RES_ID FROM HFJ_SPIDX_DATE t0 WHERE ((t0.HASH_IDENTITY = ?) AND ((t0.SP_VALUE_LOW_DATE_ORDINAL >= ?) AND (t0.SP_VALUE_HIGH_DATE_ORDINAL <= ?)))", sql);
 	}
 
 	/**

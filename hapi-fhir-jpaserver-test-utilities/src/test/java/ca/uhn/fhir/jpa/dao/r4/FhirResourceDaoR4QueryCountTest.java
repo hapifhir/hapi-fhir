@@ -18,6 +18,8 @@ import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
@@ -171,6 +173,18 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
 		myCaptureQueriesListener.logDeleteQueriesForCurrentThread();
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+	}
+
+	@Test
+	public void testSearchByBirthdateDoesNotCauseDuplicateClauses() {
+
+		myCaptureQueriesListener.clear();
+		runInTransaction(() -> {
+			myClient.search().forResource("Patient").where(Patient.BIRTHDATE.exactly().day("2022-01-01")).returnBundle(Bundle.class).execute();
+		});
+		SqlQuery doubleClauseSql = myCaptureQueriesListener.getSelectQueries().get(1);
+		ourLog.info(doubleClauseSql.getSql(true, true));
+		//TODO KBD write an actual assert here
 	}
 
 
