@@ -7,22 +7,36 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
 
 public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 
@@ -258,6 +272,101 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 			List<ResourcePersistentId> found = mySearchDao.search(resourceName, map);
 			assertThat(ResourcePersistentId.toLongList(found), empty());
 		}
+	}
+
+	private void createJankyCustomSp() {
+		SearchParameter sp = new SearchParameter();
+		sp.setId("condition-risk-scores");
+		sp.addExtension().setUrl("http://hapifhir.io/fhir/StructureDefinition/sp-unique").setValue(new BooleanType(false));
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.setCode("risk-scores");
+		sp.setBase(Collections.singletonList(new CodeType("Condition")));
+		sp.setType(Enumerations.SearchParamType.COMPOSITE);
+		sp.setExpression("Condition");
+		sp.addComponent()
+			.setDefinition("SearchParameter/Condition-clinical-status")
+			.setExpression("Condition");
+		sp.addComponent()
+			.setDefinition("SearchParameter/Condition-verification-status")
+			.setExpression("Condition");
+		sp.addComponent()
+			.setDefinition("SearchParameter/clinical-identifier")
+			.setExpression("Condition");
+		sp.addComponent()
+			.setDefinition("SearchParameter/clinical-patient")
+			.setExpression("Condition");
+		mySearchParameterDao.update(sp);
+		mySearchParamRegistry.forceRefresh();
+
+	}
+
+	@Test
+	public void testConditionSearchWithTokenIsIgnored() {
+		Patient p = new Patient();
+		p.setId("patient");
+		myPatientDao.update(p);
+		ResourceSearchParams conditions = mySearchParamRegistry.getActiveSearchParams("Condition");
+		createJankyCustomSp();
+		Condition inactiveUnconfirmedCondition = new Condition();
+		inactiveUnconfirmedCondition.setId("inactiveUnconfirmedCondition");
+		inactiveUnconfirmedCondition.addIdentifier().setSystem("http://foo").setValue("123");
+		inactiveUnconfirmedCondition.setSubject(new Reference("Patient/patient"));
+		inactiveUnconfirmedCondition.setClinicalStatus(new CodeableConcept().addCoding(new Coding().setSystem("http://terminology.hl7.org/CodeSystem/condition-clinical").setCode("inactive")));
+		inactiveUnconfirmedCondition.setVerificationStatus(new CodeableConcept().addCoding(new Coding().setSystem("http://terminology.hl7.org/CodeSystem/condition-ver-status").setCode("unconfirmed")));
+		myConditionDao.update(inactiveUnconfirmedCondition);
+
+		Condition activeConfirmedCondition = new Condition();
+		activeConfirmedCondition.setId("activeConfirmedCondition");
+		activeConfirmedCondition.addIdentifier().setSystem("http://foo").setValue("456");
+		activeConfirmedCondition.setSubject(new Reference("Patient/patient"));
+		activeConfirmedCondition.setClinicalStatus(new CodeableConcept().addCoding(new Coding().setSystem("http://terminology.hl7.org/CodeSystem/condition-clinical").setCode("active")));
+		activeConfirmedCondition.setVerificationStatus(new CodeableConcept().addCoding(new Coding().setSystem("http://terminology.hl7.org/CodeSystem/condition-ver-status").setCode("confirmed")));
+		myConditionDao.update(activeConfirmedCondition);
+
+		Condition activeUnconfirmedCondition = new Condition();
+		activeUnconfirmedCondition.setId("activeUnconfirmedCondition");
+		activeUnconfirmedCondition.addIdentifier().setSystem("http://foo").setValue("456");
+		activeUnconfirmedCondition.setSubject(new Reference("Patient/patient"));
+		activeUnconfirmedCondition.setClinicalStatus(new CodeableConcept().addCoding(new Coding().setSystem("http://terminology.hl7.org/CodeSystem/condition-clinical").setCode("active")));
+		activeUnconfirmedCondition.setVerificationStatus(new CodeableConcept().addCoding(new Coding().setSystem("http://terminology.hl7.org/CodeSystem/condition-ver-status").setCode("unconfirmed")));
+		myConditionDao.update(activeUnconfirmedCondition);
+
+
+
+		TokenParam active = new TokenParam("http://terminology.hl7.org/CodeSystem/condition-clinical", "active");
+		TokenParam inactive = new TokenParam("http://terminology.hl7.org/CodeSystem/condition-clinical", "inactive");
+		TokenParam confirmed = new TokenParam("http://terminology.hl7.org/CodeSystem/condition-ver-status", "confirmed");
+		TokenParam unconfirmed = new TokenParam("http://terminology.hl7.org/CodeSystem/condition-ver-status", "unconfirmed");
+		SearchParameterMap spMap = new SearchParameterMap();
+		spMap.add(Condition.SP_IDENTIFIER, new TokenParam("http://foo", ""));
+		spMap.add(Condition.SP_PATIENT, new ReferenceParam("Patient/patient"));
+		IBundleProvider search = myConditionDao.search(spMap);
+		assertThat(search.size(), is(equalTo(3)));
+
+		spMap = new SearchParameterMap();
+		spMap.add(Condition.SP_IDENTIFIER, new TokenParam("http://foo", ""));
+		spMap.add(Condition.SP_CLINICAL_STATUS, active);
+		spMap.add(Condition.SP_VERIFICATION_STATUS, unconfirmed);
+		search = myConditionDao.search(spMap);
+		assertThat(search.size(), is(equalTo(1)));
+
+		spMap = new SearchParameterMap();
+		spMap.add(Condition.SP_IDENTIFIER, new TokenParam("http://foo", ""));
+		spMap.add(Condition.SP_PATIENT, new ReferenceParam("Patient/patient"));
+		spMap.add(Condition.SP_CLINICAL_STATUS, active);
+		spMap.add(Condition.SP_VERIFICATION_STATUS, confirmed);
+		search = myConditionDao.search(spMap);
+		assertThat(search.size(), is(equalTo(1)));
+
+		spMap = new SearchParameterMap();
+		spMap.add(Condition.SP_IDENTIFIER, new TokenParam("http://foo", ""));
+		spMap.add(Condition.SP_PATIENT, new ReferenceParam("Patient/patient"));
+		spMap.add(Condition.SP_CLINICAL_STATUS, inactive);
+		spMap.add(Condition.SP_VERIFICATION_STATUS, unconfirmed);
+		search = myConditionDao.search(spMap);
+		assertThat(search.size(), is(equalTo(1)));
+
+
 	}
 
 }
