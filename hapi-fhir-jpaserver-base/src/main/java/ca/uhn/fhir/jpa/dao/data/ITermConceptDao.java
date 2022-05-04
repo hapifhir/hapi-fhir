@@ -9,7 +9,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -50,6 +49,9 @@ public interface ITermConceptDao extends JpaRepository<TermConcept, Long>, IHapi
 
 	@Query("SELECT c FROM TermConcept c WHERE c.myCodeSystem = :code_system AND c.myCode = :code")
 	Optional<TermConcept> findByCodeSystemAndCode(@Param("code_system") TermCodeSystemVersion theCodeSystem, @Param("code") String theCode);
+
+	@Query("FROM TermConcept WHERE myCodeSystem = :code_system AND myCode in (:codeList)")
+	List<TermConcept> findByCodeSystemAndCodeList(@Param("code_system") TermCodeSystemVersion theCodeSystem, @Param("codeList") List<String> theCodeList);
 
 	@Modifying
 	@Query("DELETE FROM TermConcept WHERE myCodeSystem.myId = :cs_pid")

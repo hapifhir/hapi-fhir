@@ -56,6 +56,11 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  */
 public class ParametersUtil {
 
+	public static Optional<String> getNamedParameterValueAsString(FhirContext theCtx, IBaseParameters theParameters, String theParameterName) {
+		Function<IPrimitiveType<?>, String> mapper = t -> defaultIfBlank(t.getValueAsString(), null);
+		return extractNamedParameters(theCtx, theParameters, theParameterName, mapper).stream().findFirst();
+	}
+
 	public static List<String> getNamedParameterValuesAsString(FhirContext theCtx, IBaseParameters theParameters, String theParameterName) {
 		Function<IPrimitiveType<?>, String> mapper = t -> defaultIfBlank(t.getValueAsString(), null);
 		return extractNamedParameters(theCtx, theParameters, theParameterName, mapper);
@@ -68,6 +73,10 @@ public class ParametersUtil {
 
 	public static Optional<Integer> getNamedParameterValueAsInteger(FhirContext theCtx, IBaseParameters theParameters, String theParameterName) {
 		return getNamedParameterValuesAsInteger(theCtx, theParameters, theParameterName).stream().findFirst();
+	}
+
+	public static Optional<IBase> getNamedParameter(FhirContext theCtx, IBaseResource theParameters, String theParameterName) {
+		return getNamedParameters(theCtx, theParameters, theParameterName).stream().findFirst();
 	}
 
 	public static List<IBase> getNamedParameters(FhirContext theCtx, IBaseResource theParameters, String theParameterName) {
@@ -307,6 +316,13 @@ public class ParametersUtil {
 	public static void addPartString(FhirContext theContext, IBase theParameter, String theName, String theValue) {
 		IPrimitiveType<String> value = (IPrimitiveType<String>) theContext.getElementDefinition("string").newInstance();
 		value.setValue(theValue);
+
+		addPart(theContext, theParameter, theName, value);
+	}
+
+	public static void addPartUrl(FhirContext theContext, IBase theParameter, String theName, String theCode) {
+		IPrimitiveType<String> value = (IPrimitiveType<String>) theContext.getElementDefinition("url").newInstance();
+		value.setValue(theCode);
 
 		addPart(theContext, theParameter, theName, value);
 	}

@@ -1,0 +1,4 @@
+---
+type: security
+issue: 3514
+title: "Bump the version of Spring Core to 5.3.18 to avoid CVE-2022-22963"

@@ -1,0 +1,3 @@
+type: add
+issue: 3534
+title: "Added a new multi-column index on the HFJ_RESOURCE table indexing the columns RES_TYPE, RES_DELETED_AT, RES_UPDATED, PARTITION_ID and RES_ID and removed the existing single-column index on the RES_TYPE column. This new index will improve the performance of the $reindex operation and will be useful for some other queries a well."

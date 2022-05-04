@@ -26,6 +26,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 
 public class FhirContextR4Config {
+
+	public static final String DEFAULT_PRESERVE_VERSION_REFS = "AuditEvent.entity.what";
+
 	@Bean(name = "primaryFhirContext")
 	@Primary
 	public FhirContext fhirContextR4() {
@@ -33,7 +36,7 @@ public class FhirContextR4Config {
 
 		// Don't strip versions in some places
 		ParserOptions parserOptions = retVal.getParserOptions();
-		parserOptions.setDontStripVersionsFromReferencesAtPaths("AuditEvent.entity.what");
+		parserOptions.setDontStripVersionsFromReferencesAtPaths(DEFAULT_PRESERVE_VERSION_REFS);
 
 		return retVal;
 	}

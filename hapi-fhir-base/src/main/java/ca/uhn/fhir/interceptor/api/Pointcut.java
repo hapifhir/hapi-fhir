@@ -1347,6 +1347,34 @@ public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>Storage Hook:</b>
+	 * Invoked before client-assigned id is created.
+	 * <p>
+	 * Hooks will have access to the contents of the resource being created
+	 * so that client-assigned ids can be allowed/denied. These changes will
+	 * be reflected in permanent storage.
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>org.hl7.fhir.instance.model.api.IBaseResource</li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	STORAGE_PRESTORAGE_CLIENT_ASSIGNED_ID(void.class,
+		"org.hl7.fhir.instance.model.api.IBaseResource",
+		"ca.uhn.fhir.rest.api.server.RequestDetails"
+	),
+
+	/**
+	 * <b>Storage Hook:</b>
 	 * Invoked before a resource will be updated, immediately before the resource
 	 * is persisted to the database.
 	 * <p>

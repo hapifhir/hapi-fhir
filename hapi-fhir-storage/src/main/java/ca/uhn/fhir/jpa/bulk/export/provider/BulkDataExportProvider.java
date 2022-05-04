@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.batch.config.BatchConstants.PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES;
 import static org.slf4j.LoggerFactory.getLogger;
 
 
@@ -89,7 +90,7 @@ public class BulkDataExportProvider {
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_FILTER, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theTypeFilter,
 		ServletRequestDetails theRequestDetails
 	) {
-		validatePreferAsyncHeader(theRequestDetails);
+		validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_EXPORT);
 		BulkDataExportOptions bulkDataExportOptions = buildSystemBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter);
 		Boolean useCache = shouldUseCache(theRequestDetails);
 		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(bulkDataExportOptions, useCache, theRequestDetails);
@@ -103,6 +104,15 @@ public class BulkDataExportProvider {
 
 	private String getServerBase(ServletRequestDetails theRequestDetails) {
 		return StringUtils.removeEnd(theRequestDetails.getServerBaseForRequest(), "/");
+	}
+
+	private String getDefaultPartitionServerBase(ServletRequestDetails theRequestDetails) {
+		if (theRequestDetails.getTenantId() == null || theRequestDetails.getTenantId().equals(JpaConstants.DEFAULT_PARTITION_NAME)) {
+			return getServerBase(theRequestDetails);
+		}
+		else {
+			return StringUtils.removeEnd(theRequestDetails.getServerBaseForRequest().replace(theRequestDetails.getTenantId(), JpaConstants.DEFAULT_PARTITION_NAME), "/");
+		}
 	}
 
 	/**
@@ -125,7 +135,7 @@ public class BulkDataExportProvider {
 		ourLog.debug("_mdm=", theMdm);
 
 
-		validatePreferAsyncHeader(theRequestDetails);
+		validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_EXPORT);
 		BulkDataExportOptions bulkDataExportOptions = buildGroupBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter, theIdParam, theMdm);
 		validateResourceTypesAllContainPatientSearchParams(bulkDataExportOptions.getResourceTypes());
 		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(bulkDataExportOptions, shouldUseCache(theRequestDetails), theRequestDetails);
@@ -135,6 +145,7 @@ public class BulkDataExportProvider {
 	private void validateResourceTypesAllContainPatientSearchParams(Set<String> theResourceTypes) {
 		if (theResourceTypes != null) {
 			List<String> badResourceTypes = theResourceTypes.stream()
+				.filter(resourceType -> !PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES.contains(resourceType))
 				.filter(resourceType -> !myBulkDataExportSvc.getPatientCompartmentResources().contains(resourceType))
 				.collect(Collectors.toList());
 
@@ -155,7 +166,7 @@ public class BulkDataExportProvider {
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_FILTER, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theTypeFilter,
 		ServletRequestDetails theRequestDetails
 	) {
-		validatePreferAsyncHeader(theRequestDetails);
+		validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_EXPORT);
 		BulkDataExportOptions bulkDataExportOptions = buildPatientBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter);
 		validateResourceTypesAllContainPatientSearchParams(bulkDataExportOptions.getResourceTypes());
 		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(bulkDataExportOptions, shouldUseCache(theRequestDetails), theRequestDetails);
@@ -195,7 +206,7 @@ public class BulkDataExportProvider {
 				bulkResponseDocument.setTransactionTime(status.getStatusTime());
 				bulkResponseDocument.setRequest(status.getRequest());
 				for (IBulkDataExportSvc.FileEntry nextFile : status.getFiles()) {
-					String serverBase = getServerBase(theRequestDetails);
+					String serverBase = getDefaultPartitionServerBase(theRequestDetails);
 					String nextUrl = serverBase + "/" + nextFile.getResourceId().toUnqualifiedVersionless().getValue();
 					bulkResponseDocument
 						.addOutput()
@@ -278,11 +289,11 @@ public class BulkDataExportProvider {
 		response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
 	}
 
-	private void validatePreferAsyncHeader(ServletRequestDetails theRequestDetails) {
+	public static void validatePreferAsyncHeader(ServletRequestDetails theRequestDetails, String theOperationName) {
 		String preferHeader = theRequestDetails.getHeader(Constants.HEADER_PREFER);
 		PreferHeader prefer = RestfulServerUtils.parsePreferHeader(null, preferHeader);
 		if (prefer.getRespondAsync() == false) {
-			throw new InvalidRequestException(Msg.code(513) + "Must request async processing for $export");
+			throw new InvalidRequestException(Msg.code(513) + "Must request async processing for " + theOperationName);
 		}
 	}
 

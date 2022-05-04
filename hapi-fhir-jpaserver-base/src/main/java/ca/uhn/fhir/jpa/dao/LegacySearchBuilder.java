@@ -20,21 +20,21 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IDao;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilder;
 import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilderFactory;
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinEnum;
@@ -53,13 +53,10 @@ import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.lastn.IElasticsearchSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.util.Dstu3DistanceHelper;
 import ca.uhn.fhir.jpa.searchparam.util.LastNParameterHelper;
 import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
-import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.jpa.util.SqlQueryList;
@@ -79,8 +76,11 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -149,7 +149,7 @@ public class LegacySearchBuilder implements ISearchBuilder {
 	@Autowired
 	private FhirContext myContext;
 	@Autowired
-	private IdHelperService myIdHelperService;
+	private IIdHelperService myIdHelperService;
 	@Autowired(required = false)
 	private IFulltextSearchSvc myFulltextSearchSvc;
 	@Autowired(required = false)
@@ -227,14 +227,14 @@ public class LegacySearchBuilder implements ISearchBuilder {
 	}
 
 	@Override
-	public Iterator<Long> createCountQuery(SearchParameterMap theParams, String theSearchUuid, RequestDetails theRequest, @Nonnull RequestPartitionId theRequestPartitionId) {
+	public Long createCountQuery(SearchParameterMap theParams, String theSearchUuid, RequestDetails theRequest, @Nonnull RequestPartitionId theRequestPartitionId) {
 		assert theRequestPartitionId != null;
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		init(theParams, theSearchUuid, theRequestPartitionId);
 
 		List<TypedQuery<Long>> queries = createQuery(null, null, null, true, theRequest, null);
-		return new CountQueryIterator(queries.get(0));
+		return new CountQueryIterator(queries.get(0)).next();
 	}
 
 	/**
@@ -287,7 +287,7 @@ public class LegacySearchBuilder implements ISearchBuilder {
 				}
 
 				if (myParams.getEverythingMode() != null) {
-					pids = myFulltextSearchSvc.everything(myResourceName, myParams, theRequest);
+					pids = queryHibernateSearchForEverythingPids();
 				} else {
 					pids = myFulltextSearchSvc.search(myResourceName, myParams);
 				}
@@ -330,6 +330,25 @@ public class LegacySearchBuilder implements ISearchBuilder {
 		}
 
 		return myQueries;
+	}
+
+	private List<ResourcePersistentId> queryHibernateSearchForEverythingPids() {
+		ResourcePersistentId pid = null;
+		if (myParams.get(IAnyResource.SP_RES_ID) != null) {
+			String idParamValue;
+			IQueryParameterType idParam = myParams.get(IAnyResource.SP_RES_ID).get(0).get(0);
+			if (idParam instanceof TokenParam) {
+				TokenParam idParm = (TokenParam) idParam;
+				idParamValue = idParm.getValue();
+			} else {
+				StringParam idParm = (StringParam) idParam;
+				idParamValue = idParm.getValue();
+			}
+
+			pid = myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, idParamValue);
+		}
+		List<ResourcePersistentId> pids = myFulltextSearchSvc.everything(myResourceName, myParams, pid);
+		return pids;
 	}
 
 	private void doCreateChunkedQueries(List<Long> thePids, SortSpec sort, Integer theOffset, boolean theCount, RequestDetails theRequest, ArrayList<TypedQuery<Long>> theQueries) {

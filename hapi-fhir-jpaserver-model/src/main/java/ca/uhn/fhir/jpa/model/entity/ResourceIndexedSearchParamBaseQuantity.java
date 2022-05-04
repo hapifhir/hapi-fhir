@@ -20,17 +20,13 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
-import javax.persistence.Column;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.MappedSuperclass;
-
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import javax.persistence.Column;
+import javax.persistence.MappedSuperclass;
 
 @MappedSuperclass
 public abstract class ResourceIndexedSearchParamBaseQuantity extends BaseResourceIndexedSearchParam {
@@ -62,10 +58,6 @@ public abstract class ResourceIndexedSearchParamBaseQuantity extends BaseResourc
 	 */
 	@Column(name = "HASH_IDENTITY", nullable = true)
 	private Long myHashIdentity;
-
-	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = {})
-	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false)
-	private ResourceTable myResource;
 
 	/**
 	 * Constructor
@@ -166,15 +158,4 @@ public abstract class ResourceIndexedSearchParamBaseQuantity extends BaseResourc
 		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, theUnits);
 	}
 
-	@Override
-	public ResourceTable getResource() {
-		return myResource;
-	}
-
-	@Override
-	public BaseResourceIndexedSearchParam setResource(ResourceTable theResource) {
-		myResource = theResource;
-		setResourceType(theResource.getResourceType());
-		return this;
-	}
 }

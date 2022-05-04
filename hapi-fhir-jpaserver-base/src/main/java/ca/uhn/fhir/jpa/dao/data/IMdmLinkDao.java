@@ -73,4 +73,7 @@ public interface IMdmLinkDao extends JpaRepository<MdmLink, Long>, IHapiFhirJpaR
 
 	@Query("SELECT ml.myId FROM MdmLink ml WHERE ml.myMdmSourceType = :resourceName AND ml.myCreated <= :highThreshold ORDER BY ml.myCreated DESC")
 	List<Long> findPidByResourceNameAndThreshold(@Param("resourceName") String theResourceName, @Param("highThreshold") Date theHighThreshold, Pageable thePageable);
+
+	@Query("SELECT ml.myId FROM MdmLink ml WHERE ml.myMdmSourceType = :resourceName AND ml.myCreated <= :highThreshold AND ml.myPartitionIdValue IN :partitionId ORDER BY ml.myCreated DESC")
+	List<Long> findPidByResourceNameAndThresholdAndPartitionId(@Param("resourceName") String theResourceName, @Param("highThreshold") Date theHighThreshold, @Param("partitionId") List<Integer> thePartitionIds, Pageable thePageable);
 }

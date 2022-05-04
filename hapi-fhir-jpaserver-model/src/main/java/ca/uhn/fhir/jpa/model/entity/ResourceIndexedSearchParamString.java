@@ -34,7 +34,6 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -60,10 +59,9 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 	// This is used for sorting, and for :contains queries currently
 	@Index(name = "IDX_SP_STRING_HASH_IDENT", columnList = "HASH_IDENTITY"),
 
-	@Index(name = "IDX_SP_STRING_HASH_NRM", columnList = "HASH_NORM_PREFIX,SP_VALUE_NORMALIZED"),
-	@Index(name = "IDX_SP_STRING_HASH_EXCT", columnList = "HASH_EXACT"),
+	@Index(name = "IDX_SP_STRING_HASH_NRM_V2", columnList = "HASH_NORM_PREFIX,SP_VALUE_NORMALIZED,RES_ID,PARTITION_ID"),
+	@Index(name = "IDX_SP_STRING_HASH_EXCT_V2", columnList = "HASH_EXACT,RES_ID,PARTITION_ID"),
 
-	@Index(name = "IDX_SP_STRING_UPDATED", columnList = "SP_UPDATED"),
 	@Index(name = "IDX_SP_STRING_RESID", columnList = "RES_ID")
 })
 public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchParam {

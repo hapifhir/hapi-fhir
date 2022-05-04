@@ -1,0 +1,4 @@
+type: fix
+issue: 3524
+jira: SMILE-3672
+title: "Previously  if partitioning was enabled, the URL returned from  `$export-poll-status` provided a location in the wrong partition. This has been fixed and all Bulk Exports will be stored in the  `DEFAULT` partition."

@@ -47,7 +47,7 @@ import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.util.InterceptorUtil;
+import ca.uhn.fhir.rest.server.interceptor.ServerInterceptorUtil;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
@@ -508,6 +508,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		return candidate.orElse(null);
 	}
 
+
 	private IBundleProvider executeQuery(String theResourceType, SearchParameterMap theParams, RequestDetails theRequestDetails, String theSearchUuid, ISearchBuilder theSb, Integer theLoadSynchronousUpTo, RequestPartitionId theRequestPartitionId) {
 		SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(theRequestDetails, theSearchUuid);
 		searchRuntimeDetails.setLoadSynchronous(true);
@@ -533,12 +534,11 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				List<List<IQueryParameterType>> contentAndTerms = theParams.get(Constants.PARAM_CONTENT);
 				List<List<IQueryParameterType>> textAndTerms = theParams.get(Constants.PARAM_TEXT);
 
-				Iterator<Long> countIterator = theSb.createCountQuery(theParams, theSearchUuid, theRequestDetails, theRequestPartitionId);
+				count = theSb.createCountQuery(theParams, theSearchUuid, theRequestDetails, theRequestPartitionId);
 
 				if (contentAndTerms != null) theParams.put(Constants.PARAM_CONTENT, contentAndTerms);
 				if (textAndTerms != null) theParams.put(Constants.PARAM_TEXT, textAndTerms);
 
-				count = countIterator.next();
 				ourLog.trace("Got count {}", count);
 			}
 
@@ -606,7 +606,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			List<IBaseResource> resources = new ArrayList<>();
 			theSb.loadResourcesByPid(pids, includedPidsList, resources, false, theRequestDetails);
 			// Hook: STORAGE_PRESHOW_RESOURCES
-			resources = InterceptorUtil.fireStoragePreshowResource(resources, theRequestDetails, myInterceptorBroadcaster);
+			resources = ServerInterceptorUtil.fireStoragePreshowResource(resources, theRequestDetails, myInterceptorBroadcaster);
 
 			SimpleBundleProvider bundleProvider = new SimpleBundleProvider(resources);
 			if (theParams.isOffsetQuery()) {
@@ -1068,8 +1068,10 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 					doSaveSearch();
 
+					ourLog.trace("saveUnsynced() - pre-commit");
 				}
 			});
+			ourLog.trace("saveUnsynced() - post-commit");
 
 		}
 
@@ -1231,8 +1233,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				 * we will have to clone those parameters here so that
 				 * the "correct" params are used in createQuery below
 				 */
-				Iterator<Long> countIterator = sb.createCountQuery(myParams.clone(), mySearch.getUuid(), myRequest, myRequestPartitionId);
-				Long count = countIterator.hasNext() ? countIterator.next() : 0L;
+				Long count = sb.createCountQuery(myParams.clone(), mySearch.getUuid(), myRequest, myRequestPartitionId);
+
 				ourLog.trace("Got count {}", count);
 
 				TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);

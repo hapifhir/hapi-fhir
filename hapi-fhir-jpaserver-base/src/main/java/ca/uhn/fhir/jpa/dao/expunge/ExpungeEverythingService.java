@@ -23,6 +23,8 @@ package ca.uhn.fhir.jpa.dao.expunge;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
+import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.entity.BulkImportJobEntity;
 import ca.uhn.fhir.jpa.entity.BulkImportJobFileEntity;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
@@ -63,7 +65,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
-import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
+import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
@@ -90,7 +92,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
-public class ExpungeEverythingService {
+public class ExpungeEverythingService implements IExpungeEverythingService {
 	private static final Logger ourLog = LoggerFactory.getLogger(ExpungeEverythingService.class);
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
@@ -109,6 +111,7 @@ public class ExpungeEverythingService {
 		myTxTemplate = new TransactionTemplate(myPlatformTransactionManager);
 	}
 
+	@Override
 	public void expungeEverything(@Nullable RequestDetails theRequest) {
 
 		final AtomicInteger counter = new AtomicInteger();
@@ -126,10 +129,12 @@ public class ExpungeEverythingService {
 			counter.addAndGet(doExpungeEverythingQuery("UPDATE " + TermCodeSystem.class.getSimpleName() + " d SET d.myCurrentVersion = null"));
 			return null;
 		});
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(Batch2WorkChunkEntity.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(Batch2JobInstanceEntity.class));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(NpmPackageVersionResourceEntity.class));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(NpmPackageVersionEntity.class));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(NpmPackageEntity.class));
-		counter.addAndGet(expungeEverythingByTypeWithoutPurging(SearchParamPresent.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(SearchParamPresentEntity.class));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(BulkImportJobFileEntity.class));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(BulkImportJobEntity.class));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(ForcedId.class));
@@ -220,6 +225,7 @@ public class ExpungeEverythingService {
                 return outcome;
         }
 
+	@Override
 	public int expungeEverythingByType(Class<?> theEntityType) {
                 int result = expungeEverythingByTypeWithoutPurging(theEntityType);
                 purgeAllCaches();

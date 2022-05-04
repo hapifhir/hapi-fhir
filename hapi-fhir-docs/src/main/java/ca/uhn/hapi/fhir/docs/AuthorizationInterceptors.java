@@ -20,6 +20,8 @@ package ca.uhn.hapi.fhir.docs;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -32,8 +34,10 @@ import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.interceptor.auth.*;
+import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -55,28 +59,28 @@ public class AuthorizationInterceptors {
       public Class<? extends IBaseResource> getResourceType() {
          return Patient.class;
       }
-      
+
       public MethodOutcome create(@ResourceParam Patient thePatient, RequestDetails theRequestDetails) {
-         
+
          return new MethodOutcome(); // populate this
       }
-      
+
    }
-   
+
    //START SNIPPET: patientAndAdmin
    @SuppressWarnings("ConstantConditions")
 	public class PatientAndAdminAuthorizationInterceptor extends AuthorizationInterceptor {
-      
+
       @Override
       public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-         
-         // Process authorization header - The following is a fake 
+
+         // Process authorization header - The following is a fake
          // implementation. Obviously we'd want something more real
          // for a production scenario.
-         // 
+         //
          // In this basic example we have two hardcoded bearer tokens,
          // one which is for a user that has access to one patient, and
-         // another that has full access. 
+         // another that has full access.
          IdType userIdPatientId = null;
          boolean userIsAdmin = false;
          String authHeader = theRequestDetails.getHeader("Authorization");
@@ -109,8 +113,8 @@ public class AuthorizationInterceptors {
                .allowAll()
                .build();
          }
-         
-         // By default, deny everything. This should never get hit, but it's 
+
+         // By default, deny everything. This should never get hit, but it's
          // good to be defensive
          return new RuleBuilder()
             .denyAll()
@@ -119,27 +123,27 @@ public class AuthorizationInterceptors {
    }
    //END SNIPPET: patientAndAdmin
 
-   
+
    //START SNIPPET: conditionalUpdate
    @Update()
    public MethodOutcome update(
          @IdParam IdType theId,
-         @ResourceParam Patient theResource, 
-         @ConditionalUrlParam String theConditionalUrl, 
+         @ResourceParam Patient theResource,
+         @ConditionalUrlParam String theConditionalUrl,
          ServletRequestDetails theRequestDetails,
 			IInterceptorBroadcaster theInterceptorBroadcaster) {
 
       // If we're processing a conditional URL...
       if (isNotBlank(theConditionalUrl)) {
-         
+
          // Pretend we've done the conditional processing. Now let's
          // notify the interceptors that an update has been performed
          // and supply the actual ID that's being updated
          IdType actual = new IdType("Patient", "1123");
-         
+
       }
-      
-      // In a real server, perhaps we would process the conditional 
+
+      // In a real server, perhaps we would process the conditional
       // request differently and follow a separate path. Either way,
       // let's pretend there is some storage code here.
       theResource.setId(theId.withVersion("2"));
@@ -263,6 +267,35 @@ public class AuthorizationInterceptors {
 
 	}
 	//END SNIPPET: narrowing
+
+	@SuppressWarnings("SpellCheckingInspection")
+	public void rsNarrowing() {
+		RestfulServer restfulServer = new RestfulServer();
+
+		//START SNIPPET: rsnarrowing
+		SearchNarrowingInterceptor narrowingInterceptor = new SearchNarrowingInterceptor() {
+			@Override
+			protected AuthorizedList buildAuthorizedList(RequestDetails theRequestDetails) {
+				// Your rules go here
+				return new AuthorizedList()
+					.addCodeInValueSet("Observation", "code", "http://hl7.org/fhir/ValueSet/observation-vitalsignresult");
+			}
+		};
+		restfulServer.registerInterceptor(narrowingInterceptor);
+
+		// Create a consent service for search narrowing
+		IValidationSupport validationSupport = null; // This needs to be populated
+		FhirContext searchParamRegistry = null; // This needs to be populated
+		SearchNarrowingConsentService consentService = new SearchNarrowingConsentService(validationSupport, searchParamRegistry);
+
+		// Create a ConsentIntereptor to apply the ConsentService and register it with the server
+		ConsentInterceptor consentInterceptor = new ConsentInterceptor();
+		consentInterceptor.registerConsentService(consentService);
+		restfulServer.registerInterceptor(consentInterceptor);
+
+
+		//END SNIPPET: rsnarrowing
+	}
 
 
 	//START SNIPPET: narrowingByCode

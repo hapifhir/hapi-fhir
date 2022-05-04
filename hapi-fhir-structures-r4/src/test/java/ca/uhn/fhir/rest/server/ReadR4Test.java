@@ -52,6 +52,7 @@ public class ReadR4Test {
 	public void testRead() throws Exception {
 		myRestfulServerExtension.getRestfulServer().registerProvider(new PatientProvider());
 
+
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient/2?_format=xml&_pretty=true");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 
@@ -74,6 +75,7 @@ public class ReadR4Test {
 				"</Patient>"));
 		}
 	}
+
 
 	@Test
 	public void testReadUsingPlainProvider() throws Exception {

@@ -20,14 +20,18 @@ package ca.uhn.fhir.jpa.dao.search;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
+import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -46,7 +50,6 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.time.Instant;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -57,19 +60,33 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_EXACT;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_NORMALIZED;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_TEXT;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.NESTED_SEARCH_PARAM_ROOT;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_CODE;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_CODE_NORM;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_PARAM_NAME;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_SYSTEM;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_VALUE;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_VALUE_NORM;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.SEARCH_PARAM_ROOT;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ExtendedLuceneClauseBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(ExtendedLuceneClauseBuilder.class);
 
+	private static final double QTY_APPROX_TOLERANCE_PERCENT = .10;
+	private static final double QTY_TOLERANCE_PERCENT = .05;
+
 	final FhirContext myFhirContext;
 	public final SearchPredicateFactory myPredicateFactory;
 	public final BooleanPredicateClausesStep<?> myRootClause;
+	public final ModelConfig myModelConfig;
 
 	final List<TemporalPrecisionEnum> ordinalSearchPrecisions = Arrays.asList(TemporalPrecisionEnum.YEAR, TemporalPrecisionEnum.MONTH, TemporalPrecisionEnum.DAY);
 
-	public ExtendedLuceneClauseBuilder(FhirContext myFhirContext, BooleanPredicateClausesStep<?> myRootClause, SearchPredicateFactory myPredicateFactory) {
+	public ExtendedLuceneClauseBuilder(FhirContext myFhirContext, ModelConfig theModelConfig,
+			BooleanPredicateClausesStep<?> myRootClause, SearchPredicateFactory myPredicateFactory) {
 		this.myFhirContext = myFhirContext;
+		this.myModelConfig = theModelConfig;
 		this.myRootClause = myRootClause;
 		this.myPredicateFactory = myPredicateFactory;
 	}
@@ -144,7 +161,7 @@ public class ExtendedLuceneClauseBuilder {
 						return myPredicateFactory.match().field(getTokenCodeFieldPath(theSearchParamName)).matching(token.getValue());
 					} else if (StringUtils.isBlank(token.getValue())) {
 						// system without value
-						return myPredicateFactory.match().field("sp." + theSearchParamName + ".token" + ".system").matching(token.getSystem());
+						return myPredicateFactory.match().field(SEARCH_PARAM_ROOT + "." + theSearchParamName + ".token" + ".system").matching(token.getSystem());
 					} else {
 						// system + value
 						return myPredicateFactory.match().field(getTokenSystemCodeFieldPath(theSearchParamName)).matching(token.getValueAsQueryToken(this.myFhirContext));
@@ -167,12 +184,12 @@ public class ExtendedLuceneClauseBuilder {
 
 	@Nonnull
 	public static String getTokenCodeFieldPath(String theSearchParamName) {
-		return "sp." + theSearchParamName + ".token" + ".code";
+		return SEARCH_PARAM_ROOT + "." + theSearchParamName + ".token" + ".code";
 	}
 
 	@Nonnull
 	public static String getTokenSystemCodeFieldPath(@Nonnull String theSearchParamName) {
-		return "sp." + theSearchParamName + ".token" + ".code-system";
+		return SEARCH_PARAM_ROOT + "." + theSearchParamName + ".token" + ".code-system";
 	}
 
 	public void addStringTextSearch(String theSearchParamName, List<List<IQueryParameterType>> stringAndOrTerms) {
@@ -190,7 +207,7 @@ public class ExtendedLuceneClauseBuilder {
 				fieldName = "myNarrativeText";
 				break;
 			default:
-				fieldName = "sp." + theSearchParamName + ".string." + IDX_STRING_TEXT;
+				fieldName = SEARCH_PARAM_ROOT + "." + theSearchParamName + ".string." + IDX_STRING_TEXT;
 				break;
 		}
 
@@ -213,7 +230,7 @@ public class ExtendedLuceneClauseBuilder {
 	}
 
 	public void addStringExactSearch(String theSearchParamName, List<List<IQueryParameterType>> theStringAndOrTerms) {
-		String fieldPath = "sp." + theSearchParamName + ".string." + IDX_STRING_EXACT;
+		String fieldPath = SEARCH_PARAM_ROOT + "." + theSearchParamName + ".string." + IDX_STRING_EXACT;
 
 		for (List<? extends IQueryParameterType> nextAnd : theStringAndOrTerms) {
 			Set<String> terms = extractOrStringParams(nextAnd);
@@ -227,7 +244,7 @@ public class ExtendedLuceneClauseBuilder {
 	}
 
 	public void addStringContainsSearch(String theSearchParamName, List<List<IQueryParameterType>> theStringAndOrTerms) {
-		String fieldPath = "sp." + theSearchParamName + ".string." + IDX_STRING_NORMALIZED;
+		String fieldPath = SEARCH_PARAM_ROOT + "." + theSearchParamName + ".string." + IDX_STRING_NORMALIZED;
 		for (List<? extends IQueryParameterType> nextAnd : theStringAndOrTerms) {
 			Set<String> terms = extractOrStringParams(nextAnd);
 			ourLog.debug("addStringContainsSearch {} {}", theSearchParamName, terms);
@@ -241,7 +258,7 @@ public class ExtendedLuceneClauseBuilder {
 	}
 
 	public void addStringUnmodifiedSearch(String theSearchParamName, List<List<IQueryParameterType>> theStringAndOrTerms) {
-		String fieldPath = "sp." + theSearchParamName + ".string." + IDX_STRING_NORMALIZED;
+		String fieldPath = SEARCH_PARAM_ROOT + "." + theSearchParamName + ".string." + IDX_STRING_NORMALIZED;
 		for (List<? extends IQueryParameterType> nextAnd : theStringAndOrTerms) {
 			Set<String> terms = extractOrStringParams(nextAnd);
 			ourLog.debug("addStringUnmodifiedSearch {} {}", theSearchParamName, terms);
@@ -255,7 +272,7 @@ public class ExtendedLuceneClauseBuilder {
 	}
 
 	public void addReferenceUnchainedSearch(String theSearchParamName, List<List<IQueryParameterType>> theReferenceAndOrTerms) {
-		String fieldPath = "sp." + theSearchParamName + ".reference.value";
+		String fieldPath = SEARCH_PARAM_ROOT + "." + theSearchParamName + ".reference.value";
 		for (List<? extends IQueryParameterType> nextAnd : theReferenceAndOrTerms) {
 			Set<String> terms = extractOrStringParams(nextAnd);
 			ourLog.trace("reference unchained search {}", terms);
@@ -362,8 +379,8 @@ public class ExtendedLuceneClauseBuilder {
 	}
 
 	private PredicateFinalStep generateDateOrdinalSearchTerms(String theSearchParamName, DateParam theDateParam) {
-		String lowerOrdinalField = "sp." + theSearchParamName + ".dt.lower-ord";
-		String upperOrdinalField = "sp." + theSearchParamName + ".dt.upper-ord";
+		String lowerOrdinalField = SEARCH_PARAM_ROOT + "." + theSearchParamName + ".dt.lower-ord";
+		String upperOrdinalField = SEARCH_PARAM_ROOT + "." + theSearchParamName + ".dt.upper-ord";
 		int lowerBoundAsOrdinal;
 		int upperBoundAsOrdinal;
 		ParamPrefixEnum prefix = theDateParam.getPrefix();
@@ -411,8 +428,8 @@ public class ExtendedLuceneClauseBuilder {
 	}
 
 	private PredicateFinalStep generateDateInstantSearchTerms(String theSearchParamName, DateParam theDateParam) {
-		String lowerInstantField = "sp." + theSearchParamName + ".dt.lower";
-		String upperInstantField = "sp." + theSearchParamName + ".dt.upper";
+		String lowerInstantField = SEARCH_PARAM_ROOT + "." + theSearchParamName + ".dt.lower";
+		String upperInstantField = SEARCH_PARAM_ROOT + "." + theSearchParamName + ".dt.upper";
 		ParamPrefixEnum prefix = theDateParam.getPrefix();
 
 		if (ParamPrefixEnum.NOT_EQUAL == prefix) {
@@ -453,4 +470,137 @@ public class ExtendedLuceneClauseBuilder {
 
 		throw new IllegalArgumentException(Msg.code(2026) + "Date search param does not support prefix of type: " + prefix);
 	}
+
+
+	/**
+	 * Differences with DB search:
+	 *  _ is not all-normalized-or-all-not. Each parameter is applied on quantity or normalized quantity depending on UCUM fitness
+	 *  _ respects ranges for equal and approximate qualifiers
+	 *
+	 * Strategy: For each parameter, if it can be canonicalized, it is, and used against 'normalized-value-quantity' index
+	 * 	otherwise it is applied as-is to 'value-quantity'
+	 */
+	public void addQuantityUnmodifiedSearch(String theSearchParamName, List<List<IQueryParameterType>> theQuantityAndOrTerms) {
+
+		for (List<IQueryParameterType> nextAnd : theQuantityAndOrTerms) {
+			BooleanPredicateClausesStep<?> quantityTerms = myPredicateFactory.bool();
+			quantityTerms.minimumShouldMatchNumber(1);
+
+			for (IQueryParameterType paramType : nextAnd) {
+				BooleanPredicateClausesStep<?> orQuantityTerms = myPredicateFactory.bool();
+				addQuantityOrClauses(theSearchParamName, paramType, orQuantityTerms);
+				quantityTerms.should(orQuantityTerms);
+			}
+
+			myRootClause.must(quantityTerms);
+		}
+	}
+
+
+	private void addQuantityOrClauses(String theSearchParamName,
+			IQueryParameterType theParamType, BooleanPredicateClausesStep<?> theQuantityTerms) {
+
+		QuantityParam qtyParam = QuantityParam.toQuantityParam(theParamType);
+		ParamPrefixEnum activePrefix = qtyParam.getPrefix() == null ? ParamPrefixEnum.EQUAL : qtyParam.getPrefix();
+		String fieldPath = NESTED_SEARCH_PARAM_ROOT + "." + theSearchParamName + "." + QTY_PARAM_NAME;
+
+		if (myModelConfig.getNormalizedQuantitySearchLevel() == NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED) {
+			QuantityParam canonicalQty = UcumServiceUtil.toCanonicalQuantityOrNull(qtyParam);
+			if (canonicalQty != null) {
+				String valueFieldPath = fieldPath + "." + QTY_VALUE_NORM;
+				setPrefixedQuantityPredicate(theQuantityTerms, activePrefix, canonicalQty, valueFieldPath);
+				theQuantityTerms.must(myPredicateFactory.match()
+					.field(fieldPath + "." + QTY_CODE_NORM)
+					.matching(canonicalQty.getUnits()));
+				return;
+			}
+		}
+
+		// not NORMALIZED_QUANTITY_SEARCH_SUPPORTED or non-canonicalizable parameter
+		String valueFieldPath = fieldPath + "." + QTY_VALUE;
+		setPrefixedQuantityPredicate(theQuantityTerms, activePrefix, qtyParam, valueFieldPath);
+
+		if ( isNotBlank(qtyParam.getSystem()) ) {
+			theQuantityTerms.must(
+				myPredicateFactory.match()
+					.field(fieldPath + "." + QTY_SYSTEM).matching(qtyParam.getSystem()) );
+		}
+
+		if ( isNotBlank(qtyParam.getUnits()) ) {
+			theQuantityTerms.must(
+				myPredicateFactory.match()
+					.field(fieldPath + "." + QTY_CODE).matching(qtyParam.getUnits()) );
+		}
+	}
+
+
+	private void setPrefixedQuantityPredicate(BooleanPredicateClausesStep<?> theQuantityTerms,
+			ParamPrefixEnum thePrefix, QuantityParam theQuantity, String valueFieldPath) {
+
+		double value = theQuantity.getValue().doubleValue();
+		double approxTolerance = value * QTY_APPROX_TOLERANCE_PERCENT;
+		double defaultTolerance = value * QTY_TOLERANCE_PERCENT;
+
+		switch (thePrefix) {
+			//	searches for resource quantity between passed param value +/- 10%
+			case APPROXIMATE:
+				theQuantityTerms.must(
+					myPredicateFactory.range()
+						.field(valueFieldPath)
+						.between(value-approxTolerance, value+approxTolerance));
+				break;
+
+			// searches for resource quantity between passed param value +/- 5%
+			case EQUAL:
+				theQuantityTerms.must(
+					myPredicateFactory.range()
+						.field(valueFieldPath)
+						.between(value-defaultTolerance, value+defaultTolerance));
+				break;
+
+			// searches for resource quantity > param value
+			case GREATERTHAN:
+			case STARTS_AFTER:  // treated as GREATERTHAN because search doesn't handle ranges
+				theQuantityTerms.must(
+					myPredicateFactory.range()
+						.field(valueFieldPath)
+						.greaterThan(value));
+				break;
+
+			// searches for resource quantity not < param value
+			case GREATERTHAN_OR_EQUALS:
+				theQuantityTerms.must(
+					myPredicateFactory.range()
+						.field(valueFieldPath)
+						.atLeast(value));
+				break;
+
+			// searches for resource quantity < param value
+			case LESSTHAN:
+			case ENDS_BEFORE:  // treated as LESSTHAN because search doesn't handle ranges
+				theQuantityTerms.must(
+					myPredicateFactory.range()
+						.field(valueFieldPath)
+						.lessThan(value));
+				break;
+
+				// searches for resource quantity not > param value
+			case LESSTHAN_OR_EQUALS:
+				theQuantityTerms.must(
+					myPredicateFactory.range()
+						.field(valueFieldPath)
+						.atMost(value));
+				break;
+
+				// NOT_EQUAL: searches for resource quantity not between passed param value +/- 5%
+			case NOT_EQUAL:
+				theQuantityTerms.mustNot(
+					myPredicateFactory.range()
+						.field(valueFieldPath)
+						.between(value-defaultTolerance, value+defaultTolerance));
+				break;
+		}
+	}
+
+
 }

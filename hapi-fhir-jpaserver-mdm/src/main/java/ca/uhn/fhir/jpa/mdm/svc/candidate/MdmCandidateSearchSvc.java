@@ -20,8 +20,10 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.rules.json.MdmFilterSearchParamJson;
@@ -52,7 +54,7 @@ public class MdmCandidateSearchSvc {
 	@Autowired
 	private IMdmSettings myMdmSettings;
 	@Autowired
-	private IdHelperService myIdHelperService;
+	private IJpaIdHelperService myJpaIdHelperService;
 	@Autowired
 	private MdmCandidateSearchCriteriaBuilderSvc myMdmCandidateSearchCriteriaBuilderSvc;
 	@Autowired
@@ -64,14 +66,14 @@ public class MdmCandidateSearchSvc {
 	/**
 	 * Given a source resource, search for all resources that are considered an MDM match based on defined MDM rules.
 	 *
-	 *
-	 * @param theResourceType
+	 * @param theResourceType the resource type of the resource being matched
 	 * @param theResource the {@link IBaseResource} we are attempting to match.
+	 * @param theRequestPartitionId  the {@link RequestPartitionId} representation of the partitions we are limited to when attempting to match
 	 *
 	 * @return the list of candidate {@link IBaseResource} which could be matches to theResource
 	 */
 	@Transactional
-	public Collection<IAnyResource> findCandidates(String theResourceType, IAnyResource theResource) {
+	public Collection<IAnyResource> findCandidates(String theResourceType, IAnyResource theResource, RequestPartitionId theRequestPartitionId) {
 		Map<Long, IAnyResource> matchedPidsToResources = new HashMap<>();
 		List<MdmFilterSearchParamJson> filterSearchParams = myMdmSettings.getMdmRules().getCandidateFilterSearchParams();
 		List<String> filterCriteria = buildFilterQuery(filterSearchParams, theResourceType);
@@ -80,7 +82,7 @@ public class MdmCandidateSearchSvc {
 		//If there are zero MdmResourceSearchParamJson, we end up only making a single search, otherwise we
 		//must perform one search per MdmResourceSearchParamJson.
 		if (candidateSearchParams.isEmpty()) {
-			searchForIdsAndAddToMap(theResourceType, theResource, matchedPidsToResources, filterCriteria, null);
+			searchForIdsAndAddToMap(theResourceType, theResource, matchedPidsToResources, filterCriteria, null, theRequestPartitionId);
 		} else {
 			for (MdmResourceSearchParamJson resourceSearchParam : candidateSearchParams) {
 
@@ -88,14 +90,14 @@ public class MdmCandidateSearchSvc {
 					continue;
 				}
 
-				searchForIdsAndAddToMap(theResourceType, theResource, matchedPidsToResources, filterCriteria, resourceSearchParam);
+				searchForIdsAndAddToMap(theResourceType, theResource, matchedPidsToResources, filterCriteria, resourceSearchParam, theRequestPartitionId);
 			}
 		}
 		//Obviously we don't want to consider the freshly added resource as a potential candidate.
 		//Sometimes, we are running this function on a resource that has not yet been persisted,
 		//so it may not have an ID yet, precluding the need to remove it.
 		if (theResource.getIdElement().getIdPart() != null) {
-			matchedPidsToResources.remove(myIdHelperService.getPidOrNull(theResource));
+			matchedPidsToResources.remove(myJpaIdHelperService.getPidOrNull(theResource));
 		}
 
 		ourLog.info("Found {} resources for {}", matchedPidsToResources.size(), theResourceType);
@@ -115,7 +117,7 @@ public class MdmCandidateSearchSvc {
 	 * 4. Store all results in `theMatchedPidsToResources`
 	 */
 	@SuppressWarnings("rawtypes")
-	private void searchForIdsAndAddToMap(String theResourceType, IAnyResource theResource, Map<Long, IAnyResource> theMatchedPidsToResources, List<String> theFilterCriteria, MdmResourceSearchParamJson resourceSearchParam) {
+	private void searchForIdsAndAddToMap(String theResourceType, IAnyResource theResource, Map<Long, IAnyResource> theMatchedPidsToResources, List<String> theFilterCriteria, MdmResourceSearchParamJson resourceSearchParam, RequestPartitionId theRequestPartitionId) {
 		//1.
 		Optional<String> oResourceCriteria = myMdmCandidateSearchCriteriaBuilderSvc.buildResourceQueryString(theResourceType, theResource, theFilterCriteria, resourceSearchParam);
 		if (!oResourceCriteria.isPresent()) {
@@ -125,7 +127,7 @@ public class MdmCandidateSearchSvc {
 		ourLog.debug("Searching for {} candidates with {}", theResourceType, resourceCriteria);
 
 		//2.
-		Optional<IBundleProvider> bundleProvider = myCandidateSearcher.search(theResourceType, resourceCriteria);
+		Optional<IBundleProvider> bundleProvider = myCandidateSearcher.search(theResourceType, resourceCriteria, theRequestPartitionId);
 		if (!bundleProvider.isPresent()) {
 			throw new TooManyCandidatesException(Msg.code(762) + "More than " + myMdmSettings.getCandidateSearchLimit() + " candidate matches found for " + resourceCriteria + ".  Aborting mdm matching.");
 		}
@@ -134,7 +136,7 @@ public class MdmCandidateSearchSvc {
 		int initialSize = theMatchedPidsToResources.size();
 
 		//4.
-		resources.forEach(resource -> theMatchedPidsToResources.put(myIdHelperService.getPidOrNull(resource), (IAnyResource) resource));
+		resources.forEach(resource -> theMatchedPidsToResources.put(myJpaIdHelperService.getPidOrNull(resource), (IAnyResource) resource));
 
 		int newSize = theMatchedPidsToResources.size();
 

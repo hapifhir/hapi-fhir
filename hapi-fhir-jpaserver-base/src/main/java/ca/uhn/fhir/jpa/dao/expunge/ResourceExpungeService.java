@@ -26,6 +26,8 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTagDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
@@ -43,10 +45,10 @@ import ca.uhn.fhir.jpa.dao.data.IResourceProvenanceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -76,6 +78,8 @@ public class ResourceExpungeService implements IResourceExpungeService {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceExpungeService.class);
 
 	@Autowired
+	private IForcedIdDao myForcedIdDao;
+	@Autowired
 	private IResourceTableDao myResourceTableDao;
 	@Autowired
 	private IResourceHistoryTableDao myResourceHistoryTableDao;
@@ -104,7 +108,7 @@ public class ResourceExpungeService implements IResourceExpungeService {
 	@Autowired
 	private IResourceTagDao myResourceTagDao;
 	@Autowired
-	private IdHelperService myIdHelperService;
+	private IIdHelperService myIdHelperService;
 	@Autowired
 	private IResourceHistoryTagDao myResourceHistoryTagDao;
 	@Autowired
@@ -122,49 +126,52 @@ public class ResourceExpungeService implements IResourceExpungeService {
 
 	@Override
 	@Transactional
-	public Slice<Long> findHistoricalVersionsOfNonDeletedResources(String theResourceName, Long theResourceId, Long theVersion, int theRemainingCount) {
+	public List<ResourcePersistentId> findHistoricalVersionsOfNonDeletedResources(String theResourceName, ResourcePersistentId theResourceId, int theRemainingCount) {
 		Pageable page = PageRequest.of(0, theRemainingCount);
-		if (theResourceId != null) {
-			if (theVersion != null) {
-				return toSlice(myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(theResourceId, theVersion));
+
+		Slice<Long> ids;
+		if (theResourceId != null && theResourceId.getId() != null) {
+			if (theResourceId.getVersion() != null) {
+				ids = toSlice(myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(theResourceId.getIdAsLong(), theResourceId.getVersion()));
 			} else {
-				return myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResourceId(page, theResourceId);
+				ids = myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResourceId(page, theResourceId.getIdAsLong());
 			}
 		} else {
 			if (theResourceName != null) {
-				return myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResources(page, theResourceName);
+				ids = myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResources(page, theResourceName);
 			} else {
-				return myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResources(page);
+				ids = myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResources(page);
 			}
 		}
+
+		return ResourcePersistentId.fromLongList(ids.getContent());
 	}
 
 	@Override
 	@Transactional
-	public Slice<Long> findHistoricalVersionsOfDeletedResources(String theResourceName, Long theResourceId, int theRemainingCount) {
+	public List<ResourcePersistentId> findHistoricalVersionsOfDeletedResources(String theResourceName, ResourcePersistentId theResourceId, int theRemainingCount) {
 		Pageable page = PageRequest.of(0, theRemainingCount);
+		Slice<Long> ids;
 		if (theResourceId != null) {
-			Slice<Long> ids = myResourceTableDao.findIdsOfDeletedResourcesOfType(page, theResourceId, theResourceName);
+			ids = myResourceTableDao.findIdsOfDeletedResourcesOfType(page, theResourceId.getIdAsLong(), theResourceName);
 			ourLog.info("Expunging {} deleted resources of type[{}] and ID[{}]", ids.getNumberOfElements(), theResourceName, theResourceId);
-			return ids;
 		} else {
 			if (theResourceName != null) {
-				Slice<Long> ids = myResourceTableDao.findIdsOfDeletedResourcesOfType(page, theResourceName);
+				ids = myResourceTableDao.findIdsOfDeletedResourcesOfType(page, theResourceName);
 				ourLog.info("Expunging {} deleted resources of type[{}]", ids.getNumberOfElements(), theResourceName);
-				return ids;
 			} else {
-				Slice<Long> ids = myResourceTableDao.findIdsOfDeletedResources(page);
+				ids = myResourceTableDao.findIdsOfDeletedResources(page);
 				ourLog.info("Expunging {} deleted resources (all types)", ids.getNumberOfElements());
-				return ids;
 			}
 		}
+		return ResourcePersistentId.fromLongList(ids.getContent());
 	}
 
 	@Override
 	@Transactional
-	public void expungeCurrentVersionOfResources(RequestDetails theRequestDetails, List<Long> theResourceIds, AtomicInteger theRemainingCount) {
-		for (Long next : theResourceIds) {
-			expungeCurrentVersionOfResource(theRequestDetails, next, theRemainingCount);
+	public void expungeCurrentVersionOfResources(RequestDetails theRequestDetails, List<ResourcePersistentId> theResourceIds, AtomicInteger theRemainingCount) {
+		for (ResourcePersistentId next : theResourceIds) {
+			expungeCurrentVersionOfResource(theRequestDetails, next.getIdAsLong(), theRemainingCount);
 			if (theRemainingCount.get() <= 0) {
 				return;
 			}
@@ -220,9 +227,9 @@ public class ResourceExpungeService implements IResourceExpungeService {
 
 	@Override
 	@Transactional
-	public void expungeHistoricalVersionsOfIds(RequestDetails theRequestDetails, List<Long> theResourceIds, AtomicInteger theRemainingCount) {
-		for (Long next : theResourceIds) {
-			expungeHistoricalVersionsOfId(theRequestDetails, next, theRemainingCount);
+	public void expungeHistoricalVersionsOfIds(RequestDetails theRequestDetails, List<ResourcePersistentId> theResourceIds, AtomicInteger theRemainingCount) {
+		for (ResourcePersistentId next : theResourceIds) {
+			expungeHistoricalVersionsOfId(theRequestDetails, next.getIdAsLong(), theRemainingCount);
 			if (theRemainingCount.get() <= 0) {
 				return;
 			}
@@ -231,9 +238,9 @@ public class ResourceExpungeService implements IResourceExpungeService {
 
 	@Override
 	@Transactional
-	public void expungeHistoricalVersions(RequestDetails theRequestDetails, List<Long> theHistoricalIds, AtomicInteger theRemainingCount) {
-		for (Long next : theHistoricalIds) {
-			expungeHistoricalVersion(theRequestDetails, next, theRemainingCount);
+	public void expungeHistoricalVersions(RequestDetails theRequestDetails, List<ResourcePersistentId> theHistoricalIds, AtomicInteger theRemainingCount) {
+		for (ResourcePersistentId next : theHistoricalIds) {
+			expungeHistoricalVersion(theRequestDetails, next.getIdAsLong(), theRemainingCount);
 			if (theRemainingCount.get() <= 0) {
 				return;
 			}
@@ -250,14 +257,14 @@ public class ResourceExpungeService implements IResourceExpungeService {
 
 		ourLog.info("Expunging current version of resource {}", resource.getIdDt().getValue());
 
-		deleteAllSearchParams(resource.getResourceId());
+		deleteAllSearchParams(new ResourcePersistentId(resource.getResourceId()));
 		resource.getTags().clear();
 
 		if (resource.getForcedId() != null) {
 			ForcedId forcedId = resource.getForcedId();
 			resource.setForcedId(null);
 			myResourceTableDao.saveAndFlush(resource);
-			myIdHelperService.delete(forcedId);
+			myForcedIdDao.deleteByPid(forcedId.getId());
 		}
 
 		myResourceTableDao.deleteByPid(resource.getId());
@@ -265,48 +272,48 @@ public class ResourceExpungeService implements IResourceExpungeService {
 
 	@Override
 	@Transactional
-	public void deleteAllSearchParams(Long theResourceId) {
-		ResourceTable resource = myResourceTableDao.findById(theResourceId).orElse(null);
+	public void deleteAllSearchParams(ResourcePersistentId theResourceId) {
+		ResourceTable resource = myResourceTableDao.findById(theResourceId.getIdAsLong()).orElse(null);
 
 		if (resource == null || resource.isParamsUriPopulated()) {
-			myResourceIndexedSearchParamUriDao.deleteByResourceId(theResourceId);
+			myResourceIndexedSearchParamUriDao.deleteByResourceId(theResourceId.getIdAsLong());
 		}
 		if (resource == null || resource.isParamsCoordsPopulated()) {
-			myResourceIndexedSearchParamCoordsDao.deleteByResourceId(theResourceId);
+			myResourceIndexedSearchParamCoordsDao.deleteByResourceId(theResourceId.getIdAsLong());
 		}
 		if (resource == null || resource.isParamsDatePopulated()) {
-			myResourceIndexedSearchParamDateDao.deleteByResourceId(theResourceId);
+			myResourceIndexedSearchParamDateDao.deleteByResourceId(theResourceId.getIdAsLong());
 		}
 		if (resource == null || resource.isParamsNumberPopulated()) {
-			myResourceIndexedSearchParamNumberDao.deleteByResourceId(theResourceId);
+			myResourceIndexedSearchParamNumberDao.deleteByResourceId(theResourceId.getIdAsLong());
 		}
 		if (resource == null || resource.isParamsQuantityPopulated()) {
-			myResourceIndexedSearchParamQuantityDao.deleteByResourceId(theResourceId);
+			myResourceIndexedSearchParamQuantityDao.deleteByResourceId(theResourceId.getIdAsLong());
 		}
 		if (resource == null || resource.isParamsQuantityNormalizedPopulated()) {
-			myResourceIndexedSearchParamQuantityNormalizedDao.deleteByResourceId(theResourceId);
+			myResourceIndexedSearchParamQuantityNormalizedDao.deleteByResourceId(theResourceId.getIdAsLong());
 		}
 		if (resource == null || resource.isParamsStringPopulated()) {
-			myResourceIndexedSearchParamStringDao.deleteByResourceId(theResourceId);
+			myResourceIndexedSearchParamStringDao.deleteByResourceId(theResourceId.getIdAsLong());
 		}
 		if (resource == null || resource.isParamsTokenPopulated()) {
-			myResourceIndexedSearchParamTokenDao.deleteByResourceId(theResourceId);
+			myResourceIndexedSearchParamTokenDao.deleteByResourceId(theResourceId.getIdAsLong());
 		}
 		if (resource == null || resource.isParamsComboStringUniquePresent()) {
-			myResourceIndexedCompositeStringUniqueDao.deleteByResourceId(theResourceId);
+			myResourceIndexedCompositeStringUniqueDao.deleteByResourceId(theResourceId.getIdAsLong());
 		}
 		if (resource == null || resource.isParamsComboTokensNonUniquePresent()) {
-			myResourceIndexedComboTokensNonUniqueDao.deleteByResourceId(theResourceId);
+			myResourceIndexedComboTokensNonUniqueDao.deleteByResourceId(theResourceId.getIdAsLong());
 		}
 		if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.ENABLED) {
-			mySearchParamPresentDao.deleteByResourceId(theResourceId);
+			mySearchParamPresentDao.deleteByResourceId(theResourceId.getIdAsLong());
 		}
 		if (resource == null || resource.isHasLinks()) {
-			myResourceLinkDao.deleteByResourceId(theResourceId);
+			myResourceLinkDao.deleteByResourceId(theResourceId.getIdAsLong());
 		}
 
 		if (resource == null || resource.isHasTags()) {
-			myResourceTagDao.deleteByResourceId(theResourceId);
+			myResourceTagDao.deleteByResourceId(theResourceId.getIdAsLong());
 		}
 	}
 

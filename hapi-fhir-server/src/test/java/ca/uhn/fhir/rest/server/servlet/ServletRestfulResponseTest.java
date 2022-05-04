@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -52,4 +53,12 @@ public class ServletRestfulResponseTest {
 		orderVerifier.verify(servletResponse).addHeader(eq("Authorization"), eq("Bearer"));
 		verify(servletResponse).setHeader(eq("Cache-Control"), eq("no-cache, no-store"));
 	}
+
+	@Test
+	public void testSanitizeHeaderField() {
+		assertEquals("AB", ServletRestfulResponse.sanitizeHeaderField("A\nB"));
+		assertEquals("AB", ServletRestfulResponse.sanitizeHeaderField("A\r\r\rB"));
+		assertEquals("AB", ServletRestfulResponse.sanitizeHeaderField("AB"));
+	}
+
 }

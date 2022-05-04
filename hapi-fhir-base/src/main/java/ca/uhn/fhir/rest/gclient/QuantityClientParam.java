@@ -25,7 +25,7 @@ import ca.uhn.fhir.rest.gclient.NumberClientParam.IMatches;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 
 /**
- * Token parameter type for use in fluent client interfaces
+ * Quantity parameter type for use in fluent client interfaces
  */
 @SuppressWarnings("deprecation")
 public class QuantityClientParam extends BaseClientParam  implements IParam {

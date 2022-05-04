@@ -23,14 +23,15 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,8 +56,6 @@ public class SubscriptionRegisteringSubscriber extends BaseSubscriberForSubscrip
 	@Autowired
 	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
 	@Autowired
-	private PartitionSettings myPartitionSettings;
-	@Autowired
 	private DaoRegistry myDaoRegistry;
 
 	/**
@@ -80,31 +79,40 @@ public class SubscriptionRegisteringSubscriber extends BaseSubscriberForSubscrip
 		}
 
 		switch (payload.getOperationType()) {
-			case DELETE:
-				mySubscriptionRegistry.unregisterSubscriptionIfRegistered(payload.getPayloadId(myFhirContext).getIdPart());
-				break;
+			case MANUALLY_TRIGGERED:
+			case TRANSACTION:
+				return;
 			case CREATE:
 			case UPDATE:
-				IBaseResource subscription = payload.getNewPayload(myFhirContext);
-				IBaseResource subscriptionToRegister = subscription;
-				String statusString = mySubscriptionCanonicalizer.getSubscriptionStatus(subscription);
-
-				// reading resource back from db in order to store partition id in the userdata of the resource for partitioned subscriptions
-				if (myPartitionSettings.isPartitioningEnabled()) {
-					IFhirResourceDao subscriptionDao = myDaoRegistry.getSubscriptionDao();
-					RequestDetails systemRequestDetails = new SystemRequestDetails().setRequestPartitionId(payload.getPartitionId());
-					subscriptionToRegister = subscriptionDao.read(subscription.getIdElement(), systemRequestDetails);
-				}
-
-				if ("active".equals(statusString)) {
-					mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(subscriptionToRegister);
-				} else {
-					mySubscriptionRegistry.unregisterSubscriptionIfRegistered(payload.getPayloadId(myFhirContext).getIdPart());
-				}
+			case DELETE:
 				break;
-			case MANUALLY_TRIGGERED:
-			default:
-				break;
+		}
+
+		// We read the resource back from the DB instead of using the supplied copy for
+		// two reasons:
+		// - in order to store partition id in the userdata of the resource for partitioned subscriptions
+		// - in case we're processing out of order and a create-then-delete has been processed backwards (or vice versa)
+
+		IBaseResource payloadResource;
+		IIdType payloadId = payload.getPayloadId(myFhirContext).toUnqualifiedVersionless();
+		try {
+			IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getResourceDao("Subscription");
+			RequestDetails systemRequestDetails = new SystemRequestDetails().setRequestPartitionId(payload.getPartitionId());
+			payloadResource = subscriptionDao.read(payloadId, systemRequestDetails);
+			if (payloadResource == null) {
+				// Only for unit test
+				payloadResource = payload.getPayload(myFhirContext);
+			}
+		} catch (ResourceGoneException e) {
+			mySubscriptionRegistry.unregisterSubscriptionIfRegistered(payloadId.getIdPart());
+			return;
+		}
+
+		String statusString = mySubscriptionCanonicalizer.getSubscriptionStatus(payloadResource);
+		if ("active".equals(statusString)) {
+			mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(payloadResource);
+		} else {
+			mySubscriptionRegistry.unregisterSubscriptionIfRegistered(payloadId.getIdPart());
 		}
 
 	}

@@ -9,16 +9,19 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
+import ca.uhn.fhir.jpa.api.svc.IResourceReindexSvc;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.batch.job.PartitionedUrlValidator;
 import ca.uhn.fhir.jpa.batch.mdm.MdmClearJobSubmitterImpl;
 import ca.uhn.fhir.jpa.batch.reader.BatchResourceSearcher;
-import ca.uhn.fhir.jpa.binstore.BinaryAccessProvider;
-import ca.uhn.fhir.jpa.binstore.BinaryStorageInterceptor;
+import ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor;
+import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
+import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
+import ca.uhn.fhir.jpa.bulk.export.svc.BulkDataExportJobSchedulingHelperImpl;
 import ca.uhn.fhir.jpa.bulk.export.svc.BulkDataExportSvcImpl;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.svc.BulkDataImportSvcImpl;
@@ -35,12 +38,14 @@ import ca.uhn.fhir.jpa.dao.TransactionProcessor;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeOperation;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
+import ca.uhn.fhir.jpa.dao.expunge.IExpungeEverythingService;
 import ca.uhn.fhir.jpa.dao.expunge.IResourceExpungeService;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceExpungeService;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;
 import ca.uhn.fhir.jpa.dao.index.DaoResourceLinkResolver;
 import ca.uhn.fhir.jpa.dao.index.DaoSearchParamSynchronizer;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
+import ca.uhn.fhir.jpa.dao.index.JpaIdHelperService;
 import ca.uhn.fhir.jpa.dao.index.SearchParamWithInlineReferencesExtractor;
 import ca.uhn.fhir.jpa.dao.mdm.MdmLinkExpandSvc;
 import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilder;
@@ -81,7 +86,7 @@ import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.provider.r4.MemberMatcherR4Helper;
-import ca.uhn.fhir.jpa.reindex.ReindexJobSubmitterImpl;
+import ca.uhn.fhir.jpa.reindex.ResourceReindexSvcImpl;
 import ca.uhn.fhir.jpa.sched.AutowiringSpringBeanJobFactory;
 import ca.uhn.fhir.jpa.sched.HapiSchedulerServiceImpl;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
@@ -123,6 +128,7 @@ import ca.uhn.fhir.jpa.search.warm.CacheWarmingSvcImpl;
 import ca.uhn.fhir.jpa.search.warm.ICacheWarmingSvc;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
 import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
+import ca.uhn.fhir.jpa.searchparam.nickname.NicknameInterceptor;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.sp.SearchParamPresenceSvcImpl;
@@ -134,12 +140,11 @@ import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.mdm.api.IMdmClearJobSubmitter;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
-import ca.uhn.fhir.rest.api.server.storage.IReindexJobSubmitter;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
 import ca.uhn.fhir.rest.server.provider.DeleteExpungeProvider;
-import ca.uhn.fhir.rest.server.provider.ReindexProvider;
 import ca.uhn.fhir.util.ThreadPoolUtil;
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -160,6 +165,7 @@ import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean;
 
 import javax.annotation.Nullable;
+import java.io.IOException;
 import java.util.Date;
 
 /*
@@ -258,8 +264,11 @@ public class JpaConfig {
 
 	@Bean(name = "myBinaryStorageInterceptor")
 	@Lazy
-	public BinaryStorageInterceptor binaryStorageInterceptor() {
-		return new BinaryStorageInterceptor();
+	public BinaryStorageInterceptor binaryStorageInterceptor(DaoConfig theDaoConfig) {
+		BinaryStorageInterceptor interceptor = new BinaryStorageInterceptor();
+		interceptor.setAllowAutoInflateBinaries(theDaoConfig.isAllowAutoInflateBinaries());
+		interceptor.setAutoInflateBinariesMaximumSize(theDaoConfig.getAutoInflateBinariesMaximumBytes());
+		return interceptor;
 	}
 
 	@Bean
@@ -438,6 +447,11 @@ public class JpaConfig {
 	}
 
 	@Bean
+	public IBulkDataExportJobSchedulingHelper bulkDataExportJobSchedulingHelper() {
+		return new BulkDataExportJobSchedulingHelperImpl();
+	}
+
+	@Bean
 	@Lazy
 	public BulkDataExportProvider bulkDataExportProvider() {
 		return new BulkDataExportProvider();
@@ -457,20 +471,8 @@ public class JpaConfig {
 
 	@Bean
 	@Lazy
-	public IReindexJobSubmitter myReindexJobSubmitter() {
-		return new ReindexJobSubmitterImpl();
-	}
-
-	@Bean
-	@Lazy
 	public DeleteExpungeProvider deleteExpungeProvider(FhirContext theFhirContext, IDeleteExpungeJobSubmitter theDeleteExpungeJobSubmitter) {
 		return new DeleteExpungeProvider(theFhirContext, theDeleteExpungeJobSubmitter);
-	}
-
-	@Bean
-	@Lazy
-	public ReindexProvider reindexProvider(FhirContext theFhirContext, IReindexJobSubmitter theReindexJobSubmitter) {
-		return new ReindexProvider(theFhirContext, theReindexJobSubmitter);
 	}
 
 	@Bean
@@ -478,7 +480,6 @@ public class JpaConfig {
 	public IBulkDataImportSvc bulkDataImportSvc() {
 		return new BulkDataImportSvcImpl();
 	}
-
 
 	@Bean
 	public PersistedJpaBundleProviderFactory persistedJpaBundleProviderFactory() {
@@ -510,6 +511,10 @@ public class JpaConfig {
 		return new ResourceVersionSvcDaoImpl();
 	}
 
+	@Bean
+	public IResourceReindexSvc resourceReindexSvc() {
+		return new ResourceReindexSvcImpl();
+	}
 
 	/* **************************************************************** *
 	 * Prototype Beans Below                                            *
@@ -729,8 +734,8 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public IdHelperService idHelperService() {
-		return new IdHelperService();
+	public IJpaIdHelperService jpaIdHelperService() {
+		return new JpaIdHelperService();
 	}
 
 	@Bean
@@ -755,12 +760,12 @@ public class JpaConfig {
 
 	@Bean
 	@Scope("prototype")
-	public ExpungeOperation expungeOperation(String theResourceName, Long theResourceId, Long theVersion, ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails) {
-		return new ExpungeOperation(theResourceName, theResourceId, theVersion, theExpungeOptions, theRequestDetails);
+	public ExpungeOperation expungeOperation(String theResourceName, ResourcePersistentId theResourceId, ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails) {
+		return new ExpungeOperation(theResourceName, theResourceId, theExpungeOptions, theRequestDetails);
 	}
 
 	@Bean
-	public ExpungeEverythingService expungeEverythingService() {
+	public IExpungeEverythingService expungeEverythingService() {
 		return new ExpungeEverythingService();
 	}
 
@@ -823,5 +828,11 @@ public class JpaConfig {
 	@Bean
 	public MemberMatcherR4Helper memberMatcherR4Helper(FhirContext theFhirContext) {
 		return new MemberMatcherR4Helper(theFhirContext);
+	}
+
+	@Lazy
+	@Bean
+	public NicknameInterceptor nicknameInterceptor() throws IOException {
+		return new NicknameInterceptor();
 	}
 }

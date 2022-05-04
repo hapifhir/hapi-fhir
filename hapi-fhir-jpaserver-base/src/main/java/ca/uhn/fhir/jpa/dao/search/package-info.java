@@ -7,7 +7,7 @@
  * This package extends this search to support token, string, and reference parameters via {@link ca.uhn.fhir.jpa.model.entity.ResourceTable#myLuceneIndexData}.
  * When active, the extracted search parameters which are written to the HFJ_SPIDX_* tables are also written to the Lucene index document.
  * For now, we use the existing JPA index entities to populate the {@link ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData}
- * in {@link ca.uhn.fhir.jpa.dao.search.ExtendedLuceneIndexExtractor#extract(ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams)} ()}
+ * in {@link ca.uhn.fhir.jpa.dao.search.ExtendedLuceneIndexExtractor#extract(org.hl7.fhir.instance.model.api.IBaseResource, ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams)} ()}
  *
  * <h2>Implementation</h2>
  * Both {@link ca.uhn.fhir.jpa.search.builder.SearchBuilder} and {@link ca.uhn.fhir.jpa.dao.LegacySearchBuilder} delegate the
@@ -16,6 +16,12 @@
  * This pid list is used as a narrowing where clause against the remaining unprocessed search parameters in a jdbc query.
  * The actual queries for the different search types (e.g. token, string, modifiers, etc.) are
  * generated in {@link ca.uhn.fhir.jpa.dao.search.ExtendedLuceneSearchBuilder}.
+ * <p>
+ *    Full resource bodies can be stored in the Hibernate Search index.
+ *    The {@link ca.uhn.fhir.jpa.dao.search.ExtendedLuceneResourceProjection} is used to extract these.
+ *    This is currently restricted to LastN, and misses tag changes from $meta-add and $meta-delete since those don't
+ *    update Hibernate Search.
+ * </p>
  *
  * <h2>Operation</h2>
  * During startup, Hibernate Search uses {@link ca.uhn.fhir.jpa.model.search.SearchParamTextPropertyBinder} to generate a schema.
