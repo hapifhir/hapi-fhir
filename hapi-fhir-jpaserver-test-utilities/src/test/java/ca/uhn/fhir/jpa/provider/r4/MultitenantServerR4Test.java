@@ -1,10 +1,12 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.batch.config.BatchConstants;
+import ca.uhn.fhir.jpa.api.model.BulkExportParameters;
+import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
+import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
-import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
 import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
@@ -12,6 +14,8 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.jpa.test.Batch2JobHelper;
+import ca.uhn.fhir.jpa.testutil.BulkExportBatch2TestUtils;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
@@ -30,9 +34,13 @@ import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
@@ -41,9 +49,7 @@ import java.util.Date;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -393,61 +399,86 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		assertThat(response.getEntry(), hasSize(2));
 	}
 
-//	@Test
-//	public void testBulkExportForDifferentPartitions() throws IOException {
-//		setBulkDataExportProvider();
-//		testBulkExport(TENANT_A);
-//		testBulkExport(TENANT_B);
-//		testBulkExport(JpaConstants.DEFAULT_PARTITION_NAME);
-//	}
-
-//	private void testBulkExport(String createInPartition) throws IOException {
-//		// Create a patient
-//		IBaseResource patientA = buildPatient(withActiveTrue());
-//		SystemRequestDetails requestDetails = new SystemRequestDetails();
-//		requestDetails.setTenantId(createInPartition);
-//		myPatientDao.create((Patient) patientA, requestDetails);
-//
-//		// Create a bulk job
-//		BulkDataExportOptions options = new BulkDataExportOptions();
-//		options.setResourceTypes(Sets.newHashSet("Patient"));
-//		options.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
-//
-//		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(options, false, requestDetails);
-//		assertNotNull(jobDetails.getJobId());
-//
-//		// Run a scheduled pass to build the export and wait for completion
-//		myBulkDataExportJobSchedulingHelper.startSubmittedJobs();
-//		myBatchJobHelper.awaitAllBulkJobCompletions(
-//			BatchConstants.BULK_EXPORT_JOB_NAME
-//		);
-//
-//		//perform export-poll-status
-//		HttpGet get = new HttpGet(buildExportUrl(createInPartition, jobDetails.getJobId()));
-//		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
-//			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-//			BulkExportResponseJson responseJson = JsonUtil.deserialize(responseString, BulkExportResponseJson.class);
-//			assertThat(responseJson.getOutput().get(0).getUrl(), containsString(JpaConstants.DEFAULT_PARTITION_NAME + "/Binary/"));
-//		}
-//	}
-
-	private void setBulkDataExportProvider() {
-		BulkDataExportProvider provider = new BulkDataExportProvider();
-		provider.setBulkDataExportSvcForUnitTests(myBulkDataExportSvc);
-		provider.setFhirContextForUnitTest(myFhirContext);
-		ourRestServer.registerProvider(provider);
-	}
-
-	private String buildExportUrl(String createInPartition, String jobId) {
-		return myClient.getServerBase() + "/" + createInPartition + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?"
-			+ JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + jobId;
-	}
-
 	private void createConditionWithAllowedUnqualified(IIdType idA) {
 		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 		IIdType idB = createResource("Condition", withTenant(TENANT_A), withObservationCode("http://cs", "A"));
 		Condition theCondition = myClient.read().resource(Condition.class).withId(idB).execute();
 		theCondition.getSubject().setReference("Patient/" + idA.getIdPart());
 		doUpdateResource(theCondition);
+	}
+
+	@Nested
+	private class PartitionTesting {
+
+		@InjectMocks
+		private BulkDataExportProvider myProvider;
+
+		@Mock
+		private IBulkDataExportSvc myExportSvc;
+
+		@Mock
+		private IBatch2JobRunner myJobRunner;
+
+		@Autowired(required = false)
+		protected Batch2JobHelper myBatch2JobHelper;
+		@Autowired
+		private IBatchJobSubmitter myBatchJobSubmitter;
+
+		@Spy
+		private FhirContext myFhirContext = FhirContext.forR4Cached();
+
+		@Test
+		public void testBulkExportForDifferentPartitions() throws IOException {
+			setBulkDataExportProvider();
+			testBulkExport(TENANT_A);
+			testBulkExport(TENANT_B);
+			testBulkExport(JpaConstants.DEFAULT_PARTITION_NAME);
+		}
+
+		private void testBulkExport(String createInPartition) throws IOException {
+			// Create a patient
+			IBaseResource patientA = buildPatient(withActiveTrue());
+			SystemRequestDetails requestDetails = new SystemRequestDetails();
+			requestDetails.setTenantId(createInPartition);
+			myPatientDao.create((Patient) patientA, requestDetails);
+
+			// Create a bulk job
+			BulkDataExportOptions options = new BulkDataExportOptions();
+			options.setResourceTypes(Sets.newHashSet("Patient"));
+			options.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
+
+			IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(options, false, requestDetails);
+			assertNotNull(jobDetails.getJobId());
+
+			// Run a scheduled pass to build the export and wait for completion
+			BulkExportParameters params = BulkExportBatch2TestUtils.getBulkExportParametersFromOptions(myFhirContext,
+				options,
+				jobDetails.getJobId());
+			String batchJobId = myJobRunner.startJob(params);
+
+			myBatch2JobHelper.awaitJobCompletion(batchJobId);
+//		myBulkDataExportJobSchedulingHelper.startSubmittedJobs();
+//		myBatchJobHelper.awaitAllBulkJobCompletions(
+//			BatchConstants.BULK_EXPORT_JOB_NAME
+//		);
+
+			//perform export-poll-status
+			HttpGet get = new HttpGet(buildExportUrl(createInPartition, jobDetails.getJobId()));
+			try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
+				String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+				BulkExportResponseJson responseJson = JsonUtil.deserialize(responseString, BulkExportResponseJson.class);
+				assertThat(responseJson.getOutput().get(0).getUrl(), containsString(JpaConstants.DEFAULT_PARTITION_NAME + "/Binary/"));
+			}
+		}
+
+		@BeforeEach
+		private void setBulkDataExportProvider() {
+			ourRestServer.registerProvider(myProvider);
+		}
+
+		private String buildExportUrl(String createInPartition, String jobId) {
+			return myClient.getServerBase() + "/" + createInPartition + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?"
+				+ JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + jobId;
+		}
 	}
 }

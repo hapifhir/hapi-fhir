@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.bulk.export.provider;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.model.BulkExportParameters;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
@@ -39,10 +38,8 @@ import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ArrayUtil;
-import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
-import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -53,7 +50,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -71,21 +67,12 @@ public class BulkDataExportProvider {
 
 	@Autowired
 	private IBulkDataExportSvc myBulkDataExportSvc;
+
 	@Autowired
 	private FhirContext myFhirContext;
 
 	@Autowired
 	private IBatch2JobRunner myJobRunner;
-
-	@VisibleForTesting
-	public void setFhirContextForUnitTest(FhirContext theFhirContext) {
-		myFhirContext = theFhirContext;
-	}
-
-	@VisibleForTesting
-	public void setBulkDataExportSvcForUnitTests(IBulkDataExportSvc theBulkDataExportSvc) {
-		myBulkDataExportSvc = theBulkDataExportSvc;
-	}
 
 	/**
 	 * $export

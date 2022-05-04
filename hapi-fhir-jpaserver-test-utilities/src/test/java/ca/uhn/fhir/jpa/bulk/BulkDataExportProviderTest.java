@@ -2,6 +2,8 @@ package ca.uhn.fhir.jpa.bulk;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.jpa.api.model.RunJobParameters;
+import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
@@ -38,7 +40,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,11 +80,17 @@ public class BulkDataExportProviderTest {
 	private IBulkDataExportSvc myBulkDataExportSvc;
 	@Mock
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
+	@Mock
+	private IBatch2JobRunner myJobRunner;
+
 	private CloseableHttpClient myClient;
 	@Captor
 	private ArgumentCaptor<BulkDataExportOptions> myBulkDataExportOptionsCaptor;
 	@Captor
 	private ArgumentCaptor<Boolean> myBooleanArgumentCaptor;
+
+	@InjectMocks
+	private BulkDataExportProvider myProvider;
 
 	@AfterEach
 	public void after() throws Exception {
@@ -92,13 +102,9 @@ public class BulkDataExportProviderTest {
 	public void start() throws Exception {
 		myServer = new Server(0);
 
-		BulkDataExportProvider provider = new BulkDataExportProvider();
-		provider.setBulkDataExportSvcForUnitTests(myBulkDataExportSvc);
-		provider.setFhirContextForUnitTest(myCtx);
-
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer(myCtx);
-		servlet.registerProvider(provider);
+		servlet.registerProvider(myProvider);
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		myServer.setHandler(proxyHandler);
@@ -109,7 +115,6 @@ public class BulkDataExportProviderTest {
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		myClient = builder.build();
-
 	}
 
 	@Test
@@ -373,6 +378,7 @@ public class BulkDataExportProviderTest {
 		assertThat(options.getFilters(), notNullValue());
 		assertEquals(GROUP_ID, options.getGroupId().getValue());
 		assertThat(options.isExpandMdm(), is(equalTo(true)));
+		verify(myJobRunner).startJob(any(RunJobParameters.class));
 	}
 
 	@Test

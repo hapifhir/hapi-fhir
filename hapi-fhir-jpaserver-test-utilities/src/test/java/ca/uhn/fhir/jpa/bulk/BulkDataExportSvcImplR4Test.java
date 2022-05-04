@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
+import ca.uhn.fhir.jpa.testutil.BulkExportBatch2TestUtils;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.parser.IParser;
@@ -110,8 +111,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 	@Autowired
 	private IBatchJobSubmitter myBatchJobSubmitter;
-//	@Autowired
-//	private BatchJobHelper myBatchJobHelper;
+
 	@Autowired(required = false)
 	protected Batch2JobHelper myBatch2JobHelper;
 
@@ -120,7 +120,6 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 	private IIdType myPatientGroupId;
 
-
 	@Override
 	public void beforeFlushFT() {
 		super.beforeFlushFT();
@@ -128,6 +127,11 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 	}
 
+	private BulkExportParameters getParamsFromOptions(BulkDataExportOptions theOptions,
+																	  String theJobId) {
+		return BulkExportBatch2TestUtils.getBulkExportParametersFromOptions(myFhirContext,
+			theOptions, theJobId);
+	}
 
 	/**
 	 * Returns parameters in format of:
@@ -157,55 +161,6 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			//Expired job but currently still running.
 			Arguments.of(BulkExportJobStatusEnum.BUILDING, previousTime, 1)
 		);
-	}
-
-	private BulkExportParameters getParamsFromOptions(BulkDataExportOptions theOptions,
-																	  String theJobId) {
-		// see BulkExportUtils
-		BulkExportParameters parameters = new BulkExportParameters(Batch2JobDefinitionConstants.BULK_EXPORT);
-		parameters.setJobId(theJobId);
-
-		parameters.setStartDate(theOptions.getSince());
-		parameters.setOutputFormat(theOptions.getOutputFormat());
-		parameters.setExportStyle(theOptions.getExportStyle());
-		if (theOptions.getFilters() != null) {
-			parameters.setFilters(new ArrayList<>(theOptions.getFilters()));
-		}
-		if (theOptions.getGroupId() != null) {
-			parameters.setGroupId(theOptions.getGroupId().getValue());
-		}
-		parameters.setExpandMdm(theOptions.isExpandMdm());
-
-		// resource types are special
-		// if none are provided, the job submitter adds them
-		// but we cannot manually start the job without correct parameters
-		// so we "correct" them here
-		if (theOptions.getResourceTypes() == null || theOptions.getResourceTypes().isEmpty()) {
-			addAllResourceTypes(parameters);
-		}
-		else {
-			parameters.setResourceTypes(new ArrayList<>(theOptions.getResourceTypes()));
-		}
-
-		return parameters;
-	}
-
-	private void addAllResourceTypes(BulkExportParameters theOptions) {
-		Set<String> rts = myFhirContext.getResourceTypes();
-		if (theOptions.getExportStyle() == BulkDataExportOptions.ExportStyle.SYSTEM) {
-			// everything
-			List<String> resourceTypes = rts.stream()
-				.filter(rt -> !rt.equalsIgnoreCase("Binary"))
-				.collect(Collectors.toList());
-			theOptions.setResourceTypes(resourceTypes);
-		}
-		else if (theOptions.getExportStyle() != null) {
-			// patients
-			List<String> patientRts = rts.stream()
-				.filter(rt -> SearchParameterUtil.isResourceTypeInPatientCompartment(myFhirContext, rt))
-				.collect(Collectors.toList());
-			theOptions.setResourceTypes(patientRts);
-		}
 	}
 
 	@ParameterizedTest
@@ -395,12 +350,10 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			assertEquals(BulkExportJobStatusEnum.SUBMITTED, status.getStatus());
 
 			// Run a scheduled pass to build the export
-//			myBulkDataExportJobSchedulingHelper.startSubmittedJobs();
 			BulkExportParameters params = getParamsFromOptions(bulkDataExportOptions,
 				jobDetails.getJobId());
 			String batchJobId = myJobRunner.startJob(params);
 
-//			awaitAllBulkJobCompletions();
 			JobInstance instance = myBatch2JobHelper.awaitJobFailure(batchJobId);
 
 			// Fetch the job again
@@ -411,18 +364,6 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
 		}
 	}
-
-//	private void awaitAllBulkJobCompletions() {
-//		// TODO - look up how james test's work to
-//		// see how he waits for batch jobs to finish
-//		myBatchJobHelper.awaitAllBulkJobCompletions(
-//			BatchConstants.BULK_EXPORT_JOB_NAME,
-//			BatchConstants.PATIENT_BULK_EXPORT_JOB_NAME,
-//			BatchConstants.GROUP_BULK_EXPORT_JOB_NAME,
-//			BatchConstants.DELETE_EXPUNGE_JOB_NAME,
-//			BatchConstants.MDM_CLEAR_JOB_NAME
-//		);
-//	}
 
 	@Test
 	public void testGenerateBulkExport_SpecificResources() {
