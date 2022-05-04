@@ -148,6 +148,8 @@ public class BulkDataExportProvider {
 
 
 		validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_EXPORT);
+
+		// TODO - if type is null, does that mean all types?
 		BulkDataExportOptions bulkDataExportOptions = buildGroupBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter, theIdParam, theMdm);
 		validateResourceTypesAllContainPatientSearchParams(bulkDataExportOptions.getResourceTypes());
 		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(bulkDataExportOptions, shouldUseCache(theRequestDetails), theRequestDetails);
