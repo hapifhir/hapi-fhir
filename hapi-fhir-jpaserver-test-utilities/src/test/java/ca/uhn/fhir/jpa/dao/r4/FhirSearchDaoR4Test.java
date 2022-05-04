@@ -284,16 +284,16 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 		sp.setType(Enumerations.SearchParamType.COMPOSITE);
 		sp.setExpression("Condition");
 		sp.addComponent()
-			.setDefinition("SearchParameter/Condition-clinical-status")
+			.setDefinition("SearchParameter/condition-clinical-status")
 			.setExpression("Condition");
 		sp.addComponent()
-			.setDefinition("SearchParameter/Condition-verification-status")
+			.setDefinition("SearchParameter/condition-verification-status")
 			.setExpression("Condition");
 		sp.addComponent()
-			.setDefinition("SearchParameter/clinical-identifier")
+			.setDefinition("SearchParameter/condition-identifier")
 			.setExpression("Condition");
 		sp.addComponent()
-			.setDefinition("SearchParameter/clinical-patient")
+			.setDefinition("SearchParameter/condition-patient")
 			.setExpression("Condition");
 		mySearchParameterDao.update(sp);
 		mySearchParamRegistry.forceRefresh();
@@ -330,7 +330,6 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 		activeUnconfirmedCondition.setClinicalStatus(new CodeableConcept().addCoding(new Coding().setSystem("http://terminology.hl7.org/CodeSystem/condition-clinical").setCode("active")));
 		activeUnconfirmedCondition.setVerificationStatus(new CodeableConcept().addCoding(new Coding().setSystem("http://terminology.hl7.org/CodeSystem/condition-ver-status").setCode("unconfirmed")));
 		myConditionDao.update(activeUnconfirmedCondition);
-
 
 
 		TokenParam active = new TokenParam("http://terminology.hl7.org/CodeSystem/condition-clinical", "active");
