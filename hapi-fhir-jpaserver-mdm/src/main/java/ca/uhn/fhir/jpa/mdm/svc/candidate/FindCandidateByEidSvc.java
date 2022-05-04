@@ -21,6 +21,8 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
  */
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmResourceDaoSvc;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.log.Logs;
@@ -46,6 +48,8 @@ public class FindCandidateByEidSvc extends BaseCandidateFinder {
 	private EIDHelper myEIDHelper;
 	@Autowired
 	private MdmResourceDaoSvc myMdmResourceDaoSvc;
+	@Autowired
+	private MdmLinkDaoSvc myMdmLinkDaoSvc;
 
 	@Override
 	protected List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(IAnyResource theBaseResource) {
@@ -57,6 +61,10 @@ public class FindCandidateByEidSvc extends BaseCandidateFinder {
 				Optional<IAnyResource> oFoundGoldenResource = myMdmResourceDaoSvc.searchGoldenResourceByEID(eid.getValue(), theBaseResource.getIdElement().getResourceType(), (RequestPartitionId) theBaseResource.getUserData(Constants.RESOURCE_PARTITION_ID));
 				if (oFoundGoldenResource.isPresent()) {
 					IAnyResource foundGoldenResource = oFoundGoldenResource.get();
+					// Exclude manually declared NO_MATCH links from candidates
+					if (isNoMatch(foundGoldenResource, theBaseResource)) {
+						continue;
+					}
 					Long pidOrNull = myIdHelperService.getPidOrNull(foundGoldenResource);
 					MatchedGoldenResourceCandidate mpc = new MatchedGoldenResourceCandidate(new ResourcePersistentId(pidOrNull), MdmMatchOutcome.EID_MATCH);
 					ourLog.debug("Matched {} by EID {}", foundGoldenResource.getIdElement(), eid);
@@ -65,6 +73,15 @@ public class FindCandidateByEidSvc extends BaseCandidateFinder {
 			}
 		}
 		return retval;
+	}
+
+	private boolean isNoMatch(IAnyResource theGoldenResource, IAnyResource theSourceResource) {
+		Optional<MdmLink> oLink = myMdmLinkDaoSvc.getLinkByGoldenResourceAndSourceResource(theGoldenResource, theSourceResource);
+		if (oLink.isEmpty()) {
+			return false;
+		}
+		MdmLink link = oLink.get();
+		return link.isNoMatch();
 	}
 
 	@Override
