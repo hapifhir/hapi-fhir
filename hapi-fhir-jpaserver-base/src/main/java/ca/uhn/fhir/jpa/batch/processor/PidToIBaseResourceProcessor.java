@@ -41,6 +41,7 @@ import java.util.stream.Collectors;
 /**
  * Reusable Item Processor which converts ResourcePersistentIds to their IBaseResources
  */
+@Deprecated
 public class PidToIBaseResourceProcessor implements ItemProcessor<List<ResourcePersistentId>, List<IBaseResource>> {
 	 private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 

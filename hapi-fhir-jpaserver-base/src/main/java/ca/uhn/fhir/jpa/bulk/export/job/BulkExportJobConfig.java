@@ -78,8 +78,6 @@ public class BulkExportJobConfig {
 	}
 
 	@Bean
-	@Lazy
-	@JobScope
 	public MdmExpansionCacheSvc mdmExpansionCacheSvc() {
 		return new MdmExpansionCacheSvc();
 	}
@@ -97,8 +95,6 @@ public class BulkExportJobConfig {
 //	}
 
 	@Bean
-	@Lazy
-	@StepScope
 	public CompositeItemProcessor<List<ResourcePersistentId>, List<IBaseResource>> inflateResourceThenAnnotateWithGoldenResourceProcessor() {
 		CompositeItemProcessor processor = new CompositeItemProcessor<>();
 		ArrayList<ItemProcessor> delegates = new ArrayList<>();
@@ -257,11 +253,10 @@ public class BulkExportJobConfig {
 //		return new BulkItemReader();
 //	}
 
-	@Bean
-	@JobScope
-	public ResourceTypePartitioner bulkExportResourceTypePartitioner() {
-		return new ResourceTypePartitioner();
-	}
+//	@Bean
+//	public ResourceTypePartitioner bulkExportResourceTypePartitioner() {
+//		return new ResourceTypePartitioner();
+//	}
 
 //	@Bean
 //	@StepScope

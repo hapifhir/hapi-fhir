@@ -96,8 +96,19 @@ public class BulkExportDaoSvc {
 
 		ourLog.info("Setting job with UUID {} to {}", theJobUUID, theStatus);
 		BulkExportJobEntity bulkExportJobEntity = oJob.get();
+
+		String msg = bulkExportJobEntity.getStatusMessage();
+		if (msg != null && !msg.trim().isEmpty()) {
+			// concatenate msgs - in case there are multiple
+			bulkExportJobEntity.setStatusMessage(msg
+				+ ", "
+				+ theStatusMessage
+			);
+		} else {
+			bulkExportJobEntity.setStatusMessage(theStatusMessage);
+		}
+
 		bulkExportJobEntity.setStatus(theStatus);
-		bulkExportJobEntity.setStatusMessage(theStatusMessage);
 		myBulkExportJobDao.save(bulkExportJobEntity);
 
 	}

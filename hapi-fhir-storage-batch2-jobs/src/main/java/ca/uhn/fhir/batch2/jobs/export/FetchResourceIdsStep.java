@@ -38,7 +38,7 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 		ourLog.info("Starting BatchExport job");
 
 		// set job status to building
-		myBulkExportProcessor.setJobStatus(params.getJobId(), BulkExportJobStatusEnum.BUILDING);
+		myBulkExportProcessor.setJobStatus(params.getJobId(), BulkExportJobStatusEnum.BUILDING, null);
 
 		ExportPIDIteratorParameters providerParams = new ExportPIDIteratorParameters();
 		providerParams.setFilters(params.getFilters());
@@ -79,10 +79,11 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 			}
 		} catch (Exception ex) {
 			ourLog.error(ex.getMessage());
-			// TODO - how to mark this as failed?
-//			myBulkExportProcessor.setJobStatus(params.getJobId(), BulkExportJobStatusEnum.ERROR);
-//			theDataSink.recoveredError(ex.getMessage());
-			return new RunOutcome(-1);
+
+			myBulkExportProcessor.setJobStatus(params.getJobId(), BulkExportJobStatusEnum.ERROR, ex.getMessage());
+			theDataSink.recoveredError(ex.getMessage());
+
+			throw new JobExecutionFailedException(ex.getMessage());
 		}
 
 		ourLog.info("Submitted {} groups of ids for processing", submissionCount);

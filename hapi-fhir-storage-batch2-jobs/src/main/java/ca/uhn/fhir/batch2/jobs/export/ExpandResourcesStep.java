@@ -12,12 +12,19 @@ import ca.uhn.fhir.batch2.jobs.models.Id;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.util.ExtensionUtil;
+import ca.uhn.fhir.util.HapiExtensions;
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +32,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import static ca.uhn.fhir.jpa.batch.config.BatchConstants.PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParameters, BulkExportIdList, BulkExportExpandedResources> {
@@ -36,6 +45,9 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 
 	@Autowired
 	private FhirContext myFhirContext;
+
+	@Autowired
+	private IBulkExportProcessor myBulkExportProcessor;
 
 	@Nonnull
 	@Override
@@ -49,9 +61,15 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 		// search the resources
 		IBundleProvider bundle = fetchAllResources(idList);
 
+		List<IBaseResource> allResources = bundle.getAllResources();
+
+		// if necessary, expand resources
+		if (jobParameters.isExpandMdm()) {
+			myBulkExportProcessor.expandMdmResources(allResources);
+		}
+
 		// encode them
-		// TODO - should we just call a writer here and let the rest of the work be done?
-		List<String> resources = encodeToString(bundle.getAllResources(), jobParameters);
+		List<String> resources = encodeToString(allResources, jobParameters);
 
 		// set to datasink
 		BulkExportExpandedResources output = new BulkExportExpandedResources();
@@ -70,13 +88,14 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 
 	private IBundleProvider fetchAllResources(BulkExportIdList theIds) {
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theIds.getResourceType());
+
 		SearchParameterMap map = new SearchParameterMap();
 		TokenOrListParam ids = new TokenOrListParam();
 		for (Id id : theIds.getIds()) {
 			ids.addOr(new TokenParam(id.toPID().getAssociatedResourceId().getValue()));
 		}
 		map.add(Constants.PARAM_ID, ids);
-		return dao.search(map);
+		return dao.search(map, SystemRequestDetails.forAllPartitions());
 	}
 
 	private List<String> encodeToString(List<IBaseResource> theResources, BulkExportJobParameters theParameters) {

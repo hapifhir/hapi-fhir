@@ -56,6 +56,8 @@ public class WriteBinaryStep implements IJobStepWorker<BulkExportJobParameters, 
 		IFhirResourceDao<IBaseBinary> binaryDao = myDaoRegistry.getResourceDao("Binary");
 
 		IBaseBinary binary = BinaryUtil.newBinary(myFhirContext);
+
+		// FiXME
 		// should be dependent on the
 		// output format in parameters
 		// but for now, only NDJSON is supported
@@ -81,7 +83,8 @@ public class WriteBinaryStep implements IJobStepWorker<BulkExportJobParameters, 
 			// processing will continue
 			// but we'll set the job to error so user knows why it's incomplete
 			myBulkExportProcessor.setJobStatus(expandedResources.getJobId(),
-				BulkExportJobStatusEnum.ERROR);
+				BulkExportJobStatusEnum.ERROR,
+				ex.getMessage());
 
 			// failure - return -1?
 			return new RunOutcome(-1);

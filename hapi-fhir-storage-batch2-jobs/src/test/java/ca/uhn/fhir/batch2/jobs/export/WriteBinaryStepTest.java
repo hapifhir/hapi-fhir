@@ -157,7 +157,7 @@ public class WriteBinaryStepTest {
 				any(IIdType.class));
 
 		verify(myBulkExportProcessor, never())
-			.setJobStatus(any(), any());
+			.setJobStatus(any(), any(), any());
 	}
 
 	@Test
@@ -192,7 +192,8 @@ public class WriteBinaryStepTest {
 
 		ArgumentCaptor<BulkExportJobStatusEnum> statusCaptor = ArgumentCaptor.forClass(BulkExportJobStatusEnum.class);
 		verify(myBulkExportProcessor).setJobStatus(eq(expandedResources.getJobId()),
-			statusCaptor.capture());
+			statusCaptor.capture(),
+			anyString());
 		assertEquals(BulkExportJobStatusEnum.ERROR, statusCaptor.getValue());
 
 		ArgumentCaptor<ILoggingEvent> logCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);

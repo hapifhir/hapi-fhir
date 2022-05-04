@@ -43,7 +43,7 @@ public class FinalBatchExportCallbackTest {
 
 		// verify
 		verify(myProcessor)
-			.setJobStatus(eq(jobId), eq(BulkExportJobStatusEnum.COMPLETE));
+			.setJobStatus(eq(jobId), eq(BulkExportJobStatusEnum.COMPLETE), any());
 	}
 
 	@Test
@@ -63,6 +63,6 @@ public class FinalBatchExportCallbackTest {
 
 		// verify
 		verify(myProcessor, never())
-			.setJobStatus(anyString(), any(BulkExportJobStatusEnum.class));
+			.setJobStatus(anyString(), any(BulkExportJobStatusEnum.class), any());
 	}
 }
