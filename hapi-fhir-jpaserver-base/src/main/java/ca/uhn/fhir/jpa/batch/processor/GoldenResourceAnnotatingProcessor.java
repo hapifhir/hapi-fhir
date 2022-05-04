@@ -50,6 +50,7 @@ import static ca.uhn.fhir.jpa.batch.config.BatchConstants.PATIENT_BULK_EXPORT_FO
  * Reusable Item Processor which attaches an extension to any outgoing resource. This extension will contain a resource
  * reference to the golden resource patient of the given resources' patient. (e.g. Observation.subject, Immunization.patient, etc)
  */
+@Deprecated
 public class GoldenResourceAnnotatingProcessor implements ItemProcessor<List<IBaseResource>, List<IBaseResource>> {
 	 private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
