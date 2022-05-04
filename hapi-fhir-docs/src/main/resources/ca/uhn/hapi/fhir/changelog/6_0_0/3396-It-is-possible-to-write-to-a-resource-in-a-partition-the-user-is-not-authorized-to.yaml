@@ -1,4 +1,4 @@
 ---
-type: fix
+type: security
 issue: 3396
-title: "User is allowed to update a resource with wrong `tenantID`. This issue has been fixed."
+title: "Previously, it was possible to update a resource with wrong `tenantID`. This issue has been fixed."
