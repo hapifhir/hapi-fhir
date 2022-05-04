@@ -1,0 +1,4 @@
+---
+type: security
+issue: 3396
+title: "Previously, it was possible to update a resource with wrong `tenantID`. This issue has been fixed."

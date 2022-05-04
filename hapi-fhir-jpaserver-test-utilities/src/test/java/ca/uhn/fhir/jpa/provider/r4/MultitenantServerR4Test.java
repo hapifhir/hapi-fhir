@@ -4,7 +4,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
-import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
 import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
@@ -14,6 +13,7 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
@@ -30,7 +30,6 @@ import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,9 +40,7 @@ import java.util.Date;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -268,6 +265,20 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		response = myPatientDao.read(idB, requestDetails);
 		assertFalse(response.getActive());
 
+	}
+
+	@Test
+	public void testPartitionInRequestDetails_UpdateWithWrongTenantId() {
+		IIdType idA = createPatient(withTenant(TENANT_A), withActiveTrue()).toVersionless();
+		IBaseResource patientA = buildPatient(withId(idA), withActiveTrue());
+		RequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setTenantId(TENANT_B);
+		try {
+			myPatientDao.update((Patient) patientA, requestDetails);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals(Msg.code(2079) + "Resource " + ((Patient) patientA).getResourceType() + "/" + ((Patient) patientA).getIdElement().getIdPart() + " is not known", e.getMessage());
+		}
 	}
 
 	@Test
