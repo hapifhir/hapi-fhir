@@ -21,11 +21,13 @@ package ca.uhn.fhir.jpa.mdm.dao;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
 import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
+import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
@@ -33,6 +35,7 @@ import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -40,10 +43,8 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -78,11 +79,8 @@ public class MdmLinkDaoSvc {
 	protected EntityManager myEntityManager;
 
 	@Transactional
-	public MdmLink createOrUpdateLinkEntity(IBaseResource theGoldenResource, IBaseResource theSourceResource, MdmMatchOutcome theMatchOutcome, MdmLinkSourceEnum theLinkSource, @Nullable MdmTransactionContext theMdmTransactionContext) {
-		Long goldenResourcePid = myJpaIdHelperService.getPidOrNull(theGoldenResource);
-		Long sourceResourcePid = myJpaIdHelperService.getPidOrNull(theSourceResource);
-
-		MdmLink mdmLink = getOrCreateMdmLinkByGoldenResourcePidAndSourceResourcePid(goldenResourcePid, sourceResourcePid);
+	public IMdmLink createOrUpdateLinkEntity(IAnyResource theGoldenResource, IAnyResource theSourceResource, MdmMatchOutcome theMatchOutcome, MdmLinkSourceEnum theLinkSource, @Nullable MdmTransactionContext theMdmTransactionContext) {
+		IMdmLink mdmLink = getOrCreateMdmLinkByGoldenResourceAndSourceResource(theGoldenResource, theSourceResource);
 		mdmLink.setLinkSource(theLinkSource);
 		mdmLink.setMatchResult(theMatchOutcome.getMatchResultEnum());
 		// Preserve these flags for link updates
@@ -108,19 +106,21 @@ public class MdmLinkDaoSvc {
 	}
 
 	@Nonnull
-	public MdmLink getOrCreateMdmLinkByGoldenResourcePidAndSourceResourcePid(Long theGoldenResourcePid, Long theSourceResourcePid) {
-		Optional<MdmLink> oExisting = getLinkByGoldenResourcePidAndSourceResourcePid(theGoldenResourcePid, theSourceResourcePid);
+	public IMdmLink getOrCreateMdmLinkByGoldenResourceAndSourceResource(IAnyResource theGoldenResource, IAnyResource theSourceResource) {
+		Long goldenResourcePid = myJpaIdHelperService.getPidOrNull(theGoldenResource);
+		Long sourceResourcePid = myJpaIdHelperService.getPidOrNull(theSourceResource);
+		Optional<? extends IMdmLink> oExisting = getLinkByGoldenResourcePidAndSourceResourcePid(goldenResourcePid, sourceResourcePid);
 		if (oExisting.isPresent()) {
 			return oExisting.get();
 		} else {
 			MdmLink newLink = myMdmLinkFactory.newMdmLink();
-			newLink.setGoldenResourcePid(theGoldenResourcePid);
-			newLink.setSourcePid(theSourceResourcePid);
+			newLink.setGoldenResourcePid(goldenResourcePid);
+			newLink.setSourcePid(sourceResourcePid);
 			return newLink;
 		}
 	}
 
-	public Optional<MdmLink> getLinkByGoldenResourcePidAndSourceResourcePid(Long theGoldenResourcePid, Long theSourceResourcePid) {
+	public Optional<? extends IMdmLink> getLinkByGoldenResourcePidAndSourceResourcePid(Long theGoldenResourcePid, Long theSourceResourcePid) {
 		if (theSourceResourcePid == null || theGoldenResourcePid == null) {
 			return Optional.empty();
 		}
@@ -239,8 +239,13 @@ public class MdmLinkDaoSvc {
 	 * @param theMdmLink the {@link MdmLink} to delete.
 	 */
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public void deleteLink(MdmLink theMdmLink) {
-		myMdmLinkDao.delete(theMdmLink);
+	public void deleteLink(IMdmLink theMdmLink) {
+		if (theMdmLink instanceof MdmLink){
+			myMdmLinkDao.delete((MdmLink) theMdmLink);
+		}
+
+		// FIXME LM
+		// Throw an exception here with a code
 	}
 
 	/**
@@ -250,7 +255,7 @@ public class MdmLinkDaoSvc {
 	 * @return A list of all {@link MdmLink} entities in which theGoldenResource is the source Golden Resource
 	 */
 	@Transactional
-	public List<MdmLink> findMdmLinksByGoldenResource(IBaseResource theGoldenResource) {
+	public List<? extends IMdmLink> findMdmLinksByGoldenResource(IBaseResource theGoldenResource) {
 		Long pid = myJpaIdHelperService.getPidOrNull(theGoldenResource);
 		if (pid == null) {
 			return Collections.emptyList();
@@ -266,12 +271,21 @@ public class MdmLinkDaoSvc {
 	 * @param theMdmLink the link to save.
 	 * @return the persisted {@link MdmLink} entity.
 	 */
-	public MdmLink save(MdmLink theMdmLink) {
-		if (theMdmLink.getCreated() == null) {
-			theMdmLink.setCreated(new Date());
+	public IMdmLink save(IMdmLink theMdmLink) {
+		MdmLink mdmLink = validateMdmLink(theMdmLink);
+		if (mdmLink.getCreated() == null) {
+			mdmLink.setCreated(new Date());
 		}
-		theMdmLink.setUpdated(new Date());
-		return myMdmLinkDao.save(theMdmLink);
+		mdmLink.setUpdated(new Date());
+		return myMdmLinkDao.save(mdmLink);
+	}
+
+	private MdmLink validateMdmLink(IMdmLink theMdmLink) {
+		if (theMdmLink instanceof MdmLink){
+			return  (MdmLink) theMdmLink;
+		}
+		// FIXME LM update the code here to whatever the latest and add coherent error message
+		throw new UnprocessableEntityException(Msg.code(1766));
 	}
 
 
