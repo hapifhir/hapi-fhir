@@ -58,11 +58,7 @@ public class MdmLinkSvcImpl implements IMdmLinkSvc {
 
 	@Override
 	@Transactional
-	public void updateLink(IAnyResource theGoldenResource, IAnyResource theSourceResource, MdmMatchOutcome theMatchOutcome, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmTransactionContext) {
-		// FIXME KHS
-//		if (theGoldenResource == null || theSourceResource == null) {
-//			return;
-//		}
+	public void updateLink(@Nonnull IAnyResource theGoldenResource, @Nonnull IAnyResource theSourceResource, MdmMatchOutcome theMatchOutcome, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmTransactionContext) {
 		if (theMatchOutcome.isPossibleDuplicate() && goldenResourceLinkedAsNoMatch(theGoldenResource, theSourceResource)) {
 			log(theMdmTransactionContext, theGoldenResource.getIdElement().toUnqualifiedVersionless() +
 				" is linked as NO_MATCH with " +
