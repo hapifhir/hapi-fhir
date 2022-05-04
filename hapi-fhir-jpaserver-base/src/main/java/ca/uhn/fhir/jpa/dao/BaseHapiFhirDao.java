@@ -156,7 +156,6 @@ import java.util.StringTokenizer;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.model.util.JpaConstants.ALL_PARTITIONS_NAME;
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -1308,8 +1307,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				} else {
 					requestPartitionId = RequestPartitionId.defaultPartition();
 				}
-
-				failIfPartitionMismatch(theRequest, entity);
 				mySearchParamWithInlineReferencesExtractor.populateFromResource(requestPartitionId, newParams, theTransactionDetails, entity, theResource, existingParams, theRequest, thePerformIndexing);
 
 				changed = populateResourceIntoEntity(theTransactionDetails, theRequest, theResource, entity, true);
@@ -1475,24 +1472,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			}
 		});
 		return retval;
-	}
-
-	/**
-	 * TODO eventually consider refactoring this to be part of an interceptor.
-	 *
-	 * Throws an exception if the partition of the request, and the partition of the existing entity do not match.
-	 * @param theRequest the request.
-	 * @param entity the existing entity.
-	 */
-	private void failIfPartitionMismatch(RequestDetails theRequest, ResourceTable entity) {
-		if (myPartitionSettings.isPartitioningEnabled() && theRequest != null && theRequest.getTenantId() != null && entity.getPartitionId() != null &&
-				theRequest.getTenantId() != ALL_PARTITIONS_NAME) {
-			PartitionEntity partitionEntity = myPartitionLookupSvc.getPartitionByName(theRequest.getTenantId());
-			//partitionEntity should never be null
-			if (partitionEntity != null && !partitionEntity.getId().equals(entity.getPartitionId().getPartitionId())) {
-				throw new InvalidRequestException(Msg.code(2079) + "Resource " + entity.getResourceType() + "/" + entity.getId() + " is not known");
-			}
-		}
 	}
 
 	private void createHistoryEntry(RequestDetails theRequest, IBaseResource theResource, ResourceTable theEntity, EncodedResource theChanged) {

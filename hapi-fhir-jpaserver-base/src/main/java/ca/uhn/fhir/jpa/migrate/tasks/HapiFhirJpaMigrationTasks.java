@@ -378,14 +378,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			version.executeRawSql("20220429.9", addTagDefConstraint);
 
 		}
-
-
-		// Fix for https://github.com/hapifhir/hapi-fhir-jpaserver-starter/issues/328
-		version.onTable("NPM_PACKAGE_VER")
-			.modifyColumn("20220501.1","FHIR_VERSION_ID").nonNullable().withType(ColumnTypeEnum.STRING, 20);
-
-		version.onTable("NPM_PACKAGE_VER_RES")
-			.modifyColumn("20220501.2","FHIR_VERSION_ID").nonNullable().withType(ColumnTypeEnum.STRING, 20);
 	}
 
 	/**
