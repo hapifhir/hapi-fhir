@@ -61,6 +61,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	/**
 	 * Copy constructor.
 	 */
+	@SuppressWarnings("CopyConstructorMissesField")
 	public DateRangeParam(DateRangeParam theDateRangeParam) {
 		super();
 		Validate.notNull(theDateRangeParam);
@@ -246,7 +247,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	 * are the same value. As such, even though the prefixes for the lower and
 	 * upper bounds default to <code>ge</code> and <code>le</code> respectively,
 	 * the resulting prefix is effectively <code>eq</code> where only a single
-	 * date is provided - as required by the FHIR specificiation (i.e. "If no
+	 * date is provided - as required by the FHIR specification (i.e. "If no
 	 * prefix is present, the prefix <code>eq</code> is assumed").
 	 * </p>
 	 */

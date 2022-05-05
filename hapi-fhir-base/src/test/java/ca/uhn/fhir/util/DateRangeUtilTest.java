@@ -5,7 +5,6 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -14,7 +13,9 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.LESSTHAN;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.LESSTHAN_OR_EQUALS;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -49,7 +50,7 @@ class DateRangeUtilTest {
 		static NarrowCase from(String theMessage, DateRangeParam theRange, Date theNarrowStart, Date theNarrowEnd, Date theResultStart, Date theResultEnd) {
 			return new NarrowCase(theMessage, theRange, theNarrowStart, theNarrowEnd,
 				theResultStart == null?null:new DateParam(GREATERTHAN_OR_EQUALS, theResultStart),
-				theResultEnd == null?null:new DateParam(ParamPrefixEnum.LESSTHAN, theResultEnd));
+				theResultEnd == null?null:new DateParam(LESSTHAN, theResultEnd));
 		}
 
 		static NarrowCase from(String theMessage, DateRangeParam theRange, Date theNarrowStart, Date theNarrowEnd,
@@ -87,7 +88,10 @@ class DateRangeUtilTest {
 			NarrowCase.from("end inside narrows end", new DateRangeParam(dateTwo, dateFive),  dateOne, dateFour, dateTwo, dateFour),
 			// half-open cases
 			NarrowCase.from("end inside open end", new DateRangeParam(dateTwo, null),  null, dateFour, dateTwo, dateFour),
-			NarrowCase.from("start inside open start", new DateRangeParam(null, dateFour),  dateTwo, null, GREATERTHAN_OR_EQUALS, dateTwo, LESSTHAN_OR_EQUALS, dateFour)
+			NarrowCase.from("start inside open start", new DateRangeParam(null, dateFour),  dateTwo, null, GREATERTHAN_OR_EQUALS, dateTwo, LESSTHAN_OR_EQUALS, dateFour),
+			NarrowCase.from("gt case preserved", new DateRangeParam(new DateParam(GREATERTHAN, dateTwo), null),  null, dateFour, GREATERTHAN, dateTwo, LESSTHAN, dateFour)
+
+
 		);
 	}
 
