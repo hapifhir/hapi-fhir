@@ -1,8 +1,8 @@
 package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import com.sun.istack.NotNull;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Date;
 
@@ -15,7 +15,7 @@ public class DateRangeUtil {
 	 * @param theEndExclusive an upper bound to apply, or null for unchanged.
 	 * @return a DateRange within the original range, and between theStartInclusive and theEnd
 	 */
-	@NotNull
+	@Nonnull
 	public static DateRangeParam narrowDateRange(@Nullable DateRangeParam theDateRangeParam, @Nullable Date theStartInclusive, @Nullable Date theEndExclusive) {
 		if (theStartInclusive == null && theEndExclusive == null) {
 			return theDateRangeParam;
