@@ -48,6 +48,7 @@ import ca.uhn.fhir.jpa.search.builder.predicate.UriPredicateBuilder;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
@@ -70,6 +71,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import org.springframework.data.repository.query.Param;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -554,8 +557,14 @@ public class SearchQueryBuilder {
 		myHaveAtLeastOnePredicate = true;
 	}
 
-	public ComboCondition addPredicateLastUpdated(DateRangeParam theDateRange) {
+	public Condition addPredicateLastUpdated(DateRangeParam theDateRange) {
 		ResourceTablePredicateBuilder resourceTableRoot = getOrCreateResourceTablePredicateBuilder(false);
+
+		if (isNotEqualsComparator(theDateRange)) {
+			validateNotEqualsValues(theDateRange);
+			BinaryCondition condition = createConditionForValueWithComparator(ParamPrefixEnum.NOT_EQUAL, resourceTableRoot.getLastUpdatedColumn(), theDateRange.getLowerBoundAsInstant());
+			return condition;
+		}
 
 		List<Condition> conditions = new ArrayList<>(2);
 		if (theDateRange.getLowerBoundAsInstant() != null) {
@@ -569,6 +578,17 @@ public class SearchQueryBuilder {
 		}
 
 		return ComboCondition.and(conditions.toArray(new Condition[0]));
+	}
+
+	private void validateNotEqualsValues(DateRangeParam theDateRange) {
+		if (!theDateRange.getLowerBoundAsInstant().equals(theDateRange.getUpperBoundAsInstant())) {
+			throw new InvalidRequestException("Values for comparator should be same.");
+			//TODO: JDJD improve this error message
+		}
+	}
+
+	private boolean isNotEqualsComparator(DateRangeParam theDateRange) {
+		return theDateRange.getLowerBound().getPrefix().equals(ParamPrefixEnum.NOT_EQUAL) && theDateRange.getUpperBound().getPrefix().equals(ParamPrefixEnum.NOT_EQUAL);
 	}
 
 
@@ -604,6 +624,8 @@ public class SearchQueryBuilder {
 				return BinaryCondition.greaterThan(theColumn, generatePlaceholder(theValue));
 			case GREATERTHAN_OR_EQUALS:
 				return BinaryCondition.greaterThanOrEq(theColumn, generatePlaceholder(theValue));
+			case NOT_EQUAL:
+				return BinaryCondition.notEqualTo(theColumn, generatePlaceholder(theValue));
 			default:
 				throw new IllegalArgumentException(Msg.code(1263));
 		}
