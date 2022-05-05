@@ -1694,7 +1694,7 @@
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>42.3.3</version>
+				<version>42.3.5</version>
 			</dependency>
 			<dependency>
 				<groupId>org.quartz-scheduler</groupId>
