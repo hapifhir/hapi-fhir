@@ -8,6 +8,7 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.DateUtils;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.ArrayList;
@@ -55,6 +56,16 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	 */
 	public DateRangeParam() {
 		super();
+	}
+
+	/**
+	 * Copy constructor.
+	 */
+	public DateRangeParam(DateRangeParam theDateRangeParam) {
+		super();
+		Validate.notNull(theDateRangeParam);
+		setLowerBound(theDateRangeParam.getLowerBound());
+		setUpperBound(theDateRangeParam.getUpperBound());
 	}
 
 	/**
