@@ -7,7 +7,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -123,4 +125,18 @@ public class DateRangeParamTest {
 		assertEquals(ParamPrefixEnum.NOT_EQUAL, dateRangeParam.getLowerBound().getPrefix());
 		assertEquals(ParamPrefixEnum.NOT_EQUAL, dateRangeParam.getUpperBound().getPrefix());
 	}
+
+	@Test
+	public void testCopyConstructor() {
+		DateParam dateStart = new DateParam("gt2021-01-01");
+		DateParam dateEnd = new DateParam("lt2021-02-01");
+		DateRangeParam input = new DateRangeParam(dateStart, dateEnd);
+
+		DateRangeParam copy = new DateRangeParam(input);
+
+		assertEquals(dateStart, copy.getLowerBound());
+		assertEquals(dateEnd, copy.getUpperBound());
+
+	}
+
 }
