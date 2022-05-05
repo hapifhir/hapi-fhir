@@ -21,6 +21,7 @@ package ca.uhn.fhir.mdm.api;
  */
 
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 
 import java.util.Date;
 
@@ -29,13 +30,13 @@ public interface IMdmLink {
 
 	IMdmLink setId(Long theId);
 
-	Long getGoldenResourcePid();
+	ResourcePersistentId getGoldenResourcePersistenceId();
 
-	IMdmLink setGoldenResourcePid(Long theGoldenResourcePid);
+	IMdmLink setGoldenResourcePersistenceId(ResourcePersistentId theGoldenResourcePid);
 
-	Long getSourcePid();
+	ResourcePersistentId getSourcePersistenceId();
 
-	IMdmLink setSourcePid(Long theSourcePid);
+	IMdmLink setSourcePersistenceId(ResourcePersistentId theSourcePid);
 
 	MdmMatchResultEnum getMatchResult();
 

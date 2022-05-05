@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.mdm.matcher;
 import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
+import ca.uhn.fhir.mdm.api.IMdmLink;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
@@ -22,7 +23,7 @@ public class IsMatchedToAGoldenResource extends TypeSafeMatcher<IAnyResource> {
 
 	@Override
 	protected boolean matchesSafely(IAnyResource theIncomingResource) {
-		Optional<MdmLink> matchedLinkForTargetPid = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(theIncomingResource));
+		Optional<? extends IMdmLink> matchedLinkForTargetPid = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(theIncomingResource));
 		return matchedLinkForTargetPid.isPresent();
 	}
 

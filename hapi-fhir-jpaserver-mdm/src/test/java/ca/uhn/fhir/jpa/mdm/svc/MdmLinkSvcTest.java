@@ -173,7 +173,7 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 		//assertEquals(patient1.getIdElement().toVersionless().getValue(), sourcePatient.getLinkFirstRep().getTarget().getReference());
 		List<String> actual = targets
 			.stream()
-			.map(link -> link.getSourcePid().toString())
+			.map(link -> link.getSourcePersistenceId().getId().toString())
 			.collect(Collectors.toList());
 
 		List<String> expected = Arrays.asList(patient1, patient2)

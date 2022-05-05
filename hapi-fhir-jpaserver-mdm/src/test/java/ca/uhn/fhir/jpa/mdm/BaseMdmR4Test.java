@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
@@ -349,18 +350,18 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		String resourceType = theBaseResource.getIdElement().getResourceType();
 		IFhirResourceDao relevantDao = myDaoRegistry.getResourceDao(resourceType);
 
-		Optional<MdmLink> matchedLinkForTargetPid = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(runInTransaction(() -> myIdHelperService.getPidOrNull(theBaseResource)));
+		Optional<? extends IMdmLink> matchedLinkForTargetPid = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(runInTransaction(() -> myIdHelperService.getPidOrNull(theBaseResource)));
 		if (matchedLinkForTargetPid.isPresent()) {
-			Long goldenResourcePid = matchedLinkForTargetPid.get().getGoldenResourcePid();
+			Long goldenResourcePid = matchedLinkForTargetPid.get().getGoldenResourcePersistenceId().getIdAsLong();
 			return (T) relevantDao.readByPid(new ResourcePersistentId(goldenResourcePid));
 		} else {
 			return null;
 		}
 	}
 
-	protected <T extends IBaseResource> T getTargetResourceFromMdmLink(MdmLink theMdmLink, String theResourceType) {
+	protected <T extends IBaseResource> T getTargetResourceFromMdmLink(IMdmLink theMdmLink, String theResourceType) {
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResourceType);
-		return (T) resourceDao.readByPid(new ResourcePersistentId(theMdmLink.getGoldenResourcePid()));
+		return (T) resourceDao.readByPid(new ResourcePersistentId(theMdmLink.getGoldenResourcePersistenceId().getIdAsLong()));
 	}
 
 	protected Patient addExternalEID(Patient thePatient, String theEID) {

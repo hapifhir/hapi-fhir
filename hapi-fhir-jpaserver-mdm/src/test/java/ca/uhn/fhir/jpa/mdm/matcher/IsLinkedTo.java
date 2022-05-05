@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.mdm.matcher;
 
 import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -15,8 +16,8 @@ import java.util.stream.Collectors;
  */
 public class IsLinkedTo extends BaseGoldenResourceMatcher {
 
-	private List<Long> baseResourceGoldenResourcePids;
-	private Long incomingResourceGoldenResourcePid;
+	private List<ResourcePersistentId> baseResourceGoldenResourcePids;
+	private ResourcePersistentId incomingResourceGoldenResourcePid;
 
 	protected IsLinkedTo(IJpaIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
 		super(theIdHelperService, theMdmLinkDaoSvc, theBaseResource);

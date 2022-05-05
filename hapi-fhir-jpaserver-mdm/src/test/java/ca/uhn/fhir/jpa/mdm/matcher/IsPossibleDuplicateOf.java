@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -18,7 +19,7 @@ public class IsPossibleDuplicateOf extends BaseGoldenResourceMatcher {
 	 * Matcher with tells us if there is an MdmLink with between these two resources that are considered POSSIBLE DUPLICATE.
 	 * For use only on GoldenResource.
 	 */
-	private Long incomingGoldenResourcePid;
+	private ResourcePersistentId incomingGoldenResourcePid;
 
 	protected IsPossibleDuplicateOf(IJpaIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
 		super(theIdHelperService, theMdmLinkDaoSvc, theBaseResource);
@@ -28,7 +29,7 @@ public class IsPossibleDuplicateOf extends BaseGoldenResourceMatcher {
 	protected boolean matchesSafely(IAnyResource theIncomingResource) {
 		incomingGoldenResourcePid = getMatchedResourcePidFromResource(theIncomingResource);
 
-		List<Long> goldenResourcePidsToMatch = myBaseResources.stream()
+		List<ResourcePersistentId> goldenResourcePidsToMatch = myBaseResources.stream()
 			.map(this::getMatchedResourcePidFromResource)
 			.collect(Collectors.toList());
 

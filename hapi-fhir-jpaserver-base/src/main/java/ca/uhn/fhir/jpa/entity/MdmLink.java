@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.persistence.Column;
@@ -145,6 +146,30 @@ public class MdmLink extends BasePartitionable implements IMdmLink {
 		return this;
 	}
 
+	@Override
+	public ResourcePersistentId getGoldenResourcePersistenceId() {
+		return new ResourcePersistentId(myGoldenResourcePid);
+	}
+
+	@Override
+	public IMdmLink setGoldenResourcePersistenceId(ResourcePersistentId theGoldenResourcePid) {
+		setPersonPid(theGoldenResourcePid.getIdAsLong());
+
+		myGoldenResourcePid = theGoldenResourcePid.getIdAsLong();
+		return this;
+	}
+
+	@Override
+	public ResourcePersistentId getSourcePersistenceId() {
+		return new ResourcePersistentId(mySourcePid);
+	}
+
+	@Override
+	public IMdmLink setSourcePersistenceId(ResourcePersistentId theSourcePid) {
+		mySourcePid = theSourcePid.getIdAsLong();
+		return this;
+	}
+
 	public ResourceTable getGoldenResource() {
 		return myGoldenResource;
 	}
@@ -159,7 +184,7 @@ public class MdmLink extends BasePartitionable implements IMdmLink {
 		return this;
 	}
 
-	@Override
+	@Deprecated
 	public Long getGoldenResourcePid() {
 		return myGoldenResourcePid;
 	}
@@ -173,7 +198,10 @@ public class MdmLink extends BasePartitionable implements IMdmLink {
 		return this;
 	}
 
-	@Override
+	/**
+	 * @deprecated  Use {@link #setGoldenResourcePersistenceId(ResourcePersistentId)} instead
+	 */
+	@Deprecated
 	public MdmLink setGoldenResourcePid(Long theGoldenResourcePid) {
 		setPersonPid(theGoldenResourcePid);
 
@@ -191,12 +219,15 @@ public class MdmLink extends BasePartitionable implements IMdmLink {
 		return this;
 	}
 
-	@Override
+	@Deprecated
 	public Long getSourcePid() {
 		return mySourcePid;
 	}
 
-	@Override
+	/**
+	 * @deprecated  Use {@link #setSourcePersistenceId(ResourcePersistentId)} instead
+	 */
+	@Deprecated
 	public MdmLink setSourcePid(Long theSourcePid) {
 		mySourcePid = theSourcePid;
 		return this;

@@ -35,6 +35,7 @@ import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -138,7 +139,7 @@ public class MdmLinkDaoSvc {
 	 * @param theMatchResult the Match Result of the relationship
 	 * @return a list of {@link MdmLink} entities matching these criteria.
 	 */
-	public List<MdmLink> getMdmLinksBySourcePidAndMatchResult(Long theSourcePid, MdmMatchResultEnum theMatchResult) {
+	public List<? extends IMdmLink> getMdmLinksBySourcePidAndMatchResult(Long theSourcePid, MdmMatchResultEnum theMatchResult) {
 		MdmLink exampleLink = myMdmLinkFactory.newMdmLink();
 		exampleLink.setSourcePid(theSourcePid);
 		exampleLink.setMatchResult(theMatchResult);
@@ -154,7 +155,7 @@ public class MdmLinkDaoSvc {
 	 * @return the {@link MdmLink} that contains the Match information for the source.
 	 */
 	@Transactional
-	public Optional<MdmLink> getMatchedLinkForSourcePid(Long theSourcePid) {
+	public Optional<? extends IMdmLink> getMatchedLinkForSourcePid(Long theSourcePid) {
 		MdmLink exampleLink = myMdmLinkFactory.newMdmLink();
 		exampleLink.setSourcePid(theSourcePid);
 		exampleLink.setMatchResult(MdmMatchResultEnum.MATCH);
@@ -207,6 +208,11 @@ public class MdmLinkDaoSvc {
 		exampleLink.setMatchResult(theMatchResult);
 		Example<MdmLink> example = Example.of(exampleLink);
 		return myMdmLinkDao.findOne(example);
+	}
+
+	public Optional<MdmLink> getMdmLinksByGoldenResourcePidSourcePidAndMatchResult(ResourcePersistentId theGoldenResourcePid,
+																											 ResourcePersistentId theSourcePid, MdmMatchResultEnum theMatchResult) {
+		return getMdmLinksByGoldenResourcePidSourcePidAndMatchResult(theGoldenResourcePid.getIdAsLong(), theSourcePid.getIdAsLong(), theMatchResult);
 	}
 
 	/**

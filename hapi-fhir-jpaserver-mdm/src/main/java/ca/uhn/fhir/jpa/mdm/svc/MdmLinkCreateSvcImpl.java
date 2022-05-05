@@ -83,7 +83,7 @@ public class MdmLinkCreateSvcImpl implements IMdmLinkCreateSvc {
 			throw new InvalidRequestException(Msg.code(753) + myMessageHelper.getMessageForPresentLink(theGoldenResource, theSourceResource));
 		}
 
-		List<MdmLink> mdmLinks = myMdmLinkDaoSvc.getMdmLinksBySourcePidAndMatchResult(targetId, MdmMatchResultEnum.MATCH);
+		List<? extends IMdmLink> mdmLinks = myMdmLinkDaoSvc.getMdmLinksBySourcePidAndMatchResult(targetId, MdmMatchResultEnum.MATCH);
 		if (mdmLinks.size() > 0 && theMatchResult == MdmMatchResultEnum.MATCH) {
 			throw new InvalidRequestException(Msg.code(754) + myMessageHelper.getMessageForMultipleGoldenRecords(theSourceResource));
 		}
