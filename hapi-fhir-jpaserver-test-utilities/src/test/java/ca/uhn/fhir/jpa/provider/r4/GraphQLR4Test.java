@@ -138,13 +138,13 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 		initTestPatients();
 
 		String uri = ourServerBase + "/$graphql";
-		HttpPost httpGet = new HttpPost(uri);
-		httpGet.setEntity(new StringEntity(INTROSPECTION_QUERY, ContentType.APPLICATION_JSON));
+		HttpPost httpPost = new HttpPost(uri);
+		httpPost.setEntity(new StringEntity(INTROSPECTION_QUERY, ContentType.APPLICATION_JSON));
 
 		// Repeat a couple of times to make sure it doesn't fail after the first one. At one point
 		// the generator polluted the structure userdata and failed the second time
 		for (int i = 0; i < 3; i++) {
-			try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
+			try (CloseableHttpResponse response = ourHttpClient.execute(httpPost)) {
 				String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 				ourLog.info("Response has size: {}", FileUtil.formatFileSize(resp.length()));
 				assertEquals(200, response.getStatusLine().getStatusCode());
