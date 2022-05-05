@@ -201,7 +201,7 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
 			@Language("json")
-			String exoected = """
+			String expected = """
 				{
 				  "PatientList":[{
 				    "name":[{
@@ -216,7 +216,7 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 				    }]
 				  }]
 				}""";
-			assertEquals(TestUtil.stripWhitespace(DATA_PREFIX + exoected + DATA_SUFFIX), TestUtil.stripWhitespace(resp));
+			assertEquals(TestUtil.stripWhitespace(DATA_PREFIX + expected + DATA_SUFFIX), TestUtil.stripWhitespace(resp));
 		}
 
 	}
