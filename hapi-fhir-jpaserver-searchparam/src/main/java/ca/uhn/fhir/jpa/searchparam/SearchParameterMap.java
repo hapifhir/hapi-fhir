@@ -513,7 +513,7 @@ public class SearchParameterMap implements Serializable {
 		}
 		addUrlIncludeParams(b, Constants.PARAM_REVINCLUDE, getRevIncludes());
 
-		if (getLastUpdated() != null) {
+		if (getLastUpdated() != null) { //TODO: JDJD this doesn't seem right
 			DateParam lb = getLastUpdated().getLowerBound();
 			addLastUpdateParam(b, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, lb);
 			DateParam ub = getLastUpdated().getUpperBound();

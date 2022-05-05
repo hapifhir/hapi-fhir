@@ -2661,6 +2661,65 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testSearchLastUpdatedParamWithNeComparator() {
+		IIdType id0;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			id0 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+
+		TestUtil.sleepOneClick();
+
+		long start = System.currentTimeMillis();
+
+		TestUtil.sleepOneClick();
+
+		IIdType id1a;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			id1a = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+
+		TestUtil.sleepOneClick();
+
+		IIdType id1b;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			id1b = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+
+		String p0LastUpdated = myPatientDao.read(id0, mySrd).getMeta().getLastUpdatedElement().getValueAsString();
+		String p1aLastUpdated = myPatientDao.read(id1a, mySrd).getMeta().getLastUpdatedElement().getValueAsString();
+		String p1bLastUpdated = myPatientDao.read(id1b, mySrd).getMeta().getLastUpdatedElement().getValueAsString();
+
+		ourLog.info("Res 1: {}", p0LastUpdated);
+		ourLog.info("Res 2: {}", p1aLastUpdated);
+		ourLog.info("Res 3: {}", p1bLastUpdated);
+
+		TestUtil.sleepOneClick();
+
+		long end = System.currentTimeMillis();
+
+		SearchParameterMap map;
+		Date startDate = new Date(start);
+		Date endDate = new Date(end);
+		DateTimeType startDateTime = new DateTimeType(startDate, TemporalPrecisionEnum.MILLI);
+		DateTimeType endDateTime = new DateTimeType(endDate, TemporalPrecisionEnum.MILLI);
+
+		//TODO: JDJD all of the above code was copy pasta
+
+		map = new SearchParameterMap();
+		DateParam lowerBound = new DateParam(ParamPrefixEnum.EQUAL, p0LastUpdated);
+		DateParam upperBound = new DateParam(ParamPrefixEnum.EQUAL, p0LastUpdated);
+		map.setLastUpdated(new DateRangeParam(startDateTime, endDateTime));
+		ourLog.info("Searching: {}", map.getLastUpdated());
+
+	}
+
+	@Test
 	public void testSearchLastUpdatedParamWithComparator() {
 		IIdType id0;
 		{
