@@ -52,6 +52,7 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -250,7 +251,9 @@ public class ExtendedLuceneClauseBuilder {
 			ourLog.debug("addStringContainsSearch {} {}", theSearchParamName, terms);
 			List<? extends PredicateFinalStep> orTerms = terms.stream()
 				.map(s ->
-					myPredicateFactory.wildcard().field(fieldPath).matching("*" + s + "*"))
+					myPredicateFactory.wildcard().field(fieldPath)
+						// wildcard is a term-level query, so it isn't analyzed.  Do our own case-folding to match the normStringAnalyzer
+						.matching("*" + s.toLowerCase(Locale.ROOT) + "*"))
 				.collect(Collectors.toList());
 
 			myRootClause.must(orPredicateOrSingle(orTerms));
@@ -264,7 +267,10 @@ public class ExtendedLuceneClauseBuilder {
 			ourLog.debug("addStringUnmodifiedSearch {} {}", theSearchParamName, terms);
 			List<? extends PredicateFinalStep> orTerms = terms.stream()
 				.map(s ->
-					myPredicateFactory.wildcard().field(fieldPath).matching(s + "*"))
+					myPredicateFactory.wildcard()
+						.field(fieldPath)
+						// wildcard is a term-level query, so it isn't analyzed.  Do our own case-folding to match the normStringAnalyzer
+						.matching(s.toLowerCase(Locale.ROOT) + "*"))
 				.collect(Collectors.toList());
 
 			myRootClause.must(orPredicateOrSingle(orTerms));

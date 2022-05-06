@@ -588,7 +588,25 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		}
 	}
 
+	/**
+	 * Verify unmodified, :contains, and :text searches are case-insensitive;
+	 * https://github.com/hapifhir/hapi-fhir/issues/3584
+	 */
+	@Test
+	void testStringCaseFolding() {
+		IIdType kelly = myTestDataBuilder.createPatient(myTestDataBuilder.withGiven("Kelly"));
 
+		myTestDaoSearch.assertSearchFinds("lowercase matches capitalized", "/Patient?name=kelly", kelly);
+		myTestDaoSearch.assertSearchFinds("uppercase matches capitalized", "/Patient?name=KELLY", kelly);
+		myTestDaoSearch.assertSearchFinds("contains also case-insensitive", "/Patient?name:contains=elly", kelly);
+		myTestDaoSearch.assertSearchFinds("contains also case-insensitive", "/Patient?name:contains=ELLY", kelly);
+		myTestDaoSearch.assertSearchFinds("text also case-insensitive", "/Patient?name:text=kelly", kelly);
+		myTestDaoSearch.assertSearchFinds("text also case-insensitive", "/Patient?name:text=KELLY", kelly);
+		myTestDaoSearch.assertSearchFinds("exact case sensitive", "/Patient?name:exact=Kelly", kelly);
+		myTestDaoSearch.assertSearchNotFound("exact case sensitive", "/Patient?name:exact=KELLY", kelly);
+		myTestDaoSearch.assertSearchNotFound("exact case sensitive", "/Patient?name:exact=kelly", kelly);
+
+	}
 
 	private void assertObservationSearchMatchesNothing(String message, SearchParameterMap map) {
 		assertObservationSearchMatches(message, map);
