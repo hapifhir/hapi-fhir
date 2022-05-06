@@ -41,7 +41,6 @@ import ca.uhn.fhir.rest.param.HasAndListParam;
 import ca.uhn.fhir.rest.param.HasOrListParam;
 import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.NumberParam;
-import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
@@ -158,6 +157,12 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_TYPE;
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.EQUAL;
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN;
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.LESSTHAN;
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.LESSTHAN_OR_EQUALS;
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.NOT_EQUAL;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.hamcrest.CoreMatchers.is;
@@ -2036,7 +2041,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		String param = Observation.SP_COMPONENT_VALUE_QUANTITY;
 
 		{
-			QuantityParam v1 = new QuantityParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, 150, "http://bar", "code1");
+			QuantityParam v1 = new QuantityParam(GREATERTHAN_OR_EQUALS, 150, "http://bar", "code1");
 			SearchParameterMap map = new SearchParameterMap().setLoadSynchronous(true).add(param, v1);
 			IBundleProvider result = myObservationDao.search(map);
 			assertThat("Got: " + toUnqualifiedVersionlessIdValues(result), toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(id1.getValue()));
@@ -2067,7 +2072,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		{
 			TokenParam v0 = new TokenParam("http://foo", "code1");
-			QuantityParam v1 = new QuantityParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, 150, "http://bar", "code1");
+			QuantityParam v1 = new QuantityParam(GREATERTHAN_OR_EQUALS, 150, "http://bar", "code1");
 			CompositeParam<TokenParam, QuantityParam> val = new CompositeParam<>(v0, v1);
 			SearchParameterMap map = new SearchParameterMap().setLoadSynchronous(true).add(param, val);
 			myCaptureQueriesListener.clear();
@@ -2077,21 +2082,21 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		}
 		{
 			TokenParam v0 = new TokenParam("http://foo", "code1");
-			QuantityParam v1 = new QuantityParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, 50, "http://bar", "code1");
+			QuantityParam v1 = new QuantityParam(GREATERTHAN_OR_EQUALS, 50, "http://bar", "code1");
 			CompositeParam<TokenParam, QuantityParam> val = new CompositeParam<>(v0, v1);
 			IBundleProvider result = myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add(param, val));
 			assertThat(toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(id1.getValue(), id2.getValue()));
 		}
 		{
 			TokenParam v0 = new TokenParam("http://foo", "code4");
-			QuantityParam v1 = new QuantityParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, 50, "http://bar", "code1");
+			QuantityParam v1 = new QuantityParam(GREATERTHAN_OR_EQUALS, 50, "http://bar", "code1");
 			CompositeParam<TokenParam, QuantityParam> val = new CompositeParam<>(v0, v1);
 			IBundleProvider result = myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add(param, val));
 			assertThat(toUnqualifiedVersionlessIdValues(result), empty());
 		}
 		{
 			TokenParam v0 = new TokenParam("http://foo", "code1");
-			QuantityParam v1 = new QuantityParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, 50, "http://bar", "code4");
+			QuantityParam v1 = new QuantityParam(GREATERTHAN_OR_EQUALS, 50, "http://bar", "code4");
 			CompositeParam<TokenParam, QuantityParam> val = new CompositeParam<>(v0, v1);
 			IBundleProvider result = myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add(param, val));
 			assertThat(toUnqualifiedVersionlessIdValues(result), empty());
@@ -2482,7 +2487,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		{
 			// Don't load synchronous
 			SearchParameterMap map = new SearchParameterMap();
-			map.setLastUpdated(new DateRangeParam().setUpperBound(new DateParam(ParamPrefixEnum.LESSTHAN, "2042-01-01")));
+			map.setLastUpdated(new DateRangeParam().setUpperBound(new DateParam(LESSTHAN, "2042-01-01")));
 			IBundleProvider found = myPatientDao.search(map);
 			Set<String> dates = new HashSet<>();
 			String searchId = found.getUuid();
@@ -2609,203 +2614,37 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			id2 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
+		List<IIdType> result;
+
 		{
 			SearchParameterMap params = new SearchParameterMap();
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
 			assertThat(patients, hasItems(id1a, id1b, id2));
 		}
-		{
-			SearchParameterMap params = new SearchParameterMap();
-			params.setLastUpdated(new DateRangeParam(beforeAny, null));
-			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
-			assertThat(patients, hasItems(id1a, id1b, id2));
-		}
-		{
-			SearchParameterMap params = new SearchParameterMap();
-			params.setLastUpdated(new DateRangeParam(beforeR2, null));
-			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
-			assertThat(patients, hasItems(id2));
-			assertThat(patients, not(hasItems(id1a, id1b)));
-		}
-		{
-			SearchParameterMap params = new SearchParameterMap();
-			params.setLastUpdated(new DateRangeParam(beforeAny, beforeR2));
-			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
-			assertThat(patients.toString(), patients, not(hasItems(id2)));
-			assertThat(patients.toString(), patients, (hasItems(id1a, id1b)));
-		}
-		{
-			SearchParameterMap params = new SearchParameterMap();
-			params.setLastUpdated(new DateRangeParam(null, beforeR2));
-			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
-			assertThat(patients, (hasItems(id1a, id1b)));
-			assertThat(patients, not(hasItems(id2)));
-		}
+
+		result = performSearchLastUpdatedAndReturnIds(new DateRangeParam(beforeAny, null));
+		assertThat(result, hasItems(id1a, id1b, id2));
+
+		result = performSearchLastUpdatedAndReturnIds(new DateRangeParam(beforeR2, null));
+		assertThat(result, hasItems(id2));
+		assertThat(result, not(hasItems(id1a, id1b)));
 
 
-		{
-			SearchParameterMap params = new SearchParameterMap();
-			params.setLastUpdated(new DateRangeParam(new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, beforeR2)));
-			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
-			assertThat(patients, not(hasItems(id1a, id1b)));
-			assertThat(patients, (hasItems(id2)));
-		}
-		{
-			SearchParameterMap params = new SearchParameterMap();
-			params.setLastUpdated(new DateRangeParam(new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, beforeR2)));
-			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
-			assertThat(patients, (hasItems(id1a, id1b)));
-			assertThat(patients, not(hasItems(id2)));
-		}
+		result = performSearchLastUpdatedAndReturnIds(new DateRangeParam(beforeAny, beforeR2));
+		assertThat(result.toString(), result, not(hasItems(id2)));
+		assertThat(result.toString(), result, (hasItems(id1a, id1b)));
 
-	}
+		result = performSearchLastUpdatedAndReturnIds(new DateRangeParam(null, beforeR2));
+		assertThat(result, (hasItems(id1a, id1b)));
+		assertThat(result, not(hasItems(id2)));
 
-	@Test
-	public void testSearchLastUpdatedParamWithEqComparator() {
-		IIdType id0;
-		{
+		result = performSearchLastUpdatedAndReturnIds(new DateRangeParam(new DateParam(GREATERTHAN_OR_EQUALS, beforeR2)));
+		assertThat(result, not(hasItems(id1a, id1b)));
+		assertThat(result, (hasItems(id2)));
 
-
-
-
-			Patient patient = new Patient();
-			patient.addIdentifier().setSystem("urn:system").setValue("001");
-			id0 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
-		}
-
-		TestUtil.sleepOneClick();
-
-		long start = System.currentTimeMillis();
-
-		TestUtil.sleepOneClick();
-
-		IIdType id1a;
-		{
-			Patient patient = new Patient();
-			patient.addIdentifier().setSystem("urn:system").setValue("001");
-			id1a = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
-		}
-
-		TestUtil.sleepOneClick();
-
-		IIdType id1b;
-		{
-			Patient patient = new Patient();
-			patient.addIdentifier().setSystem("urn:system").setValue("001");
-			id1b = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
-		}
-
-		String p0LastUpdated = myPatientDao.read(id0, mySrd).getMeta().getLastUpdatedElement().getValueAsString();
-		String p1aLastUpdated = myPatientDao.read(id1a, mySrd).getMeta().getLastUpdatedElement().getValueAsString();
-		String p1bLastUpdated = myPatientDao.read(id1b, mySrd).getMeta().getLastUpdatedElement().getValueAsString();
-
-		ourLog.info("Res 1: {}", p0LastUpdated);
-		ourLog.info("Res 2: {}", p1aLastUpdated);
-		ourLog.info("Res 3: {}", p1bLastUpdated);
-
-		TestUtil.sleepOneClick();
-
-		long end = System.currentTimeMillis();
-
-		SearchParameterMap map;
-		DateParam lowerBound;
-		DateParam upperBound;
-
-		//TODO: JDJD all of the above code was copy pasta
-
-		map = new SearchParameterMap();
-		lowerBound = new DateParam(ParamPrefixEnum.EQUAL, p0LastUpdated);
-		upperBound = new DateParam(ParamPrefixEnum.EQUAL, p0LastUpdated);
-		map.setLastUpdated(new DateRangeParam(lowerBound, upperBound));
-		ourLog.info("Searching: {}", map.getLastUpdated());
-		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), containsInAnyOrder(id0));
-
-		map = new SearchParameterMap();
-		lowerBound = new DateParam(ParamPrefixEnum.EQUAL, p1aLastUpdated);
-		upperBound = new DateParam(ParamPrefixEnum.EQUAL, p1aLastUpdated);
-		map.setLastUpdated(new DateRangeParam(lowerBound, upperBound));
-		ourLog.info("Searching: {}", map.getLastUpdated());
-		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), containsInAnyOrder(id1a));
-
-		map = new SearchParameterMap();
-		lowerBound = new DateParam(ParamPrefixEnum.EQUAL, p1bLastUpdated);
-		upperBound = new DateParam(ParamPrefixEnum.EQUAL, p1bLastUpdated);
-		map.setLastUpdated(new DateRangeParam(lowerBound, upperBound));
-		ourLog.info("Searching: {}", map.getLastUpdated());
-		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), containsInAnyOrder(id1b));
-	}
-
-	@Test
-	public void testSearchLastUpdatedParamWithNeComparator() {
-		IIdType id0;
-		{
-			Patient patient = new Patient();
-			patient.addIdentifier().setSystem("urn:system").setValue("001");
-			id0 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
-		}
-
-		TestUtil.sleepOneClick();
-
-		long start = System.currentTimeMillis();
-
-		TestUtil.sleepOneClick();
-
-		IIdType id1a;
-		{
-			Patient patient = new Patient();
-			patient.addIdentifier().setSystem("urn:system").setValue("001");
-			id1a = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
-		}
-
-		TestUtil.sleepOneClick();
-
-		IIdType id1b;
-		{
-			Patient patient = new Patient();
-			patient.addIdentifier().setSystem("urn:system").setValue("001");
-			id1b = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
-		}
-
-		String p0LastUpdated = myPatientDao.read(id0, mySrd).getMeta().getLastUpdatedElement().getValueAsString();
-		String p1aLastUpdated = myPatientDao.read(id1a, mySrd).getMeta().getLastUpdatedElement().getValueAsString();
-		String p1bLastUpdated = myPatientDao.read(id1b, mySrd).getMeta().getLastUpdatedElement().getValueAsString();
-
-		ourLog.info("Res 1: {}", p0LastUpdated);
-		ourLog.info("Res 2: {}", p1aLastUpdated);
-		ourLog.info("Res 3: {}", p1bLastUpdated);
-
-		TestUtil.sleepOneClick();
-
-		long end = System.currentTimeMillis();
-
-		SearchParameterMap map;
-		DateParam lowerBound;
-		DateParam upperBound;
-
-		//TODO: JDJD all of the above code was copy pasta
-
-		map = new SearchParameterMap();
-		lowerBound = new DateParam(ParamPrefixEnum.NOT_EQUAL, p0LastUpdated);
-		upperBound = new DateParam(ParamPrefixEnum.NOT_EQUAL, p0LastUpdated);
-		map.setLastUpdated(new DateRangeParam(lowerBound, upperBound));
-		ourLog.info("Searching: {}", map.getLastUpdated());
-		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), containsInAnyOrder(id1a, id1b));
-
-		map = new SearchParameterMap();
-		lowerBound = new DateParam(ParamPrefixEnum.NOT_EQUAL, p1aLastUpdated);
-		upperBound = new DateParam(ParamPrefixEnum.NOT_EQUAL, p1aLastUpdated);
-		map.setLastUpdated(new DateRangeParam(lowerBound, upperBound));
-		ourLog.info("Searching: {}", map.getLastUpdated());
-		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), containsInAnyOrder(id0, id1b));
-
-		map = new SearchParameterMap();
-		lowerBound = new DateParam(ParamPrefixEnum.NOT_EQUAL, p1bLastUpdated);
-		upperBound = new DateParam(ParamPrefixEnum.NOT_EQUAL, p1bLastUpdated);
-		map.setLastUpdated(new DateRangeParam(lowerBound, upperBound));
-		ourLog.info("Searching: {}", map.getLastUpdated());
-		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), containsInAnyOrder(id0, id1a));
-
-		//TODO: JDJD clean up remove the ParamPrefixEnum in front of the comparators
+		result = performSearchLastUpdatedAndReturnIds(new DateRangeParam(new DateParam(LESSTHAN_OR_EQUALS, beforeR2)));
+		assertThat(result, (hasItems(id1a, id1b)));
+		assertThat(result, not(hasItems(id2)));
 	}
 
 	@Test
@@ -2839,40 +2678,57 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			id1b = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
-		ourLog.info("Res 1: {}", myPatientDao.read(id0, mySrd).getMeta().getLastUpdatedElement().getValueAsString());
-		ourLog.info("Res 2: {}", myPatientDao.read(id1a, mySrd).getMeta().getLastUpdatedElement().getValueAsString());
-		ourLog.info("Res 3: {}", myPatientDao.read(id1b, mySrd).getMeta().getLastUpdatedElement().getValueAsString());
+		String p0LastUpdated = myPatientDao.read(id0, mySrd).getMeta().getLastUpdatedElement().getValueAsString();
+		String p1aLastUpdated = myPatientDao.read(id1a, mySrd).getMeta().getLastUpdatedElement().getValueAsString();
+		String p1bLastUpdated = myPatientDao.read(id1b, mySrd).getMeta().getLastUpdatedElement().getValueAsString();
+
+		ourLog.info("Res 1: {}", p0LastUpdated);
+		ourLog.info("Res 2: {}", p1aLastUpdated);
+		ourLog.info("Res 3: {}", p1bLastUpdated);
 
 		TestUtil.sleepOneClick();
 
 		long end = System.currentTimeMillis();
 
-		SearchParameterMap map;
+		List<IIdType> result;
+		DateRangeParam dateRange;
 		Date startDate = new Date(start);
 		Date endDate = new Date(end);
 		DateTimeType startDateTime = new DateTimeType(startDate, TemporalPrecisionEnum.MILLI);
 		DateTimeType endDateTime = new DateTimeType(endDate, TemporalPrecisionEnum.MILLI);
 
-		map = new SearchParameterMap();
-		map.setLastUpdated(new DateRangeParam(startDateTime, endDateTime));
-		ourLog.info("Searching: {}", map.getLastUpdated());
-		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), containsInAnyOrder(id1a, id1b));
+		dateRange = new DateRangeParam(startDateTime, endDateTime);
+		result = performSearchLastUpdatedAndReturnIds(dateRange);
+		assertThat(result, containsInAnyOrder(id1a, id1b));
 
-		map = new SearchParameterMap();
-		map.setLastUpdated(new DateRangeParam(new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, startDateTime), new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, endDateTime)));
-		ourLog.info("Searching: {}", map.getLastUpdated());
-		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), containsInAnyOrder(id1a, id1b));
+		dateRange = new DateRangeParam(new DateParam(GREATERTHAN_OR_EQUALS, startDateTime), new DateParam(LESSTHAN_OR_EQUALS, endDateTime));
+		result = performSearchLastUpdatedAndReturnIds(dateRange);
+		assertThat(result, containsInAnyOrder(id1a, id1b));
 
-		map = new SearchParameterMap();
-		map.setLastUpdated(new DateRangeParam(new DateParam(ParamPrefixEnum.GREATERTHAN, startDateTime), new DateParam(ParamPrefixEnum.LESSTHAN, endDateTime)));
-		ourLog.info("Searching: {}", map.getLastUpdated());
-		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), containsInAnyOrder(id1a, id1b));
+		dateRange = new DateRangeParam(new DateParam(GREATERTHAN, startDateTime), new DateParam(LESSTHAN, endDateTime));
+		result = performSearchLastUpdatedAndReturnIds(dateRange);
+		assertThat(result, containsInAnyOrder(id1a, id1b));
 
-		map = new SearchParameterMap();
-		map.setLastUpdated(new DateRangeParam(new DateParam(ParamPrefixEnum.GREATERTHAN, startDateTime.getValue()),
-			new DateParam(ParamPrefixEnum.LESSTHAN, TestUtil.getTimestamp(myPatientDao.read(id1b, mySrd)))));
+		dateRange = new DateRangeParam(new DateParam(GREATERTHAN, startDateTime.getValue()), new DateParam(LESSTHAN, TestUtil.getTimestamp(myPatientDao.read(id1b, mySrd))));
+		result = performSearchLastUpdatedAndReturnIds(dateRange);
+		assertThat(result, containsInAnyOrder(id1a));
+
+		dateRange = new DateRangeParam(new DateParam(NOT_EQUAL, p0LastUpdated), new DateParam(NOT_EQUAL, p0LastUpdated));
+		result = performSearchLastUpdatedAndReturnIds(dateRange);
+		assertThat(result, containsInAnyOrder(id1a, id1b));
+		assertThat(result, not(containsInAnyOrder(id0)));
+
+		dateRange = new DateRangeParam(new DateParam(EQUAL, p0LastUpdated), new DateParam(EQUAL, p0LastUpdated));
+		result = performSearchLastUpdatedAndReturnIds(dateRange);
+		assertThat(result, containsInAnyOrder(id0));
+		assertThat(result, not(containsInAnyOrder(id1a, id1b)));
+	}
+
+	private List<IIdType> performSearchLastUpdatedAndReturnIds(DateRangeParam theDateRange) {
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLastUpdated(theDateRange);
 		ourLog.info("Searching: {}", map.getLastUpdated());
-		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), containsInAnyOrder(id1a));
+		return toUnqualifiedVersionlessIds(myPatientDao.search(map));
 	}
 
 	@Test
@@ -4269,7 +4125,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
-		param = new QuantityParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, new BigDecimal("10"), null, null);
+		param = new QuantityParam(GREATERTHAN_OR_EQUALS, new BigDecimal("10"), null, null);
 		map.add(Observation.SP_VALUE_QUANTITY, param);
 		myCaptureQueriesListener.clear();
 		found = myObservationDao.search(map);
@@ -4284,28 +4140,28 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
-		param = new QuantityParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, new BigDecimal("10"), null, methodName + "units");
+		param = new QuantityParam(GREATERTHAN_OR_EQUALS, new BigDecimal("10"), null, methodName + "units");
 		map.add(Observation.SP_VALUE_QUANTITY, param);
 		found = myObservationDao.search(map);
 		assertThat(toUnqualifiedVersionlessIdValues(found), contains(id1));
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
-		param = new QuantityParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, new BigDecimal("10"), "urn:bar:" + methodName, null);
+		param = new QuantityParam(GREATERTHAN_OR_EQUALS, new BigDecimal("10"), "urn:bar:" + methodName, null);
 		map.add(Observation.SP_VALUE_QUANTITY, param);
 		found = myObservationDao.search(map);
 		assertThat(toUnqualifiedVersionlessIdValues(found), contains(id1));
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
-		param = new QuantityParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, new BigDecimal("10"), "urn:bar:" + methodName, methodName + "units");
+		param = new QuantityParam(GREATERTHAN_OR_EQUALS, new BigDecimal("10"), "urn:bar:" + methodName, methodName + "units");
 		map.add(Observation.SP_VALUE_QUANTITY, param);
 		found = myObservationDao.search(map);
 		assertThat(toUnqualifiedVersionlessIdValues(found), contains(id1));
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
-		param = new QuantityParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, new BigDecimal("1000"), "urn:bar:" + methodName, methodName + "units");
+		param = new QuantityParam(GREATERTHAN_OR_EQUALS, new BigDecimal("1000"), "urn:bar:" + methodName, methodName + "units");
 		map.add(Observation.SP_VALUE_QUANTITY, param);
 		found = myObservationDao.search(map);
 		assertThat(toUnqualifiedVersionlessIdValues(found), empty());
@@ -4455,14 +4311,14 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		{
 			SearchParameterMap params = new SearchParameterMap();
 			params.setLoadSynchronous(true);
-			params.add(Patient.SP_BIRTHDATE, new DateParam("2011-01-03").setPrefix(ParamPrefixEnum.LESSTHAN));
+			params.add(Patient.SP_BIRTHDATE, new DateParam("2011-01-03").setPrefix(LESSTHAN));
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
 			assertThat(patients, contains(id2));
 		}
 		{
 			SearchParameterMap params = new SearchParameterMap();
 			params.setLoadSynchronous(true);
-			params.add(Patient.SP_BIRTHDATE, new DateParam("2010-01-01").setPrefix(ParamPrefixEnum.LESSTHAN));
+			params.add(Patient.SP_BIRTHDATE, new DateParam("2010-01-01").setPrefix(LESSTHAN));
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
 			assertThat(patients, empty());
 		}
@@ -5632,7 +5488,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.clear();
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
-		params.add(CommunicationRequest.SP_OCCURRENCE, new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, "2015-08-10T11:33:00-04:00"));
+		params.add(CommunicationRequest.SP_OCCURRENCE, new DateParam(GREATERTHAN_OR_EQUALS, "2015-08-10T11:33:00-04:00"));
 		IBundleProvider outcome = myCommunicationRequestDao.search(params);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(toUnqualifiedVersionlessIdValues(outcome), contains(crId));
