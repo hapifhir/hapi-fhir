@@ -20,8 +20,8 @@ package ca.uhn.fhir.jpa.search.builder.sql;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -34,8 +34,8 @@ import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ForcedIdPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder;
-import ca.uhn.fhir.jpa.search.builder.predicate.QuantityPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.QuantityNormalizedPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.QuantityPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceIdPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceLinkPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
@@ -45,10 +45,10 @@ import ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TagPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.UriPredicateBuilder;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
-
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
@@ -70,15 +70,11 @@ import org.hibernate.engine.spi.RowSelection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
-import org.springframework.data.repository.query.Param;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -559,36 +555,34 @@ public class SearchQueryBuilder {
 
 	public Condition addPredicateLastUpdated(DateRangeParam theDateRange) {
 		ResourceTablePredicateBuilder resourceTableRoot = getOrCreateResourceTablePredicateBuilder(false);
+		BinaryCondition condition;
 
 		if (isNotEqualsComparator(theDateRange)) {
-			validateNotEqualsValues(theDateRange);
-			BinaryCondition condition = createConditionForValueWithComparator(ParamPrefixEnum.NOT_EQUAL, resourceTableRoot.getLastUpdatedColumn(), theDateRange.getLowerBoundAsInstant());
+			condition = createConditionForValueWithComparator(ParamPrefixEnum.NOT_EQUAL, resourceTableRoot.getLastUpdatedColumn(), theDateRange.getLowerBoundAsInstant());
 			return condition;
 		}
 
 		List<Condition> conditions = new ArrayList<>(2);
 		if (theDateRange.getLowerBoundAsInstant() != null) {
-			BinaryCondition condition = createConditionForValueWithComparator(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, resourceTableRoot.getLastUpdatedColumn(), theDateRange.getLowerBoundAsInstant());
+			condition = createConditionForValueWithComparator(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, resourceTableRoot.getLastUpdatedColumn(), theDateRange.getLowerBoundAsInstant());
 			conditions.add(condition);
 		}
 
 		if (theDateRange.getUpperBoundAsInstant() != null) {
-			BinaryCondition condition = createConditionForValueWithComparator(ParamPrefixEnum.LESSTHAN_OR_EQUALS, resourceTableRoot.getLastUpdatedColumn(), theDateRange.getUpperBoundAsInstant());
+			condition = createConditionForValueWithComparator(ParamPrefixEnum.LESSTHAN_OR_EQUALS, resourceTableRoot.getLastUpdatedColumn(), theDateRange.getUpperBoundAsInstant());
 			conditions.add(condition);
 		}
 
 		return ComboCondition.and(conditions.toArray(new Condition[0]));
 	}
 
-	private void validateNotEqualsValues(DateRangeParam theDateRange) {
-		if (!theDateRange.getLowerBoundAsInstant().equals(theDateRange.getUpperBoundAsInstant())) {
-			throw new InvalidRequestException("Values for comparator should be same.");
-			//TODO: JDJD improve this error message
-		}
-	}
-
 	private boolean isNotEqualsComparator(DateRangeParam theDateRange) {
-		return theDateRange.getLowerBound().getPrefix().equals(ParamPrefixEnum.NOT_EQUAL) && theDateRange.getUpperBound().getPrefix().equals(ParamPrefixEnum.NOT_EQUAL);
+		if (theDateRange != null) {
+			DateParam lb = theDateRange.getLowerBound();
+			DateParam ub = theDateRange.getUpperBound();
+			return lb != null && ub != null && lb.getPrefix().equals(ParamPrefixEnum.NOT_EQUAL) && ub.getPrefix().equals(ParamPrefixEnum.NOT_EQUAL) && theDateRange.getLowerBoundAsInstant().equals(theDateRange.getUpperBoundAsInstant());
+		}
+		return false;
 	}
 
 

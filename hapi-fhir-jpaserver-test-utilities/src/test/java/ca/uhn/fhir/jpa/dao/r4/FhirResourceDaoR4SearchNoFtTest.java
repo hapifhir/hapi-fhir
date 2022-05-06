@@ -2664,6 +2664,10 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	public void testSearchLastUpdatedParamWithEqComparator() {
 		IIdType id0;
 		{
+
+
+
+
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("001");
 			id0 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();

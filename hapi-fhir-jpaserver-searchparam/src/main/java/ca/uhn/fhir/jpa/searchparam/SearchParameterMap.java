@@ -514,13 +514,15 @@ public class SearchParameterMap implements Serializable {
 		addUrlIncludeParams(b, Constants.PARAM_REVINCLUDE, getRevIncludes());
 
 		if (getLastUpdated() != null) { //TODO: JDJD this doesn't seem right
-			if (getLastUpdated().getLowerBound().getPrefix().equals(ParamPrefixEnum.NOT_EQUAL)) {
-				addLastUpdateParam(b, ParamPrefixEnum.NOT_EQUAL, getLastUpdated().getLowerBound());
-			}
 			DateParam lb = getLastUpdated().getLowerBound();
-			addLastUpdateParam(b, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, lb);
 			DateParam ub = getLastUpdated().getUpperBound();
-			addLastUpdateParam(b, ParamPrefixEnum.LESSTHAN_OR_EQUALS, ub);
+
+			if (isNotEqualsComparator(lb, ub)) {
+				addLastUpdateParam(b, ParamPrefixEnum.NOT_EQUAL, getLastUpdated().getLowerBound());
+			} else {
+				addLastUpdateParam(b, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, lb);
+				addLastUpdateParam(b, ParamPrefixEnum.LESSTHAN_OR_EQUALS, ub);
+			}
 		}
 
 		if (getCount() != null) {
@@ -569,6 +571,10 @@ public class SearchParameterMap implements Serializable {
 		return b.toString();
 	}
 
+	private boolean isNotEqualsComparator(DateParam lb, DateParam ub) {
+		return lb != null && ub != null && lb.getPrefix().equals(ParamPrefixEnum.NOT_EQUAL) && ub.getPrefix().equals(ParamPrefixEnum.NOT_EQUAL);
+	}
+
 	/**
 	 * @since 5.5.0
 	 */
@@ -579,10 +585,10 @@ public class SearchParameterMap implements Serializable {
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-		if (isEmpty() == false) {
+		if (!isEmpty()) {
 			b.append("params", mySearchParameterMap);
 		}
-		if (getIncludes().isEmpty() == false) {
+		if (!getIncludes().isEmpty()) {
 			b.append("includes", getIncludes());
 		}
 		return b.toString();
@@ -671,7 +677,7 @@ public class SearchParameterMap implements Serializable {
 	/**
 	 * Variant of removeByNameAndModifier for unmodified params.
 	 *
-	 * @param theName
+	 * @param theName the query parameter key
 	 * @return an And/Or List of Query Parameters matching the name with no modifier.
 	 */
 	public List<List<IQueryParameterType>> removeByNameUnmodified(String theName) {
