@@ -2539,7 +2539,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		}
 
 		SearchParameterMap params;
-		List result;
 
 		params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
@@ -3708,7 +3707,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		sp.setLastUpdated(new DateRangeParam()
 			.setUpperBound(new DateParam("le2019-02-22T17:50:00"))
 			.setLowerBound(new DateParam("ge2019-02-22T13:50:00")));
-		IBundleProvider retrieved = myMedicationRequestDao.search(sp);
+		myMedicationRequestDao.search(sp);
 
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		List<String> queries = myCaptureQueriesListener
@@ -3735,7 +3734,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		myCaptureQueriesListener.clear();
 		sp.setLoadSynchronous(true);
-		IBundleProvider retrieved = myProcedureDao.search(sp);
+		myProcedureDao.search(sp);
 
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 //		List<String> queries = myCaptureQueriesListener
@@ -4478,7 +4477,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		map.setLoadSynchronous(true);
 		myCaptureQueriesListener.clear();
 		IBundleProvider values = myPatientDao.search(map);
-		assertEquals(null, values.size());
+		assertNull(values.size());
 		assertEquals(5, values.getResources(0, 1000).size());
 
 		String sql = myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
