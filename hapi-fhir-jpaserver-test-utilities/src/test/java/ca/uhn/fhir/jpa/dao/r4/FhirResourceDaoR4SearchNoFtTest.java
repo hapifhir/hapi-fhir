@@ -2682,13 +2682,13 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			id1b = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
-		String p0LastUpdated = myPatientDao.read(id0, mySrd).getMeta().getLastUpdatedElement().getValueAsString();
-		String p1aLastUpdated = myPatientDao.read(id1a, mySrd).getMeta().getLastUpdatedElement().getValueAsString();
-		String p1bLastUpdated = myPatientDao.read(id1b, mySrd).getMeta().getLastUpdatedElement().getValueAsString();
+		InstantType p0LastUpdated = myPatientDao.read(id0, mySrd).getMeta().getLastUpdatedElement();
+		InstantType p1aLastUpdated = myPatientDao.read(id1a, mySrd).getMeta().getLastUpdatedElement();
+		InstantType p1bLastUpdated = myPatientDao.read(id1b, mySrd).getMeta().getLastUpdatedElement();
 
-		ourLog.info("Res 1: {}", p0LastUpdated);
-		ourLog.info("Res 2: {}", p1aLastUpdated);
-		ourLog.info("Res 3: {}", p1bLastUpdated);
+		ourLog.info("Res 1: {}", p0LastUpdated.getValueAsString());
+		ourLog.info("Res 2: {}", p1aLastUpdated.getValueAsString());
+		ourLog.info("Res 3: {}", p1bLastUpdated.getValueAsString());
 
 		TestUtil.sleepOneClick();
 
@@ -2717,15 +2717,24 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		result = performSearchLastUpdatedAndReturnIds(dateRange);
 		assertThat(result, containsInAnyOrder(id1a));
 
+		dateRange = new DateRangeParam(new DateParam(EQUAL, p0LastUpdated), new DateParam(EQUAL, p0LastUpdated));
+		result = performSearchLastUpdatedAndReturnIds(dateRange);
+		assertThat(result, containsInAnyOrder(id0));
+		assertThat(result, not(containsInAnyOrder(id1a, id1b)));
+
+		DateTimeType p0LastUpdatedDay = new DateTimeType(p0LastUpdated.getValue(), TemporalPrecisionEnum.DAY);
+		dateRange = new DateRangeParam(new DateParam(EQUAL, p0LastUpdatedDay), new DateParam(EQUAL, p0LastUpdatedDay));
+		result = performSearchLastUpdatedAndReturnIds(dateRange);
+		assertThat(result, containsInAnyOrder(id0, id1a, id1b));
+
 		dateRange = new DateRangeParam(new DateParam(NOT_EQUAL, p0LastUpdated), new DateParam(NOT_EQUAL, p0LastUpdated));
 		result = performSearchLastUpdatedAndReturnIds(dateRange);
 		assertThat(result, containsInAnyOrder(id1a, id1b));
 		assertThat(result, not(containsInAnyOrder(id0)));
 
-		dateRange = new DateRangeParam(new DateParam(EQUAL, p0LastUpdated), new DateParam(EQUAL, p0LastUpdated));
+		dateRange = new DateRangeParam(new DateParam(NOT_EQUAL, p0LastUpdatedDay), new DateParam(NOT_EQUAL, p0LastUpdatedDay));
 		result = performSearchLastUpdatedAndReturnIds(dateRange);
-		assertThat(result, containsInAnyOrder(id0));
-		assertThat(result, not(containsInAnyOrder(id1a, id1b)));
+		assertEquals(0, result.size());
 	}
 
 	private List<IIdType> performSearchLastUpdatedAndReturnIds(DateRangeParam theDateRange) {

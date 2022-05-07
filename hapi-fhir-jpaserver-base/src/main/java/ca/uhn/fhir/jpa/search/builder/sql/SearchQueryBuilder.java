@@ -79,6 +79,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.*;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 public class SearchQueryBuilder {
@@ -553,23 +554,26 @@ public class SearchQueryBuilder {
 		myHaveAtLeastOnePredicate = true;
 	}
 
-	public Condition addPredicateLastUpdated(DateRangeParam theDateRange) {
+	public ComboCondition addPredicateLastUpdated(DateRangeParam theDateRange) {
 		ResourceTablePredicateBuilder resourceTableRoot = getOrCreateResourceTablePredicateBuilder(false);
+		List<Condition> conditions = new ArrayList<>(2);
 		BinaryCondition condition;
 
 		if (isNotEqualsComparator(theDateRange)) {
-			condition = createConditionForValueWithComparator(ParamPrefixEnum.NOT_EQUAL, resourceTableRoot.getLastUpdatedColumn(), theDateRange.getLowerBoundAsInstant());
-			return condition;
+			condition = createConditionForValueWithComparator(LESSTHAN, resourceTableRoot.getLastUpdatedColumn(), theDateRange.getLowerBoundAsInstant());
+			conditions.add(condition);
+			condition = createConditionForValueWithComparator(GREATERTHAN, resourceTableRoot.getLastUpdatedColumn(), theDateRange.getUpperBoundAsInstant());
+			conditions.add(condition);
+			return ComboCondition.or(conditions.toArray(new Condition[0]));
 		}
 
-		List<Condition> conditions = new ArrayList<>(2);
 		if (theDateRange.getLowerBoundAsInstant() != null) {
-			condition = createConditionForValueWithComparator(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, resourceTableRoot.getLastUpdatedColumn(), theDateRange.getLowerBoundAsInstant());
+			condition = createConditionForValueWithComparator(GREATERTHAN_OR_EQUALS, resourceTableRoot.getLastUpdatedColumn(), theDateRange.getLowerBoundAsInstant());
 			conditions.add(condition);
 		}
 
 		if (theDateRange.getUpperBoundAsInstant() != null) {
-			condition = createConditionForValueWithComparator(ParamPrefixEnum.LESSTHAN_OR_EQUALS, resourceTableRoot.getLastUpdatedColumn(), theDateRange.getUpperBoundAsInstant());
+			condition = createConditionForValueWithComparator(LESSTHAN_OR_EQUALS, resourceTableRoot.getLastUpdatedColumn(), theDateRange.getUpperBoundAsInstant());
 			conditions.add(condition);
 		}
 
@@ -580,7 +584,14 @@ public class SearchQueryBuilder {
 		if (theDateRange != null) {
 			DateParam lb = theDateRange.getLowerBound();
 			DateParam ub = theDateRange.getUpperBound();
-			return lb != null && ub != null && lb.getPrefix().equals(ParamPrefixEnum.NOT_EQUAL) && ub.getPrefix().equals(ParamPrefixEnum.NOT_EQUAL) && theDateRange.getLowerBoundAsInstant().equals(theDateRange.getUpperBoundAsInstant());
+			boolean a = lb != null;
+			boolean b = ub != null;
+			boolean c = lb.getPrefix().equals(NOT_EQUAL);
+			boolean d = ub.getPrefix().equals(NOT_EQUAL);
+			boolean e = theDateRange.getLowerBound().getValue().equals(theDateRange.getUpperBound().getValue());
+
+
+			return lb != null && ub != null && lb.getPrefix().equals(NOT_EQUAL) && ub.getPrefix().equals(NOT_EQUAL) && theDateRange.getLowerBound().getValue().equals(theDateRange.getUpperBound().getValue());
 		}
 		return false;
 	}
