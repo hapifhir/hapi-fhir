@@ -52,6 +52,8 @@ public interface IJobCoordinator {
 	 */
 	List<JobInstance> getInstances(int thePageSize, int thePageIndex);
 
+	List<JobInstance> getRecentInstances(int thePageSize, int thePageIndex);
+
 	void cancelInstance(String theInstanceId) throws ResourceNotFoundException;
 
 }
