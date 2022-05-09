@@ -68,6 +68,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
@@ -89,14 +90,14 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.persistence.EntityManager;
 import java.io.IOException;
-import java.time.Month;
+import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.model.util.UcumServiceUtil.UCUM_CODESYSTEM_URL;
+import static ca.uhn.fhir.rest.api.Constants.CHARSET_UTF8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -105,6 +106,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -595,17 +597,37 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	@Test
 	void testStringCaseFolding() {
 		IIdType kelly = myTestDataBuilder.createPatient(myTestDataBuilder.withGiven("Kelly"));
+		IIdType keely = myTestDataBuilder.createPatient(myTestDataBuilder.withGiven("Kélly"));
 
-		myTestDaoSearch.assertSearchFinds("lowercase matches capitalized", "/Patient?name=kelly", kelly);
-		myTestDaoSearch.assertSearchFinds("uppercase matches capitalized", "/Patient?name=KELLY", kelly);
-		myTestDaoSearch.assertSearchFinds("contains also case-insensitive", "/Patient?name:contains=elly", kelly);
-		myTestDaoSearch.assertSearchFinds("contains also case-insensitive", "/Patient?name:contains=ELLY", kelly);
-		myTestDaoSearch.assertSearchFinds("text also case-insensitive", "/Patient?name:text=kelly", kelly);
-		myTestDaoSearch.assertSearchFinds("text also case-insensitive", "/Patient?name:text=KELLY", kelly);
+		// unmodifed, :contains, and :text are all ascii normalized, and case-folded
+		myTestDaoSearch.assertSearchFinds("lowercase matches capitalized", "/Patient?name=kelly", kelly, keely);
+		myTestDaoSearch.assertSearchFinds("uppercase matches capitalized", "/Patient?name=KELLY", kelly, keely);
+		myTestDaoSearch.assertSearchFinds("contains also case-insensitive", "/Patient?name:contains=elly", kelly, keely);
+		myTestDaoSearch.assertSearchFinds("contains also case-insensitive", "/Patient?name:contains=ELLY", kelly, keely);
+		myTestDaoSearch.assertSearchFinds("contains accent-insensitive", "/Patient?name:contains=ELLY", kelly, keely);
+		myTestDaoSearch.assertSearchFinds("contains accent-insensitive", "/Patient?name:contains=" + urlencode("éLLY"), kelly, keely);
+		myTestDaoSearch.assertSearchFinds("text also case-insensitive", "/Patient?name:text=kelly", kelly, keely);
+		myTestDaoSearch.assertSearchFinds("text also case-insensitive", "/Patient?name:text=KELLY", kelly, keely);
+
 		myTestDaoSearch.assertSearchFinds("exact case sensitive", "/Patient?name:exact=Kelly", kelly);
-		myTestDaoSearch.assertSearchNotFound("exact case sensitive", "/Patient?name:exact=KELLY", kelly);
-		myTestDaoSearch.assertSearchNotFound("exact case sensitive", "/Patient?name:exact=kelly", kelly);
+		// ugh.  Our url parser won't handle raw utf8 urls.  It requires everything to be single-byte encoded.
+		myTestDaoSearch.assertSearchFinds("exact case sensitive", "/Patient?name:exact=" + urlencode("Kélly"), keely);
+		myTestDaoSearch.assertSearchNotFound("exact case sensitive", "/Patient?name:exact=KELLY,kelly", kelly);
+		myTestDaoSearch.assertSearchNotFound("exact case sensitive",
+			"/Patient?name:exact=" + urlencode("KÉLLY,kélly"),
+			keely);
 
+		myTestDaoSearch.assertSearchFinds("exact accent sensitive", "/Patient?name:exact=Kelly", kelly);
+		myTestDaoSearch.assertSearchFinds("exact accent sensitive", "/Patient?name:exact=" + urlencode("Kélly"), keely);
+		myTestDaoSearch.assertSearchNotFound("exact accent sensitive", "/Patient?name:exact=Kelly", keely);
+		myTestDaoSearch.assertSearchNotFound("exact accent sensitive", "/Patient?name:exact=" +
+			urlencode("kélly"), kelly);
+
+	}
+
+	/** Our url parser requires all chars to be single-byte, and in utf8, that means ascii. */
+	private String urlencode(String theParam) {
+		return URLEncoder.encode(theParam, CHARSET_UTF8);
 	}
 
 	private void assertObservationSearchMatchesNothing(String message, SearchParameterMap map) {
@@ -655,13 +677,12 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 					"}";
 			Observation o = myFhirCtx.newJsonParser().parseResource(Observation.class, json);
 
-			myObservationDao.create(o, mySrd).getId().toUnqualifiedVersionless();
+			IIdType id = myObservationDao.create(o, mySrd).getId().toUnqualifiedVersionless();
 
 			// no error.
+			assertThat(id, notNullValue());
 		}
 	}
-
-
 
 	@Test
 	public void testExpandWithIsAInExternalValueSet() {
@@ -1588,7 +1609,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	}
 
 
-	@Disabled // keeping to check search scrolling
+	@Disabled("keeping to debug search scrolling")
 	@Test
 	public void withoutCount() {
 		createObservations(600);
