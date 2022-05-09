@@ -591,7 +591,8 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	}
 
 	/**
-	 * Verify unmodified, :contains, and :text searches are case-insensitive;
+	 * Verify unmodified, :contains, and :text searches are case-insensitive and normalized;
+	 * :exact is still sensitive
 	 * https://github.com/hapifhir/hapi-fhir/issues/3584
 	 */
 	@Test
@@ -599,7 +600,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		IIdType kelly = myTestDataBuilder.createPatient(myTestDataBuilder.withGiven("Kelly"));
 		IIdType keely = myTestDataBuilder.createPatient(myTestDataBuilder.withGiven("Kélly"));
 
-		// un-modifed, :contains, and :text are all ascii normalized, and case-folded
+		// un-modified, :contains, and :text are all ascii normalized, and case-folded
 		myTestDaoSearch.assertSearchFinds("lowercase matches capitalized", "/Patient?name=kelly", kelly, keely);
 		myTestDaoSearch.assertSearchFinds("uppercase matches capitalized", "/Patient?name=KELLY", kelly, keely);
 		myTestDaoSearch.assertSearchFinds("unmodified is accent insensitive", "/Patient?name=" + urlencode("Kélly"), kelly, keely);
