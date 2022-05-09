@@ -22,7 +22,12 @@ package ca.uhn.fhir.rest.api;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
@@ -243,6 +248,7 @@ public class Constants {
 	public static final String POWERED_BY_HEADER = "X-Powered-By";
 	public static final Charset CHARSET_US_ASCII;
 	public static final String PARAM_PAGEID = "_pageId";
+	public static final String JAVA_VALIDATOR_DETAILS_SYSTEM = "http://hl7.org/fhir/java-api-operation-outcome";
 	/**
 	 * This is provided for testing only! Use with caution as this property may change.
 	 */

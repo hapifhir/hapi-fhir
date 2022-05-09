@@ -1,10 +1,10 @@
 package org.hl7.fhir.r5.hapi.ctx;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.CoverageIgnore;
 import com.github.benmanes.caffeine.cache.Cache;
@@ -498,6 +498,11 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	@Override
 	public TimeTracker clock() {
 		return null;
+	}
+
+	@Override
+	public List<String> getCanonicalResourceNames() {
+		throw new UnsupportedOperationException(Msg.code(2079));
 	}
 
 	@Override

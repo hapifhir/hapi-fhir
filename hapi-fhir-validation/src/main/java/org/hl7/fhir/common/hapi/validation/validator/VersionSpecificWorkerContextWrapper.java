@@ -1,11 +1,11 @@
 package org.hl7.fhir.common.hapi.validation.validator;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -411,6 +411,11 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	@Override
 	public Set<String> getResourceNamesAsSet() {
 		return myValidationSupportContext.getRootValidationSupport().getFhirContext().getResourceTypes();
+	}
+
+	@Override
+	public List<String> getCanonicalResourceNames() {
+		throw new UnsupportedOperationException(Msg.code(2080));
 	}
 
 	@Override
