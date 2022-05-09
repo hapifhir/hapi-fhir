@@ -599,21 +599,25 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		IIdType kelly = myTestDataBuilder.createPatient(myTestDataBuilder.withGiven("Kelly"));
 		IIdType keely = myTestDataBuilder.createPatient(myTestDataBuilder.withGiven("Kélly"));
 
-		// unmodifed, :contains, and :text are all ascii normalized, and case-folded
+		// un-modifed, :contains, and :text are all ascii normalized, and case-folded
 		myTestDaoSearch.assertSearchFinds("lowercase matches capitalized", "/Patient?name=kelly", kelly, keely);
 		myTestDaoSearch.assertSearchFinds("uppercase matches capitalized", "/Patient?name=KELLY", kelly, keely);
-		myTestDaoSearch.assertSearchFinds("contains also case-insensitive", "/Patient?name:contains=elly", kelly, keely);
-		myTestDaoSearch.assertSearchFinds("contains also case-insensitive", "/Patient?name:contains=ELLY", kelly, keely);
+		myTestDaoSearch.assertSearchFinds("unmodified is accent insensitive", "/Patient?name=" + urlencode("Kélly"), kelly, keely);
+
+		myTestDaoSearch.assertSearchFinds("contains case-insensitive", "/Patient?name:contains=elly", kelly, keely);
+		myTestDaoSearch.assertSearchFinds("contains case-insensitive", "/Patient?name:contains=ELLY", kelly, keely);
 		myTestDaoSearch.assertSearchFinds("contains accent-insensitive", "/Patient?name:contains=ELLY", kelly, keely);
 		myTestDaoSearch.assertSearchFinds("contains accent-insensitive", "/Patient?name:contains=" + urlencode("éLLY"), kelly, keely);
-		myTestDaoSearch.assertSearchFinds("text also case-insensitive", "/Patient?name:text=kelly", kelly, keely);
-		myTestDaoSearch.assertSearchFinds("text also case-insensitive", "/Patient?name:text=KELLY", kelly, keely);
 
-		myTestDaoSearch.assertSearchFinds("exact case sensitive", "/Patient?name:exact=Kelly", kelly);
+		myTestDaoSearch.assertSearchFinds("text also accent and case-insensitive", "/Patient?name:text=kelly", kelly, keely);
+		myTestDaoSearch.assertSearchFinds("text also accent and case-insensitive", "/Patient?name:text=KELLY", kelly, keely);
+		myTestDaoSearch.assertSearchFinds("text also accent and case-insensitive", "/Patient?name:text=" + urlencode("KÉLLY"), kelly, keely);
+
+		myTestDaoSearch.assertSearchFinds("exact case and accent sensitive", "/Patient?name:exact=Kelly", kelly);
 		// ugh.  Our url parser won't handle raw utf8 urls.  It requires everything to be single-byte encoded.
-		myTestDaoSearch.assertSearchFinds("exact case sensitive", "/Patient?name:exact=" + urlencode("Kélly"), keely);
-		myTestDaoSearch.assertSearchNotFound("exact case sensitive", "/Patient?name:exact=KELLY,kelly", kelly);
-		myTestDaoSearch.assertSearchNotFound("exact case sensitive",
+		myTestDaoSearch.assertSearchFinds("exact case and accent sensitive", "/Patient?name:exact=" + urlencode("Kélly"), keely);
+		myTestDaoSearch.assertSearchNotFound("exact case and accent sensitive", "/Patient?name:exact=KELLY,kelly", kelly);
+		myTestDaoSearch.assertSearchNotFound("exact case and accent sensitive",
 			"/Patient?name:exact=" + urlencode("KÉLLY,kélly"),
 			keely);
 
