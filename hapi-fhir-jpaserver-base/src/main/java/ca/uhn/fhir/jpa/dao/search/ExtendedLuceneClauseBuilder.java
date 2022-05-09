@@ -37,6 +37,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.DateUtils;
+import ca.uhn.fhir.util.StringUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -52,6 +53,7 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -214,7 +216,7 @@ public class ExtendedLuceneClauseBuilder {
 		for (List<? extends IQueryParameterType> nextAnd : stringAndOrTerms) {
 			Set<String> terms = extractOrStringParams(nextAnd);
 			ourLog.debug("addStringTextSearch {}, {}", theSearchParamName, terms);
-			if (terms.size() >= 1) {
+			if (!terms.isEmpty()) {
 				String query = terms.stream()
 					.map(s -> "( " + s + " )")
 					.collect(Collectors.joining(" | "));
@@ -249,8 +251,11 @@ public class ExtendedLuceneClauseBuilder {
 			Set<String> terms = extractOrStringParams(nextAnd);
 			ourLog.debug("addStringContainsSearch {} {}", theSearchParamName, terms);
 			List<? extends PredicateFinalStep> orTerms = terms.stream()
-				.map(s ->
-					myPredicateFactory.wildcard().field(fieldPath).matching("*" + s + "*"))
+				// wildcard is a term-level query, so queries aren't analyzed.  Do our own normalization first.
+				.map(s-> StringUtil.normalizeStringForSearchIndexing(s).toLowerCase(Locale.ROOT))
+				.map(s -> myPredicateFactory
+					.wildcard().field(fieldPath)
+					.matching("*" + s + "*"))
 				.collect(Collectors.toList());
 
 			myRootClause.must(orPredicateOrSingle(orTerms));
@@ -264,7 +269,10 @@ public class ExtendedLuceneClauseBuilder {
 			ourLog.debug("addStringUnmodifiedSearch {} {}", theSearchParamName, terms);
 			List<? extends PredicateFinalStep> orTerms = terms.stream()
 				.map(s ->
-					myPredicateFactory.wildcard().field(fieldPath).matching(s + "*"))
+					myPredicateFactory.wildcard()
+						.field(fieldPath)
+						// wildcard is a term-level query, so it isn't analyzed.  Do our own case-folding to match the normStringAnalyzer
+						.matching(s.toLowerCase(Locale.ROOT) + "*"))
 				.collect(Collectors.toList());
 
 			myRootClause.must(orPredicateOrSingle(orTerms));
@@ -355,8 +363,8 @@ public class ExtendedLuceneClauseBuilder {
 	 * }
 	 * </pre>
 	 *
-	 * @param theSearchParamName
-	 * @param theDateAndOrTerms
+	 * @param theSearchParamName e.g code
+	 * @param theDateAndOrTerms The and/or list of DateParam values
 	 */
 	public void addDateUnmodifiedSearch(String theSearchParamName, List<List<IQueryParameterType>> theDateAndOrTerms) {
 		for (List<? extends IQueryParameterType> nextAnd : theDateAndOrTerms) {

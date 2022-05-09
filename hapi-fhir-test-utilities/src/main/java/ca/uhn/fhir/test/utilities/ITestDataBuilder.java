@@ -74,6 +74,13 @@ public interface ITestDataBuilder {
 		};
 	}
 
+
+	/** Patient.name.given */
+	default <T extends IBaseResource>  Consumer<T> withGiven(String theName) {
+		return withPrimitiveAttribute("name.given", theName);
+	}
+
+
 	/**
 	 * Set Patient.birthdate
 	 */
@@ -293,5 +300,4 @@ public interface ITestDataBuilder {
 		booleanType.setValueAsString(theValue);
 		activeChild.getMutator().addValue(theTarget, booleanType);
 	}
-
 }
