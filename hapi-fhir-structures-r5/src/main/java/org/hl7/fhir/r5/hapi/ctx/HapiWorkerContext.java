@@ -502,7 +502,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public List<String> getCanonicalResourceNames() {
-		throw new UnsupportedOperationException(Msg.code(2079));
+		throw new UnsupportedOperationException(Msg.code(2080));
 	}
 
 	@Override

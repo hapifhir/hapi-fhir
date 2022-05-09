@@ -415,7 +415,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public List<String> getCanonicalResourceNames() {
-		throw new UnsupportedOperationException(Msg.code(2080));
+		throw new UnsupportedOperationException(Msg.code(2081));
 	}
 
 	@Override
