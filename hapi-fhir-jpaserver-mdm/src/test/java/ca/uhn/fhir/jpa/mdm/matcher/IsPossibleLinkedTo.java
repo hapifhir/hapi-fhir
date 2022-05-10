@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.mdm.matcher;
 
-import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hamcrest.Description;
@@ -17,15 +18,15 @@ import java.util.stream.Collectors;
 public class IsPossibleLinkedTo extends BaseGoldenResourceMatcher {
 
 	private List<ResourcePersistentId> baseResourceGoldenResourcePids;
-	private Long incomingResourceGoldenResourcePid;
+	private ResourcePersistentId incomingResourceGoldenResourcePid;
 
-	protected IsPossibleLinkedTo(IJpaIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theTargetResources) {
+	protected IsPossibleLinkedTo(IIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theTargetResources) {
 		super(theIdHelperService, theMdmLinkDaoSvc, theTargetResources);
 	}
 
 	@Override
 	protected boolean matchesSafely(IAnyResource theGoldenResource) {
-		incomingResourceGoldenResourcePid = myIdHelperService.getPidOrNull(theGoldenResource);
+		incomingResourceGoldenResourcePid = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theGoldenResource);
 
 		//OK, lets grab all the golden resource pids of the resources passed in via the constructor.
 		baseResourceGoldenResourcePids = myBaseResources.stream()
@@ -41,7 +42,7 @@ public class IsPossibleLinkedTo extends BaseGoldenResourceMatcher {
 	public void describeTo(Description theDescription) {
 	}
 
-	public static Matcher<IAnyResource> possibleLinkedTo(IJpaIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
+	public static Matcher<IAnyResource> possibleLinkedTo(IIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
 		return new IsPossibleLinkedTo(theIdHelperService, theMdmLinkDaoSvc, theBaseResource);
 	}
 }

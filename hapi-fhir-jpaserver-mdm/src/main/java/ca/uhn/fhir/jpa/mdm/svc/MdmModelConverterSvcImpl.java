@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,14 +28,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class MdmModelConverterSvcImpl implements IMdmModelConverterSvc {
 
 	@Autowired
-	IJpaIdHelperService myIdHelperService;
+	IIdHelperService myIdHelperService;
 
 	@Override
 	public MdmLinkJson toJson(MdmLink theLink) {
 		MdmLinkJson retVal = new MdmLinkJson();
-		String sourceId = myIdHelperService.resourceIdFromPidOrThrowException(theLink.getSourcePid()).toVersionless().getValue();
+		String sourceId = myIdHelperService.resourceIdFromPidOrThrowException(theLink.getSourcePersistenceId()).toVersionless().getValue();
 		retVal.setSourceId(sourceId);
-		String goldenResourceId = myIdHelperService.resourceIdFromPidOrThrowException(theLink.getGoldenResourcePid()).toVersionless().getValue();
+		String goldenResourceId = myIdHelperService.resourceIdFromPidOrThrowException(theLink.getGoldenResourcePersistenceId()).toVersionless().getValue();
 		retVal.setGoldenResourceId(goldenResourceId);
 		retVal.setCreated(theLink.getCreated());
 		retVal.setEidMatch(theLink.getEidMatch());

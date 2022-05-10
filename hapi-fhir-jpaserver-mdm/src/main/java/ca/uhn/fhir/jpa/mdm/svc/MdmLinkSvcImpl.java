@@ -21,7 +21,8 @@ package ca.uhn.fhir.jpa.mdm.svc;
  */
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
@@ -30,6 +31,7 @@ import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
@@ -53,7 +55,7 @@ public class MdmLinkSvcImpl implements IMdmLinkSvc {
 	@Autowired
 	private MdmLinkDaoSvc myMdmLinkDaoSvc;
 	@Autowired
-	private IJpaIdHelperService myIdHelperService;
+	private IIdHelperService myIdHelperService;
 
 	@Override
 	@Transactional
@@ -75,8 +77,8 @@ public class MdmLinkSvcImpl implements IMdmLinkSvc {
 	}
 
 	private boolean goldenResourceLinkedAsNoMatch(IAnyResource theGoldenResource, IAnyResource theSourceResource) {
-		Long goldenResourceId = myIdHelperService.getPidOrThrowException(theGoldenResource);
-		Long sourceId = myIdHelperService.getPidOrThrowException(theSourceResource);
+		ResourcePersistentId goldenResourceId = myIdHelperService.getPidOrThrowException(theGoldenResource);
+		ResourcePersistentId sourceId = myIdHelperService.getPidOrThrowException(theSourceResource);
 		// TODO perf collapse into one query
 		return myMdmLinkDaoSvc.getMdmLinksByGoldenResourcePidSourcePidAndMatchResult(goldenResourceId, sourceId, MdmMatchResultEnum.NO_MATCH).isPresent() ||
 			myMdmLinkDaoSvc.getMdmLinksByGoldenResourcePidSourcePidAndMatchResult(sourceId, goldenResourceId, MdmMatchResultEnum.NO_MATCH).isPresent();
@@ -129,8 +131,8 @@ public class MdmLinkSvcImpl implements IMdmLinkSvc {
 			return Optional.empty();
 		} else {
 			return myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(
-				myIdHelperService.getPidOrNull(theGoldenResource),
-				myIdHelperService.getPidOrNull(theCandidate)
+				myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theGoldenResource).getIdAsLong(),
+				myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theCandidate).getIdAsLong()
 			);
 		}
 	}

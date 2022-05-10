@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoStructureDefinition;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoSubscription;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
@@ -69,7 +70,6 @@ import ca.uhn.fhir.jpa.dao.data.ITermConceptPropertyDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDesignationDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
-import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -509,7 +509,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	protected DaoRegistry myDaoRegistry;
 	@Autowired
-	protected IJpaIdHelperService myIdHelperService;
+	protected IIdHelperService myIdHelperService;
 	@Autowired
 	protected IBatchJobSubmitter myBatchJobSubmitter;
 	@Autowired

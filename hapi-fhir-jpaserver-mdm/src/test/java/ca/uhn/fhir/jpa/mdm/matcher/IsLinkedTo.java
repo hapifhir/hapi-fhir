@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.matcher;
 
-import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hamcrest.Description;
@@ -19,7 +19,7 @@ public class IsLinkedTo extends BaseGoldenResourceMatcher {
 	private List<ResourcePersistentId> baseResourceGoldenResourcePids;
 	private ResourcePersistentId incomingResourceGoldenResourcePid;
 
-	protected IsLinkedTo(IJpaIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
+	protected IsLinkedTo(IIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
 		super(theIdHelperService, theMdmLinkDaoSvc, theBaseResource);
 	}
 
@@ -42,7 +42,7 @@ public class IsLinkedTo extends BaseGoldenResourceMatcher {
 	public void describeTo(Description theDescription) {
 	}
 
-	public static Matcher<IAnyResource> linkedTo(IJpaIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
+	public static Matcher<IAnyResource> linkedTo(IIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
 		return new IsLinkedTo(theIdHelperService, theMdmLinkDaoSvc, theBaseResource);
 	}
 }

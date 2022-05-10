@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -14,6 +15,7 @@ import ca.uhn.fhir.mdm.util.EIDHelper;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -271,15 +273,14 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 
 		Patient finalPatient1 = patient1;
 		Patient finalPatient2 = patient2;
-		List<Long> duplicatePids = runInTransaction(()->Stream.of(finalPatient1, finalPatient2)
-			.map(this::getGoldenResourceFromTargetResource)
-			.map(myIdHelperService::getPidOrNull)
+		List<ResourcePersistentId> duplicatePids = runInTransaction(()->Stream.of(finalPatient1, finalPatient2)
+			.map(t -> myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), getGoldenResourceFromTargetResource(t)))
 			.collect(Collectors.toList()));
 
 		//The two GoldenResources related to the patients should both show up in the only existing POSSIBLE_DUPLICATE MdmLink.
 		MdmLink mdmLink = possibleDuplicates.get(0);
-		assertThat(mdmLink.getGoldenResourcePid(), is(in(duplicatePids)));
-		assertThat(mdmLink.getSourcePid(), is(in(duplicatePids)));
+		assertThat(mdmLink.getGoldenResourcePersistenceId(), is(in(duplicatePids)));
+		assertThat(mdmLink.getSourcePersistenceId(), is(in(duplicatePids)));
 	}
 
 	@Test
@@ -364,7 +365,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		assertThat(incomingJanePatient, is(possibleMatchWith(janePatient, janePatient2)));
 
 		//Ensure there is no successful MATCH links for incomingJanePatient
-		Optional<? extends IMdmLink> matchedLinkForTargetPid = runInTransaction(()->myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(incomingJanePatient)));
+		Optional<? extends IMdmLink> matchedLinkForTargetPid = runInTransaction(()->myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), incomingJanePatient).getIdAsLong()));
 		assertThat(matchedLinkForTargetPid.isPresent(), is(false));
 
 		logAllLinks();

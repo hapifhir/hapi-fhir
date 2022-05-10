@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.dao;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
@@ -8,6 +9,7 @@ import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 
@@ -96,8 +98,8 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 		mdmLink.setMatchResult(theMdmMatchResultEnum);
 		mdmLink.setCreated(new Date());
 		mdmLink.setUpdated(new Date());
-		mdmLink.setGoldenResourcePid(thePatientPid);
-		mdmLink.setSourcePid(runInTransaction(()->myIdHelperService.getPidOrNull(patient)));
+		mdmLink.setGoldenResourcePersistenceId(new ResourcePersistentId(thePatientPid));
+		mdmLink.setSourcePersistenceId(runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), patient)));
 		MdmLink saved= myMdmLinkDao.save(mdmLink);
 		return saved;
 	}

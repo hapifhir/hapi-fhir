@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.matcher;
 
-import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
  */
 public class IsPossibleMatchWith extends BaseGoldenResourceMatcher {
 
-	protected IsPossibleMatchWith(IJpaIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
+	protected IsPossibleMatchWith(IIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
 		super(theIdHelperService, theMdmLinkDaoSvc, theBaseResource);
 	}
 
@@ -55,7 +55,7 @@ public class IsPossibleMatchWith extends BaseGoldenResourceMatcher {
 		mismatchDescription.appendText("No MDM Link With POSSIBLE_MATCH was found");
 	}
 
-	public static Matcher<IAnyResource> possibleMatchWith(IJpaIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
+	public static Matcher<IAnyResource> possibleMatchWith(IIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
 		return new IsPossibleMatchWith(theIdHelperService, theMdmLinkDaoSvc, theBaseResource);
 	}
 }

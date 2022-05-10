@@ -23,8 +23,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
-import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
@@ -54,7 +53,7 @@ public class MdmLinkCreateSvcImpl implements IMdmLinkCreateSvc {
 	@Autowired
 	FhirContext myFhirContext;
 	@Autowired
-	IJpaIdHelperService myIdHelperService;
+	IIdHelperService myIdHelperService;
 	@Autowired
 	MdmLinkDaoSvc myMdmLinkDaoSvc;
 	@Autowired
@@ -72,8 +71,8 @@ public class MdmLinkCreateSvcImpl implements IMdmLinkCreateSvc {
 		validateCreateLinkRequest(theGoldenResource, theSourceResource, sourceType);
 
 		// FIXME Remove these
-		Long goldenResourceId = myIdHelperService.getPidOrThrowException(theGoldenResource);
-		Long targetId = myIdHelperService.getPidOrThrowException(theSourceResource);
+		Long goldenResourceId = myIdHelperService.getPidOrThrowException(theGoldenResource).getIdAsLong();
+		Long targetId = myIdHelperService.getPidOrThrowException(theSourceResource).getIdAsLong();
 
 		// check if the golden resource and the source resource are in the same partition, throw error if not
 		myMdmPartitionHelper.validateResourcesInSamePartition(theGoldenResource, theSourceResource);

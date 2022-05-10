@@ -27,6 +27,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.Multimaps;
@@ -36,6 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
+import javax.persistence.Persistence;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.TypedQuery;
@@ -46,9 +48,12 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.dao.LegacySearchBuilder.toPredicateArray;
 
@@ -120,15 +125,16 @@ public class HistoryBuilder {
 		List<ResourceHistoryTable> tables = query.getResultList();
 		if (tables.size() > 0) {
 			ImmutableListMultimap<Long, ResourceHistoryTable> resourceIdToHistoryEntries = Multimaps.index(tables, ResourceHistoryTable::getResourceId);
-
-			Map<Long, Optional<String>> pidToForcedId = myIdHelperService.translatePidsToForcedIds(resourceIdToHistoryEntries.keySet());
+			Set<ResourcePersistentId> pids  = resourceIdToHistoryEntries.keySet().stream().map(t-> new ResourcePersistentId(t)).collect(Collectors.toSet());
+			Map<ResourcePersistentId, Optional<String>> pidToForcedId = myIdHelperService.translatePidsToForcedIds(pids);
 			ourLog.trace("Translated IDs: {}", pidToForcedId);
 
 			for (Long nextResourceId : resourceIdToHistoryEntries.keySet()) {
 				List<ResourceHistoryTable> historyTables = resourceIdToHistoryEntries.get(nextResourceId);
 
 				String resourceId;
-				Optional<String> forcedId = pidToForcedId.get(nextResourceId);
+
+				Optional<String> forcedId = pidToForcedId.get(new ResourcePersistentId(nextResourceId));
 				if (forcedId.isPresent()) {
 					resourceId = forcedId.get();
 				} else {

@@ -29,6 +29,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import ca.uhn.fhir.util.HapiExtensions;
@@ -1328,7 +1329,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		goldenPatient.setManagingOrganization(new Reference(goldenOrgId.toVersionless()));
 
 		DaoMethodOutcome g1Outcome = myPatientDao.update(goldenPatient, srd);
-		Long goldenPid = runInTransaction(() -> myIdHelperService.getPidOrNull(g1Outcome.getResource()));
+		ResourcePersistentId goldenPid = runInTransaction(() -> myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), g1Outcome.getResource()));
 
 		//Create our golden records' data.
 		createObservationWithIndex(999, g1Outcome.getId());
@@ -1340,7 +1341,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			IIdType practId = createPractitionerWithIndex(i);
 			DaoMethodOutcome patientOutcome = createPatientWithIndexAndGPAndManagingOrganization(i, practId, orgId);
 			IIdType patId = patientOutcome.getId().toUnqualifiedVersionless();
-			Long sourcePid = runInTransaction(() -> myIdHelperService.getPidOrNull(patientOutcome.getResource()));
+			ResourcePersistentId sourcePid = runInTransaction(() -> myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), patientOutcome.getResource()));
 
 			//Link the patient to the golden resource
 			linkToGoldenResource(goldenPid, sourcePid);
@@ -1362,7 +1363,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		Patient goldenPatient2 = new Patient();
 		goldenPatient2.setId("PAT888");
 		DaoMethodOutcome g2Outcome = myPatientDao.update(goldenPatient2, new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.defaultPartition()));
-		Long goldenPid2 = runInTransaction(() -> myIdHelperService.getPidOrNull(g2Outcome.getResource()));
+		ResourcePersistentId goldenPid2 = runInTransaction(() -> myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), g2Outcome.getResource()));
 
 		//Create some nongroup patients MDM linked to a different golden resource. They shouldnt be included in the query.
 		for (int i = 0; i < 5; i++) {
@@ -1371,7 +1372,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			IIdType practId = createPractitionerWithIndex(i);
 			DaoMethodOutcome patientOutcome = createPatientWithIndexAndGPAndManagingOrganization(index, practId, orgId);
 			IIdType patId = patientOutcome.getId().toUnqualifiedVersionless();
-			Long sourcePid = runInTransaction(() -> myIdHelperService.getPidOrNull(patientOutcome.getResource()));
+			ResourcePersistentId sourcePid = runInTransaction(() -> myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), patientOutcome.getResource()));
 			linkToGoldenResource(goldenPid2, sourcePid);
 			createObservationWithIndex(index, patId);
 			createImmunizationWithIndex(index, patId);
@@ -1445,12 +1446,12 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		myObservationDao.update(obs, new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.defaultPartition()));
 	}
 
-	public void linkToGoldenResource(Long theGoldenPid, Long theSourcePid) {
+	public void linkToGoldenResource(ResourcePersistentId theGoldenPid, ResourcePersistentId theSourcePid) {
 		MdmLink mdmLink = new MdmLink();
 		mdmLink.setCreated(new Date());
 		mdmLink.setMdmSourceType("Patient");
-		mdmLink.setGoldenResourcePid(theGoldenPid);
-		mdmLink.setSourcePid(theSourcePid);
+		mdmLink.setGoldenResourcePersistenceId(theGoldenPid);
+		mdmLink.setSourcePersistenceId(theSourcePid);
 		mdmLink.setMatchResult(MdmMatchResultEnum.MATCH);
 		mdmLink.setHadToCreateNewGoldenResource(false);
 		mdmLink.setEidMatch(false);

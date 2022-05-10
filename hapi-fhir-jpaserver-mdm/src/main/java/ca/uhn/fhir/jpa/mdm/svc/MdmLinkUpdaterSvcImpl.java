@@ -22,15 +22,11 @@ package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
-import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
-import ca.uhn.fhir.jpa.entity.MdmLink;
-import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
@@ -60,7 +56,7 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 	@Autowired
 	FhirContext myFhirContext;
 	@Autowired
-	IJpaIdHelperService myIdHelperService;
+	IIdHelperService myIdHelperService;
 	@Autowired
 	MdmLinkDaoSvc myMdmLinkDaoSvc;
 	@Autowired
@@ -85,8 +81,8 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 
 		validateUpdateLinkRequest(theGoldenResource, theSourceResource, theMatchResult, sourceType);
 
-		Long goldenResourceId = myIdHelperService.getPidOrThrowException(theGoldenResource);
-		Long targetId = myIdHelperService.getPidOrThrowException(theSourceResource);
+		Long goldenResourceId = myIdHelperService.getPidOrThrowException(theGoldenResource).getIdAsLong();
+		Long targetId = myIdHelperService.getPidOrThrowException(theSourceResource).getIdAsLong();
 
 		// check if the golden resource and the source resource are in the same partition, throw error if not
 		myMdmPartitionHelper.validateResourcesInSamePartition(theGoldenResource, theSourceResource);
@@ -161,8 +157,8 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 	public void notDuplicateGoldenResource(IAnyResource theGoldenResource, IAnyResource theTargetGoldenResource, MdmTransactionContext theMdmContext) {
 		validateNotDuplicateGoldenResourceRequest(theGoldenResource, theTargetGoldenResource);
 
-		Long goldenResourceId = myIdHelperService.getPidOrThrowException(theGoldenResource);
-		Long targetId = myIdHelperService.getPidOrThrowException(theTargetGoldenResource);
+		Long goldenResourceId = myIdHelperService.getPidOrThrowException(theGoldenResource).getIdAsLong();
+		Long targetId = myIdHelperService.getPidOrThrowException(theTargetGoldenResource).getIdAsLong();
 
 		Optional<? extends IMdmLink> oMdmLink = myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenResourceId, targetId);
 		if (!oMdmLink.isPresent()) {

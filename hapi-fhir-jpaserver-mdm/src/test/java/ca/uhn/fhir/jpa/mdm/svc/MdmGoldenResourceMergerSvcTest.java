@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
@@ -68,10 +69,10 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 	public void before() {
 		myFromGoldenPatient = createGoldenPatient();
 		IdType fromSourcePatientId = myFromGoldenPatient.getIdElement().toUnqualifiedVersionless();
-		myFromGoldenPatientPid = runInTransaction(()->myIdHelperService.getPidOrThrowException(fromSourcePatientId));
+		myFromGoldenPatientPid = runInTransaction(()->myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), fromSourcePatientId)).getIdAsLong();
 		myToGoldenPatient = createGoldenPatient();
 		IdType toGoldenPatientId = myToGoldenPatient.getIdElement().toUnqualifiedVersionless();
-		myToGoldenPatientPid = runInTransaction(()->myIdHelperService.getPidOrThrowException(toGoldenPatientId));
+		myToGoldenPatientPid = runInTransaction(()->myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), toGoldenPatientId)).getIdAsLong();
 
 		myTargetPatient1 = createPatient();
 		myTargetPatient2 = createPatient();

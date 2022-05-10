@@ -22,9 +22,7 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
-import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
-import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
@@ -48,7 +46,7 @@ import java.util.stream.Collectors;
 public class FindCandidateByExampleSvc extends BaseCandidateFinder {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 	@Autowired
-	IJpaIdHelperService myIdHelperService;
+	IIdHelperService myIdHelperService;
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
@@ -78,7 +76,7 @@ public class FindCandidateByExampleSvc extends BaseCandidateFinder {
 		// MatchedTargetCandidate -> Golden Resource -> MdmLink -> MatchedGoldenResourceCandidate
 		matchedCandidates = matchedCandidates.stream().filter(mc -> mc.isMatch() || mc.isPossibleMatch()).collect(Collectors.toList());
 		for (MatchedTarget match : matchedCandidates) {
-			Optional<? extends IMdmLink> optionalMdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(match.getTarget()));
+			Optional<? extends IMdmLink> optionalMdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), match.getTarget()).getIdAsLong());
 			if (!optionalMdmLink.isPresent()) {
 				continue;
 			}
@@ -96,7 +94,7 @@ public class FindCandidateByExampleSvc extends BaseCandidateFinder {
 	}
 
 	private List<ResourcePersistentId> getNoMatchGoldenResourcePids(IBaseResource theBaseResource) {
-		Long targetPid = myIdHelperService.getPidOrNull(theBaseResource);
+		Long targetPid = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theBaseResource).getIdAsLong();
 		return myMdmLinkDaoSvc.getMdmLinksBySourcePidAndMatchResult(targetPid, MdmMatchResultEnum.NO_MATCH)
 			.stream()
 			.map(IMdmLink::getGoldenResourcePersistenceId)

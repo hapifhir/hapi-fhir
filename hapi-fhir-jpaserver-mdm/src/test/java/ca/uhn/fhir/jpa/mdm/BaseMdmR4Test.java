@@ -5,8 +5,8 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
-import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.config.MdmConsumerConfig;
 import ca.uhn.fhir.jpa.mdm.config.MdmSubmitterConfig;
@@ -111,7 +111,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 	@Autowired
 	protected MdmLinkDaoSvc myMdmLinkDaoSvc;
 	@Autowired
-	protected IJpaIdHelperService myIdHelperService;
+	protected IIdHelperService myIdHelperService;
 	@Autowired
 	protected IMdmSettings myMdmSettings;
 	@Autowired
@@ -350,7 +350,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		String resourceType = theBaseResource.getIdElement().getResourceType();
 		IFhirResourceDao relevantDao = myDaoRegistry.getResourceDao(resourceType);
 
-		Optional<? extends IMdmLink> matchedLinkForTargetPid = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(runInTransaction(() -> myIdHelperService.getPidOrNull(theBaseResource)));
+		Optional<? extends IMdmLink> matchedLinkForTargetPid = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(runInTransaction(() -> myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theBaseResource)).getIdAsLong());
 		if (matchedLinkForTargetPid.isPresent()) {
 			Long goldenResourcePid = matchedLinkForTargetPid.get().getGoldenResourcePersistenceId().getIdAsLong();
 			return (T) relevantDao.readByPid(new ResourcePersistentId(goldenResourcePid));
@@ -533,8 +533,8 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		MdmLink mdmLink = myMdmLinkDaoSvc.newMdmLink();
 		mdmLink.setLinkSource(MdmLinkSourceEnum.MANUAL);
 		mdmLink.setMatchResult(MdmMatchResultEnum.MATCH);
-		mdmLink.setGoldenResourcePid(runInTransaction(() -> myIdHelperService.getPidOrNull(sourcePatient)));
-		mdmLink.setSourcePid(runInTransaction(() -> myIdHelperService.getPidOrNull(patient)));
+		mdmLink.setGoldenResourcePersistenceId(runInTransaction(() -> myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), sourcePatient)));
+		mdmLink.setSourcePersistenceId(runInTransaction(() -> myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), patient)));
 		return mdmLink;
 	}
 
