@@ -45,7 +45,6 @@ import org.hibernate.search.engine.search.common.BooleanOperator;
 import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
 import org.hibernate.search.engine.search.predicate.dsl.PredicateFinalStep;
 import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -270,7 +269,7 @@ public class ExtendedLuceneClauseBuilder {
 	 * @param theString the raw string
 	 * @return a case and accent normalized version of the input
 	 */
-	@NotNull
+	@Nonnull
 	private String normalize(String theString) {
 		return StringUtil.normalizeStringForSearchIndexing(theString).toLowerCase(Locale.ROOT);
 	}
