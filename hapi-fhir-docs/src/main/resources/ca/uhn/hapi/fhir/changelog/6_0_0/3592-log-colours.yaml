@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 3592
+jira: SMILE-691
+title: "Command-line log output now only sends colour commands if output is being printed to a console.  Otherwise,
+ (e.g. if output is redirected to a file) the log output will not contain any special colour escape characters."
