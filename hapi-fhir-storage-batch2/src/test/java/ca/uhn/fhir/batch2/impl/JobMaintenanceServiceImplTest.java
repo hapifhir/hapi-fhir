@@ -248,29 +248,75 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 	}
 
 
+	@Nested
+	public class CancellationTests {
 
-	@Test
-	public void cancelJustAfterStart() {
-		// Setup
-		myJobDefinitionRegistry.addJobDefinition(createJobDefinition(JobDefinition.Builder::gatedExecution));
-		when(myJobPersistence.fetchWorkChunksWithoutData(eq(INSTANCE_ID), eq(100), eq(0))).thenReturn(Lists.newArrayList(
-			createWorkChunkStep2().setStatus(StatusEnum.QUEUED).setId(CHUNK_ID),
-			createWorkChunkStep2().setStatus(StatusEnum.QUEUED).setId(CHUNK_ID_2)
-		));
-		JobInstance instance1 = createInstance();
-		instance1.setCurrentGatedStepId(STEP_1);
-		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance1));
+		@Test
+		public void justAfterStart() {
+			// Setup
+			myJobDefinitionRegistry.addJobDefinition(createJobDefinition(JobDefinition.Builder::gatedExecution));
+			JobInstance instance1 = createInstance();
+			instance1.setCurrentGatedStepId(STEP_1);
 
-		mySvc.runMaintenancePass();
+			// Execute
+			instance1.setCancelled(true);
 
-		// Execute
-		instance1.setCancelled(true);
+			mySvc.runMaintenancePass();
 
-		mySvc.runMaintenancePass();
+			// Verify
+			assertEquals(StatusEnum.IN_PROGRESS, instance1.getStatus());
+			assertNull(instance1.getErrorMessage());
+		}
 
-		// Verify
-		assertEquals(StatusEnum.ERRORED, instance1.getStatus());
-		assertTrue(instance1.getErrorMessage().startsWith("Job instance cancelled"));
+		@Test
+		public void afterFirstMaintenancePass() {
+			// Setup
+			myJobDefinitionRegistry.addJobDefinition(createJobDefinition(JobDefinition.Builder::gatedExecution));
+			when(myJobPersistence.fetchWorkChunksWithoutData(eq(INSTANCE_ID), eq(100), eq(0))).thenReturn(Lists.newArrayList(
+				createWorkChunkStep2().setStatus(StatusEnum.QUEUED).setId(CHUNK_ID),
+				createWorkChunkStep2().setStatus(StatusEnum.QUEUED).setId(CHUNK_ID_2)
+			));
+			JobInstance instance1 = createInstance();
+			instance1.setCurrentGatedStepId(STEP_1);
+			when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance1));
+
+			mySvc.runMaintenancePass();
+
+			// Execute
+			instance1.setCancelled(true);
+
+			mySvc.runMaintenancePass();
+
+			// Verify
+			assertEquals(StatusEnum.CANCELLED, instance1.getStatus());
+			assertTrue(instance1.getErrorMessage().startsWith("Job instance cancelled"));
+		}
+
+		@Test
+		public void afterSecondMaintenancePass() {
+			// Setup
+			myJobDefinitionRegistry.addJobDefinition(createJobDefinition(JobDefinition.Builder::gatedExecution));
+			when(myJobPersistence.fetchWorkChunksWithoutData(eq(INSTANCE_ID), eq(100), eq(0))).thenReturn(Lists.newArrayList(
+				createWorkChunkStep2().setStatus(StatusEnum.QUEUED).setId(CHUNK_ID),
+				createWorkChunkStep2().setStatus(StatusEnum.QUEUED).setId(CHUNK_ID_2)
+			));
+			JobInstance instance1 = createInstance();
+			instance1.setCurrentGatedStepId(STEP_1);
+			when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance1));
+
+			mySvc.runMaintenancePass();
+			mySvc.runMaintenancePass();
+
+			// Execute
+			instance1.setCancelled(true);
+
+			mySvc.runMaintenancePass();
+
+			// Verify
+			assertEquals(StatusEnum.CANCELLED, instance1.getStatus());
+			assertTrue(instance1.getErrorMessage().startsWith("Job instance cancelled"));
+		}
+
 	}
 
 

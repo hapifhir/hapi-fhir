@@ -147,7 +147,7 @@ public class JobMaintenanceServiceImpl extends BaseJobService implements IJobMai
 				msg += " while running step " + theInstance.getCurrentGatedStepId();
 			}
 			theInstance.setErrorMessage(msg);
-			theInstance.setStatus(StatusEnum.ERRORED);
+			theInstance.setStatus(StatusEnum.CANCELLED);
 			myJobPersistence.updateInstance(theInstance);
 		}
 
@@ -163,6 +163,7 @@ public class JobMaintenanceServiceImpl extends BaseJobService implements IJobMai
 				break;
 			case COMPLETED:
 			case FAILED:
+			case CANCELLED:
 				if (theInstance.getEndTime() != null) {
 					long cutoff = System.currentTimeMillis() - PURGE_THRESHOLD;
 					if (theInstance.getEndTime().getTime() < cutoff) {
@@ -174,7 +175,8 @@ public class JobMaintenanceServiceImpl extends BaseJobService implements IJobMai
 				break;
 		}
 
-		if ((theInstance.getStatus() == StatusEnum.COMPLETED || theInstance.getStatus() == StatusEnum.FAILED) && !theInstance.isWorkChunksPurged()) {
+		if ((theInstance.getStatus() == StatusEnum.COMPLETED || theInstance.getStatus() == StatusEnum.FAILED
+				|| theInstance.getStatus() == StatusEnum.CANCELLED) && !theInstance.isWorkChunksPurged()) {
 			theInstance.setWorkChunksPurged(true);
 			myJobPersistence.deleteChunks(theInstance.getInstanceId());
 			myJobPersistence.updateInstance(theInstance);
@@ -191,7 +193,7 @@ public class JobMaintenanceServiceImpl extends BaseJobService implements IJobMai
 		int errorCountForAllStatuses = 0;
 		Long earliestStartTime = null;
 		Long latestEndTime = null;
-		String errorMessage = theInstance.isCancelled() ? theInstance.getErrorMessage() : null;
+		String errorMessage = null;
 		for (int page = 0; ; page++) {
 			List<WorkChunk> chunks = myJobPersistence.fetchWorkChunksWithoutData(theInstance.getInstanceId(), INSTANCES_PER_PASS, page);
 
@@ -230,6 +232,8 @@ public class JobMaintenanceServiceImpl extends BaseJobService implements IJobMai
 					case FAILED:
 						failedChunkCount++;
 						errorMessage = chunk.getErrorMessage();
+						break;
+					case CANCELLED:
 						break;
 				}
 			}
