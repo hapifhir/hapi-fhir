@@ -3,6 +3,7 @@ package ca.uhn.fhir.batch2.impl;
 import ca.uhn.fhir.batch2.api.IJobCompletionHandler;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobCompletionDetails;
+import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
@@ -11,6 +12,7 @@ import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -28,6 +30,7 @@ import static ca.uhn.fhir.batch2.impl.JobCoordinatorImplTest.createWorkChunkStep
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -243,6 +246,33 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 
 		verifyNoMoreInteractions(myJobPersistence);
 	}
+
+
+
+	@Test
+	public void cancelJustAfterStart() {
+		// Setup
+		myJobDefinitionRegistry.addJobDefinition(createJobDefinition(JobDefinition.Builder::gatedExecution));
+		when(myJobPersistence.fetchWorkChunksWithoutData(eq(INSTANCE_ID), eq(100), eq(0))).thenReturn(Lists.newArrayList(
+			createWorkChunkStep2().setStatus(StatusEnum.QUEUED).setId(CHUNK_ID),
+			createWorkChunkStep2().setStatus(StatusEnum.QUEUED).setId(CHUNK_ID_2)
+		));
+		JobInstance instance1 = createInstance();
+		instance1.setCurrentGatedStepId(STEP_1);
+		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance1));
+
+		mySvc.runMaintenancePass();
+
+		// Execute
+		instance1.setCancelled(true);
+
+		mySvc.runMaintenancePass();
+
+		// Verify
+		assertEquals(StatusEnum.ERRORED, instance1.getStatus());
+		assertTrue(instance1.getErrorMessage().startsWith("Job instance cancelled"));
+	}
+
 
 	private static Date parseTime(String theDate) {
 		return new DateTimeType(theDate).getValue();

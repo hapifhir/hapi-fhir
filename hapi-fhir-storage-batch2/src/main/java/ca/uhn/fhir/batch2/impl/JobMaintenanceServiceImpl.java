@@ -71,6 +71,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  *    <li>For instances that are COMPLETE, purges chunk data</li>
  *    <li>For instances that are IN_PROGRESS where at least one chunk is FAILED, marks instance as FAILED and propagates the error message to the instance, and purges chunk data</li>
  *    <li>For instances that are IN_PROGRESS with an error message set where no chunks are ERRORED or FAILED, clears the error message in the instance (meaning presumably there was an error but it cleared)</li>
+ *    <li>For instances that are IN_PROGRESS and isCancelled flag is set marks them as ERRORED and indicating the current running step if any</li>
  *    <li>For instances that are COMPLETE or FAILED and are old, delete them entirely</li>
  * </ul>
  * 	</p>
@@ -125,6 +126,7 @@ public class JobMaintenanceServiceImpl extends BaseJobService implements IJobMai
 
 			for (JobInstance instance : instances) {
 				if (processedInstanceIds.add(instance.getInstanceId())) {
+					handleCancellation(instance);
 					cleanupInstance(instance, progressAccumulator);
 					triggerGatedExecutions(instance, progressAccumulator);
 				}
@@ -134,6 +136,21 @@ public class JobMaintenanceServiceImpl extends BaseJobService implements IJobMai
 				break;
 			}
 		}
+	}
+
+	private void handleCancellation(JobInstance theInstance) {
+		if (! theInstance.isCancelled()) { return; }
+
+		if (theInstance.getStatus() == StatusEnum.QUEUED || theInstance.getStatus() == StatusEnum.IN_PROGRESS) {
+			String msg = "Job instance cancelled";
+			if (theInstance.getCurrentGatedStepId() != null) {
+				msg += " while running step " + theInstance.getCurrentGatedStepId();
+			}
+			theInstance.setErrorMessage(msg);
+			theInstance.setStatus(StatusEnum.ERRORED);
+			myJobPersistence.updateInstance(theInstance);
+		}
+
 	}
 
 	private void cleanupInstance(JobInstance theInstance, JobChunkProgressAccumulator theProgressAccumulator) {
@@ -174,7 +191,7 @@ public class JobMaintenanceServiceImpl extends BaseJobService implements IJobMai
 		int errorCountForAllStatuses = 0;
 		Long earliestStartTime = null;
 		Long latestEndTime = null;
-		String errorMessage = null;
+		String errorMessage = theInstance.isCancelled() ? theInstance.getErrorMessage() : null;
 		for (int page = 0; ; page++) {
 			List<WorkChunk> chunks = myJobPersistence.fetchWorkChunksWithoutData(theInstance.getInstanceId(), INSTANCES_PER_PASS, page);
 
