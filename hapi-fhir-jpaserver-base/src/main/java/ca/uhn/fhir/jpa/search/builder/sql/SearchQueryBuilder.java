@@ -584,14 +584,8 @@ public class SearchQueryBuilder {
 		if (theDateRange != null) {
 			DateParam lb = theDateRange.getLowerBound();
 			DateParam ub = theDateRange.getUpperBound();
-			boolean a = lb != null;
-			boolean b = ub != null;
-			boolean c = lb.getPrefix().equals(NOT_EQUAL);
-			boolean d = ub.getPrefix().equals(NOT_EQUAL);
-			boolean e = theDateRange.getLowerBound().getValue().equals(theDateRange.getUpperBound().getValue());
 
-
-			return lb != null && ub != null && lb.getPrefix().equals(NOT_EQUAL) && ub.getPrefix().equals(NOT_EQUAL) && theDateRange.getLowerBound().getValue().equals(theDateRange.getUpperBound().getValue());
+			return lb != null && ub != null && lb.getPrefix().equals(NOT_EQUAL) && ub.getPrefix().equals(NOT_EQUAL);
 		}
 		return false;
 	}

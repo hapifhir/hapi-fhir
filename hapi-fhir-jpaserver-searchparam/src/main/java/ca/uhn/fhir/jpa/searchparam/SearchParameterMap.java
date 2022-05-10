@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.*;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -518,10 +519,10 @@ public class SearchParameterMap implements Serializable {
 			DateParam ub = getLastUpdated().getUpperBound();
 
 			if (isNotEqualsComparator(lb, ub)) {
-				addLastUpdateParam(b, ParamPrefixEnum.NOT_EQUAL, getLastUpdated().getLowerBound());
+				addLastUpdateParam(b, NOT_EQUAL, getLastUpdated().getLowerBound());
 			} else {
-				addLastUpdateParam(b, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, lb);
-				addLastUpdateParam(b, ParamPrefixEnum.LESSTHAN_OR_EQUALS, ub);
+				addLastUpdateParam(b, GREATERTHAN_OR_EQUALS, lb);
+				addLastUpdateParam(b, LESSTHAN_OR_EQUALS, ub);
 			}
 		}
 
@@ -572,7 +573,7 @@ public class SearchParameterMap implements Serializable {
 	}
 
 	private boolean isNotEqualsComparator(DateParam lb, DateParam ub) {
-		return lb != null && ub != null && lb.getPrefix().equals(ParamPrefixEnum.NOT_EQUAL) && ub.getPrefix().equals(ParamPrefixEnum.NOT_EQUAL);
+		return lb != null && ub != null && lb.getPrefix().equals(NOT_EQUAL) && ub.getPrefix().equals(NOT_EQUAL);
 	}
 
 	/**
