@@ -66,6 +66,11 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	}
 
 	@Override
+	public List<JobInstance> fetchRecentInstances(int thePageSize, int thePageIndex) {
+		return myWrap.fetchRecentInstances(thePageSize, thePageIndex);
+	}
+
+	@Override
 	public synchronized Optional<JobInstance> fetchInstanceAndMarkInProgress(String theInstanceId) {
 		return myWrap.fetchInstanceAndMarkInProgress(theInstanceId);
 	}
