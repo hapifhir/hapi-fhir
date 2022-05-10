@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search.reindex;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,34 +20,28 @@ package ca.uhn.fhir.jpa.search.reindex;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceReindexJobDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.ResourceReindexJobEntity;
-import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.apache.commons.lang3.time.DateUtils;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.InstantType;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
@@ -60,6 +54,7 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -80,9 +75,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+/**
+ * @see ca.uhn.fhir.jpa.reindex.job.ReindexJobConfig
+ * @deprecated
+ */
+@Deprecated
 public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 
 	private static final Date BEGINNING_OF_TIME = new Date(0);
@@ -96,12 +95,10 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 	@Autowired
 	private PlatformTransactionManager myTxManager;
 	private TransactionTemplate myTxTemplate;
-	private ThreadFactory myReindexingThreadFactory = new BasicThreadFactory.Builder().namingPattern("ResourceReindex-%d").build();
+	private final ThreadFactory myReindexingThreadFactory = new BasicThreadFactory.Builder().namingPattern("ResourceReindex-%d").build();
 	private ThreadPoolExecutor myTaskExecutor;
 	@Autowired
 	private IResourceTableDao myResourceTableDao;
-	@Autowired
-	private IResourceHistoryTableDao myResourceHistoryTableDao;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
@@ -114,11 +111,8 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	private ISchedulerService mySchedulerService;
-
-	@VisibleForTesting
-	void setReindexJobDaoForUnitTest(IResourceReindexJobDao theReindexJobDao) {
-		myReindexJobDao = theReindexJobDao;
-	}
+	@Autowired
+	private ResourceReindexer myResourceReindexer;
 
 	@VisibleForTesting
 	void setDaoConfigForUnitTest(DaoConfig theDaoConfig) {
@@ -126,33 +120,8 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 	}
 
 	@VisibleForTesting
-	void setTxManagerForUnitTest(PlatformTransactionManager theTxManager) {
-		myTxManager = theTxManager;
-	}
-
-	@VisibleForTesting
-	void setResourceTableDaoForUnitTest(IResourceTableDao theResourceTableDao) {
-		myResourceTableDao = theResourceTableDao;
-	}
-
-	@VisibleForTesting
-	void setDaoRegistryForUnitTest(DaoRegistry theDaoRegistry) {
-		myDaoRegistry = theDaoRegistry;
-	}
-
-	@VisibleForTesting
-	void setForcedIdDaoForUnitTest(IForcedIdDao theForcedIdDao) {
-		myForcedIdDao = theForcedIdDao;
-	}
-
-	@VisibleForTesting
 	void setContextForUnitTest(FhirContext theContext) {
 		myContext = theContext;
-	}
-
-	@VisibleForTesting
-	void setSchedulerServiceForUnitTest(ISchedulerService theSchedulerService) {
-		mySchedulerService = theSchedulerService;
 	}
 
 	@PostConstruct
@@ -172,29 +141,6 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 			myReindexingThreadFactory,
 			rejectHandler
 		);
-	}
-	/**
-	 * A handler for rejected tasks that will have the caller block until space is available.
-	 * This was stolen from old hibernate search(5.X.X), as it has been removed in HS6. We can probably come up with a better solution though.
-	 */
-	public static class BlockPolicy implements RejectedExecutionHandler {
-
-		/**
-		 * Puts the Runnable to the blocking queue, effectively blocking the delegating thread until space is available.
-		 *
-		 * @param r the runnable task requested to be executed
-		 * @param e the executor attempting to execute this task
-		 */
-		@Override
-		public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
-			try {
-				e.getQueue().put( r );
-			}
-			catch (InterruptedException e1) {
-				ourLog.error("Interrupted Execption for task: {}",r, e1 );
-				Thread.currentThread().interrupt();
-			}
-		}
 	}
 
 
@@ -220,7 +166,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 			try {
 				myContext.getResourceType(theType);
 			} catch (DataFormatException e) {
-				throw new InvalidRequestException("Unknown resource type: " + theType);
+				throw new InvalidRequestException(Msg.code(1170) + "Unknown resource type: " + theType);
 			}
 			myReindexJobDao.markAllOfTypeAsDeleted(theType);
 			typeDesc = theType;
@@ -256,7 +202,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 	@Override
 	@Transactional(Transactional.TxType.NEVER)
 	public Integer runReindexingPass() {
-		if (myDaoConfig.isSchedulingDisabled()) {
+		if (myDaoConfig.isSchedulingDisabled() || !myDaoConfig.isEnableTaskPreExpandValueSets()) {
 			return null;
 		}
 		if (myIndexingLock.tryLock()) {
@@ -289,15 +235,15 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 		ourLog.info("Cancelling and purging all resource reindexing jobs");
 		myIndexingLock.lock();
 		try {
-		myTxTemplate.execute(t -> {
-			myReindexJobDao.markAllOfTypeAsDeleted();
-			return null;
-		});
+			myTxTemplate.execute(t -> {
+				myReindexJobDao.markAllOfTypeAsDeleted();
+				return null;
+			});
 
-		myTaskExecutor.shutdown();
-		initExecutor();
+			myTaskExecutor.shutdown();
+			initExecutor();
 
-		expungeJobsMarkedAsDeleted();
+			expungeJobsMarkedAsDeleted();
 		} finally {
 			myIndexingLock.unlock();
 		}
@@ -346,8 +292,8 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 	}
 
 	@VisibleForTesting
-	void setSearchParamRegistryForUnitTest(ISearchParamRegistry theSearchParamRegistry) {
-		mySearchParamRegistry = theSearchParamRegistry;
+	public void setResourceReindexerForUnitTest(ResourceReindexer theResourceReindexer) {
+		myResourceReindexer = theResourceReindexer;
 	}
 
 	private int runReindexJob(ResourceReindexJobEntity theJob) {
@@ -387,7 +333,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 		});
 		Validate.notNull(range);
 		int count = range.getNumberOfElements();
-		ourLog.info("Loaded {} resources for reindexing in {}", count, pageSw.toString());
+		ourLog.info("Loaded {} resources for reindexing in {}", count, pageSw);
 
 		// If we didn't find any results at all, mark as deleted
 		if (count == 0) {
@@ -446,7 +392,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 			return null;
 		});
 
-		ourLog.info("Completed pass of reindex JOB[{}] - Indexed {} resources in {} ({} / sec) - Have indexed until: {}", theJob.getId(), count, sw.toString(), sw.formatThroughput(count, TimeUnit.SECONDS), new InstantType(newLow));
+		ourLog.info("Completed pass of reindex JOB[{}] - Indexed {} resources in {} ({} / sec) - Have indexed until: {}", theJob.getId(), count, sw, sw.formatThroughput(count, TimeUnit.SECONDS), new InstantType(newLow));
 		return counter.get();
 	}
 
@@ -465,7 +411,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		txTemplate.execute((TransactionCallback<Void>) theStatus -> {
-			ourLog.info("Marking resource with PID {} as indexing_failed", new Object[]{theId});
+			ourLog.info("Marking resource with PID {} as indexing_failed", theId);
 
 			myResourceTableDao.updateIndexStatus(theId, BaseHapiFhirDao.INDEX_STATUS_INDEXING_FAILED);
 
@@ -492,7 +438,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 			q = myEntityManager.createQuery("DELETE FROM ResourceIndexedSearchParamQuantityNormalized t WHERE t.myResourcePid = :id");
 			q.setParameter("id", theId);
 			q.executeUpdate();
-			
+
 			q = myEntityManager.createQuery("DELETE FROM ResourceIndexedSearchParamString t WHERE t.myResourcePid = :id");
 			q.setParameter("id", theId);
 			q.executeUpdate();
@@ -527,63 +473,12 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 			myCounter = theCounter;
 		}
 
-
-		@SuppressWarnings("unchecked")
-		private <T extends IBaseResource> void doReindex(ResourceTable theResourceTable, T theResource) {
-			RuntimeResourceDefinition resourceDefinition = myContext.getResourceDefinition(theResource.getClass());
-			Class<T> resourceClass = (Class<T>) resourceDefinition.getImplementingClass();
-			final IFhirResourceDao<T> dao = myDaoRegistry.getResourceDao(resourceClass);
-			dao.reindex(theResource, theResourceTable);
-
-			myCounter.incrementAndGet();
-		}
-
 		@Override
 		public Date call() {
 			Throwable reindexFailure;
+
 			try {
-				reindexFailure = myTxTemplate.execute(t -> {
-					ResourceTable resourceTable = myResourceTableDao.findById(myNextId).orElseThrow(IllegalStateException::new);
-					myUpdated = resourceTable.getUpdatedDate();
-
-					try {
-						/*
-						 * This part is because from HAPI 1.5 - 1.6 we changed the format of forced ID to be "type/id" instead of just "id"
-						 */
-						ForcedId forcedId = resourceTable.getForcedId();
-						if (forcedId != null) {
-							if (isBlank(forcedId.getResourceType())) {
-								ourLog.info("Updating resource {} forcedId type to {}", forcedId.getForcedId(), resourceTable.getResourceType());
-								forcedId.setResourceType(resourceTable.getResourceType());
-								myForcedIdDao.save(forcedId);
-							}
-						}
-
-						IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceTable.getResourceType());
-						long expectedVersion = resourceTable.getVersion();
-						IBaseResource resource = dao.readByPid(new ResourcePersistentId(resourceTable.getId()), true);
-
-						if (resource == null) {
-							throw new InternalErrorException("Could not find resource version " + resourceTable.getIdDt().toUnqualified().getValue() + " in database");
-						}
-
-						Long actualVersion = resource.getIdElement().getVersionIdPartAsLong();
-						if (actualVersion < expectedVersion) {
-							ourLog.warn("Resource {} version {} does not exist, renumbering version {}", resource.getIdElement().toUnqualifiedVersionless().getValue(), resource.getIdElement().getVersionIdPart(), expectedVersion);
-							myResourceHistoryTableDao.updateVersion(resourceTable.getId(), actualVersion, expectedVersion);
-						}
-
-						doReindex(resourceTable, resource);
-
-						return null;
-
-					} catch (Exception e) {
-						ourLog.error("Failed to index resource {}: {}", resourceTable.getIdDt(), e.toString(), e);
-						t.setRollbackOnly();
-						return e;
-					}
-				});
-
+				reindexFailure = readResourceAndReindex();
 			} catch (ResourceVersionConflictException e) {
 				/*
 				 * We reindex in multiple threads, so it's technically possible that two threads try
@@ -602,6 +497,27 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 			}
 
 			return myUpdated;
+		}
+
+		@Nullable
+		private Throwable readResourceAndReindex() {
+			Throwable reindexFailure;
+			reindexFailure = myTxTemplate.execute(t -> {
+				ResourceTable resourceTable = myResourceTableDao.findById(myNextId).orElseThrow(IllegalStateException::new);
+				myUpdated = resourceTable.getUpdatedDate();
+
+				try {
+					myResourceReindexer.reindexResourceEntity(resourceTable);
+					myCounter.incrementAndGet();
+					return null;
+
+				} catch (Exception e) {
+					ourLog.error("Failed to index resource {}: {}", resourceTable.getIdDt(), e, e);
+					t.setRollbackOnly();
+					return e;
+				}
+			});
+			return reindexFailure;
 		}
 	}
 }

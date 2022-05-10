@@ -1,4 +1,5 @@
 ---
 type: fix
 issue: 1644
-title: "support Oracle specific syntax when using a TermValueSetConceptView"
+title: "An SQL syntax error was corrected when using the JPA server terminology services to pre-expand valuesets when
+    using Oracle Database."

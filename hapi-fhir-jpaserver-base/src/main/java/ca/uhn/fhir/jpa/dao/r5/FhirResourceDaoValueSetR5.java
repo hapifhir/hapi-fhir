@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.r5;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,8 @@ import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
-import org.hl7.fhir.convertors.conv40_50.ValueSet40_50;
+import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_40_50;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -52,14 +53,14 @@ public class FhirResourceDaoValueSetR5 extends BaseHapiFhirResourceDao<ValueSet>
 	@Override
 	public ValueSet expandByIdentifier(String theUri, ValueSetExpansionOptions theOptions) {
 		org.hl7.fhir.r4.model.ValueSet canonicalOutput = myTerminologySvc.expandValueSet(theOptions, theUri);
-		return ValueSet40_50.convertValueSet(canonicalOutput);
+		return (ValueSet) VersionConvertorFactory_40_50.convertResource(canonicalOutput, new BaseAdvisor_40_50(false));
 	}
 
 	@Override
 	public ValueSet expand(ValueSet theSource, ValueSetExpansionOptions theOptions) {
-		org.hl7.fhir.r4.model.ValueSet canonicalInput = ValueSet40_50.convertValueSet(theSource);
+		org.hl7.fhir.r4.model.ValueSet canonicalInput = (org.hl7.fhir.r4.model.ValueSet) VersionConvertorFactory_40_50.convertResource(theSource, new BaseAdvisor_40_50(false));
 		org.hl7.fhir.r4.model.ValueSet canonicalOutput = myTerminologySvc.expandValueSet(theOptions, canonicalInput);
-		return ValueSet40_50.convertValueSet(canonicalOutput);
+		return (ValueSet) VersionConvertorFactory_40_50.convertResource(canonicalOutput, new BaseAdvisor_40_50(false));
 	}
 
 	@Override
@@ -79,10 +80,10 @@ public class FhirResourceDaoValueSetR5 extends BaseHapiFhirResourceDao<ValueSet>
 												 boolean theUpdateVersion, TransactionDetails theTransactionDetails, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
 		ResourceTable retVal = super.updateEntity(theRequestDetails, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theTransactionDetails, theForceUpdate, theCreateNewHistoryEntry);
 
-		if (myDaoConfig.isPreExpandValueSets() && !retVal.isUnchangedInCurrentOperation()) {
+		if (getConfig().isPreExpandValueSets() && !retVal.isUnchangedInCurrentOperation()) {
 			if (retVal.getDeleted() == null) {
 				ValueSet valueSet = (ValueSet) theResource;
-				myTerminologySvc.storeTermValueSet(retVal, org.hl7.fhir.convertors.conv40_50.ValueSet40_50.convertValueSet(valueSet));
+				myTerminologySvc.storeTermValueSet(retVal, (org.hl7.fhir.r4.model.ValueSet) VersionConvertorFactory_40_50.convertResource(valueSet, new BaseAdvisor_40_50(false)));
 			} else {
 				myTerminologySvc.deleteValueSetAndChildren(retVal);
 			}

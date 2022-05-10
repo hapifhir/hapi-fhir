@@ -1,0 +1,3 @@
+---
+type: change
+title: "Add email configuration to MailSvc constructor"

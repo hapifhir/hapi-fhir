@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,7 +80,7 @@ public class MdmEidUpdateService {
 		} else {
 			//This is a new linking scenario. we have to break the existing link and link to the new Golden Resource. For now, we create duplicate.
 			//updated patient has an EID that matches to a new candidate. Link them, and set the Golden Resources possible duplicates
-			linkToNewGoldenResourceAndFlagAsDuplicate(theTargetResource, updateContext.getExistingGoldenResource(), updateContext.getMatchedGoldenResource(), theMdmTransactionContext);
+			linkToNewGoldenResourceAndFlagAsDuplicate(theTargetResource, theMatchedGoldenResourceCandidate.getMatchResult(), updateContext.getExistingGoldenResource(), updateContext.getMatchedGoldenResource(), theMdmTransactionContext);
 
 			myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(theTargetResource, updateContext.getMatchedGoldenResource(), theMdmTransactionContext);
 			myMdmResourceDaoSvc.upsertGoldenResource(updateContext.getMatchedGoldenResource(), theMdmTransactionContext.getResourceType());
@@ -121,10 +121,10 @@ public class MdmEidUpdateService {
 		myMdmLinkSvc.updateLink(newGoldenResource, theOldGoldenResource, MdmMatchOutcome.POSSIBLE_DUPLICATE, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 	}
 
-	private void linkToNewGoldenResourceAndFlagAsDuplicate(IAnyResource theResource, IAnyResource theOldGoldenResource, IAnyResource theNewGoldenResource, MdmTransactionContext theMdmTransactionContext) {
+	private void linkToNewGoldenResourceAndFlagAsDuplicate(IAnyResource theResource, MdmMatchOutcome theMatchResult, IAnyResource theOldGoldenResource, IAnyResource theNewGoldenResource, MdmTransactionContext theMdmTransactionContext) {
 		log(theMdmTransactionContext, "Changing a match link!");
 		myMdmLinkSvc.deleteLink(theOldGoldenResource, theResource, theMdmTransactionContext);
-		myMdmLinkSvc.updateLink(theNewGoldenResource, theResource, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
+		myMdmLinkSvc.updateLink(theNewGoldenResource, theResource, theMatchResult, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 		log(theMdmTransactionContext, "Duplicate detected based on the fact that both resources have different external EIDs.");
 		myMdmLinkSvc.updateLink(theNewGoldenResource, theOldGoldenResource, MdmMatchOutcome.POSSIBLE_DUPLICATE, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 	}
@@ -132,6 +132,11 @@ public class MdmEidUpdateService {
 	private void log(MdmTransactionContext theMdmTransactionContext, String theMessage) {
 		theMdmTransactionContext.addTransactionLogMessage(theMessage);
 		ourLog.debug(theMessage);
+	}
+
+	public void applySurvivorshipRulesAndSaveGoldenResource(IAnyResource theTargetResource, IAnyResource theGoldenResource, MdmTransactionContext theMdmTransactionContext) {
+		myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(theTargetResource, theGoldenResource, theMdmTransactionContext);
+		myMdmResourceDaoSvc.upsertGoldenResource(theGoldenResource, theMdmTransactionContext.getResourceType());
 	}
 
 	/**
@@ -156,13 +161,13 @@ public class MdmEidUpdateService {
 			myHasEidsInCommon = myEIDHelper.hasEidOverlap(myMatchedGoldenResource, theResource);
 			myIncomingResourceHasAnEid = !myEIDHelper.getExternalEid(theResource).isEmpty();
 
-			Optional<MdmLink> theExistingMatchLink = myMdmLinkDaoSvc.getMatchedLinkForSource(theResource);
+			Optional<MdmLink> theExistingMatchOrPossibleMatchLink = myMdmLinkDaoSvc.getMatchedOrPossibleMatchedLinkForSource(theResource);
 			myExistingGoldenResource = null;
 
-			if (theExistingMatchLink.isPresent()) {
-				MdmLink mdmLink = theExistingMatchLink.get();
+			if (theExistingMatchOrPossibleMatchLink.isPresent()) {
+				MdmLink mdmLink = theExistingMatchOrPossibleMatchLink.get();
 				Long existingGoldenResourcePid = mdmLink.getGoldenResourcePid();
-				myExistingGoldenResource =  myMdmResourceDaoSvc.readGoldenResourceByPid(new ResourcePersistentId(existingGoldenResourcePid), resourceType);
+				myExistingGoldenResource = myMdmResourceDaoSvc.readGoldenResourceByPid(new ResourcePersistentId(existingGoldenResourcePid), resourceType);
 				myRemainsMatchedToSameGoldenResource = candidateIsSameAsMdmLinkGoldenResource(mdmLink, theMatchedGoldenResourceCandidate);
 			} else {
 				myRemainsMatchedToSameGoldenResource = false;

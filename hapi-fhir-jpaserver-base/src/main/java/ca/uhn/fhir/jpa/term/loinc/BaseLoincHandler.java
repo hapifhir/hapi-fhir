@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.term.loinc;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,8 @@ package ca.uhn.fhir.jpa.term.loinc;
  */
 
 import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.term.IRecordHandler;
+import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -37,9 +38,8 @@ import java.util.Properties;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.*;
 import static org.apache.commons.lang3.StringUtils.*;
 
-public abstract class BaseLoincHandler implements IRecordHandler {
+public abstract class BaseLoincHandler implements IZipContentsHandlerCsv {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseLoincHandler.class);
-	public static final String LOINC_COPYRIGHT_STATEMENT = "This content from LOINC® is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at https://loinc.org/license/";
 
 	/**
 	 * This is <b>NOT</b> the LOINC CodeSystem URI! It is just
@@ -53,14 +53,22 @@ public abstract class BaseLoincHandler implements IRecordHandler {
 	private final Map<String, ValueSet> myIdToValueSet = new HashMap<>();
 	private final Map<String, TermConcept> myCode2Concept;
 	protected final Properties myUploadProperties;
+	protected String myLoincCopyrightStatement;
 
-	BaseLoincHandler(Map<String, TermConcept> theCode2Concept, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps, Properties theUploadProperties) {
+	BaseLoincHandler(Map<String, TermConcept> theCode2Concept, List<ValueSet> theValueSets,
+			List<ConceptMap> theConceptMaps, Properties theUploadProperties) {
+		this(theCode2Concept, theValueSets, theConceptMaps, theUploadProperties, null);
+	}
+
+	BaseLoincHandler(Map<String, TermConcept> theCode2Concept, List<ValueSet> theValueSets,
+			List<ConceptMap> theConceptMaps, Properties theUploadProperties, String theCopyrightStatement) {
 		myValueSets = theValueSets;
 		myValueSets.forEach(t -> myIdToValueSet.put(t.getId(), t));
 		myCode2Concept = theCode2Concept;
 		myConceptMaps = theConceptMaps;
 		myConceptMaps.forEach(t -> myIdToConceptMaps.put(t.getId(), t));
 		myUploadProperties = theUploadProperties;
+		myLoincCopyrightStatement = theCopyrightStatement;
 	}
 
 	void addCodeAsIncludeToValueSet(ValueSet theVs, String theCodeSystemUrl, String theCode, String theDisplayName) {
@@ -74,6 +82,9 @@ public abstract class BaseLoincHandler implements IRecordHandler {
 		if (include == null) {
 			include = theVs.getCompose().addInclude();
 			include.setSystem(theCodeSystemUrl);
+			if (StringUtils.isNotBlank(theVs.getVersion())) {
+				include.setVersion(theVs.getVersion());
+			}
 		}
 
 		boolean found = false;
@@ -101,7 +112,7 @@ public abstract class BaseLoincHandler implements IRecordHandler {
 	}
 
 
-	void addConceptMapEntry(ConceptMapping theMapping, String theCopyright) {
+	void addConceptMapEntry(ConceptMapping theMapping, String theExternalCopyright) {
 		if (isBlank(theMapping.getSourceCode())) {
 			return;
 		}
@@ -122,11 +133,14 @@ public abstract class BaseLoincHandler implements IRecordHandler {
 				.addTelecom()
 				.setSystem(ContactPoint.ContactPointSystem.URL)
 				.setValue(LOINC_WEBSITE_URL);
-			String copyright = theCopyright;
+
+			String copyright = theExternalCopyright;
 			if (!copyright.contains("LOINC")) {
-				copyright = LOINC_COPYRIGHT_STATEMENT + ". " + copyright;
+				copyright = myLoincCopyrightStatement +
+					(myLoincCopyrightStatement.endsWith(".") ? " " : ". ") + copyright;
 			}
 			conceptMap.setCopyright(copyright);
+
 			myIdToConceptMaps.put(theMapping.getConceptMapId(), conceptMap);
 			myConceptMaps.add(conceptMap);
 		} else {
@@ -214,7 +228,7 @@ public abstract class BaseLoincHandler implements IRecordHandler {
 				.addTelecom()
 				.setSystem(ContactPoint.ContactPointSystem.URL)
 				.setValue(LOINC_WEBSITE_URL);
-			vs.setCopyright(LOINC_COPYRIGHT_STATEMENT);
+			vs.setCopyright(myLoincCopyrightStatement);
 			myIdToValueSet.put(theValueSetId, vs);
 			myValueSets.add(vs);
 		} else {

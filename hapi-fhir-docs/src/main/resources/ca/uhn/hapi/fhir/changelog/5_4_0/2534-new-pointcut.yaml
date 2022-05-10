@@ -1,0 +1,4 @@
+---
+type: add
+issue: 2534
+title: "Add new pointcut `STORAGE_TRANSACTION_PROCESSED`, which fires after all operations in a transaction have executed."

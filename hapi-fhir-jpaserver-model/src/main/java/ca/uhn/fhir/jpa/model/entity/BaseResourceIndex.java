@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import org.apache.commons.lang3.ObjectUtils;
+
 import javax.persistence.MappedSuperclass;
 import java.io.Serializable;
 
@@ -31,6 +33,16 @@ public abstract class BaseResourceIndex extends BasePartitionable implements Ser
 	public abstract void setId(Long theId);
 
 	public abstract void calculateHashes();
+
+	public abstract void clearHashes();
+
+	@Override
+	public void setPartitionId(PartitionablePartitionId thePartitionId) {
+		if (ObjectUtils.notEqual(getPartitionId(), thePartitionId)) {
+			super.setPartitionId(thePartitionId);
+			clearHashes();
+		}
+	}
 
 	/**
 	 * Subclasses must implement

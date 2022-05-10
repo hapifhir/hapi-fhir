@@ -4,7 +4,7 @@ package ca.uhn.fhir.cql.common.evaluation;
  * #%L
  * HAPI FHIR JPA Server - Clinical Quality Language
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.cql.common.evaluation;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -78,7 +79,7 @@ public enum MeasurePopulationType {
             // } else if (Configuration.isAcceptInvalidEnums()) {
             //     return null;
             // } else {
-            //     // throw new FHIRException("Unknown MeasureScoring code \'" + code + "\'");
+            //     // throw new FHIRException(Msg.code(1655) + "Unknown MeasureScoring code \'" + code + "\'");
             // }
         }
 

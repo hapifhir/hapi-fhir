@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,4 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 
 enum AppliesTypeEnum {
 	ALL_RESOURCES, TYPES, INSTANCES
-
-	
-	
 }

@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.StringDt;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -34,8 +36,12 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import javax.annotation.Nullable;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -43,11 +49,17 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * Utilities for dealing with parameters resources in a version indepenedent way
  */
 public class ParametersUtil {
+
+	public static Optional<String> getNamedParameterValueAsString(FhirContext theCtx, IBaseParameters theParameters, String theParameterName) {
+		Function<IPrimitiveType<?>, String> mapper = t -> defaultIfBlank(t.getValueAsString(), null);
+		return extractNamedParameters(theCtx, theParameters, theParameterName, mapper).stream().findFirst();
+	}
 
 	public static List<String> getNamedParameterValuesAsString(FhirContext theCtx, IBaseParameters theParameters, String theParameterName) {
 		Function<IPrimitiveType<?>, String> mapper = t -> defaultIfBlank(t.getValueAsString(), null);
@@ -61,6 +73,10 @@ public class ParametersUtil {
 
 	public static Optional<Integer> getNamedParameterValueAsInteger(FhirContext theCtx, IBaseParameters theParameters, String theParameterName) {
 		return getNamedParameterValuesAsInteger(theCtx, theParameters, theParameterName).stream().findFirst();
+	}
+
+	public static Optional<IBase> getNamedParameter(FhirContext theCtx, IBaseResource theParameters, String theParameterName) {
+		return getNamedParameters(theCtx, theParameters, theParameterName).stream().findFirst();
 	}
 
 	public static List<IBase> getNamedParameters(FhirContext theCtx, IBaseResource theParameters, String theParameterName) {
@@ -149,7 +165,7 @@ public class ParametersUtil {
 				addClientParameter(theContext, next, theTargetResource, paramChild, paramChildElem, theName);
 			}
 		} else {
-			throw new IllegalArgumentException("Don't know how to handle value of type " + theValue.getClass() + " for parameter " + theName);
+			throw new IllegalArgumentException(Msg.code(1806) + "Don't know how to handle value of type " + theValue.getClass() + " for parameter " + theName);
 		}
 	}
 
@@ -304,6 +320,13 @@ public class ParametersUtil {
 		addPart(theContext, theParameter, theName, value);
 	}
 
+	public static void addPartUrl(FhirContext theContext, IBase theParameter, String theName, String theCode) {
+		IPrimitiveType<String> value = (IPrimitiveType<String>) theContext.getElementDefinition("url").newInstance();
+		value.setValue(theCode);
+
+		addPart(theContext, theParameter, theName, value);
+	}
+
 	public static void addPartBoolean(FhirContext theContext, IBase theParameter, String theName, Boolean theValue) {
 		addPart(theContext, theParameter, theName, theContext.getPrimitiveBoolean(theValue));
 	}
@@ -343,7 +366,6 @@ public class ParametersUtil {
 		} else {
 			partChildElem.getChildByName("value[x]").getMutator().addValue(part, theValue);
 		}
-
 	}
 
 	public static void addPartResource(FhirContext theContext, IBase theParameter, String theName, IBaseResource theValue) {
@@ -418,4 +440,60 @@ public class ParametersUtil {
 			.findFirst();
 	}
 
+	@Nullable
+	public static String extractDescription(AnnotatedElement theType) {
+		Description description = theType.getAnnotation(Description.class);
+		if (description != null) {
+			return extractDescription(description);
+		} else {
+			return null;
+		}
+	}
+
+	@Nullable
+	public static String extractDescription(Description desc) {
+		String description = desc.value();
+		if (isBlank(description)) {
+			description = desc.formalDefinition();
+		}
+		if (isBlank(description)) {
+			description = desc.shortDefinition();
+		}
+		return defaultIfBlank(description, null);
+	}
+
+	@Nullable
+	public static String extractShortDefinition(AnnotatedElement theType) {
+		Description description = theType.getAnnotation(Description.class);
+		if (description != null) {
+			return defaultIfBlank(description.shortDefinition(), null);
+		} else {
+			return null;
+		}
+	}
+
+	public static String extractDescription(Annotation[] theParameterAnnotations) {
+		for (Annotation next : theParameterAnnotations) {
+			if (next instanceof Description) {
+				return extractDescription((Description)next);
+			}
+		}
+		return null;
+	}
+
+	public static List<String> extractExamples(Annotation[] theParameterAnnotations) {
+		ArrayList<String> retVal = null;
+		for (Annotation next : theParameterAnnotations) {
+			if (next instanceof Description) {
+				String[] examples = ((Description) next).example();
+				if (examples.length > 0) {
+					if (retVal == null) {
+						retVal = new ArrayList<>();
+					}
+					retVal.addAll(Arrays.asList(examples));
+				}
+			}
+		}
+		return retVal;
+	}
 }

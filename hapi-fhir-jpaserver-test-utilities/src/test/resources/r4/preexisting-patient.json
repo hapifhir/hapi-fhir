@@ -1,0 +1,13 @@
+{
+	"resourceType": "Patient",
+	"identifier": [
+		{
+			"system": "https://example.org/fhir/memberidentifier",
+			"value": "12345670"
+		},
+		{
+			"system": "https://example.org/fhir/memberuniqueidentifier",
+			"value": "12345670TT"
+		}
+	]
+}

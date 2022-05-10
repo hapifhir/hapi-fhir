@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2826
+title: "When Client Id Strategy is set to NOT_ALLOWED, permit system requests to create resources, e.g. SearchParameter
+and Subscription resources required by the system."

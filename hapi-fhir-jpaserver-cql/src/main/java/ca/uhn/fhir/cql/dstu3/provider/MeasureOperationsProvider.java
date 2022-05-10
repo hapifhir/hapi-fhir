@@ -4,7 +4,7 @@ package ca.uhn.fhir.cql.dstu3.provider;
  * #%L
  * HAPI FHIR JPA Server - Clinical Quality Language
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.cql.dstu3.provider;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.cql.common.provider.EvaluationProviderFactory;
 import ca.uhn.fhir.cql.common.provider.LibraryResolutionProvider;
 import ca.uhn.fhir.cql.dstu3.evaluation.MeasureEvaluation;
@@ -30,6 +31,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.dstu3.model.Extension;
@@ -40,8 +42,6 @@ import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.opencds.cqf.cql.engine.execution.LibraryLoader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -54,8 +54,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class MeasureOperationsProvider {
-	private static final Logger logger = LoggerFactory.getLogger(MeasureOperationsProvider.class);
-
 	@Autowired
 	private LibraryResolutionProvider<Library> libraryResolutionProvider;
 	@Autowired
@@ -85,17 +83,18 @@ public class MeasureOperationsProvider {
 													 @OperationParam(name = "lastReceivedOn") String lastReceivedOn,
 													 @OperationParam(name = "source") String source,
 													 @OperationParam(name = "user") String user,
-													 @OperationParam(name = "pass") String pass) throws InternalErrorException, FHIRException {
+													 @OperationParam(name = "pass") String pass,
+													 RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
 		LibraryLoader libraryLoader = this.libraryHelper.createLibraryLoader(this.libraryResolutionProvider);
 		MeasureEvaluationSeed seed = new MeasureEvaluationSeed(this.factory, libraryLoader,
 			this.libraryResolutionProvider, this.libraryHelper);
-		Measure measure = myMeasureDao.read(theId);
+		Measure measure = myMeasureDao.read(theId, theRequestDetails);
 
 		if (measure == null) {
-			throw new RuntimeException("Could not find Measure/" + theId.getIdPart());
+			throw new RuntimeException(Msg.code(1639) + "Could not find Measure/" + theId.getIdPart());
 		}
 
-		seed.setup(measure, periodStart, periodEnd, productLine, source, user, pass);
+		seed.setup(measure, periodStart, periodEnd, productLine, source, user, pass, theRequestDetails);
 
 		// resolve report type
 		MeasureEvaluation evaluator = new MeasureEvaluation(this.registry,
@@ -103,18 +102,18 @@ public class MeasureOperationsProvider {
 		if (reportType != null) {
 			switch (reportType) {
 				case "patient":
-					return evaluator.evaluatePatientMeasure(seed.getMeasure(), seed.getContext(), patientRef);
+					return evaluator.evaluatePatientMeasure(seed.getMeasure(), seed.getContext(), patientRef, theRequestDetails);
 				case "patient-list":
-					return evaluator.evaluatePatientListMeasure(seed.getMeasure(), seed.getContext(), practitionerRef);
+					return evaluator.evaluatePatientListMeasure(seed.getMeasure(), seed.getContext(), practitionerRef, theRequestDetails);
 				case "population":
-					return evaluator.evaluatePopulationMeasure(seed.getMeasure(), seed.getContext());
+					return evaluator.evaluatePopulationMeasure(seed.getMeasure(), seed.getContext(), theRequestDetails);
 				default:
-					throw new IllegalArgumentException("Invalid report type: " + reportType);
+					throw new IllegalArgumentException(Msg.code(1640) + "Invalid report type: " + reportType);
 			}
 		}
 
 		// default report type is patient
-		MeasureReport report = evaluator.evaluatePatientMeasure(seed.getMeasure(), seed.getContext(), patientRef);
+		MeasureReport report = evaluator.evaluatePatientMeasure(seed.getMeasure(), seed.getContext(), patientRef, theRequestDetails);
 		if (productLine != null) {
 			Extension ext = new Extension();
 			ext.setUrl("http://hl7.org/fhir/us/cqframework/cqfmeasures/StructureDefinition/cqfm-productLine");

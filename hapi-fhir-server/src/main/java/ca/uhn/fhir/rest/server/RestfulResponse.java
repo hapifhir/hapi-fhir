@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ public abstract class RestfulResponse<T extends RequestDetails> implements IRest
 
 	private IIdType myOperationResourceId;
 	private IPrimitiveType<Date> myOperationResourceLastUpdated;
-	private Map<String, List<String>> theHeaders = new HashMap<>();
+	private final Map<String, List<String>> myHeaders = new HashMap<>();
 	private T theRequestDetails;
 
 	public RestfulResponse(T requestDetails) {
@@ -51,7 +51,7 @@ public abstract class RestfulResponse<T extends RequestDetails> implements IRest
 	 */
 	@Override
 	public Map<String, List<String>> getHeaders() {
-		return theHeaders;
+		return myHeaders;
 	}
 
 	/**

@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 2764
+backport: 5.4.2
+title: "Searches for mdm-expanded references such as Observation?subject:mdm=123 were getting denied by access rules
+that did not recognize the :mdm suffix.  This has been corrected."

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Swagger UI</title>
+    <link rel="stylesheet" type="text/css" href="./swagger-ui.css" />
+    <link rel="icon" type="image/png" href="./favicon-32x32.png" sizes="32x32" />
+    <link rel="icon" type="image/png" href="./favicon-16x16.png" sizes="16x16" />
+    <link rel="stylesheet" type="text/css" href="./index.css" />
+</head>
+
+<body>
+<div class="container">
+</div>
+<div class="banner">
+    <img th:src="${BANNER_IMAGE_URL}" style="height: 100px;"/>
+    <h1>[[${DESCRIPTION}]]<br/><span class="version" th:text="${SERVER_NAME} + ' ' + ${SERVER_VERSION}"></span></h1>
+</div>
+<div class="banner2">
+    <div>
+        <div class="banner2_key">FHIR Server Base URL</div><div class="banner2_value"><a th:href="${BASE_URL}" th:text="${BASE_URL}"></a></div>
+    </div>
+    <div>
+        <div class="banner2_key">OpenAPI Docs</div><div class="banner2_value"><a th:href="${OPENAPI_DOCS}" th:text="${OPENAPI_DOCS}"></a></div>
+    </div>
+    <div>
+        <div class="banner2_key">FHIR Version</div><div class="banner2_value">[[${FHIR_VERSION}]] ([[${FHIR_VERSION_CODENAME}]])</div>
+    </div>
+</div>
+<div class="bannerCopyright" th:if="${COPYRIGHT_HTML} != null" th:utext="${COPYRIGHT_HTML}">
+</div>
+<div class="banner3">
+    <div class="pageButtons" id="pageButtons">
+        <a class="pageButton" th:each="pageName : ${PAGE_NAMES}" th:classappend="${pageName} == ${PAGE} ? 'pageButtonSelected' : ''" th:href="@{/swagger-ui/(page=${pageName})}">
+            [[${pageName}]]
+            <span th:if="${PAGE_NAME_TO_COUNT.containsKey(pageName)}" th:text="${PAGE_NAME_TO_COUNT.get(pageName)}" class="resourceCountBadge"></span>
+        </a>
+    </div>
+
+</div>
+<div id="swagger-ui"></div>
+
+<script src="./swagger-ui-bundle.js" charset="UTF-8"> </script>
+<script src="./swagger-ui-standalone-preset.js" charset="UTF-8"> </script>
+<script>
+    window.onload = function() {
+        // Begin Swagger UI call region
+        const ui = SwaggerUIBundle({
+            url: "[[${OPENAPI_DOCS} + '?page=' + ${PAGE}]]",
+            dom_id: '#swagger-ui',
+            deepLinking: true,
+            presets: [
+                SwaggerUIBundle.presets.apis,
+                SwaggerUIStandalonePreset
+            ],
+            plugins: [
+                // SwaggerUIBundle.plugins.DownloadUrl
+            ],
+            // layout: "StandaloneLayout",
+            oauth2RedirectUrl: "[[${OAUTH2_REDIRECT_URL_PROPERTY}]]"
+        });
+        // End Swagger UI call region
+
+        window.ui = ui;
+    };
+</script>
+</body>
+</html>

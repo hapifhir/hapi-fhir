@@ -1,6 +1,7 @@
 package ca.uhn.fhir.model.primitive;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.dstu2.resource.Condition;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
@@ -198,7 +199,7 @@ public class BaseDateTimeDtDstu2Test {
 		try {
 			dt.setNanos(BaseDateTimeDt.NANOS_PER_SECOND);
 		} catch (IllegalArgumentException e) {
-			assertEquals("Value 1000000000 is not between allowable range: 0 - 999999999", e.getMessage());
+			assertEquals(Msg.code(1884) + "Value 1000000000 is not between allowable range: 0 - 999999999", e.getMessage());
 		}
 	}
 
@@ -511,7 +512,7 @@ public class BaseDateTimeDtDstu2Test {
 			new DateTimeDt("2010-01-01T00:00:00.1234-09:00Z");
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Invalid date/time format: \"2010-01-01T00:00:00.1234-09:00Z\"", e.getMessage());
+			assertEquals(Msg.code(1882) + "Invalid date/time format: \"2010-01-01T00:00:00.1234-09:00Z\"", e.getMessage());
 		}
 	}
 
@@ -587,7 +588,7 @@ public class BaseDateTimeDtDstu2Test {
 			dt.setValueAsString("2013-02-03T11:22");
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals(e.getMessage(), "Invalid date/time string (datatype DateTimeDt does not support MINUTE precision): 2013-02-03T11:22");
+			assertEquals(e.getMessage(), Msg.code(1885) + "Invalid date/time string (datatype DateTimeDt does not support MINUTE precision): 2013-02-03T11:22");
 		}
 	}
 
@@ -598,7 +599,7 @@ public class BaseDateTimeDtDstu2Test {
 			dt.setValueAsString("2013-02-03T11:22Z");
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals(e.getMessage(), "Invalid date/time string (datatype DateTimeDt does not support MINUTE precision): 2013-02-03T11:22Z");
+			assertEquals(e.getMessage(), Msg.code(1885) + "Invalid date/time string (datatype DateTimeDt does not support MINUTE precision): 2013-02-03T11:22Z");
 		}
 	}
 
@@ -827,7 +828,7 @@ public class BaseDateTimeDtDstu2Test {
 	@AfterAll
 	public static void afterClassClearContext() {
 		Locale.setDefault(ourDefaultLocale);
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 	@BeforeAll

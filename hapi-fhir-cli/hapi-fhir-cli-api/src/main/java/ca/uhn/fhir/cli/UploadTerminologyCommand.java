@@ -4,7 +4,7 @@ package ca.uhn.fhir.cli;
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
@@ -39,16 +40,21 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.CountingInputStream;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.hl7.fhir.r4.model.CodeSystem;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public class UploadTerminologyCommand extends BaseCommand {
+public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 	static final String UPLOAD_TERMINOLOGY = "upload-terminology";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UploadTerminologyCommand.class);
 	private static final long DEFAULT_TRANSFER_SIZE_LIMIT = 10 * FileUtils.ONE_MB;
@@ -66,15 +72,11 @@ public class UploadTerminologyCommand extends BaseCommand {
 
 	@Override
 	public Options getOptions() {
-		Options options = new Options();
+		Options options = super.getOptions();
 
-		addFhirVersionOption(options);
-		addBaseUrlOption(options);
 		addRequiredOption(options, "u", "url", true, "The code system URL associated with this upload (e.g. " + ITermLoaderSvc.SCT_URI + ")");
 		addOptionalOption(options, "d", "data", true, "Local file to use to upload (can be a raw file or a ZIP containing the raw file)");
 		addOptionalOption(options, "m", "mode", true, "The upload mode: SNAPSHOT (default), ADD, REMOVE");
-		addBasicAuthOption(options);
-		addVerboseLoggingOption(options);
 
 		return options;
 	}
@@ -88,42 +90,48 @@ public class UploadTerminologyCommand extends BaseCommand {
 		try {
 			mode = ModeEnum.valueOf(modeString);
 		} catch (IllegalArgumentException e) {
-			throw new ParseException("Invalid mode: " + modeString);
+			throw new ParseException(Msg.code(1538) + "Invalid mode: " + modeString);
 		}
 
 		String termUrl = theCommandLine.getOptionValue("u");
 		if (isBlank(termUrl)) {
-			throw new ParseException("No URL provided");
+			throw new ParseException(Msg.code(1539) + "No URL provided");
 		}
 
 		String[] datafile = theCommandLine.getOptionValues("d");
 		if (datafile == null || datafile.length == 0) {
-			throw new ParseException("No data file provided");
+			throw new ParseException(Msg.code(1540) + "No data file provided");
 		}
 
-		IGenericClient client = super.newClient(theCommandLine);
-		IBaseParameters inputParameters = ParametersUtil.newInstance(myFhirCtx);
+		IGenericClient client = newClient(theCommandLine);
 
 		if (theCommandLine.hasOption(VERBOSE_LOGGING_PARAM)) {
 			client.registerInterceptor(new LoggingInterceptor(true));
 		}
 
+		String requestName = null;
 		switch (mode) {
 			case SNAPSHOT:
-				invokeOperation(termUrl, datafile, client, inputParameters, JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM);
+				requestName = JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM;
 				break;
 			case ADD:
-				invokeOperation(termUrl, datafile, client, inputParameters, JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD);
+				requestName = JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD;
 				break;
 			case REMOVE:
-				invokeOperation(termUrl, datafile, client, inputParameters, JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE);
+				requestName = JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE;
 				break;
 		}
-
+		invokeOperation(termUrl, datafile, client, requestName);
 	}
 
-	private void invokeOperation(String theTermUrl, String[] theDatafile, IGenericClient theClient, IBaseParameters theInputParameters, String theOperationName) throws ParseException {
-		ParametersUtil.addParameterToParametersUri(myFhirCtx, theInputParameters, TerminologyUploaderProvider.PARAM_SYSTEM, theTermUrl);
+	private void invokeOperation(String theTermUrl, String[] theDatafile, IGenericClient theClient, String theOperationName) throws ParseException {
+		IBaseParameters inputParameters = ParametersUtil.newInstance(myFhirCtx);
+
+		boolean isDeltaOperation =
+			theOperationName.equals(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD) ||
+				theOperationName.equals(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE);
+
+		ParametersUtil.addParameterToParametersUri(myFhirCtx, inputParameters, TerminologyUploaderProvider.PARAM_SYSTEM, theTermUrl);
 
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream, Charsets.UTF_8);
@@ -134,42 +142,47 @@ public class UploadTerminologyCommand extends BaseCommand {
 			for (String nextDataFile : theDatafile) {
 
 				try (FileInputStream fileInputStream = new FileInputStream(nextDataFile)) {
-					if (nextDataFile.endsWith(".csv") || nextDataFile.endsWith(".properties")) {
+					boolean isFhirType = nextDataFile.endsWith(".json") || nextDataFile.endsWith(".xml");
+					if (nextDataFile.endsWith(".csv") || nextDataFile.endsWith(".properties") || isFhirType) {
 
-						ourLog.info("Compressing and adding file: {}", nextDataFile);
-						ZipEntry nextEntry = new ZipEntry(stripPath(nextDataFile));
-						zipOutputStream.putNextEntry(nextEntry);
+						if (isDeltaOperation && isFhirType) {
 
-						CountingInputStream countingInputStream = new CountingInputStream(fileInputStream);
-						IOUtils.copy(countingInputStream, zipOutputStream);
-						haveCompressedContents = true;
-						compressedSourceBytesCount += countingInputStream.getCount();
+							ourLog.info("Adding CodeSystem resource file: {}", nextDataFile);
 
-						zipOutputStream.flush();
-						ourLog.info("Finished compressing {}", nextDataFile);
+							String contents = IOUtils.toString(fileInputStream, Charsets.UTF_8);
+							EncodingEnum encoding = EncodingEnum.detectEncodingNoDefault(contents);
+							if (encoding == null) {
+								throw new ParseException(Msg.code(1541) + "Could not detect FHIR encoding for file: " + nextDataFile);
+							}
+
+							IBaseResource resource = encoding.newParser(myFhirCtx).parseResource(contents);
+							ParametersUtil.addParameterToParameters(myFhirCtx, inputParameters, TerminologyUploaderProvider.PARAM_CODESYSTEM, resource);
+
+						} else {
+
+							ourLog.info("Compressing and adding file: {}", nextDataFile);
+							ZipEntry nextEntry = new ZipEntry(stripPath(nextDataFile));
+							zipOutputStream.putNextEntry(nextEntry);
+
+							CountingInputStream countingInputStream = new CountingInputStream(fileInputStream);
+							IOUtils.copy(countingInputStream, zipOutputStream);
+							haveCompressedContents = true;
+							compressedSourceBytesCount += countingInputStream.getCount();
+
+							zipOutputStream.flush();
+							ourLog.info("Finished compressing {}", nextDataFile);
+
+						}
 
 					} else if (nextDataFile.endsWith(".zip")) {
 
 						ourLog.info("Adding ZIP file: {}", nextDataFile);
 						String fileName = "file:" + nextDataFile;
-						addFileToRequestBundle(theInputParameters, fileName, IOUtils.toByteArray(fileInputStream));
-
-					} else if (nextDataFile.endsWith(".json") || nextDataFile.endsWith(".xml")) {
-
-						ourLog.info("Adding CodeSystem resource file: {}", nextDataFile);
-
-						String contents = IOUtils.toString(fileInputStream, Charsets.UTF_8);
-						EncodingEnum encoding = EncodingEnum.detectEncodingNoDefault(contents);
-						if (encoding == null) {
-							throw new ParseException("Could not detect FHIR encoding for file: " + nextDataFile);
-						}
-
-						CodeSystem resource = encoding.newParser(myFhirCtx).parseResource(CodeSystem.class, contents);
-						ParametersUtil.addParameterToParameters(myFhirCtx, theInputParameters, TerminologyUploaderProvider.PARAM_CODESYSTEM, resource);
+						addFileToRequestBundle(inputParameters, fileName, IOUtils.toByteArray(fileInputStream));
 
 					} else {
 
-						throw new ParseException("Don't know how to handle file: " + nextDataFile);
+						throw new ParseException(Msg.code(1542) + "Don't know how to handle file: " + nextDataFile);
 
 					}
 				}
@@ -178,20 +191,20 @@ public class UploadTerminologyCommand extends BaseCommand {
 			zipOutputStream.flush();
 			zipOutputStream.close();
 		} catch (IOException e) {
-			throw new ParseException(e.toString());
+			throw new ParseException(Msg.code(1543) + e.toString());
 		}
 
 		if (haveCompressedContents) {
 			byte[] compressedBytes = byteArrayOutputStream.toByteArray();
 			ourLog.info("Compressed {} bytes in {} file(s) into {} bytes", FileUtil.formatFileSize(compressedSourceBytesCount), compressedFileCount, FileUtil.formatFileSize(compressedBytes.length));
 
-			addFileToRequestBundle(theInputParameters, "file:/files.zip", compressedBytes);
+			addFileToRequestBundle(inputParameters, "file:/files.zip", compressedBytes);
 		}
 
 		ourLog.info("Beginning upload - This may take a while...");
 
 		if (ourLog.isDebugEnabled() || "true".equals(System.getProperty("test"))) {
-			ourLog.info("Submitting parameters: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(theInputParameters));
+			ourLog.info("Submitting parameters: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inputParameters));
 		}
 
 		IBaseParameters response;
@@ -200,7 +213,7 @@ public class UploadTerminologyCommand extends BaseCommand {
 				.operation()
 				.onType(myFhirCtx.getResourceDefinition("CodeSystem").getImplementingClass())
 				.named(theOperationName)
-				.withParameters(theInputParameters)
+				.withParameters(inputParameters)
 				.execute();
 		} catch (BaseServerResponseException e) {
 			if (e.getOperationOutcome() != null) {
@@ -232,7 +245,7 @@ public class UploadTerminologyCommand extends BaseCommand {
 					fileName = "localfile:" + tempFile.getAbsolutePath();
 				}
 			} catch (IOException e) {
-				throw new CommandFailureException(e);
+				throw new CommandFailureException(Msg.code(1544) + e);
 			}
 		}
 

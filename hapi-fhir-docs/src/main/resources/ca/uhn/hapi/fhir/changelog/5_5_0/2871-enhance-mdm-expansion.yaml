@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2871
+title: "Modified the behaviour of the `:mdm` param qualifier. Previously, it used to only resolve IDs if the resource ID was a source resource.
+Now, MDM expansion will work if you pass it the ID of a golden resource instead."

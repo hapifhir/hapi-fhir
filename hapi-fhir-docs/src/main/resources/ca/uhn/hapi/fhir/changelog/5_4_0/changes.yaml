@@ -1,0 +1,29 @@
+---
+- item:
+    type: "add"
+    title: "The version of a few dependencies have been bumped to the latest versions
+(dependent HAPI modules listed in brackets):
+<ul>
+<li>Commons-Lang3 (Core): 3.9 -> 3.12.0</li>
+<li>Commons-Text (Core): 1.7 -> 1.9</li>
+<li>Commons-Codec (Core): 1.14 -> 1.15</li>
+<li>Commons-IO (Core): 2.6 -> 2.8.0</li>
+<li>Guava (Core): 30.1-jre -> 30.1.1-jre</li>
+<li>Jackson (Core): 2.12.1 -> 2.12.3</li>
+<li>Woodstox (Core): 6.2.3 -> 6.2.5</li>
+<li>Apache Jena (Core/RDF): 3.16.0 -> 3.17.0</li>
+<li>Gson (JPA): 2.8.5 -> 2.8.6</li>
+<li>Caffeine (JPA): 2.7.0 -> 3.0.1</li>
+<li>Hibernate (JPA): 5.4.26.Final -> 5.4.30.Final</li>
+<li>Hibernate Search (JPA): 6.0.0.Final -> 6.0.3.Final</li>
+<li>Spring (JPA): 5.3.3 -> 5.3.6</li>
+<li>Spring Batch (JPA): 4.2.3.RELEASE -> 4.3.2</li>
+<li>Spring Data (JPA): 2.4.2 -> 2.5.0</li>
+<li>Commons DBCP2 (JPA): 2.7.0 -> 2.8.0</li>
+<li>ElasticSearch Client (JPA): 7.10.2 -> 7.12.1</li>
+<li>Thymeleaf (Testpage Overlay): 3.0.11.RELEASE -> 3.0.12.RELEASE</li>
+<li>JAnsi (CLI): 2.1.1 -> 2.3.2</li>
+<li>JArchivelib (CLI): 1.0.0 -> 1.1.0</li>
+</ul>
+"
+

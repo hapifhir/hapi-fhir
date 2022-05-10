@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,10 @@ package ca.uhn.fhir.jpa.dao;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -70,7 +71,7 @@ public class HistoryBuilder {
 	@Autowired
 	private FhirContext myCtx;
 	@Autowired
-	private IdHelperService myIdHelperService;
+	private IIdHelperService myIdHelperService;
 
 	/**
 	 * Constructor
@@ -95,7 +96,7 @@ public class HistoryBuilder {
 	}
 
 	@SuppressWarnings("OptionalIsPresent")
-	public List<ResourceHistoryTable> fetchEntities(RequestPartitionId thePartitionId, int theFromIndex, int theToIndex) {
+	public List<ResourceHistoryTable> fetchEntities(RequestPartitionId thePartitionId, Integer theOffset, int theFromIndex, int theToIndex) {
 		CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<ResourceHistoryTable> criteriaQuery = cb.createQuery(ResourceHistoryTable.class);
 		Root<ResourceHistoryTable> from = criteriaQuery.from(ResourceHistoryTable.class);
@@ -108,7 +109,12 @@ public class HistoryBuilder {
 
 		TypedQuery<ResourceHistoryTable> query = myEntityManager.createQuery(criteriaQuery);
 
-		query.setFirstResult(theFromIndex);
+		int startIndex = theFromIndex;
+		if (theOffset != null) {
+			startIndex += theOffset;
+		}
+		query.setFirstResult(startIndex);
+
 		query.setMaxResults(theToIndex - theFromIndex);
 
 		List<ResourceHistoryTable> tables = query.getResultList();
@@ -179,7 +185,7 @@ public class HistoryBuilder {
 		if (myPartitionSettings.isPartitioningEnabled()) {
 			if (thePartitionId.isAllPartitions()) {
 				String msg = myCtx.getLocalizer().getMessage(HistoryBuilder.class, "noSystemOrTypeHistoryForPartitionAwareServer");
-				throw new InvalidRequestException(msg);
+				throw new InvalidRequestException(Msg.code(953) + msg);
 			}
 		}
 	}

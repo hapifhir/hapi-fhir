@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.gclient;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import ca.uhn.fhir.rest.gclient.NumberClientParam.IMatches;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 
 /**
- * Token parameter type for use in fluent client interfaces
+ * Quantity parameter type for use in fluent client interfaces
  */
 @SuppressWarnings("deprecation")
 public class QuantityClientParam extends BaseClientParam  implements IParam {

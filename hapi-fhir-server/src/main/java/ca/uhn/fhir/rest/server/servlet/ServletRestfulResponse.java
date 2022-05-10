@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.servlet;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.ParseAction;
 import ca.uhn.fhir.rest.server.RestfulResponse;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 
 import javax.servlet.ServletOutputStream;
@@ -80,9 +81,12 @@ public class ServletRestfulResponse extends RestfulResponse<ServletRequestDetail
 		HttpServletResponse theHttpResponse = getRequestDetails().getServletResponse();
 		getRequestDetails().getServer().addHeadersToResponse(theHttpResponse);
 		for (Entry<String, List<String>> header : getHeaders().entrySet()) {
-			final String key = header.getKey();
+			String key = header.getKey();
+			key = sanitizeHeaderField(key);
 			boolean first = true;
 			for (String value : header.getValue()) {
+				value = sanitizeHeaderField(value);
+
 				// existing headers should be overridden
 				if (first) {
 					theHttpResponse.setHeader(key, value);
@@ -92,6 +96,10 @@ public class ServletRestfulResponse extends RestfulResponse<ServletRequestDetail
 				}
 			}
 		}
+	}
+
+	static String sanitizeHeaderField(String theKey) {
+		return StringUtils.replaceChars(theKey, "\r\n", null);
 	}
 
 	@Override

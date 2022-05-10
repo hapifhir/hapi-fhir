@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 2556
+title: "Fixed a bug which would cause Bulk Export to fail when run in a partitioned environment."

@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -121,4 +121,10 @@ public interface IAuthRuleBuilderRule {
 	 */
 	IAuthRuleBuilderGraphQL graphQL();
 
+	/**
+	 * This rule permits the user to initiate a FHIR bulk export
+	 *
+	 * @since 5.5.0
+	 */
+	IAuthRuleBuilderRuleBulkExport bulkExport();
 }

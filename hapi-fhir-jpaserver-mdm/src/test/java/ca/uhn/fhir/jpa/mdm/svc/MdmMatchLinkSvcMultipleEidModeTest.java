@@ -71,11 +71,11 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 
 		//The collision should have added a new identifier with the external system.
 		Identifier secondIdentifier = identifier.get(1);
-		assertThat(secondIdentifier.getSystem(), is(equalTo(myMdmSettings.getMdmRules().getEnterpriseEIDSystem())));
+		assertThat(secondIdentifier.getSystem(), is(equalTo(myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType("Patient"))));
 		assertThat(secondIdentifier.getValue(), is(equalTo("12345")));
 
 		Identifier thirdIdentifier = identifier.get(2);
-		assertThat(thirdIdentifier.getSystem(), is(equalTo(myMdmSettings.getMdmRules().getEnterpriseEIDSystem())));
+		assertThat(thirdIdentifier.getSystem(), is(equalTo(myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType("Patient"))));
 		assertThat(thirdIdentifier.getValue(), is(equalTo("67890")));
 	}
 
@@ -110,6 +110,7 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 		Patient patientFromTarget = (Patient) getGoldenResourceFromTargetResource(patient2);
 		assertThat(patientFromTarget.getIdentifier(), hasSize(5));
 
+		ourLog.info("About to update patient...");
 		updatePatientAndUpdateLinks(patient2);
 		assertLinksMatchResult(MATCH, MATCH);
 		assertLinksCreatedNewResource(true, false);
@@ -142,10 +143,12 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 		List<MdmLink> possibleDuplicates = myMdmLinkDaoSvc.getPossibleDuplicates();
 		assertThat(possibleDuplicates, hasSize(1));
 
-		List<Long> duplicatePids = Stream.of(patient1, patient2)
+		Patient finalPatient1 = patient1;
+		Patient finalPatient2 = patient2;
+		List<Long> duplicatePids = runInTransaction(()->Stream.of(finalPatient1, finalPatient2)
 			.map(this::getGoldenResourceFromTargetResource)
 			.map(myIdHelperService::getPidOrNull)
-			.collect(Collectors.toList());
+			.collect(Collectors.toList()));
 
 		//The two GoldenResources related to the patients should both show up in the only existing POSSIBLE_DUPLICATE MdmLink.
 		MdmLink mdmLink = possibleDuplicates.get(0);

@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.interceptor;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -55,7 +56,7 @@ public class BanUnsupportedHttpMethodsInterceptor extends InterceptorAdapter {
 			return true;
 		}
 		
-		throw new MethodNotAllowedException("Method not supported: " + theRequest.getMethod());
+		throw new MethodNotAllowedException(Msg.code(329) + "Method not supported: " + theRequest.getMethod());
 	}
 
 }

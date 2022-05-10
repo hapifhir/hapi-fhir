@@ -1,0 +1,8 @@
+---
+type: add
+issue: 2676
+backport: 5.4.1
+title: "A new setting has been added to the DaoConfig that allows the maximum number of
+  `_include` and `_revinclude` resources to be added to a single search page result. In addition, the
+  include/revinclue processor have been redesigned to avoid accidentally overloading the server if
+  an include/revinclude would return unexpected massive amounts of data."

@@ -1,0 +1,6 @@
+---
+type: change
+issue: 2766
+title: "When operating in partitioned mode, the interceptor pointcut `STORAGE_PARTITION_IDENTIFY_CREATE` will now be invoked
+   to determine the partition to use for create with client-assigned IDs. Previously the `STORAGE_PARTITION_IDENTIFY_READ`
+   pointcut was invoked, which was confusing and potentially unexpected."

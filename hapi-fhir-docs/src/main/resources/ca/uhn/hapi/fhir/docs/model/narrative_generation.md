@@ -63,22 +63,32 @@ Then create a properties file which describes your templates. In this properties
 The first (name.class) defines the class name of the resource to define a template for. The second (name.narrative) defines the path/classpath to the template file. The format of this path is `file:/path/foo.html` or  `classpath:/com/classpath/foo.html`.
 
 ```properties
-# Two property lines in the file per template
+# Two property lines in the file per template. There are several forms you
+# can use. This first form assigns a template type to a resource by 
+# resource name
 practitioner.resourceType=Practitioner
-practitioner.narrative=file:src/test/resources/narrative/Practitioner.html
+practitioner.narrative=classpath:com/example/narrative/Practitioner.html
 
-observation.class=ca.uhn.fhir.model.dstu.resource.Observation
-observation.narrative=file:src/test/resources/narrative/Observation.html
+# This second form assigns a template by class name. This can be used for
+# HAPI FHIR built-in structures, or for custom structures as well.
+observation.class=org.hl7.fhir.r4.model.Observation
+observation.narrative=classpath:com/example/narrative/Observation.html
 
-# etc...
+# You can also assign a template based on profile ID (Resource.meta.profile)
+vitalsigns.profile=http://hl7.org/fhir/StructureDefinition/vitalsigns
+vitalsigns.narrative=classpath:com/example/narrative/Observation_Vitals.html
 ```
 
-You may also override/define behaviour for datatypes. These datatype narrative definitions will be used as content within <code>th:narrative</code> blocks in resource templates. See the example resource template above for an example.
+You may also override/define behaviour for datatypes and other structures. These datatype narrative definitions will be used as content within <code>th:narrative</code> blocks in resource templates. See the example resource template above for an example.
 
 ```properties
-# datatypes use the same format as resources
-humanname.resourceType=HumanNameDt
-humanname.narrative=classpath:ca/uhn/fhir/narrative/HumanNameDt.html]]></source>
+# You can create a template based on a type name
+quantity.dataType=Quantity
+quantity.narrative=classpath:com/example/narrative/Quantity.html
+
+# Or by class name, which can be useful for custom datatypes and structures
+custom_extension.class=com.example.model.MyCustomExtension
+custom_extension.narrative=classpath:com/example/narrative/CustomExtension.html
 ```
 
 Finally, use the [CustomThymeleafNarrativeGenerator](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/narrative/CustomThymeleafNarrativeGenerator.html) and provide it to the FhirContext.

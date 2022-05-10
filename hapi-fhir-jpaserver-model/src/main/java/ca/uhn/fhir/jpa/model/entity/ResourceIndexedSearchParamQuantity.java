@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,42 +20,42 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
-import java.math.BigDecimal;
-import java.util.Objects;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.param.QuantityParam;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.ScaledNumberField;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import java.math.BigDecimal;
+import java.util.Objects;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.ScaledNumberField;
-
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.rest.param.QuantityParam;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 //@formatter:off
 @Embeddable
 @Entity
 @Table(name = "HFJ_SPIDX_QUANTITY", indexes = {
 //	We used to have an index named IDX_SP_QUANTITY - Dont reuse
-	@Index(name = "IDX_SP_QUANTITY_HASH", columnList = "HASH_IDENTITY,SP_VALUE"),
-	@Index(name = "IDX_SP_QUANTITY_HASH_UN", columnList = "HASH_IDENTITY_AND_UNITS,SP_VALUE"),
-	@Index(name = "IDX_SP_QUANTITY_HASH_SYSUN", columnList = "HASH_IDENTITY_SYS_UNITS,SP_VALUE"),
-	@Index(name = "IDX_SP_QUANTITY_UPDATED", columnList = "SP_UPDATED"),
-	@Index(name = "IDX_SP_QUANTITY_RESID", columnList = "RES_ID")
+	@Index(name = "IDX_SP_QUANTITY_HASH_V2", columnList = "HASH_IDENTITY,SP_VALUE,RES_ID,PARTITION_ID"),
+	@Index(name = "IDX_SP_QUANTITY_HASH_UN_V2", columnList = "HASH_IDENTITY_AND_UNITS,SP_VALUE,RES_ID,PARTITION_ID"),
+	@Index(name = "IDX_SP_QUANTITY_HASH_SYSUN_V2", columnList = "HASH_IDENTITY_SYS_UNITS,SP_VALUE,RES_ID,PARTITION_ID"),
+	@Index(name = "IDX_SP_QUANTITY_RESID_V2", columnList = "RES_ID,HASH_IDENTITY,HASH_IDENTITY_SYS_UNITS,HASH_IDENTITY_AND_UNITS,SP_VALUE,PARTITION_ID")
 })
 public class ResourceIndexedSearchParamQuantity extends ResourceIndexedSearchParamBaseQuantity {
 
@@ -70,6 +70,11 @@ public class ResourceIndexedSearchParamQuantity extends ResourceIndexedSearchPar
 	@Column(name = "SP_VALUE", nullable = true)
 	@ScaledNumberField
 	public Double myValue;
+
+	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = {})
+	@JoinColumn(foreignKey = @ForeignKey(name = "FK_SP_QUANTITY_RES"),
+		name = "RES_ID", referencedColumnName = "RES_ID", nullable = false)
+	private ResourceTable myResource;
 
 	public ResourceIndexedSearchParamQuantity() {
 		super();
@@ -197,4 +202,15 @@ public class ResourceIndexedSearchParamQuantity extends ResourceIndexedSearchPar
 		return retval;
 	}
 
+	@Override
+	public ResourceTable getResource() {
+		return myResource;
+	}
+
+	@Override
+	public BaseResourceIndexedSearchParam setResource(ResourceTable theResource) {
+		myResource = theResource;
+		setResourceType(theResource.getResourceType());
+		return this;
+	}
 }

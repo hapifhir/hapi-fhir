@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.api;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.UrlUtil;
 
@@ -51,7 +52,7 @@ public enum SearchContainedModeEnum {
 		myCode = theCode;
 	}
 
-	private String getCode() {
+	public String getCode() {
 		return myCode;
 	}
 
@@ -67,7 +68,7 @@ public enum SearchContainedModeEnum {
 
 		SearchContainedModeEnum retVal = codeToEnum.get(theCode);
 		if (retVal == null) {
-			throw new InvalidRequestException("Invalid contained mode: " + UrlUtil.sanitizeUrlPart(theCode));
+			throw new InvalidRequestException(Msg.code(1963) + "Invalid contained mode: " + UrlUtil.sanitizeUrlPart(theCode));
 		}
 
 		return retVal;

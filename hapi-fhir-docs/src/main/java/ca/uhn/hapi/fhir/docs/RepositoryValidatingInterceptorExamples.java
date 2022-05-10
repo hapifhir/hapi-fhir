@@ -4,7 +4,7 @@ package ca.uhn.hapi.fhir.docs;
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import ca.uhn.fhir.jpa.interceptor.validation.RepositoryValidatingRuleBuilder;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import org.springframework.context.ApplicationContext;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 
 @SuppressWarnings("unused")
@@ -121,8 +120,10 @@ public class RepositoryValidatingInterceptorExamples {
 			.forResourcesOfType("Patient")
 			.requireValidationToDeclaredProfiles()
 
-			// Configure the validator to never reject extensions
-			.allowAnyExtensions()
+			// Configure the validator to reject unknown extensions
+			// by default, all extensions are accepted and to undo this rejection
+			// call allowAnyExtensions()
+			.rejectUnknownExtensions()
 
 			// Configure the validator to not perform terminology validation
 			.disableTerminologyChecks()

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.config;
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,8 @@ public class PartitionSettings {
 	private boolean myPartitioningEnabled = false;
 	private CrossPartitionReferenceMode myAllowReferencesAcrossPartitions = CrossPartitionReferenceMode.NOT_ALLOWED;
 	private boolean myIncludePartitionInSearchHashes = false;
+	private boolean myUnnamedPartitionMode;
+	private Integer myDefaultPartitionId;
 
 	/**
 	 * If set to <code>true</code> (default is <code>false</code>) the <code>PARTITION_ID</code> value will be factored into the
@@ -92,6 +94,48 @@ public class PartitionSettings {
 		myAllowReferencesAcrossPartitions = theAllowReferencesAcrossPartitions;
 	}
 
+	/**
+	 * If set to <code>true</code> (default is <code>false</code>), partitions will be unnamed and all IDs from {@link Integer#MIN_VALUE} through
+	 * {@link Integer#MAX_VALUE} will be allowed without needing to be created ahead of time.
+	 *
+	 * @since 5.5.0
+	 */
+	public boolean isUnnamedPartitionMode() {
+		return myUnnamedPartitionMode;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is <code>false</code>), partitions will be unnamed and all IDs from {@link Integer#MIN_VALUE} through
+	 * {@link Integer#MAX_VALUE} will be allowed without needing to be created ahead of time.
+	 *
+	 * @since 5.5.0
+	 */
+	public void setUnnamedPartitionMode(boolean theUnnamedPartitionMode) {
+		myUnnamedPartitionMode = theUnnamedPartitionMode;
+	}
+
+	/**
+	 * If set, the given ID will be used for the default partition. The default is
+	 * <code>null</code> which will result in the use of a null value for default
+	 * partition items.
+	 *
+	 * @since 5.5.0
+	 */
+	public Integer getDefaultPartitionId() {
+		return myDefaultPartitionId;
+	}
+
+	/**
+	 * If set, the given ID will be used for the default partition. The default is
+	 * <code>null</code> which will result in the use of a null value for default
+	 * partition items.
+	 *
+	 * @since 5.5.0
+	 */
+	public void setDefaultPartitionId(Integer theDefaultPartitionId) {
+		myDefaultPartitionId = theDefaultPartitionId;
+	}
+
 
 	public enum CrossPartitionReferenceMode {
 
@@ -105,6 +149,14 @@ public class PartitionSettings {
 		 */
 		ALLOWED_UNQUALIFIED
 
+	}
+
+	/**
+	 * If enabled the JPA server will allow unqualified cross partition reference
+	 *
+	 */
+	public boolean isAllowUnqualifiedCrossPartitionReference() {
+		return myAllowReferencesAcrossPartitions.equals(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 	}
 
 }

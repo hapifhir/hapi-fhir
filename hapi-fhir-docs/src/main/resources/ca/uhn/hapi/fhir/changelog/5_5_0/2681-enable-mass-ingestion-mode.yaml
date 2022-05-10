@@ -1,0 +1,6 @@
+---
+type: add
+issue: 2681
+backport: 5.4.1
+title: "A new DaoConfig setting called Mass Ingestion Mode has been added. This mode enables rapid
+  data ingestion by skipping a number of unnecessary checks during backloading."

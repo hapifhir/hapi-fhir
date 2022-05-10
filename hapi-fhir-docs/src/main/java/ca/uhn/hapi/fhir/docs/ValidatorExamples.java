@@ -4,7 +4,7 @@ package ca.uhn.hapi.fhir.docs;
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.hapi.fhir.docs;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
@@ -40,8 +41,10 @@ import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.NpmPackageValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
@@ -53,6 +56,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
 
+import javax.annotation.Nonnull;
 import javax.servlet.ServletException;
 import java.io.File;
 import java.io.FileReader;
@@ -291,13 +295,13 @@ public class ValidatorExamples {
 			}
 
 			@Override
-			public CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+			public CodeValidationResult validateCode(@Nonnull ValidationSupportContext theValidationSupportContext, @Nonnull ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 				// TODO: implement (or return null if your implementation does not support this function)
 				return null;
 			}
 
 			@Override
-			public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
+			public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode, String theDisplayLanguage) {
 				// TODO: implement (or return null if your implementation does not support this function)
 				return null;
 			}
@@ -430,12 +434,52 @@ public class ValidatorExamples {
          // validation failure
          ValidationResult result = validator.validateWithResult(resource);
          if (result.isSuccessful() == false) {
-            throw new Exception("We failed!");
+            throw new Exception(Msg.code(640) + "We failed!");
          }
          
       }
 
       // END SNIPPET: validateFiles
    }
-   
+
+
+   @SuppressWarnings("unused")
+   private static void npm() throws Exception {
+      // START SNIPPET: npm
+		// Create an NPM Package Support module and load one package in from
+		// the classpath
+		FhirContext ctx = FhirContext.forR4();
+		NpmPackageValidationSupport npmPackageSupport = new NpmPackageValidationSupport(ctx);
+		npmPackageSupport.loadPackageFromClasspath("classpath:package/UK.Core.r4-1.1.0.tgz");
+
+		// Create a support chain including the NPM Package Support
+		ValidationSupportChain validationSupportChain = new ValidationSupportChain(
+			npmPackageSupport,
+			new DefaultProfileValidationSupport(ctx),
+			new CommonCodeSystemsTerminologyService(ctx),
+			new InMemoryTerminologyServerValidationSupport(ctx),
+			new SnapshotGeneratingValidationSupport(ctx)
+		);
+		CachingValidationSupport validationSupport = new CachingValidationSupport(validationSupportChain);
+
+		// Create a validator. Note that for good performance you can create as many validator objects
+		// as you like, but you should reuse the same validation support object in all of the,.
+		FhirValidator validator = ctx.newValidator();
+		FhirInstanceValidator instanceValidator = new FhirInstanceValidator(validationSupport);
+		validator.registerValidatorModule(instanceValidator);
+
+		// Create a test patient to validate
+		Patient patient = new Patient();
+		patient.getMeta().addProfile("https://fhir.nhs.uk/R4/StructureDefinition/UKCore-Patient");
+		// System but not value set for NHS identifier (this should generate an error)
+		patient.addIdentifier().setSystem("https://fhir.nhs.uk/Id/nhs-number");
+
+		// Perform the validation
+		ValidationResult outcome = validator.validateWithResult(patient);
+      // END SNIPPET: npm
+   }
+
+
+
+
 }

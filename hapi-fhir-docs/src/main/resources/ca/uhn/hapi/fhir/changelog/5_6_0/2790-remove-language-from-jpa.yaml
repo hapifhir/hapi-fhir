@@ -1,0 +1,7 @@
+---
+type: change
+issue: 2790
+title: "Support for the `_language` search parameter has been dropped from the JPA server. This search parameter
+  was specified in FHIR DSTU1 but was dropped in later versions. It is rarely used in practice and imposes
+  an indexing cost, so it has now been removed. A custom search parameter may be used in order to achieve
+  the same functionality if needed."

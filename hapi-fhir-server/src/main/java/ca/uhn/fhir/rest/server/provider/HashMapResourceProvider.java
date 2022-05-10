@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.provider;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.provider;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
@@ -39,6 +40,7 @@ import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Update;
+import ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
@@ -170,7 +172,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 
 		TreeMap<Long, T> versions = myIdToVersionToResourceMap.get(theId.getIdPart());
 		if (versions == null || versions.isEmpty()) {
-			throw new ResourceNotFoundException(theId);
+			throw new ResourceNotFoundException(Msg.code(1979) + theId);
 		}
 
 
@@ -237,7 +239,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	public  synchronized List<IBaseResource> historyInstance(@IdParam IIdType theId, RequestDetails theRequestDetails) {
 		LinkedList<T> retVal = myIdToHistory.get(theId.getIdPart());
 		if (retVal == null) {
-			throw new ResourceNotFoundException(theId);
+			throw new ResourceNotFoundException(Msg.code(1980) + theId);
 		}
 
 		return fireInterceptorsAndFilterAsNeeded(retVal, theRequestDetails);
@@ -252,18 +254,18 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	public  synchronized T read(@IdParam IIdType theId, RequestDetails theRequestDetails) {
 		TreeMap<Long, T> versions = myIdToVersionToResourceMap.get(theId.getIdPart());
 		if (versions == null || versions.isEmpty()) {
-			throw new ResourceNotFoundException(theId);
+			throw new ResourceNotFoundException(Msg.code(1981) + theId);
 		}
 
 		T retVal;
 		if (theId.hasVersionIdPart()) {
 			Long versionId = theId.getVersionIdPartAsLong();
 			if (!versions.containsKey(versionId)) {
-				throw new ResourceNotFoundException(theId);
+				throw new ResourceNotFoundException(Msg.code(1982) + theId);
 			} else {
 				T resource = versions.get(versionId);
 				if (resource == null) {
-					throw new ResourceGoneException(theId);
+					throw new ResourceGoneException(Msg.code(1983) + theId);
 				}
 				retVal = resource;
 			}
@@ -276,7 +278,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 
 		retVal = fireInterceptorsAndFilterAsNeeded(retVal, theRequestDetails);
 		if (retVal == null) {
-			throw new ResourceNotFoundException(theId);
+			throw new ResourceNotFoundException(Msg.code(1984) + theId);
 		}
 		return retVal;
 	}
@@ -387,25 +389,42 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 				if (!myIdToHistory.containsKey(theIdPart)) {
 
 					// Interceptor call: STORAGE_PRESTORAGE_RESOURCE_CREATED
-					HookParams params = new HookParams()
+					HookParams preStorageParams = new HookParams()
 						.add(RequestDetails.class, theRequestDetails)
 						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 						.add(IBaseResource.class, theResource)
 						.add(TransactionDetails.class, theTransactionDetails);
-					interceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, params);
-					interceptorBroadcaster.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED, params);
+					interceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, preStorageParams);
+
+					// Interceptor call: STORAGE_PRECOMMIT_RESOURCE_CREATED
+					HookParams preCommitParams = new HookParams()
+						.add(RequestDetails.class, theRequestDetails)
+						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+						.add(IBaseResource.class, theResource)
+						.add(TransactionDetails.class, theTransactionDetails)
+						.add(InterceptorInvocationTimingEnum.class, theTransactionDetails.getInvocationTiming(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED));
+					interceptorBroadcaster.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED, preCommitParams);
 
 				} else {
 
 					// Interceptor call: STORAGE_PRESTORAGE_RESOURCE_UPDATED
-					HookParams params = new HookParams()
+					HookParams preStorageParams = new HookParams()
 						.add(RequestDetails.class, theRequestDetails)
 						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 						.add(IBaseResource.class, myIdToHistory.get(theIdPart).getFirst())
 						.add(IBaseResource.class, theResource)
 						.add(TransactionDetails.class, theTransactionDetails);
-					interceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, params);
-					interceptorBroadcaster.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, params);
+					interceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, preStorageParams);
+
+					// Interceptor call: STORAGE_PRECOMMIT_RESOURCE_UPDATED
+					HookParams preCommitParams = new HookParams()
+						.add(RequestDetails.class, theRequestDetails)
+						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+						.add(IBaseResource.class, myIdToHistory.get(theIdPart).getFirst())
+						.add(IBaseResource.class, theResource)
+						.add(TransactionDetails.class, theTransactionDetails)
+						.add(InterceptorInvocationTimingEnum.class, theTransactionDetails.getInvocationTiming(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED));
+					interceptorBroadcaster.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, preCommitParams);
 
 				}
 			}

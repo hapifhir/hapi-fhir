@@ -1,0 +1,6 @@
+---
+type: change
+issue: 2843
+title: "HAPI-FHIR provides indexing on Canonical Types as references. However, the option to [treat absolute references as local](/hapi-fhir/docs/server_jpa/configuration.html#jpa-server-configuration-options)
+ was being ignored for those indexed canonicals. This has been corrected. Now, if you have set `getTreatBaseUrlsAsLocal()` and HAPI-FHIR detects a canonical which starts with such a url, that prefix will be stripped,
+ and indexing will occur normally."

@@ -1,6 +1,7 @@
 package ca.uhn.fhir.parser;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -12,8 +13,23 @@ import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu2.resource.*;
+import ca.uhn.fhir.model.dstu2.resource.BaseResource;
+import ca.uhn.fhir.model.dstu2.resource.Basic;
+import ca.uhn.fhir.model.dstu2.resource.Binary;
+import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
+import ca.uhn.fhir.model.dstu2.resource.Condition;
+import ca.uhn.fhir.model.dstu2.resource.Conformance;
+import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
+import ca.uhn.fhir.model.dstu2.resource.DocumentManifest;
+import ca.uhn.fhir.model.dstu2.resource.Goal;
+import ca.uhn.fhir.model.dstu2.resource.Medication;
+import ca.uhn.fhir.model.dstu2.resource.MedicationOrder;
+import ca.uhn.fhir.model.dstu2.resource.Observation;
+import ca.uhn.fhir.model.dstu2.resource.Organization;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.resource.ProcedureRequest;
+import ca.uhn.fhir.model.dstu2.resource.QuestionnaireResponse;
 import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
 import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.ConditionVerificationStatusEnum;
@@ -52,6 +68,7 @@ import org.mockito.internal.stubbing.answers.ThrowsException;
 import org.slf4j.LoggerFactory;
 
 import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -1781,7 +1798,7 @@ public class JsonParserDstu2Test {
 			parser.parseResource(input);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Resource is missing required element 'url' in parent element 'extension'", e.getMessage());
+			assertEquals(Msg.code(1822) + "Resource is missing required element 'url' in parent element 'extension'", e.getMessage());
 		}
 
 	}
@@ -1811,7 +1828,7 @@ public class JsonParserDstu2Test {
 			parser.parseResource(input);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Resource is missing required element 'url' in parent element 'modifierExtension'", e.getMessage());
+			assertEquals(Msg.code(1822) + "Resource is missing required element 'url' in parent element 'modifierExtension'", e.getMessage());
 		}
 
 	}
@@ -2065,7 +2082,7 @@ public class JsonParserDstu2Test {
 			jsonParser.parseResource(input);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Missing required element 'resourceType' from JSON resource object, unable to parse", e.getMessage());
+			assertEquals(Msg.code(1843) + "Missing required element 'resourceType' from JSON resource object, unable to parse", e.getMessage());
 		}
 	}
 
@@ -2078,7 +2095,7 @@ public class JsonParserDstu2Test {
 		Patient p = parser.parseResource(Patient.class, input);
 
 		ArgumentCaptor<String> capt = ArgumentCaptor.forClass(String.class);
-		verify(peh, times(0)).unknownElement(Mockito.isNull(IParseLocation.class), capt.capture());
+		verify(peh, times(0)).unknownElement(Mockito.isNull(), capt.capture());
 
 		assertEquals("Smith", p.getName().get(0).getGiven().get(0).getValue());
 		assertExtensionMetadata(p, "fhir-request-method", false, StringDt.class, "POST");
@@ -2089,12 +2106,12 @@ public class JsonParserDstu2Test {
 
 	@Test
 	public void testParseWithWrongTypeObjectShouldBeArray() throws Exception {
-		String input = IOUtils.toString(getClass().getResourceAsStream("/invalid_metadata.json"));
+		String input = IOUtils.toString(getClass().getResourceAsStream("/invalid_metadata.json"), StandardCharsets.UTF_8);
 		try {
 			ourCtx.newJsonParser().parseResource(Conformance.class, input);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Syntax error parsing JSON FHIR structure: Expected ARRAY at element 'modifierExtension', found 'OBJECT'", e.getMessage());
+			assertEquals(Msg.code(1841) + "Syntax error parsing JSON FHIR structure: Expected ARRAY at element 'modifierExtension', found 'OBJECT'", e.getMessage());
 		}
 	}
 
@@ -2199,7 +2216,7 @@ public class JsonParserDstu2Test {
 
 	@AfterAll
 	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 	private static final class TimestampFields {

@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 2693
+backport: 5.4.1
+title: "Constraint errors were not always auto-retried even when configured to do so on certain
+  platforms (particularly Postgresql) where constraint names are auto converted to lower case.
+  Thanks to Bruno Hedman for the pull request!"

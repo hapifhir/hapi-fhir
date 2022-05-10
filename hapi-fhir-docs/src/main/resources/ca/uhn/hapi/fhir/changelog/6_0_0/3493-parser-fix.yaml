@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3493
+title: "Previously the Fhir parser would only set the resource type on the resource ID for resources which implemented `IDomainResource`. This caused a few resource types 
+to be missed. This has been corrected, and resource type is now set on the id element for all `IBaseResource` instances instead."

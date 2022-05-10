@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 2643
+title: "When using Auto-Version references in the JPA server, if an auto-versioned reference
+  within a FHIR transaction pointed to a resource that did not actually change during the
+  transaction (e.g. an update/PUT where the resource body was unchanged from the existing
+  version), the reference would point to an incremented version number even though none existed.
+  This has been corrected."

@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2662
+title: "It is now possible to declare database migrations as being mandatory even
+   when running in schema initialization mode."

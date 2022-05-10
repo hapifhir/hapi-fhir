@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2823
+title: "Mdm failed to load if any mdm subscription had been deleted, e.g. if $expunge expungeEverything had been run
+on the server.  This has been corrected."

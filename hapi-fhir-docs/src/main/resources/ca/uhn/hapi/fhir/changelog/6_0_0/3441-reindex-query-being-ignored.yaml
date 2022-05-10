@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 3441
+jira: SMILE-3441
+title: "Reindexing jobs were not respected the passed in date range in SearchParams. We now take date these date ranges
+into account when running re-indexing jobs."

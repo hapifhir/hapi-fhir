@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,12 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
@@ -28,6 +33,7 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.List;
 
 public class JsonUtil {
 
@@ -47,28 +53,45 @@ public class JsonUtil {
 	/**
 	 * Parse JSON
 	 */
-	public static <T> T deserialize(@Nonnull String theInput, @Nonnull Class<T> theType) throws IOException {
-		return ourMapperPrettyPrint.readerFor(theType).readValue(theInput);
+	public static <T> T deserialize(@Nonnull String theInput, @Nonnull Class<T> theType) {
+		try {
+			return ourMapperPrettyPrint.readerFor(theType).readValue(theInput);
+		} catch (IOException e) {
+			// Should not happen
+			throw new InternalErrorException(Msg.code(2060) + e);
+		}
+	}
+
+	/**
+	 * Parse JSON
+	 */
+	public static <T> List<T> deserializeList(@Nonnull String theInput, @Nonnull Class<T> theType) throws IOException {
+		return ourMapperPrettyPrint.readerForListOf(theType).readValue(theInput);
 	}
 
 	/**
 	 * Encode JSON
 	 */
-	public static String serialize(@Nonnull Object theInput) throws IOException {
+	public static String serialize(@Nonnull Object theInput) {
 		return serialize(theInput, true);
 	}
 
 	/**
 	 * Encode JSON
 	 */
-	public static String serialize(@Nonnull Object theInput, boolean thePrettyPrint) throws IOException {
-		StringWriter sw = new StringWriter();
-		if (thePrettyPrint) {
-			ourMapperPrettyPrint.writeValue(sw, theInput);
-		} else {
-			ourMapperNonPrettyPrint.writeValue(sw, theInput);
+	public static String serialize(@Nonnull Object theInput, boolean thePrettyPrint) {
+		try {
+			StringWriter sw = new StringWriter();
+			if (thePrettyPrint) {
+				ourMapperPrettyPrint.writeValue(sw, theInput);
+			} else {
+				ourMapperNonPrettyPrint.writeValue(sw, theInput);
+			}
+			return sw.toString();
+		} catch (IOException e) {
+			// Should not happen
+			throw new InternalErrorException(Msg.code(2061) + e);
 		}
-		return sw.toString();
 	}
 
 	/**
@@ -82,4 +105,11 @@ public class JsonUtil {
 		theWriter.append(serialize(theInput));
 	}
 
+	public static String serializeOrInvalidRequest(IModelJson theJson) {
+		try {
+			return ourMapperNonPrettyPrint.writeValueAsString(theJson);
+		} catch (JsonProcessingException e) {
+			throw new InvalidRequestException(Msg.code(1741) + "Failed to encode " + theJson.getClass(), e);
+		}
+	}
 }

@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.dao.data;
 
-import ca.uhn.fhir.jpa.bulk.model.BulkJobStatusEnum;
+import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -16,7 +16,7 @@ import java.util.Optional;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,19 +32,22 @@ import java.util.Optional;
  * #L%
  */
 
-public interface IBulkExportJobDao extends JpaRepository<BulkExportJobEntity, Long> {
+public interface IBulkExportJobDao extends JpaRepository<BulkExportJobEntity, Long>, IHapiFhirJpaRepository {
 
 	@Query("SELECT j FROM BulkExportJobEntity j WHERE j.myJobId = :jobid")
 	Optional<BulkExportJobEntity> findByJobId(@Param("jobid") String theUuid);
 
 	@Query("SELECT j FROM BulkExportJobEntity j WHERE j.myStatus = :status")
-	Slice<BulkExportJobEntity> findByStatus(Pageable thePage, @Param("status") BulkJobStatusEnum theSubmitted);
+	Slice<BulkExportJobEntity> findByStatus(Pageable thePage, @Param("status") BulkExportJobStatusEnum theSubmitted);
 
 	@Query("SELECT j FROM BulkExportJobEntity j WHERE j.myExpiry < :cutoff")
 	Slice<BulkExportJobEntity> findByExpiry(Pageable thePage, @Param("cutoff") Date theCutoff);
 
+	@Query("SELECT j FROM BulkExportJobEntity j WHERE j.myExpiry IS NOT NULL and j.myExpiry < :cutoff AND j.myStatus <> 'BUILDING'")
+	Slice<BulkExportJobEntity> findNotRunningByExpiry(Pageable thePage, @Param("cutoff") Date theCutoff);
+
 	@Query("SELECT j FROM BulkExportJobEntity j WHERE j.myRequest = :request AND j.myCreated > :createdAfter AND j.myStatus <> :status ORDER BY j.myCreated DESC")
-	Slice<BulkExportJobEntity> findExistingJob(Pageable thePage, @Param("request") String theRequest, @Param("createdAfter") Date theCreatedAfter, @Param("status") BulkJobStatusEnum theNotStatus);
+	Slice<BulkExportJobEntity> findExistingJob(Pageable thePage, @Param("request") String theRequest, @Param("createdAfter") Date theCreatedAfter, @Param("status") BulkExportJobStatusEnum theNotStatus);
 
 	@Modifying
 	@Query("DELETE FROM BulkExportJobEntity t")

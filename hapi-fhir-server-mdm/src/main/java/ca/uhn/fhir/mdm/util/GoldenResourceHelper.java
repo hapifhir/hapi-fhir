@@ -4,7 +4,7 @@ package ca.uhn.fhir.mdm.util;
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.mdm.util;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
@@ -31,6 +32,7 @@ import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.FhirTerser;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -97,6 +99,9 @@ public class GoldenResourceHelper {
 		MdmResourceUtil.setMdmManaged(newGoldenResource);
 		MdmResourceUtil.setGoldenResource(newGoldenResource);
 
+		// add the partition id to the new resource
+		newGoldenResource.setUserData(Constants.RESOURCE_PARTITION_ID, theIncomingResource.getUserData(Constants.RESOURCE_PARTITION_ID));
+
 		return (T) newGoldenResource;
 	}
 
@@ -120,7 +125,7 @@ public class GoldenResourceHelper {
 	}
 
 	private void cloneAllExternalEidsIntoNewGoldenResource(BaseRuntimeChildDefinition theGoldenResourceIdentifier,
-																			 IBase theGoldenResource, IBase theNewGoldenResource) {
+																			 IAnyResource theGoldenResource, IBase theNewGoldenResource) {
 		// FHIR choice types - fields within fhir where we have a choice of ids
 		IFhirPath fhirPath = myFhirContext.newFhirPath();
 		List<IBase> goldenResourceIdentifiers = theGoldenResourceIdentifier.getAccessor().getValues(theGoldenResource);
@@ -128,7 +133,8 @@ public class GoldenResourceHelper {
 		for (IBase base : goldenResourceIdentifiers) {
 			Optional<IPrimitiveType> system = fhirPath.evaluateFirst(base, "system", IPrimitiveType.class);
 			if (system.isPresent()) {
-				String mdmSystem = myMdmSettings.getMdmRules().getEnterpriseEIDSystem();
+				String resourceType = myFhirContext.getResourceType(theGoldenResource);
+				String mdmSystem = myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType(resourceType);
 				String baseSystem = system.get().getValueAsString();
 				if (Objects.equals(baseSystem, mdmSystem)) {
 					ca.uhn.fhir.util.TerserUtil.cloneEidIntoResource(myFhirContext, theGoldenResourceIdentifier, base, theNewGoldenResource);
@@ -145,7 +151,7 @@ public class GoldenResourceHelper {
 		if (fhirVersion == R4 || fhirVersion == DSTU3) {
 			return;
 		}
-		throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
+		throw new UnsupportedOperationException(Msg.code(1489) + "Version not supported: " + myFhirContext.getVersion().getVersion());
 	}
 
 	/**
@@ -175,8 +181,7 @@ public class GoldenResourceHelper {
 		} else if (!goldenResourceOfficialEid.isEmpty() && myEIDHelper.eidMatchExists(goldenResourceOfficialEid, incomingSourceEid)) {
 			log(theMdmTransactionContext, "incoming resource:" + theSourceResource.getIdElement().toVersionless() + " with EIDs " + incomingSourceEid.stream().map(CanonicalEID::toString).collect(Collectors.joining(",")) + " does not need to overwrite Golden Resource, as this EID is already present");
 		} else {
-			throw new IllegalArgumentException(
-				String.format("Source EIDs %s would create a duplicate golden resource, as EIDs %s already exist!",
+			throw new IllegalArgumentException(Msg.code(1490) + String.format("Source EIDs %s would create a duplicate golden resource, as EIDs %s already exist!",
 					incomingSourceEid.toString(), goldenResourceOfficialEid.toString()));
 		}
 		return theGoldenResource;
@@ -188,7 +193,7 @@ public class GoldenResourceHelper {
 		return theGoldenResource;
 	}
 
-	private void clearExternalEidsFromTheGoldenResource(BaseRuntimeChildDefinition theGoldenResourceIdentifier, IBase theGoldenResource) {
+	private void clearExternalEidsFromTheGoldenResource(BaseRuntimeChildDefinition theGoldenResourceIdentifier, IBaseResource theGoldenResource) {
 		IFhirPath fhirPath = myFhirContext.newFhirPath();
 		List<IBase> goldenResourceIdentifiers = theGoldenResourceIdentifier.getAccessor().getValues(theGoldenResource);
 		List<IBase> clonedIdentifiers = new ArrayList<>();
@@ -197,7 +202,8 @@ public class GoldenResourceHelper {
 		for (IBase base : goldenResourceIdentifiers) {
 			Optional<IPrimitiveType> system = fhirPath.evaluateFirst(base, "system", IPrimitiveType.class);
 			if (system.isPresent()) {
-				String mdmSystem = myMdmSettings.getMdmRules().getEnterpriseEIDSystem();
+				String resourceType = myFhirContext.getResourceType(theGoldenResource);
+				String mdmSystem = myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType(resourceType);
 				String baseSystem = system.get().getValueAsString();
 				if (Objects.equals(baseSystem, mdmSystem)) {
 					ourLog.debug("Found EID confirming to MDM rules {}. It should not be copied, skipping", baseSystem);

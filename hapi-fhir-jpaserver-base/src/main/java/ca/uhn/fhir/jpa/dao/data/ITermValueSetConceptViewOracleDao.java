@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.data;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.data.repository.query.Param;
 import java.io.Serializable;
 import java.util.List;
 
-public interface ITermValueSetConceptViewOracleDao extends JpaRepository<TermValueSetConceptViewOracle, Long> {
+public interface ITermValueSetConceptViewOracleDao extends JpaRepository<TermValueSetConceptViewOracle, Long>, IHapiFhirJpaRepository {
 		@Query("SELECT v FROM TermValueSetConceptViewOracle v WHERE v.myConceptValueSetPid = :pid AND v.myConceptOrder >= :from AND v.myConceptOrder < :to ORDER BY v.myConceptOrder")
 		List<TermValueSetConceptViewOracle> findByTermValueSetId(@Param("from") int theFrom, @Param("to") int theTo, @Param("pid") Long theValueSetId);
 

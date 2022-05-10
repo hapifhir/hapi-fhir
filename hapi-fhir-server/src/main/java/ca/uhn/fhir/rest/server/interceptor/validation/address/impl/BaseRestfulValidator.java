@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor.validation.address.impl;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,14 @@ package ca.uhn.fhir.rest.server.interceptor.validation.address.impl;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.interceptor.validation.address.IAddressValidator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidationException;
 import ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidationResult;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +39,7 @@ import java.util.Properties;
 public abstract class BaseRestfulValidator implements IAddressValidator {
 
 	public static final String PROPERTY_SERVICE_KEY = "service.key";
+	public static final String PROPERTY_SERVICE_ENDPOINT = "service.endpoint";
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseRestfulValidator.class);
 
@@ -60,11 +63,11 @@ public abstract class BaseRestfulValidator implements IAddressValidator {
 		try {
 			entity = getResponseEntity(theAddress, theFhirContext);
 		} catch (Exception e) {
-			throw new AddressValidationException("Unable to complete address validation web-service call", e);
+			throw new AddressValidationException(Msg.code(345) + "Unable to complete address validation web-service call", e);
 		}
 
 		if (isError(entity)) {
-			throw new AddressValidationException(String.format("Service returned an error code %s", entity.getStatusCode()));
+			throw new AddressValidationException(Msg.code(346) + String.format("Service returned an error code %s", entity.getStatusCode()));
 		}
 
 		String responseBody = entity.getBody();
@@ -74,11 +77,11 @@ public abstract class BaseRestfulValidator implements IAddressValidator {
 		retVal.setRawResponse(responseBody);
 
 		try {
-			JsonNode response  = new ObjectMapper().readTree(responseBody);
+			JsonNode response = new ObjectMapper().readTree(responseBody);
 			ourLog.debug("Parsed address validator response {}", response);
 			return getValidationResult(retVal, response, theFhirContext);
 		} catch (Exception e) {
-			throw new AddressValidationException("Unable to validate the address", e);
+			throw new AddressValidationException(Msg.code(347) + "Unable to validate the address", e);
 		}
 	}
 
@@ -96,5 +99,9 @@ public abstract class BaseRestfulValidator implements IAddressValidator {
 
 	protected String getApiKey() {
 		return getProperties().getProperty(PROPERTY_SERVICE_KEY);
+	}
+
+	protected String getApiEndpoint() {
+		return getProperties().getProperty(PROPERTY_SERVICE_ENDPOINT);
 	}
 }

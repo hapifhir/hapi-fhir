@@ -4,7 +4,7 @@ package ca.uhn.fhir.mdm.rules.matcher;
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,11 @@ package ca.uhn.fhir.mdm.rules.matcher;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.util.CanonicalIdentifier;
 import ca.uhn.fhir.mdm.util.IdentifierUtil;
+import ca.uhn.fhir.model.primitive.StringDt;
 import org.hl7.fhir.instance.model.api.IBase;
 
 public class IdentifierMatcher implements IMdmFieldMatcher {
 	/**
-	 *
 	 * @return true if the two fhir identifiers are the same.  If @param theIdentifierSystem is not null, then the
 	 * matcher only returns true if the identifier systems also match this system.
 	 * @throws UnsupportedOperationException if either Base is not an Identifier instance
@@ -41,6 +41,16 @@ public class IdentifierMatcher implements IMdmFieldMatcher {
 			}
 		}
 		CanonicalIdentifier right = IdentifierUtil.identifierDtFromIdentifier(theRightBase);
+		if (isEmpty(left.getValueElement()) || isEmpty(right.getValueElement())) {
+			return false;
+		}
 		return left.equals(right);
+	}
+
+	private boolean isEmpty(StringDt theValue) {
+		if (theValue == null) {
+			return true;
+		}
+		return theValue.isEmpty();
 	}
 }

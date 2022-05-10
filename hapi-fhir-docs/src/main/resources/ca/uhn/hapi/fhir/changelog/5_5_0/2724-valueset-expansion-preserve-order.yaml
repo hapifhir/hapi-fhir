@@ -1,0 +1,6 @@
+---
+type: fix
+backport: 5.4.2
+issue: 2624
+title: "ValueSet expansion did not correctly preserve the order if multiple codes were included
+  in a single inclusion block."

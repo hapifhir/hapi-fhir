@@ -359,6 +359,61 @@
 			"lat": 23.2420,
 			"lon": 72.6272,
 			"added": "2021-03-17"
-}
+		},
+		{
+			"title": "Snowstorm by SNOMED International",
+			"description": "Open Source Scalable SNOMED CT Terminology Server. Support for FHIR R4.",
+			"link": "https://github.com/IHTSDO/snowstorm",
+			"contactName": "Kai Kewley",
+			"contactEmail": "techsupport@snomed.org",
+			"city": "London",
+			"lat": 51.507351,
+			"lon": -0.127758
+		},
+		{
+			"title": "Cortico Health Technologies Inc.",
+			"description": "Making health technology work in the service of patients, doctors and healthcare staff.",
+			"company": "Cortico Health Technologies Inc.",
+			"contactName": "Clark Van Oyen",
+			"contactEmail": "clark.van.oyen@coritco.health",
+			"link": "https://cortico.health",
+			"city": "Vancouver, BC",
+			"lat": 49.234000,
+			"lon": -123.065890,
+			"added": "2021-06-29"
+		},
+		{
+			"title": "Innovattic",
+			"description": "Creating remote monitoring solutions for several hospitals in the Netherlands.",
+			"contactName": "Lauwerens Metz",
+			"contactEmail": "info@innovattic.com",
+			"link": "https://innovattic.com/",
+			"city": "Delft, The Netherlands",
+			"lat": 52.01804,
+			"lon": 4.354307,
+			"added": "2021-07-15"
+		},
+		{
+			"title": "Columna Cura",
+			"description": "The electronic care record that ensures efficient documentation and optimal task management of community care services.",
+			"company": "Systematic",
+			"contactName": "Columna Cura",
+			"link": "https://systematic.com/en-gb/industries/healthcare/community-care/columna-cura",
+			"city": "Aarhus, Denmark",
+			"lat": 56.15195,
+			"lon": 10.17705,
+			"added": "2021-10-06"
+		},
+				{
+			"title": "Burai L.L.C",
+			"description": "SaaS ERP for Healthcare Services, SMART ON FHIR compliance with 21st century cures act and HIPPA",
+			"company": "Burai LLC",
+			"contactName": "Tomomi Yamano",
+			"link": "https:burai.live",
+			"city": "Tokyo Japan, Florida USA",
+			"lat": 35.6762,
+			"lon": 139.6503,
+			"added": "2021-12-03"
+		}
 	]
 }

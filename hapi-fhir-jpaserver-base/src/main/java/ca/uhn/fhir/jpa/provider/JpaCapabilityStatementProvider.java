@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.provider;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,6 +80,11 @@ public class JpaCapabilityStatementProvider extends ServerCapabilityStatementPro
 		if (isNotBlank(myImplementationDescription)) {
 			theTerser.setElement(theCapabilityStatement, "implementation.description", myImplementationDescription);
 		}
+
+		theTerser.addElement(theCapabilityStatement, "patchFormat", Constants.CT_FHIR_JSON_NEW);
+		theTerser.addElement(theCapabilityStatement, "patchFormat", Constants.CT_FHIR_XML_NEW);
+		theTerser.addElement(theCapabilityStatement, "patchFormat", Constants.CT_JSON_PATCH);
+		theTerser.addElement(theCapabilityStatement, "patchFormat", Constants.CT_XML_PATCH);
 	}
 
 	@Override
@@ -139,5 +144,10 @@ public class JpaCapabilityStatementProvider extends ServerCapabilityStatementPro
 	@CoverageIgnore
 	public void setSystemDao(IFhirSystemDao<Bundle, Meta> mySystemDao) {
 		this.mySystemDao = mySystemDao;
+	}
+
+	@Override
+	protected boolean searchParamEnabled(String theSearchParam) {
+		return !Constants.PARAM_FILTER.equals(theSearchParam) || myDaoConfig.isFilterParameterEnabled();
 	}
 }

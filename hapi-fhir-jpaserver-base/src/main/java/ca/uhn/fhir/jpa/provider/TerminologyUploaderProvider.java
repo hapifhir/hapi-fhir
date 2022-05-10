@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.provider;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.provider;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -28,6 +29,7 @@ import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.custom.ConceptHandler;
 import ca.uhn.fhir.jpa.term.custom.HierarchyHandler;
+import ca.uhn.fhir.jpa.term.custom.PropertyHandler;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -39,6 +41,10 @@ import ca.uhn.fhir.util.ValidateUtil;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_30_40;
+import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_40_50;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
@@ -57,10 +63,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.trim;
-import static org.hl7.fhir.convertors.conv30_40.CodeSystem30_40.convertCodeSystem;
+import static org.apache.commons.lang3.StringUtils.*;
 
 public class TerminologyUploaderProvider extends BaseJpaProvider {
 
@@ -108,11 +111,11 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		startRequest(theServletRequest);
 
 		if (theCodeSystemUrl == null || isBlank(theCodeSystemUrl.getValueAsString())) {
-			throw new InvalidRequestException("Missing mandatory parameter: " + PARAM_SYSTEM);
+			throw new InvalidRequestException(Msg.code(1137) + "Missing mandatory parameter: " + PARAM_SYSTEM);
 		}
 
 		if (theFiles == null || theFiles.size() == 0) {
-			throw new InvalidRequestException("No '" + PARAM_FILE + "' parameter, or package had no data");
+			throw new InvalidRequestException(Msg.code(1138) + "No '" + PARAM_FILE + "' parameter, or package had no data");
 		}
 		for (ICompositeType next : theFiles) {
 			ValidateUtil.isTrueOrThrowInvalidRequest(getContext().getElementDefinition(next.getClass()).getName().equals("Attachment"), "Package must be of type Attachment");
@@ -126,14 +129,17 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 
 			UploadStatistics stats;
 			switch (codeSystemUrl) {
-				case ITermLoaderSvc.SCT_URI:
-					stats = myTerminologyLoaderSvc.loadSnomedCt(localFiles, theRequestDetails);
+				case ITermLoaderSvc.ICD10CM_URI:
+					stats = myTerminologyLoaderSvc.loadIcd10cm(localFiles, theRequestDetails);
+					break;
+				case ITermLoaderSvc.IMGTHLA_URI:
+					stats = myTerminologyLoaderSvc.loadImgthla(localFiles, theRequestDetails);
 					break;
 				case ITermLoaderSvc.LOINC_URI:
 					stats = myTerminologyLoaderSvc.loadLoinc(localFiles, theRequestDetails);
 					break;
-				case ITermLoaderSvc.IMGTHLA_URI:
-					stats = myTerminologyLoaderSvc.loadImgthla(localFiles, theRequestDetails);
+				case ITermLoaderSvc.SCT_URI:
+					stats = myTerminologyLoaderSvc.loadSnomedCt(localFiles, theRequestDetails);
 					break;
 				default:
 					stats = myTerminologyLoaderSvc.loadCustom(codeSystemUrl, localFiles, theRequestDetails);
@@ -214,12 +220,14 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 
 	private void convertCodeSystemsToFileDescriptors(List<ITermLoaderSvc.FileDescriptor> theFiles, List<IBaseResource> theCodeSystems) {
 		Map<String, String> codes = new LinkedHashMap<>();
+		Map<String, List<CodeSystem.ConceptPropertyComponent>> codeToProperties = new LinkedHashMap<>();
+
 		Multimap<String, String> codeToParentCodes = ArrayListMultimap.create();
 
 		if (theCodeSystems != null) {
 			for (IBaseResource nextCodeSystemUncast : theCodeSystems) {
 				CodeSystem nextCodeSystem = canonicalizeCodeSystem(nextCodeSystemUncast);
-				convertCodeSystemCodesToCsv(nextCodeSystem.getConcept(), codes, null, codeToParentCodes);
+				convertCodeSystemCodesToCsv(nextCodeSystem.getConcept(), codes, codeToProperties, null, codeToParentCodes);
 			}
 		}
 
@@ -260,6 +268,36 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			ITermLoaderSvc.ByteArrayFileDescriptor fileDescriptor = new ITermLoaderSvc.ByteArrayFileDescriptor(fileName, bytes);
 			theFiles.add(fileDescriptor);
 		}
+		// Create codeToProperties file
+		if (codeToProperties.size() > 0) {
+			StringBuilder b = new StringBuilder();
+			b.append(PropertyHandler.CODE);
+			b.append(",");
+			b.append(PropertyHandler.KEY);
+			b.append(",");
+			b.append(PropertyHandler.VALUE);
+			b.append(",");
+			b.append(PropertyHandler.TYPE);
+			b.append("\n");
+
+			for (Map.Entry<String, List<CodeSystem.ConceptPropertyComponent>> nextEntry : codeToProperties.entrySet()) {
+				for (CodeSystem.ConceptPropertyComponent propertyComponent : nextEntry.getValue()) {
+					b.append(csvEscape(nextEntry.getKey()));
+					b.append(",");
+					b.append(csvEscape(propertyComponent.getCode()));
+					b.append(",");
+					//TODO: check this for different types, other types should be added once TermConceptPropertyTypeEnum contain different types
+					b.append(csvEscape(propertyComponent.getValueStringType().getValue()));
+					b.append(",");
+					b.append(csvEscape(propertyComponent.getValue().primitiveValue()));
+					b.append("\n");
+				}
+			}
+			byte[] bytes = b.toString().getBytes(Charsets.UTF_8);
+			String fileName = TermLoaderSvcImpl.CUSTOM_PROPERTIES_FILE;
+			ITermLoaderSvc.ByteArrayFileDescriptor fileDescriptor = new ITermLoaderSvc.ByteArrayFileDescriptor(fileName, bytes);
+			theFiles.add(fileDescriptor);
+		}
 
 	}
 
@@ -272,10 +310,10 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		CodeSystem nextCodeSystem;
 		switch (getContext().getVersion().getVersion()) {
 			case DSTU3:
-				nextCodeSystem = convertCodeSystem((org.hl7.fhir.dstu3.model.CodeSystem) theCodeSystem);
+				nextCodeSystem = (CodeSystem) VersionConvertorFactory_30_40.convertResource((org.hl7.fhir.dstu3.model.CodeSystem) theCodeSystem, new BaseAdvisor_30_40(false));
 				break;
 			case R5:
-				nextCodeSystem = org.hl7.fhir.convertors.conv40_50.CodeSystem40_50.convertCodeSystem((org.hl7.fhir.r5.model.CodeSystem) theCodeSystem);
+				nextCodeSystem = (CodeSystem) VersionConvertorFactory_40_50.convertResource((org.hl7.fhir.r5.model.CodeSystem) theCodeSystem, new BaseAdvisor_40_50(false));
 				break;
 			default:
 				nextCodeSystem = (CodeSystem) theCodeSystem;
@@ -283,21 +321,24 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		return nextCodeSystem;
 	}
 
-	private void convertCodeSystemCodesToCsv(List<CodeSystem.ConceptDefinitionComponent> theConcept, Map<String, String> theCodes, String theParentCode, Multimap<String, String> theCodeToParentCodes) {
+	private void convertCodeSystemCodesToCsv(List<CodeSystem.ConceptDefinitionComponent> theConcept, Map<String, String> theCodes, Map<String, List<CodeSystem.ConceptPropertyComponent>> theProperties, String theParentCode, Multimap<String, String> theCodeToParentCodes) {
 		for (CodeSystem.ConceptDefinitionComponent nextConcept : theConcept) {
 			if (isNotBlank(nextConcept.getCode())) {
 				theCodes.put(nextConcept.getCode(), nextConcept.getDisplay());
 				if (isNotBlank(theParentCode)) {
 					theCodeToParentCodes.put(nextConcept.getCode(), theParentCode);
 				}
-				convertCodeSystemCodesToCsv(nextConcept.getConcept(), theCodes, nextConcept.getCode(), theCodeToParentCodes);
+				if (nextConcept.getProperty() != null) {
+					theProperties.put(nextConcept.getCode(), nextConcept.getProperty());
+				}
+				convertCodeSystemCodesToCsv(nextConcept.getConcept(), theCodes, theProperties, nextConcept.getCode(), theCodeToParentCodes);
 			}
 		}
 	}
 
 	private void validateHaveSystem(IPrimitiveType<String> theSystem) {
 		if (theSystem == null || isBlank(theSystem.getValueAsString())) {
-			throw new InvalidRequestException("Missing mandatory parameter: " + PARAM_SYSTEM);
+			throw new InvalidRequestException(Msg.code(1139) + "Missing mandatory parameter: " + PARAM_SYSTEM);
 		}
 	}
 
@@ -316,7 +357,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 				}
 			}
 		}
-		throw new InvalidRequestException("Missing mandatory parameter: " + PARAM_FILE);
+		throw new InvalidRequestException(Msg.code(1140) + "Missing mandatory parameter: " + PARAM_FILE);
 	}
 
 	@Nonnull
@@ -337,7 +378,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 						ourLog.info("Reading in local file: {}", nextLocalFile);
 						File nextFile = new File(nextLocalFile);
 						if (!nextFile.exists() || !nextFile.isFile()) {
-							throw new InvalidRequestException("Unknown file: " + nextFile.getName());
+							throw new InvalidRequestException(Msg.code(1141) + "Unknown file: " + nextFile.getName());
 						}
 						files.add(new FileBackedFileDescriptor(nextFile));
 					}
@@ -359,7 +400,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		return retVal;
 	}
 
-	private static class FileBackedFileDescriptor implements ITermLoaderSvc.FileDescriptor {
+	public static class FileBackedFileDescriptor implements ITermLoaderSvc.FileDescriptor {
 		private final File myNextFile;
 
 		public FileBackedFileDescriptor(File theNextFile) {
@@ -376,7 +417,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			try {
 				return new FileInputStream(myNextFile);
 			} catch (FileNotFoundException theE) {
-				throw new InternalErrorException(theE);
+				throw new InternalErrorException(Msg.code(1142) + theE);
 			}
 		}
 	}

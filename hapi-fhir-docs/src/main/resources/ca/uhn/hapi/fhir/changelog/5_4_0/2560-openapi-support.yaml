@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2560
+title: "A new interceptor called `OpenApiInterceptor` has been added. This interceptor can be registered against FHIR Servers to
+   automatically add support for OpenAPI / Swagger."

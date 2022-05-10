@@ -1,7 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.method.ConformanceMethodBinding;
@@ -24,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CapabilityStatementCacheR4Test {
 
-	private final FhirContext myFhirContext = FhirContext.forCached(FhirVersionEnum.R4);
+	private final FhirContext myFhirContext = FhirContext.forR4Cached();
 
 	@RegisterExtension
 	protected final RestfulServerExtension myServerExtension = new RestfulServerExtension(myFhirContext)

@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,7 @@ package ca.uhn.fhir.rest.api;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
@@ -73,6 +68,7 @@ public class Constants {
 	public static final String CT_OCTET_STREAM = "application/octet-stream";
 	public static final String CT_TEXT = "text/plain";
 	public static final String CT_TEXT_WITH_UTF8 = CT_TEXT + CHARSET_UTF8_CTSUFFIX;
+	public static final String CT_TEXT_CDA = "text/xml+cda";
 	public static final String CT_X_FORM_URLENCODED = "application/x-www-form-urlencoded";
 	public static final String CT_XML = "application/xml";
 	public static final String CT_XML_PATCH = "application/xml-patch+xml";
@@ -84,6 +80,7 @@ public class Constants {
 	public static final String EXTOP_VALIDATE_RESOURCE = "resource";
 	public static final String FORMAT_HTML = "html";
 	public static final String FORMAT_JSON = "json";
+	public static final String FORMAT_NDJSON = "ndjson";
 	public static final String FORMAT_XML = "xml";
 	public static final String CT_RDF_TURTLE_LEGACY = "text/turtle";
 	public static final String FORMAT_TURTLE = "ttl";
@@ -152,6 +149,7 @@ public class Constants {
 	public static final String OPENSEARCH_NS_OLDER = "http://purl.org/atompub/tombstones/1.0";
 	public static final String PARAM_ASYNC = "async"; //Used in messaging
 	public static final String PARAM_AT = "_at";
+	public static final String PARAM_ID= "_id";
 	/**
 	 * Used in paging links
 	 */
@@ -199,12 +197,24 @@ public class Constants {
 	public static final String PARAM_TAGS = "_tags";
 	public static final String PARAM_TEXT = "_text";
 	public static final String PARAM_VALIDATE = "_validate";
+
+	/**
+	 * $member-match operation
+	 */
+	public static final String PARAM_MEMBER_PATIENT = "MemberPatient";
+	public static final String PARAM_OLD_COVERAGE = "OldCoverage";
+	public static final String PARAM_NEW_COVERAGE = "NewCoverage";
+
 	public static final String PARAMQUALIFIER_MISSING = ":missing";
 	public static final String PARAMQUALIFIER_MISSING_FALSE = "false";
 	public static final String PARAMQUALIFIER_MISSING_TRUE = "true";
 	public static final String PARAMQUALIFIER_STRING_CONTAINS = ":contains";
 	public static final String PARAMQUALIFIER_STRING_EXACT = ":exact";
 	public static final String PARAMQUALIFIER_TOKEN_TEXT = ":text";
+	public static final String PARAMQUALIFIER_MDM = ":mdm";
+	public static final String PARAMQUALIFIER_NICKNAME = ":nickname";
+	public static final String PARAMQUALIFIER_TOKEN_OF_TYPE = ":of-type";
+	public static final String PARAMQUALIFIER_TOKEN_NOT = ":not";
 	public static final int STATUS_HTTP_200_OK = 200;
 	public static final int STATUS_HTTP_201_CREATED = 201;
 	public static final int STATUS_HTTP_204_NO_CONTENT = 204;
@@ -271,8 +281,18 @@ public class Constants {
 	 * key will be of type {@link ca.uhn.fhir.interceptor.model.RequestPartitionId}.
 	 */
 	public static final String RESOURCE_PARTITION_ID = Constants.class.getName() + "_RESOURCE_PARTITION_ID";
+	public static final String PARTITION_IDS = "partitionIds";
 	public static final String CT_APPLICATION_GZIP = "application/gzip";
 	public static final String[] EMPTY_STRING_ARRAY = new String[0];
+	public static final String SUBSCRIPTION_MULTITYPE_PREFIX = "[";
+	public static final String SUBSCRIPTION_MULTITYPE_SUFFIX = "]";
+	public static final String SUBSCRIPTION_MULTITYPE_STAR = "*";
+	public static final String SUBSCRIPTION_STAR_CRITERIA = SUBSCRIPTION_MULTITYPE_PREFIX + SUBSCRIPTION_MULTITYPE_STAR + SUBSCRIPTION_MULTITYPE_SUFFIX;
+	public static final String INCLUDE_STAR = "*";
+	public static final String PARAMQUALIFIER_TOKEN_IN = ":in";
+	public static final String PARAMQUALIFIER_TOKEN_NOT_IN = ":not-in";
+	public static final String PARAMQUALIFIER_TOKEN_ABOVE = ":above";
+	public static final String PARAMQUALIFIER_TOKEN_BELOW = ":below";
 
 	static {
 		CHARSET_UTF8 = StandardCharsets.UTF_8;

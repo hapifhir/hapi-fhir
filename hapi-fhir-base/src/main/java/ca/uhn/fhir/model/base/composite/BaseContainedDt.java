@@ -1,16 +1,17 @@
 package ca.uhn.fhir.model.base.composite;
 
-import java.util.List;
-
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.util.CoverageIgnore;
+
+import java.util.List;
 
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +39,7 @@ public abstract class BaseContainedDt implements IDatatype {
 	@Override
 	@CoverageIgnore
 	public List<String> getFormatCommentsPost() {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(1901));
 	}
 
 	/**
@@ -47,7 +48,7 @@ public abstract class BaseContainedDt implements IDatatype {
 	@Override
 	@CoverageIgnore
 	public List<String> getFormatCommentsPre() {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(1902));
 	}
 
 	/**

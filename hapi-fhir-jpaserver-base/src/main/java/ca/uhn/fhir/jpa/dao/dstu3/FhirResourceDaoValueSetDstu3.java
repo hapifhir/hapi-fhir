@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
@@ -30,7 +31,8 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import org.hl7.fhir.convertors.conv30_40.ValueSet30_40;
+import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_30_40;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ValueSet;
@@ -42,7 +44,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import java.util.Date;
 
 import static ca.uhn.fhir.jpa.dao.FhirResourceDaoValueSetDstu2.toStringOrNull;
-import static org.hl7.fhir.convertors.conv30_40.ValueSet30_40.convertValueSet;
 
 public class FhirResourceDaoValueSetDstu3 extends BaseHapiFhirResourceDao<ValueSet> implements IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> {
 
@@ -54,15 +55,15 @@ public class FhirResourceDaoValueSetDstu3 extends BaseHapiFhirResourceDao<ValueS
 
 	@Override
 	public org.hl7.fhir.dstu3.model.ValueSet expand(org.hl7.fhir.dstu3.model.ValueSet theSource, ValueSetExpansionOptions theOptions) {
-		org.hl7.fhir.r4.model.ValueSet canonicalInput = ValueSet30_40.convertValueSet(theSource);
+		org.hl7.fhir.r4.model.ValueSet canonicalInput = (org.hl7.fhir.r4.model.ValueSet) VersionConvertorFactory_30_40.convertResource(theSource, new BaseAdvisor_30_40(false));
 		org.hl7.fhir.r4.model.ValueSet canonicalOutput = myTerminologySvc.expandValueSet(theOptions, canonicalInput);
-		return ValueSet30_40.convertValueSet(canonicalOutput);
+		return (ValueSet) VersionConvertorFactory_30_40.convertResource(canonicalOutput, new BaseAdvisor_30_40(false));
 	}
 
 	@Override
 	public org.hl7.fhir.dstu3.model.ValueSet expandByIdentifier(String theUri, ValueSetExpansionOptions theOptions) {
 		org.hl7.fhir.r4.model.ValueSet canonicalOutput = myTerminologySvc.expandValueSet(theOptions, theUri);
-		return ValueSet30_40.convertValueSet(canonicalOutput);
+		return (ValueSet) VersionConvertorFactory_30_40.convertResource(canonicalOutput, new BaseAdvisor_30_40(false));
 	}
 
 	@Override
@@ -82,14 +83,14 @@ public class FhirResourceDaoValueSetDstu3 extends BaseHapiFhirResourceDao<ValueS
 												 boolean theUpdateVersion, TransactionDetails theTransactionDetails, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
 		ResourceTable retVal = super.updateEntity(theRequestDetails, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theTransactionDetails, theForceUpdate, theCreateNewHistoryEntry);
 
-		if (myDaoConfig.isPreExpandValueSets() && !retVal.isUnchangedInCurrentOperation()) {
+		if (getConfig().isPreExpandValueSets() && !retVal.isUnchangedInCurrentOperation()) {
 			if (retVal.getDeleted() == null) {
 				try {
 					ValueSet valueSet = (ValueSet) theResource;
-					org.hl7.fhir.r4.model.ValueSet converted = convertValueSet(valueSet);
+					org.hl7.fhir.r4.model.ValueSet converted = (org.hl7.fhir.r4.model.ValueSet) VersionConvertorFactory_30_40.convertResource(valueSet, new BaseAdvisor_30_40(false));
 					myTerminologySvc.storeTermValueSet(retVal, converted);
 				} catch (FHIRException fe) {
-					throw new InternalErrorException(fe);
+					throw new InternalErrorException(Msg.code(1080) + fe);
 				}
 			} else {
 				myTerminologySvc.deleteValueSetAndChildren(retVal);

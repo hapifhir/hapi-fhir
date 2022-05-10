@@ -4,7 +4,7 @@ package ca.uhn.fhir.validation;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,17 +20,16 @@ package ca.uhn.fhir.validation;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.util.OperationOutcomeUtil;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 import java.util.Collections;
 import java.util.List;
 
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.util.OperationOutcomeUtil;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * Encapsulates the results of validation
@@ -39,18 +38,22 @@ import ca.uhn.fhir.util.OperationOutcomeUtil;
  * @since 0.7
  */
 public class ValidationResult {
+	public static final int ERROR_DISPLAY_LIMIT_DEFAULT = 1;
+
 	private final FhirContext myCtx;
 	private final boolean myIsSuccessful;
 	private final List<SingleValidationMessage> myMessages;
+
+	private int myErrorDisplayLimit = ERROR_DISPLAY_LIMIT_DEFAULT;
 
 	public ValidationResult(FhirContext theCtx, List<SingleValidationMessage> theMessages) {
 		boolean successful = true;
 		myCtx = theCtx;
 		myMessages = theMessages;
 		for (SingleValidationMessage next : myMessages) {
-			next.getSeverity();
 			if (next.getSeverity() == null || next.getSeverity().ordinal() > ResultSeverityEnum.WARNING.ordinal()) {
 				successful = false;
+				break;
 			}
 		}
 		myIsSuccessful = successful;
@@ -72,21 +75,35 @@ public class ValidationResult {
 		return myIsSuccessful;
 	}
 
+
 	private String toDescription() {
-		StringBuilder b = new StringBuilder(100);
-		if (myMessages.size() > 0) {
-			if (myMessages.get(0).getSeverity() != null) {
-				b.append(myMessages.get(0).getSeverity().name());
+		if (myMessages.isEmpty()) {
+			return "No issues";
+		}
+
+		StringBuilder b = new StringBuilder(100 * myMessages.size());
+		int shownMsgQty = Math.min(myErrorDisplayLimit, myMessages.size());
+
+		if (shownMsgQty < myMessages.size()) {
+			b.append("(showing first ").append(shownMsgQty).append(" messages out of ")
+				.append(myMessages.size()).append(" total)").append(ourNewLine);
+		}
+
+		for (int i = 0; i < shownMsgQty; i++) {
+			SingleValidationMessage nextMsg = myMessages.get(i);
+			b.append(ourNewLine);
+			if (nextMsg.getSeverity() != null) {
+				b.append(nextMsg.getSeverity().name());
 				b.append(" - ");
 			}
-			b.append(myMessages.get(0).getMessage());
+			b.append(nextMsg.getMessage());
 			b.append(" - ");
-			b.append(myMessages.get(0).getLocationString());
-		} else {
-			b.append("No issues");
+			b.append(nextMsg.getLocationString());
 		}
+
 		return b.toString();
 	}
+
 
 	/**
 	 * @deprecated Use {@link #toOperationOutcome()} instead since this method returns a view.
@@ -149,4 +166,18 @@ public class ValidationResult {
 	public String toString() {
 		return "ValidationResult{" + "messageCount=" + myMessages.size() + ", isSuccessful=" + myIsSuccessful + ", description='" + toDescription() + '\'' + '}';
 	}
+
+	/**
+	 * @since 5.5.0
+	 */
+	public FhirContext getContext() {
+		return myCtx;
+	}
+
+	public int getErrorDisplayLimit() { return myErrorDisplayLimit; }
+
+	public void setErrorDisplayLimit(int theErrorDisplayLimit) { myErrorDisplayLimit = theErrorDisplayLimit; }
+
+
+	private static final String  ourNewLine = System.getProperty("line.separator");
 }

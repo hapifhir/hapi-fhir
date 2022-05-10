@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.term.loinc;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,10 @@ package ca.uhn.fhir.jpa.term.loinc;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import ca.uhn.fhir.jpa.term.IRecordHandler;
+import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.csv.CSVRecord;
@@ -36,7 +36,7 @@ import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.*;
 
-public class LoincHandler implements IRecordHandler {
+public class LoincHandler implements IZipContentsHandlerCsv {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(LoincHandler.class);
 	private final Map<String, TermConcept> myCode2Concept;
@@ -95,7 +95,7 @@ public class LoincHandler implements IRecordHandler {
 						case BOOLEAN:
 						case DATETIME:
 						case NULL:
-							throw new InternalErrorException("Don't know how to handle LOINC property of type: " + nextPropertyType);
+							throw new InternalErrorException(Msg.code(915) + "Don't know how to handle LOINC property of type: " + nextPropertyType);
 					}
 
 				}

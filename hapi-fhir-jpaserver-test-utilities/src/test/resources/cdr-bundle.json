@@ -1,0 +1,319 @@
+ {
+	"resourceType": "Bundle",
+	"entry": [
+		{
+			"fullUrl": "urn:uuid:7079b926-3bc9-4848-874b-da066b3b0ceb",
+			"resource": {
+				"resourceType": "Practitioner",
+				"identifier": [
+					{
+						"system": "http://acme.org/clinicians",
+						"value": "777"
+					}
+				],
+				"name": [
+					{
+						"family": [
+							"Jones"
+						],
+						"given": [
+							"Lisa",
+							"Frances"
+						]
+					}
+				],
+				"telecom": [
+					{
+						"system": "phone",
+						"value": "1(837)555-1978",
+						"use": "work"
+					}
+				],
+				"address": [
+					{
+						"use": "work",
+						"line": [
+							"123 Brewer Street"
+						],
+						"city": "Buffalo",
+						"state": "NY",
+						"postalCode": "98765",
+						"country": "USA"
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "/Practitioner?identifier=http%3A%2F%2Facme.org%2Fclinicians%7C777"
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:47521791-e0f9-4eb4-b65d-be4ec2b602bf",
+			"resource": {
+				"resourceType": "Patient",
+				"identifier": [
+					{
+						"use": "official",
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "MR"
+								}
+							]
+						},
+						"system": "http://acme.org/mrns",
+						"value": "7000135"
+					},
+					{
+						"use": "secondary",
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "SB"
+								}
+							]
+						},
+						"system": "http://acme.org/secondaryIds",
+						"value": "01238638267"
+					}
+				],
+				"name": [
+					{
+						"use": "official",
+						"family": [
+							"Smith"
+						],
+						"given": [
+							"John",
+							"Q"
+						],
+						"suffix": [
+							"Jr"
+						]
+					}
+				],
+				"telecom": [
+					{
+						"system": "phone",
+						"value": "1(333)555-1234",
+						"use": "home"
+					}
+				],
+				"gender": "male",
+				"birthDate": "1965-03-22",
+				"deceasedBoolean": false,
+				"address": [
+					{
+						"use": "home",
+						"line": [
+							"342 Evergreen Terrace",
+							"2nd Floor"
+						],
+						"city": "Springfield",
+						"state": "NI",
+						"postalCode": "12345",
+						"country": "USA"
+					}
+				],
+				"generalPractitioner": [
+					{
+						"reference": "urn:uuid:7079b926-3bc9-4848-874b-da066b3b0ceb"
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "/Patient?identifier=http%3A%2F%2Facme.org%2Fmrns%7C7000135"
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:fd42a622-66ce-4a76-bbb6-573c018e29ed",
+			"resource": {
+				"resourceType": "Encounter",
+				"identifier": [
+					{
+						"use": "official",
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "VN"
+								}
+							]
+						},
+						"system": "http://acme.org/visitNumbers",
+						"value": "4736455"
+					}
+				],
+				"class": {
+					"system": "http://hl7.org/fhir/v3/ActCode",
+					"code": "IMP",
+					"display": "Inpatient"
+				},
+				"subject": {
+					"reference": "urn:uuid:47521791-e0f9-4eb4-b65d-be4ec2b602bf"
+				},
+				"participant": [
+					{
+						"type": [
+							{
+								"coding": [
+									{
+										"system": "http://hl7.org/fhir/v3/ParticipationType",
+										"code": "ADM",
+										"display": "admitter"
+									}
+								]
+							}
+						],
+						"individual": {
+							"reference": "urn:uuid:5e0a848f-0b14-4068-8618-aa3c08c242ab"
+						}
+					},
+					{
+						"type": [
+							{
+								"coding": [
+									{
+										"system": "http://hl7.org/fhir/v3/ParticipationType",
+										"code": "ATND",
+										"display": "attender"
+									}
+								]
+							}
+						],
+						"individual": {
+							"reference": "urn:uuid:2cc6e9d3-0abb-4544-9b8e-3892f22b533b"
+						}
+					}
+				],
+				"period": {
+					"start": "2016-01-22T09:44:30-04:00",
+					"end": "2016-01-22T09:44:31-04:00"
+				},
+				"location": [
+					{
+						"location": {
+							"reference": "urn:uuid:76f243bc-49f2-40da-9064-379fcbc151d2"
+						}
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "/Encounter?identifier=http%3A%2F%2Facme.org%2FvisitNumbers%7C4736455"
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:76f243bc-49f2-40da-9064-379fcbc151d2",
+			"resource": {
+				"resourceType": "Location",
+				"identifier": [
+					{
+						"system": "http://acme.org/beds",
+						"value": "124 6"
+					}
+				],
+				"name": "6",
+				"description": "124 Bed 6"
+			},
+			"request": {
+				"method": "POST",
+				"url": "/Location",
+				"ifNoneExist": "Location?name=6"
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:5e0a848f-0b14-4068-8618-aa3c08c242ab",
+			"resource": {
+				"resourceType": "Practitioner",
+				"identifier": [
+					{
+						"system": "http://acme.org/clinicians",
+						"value": "3622"
+					}
+				],
+				"name": [
+					{
+						"family": [
+							"Hawkins"
+						],
+						"given": [
+							"Finnie"
+						]
+					}
+				],
+				"telecom": [
+					{
+						"system": "phone",
+						"value": "1(837)555-2133",
+						"use": "work"
+					}
+				],
+				"address": [
+					{
+						"use": "work",
+						"line": [
+							"20 Canal St"
+						],
+						"city": "Buffalo",
+						"state": "NY",
+						"postalCode": "98222",
+						"country": "USA"
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "/Practitioner?identifier=http%3A%2F%2Facme.org%2Fclinicians%7C3622"
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:2cc6e9d3-0abb-4544-9b8e-3892f22b533b",
+			"resource": {
+				"resourceType": "Practitioner",
+				"identifier": [
+					{
+						"system": "http://acme.org/clinicians",
+						"value": "7452"
+					}
+				],
+				"name": [
+					{
+						"family": [
+							"May"
+						],
+						"given": [
+							"Sadie"
+						]
+					}
+				],
+				"telecom": [
+					{
+						"system": "phone",
+						"value": "1(837)555-6624",
+						"use": "work"
+					}
+				],
+				"address": [
+					{
+						"use": "work",
+						"line": [
+							"313 Fleet Street"
+						],
+						"city": "Cheektowaga",
+						"state": "NY",
+						"postalCode": "28366",
+						"country": "USA"
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "/Practitioner?identifier=http%3A%2F%2Facme.org%2Fclinicians%7C7452"
+			}
+		}
+	]
+}

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,19 +20,21 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IDao;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilder;
 import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilderFactory;
 import ca.uhn.fhir.jpa.dao.predicate.SearchBuilderJoinEnum;
@@ -42,7 +44,7 @@ import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedCompositeStringUnique;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
@@ -51,12 +53,10 @@ import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.lastn.IElasticsearchSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.util.Dstu3DistanceHelper;
 import ca.uhn.fhir.jpa.searchparam.util.LastNParameterHelper;
 import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
-import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.jpa.util.SqlQueryList;
@@ -76,8 +76,11 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -146,7 +149,7 @@ public class LegacySearchBuilder implements ISearchBuilder {
 	@Autowired
 	private FhirContext myContext;
 	@Autowired
-	private IdHelperService myIdHelperService;
+	private IIdHelperService myIdHelperService;
 	@Autowired(required = false)
 	private IFulltextSearchSvc myFulltextSearchSvc;
 	@Autowired(required = false)
@@ -224,14 +227,14 @@ public class LegacySearchBuilder implements ISearchBuilder {
 	}
 
 	@Override
-	public Iterator<Long> createCountQuery(SearchParameterMap theParams, String theSearchUuid, RequestDetails theRequest, @Nonnull RequestPartitionId theRequestPartitionId) {
+	public Long createCountQuery(SearchParameterMap theParams, String theSearchUuid, RequestDetails theRequest, @Nonnull RequestPartitionId theRequestPartitionId) {
 		assert theRequestPartitionId != null;
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		init(theParams, theSearchUuid, theRequestPartitionId);
 
 		List<TypedQuery<Long>> queries = createQuery(null, null, null, true, theRequest, null);
-		return new CountQueryIterator(queries.get(0));
+		return new CountQueryIterator(queries.get(0)).next();
 	}
 
 	/**
@@ -275,23 +278,23 @@ public class LegacySearchBuilder implements ISearchBuilder {
 		 */
 		if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT) || myParams.isLastN()) {
 			if (myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT)) {
-				if (myFulltextSearchSvc == null) {
+				if (myFulltextSearchSvc == null || myFulltextSearchSvc.isDisabled()) {
 					if (myParams.containsKey(Constants.PARAM_TEXT)) {
-						throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
+						throw new InvalidRequestException(Msg.code(937) + "Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_TEXT);
 					} else if (myParams.containsKey(Constants.PARAM_CONTENT)) {
-						throw new InvalidRequestException("Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
+						throw new InvalidRequestException(Msg.code(938) + "Fulltext search is not enabled on this service, can not process parameter: " + Constants.PARAM_CONTENT);
 					}
 				}
 
 				if (myParams.getEverythingMode() != null) {
-					pids = myFulltextSearchSvc.everything(myResourceName, myParams, theRequest);
+					pids = queryHibernateSearchForEverythingPids();
 				} else {
 					pids = myFulltextSearchSvc.search(myResourceName, myParams);
 				}
 			} else if (myParams.isLastN()) {
 				if (myIElasticsearchSvc == null) {
 					if (myParams.isLastN()) {
-						throw new InvalidRequestException("LastN operation is not enabled on this service, can not process this request");
+						throw new InvalidRequestException(Msg.code(939) + "LastN operation is not enabled on this service, can not process this request");
 					}
 				}
 				List<String> lastnResourceIds = myIElasticsearchSvc.executeLastN(myParams, myContext, theMaximumResults);
@@ -305,7 +308,7 @@ public class LegacySearchBuilder implements ISearchBuilder {
 					.add(RequestDetails.class, theRequest)
 					.addIfMatchesType(ServletRequestDetails.class, theRequest)
 					.add(SearchRuntimeDetails.class, theSearchRuntimeDetails);
-				JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INDEXSEARCH_QUERY_COMPLETE, params);
+				CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INDEXSEARCH_QUERY_COMPLETE, params);
 			}
 
 			if (pids.isEmpty()) {
@@ -327,6 +330,25 @@ public class LegacySearchBuilder implements ISearchBuilder {
 		}
 
 		return myQueries;
+	}
+
+	private List<ResourcePersistentId> queryHibernateSearchForEverythingPids() {
+		ResourcePersistentId pid = null;
+		if (myParams.get(IAnyResource.SP_RES_ID) != null) {
+			String idParamValue;
+			IQueryParameterType idParam = myParams.get(IAnyResource.SP_RES_ID).get(0).get(0);
+			if (idParam instanceof TokenParam) {
+				TokenParam idParm = (TokenParam) idParam;
+				idParamValue = idParm.getValue();
+			} else {
+				StringParam idParm = (StringParam) idParam;
+				idParamValue = idParm.getValue();
+			}
+
+			pid = myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, idParamValue);
+		}
+		List<ResourcePersistentId> pids = myFulltextSearchSvc.everything(myResourceName, myParams, pid);
+		return pids;
 	}
 
 	private void doCreateChunkedQueries(List<Long> thePids, SortSpec sort, Integer theOffset, boolean theCount, RequestDetails theRequest, ArrayList<TypedQuery<Long>> theQueries) {
@@ -368,8 +390,14 @@ public class LegacySearchBuilder implements ISearchBuilder {
 			From<?, ResourceLink> join = myQueryStack.createJoin(SearchBuilderJoinEnum.REFERENCE, null);
 
 			if (myParams.get(IAnyResource.SP_RES_ID) != null) {
-				StringParam idParam = (StringParam) myParams.get(IAnyResource.SP_RES_ID).get(0).get(0);
-				ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, idParam.getValue());
+				ResourcePersistentId pid = null;
+				if (myParams.get(IAnyResource.SP_RES_ID) instanceof StringParam) {
+					StringParam idParam = (StringParam) myParams.get(IAnyResource.SP_RES_ID).get(0).get(0);
+					pid = myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, idParam.getValue());
+				} else {
+					TokenParam tokenParam = (TokenParam) myParams.get(IAnyResource.SP_RES_ID).get(0).get(0);
+					pid = myIdHelperService.resolveResourcePersistentIds(myRequestPartitionId, myResourceName, tokenParam.getValue());
+				}
 				if (myAlsoIncludePids == null) {
 					myAlsoIncludePids = new ArrayList<>(1);
 				}
@@ -483,7 +511,7 @@ public class LegacySearchBuilder implements ISearchBuilder {
 
 		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(myResourceName, theSort.getParamName());
 		if (param == null) {
-			throw new InvalidRequestException("Unknown sort parameter '" + theSort.getParamName() + "'");
+			throw new InvalidRequestException(Msg.code(940) + "Unknown sort parameter '" + theSort.getParamName() + "'");
 		}
 
 		String[] sortAttrName;
@@ -522,7 +550,7 @@ public class LegacySearchBuilder implements ISearchBuilder {
 			case COMPOSITE:
 			case HAS:
 			default:
-				throw new InvalidRequestException("This server does not support _sort specifications of type " + param.getParamType() + " - Can't serve _sort=" + theSort.getParamName());
+				throw new InvalidRequestException(Msg.code(941) + "This server does not support _sort specifications of type " + param.getParamType() + " - Can't serve _sort=" + theSort.getParamName());
 		}
 
 		/*
@@ -688,7 +716,7 @@ public class LegacySearchBuilder implements ISearchBuilder {
 	 */
 	@Override
 	public HashSet<ResourcePersistentId> loadIncludes(FhirContext theContext, EntityManager theEntityManager, Collection<ResourcePersistentId> theMatches, Set<Include> theRevIncludes,
-																	  boolean theReverseMode, DateRangeParam theLastUpdated, String theSearchIdOrDescription, RequestDetails theRequest) {
+																	  boolean theReverseMode, DateRangeParam theLastUpdated, String theSearchIdOrDescription, RequestDetails theRequest, Integer theMaxCount) {
 		if (theMatches.size() == 0) {
 			return new HashSet<>();
 		}
@@ -804,11 +832,6 @@ public class LegacySearchBuilder implements ISearchBuilder {
 					pidsToInclude = new HashSet<>(filterResourceIdsByLastUpdated(theEntityManager, theLastUpdated, pidsToInclude));
 				}
 			}
-			for (ResourcePersistentId next : pidsToInclude) {
-				if (original.contains(next) == false && allAdded.contains(next) == false) {
-					theMatches.add(next);
-				}
-			}
 
 			addedSomeThisRound = allAdded.addAll(pidsToInclude);
 			nextRoundMatches = pidsToInclude;
@@ -828,18 +851,18 @@ public class LegacySearchBuilder implements ISearchBuilder {
 				.add(IPreResourceAccessDetails.class, accessDetails)
 				.add(RequestDetails.class, theRequest)
 				.addIfMatchesType(ServletRequestDetails.class, theRequest);
-			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+
+			allAdded = new HashSet<>(includedPidList);
 
 			for (int i = includedPidList.size() - 1; i >= 0; i--) {
 				if (accessDetails.isDontReturnResourceAtIndex(i)) {
 					ResourcePersistentId value = includedPidList.remove(i);
 					if (value != null) {
-						theMatches.remove(value);
+						allAdded.remove(value);
 					}
 				}
 			}
-
-			allAdded = new HashSet<>(includedPidList);
 		}
 
 		return allAdded;
@@ -873,8 +896,10 @@ public class LegacySearchBuilder implements ISearchBuilder {
 		// Since we're going to remove elements below
 		theParams.values().forEach(nextAndList -> ensureSubListsAreWritable(nextAndList));
 
-		List<RuntimeSearchParam> activeUniqueSearchParams = mySearchParamRegistry.getActiveUniqueSearchParams(myResourceName, theParams.keySet());
+		List<RuntimeSearchParam> activeUniqueSearchParams = mySearchParamRegistry.getActiveComboSearchParams(myResourceName, theParams.keySet());
 		if (activeUniqueSearchParams.size() > 0) {
+
+			Validate.isTrue(activeUniqueSearchParams.get(0).getComboSearchParamType()== ComboSearchParamType.UNIQUE, "Non unique combo parameters are not supported with the legacy search builder");
 
 			StringBuilder sb = new StringBuilder();
 			sb.append(myResourceName);
@@ -930,7 +955,7 @@ public class LegacySearchBuilder implements ISearchBuilder {
 					.add(RequestDetails.class, theRequest)
 					.addIfMatchesType(ServletRequestDetails.class, theRequest)
 					.add(StorageProcessingMessage.class, msg);
-				JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INFO, params);
+				CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INFO, params);
 
 				addPredicateCompositeStringUnique(theParams, indexString, myRequestPartitionId);
 			}
@@ -948,7 +973,7 @@ public class LegacySearchBuilder implements ISearchBuilder {
 	}
 
 	private void addPredicateCompositeStringUnique(@Nonnull SearchParameterMap theParams, String theIndexedString, RequestPartitionId theRequestPartitionId) {
-		From<?, ResourceIndexedCompositeStringUnique> join = myQueryStack.createJoin(SearchBuilderJoinEnum.COMPOSITE_UNIQUE, null);
+		From<?, ResourceIndexedComboStringUnique> join = myQueryStack.createJoin(SearchBuilderJoinEnum.COMPOSITE_UNIQUE, null);
 
 		if (!theRequestPartitionId.isAllPartitions()) {
 			Integer partitionId = theRequestPartitionId.getFirstPartitionIdOrNull();
@@ -1042,11 +1067,12 @@ public class LegacySearchBuilder implements ISearchBuilder {
 				}
 
 				Set<Include> includes = Collections.singleton(new Include("*", true));
-				Set<ResourcePersistentId> newPids = loadIncludes(myContext, myEntityManager, myCurrentPids, includes, false, getParams().getLastUpdated(), mySearchUuid, myRequest);
+				Set<ResourcePersistentId> newPids = loadIncludes(myContext, myEntityManager, myCurrentPids, includes, false, getParams().getLastUpdated(), mySearchUuid, myRequest, null);
 				if (newPids.isEmpty()) {
 					myNext = NO_MORE;
 					break;
 				}
+				myCurrentPids.addAll(newPids);
 				myCurrentIterator = newPids.iterator();
 			}
 		}
@@ -1076,7 +1102,6 @@ public class LegacySearchBuilder implements ISearchBuilder {
 		private boolean myFirst = true;
 		private IncludesIterator myIncludesIterator;
 		private ResourcePersistentId myNext;
-		private Iterator<ResourcePersistentId> myPreResultsIterator;
 		private ScrollableResultsIterator<Long> myResultsIterator;
 		private Integer myOffset;
 		private final SortSpec mySort;
@@ -1097,8 +1122,8 @@ public class LegacySearchBuilder implements ISearchBuilder {
 				myStillNeedToFetchIncludes = true;
 			}
 
-			myHavePerfTraceFoundIdHook = JpaInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_SEARCH_FOUND_ID, myInterceptorBroadcaster, myRequest);
-			myHaveRawSqlHooks = JpaInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_RAW_SQL, myInterceptorBroadcaster, myRequest);
+			myHavePerfTraceFoundIdHook = CompositeInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_SEARCH_FOUND_ID, myInterceptorBroadcaster, myRequest);
+			myHaveRawSqlHooks = CompositeInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_RAW_SQL, myInterceptorBroadcaster, myRequest);
 
 		}
 
@@ -1130,16 +1155,14 @@ public class LegacySearchBuilder implements ISearchBuilder {
 
 					initializeIteratorQuery(myOffset, myMaxResultsToFetch);
 
-					// If the query resulted in extra results being requested
-					if (myAlsoIncludePids != null) {
-						myPreResultsIterator = myAlsoIncludePids.iterator();
+					if (myAlsoIncludePids == null) {
+						myAlsoIncludePids = new ArrayList<>();
 					}
 				}
 
 				if (myNext == null) {
 
-					if (myPreResultsIterator != null && myPreResultsIterator.hasNext()) {
-						while (myPreResultsIterator.hasNext()) {
+					for (Iterator<ResourcePersistentId> myPreResultsIterator = myAlsoIncludePids.iterator(); myPreResultsIterator.hasNext();) {
 							ResourcePersistentId next = myPreResultsIterator.next();
 							if (next != null)
 								if (myPidSet.add(next)) {
@@ -1147,7 +1170,6 @@ public class LegacySearchBuilder implements ISearchBuilder {
 									break;
 								}
 						}
-					}
 
 					if (myNext == null) {
 						while (myResultsIterator.hasNext() || !myQueryList.isEmpty()) {
@@ -1161,7 +1183,7 @@ public class LegacySearchBuilder implements ISearchBuilder {
 								HookParams params = new HookParams()
 									.add(Integer.class, System.identityHashCode(this))
 									.add(Object.class, nextLong);
-								JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_FOUND_ID, params);
+								CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_FOUND_ID, params);
 							}
 
 							if (nextLong != null) {
@@ -1188,7 +1210,7 @@ public class LegacySearchBuilder implements ISearchBuilder {
 											.add(RequestDetails.class, myRequest)
 											.addIfMatchesType(ServletRequestDetails.class, myRequest)
 											.add(StorageProcessingMessage.class, message);
-										JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_WARNING, params);
+										CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_WARNING, params);
 
 										initializeIteratorQuery(null, myMaxResultsToFetch);
 									}
@@ -1230,7 +1252,7 @@ public class LegacySearchBuilder implements ISearchBuilder {
 						.add(RequestDetails.class, myRequest)
 						.addIfMatchesType(ServletRequestDetails.class, myRequest)
 						.add(SqlQueryList.class, capturedQueries);
-					JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_RAW_SQL, params);
+					CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_RAW_SQL, params);
 				}
 			}
 
@@ -1239,7 +1261,7 @@ public class LegacySearchBuilder implements ISearchBuilder {
 					.add(RequestDetails.class, myRequest)
 					.addIfMatchesType(ServletRequestDetails.class, myRequest)
 					.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
-				JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_FIRST_RESULT_LOADED, params);
+				CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_FIRST_RESULT_LOADED, params);
 				myFirst = false;
 			}
 
@@ -1248,7 +1270,7 @@ public class LegacySearchBuilder implements ISearchBuilder {
 					.add(RequestDetails.class, myRequest)
 					.addIfMatchesType(ServletRequestDetails.class, myRequest)
 					.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
-				JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE, params);
+				CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE, params);
 			}
 
 		}

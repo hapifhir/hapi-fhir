@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.term.custom;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,20 +20,19 @@ package ca.uhn.fhir.jpa.term.custom;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.term.IRecordHandler;
+import ca.uhn.fhir.jpa.entity.TermConceptProperty;
+import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
 import ca.uhn.fhir.jpa.term.LoadedFileDescriptors;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ListMultimap;
 import org.apache.commons.csv.QuoteMode;
 import org.apache.commons.lang3.Validate;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -63,8 +62,8 @@ public class CustomTerminologySet {
 		myRootConcepts = theRootConcepts;
 	}
 
-	public void addRootConcept(String theCode) {
-		addRootConcept(theCode, null);
+	public TermConcept addRootConcept(String theCode) {
+		return addRootConcept(theCode, null);
 	}
 
 	public TermConcept addRootConcept(String theCode, String theDisplay) {
@@ -118,7 +117,7 @@ public class CustomTerminologySet {
 
 	private void validateNoCycleOrThrowInvalidRequest(Set<String> theCodes, TermConcept next) {
 		if (!theCodes.add(next.getCode())) {
-			throw new InvalidRequestException("Cycle detected around code " + next.getCode());
+			throw new InvalidRequestException(Msg.code(926) + "Cycle detected around code " + next.getCode());
 		}
 		validateNoCycleOrThrowInvalidRequest(theCodes, next.getChildCodes());
 	}
@@ -134,10 +133,24 @@ public class CustomTerminologySet {
 	public static CustomTerminologySet load(LoadedFileDescriptors theDescriptors, boolean theFlat) {
 
 		final Map<String, TermConcept> code2concept = new LinkedHashMap<>();
-
 		// Concepts
-		IRecordHandler conceptHandler = new ConceptHandler(code2concept);
-		TermLoaderSvcImpl.iterateOverZipFile(theDescriptors, TermLoaderSvcImpl.CUSTOM_CONCEPTS_FILE, conceptHandler, ',', QuoteMode.NON_NUMERIC, false);
+		IZipContentsHandlerCsv conceptHandler = new ConceptHandler(code2concept);
+
+		TermLoaderSvcImpl.iterateOverZipFileCsv(theDescriptors, TermLoaderSvcImpl.CUSTOM_CONCEPTS_FILE, conceptHandler, ',', QuoteMode.NON_NUMERIC, false);
+
+		if (theDescriptors.hasFile(TermLoaderSvcImpl.CUSTOM_PROPERTIES_FILE)) {
+			Map<String, List<TermConceptProperty>> theCode2property = new LinkedHashMap<>();
+			IZipContentsHandlerCsv propertyHandler = new PropertyHandler(theCode2property);
+			TermLoaderSvcImpl.iterateOverZipFileCsv(theDescriptors, TermLoaderSvcImpl.CUSTOM_PROPERTIES_FILE, propertyHandler, ',', QuoteMode.NON_NUMERIC, false);
+			for (TermConcept termConcept : code2concept.values()) {
+				if (!theCode2property.isEmpty() &&  theCode2property.get(termConcept.getCode()) != null) {
+					theCode2property.get(termConcept.getCode()).forEach(property -> {
+						termConcept.getProperties().add(property);
+					});
+				}
+			}
+		}
+
 		if (theFlat) {
 
 			return new CustomTerminologySet(code2concept.size(), new ArrayList<>(code2concept.values()));
@@ -146,8 +159,8 @@ public class CustomTerminologySet {
 
 			// Hierarchy
 			if (theDescriptors.hasFile(TermLoaderSvcImpl.CUSTOM_HIERARCHY_FILE)) {
-				IRecordHandler hierarchyHandler = new HierarchyHandler(code2concept);
-				TermLoaderSvcImpl.iterateOverZipFile(theDescriptors, TermLoaderSvcImpl.CUSTOM_HIERARCHY_FILE, hierarchyHandler, ',', QuoteMode.NON_NUMERIC, false);
+				IZipContentsHandlerCsv hierarchyHandler = new HierarchyHandler(code2concept);
+				TermLoaderSvcImpl.iterateOverZipFileCsv(theDescriptors, TermLoaderSvcImpl.CUSTOM_HIERARCHY_FILE, hierarchyHandler, ',', QuoteMode.NON_NUMERIC, false);
 			}
 
 			Map<String, Integer> codesInOrder = new HashMap<>();

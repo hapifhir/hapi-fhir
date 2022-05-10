@@ -9,17 +9,108 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.PrimitiveType;
 import org.junit.jupiter.api.Test;
 
+import java.util.Date;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TerserUtilTest {
 
 	private FhirContext ourFhirContext = FhirContext.forR4();
+	private static final String SAMPLE_PERSON =
+		"""
+			{
+			      "resourceType": "Patient",
+			      "extension": [
+			        {
+			          "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+			          "valueCoding": {
+			            "system": "MyInternalRace",
+			            "code": "X",
+			            "display": "Eks"
+			          }
+			        },
+			        {
+			          "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity'",
+			          "valueCoding": {
+			            "system": "MyInternalEthnicity",
+			            "display": "NNN"
+			          }
+			        }
+			      ],
+			      "identifier": [
+			        {
+			          "system": "http://example.org/member_id",
+			          "value": "123123"
+			        },
+			        {
+			          "system": "http://example.org/medicaid_id",
+			          "value": "12312323123Z"
+			        },
+			        {
+			          "system": "http://example.org/CDNS_id",
+			          "value": "123123123E"
+			        },
+			        {
+			          "system": "http://example.org/SSN"
+			        }
+			      ],
+			      "active": true,
+			      "name": [
+			        {
+			          "family": "TestFamily",
+			          "given": [
+			            "Given"
+			          ]
+			        }
+			      ],
+			      "telecom": [
+			        {
+			          "system": "email",
+			          "value": "email@email.io"
+			        },
+			        {
+			          "system": "phone",
+			          "value": "123123231"
+			        },
+			        {
+			          "system": "phone",
+			          "value": "1231232312"
+			        },
+			        {
+			          "system": "phone",
+			          "value": "1231232314"
+			        }
+			      ],
+			      "gender": "male",
+			      "birthDate": "1900-01-01",
+			      "deceasedBoolean": true,
+			       "contained": [
+			              {
+			                  "id": "1",
+			                  "identifier": [
+			                      {
+			                          "system": "urn:hssc:srhs:contact:organizationId",
+			                          "value": "1000"
+			                      }
+			                  ],
+			                  "name": "BUILDERS FIRST SOURCE",
+			                  "resourceType": "Organization"
+			              }
+			          ]
+			    }
+				""";
 
 	@Test
 	void testCloneEidIntoResource() {
@@ -35,6 +126,44 @@ class TerserUtilTest {
 		assertEquals(1, p2.getIdentifier().size());
 		assertEquals(p1.getIdentifier().get(0).getSystem(), p2.getIdentifier().get(0).getSystem());
 		assertEquals(p1.getIdentifier().get(0).getValue(), p2.getIdentifier().get(0).getValue());
+	}
+
+	@Test
+	void testReplaceBooleanField() {
+		Patient p1 = ourFhirContext.newJsonParser().parseResource(Patient.class, SAMPLE_PERSON);
+
+		Patient p2 = new Patient();
+		TerserUtil.replaceFields(ourFhirContext, p1, p2, TerserUtil.EXCLUDE_IDS_AND_META);
+
+		assertTrue(p2.hasDeceased());
+		assertTrue("true".equals(p2.getDeceased().primitiveValue()));
+		assertEquals(2, p2.getExtension().size());
+	}
+
+	@Test
+	void testMergeBooleanField() {
+		Patient p1 = ourFhirContext.newJsonParser().parseResource(Patient.class, SAMPLE_PERSON);
+
+		Patient p2 = new Patient();
+		TerserUtil.mergeAllFields(ourFhirContext, p1, p2);
+
+		assertTrue(p2.hasDeceased());
+		assertTrue("true".equals(p2.getDeceased().primitiveValue()));
+		assertEquals(2, p2.getExtension().size());
+	}
+
+	@Test
+	void testCloneContainedResource() {
+		Patient p1 = ourFhirContext.newJsonParser().parseResource(Patient.class, SAMPLE_PERSON);
+
+		Patient p2 = new Patient();
+		TerserUtil.mergeAllFields(ourFhirContext, p1, p2);
+
+		Organization org1 = (Organization) p1.getContained().get(0);
+		Organization org2 = (Organization) p2.getContained().get(0);
+		assertNotEquals(org1, org2);
+		assertEquals("BUILDERS FIRST SOURCE", org1.getName());
+		assertEquals("BUILDERS FIRST SOURCE", org2.getName());
 	}
 
 	@Test
@@ -77,6 +206,7 @@ class TerserUtilTest {
 		assertEquals(check.getValue(), p.getBirthDate());
 	}
 
+
 	@Test
 	void testFieldExists() {
 		assertTrue(TerserUtil.fieldExists(ourFhirContext, "identifier", TerserUtil.newResource(ourFhirContext, "Patient")));
@@ -97,6 +227,38 @@ class TerserUtilTest {
 		assertNull(p2.getId());
 		assertEquals(1, p2.getName().size());
 		assertEquals(p1.getName().get(0).getNameAsSingleString(), p2.getName().get(0).getNameAsSingleString());
+	}
+
+	@Test
+	void testCloneIdentifiers() {
+		Patient p1 = new Patient();
+		p1.addIdentifier(new Identifier().setSystem("uri:mi").setValue("123456"));
+		p1.addIdentifier(new Identifier().setSystem("uri:mdi").setValue("287351247K"));
+		p1.addIdentifier(new Identifier().setSystem("uri:cdns").setValue("654841918"));
+		p1.addIdentifier(new Identifier().setSystem("uri:ssn").setValue("855191882"));
+		p1.addName().setFamily("Sat").addGiven("Joe");
+
+		Patient p2 = new Patient();
+		TerserUtil.mergeField(ourFhirContext, ourFhirContext.newTerser(), "identifier", p1, p2);
+
+		assertEquals(4, p2.getIdentifier().size());
+		assertTrue(p2.getName().isEmpty());
+	}
+
+	@Test
+	void testReplaceIdentifiers() {
+		Patient p1 = new Patient();
+		p1.addIdentifier(new Identifier().setSystem("uri:mi").setValue("123456"));
+		p1.addIdentifier(new Identifier().setSystem("uri:mdi").setValue("287351247K"));
+		p1.addIdentifier(new Identifier().setSystem("uri:cdns").setValue("654841918"));
+		p1.addIdentifier(new Identifier().setSystem("uri:ssn").setValue("855191882"));
+		p1.addName().setFamily("Sat").addGiven("Joe");
+
+		Patient p2 = new Patient();
+		TerserUtil.replaceField(ourFhirContext, "identifier", p1, p2);
+
+		assertEquals(4, p2.getIdentifier().size());
+		assertTrue(p2.getName().isEmpty());
 	}
 
 	@Test
@@ -295,13 +457,60 @@ class TerserUtilTest {
 	}
 
 	@Test
-	public void testClearFields() {
+	public void testReplaceFields_SameValues() {
 		Patient p1 = new Patient();
 		p1.addName().setFamily("Doe");
+		Patient p2 = new Patient();
+		p2.setName(p1.getName());
 
-		TerserUtil.clearField(ourFhirContext, "name", p1);
+		TerserUtil.replaceField(ourFhirContext, "name", p1, p2);
 
-		assertEquals(0, p1.getName().size());
+		assertEquals(1, p2.getName().size());
+		assertEquals("Doe", p2.getName().get(0).getFamily());
+	}
+
+	@Test
+	public void testReplaceFieldsByPredicate() {
+		Patient p1 = new Patient();
+		p1.addName().setFamily("Doe");
+		p1.setGender(Enumerations.AdministrativeGender.MALE);
+
+		Patient p2 = new Patient();
+		p2.addName().setFamily("Smith");
+		Date dob = new Date();
+		p2.setBirthDate(dob);
+
+		TerserUtil.replaceFieldsByPredicate(ourFhirContext, p1, p2, TerserUtil.EXCLUDE_IDS_META_AND_EMPTY);
+
+		// expect p2 to have "Doe" and MALE after replace
+		assertEquals(1, p2.getName().size());
+		assertEquals("Doe", p2.getName().get(0).getFamily());
+
+		assertEquals(Enumerations.AdministrativeGender.MALE, p2.getGender());
+		assertEquals(dob, p2.getBirthDate());
+	}
+
+	@Test
+	public void testClearFields() {
+		{
+			Patient p1 = new Patient();
+			p1.addName().setFamily("Doe");
+
+			TerserUtil.clearField(ourFhirContext, p1, "name");
+
+			assertEquals(0, p1.getName().size());
+		}
+
+		{
+			Address a1 = new Address();
+			a1.addLine("Line 1");
+			a1.addLine("Line 2");
+			a1.setCity("Test");
+			TerserUtil.clearField(ourFhirContext, "line", a1);
+
+			assertEquals(0, a1.getLine().size());
+			assertEquals("Test", a1.getCity());
+		}
 	}
 
 	@Test

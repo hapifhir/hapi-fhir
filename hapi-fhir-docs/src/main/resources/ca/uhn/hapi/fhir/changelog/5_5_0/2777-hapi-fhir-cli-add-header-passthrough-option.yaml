@@ -1,0 +1,7 @@
+---
+type: add
+issue: 2777
+title: "Support for multiple header-passthrough option using <b>-hp</b> or <b>--header-passthrough</b>
+   parameter has been added to hapi-fhir-cli commands: <b>example-data-uploader</b>, <b>export-conceptmap-to-csv</b>,
+   <b>import-csv-to-conceptmap</b> and <b>upload-terminology</b>"
+

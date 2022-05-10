@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.annotation;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ public @interface OperationParam {
 	/**
 	 * Value for {@link OperationParam#max()} indicating no maximum
 	 */
-	final int MAX_UNLIMITED = -1;
+	int MAX_UNLIMITED = -1;
 
 
 	/**
@@ -57,7 +57,7 @@ public @interface OperationParam {
 	 * 
 	 * @since 1.5
 	 */
-	final int MAX_DEFAULT = -2;
+	int MAX_DEFAULT = -2;
 	
 	/**
 	 * The name of the parameter

@@ -1,0 +1,8 @@
+---
+type: change
+issue: 2653
+backport: 5.4.1
+title: "When performing a conditional create/update/delete on a JPA server, if the match URL
+  contained a plus character, this character was interpreted as a space (per legacy URL encoding
+  rules) even though this has proven to not be the intended behaviour in real life applications.
+  Plus characters will now be treated literally as a plus character in these URLs."

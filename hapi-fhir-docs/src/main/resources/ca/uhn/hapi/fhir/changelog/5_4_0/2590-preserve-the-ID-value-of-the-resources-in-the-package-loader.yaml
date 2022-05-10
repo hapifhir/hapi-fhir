@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2590
+title: "When resources are created using package load, the new resources will use the same IDs as were provided in with the resource definitions in the package, if they exist.
+If the ids are numeric, a prefix of 'npm-' will be added."

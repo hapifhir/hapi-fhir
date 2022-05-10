@@ -1,5 +1,6 @@
 package ca.uhn.fhirtest.interceptor;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.provider.BaseJpaSystemProvider;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -7,6 +8,7 @@ import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRule;
 import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -37,21 +39,21 @@ public class PublicSecurityInterceptor extends AuthorizationInterceptor {
 				.deny().operation().named(JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM).onServer().andAllowAllResponses().andThen()
 				.deny().operation().named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD).atAnyLevel().andAllowAllResponses().andThen()
 				.deny().operation().named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE).atAnyLevel().andAllowAllResponses().andThen()
-				.deny().operation().named(JpaConstants.OPERATION_EXPUNGE).onServer().andAllowAllResponses().andThen()
-				.deny().operation().named(JpaConstants.OPERATION_EXPUNGE).onAnyType().andAllowAllResponses().andThen()
-				.deny().operation().named(JpaConstants.OPERATION_EXPUNGE).onAnyInstance().andAllowAllResponses().andThen()
+				.deny().operation().named(ProviderConstants.OPERATION_EXPUNGE).onServer().andAllowAllResponses().andThen()
+				.deny().operation().named(ProviderConstants.OPERATION_EXPUNGE).onAnyType().andAllowAllResponses().andThen()
+				.deny().operation().named(ProviderConstants.OPERATION_EXPUNGE).onAnyInstance().andAllowAllResponses().andThen()
 				.allowAll()
 				.build();
 		}
 
 		if (!authHeader.startsWith("Bearer ")) {
-			throw new ForbiddenOperationException("Invalid bearer token, must be in the form \"Authorization: Bearer [token]\"");
+			throw new ForbiddenOperationException(Msg.code(1978) + "Invalid bearer token, must be in the form \"Authorization: Bearer [token]\"");
 		}
 		
 		String token = authHeader.substring("Bearer ".length()).trim();
 		if (!myTokens.contains(token)) {
 			ourLog.error("Invalid token '{}' - Valid are: {}", token, myTokens);
-			throw new ForbiddenOperationException("Unknown/expired bearer token");
+			throw new ForbiddenOperationException(Msg.code(1979) + "Unknown/expired bearer token");
 		}
 		
 		ourLog.info("User logged in with bearer token: " + token.substring(0, 4) + "...");

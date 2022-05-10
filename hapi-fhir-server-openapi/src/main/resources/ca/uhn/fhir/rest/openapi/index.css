@@ -1,0 +1,141 @@
+html
+{
+    box-sizing: border-box;
+    overflow: -moz-scrollbars-vertical;
+    overflow-y: scroll;
+}
+
+*,
+*:before,
+*:after
+{
+    box-sizing: inherit;
+}
+
+body
+{
+    margin:0;
+    background: #fafafa;
+}
+
+.information-container
+{
+    display: none
+}
+
+.banner {
+    padding-top: 20px;
+    padding-left: 25px;
+    display: flex;
+    flex-direction: row;
+    background-color: #AAA;
+    border-bottom: 2px solid #888;
+}
+
+.banner H1 {
+    font-family: sans-serif;
+    height: 150%;
+    position: relative;
+    line-height: 120%;
+    top: 6px;
+    left: 18px;
+}
+
+.banner .version {
+    font-size: 30%;
+    position: relative;
+    top: -11px;
+    background-color: #888;
+    color: #FFF;
+    padding: 5px;
+    border-radius: 15px;
+}
+
+.bannerCopyright {
+    font-family: sans-serif;
+    padding-top: 20px;
+    padding-left: 30px;
+    padding-right: 30px;
+    padding-bottom: 20px;
+    background-color: #CCC;
+    border-bottom: 2px solid #888;
+    width: 100%;
+    font-size: 0.9em;
+}
+
+.banner2 {
+    font-family: sans-serif;
+    padding-top: 30px;
+    padding-left: 30px;
+    padding-right: 30px;
+    padding-bottom: 20px;
+    display: table;
+    flex-direction: row;
+    background-color: #CCC;
+    border-bottom: 2px solid #888;
+    width: 100%;
+}
+
+.banner2 > DIV {
+    display: table-row;
+}
+
+.banner2 > DIV > DIV {
+    display: table-cell;
+    padding-bottom: 10px;
+}
+
+.banner2_key {
+    min-width: 100px;
+    white-space: nowrap;
+    font-weight: bold;
+}
+
+.banner2_value {
+    padding-left: 20px;
+    width: 100%;
+}
+
+.banner3 {
+    font-family: sans-serif;
+    padding-top: 20px;
+    padding-left: 30px;
+    padding-right: 30px;
+    padding-bottom: 20px;
+    background-color: #EEE;
+    border-bottom: 2px solid #888;
+    width: 100%;
+}
+
+.pageButtons {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.pageButton {
+    background-color: #FFF;
+    color: #666;
+    padding: 10px;
+    margin: 5px;
+    border-radius: 8px;
+    text-decoration: none;
+    line-height: 0.5em;
+    border: 1px solid #FFF;
+}
+
+.pageButton:HOVER {
+    border: 1px solid #888;
+}
+
+.pageButtonSelected {
+    background-color: #888;
+    color: #FFF;
+}
+
+.resourceCountBadge {
+    font-size: 0.8em;
+    background: #DDD;
+    padding: 4px;
+    border-radius: 6px;
+    color: #000;
+}

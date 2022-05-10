@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2692
+backport: 5.4.1
+title: "A new Pointcut has been added that is invoked when a new Bulk Export is initiated."

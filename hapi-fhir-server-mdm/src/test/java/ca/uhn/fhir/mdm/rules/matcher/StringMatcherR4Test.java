@@ -14,24 +14,33 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class StringMatcherR4Test extends BaseMatcherR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(StringMatcherR4Test.class);
-	public static final String LEFT = "namadega";
-	public static final String RIGHT = "namaedga";
+	public static final String LEFT_NAME = "namadega";
+	public static final String RIGHT_NAME = "namaedga";
 
 	@Test
 	public void testNamadega() {
-		assertTrue(match(MdmMatcherEnum.COLOGNE, LEFT, RIGHT));
-		assertTrue(match(MdmMatcherEnum.DOUBLE_METAPHONE, LEFT, RIGHT));
-		assertTrue(match(MdmMatcherEnum.MATCH_RATING_APPROACH, LEFT, RIGHT));
-		assertTrue(match(MdmMatcherEnum.METAPHONE, LEFT, RIGHT));
-		assertTrue(match(MdmMatcherEnum.SOUNDEX, LEFT, RIGHT));
-		assertTrue(match(MdmMatcherEnum.METAPHONE, LEFT, RIGHT));
+		String left = LEFT_NAME;
+		String right = RIGHT_NAME;
+		assertTrue(match(MdmMatcherEnum.COLOGNE, left, right));
+		assertTrue(match(MdmMatcherEnum.DOUBLE_METAPHONE, left, right));
+		assertTrue(match(MdmMatcherEnum.MATCH_RATING_APPROACH, left, right));
+		assertTrue(match(MdmMatcherEnum.METAPHONE, left, right));
+		assertTrue(match(MdmMatcherEnum.SOUNDEX, left, right));
+		assertTrue(match(MdmMatcherEnum.METAPHONE, left, right));
 
-		assertFalse(match(MdmMatcherEnum.CAVERPHONE1, LEFT, RIGHT));
-		assertFalse(match(MdmMatcherEnum.CAVERPHONE2, LEFT, RIGHT));
-		assertFalse(match(MdmMatcherEnum.NYSIIS, LEFT, RIGHT));
-		assertFalse(match(MdmMatcherEnum.REFINED_SOUNDEX, LEFT, RIGHT));
-		assertFalse(match(MdmMatcherEnum.STRING, LEFT, RIGHT));
-		assertFalse(match(MdmMatcherEnum.SUBSTRING, LEFT, RIGHT));
+		assertFalse(match(MdmMatcherEnum.CAVERPHONE1, left, right));
+		assertFalse(match(MdmMatcherEnum.CAVERPHONE2, left, right));
+		assertFalse(match(MdmMatcherEnum.NYSIIS, left, right));
+		assertFalse(match(MdmMatcherEnum.REFINED_SOUNDEX, left, right));
+		assertFalse(match(MdmMatcherEnum.STRING, left, right));
+		assertFalse(match(MdmMatcherEnum.SUBSTRING, left, right));
+	}
+
+	@Test
+	public void testNumeric() {
+		assertTrue(match(MdmMatcherEnum.NUMERIC, "4169671111", "(416) 967-1111"));
+		assertFalse(match(MdmMatcherEnum.NUMERIC, "5169671111", "(416) 967-1111"));
+		assertFalse(match(MdmMatcherEnum.NUMERIC, "4169671111", "(416) 967-1111x123"));
 	}
 
 	@Test

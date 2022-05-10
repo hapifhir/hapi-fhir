@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2712
+backport: 5.4.1
+title: "AuthorizationInterceptor can now be used to authorize bulk export requests"

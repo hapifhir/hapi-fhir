@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.r5;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,28 +48,28 @@ public class FhirResourceDaoObservationR5 extends BaseHapiFhirResourceDaoObserva
 
 		updateSearchParamsForLastn(theSearchParameterMap, theRequestDetails);
 
-		RequestPartitionId requestPartitionId = myPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, getResourceName());
+		RequestPartitionId requestPartitionId = myPartitionHelperSvc.determineReadPartitionForRequestForSearchType(theRequestDetails, getResourceName(), theSearchParameterMap, null);
 		return mySearchCoordinatorSvc.registerSearch(this, theSearchParameterMap, getResourceName(), new CacheControlDirective().parse(theRequestDetails.getHeaders(Constants.HEADER_CACHE_CONTROL)), theRequestDetails, requestPartitionId);
 	}
 
 	@Override
 	protected String getEffectiveParamName() {
-		return Observation.SP_DATE;
+		return org.hl7.fhir.r4.model.Observation.SP_DATE;
 	}
 
 	@Override
 	protected String getCodeParamName() {
-		return Observation.SP_CODE;
+		return org.hl7.fhir.r4.model.Observation.SP_CODE;
 	}
 
 	@Override
 	protected String getSubjectParamName() {
-		return Observation.SP_SUBJECT;
+		return org.hl7.fhir.r4.model.Observation.SP_SUBJECT;
 	}
 
 	@Override
 	protected String getPatientParamName() {
-		return Observation.SP_PATIENT;
+		return org.hl7.fhir.r4.model.Observation.SP_PATIENT;
 	}
 
 	@Override

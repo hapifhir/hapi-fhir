@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2762
+backport: 5.4.2
+title: "A regression was introduced in 2760 where a READ compartment could get collapsed into a WRITE compartment.  This has been corrected."

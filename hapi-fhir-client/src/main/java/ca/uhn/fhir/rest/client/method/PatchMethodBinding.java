@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.method;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.client.method;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -63,10 +64,10 @@ public class PatchMethodBinding extends BaseOutcomeReturningMethodBindingWithRes
 		}
 
 		if (myPatchTypeParameterIndex == -1) {
-			throw new ConfigurationException("Method has no parameter of type " + PatchTypeEnum.class.getName() + " - " + theMethod.toString());
+			throw new ConfigurationException(Msg.code(1414) + "Method has no parameter of type " + PatchTypeEnum.class.getName() + " - " + theMethod.toString());
 		}
 		if (myResourceParamIndex == -1) {
-			throw new ConfigurationException("Method has no parameter with @" + ResourceParam.class.getSimpleName() + " annotation - " + theMethod.toString());
+			throw new ConfigurationException(Msg.code(1415) + "Method has no parameter with @" + ResourceParam.class.getSimpleName() + " annotation - " + theMethod.toString());
 		}
 	}
 
@@ -97,13 +98,13 @@ public class PatchMethodBinding extends BaseOutcomeReturningMethodBindingWithRes
 	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
 		IIdType idDt = (IIdType) theArgs[getIdParameterIndex()];
 		if (idDt == null) {
-			throw new NullPointerException("ID can not be null");
+			throw new NullPointerException(Msg.code(1416) + "ID can not be null");
 		}
 
 		if (idDt.hasResourceType() == false) {
 			idDt = idDt.withResourceType(getResourceName());
 		} else if (getResourceName().equals(idDt.getResourceType()) == false) {
-			throw new InvalidRequestException("ID parameter has the wrong resource type, expected '" + getResourceName() + "', found: " + idDt.getResourceType());
+			throw new InvalidRequestException(Msg.code(1417) + "ID parameter has the wrong resource type, expected '" + getResourceName() + "', found: " + idDt.getResourceType());
 		}
 
 		PatchTypeEnum patchType = (PatchTypeEnum) theArgs[myPatchTypeParameterIndex];

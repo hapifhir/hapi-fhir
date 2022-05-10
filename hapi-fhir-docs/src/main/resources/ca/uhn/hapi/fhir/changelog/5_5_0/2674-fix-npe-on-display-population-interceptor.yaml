@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 2674
+backport: 5.4.1
+title: "A null-pointer exception was fixed when a ResponseTerminologyDisplayInterceptor is registered and a search
+    or read response returns a resource with code value that in turn returns a null code lookup."

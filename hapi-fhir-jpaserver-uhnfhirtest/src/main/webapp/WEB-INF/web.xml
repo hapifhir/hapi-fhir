@@ -31,10 +31,6 @@
 			<param-name>contextConfigLocation</param-name>
 			<param-value>
 				ca.uhn.fhirtest.config.FhirTesterConfig
-				<!-- 
-				ca.uhn.fhir.jpa.config.WebsocketDstu2Config
-				ca.uhn.fhir.jpa.config.dstu3.WebsocketDstu3Config
-				-->
 			</param-value>
 		</init-param>
 		<load-on-startup>2</load-on-startup>
@@ -43,10 +39,6 @@
 	<servlet>
 		<servlet-name>fhirServletR5</servlet-name>
 		<servlet-class>ca.uhn.fhirtest.TestRestfulServer</servlet-class>
-		<init-param>
-			<param-name>ImplementationDescription</param-name>
-			<param-value>UHN Test Server (R5 Resources)</param-value>
-		</init-param>
 		<init-param>
 			<param-name>FhirVersion</param-name>
 			<param-value>R5</param-value>
@@ -58,10 +50,6 @@
 		<servlet-name>fhirServletR4</servlet-name>
 		<servlet-class>ca.uhn.fhirtest.TestRestfulServer</servlet-class>
 		<init-param>
-			<param-name>ImplementationDescription</param-name>
-			<param-value>UHN Test Server (R4 Resources)</param-value>
-		</init-param>
-		<init-param>
 			<param-name>FhirVersion</param-name>
 			<param-value>R4</param-value>
 		</init-param>
@@ -71,10 +59,6 @@
 	<servlet>
 		<servlet-name>fhirServletDstu2</servlet-name>
 		<servlet-class>ca.uhn.fhirtest.TestRestfulServer</servlet-class>
-		<init-param>
-			<param-name>ImplementationDescription</param-name>
-			<param-value>UHN Test Server (DSTU2 Resources)</param-value>
-		</init-param>
 		<init-param>
 			<param-name>FhirVersion</param-name>
 			<param-value>DSTU2</param-value>
@@ -86,44 +70,11 @@
 		<servlet-name>fhirServletDstu3</servlet-name>
 		<servlet-class>ca.uhn.fhirtest.TestRestfulServer</servlet-class>
 		<init-param>
-			<param-name>ImplementationDescription</param-name>
-			<param-value>UHN Test Server (STU3 Resources)</param-value>
-		</init-param>
-		<init-param>
 			<param-name>FhirVersion</param-name>
 			<param-value>DSTU3</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
-
-<!--
-	<servlet>
-		<servlet-name>fhirServletTdl2</servlet-name>
-		<servlet-class>ca.uhn.fhirtest.TestRestfulServer</servlet-class>
-		<init-param>
-			<param-name>ImplementationDescription</param-name>
-			<param-value>Test Data Library (DSTU2 Resources)</param-value>
-		</init-param>
-		<init-param>
-			<param-name>FhirVersion</param-name>
-			<param-value>TDL2</param-value>
-		</init-param>
-		<load-on-startup>1</load-on-startup>
-	</servlet>
-	<servlet>
-		<servlet-name>fhirServletTdl3</servlet-name>
-		<servlet-class>ca.uhn.fhirtest.TestRestfulServer</servlet-class>
-		<init-param>
-			<param-name>ImplementationDescription</param-name>
-			<param-value>FHIR Test Data Library (STU3 Resources)</param-value>
-		</init-param>
-		<init-param>
-			<param-name>FhirVersion</param-name>
-			<param-value>TDL3</param-value>
-		</init-param>
-		<load-on-startup>1</load-on-startup>
-	</servlet>
--->
 
 	<servlet-mapping>
 		<servlet-name>fhirServletR5</servlet-name>

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.bulk.model.BulkJobStatusEnum;
+import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.r5.model.InstantType;
@@ -51,13 +51,13 @@ import static org.apache.commons.lang3.StringUtils.left;
 
 @Entity
 @Table(name = "HFJ_BLK_EXPORT_JOB", uniqueConstraints = {
-	@UniqueConstraint(name = "IDX_BLKEX_JOB_ID", columnNames = "JOB_ID")
+		  @UniqueConstraint(name = "IDX_BLKEX_JOB_ID", columnNames = "JOB_ID")
 }, indexes = {
-	@Index(name = "IDX_BLKEX_EXPTIME", columnList = "EXP_TIME")
+		  @Index(name = "IDX_BLKEX_EXPTIME", columnList = "EXP_TIME")
 })
 public class BulkExportJobEntity implements Serializable {
 
-	public static final int REQUEST_LENGTH = 500;
+	public static final int REQUEST_LENGTH = 1024;
 	public static final int STATUS_MESSAGE_LEN = 500;
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_BLKEXJOB_PID")
@@ -70,7 +70,7 @@ public class BulkExportJobEntity implements Serializable {
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "JOB_STATUS", length = 10, nullable = false)
-	private BulkJobStatusEnum myStatus;
+	private BulkExportJobStatusEnum myStatus;
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "CREATED_TIME", nullable = false)
 	private Date myCreated;
@@ -78,7 +78,7 @@ public class BulkExportJobEntity implements Serializable {
 	@Column(name = "STATUS_TIME", nullable = false)
 	private Date myStatusTime;
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "EXP_TIME", nullable = false)
+	@Column(name = "EXP_TIME", nullable = true)
 	private Date myExpiry;
 	@Column(name = "REQUEST", nullable = false, length = REQUEST_LENGTH)
 	private String myRequest;
@@ -146,7 +146,7 @@ public class BulkExportJobEntity implements Serializable {
 		if (myStatus != null) {
 			b.append("status", myStatus + " " + new InstantType(myStatusTime).getValueAsString());
 		}
-		b.append("created", new InstantType(myExpiry).getValueAsString());
+		b.append("created", new InstantType(myCreated).getValueAsString());
 		b.append("expiry", new InstantType(myExpiry).getValueAsString());
 		b.append("request", myRequest);
 		b.append("since", mySince);
@@ -156,11 +156,11 @@ public class BulkExportJobEntity implements Serializable {
 		return b.toString();
 	}
 
-	public BulkJobStatusEnum getStatus() {
+	public BulkExportJobStatusEnum getStatus() {
 		return myStatus;
 	}
 
-	public void setStatus(BulkJobStatusEnum theStatus) {
+	public void setStatus(BulkExportJobStatusEnum theStatus) {
 		if (myStatus != theStatus) {
 			myStatusTime = new Date();
 			myStatus = theStatus;

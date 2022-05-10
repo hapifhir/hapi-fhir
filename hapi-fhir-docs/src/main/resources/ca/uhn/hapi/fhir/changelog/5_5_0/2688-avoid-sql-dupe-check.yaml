@@ -1,0 +1,6 @@
+---
+type: perf
+issue: 2688
+backport: 5.4.1
+title: "FHIR Transaction duplicate record checks are now performed without any database interactions or SQL statements,
+   reducing the processing load associated with FHIR transactions by at least a small amount."

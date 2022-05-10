@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.annotation;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,5 +73,15 @@ public @interface DeleteTags {
 	 * are specific to the given resource type.
 	 */
 	Class<? extends IBaseResource> type() default IBaseResource.class;
+
+	/**
+	 * This method allows the return type for this method to be specified in a
+	 * non-type-specific way, using the text name of the resource, e.g. "Patient".
+	 *
+	 * This attribute should be populate, or {@link #type()} should be, but not both.
+	 *
+	 * @since 5.4.0
+	 */
+	String typeName() default "";
 
 }

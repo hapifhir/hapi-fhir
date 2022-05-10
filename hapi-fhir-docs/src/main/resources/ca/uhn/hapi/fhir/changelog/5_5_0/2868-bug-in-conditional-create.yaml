@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 2868
+jira: SMILE-1153
+title: "Fixed a bug in transaction bundle processing, specifically for bundles which contained both a conditional create, and a resource which relied on this conditional create as a reference.
+This would cause the referring resource to generate a contained resource instead of appropriately referencing the existing patient."

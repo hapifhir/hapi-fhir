@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 2676
+backport: 5.4.1
+title: "Subscription notifications will no longer be triggered by default in response to changes
+   that do not increment the resource version (e.g. `$meta-add` and `$meta-delete`). A new
+   DaoConfig setting has been added to make this configurable."

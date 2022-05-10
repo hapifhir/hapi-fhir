@@ -1,0 +1,5 @@
+---
+type: add
+issue: 3005
+jira: SMILE-723
+title: "Open up the visibility of some methods in the generation of the Open API definition files to allow extenders to add support for OIDC authorization."

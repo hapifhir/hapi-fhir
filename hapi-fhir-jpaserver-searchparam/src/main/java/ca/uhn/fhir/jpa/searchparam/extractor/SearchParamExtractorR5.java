@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,15 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.PathEngineException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r5.model.Base;
+import org.hl7.fhir.r5.model.ExpressionNode;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.ResourceType;
@@ -42,12 +45,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class SearchParamExtractorR5 extends BaseSearchParamExtractor implements ISearchParamExtractor {
 
 	private FHIRPathEngine myFhirPathEngine;
+	private Cache<String, ExpressionNode> myParsedFhirPathCache;
 
 	public SearchParamExtractorR5() {
 		super();
@@ -75,11 +80,19 @@ public class SearchParamExtractorR5 extends BaseSearchParamExtractor implements 
 		IWorkerContext worker = new HapiWorkerContext(getContext(), getContext().getValidationSupport());
 		myFhirPathEngine = new FHIRPathEngine(worker);
 		myFhirPathEngine.setHostServices(new SearchParamExtractorR5HostServices());
+
+		myParsedFhirPathCache = Caffeine
+			.newBuilder()
+			.expireAfterWrite(10, TimeUnit.MINUTES)
+			.build();
 	}
 
 	@Override
-	protected IValueExtractor getPathValueExtractor(IBaseResource theResource, String nextPath) {
-		return () -> myFhirPathEngine.evaluate((Base) theResource, nextPath);
+	public IValueExtractor getPathValueExtractor(IBaseResource theResource, String theSinglePath) {
+		return () -> {
+			ExpressionNode parsed = myParsedFhirPathCache.get(theSinglePath, path -> myFhirPathEngine.parse(path));
+			return myFhirPathEngine.evaluate((Base) theResource, parsed);
+		};
 	}
 
 
@@ -88,7 +101,7 @@ public class SearchParamExtractorR5 extends BaseSearchParamExtractor implements 
 		private final Map<String, Base> myResourceTypeToStub = Collections.synchronizedMap(new HashMap<>());
 
 		@Override
-		public Base resolveConstant(Object appContext, String name, boolean beforeContext) throws PathEngineException {
+		public List<Base> resolveConstant(Object appContext, String name, boolean beforeContext) throws PathEngineException {
 			return null;
 		}
 

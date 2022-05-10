@@ -1,6 +1,7 @@
 
 package ca.uhn.fhir.tinder.util;
 
+import ca.uhn.fhir.i18n.Msg;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -28,7 +29,7 @@ public class XMLUtils {
                 DOMImplementationRegistry registry = DOMImplementationRegistry.newInstance();
                 IMPL = registry.getDOMImplementation("LS 3.0");
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException(Msg.code(149) + e);
             }
         }
         return (T) IMPL;
@@ -40,7 +41,7 @@ public class XMLUtils {
             DOMImplementationRegistry registry = DOMImplementationRegistry.newInstance();
             return (T) registry.getDOMImplementation("LS 3.0");
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(Msg.code(150) + e);
         }
     }
 

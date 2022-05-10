@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 2665
+backport: 5.4.1
+title: When performing a FHIR transaction containing a conditional create, references to that resource
+   were inadvertently replaced with contained references."

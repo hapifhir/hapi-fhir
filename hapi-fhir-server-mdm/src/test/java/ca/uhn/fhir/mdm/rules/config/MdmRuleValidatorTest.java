@@ -2,6 +2,7 @@ package ca.uhn.fhir.mdm.rules.config;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.BaseR4Test;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -12,6 +13,7 @@ import org.springframework.core.io.Resource;
 
 import java.io.IOException;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.startsWith;
@@ -37,7 +39,7 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 			setMdmRuleJson("bad-rules-bad-url.json");
 			fail();
 		} catch (ConfigurationException e){
-			assertThat(e.getMessage(), is("Enterprise Identifier System (eidSystem) must be a valid URI"));
+			assertThat(e.getMessage(), is(Msg.code(1519) + "Enterprise Identifier System (eidSystem) must be a valid URI"));
 		}
    }
 
@@ -47,7 +49,7 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 			setMdmRuleJson("bad-rules-missing-name.json");
 			fail();
 		} catch (ConfigurationException e) {
-			assertThat(e.getMessage(), is("There is no matchField with name foo"));
+			assertThat(e.getMessage(), is(Msg.code(1523) + "There is no matchField with name foo"));
 		}
 	}
 
@@ -57,7 +59,7 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 			setMdmRuleJson("bad-rules-missing-threshold.json");
 			fail();
 		} catch (ConfigurationException e) {
-			assertThat(e.getMessage(), is("MatchField given-name similarity COSINE requires a matchThreshold"));
+			assertThat(e.getMessage(), is(Msg.code(1514) + "MatchField given-name similarity COSINE requires a matchThreshold"));
 		}
 	}
 
@@ -67,7 +69,7 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 			setMdmRuleJson("bad-rules-bad-path.json");
 			fail();
 		} catch (ConfigurationException e) {
-			assertThat(e.getMessage(), startsWith("MatchField given-name resourceType Patient has invalid path 'name.first'.  Unknown child name 'first' in element HumanName"));
+			assertThat(e.getMessage(), startsWith(Msg.code(1517) + "MatchField given-name resourceType Patient has invalid path 'name.first'.  "+ Msg.code(1700) + "Unknown child name 'first' in element HumanName"));
 		}
 	}
 
@@ -77,7 +79,7 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 			setMdmRuleJson("bad-rules-bad-fhirpath.json");
 			fail();
 		} catch (ConfigurationException e) {
-			assertThat(e.getMessage(), startsWith("MatchField [given-name] resourceType [Patient] has failed FHIRPath evaluation.  Error in ?? at 1, 1: The name blurst is not a valid function name"));
+			assertThat(e.getMessage(), startsWith(Msg.code(1518) + "MatchField [given-name] resourceType [Patient] has failed FHIRPath evaluation.  Error in ?? at 1, 1: The name blurst is not a valid function name"));
 		}
 	}
 
@@ -87,7 +89,7 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 			setMdmRuleJson("bad-rules-no-path.json");
 			fail();
 		} catch (ConfigurationException e) {
-			assertThat(e.getMessage(), startsWith("MatchField [given-name] resourceType [Patient] has defined neither a resourcePath or a fhirPath. You must define one of the two."));
+			assertThat(e.getMessage(), startsWith(Msg.code(1516) + "MatchField [given-name] resourceType [Patient] has defined neither a resourcePath or a fhirPath. You must define one of the two."));
 		}
 	}
 
@@ -97,7 +99,7 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 			setMdmRuleJson("bad-rules-both-paths.json");
 			fail();
 		} catch (ConfigurationException e) {
-			assertThat(e.getMessage(), startsWith("MatchField [given-name] resourceType [Patient] has defined both a resourcePath and a fhirPath. You must define one of the two."));
+			assertThat(e.getMessage(), startsWith(Msg.code(1515) + "MatchField [given-name] resourceType [Patient] has defined both a resourcePath and a fhirPath. You must define one of the two."));
 		}
 	}
 
@@ -107,7 +109,7 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 			setMdmRuleJson("bad-rules-bad-searchparam.json");
 			fail();
 		} catch (ConfigurationException e) {
-			assertThat(e.getMessage(), startsWith("Error in candidateSearchParams: Patient does not have a search parameter called 'foo'"));
+			assertThat(e.getMessage(), startsWith(Msg.code(1511) + "Error in candidateSearchParams: Patient does not have a search parameter called 'foo'"));
 		}
 	}
 
@@ -117,7 +119,7 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 			setMdmRuleJson("bad-rules-bad-filter.json");
 			fail();
 		} catch (ConfigurationException e) {
-			assertThat(e.getMessage(), startsWith("Error in candidateFilterSearchParams: Patient does not have a search parameter called 'foo'"));
+			assertThat(e.getMessage(), startsWith(Msg.code(1511) + "Error in candidateFilterSearchParams: Patient does not have a search parameter called 'foo'"));
 		}
 	}
 
@@ -127,7 +129,7 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 			setMdmRuleJson("bad-rules-missing-mdm-types.json");
 			fail();
 		} catch (ConfigurationException e) {
-			assertThat(e.getMessage(), startsWith("mdmTypes must be set to a list of resource types."));
+			assertThat(e.getMessage(), startsWith(Msg.code(1509) + "mdmTypes must be set to a list of resource types."));
 		}
 	}
 
@@ -137,7 +139,7 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 			setMdmRuleJson("bad-rules-duplicate-name.json");
 			fail();
 		} catch (ConfigurationException e) {
-			assertThat(e.getMessage(), startsWith("Two MatchFields have the same name 'foo'"));
+			assertThat(e.getMessage(), startsWith(Msg.code(1512) + "Two MatchFields have the same name 'foo'"));
 		}
 	}
 
@@ -147,7 +149,7 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 			setMdmRuleJson("bad-rules-invalid-path.json");
 			fail();
 		} catch (ConfigurationException e) {
-			assertThat(e.getMessage(), startsWith("MatchField name-prefix resourceType Organization has invalid path"));
+			assertThat(e.getMessage(), startsWith(Msg.code(1517) + "MatchField name-prefix resourceType Organization has invalid path"));
 		}
 	}
 
@@ -158,6 +160,25 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 		}
 		catch (ConfigurationException e){
 			fail("Unable to validate extension matcher");
+		}
+	}
+
+	@Test
+	public void testBadEidResourceType() throws IOException {
+		try {
+			setMdmRuleJson("bad-rules-illegal-resource-type-eid.json");
+		}
+		catch (ConfigurationException e){
+			assertThat(e.getMessage(), is(equalTo(Msg.code(1508) + "not-a-resource is not a valid resource type, but is set in the eidSystems field.")));
+		}
+	}
+	@Test
+	public void testBadEidDoesntMatchKnownMdmTypes() throws IOException {
+		try {
+			setMdmRuleJson("bad-rules-illegal-missing-resource-type.json");
+		}
+		catch (ConfigurationException e){
+			assertThat(e.getMessage(), is(equalTo(Msg.code(1507) + "There is an eidSystem set for [Patient] but that is not one of the mdmTypes. Valid options are [Organization, *].")));
 		}
 	}
 

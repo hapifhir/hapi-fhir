@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.searchparam.matcher;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,11 @@ package ca.uhn.fhir.jpa.searchparam.matcher;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.util.SourceParam;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
@@ -37,8 +37,10 @@ import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.MetaUtil;
 import ca.uhn.fhir.util.UrlUtil;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu3.model.Location;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -61,6 +63,8 @@ public class InMemoryResourceMatcher {
 	@Autowired
 	FhirContext myFhirContext;
 
+	public InMemoryResourceMatcher() {}
+
 	/**
 	 * This method is called in two different scenarios.  With a null theResource, it determines whether database matching might be required.
 	 * Otherwise, it tries to perform the match in-memory, returning UNSUPPORTED if it's not possible.
@@ -73,6 +77,8 @@ public class InMemoryResourceMatcher {
 	public InMemoryMatchResult match(String theCriteria, IBaseResource theResource, ResourceIndexedSearchParams theSearchParams) {
 		RuntimeResourceDefinition resourceDefinition;
 		if (theResource == null) {
+			Validate.isTrue(!theCriteria.startsWith("?"), "Invalid match URL format (must match \"[resourceType]?[params]\")");
+			Validate.isTrue(theCriteria.contains("?"), "Invalid match URL format (must match \"[resourceType]?[params]\")");
 			resourceDefinition = UrlUtil.parseUrlResourceType(myFhirContext, theCriteria);
 		} else {
 			resourceDefinition = myFhirContext.getResourceDefinition(theResource);
@@ -152,6 +158,7 @@ public class InMemoryResourceMatcher {
 		String resourceName = theResourceDefinition.getName();
 		RuntimeSearchParam paramDef = mySearchParamRegistry.getActiveSearchParam(resourceName, theParamName);
 		InMemoryMatchResult checkUnsupportedResult = checkUnsupportedPrefixes(theParamName, paramDef, theAndOrParams);
+
 		if (!checkUnsupportedResult.supported()) {
 			return checkUnsupportedResult;
 		}
@@ -160,7 +167,6 @@ public class InMemoryResourceMatcher {
 			case IAnyResource.SP_RES_ID:
 				return InMemoryMatchResult.fromBoolean(matchIdsAndOr(theAndOrParams, theResource));
 
-			case IAnyResource.SP_RES_LANGUAGE:
 			case Constants.PARAM_HAS:
 			case Constants.PARAM_TAG:
 			case Constants.PARAM_PROFILE:
@@ -237,7 +243,7 @@ public class InMemoryResourceMatcher {
 			if (Constants.PARAM_CONTENT.equals(theParamName) || Constants.PARAM_TEXT.equals(theParamName)) {
 				return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName, InMemoryMatchResult.PARAM);
 			} else {
-				throw new InvalidRequestException("Unknown search parameter " + theParamName + " for resource type " + theResourceName);
+				throw new InvalidRequestException(Msg.code(509) + "Unknown search parameter " + theParamName + " for resource type " + theResourceName);
 			}
 		}
 	}

@@ -1,6 +1,6 @@
 package ca.uhn.fhir.tinder;
 
-import org.apache.commons.collections.CollectionUtils;
+import ca.uhn.fhir.i18n.Msg;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,13 +33,12 @@ public class ExamineTestTrace {
 			} else if (isBlank(next)) {
 				continue;
 			} else {
-				throw new IllegalStateException("Unknown line: " + next);
+				throw new IllegalStateException(Msg.code(107) + "Unknown line: " + next);
 			}
 		}
 
 		ourLog.info("Started {}", started.size());
 		ourLog.info("Finished {}", finished.size());
-		ourLog.info(CollectionUtils.disjunction(started, finished).toString());
 
 	}
 

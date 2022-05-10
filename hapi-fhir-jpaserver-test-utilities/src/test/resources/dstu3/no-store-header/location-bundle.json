@@ -1,0 +1,211 @@
+{
+	"resourceType": "Bundle",
+	"id": "PROD-DEMO-DATA",
+	"type": "batch",
+	"entry": [
+		{
+			"resource": {
+				"resourceType": "Location",
+				"id": "L439101",
+				"meta": {
+					"versionId": "17",
+					"lastUpdated": "2019-03-24T19:52:02.888-04:00"
+				},
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "FI",
+									"display": "Facility ID"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.5.1",
+						"value": "439101"
+					}
+				],
+				"status": "active",
+				"name": "DemoClinicA",
+				"type": {
+					"coding": [
+						{
+							"system": "http://mydomain.org/fhir/cs/OrgHierarchy",
+							"code": "DL",
+							"display": "Dialysis Location"
+						}
+					],
+					"text": "Dialysis Location"
+				},
+				"telecom": [
+					{
+						"system": "phone",
+						"value": "800-243-1139"
+					},
+					{
+						"system": "fax",
+						"value": "800-243-1488"
+					}
+				],
+				"address": {
+					"type": "physical",
+					"line": [
+						"2345 W. Van Buren Road"
+					],
+					"city": "Chicago",
+					"district": "test district",
+					"state": "IL",
+					"postalCode": "60654"
+				},
+				"position": {
+					"longitude": -17.6723,
+					"latitude": 11.89018
+				},
+				"managingOrganization": {
+					"reference": "Organization/O182901"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Location/L439101"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Location",
+				"id": "L439102",
+				"meta": {
+					"versionId": "1",
+					"lastUpdated": "2019-03-24T16:42:27.858-04:00"
+				},
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "FI",
+									"display": "Facility ID"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.5.1",
+						"value": "439102"
+					}
+				],
+				"status": "active",
+				"name": "DemoClinicB",
+				"type": {
+					"coding": [
+						{
+							"system": "http://mydomain.org/fhir/cs/OrgHierarchy",
+							"code": "DL",
+							"display": "Dialysis Location"
+						}
+					],
+					"text": "Dialysis Location"
+				},
+				"telecom": [
+					{
+						"system": "phone",
+						"value": "800-100-1000"
+					},
+					{
+						"system": "fax",
+						"value": "800-100-1000"
+					}
+				],
+				"address": {
+					"type": "physical",
+					"line": [
+						"1234 West Hubbard Street"
+					],
+					"city": "Chicago",
+					"district": "test district",
+					"state": "IL",
+					"postalCode": "60654"
+				},
+				"position": {
+					"longitude": -17.9596,
+					"latitude": 313.83922
+				},
+				"managingOrganization": {
+					"reference": "Organization/O182902"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Location/L439102"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Location",
+				"id": "L439103",
+				"meta": {
+					"versionId": "1",
+					"lastUpdated": "2019-03-24T16:42:42.794-04:00"
+				},
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "FI",
+									"display": "Facility ID"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.5.1",
+						"value": "439103"
+					}
+				],
+				"status": "active",
+				"name": "DemoClinicC",
+				"type": {
+					"coding": [
+						{
+							"system": "http://mydomain.org/fhir/cs/OrgHierarchy",
+							"code": "DL",
+							"display": "Dialysis Location"
+						}
+					],
+					"text": "Dialysis Location"
+				},
+				"telecom": [
+					{
+						"system": "phone",
+						"value": "800-243-1139"
+					},
+					{
+						"system": "fax",
+						"value": "800-243-1488"
+					}
+				],
+				"address": {
+					"type": "physical",
+					"line": [
+						"345 Katella Road"
+					],
+					"city": "Anaheim",
+					"district": "test district",
+					"state": "CA",
+					"postalCode": "92802"
+				},
+				"position": {
+					"longitude": -17.6723,
+					"latitude": 11.89018
+				},
+				"managingOrganization": {
+					"reference": "Organization/O182903"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Location/L439103"
+			}
+		}
+	]
+}

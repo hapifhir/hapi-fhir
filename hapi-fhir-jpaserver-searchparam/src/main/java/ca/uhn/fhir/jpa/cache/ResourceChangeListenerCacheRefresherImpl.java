@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.cache;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -173,8 +173,8 @@ public class ResourceChangeListenerCacheRefresherImpl implements IResourceChange
 		List<IIdType> updatedIds = new ArrayList<>();
 
 		for (IIdType id : theNewResourceVersionMap.keySet()) {
-			String previousValue = theOldResourceVersionCache.put(id, theNewResourceVersionMap.get(id));
-			IIdType newId = id.withVersion(theNewResourceVersionMap.get(id));
+			Long previousValue = theOldResourceVersionCache.put(id, theNewResourceVersionMap.get(id));
+			IIdType newId = id.withVersion(theNewResourceVersionMap.get(id).toString());
 			if (previousValue == null) {
 				createdIds.add(newId);
 			} else if (!theNewResourceVersionMap.get(id).equals(previousValue)) {

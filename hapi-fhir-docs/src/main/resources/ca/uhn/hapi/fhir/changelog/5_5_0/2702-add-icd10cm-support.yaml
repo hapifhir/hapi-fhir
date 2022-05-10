@@ -1,0 +1,6 @@
+---
+type: add
+issue: 2702
+backport: 5.4.1
+title: "The JPA server terminology uploader now supports uploading ICD-10-CM (US Edition) using the
+   native format for that vocabulary."

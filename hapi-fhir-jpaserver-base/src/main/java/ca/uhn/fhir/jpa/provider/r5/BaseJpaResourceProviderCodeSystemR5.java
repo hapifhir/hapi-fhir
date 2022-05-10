@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.provider.r5;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,6 +60,7 @@ public class BaseJpaResourceProviderCodeSystemR5 extends JpaResourceProviderR5<C
 			@OperationParam(name="system", min=0, max=1) UriType theSystem,
 			@OperationParam(name="coding", min=0, max=1) Coding theCoding,
 			@OperationParam(name="version", min=0, max=1) StringType theVersion,
+			@OperationParam(name="displayLanguage", min=0, max=1) CodeType theDisplayLanguage,
 			@OperationParam(name = "property", min = 0, max = OperationParam.MAX_UNLIMITED) List<CodeType> theProperties,
 			RequestDetails theRequestDetails
 			) {
@@ -69,9 +70,9 @@ public class BaseJpaResourceProviderCodeSystemR5 extends JpaResourceProviderR5<C
 			IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> dao = (IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept>) getDao();
 			IValidationSupport.LookupCodeResult result;
 			if (theVersion != null) {
-				result = dao.lookupCode(theCode, new UriType(theSystem.getValue() + "|" + theVersion), theCoding, theRequestDetails);
+				result = dao.lookupCode(theCode, new UriType(theSystem.getValue() + "|" + theVersion), theCoding, theDisplayLanguage, theRequestDetails);
 			} else {
-				result = dao.lookupCode(theCode, theSystem, theCoding, theRequestDetails);
+				result = dao.lookupCode(theCode, theSystem, theCoding, theDisplayLanguage, theRequestDetails);
 			}
 			result.throwNotFoundIfAppropriate();
 			return (Parameters) result.toParameters(theRequestDetails.getFhirContext(), theProperties);

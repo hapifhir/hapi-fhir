@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.cache.config.RegisteredResourceListenerFactoryConfig;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -64,9 +65,12 @@ class ResourceChangeListenerRegistryImplTest {
 	@Configuration
 	@Import(RegisteredResourceListenerFactoryConfig.class)
 	static class SpringContext {
+		@Autowired
+		ResourceChangeListenerCacheFactory myResourceChangeListenerCacheFactory;
+
 		@Bean
-		public IResourceChangeListenerRegistry resourceChangeListenerRegistry() {
-			return new ResourceChangeListenerRegistryImpl();
+		public IResourceChangeListenerRegistry resourceChangeListenerRegistry(InMemoryResourceMatcher theInMemoryResourceMatcher) {
+			return new ResourceChangeListenerRegistryImpl(ourFhirContext, myResourceChangeListenerCacheFactory, theInMemoryResourceMatcher);
 		}
 
 		@Bean
@@ -78,7 +82,7 @@ class ResourceChangeListenerRegistryImplTest {
 	@BeforeEach
 	public void before() {
 		Set<IResourceChangeListenerCache> entries = new HashSet<>();
-		IResourceChangeListenerCache cache = myResourceChangeListenerCacheFactory.create(PATIENT_RESOURCE_NAME, ourMap, myTestListener, TEST_REFRESH_INTERVAL_MS);
+		IResourceChangeListenerCache cache = myResourceChangeListenerCacheFactory.newResourceChangeListenerCache(PATIENT_RESOURCE_NAME, ourMap, myTestListener, TEST_REFRESH_INTERVAL_MS);
 		entries.add(cache);
 		when(myInMemoryResourceMatcher.canBeEvaluatedInMemory(any(), any())).thenReturn(InMemoryMatchResult.successfulMatch());
 	}
@@ -89,7 +93,7 @@ class ResourceChangeListenerRegistryImplTest {
 			myResourceChangeListenerRegistry.registerResourceResourceChangeListener("Foo", ourMap, myTestListener, TEST_REFRESH_INTERVAL_MS);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Unknown resource name \"Foo\" (this name is not known in FHIR version \"R4\")", e.getMessage());
+			assertEquals(Msg.code(1684) + "Unknown resource name \"Foo\" (this name is not known in FHIR version \"R4\")", e.getMessage());
 		}
 	}
 
@@ -100,7 +104,7 @@ class ResourceChangeListenerRegistryImplTest {
 			myResourceChangeListenerRegistry.registerResourceResourceChangeListener(PATIENT_RESOURCE_NAME, ourMap, myTestListener, TEST_REFRESH_INTERVAL_MS);
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("SearchParameterMap SearchParameterMap[] cannot be evaluated in-memory: TEST REASON.  Only search parameter maps that can be evaluated in-memory may be registered.", e.getMessage());
+			assertEquals(Msg.code(482) + "SearchParameterMap SearchParameterMap[] cannot be evaluated in-memory: TEST REASON.  Only search parameter maps that can be evaluated in-memory may be registered.", e.getMessage());
 		}
 	}
 

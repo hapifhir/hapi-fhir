@@ -1,0 +1,9 @@
+---
+type: change
+backport: 5.4.2
+issue: 2697
+title: "DELETE _expunge=true has been converted to use Spring Batch.  It now simply returns the jobId of the Spring Batch
+job while the job continues to run in the background.  A new operation called $expunge-delete has been added to provide
+more fine-grained control of the delete expunge operation.  This operation accepts an ordered list of URLs to be delete
+expunged and an optional batch-size parameter that will be used to perform the delete expunge.  If no batch size is
+specified in the operation, then the value of DaoConfig.getExpungeBatchSize() is used."

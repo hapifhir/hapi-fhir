@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.util.CoverageIgnore;
@@ -94,13 +95,13 @@ public abstract class BaseIdentifiableElement extends BaseElement implements IId
 		@Override
 		@CoverageIgnore
 		public IdDt setValue(String theValue) throws DataFormatException {
-			throw new UnsupportedOperationException("Use IElement#setElementSpecificId(String) to set the element ID for an element");
+			throw new UnsupportedOperationException(Msg.code(1899) + "Use IElement#setElementSpecificId(String) to set the element ID for an element");
 		}
 
 		@Override
 		@CoverageIgnore
 		public void setValueAsString(String theValue) throws DataFormatException {
-			throw new UnsupportedOperationException("Use IElement#setElementSpecificId(String) to set the element ID for an element");
+			throw new UnsupportedOperationException(Msg.code(1900) + "Use IElement#setElementSpecificId(String) to set the element ID for an element");
 		}
 
 	}

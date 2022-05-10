@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,13 @@ package ca.uhn.fhir.jpa.model.entity;
  */
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
-import javax.validation.constraints.Null;
 import java.time.LocalDate;
 
 @Embeddable
@@ -64,6 +65,21 @@ public class PartitionablePartitionId implements Cloneable {
 		return this;
 	}
 
+	@Override
+	public boolean equals(Object theO) {
+		if (!(theO instanceof PartitionablePartitionId)) {
+			return false;
+		}
+
+		PartitionablePartitionId that = (PartitionablePartitionId) theO;
+		return new EqualsBuilder().append(myPartitionId, that.myPartitionId).append(myPartitionDate, that.myPartitionDate).isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37).append(myPartitionId).append(myPartitionDate).toHashCode();
+	}
+
 	@Nullable
 	public LocalDate getPartitionDate() {
 		return myPartitionDate;
@@ -86,12 +102,20 @@ public class PartitionablePartitionId implements Cloneable {
 		return RequestPartitionId.fromPartitionId(getPartitionId(), getPartitionDate());
 	}
 
-	@Nullable
+	@Override
+	public String toString() {
+		return "PartitionablePartitionId{" +
+			"myPartitionId=" + myPartitionId +
+			", myPartitionDate=" + myPartitionDate +
+			'}';
+	}
+
+	@Nonnull
 	public static RequestPartitionId toRequestPartitionId(@Nullable PartitionablePartitionId theRequestPartitionId) {
 		if (theRequestPartitionId != null) {
 			return theRequestPartitionId.toPartitionId();
 		} else {
-			return null;
+			return RequestPartitionId.defaultPartition();
 		}
 	}
 }

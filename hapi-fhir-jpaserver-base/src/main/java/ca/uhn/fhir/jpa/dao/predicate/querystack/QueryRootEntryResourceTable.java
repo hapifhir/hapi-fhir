@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.predicate.querystack;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -170,7 +170,7 @@ class QueryRootEntryResourceTable extends QueryRootEntry {
 				join = myResourceTableRoot.join("mySearchParamPresents", JoinType.LEFT);
 				break;
 			case COMPOSITE_UNIQUE:
-				join = myResourceTableRoot.join("myParamsCompositeStringUnique", JoinType.LEFT);
+				join = myResourceTableRoot.join("myParamsComboStringUnique", JoinType.LEFT);
 				break;
 			case RESOURCE_TAGS:
 				join = myResourceTableRoot.join("myTags", JoinType.LEFT);

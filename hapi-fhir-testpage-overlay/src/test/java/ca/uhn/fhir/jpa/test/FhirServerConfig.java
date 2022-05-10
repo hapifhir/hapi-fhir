@@ -18,6 +18,4 @@ public class FhirServerConfig {
 		DaoConfig retVal = new DaoConfig();
 		return retVal;
 	}
-
-
 }

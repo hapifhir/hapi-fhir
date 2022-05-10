@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -27,19 +28,27 @@ import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.server.method.SearchParameter;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
+import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.TreeMultimap;
+import org.apache.commons.text.WordUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -58,7 +67,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -203,6 +212,9 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		terser.addElement(retVal, "implementation.url", serverBase);
 		terser.addElement(retVal, "implementation.description", configuration.getImplementationDescription());
 		terser.addElement(retVal, "kind", "instance");
+		if (myServer != null && isNotBlank(myServer.getCopyright())) {
+			terser.addElement(retVal, "copyright", myServer.getCopyright());
+		}
 		terser.addElement(retVal, "software.name", configuration.getServerName());
 		terser.addElement(retVal, "software.version", configuration.getServerVersion());
 		if (myContext.isFormatXmlSupported()) {
@@ -223,10 +235,10 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		terser.addElement(rest, "mode", "server");
 
 		Set<String> systemOps = new HashSet<>();
-		Set<String> operationNames = new HashSet<>();
 
 		Map<String, List<BaseMethodBinding<?>>> resourceToMethods = configuration.collectMethodBindings();
 		Map<String, Class<? extends IBaseResource>> resourceNameToSharedSupertype = configuration.getNameToSharedSupertype();
+		List<BaseMethodBinding<?>> globalMethodBindings = configuration.getGlobalBindings();
 
 		TreeMultimap<String, String> resourceNameToIncludes = TreeMultimap.create();
 		TreeMultimap<String, String> resourceNameToRevIncludes = TreeMultimap.create();
@@ -243,6 +255,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 
 		for (Entry<String, List<BaseMethodBinding<?>>> nextEntry : resourceToMethods.entrySet()) {
 
+			Set<String> operationNames = new HashSet<>();
 			String resourceName = nextEntry.getKey();
 			if (nextEntry.getKey().isEmpty() == false) {
 				Set<String> resourceOps = new HashSet<>();
@@ -326,39 +339,73 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 
 					checkBindingForSystemOps(terser, rest, systemOps, nextMethodBinding);
 
+					// Resource Operations
 					if (nextMethodBinding instanceof SearchMethodBinding) {
-						SearchMethodBinding methodBinding = (SearchMethodBinding) nextMethodBinding;
-						if (methodBinding.getQueryName() != null) {
-							String queryName = bindings.getNamedSearchMethodBindingToName().get(methodBinding);
-							if (operationNames.add(queryName)) {
-								IBase operation = terser.addElement(rest, "operation");
-								terser.addElement(operation, "name", methodBinding.getQueryName());
-								terser.addElement(operation, "definition", (getOperationDefinitionPrefix(theRequestDetails) + "OperationDefinition/" + queryName));
-							}
-						}
+						addSearchMethodIfSearchIsNamedQuery(theRequestDetails, bindings, terser, operationNames, resource, (SearchMethodBinding) nextMethodBinding);
 					} else if (nextMethodBinding instanceof OperationMethodBinding) {
 						OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
-						String opName = bindings.getOperationBindingToName().get(methodBinding);
+						String opName = bindings.getOperationBindingToId().get(methodBinding);
 						// Only add each operation (by name) once
 						if (operationNames.add(opName)) {
-							IBase operation = terser.addElement(rest, "operation");
-							terser.addElement(operation, "name", methodBinding.getName().substring(1));
-							terser.addElement(operation, "definition", getOperationDefinitionPrefix(theRequestDetails) + "OperationDefinition/" + opName);
+							IBase operation = terser.addElement(resource, "operation");
+							populateOperation(theRequestDetails, terser, methodBinding, opName, operation);
 						}
 					}
 
 				}
 
-				ISearchParamRegistry searchParamRegistry;
-				if (mySearchParamRegistry != null) {
-					searchParamRegistry = mySearchParamRegistry;
-				} else if (myServerConfiguration != null) {
-					searchParamRegistry = myServerConfiguration;
-				} else {
-					searchParamRegistry = myServer.createConfiguration();
+				// Find any global operations (Operations defines at the system level but with the
+				// global flag set to true, meaning they apply to all resource types)
+				if (globalMethodBindings != null) {
+					Set<String> globalOperationNames = new HashSet<>();
+					for (BaseMethodBinding<?> next : globalMethodBindings) {
+						if (next instanceof OperationMethodBinding) {
+							OperationMethodBinding methodBinding = (OperationMethodBinding) next;
+							if (methodBinding.isGlobalMethod()) {
+								if (methodBinding.isCanOperateAtInstanceLevel() || methodBinding.isCanOperateAtTypeLevel()) {
+									String opName = bindings.getOperationBindingToId().get(methodBinding);
+									// Only add each operation (by name) once
+									if (globalOperationNames.add(opName)) {
+										IBase operation = terser.addElement(resource, "operation");
+										populateOperation(theRequestDetails, terser, methodBinding, opName, operation);
+									}
+								}
+							}
+						}
+					}
 				}
 
-				Map<String, RuntimeSearchParam> searchParams = searchParamRegistry.getActiveSearchParams(resourceName);
+				ISearchParamRegistry serverConfiguration;
+				if (myServerConfiguration != null) {
+					serverConfiguration = myServerConfiguration;
+				} else {
+					serverConfiguration = myServer.createConfiguration();
+				}
+
+				/*
+				 * If we have an explicit registry (which will be the case in the JPA server) we use it as priority,
+				 * but also fill in any gaps using params from the server itself. This makes sure we include
+				 * global params like _lastUpdated
+				 */
+				ResourceSearchParams searchParams;
+				ISearchParamRegistry searchParamRegistry;
+				ResourceSearchParams serverConfigurationActiveSearchParams = serverConfiguration.getActiveSearchParams(resourceName);
+				if (mySearchParamRegistry != null) {
+					searchParamRegistry = mySearchParamRegistry;
+					searchParams = mySearchParamRegistry.getActiveSearchParams(resourceName).makeCopy();
+					for (String nextBuiltInSpName : serverConfigurationActiveSearchParams.getSearchParamNames()) {
+						if (nextBuiltInSpName.startsWith("_") &&
+							!searchParams.containsParamName(nextBuiltInSpName) &&
+							searchParamEnabled(nextBuiltInSpName)) {
+							searchParams.put(nextBuiltInSpName, serverConfigurationActiveSearchParams.get(nextBuiltInSpName));
+						}
+					}
+				} else {
+					searchParamRegistry = serverConfiguration;
+					searchParams = serverConfigurationActiveSearchParams;
+				}
+
+
 				for (RuntimeSearchParam next : searchParams.values()) {
 					IBase searchParam = terser.addElement(resource, "searchParam");
 					terser.addElement(searchParam, "name", next.getName());
@@ -368,15 +415,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 					}
 
 					String spUri = next.getUri();
-					if (isBlank(spUri) && servletRequest != null) {
-						String id;
-						if (next.getId() != null) {
-							id = next.getId().toUnqualifiedVersionless().getValue();
-						} else {
-							id = resourceName + "-" + next.getName();
-						}
-						spUri = configuration.getServerAddressStrategy().determineServerBase(servletRequest.getServletContext(), servletRequest) + "/" + id;
-					}
+					
 					if (isNotBlank(spUri)) {
 						terser.addElement(searchParam, "definition", spUri);
 					}
@@ -412,9 +451,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 								continue;
 							}
 
-							for (RuntimeSearchParam t : searchParamRegistry
-								.getActiveSearchParams(nextResourceName)
-								.values()) {
+							for (RuntimeSearchParam t : searchParamRegistry.getActiveSearchParams(nextResourceName).values()) {
 								if (t.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
 									if (isNotBlank(t.getName())) {
 										boolean appropriateTarget = false;
@@ -449,24 +486,83 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 					checkBindingForSystemOps(terser, rest, systemOps, nextMethodBinding);
 					if (nextMethodBinding instanceof OperationMethodBinding) {
 						OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
-						String opName = bindings.getOperationBindingToName().get(methodBinding);
-						if (operationNames.add(opName)) {
-							ourLog.debug("Found bound operation: {}", opName);
-							IBase operation = terser.addElement(rest, "operation");
-							terser.addElement(operation, "name", methodBinding.getName().substring(1));
-							terser.addElement(operation, "definition", getOperationDefinitionPrefix(theRequestDetails) + "OperationDefinition/" + opName);
+						if (!methodBinding.isGlobalMethod()) {
+							String opName = bindings.getOperationBindingToId().get(methodBinding);
+							if (operationNames.add(opName)) {
+								ourLog.debug("Found bound operation: {}", opName);
+								IBase operation = terser.addElement(rest, "operation");
+								populateOperation(theRequestDetails, terser, methodBinding, opName, operation);
+							}
 						}
+					} else if (nextMethodBinding instanceof SearchMethodBinding) {
+						addSearchMethodIfSearchIsNamedQuery(theRequestDetails, bindings, terser, operationNames, rest, (SearchMethodBinding) nextMethodBinding);
 					}
 				}
 			}
 
-			postProcessRest(terser, rest);
-
 		}
 
+
+		// Find any global operations (Operations defines at the system level but with the
+		// global flag set to true, meaning they apply to all resource types)
+		if (globalMethodBindings != null) {
+			Set<String> globalOperationNames = new HashSet<>();
+			for (BaseMethodBinding<?> next : globalMethodBindings) {
+				if (next instanceof OperationMethodBinding) {
+					OperationMethodBinding methodBinding = (OperationMethodBinding) next;
+					if (methodBinding.isGlobalMethod()) {
+						if (methodBinding.isCanOperateAtServerLevel()) {
+							String opName = bindings.getOperationBindingToId().get(methodBinding);
+							// Only add each operation (by name) once
+							if (globalOperationNames.add(opName)) {
+								IBase operation = terser.addElement(rest, "operation");
+								populateOperation(theRequestDetails, terser, methodBinding, opName, operation);
+							}
+						}
+					}
+				}
+			}
+		}
+
+
+		postProcessRest(terser, rest);
 		postProcess(terser, retVal);
 
 		return retVal;
+	}
+
+	/**
+	 *
+	 * @param theSearchParam
+	 * @return true if theSearchParam is enabled on this server
+	 */
+	protected boolean searchParamEnabled(String theSearchParam) {
+		return true;
+	}
+
+	private void addSearchMethodIfSearchIsNamedQuery(RequestDetails theRequestDetails, Bindings theBindings, FhirTerser theTerser, Set<String> theOperationNamesAlreadyAdded, IBase theElementToAddTo, SearchMethodBinding theSearchMethodBinding) {
+		if (theSearchMethodBinding.getQueryName() != null) {
+			String queryName = theBindings.getNamedSearchMethodBindingToName().get(theSearchMethodBinding);
+			if (theOperationNamesAlreadyAdded.add(queryName)) {
+				IBase operation = theTerser.addElement(theElementToAddTo, "operation");
+				theTerser.addElement(operation, "name", theSearchMethodBinding.getQueryName());
+				theTerser.addElement(operation, "definition", (createOperationUrl(theRequestDetails, queryName)));
+			}
+		}
+	}
+
+	private void populateOperation(RequestDetails theRequestDetails, FhirTerser theTerser, OperationMethodBinding theMethodBinding, String theOpName, IBase theOperation) {
+		String operationName = theMethodBinding.getName().substring(1);
+		theTerser.addElement(theOperation, "name", operationName);
+		theTerser.addElement(theOperation, "definition", createOperationUrl(theRequestDetails, theOpName));
+		if (isNotBlank(theMethodBinding.getDescription())) {
+			theTerser.addElement(theOperation, "documentation", theMethodBinding.getDescription());
+		}
+	}
+
+	@Nonnull
+	private String createOperationUrl(RequestDetails theRequestDetails, String theOpName) {
+		return getOperationDefinitionPrefix(theRequestDetails) + "OperationDefinition/" + theOpName;
 	}
 
 	private TreeMultimap<String, String> getSupportedProfileMultimap(FhirTerser terser) {
@@ -529,23 +625,25 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 	}
 
 
+	@Override
 	@Read(typeName = "OperationDefinition")
 	public IBaseResource readOperationDefinition(@IdParam IIdType theId, RequestDetails theRequestDetails) {
 		if (theId == null || theId.hasIdPart() == false) {
-			throw new ResourceNotFoundException(theId);
+			throw new ResourceNotFoundException(Msg.code(1977) + theId);
 		}
 		RestfulServerConfiguration configuration = getServerConfiguration();
 		Bindings bindings = configuration.provideBindings();
 
-		List<OperationMethodBinding> operationBindings = bindings.getOperationNameToBindings().get(theId.getIdPart());
+		List<OperationMethodBinding> operationBindings = bindings.getOperationIdToBindings().get(theId.getIdPart());
 		if (operationBindings != null && !operationBindings.isEmpty()) {
-			return readOperationDefinitionForOperation(operationBindings);
+			return readOperationDefinitionForOperation(theRequestDetails, bindings, operationBindings);
 		}
+
 		List<SearchMethodBinding> searchBindings = bindings.getSearchNameToBindings().get(theId.getIdPart());
 		if (searchBindings != null && !searchBindings.isEmpty()) {
 			return readOperationDefinitionForNamedSearch(searchBindings);
 		}
-		throw new ResourceNotFoundException(theId);
+		throw new ResourceNotFoundException(Msg.code(1978) + theId);
 	}
 
 	private IBaseResource readOperationDefinitionForNamedSearch(List<SearchMethodBinding> bindings) {
@@ -598,12 +696,14 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		}
 
 		terser.addElement(op, "code", operationCode);
-		terser.addElement(op, "name", "Search_" + operationCode);
+
+		String operationName = WordUtils.capitalize(operationCode);
+		terser.addElement(op, "name", operationName);
 
 		return op;
 	}
 
-	private IBaseResource readOperationDefinitionForOperation(List<OperationMethodBinding> bindings) {
+	private IBaseResource readOperationDefinitionForOperation(RequestDetails theRequestDetails, Bindings theBindings, List<OperationMethodBinding> theOperationMethodBindings) {
 		IBaseResource op = myContext.getResourceDefinition("OperationDefinition").newInstance();
 		FhirTerser terser = myContext.newTerser();
 
@@ -615,61 +715,107 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		boolean instanceLevel = false;
 		boolean affectsState = false;
 		String description = null;
+		String title = null;
 		String code = null;
-		String name;
+		String url = null;
 
 		Set<String> resourceNames = new TreeSet<>();
-		Set<String> inParams = new HashSet<>();
-		Set<String> outParams = new HashSet<>();
+		Map<String, IBase> inParams = new HashMap<>();
+		Map<String, IBase> outParams = new HashMap<>();
 
-		for (OperationMethodBinding sharedDescription : bindings) {
-			if (isNotBlank(sharedDescription.getDescription()) && isBlank(description)) {
-				description = sharedDescription.getDescription();
+		for (OperationMethodBinding operationMethodBinding : theOperationMethodBindings) {
+			if (isNotBlank(operationMethodBinding.getDescription()) && isBlank(description)) {
+				description = operationMethodBinding.getDescription();
 			}
-			if (sharedDescription.isCanOperateAtInstanceLevel()) {
+			if (isNotBlank(operationMethodBinding.getShortDescription()) && isBlank(title)) {
+				title = operationMethodBinding.getShortDescription();
+			}
+			if (operationMethodBinding.isCanOperateAtInstanceLevel()) {
 				instanceLevel = true;
 			}
-			if (sharedDescription.isCanOperateAtServerLevel()) {
+			if (operationMethodBinding.isCanOperateAtServerLevel()) {
 				systemLevel = true;
 			}
-			if (sharedDescription.isCanOperateAtTypeLevel()) {
+			if (operationMethodBinding.isCanOperateAtTypeLevel()) {
 				typeLevel = true;
 			}
-			if (!sharedDescription.isIdempotent()) {
+			if (!operationMethodBinding.isIdempotent()) {
 				affectsState |= true;
 			}
 
-			code = sharedDescription.getName().substring(1);
+			code = operationMethodBinding.getName().substring(1);
 
-			if (isNotBlank(sharedDescription.getResourceName())) {
-				resourceNames.add(sharedDescription.getResourceName());
+			if (isNotBlank(operationMethodBinding.getResourceName())) {
+				resourceNames.add(operationMethodBinding.getResourceName());
 			}
 
-			for (IParameter nextParamUntyped : sharedDescription.getParameters()) {
+			if (isBlank(url)) {
+				url = theBindings.getOperationBindingToId().get(operationMethodBinding);
+				if (isNotBlank(url)) {
+					url = createOperationUrl(theRequestDetails, url);
+				}
+			}
+
+
+			for (IParameter nextParamUntyped : operationMethodBinding.getParameters()) {
 				if (nextParamUntyped instanceof OperationParameter) {
 					OperationParameter nextParam = (OperationParameter) nextParamUntyped;
-					if (!inParams.add(nextParam.getName())) {
-						continue;
+
+					IBase param = inParams.get(nextParam.getName());
+					if (param == null){
+						param = terser.addElement(op, "parameter");
+						inParams.put(nextParam.getName(), param);
 					}
-					IBase param = terser.addElement(op, "parameter");
-					terser.addElement(param, "use", "in");
+
+					IBase existingParam = inParams.get(nextParam.getName());
+					if (isNotBlank(nextParam.getDescription()) && terser.getValues(existingParam, "documentation").isEmpty()) {
+						terser.addElement(existingParam, "documentation", nextParam.getDescription());
+					}
+
 					if (nextParam.getParamType() != null) {
-						terser.addElement(param, "type", nextParam.getParamType());
+						String existingType = terser.getSinglePrimitiveValueOrNull(existingParam, "type");
+						if (!nextParam.getParamType().equals(existingType)) {
+							if (existingType == null) {
+								terser.setElement(existingParam, "type", nextParam.getParamType());
+							} else {
+								terser.setElement(existingParam, "type", "Resource");
+							}
+						}
 					}
+
+					terser.setElement(param, "use", "in");
 					if (nextParam.getSearchParamType() != null) {
-						terser.addElement(param, "searchType", nextParam.getSearchParamType());
+						terser.setElement(param, "searchType", nextParam.getSearchParamType());
 					}
-					terser.addElement(param, "min", Integer.toString(nextParam.getMin()));
-					terser.addElement(param, "max", (nextParam.getMax() == -1 ? "*" : Integer.toString(nextParam.getMax())));
-					terser.addElement(param, "name", nextParam.getName());
+					terser.setElement(param, "min", Integer.toString(nextParam.getMin()));
+					terser.setElement(param, "max", (nextParam.getMax() == -1 ? "*" : Integer.toString(nextParam.getMax())));
+					terser.setElement(param, "name", nextParam.getName());
+
+					List<IBaseExtension<?, ?>> existingExampleExtensions = ExtensionUtil.getExtensionsByUrl((IBaseHasExtensions) param, HapiExtensions.EXT_OP_PARAMETER_EXAMPLE_VALUE);
+					Set<String> existingExamples = existingExampleExtensions
+						.stream()
+						.map(t -> t.getValue())
+						.filter(t -> t != null)
+						.map(t -> (IPrimitiveType<?>) t)
+						.map(t -> t.getValueAsString())
+						.collect(Collectors.toSet());
+					for (String nextExample : nextParam.getExampleValues()) {
+						if (!existingExamples.contains(nextExample)) {
+							ExtensionUtil.addExtension(myContext, param, HapiExtensions.EXT_OP_PARAMETER_EXAMPLE_VALUE, "string", nextExample);
+						}
+					}
+
 				}
 			}
 
-			for (ReturnType nextParam : sharedDescription.getReturnParams()) {
-				if (!outParams.add(nextParam.getName())) {
+			for (ReturnType nextParam : operationMethodBinding.getReturnParams()) {
+				if (outParams.containsKey(nextParam.getName())) {
 					continue;
 				}
+
 				IBase param = terser.addElement(op, "parameter");
+				outParams.put(nextParam.getName(), param);
+
 				terser.addElement(param, "use", "out");
 				if (nextParam.getType() != null) {
 					terser.addElement(param, "type", nextParam.getType());
@@ -679,13 +825,14 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 				terser.addElement(param, "name", nextParam.getName());
 			}
 		}
-
-		name = "Operation_" + code;
+		String name = WordUtils.capitalize(code);
 
 		terser.addElements(op, "resource", resourceNames);
 		terser.addElement(op, "name", name);
+		terser.addElement(op, "url", url);
 		terser.addElement(op, "code", code);
 		terser.addElement(op, "description", description);
+		terser.addElement(op, "title", title);
 		terser.addElement(op, "affectsState", Boolean.toString(affectsState));
 		terser.addElement(op, "system", Boolean.toString(systemLevel));
 		terser.addElement(op, "type", Boolean.toString(typeLevel));

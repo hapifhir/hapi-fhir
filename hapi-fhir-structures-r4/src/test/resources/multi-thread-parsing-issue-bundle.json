@@ -1,0 +1,471 @@
+{
+	"resourceType": "Bundle",
+	"type": "transaction",
+	"entry": [
+		{
+			"fullUrl": "5b6a6591-ae0f-3bfc-987e-5f144a43a036",
+			"resource": {
+				"resourceType": "Condition",
+				"id": "5b6a6591-ae0f-3bfc-987e-5f144a43a036",
+				"meta": {
+					"profile": [
+						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"
+					]
+				},
+				"identifier": [
+					{
+						"system": "http://bluecrossnc.com/fhir/conditionIdentifier",
+						"value": "13028683"
+					}
+				],
+				"clinicalStatus": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+							"code": "active"
+						}
+					]
+				},
+				"verificationStatus": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+							"code": "unconfirmed"
+						}
+					]
+				},
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/condition-category",
+								"code": "encounter-diagnosis"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://hl7.org/fhir/sid/icd-10-cm",
+							"code": "Z80.3"
+						}
+					]
+				},
+				"subject": {
+					"reference": "Patient?_type=http://terminology.hl7.org/CodeSystem/v2-0203|MB&identifier=111111111",
+					"identifier": {
+						"type": {
+							"coding": [
+								{
+									"system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+									"code": "MB"
+								}
+							]
+						},
+						"value": "111111111"
+					}
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Condition/5b6a6591-ae0f-3bfc-987e-5f144a43a036"
+			}
+		},
+		{
+			"fullUrl": "a621019a-fadb-37dd-964a-01c21926e9b4",
+			"resource": {
+				"resourceType": "Practitioner",
+				"id": "a621019a-fadb-37dd-964a-01c21926e9b4",
+				"meta": {
+					"profile": [
+						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner",
+						"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner"
+					]
+				},
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+									"code": "npi"
+								}
+							]
+						},
+						"system": "http://hl7.org/fhir/sid/us-npi",
+						"value": "1134567787"
+					}
+				],
+				"active": true,
+				"name": [
+					{
+						"family": "BRIMMAGE",
+						"given": [
+							"BRAIN BRIMMAGE"
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Practitioner/a621019a-fadb-37dd-964a-01c21926e9b4"
+			}
+		},
+		{
+			"fullUrl": "fb1490ab-c62e-33ca-8414-b6437b0fa578",
+			"resource": {
+				"resourceType": "Practitioner",
+				"id": "fb1490ab-c62e-33ca-8414-b6437b0fa578",
+				"meta": {
+					"profile": [
+						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner",
+						"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner"
+					]
+				},
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+									"code": "npi"
+								}
+							]
+						},
+						"system": "http://hl7.org/fhir/sid/us-npi",
+						"value": "1386735827"
+					}
+				],
+				"active": true,
+				"name": [
+					{
+						"family": "NIEVES-ARRIBA",
+						"given": [
+							"NIEVES-ARRIBA, LUCYBETH"
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Practitioner/fb1490ab-c62e-33ca-8414-b6437b0fa578"
+			}
+		},
+		{
+			"fullUrl": "77409d95-a9e3-3868-8706-069ee7074d90",
+			"resource": {
+				"resourceType": "Location",
+				"id": "77409d95-a9e3-3868-8706-069ee7074d90",
+				"name": "LabCorp",
+				"address": {
+					"line": [
+						"231 MAPLE AVENUE",
+						"BURLINGTON"
+					],
+					"city": "NC",
+					"state": "27215"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Location/77409d95-a9e3-3868-8706-069ee7074d90"
+			}
+		},
+		{
+			"fullUrl": "6ee4bf07-3948-3093-b0ed-c84d0e511036",
+			"resource": {
+				"resourceType": "Encounter",
+				"id": "6ee4bf07-3948-3093-b0ed-c84d0e511036",
+				"meta": {
+					"profile": [
+						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter"
+					]
+				},
+				"identifier": [
+					{
+						"system": "http://bluecrossnc.com/fhir/encounterIdentifier",
+						"value": "13028683"
+					}
+				],
+				"status": "finished",
+				"class": {
+					"system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+					"code": "AMB"
+				},
+				"type": [
+					{
+						"text": "Authorization"
+					},
+					{
+						"coding": [
+							{
+								"system": "http://www.ama-assn.org/go/cpt",
+								"code": "81163"
+							}
+						]
+					}
+				],
+				"subject": {
+					"reference": "Patient?_type=http://terminology.hl7.org/CodeSystem/v2-0203|MB&identifier=111111111",
+					"identifier": {
+						"type": {
+							"coding": [
+								{
+									"system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+									"code": "MB"
+								}
+							]
+						},
+						"value": "111111111"
+					}
+				},
+				"participant": [
+					{
+						"type": [
+							{
+								"coding": [
+									{
+										"system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+										"code": "PART"
+									}
+								]
+							}
+						],
+						"period": {
+							"start": "2021-08-27",
+							"end": "2021-09-26"
+						},
+						"individual": {
+							"reference": "Practitioner/a621019a-fadb-37dd-964a-01c21926e9b4"
+						}
+					},
+					{
+						"type": [
+							{
+								"coding": [
+									{
+										"system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+										"code": "PART"
+									}
+								]
+							}
+						],
+						"period": {
+							"start": "2019-04-15",
+							"end": "2019-05-15"
+						},
+						"individual": {
+							"reference": "Practitioner/fb1490ab-c62e-33ca-8414-b6437b0fa578"
+						}
+					}
+				],
+				"period": {
+					"start": "2019-04-15",
+					"end": "2019-05-15"
+				},
+				"reasonCode": [
+					{
+						"text": "Diagnostic Medical"
+					}
+				],
+				"location": [
+					{
+						"location": {
+							"reference": "Location/77409d95-a9e3-3868-8706-069ee7074d90"
+						}
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Encounter/6ee4bf07-3948-3093-b0ed-c84d0e511036"
+			}
+		},
+		{
+			"fullUrl": "aa00fd16-222f-36e6-ad0d-df8cf9abb325",
+			"resource": {
+				"resourceType": "DocumentReference",
+				"id": "aa00fd16-222f-36e6-ad0d-df8cf9abb325",
+				"meta": {
+					"profile": [
+						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-documentreference"
+					]
+				},
+				"identifier": [
+					{
+						"system": "http://bluecrossnc.com/fhir/documentreferenceIdentifier",
+						"value": "127598"
+					}
+				],
+				"status": "current",
+				"type": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "11506-3"
+						}
+					]
+				},
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://hl7.org/fhir/us/core/CodeSystem/us-core-documentreference-category",
+								"code": "clinical-note"
+							}
+						]
+					}
+				],
+				"subject": {
+					"reference": "Patient?_type=http://terminology.hl7.org/CodeSystem/v2-0203|MB&identifier=10215619000",
+					"identifier": {
+						"type": {
+							"coding": [
+								{
+									"system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+									"code": "MB"
+								}
+							]
+						},
+						"value": "10215619000"
+					}
+				},
+				"date": "2021-09-16T20:00:00.000-04:00",
+				"author": [
+					{
+						"reference": "Organization/BCBSNC"
+					}
+				],
+				"content": [
+					{
+						"attachment": {
+							"contentType": "text/plain",
+							"data": "VkdWemRDQlFhSGx6YVdOcFlXNGdVbUYwYVc5dVlXeGw="
+						}
+					}
+				],
+				"context": {
+					"encounter": [
+						{
+							"display": "13028683"
+						}
+					],
+					"period": {
+						"start": "2021-08-26T20:00:00-04:00",
+						"end": "2021-09-25T20:00:00-04:00"
+					}
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "DocumentReference/aa00fd16-222f-36e6-ad0d-df8cf9abb325"
+			}
+		},
+		{
+			"fullUrl": "89a97fee-729a-3953-9482-caeb82ee8db5",
+			"resource": {
+				"resourceType": "Provenance",
+				"id": "89a97fee-729a-3953-9482-caeb82ee8db5",
+				"meta": {
+					"profile": [
+						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-provenance"
+					]
+				},
+				"target": [
+					{
+						"reference": "Patient?_type=http://terminology.hl7.org/CodeSystem/v2-0203|MB&identifier=10215619000",
+						"identifier": {
+							"type": {
+								"coding": [
+									{
+										"system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+										"code": "MB"
+									}
+								]
+							},
+							"value": "10215619000"
+						}
+					},
+					{
+						"reference": "Condition/5b6a6591-ae0f-3bfc-987e-5f144a43a036"
+					},
+					{
+						"reference": "DocumentReference/aa00fd16-222f-36e6-ad0d-df8cf9abb325"
+					}
+				],
+				"recorded": "2021-08-27T00:00:00.000-04:00",
+				"agent": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+									"code": "author"
+								}
+							]
+						},
+						"who": {
+							"reference": "Organization/BCBSNC"
+						}
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Provenance/89a97fee-729a-3953-9482-caeb82ee8db5"
+			}
+		},
+		{
+			"fullUrl": "69d1f8f0-87e6-3cff-bd41-c3e01a5c479d",
+			"resource": {
+				"resourceType": "Provenance",
+				"id": "69d1f8f0-87e6-3cff-bd41-c3e01a5c479d",
+				"meta": {
+					"profile": [
+						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-provenance"
+					]
+				},
+				"target": [
+					{
+						"reference": "Patient?_type=http://terminology.hl7.org/CodeSystem/v2-0203|MB&identifier=10215619000",
+						"identifier": {
+							"type": {
+								"coding": [
+									{
+										"system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+										"code": "MB"
+									}
+								]
+							},
+							"value": "10215619000"
+						}
+					},
+					{
+						"reference": "Encounter/6ee4bf07-3948-3093-b0ed-c84d0e511036"
+					}
+				],
+				"recorded": "2019-04-15T00:00:00.000-04:00",
+				"agent": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+									"code": "author"
+								}
+							]
+						},
+						"who": {
+							"reference": "Organization/BCBSNC"
+						}
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Provenance/69d1f8f0-87e6-3cff-bd41-c3e01a5c479d"
+			}
+		}
+	]
+}

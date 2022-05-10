@@ -1,17 +1,19 @@
 package ca.uhn.fhir.model.api;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import ca.uhn.fhir.i18n.Msg;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.io.Serializable;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +36,9 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  * equality. Prior to HAPI 1.2 (and FHIR DSTU2) the recurse property did not exist, so this may merit consideration when
  * upgrading servers.
  * </p>
+ * <p>
+ * Note on thrwead safety: This class is not thread safe.
+ * </p>
  */
 public class Include implements Serializable {
 
@@ -42,6 +47,9 @@ public class Include implements Serializable {
 	private final boolean myImmutable;
 	private boolean myIterate;
 	private String myValue;
+	private String myParamType;
+	private String myParamName;
+	private String myParamTargetType;
 
 	/**
 	 * Constructor for <b>non-recursive</b> include
@@ -50,8 +58,7 @@ public class Include implements Serializable {
 	 *           The <code>_include</code> value, e.g. "Patient:name"
 	 */
 	public Include(String theValue) {
-		myValue = theValue;
-		myImmutable = false;
+		this(theValue, false);
 	}
 
 	/**
@@ -63,9 +70,7 @@ public class Include implements Serializable {
 	 *           Should the include recurse
 	 */
 	public Include(String theValue, boolean theIterate) {
-		myValue = theValue;
-		myIterate = theIterate;
-		myImmutable = false;
+		this(theValue, theIterate, false);
 	}
 
 	/**
@@ -77,7 +82,7 @@ public class Include implements Serializable {
 	 *           Should the include recurse
 	 */
 	public Include(String theValue, boolean theIterate, boolean theImmutable) {
-		myValue = theValue;
+		setValue(theValue);
 		myIterate = theIterate;
 		myImmutable = theImmutable;
 	}
@@ -128,41 +133,21 @@ public class Include implements Serializable {
 	 * Returns the portion of the value before the first colon
 	 */
 	public String getParamType() {
-		int firstColon = myValue.indexOf(':');
-		if (firstColon == -1 || firstColon == myValue.length() - 1) {
-			return null;
-		}
-		return myValue.substring(0, firstColon);
+		return myParamType;
 	}
 
 	/**
 	 * Returns the portion of the value after the first colon but before the second colon
 	 */
 	public String getParamName() {
-		int firstColon = myValue.indexOf(':');
-		if (firstColon == -1 || firstColon == myValue.length() - 1) {
-			return null;
-		}
-		int secondColon = myValue.indexOf(':', firstColon + 1);
-		if (secondColon != -1) {
-			return myValue.substring(firstColon + 1, secondColon);
-		}
-		return myValue.substring(firstColon + 1);
+		return myParamName;
 	}
 
 	/**
 	 * Returns the portion of the string after the second colon, or null if there are not two colons in the value.
 	 */
 	public String getParamTargetType() {
-		int firstColon = myValue.indexOf(':');
-		if (firstColon == -1 || firstColon == myValue.length() - 1) {
-			return null;
-		}
-		int secondColon = myValue.indexOf(':', firstColon + 1);
-		if (secondColon != -1) {
-			return myValue.substring(secondColon + 1);
-		}
-		return null;
+		return myParamTargetType;
 
 	}
 
@@ -205,9 +190,36 @@ public class Include implements Serializable {
 
 	public void setValue(String theValue) {
 		if (myImmutable) {
-			throw new IllegalStateException("Can not change the value of this include");
+			throw new IllegalStateException(Msg.code(1888) + "Can not change the value of this include");
 		}
+
+		String value = defaultString(theValue);
+
+		int firstColon = value.indexOf(':');
+		String paramType;
+		String paramName;
+		String paramTargetType;
+		if (firstColon == -1 || firstColon == value.length() - 1) {
+			paramType = null;
+			paramName = null;
+			paramTargetType = null;
+		} else {
+			paramType = value.substring(0, firstColon);
+			int secondColon = value.indexOf(':', firstColon + 1);
+			if (secondColon == -1) {
+				paramName = value.substring(firstColon + 1);
+				paramTargetType = null;
+			} else {
+				paramName =  value.substring(firstColon + 1, secondColon);
+				paramTargetType = value.substring(secondColon + 1);
+			}
+		}
+
+		myParamType = paramType;
+		myParamName = paramName;
+		myParamTargetType = paramTargetType;
 		myValue = theValue;
+
 	}
 
 	/**
@@ -263,7 +275,7 @@ public class Include implements Serializable {
 		String paramType = getParamType();
 		String paramName = getParamName();
 		if (isBlank(paramType) || isBlank(paramName)) {
-			throw new IllegalStateException("This include does not contain a value in the format [ResourceType]:[paramName]");
+			throw new IllegalStateException(Msg.code(1889) + "This include does not contain a value in the format [ResourceType]:[paramName]");
 		}
 		b.append(paramType);
 		b.append(":");

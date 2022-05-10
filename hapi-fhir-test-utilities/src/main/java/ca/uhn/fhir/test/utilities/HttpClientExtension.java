@@ -4,7 +4,7 @@ package ca.uhn.fhir.test.utilities;
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,17 @@ package ca.uhn.fhir.test.utilities;
  * #L%
  */
 
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
+import java.io.IOException;
+
+// TODO KHS merge with HttpClientHelper
 public class HttpClientExtension implements BeforeEachCallback, AfterEachCallback {
 	private CloseableHttpClient myClient;
 
@@ -43,5 +48,9 @@ public class HttpClientExtension implements BeforeEachCallback, AfterEachCallbac
 		myClient = HttpClientBuilder
 			.create()
 			.build();
+	}
+
+	public CloseableHttpResponse execute(HttpUriRequest theRequest) throws IOException {
+		return myClient.execute(theRequest);
 	}
 }

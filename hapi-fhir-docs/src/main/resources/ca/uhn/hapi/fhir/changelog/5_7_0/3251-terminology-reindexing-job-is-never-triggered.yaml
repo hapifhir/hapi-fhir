@@ -1,0 +1,4 @@
+---
+type: fix
+title: "Terminology reindexing job was launching the wrong process, so terminology reindexing was never
+   launched. This has been fixed."

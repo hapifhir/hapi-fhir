@@ -1,0 +1,4 @@
+---
+type: fix
+title: "In servers with a large number of StructureDefinition resources loaded, occasionally a call for the 
+  CapabilityStatement could take a very long time to return. This has been corrected."

@@ -1,0 +1,4 @@
+---
+type: add
+issue: 2718
+title: "Added support for cross-partition subscriptions. Subscription in the default partition can now listen to resource changes from all partitions"

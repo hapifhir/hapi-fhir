@@ -15,7 +15,7 @@ import ca.uhn.fhir.jpa.entity.TermConceptMap;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import ca.uhn.fhir.jpa.entity.TermConceptMap;
  * #L%
  */
 
-public interface ITermConceptMapDao extends JpaRepository<TermConceptMap, Long> {
+public interface ITermConceptMapDao extends JpaRepository<TermConceptMap, Long>, IHapiFhirJpaRepository {
 	@Query("DELETE FROM TermConceptMap cm WHERE cm.myId = :pid")
 	@Modifying
 	void deleteTermConceptMapById(@Param("pid") Long theId);

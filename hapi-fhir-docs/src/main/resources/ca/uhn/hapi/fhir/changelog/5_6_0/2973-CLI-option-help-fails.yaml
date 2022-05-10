@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 2973
+title: "CLI `smileutil help {command}` returns `Unknown command` which should return the usage of `command`. This has been corrected."

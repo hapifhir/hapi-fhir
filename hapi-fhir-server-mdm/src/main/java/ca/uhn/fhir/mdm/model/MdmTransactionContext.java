@@ -4,7 +4,7 @@ package ca.uhn.fhir.mdm.model;
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,12 @@ package ca.uhn.fhir.mdm.model;
  * #L%
  */
 
+import ca.uhn.fhir.mdm.api.IMdmLink;
+import ca.uhn.fhir.mdm.api.MdmLinkEvent;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MdmTransactionContext {
 
@@ -30,6 +35,7 @@ public class MdmTransactionContext {
 		SUBMIT_RESOURCE_TO_MDM,
 		QUERY_LINKS,
 		UPDATE_LINK,
+		CREATE_LINK,
 		DUPLICATE_GOLDEN_RESOURCES,
 		NOT_DUPLICATE,
 		MERGE_GOLDEN_RESOURCES,
@@ -44,6 +50,8 @@ public class MdmTransactionContext {
 	private OperationType myRestOperation;
 
 	private String myResourceType;
+
+	private List<IMdmLink> myMdmLinkEvents = new ArrayList<>();
 
 	public TransactionLogMessages getTransactionLogMessages() {
 		return myTransactionLogMessages;
@@ -91,5 +99,18 @@ public class MdmTransactionContext {
 
 	public void setResourceType(String myResourceType) {
 		this.myResourceType = myResourceType;
+	}
+
+	public List<IMdmLink> getMdmLinks() {
+		return myMdmLinkEvents;
+	}
+
+	public MdmTransactionContext addMdmLink(IMdmLink theMdmLinkEvent) {
+		getMdmLinks().add(theMdmLinkEvent);
+		return this;
+	}
+
+	public void setMdmLinks(List<IMdmLink> theMdmLinkEvents) {
+		myMdmLinkEvents = theMdmLinkEvents;
 	}
 }

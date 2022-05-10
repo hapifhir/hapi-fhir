@@ -36,10 +36,10 @@ import org.hl7.fhir.dstu2016may.model.Parameters;
 import org.hl7.fhir.dstu2016may.model.Patient;
 import org.hl7.fhir.dstu2016may.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.http.HttpServletRequest;
@@ -193,7 +193,7 @@ public class OperationServerWithSearchParamTypesDstu2_1Test {
 		/*
 		 * Check the operation definitions themselves
 		 */
-		OperationDefinition andListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient--andlist"), createRequestDetails(rs));
+		OperationDefinition andListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient-t-andlist"), createRequestDetails(rs));
 		String def = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(andListDef);
 		ourLog.info(def);
 		//@formatter:off
@@ -209,7 +209,7 @@ public class OperationServerWithSearchParamTypesDstu2_1Test {
 		));
 		//@formatter:on
 		
-		andListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient--andlist-withnomax"), createRequestDetails(rs));
+		andListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient-t-andlist-withnomax"), createRequestDetails(rs));
 		def = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(andListDef);
 		ourLog.info(def);
 		//@formatter:off
@@ -225,7 +225,7 @@ public class OperationServerWithSearchParamTypesDstu2_1Test {
 		));
 		//@formatter:on
 
-		OperationDefinition orListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient--orlist"), createRequestDetails(rs));
+		OperationDefinition orListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient-t-orlist"), createRequestDetails(rs));
 		def = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(orListDef);
 		ourLog.info(def);
 		//@formatter:off
@@ -241,7 +241,7 @@ public class OperationServerWithSearchParamTypesDstu2_1Test {
 		));
 		//@formatter:on
 		
-		orListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient--orlist-withnomax"), createRequestDetails(rs));
+		orListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient-t-orlist-withnomax"), createRequestDetails(rs));
 		def = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(orListDef);
 		ourLog.info(def);
 		//@formatter:off
@@ -387,7 +387,7 @@ public class OperationServerWithSearchParamTypesDstu2_1Test {
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 	@BeforeAll
 	public static void beforeClass() throws Exception {
@@ -505,7 +505,7 @@ public class OperationServerWithSearchParamTypesDstu2_1Test {
 
 
 	private RequestDetails createRequestDetails(RestfulServer theServer) {
-		ServletRequestDetails retVal = new ServletRequestDetails(null);
+		ServletRequestDetails retVal = new ServletRequestDetails();
 		retVal.setServer(theServer);
 		return retVal;
 	}

@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.method;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.client.method;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -221,13 +222,13 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 			if (returnTypeFromMethod == null) {
 				ourLog.trace("Method {} returns a non-typed list, can't verify return type", theMethod);
 			} else if (!verifyIsValidResourceReturnType(returnTypeFromMethod) && !isResourceInterface(returnTypeFromMethod)) {
-				throw new ConfigurationException("Method '" + theMethod.getName() + "' from client type " + theMethod.getDeclaringClass().getCanonicalName()
+				throw new ConfigurationException(Msg.code(1427) + "Method '" + theMethod.getName() + "' from client type " + theMethod.getDeclaringClass().getCanonicalName()
 						+ " returns a collection with generic type " + toLogString(returnTypeFromMethod)
 						+ " - Must return a resource type or a collection (List, Set) with a resource type parameter (e.g. List<Patient> or List<IBaseResource> )");
 			}
 		} else {
 			if (!isResourceInterface(returnTypeFromMethod) && !verifyIsValidResourceReturnType(returnTypeFromMethod)) {
-				throw new ConfigurationException("Method '" + theMethod.getName() + "' from client type " + theMethod.getDeclaringClass().getCanonicalName()
+				throw new ConfigurationException(Msg.code(1428) + "Method '" + theMethod.getName() + "' from client type " + theMethod.getDeclaringClass().getCanonicalName()
 						+ " returns " + toLogString(returnTypeFromMethod) + " - Must return a resource type (eg Patient, Bundle"
 						+ ", etc., see the documentation for more details)");
 			}
@@ -258,7 +259,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 
 		if (!isResourceInterface(returnTypeFromAnnotation)) {
 			if (!verifyIsValidResourceReturnType(returnTypeFromAnnotation)) {
-				throw new ConfigurationException("Method '" + theMethod.getName() + "' from client type " + theMethod.getDeclaringClass().getCanonicalName()
+				throw new ConfigurationException(Msg.code(1429) + "Method '" + theMethod.getName() + "' from client type " + theMethod.getDeclaringClass().getCanonicalName()
 						+ " returns " + toLogString(returnTypeFromAnnotation) + " according to annotation - Must return a resource type");
 			}
 			returnType = returnTypeFromAnnotation;
@@ -296,7 +297,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		} else if (operation != null) {
 			return new OperationMethodBinding(returnType, returnTypeFromRp, theMethod, theContext, theProvider, operation);
 		} else {
-			throw new ConfigurationException("Did not detect any FHIR annotations on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
+			throw new ConfigurationException(Msg.code(1430) + "Did not detect any FHIR annotations on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
 		}
 
 		// // each operation name must have a request type annotation and be
@@ -360,7 +361,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 				if (obj1 == null) {
 					obj1 = object;
 				} else {
-					throw new ConfigurationException("Method " + theNextMethod.getName() + " on type '" + theNextMethod.getDeclaringClass().getSimpleName() + " has annotations @"
+					throw new ConfigurationException(Msg.code(1431) + "Method " + theNextMethod.getName() + " on type '" + theNextMethod.getDeclaringClass().getSimpleName() + " has annotations @"
 							+ obj1.getClass().getSimpleName() + " and @" + object.getClass().getSimpleName() + ". Can not have both.");
 				}
 
@@ -368,7 +369,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		}
 		if (obj1 == null) {
 			return false;
-			// throw new ConfigurationException("Method '" +
+			// throw new ConfigurationException(Msg.code(1432) + "Method '" +
 			// theNextMethod.getName() + "' on type '" +
 			// theNextMethod.getDeclaringClass().getSimpleName() +
 			// " has no FHIR method annotations.");

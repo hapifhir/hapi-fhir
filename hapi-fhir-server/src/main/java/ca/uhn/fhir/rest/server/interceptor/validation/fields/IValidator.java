@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor.validation.fields;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ package ca.uhn.fhir.rest.server.interceptor.validation.fields;
  */
 
 public interface IValidator {
+
+	public static final String VALIDATION_EXTENSION_URL = "https://hapifhir.org/StructureDefinition/ext-validation-field-has-error";
 
 	public boolean isValid(String theString);
 

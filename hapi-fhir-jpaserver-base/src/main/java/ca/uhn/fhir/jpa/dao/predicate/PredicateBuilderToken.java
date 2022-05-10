@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -109,7 +110,7 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 						} else {
 							msg = myContext.getLocalizer().getMessage(PredicateBuilderToken.class, "textModifierDisabledForSearchParam");
 						}
-						throw new MethodNotAllowedException(msg);
+						throw new MethodNotAllowedException(Msg.code(1032) + msg);
 					}
 
 					myPredicateBuilder.addPredicateString(theResourceName, theSearchParam, theList, theOperation, theRequestPartitionId);
@@ -187,17 +188,15 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 				system = null;
 				code = number.getValueAsQueryToken(myContext);
 			} else {
-				throw new IllegalArgumentException("Invalid token type: " + nextParameter.getClass());
+				throw new IllegalArgumentException(Msg.code(1033) + "Invalid token type: " + nextParameter.getClass());
 			}
 
 			if (system != null && system.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
-				throw new InvalidRequestException(
-					"Parameter[" + paramName + "] has system (" + system.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + system);
+				throw new InvalidRequestException(Msg.code(1034) + "Parameter[" + paramName + "] has system (" + system.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + system);
 			}
 
 			if (code != null && code.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
-				throw new InvalidRequestException(
-					"Parameter[" + paramName + "] has code (" + code.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + code);
+				throw new InvalidRequestException(Msg.code(1035) + "Parameter[" + paramName + "] has code (" + code.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + code);
 			}
 
 			/*
@@ -261,6 +260,9 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 			if (theSearchParam != null) {
 				Set<String> valueSetUris = Sets.newHashSet();
 				for (String nextPath : theSearchParam.getPathsSplit()) {
+					if (!nextPath.startsWith(myResourceType + ".")) {
+						continue;
+					}
 					BaseRuntimeChildDefinition def = myContext.newTerser().getDefinition(myResourceType, nextPath);
 					if (def instanceof BaseRuntimeDeclaredChildDefinition) {
 						String valueSet = ((BaseRuntimeDeclaredChildDefinition) def).getBindingValueSet();
@@ -291,11 +293,11 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 		String codeDesc = defaultIfBlank(theCode, "(missing)");
 		if (isBlank(theCode)) {
 			String msg = myContext.getLocalizer().getMessage(LegacySearchBuilder.class, "invalidCodeMissingSystem", theParamName, systemDesc, codeDesc);
-			throw new InvalidRequestException(msg);
+			throw new InvalidRequestException(Msg.code(1036) + msg);
 		}
 		if (isBlank(theSystem)) {
 			String msg = myContext.getLocalizer().getMessage(LegacySearchBuilder.class, "invalidCodeMissingCode", theParamName, systemDesc, codeDesc);
-			throw new InvalidRequestException(msg);
+			throw new InvalidRequestException(Msg.code(1037) + msg);
 		}
 	}
 

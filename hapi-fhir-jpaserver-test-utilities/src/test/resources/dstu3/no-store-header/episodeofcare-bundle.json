@@ -1,0 +1,4112 @@
+{
+	"resourceType": "Bundle",
+	"id": "PROD-DEMO-DATA",
+	"type": "batch",
+	"entry": [
+		{
+			"resource": {
+				"resourceType": "EpisodeOfCare",
+				"id": "ECC19005O3",
+				"meta": {
+					"versionId": "1",
+					"lastUpdated": "2019-03-23T11:17:38.981-04:00"
+				},
+				"extension": [
+					{
+						"url": "EpisodeOfCare#dialysisSchedule",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDialysisSchedule",
+									"code": "TueThuSat",
+									"display": "TueThuSat"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#scheduleShift",
+						"valueString": "1"
+					},
+					{
+						"url": "EpisodeOfCare#dateOfFirstDialysis",
+						"valueDate": "1996-11-07"
+					},
+					{
+						"url": "EpisodeOfCare#livingArrangement",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCLivingArrangement",
+									"code": "Other",
+									"display": "Other"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#diagnosisReason",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDiagnosisReason",
+									"code": "N18.6 End stage renal disease",
+									"display": "N18.6 End stage renal disease"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#financialClass",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCFinancialClass",
+									"code": "HMO Medicare risk",
+									"display": "HMO Medicare risk"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#primaryCause",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCPrimaryCause",
+									"code": "E11.22",
+									"display": " Type 2 diabetes mellitus with diabetic chronic kidney disease"
+								}
+							]
+						}
+					}
+				],
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "VN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.1",
+						"value": "C19005O3"
+					},
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "AN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.2",
+						"value": "51158O3"
+					}
+				],
+				"status": "active",
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCPlacementType",
+								"code": "Permanent"
+							}
+						]
+					},
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCModality",
+								"code": "IHD",
+								"display": "In-Center HemoDialysis"
+							}
+						]
+					}
+				],
+				"patient": {
+					"reference": "Patient/P999999991"
+				},
+				"period": {
+					"start": "1996-11-07T00:00:00-05:00"
+				},
+				"careManager": {
+					"reference": "Practitioner/PRMonicaProviderOne"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "EpisodeOfCare/ECC19005O3"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "EpisodeOfCare",
+				"id": "ECC1350361O3",
+				"meta": {
+					"versionId": "1",
+					"lastUpdated": "2019-03-23T11:17:39.013-04:00"
+				},
+				"extension": [
+					{
+						"url": "EpisodeOfCare#dialysisSchedule",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDialysisSchedule",
+									"code": "MonWedFri",
+									"display": "MonWedFri"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#scheduleShift",
+						"valueString": "2"
+					},
+					{
+						"url": "EpisodeOfCare#dateOfFirstDialysis",
+						"valueDate": "2017-10-20"
+					},
+					{
+						"url": "EpisodeOfCare#livingArrangement",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCLivingArrangement",
+									"code": "Other",
+									"display": "Other"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#diagnosisReason",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDiagnosisReason",
+									"code": "N18.6 End stage renal disease",
+									"display": "N18.6 End stage renal disease"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#financialClass",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCFinancialClass",
+									"code": "HMO Medicare risk",
+									"display": "HMO Medicare risk"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#primaryCause",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCPrimaryCause",
+									"code": "E11.22",
+									"display": " Type 2 diabetes mellitus with diabetic chronic kidney disease"
+								}
+							]
+						}
+					}
+				],
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "VN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.1",
+						"value": "C1350361O3"
+					},
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "AN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.2",
+						"value": "2145677O3"
+					}
+				],
+				"status": "active",
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCPlacementType",
+								"code": "Permanent"
+							}
+						]
+					},
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCModality",
+								"code": "IHD",
+								"display": "In-Center HemoDialysis"
+							}
+						]
+					}
+				],
+				"patient": {
+					"reference": "Patient/P999999990"
+				},
+				"period": {
+					"start": "2017-10-20T00:00:00-04:00"
+				},
+				"careManager": {
+					"reference": "Practitioner/PRMonicaProviderOne"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "EpisodeOfCare/ECC1350361O3"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "EpisodeOfCare",
+				"id": "ECA492663O3",
+				"meta": {
+					"versionId": "1",
+					"lastUpdated": "2019-03-23T11:17:39.025-04:00"
+				},
+				"extension": [
+					{
+						"url": "EpisodeOfCare#dialysisSchedule",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDialysisSchedule",
+									"code": "TueThuSat",
+									"display": "TueThuSat"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#scheduleShift",
+						"valueString": "3"
+					},
+					{
+						"url": "EpisodeOfCare#dateOfFirstDialysis",
+						"valueDate": "2010-07-13"
+					},
+					{
+						"url": "EpisodeOfCare#livingArrangement",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCLivingArrangement",
+									"code": "Rehab Center",
+									"display": "Rehab Center"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#diagnosisReason",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDiagnosisReason",
+									"code": "N18.6 End stage renal disease",
+									"display": "N18.6 End stage renal disease"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#financialClass",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCFinancialClass",
+									"code": "Medicare B",
+									"display": "Medicare B"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#primaryCause",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCPrimaryCause",
+									"code": "E11.22",
+									"display": " Type 2 diabetes mellitus with diabetic chronic kidney disease"
+								}
+							]
+						}
+					}
+				],
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "VN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.1",
+						"value": "A492663O3"
+					},
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "AN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.2",
+						"value": "156496O3"
+					}
+				],
+				"status": "active",
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCPlacementType",
+								"code": "Permanent"
+							}
+						]
+					},
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCModality",
+								"code": "IHD",
+								"display": "In-Center HemoDialysis"
+							}
+						]
+					}
+				],
+				"patient": {
+					"reference": "Patient/P999999983"
+				},
+				"period": {
+					"start": "2011-10-01T00:00:00-04:00"
+				},
+				"careManager": {
+					"reference": "Practitioner/PRMonicaProviderOne"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "EpisodeOfCare/ECA492663O3"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "EpisodeOfCare",
+				"id": "ECC1662888O3",
+				"meta": {
+					"versionId": "1",
+					"lastUpdated": "2019-03-23T11:17:39.039-04:00"
+				},
+				"extension": [
+					{
+						"url": "EpisodeOfCare#dialysisSchedule",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDialysisSchedule",
+									"code": "TueThuSat",
+									"display": "TueThuSat"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#scheduleShift",
+						"valueString": "2"
+					},
+					{
+						"url": "EpisodeOfCare#dateOfFirstDialysis",
+						"valueDate": "2013-12-30"
+					},
+					{
+						"url": "EpisodeOfCare#livingArrangement",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCLivingArrangement",
+									"code": "House",
+									"display": "House"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#diagnosisReason",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDiagnosisReason",
+									"code": "N17.0 Acute kidney failure with tubular necrosis",
+									"display": "N17.0 Acute kidney failure with tubular necrosis"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#financialClass",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCFinancialClass",
+									"code": "Commercial",
+									"display": "Commercial"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#primaryCause",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCPrimaryCause",
+									"code": "E11.22",
+									"display": " Type 2 diabetes mellitus with diabetic chronic kidney disease"
+								}
+							]
+						}
+					}
+				],
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "VN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.1",
+						"value": "C1662888O3"
+					},
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "AN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.2",
+						"value": "2715949O3"
+					}
+				],
+				"status": "active",
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCPlacementType",
+								"code": "Permanent"
+							}
+						]
+					},
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCModality",
+								"code": "IHD",
+								"display": "In-Center HemoDialysis"
+							}
+						]
+					}
+				],
+				"patient": {
+					"reference": "Patient/P999999981"
+				},
+				"period": {
+					"start": "2018-12-06T00:00:00-05:00",
+					"end": "2018-12-19T23:59:59-05:00"
+				},
+				"careManager": {
+					"reference": "Practitioner/PRMonicaProviderOne"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "EpisodeOfCare/ECC1662888O3"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "EpisodeOfCare",
+				"id": "ECA2265417O3",
+				"meta": {
+					"versionId": "1",
+					"lastUpdated": "2019-03-23T11:17:39.052-04:00"
+				},
+				"extension": [
+					{
+						"url": "EpisodeOfCare#dialysisSchedule",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDialysisSchedule",
+									"code": "MonWedFri",
+									"display": "MonWedFri"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#scheduleShift",
+						"valueString": "1"
+					},
+					{
+						"url": "EpisodeOfCare#dateOfFirstDialysis",
+						"valueDate": "2016-03-14"
+					},
+					{
+						"url": "EpisodeOfCare#livingArrangement",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCLivingArrangement",
+									"code": "Nursing Home",
+									"display": "Nursing Home"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#diagnosisReason",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDiagnosisReason",
+									"code": "N18.6 End stage renal disease",
+									"display": "N18.6 End stage renal disease"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#financialClass",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCFinancialClass",
+									"code": "Medicare B",
+									"display": "Medicare B"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#primaryCause",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCPrimaryCause",
+									"code": "E11.22",
+									"display": " Type 2 diabetes mellitus with diabetic chronic kidney disease"
+								}
+							]
+						}
+					}
+				],
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "VN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.1",
+						"value": "A2265417O3"
+					},
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "AN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.2",
+						"value": "1914488O3"
+					}
+				],
+				"status": "active",
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCPlacementType",
+								"code": "Permanent"
+							}
+						]
+					},
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCModality",
+								"code": "IHD",
+								"display": "In-Center HemoDialysis"
+							}
+						]
+					}
+				],
+				"patient": {
+					"reference": "Patient/P999999982"
+				},
+				"period": {
+					"start": "2017-05-15T00:00:00-04:00"
+				},
+				"careManager": {
+					"reference": "Practitioner/PRMonicaProviderOne"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "EpisodeOfCare/ECA2265417O3"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "EpisodeOfCare",
+				"id": "ECC1663755O3",
+				"meta": {
+					"versionId": "1",
+					"lastUpdated": "2019-03-23T11:17:39.065-04:00"
+				},
+				"extension": [
+					{
+						"url": "EpisodeOfCare#dialysisSchedule",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDialysisSchedule",
+									"code": "MonWedFri",
+									"display": "MonWedFri"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#scheduleShift",
+						"valueString": "1"
+					},
+					{
+						"url": "EpisodeOfCare#dateOfFirstDialysis",
+						"valueDate": "2019-03-31"
+					},
+					{
+						"url": "EpisodeOfCare#livingArrangement",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCLivingArrangement",
+									"code": "apartment",
+									"display": "apartment"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#diagnosisReason",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDiagnosisReason",
+									"code": "N17.0 Acute kidney failure with tubular necrosis",
+									"display": "N17.0 Acute kidney failure with tubular necrosis"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#financialClass",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCFinancialClass",
+									"code": "Medicare B",
+									"display": "Medicare B"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#primaryCause",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCPrimaryCause",
+									"code": "I12.9",
+									"display": " Hypertensive chronic kidney disease with stage 1 through stage 4 chronic kidney disease, or unspecified chronic kidney disease"
+								}
+							]
+						}
+					}
+				],
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "VN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.1",
+						"value": "C1663755O3"
+					},
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "AN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.2",
+						"value": "2687219O3"
+					}
+				],
+				"status": "active",
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCPlacementType",
+								"code": "Permanent"
+							}
+						]
+					},
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCModality",
+								"code": "IHD",
+								"display": "In-Center HemoDialysis"
+							}
+						]
+					}
+				],
+				"patient": {
+					"reference": "Patient/P999999986"
+				},
+				"period": {
+					"start": "2018-11-16T00:00:00-05:00",
+					"end": "2018-12-12T23:59:59-05:00"
+				},
+				"careManager": {
+					"reference": "Practitioner/PRMonicaProviderOne"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "EpisodeOfCare/ECC1663755O3"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "EpisodeOfCare",
+				"id": "ECC1431339O3",
+				"meta": {
+					"versionId": "1",
+					"lastUpdated": "2019-03-23T11:17:39.078-04:00"
+				},
+				"extension": [
+					{
+						"url": "EpisodeOfCare#dialysisSchedule",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDialysisSchedule",
+									"code": "TueThuSat",
+									"display": "TueThuSat"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#scheduleShift",
+						"valueString": "1"
+					},
+					{
+						"url": "EpisodeOfCare#dateOfFirstDialysis",
+						"valueDate": "2017-11-07"
+					},
+					{
+						"url": "EpisodeOfCare#livingArrangement",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCLivingArrangement",
+									"code": "Other",
+									"display": "Other"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#diagnosisReason",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDiagnosisReason",
+									"code": "N18.6 End stage renal disease",
+									"display": "N18.6 End stage renal disease"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#financialClass",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCFinancialClass",
+									"code": "Medicare B",
+									"display": "Medicare B"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#primaryCause",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCPrimaryCause",
+									"code": "N13.70",
+									"display": " Vesicoureteral-reflux, unspecified"
+								}
+							]
+						}
+					}
+				],
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "VN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.1",
+						"value": "C1431339O3"
+					},
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "AN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.2",
+						"value": "2261697O3"
+					}
+				],
+				"status": "active",
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCPlacementType",
+								"code": "Permanent"
+							}
+						]
+					},
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCModality",
+								"code": "IHD",
+								"display": "In-Center HemoDialysis"
+							}
+						]
+					}
+				],
+				"patient": {
+					"reference": "Patient/P999999989"
+				},
+				"period": {
+					"start": "2018-01-24T00:00:00-05:00"
+				},
+				"careManager": {
+					"reference": "Practitioner/PRMonicaProviderOne"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "EpisodeOfCare/ECC1431339O3"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "EpisodeOfCare",
+				"id": "ECA2728794O3",
+				"meta": {
+					"versionId": "1",
+					"lastUpdated": "2019-03-23T11:17:39.090-04:00"
+				},
+				"extension": [
+					{
+						"url": "EpisodeOfCare#dialysisSchedule",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDialysisSchedule",
+									"code": "TueThuSat",
+									"display": "TueThuSat"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#scheduleShift",
+						"valueString": "2"
+					},
+					{
+						"url": "EpisodeOfCare#dateOfFirstDialysis",
+						"valueDate": "2018-12-17"
+					},
+					{
+						"url": "EpisodeOfCare#diagnosisReason",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDiagnosisReason",
+									"code": "N18.6 End stage renal disease",
+									"display": "N18.6 End stage renal disease"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#financialClass",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCFinancialClass",
+									"code": "Medicare B",
+									"display": "Medicare B"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#primaryCause",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCPrimaryCause",
+									"code": "I12.9",
+									"display": " Hypertensive chronic kidney disease with stage 1 through stage 4 chronic kidney disease, or unspecified chronic kidney disease"
+								}
+							]
+						}
+					}
+				],
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "VN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.1",
+						"value": "A2728794O3"
+					},
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "AN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.2",
+						"value": "2604342O3"
+					}
+				],
+				"status": "active",
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCPlacementType",
+								"code": "Permanent"
+							}
+						]
+					},
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCModality",
+								"code": "IHD",
+								"display": "In-Center HemoDialysis"
+							}
+						]
+					}
+				],
+				"patient": {
+					"reference": "Patient/P999999984"
+				},
+				"period": {
+					"start": "2018-10-09T00:00:00-04:00"
+				},
+				"careManager": {
+					"reference": "Practitioner/PRMonicaProviderOne"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "EpisodeOfCare/ECA2728794O3"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "EpisodeOfCare",
+				"id": "ECC168866O3",
+				"meta": {
+					"versionId": "1",
+					"lastUpdated": "2019-03-23T11:17:39.103-04:00"
+				},
+				"extension": [
+					{
+						"url": "EpisodeOfCare#dialysisSchedule",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDialysisSchedule",
+									"code": "TueThuSat",
+									"display": "TueThuSat"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#scheduleShift",
+						"valueString": "1"
+					},
+					{
+						"url": "EpisodeOfCare#dateOfFirstDialysis",
+						"valueDate": "2013-09-17"
+					},
+					{
+						"url": "EpisodeOfCare#livingArrangement",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCLivingArrangement",
+									"code": "House",
+									"display": "House"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#diagnosisReason",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDiagnosisReason",
+									"code": "N18.6 End stage renal disease",
+									"display": "N18.6 End stage renal disease"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#financialClass",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCFinancialClass",
+									"code": "Self-pay",
+									"display": "Self-pay"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#primaryCause",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCPrimaryCause",
+									"code": "E11.22",
+									"display": " Type 2 diabetes mellitus with diabetic chronic kidney disease"
+								}
+							]
+						}
+					}
+				],
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "VN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.1",
+						"value": "C168866O3"
+					},
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "AN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.2",
+						"value": "518911O3"
+					}
+				],
+				"status": "active",
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCPlacementType",
+								"code": "Permanent"
+							}
+						]
+					},
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCModality",
+								"code": "IHD",
+								"display": "In-Center HemoDialysis"
+							}
+						]
+					}
+				],
+				"patient": {
+					"reference": "Patient/P999999987"
+				},
+				"period": {
+					"start": "2013-09-17T00:00:00-04:00"
+				},
+				"careManager": {
+					"reference": "Practitioner/PRMonicaProviderOne"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "EpisodeOfCare/ECC168866O3"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "EpisodeOfCare",
+				"id": "ECA1890903O3",
+				"meta": {
+					"versionId": "1",
+					"lastUpdated": "2019-03-23T11:17:39.115-04:00"
+				},
+				"extension": [
+					{
+						"url": "EpisodeOfCare#dialysisSchedule",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDialysisSchedule",
+									"code": "MonWedFri",
+									"display": "MonWedFri"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#scheduleShift",
+						"valueString": "1"
+					},
+					{
+						"url": "EpisodeOfCare#dateOfFirstDialysis",
+						"valueDate": "2016-02-08"
+					},
+					{
+						"url": "EpisodeOfCare#diagnosisReason",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDiagnosisReason",
+									"code": "N18.6 End stage renal disease",
+									"display": "N18.6 End stage renal disease"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#financialClass",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCFinancialClass",
+									"code": "Medicare B",
+									"display": "Medicare B"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#primaryCause",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCPrimaryCause",
+									"code": "N04.8",
+									"display": " Nephrotic syndrome with other morphologic changes"
+								}
+							]
+						}
+					}
+				],
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "VN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.1",
+						"value": "A1890903O3"
+					},
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "AN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.2",
+						"value": "1341485O3"
+					}
+				],
+				"status": "active",
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCPlacementType",
+								"code": "Permanent"
+							}
+						]
+					},
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCModality",
+								"code": "IHD",
+								"display": "In-Center HemoDialysis"
+							}
+						]
+					}
+				],
+				"patient": {
+					"reference": "Patient/P999999985"
+				},
+				"period": {
+					"start": "2016-02-05T00:00:00-05:00"
+				},
+				"careManager": {
+					"reference": "Practitioner/PRMonicaProviderOne"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "EpisodeOfCare/ECA1890903O3"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "EpisodeOfCare",
+				"id": "ECC19005O2",
+				"meta": {
+					"versionId": "1",
+					"lastUpdated": "2019-03-23T11:17:39.127-04:00"
+				},
+				"extension": [
+					{
+						"url": "EpisodeOfCare#dialysisSchedule",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDialysisSchedule",
+									"code": "TueThuSat",
+									"display": "TueThuSat"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#scheduleShift",
+						"valueString": "1"
+					},
+					{
+						"url": "EpisodeOfCare#dateOfFirstDialysis",
+						"valueDate": "1996-11-07"
+					},
+					{
+						"url": "EpisodeOfCare#livingArrangement",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCLivingArrangement",
+									"code": "Other",
+									"display": "Other"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#diagnosisReason",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDiagnosisReason",
+									"code": "N18.6 End stage renal disease",
+									"display": "N18.6 End stage renal disease"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#financialClass",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCFinancialClass",
+									"code": "HMO Medicare risk",
+									"display": "HMO Medicare risk"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#primaryCause",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCPrimaryCause",
+									"code": "E11.22",
+									"display": " Type 2 diabetes mellitus with diabetic chronic kidney disease"
+								}
+							]
+						}
+					}
+				],
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "VN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.1",
+						"value": "C19005O2"
+					},
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "AN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.2",
+						"value": "51158O2"
+					}
+				],
+				"status": "active",
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCPlacementType",
+								"code": "Permanent"
+							}
+						]
+					},
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCModality",
+								"code": "IHD",
+								"display": "In-Center HemoDialysis"
+							}
+						]
+					}
+				],
+				"patient": {
+					"reference": "Patient/P999999980"
+				},
+				"period": {
+					"start": "1996-11-07T00:00:00-05:00"
+				},
+				"careManager": {
+					"reference": "Practitioner/PRMonicaProviderOne"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "EpisodeOfCare/ECC19005O2"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "EpisodeOfCare",
+				"id": "ECC1350361O2",
+				"meta": {
+					"versionId": "1",
+					"lastUpdated": "2019-03-23T11:17:39.140-04:00"
+				},
+				"extension": [
+					{
+						"url": "EpisodeOfCare#dialysisSchedule",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDialysisSchedule",
+									"code": "MonWedFri",
+									"display": "MonWedFri"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#scheduleShift",
+						"valueString": "2"
+					},
+					{
+						"url": "EpisodeOfCare#dateOfFirstDialysis",
+						"valueDate": "2017-10-20"
+					},
+					{
+						"url": "EpisodeOfCare#livingArrangement",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCLivingArrangement",
+									"code": "Other",
+									"display": "Other"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#diagnosisReason",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDiagnosisReason",
+									"code": "N18.6 End stage renal disease",
+									"display": "N18.6 End stage renal disease"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#financialClass",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCFinancialClass",
+									"code": "HMO Medicare risk",
+									"display": "HMO Medicare risk"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#primaryCause",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCPrimaryCause",
+									"code": "E11.22",
+									"display": " Type 2 diabetes mellitus with diabetic chronic kidney disease"
+								}
+							]
+						}
+					}
+				],
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "VN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.1",
+						"value": "C1350361O2"
+					},
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "AN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.2",
+						"value": "2145677O2"
+					}
+				],
+				"status": "active",
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCPlacementType",
+								"code": "Permanent"
+							}
+						]
+					},
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCModality",
+								"code": "IHD",
+								"display": "In-Center HemoDialysis"
+							}
+						]
+					}
+				],
+				"patient": {
+					"reference": "Patient/P999999979"
+				},
+				"period": {
+					"start": "2017-10-20T00:00:00-04:00"
+				},
+				"careManager": {
+					"reference": "Practitioner/PRMonicaProviderOne"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "EpisodeOfCare/ECC1350361O2"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "EpisodeOfCare",
+				"id": "ECA492663O2",
+				"meta": {
+					"versionId": "1",
+					"lastUpdated": "2019-03-23T11:17:39.152-04:00"
+				},
+				"extension": [
+					{
+						"url": "EpisodeOfCare#dialysisSchedule",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDialysisSchedule",
+									"code": "TueThuSat",
+									"display": "TueThuSat"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#scheduleShift",
+						"valueString": "3"
+					},
+					{
+						"url": "EpisodeOfCare#dateOfFirstDialysis",
+						"valueDate": "2010-07-13"
+					},
+					{
+						"url": "EpisodeOfCare#livingArrangement",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCLivingArrangement",
+									"code": "Rehab Center",
+									"display": "Rehab Center"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#diagnosisReason",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDiagnosisReason",
+									"code": "N18.6 End stage renal disease",
+									"display": "N18.6 End stage renal disease"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#financialClass",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCFinancialClass",
+									"code": "Medicare B",
+									"display": "Medicare B"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#primaryCause",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCPrimaryCause",
+									"code": "E11.22",
+									"display": " Type 2 diabetes mellitus with diabetic chronic kidney disease"
+								}
+							]
+						}
+					}
+				],
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "VN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.1",
+						"value": "A492663O2"
+					},
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "AN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.2",
+						"value": "156496O2"
+					}
+				],
+				"status": "active",
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCPlacementType",
+								"code": "Permanent"
+							}
+						]
+					},
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCModality",
+								"code": "IHD",
+								"display": "In-Center HemoDialysis"
+							}
+						]
+					}
+				],
+				"patient": {
+					"reference": "Patient/P999999972"
+				},
+				"period": {
+					"start": "2011-10-01T00:00:00-04:00"
+				},
+				"careManager": {
+					"reference": "Practitioner/PRMonicaProviderOne"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "EpisodeOfCare/ECA492663O2"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "EpisodeOfCare",
+				"id": "ECC1662888O2",
+				"meta": {
+					"versionId": "1",
+					"lastUpdated": "2019-03-23T11:17:39.171-04:00"
+				},
+				"extension": [
+					{
+						"url": "EpisodeOfCare#dialysisSchedule",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDialysisSchedule",
+									"code": "TueThuSat",
+									"display": "TueThuSat"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#scheduleShift",
+						"valueString": "2"
+					},
+					{
+						"url": "EpisodeOfCare#dateOfFirstDialysis",
+						"valueDate": "2013-12-30"
+					},
+					{
+						"url": "EpisodeOfCare#livingArrangement",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCLivingArrangement",
+									"code": "House",
+									"display": "House"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#diagnosisReason",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDiagnosisReason",
+									"code": "N17.0 Acute kidney failure with tubular necrosis",
+									"display": "N17.0 Acute kidney failure with tubular necrosis"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#financialClass",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCFinancialClass",
+									"code": "Commercial",
+									"display": "Commercial"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#primaryCause",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCPrimaryCause",
+									"code": "E11.22",
+									"display": " Type 2 diabetes mellitus with diabetic chronic kidney disease"
+								}
+							]
+						}
+					}
+				],
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "VN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.1",
+						"value": "C1662888O2"
+					},
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "AN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.2",
+						"value": "2715949O2"
+					}
+				],
+				"status": "active",
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCPlacementType",
+								"code": "Permanent"
+							}
+						]
+					},
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCModality",
+								"code": "IHD",
+								"display": "In-Center HemoDialysis"
+							}
+						]
+					}
+				],
+				"patient": {
+					"reference": "Patient/P999999970"
+				},
+
+				"period": {
+					"start": "2018-12-06T00:00:00-05:00",
+					"end": "2018-12-19T23:59:59-05:00"
+				},
+				"careManager": {
+					"reference": "Practitioner/PRMonicaProviderOne"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "EpisodeOfCare/ECC1662888O2"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "EpisodeOfCare",
+				"id": "ECA2265417O2",
+				"meta": {
+					"versionId": "1",
+					"lastUpdated": "2019-03-23T11:17:39.184-04:00"
+				},
+				"extension": [
+					{
+						"url": "EpisodeOfCare#dialysisSchedule",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDialysisSchedule",
+									"code": "MonWedFri",
+									"display": "MonWedFri"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#scheduleShift",
+						"valueString": "1"
+					},
+					{
+						"url": "EpisodeOfCare#dateOfFirstDialysis",
+						"valueDate": "2016-03-14"
+					},
+					{
+						"url": "EpisodeOfCare#livingArrangement",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCLivingArrangement",
+									"code": "Nursing Home",
+									"display": "Nursing Home"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#diagnosisReason",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDiagnosisReason",
+									"code": "N18.6 End stage renal disease",
+									"display": "N18.6 End stage renal disease"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#financialClass",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCFinancialClass",
+									"code": "Medicare B",
+									"display": "Medicare B"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#primaryCause",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCPrimaryCause",
+									"code": "E11.22",
+									"display": " Type 2 diabetes mellitus with diabetic chronic kidney disease"
+								}
+							]
+						}
+					}
+				],
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "VN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.1",
+						"value": "A2265417O2"
+					},
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "AN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.2",
+						"value": "1914488O2"
+					}
+				],
+				"status": "active",
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCPlacementType",
+								"code": "Permanent"
+							}
+						]
+					},
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCModality",
+								"code": "IHD",
+								"display": "In-Center HemoDialysis"
+							}
+						]
+					}
+				],
+				"patient": {
+					"reference": "Patient/P999999971"
+				},
+				"period": {
+					"start": "2017-05-15T00:00:00-04:00"
+				},
+				"careManager": {
+					"reference": "Practitioner/PRMonicaProviderOne"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "EpisodeOfCare/ECA2265417O2"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "EpisodeOfCare",
+				"id": "ECC1663755O2",
+				"meta": {
+					"versionId": "1",
+					"lastUpdated": "2019-03-23T11:17:39.196-04:00"
+				},
+				"extension": [
+					{
+						"url": "EpisodeOfCare#dialysisSchedule",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDialysisSchedule",
+									"code": "MonWedFri",
+									"display": "MonWedFri"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#scheduleShift",
+						"valueString": "1"
+					},
+					{
+						"url": "EpisodeOfCare#dateOfFirstDialysis",
+						"valueDate": "2019-03-31"
+					},
+					{
+						"url": "EpisodeOfCare#livingArrangement",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCLivingArrangement",
+									"code": "apartment",
+									"display": "apartment"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#diagnosisReason",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDiagnosisReason",
+									"code": "N17.0 Acute kidney failure with tubular necrosis",
+									"display": "N17.0 Acute kidney failure with tubular necrosis"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#financialClass",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCFinancialClass",
+									"code": "Medicare B",
+									"display": "Medicare B"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#primaryCause",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCPrimaryCause",
+									"code": "I12.9",
+									"display": " Hypertensive chronic kidney disease with stage 1 through stage 4 chronic kidney disease, or unspecified chronic kidney disease"
+								}
+							]
+						}
+					}
+				],
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "VN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.1",
+						"value": "C1663755O2"
+					},
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "AN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.2",
+						"value": "2687219O2"
+					}
+				],
+				"status": "active",
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCPlacementType",
+								"code": "Permanent"
+							}
+						]
+					},
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCModality",
+								"code": "IHD",
+								"display": "In-Center HemoDialysis"
+							}
+						]
+					}
+				],
+				"patient": {
+					"reference": "Patient/P999999975"
+				},
+				"period": {
+					"start": "2018-11-16T00:00:00-05:00",
+					"end": "2018-12-12T23:59:59-05:00"
+				},
+				"careManager": {
+					"reference": "Practitioner/PRMonicaProviderOne"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "EpisodeOfCare/ECC1663755O2"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "EpisodeOfCare",
+				"id": "ECC1431339O2",
+				"meta": {
+					"versionId": "1",
+					"lastUpdated": "2019-03-23T11:17:39.212-04:00"
+				},
+				"extension": [
+					{
+						"url": "EpisodeOfCare#dialysisSchedule",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDialysisSchedule",
+									"code": "TueThuSat",
+									"display": "TueThuSat"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#scheduleShift",
+						"valueString": "1"
+					},
+					{
+						"url": "EpisodeOfCare#dateOfFirstDialysis",
+						"valueDate": "2017-11-07"
+					},
+					{
+						"url": "EpisodeOfCare#livingArrangement",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCLivingArrangement",
+									"code": "Other",
+									"display": "Other"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#diagnosisReason",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDiagnosisReason",
+									"code": "N18.6 End stage renal disease",
+									"display": "N18.6 End stage renal disease"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#financialClass",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCFinancialClass",
+									"code": "Medicare B",
+									"display": "Medicare B"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#primaryCause",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCPrimaryCause",
+									"code": "N13.70",
+									"display": " Vesicoureteral-reflux, unspecified"
+								}
+							]
+						}
+					}
+				],
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "VN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.1",
+						"value": "C1431339O2"
+					},
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "AN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.2",
+						"value": "2261697O2"
+					}
+				],
+				"status": "active",
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCPlacementType",
+								"code": "Permanent"
+							}
+						]
+					},
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCModality",
+								"code": "IHD",
+								"display": "In-Center HemoDialysis"
+							}
+						]
+					}
+				],
+				"patient": {
+					"reference": "Patient/P999999977"
+				},
+				"period": {
+					"start": "2018-01-24T00:00:00-05:00"
+				},
+				"careManager": {
+					"reference": "Practitioner/PRMonicaProviderOne"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "EpisodeOfCare/ECC1431339O2"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "EpisodeOfCare",
+				"id": "ECA2728794O2",
+				"meta": {
+					"versionId": "1",
+					"lastUpdated": "2019-03-23T11:17:39.224-04:00"
+				},
+				"extension": [
+					{
+						"url": "EpisodeOfCare#dialysisSchedule",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDialysisSchedule",
+									"code": "TueThuSat",
+									"display": "TueThuSat"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#scheduleShift",
+						"valueString": "2"
+					},
+					{
+						"url": "EpisodeOfCare#dateOfFirstDialysis",
+						"valueDate": "2018-12-17"
+					},
+					{
+						"url": "EpisodeOfCare#diagnosisReason",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDiagnosisReason",
+									"code": "N18.6 End stage renal disease",
+									"display": "N18.6 End stage renal disease"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#financialClass",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCFinancialClass",
+									"code": "Medicare B",
+									"display": "Medicare B"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#primaryCause",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCPrimaryCause",
+									"code": "I12.9",
+									"display": " Hypertensive chronic kidney disease with stage 1 through stage 4 chronic kidney disease, or unspecified chronic kidney disease"
+								}
+							]
+						}
+					}
+				],
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "VN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.1",
+						"value": "A2728794O2"
+					},
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "AN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.2",
+						"value": "2604342O2"
+					}
+				],
+				"status": "active",
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCPlacementType",
+								"code": "Permanent"
+							}
+						]
+					},
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCModality",
+								"code": "IHD",
+								"display": "In-Center HemoDialysis"
+							}
+						]
+					}
+				],
+				"patient": {
+					"reference": "Patient/P999999973"
+				},
+				"period": {
+					"start": "2018-10-09T00:00:00-04:00"
+				},
+				"careManager": {
+					"reference": "Practitioner/PRMonicaProviderOne"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "EpisodeOfCare/ECA2728794O2"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "EpisodeOfCare",
+				"id": "ECC168866O2",
+				"meta": {
+					"versionId": "1",
+					"lastUpdated": "2019-03-23T11:17:39.237-04:00"
+				},
+				"extension": [
+					{
+						"url": "EpisodeOfCare#dialysisSchedule",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDialysisSchedule",
+									"code": "TueThuSat",
+									"display": "TueThuSat"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#scheduleShift",
+						"valueString": "1"
+					},
+					{
+						"url": "EpisodeOfCare#dateOfFirstDialysis",
+						"valueDate": "2013-09-17"
+					},
+					{
+						"url": "EpisodeOfCare#livingArrangement",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCLivingArrangement",
+									"code": "House",
+									"display": "House"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#diagnosisReason",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDiagnosisReason",
+									"code": "N18.6 End stage renal disease",
+									"display": "N18.6 End stage renal disease"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#financialClass",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCFinancialClass",
+									"code": "Self-pay",
+									"display": "Self-pay"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#primaryCause",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCPrimaryCause",
+									"code": "E11.22",
+									"display": " Type 2 diabetes mellitus with diabetic chronic kidney disease"
+								}
+							]
+						}
+					}
+				],
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "VN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.1",
+						"value": "C168866O2"
+					},
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "AN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.2",
+						"value": "518911O2"
+					}
+				],
+				"status": "active",
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCPlacementType",
+								"code": "Permanent"
+							}
+						]
+					},
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCModality",
+								"code": "IHD",
+								"display": "In-Center HemoDialysis"
+							}
+						]
+					}
+				],
+				"patient": {
+					"reference": "Patient/P999999976"
+				},
+				"period": {
+					"start": "2013-09-17T00:00:00-04:00"
+				},
+				"careManager": {
+					"reference": "Practitioner/PRMonicaProviderOne"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "EpisodeOfCare/ECC168866O2"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "EpisodeOfCare",
+				"id": "ECA1890903O2",
+				"meta": {
+					"versionId": "1",
+					"lastUpdated": "2019-03-23T11:17:39.253-04:00"
+				},
+				"extension": [
+					{
+						"url": "EpisodeOfCare#dialysisSchedule",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDialysisSchedule",
+									"code": "MonWedFri",
+									"display": "MonWedFri"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#scheduleShift",
+						"valueString": "1"
+					},
+					{
+						"url": "EpisodeOfCare#dateOfFirstDialysis",
+						"valueDate": "2016-02-08"
+					},
+					{
+						"url": "EpisodeOfCare#diagnosisReason",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDiagnosisReason",
+									"code": "N18.6 End stage renal disease",
+									"display": "N18.6 End stage renal disease"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#financialClass",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCFinancialClass",
+									"code": "Medicare B",
+									"display": "Medicare B"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#primaryCause",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCPrimaryCause",
+									"code": "N04.8",
+									"display": " Nephrotic syndrome with other morphologic changes"
+								}
+							]
+						}
+					}
+				],
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "VN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.1",
+						"value": "A1890903O2"
+					},
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "AN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.2",
+						"value": "1341485O2"
+					}
+				],
+				"status": "active",
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCPlacementType",
+								"code": "Permanent"
+							}
+						]
+					},
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCModality",
+								"code": "IHD",
+								"display": "In-Center HemoDialysis"
+							}
+						]
+					}
+				],
+				"patient": {
+					"reference": "Patient/P999999974"
+				},
+				"period": {
+					"start": "2016-02-05T00:00:00-05:00"
+				},
+				"careManager": {
+					"reference": "Practitioner/PRMonicaProviderOne"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "EpisodeOfCare/ECA1890903O2"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "EpisodeOfCare",
+				"id": "ECC19005O1",
+				"meta": {
+					"versionId": "1",
+					"lastUpdated": "2019-03-23T11:17:39.266-04:00"
+				},
+				"extension": [
+					{
+						"url": "EpisodeOfCare#dialysisSchedule",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDialysisSchedule",
+									"code": "TueThuSat",
+									"display": "TueThuSat"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#scheduleShift",
+						"valueString": "1"
+					},
+					{
+						"url": "EpisodeOfCare#dateOfFirstDialysis",
+						"valueDate": "1996-11-07"
+					},
+					{
+						"url": "EpisodeOfCare#livingArrangement",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCLivingArrangement",
+									"code": "Other",
+									"display": "Other"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#diagnosisReason",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDiagnosisReason",
+									"code": "N18.6 End stage renal disease",
+									"display": "N18.6 End stage renal disease"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#financialClass",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCFinancialClass",
+									"code": "HMO Medicare risk",
+									"display": "HMO Medicare risk"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#primaryCause",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCPrimaryCause",
+									"code": "E11.22",
+									"display": " Type 2 diabetes mellitus with diabetic chronic kidney disease"
+								}
+							]
+						}
+					}
+				],
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "VN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.1",
+						"value": "C19005O1"
+					},
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "AN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.2",
+						"value": "51158O1"
+					}
+				],
+				"status": "active",
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCPlacementType",
+								"code": "Permanent"
+							}
+						]
+					},
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCModality",
+								"code": "IHD",
+								"display": "In-Center HemoDialysis TEST"
+							}
+						]
+					}
+				],
+				"patient": {
+					"reference": "Patient/P999999969"
+				},
+				"period": {
+					"start": "1996-11-07T00:00:00-05:00"
+				},
+				"careManager": {
+					"reference": "Practitioner/PRMonicaProviderOne"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "EpisodeOfCare/ECC19005O1"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "EpisodeOfCare",
+				"id": "ECC1350361O1",
+				"meta": {
+					"versionId": "1",
+					"lastUpdated": "2019-03-23T11:17:39.279-04:00"
+				},
+				"extension": [
+					{
+						"url": "EpisodeOfCare#dialysisSchedule",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDialysisSchedule",
+									"code": "MonWedFri",
+									"display": "MonWedFri"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#scheduleShift",
+						"valueString": "2"
+					},
+					{
+						"url": "EpisodeOfCare#dateOfFirstDialysis",
+						"valueDate": "2017-10-20"
+					},
+					{
+						"url": "EpisodeOfCare#livingArrangement",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCLivingArrangement",
+									"code": "Other",
+									"display": "Other"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#diagnosisReason",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDiagnosisReason",
+									"code": "N18.6 End stage renal disease",
+									"display": "N18.6 End stage renal disease"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#financialClass",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCFinancialClass",
+									"code": "HMO Medicare risk",
+									"display": "HMO Medicare risk"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#primaryCause",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCPrimaryCause",
+									"code": "E11.22",
+									"display": " Type 2 diabetes mellitus with diabetic chronic kidney disease"
+								}
+							]
+						}
+					}
+				],
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "VN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.1",
+						"value": "C1350361O1"
+					},
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "AN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.2",
+						"value": "2145677O1"
+					}
+				],
+				"status": "active",
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCPlacementType",
+								"code": "Permanent"
+							}
+						]
+					},
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCModality",
+								"code": "IHD",
+								"display": "In-Center HemoDialysis"
+							}
+						]
+					}
+				],
+				"patient": {
+					"reference": "Patient/P999999968"
+				},
+				"period": {
+					"start": "2017-10-20T00:00:00-04:00"
+				},
+				"careManager": {
+					"reference": "Practitioner/PRMonicaProviderOne"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "EpisodeOfCare/ECC1350361O1"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "EpisodeOfCare",
+				"id": "ECA492663O1",
+				"meta": {
+					"versionId": "1",
+					"lastUpdated": "2019-03-23T11:17:39.292-04:00"
+				},
+				"extension": [
+					{
+						"url": "EpisodeOfCare#dialysisSchedule",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDialysisSchedule",
+									"code": "TueThuSat",
+									"display": "TueThuSat"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#scheduleShift",
+						"valueString": "3"
+					},
+					{
+						"url": "EpisodeOfCare#dateOfFirstDialysis",
+						"valueDate": "2010-07-13"
+					},
+					{
+						"url": "EpisodeOfCare#livingArrangement",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCLivingArrangement",
+									"code": "Rehab Center",
+									"display": "Rehab Center"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#diagnosisReason",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDiagnosisReason",
+									"code": "N18.6 End stage renal disease",
+									"display": "N18.6 End stage renal disease"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#financialClass",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCFinancialClass",
+									"code": "Medicare B",
+									"display": "Medicare B"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#primaryCause",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCPrimaryCause",
+									"code": "E11.22",
+									"display": " Type 2 diabetes mellitus with diabetic chronic kidney disease"
+								}
+							]
+						}
+					}
+				],
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "VN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.1",
+						"value": "A492663O1"
+					},
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "AN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.2",
+						"value": "156496O1"
+					}
+				],
+				"status": "active",
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCPlacementType",
+								"code": "Permanent"
+							}
+						]
+					},
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCModality",
+								"code": "IHD",
+								"display": "In-Center HemoDialysis"
+							}
+						]
+					}
+				],
+				"patient": {
+					"reference": "Patient/P999999961"
+				},
+				"period": {
+					"start": "2011-10-01T00:00:00-04:00"
+				},
+				"careManager": {
+					"reference": "Practitioner/PRMonicaProviderOne"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "EpisodeOfCare/ECA492663O1"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "EpisodeOfCare",
+				"id": "ECC1662888O1",
+				"meta": {
+					"versionId": "1",
+					"lastUpdated": "2019-03-23T11:17:39.305-04:00"
+				},
+				"extension": [
+					{
+						"url": "EpisodeOfCare#dialysisSchedule",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDialysisSchedule",
+									"code": "TueThuSat",
+									"display": "TueThuSat"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#scheduleShift",
+						"valueString": "2"
+					},
+					{
+						"url": "EpisodeOfCare#dateOfFirstDialysis",
+						"valueDate": "2013-12-30"
+					},
+					{
+						"url": "EpisodeOfCare#livingArrangement",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCLivingArrangement",
+									"code": "House",
+									"display": "House"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#diagnosisReason",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDiagnosisReason",
+									"code": "N17.0 Acute kidney failure with tubular necrosis",
+									"display": "N17.0 Acute kidney failure with tubular necrosis"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#financialClass",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCFinancialClass",
+									"code": "Commercial",
+									"display": "Commercial"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#primaryCause",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCPrimaryCause",
+									"code": "E11.22",
+									"display": " Type 2 diabetes mellitus with diabetic chronic kidney disease"
+								}
+							]
+						}
+					}
+				],
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "VN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.1",
+						"value": "C1662888O1"
+					},
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "AN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.2",
+						"value": "2715949O1"
+					}
+				],
+				"status": "active",
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCPlacementType",
+								"code": "Permanent"
+							}
+						]
+					},
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCModality",
+								"code": "IHD",
+								"display": "In-Center HemoDialysis"
+							}
+						]
+					}
+				],
+				"patient": {
+					"reference": "Patient/P999999959"
+				},
+				"period": {
+					"start": "2018-12-06T00:00:00-05:00",
+					"end": "2018-12-19T23:59:59-05:00"
+				},
+				"careManager": {
+					"reference": "Practitioner/PRMonicaProviderOne"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "EpisodeOfCare/ECC1662888O1"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "EpisodeOfCare",
+				"id": "ECA2265417O1",
+				"meta": {
+					"versionId": "1",
+					"lastUpdated": "2019-03-23T11:17:39.317-04:00"
+				},
+				"extension": [
+					{
+						"url": "EpisodeOfCare#dialysisSchedule",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDialysisSchedule",
+									"code": "MonWedFri",
+									"display": "MonWedFri"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#scheduleShift",
+						"valueString": "1"
+					},
+					{
+						"url": "EpisodeOfCare#dateOfFirstDialysis",
+						"valueDate": "2016-03-14"
+					},
+					{
+						"url": "EpisodeOfCare#livingArrangement",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCLivingArrangement",
+									"code": "Nursing Home",
+									"display": "Nursing Home"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#diagnosisReason",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDiagnosisReason",
+									"code": "N18.6 End stage renal disease",
+									"display": "N18.6 End stage renal disease"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#financialClass",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCFinancialClass",
+									"code": "Medicare B",
+									"display": "Medicare B"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#primaryCause",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCPrimaryCause",
+									"code": "E11.22",
+									"display": " Type 2 diabetes mellitus with diabetic chronic kidney disease"
+								}
+							]
+						}
+					}
+				],
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "VN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.1",
+						"value": "A2265417O1"
+					},
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "AN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.2",
+						"value": "1914488O1"
+					}
+				],
+				"status": "active",
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCPlacementType",
+								"code": "Permanent"
+							}
+						]
+					},
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCModality",
+								"code": "IHD",
+								"display": "In-Center HemoDialysis"
+							}
+						]
+					}
+				],
+				"patient": {
+					"reference": "Patient/P999999960"
+				},
+				"period": {
+					"start": "2017-05-15T00:00:00-04:00"
+				},
+				"careManager": {
+					"reference": "Practitioner/PRMonicaProviderOne"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "EpisodeOfCare/ECA2265417O1"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "EpisodeOfCare",
+				"id": "ECC1663755O1",
+				"meta": {
+					"versionId": "1",
+					"lastUpdated": "2019-03-23T11:17:39.330-04:00"
+				},
+				"extension": [
+					{
+						"url": "EpisodeOfCare#dialysisSchedule",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDialysisSchedule",
+									"code": "MonWedFri",
+									"display": "MonWedFri"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#scheduleShift",
+						"valueString": "1"
+					},
+					{
+						"url": "EpisodeOfCare#dateOfFirstDialysis",
+						"valueDate": "2019-03-31"
+					},
+					{
+						"url": "EpisodeOfCare#livingArrangement",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCLivingArrangement",
+									"code": "apartment",
+									"display": "apartment"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#diagnosisReason",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDiagnosisReason",
+									"code": "N17.0 Acute kidney failure with tubular necrosis",
+									"display": "N17.0 Acute kidney failure with tubular necrosis"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#financialClass",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCFinancialClass",
+									"code": "Medicare B",
+									"display": "Medicare B"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#primaryCause",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCPrimaryCause",
+									"code": "I12.9",
+									"display": " Hypertensive chronic kidney disease with stage 1 through stage 4 chronic kidney disease, or unspecified chronic kidney disease"
+								}
+							]
+						}
+					}
+				],
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "VN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.1",
+						"value": "C1663755O1"
+					},
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "AN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.2",
+						"value": "2687219O1"
+					}
+				],
+				"status": "active",
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCPlacementType",
+								"code": "Permanent"
+							}
+						]
+					},
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCModality",
+								"code": "IHD",
+								"display": "In-Center HemoDialysis"
+							}
+						]
+					}
+				],
+				"patient": {
+					"reference": "Patient/P999999964"
+				},
+				"period": {
+					"start": "2018-11-16T00:00:00-05:00",
+					"end": "2018-12-12T23:59:59-05:00"
+				},
+				"careManager": {
+					"reference": "Practitioner/PRMonicaProviderOne"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "EpisodeOfCare/ECC1663755O1"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "EpisodeOfCare",
+				"id": "ECC1431339O1",
+				"meta": {
+					"versionId": "1",
+					"lastUpdated": "2019-03-23T11:17:39.343-04:00"
+				},
+				"extension": [
+					{
+						"url": "EpisodeOfCare#dialysisSchedule",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDialysisSchedule",
+									"code": "TueThuSat",
+									"display": "TueThuSat"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#scheduleShift",
+						"valueString": "1"
+					},
+					{
+						"url": "EpisodeOfCare#dateOfFirstDialysis",
+						"valueDate": "2017-11-07"
+					},
+					{
+						"url": "EpisodeOfCare#livingArrangement",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCLivingArrangement",
+									"code": "Other",
+									"display": "Other"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#diagnosisReason",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDiagnosisReason",
+									"code": "N18.6 End stage renal disease",
+									"display": "N18.6 End stage renal disease"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#financialClass",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCFinancialClass",
+									"code": "Medicare B",
+									"display": "Medicare B"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#primaryCause",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCPrimaryCause",
+									"code": "N13.70",
+									"display": " Vesicoureteral-reflux, unspecified"
+								}
+							]
+						}
+					}
+				],
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "VN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.1",
+						"value": "C1431339O1"
+					},
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "AN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.2",
+						"value": "2261697O1"
+					}
+				],
+				"status": "active",
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCPlacementType",
+								"code": "Permanent"
+							}
+						]
+					},
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCModality",
+								"code": "IHD",
+								"display": "In-Center HemoDialysis"
+							}
+						]
+					}
+				],
+				"patient": {
+					"reference": "Patient/P999999966"
+				},
+				"period": {
+					"start": "2018-01-24T00:00:00-05:00"
+				},
+				"careManager": {
+					"reference": "Practitioner/PRMonicaProviderOne"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "EpisodeOfCare/ECC1431339O1"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "EpisodeOfCare",
+				"id": "ECA2728794O1",
+				"meta": {
+					"versionId": "1",
+					"lastUpdated": "2019-03-23T11:17:39.357-04:00"
+				},
+				"extension": [
+					{
+						"url": "EpisodeOfCare#dialysisSchedule",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDialysisSchedule",
+									"code": "TueThuSat",
+									"display": "TueThuSat"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#scheduleShift",
+						"valueString": "2"
+					},
+					{
+						"url": "EpisodeOfCare#dateOfFirstDialysis",
+						"valueDate": "2018-12-17"
+					},
+					{
+						"url": "EpisodeOfCare#diagnosisReason",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDiagnosisReason",
+									"code": "N18.6 End stage renal disease",
+									"display": "N18.6 End stage renal disease"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#financialClass",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCFinancialClass",
+									"code": "Medicare B",
+									"display": "Medicare B"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#primaryCause",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCPrimaryCause",
+									"code": "I12.9",
+									"display": " Hypertensive chronic kidney disease with stage 1 through stage 4 chronic kidney disease, or unspecified chronic kidney disease"
+								}
+							]
+						}
+					}
+				],
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "VN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.1",
+						"value": "A2728794O1"
+					},
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "AN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.2",
+						"value": "2604342O1"
+					}
+				],
+				"status": "active",
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCPlacementType",
+								"code": "Permanent"
+							}
+						]
+					},
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCModality",
+								"code": "IHD",
+								"display": "In-Center HemoDialysis"
+							}
+						]
+					}
+				],
+				"patient": {
+					"reference": "Patient/P999999962"
+				},
+				"period": {
+					"start": "2018-10-09T00:00:00-04:00"
+				},
+				"careManager": {
+					"reference": "Practitioner/PRMonicaProviderOne"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "EpisodeOfCare/ECA2728794O1"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "EpisodeOfCare",
+				"id": "ECC168866O1",
+				"meta": {
+					"versionId": "1",
+					"lastUpdated": "2019-03-23T11:17:39.369-04:00"
+				},
+				"extension": [
+					{
+						"url": "EpisodeOfCare#dialysisSchedule",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDialysisSchedule",
+									"code": "TueThuSat",
+									"display": "TueThuSat"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#scheduleShift",
+						"valueString": "1"
+					},
+					{
+						"url": "EpisodeOfCare#dateOfFirstDialysis",
+						"valueDate": "2013-09-17"
+					},
+					{
+						"url": "EpisodeOfCare#livingArrangement",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCLivingArrangement",
+									"code": "House",
+									"display": "House"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#diagnosisReason",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDiagnosisReason",
+									"code": "N18.6 End stage renal disease",
+									"display": "N18.6 End stage renal disease"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#financialClass",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCFinancialClass",
+									"code": "Self-pay",
+									"display": "Self-pay"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#primaryCause",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCPrimaryCause",
+									"code": "E11.22",
+									"display": " Type 2 diabetes mellitus with diabetic chronic kidney disease"
+								}
+							]
+						}
+					}
+				],
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "VN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.1",
+						"value": "C168866O1"
+					},
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "AN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.2",
+						"value": "518911O1"
+					}
+				],
+				"status": "active",
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCPlacementType",
+								"code": "Permanent"
+							}
+						]
+					},
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCModality",
+								"code": "IHD",
+								"display": "In-Center HemoDialysis"
+							}
+						]
+					}
+				],
+				"patient": {
+					"reference": "Patient/P999999965"
+				},
+				"period": {
+					"start": "2013-09-17T00:00:00-04:00"
+				},
+				"careManager": {
+					"reference": "Practitioner/PRMonicaProviderOne"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "EpisodeOfCare/ECC168866O1"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "EpisodeOfCare",
+				"id": "ECA1890903O1",
+				"meta": {
+					"versionId": "1",
+					"lastUpdated": "2019-03-23T11:17:39.382-04:00"
+				},
+				"extension": [
+					{
+						"url": "EpisodeOfCare#dialysisSchedule",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDialysisSchedule",
+									"code": "MonWedFri",
+									"display": "MonWedFri"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#scheduleShift",
+						"valueString": "1"
+					},
+					{
+						"url": "EpisodeOfCare#dateOfFirstDialysis",
+						"valueDate": "2016-02-08"
+					},
+					{
+						"url": "EpisodeOfCare#diagnosisReason",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCDiagnosisReason",
+									"code": "N18.6 End stage renal disease",
+									"display": "N18.6 End stage renal disease"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#financialClass",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCFinancialClass",
+									"code": "Medicare B",
+									"display": "Medicare B"
+								}
+							]
+						}
+					},
+					{
+						"url": "EpisodeOfCare#primaryCause",
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://mydomain.org/fhir/cs/ABCPrimaryCause",
+									"code": "N04.8",
+									"display": " Nephrotic syndrome with other morphologic changes"
+								}
+							]
+						}
+					}
+				],
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "VN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.1",
+						"value": "A1890903O1"
+					},
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "AN"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.4.2",
+						"value": "1341485O1"
+					}
+				],
+				"status": "active",
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCPlacementType",
+								"code": "Permanent"
+							}
+						]
+					},
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ABCModality",
+								"code": "IHD",
+								"display": "In-Center HemoDialysis"
+							}
+						]
+					}
+				],
+				"patient": {
+					"reference": "Patient/P999999963"
+				},
+				"period": {
+					"start": "2016-02-05T00:00:00-05:00"
+				},
+				"careManager": {
+					"reference": "Practitioner/PRMonicaProviderOne"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "EpisodeOfCare/ECA1890903O1"
+			}
+		}
+	]
+}

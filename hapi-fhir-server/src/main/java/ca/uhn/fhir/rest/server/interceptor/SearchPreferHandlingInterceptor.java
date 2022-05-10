@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.server.interceptor;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.HapiLocalizer;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -140,10 +141,10 @@ public class SearchPreferHandlingInterceptor {
 				} else {
 
 					// Strict handling
-					List<String> allowedParams = searchParamRetriever.getActiveSearchParams(resourceName).keySet().stream().sorted().distinct().collect(Collectors.toList());
+					List<String> allowedParams = searchParamRetriever.getActiveSearchParams(resourceName).getSearchParamNames().stream().sorted().distinct().collect(Collectors.toList());
 					HapiLocalizer localizer = theRequestDetails.getFhirContext().getLocalizer();
-					String msg = localizer.getMessage("ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao.invalidSearchParameter", paramName, resourceName, allowedParams);
-					throw new InvalidRequestException(msg);
+					String msg = localizer.getMessage("ca.uhn.fhir.jpa.dao.BaseStorageDao.invalidSearchParameter", paramName, resourceName, allowedParams);
+					throw new InvalidRequestException(Msg.code(323) + msg);
 
 				}
 			}

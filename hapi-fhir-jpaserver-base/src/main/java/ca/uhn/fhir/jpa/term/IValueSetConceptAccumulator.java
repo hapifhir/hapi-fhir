@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.term;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,9 +29,9 @@ public interface IValueSetConceptAccumulator {
 
 	void addMessage(String theMessage);
 
-	void includeConcept(String theSystem, String theCode, String theDisplay, Long theSourceConceptPid, String theSourceConceptDirectParentPids);
+	void includeConcept(String theSystem, String theCode, String theDisplay, Long theSourceConceptPid, String theSourceConceptDirectParentPids, @Nullable String theSystemVersion);
 
-	void includeConceptWithDesignations(String theSystem, String theCode, String theDisplay, @Nullable Collection<TermConceptDesignation> theDesignations, Long theSourceConceptPid, String theSourceConceptDirectParentPids);
+	void includeConceptWithDesignations(String theSystem, String theCode, String theDisplay, @Nullable Collection<TermConceptDesignation> theDesignations, Long theSourceConceptPid, String theSourceConceptDirectParentPids, @Nullable String theSystemVersion);
 
 	/**
 	 * @return Returns <code>true</code> if the code was actually present and was removed

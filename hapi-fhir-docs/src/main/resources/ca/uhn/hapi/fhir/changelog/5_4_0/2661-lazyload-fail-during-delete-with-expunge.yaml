@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 2661
+title: "Fixed a bug where delete with expunge would throw a LazyInitializationException if there were delete conflicts, and
+       the expunge batch size was smaller than the available list of resources to delete."
+

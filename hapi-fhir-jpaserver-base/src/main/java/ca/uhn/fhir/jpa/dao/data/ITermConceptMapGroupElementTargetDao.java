@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.springframework.data.repository.query.Param;
  * #L%
  */
 
-public interface ITermConceptMapGroupElementTargetDao extends JpaRepository<TermConceptMapGroupElementTarget, Long> {
+public interface ITermConceptMapGroupElementTargetDao extends JpaRepository<TermConceptMapGroupElementTarget, Long>, IHapiFhirJpaRepository {
 	@Query("DELETE FROM TermConceptMapGroupElementTarget t WHERE t.myId = :pid")
 	@Modifying
 	void deleteTermConceptMapGroupElementTargetById(@Param("pid") Long theId);

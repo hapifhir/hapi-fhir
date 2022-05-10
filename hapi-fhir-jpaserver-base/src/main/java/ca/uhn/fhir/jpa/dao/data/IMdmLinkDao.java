@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.data;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,19 +20,20 @@ package ca.uhn.fhir.jpa.dao.data;
  * #L%
  */
 
-import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.jpa.entity.MdmLink;
-import org.springframework.beans.factory.annotation.Value;
+import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 
 @Repository
-public interface IMdmLinkDao extends JpaRepository<MdmLink, Long> {
+public interface IMdmLinkDao extends JpaRepository<MdmLink, Long>, IHapiFhirJpaRepository {
 	@Modifying
 	@Query("DELETE FROM MdmLink f WHERE myGoldenResourcePid = :pid OR mySourcePid = :pid")
 	int deleteWithAnyReferenceToPid(@Param("pid") Long thePid);
@@ -58,4 +59,21 @@ public interface IMdmLinkDao extends JpaRepository<MdmLink, Long> {
 		Long getSourcePid();
 	}
 
+	@Query("SELECT ml.myGoldenResourcePid as goldenPid, ml.mySourcePid as sourcePid " +
+		"FROM MdmLink ml " +
+		"INNER JOIN MdmLink ml2 " +
+		"on ml.myGoldenResourcePid=ml2.myGoldenResourcePid " +
+		"WHERE ml2.mySourcePid=:sourcePid " +
+		"AND ml2.myMatchResult=:matchResult " +
+		"AND ml.myMatchResult=:matchResult")
+	List<MdmPidTuple> expandPidsBySourcePidAndMatchResult(@Param("sourcePid") Long theSourcePid, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
+
+	@Query("SELECT ml.myGoldenResourcePid as goldenPid, ml.mySourcePid as sourcePid FROM MdmLink ml WHERE ml.myGoldenResourcePid = :goldenPid and ml.myMatchResult = :matchResult")
+	List<MdmPidTuple> expandPidsByGoldenResourcePidAndMatchResult(@Param("goldenPid") Long theSourcePid, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
+
+	@Query("SELECT ml.myId FROM MdmLink ml WHERE ml.myMdmSourceType = :resourceName AND ml.myCreated <= :highThreshold ORDER BY ml.myCreated DESC")
+	List<Long> findPidByResourceNameAndThreshold(@Param("resourceName") String theResourceName, @Param("highThreshold") Date theHighThreshold, Pageable thePageable);
+
+	@Query("SELECT ml.myId FROM MdmLink ml WHERE ml.myMdmSourceType = :resourceName AND ml.myCreated <= :highThreshold AND ml.myPartitionIdValue IN :partitionId ORDER BY ml.myCreated DESC")
+	List<Long> findPidByResourceNameAndThresholdAndPartitionId(@Param("resourceName") String theResourceName, @Param("highThreshold") Date theHighThreshold, @Param("partitionId") List<Integer> thePartitionIds, Pageable thePageable);
 }

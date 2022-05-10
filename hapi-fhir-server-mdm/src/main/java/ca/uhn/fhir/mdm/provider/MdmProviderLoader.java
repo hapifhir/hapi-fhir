@@ -4,7 +4,7 @@ package ca.uhn.fhir.mdm.provider;
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,9 @@ package ca.uhn.fhir.mdm.provider;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
-import ca.uhn.fhir.mdm.api.IMdmExpungeSvc;
-import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,13 +39,13 @@ public class MdmProviderLoader {
 	@Autowired
 	private ResourceProviderFactory myResourceProviderFactory;
 	@Autowired
-	private IMdmMatchFinderSvc myMdmMatchFinderSvc;
+	private MdmControllerHelper myMdmControllerHelper;
 	@Autowired
 	private IMdmControllerSvc myMdmControllerSvc;
 	@Autowired
-	private IMdmExpungeSvc myMdmExpungeSvc;
-	@Autowired
 	private IMdmSubmitSvc myMdmSubmitSvc;
+	@Autowired
+	private IMdmSettings myMdmSettings;
 
 	private BaseMdmProvider myMdmProvider;
 
@@ -54,12 +54,16 @@ public class MdmProviderLoader {
 			case DSTU3:
 			case R4:
 				myResourceProviderFactory.addSupplier(() -> {
-					myMdmProvider = new MdmProviderDstu3Plus(myFhirContext, myMdmControllerSvc, myMdmMatchFinderSvc, myMdmExpungeSvc, myMdmSubmitSvc);
+					myMdmProvider = new MdmProviderDstu3Plus(myFhirContext,
+						myMdmControllerSvc,
+						myMdmControllerHelper,
+						myMdmSubmitSvc,
+						myMdmSettings);
 					return myMdmProvider;
 				});
 				break;
 			default:
-				throw new ConfigurationException("MDM not supported for FHIR version " + myFhirContext.getVersion().getVersion());
+				throw new ConfigurationException(Msg.code(1497) + "MDM not supported for FHIR version " + myFhirContext.getVersion().getVersion());
 		}
 	}
 

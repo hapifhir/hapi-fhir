@@ -7,6 +7,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.annotation.RawParam;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateAndListParam;
@@ -16,11 +17,14 @@ import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import java.util.List;
+import java.util.Map;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,9 +79,11 @@ public class BaseJpaResourceProviderObservationDstu3 extends JpaResourceProvider
 
 		@Description(shortDefinition="The maximum number of observations to return for each observation code")
 		@OperationParam(name = "max", typeName = "integer", min = 0, max = 1)
-			IPrimitiveType<Integer> theMax
+			IPrimitiveType<Integer> theMax,
 
-	) {
+		@RawParam
+			Map<String, List<String>> theAdditionalRawParams
+		) {
 		startRequest(theServletRequest);
 		try {
 			SearchParameterMap paramMap = new SearchParameterMap();
@@ -96,6 +102,8 @@ public class BaseJpaResourceProviderObservationDstu3 extends JpaResourceProvider
 			if (theCount != null) {
 				paramMap.setCount(theCount.getValue());
 			}
+
+			getDao().translateRawParameters(theAdditionalRawParams, paramMap);
 
 			return ((IFhirResourceDaoObservation<Observation>) getDao()).observationsLastN(paramMap, theRequestDetails, theServletResponse);
 		} finally {

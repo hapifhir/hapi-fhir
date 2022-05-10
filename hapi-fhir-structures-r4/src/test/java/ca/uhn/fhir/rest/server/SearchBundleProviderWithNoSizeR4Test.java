@@ -20,10 +20,10 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleLinkComponent;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -61,7 +61,8 @@ public class SearchBundleProviderWithNoSizeR4Test {
 	public void testBundleProviderReturnsNoSize() throws Exception {
 		Bundle respBundle;
 		
-		ourLastBundleProvider = mock(IBundleProvider.class); 
+		ourLastBundleProvider = mock(IBundleProvider.class);
+		when(ourLastBundleProvider.getCurrentPageOffset()).thenReturn(null);
 		when(ourLastBundleProvider.size()).thenReturn(null);
 		when(ourLastBundleProvider.getResources(any(int.class), any(int.class))).then(new Answer<List<IBaseResource>>() {
 			@Override
@@ -143,7 +144,7 @@ public class SearchBundleProviderWithNoSizeR4Test {
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 	@BeforeAll

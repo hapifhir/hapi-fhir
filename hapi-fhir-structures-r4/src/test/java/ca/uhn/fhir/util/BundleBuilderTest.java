@@ -157,6 +157,36 @@ public class BundleBuilderTest {
 	}
 
 	@Test
+	public void testAddEntryDelete() {
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
+
+		Patient patient = new Patient();
+		patient.setActive(true);
+		patient.setId("123");
+		builder.addTransactionDeleteEntry(patient);
+		builder.addTransactionDeleteEntry("Patient", "123");
+		Bundle bundle = (Bundle) builder.getBundle();
+
+		ourLog.info("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+
+		assertEquals(Bundle.BundleType.TRANSACTION, bundle.getType());
+		assertEquals(2, bundle.getEntry().size());
+
+		//Check the IBaseresource style entry
+		assertNull(bundle.getEntry().get(0).getResource());
+		assertEquals("Patient/123", bundle.getEntry().get(0).getRequest().getUrl());
+		assertEquals(Bundle.HTTPVerb.DELETE, bundle.getEntry().get(0).getRequest().getMethod());
+
+		//Check the resourcetype + id style entry.
+		assertNull(bundle.getEntry().get(1).getResource());
+		assertEquals("Patient/123", bundle.getEntry().get(1).getRequest().getUrl());
+		assertEquals(Bundle.HTTPVerb.DELETE, bundle.getEntry().get(1).getRequest().getMethod());
+
+
+
+	}
+
+	@Test
 	public void testAddEntryCreateConditional() {
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
 

@@ -1,0 +1,6 @@
+---
+type: add
+issue: 2767
+title: "`$mdm-query-links` and `$mdm-duplicate-golden-resources` now enforce paging via parameters `_offset` and `_count`. More
+details can be found in the [MDM Operations documentation](/hapi-fhir/docs/server_jpa_mdm/mdm_operations.html)."
+

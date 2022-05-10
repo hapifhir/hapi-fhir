@@ -19,6 +19,7 @@ package ca.uhn.fhir.tinder.ant;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -29,13 +30,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import ca.uhn.fhir.tinder.TinderResourceGeneratorMojo;
 import org.apache.commons.lang.WordUtils;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.tools.generic.EscapeTool;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.tinder.AbstractGenerator;
@@ -332,16 +333,16 @@ public class TinderGeneratorTask extends Task {
 			context.setValueSetFiles(valueSetFiles);
 			if (ResourceSource.MODEL.equals(context.getResourceSource())) {
 				if (generateDatatypes) {
-					throw new BuildException("Cannot use \"generateDatatypes\" when resourceSource=model");
+					throw new BuildException(Msg.code(135) + "Cannot use \"generateDatatypes\" when resourceSource=model");
 				}
 				if (generateValueSets) {
-					throw new BuildException("Cannot use \"generateValueSets\" when resourceSource=model");
+					throw new BuildException(Msg.code(136) + "Cannot use \"generateValueSets\" when resourceSource=model");
 				}
 			}
 
 			generator.prepare(context);
 		} catch (MojoFailureException | FailureException e) {
-			throw new BuildException(e.getMessage(), e.getCause());
+			throw new BuildException(Msg.code(137) + e.getMessage(), e.getCause());
 		}
 
 		/*
@@ -351,17 +352,17 @@ public class TinderGeneratorTask extends Task {
 		File targetDirectory = null;
 		if (targetSourceDirectory != null) {
 			if (targetResourceDirectory != null) {
-				throw new BuildException("Both [targetSourceDirectory] and [targetResourceDirectory] are specified. Please choose just one.");
+				throw new BuildException(Msg.code(138) + "Both [targetSourceDirectory] and [targetResourceDirectory] are specified. Please choose just one.");
 			}
 			targetType = TargetType.SOURCE;
 			if (null == targetPackage) {
-				throw new BuildException("The [targetPackage] property must be specified when generating Java source code.");
+				throw new BuildException(Msg.code(139) + "The [targetPackage] property must be specified when generating Java source code.");
 			}
 			targetDirectory = new File(targetSourceDirectory, targetPackage.replace('.', File.separatorChar));
 		} else
 		if (targetResourceDirectory != null) {
 			if (targetSourceDirectory != null) {
-				throw new BuildException("Both [targetSourceDirectory] and [targetResourceDirectory] are specified. Please choose just one.");
+				throw new BuildException(Msg.code(140) + "Both [targetSourceDirectory] and [targetResourceDirectory] are specified. Please choose just one.");
 			}
 			targetType = TargetType.RESOURCE;
 			if (targetFolder != null) {
@@ -373,7 +374,7 @@ public class TinderGeneratorTask extends Task {
 				targetPackage = "";
 			}
 		} else {
-			throw new BuildException("Either [targetSourceDirectory] or [targetResourceDirectory] must be specified.");
+			throw new BuildException(Msg.code(141) + "Either [targetSourceDirectory] or [targetResourceDirectory] must be specified.");
 		}
 		targetDirectory.mkdirs();
 		log(" * Output ["+targetType.toString()+"] Directory: " + targetDirectory.getAbsolutePath());
@@ -423,7 +424,7 @@ public class TinderGeneratorTask extends Task {
 				ctx.put("version", version);
 				ctx.put("isRi", BaseStructureSpreadsheetParser.determineVersionEnum(version).isRi());
 				ctx.put("hash", "#");
-				ctx.put("esc", new EscapeTool());
+				ctx.put("esc", new TinderResourceGeneratorMojo.EscapeTool());
 				if (BaseStructureSpreadsheetParser.determineVersionEnum(version).isRi()) {
 					ctx.put("resourcePackage", "org.hl7.fhir." + version + ".model");
 				} else {
@@ -512,7 +513,7 @@ public class TinderGeneratorTask extends Task {
 			}
 			log("Caught exception: "+e.getClass().getName()+" ["+e.getMessage()+"]", 1);
 			e.printStackTrace();
-			throw new BuildException("Error processing "+getTaskName()+" task.", e);
+			throw new BuildException(Msg.code(142) + "Error processing "+getTaskName()+" task.", e);
 		} finally {
 			cleanup();
 		}
@@ -645,25 +646,25 @@ public class TinderGeneratorTask extends Task {
 
 	protected void validateAttributes () throws BuildException {
 		if (null == version) {
-			throw new BuildException("The "+this.getTaskName()+" task requires \"version\" attribute.");
+			throw new BuildException(Msg.code(143) + "The "+this.getTaskName()+" task requires \"version\" attribute.");
 		}
 		if (null == template) {
 			if (null == templateFile) {
-				throw new BuildException("The "+this.getTaskName()+" task requires \"template\" or \"templateFile\" attribute.");
+				throw new BuildException(Msg.code(144) + "The "+this.getTaskName()+" task requires \"template\" or \"templateFile\" attribute.");
 			}
 			if (!templateFile.exists()) {
-				throw new BuildException("The Velocity template file  ["+templateFile.getAbsolutePath()+"] does not exist.");
+				throw new BuildException(Msg.code(145) + "The Velocity template file  ["+templateFile.getAbsolutePath()+"] does not exist.");
 			}
 			if (!templateFile.canRead()) {
-				throw new BuildException("The Velocity template file ["+templateFile.getAbsolutePath()+"] cannot be read.");
+				throw new BuildException(Msg.code(146) + "The Velocity template file ["+templateFile.getAbsolutePath()+"] cannot be read.");
 			}
 			if (!templateFile.isFile()) {
-				throw new BuildException("The Velocity template file ["+templateFile.getAbsolutePath()+"] is not a file.");
+				throw new BuildException(Msg.code(147) + "The Velocity template file ["+templateFile.getAbsolutePath()+"] is not a file.");
 			}
 		}
 
 		if (null == projectHome) {
-			throw new BuildException("The "+this.getTaskName()+" task requires \"projectHome\" attribute.");
+			throw new BuildException(Msg.code(148) + "The "+this.getTaskName()+" task requires \"projectHome\" attribute.");
 		}
 	}
 

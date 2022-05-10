@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
@@ -52,7 +53,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -788,7 +789,12 @@ public class ResponseHighlighterInterceptor {
 
 			InputStream jsStream = ResponseHighlighterInterceptor.class.getResourceAsStream("ResponseHighlighter.js");
 			String jsStr = jsStream != null ? IOUtils.toString(jsStream, StandardCharsets.UTF_8) : "console.log('ResponseHighlighterInterceptor: javascript theResource not found')";
-			jsStr = jsStr.replace("FHIR_BASE", theRequestDetails.getServerBaseForRequest());
+
+			String baseUrl = theRequestDetails.getServerBaseForRequest();
+
+			baseUrl = UrlUtil.sanitizeBaseUrl(baseUrl);
+
+			jsStr = jsStr.replace("FHIR_BASE", baseUrl);
 			outputBuffer.append("<script type=\"text/javascript\">");
 			outputBuffer.append(jsStr);
 			outputBuffer.append("</script>\n");
@@ -814,7 +820,7 @@ public class ResponseHighlighterInterceptor {
 
 			theServletResponse.getWriter().close();
 		} catch (IOException e) {
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(322) + e);
 		}
 	}
 

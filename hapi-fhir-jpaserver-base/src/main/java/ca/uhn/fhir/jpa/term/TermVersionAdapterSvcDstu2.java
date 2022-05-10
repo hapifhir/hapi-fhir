@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.term;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,9 @@ package ca.uhn.fhir.jpa.term;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
@@ -29,18 +31,18 @@ import org.hl7.fhir.r4.model.ValueSet;
 public class TermVersionAdapterSvcDstu2 implements ITermVersionAdapterSvc {
 
 	@Override
-	public IIdType createOrUpdateCodeSystem(CodeSystem theCodeSystemResource) {
-		throw new UnsupportedOperationException();
+	public IIdType createOrUpdateCodeSystem(CodeSystem theCodeSystemResource, RequestDetails theRequestDetails) {
+		throw new UnsupportedOperationException(Msg.code(882));
 	}
 
 	@Override
 	public void createOrUpdateConceptMap(ConceptMap theNextConceptMap) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(883));
 	}
 
 	@Override
 	public void createOrUpdateValueSet(ValueSet theValueSet) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(884));
 	}
 
 }

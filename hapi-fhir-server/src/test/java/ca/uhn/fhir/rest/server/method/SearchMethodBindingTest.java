@@ -104,7 +104,7 @@ public class SearchMethodBindingTest {
 		when(requestDetails.getParameters()).thenReturn(params);
 
 		when(requestDetails.getUnqualifiedToQualifiedNames()).thenAnswer(t -> {
-			RequestDetails rd = new ServletRequestDetails(null);
+			RequestDetails rd = new ServletRequestDetails();
 			rd.setParameters(params);
 			return rd.getUnqualifiedToQualifiedNames();
 		});

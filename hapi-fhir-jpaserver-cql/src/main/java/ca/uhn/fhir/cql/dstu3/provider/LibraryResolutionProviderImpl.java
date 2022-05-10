@@ -4,7 +4,7 @@ package ca.uhn.fhir.cql.dstu3.provider;
  * #%L
  * HAPI FHIR JPA Server - Clinical Quality Language
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,12 @@ package ca.uhn.fhir.cql.dstu3.provider;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.cql.common.provider.LibraryResolutionProvider;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
@@ -48,16 +51,16 @@ public class LibraryResolutionProviderImpl implements LibraryResolutionProvider<
 	}
 
 	@Override
-	public Library resolveLibraryById(String libraryId) {
+	public Library resolveLibraryById(String libraryId, RequestDetails theRequestDetails) {
 		try {
-			return myLibraryDao.read(new IdType(libraryId));
+			return myLibraryDao.read(new IdType(libraryId), theRequestDetails);
 		} catch (Exception e) {
-			throw new IllegalArgumentException(String.format("Could not resolve library id %s", libraryId));
+			throw new IllegalArgumentException(Msg.code(1641) + String.format("Could not resolve library id %s", libraryId));
 		}
 	}
 
 	@Override
-	public Library resolveLibraryByCanonicalUrl(String url) {
+	public Library resolveLibraryByCanonicalUrl(String url, RequestDetails theRequestDetails) {
 		Objects.requireNonNull(url, "url must not be null");
 
 		String[] parts = url.split("\\|");
@@ -67,18 +70,18 @@ public class LibraryResolutionProviderImpl implements LibraryResolutionProvider<
 			version = parts[1];
 		}
 
-		SearchParameterMap map = new SearchParameterMap();
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
 		map.add("url", new UriParam(resourceUrl));
 		if (version != null) {
 			map.add("version", new TokenParam(version));
 		}
 
-		ca.uhn.fhir.rest.api.server.IBundleProvider bundleProvider = myLibraryDao.search(map);
+		ca.uhn.fhir.rest.api.server.IBundleProvider bundleProvider = myLibraryDao.search(map, theRequestDetails);
 
-		if (bundleProvider.size() == 0) {
+		if (bundleProvider.size() == null || bundleProvider.size() == 0) {
 			return null;
 		}
-		List<IBaseResource> resourceList = bundleProvider.getResources(0, bundleProvider.size());
+		List<IBaseResource> resourceList = bundleProvider.getAllResources();
 		return LibraryResolutionProvider.selectFromList(resolveLibraries(resourceList), version, x -> x.getVersion());
 	}
 
@@ -89,7 +92,7 @@ public class LibraryResolutionProviderImpl implements LibraryResolutionProvider<
 			x -> x.getVersion());
 
 		if (library == null) {
-			throw new IllegalArgumentException(String.format("Could not resolve library name %s", libraryName));
+			throw new IllegalArgumentException(Msg.code(1642) + String.format("Could not resolve library name %s", libraryName));
 		}
 
 		return library;
@@ -97,14 +100,14 @@ public class LibraryResolutionProviderImpl implements LibraryResolutionProvider<
 
 	private Iterable<org.hl7.fhir.dstu3.model.Library> getLibrariesByName(String name) {
 		// Search for libraries by name
-		SearchParameterMap map = new SearchParameterMap();
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
 		map.add("name", new StringParam(name, true));
-		ca.uhn.fhir.rest.api.server.IBundleProvider bundleProvider = myLibraryDao.search(map);
+		ca.uhn.fhir.rest.api.server.IBundleProvider bundleProvider = myLibraryDao.search(map, new SystemRequestDetails());
 
-		if (bundleProvider.size() == 0) {
+		if (bundleProvider.size() == null || bundleProvider.size() == 0) {
 			return new ArrayList<>();
 		}
-		List<IBaseResource> resourceList = bundleProvider.getResources(0, bundleProvider.size());
+		List<IBaseResource> resourceList = bundleProvider.getAllResources();
 		return resolveLibraries(resourceList);
 	}
 

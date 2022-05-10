@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.data;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 
 import java.util.Optional;
 
-public interface ITermCodeSystemDao  extends JpaRepository<TermCodeSystem, Long> {
+public interface ITermCodeSystemDao  extends JpaRepository<TermCodeSystem, Long>, IHapiFhirJpaRepository {
 
 	@Query("SELECT cs FROM TermCodeSystem cs WHERE cs.myCodeSystemUri = :code_system_uri")
 	TermCodeSystem findByCodeSystemUri(@Param("code_system_uri") String theCodeSystemUri);

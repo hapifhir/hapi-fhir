@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.method;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.method;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -33,6 +34,7 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
@@ -68,7 +70,7 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 		MethodReturnTypeEnum methodReturnType = getMethodReturnType();
 		Class<?> genericReturnType = (Class<?>) theMethod.getGenericReturnType();
 		if (methodReturnType != MethodReturnTypeEnum.RESOURCE || !IBaseConformance.class.isAssignableFrom(genericReturnType)) {
-			throw new ConfigurationException("Conformance resource provider method '" + theMethod.getName() + "' should return a Conformance resource class, returns: " + theMethod.getReturnType());
+			throw new ConfigurationException(Msg.code(387) + "Conformance resource provider method '" + theMethod.getName() + "' should return a Conformance resource class, returns: " + theMethod.getReturnType());
 		}
 
 		Metadata metadata = theMethod.getAnnotation(Metadata.class);
@@ -109,7 +111,7 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 	 * @see Metadata#cacheMillis()
 	 * @since 4.1.0
 	 */
-	private void setCacheMillis(long theCacheMillis) {
+	public void setCacheMillis(long theCacheMillis) {
 		myCacheMillis = theCacheMillis;
 	}
 
@@ -194,6 +196,7 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 			myCachedResponse.set(conf);
 			myCachedResponseExpires.set(System.currentTimeMillis() + getCacheMillis());
 		}
+		
 		return conf;
 	}
 
@@ -213,7 +216,7 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 			if (theRequest.getRequestType() == RequestTypeEnum.GET) {
 				return MethodMatchEnum.EXACT;
 			}
-			throw new MethodNotAllowedException("/metadata request must use HTTP GET", RequestTypeEnum.GET);
+			throw new MethodNotAllowedException(Msg.code(388) + "/metadata request must use HTTP GET", RequestTypeEnum.GET);
 		}
 
 		return MethodMatchEnum.NONE;
@@ -228,6 +231,15 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 	@Override
 	protected BundleTypeEnum getResponseBundleType() {
 		return null;
+	}
+
+	/**
+	 * Create and return the server's CapabilityStatement
+	 */
+	public IBaseConformance provideCapabilityStatement(RestfulServer theServer, RequestDetails theRequest) {
+		Object[] params = createMethodParams(theRequest);
+		IBundleProvider resultObj = invokeServer(theServer, theRequest, params);
+		return (IBaseConformance) resultObj.getResources(0,1).get(0);
 	}
 
 }

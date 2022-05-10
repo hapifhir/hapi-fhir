@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.method;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,7 @@ package ca.uhn.fhir.rest.client.method;
  * #L%
  */
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.*;
-
-import org.hl7.fhir.instance.model.api.*;
-
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
@@ -38,6 +31,22 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ReflectionUtil;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Object> {
 	protected static final Set<String> ALLOWED_PARAMS;
@@ -75,8 +84,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			Class<?> collectionType = ReflectionUtil.getGenericCollectionTypeOfMethodReturnType(theMethod);
 			if (collectionType != null) {
 				if (!Object.class.equals(collectionType) && !IBaseResource.class.isAssignableFrom(collectionType)) {
-					throw new ConfigurationException(
-							"Method " + theMethod.getDeclaringClass().getSimpleName() + "#" + theMethod.getName() + " returns an invalid collection generic type: " + collectionType);
+					throw new ConfigurationException(Msg.code(1458) + "Method " + theMethod.getDeclaringClass().getSimpleName() + "#" + theMethod.getName() + " returns an invalid collection generic type: " + collectionType);
 				}
 			}
 			myResourceListCollectionType = collectionType;
@@ -90,8 +98,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		} else if (MethodOutcome.class.isAssignableFrom(methodReturnType)) {
 			myMethodReturnType = MethodReturnTypeEnum.METHOD_OUTCOME;
 		} else {
-			throw new ConfigurationException(
-					"Invalid return type '" + methodReturnType.getCanonicalName() + "' on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
+			throw new ConfigurationException(Msg.code(1459) + "Invalid return type '" + methodReturnType.getCanonicalName() + "' on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
 		}
 
 		if (theReturnResourceType != null) {
@@ -163,7 +170,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				} else if (list.size() == 1) {
 					return list.get(0);
 				} else {
-					throw new InvalidResponseException(theResponseStatusCode, "FHIR server call returned a bundle with multiple resources, but this method is only able to returns one.");
+					throw new InvalidResponseException(Msg.code(1460) + "FHIR server call returned a bundle with multiple resources, but this method is only able to returns one.", theResponseStatusCode);
 				}
 			default:
 				break;
@@ -184,7 +191,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		}
 		}
 
-		throw new IllegalStateException("Should not get here!");
+		throw new IllegalStateException(Msg.code(1461) + "Should not get here!");
 	}
 
 	private Object toReturnType(IBaseResource resource) {

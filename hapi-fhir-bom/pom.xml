@@ -3,16 +3,16 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>ca.uhn.hapi.fhir</groupId>
     <artifactId>hapi-fhir-bom</artifactId>
-    <version>5.4.0-PRE5-SNAPSHOT</version>
+    <version>6.1.0-PRE1-SNAPSHOT</version>
     <packaging>pom</packaging>
 	 <name>HAPI FHIR BOM</name>
 
-    <parent>
-      <groupId>ca.uhn.hapi.fhir</groupId>
-      <artifactId>hapi-deployable-pom</artifactId>
-      <version>5.4.0-PRE5-SNAPSHOT</version>
-      <relativePath>../hapi-deployable-pom/pom.xml</relativePath>
-   </parent>
+	<parent>
+		<groupId>ca.uhn.hapi.fhir</groupId>
+		<artifactId>hapi-deployable-pom</artifactId>
+		<version>6.1.0-PRE1-SNAPSHOT</version>
+		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
+	</parent>
     
     <dependencyManagement>
         <dependencies>
@@ -21,8 +21,13 @@
                 <artifactId>hapi-fhir-base</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
+			  <dependency>
+				  <groupId>${project.groupId}</groupId>
+				  <artifactId>hapi-fhir-checkstyle</artifactId>
+				  <version>${project.version}</version>
+			  </dependency>
+			  <dependency>
+				  <groupId>${project.groupId}</groupId>
                 <artifactId>hapi-fhir-utilities</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -41,6 +46,11 @@
 				  <artifactId>hapi-fhir-server-mdm</artifactId>
 				  <version>${project.version}</version>
 			  </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>hapi-fhir-server-openapi</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>hapi-fhir-validation</artifactId>
@@ -128,7 +138,7 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>hapi-fhir-jpaserver-migrate</artifactId>
+					<artifactId>hapi-fhir-sql-migrate</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

@@ -1,8 +1,13 @@
 package ca.uhn.fhir.util;
 
+import org.apache.http.message.BasicNameValuePair;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class UrlUtilTest {
 
@@ -80,6 +85,25 @@ public class UrlUtilTest {
 		assertEquals(" &#10; ", UrlUtil.sanitizeUrlPart(" \n "));
 		assertEquals(" &#13; ", UrlUtil.sanitizeUrlPart(" \r "));
 		assertEquals("  ", UrlUtil.sanitizeUrlPart(" \0 "));
+	}
+
+	@Test
+	public void testTranslateMatchUrl_UrlWithSpaces() {
+		// Real space
+		assertThat(UrlUtil.translateMatchUrl("Observation?names=homer%20simpson"),
+			containsInAnyOrder(new BasicNameValuePair("names", "homer simpson")));
+
+		// Treat + as an actual + and not a space
+		assertThat(UrlUtil.translateMatchUrl("Observation?names=homer+simpson"),
+			containsInAnyOrder(new BasicNameValuePair("names", "homer+simpson")));
+
+	}
+
+	@Test
+	public void testTranslateMatchUrl_UrlWithPipe() {
+		// Real space
+		assertThat(UrlUtil.translateMatchUrl("Observation?names=homer|simpson"),
+			containsInAnyOrder(new BasicNameValuePair("names", "homer|simpson")));
 	}
 
 }

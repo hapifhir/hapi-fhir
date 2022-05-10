@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.exceptions;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,17 @@ public class ResourceVersionConflictException extends BaseServerResponseExceptio
 	 */
 	public ResourceVersionConflictException(String theMessage, IBaseOperationOutcome theOperationOutcome) {
 		super(STATUS_CODE, theMessage, theOperationOutcome);
+	}
+
+	/**
+	 * Constructor
+	 *
+	 * @param theMessage
+	 *            The message
+	 *  @param theOperationOutcome The OperationOutcome resource to return to the client
+	 */
+	public ResourceVersionConflictException(String theMessage, Throwable theCause, IBaseOperationOutcome theOperationOutcome) {
+		super(STATUS_CODE, theMessage, theCause, theOperationOutcome);
 	}
 
 }

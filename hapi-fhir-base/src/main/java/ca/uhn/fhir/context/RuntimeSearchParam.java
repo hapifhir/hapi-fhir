@@ -10,6 +10,7 @@ import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -27,7 +28,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +56,7 @@ public class RuntimeSearchParam {
 	private final RuntimeSearchParamStatusEnum myStatus;
 	private final String myUri;
 	private final Map<String, List<IBaseExtension<?, ?>>> myExtensions = new HashMap<>();
-	private final boolean myUnique;
+	private final ComboSearchParamType myComboSearchParamType;
 	private final List<Component> myComponents;
 	private IPhoneticEncoder myPhoneticEncoder;
 
@@ -64,20 +65,20 @@ public class RuntimeSearchParam {
 	 */
 	public RuntimeSearchParam(IIdType theId, String theUri, String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType,
 									  Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus, Collection<String> theBase) {
-		this(theId, theUri, theName, theDescription, thePath, theParamType, theProvidesMembershipInCompartments, theTargets, theStatus, false, Collections.emptyList(), theBase);
+		this(theId, theUri, theName, theDescription, thePath, theParamType, theProvidesMembershipInCompartments, theTargets, theStatus, null, Collections.emptyList(), theBase);
 	}
 
 	/**
 	 * Copy constructor
 	 */
 	public RuntimeSearchParam(RuntimeSearchParam theSp) {
-		this(theSp.getId(), theSp.getUri(), theSp.getName(), theSp.getDescription(), theSp.getPath(), theSp.getParamType(), theSp.getProvidesMembershipInCompartments(), theSp.getTargets(), theSp.getStatus(), theSp.isUnique(), theSp.getComponents(), theSp.getBase());
+		this(theSp.getId(), theSp.getUri(), theSp.getName(), theSp.getDescription(), theSp.getPath(), theSp.getParamType(), theSp.getProvidesMembershipInCompartments(), theSp.getTargets(), theSp.getStatus(), theSp.getComboSearchParamType(), theSp.getComponents(), theSp.getBase());
 	}
 
 	/**
 	 * Constructor
 	 */
-	public RuntimeSearchParam(IIdType theId, String theUri, String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus, boolean theUnique, List<Component> theComponents, Collection<String> theBase) {
+	public RuntimeSearchParam(IIdType theId, String theUri, String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, Set<String> theProvidesMembershipInCompartments, Set<String> theTargets, RuntimeSearchParamStatusEnum theStatus, ComboSearchParamType theComboSearchParamType, List<Component> theComponents, Collection<String> theBase) {
 		super();
 
 		myId = theId;
@@ -110,7 +111,7 @@ public class RuntimeSearchParam {
 		} else {
 			myBase = Collections.unmodifiableSet(new HashSet<>(theBase));
 		}
-		myUnique = theUnique;
+		myComboSearchParamType = theComboSearchParamType;
 		if (theComponents != null) {
 			myComponents = Collections.unmodifiableList(theComponents);
 		} else {
@@ -122,8 +123,12 @@ public class RuntimeSearchParam {
 		return myComponents;
 	}
 
-	public boolean isUnique() {
-		return myUnique;
+	/**
+	 * Returns <code>null</code> if this is not a combo search param type
+	 */
+	@Nullable
+	public ComboSearchParamType getComboSearchParamType() {
+		return myComboSearchParamType;
 	}
 
 	/**
@@ -228,18 +233,7 @@ public class RuntimeSearchParam {
 	}
 
 	public List<String> getPathsSplit() {
-		String path = getPath();
-		if (path.indexOf('|') == -1) {
-			return Collections.singletonList(path);
-		}
-
-		List<String> retVal = new ArrayList<>();
-		StringTokenizer tok = new StringTokenizer(path, "|");
-		while (tok.hasMoreElements()) {
-			String nextPath = tok.nextToken().trim();
-			retVal.add(nextPath.trim());
-		}
-		return retVal;
+		return getPathsSplitForResourceType(null);
 	}
 
 	/**
@@ -259,6 +253,41 @@ public class RuntimeSearchParam {
 			return theString;
 		}
 		return myPhoneticEncoder.encode(theString);
+	}
+
+	public List<String> getPathsSplitForResourceType(@Nullable String theResourceName) {
+		String path = getPath();
+		if (path.indexOf('|') == -1) {
+			if (theResourceName != null && !pathMatchesResourceType(theResourceName, path)) {
+				return Collections.emptyList();
+			}
+			return Collections.singletonList(path);
+		}
+
+		List<String> retVal = new ArrayList<>();
+		StringTokenizer tok = new StringTokenizer(path, "|");
+		while (tok.hasMoreElements()) {
+			String nextPath = tok.nextToken().trim();
+			if (theResourceName != null && !pathMatchesResourceType(theResourceName, nextPath)) {
+				continue;
+			}
+			retVal.add(nextPath.trim());
+		}
+		return retVal;
+	}
+
+	private boolean pathMatchesResourceType(String theResourceName, String thePath) {
+		if (thePath.startsWith(theResourceName + ".")) {
+			return true;
+		}
+		if (thePath.startsWith("Resouce.") || thePath.startsWith("DomainResource.")) {
+			return true;
+		}
+		if (Character.isLowerCase(thePath.charAt(0))) {
+			return true;
+		}
+
+		return false;
 	}
 
 	public enum RuntimeSearchParamStatusEnum {

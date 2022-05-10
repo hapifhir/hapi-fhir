@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ public enum NormalizedQuantitySearchLevel {
 	 * and {@link ResourceIndexedSearchParamQuantityNormalized}, 
 	 * {@link ResourceIndexedSearchParamQuantityNormalized} is used by searching.
 	 */
-	NORMALIZED_QUANTITY_SEARCH_SUPPORTED,
+	NORMALIZED_QUANTITY_SEARCH_SUPPORTED;
 
 	/**
 	 * Quantity is stored in only in {@link ResourceIndexedSearchParamQuantityNormalized}, 
@@ -55,4 +55,11 @@ public enum NormalizedQuantitySearchLevel {
 	 */
 	// When this is enabled, we can enable testSortByQuantityWithNormalizedQuantitySearchFullSupported()
 	//NORMALIZED_QUANTITY_SEARCH_FULL_SUPPORTED,
+
+	public boolean storageOrSearchSupported() {
+			return this.equals(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_STORAGE_SUPPORTED)
+				||  this.equals(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+	}
+
+
 }

@@ -6,7 +6,7 @@ import java.util.Collection;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.data.repository.query.Param;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 
-public interface IResourceTagDao extends JpaRepository<ResourceTag, Long> {
+public interface IResourceTagDao extends JpaRepository<ResourceTag, Long>, IHapiFhirJpaRepository {
 	@Query("" + 
 			   "SELECT t FROM ResourceTag t " + 
 			   "INNER JOIN FETCH t.myTag td " +

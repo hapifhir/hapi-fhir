@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.method;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition.IAccessor;
 import ca.uhn.fhir.i18n.HapiLocalizer;
@@ -35,7 +36,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,17 +69,23 @@ public class OperationParameter implements IParameter {
 	private Class<?> myParameterType;
 	private String myParamType;
 	private SearchParameter mySearchParameterBinding;
+	private String myDescription;
+	private List<String> myExampleValues;
 
-	public OperationParameter(FhirContext theCtx, String theOperationName, OperationParam theOperationParam) {
-		this(theCtx, theOperationName, theOperationParam.name(), theOperationParam.min(), theOperationParam.max());
-	}
-
-	OperationParameter(FhirContext theCtx, String theOperationName, String theParameterName, int theMin, int theMax) {
+	OperationParameter(FhirContext theCtx, String theOperationName, String theParameterName, int theMin, int theMax, String theDescription, List<String> theExampleValues) {
 		myOperationName = theOperationName;
 		myName = theParameterName;
 		myMin = theMin;
 		myMax = theMax;
 		myContext = theCtx;
+		myDescription = theDescription;
+
+		List<String> exampleValues = new ArrayList<>();
+		if (theExampleValues != null) {
+			exampleValues.addAll(theExampleValues);
+		}
+		myExampleValues = Collections.unmodifiableList(exampleValues);
+
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
@@ -126,11 +133,8 @@ public class OperationParameter implements IParameter {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
-		if (getContext().getVersion().getVersion().isRi()) {
-			if (IDatatype.class.isAssignableFrom(theParameterType)) {
-				throw new ConfigurationException("Incorrect use of type " + theParameterType.getSimpleName() + " as parameter type for method when context is for version " + getContext().getVersion().getVersion().name() + " in method: " + theMethod.toString());
-			}
-		}
+		FhirContext context = getContext();
+		validateTypeIsAppropriateVersionForContext(theMethod, theParameterType, context, "parameter");
 
 		myParameterType = theParameterType;
 		if (theInnerCollectionType != null) {
@@ -195,11 +199,28 @@ public class OperationParameter implements IParameter {
 				mySearchParameterBinding.setType(myContext, theParameterType, theInnerCollectionType, theOuterCollectionType);
 				myConverter = new OperationParamConverter();
 			} else {
-				throw new ConfigurationException("Invalid type for @OperationParam on method " + theMethod + ": " + myParameterType.getName());
+				throw new ConfigurationException(Msg.code(361) + "Invalid type for @OperationParam on method " + theMethod + ": " + myParameterType.getName());
 			}
 
 		}
 
+	}
+
+	public static void validateTypeIsAppropriateVersionForContext(Method theMethod, Class<?> theParameterType, FhirContext theContext, String theUseDescription) {
+		if (theParameterType != null) {
+			if (theParameterType.isInterface()) {
+				// TODO: we could probably be a bit more nuanced here but things like
+				// IBaseResource are often used and they aren't version specific
+				return;
+			}
+
+			FhirVersionEnum elementVersion = FhirVersionEnum.determineVersionForType(theParameterType);
+			if (elementVersion != null) {
+				if (elementVersion != theContext.getVersion().getVersion()) {
+					throw new ConfigurationException(Msg.code(360) + "Incorrect use of type " + theParameterType.getSimpleName() + " as " + theUseDescription + " type for method when theContext is for version " + theContext.getVersion().getVersion().name() + " in method: " + theMethod.toString());
+				}
+			}
+		}
 	}
 
 	public OperationParameter setConverter(IOperationParamConverter theConverter) {
@@ -208,7 +229,7 @@ public class OperationParameter implements IParameter {
 	}
 
 	private void throwWrongParamType(Object nextValue) {
-		throw new InvalidRequestException("Request has parameter " + myName + " of type " + nextValue.getClass().getSimpleName() + " but method expects type " + myParameterType.getSimpleName());
+		throw new InvalidRequestException(Msg.code(362) + "Request has parameter " + myName + " of type " + nextValue.getClass().getSimpleName() + " but method expects type " + myParameterType.getSimpleName());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -331,7 +352,7 @@ public class OperationParameter implements IParameter {
 				} else {
 					HapiLocalizer localizer = theRequest.getServer().getFhirContext().getLocalizer();
 					String msg = localizer.getMessage(OperationParameter.class, "urlParamNotPrimitive", myOperationName, myName);
-					throw new MethodNotAllowedException(msg, RequestTypeEnum.POST);
+					throw new MethodNotAllowedException(Msg.code(363) + msg, RequestTypeEnum.POST);
 				}
 			}
 		}
@@ -438,6 +459,14 @@ public class OperationParameter implements IParameter {
 		}
 	}
 
+	public String getDescription() {
+		return myDescription;
+	}
+
+	public List<String> getExampleValues() {
+		return myExampleValues;
+	}
+
 	interface IOperationParamConverter {
 
 		Object incomingServer(Object theObject);
@@ -470,7 +499,7 @@ public class OperationParameter implements IParameter {
 	}
 
 	public static void throwInvalidMode(String paramValues) {
-		throw new InvalidRequestException("Invalid mode value: \"" + paramValues + "\"");
+		throw new InvalidRequestException(Msg.code(364) + "Invalid mode value: \"" + paramValues + "\"");
 	}
 
 

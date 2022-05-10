@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,7 @@ public class NpmPackageVersionEntity {
 	public static final int VERSION_ID_LENGTH = 200;
 	public static final int PACKAGE_DESC_LENGTH = 200;
 	public static final int FHIR_VERSION_LENGTH = 10;
+	public static final int FHIR_VERSION_ID_LENGTH = 20;
 
 	@SequenceGenerator(name = "SEQ_NPM_PACKVER", sequenceName = "SEQ_NPM_PACKVER")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_NPM_PACKVER")
@@ -81,7 +82,7 @@ public class NpmPackageVersionEntity {
 	private String myDescriptionUpper;
 	@Column(name = "CURRENT_VERSION", nullable = false)
 	private boolean myCurrentVersion;
-	@Column(name = "FHIR_VERSION_ID", length = NpmPackageVersionEntity.FHIR_VERSION_LENGTH, nullable = false)
+	@Column(name = "FHIR_VERSION_ID", length = NpmPackageVersionEntity.FHIR_VERSION_ID_LENGTH, nullable = false)
 	private String myFhirVersionId;
 	@Enumerated(EnumType.STRING)
 	@Column(name = "FHIR_VERSION", length = NpmPackageVersionEntity.FHIR_VERSION_LENGTH, nullable = false)

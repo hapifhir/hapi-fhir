@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,16 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
+import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
 import ca.uhn.fhir.mdm.api.MatchedTarget;
+import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.log.Logs;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
-import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
-import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -43,20 +46,19 @@ import java.util.stream.Collectors;
 @Service
 public class FindCandidateByExampleSvc extends BaseCandidateFinder {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
-
+	@Autowired
+	IJpaIdHelperService myIdHelperService;
 	@Autowired
 	private FhirContext myFhirContext;
-	@Autowired
-	IdHelperService myIdHelperService;
 	@Autowired
 	private MdmLinkDaoSvc myMdmLinkDaoSvc;
 	@Autowired
 	private IMdmMatchFinderSvc myMdmMatchFinderSvc;
 
 	/**
-	 * Attempt to find matching Golden Resources by resolving them from similar Matching target resources, where target resource
-	 * can be either Patient or Practitioner. Runs MDM logic over the existing target resources, then finds their
-	 * entries in the MdmLink table, and returns all the matches found therein.
+	 * Attempt to find matching Golden Resources by resolving them from similar Matching target resources. Runs MDM logic
+	 * over the existing target resources, then finds their entries in the MdmLink table, and returns all the matches
+	 * found therein.
 	 *
 	 * @param theTarget the {@link IBaseResource} which we want to find candidate Golden Resources for.
 	 * @return an Optional list of {@link MatchedGoldenResourceCandidate} indicating matches.
@@ -67,10 +69,10 @@ public class FindCandidateByExampleSvc extends BaseCandidateFinder {
 
 		List<Long> goldenResourcePidsToExclude = getNoMatchGoldenResourcePids(theTarget);
 
-		List<MatchedTarget> matchedCandidates = myMdmMatchFinderSvc.getMatchedTargets(myFhirContext.getResourceType(theTarget), theTarget);
+		List<MatchedTarget> matchedCandidates = myMdmMatchFinderSvc.getMatchedTargets(myFhirContext.getResourceType(theTarget), theTarget, (RequestPartitionId) theTarget.getUserData(Constants.RESOURCE_PARTITION_ID));
 
-		//Convert all possible match targets to their equivalent Golden Resources by looking up in the MdmLink table,
-		//while ensuring that the matches aren't in our NO_MATCH list.
+		// Convert all possible match targets to their equivalent Golden Resources by looking up in the MdmLink table,
+		// while ensuring that the matches aren't in our NO_MATCH list.
 		// The data flow is as follows ->
 		// MatchedTargetCandidate -> Golden Resource -> MdmLink -> MatchedGoldenResourceCandidate
 		matchedCandidates = matchedCandidates.stream().filter(mc -> mc.isMatch() || mc.isPossibleMatch()).collect(Collectors.toList());

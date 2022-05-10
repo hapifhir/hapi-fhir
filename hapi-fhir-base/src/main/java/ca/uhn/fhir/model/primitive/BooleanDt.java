@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.primitive;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,12 @@ package ca.uhn.fhir.model.primitive;
  * #L%
  */
 
-import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
-
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.parser.DataFormatException;
+import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
 
 @DatatypeDef(name = "boolean")
 public class BooleanDt extends BasePrimitive<Boolean> implements IBaseBooleanDatatype {
@@ -52,7 +52,7 @@ public class BooleanDt extends BasePrimitive<Boolean> implements IBaseBooleanDat
 		} else if ("false".equals(theValue)) {
 			return Boolean.FALSE;
 		} else {
-			throw new DataFormatException("Invalid boolean string: '" + theValue + "'");
+			throw new DataFormatException(Msg.code(1872) + "Invalid boolean string: '" + theValue + "'");
 		}
 	}
 

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.term;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,11 +63,11 @@ public class TermReindexingSvcImpl implements ITermReindexingSvc {
 	@Autowired
 	private ITermConceptParentChildLinkDao myConceptParentChildLinkDao;
 	@Autowired
-	private ITermCodeSystemStorageSvc myConceptStorageSvc;
-	@Autowired
 	private ITermDeferredStorageSvc myDeferredStorageSvc;
 	@Autowired
 	private ISchedulerService mySchedulerService;
+	@Autowired
+	private TermConceptDaoSvc myTermConceptDaoSvc;
 
 	@Override
 	public void processReindexing() {
@@ -138,7 +138,7 @@ public class TermReindexingSvcImpl implements ITermReindexingSvc {
 						nextConcept.setParentPids(parentsBuilder.toString());
 					}
 
-					myConceptStorageSvc.saveConcept(nextConcept);
+					myTermConceptDaoSvc.saveConcept(nextConcept);
 					count++;
 				}
 
@@ -161,11 +161,11 @@ public class TermReindexingSvcImpl implements ITermReindexingSvc {
 
 	public static class Job implements HapiJob {
 		@Autowired
-		private ITermDeferredStorageSvc myTerminologySvc;
+		private ITermReindexingSvc myTermReindexingSvc;
 
 		@Override
 		public void execute(JobExecutionContext theContext) {
-			myTerminologySvc.saveDeferred();
+			myTermReindexingSvc.processReindexing();
 		}
 	}
 

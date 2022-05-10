@@ -2,6 +2,7 @@ package ca.uhn.fhir.rest.client;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -20,8 +21,6 @@ import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
-import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -44,7 +43,6 @@ import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
-import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.client.impl.BaseClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -560,14 +558,14 @@ public class GenericClientDstu2Test {
 			client.delete().resource(pat).execute();
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("theResource.getId() must contain a resource type and logical ID at a minimum (e.g. Patient/1234), found: 123", e.getMessage());
+			assertEquals(Msg.code(1369) + "theResource.getId() must contain a resource type and logical ID at a minimum (e.g. Patient/1234), found: 123", e.getMessage());
 		}
 
 		try {
 			client.delete().resourceById(new IdDt("123")).execute();
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("theId must contain a resource type and logical ID at a minimum (e.g. Patient/1234)found: 123", e.getMessage());
+			assertEquals(Msg.code(1370) + "theId must contain a resource type and logical ID at a minimum (e.g. Patient/1234)found: 123", e.getMessage());
 		}
 
 		try {
@@ -588,7 +586,7 @@ public class GenericClientDstu2Test {
 			client.delete().resourceConditionalByType("InvalidType");
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Unknown resource name \"InvalidType\" (this name is not known in FHIR version \"DSTU2\")", e.getMessage());
+			assertEquals(Msg.code(1684) + "Unknown resource name \"InvalidType\" (this name is not known in FHIR version \"DSTU2\")", e.getMessage());
 		}
 	}
 
@@ -766,7 +764,7 @@ public class GenericClientDstu2Test {
 			ourCtx.getRestfulClientFactory().newClient(RestfulClientInstance.class, "http://foo");
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals("ca.uhn.fhir.context.ConfigurationException: ca.uhn.fhir.rest.client.GenericClientDstu2Test.RestfulClientInstance is not an interface", e.toString());
+			assertEquals("ca.uhn.fhir.context.ConfigurationException: " + Msg.code(1354) + "ca.uhn.fhir.rest.client.GenericClientDstu2Test.RestfulClientInstance is not an interface", e.toString());
 		}
 	}
 
@@ -1262,7 +1260,7 @@ public class GenericClientDstu2Test {
 				.execute();
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("Don't know how to handle parameter of type class ca.uhn.fhir.rest.client.GenericClientDstu2Test$22", e.getMessage());
+			assertEquals(Msg.code(1380) + "Don't know how to handle parameter of type class ca.uhn.fhir.rest.client.GenericClientDstu2Test$22", e.getMessage());
 		}
 	}
 
@@ -1606,7 +1604,7 @@ public class GenericClientDstu2Test {
 			ourCtx.newRestfulGenericClient("http://localhost:8080/fhir");
 			fail();
 		} catch (IllegalStateException e) {
-			assertEquals("ApacheRestfulClientFactory does not have FhirContext defined. This must be set via ApacheRestfulClientFactory#setFhirContext(FhirContext)", e.getMessage());
+			assertEquals(Msg.code(1355) + "ApacheRestfulClientFactory does not have FhirContext defined. This must be set via ApacheRestfulClientFactory#setFhirContext(FhirContext)", e.getMessage());
 		}
 	}
 
@@ -1675,14 +1673,14 @@ public class GenericClientDstu2Test {
 			client.read(new UriDt("1"));
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("The given URI is not an absolute URL and is not usable for this operation: 1", e.getMessage());
+			assertEquals(Msg.code(1365) + "The given URI is not an absolute URL and is not usable for this operation: 1", e.getMessage());
 		}
 
 		try {
 			client.read(new UriDt("http://example.com/InvalidResource/1"));
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Unknown resource name \"InvalidResource\" (this name is not known in FHIR version \"DSTU2\")", e.getMessage());
+			assertEquals(Msg.code(1684) + "Unknown resource name \"InvalidResource\" (this name is not known in FHIR version \"DSTU2\")", e.getMessage());
 		}
 	}
 
@@ -2058,7 +2056,7 @@ public class GenericClientDstu2Test {
 		try {
 			client.search().byUrl("foo/bar?test=1");
 		} catch (IllegalArgumentException e) {
-			assertEquals("Search URL must be either a complete URL starting with http: or https:, or a relative FHIR URL in the form [ResourceType]?[Params]", e.getMessage());
+			assertEquals(Msg.code(1393) + "Search URL must be either a complete URL starting with http: or https:, or a relative FHIR URL in the form [ResourceType]?[Params]", e.getMessage());
 		}
 	}
 
@@ -2734,7 +2732,7 @@ public class GenericClientDstu2Test {
 
 	@AfterAll
 	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 	@BeforeAll

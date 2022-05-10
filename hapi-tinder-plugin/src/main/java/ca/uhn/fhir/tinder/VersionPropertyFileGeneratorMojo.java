@@ -1,5 +1,6 @@
 package ca.uhn.fhir.tinder;
 
+import ca.uhn.fhir.i18n.Msg;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -50,7 +51,7 @@ public class VersionPropertyFileGeneratorMojo extends AbstractMojo {
 				})
 				.collect(Collectors.toList());
 		} catch (IOException e) {
-			throw new MojoFailureException(e.getMessage(), e);
+			throw new MojoFailureException(Msg.code(108) + e.getMessage(), e);
 		}
 
 		Assert.isTrue(components.size() > 50, "Only have " + components.size() + " components");
@@ -77,7 +78,7 @@ public class VersionPropertyFileGeneratorMojo extends AbstractMojo {
 					name = annotation.name() + ".2";
 				}
 				if (datatypeTypes.containsKey(name)) {
-					throw new Error("Already have " + name);
+					throw new Error(Msg.code(109) + "Already have " + name);
 				}
 				datatypeTypes.put(name, clazz);
 			}
@@ -90,7 +91,7 @@ public class VersionPropertyFileGeneratorMojo extends AbstractMojo {
 			ourLog.info("Found datatype: {}", annotation.name());
 			datatypeTypes.put(annotation.name(), clazz);
 		} catch (ClassNotFoundException e1) {
-			throw new MojoFailureException("Unknown", e1);
+			throw new MojoFailureException(Msg.code(110) + "Unknown", e1);
 		}
 		
 		ourLog.info("Found {} resources and {} datatypes", resourceTypes.size(), datatypeTypes.size());
@@ -118,7 +119,7 @@ public class VersionPropertyFileGeneratorMojo extends AbstractMojo {
 			}
 			w.flush();
 		} catch (IOException e) {
-			throw new MojoFailureException("Failed to write property file", e);
+			throw new MojoFailureException(Msg.code(111) + "Failed to write property file", e);
 		} finally {
 			IOUtils.closeQuietly(w);
 		}
@@ -126,12 +127,12 @@ public class VersionPropertyFileGeneratorMojo extends AbstractMojo {
 
 	public static void main(String[] theArgs) throws MojoFailureException {
 
-		VersionPropertyFileGeneratorMojo m = new VersionPropertyFileGeneratorMojo();
-		m.packageName = "org.hl7.fhir.r4.model";
-		m.targetFile = new File("hapi-fhir-structures-r4/src/main/resources/org/hl7/fhir/r4/model/fhirversion.properties");
-		m.execute();
+//		VersionPropertyFileGeneratorMojo m = new VersionPropertyFileGeneratorMojo();
+//		m.packageName = "org.hl7.fhir.r4.model";
+//		m.targetFile = new File("hapi-fhir-structures-r4/src/main/resources/org/hl7/fhir/r4/model/fhirversion.properties");
+//		m.execute();
 
-		m = new VersionPropertyFileGeneratorMojo();
+		VersionPropertyFileGeneratorMojo m = new VersionPropertyFileGeneratorMojo();
 		m.packageName = "org.hl7.fhir.r5.model";
 		m.targetFile = new File("hapi-fhir-structures-r5/src/main/resources/org/hl7/fhir/r5/model/fhirversion.properties");
 		m.execute();

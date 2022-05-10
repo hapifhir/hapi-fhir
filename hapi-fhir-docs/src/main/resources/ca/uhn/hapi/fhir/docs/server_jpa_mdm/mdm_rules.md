@@ -99,7 +99,11 @@ Here is an example of a full HAPI MDM rules json document:
 		"lastname-jaro,phone,birthday": "POSSIBLE_MATCH",
 		"firstname-jaro,phone,birthday": "POSSIBLE_MATCH",
         "org-name": "MATCH"
-	}
+	},
+   "eidSystems": {
+      "Organization": "https://hapifhir.org/identifier/naming/business-number",
+      "Practitioner": "https://hapifhir.org/identifier/naming/license-number"
+   }
 }
 ```
 
@@ -165,7 +169,7 @@ then the above `candidateSearchParams` and `candidateFilterSearchParams` would r
 
 ### matchFields
 
-Once the match candidates have been found, they are then each compared to the incoming Patient resource.  This comparison is made across a list of `matchField`s.  Each matchField returns `true` or `false` indicating whether the candidate and the incoming Patient match on that field.   There are two types of matchFields: `matcher` and `similarity`.  `matcher` matchFields return a `true` or `false` directly, whereas `similarity` matchFields return a score between 0.0 (no match) and 1.0 (exact match) and this score is translated to a `true/false` via a `matchThreshold`.  E.g. if a `JARO_WINKLER` matchField is configured with a `matchThreshold` of 0.8 then that matchField will only return `true` if the `JARO_WINKLER` similarity evaluates to a score >= 8.0.
+Once the match candidates have been found, they are then each compared to the incoming Patient resource.  This comparison is made across a list of `matchField`s.  Each matchField returns `true` or `false` indicating whether the candidate and the incoming Patient match on that field.   There are two types of matchFields: `matcher` and `similarity`.  `matcher` matchFields return a `true` or `false` directly, whereas `similarity` matchFields return a score between 0.0 (no match) and 1.0 (exact match) and this score is translated to a `true/false` via a `matchThreshold`.  E.g. if a `JARO_WINKLER` matchField is configured with a `matchThreshold` of 0.8 then that matchField will only return `true` if the `JARO_WINKLER` similarity evaluates to a score >= 0.8.
 
 By default, all matchFields have `exact=false` which means that they will have all diacritical marks removed and all letters will be converted to upper case before matching.  `exact=true` can be added to any matchField to compare the strings as they are originally capitalized and accented.
 
@@ -292,10 +296,10 @@ The following algorithms are currently supported:
             <td>Gail = Gael, Gail != Gale, Thomas != Tom</td>
         </tr>
         <tr>
-            <td>CAVERPHONE1</td>
+            <td>CAVERPHONE2</td>
             <td>matcher</td>
             <td>
-              <a href="https://commons.apache.org/proper/commons-codec/apidocs/org/apache/commons/codec/language/Caverphone1.html">Apache Caverphone1</a>          
+              <a href="https://commons.apache.org/proper/commons-codec/apidocs/org/apache/commons/codec/language/Caverphone2.html">Apache Caverphone2</a>          
             </td>
             <td>Gail = Gael, Gail = Gale, Thomas != Tom</td>
         </tr>
@@ -380,6 +384,14 @@ The following algorithms are currently supported:
             <td>2019-12,Month = 2019-12-19,Day</td>
         </tr>
         <tr>
+            <td>NUMERIC</td>
+            <td>matcher</td>
+            <td>
+               Remove all non-numeric characters from the string before comparing.
+            </td>
+            <td>4169671111 = (416) 967-1111</td>
+        </tr>
+        <tr>
             <td>NAME_ANY_ORDER</td>
             <td>matcher</td>
             <td>
@@ -394,6 +406,14 @@ The following algorithms are currently supported:
                Match names as strings in any order
             </td>
             <td>John Henry = John HENRY when exact=false, John Henry != Henry John</td>
+        </tr>
+        <tr>
+            <td>NICKNAME</td>
+            <td>matcher</td>
+            <td>
+               True if one name is a nickname of the other
+            </td>
+            <td>Ken = Kenneth, Kenny = Ken.  Allen != Allan.</td>
         </tr>     
 				<tr>
             <td>IDENTIFIER</td>
@@ -475,6 +495,13 @@ These entries convert combinations of successful matchFields into an MDM Match R
 }
 ```
 
-### eidSystem
+### eidSystems
 
-The external EID system that the HAPI MDM system should expect to see on incoming Patient resources. Must be a valid URI.  See [MDM EID](/hapi-fhir/docs/server_jpa_mdm/mdm_eid.html) for details on how EIDs are managed by HAPI MDM.
+The external EID systems that the HAPI MDM system can expect to see on incoming resources. These are defined on a per-resource basis. Alternatively, you may use `*` to indicate 
+that an EID is valid for all managed resource types. The values must be valid URIs, and the keys must be valid resource types, or `*`.
+See [MDM EID](/hapi-fhir/docs/server_jpa_mdm/mdm_eid.html) for details on how EIDs are managed by HAPI MDM.
+
+<p class="helpInfoCalloutBox">
+    Note that this field used to be called `eidSystem`. While that field is deprecated, it will continue to work. In the background, it effectively sets the eid for resource type `*`.
+</p>
+

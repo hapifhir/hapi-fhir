@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,9 +36,11 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -153,12 +155,17 @@ public class ResponseTerminologyTranslationInterceptor extends BaseResponseTermi
 						if (!foundSystemsToCodes.containsKey(wantTargetSystem)) {
 
 							for (String code : foundSystemsToCodes.get(nextSourceSystem)) {
-								TranslateConceptResults translateConceptResults = myValidationSupport.translateConcept(new IValidationSupport.TranslateCodeRequest(nextSourceSystem, code, wantTargetSystem));
+								List<IBaseCoding> codings = new ArrayList<IBaseCoding>();
+								codings.add(createCodingFromPrimitives(nextSourceSystem, code, null));
+								TranslateConceptResults translateConceptResults = myValidationSupport.translateConcept(new IValidationSupport.TranslateCodeRequest(codings, wantTargetSystem));
 								if (translateConceptResults != null) {
 									List<TranslateConceptResult> mappings = translateConceptResults.getResults();
 									for (TranslateConceptResult nextMapping : mappings) {
 
-										IBase newCoding = createCodingFromMappingTarget(nextMapping);
+										IBase newCoding = createCodingFromPrimitives(
+											nextMapping.getSystem(),
+											nextMapping.getCode(),
+											nextMapping.getDisplay());
 
 										// Add coding to existing CodeableConcept
 										myCodeableConceptCodingChild.getMutator().addValue(theElement, newCoding);
@@ -174,14 +181,14 @@ public class ResponseTerminologyTranslationInterceptor extends BaseResponseTermi
 
 		}
 
-		private IBase createCodingFromMappingTarget(TranslateConceptResult nextMapping) {
-			IBase newCoding = myCodingDefinitition.newInstance();
-			IPrimitiveType<?> newSystem = myUriDefinition.newInstance(nextMapping.getSystem());
+		private IBaseCoding createCodingFromPrimitives(String system, String code, String display) {
+			IBaseCoding newCoding = (IBaseCoding) myCodingDefinitition.newInstance();
+			IPrimitiveType<?> newSystem = myUriDefinition.newInstance(system);
 			myCodingSystemChild.getMutator().addValue(newCoding, newSystem);
-			IPrimitiveType<?> newCode = myCodeDefinition.newInstance(nextMapping.getCode());
+			IPrimitiveType<?> newCode = myCodeDefinition.newInstance(code);
 			myCodingCodeChild.getMutator().addValue(newCoding, newCode);
-			if (isNotBlank(nextMapping.getDisplay())) {
-				IPrimitiveType<?> newDisplay = myStringDefinition.newInstance(nextMapping.getDisplay());
+			if (isNotBlank(display)) {
+				IPrimitiveType<?> newDisplay = myStringDefinition.newInstance(display);
 				myCodingDisplayChild.getMutator().addValue(newCoding, newDisplay);
 			}
 			return newCoding;

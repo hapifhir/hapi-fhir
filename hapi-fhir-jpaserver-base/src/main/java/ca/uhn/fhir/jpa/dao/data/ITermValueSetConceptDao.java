@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.data;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.dao.data;
  */
 
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -29,7 +30,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface ITermValueSetConceptDao extends JpaRepository<TermValueSetConcept, Long> {
+public interface ITermValueSetConceptDao extends JpaRepository<TermValueSetConcept, Long>, IHapiFhirJpaRepository {
 
 	@Query("SELECT COUNT(*) FROM TermValueSetConcept vsc WHERE vsc.myValueSetPid = :pid")
 	Integer countByTermValueSetId(@Param("pid") Long theValueSetId);
@@ -37,6 +38,9 @@ public interface ITermValueSetConceptDao extends JpaRepository<TermValueSetConce
 	@Query("DELETE FROM TermValueSetConcept vsc WHERE vsc.myValueSetPid = :pid")
 	@Modifying
 	void deleteByTermValueSetId(@Param("pid") Long theValueSetId);
+
+	@Query("SELECT vsc FROM TermValueSetConcept vsc WHERE vsc.myValueSetPid = :pid AND vsc.mySystem = :system_url")
+	List<TermValueSetConcept> findByTermValueSetIdSystemOnly(Pageable thePage, @Param("pid") Long theValueSetId, @Param("system_url") String theSystem);
 
 	@Query("SELECT vsc FROM TermValueSetConcept vsc WHERE vsc.myValueSetPid = :pid AND vsc.mySystem = :system_url AND vsc.myCode = :codeval")
 	Optional<TermValueSetConcept> findByTermValueSetIdSystemAndCode(@Param("pid") Long theValueSetId, @Param("system_url") String theSystem, @Param("codeval") String theCode);

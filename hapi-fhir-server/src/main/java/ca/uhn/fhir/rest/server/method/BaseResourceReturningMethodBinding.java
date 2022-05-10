@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.method;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -13,6 +14,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
@@ -27,6 +29,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ReflectionUtil;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -45,6 +48,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -52,7 +56,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,14 +83,19 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		super(theMethod, theContext, theProvider);
 
 		Class<?> methodReturnType = theMethod.getReturnType();
-		if (Collection.class.isAssignableFrom(methodReturnType)) {
+
+		Set<Class<?>> expectedReturnTypes = provideExpectedReturnTypes();
+		if (expectedReturnTypes != null) {
+
+			Validate.isTrue(expectedReturnTypes.contains(methodReturnType), "Unexpected method return type on %s - Allowed: %s", theMethod, expectedReturnTypes);
+
+		} else if (Collection.class.isAssignableFrom(methodReturnType)) {
 
 			myMethodReturnType = MethodReturnTypeEnum.LIST_OF_RESOURCES;
 			Class<?> collectionType = ReflectionUtil.getGenericCollectionTypeOfMethodReturnType(theMethod);
 			if (collectionType != null) {
 				if (!Object.class.equals(collectionType) && !IBaseResource.class.isAssignableFrom(collectionType)) {
-					throw new ConfigurationException(
-						"Method " + theMethod.getDeclaringClass().getSimpleName() + "#" + theMethod.getName() + " returns an invalid collection generic type: " + collectionType);
+					throw new ConfigurationException(Msg.code(433) + "Method " + theMethod.getDeclaringClass().getSimpleName() + "#" + theMethod.getName() + " returns an invalid collection generic type: " + collectionType);
 				}
 			}
 
@@ -104,8 +113,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		} else if (void.class.equals(methodReturnType)) {
 			myMethodReturnType = MethodReturnTypeEnum.VOID;
 		} else {
-			throw new ConfigurationException(
-				"Invalid return type '" + methodReturnType.getCanonicalName() + "' on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
+			throw new ConfigurationException(Msg.code(434) + "Invalid return type '" + methodReturnType.getCanonicalName() + "' on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
 		}
 
 		if (theReturnResourceType != null) {
@@ -123,27 +131,49 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 
 	}
 
+	/**
+	 * Subclasses may override
+	 */
+	protected Set<Class<?>> provideExpectedReturnTypes() {
+		return null;
+	}
+
 	IBaseResource createBundleFromBundleProvider(IRestfulServer<?> theServer, RequestDetails theRequest, Integer theLimit, String theLinkSelf, Set<Include> theIncludes,
 																IBundleProvider theResult, int theOffset, BundleTypeEnum theBundleType, EncodingEnum theLinkEncoding, String theSearchId) {
 		IVersionSpecificBundleFactory bundleFactory = theServer.getFhirContext().newBundleFactory();
-		final Integer requestOffset = RestfulServerUtils.tryToExtractNamedParameter(theRequest, Constants.PARAM_OFFSET);
+		final Integer offset;
+		Integer limit = theLimit;
+
+		if (theResult.getCurrentPageOffset() != null) {
+			offset = theResult.getCurrentPageOffset();
+			limit = theResult.getCurrentPageSize();
+			Validate.notNull(limit, "IBundleProvider returned a non-null offset, but did not return a non-null page size");
+		} else {
+			offset = RestfulServerUtils.tryToExtractNamedParameter(theRequest, Constants.PARAM_OFFSET);
+		}
 
 		int numToReturn;
 		String searchId = null;
 		List<IBaseResource> resourceList;
 		Integer numTotalResults = theResult.size();
 
-		if (requestOffset != null || !theServer.canStoreSearchResults()) {
-			if (theLimit != null) {
-				numToReturn = theLimit;
+		int pageSize;
+		if (offset != null || !theServer.canStoreSearchResults()) {
+			if (limit != null) {
+				pageSize = limit;
 			} else {
 				if (theServer.getDefaultPageSize() != null) {
-					numToReturn = theServer.getDefaultPageSize();
+					pageSize = theServer.getDefaultPageSize();
 				} else {
-					numToReturn = numTotalResults != null ? numTotalResults : Integer.MAX_VALUE;
+					pageSize = numTotalResults != null ? numTotalResults : Integer.MAX_VALUE;
 				}
 			}
-			if (numToReturn > 0) {
+			numToReturn = pageSize;
+
+			if ((offset != null && !isOffsetModeHistory()) || theResult.getCurrentPageOffset() != null) {
+				// When offset query is done theResult already contains correct amount (+ their includes etc.) so return everything
+				resourceList = theResult.getResources(0, Integer.MAX_VALUE);
+			} else if (numToReturn > 0) {
 				resourceList = theResult.getResources(0, numToReturn);
 			} else {
 				resourceList = Collections.emptyList();
@@ -152,11 +182,12 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 
 		} else {
 			IPagingProvider pagingProvider = theServer.getPagingProvider();
-			if (theLimit == null || theLimit.equals(0)) {
-				numToReturn = pagingProvider.getDefaultPageSize();
+			if (limit == null || ((Integer) limit).equals(0)) {
+				pageSize = pagingProvider.getDefaultPageSize();
 			} else {
-				numToReturn = Math.min(pagingProvider.getMaximumPageSize(), theLimit);
+				pageSize = Math.min(pagingProvider.getMaximumPageSize(), limit);
 			}
+			numToReturn = pageSize;
 
 			if (numTotalResults != null) {
 				numToReturn = Math.min(numToReturn, numTotalResults - theOffset);
@@ -208,7 +239,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		for (IBaseResource next : resourceList) {
 			if (next.getIdElement() == null || next.getIdElement().isEmpty()) {
 				if (!(next instanceof IBaseOperationOutcome)) {
-					throw new InternalErrorException("Server method returned resource of type[" + next.getClass().getSimpleName() + "] with no ID specified (IResource#setId(IdDt) must be called)");
+					throw new InternalErrorException(Msg.code(435) + "Server method returned resource of type[" + next.getClass().getSimpleName() + "] with no ID specified (IResource#setId(IdDt) must be called)");
 				}
 			}
 		}
@@ -216,21 +247,33 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		BundleLinks links = new BundleLinks(theRequest.getFhirServerBase(), theIncludes, RestfulServerUtils.prettyPrintResponse(theServer, theRequest), theBundleType);
 		links.setSelf(theLinkSelf);
 
-		if (requestOffset != null || !theServer.canStoreSearchResults()) {
-			int offset = requestOffset != null ? requestOffset : 0;
+		if (theResult.getCurrentPageOffset() != null) {
+
+			if (isNotBlank(theResult.getNextPageId())) {
+				links.setNext(RestfulServerUtils.createOffsetPagingLink(links, theRequest.getRequestPath(), theRequest.getTenantId(), offset + limit, limit, theRequest.getParameters()));
+			}
+			if (isNotBlank(theResult.getPreviousPageId())) {
+				links.setNext(RestfulServerUtils.createOffsetPagingLink(links, theRequest.getRequestPath(), theRequest.getTenantId(), Math.max(offset - limit, 0), limit, theRequest.getParameters()));
+			}
+
+		}
+
+		if (offset != null || (!theServer.canStoreSearchResults() && !isEverythingOperation(theRequest)) || isOffsetModeHistory()) {
 			// Paging without caching
-			// We're doing requestOffset pages
+			// We're doing offset pages
 			int requestedToReturn = numToReturn;
-			if (theServer.getPagingProvider() == null) {
+			if (theServer.getPagingProvider() == null && offset != null) {
 				// There is no paging provider at all, so assume we're querying up to all the results we need every time
 				requestedToReturn += offset;
 			}
 			if (numTotalResults == null || requestedToReturn < numTotalResults) {
-				links.setNext(RestfulServerUtils.createOffsetPagingLink(links, theRequest.getRequestPath(), theRequest.getTenantId(), offset + numToReturn, numToReturn, theRequest.getParameters()));
+				if (!resourceList.isEmpty()) {
+					links.setNext(RestfulServerUtils.createOffsetPagingLink(links, theRequest.getRequestPath(), theRequest.getTenantId(), defaultIfNull(offset, 0) + numToReturn, numToReturn, theRequest.getParameters()));
+				}
 			}
-			if (offset > 0) {
-				int start = Math.max(0, offset - numToReturn);
-				links.setPrev(RestfulServerUtils.createOffsetPagingLink(links, theRequest.getRequestPath(), theRequest.getTenantId(), start, numToReturn, theRequest.getParameters()));
+			if (offset != null && offset > 0) {
+				int start = Math.max(0, theOffset - pageSize);
+				links.setPrev(RestfulServerUtils.createOffsetPagingLink(links, theRequest.getRequestPath(), theRequest.getTenantId(), start, pageSize, theRequest.getParameters()));
 			}
 		} else if (isNotBlank(theResult.getCurrentPageId())) {
 			// We're doing named pages
@@ -253,8 +296,8 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 					links.setNext((RestfulServerUtils.createPagingLink(links, theRequest, searchId, theOffset + numToReturn, numToReturn, theRequest.getParameters())));
 				}
 				if (theOffset > 0) {
-				int start = Math.max(0, theOffset - numToReturn);
-					links.setPrev(RestfulServerUtils.createPagingLink(links, theRequest, searchId, start, numToReturn, theRequest.getParameters()));
+					int start = Math.max(0, theOffset - pageSize);
+					links.setPrev(RestfulServerUtils.createPagingLink(links, theRequest, searchId, start, pageSize, theRequest.getParameters()));
 				}
 			}
 		}
@@ -264,6 +307,16 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 
 		return bundleFactory.getResourceBundle();
 
+	}
+
+	protected boolean isOffsetModeHistory() {
+		return false;
+	}
+
+	private boolean isEverythingOperation(RequestDetails theRequest) {
+		return (theRequest.getRestOperationType() == RestOperationTypeEnum.EXTENDED_OPERATION_TYPE
+			|| theRequest.getRestOperationType() == RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE)
+			&& theRequest.getOperation() != null && theRequest.getOperation().equals("$everything");
 	}
 
 	public IBaseResource doInvokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) {
@@ -339,9 +392,9 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			case RESOURCE: {
 				IBundleProvider result = (IBundleProvider) resultObj;
 				if (result.size() == 0) {
-					throw new ResourceNotFoundException(theRequest.getId());
+					throw new ResourceNotFoundException(Msg.code(436) + "Resource " + theRequest.getId() + " is not known");
 				} else if (result.size() > 1) {
-					throw new InternalErrorException("Method returned multiple resources");
+					throw new InternalErrorException(Msg.code(437) + "Method returned multiple resources");
 				}
 
 				IBaseResource resource = result.getResources(0, 1).get(0);
@@ -349,7 +402,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				break;
 			}
 			default:
-				throw new IllegalStateException(); // should not happen
+				throw new IllegalStateException(Msg.code(438)); // should not happen
 		}
 		return responseObject;
 	}
@@ -376,26 +429,28 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 
 	@Override
 	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
-
 		IBaseResource response = doInvokeServer(theServer, theRequest);
+		/*
+		 When we write directly to an HttpServletResponse, the invocation returns null. However, we still want to invoke
+		 the SERVER_OUTGOING_RESPONSE pointcut.
+		*/
 		if (response == null) {
+			ResponseDetails responseDetails = new ResponseDetails();
+			responseDetails.setResponseCode(Constants.STATUS_HTTP_200_OK);
+			callOutgoingResponseHook(theRequest, responseDetails);
 			return null;
+		} else {
+			Set<SummaryEnum> summaryMode = RestfulServerUtils.determineSummaryMode(theRequest);
+			ResponseDetails responseDetails = new ResponseDetails();
+			responseDetails.setResponseResource(response);
+			responseDetails.setResponseCode(Constants.STATUS_HTTP_200_OK);
+			if (!callOutgoingResponseHook(theRequest, responseDetails)) {
+				return null;
+			}
+			boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
+
+			return theRequest.getResponse().streamResponseAsResource(responseDetails.getResponseResource(), prettyPrint, summaryMode, responseDetails.getResponseCode(), null, theRequest.isRespondGzip(), isAddContentLocationHeader());
 		}
-
-		Set<SummaryEnum> summaryMode = RestfulServerUtils.determineSummaryMode(theRequest);
-
-		ResponseDetails responseDetails = new ResponseDetails();
-		responseDetails.setResponseResource(response);
-		responseDetails.setResponseCode(Constants.STATUS_HTTP_200_OK);
-
-		if (!callOutgoingResponseHook(theRequest, responseDetails)) {
-			return null;
-		}
-
-		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
-
-		return theRequest.getResponse().streamResponseAsResource(responseDetails.getResponseResource(), prettyPrint, summaryMode, responseDetails.getResponseCode(), null, theRequest.isRespondGzip(), isAddContentLocationHeader());
-
 	}
 
 	public abstract Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException;

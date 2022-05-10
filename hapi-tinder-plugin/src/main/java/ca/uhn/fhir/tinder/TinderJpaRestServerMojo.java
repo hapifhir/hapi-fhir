@@ -1,21 +1,36 @@
 package ca.uhn.fhir.tinder;
 
-import java.io.*;
-import java.util.*;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.tinder.parser.BaseStructureSpreadsheetParser;
+import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingModel;
+import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;
 import org.apache.commons.lang.WordUtils;
 import org.apache.maven.model.Resource;
-import org.apache.maven.plugin.*;
-import org.apache.maven.plugins.annotations.*;
+import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Component;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.tools.generic.EscapeTool;
+import org.apache.velocity.runtime.RuntimeConstants;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.tinder.parser.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
+import java.util.TreeSet;
 
 @Mojo(name = "generate-jparest-server", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 public class TinderJpaRestServerMojo extends AbstractMojo {
@@ -33,7 +48,7 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 
 	@Parameter(required = true)
 	private String packageBase;
-	
+
 	@Parameter(required = true)
 	private String configPackageBase;
 
@@ -69,25 +84,25 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 			fhirContext = FhirContext.forR5();
 			packageSuffix = ".r5";
 		} else {
-			throw new MojoFailureException("Unknown version configured: " + version);
+			throw new MojoFailureException(Msg.code(113) + "Unknown version configured: " + version);
 		}
-		
+
 		if (baseResourceNames == null || baseResourceNames.isEmpty()) {
 			baseResourceNames = new ArrayList<>();
-			
-			ourLog.info("No resource names supplied, going to use all resources from version: {}",fhirContext.getVersion().getVersion());
-			
+
+			ourLog.info("No resource names supplied, going to use all resources from version: {}", fhirContext.getVersion().getVersion());
+
 			Properties p = new Properties();
 			try {
 				p.load(fhirContext.getVersion().getFhirVersionPropertiesFile());
 			} catch (IOException e) {
-				throw new MojoFailureException("Failed to load version property file", e);
+				throw new MojoFailureException(Msg.code(114) + "Failed to load version property file", e);
 			}
 
-			ourLog.debug("Property file contains: {}",p);
+			ourLog.debug("Property file contains: {}", p);
 
 			TreeSet<String> keys = new TreeSet<>();
-			for(Object next : p.keySet()) {
+			for (Object next : p.keySet()) {
 				keys.add((String) next);
 			}
 			for (String next : keys) {
@@ -95,7 +110,7 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 					baseResourceNames.add(next.substring("resource.".length()).toLowerCase());
 				}
 			}
-			
+
 			if (fhirContext.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
 				baseResourceNames.remove("conformance");
 			}
@@ -111,9 +126,9 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 			}
 			baseResourceNames.removeAll(excludeResourceNames);
 		}
-		
+
 		ourLog.info("Including the following resources: {}", baseResourceNames);
-		
+
 		File configPackageDirectoryBase = new File(targetDirectory, configPackageBase.replace(".", File.separatorChar + ""));
 		configPackageDirectoryBase.mkdirs();
 		File packageDirectoryBase = new File(targetDirectory, packageBase.replace(".", File.separatorChar + ""));
@@ -127,14 +142,14 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 
 			gen.setFilenameSuffix("ResourceProvider");
 			gen.setTemplate("/vm/jpa_resource_provider.vm");
-			gen.writeAll(packageDirectoryBase, null,packageBase);
+			gen.writeAll(packageDirectoryBase, null, packageBase);
 
 			// gen.setFilenameSuffix("ResourceTable");
 			// gen.setTemplate("/vm/jpa_resource_table.vm");
 			// gen.writeAll(directoryBase, packageBase);
 
 		} catch (Exception e) {
-			throw new MojoFailureException("Failed to generate server", e);
+			throw new MojoFailureException(Msg.code(115) + "Failed to generate server", e);
 		}
 
 		myProject.addCompileSourceRoot(targetDirectory.getAbsolutePath());
@@ -146,23 +161,23 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 			ctx.put("configPackageBase", configPackageBase);
 			ctx.put("version", version);
 			ctx.put("package_suffix", packageSuffix);
-			ctx.put("esc", new EscapeTool());
+			ctx.put("esc", new TinderResourceGeneratorMojo.EscapeTool());
 			if (BaseStructureSpreadsheetParser.determineVersionEnum(version).isRi()) {
 				ctx.put("resourcePackage", "org.hl7.fhir." + version + ".model");
 			} else {
 				ctx.put("resourcePackage", "ca.uhn.fhir.model." + version + ".resource");
 			}
-			
+
 			String capitalize = WordUtils.capitalize(version);
 			if ("Dstu".equals(capitalize)) {
-				capitalize="Dstu1";
+				capitalize = "Dstu1";
 			}
 			ctx.put("versionCapitalized", capitalize);
 
 			VelocityEngine v = new VelocityEngine();
-			v.setProperty("resource.loader", "cp");
-			v.setProperty("cp.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
-			v.setProperty("runtime.references.strict", Boolean.TRUE);
+			v.setProperty(RuntimeConstants.RESOURCE_LOADERS, "cp");
+			v.setProperty("resource.loader.cp.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+			v.setProperty("runtime.strict_mode.enable", Boolean.TRUE);
 
 
 			/*
@@ -175,7 +190,7 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 			OutputStreamWriter w = new OutputStreamWriter(new FileOutputStream(f, false), "UTF-8");
 			v.evaluate(ctx, w, "", templateReader);
 			w.close();
-			
+
 			Resource resource = new Resource();
 			resource.setDirectory(targetResourceDirectory.getAbsolutePath());
 			resource.addInclude(targetResourceSpringBeansFile);
@@ -186,13 +201,13 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 			 */
 			templateIs = ResourceGeneratorUsingSpreadsheet.class.getResourceAsStream("/vm/jpa_spring_beans_java.vm");
 			templateReader = new InputStreamReader(templateIs);
-			f = new File(configPackageDirectoryBase, "BaseJavaConfig" + capitalize + ".java");
+			f = new File(configPackageDirectoryBase, "GeneratedDaoAndResourceProviderConfig" + capitalize + ".java");
 			w = new OutputStreamWriter(new FileOutputStream(f, false), "UTF-8");
 			v.evaluate(ctx, w, "", templateReader);
 			w.close();
 
 		} catch (Exception e) {
-			throw new MojoFailureException("Failed to generate server", e);
+			throw new MojoFailureException(Msg.code(116) + "Failed to generate server", e);
 		}
 	}
 
@@ -219,12 +234,12 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 		mojo.packageBase = "ca.uhn.fhir.jpa.rp.r4";
 		mojo.configPackageBase = "ca.uhn.fhir.jpa.config";
 		mojo.baseResourceNames = new ArrayList<String>(Arrays.asList(
-				"bundle",
-				"observation",
+			"bundle",
+			"observation",
 //				"communicationrequest"
-				"binary",
-				"structuredefinition"
-				));
+			"binary",
+			"structuredefinition"
+		));
 		mojo.targetDirectory = new File("target/generated/valuesets");
 		mojo.targetResourceDirectory = new File("target/generated/valuesets");
 		mojo.targetResourceSpringBeansFile = "tmp_beans.xml";

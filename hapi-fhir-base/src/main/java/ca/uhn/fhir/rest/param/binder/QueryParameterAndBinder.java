@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.param.binder;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,16 @@ package ca.uhn.fhir.rest.param.binder;
  * #L%
  */
 
-import java.util.List;
-
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.IQueryParameterAnd;
+import ca.uhn.fhir.model.api.IQueryParameterOr;
+import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+
+import java.util.List;
 
 public final class QueryParameterAndBinder extends BaseBinder<IQueryParameterAnd<?>> implements IParamBinder<IQueryParameterAnd<?>> {
 
@@ -48,7 +51,7 @@ public final class QueryParameterAndBinder extends BaseBinder<IQueryParameterAnd
 			dt = newInstance();
 			dt.setValuesAsQueryTokens(theContext, theParamName, theString);
 		} catch (SecurityException e) {
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(1952) + e);
 		}
 		return dt;
 	}

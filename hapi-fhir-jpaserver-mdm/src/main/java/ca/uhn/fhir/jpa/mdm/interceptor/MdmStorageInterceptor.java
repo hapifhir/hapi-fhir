@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.mdm.interceptor;
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,17 +20,18 @@ package ca.uhn.fhir.jpa.mdm.interceptor;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.dao.expunge.IExpungeEverythingService;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.util.EIDHelper;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
-import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.mdm.MdmLinkDeleteSvc;
-import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
@@ -41,14 +42,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class MdmStorageInterceptor implements IMdmStorageInterceptor {
+
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmStorageInterceptor.class);
+
 	@Autowired
-	private ExpungeEverythingService myExpungeEverythingService;
+	private IExpungeEverythingService myExpungeEverythingService;
 	@Autowired
 	private MdmLinkDeleteSvc myMdmLinkDeleteSvc;
 	@Autowired
@@ -57,20 +61,25 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	private EIDHelper myEIDHelper;
 	@Autowired
 	private IMdmSettings myMdmSettings;
-	@Autowired
-	private GoldenResourceHelper myGoldenResourceHelper;
 
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
 	public void blockManualResourceManipulationOnCreate(IBaseResource theBaseResource, RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
+		ourLog.debug("Starting pre-storage resource created hook for {}, {}, {}", theBaseResource, theRequestDetails, theServletRequestDetails);
+		if (theBaseResource == null) {
+			ourLog.warn("Attempting to block golden resource manipulation on a null resource");
+			return;
+		}
 
 		//If running in single EID mode, forbid multiple eids.
 		if (myMdmSettings.isPreventMultipleEids()) {
+			ourLog.debug("Forbidding multiple EIDs on ", theBaseResource);
 			forbidIfHasMultipleEids(theBaseResource);
 		}
 
 		// TODO GGG MDM find a better way to identify internal calls?
 		if (isInternalRequest(theRequestDetails)) {
+			ourLog.debug("Internal request - completed processing");
 			return;
 		}
 
@@ -79,8 +88,16 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
 	public void blockManualGoldenResourceManipulationOnUpdate(IBaseResource theOldResource, IBaseResource theUpdatedResource, RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
+		ourLog.debug("Starting pre-storage resource updated hook for {}, {}, {}, {}", theOldResource, theUpdatedResource, theRequestDetails, theServletRequestDetails);
+
+		if (theUpdatedResource == null) {
+			ourLog.warn("Attempting to block golden resource manipulation on a null resource");
+			return;
+		}
+
 		//If running in single EID mode, forbid multiple eids.
 		if (myMdmSettings.isPreventMultipleEids()) {
+			ourLog.debug("Forbidding multiple EIDs on ", theUpdatedResource);
 			forbidIfHasMultipleEids(theUpdatedResource);
 		}
 
@@ -93,10 +110,16 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 		}
 
 		if (isInternalRequest(theRequestDetails)) {
+			ourLog.debug("Internal request - completed processing");
 			return;
 		}
-		forbidIfMdmManagedTagIsPresent(theOldResource);
-		forbidModifyingMdmTag(theUpdatedResource, theOldResource);
+
+		if (theOldResource != null) {
+			forbidIfMdmManagedTagIsPresent(theOldResource);
+			forbidModifyingMdmTag(theUpdatedResource, theOldResource);
+		} else {
+			ourLog.warn("Null theOldResource for {} {}", theUpdatedResource == null ? "null updated resource" : theUpdatedResource.getIdElement(), theRequestDetails);
+		}
 
 		if (myMdmSettings.isPreventEidUpdates()) {
 			forbidIfModifyingExternalEidOnTarget(theUpdatedResource, theOldResource);
@@ -112,8 +135,15 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	}
 
 	private void forbidIfModifyingExternalEidOnTarget(IBaseResource theNewResource, IBaseResource theOldResource) {
-		List<CanonicalEID> newExternalEids = myEIDHelper.getExternalEid(theNewResource);
-		List<CanonicalEID> oldExternalEids = myEIDHelper.getExternalEid(theOldResource);
+		List<CanonicalEID> newExternalEids = Collections.emptyList();
+		List<CanonicalEID> oldExternalEids = Collections.emptyList();
+		if (theNewResource != null) {
+			newExternalEids = myEIDHelper.getExternalEid(theNewResource);
+		}
+		if (theOldResource != null) {
+			oldExternalEids = myEIDHelper.getExternalEid(theOldResource);
+		}
+
 		if (oldExternalEids.isEmpty()) {
 			return;
 		}
@@ -124,7 +154,7 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	}
 
 	private void throwBlockEidChange() {
-		throw new ForbiddenOperationException("While running with EID updates disabled, EIDs may not be updated on source resources");
+		throw new ForbiddenOperationException(Msg.code(763) + "While running with EID updates disabled, EIDs may not be updated on source resources");
 	}
 
 	/*
@@ -149,10 +179,15 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	 * We assume that if we have RequestDetails, then this was an HTTP request and not an internal one.
 	 */
 	private boolean isInternalRequest(RequestDetails theRequestDetails) {
-		return theRequestDetails == null;
+		return theRequestDetails == null || theRequestDetails instanceof SystemRequestDetails;
 	}
 
 	private void forbidIfMdmManagedTagIsPresent(IBaseResource theResource) {
+		if (theResource == null) {
+			ourLog.warn("Attempting to forbid MDM on a null resource");
+			return;
+		}
+
 		if (MdmResourceUtil.isMdmManaged(theResource)) {
 			throwModificationBlockedByMdm();
 		}
@@ -162,15 +197,15 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	}
 
 	private void throwBlockMdmManagedTagChange() {
-		throw new ForbiddenOperationException("The " + MdmConstants.CODE_HAPI_MDM_MANAGED + " tag on a resource may not be changed once created.");
+		throw new ForbiddenOperationException(Msg.code(764) + "The " + MdmConstants.CODE_HAPI_MDM_MANAGED + " tag on a resource may not be changed once created.");
 	}
 
 	private void throwModificationBlockedByMdm() {
-		throw new ForbiddenOperationException("Cannot create or modify Resources that are managed by MDM. This resource contains a tag with one of these systems: " + MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS + " or " + MdmConstants.SYSTEM_MDM_MANAGED);
+		throw new ForbiddenOperationException(Msg.code(765) + "Cannot create or modify Resources that are managed by MDM. This resource contains a tag with one of these systems: " + MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS + " or " + MdmConstants.SYSTEM_MDM_MANAGED);
 	}
 
 	private void throwBlockMultipleEids() {
-		throw new ForbiddenOperationException("While running with multiple EIDs disabled, source resources may have at most one EID.");
+		throw new ForbiddenOperationException(Msg.code(766) + "While running with multiple EIDs disabled, source resources may have at most one EID.");
 	}
 
 	private String extractResourceType(IBaseResource theResource) {

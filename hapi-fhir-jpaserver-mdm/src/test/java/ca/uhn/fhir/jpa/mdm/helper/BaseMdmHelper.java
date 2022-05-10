@@ -106,5 +106,8 @@ public abstract class BaseMdmHelper implements BeforeEachCallback, AfterEachCall
 		return channel.getQueueSizeForUnitTest();
 	}
 
+	public PointcutLatch getAfterMdmLatch() {
+		return myAfterMdmLatch;
+	}
 
 }

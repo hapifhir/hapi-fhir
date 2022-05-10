@@ -2,6 +2,7 @@ package ca.uhn.fhir.parser;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
@@ -37,7 +38,7 @@ public class MultiVersionXmlParserTest {
 			FhirContext.forDstu3().newXmlParser().encodeResourceToString(p);
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("This parser is for FHIR version DSTU3 - Can not encode a structure for version DSTU2", e.getMessage());
+			assertEquals(Msg.code(1829) + "This parser is for FHIR version DSTU3 - Can not encode a structure for version DSTU2", e.getMessage());
 		}
 	}
 
@@ -59,20 +60,20 @@ public class MultiVersionXmlParserTest {
 			ourCtxDstu3.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Patient.class, res);
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals("This context is for FHIR version \"DSTU3\" but the class \"ca.uhn.fhir.model.dstu2.resource.Patient\" is for version \"DSTU2\"", e.getMessage());
+			assertEquals(Msg.code(1731) + "This context is for FHIR version \"DSTU3\" but the class \"ca.uhn.fhir.model.dstu2.resource.Patient\" is for version \"DSTU2\"", e.getMessage());
 		}
 		try {
 			ourCtxDstu3.newXmlParser().parseResource(Patient.class, res);
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals("This context is for FHIR version \"DSTU3\" but the class \"ca.uhn.fhir.model.dstu2.resource.Patient\" is for version \"DSTU2\"", e.getMessage());
+			assertEquals(Msg.code(1731) + "This context is for FHIR version \"DSTU3\" but the class \"ca.uhn.fhir.model.dstu2.resource.Patient\" is for version \"DSTU2\"", e.getMessage());
 		}
 
 	}
 
 	@AfterAll
 	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 

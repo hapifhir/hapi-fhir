@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2828
+title: "PatientIdPartitionInterceptor now supports conditional creates of resources where the resource is in
+    the patient compartment but the conditional URL does not contain a patietn reference."

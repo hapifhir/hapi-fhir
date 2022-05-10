@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.annotations.Immutable;
@@ -49,6 +50,7 @@ import java.sql.SQLException;
 		"       vsc.SYSTEM_URL                  AS CONCEPT_SYSTEM_URL, " +
 		"       vsc.CODEVAL                     AS CONCEPT_CODEVAL, " +
 		"       vsc.DISPLAY                     AS CONCEPT_DISPLAY, " +
+		"       vsc.SYSTEM_VER                  AS SYSTEM_VER, " +
 		"       vsc.SOURCE_PID                  AS SOURCE_PID, " +
 		"       vsc.SOURCE_DIRECT_PARENT_PIDS   AS SOURCE_DIRECT_PARENT_PIDS, " +
 		"       vscd.PID                        AS DESIGNATION_PID, " +
@@ -84,6 +86,9 @@ public class TermValueSetConceptViewOracle implements Serializable, ITermValueSe
 
 	@Column(name = "CONCEPT_DISPLAY", length = TermConcept.MAX_DESC_LENGTH)
 	private String myConceptDisplay;
+
+	@Column(name="SYSTEM_VER", length = TermCodeSystemVersion.MAX_VERSION_LENGTH)
+	private String myConceptSystemVersion;
 
 	@Column(name = "DESIGNATION_PID")
 	private Long myDesignationPid;
@@ -131,6 +136,11 @@ public class TermValueSetConceptViewOracle implements Serializable, ITermValueSe
 	}
 
 	@Override
+	public String getConceptSystemVersion() {
+		return myConceptSystemVersion;
+	}
+
+	@Override
 	public Long getSourceConceptPid() {
 		return mySourceConceptPid;
 	}
@@ -141,7 +151,7 @@ public class TermValueSetConceptViewOracle implements Serializable, ITermValueSe
 			try (Reader characterStream = mySourceConceptDirectParentPids.getCharacterStream()) {
 				return IOUtils.toString(characterStream);
 			} catch (IOException | SQLException e) {
-				throw new InternalErrorException(e);
+				throw new InternalErrorException(Msg.code(829) + e);
 			}
 		}
 		return null;

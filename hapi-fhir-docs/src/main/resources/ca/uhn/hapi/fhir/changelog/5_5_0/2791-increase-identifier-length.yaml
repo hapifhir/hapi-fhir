@@ -1,0 +1,4 @@
+---
+type: change
+issue: 2791
+title: "Identifier maximum length increased from 200 to 500. This specifically applies to table HFJ_IDX_CMP_STRING_UNIQ."

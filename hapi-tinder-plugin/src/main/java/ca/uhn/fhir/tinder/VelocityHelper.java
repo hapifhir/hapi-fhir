@@ -20,6 +20,7 @@ package ca.uhn.fhir.tinder;
  */
 
 
+import ca.uhn.fhir.i18n.Msg;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -56,7 +57,7 @@ public class VelocityHelper {
 					}
 				}
 			} else {
-				throw new FileNotFoundException("Velocity property file ["+propertyFile+"] does not exist or is not readable.");
+				throw new FileNotFoundException(Msg.code(94) + "Velocity property file ["+propertyFile+"] does not exist or is not readable.");
 			}
 		}
 		
@@ -74,8 +75,8 @@ public class VelocityHelper {
 					result.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, path);
 				}
 			} else {
-				result.setProperty("resource.loader", "cp");
-				result.setProperty("cp.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+				result.setProperty(RuntimeConstants.RESOURCE_LOADERS, "cp");
+				result.setProperty("resource.loader.cp.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
 			}
 		}
 		

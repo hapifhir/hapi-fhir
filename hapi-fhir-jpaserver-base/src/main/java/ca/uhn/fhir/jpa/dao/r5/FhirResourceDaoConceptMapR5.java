@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.r5;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,32 +20,35 @@ package ca.uhn.fhir.jpa.dao.r5;
  * #L%
  */
 
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
 import ca.uhn.fhir.jpa.api.model.TranslationRequest;
-import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_40_50;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.ConceptMap;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Collections;
 import java.util.Date;
 
 public class FhirResourceDaoConceptMapR5 extends BaseHapiFhirResourceDao<ConceptMap> implements IFhirResourceDaoConceptMap<ConceptMap> {
 	@Autowired
 	private ITermConceptMappingSvc myTermConceptMappingSvc;
+	@Autowired
+	private IValidationSupport myValidationSupport;
 
 	@Override
 	public TranslateConceptResults translate(TranslationRequest theTranslationRequest, RequestDetails theRequestDetails) {
-		if (theTranslationRequest.hasReverse() && theTranslationRequest.getReverseAsBoolean()) {
-			return myTermConceptMappingSvc.translateWithReverse(theTranslationRequest);
-		}
-
-		return myTermConceptMappingSvc.translate(theTranslationRequest);
+		IValidationSupport.TranslateCodeRequest translateCodeRequest = theTranslationRequest.asTranslateCodeRequest();
+		return myValidationSupport.translateConcept(translateCodeRequest);
 	}
 
 	@Override
@@ -56,7 +59,8 @@ public class FhirResourceDaoConceptMapR5 extends BaseHapiFhirResourceDao<Concept
 
 			if (retVal.getDeleted() == null) {
 				ConceptMap conceptMap = (ConceptMap) theResource;
-				myTermConceptMappingSvc.storeTermConceptMapAndChildren(retVal, org.hl7.fhir.convertors.conv40_50.ConceptMap40_50.convertConceptMap(conceptMap));
+				myTermConceptMappingSvc.storeTermConceptMapAndChildren(retVal,
+					(org.hl7.fhir.r4.model.ConceptMap) VersionConvertorFactory_40_50.convertResource(conceptMap, new BaseAdvisor_40_50(false)));
 			} else {
 				myTermConceptMappingSvc.deleteConceptMapAndChildren(retVal);
 			}

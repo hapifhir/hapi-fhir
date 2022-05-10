@@ -1,0 +1,16 @@
+{
+	"resourceType": "Bundle",
+	"type": "transaction",
+	"entry": [
+		{
+			"request": {
+				"method": "POST",
+				"url": "http://localhost:8000/fhir/Goal"
+			},
+			"resource": {
+				"resourceType": "Goal",
+				"id": "4bebccef-de86-4b49-9ca8-7567bffcc6f5"
+			}
+		}
+	]
+}

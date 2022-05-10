@@ -4,7 +4,7 @@ package ca.uhn.fhir.cql.config;
  * #%L
  * HAPI FHIR JPA Server - Clinical Quality Language
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.cqframework.cql.cql2elm.model.Model;
+import org.cqframework.cql.elm.execution.Library;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.springframework.context.annotation.Bean;
 
@@ -46,4 +47,9 @@ public abstract class BaseCqlConfig {
 	Map<VersionedIdentifier, Model> globalModelCache() {
 		return new ConcurrentHashMap<VersionedIdentifier, Model>();
 	}
+
+	@Bean(name="globalLibraryCache") 
+	Map<org.cqframework.cql.elm.execution.VersionedIdentifier, Library> globalLibraryCache() {
+		return new ConcurrentHashMap<org.cqframework.cql.elm.execution.VersionedIdentifier, Library>();
+	} 
 }

@@ -30,6 +30,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 import java.io.Serializable;
@@ -48,7 +49,7 @@ import static org.apache.commons.lang3.StringUtils.left;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -144,10 +145,27 @@ public class Search implements ICachedSearchDetails, Serializable {
 	private byte[] mySearchParameterMap;
 
 	/**
+	 * This isn't currently persisted in the DB as it's only used for offset mode. We could
+	 * change this if needed in the future.
+	 */
+	@Transient
+	private Integer myOffset;
+	/**
+	 * This isn't currently persisted in the DB as it's only used for offset mode. We could
+	 * change this if needed in the future.
+	 */
+	@Transient
+	private Integer mySizeModeSize;
+
+	/**
 	 * Constructor
 	 */
 	public Search() {
 		super();
+	}
+
+	public Integer getSizeModeSize() {
+		return mySizeModeSize;
 	}
 
 	@Override
@@ -386,6 +404,14 @@ public class Search implements ICachedSearchDetails, Serializable {
 	@Override
 	public void setCannotBeReused() {
 		mySearchQueryStringHash = null;
+	}
+
+	public Integer getOffset() {
+		return myOffset;
+	}
+
+	public void setOffset(Integer theOffset) {
+		myOffset = theOffset;
 	}
 
 	@Nonnull

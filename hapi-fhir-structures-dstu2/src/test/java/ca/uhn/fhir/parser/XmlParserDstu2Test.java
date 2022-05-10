@@ -1,6 +1,7 @@
 package ca.uhn.fhir.parser;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -9,12 +10,48 @@ import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
-import ca.uhn.fhir.model.dstu2.composite.*;
+import ca.uhn.fhir.model.dstu2.composite.AnnotationDt;
+import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
+import ca.uhn.fhir.model.dstu2.composite.CodingDt;
+import ca.uhn.fhir.model.dstu2.composite.ContainedDt;
+import ca.uhn.fhir.model.dstu2.composite.DurationDt;
+import ca.uhn.fhir.model.dstu2.composite.ElementDefinitionDt;
 import ca.uhn.fhir.model.dstu2.composite.ElementDefinitionDt.Binding;
-import ca.uhn.fhir.model.dstu2.resource.*;
+import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
+import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
+import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu2.composite.SimpleQuantityDt;
+import ca.uhn.fhir.model.dstu2.resource.AllergyIntolerance;
+import ca.uhn.fhir.model.dstu2.resource.Binary;
+import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Link;
-import ca.uhn.fhir.model.dstu2.valueset.*;
+import ca.uhn.fhir.model.dstu2.resource.Composition;
+import ca.uhn.fhir.model.dstu2.resource.Condition;
+import ca.uhn.fhir.model.dstu2.resource.DataElement;
+import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
+import ca.uhn.fhir.model.dstu2.resource.Encounter;
+import ca.uhn.fhir.model.dstu2.resource.Medication;
+import ca.uhn.fhir.model.dstu2.resource.MedicationOrder;
+import ca.uhn.fhir.model.dstu2.resource.MedicationStatement;
+import ca.uhn.fhir.model.dstu2.resource.Observation;
+import ca.uhn.fhir.model.dstu2.resource.Organization;
+import ca.uhn.fhir.model.dstu2.resource.Parameters;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.resource.Practitioner;
+import ca.uhn.fhir.model.dstu2.valueset.AddressUseEnum;
+import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
+import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
+import ca.uhn.fhir.model.dstu2.valueset.ContactPointSystemEnum;
+import ca.uhn.fhir.model.dstu2.valueset.DiagnosticReportStatusEnum;
+import ca.uhn.fhir.model.dstu2.valueset.DocumentReferenceStatusEnum;
+import ca.uhn.fhir.model.dstu2.valueset.IdentifierTypeCodesEnum;
+import ca.uhn.fhir.model.dstu2.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.dstu2.valueset.MaritalStatusCodesEnum;
+import ca.uhn.fhir.model.dstu2.valueset.NameUseEnum;
+import ca.uhn.fhir.model.dstu2.valueset.ObservationRelationshipTypeEnum;
+import ca.uhn.fhir.model.dstu2.valueset.ObservationStatusEnum;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
@@ -152,7 +189,7 @@ public class XmlParserDstu2Test {
 			parser.parseResource(input);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Resource is missing required element 'url' in parent element 'extension'", e.getCause().getMessage());
+			assertEquals(Msg.code(1822) + "Resource is missing required element 'url' in parent element 'extension'", e.getCause().getMessage());
 		}
 
 	}
@@ -183,7 +220,7 @@ public class XmlParserDstu2Test {
 			parser.parseResource(input);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Resource is missing required element 'url' in parent element 'modifierExtension'", e.getCause().getMessage());
+			assertEquals(Msg.code(1822) + "Resource is missing required element 'url' in parent element 'modifierExtension'", e.getCause().getMessage());
 		}
 
 	}
@@ -218,7 +255,7 @@ public class XmlParserDstu2Test {
 			parser.parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, string);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("DataFormatException at [[row,col {unknown-source}]: [49,11]]: Resource has contained child resource with no ID", e.getMessage());
+			assertEquals(Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [49,11]]: " + Msg.code(1819) + "Resource has contained child resource with no ID", e.getMessage());
 		}
 	}
 
@@ -282,7 +319,7 @@ public class XmlParserDstu2Test {
 			parser.parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, string);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("DataFormatException at [[row,col {unknown-source}]: [47,7]]: Resource has invalid reference: #1", e.getMessage());
+			assertEquals(Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [47,7]]: " + Msg.code(1826) + "Resource has invalid reference: #1", e.getMessage());
 		}
 	}
 
@@ -1134,7 +1171,7 @@ public class XmlParserDstu2Test {
 		ourLog.info(string);
 
 		parsed = parser.parseResource(Composition.class, string);
-		assertEquals(2, parsed.getContained().getContainedResources().size());
+		assertEquals(3, parsed.getContained().getContainedResources().size());
 	}
 
 	/**
@@ -1159,7 +1196,7 @@ public class XmlParserDstu2Test {
 		ourLog.info(string);
 
 		parsed = parser.parseResource(Composition.class, string);
-		assertEquals(2, parsed.getContained().getContainedResources().size());
+		assertEquals(3, parsed.getContained().getContainedResources().size());
 	}
 
 	@Test
@@ -1333,7 +1370,7 @@ public class XmlParserDstu2Test {
 	}
 
 	@Test
-	public void testEncodeContainedWithNarrativeIsSuppresed() throws Exception {
+	public void testEncodeContainedWithNarrative() throws Exception {
 		IParser parser = ourCtx.newXmlParser().setPrettyPrint(true);
 
 		// Create an organization, note that the organization does not have an ID
@@ -1352,9 +1389,9 @@ public class XmlParserDstu2Test {
 		ourLog.info(encoded);
 
 		assertThat(encoded, stringContainsInOrder("<Patient", "<text>", "<div xmlns=\"http://www.w3.org/1999/xhtml\">BARFOO</div>", "<contained>", "<Organization", "</Organization"));
-		assertThat(encoded, not(stringContainsInOrder("<Patient", "<text>", "<contained>", "<Organization", "<text", "</Organization")));
+		assertThat(encoded, stringContainsInOrder("<Patient", "<text>", "<contained>", "<Organization", "<text", "</Organization"));
 
-		assertThat(encoded, not(containsString("FOOBAR")));
+		assertThat(encoded, (containsString("FOOBAR")));
 		assertThat(encoded, (containsString("BARFOO")));
 
 	}
@@ -2587,7 +2624,7 @@ public class XmlParserDstu2Test {
 			parser.parseResource(resource);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("DataFormatException at [[row,col {unknown-source}]: [2,4]]: [element=\"active\"] Invalid attribute value \"1\": Invalid boolean string: '1'", e.getMessage());
+			assertEquals(Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [2,4]]: " + Msg.code(1821) + "[element=\"active\"] Invalid attribute value \"1\": " + Msg.code(1872) + "Invalid boolean string: '1'", e.getMessage());
 		}
 	}
 
@@ -2924,7 +2961,7 @@ public class XmlParserDstu2Test {
 
 	@AfterAll
 	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 	public static void main(String[] args) {

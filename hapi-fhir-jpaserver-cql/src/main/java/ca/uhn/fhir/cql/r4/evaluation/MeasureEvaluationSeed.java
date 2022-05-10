@@ -4,7 +4,7 @@ package ca.uhn.fhir.cql.r4.evaluation;
  * #%L
  * HAPI FHIR JPA Server - Clinical Quality Language
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,13 @@ package ca.uhn.fhir.cql.r4.evaluation;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.cql.common.helper.DateHelper;
 import ca.uhn.fhir.cql.common.helper.UsingHelper;
 import ca.uhn.fhir.cql.common.provider.EvaluationProviderFactory;
 import ca.uhn.fhir.cql.common.provider.LibraryResolutionProvider;
 import ca.uhn.fhir.cql.r4.helper.LibraryHelper;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.apache.commons.lang3.tuple.Triple;
 import org.cqframework.cql.elm.execution.Library;
 import org.hl7.fhir.r4.model.Measure;
@@ -74,13 +76,13 @@ public class MeasureEvaluationSeed {
 	}
 
 	public void setup(Measure measure, String periodStart, String periodEnd, String productLine, String source,
-			String user, String pass) {
+							String user, String pass, RequestDetails theRequestDetails) {
 		this.measure = measure;
 
-		this.libraryHelper.loadLibraries(measure, this.libraryLoader, this.libraryResourceProvider);
+		this.libraryHelper.loadLibraries(measure, this.libraryLoader, this.libraryResourceProvider, theRequestDetails);
 
 		// resolve primary library
-		Library library = this.libraryHelper.resolvePrimaryLibrary(measure, libraryLoader, this.libraryResourceProvider);
+		Library library = this.libraryHelper.resolvePrimaryLibrary(measure, libraryLoader, this.libraryResourceProvider, theRequestDetails);
 
 
 		// resolve execution context
@@ -90,8 +92,7 @@ public class MeasureEvaluationSeed {
 		List<Triple<String, String, String>> usingDefs = UsingHelper.getUsingUrlAndVersion(library.getUsings());
 
 		if (usingDefs.size() > 1) {
-			throw new IllegalArgumentException(
-					"Evaluation of Measure using multiple Models is not supported at this time.");
+			throw new IllegalArgumentException(Msg.code(1671) + "Evaluation of Measure using multiple Models is not supported at this time.");
 		}
 
 		// If there are no Usings, there is probably not any place the Terminology
@@ -109,7 +110,7 @@ public class MeasureEvaluationSeed {
 
 		for (Triple<String, String, String> def : usingDefs) {
 			this.dataProvider = this.providerFactory.createDataProvider(def.getLeft(), def.getMiddle(),
-					terminologyProvider);
+				terminologyProvider, theRequestDetails);
 			context.registerDataProvider(def.getRight(), dataProvider);
 		}
 

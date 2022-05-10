@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.term;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,10 @@ package ca.uhn.fhir.jpa.term;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -32,7 +34,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 
+import java.security.InvalidParameterException;
+
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
 
 public class TermVersionAdapterSvcR4 extends BaseTermVersionAdapterSvcImpl implements ITermVersionAdapterSvc {
 	private IFhirResourceDao<ConceptMap> myConceptMapResourceDao;
@@ -59,13 +64,16 @@ public class TermVersionAdapterSvcR4 extends BaseTermVersionAdapterSvcImpl imple
 	}
 
 	@Override
-	public IIdType createOrUpdateCodeSystem(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource) {
+	public IIdType createOrUpdateCodeSystem(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource, RequestDetails theRequestDetails) {
 		validateCodeSystemForStorage(theCodeSystemResource);
 		if (isBlank(theCodeSystemResource.getIdElement().getIdPart())) {
+			if (theCodeSystemResource.getUrl().contains(LOINC_LOW)) {
+				throw new InvalidParameterException(Msg.code(859) + "'loinc' CodeSystem must have an 'ID' element");
+			}
 			String matchUrl = "CodeSystem?url=" + UrlUtil.escapeUrlParam(theCodeSystemResource.getUrl());
-			return myCodeSystemResourceDao.update(theCodeSystemResource, matchUrl).getId();
+			return myCodeSystemResourceDao.update(theCodeSystemResource, matchUrl, theRequestDetails).getId();
 		} else {
-			return myCodeSystemResourceDao.update(theCodeSystemResource).getId();
+			return myCodeSystemResourceDao.update(theCodeSystemResource, theRequestDetails).getId();
 		}
 	}
 
