@@ -82,7 +82,7 @@ public class FindCandidateByExampleSvc extends BaseCandidateFinder {
 			}
 
 			IMdmLink matchMdmLink = optionalMdmLink.get();
-			if (goldenResourcePidsToExclude.contains(matchMdmLink.getSourcePersistenceId())) {
+			if (goldenResourcePidsToExclude.contains(matchMdmLink.getGoldenResourcePersistenceId())) {
 				ourLog.info("Skipping MDM on candidate Golden Resource with PID {} due to manual NO_MATCH", matchMdmLink.getGoldenResourcePersistenceId());
 				continue;
 			}
