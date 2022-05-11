@@ -252,23 +252,6 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 	public class CancellationTests {
 
 		@Test
-		public void justAfterStart() {
-			// Setup
-			myJobDefinitionRegistry.addJobDefinition(createJobDefinition(JobDefinition.Builder::gatedExecution));
-			JobInstance instance1 = createInstance();
-			instance1.setCurrentGatedStepId(STEP_1);
-
-			// Execute
-			instance1.setCancelled(true);
-
-			mySvc.runMaintenancePass();
-
-			// Verify
-			assertEquals(StatusEnum.IN_PROGRESS, instance1.getStatus());
-			assertNull(instance1.getErrorMessage());
-		}
-
-		@Test
 		public void afterFirstMaintenancePass() {
 			// Setup
 			myJobDefinitionRegistry.addJobDefinition(createJobDefinition(JobDefinition.Builder::gatedExecution));
