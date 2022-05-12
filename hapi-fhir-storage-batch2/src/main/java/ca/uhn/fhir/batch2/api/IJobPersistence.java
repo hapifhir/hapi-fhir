@@ -23,6 +23,7 @@ package ca.uhn.fhir.batch2.api;
 import ca.uhn.fhir.batch2.impl.BatchWorkChunk;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.rest.api.SortOrderEnum;
 
 import java.util.List;
 import java.util.Optional;
@@ -67,6 +68,11 @@ public interface IJobPersistence {
 	 * Fetch all instances
 	 */
 	List<JobInstance> fetchInstances(int thePageSize, int thePageIndex);
+
+	/**
+	 * Fetch instances ordered by myCreateTime DESC
+	 */
+	List<JobInstance> fetchRecentInstances(int thePageSize, int thePageIndex);
 
 	/**
 	 * Fetch a given instance and update the stored status

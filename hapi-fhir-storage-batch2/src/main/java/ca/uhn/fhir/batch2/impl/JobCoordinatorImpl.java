@@ -162,6 +162,12 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 	}
 
 	@Override
+	public List<JobInstance> getRecentInstances(int theCount, int theStart) {
+		return myJobPersistence.fetchRecentInstances(theCount, theStart)
+			.stream().map(this::massageInstanceForUserAccess).collect(Collectors.toList());
+	}
+
+	@Override
 	public void cancelInstance(String theInstanceId) throws ResourceNotFoundException {
 		myJobPersistence.cancelInstance(theInstanceId);
 	}
