@@ -188,12 +188,12 @@ public class XmlParserDstu3Test {
 
 
 	@Test
-	public void testEncodeInvalidMetaTime() {
+	public void testEncodeMetaTime() {
 
 		Patient p = new Patient();
-		p.getMeta().getLastUpdatedElement().setValueAsString("2019-01-01");
+		p.getMeta().getLastUpdatedElement().setValueAsString("2019-01-01T10:57:34+01:00");
 		String output = ourCtx.newXmlParser().encodeResourceToString(p);
-		assertThat(output, containsString("lastUpdated value=\"2019-01-01\""));
+		assertThat(output, containsString("lastUpdated value=\"2019-01-01T10:57:34+01:00\""));
 
 	}
 
