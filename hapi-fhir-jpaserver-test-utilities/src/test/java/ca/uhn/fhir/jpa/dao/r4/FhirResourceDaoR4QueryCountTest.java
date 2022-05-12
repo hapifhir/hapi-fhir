@@ -177,7 +177,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@Test
 	public void testSearchByBirthdateDoesNotCauseDuplicateClauses() {
-		String expectedSQL = "SELECT t0.RES_ID FROM HFJ_SPIDX_DATE t0 WHERE (((t0.HASH_IDENTITY = '5247847184787287691') AND ((t0.SP_VALUE_LOW_DATE_ORDINAL >= '20220101') AND (t0.SP_VALUE_HIGH_DATE_ORDINAL <= '20220101'))) AND ((t0.SP_VALUE_LOW_DATE_ORDINAL >= '20220101') AND (t0.SP_VALUE_HIGH_DATE_ORDINAL <= '20220101'))) limit '500'";
+		String expectedSQL = "SELECT t0.RES_ID FROM HFJ_SPIDX_DATE t0 WHERE ((t0.HASH_IDENTITY = '5247847184787287691') AND ((t0.SP_VALUE_LOW_DATE_ORDINAL >= '20220101') AND (t0.SP_VALUE_HIGH_DATE_ORDINAL <= '20220101'))) limit '500'";
 		myCaptureQueriesListener.clear();
 		runInTransaction(() -> {
 			myClient.search().forResource("Patient").where(Patient.BIRTHDATE.exactly().day("2022-01-01")).returnBundle(Bundle.class).execute();
