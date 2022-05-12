@@ -6,7 +6,7 @@
 			"resource": {
 				"resourceType": "ExplanationOfBenefit",
 				"meta": {
-					"lastUpdated": "2021-06-07",
+					"lastUpdated": "2021-06-07T00:00:00Z",
 					"profile": [
 						"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician"
 					]
@@ -535,7 +535,7 @@
 				"resourceType": "Patient",
 				"id": "d16f4424-9703-23bf-8331-3fc4bceb0c21",
 				"meta": {
-					"lastUpdated": "2021-06-07",
+					"lastUpdated": "2021-06-07T00:00:00Z",
 					"profile": [
 						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
 					]
@@ -596,7 +596,7 @@
 			"resource": {
 				"resourceType": "Coverage",
 				"meta": {
-					"lastUpdated": "2021-06-07",
+					"lastUpdated": "2021-06-07T00:00:00Z",
 					"profile": [
 						"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage"
 					]
@@ -675,7 +675,7 @@
 				"resourceType": "Organization",
 				"id": "e03b46ec-94df-0849-49eb-f5bba0c024c2",
 				"meta": {
-					"lastUpdated": "2021-06-07",
+					"lastUpdated": "2021-06-07T00:00:00Z",
 					"profile": [
 						"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization"
 					]
@@ -741,7 +741,7 @@
 				"resourceType": "Organization",
 				"id": "b77d3b98-03d8-1f0a-07b7-30b636c6ea9b",
 				"meta": {
-					"lastUpdated": "2021-06-07",
+					"lastUpdated": "2021-06-07T00:00:00Z",
 					"profile": [
 						"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization"
 					]
@@ -805,7 +805,7 @@
 				"resourceType": "Practitioner",
 				"id": "d2fc93e1-e1f8-c6d3-6c2c-9301f0e02c7c",
 				"meta": {
-					"lastUpdated": "2021-06-07",
+					"lastUpdated": "2021-06-07T00:00:00Z",
 					"profile": [
 						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner"
 					]
@@ -855,7 +855,7 @@
 				"resourceType": "Location",
 				"id": "11651884-37d2-eede-e1b9-059afd90811a",
 				"meta": {
-					"lastUpdated": "2021-06-07"
+					"lastUpdated": "2021-06-07T00:00:00Z"
 				},
 				"identifier": [
 					{

@@ -6,7 +6,7 @@
 			"resource": {
 				"resourceType": "ExplanationOfBenefit",
 				"meta": {
-					"lastUpdated": "2021-06-30",
+					"lastUpdated": "2021-06-30T00:00:00Z",
 					"profile": [
 						"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician"
 					]
@@ -527,7 +527,7 @@
 				"resourceType": "Patient",
 				"id": "d1a47e2c-509b-e326-deab-597e3f598ca5",
 				"meta": {
-					"lastUpdated": "2021-06-30",
+					"lastUpdated": "2021-06-30T00:00:00Z",
 					"profile": [
 						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
 					]
@@ -588,7 +588,7 @@
 			"resource": {
 				"resourceType": "Coverage",
 				"meta": {
-					"lastUpdated": "2021-06-30",
+					"lastUpdated": "2021-06-30T00:00:00Z",
 					"profile": [
 						"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage"
 					]
@@ -668,7 +668,7 @@
 				"resourceType": "Organization",
 				"id": "68ae4f74-afdc-6242-c50e-02ef776d8e5d",
 				"meta": {
-					"lastUpdated": "2021-06-30",
+					"lastUpdated": "2021-06-30T00:00:00Z",
 					"profile": [
 						"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization"
 					]
@@ -733,7 +733,7 @@
 				"resourceType": "Organization",
 				"id": "5954a17b-0779-334c-4f1c-e894e45d15fb",
 				"meta": {
-					"lastUpdated": "2021-06-30",
+					"lastUpdated": "2021-06-30T00:00:00Z",
 					"profile": [
 						"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization"
 					]
@@ -797,7 +797,7 @@
 				"resourceType": "Practitioner",
 				"id": "23eccc61-ab67-bf8a-e464-6260f7989556",
 				"meta": {
-					"lastUpdated": "2021-06-30",
+					"lastUpdated": "2021-06-30T00:00:00Z",
 					"profile": [
 						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner"
 					]
@@ -852,7 +852,7 @@
 				"resourceType": "Practitioner",
 				"id": "dbbc9a06-f685-b481-d739-133755af138e",
 				"meta": {
-					"lastUpdated": "2021-06-30",
+					"lastUpdated": "2021-06-30T00:00:00Z",
 					"profile": [
 						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner"
 					]
@@ -920,7 +920,7 @@
 				"resourceType": "Practitioner",
 				"id": "39b9250c-0d01-cbb0-ea89-0de9c74af511",
 				"meta": {
-					"lastUpdated": "2021-06-30",
+					"lastUpdated": "2021-06-30T00:00:00Z",
 					"profile": [
 						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner"
 					]
