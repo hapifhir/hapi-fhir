@@ -124,7 +124,7 @@ public class HistoryR4Test {
 	@Test
 	public void testSince() throws Exception {
 		{
-			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/_history?_since=2005");
+			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/_history?_since=2005-01-01T00:00:00Z");
 			String responseContent;
 			try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 				responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
@@ -133,12 +133,12 @@ public class HistoryR4Test {
 			}
 
 			assertEquals(null, ourLastAt);
-			assertEquals("2005", ourLastSince.getValueAsString());
-			assertEquals("2005", ourLastSince2.getValueAsString());
+			assertEquals("2005-01-01T00:00:00Z", ourLastSince.getValueAsString());
+			assertEquals("2005-01-01T00:00:00Z", ourLastSince2.getValueAsString());
 			assertTrue(DateTimeType.class.equals(ourLastSince2.getClass()));
-			assertEquals("2005", ourLastSince3.getValueAsString());
+			assertEquals("2005-01-01T00:00:00Z", ourLastSince3.getValueAsString());
 			assertTrue(StringType.class.equals(ourLastSince3.getClass()));
-			assertEquals("2005", ourLastSince4.getValueAsString());
+			assertEquals("2005-01-01T00:00:00Z", ourLastSince4.getValueAsString());
 			assertTrue(StringType.class.equals(ourLastSince4.getClass()));
 		}
 	}
