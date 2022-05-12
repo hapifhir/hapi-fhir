@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
-import ca.uhn.fhir.mdm.rules.json.MdmResourceSearchParamJson;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmCandidateSearchCriteriaBuilderSvc;
+import ca.uhn.fhir.mdm.rules.json.MdmResourceSearchParamJson;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;

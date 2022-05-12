@@ -789,7 +789,12 @@ public class ResponseHighlighterInterceptor {
 
 			InputStream jsStream = ResponseHighlighterInterceptor.class.getResourceAsStream("ResponseHighlighter.js");
 			String jsStr = jsStream != null ? IOUtils.toString(jsStream, StandardCharsets.UTF_8) : "console.log('ResponseHighlighterInterceptor: javascript theResource not found')";
-			jsStr = jsStr.replace("FHIR_BASE", theRequestDetails.getServerBaseForRequest());
+
+			String baseUrl = theRequestDetails.getServerBaseForRequest();
+
+			baseUrl = UrlUtil.sanitizeBaseUrl(baseUrl);
+
+			jsStr = jsStr.replace("FHIR_BASE", baseUrl);
 			outputBuffer.append("<script type=\"text/javascript\">");
 			outputBuffer.append(jsStr);
 			outputBuffer.append("</script>\n");

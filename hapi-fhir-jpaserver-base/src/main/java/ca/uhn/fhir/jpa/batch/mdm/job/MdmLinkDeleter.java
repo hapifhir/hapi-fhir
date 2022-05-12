@@ -25,11 +25,11 @@ import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
 import ca.uhn.fhir.jpa.dao.expunge.PartitionRunner;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.SliceImpl;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -58,14 +58,14 @@ public class MdmLinkDeleter implements ItemProcessor<List<Long>, List<Long>> {
 	public List<Long> process(List<Long> thePidList) throws Exception {
 		ConcurrentLinkedQueue<Long> goldenPidAggregator = new ConcurrentLinkedQueue<>();
 		PartitionRunner partitionRunner = new PartitionRunner(PROCESS_NAME, THREAD_PREFIX, myDaoConfig.getReindexBatchSize(), myDaoConfig.getReindexThreadCount());
-		partitionRunner.runInPartitionedThreads(new SliceImpl<>(thePidList), pids -> removeLinks(pids, goldenPidAggregator));
+		partitionRunner.runInPartitionedThreads(ResourcePersistentId.fromLongList(thePidList), pids -> removeLinks(pids, goldenPidAggregator));
 		return new ArrayList<>(goldenPidAggregator);
 	}
 
-	private void removeLinks(List<Long> pidList, ConcurrentLinkedQueue<Long> theGoldenPidAggregator) {
+	private void removeLinks(List<ResourcePersistentId> pidList, ConcurrentLinkedQueue<Long> theGoldenPidAggregator) {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 
-		txTemplate.executeWithoutResult(t -> theGoldenPidAggregator.addAll(deleteMdmLinksAndReturnGoldenResourcePids(pidList)));
+		txTemplate.executeWithoutResult(t -> theGoldenPidAggregator.addAll(deleteMdmLinksAndReturnGoldenResourcePids(ResourcePersistentId.toLongList(pidList))));
 	}
 
 	public List<Long> deleteMdmLinksAndReturnGoldenResourcePids(List<Long> thePids) {

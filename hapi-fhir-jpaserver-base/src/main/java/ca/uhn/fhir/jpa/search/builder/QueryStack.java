@@ -546,17 +546,12 @@ public class QueryStack {
 				//Ensure that the name of the search param
 				// (e.g. the `code` in Patient?_has:Observation:subject:code=sys|val)
 				// exists on the target resource type.
-				RuntimeSearchParam owningParameterDef = mySearchParamRegistry.getActiveSearchParam(targetResourceType, paramName);
-				if (owningParameterDef == null) {
-					throw new InvalidRequestException(Msg.code(1209) + "Unknown parameter name: " + targetResourceType + ':' + parameterName);
-				}
+				RuntimeSearchParam owningParameterDef = mySearchParamRegistry.getRuntimeSearchParam(targetResourceType, paramName);
 
 				//Ensure that the name of the back-referenced search param on the target (e.g. the `subject` in Patient?_has:Observation:subject:code=sys|val)
-				//exists on the target resource.
-				RuntimeSearchParam joiningParameterDef = mySearchParamRegistry.getActiveSearchParam(targetResourceType, paramReference);
-				if (joiningParameterDef == null) {
-					throw new InvalidRequestException(Msg.code(1210) + "Unknown parameter name: " + targetResourceType + ':' + paramReference);
-				}
+				//exists on the target resource, or in the top-level Resource resource.
+				mySearchParamRegistry.getRuntimeSearchParam(targetResourceType, paramReference);
+
 
 				IQueryParameterAnd<?> parsedParam = JpaParamUtil.parseQueryParams(mySearchParamRegistry, myFhirContext, owningParameterDef, paramName, parameters);
 

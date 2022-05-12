@@ -88,6 +88,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.api.dao.IDao.RESOURCE_PID_KEY;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
@@ -277,7 +278,9 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			if (theCodeSystem.getContent() == CodeSystem.CodeSystemContentMode.COMPLETE || theCodeSystem.getContent() == null || theCodeSystem.getContent() == CodeSystem.CodeSystemContentMode.NOTPRESENT) {
 				ourLog.info("CodeSystem {} has a status of {}, going to store concepts in terminology tables", theResourceEntity.getIdDt().getValue(), theCodeSystem.getContentElement().getValueAsString());
 
-				ResourcePersistentId codeSystemResourcePid = getCodeSystemResourcePid(theCodeSystem.getIdElement());
+				Long pid = (Long)theCodeSystem.getUserData(RESOURCE_PID_KEY);
+				assert pid != null;
+				ResourcePersistentId codeSystemResourcePid = new ResourcePersistentId(pid);
 
 				/*
 				 * If this is a not-present codesystem and codesystem version already exists, we don't want to
@@ -557,10 +560,6 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			childIndex++;
 		}
 
-	}
-
-	private ResourcePersistentId getCodeSystemResourcePid(IIdType theIdType) {
-		return myIdHelperService.resolveResourcePersistentIds(RequestPartitionId.allPartitions(), theIdType.getResourceType(), theIdType.getIdPart());
 	}
 
 	private void persistChildren(TermConcept theConcept, TermCodeSystemVersion theCodeSystem, IdentityHashMap<TermConcept, Object> theConceptsStack, int theTotalConcepts) {

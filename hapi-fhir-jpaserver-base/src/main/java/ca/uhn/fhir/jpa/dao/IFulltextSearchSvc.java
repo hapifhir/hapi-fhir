@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
 import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteOptions;
+import ca.uhn.fhir.jpa.search.builder.ISearchQueryExecutor;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -43,6 +44,17 @@ public interface IFulltextSearchSvc {
 	 * @return the pid list for the matchign resources.
 	 */
 	List<ResourcePersistentId> search(String theResourceName, SearchParameterMap theParams);
+
+
+	/**
+	 * Query the index for a scrollable iterator of results.
+	 * No max size to the result iterator.
+	 *
+	 * @param theResourceName e.g. Patient
+	 * @param theParams The search query
+	 * @return Iterator of result PIDs
+	 */
+	ISearchQueryExecutor searchAsync(String theResourceName, SearchParameterMap theParams);
 
 	/**
 	 * Autocomplete search for NIH $expand contextDirection=existing
@@ -79,4 +91,8 @@ public interface IFulltextSearchSvc {
 	 */
 	List<IBaseResource> getResources(Collection<Long> thePids);
 
+	/**
+	 * Returns accurate hit count
+	 */
+	long count(String theResourceName, SearchParameterMap theParams);
 }

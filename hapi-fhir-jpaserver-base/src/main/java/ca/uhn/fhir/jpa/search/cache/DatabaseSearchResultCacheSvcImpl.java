@@ -72,7 +72,7 @@ public class DatabaseSearchResultCacheSvcImpl implements ISearchResultCacheSvc {
 	public void storeResults(Search theSearch, List<ResourcePersistentId> thePreviouslyStoredResourcePids, List<ResourcePersistentId> theNewResourcePids) {
 		List<SearchResult> resultsToSave = Lists.newArrayList();
 
-		ourLog.trace("Storing {} results with {} previous for search", theNewResourcePids.size(), thePreviouslyStoredResourcePids.size());
+		ourLog.debug("Storing {} results with {} previous for search", theNewResourcePids.size(), thePreviouslyStoredResourcePids.size());
 
 		int order = thePreviouslyStoredResourcePids.size();
 		for (ResourcePersistentId nextPid : theNewResourcePids) {

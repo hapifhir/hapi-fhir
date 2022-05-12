@@ -1,0 +1,5 @@
+type: change
+issue: 3534
+title: "Ensure that migration steps do not timeout.
+   Adding an index, and other migration steps can take exceed the default connection timeout.
+   This has been changed - migration steps now have no timeout and will run until completion."

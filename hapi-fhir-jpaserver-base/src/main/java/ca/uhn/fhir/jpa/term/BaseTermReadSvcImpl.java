@@ -110,8 +110,8 @@ import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
 import org.hibernate.search.engine.search.query.SearchQuery;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.common.EntityReference;
-import org.hibernate.search.mapper.orm.massindexing.impl.LoggingMassIndexingMonitor;
 import org.hibernate.search.mapper.orm.session.SearchSession;
+import org.hibernate.search.mapper.pojo.massindexing.impl.PojoMassIndexingLoggingMonitor;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
@@ -2701,9 +2701,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				.cacheMode( CacheMode.IGNORE )
 				.threadsToLoadObjects( 6 )
 				.transactionTimeout( 60 * SECONDS_IN_MINUTE )
-				.monitor( new LoggingMassIndexingMonitor(INDEXED_ROOTS_LOGGING_COUNT) )
+				.monitor( new PojoMassIndexingLoggingMonitor(INDEXED_ROOTS_LOGGING_COUNT) )
 				.startAndWait();
-
 		} finally {
 			myDeferredStorageSvc.setProcessDeferred(true);
 		}

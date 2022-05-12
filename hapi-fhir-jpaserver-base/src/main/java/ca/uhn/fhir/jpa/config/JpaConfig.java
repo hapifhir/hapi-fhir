@@ -16,8 +16,8 @@ import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.batch.job.PartitionedUrlValidator;
 import ca.uhn.fhir.jpa.batch.mdm.MdmClearJobSubmitterImpl;
 import ca.uhn.fhir.jpa.batch.reader.BatchResourceSearcher;
-import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor;
+import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
@@ -38,6 +38,7 @@ import ca.uhn.fhir.jpa.dao.TransactionProcessor;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeOperation;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
+import ca.uhn.fhir.jpa.dao.expunge.IExpungeEverythingService;
 import ca.uhn.fhir.jpa.dao.expunge.IResourceExpungeService;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceExpungeService;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;
@@ -127,6 +128,7 @@ import ca.uhn.fhir.jpa.search.warm.CacheWarmingSvcImpl;
 import ca.uhn.fhir.jpa.search.warm.ICacheWarmingSvc;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
 import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
+import ca.uhn.fhir.jpa.searchparam.nickname.NicknameInterceptor;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.sp.SearchParamPresenceSvcImpl;
@@ -138,6 +140,7 @@ import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.mdm.api.IMdmClearJobSubmitter;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
@@ -162,6 +165,7 @@ import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean;
 
 import javax.annotation.Nullable;
+import java.io.IOException;
 import java.util.Date;
 
 /*
@@ -260,8 +264,11 @@ public class JpaConfig {
 
 	@Bean(name = "myBinaryStorageInterceptor")
 	@Lazy
-	public BinaryStorageInterceptor binaryStorageInterceptor() {
-		return new BinaryStorageInterceptor();
+	public BinaryStorageInterceptor binaryStorageInterceptor(DaoConfig theDaoConfig) {
+		BinaryStorageInterceptor interceptor = new BinaryStorageInterceptor();
+		interceptor.setAllowAutoInflateBinaries(theDaoConfig.isAllowAutoInflateBinaries());
+		interceptor.setAutoInflateBinariesMaximumSize(theDaoConfig.getAutoInflateBinariesMaximumBytes());
+		return interceptor;
 	}
 
 	@Bean
@@ -753,12 +760,12 @@ public class JpaConfig {
 
 	@Bean
 	@Scope("prototype")
-	public ExpungeOperation expungeOperation(String theResourceName, Long theResourceId, Long theVersion, ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails) {
-		return new ExpungeOperation(theResourceName, theResourceId, theVersion, theExpungeOptions, theRequestDetails);
+	public ExpungeOperation expungeOperation(String theResourceName, ResourcePersistentId theResourceId, ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails) {
+		return new ExpungeOperation(theResourceName, theResourceId, theExpungeOptions, theRequestDetails);
 	}
 
 	@Bean
-	public ExpungeEverythingService expungeEverythingService() {
+	public IExpungeEverythingService expungeEverythingService() {
 		return new ExpungeEverythingService();
 	}
 
@@ -821,5 +828,11 @@ public class JpaConfig {
 	@Bean
 	public MemberMatcherR4Helper memberMatcherR4Helper(FhirContext theFhirContext) {
 		return new MemberMatcherR4Helper(theFhirContext);
+	}
+
+	@Lazy
+	@Bean
+	public NicknameInterceptor nicknameInterceptor() throws IOException {
+		return new NicknameInterceptor();
 	}
 }

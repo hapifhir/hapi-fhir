@@ -6,7 +6,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>6.0.0-PRE10-SNAPSHOT</version>
+	<version>6.1.0-PRE1-SNAPSHOT</version>
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
 	<url>https://hapifhir.io</url>
@@ -58,9 +58,6 @@
 	</repositories>
 
 	<dependencies>
-		<!-- Cobertura is here as a 'provided' depdendency just to get the @CoverageIgnore annotation. It would be nice if there was a better way for this.. -->
-		<!-- <dependency> <groupId>net.sourceforge.cobertura</groupId> <artifactId>cobertura</artifactId> <version>2.1.1</version> <scope>provided</scope> <exclusions> <exclusion> <artifactId>jetty</artifactId>
-			<groupId>org.mortbay.jetty</groupId> </exclusion> </exclusions> </dependency> -->
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter</artifactId>
@@ -802,9 +799,9 @@
         <flexmark_version>0.50.40</flexmark_version>
         <flyway_version>8.5.0</flyway_version>
         <hibernate_version>5.6.2.Final</hibernate_version>
-        <hibernate_search_version>6.0.3.Final</hibernate_search_version>
+        <hibernate_search_version>6.1.4.Final</hibernate_search_version>
         <!-- Update lucene version when you update hibernate-search version -->
-        <lucene_version>8.7.0</lucene_version>
+        <lucene_version>8.11.1</lucene_version>
         <hamcrest_version>2.2</hamcrest_version>
         <hibernate_validator_version>6.1.5.Final</hibernate_validator_version>
         <httpcore_version>4.4.13</httpcore_version>
@@ -832,7 +829,7 @@
         <spring_retry_version>1.2.2.RELEASE</spring_retry_version>
 
         <stax2_api_version>3.1.4</stax2_api_version>
-        <testcontainers_version>1.16.2</testcontainers_version>
+        <testcontainers_version>1.17.1</testcontainers_version>
         <thymeleaf-version>3.0.14.RELEASE</thymeleaf-version>
         <woodstox_core_asl_version>4.4.1</woodstox_core_asl_version>
 
@@ -935,13 +932,13 @@
 				<groupId>com.icegreen</groupId>
 				<artifactId>greenmail</artifactId>
 				<version>1.6.4</version>
-				<scope>test</scope>
+				<scope>compile</scope>
 			</dependency>
 			<dependency>
 				<groupId>com.icegreen</groupId>
 				<artifactId>greenmail-junit5</artifactId>
 				<version>1.6.4</version>
-				<scope>test</scope>
+				<scope>compile</scope>
 			</dependency>
 			<!-- mail end -->
 			<dependency>
@@ -1616,7 +1613,7 @@
 				-->
 				<groupId>org.elasticsearch.client</groupId>
 				<artifactId>elasticsearch-rest-high-level-client</artifactId>
-				<version>7.13.4</version>
+				<version>7.17.3</version>
 				<exclusions>
 					<exclusion>
 						<groupId>com.fasterxml.jackson.dataformat</groupId>
@@ -1626,20 +1623,7 @@
 						<groupId>org.yaml</groupId>
 						<artifactId>*</artifactId>
 					</exclusion>
-					<exclusion>
-						<!-- Elastic have repackaged net.java.dev.jna, but we need a newer version to support Mac ARM. Managed below. -->
-						<groupId>org.elasticsearch</groupId>
-						<artifactId>jna</artifactId>
-					</exclusion>
 				</exclusions>
-			</dependency>
-			<!--  Upgrade testcontainers and elasticsearch dependency for Mac M1 ARM64 support.
-			  We can delete this once testcontainers and elasticsearch upgrade. -->
-			<dependency>
-				<groupId>net.java.dev.jna</groupId>
-				<artifactId>jna</artifactId>
-				<version>5.8.0</version>
-				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate.search</groupId>
@@ -1716,6 +1700,20 @@
 				<groupId>org.quartz-scheduler</groupId>
 				<artifactId>quartz</artifactId>
 				<version>2.3.2</version>
+				<exclusions>
+					<exclusion>
+						<groupId>com.zaxxer</groupId>
+						<artifactId>HikariCP-java7</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>com.mchange</groupId>
+						<artifactId>c3p0</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>com.mchange</groupId>
+						<artifactId>mchange-commons-java</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
@@ -2004,7 +2002,7 @@
                             <groupId>ca.uhn.hapi.fhir</groupId>
                             <artifactId>hapi-fhir-checkstyle</artifactId>
 									<!-- Remember to bump this when you upgrade the version -->
-                            <version>6.0.0-PRE10-SNAPSHOT</version>
+                            <version>6.1.0-PRE1-SNAPSHOT</version>
                         </dependency>
 					</dependencies>
 				</plugin>
@@ -2803,6 +2801,7 @@
 				<module>hapi-fhir-storage</module>
 				<module>hapi-fhir-storage-batch2</module>
 				<module>hapi-fhir-storage-batch2-jobs</module>
+				<module>hapi-fhir-storage-test-utilities</module>
 				<module>hapi-fhir-jpaserver-cql</module>
 				<module>hapi-fhir-jpaserver-model</module>
 				<module>hapi-fhir-jpaserver-searchparam</module>
@@ -2972,6 +2971,20 @@
 						<executions>
 							<execution><id>validate</id><phase>none</phase></execution>
 						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>LGTM</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-enforcer-plugin</artifactId>
+						<configuration>
+							<skip>true</skip>
+						</configuration>
 					</plugin>
 				</plugins>
 			</build>

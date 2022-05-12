@@ -6,7 +6,7 @@
  *       framework, used to start and stop jobs and inquire about status.
  *    </ol>
  *    <ol>
- *       {@link ca.uhn.fhir.batch2.api.IJobCleanerService} is a background processor that
+ *       {@link ca.uhn.fhir.batch2.api.IJobMaintenanceService} is a background processor that
  *       updates statistics and clean up stale data
  *    </ol>
  *    <ol>

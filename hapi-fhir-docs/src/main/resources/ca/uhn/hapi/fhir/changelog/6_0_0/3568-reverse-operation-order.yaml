@@ -1,0 +1,4 @@
+type: change
+issue: 3568
+title: "Modified operation method binding so that later registered custom providers take precedence over earlier registered ones.
+In particular, this means that custom operations can now override built-in operations."

@@ -25,6 +25,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
@@ -78,10 +79,11 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private FhirContext myContext;
+	@Autowired
+	private DaoConfig myDaoConfig;
 
 	private Set<String> myCompartmentResources;
 
-	private final int myRetentionPeriod = (int) (2 * DateUtils.MILLIS_PER_HOUR);
 
 	@Transactional
 	@Override
@@ -233,8 +235,18 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			.setStatus(theJob.getStatus());
 	}
 
+	/**
+	 * If the retention period is set to <= 0, set it to null, which prevents it from getting expired, otherwise, set
+	 * the retention period.
+	 *
+	 * @param theJob the job to update the expiry for.
+	 */
 	private void updateExpiry(BulkExportJobEntity theJob) {
-		theJob.setExpiry(DateUtils.addMilliseconds(new Date(), myRetentionPeriod));
+		if (myDaoConfig.getBulkExportFileRetentionPeriodHours() > 0) {
+			theJob.setExpiry(DateUtils.addHours(new Date(), myDaoConfig.getBulkExportFileRetentionPeriodHours()));
+		} else {
+			theJob.setExpiry(null);
+		}
 	}
 
 	@Transactional

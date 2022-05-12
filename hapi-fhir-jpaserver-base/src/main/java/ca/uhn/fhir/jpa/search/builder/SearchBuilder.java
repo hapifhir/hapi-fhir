@@ -75,6 +75,7 @@ import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
+import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
@@ -93,9 +94,11 @@ import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Streams;
 import com.healthmarketscience.sqlbuilder.Condition;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.jena.sparql.engine.QueryIterator;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -118,6 +121,7 @@ import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -270,18 +274,24 @@ public class SearchBuilder implements ISearchBuilder {
 
 	@SuppressWarnings("ConstantConditions")
 	@Override
-	public Iterator<Long> createCountQuery(SearchParameterMap theParams, String theSearchUuid, RequestDetails theRequest, @Nonnull RequestPartitionId theRequestPartitionId) {
+	public Long createCountQuery(SearchParameterMap theParams, String theSearchUuid,
+				RequestDetails theRequest, @Nonnull RequestPartitionId theRequestPartitionId) {
+
 		assert theRequestPartitionId != null;
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		init(theParams, theSearchUuid, theRequestPartitionId);
 
-		List<ISearchQueryExecutor> queries = createQuery(myParams, null, null, null, true, theRequest, null);
-		if (queries.isEmpty()) {
-			return Collections.emptyIterator();
+		if (checkUseHibernateSearch()) {
+			long count = myFulltextSearchSvc.count(myResourceName, theParams.clone());
+			return count;
 		}
-		try (ISearchQueryExecutor queryExecutor = queries.get(0)) {
-			return Lists.newArrayList(queryExecutor.next()).iterator();
+
+		List<ISearchQueryExecutor> queries = createQuery(theParams.clone(), null, null, null, true, theRequest, null);
+		if (queries.isEmpty()) {
+			return 0L;
+		} else {
+			return queries.get(0).next();
 		}
 	}
 
@@ -308,6 +318,7 @@ public class SearchBuilder implements ISearchBuilder {
 		return new QueryIterator(theSearchRuntimeDetails, theRequest);
 	}
 
+
 	private void init(SearchParameterMap theParams, String theSearchUuid, RequestPartitionId theRequestPartitionId) {
 		myCriteriaBuilder = myEntityManager.getCriteriaBuilder();
 		myParams = theParams;
@@ -315,24 +326,35 @@ public class SearchBuilder implements ISearchBuilder {
 		myRequestPartitionId = theRequestPartitionId;
 	}
 
-	private List<ISearchQueryExecutor> createQuery(SearchParameterMap theParams, SortSpec sort, Integer theOffset, Integer theMaximumResults, boolean theCount, RequestDetails theRequest,
+	private List<ISearchQueryExecutor> createQuery(SearchParameterMap theParams, SortSpec sort, Integer theOffset, Integer theMaximumResults, boolean theCountOnlyFlag, RequestDetails theRequest,
 																		 SearchRuntimeDetails theSearchRuntimeDetails) {
 
 		ArrayList<ISearchQueryExecutor> queries = new ArrayList<>();
 
 		if (checkUseHibernateSearch()) {
 			// we're going to run at least part of the search against the Fulltext service.
-			List<ResourcePersistentId> fulltextMatchIds;
+
+			// Ugh - we have two different return types for now
+			ISearchQueryExecutor fulltextExecutor = null;
+			List<ResourcePersistentId> fulltextMatchIds = null;
+			int resultCount = 0;
 			if (myParams.isLastN()) {
 				fulltextMatchIds = executeLastNAgainstIndex(theMaximumResults);
+				resultCount = fulltextMatchIds.size();
 			} else if (myParams.getEverythingMode() != null) {
 				fulltextMatchIds = queryHibernateSearchForEverythingPids();
+				resultCount = fulltextMatchIds.size();
 			} else {
-				fulltextMatchIds = myFulltextSearchSvc.search(myResourceName, myParams);
+				fulltextExecutor = myFulltextSearchSvc.searchAsync(myResourceName, myParams);
+			}
+
+			if (fulltextExecutor == null) {
+				fulltextExecutor = SearchQueryExecutors.from(fulltextMatchIds);
 			}
 
 			if (theSearchRuntimeDetails != null) {
-				theSearchRuntimeDetails.setFoundIndexMatchesCount(fulltextMatchIds.size());
+				// wipmb we no longer have full size.
+				theSearchRuntimeDetails.setFoundIndexMatchesCount(resultCount);
 				HookParams params = new HookParams()
 					.add(RequestDetails.class, theRequest)
 					.addIfMatchesType(ServletRequestDetails.class, theRequest)
@@ -340,17 +362,13 @@ public class SearchBuilder implements ISearchBuilder {
 				CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INDEXSEARCH_QUERY_COMPLETE, params);
 			}
 
-			List<Long> rawPids = ResourcePersistentId.toLongList(fulltextMatchIds);
-
 			// wipmb extract
 			// can we skip the database entirely and return the pid list from here?
 			boolean canSkipDatabase =
 				// if we processed an AND clause, and it returned nothing, then nothing can match.
-				rawPids.isEmpty() ||
+				!fulltextExecutor.hasNext() ||
 					// Our hibernate search query doesn't respect partitions yet
 					(!myPartitionSettings.isPartitioningEnabled() &&
-						// we don't support _count=0 yet.
-						!theCount &&
 					// were there AND terms left?  Then we still need the db.
 						theParams.isEmpty() &&
 						// not every param is a param. :-(
@@ -363,16 +381,20 @@ public class SearchBuilder implements ISearchBuilder {
 					);
 
 			if (canSkipDatabase) {
-				queries.add(ResolvedSearchQueryExecutor.from(rawPids));
+				if (theMaximumResults != null) {
+					fulltextExecutor = SearchQueryExecutors.limited(fulltextExecutor, theMaximumResults);
+				}
+				queries.add(fulltextExecutor);
 			} else {
 				// Finish the query in the database for the rest of the search parameters, sorting, partitioning, etc.
 				// We break the pids into chunks that fit in the 1k limit for jdbc bind params.
+				// wipmb change chunk to take iterator
 				new QueryChunker<Long>()
-					.chunk(rawPids, t -> doCreateChunkedQueries(theParams, t, theOffset, sort, theCount, theRequest, queries));
+					.chunk(Streams.stream(fulltextExecutor).collect(Collectors.toList()), t -> doCreateChunkedQueries(theParams, t, theOffset, sort, theCountOnlyFlag, theRequest, queries));
 			}
 		} else {
 			// do everything in the database.
-			Optional<SearchQueryExecutor> query = createChunkedQuery(theParams, sort, theOffset, theMaximumResults, theCount, theRequest, null);
+			Optional<SearchQueryExecutor> query = createChunkedQuery(theParams, sort, theOffset, theMaximumResults, theCountOnlyFlag, theRequest, null);
 			query.ifPresent(queries::add);
 		}
 
@@ -394,7 +416,7 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		// TODO MB someday we'll want a query planner to figure out if we _should_ or _must_ use the ft index, not just if we can.
-		return fulltextEnabled &&
+		return fulltextEnabled && myParams != null &&
 			myParams.getSearchContainedMode() == SearchContainedModeEnum.FALSE &&
 			myFulltextSearchSvc.supportsSomeOf(myParams);
 	}
@@ -492,9 +514,9 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 	}
 
-	private Optional<SearchQueryExecutor> createChunkedQuery(SearchParameterMap theParams, SortSpec sort, Integer theOffset, Integer theMaximumResults, boolean theCount, RequestDetails theRequest, List<Long> thePidList) {
+	private Optional<SearchQueryExecutor> createChunkedQuery(SearchParameterMap theParams, SortSpec sort, Integer theOffset, Integer theMaximumResults, boolean theCountOnlyFlag, RequestDetails theRequest, List<Long> thePidList) {
 		String sqlBuilderResourceName = myParams.getEverythingMode() == null ? myResourceName : null;
-		SearchQueryBuilder sqlBuilder = new SearchQueryBuilder(myContext, myDaoConfig.getModelConfig(), myPartitionSettings, myRequestPartitionId, sqlBuilderResourceName, mySqlBuilderFactory, myDialectProvider, theCount);
+		SearchQueryBuilder sqlBuilder = new SearchQueryBuilder(myContext, myDaoConfig.getModelConfig(), myPartitionSettings, myRequestPartitionId, sqlBuilderResourceName, mySqlBuilderFactory, myDialectProvider, theCountOnlyFlag);
 		QueryStack queryStack3 = new QueryStack(theParams, myDaoConfig, myDaoConfig.getModelConfig(), myContext, sqlBuilder, mySearchParamRegistry, myPartitionSettings);
 
 		if (theParams.keySet().size() > 1 || theParams.getSort() != null || theParams.keySet().contains(Constants.PARAM_HAS) || isPotentiallyContainedReferenceParameterExistsAtRoot(theParams)) {
@@ -519,7 +541,7 @@ public class SearchBuilder implements ISearchBuilder {
 				// is basically a reverse-include search. For type/Everything (as opposed to instance/Everything)
 				// the one problem with this approach is that it doesn't catch Patients that have absolutely
 				// nothing linked to them. So we do one additional query to make sure we catch those too.
-				SearchQueryBuilder fetchPidsSqlBuilder = new SearchQueryBuilder(myContext, myDaoConfig.getModelConfig(), myPartitionSettings, myRequestPartitionId, myResourceName, mySqlBuilderFactory, myDialectProvider, theCount);
+				SearchQueryBuilder fetchPidsSqlBuilder = new SearchQueryBuilder(myContext, myDaoConfig.getModelConfig(), myPartitionSettings, myRequestPartitionId, myResourceName, mySqlBuilderFactory, myDialectProvider, theCountOnlyFlag);
 				GeneratedSql allTargetsSql = fetchPidsSqlBuilder.generate(theOffset, myMaxResultsToFetch);
 				String sql = allTargetsSql.getSql();
 				Object[] args = allTargetsSql.getBindVariables().toArray(new Object[0]);
@@ -599,7 +621,7 @@ public class SearchBuilder implements ISearchBuilder {
 		 * finds the appropriate resources) in an outer search which is then sorted
 		 */
 		if (sort != null) {
-			assert !theCount;
+			assert !theCountOnlyFlag;
 
 			createSort(queryStack3, sort);
 		}
@@ -1384,41 +1406,6 @@ public class SearchBuilder implements ISearchBuilder {
 		myDaoConfig = theDaoConfig;
 	}
 
-	/**
-	 * Adapt bare Iterator to our internal query interface.
-	 */
-	static class ResolvedSearchQueryExecutor implements ISearchQueryExecutor {
-		private final Iterator<Long> myIterator;
-
-		ResolvedSearchQueryExecutor(Iterable<Long> theIterable) {
-			this(theIterable.iterator());
-		}
-
-		ResolvedSearchQueryExecutor(Iterator<Long> theIterator) {
-			myIterator = theIterator;
-		}
-
-		@Nonnull
-		public static ResolvedSearchQueryExecutor from(List<Long> rawPids) {
-			return new ResolvedSearchQueryExecutor(rawPids);
-		}
-
-		@Override
-		public boolean hasNext() {
-			return myIterator.hasNext();
-		}
-
-		@Override
-		public Long next() {
-			return myIterator.next();
-		}
-
-		@Override
-		public void close() {
-			// empty
-		}
-	}
-
 	public class IncludesIterator extends BaseIterator<ResourcePersistentId> implements Iterator<ResourcePersistentId> {
 
 		private final RequestDetails myRequest;
@@ -1643,6 +1630,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 		private void initializeIteratorQuery(Integer theOffset, Integer theMaxResultsToFetch) {
 			if (myQueryList.isEmpty()) {
+				// wipmb what is this?
 				// Capture times for Lucene/Elasticsearch queries as well
 				mySearchRuntimeDetails.setQueryStopwatch(new StopWatch());
 				myQueryList = createQuery(myParams, mySort, theOffset, theMaxResultsToFetch, false, myRequest, mySearchRuntimeDetails);
