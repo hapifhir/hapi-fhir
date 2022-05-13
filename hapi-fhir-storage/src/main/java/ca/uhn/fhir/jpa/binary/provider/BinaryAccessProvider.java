@@ -99,7 +99,7 @@ public class BinaryAccessProvider {
 		IBaseResource resource = dao.read(theResourceId, theRequestDetails, false);
 
 		IBinaryTarget target = findAttachmentForRequest(resource, path, theRequestDetails);
-		Optional<String> attachmentId = target.getAttachmentId();
+		Optional<String> attachmentId = target.getExternalizedBlobId();
 
 		//for unit test only
 		if (addTargetAttachmentIdForTest){
@@ -245,8 +245,7 @@ public class BinaryAccessProvider {
 		}
 		IBase element = type.get();
 
-		Optional<IBinaryTarget> binaryTarget = toBinaryTarget(element);
-
+		Optional<IBinaryTarget> binaryTarget = myBinaryStorageSvc.toBinaryTarget(element);
 		if (binaryTarget.isPresent() == false) {
 			BaseRuntimeElementDefinition<?> def2 = myCtx.getElementDefinition(element.getClass());
 			String msg = this.myCtx.getLocalizer().getMessageSanitized(BinaryAccessProvider.class, "unknownType", resType, thePath, def2.getName());
@@ -255,92 +254,6 @@ public class BinaryAccessProvider {
 			return binaryTarget.get();
 		}
 
-	}
-
-	public Optional<IBinaryTarget> toBinaryTarget(IBase theElement) {
-		IBinaryTarget binaryTarget = null;
-
-		// Path is attachment
-		BaseRuntimeElementDefinition<?> def = myCtx.getElementDefinition(theElement.getClass());
-		if (def.getName().equals("Attachment")) {
-			ICompositeType attachment = (ICompositeType) theElement;
-			binaryTarget = new IBinaryTarget() {
-				@Override
-				public void setSize(Integer theSize) {
-					AttachmentUtil.setSize(BinaryAccessProvider.this.myCtx, attachment, theSize);
-				}
-
-				@Override
-				public String getContentType() {
-					return AttachmentUtil.getOrCreateContentType(BinaryAccessProvider.this.myCtx, attachment).getValueAsString();
-				}
-
-				@Override
-				public byte[] getData() {
-					IPrimitiveType<byte[]> dataDt = AttachmentUtil.getOrCreateData(myCtx, attachment);
-					return dataDt.getValue();
-				}
-
-				@Override
-				public IBaseHasExtensions getTarget() {
-					return (IBaseHasExtensions) AttachmentUtil.getOrCreateData(myCtx, attachment);
-				}
-
-				@Override
-				public void setContentType(String theContentType) {
-					AttachmentUtil.setContentType(BinaryAccessProvider.this.myCtx, attachment, theContentType);
-				}
-
-
-				@Override
-				public void setData(byte[] theBytes) {
-					AttachmentUtil.setData(myCtx, attachment, theBytes);
-				}
-
-
-			};
-		}
-
-		// Path is Binary
-		if (def.getName().equals("Binary")) {
-			IBaseBinary binary = (IBaseBinary) theElement;
-			binaryTarget = new IBinaryTarget() {
-				@Override
-				public void setSize(Integer theSize) {
-					// ignore
-				}
-
-				@Override
-				public String getContentType() {
-					return binary.getContentType();
-				}
-
-				@Override
-				public byte[] getData() {
-					return binary.getContent();
-				}
-
-				@Override
-				public IBaseHasExtensions getTarget() {
-					return (IBaseHasExtensions) BinaryUtil.getOrCreateData(BinaryAccessProvider.this.myCtx, binary);
-				}
-
-				@Override
-				public void setContentType(String theContentType) {
-					binary.setContentType(theContentType);
-				}
-
-
-				@Override
-				public void setData(byte[] theBytes) {
-					binary.setContent(theBytes);
-				}
-
-
-			};
-		}
-
-		return Optional.ofNullable(binaryTarget);
 	}
 
 	private String validateResourceTypeAndPath(@IdParam IIdType theResourceId, @OperationParam(name = "path", min = 1, max = 1) IPrimitiveType<String> thePath) {

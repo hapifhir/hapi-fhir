@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.binary.api;
  */
 
 import ca.uhn.fhir.util.HapiExtensions;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
@@ -47,15 +48,15 @@ public interface IBinaryTarget {
 	IBaseHasExtensions getTarget();
 
 	@SuppressWarnings("unchecked")
-	default Optional<String> getAttachmentId() {
+	default Optional<String> getExternalizedBlobId() {
 		return getTarget()
 			.getExtension()
 			.stream()
 			.filter(t -> HapiExtensions.EXT_EXTERNALIZED_BINARY_ID.equals(t.getUrl()))
 			.filter(t -> t.getValue() instanceof IPrimitiveType)
 			.map(t -> (IPrimitiveType<String>) t.getValue())
-			.map(t -> t.getValue())
-			.filter(t -> isNotBlank(t))
+			.map(IPrimitiveType::getValue)
+			.filter(StringUtils::isNotBlank)
 			.findFirst();
 	}
 }

@@ -20,29 +20,42 @@ package ca.uhn.fhir.jpa.binary.svc;
  * #L%
  */
 
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
+import ca.uhn.fhir.jpa.binary.api.IBinaryTarget;
+import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PayloadTooLargeException;
+import ca.uhn.fhir.util.AttachmentUtil;
 import ca.uhn.fhir.util.BinaryUtil;
 import ca.uhn.fhir.util.HapiExtensions;
+import ca.uhn.fhir.util.IModelVisitor2;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import com.google.common.hash.HashingInputStream;
 import com.google.common.io.ByteStreams;
 import org.apache.commons.io.input.CountingInputStream;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -55,6 +68,14 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	private int myMaximumBinarySize = Integer.MAX_VALUE;
 	private int myMinimumBinarySize;
 
+	private Class<? extends IPrimitiveType<byte[]>> myBinaryType;
+
+	@PostConstruct
+	public void start() {
+		BaseRuntimeElementDefinition<?> base64Binary = myFhirContext.getElementDefinition("base64Binary");
+		assert base64Binary != null;
+		myBinaryType = (Class<? extends IPrimitiveType<byte[]>>) base64Binary.getImplementingClass();
+	}
 	@Autowired
 	private FhirContext myFhirContext;
 
@@ -154,5 +175,138 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 			.map(t -> t.getValue())
 			.filter(t -> isNotBlank(t))
 			.findFirst();
+	}
+
+	@Override
+	public long inflateAllBinariesInResource(IBaseResource theResource) throws IOException {
+		return inflateBinariesInResourceUpTo(theResource, -1);
+	}
+
+	@Override
+	public long inflateBinariesInResourceUpTo(IBaseResource theResource, long theMaximumBytes) throws IOException {
+		long unmarshalledByteCount = 0;
+		IIdType resourceId = theResource.getIdElement();
+		List<IBinaryTarget> attachments = recursivelyScanResourceForBinaryData(theResource);
+		for (IBinaryTarget nextTarget : attachments) {
+			Optional<String> attachmentId = nextTarget.getExternalizedBlobId();
+			if (attachmentId.isPresent()) {
+				StoredDetails blobDetails = fetchBlobDetails(resourceId, attachmentId.get());
+				if (blobDetails == null) {
+					String msg = myFhirContext.getLocalizer().getMessage(BaseBinaryStorageSvcImpl.class, "unknownBlobId");
+					throw new InvalidRequestException(Msg.code(1330) + msg);
+				}
+
+				if (theMaximumBytes < 0 || (unmarshalledByteCount + blobDetails.getBytes()) < theMaximumBytes) {
+					byte[] bytes = fetchBlob(resourceId, attachmentId.get());
+					nextTarget.setData(bytes);
+					unmarshalledByteCount += blobDetails.getBytes();
+				}
+			}
+		}
+		return unmarshalledByteCount;
+	}
+
+	@Nonnull
+	private List<IBinaryTarget> recursivelyScanResourceForBinaryData(IBaseResource theResource) {
+		List<IBinaryTarget> binaryTargets = new ArrayList<>();
+		myFhirContext.newTerser().visit(theResource, new IModelVisitor2() {
+			@Override
+			public boolean acceptElement(IBase theElement, List<IBase> theContainingElementPath, List<BaseRuntimeChildDefinition> theChildDefinitionPath, List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
+				if (theElement.getClass().equals(myBinaryType)) {
+					IBase parent = theContainingElementPath.get(theContainingElementPath.size() - 2);
+					Optional<IBinaryTarget> binaryTarget = toBinaryTarget(parent);
+					binaryTarget.ifPresent(binaryTargets::add);
+				}
+				return true;
+			}
+		});
+		return binaryTargets;
+	}
+
+	@Override
+	public Optional<IBinaryTarget> toBinaryTarget(IBase theElement) {
+		IBinaryTarget binaryTarget = null;
+
+		// Path is attachment
+		BaseRuntimeElementDefinition<?> def = myFhirContext.getElementDefinition(theElement.getClass());
+		if (def.getName().equals("Attachment")) {
+			ICompositeType attachment = (ICompositeType) theElement;
+			binaryTarget = new IBinaryTarget() {
+				@Override
+				public void setSize(Integer theSize) {
+					AttachmentUtil.setSize(BaseBinaryStorageSvcImpl.this.myFhirContext, attachment, theSize);
+				}
+
+				@Override
+				public String getContentType() {
+					return AttachmentUtil.getOrCreateContentType(BaseBinaryStorageSvcImpl.this.myFhirContext, attachment).getValueAsString();
+				}
+
+				@Override
+				public byte[] getData() {
+					IPrimitiveType<byte[]> dataDt = AttachmentUtil.getOrCreateData(myFhirContext, attachment);
+					return dataDt.getValue();
+				}
+
+				@Override
+				public IBaseHasExtensions getTarget() {
+					return (IBaseHasExtensions) AttachmentUtil.getOrCreateData(myFhirContext, attachment);
+				}
+
+				@Override
+				public void setContentType(String theContentType) {
+					AttachmentUtil.setContentType(BaseBinaryStorageSvcImpl.this.myFhirContext, attachment, theContentType);
+				}
+
+
+				@Override
+				public void setData(byte[] theBytes) {
+					AttachmentUtil.setData(myFhirContext, attachment, theBytes);
+				}
+
+
+			};
+		}
+
+		// Path is Binary
+		if (def.getName().equals("Binary")) {
+			IBaseBinary binary = (IBaseBinary) theElement;
+			binaryTarget = new IBinaryTarget() {
+				@Override
+				public void setSize(Integer theSize) {
+					// ignore
+				}
+
+				@Override
+				public String getContentType() {
+					return binary.getContentType();
+				}
+
+				@Override
+				public byte[] getData() {
+					return binary.getContent();
+				}
+
+				@Override
+				public IBaseHasExtensions getTarget() {
+					return (IBaseHasExtensions) BinaryUtil.getOrCreateData(BaseBinaryStorageSvcImpl.this.myFhirContext, binary);
+				}
+
+				@Override
+				public void setContentType(String theContentType) {
+					binary.setContentType(theContentType);
+				}
+
+
+				@Override
+				public void setData(byte[] theBytes) {
+					binary.setContent(theBytes);
+				}
+
+
+			};
+		}
+
+		return Optional.ofNullable(binaryTarget);
 	}
 }

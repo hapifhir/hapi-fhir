@@ -20,13 +20,18 @@ package ca.uhn.fhir.jpa.binary.api;
  * #L%
  */
 
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Map;
+import java.util.Optional;
 
 public interface IBinaryStorageSvc {
 
@@ -103,6 +108,8 @@ public interface IBinaryStorageSvc {
 	 */
 	byte[] fetchBlob(IIdType theResourceId, String theBlobId) throws IOException;
 
+
+
 	/**
 	 * Fetch the byte[] contents of a given Binary resource's `data` element. If the data is a standard base64encoded string that is embedded, return it.
 	 * Otherwise, attempt to load the externalized binary blob via the the externalized binary storage service.
@@ -111,4 +118,11 @@ public interface IBinaryStorageSvc {
 	 * @return The binary data blob as a byte array
 	 */
 	byte[] fetchDataBlobFromBinary(IBaseBinary theResource) throws IOException;
+
+	//FIXME docs
+	long inflateAllBinariesInResource(IBaseResource theResource) throws IOException;
+	long inflateBinariesInResourceUpTo(IBaseResource theResource, long theMaximumBytes) throws IOException;
+
+
+	Optional<IBinaryTarget> toBinaryTarget(IBase theElement);
 }

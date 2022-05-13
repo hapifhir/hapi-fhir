@@ -122,7 +122,6 @@ public class BinaryStorageInterceptor {
 
 			ourLog.info("Deleting binary blob {} because resource {} is being expunged", next, theResource.getIdElement().getValue());
 		}
-
 	}
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
@@ -254,31 +253,12 @@ public class BinaryStorageInterceptor {
 		}
 
 		long unmarshalledByteCount = 0;
-
+		long bytesRemaining = myAutoInflateBinariesMaximumBytes;
 		for (IBaseResource nextResource : theDetails) {
-
-			IIdType resourceId = nextResource.getIdElement();
-			List<IBinaryTarget> attachments = recursivelyScanResourceForBinaryData(nextResource);
-
-			for (IBinaryTarget nextTarget : attachments) {
-				Optional<String> attachmentId = nextTarget.getAttachmentId();
-				if (attachmentId.isPresent()) {
-
-					StoredDetails blobDetails = myBinaryStorageSvc.fetchBlobDetails(resourceId, attachmentId.get());
-					if (blobDetails == null) {
-						String msg = myCtx.getLocalizer().getMessage(BinaryAccessProvider.class, "unknownBlobId");
-						throw new InvalidRequestException(Msg.code(1330) + msg);
-					}
-
-					if ((unmarshalledByteCount + blobDetails.getBytes()) < myAutoInflateBinariesMaximumBytes) {
-
-						byte[] bytes = myBinaryStorageSvc.fetchBlob(resourceId, attachmentId.get());
-						nextTarget.setData(bytes);
-						unmarshalledByteCount += blobDetails.getBytes();
-					}
-				}
+			bytesRemaining -= myBinaryStorageSvc.inflateBinariesInResourceUpTo(nextResource, bytesRemaining);
+			if (myAutoInflateBinariesMaximumBytes > 0 && bytesRemaining <= 0) {
+				ourLog.debug("Auto-inflating binaries stopped after {} bytes", unmarshalledByteCount);
 			}
-
 		}
 	}
 
@@ -291,7 +271,7 @@ public class BinaryStorageInterceptor {
 
 				if (theElement.getClass().equals(myBinaryType)) {
 					IBase parent = theContainingElementPath.get(theContainingElementPath.size() - 2);
-					Optional<IBinaryTarget> binaryTarget = myBinaryAccessProvider.toBinaryTarget(parent);
+					Optional<IBinaryTarget> binaryTarget = myBinaryStorageSvc.toBinaryTarget(parent);
 					binaryTarget.ifPresent(binaryTargets::add);
 				}
 				return true;
