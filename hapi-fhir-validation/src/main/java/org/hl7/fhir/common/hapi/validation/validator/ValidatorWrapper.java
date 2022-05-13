@@ -204,7 +204,7 @@ class ValidatorWrapper {
 			.collect(Collectors.toList());
 
 		if (myErrorForUnknownProfiles) {
-			messages.stream().filter(m -> m.getMessageId() != null && m.getMessageId().equals(I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN))
+			messages.stream().filter(m -> m.getMessageId() != null && (m.getMessageId().equals(I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN) || m.getMessageId().equals(I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN_NOT_POLICY)))
 				.filter(m -> m.getLevel() == ValidationMessage.IssueSeverity.WARNING)
 				.forEach(m -> m.setLevel(ValidationMessage.IssueSeverity.ERROR));
 		}
