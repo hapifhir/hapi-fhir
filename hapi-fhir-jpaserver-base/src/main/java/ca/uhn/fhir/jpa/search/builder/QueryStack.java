@@ -329,10 +329,6 @@ public class QueryStack {
 		return orCondidtion;
 	}
 
-	private Condition createPredicateCompositePart(@Nullable DbColumn theSourceJoinColumn, String theResourceName, String theSpnamePrefix, RuntimeSearchParam theParam, IQueryParameterType theParamValue, RequestPartitionId theRequestPartitionId) {
-		return createPredicateCompositePart(theSourceJoinColumn, theResourceName, theSpnamePrefix, theParam, theParamValue, theRequestPartitionId, mySqlBuilder);
-	}
-
 	private Condition createPredicateCompositePart(@Nullable DbColumn theSourceJoinColumn, String theResourceName, String theSpnamePrefix, RuntimeSearchParam theParam, IQueryParameterType theParamValue, RequestPartitionId theRequestPartitionId, SearchQueryBuilder theSqlBuilder) {
 
 		switch (theParam.getParamType()) {
@@ -930,7 +926,7 @@ public class QueryStack {
 	}
 
 	public Condition createPredicateReferenceForContainedResource(@Nullable DbColumn theSourceJoinColumn,
-																					  String theResourceName, String theParamName, List<String> theQualifiers, RuntimeSearchParam theSearchParam,
+																					  String theResourceName, RuntimeSearchParam theSearchParam,
 																					  List<? extends IQueryParameterType> theList, SearchFilterParser.CompareOperation theOperation,
 																					  RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
 		// A bit of a hack, but we need to turn off cache reuse while in this method so that we don't try to reuse builders across different subselects
@@ -1093,7 +1089,7 @@ public class QueryStack {
 	}
 
 	private Condition createIndexPredicate(DbColumn theSourceJoinColumn, String theResourceName, String theSpnamePrefix, String theParamName, RuntimeSearchParam theParamDefinition, ArrayList<IQueryParameterType> theOrValues, SearchFilterParser.CompareOperation theOperation, List<String> theQualifiers, RequestDetails theRequest, RequestPartitionId theRequestPartitionId, SearchQueryBuilder theSqlBuilder) {
-		Condition containedCondition = null;
+		Condition containedCondition;
 
 		switch (theParamDefinition.getParamType()) {
 			case DATE:
@@ -1309,7 +1305,7 @@ public class QueryStack {
 		List<IQueryParameterType> tokens = new ArrayList<>(); 
 		
 		boolean paramInverted = false;
-		TokenParamModifier modifier = null;
+		TokenParamModifier modifier;
 		
 		for (IQueryParameterType nextOr : theList) {
 			if (nextOr instanceof TokenParam) {
@@ -1334,7 +1330,7 @@ public class QueryStack {
 					
 					modifier = id.getModifier();
 					// for :not modifier, create a token and remove the :not modifier
-					if (modifier != null && modifier == TokenParamModifier.NOT) {
+					if (modifier == TokenParamModifier.NOT) {
 						tokens.add(new TokenParam(((TokenParam) nextOr).getSystem(), ((TokenParam) nextOr).getValue()));
 						paramInverted = true;
 					} else {
@@ -1431,7 +1427,7 @@ public class QueryStack {
 			case Constants.PARAM_PROFILE:
 			case Constants.PARAM_SECURITY:
 				if (myDaoConfig.getTagStorageMode() == DaoConfig.TagStorageModeEnum.INLINE) {
-					return createPredicateSearchParameter(theSourceJoinColumn, theResourceName, theParamName, theAndOrParams, theRequest, theRequestPartitionId, theSearchContainedMode);
+					return createPredicateSearchParameter(theSourceJoinColumn, theResourceName, theParamName, theAndOrParams, theRequest, theRequestPartitionId);
 				} else {
 					return createPredicateTag(theSourceJoinColumn, theAndOrParams, theParamName, theRequestPartitionId);
 				}
@@ -1440,14 +1436,14 @@ public class QueryStack {
 				return createPredicateSourceForAndList(theSourceJoinColumn, theAndOrParams);
 
 			default:
-				return createPredicateSearchParameter(theSourceJoinColumn, theResourceName, theParamName, theAndOrParams, theRequest, theRequestPartitionId, theSearchContainedMode);
+				return createPredicateSearchParameter(theSourceJoinColumn, theResourceName, theParamName, theAndOrParams, theRequest, theRequestPartitionId);
 
 		}
 
 	}
 
 	@Nullable
-	private Condition createPredicateSearchParameter(@Nullable DbColumn theSourceJoinColumn, String theResourceName, String theParamName, List<List<IQueryParameterType>> theAndOrParams, RequestDetails theRequest, RequestPartitionId theRequestPartitionId, SearchContainedModeEnum theSearchContainedMode) {
+	private Condition createPredicateSearchParameter(@Nullable DbColumn theSourceJoinColumn, String theResourceName, String theParamName, List<List<IQueryParameterType>> theAndOrParams, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
 		List<Condition> andPredicates = new ArrayList<>();
 		RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
 		if (nextParamDef != null) {
@@ -1469,7 +1465,6 @@ public class QueryStack {
 							operation = toOperation(param.getPrefix());
 						}
 						andPredicates.add(createPredicateDate(theSourceJoinColumn, theResourceName, null, nextParamDef, nextAnd, operation, theRequestPartitionId));
-						//andPredicates.add(createPredicateDate(theSourceJoinColumn, theResourceName, nextParamDef, nextAnd, null, theRequestPartitionId));
 					}
 					break;
 				case QUANTITY:
@@ -1485,7 +1480,7 @@ public class QueryStack {
 				case REFERENCE:
 					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
 						if (isEligibleForContainedResourceSearch(nextAnd)) {
-							andPredicates.add(createPredicateReferenceForContainedResource(theSourceJoinColumn, theResourceName, theParamName, new ArrayList<>(), nextParamDef, nextAnd, null, theRequest, theRequestPartitionId));
+							andPredicates.add(createPredicateReferenceForContainedResource(theSourceJoinColumn, theResourceName, nextParamDef, nextAnd, null, theRequest, theRequestPartitionId));
 						} else {
 							andPredicates.add(createPredicateReference(theSourceJoinColumn, theResourceName, theParamName, new ArrayList<>(), nextAnd, null, theRequest, theRequestPartitionId));
 						}

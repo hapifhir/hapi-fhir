@@ -308,12 +308,12 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 					break;
 				case EQUAL:
 				case GREATERTHAN_OR_EQUALS:
+				case NOT_EQUAL:
 					break;
 				case LESSTHAN:
 				case APPROXIMATE:
 				case LESSTHAN_OR_EQUALS:
 				case ENDS_BEFORE:
-				case NOT_EQUAL:
 					throw new IllegalStateException(Msg.code(1926) + "Invalid lower bound comparator: " + myLowerBound.getPrefix());
 			}
 		}
@@ -338,11 +338,11 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 					break;
 				case EQUAL:
 				case LESSTHAN_OR_EQUALS:
+				case NOT_EQUAL:
 					break;
 				case GREATERTHAN_OR_EQUALS:
 				case GREATERTHAN:
 				case APPROXIMATE:
-				case NOT_EQUAL:
 				case STARTS_AFTER:
 					throw new IllegalStateException(Msg.code(1927) + "Invalid upper bound comparator: " + myUpperBound.getPrefix());
 			}
@@ -367,13 +367,13 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 					retVal = myLowerBound.getPrecision().add(retVal, 1);
 					break;
 				case EQUAL:
+				case NOT_EQUAL:
 				case GREATERTHAN_OR_EQUALS:
 					break;
 				case LESSTHAN:
 				case APPROXIMATE:
 				case LESSTHAN_OR_EQUALS:
 				case ENDS_BEFORE:
-				case NOT_EQUAL:
 					throw new IllegalStateException(Msg.code(1928) + "Invalid lower bound comparator: " + myLowerBound.getPrefix());
 			}
 		}
@@ -429,6 +429,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 					retVal = new Date(retVal.getTime() - 1L);
 					break;
 				case EQUAL:
+				case NOT_EQUAL:
 				case LESSTHAN_OR_EQUALS:
 					retVal = myUpperBound.getPrecision().add(retVal, 1);
 					retVal = new Date(retVal.getTime() - 1L);
@@ -436,7 +437,6 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 				case GREATERTHAN_OR_EQUALS:
 				case GREATERTHAN:
 				case APPROXIMATE:
-				case NOT_EQUAL:
 				case STARTS_AFTER:
 					throw new IllegalStateException(Msg.code(1929) + "Invalid upper bound comparator: " + myUpperBound.getPrefix());
 			}
