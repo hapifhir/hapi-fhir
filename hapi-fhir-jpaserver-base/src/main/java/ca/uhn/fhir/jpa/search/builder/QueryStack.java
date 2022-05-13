@@ -101,7 +101,7 @@ import org.apache.commons.collections4.bidimap.UnmodifiableBidiMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1221,52 +1221,11 @@ public class QueryStack {
 
 		List<Condition> andPredicates = new ArrayList<>();
 		for (List<? extends IQueryParameterType> nextAndParams : theList) {
-			boolean haveTags = false;
-			for (IQueryParameterType nextParamUncasted : nextAndParams) {
-				if (nextParamUncasted instanceof TokenParam) {
-					TokenParam nextParam = (TokenParam) nextParamUncasted;
-					if (isNotBlank(nextParam.getValue())) {
-						haveTags = true;
-					} else if (isNotBlank(nextParam.getSystem())) {
-						throw new InvalidRequestException(Msg.code(1218) + "Invalid " + theParamName + " parameter (must supply a value/code and not just a system): " + nextParam.getValueAsQueryToken(myFhirContext));
-					}
-				} else {
-					UriParam nextParam = (UriParam) nextParamUncasted;
-					if (isNotBlank(nextParam.getValue())) {
-						haveTags = true;
-					}
-				}
-			}
-			if (!haveTags) {
-				continue;
-			}
+			if ( ! checkHaveTags(nextAndParams, theParamName)) { continue; }
 
-			boolean paramInverted = false;
-			List<Pair<String, String>> tokens = Lists.newArrayList();
-			for (IQueryParameterType nextOrParams : nextAndParams) {
-				String code;
-				String system;
-				if (nextOrParams instanceof TokenParam) {
-					TokenParam nextParam = (TokenParam) nextOrParams;
-					code = nextParam.getValue();
-					system = nextParam.getSystem();
-					if (nextParam.getModifier() == TokenParamModifier.NOT) {
-						paramInverted = true;
-					}
-				} else {
-					UriParam nextParam = (UriParam) nextOrParams;
-					code = nextParam.getValue();
-					system = null;
-				}
-
-				if (isNotBlank(code)) {
-					tokens.add(Pair.of(system, code));
-				}
-			}
-
-			if (tokens.isEmpty()) {
-				continue;
-			}
+			List<Triple<String, String, String>> tokens = Lists.newArrayList();
+			boolean paramInverted = populateTokens(tokens, nextAndParams);
+			if (tokens.isEmpty()) { continue; }
 
 			Condition tagPredicate;
 			BaseJoiningPredicateBuilder join;
@@ -1294,6 +1253,50 @@ public class QueryStack {
 		}
 
 		return toAndPredicate(andPredicates);
+	}
+
+	private boolean populateTokens(List<Triple<String, String, String>> theTokens, List<? extends IQueryParameterType> theAndParams) {
+		boolean paramInverted = false;
+
+		for (IQueryParameterType nextOrParam : theAndParams) {
+			String code;
+			String system;
+			if (nextOrParam instanceof TokenParam) {
+				TokenParam nextParam = (TokenParam) nextOrParam;
+				code = nextParam.getValue();
+				system = nextParam.getSystem();
+				if (nextParam.getModifier() == TokenParamModifier.NOT) {
+					paramInverted = true;
+				}
+			} else {
+				UriParam nextParam = (UriParam) nextOrParam;
+				code = nextParam.getValue();
+				system = null;
+			}
+
+			if (isNotBlank(code)) {
+				theTokens.add(Triple.of(system, nextOrParam.getQueryParameterQualifier(), code));
+			}
+		}
+		return paramInverted;
+	}
+
+	private boolean checkHaveTags(List<? extends IQueryParameterType> theParams, String theParamName) {
+		for (IQueryParameterType nextParamUncasted : theParams) {
+			if (nextParamUncasted instanceof TokenParam) {
+				TokenParam nextParam = (TokenParam) nextParamUncasted;
+				if (isNotBlank(nextParam.getValue())) { return true; }
+				if (isNotBlank(nextParam.getSystem())) {
+					throw new InvalidRequestException(Msg.code(1218) + "Invalid " + theParamName +
+						" parameter (must supply a value/code and not just a system): " + nextParam.getValueAsQueryToken(myFhirContext));
+				}
+			}
+
+			UriParam nextParam = (UriParam) nextParamUncasted;
+			if (isNotBlank(nextParam.getValue())) { return true; }
+		}
+
+		return false;
 	}
 
 	public Condition createPredicateToken(@Nullable DbColumn theSourceJoinColumn, String theResourceName,
