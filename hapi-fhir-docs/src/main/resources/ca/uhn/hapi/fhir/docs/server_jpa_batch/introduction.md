@@ -18,3 +18,10 @@ A HAPI-FHIR batch job definition consists of a job name, version, parameter json
 
 After a job has been defined, *instances* of that job can be submitted for batch processing by populating a `JobInstanceStartRequest` with the job name and job parameters json and then submitting that request to the Batch Job Coordinator.
 
+The Batch Job Coordinator will then store two records in the database:
+- Job Instance: that is the parent record for all data concerning this job
+- Batch Work Chunk: this describes the first "chunk" of work required for this job
+
+Lastly the Batch Job Coordinator publishes a message to the `batch2-work-notification` channel to inform worker threads that a chunk of work is now ready for processing.
+
+
