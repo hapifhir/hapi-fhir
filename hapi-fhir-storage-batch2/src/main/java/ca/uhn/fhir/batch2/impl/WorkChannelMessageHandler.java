@@ -72,16 +72,19 @@ class WorkChannelMessageHandler implements MessageHandler {
 			return;
 		}
 
-		executeStep(chunk, jobDefinitionId, jobDefinitionVersion, definition, cursor, instance);
+		executeStep(definition, instance, chunk, cursor);
 	}
 
 
 	@SuppressWarnings("unchecked")
-	private <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> void executeStep(WorkChunk theWorkChunk, String theJobDefinitionId, int theJobDefinitionVersion, JobDefinition<PT> theDefinition, JobWorkCursor theJobWorkCursor, JobInstance theInstance) {
-		String targetStepId = theJobWorkCursor.getTargetStepId();
+	private <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> void executeStep(JobDefinition<PT> theDefinition, JobInstance theInstance, WorkChunk theWorkChunk, JobWorkCursor theJobWorkCursor) {
+		String jobDefinitionId  = theDefinition.getJobDefinitionId();
+		int jobDefinitionVersion = theDefinition.getJobDefinitionVersion();
+
 		boolean isFirstStep = theJobWorkCursor.isFirstStep;
 		JobDefinitionStep<PT, IT, OT> step = theJobWorkCursor.targetStep;
 		JobDefinitionStep<PT, OT, ?> subsequentStep = theJobWorkCursor.nextStep;
+		String targetStepId = theJobWorkCursor.getTargetStepId();
 
 		String instanceId = theInstance.getInstanceId();
 		PT parameters = theInstance.getParameters(theDefinition.getParametersType());
@@ -90,13 +93,13 @@ class WorkChannelMessageHandler implements MessageHandler {
 		BaseDataSink<OT> dataSink;
 		boolean finalStep = subsequentStep == null;
 		if (!finalStep) {
-			dataSink = new JobDataSink<>(myBatchJobSender, myJobPersistence, theJobDefinitionId, theJobDefinitionVersion, subsequentStep, instanceId, step.getStepId(), theDefinition.isGatedExecution());
+			dataSink = new JobDataSink<>(myBatchJobSender, myJobPersistence, jobDefinitionId, jobDefinitionVersion, subsequentStep, instanceId, step.getStepId(), theDefinition.isGatedExecution());
 		} else {
-			dataSink = (BaseDataSink<OT>) new FinalStepDataSink(theJobDefinitionId, instanceId, step.getStepId());
+			dataSink = (BaseDataSink<OT>) new FinalStepDataSink(jobDefinitionId, instanceId, step.getStepId());
 		}
 
 		Class<IT> inputType = step.getInputType();
-		boolean success = executeStep(theWorkChunk, theJobDefinitionId, targetStepId, inputType, parameters, worker, dataSink);
+		boolean success = executeStep(jobDefinitionId, targetStepId, theWorkChunk, inputType, parameters, worker, dataSink);
 		if (!success) {
 			return;
 		}
@@ -114,7 +117,7 @@ class WorkChannelMessageHandler implements MessageHandler {
 
 	}
 
-	private <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> boolean executeStep(@Nonnull WorkChunk theWorkChunk, String theJobDefinitionId, String theTargetStepId, Class<IT> theInputType, PT theParameters, IJobStepWorker<PT, IT, OT> theWorker, BaseDataSink<OT> theDataSink) {
+	private <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> boolean executeStep(String theJobDefinitionId, String theTargetStepId, @Nonnull WorkChunk theWorkChunk, Class<IT> theInputType, PT theParameters, IJobStepWorker<PT, IT, OT> theWorker, BaseDataSink<OT> theDataSink) {
 		IT data = null;
 		if (!theInputType.equals(VoidModel.class)) {
 			data = theWorkChunk.getData(theInputType);
