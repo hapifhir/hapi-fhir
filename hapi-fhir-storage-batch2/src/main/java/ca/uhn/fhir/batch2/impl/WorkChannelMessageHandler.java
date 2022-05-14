@@ -58,7 +58,7 @@ class WorkChannelMessageHandler implements MessageHandler {
 
 		String jobDefinitionId = workNotification.getJobDefinitionId();
 		int jobDefinitionVersion = workNotification.getJobDefinitionVersion();
-		JobDefinition definition = myJobDefinitionRegistry.getDefinitionOrThrowException(jobDefinitionId, jobDefinitionVersion);
+		JobDefinition definition = myJobDefinitionRegistry.getJobDefinitionOrThrowException(jobDefinitionId, jobDefinitionVersion);
 		JobWorkCursor cursor = definition.cursorFromWorkNotification(workNotification);
 		Validate.isTrue(chunk.getTargetStepId().equals(cursor.getTargetStepId()), "Chunk %s has target step %s but expected %s", chunkId, chunk.getTargetStepId(), cursor.getTargetStepId());
 
