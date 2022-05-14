@@ -81,11 +81,12 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * is complete (all chunks are in COMPLETE status) and trigger the next step.
  * </p>
  */
-public class JobMaintenanceServiceImpl extends BaseJobService implements IJobMaintenanceService {
+public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 
 	public static final int INSTANCES_PER_PASS = 100;
 	public static final long PURGE_THRESHOLD = 7L * DateUtils.MILLIS_PER_DAY;
 	private static final Logger ourLog = LoggerFactory.getLogger(JobMaintenanceServiceImpl.class);
+	private final IJobPersistence myJobPersistence;
 	private final ISchedulerService mySchedulerService;
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final BatchJobSender myBatchJobSender;
@@ -94,12 +95,13 @@ public class JobMaintenanceServiceImpl extends BaseJobService implements IJobMai
 	/**
 	 * Constructor
 	 */
-	public JobMaintenanceServiceImpl(ISchedulerService theSchedulerService, IJobPersistence theJobPersistence, JobDefinitionRegistry theJobDefinitionRegistry, BatchJobSender theBatchJobSender) {
-		super(theJobPersistence);
+	public JobMaintenanceServiceImpl(@Nonnull ISchedulerService theSchedulerService, @Nonnull IJobPersistence theJobPersistence, @Nonnull JobDefinitionRegistry theJobDefinitionRegistry, @Nonnull BatchJobSender theBatchJobSender) {
 		Validate.notNull(theSchedulerService);
+		Validate.notNull(theJobPersistence);
 		Validate.notNull(theJobDefinitionRegistry);
 		Validate.notNull(theBatchJobSender);
 
+		myJobPersistence = theJobPersistence;
 		mySchedulerService = theSchedulerService;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 		myBatchJobSender = theBatchJobSender;
