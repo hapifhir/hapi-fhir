@@ -24,8 +24,12 @@ import ca.uhn.fhir.batch2.api.IJobCompletionHandler;
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.lang3.Validate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -35,7 +39,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class JobDefinition<PT extends IModelJson> {
-
+	private static final Logger ourLog = LoggerFactory.getLogger(JobDefinition.class);
 	public static final int ID_MAX_LENGTH = 100;
 
 	private final String myJobDefinitionId;
@@ -61,7 +65,7 @@ public class JobDefinition<PT extends IModelJson> {
 		myJobDefinitionVersion = theJobDefinitionVersion;
 		myJobDescription = theJobDescription;
 		mySteps = theSteps;
-		myStepIds = mySteps.stream().map(t -> t.getStepId()).collect(Collectors.toList());
+		myStepIds = mySteps.stream().map(JobDefinitionStep::getStepId).collect(Collectors.toList());
 		myParametersType = theParametersType;
 		myParametersValidator = theParametersValidator;
 		myGatedExecution = theGatedExecution;
@@ -122,6 +126,34 @@ public class JobDefinition<PT extends IModelJson> {
 
 	public boolean isLastStep(String theStepId) {
 		return getStepIndex(theStepId) == (myStepIds.size() - 1);
+	}
+
+	public JobWorkCursor cursorFromWorkNotification(JobWorkNotification theWorkNotification) {
+		String targetStepId = theWorkNotification.getTargetStepId();
+		boolean firstStep = false;
+		JobDefinitionStep targetStep = null;
+		JobDefinitionStep nextStep = null;
+		for (int i = 0; i < mySteps.size(); i++) {
+			JobDefinitionStep<?, ?, ?> step = mySteps.get(i);
+			if (step.getStepId().equals(targetStepId)) {
+				targetStep = step;
+				if (i == 0) {
+					firstStep = true;
+				}
+				if (i < (getSteps().size() - 1)) {
+					nextStep = mySteps.get(i + 1);
+				}
+				break;
+			}
+		}
+
+		if (targetStep == null) {
+			String msg = "Unknown step[" + targetStepId + "] for job definition ID[" + myJobDefinitionId + "] version[" + myJobDefinitionVersion + "]";
+			ourLog.warn(msg);
+			throw new InternalErrorException(Msg.code(2042) + msg);
+		}
+
+		return new JobWorkCursor(firstStep, targetStep, nextStep);
 	}
 
 	public static class Builder<PT extends IModelJson, NIT extends IModelJson> {

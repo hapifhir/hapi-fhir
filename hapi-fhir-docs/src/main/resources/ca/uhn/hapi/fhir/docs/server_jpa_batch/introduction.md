@@ -22,6 +22,12 @@ The Batch Job Coordinator will then store two records in the database:
 - Job Instance: that is the parent record for all data concerning this job
 - Batch Work Chunk: this describes the first "chunk" of work required for this job
 
-Lastly the Batch Job Coordinator publishes a message to the `batch2-work-notification` channel to inform worker threads that a chunk of work is now ready for processing.
+Lastly the Batch Job Coordinator publishes a message to the `batch2-work-notification` channel to inform worker threads that this first chunk of work is now ready for processing.
 
+### Job Processing
 
+HAPI-FHIR Batch Jobs run based on job notification messages.  The process is kicked off by the first chunk of work.  When this notification message arrives, the message handler makes a single call to the first step defined in the job definition, passing in the job parameters as input.
+
+The handler then does the following:
+1. Mark this work chunk as IN_PROGRESS
+2. 

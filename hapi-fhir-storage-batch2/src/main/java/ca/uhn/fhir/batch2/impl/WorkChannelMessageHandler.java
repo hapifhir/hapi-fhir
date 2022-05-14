@@ -10,6 +10,7 @@ import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.batch2.model.WorkChunk;
@@ -44,9 +45,9 @@ class WorkChannelMessageHandler implements MessageHandler {
 	}
 
 	private void handleWorkChannelMessage(JobWorkNotificationJsonMessage theMessage) {
-		JobWorkNotification payload = theMessage.getPayload();
+		JobWorkNotification workNotification = theMessage.getPayload();
 
-		String chunkId = payload.getChunkId();
+		String chunkId = workNotification.getChunkId();
 		Validate.notNull(chunkId);
 		Optional<WorkChunk> chunkOpt = myJobPersistence.fetchWorkChunkSetStartTimeAndMarkInProgress(chunkId);
 		if (chunkOpt.isEmpty()) {
@@ -55,38 +56,14 @@ class WorkChannelMessageHandler implements MessageHandler {
 		}
 		WorkChunk chunk = chunkOpt.get();
 
-		String jobDefinitionId = payload.getJobDefinitionId();
-		int jobDefinitionVersion = payload.getJobDefinitionVersion();
+		String jobDefinitionId = workNotification.getJobDefinitionId();
+		int jobDefinitionVersion = workNotification.getJobDefinitionVersion();
 		JobDefinition definition = myJobDefinitionRegistry.getDefinitionOrThrowException(jobDefinitionId, jobDefinitionVersion);
+		JobWorkCursor cursor = definition.cursorFromWorkNotification(workNotification);
+		Validate.isTrue(chunk.getTargetStepId().equals(cursor.getTargetStepId()), "Chunk %s has target step %s but expected %s", chunkId, chunk.getTargetStepId(), cursor.getTargetStepId());
 
-		JobDefinitionStep targetStep = null;
-		JobDefinitionStep nextStep = null;
-		String targetStepId = payload.getTargetStepId();
-		boolean firstStep = false;
-		for (int i = 0; i < definition.getSteps().size(); i++) {
-			JobDefinitionStep<?, ?, ?> step = (JobDefinitionStep<?, ?, ?>) definition.getSteps().get(i);
-			if (step.getStepId().equals(targetStepId)) {
-				targetStep = step;
-				if (i == 0) {
-					firstStep = true;
-				}
-				if (i < (definition.getSteps().size() - 1)) {
-					nextStep = (JobDefinitionStep<?, ?, ?>) definition.getSteps().get(i + 1);
-				}
-				break;
-			}
-		}
-
-		if (targetStep == null) {
-			String msg = "Unknown step[" + targetStepId + "] for job definition ID[" + jobDefinitionId + "] version[" + jobDefinitionVersion + "]";
-			ourLog.warn(msg);
-			throw new InternalErrorException(Msg.code(2042) + msg);
-		}
-
-		Validate.isTrue(chunk.getTargetStepId().equals(targetStep.getStepId()), "Chunk %s has target step %s but expected %s", chunkId, chunk.getTargetStepId(), targetStep.getStepId());
-
-		Optional<JobInstance> instanceOpt = myJobPersistence.fetchInstanceAndMarkInProgress(payload.getInstanceId());
-		JobInstance instance = instanceOpt.orElseThrow(() -> new InternalErrorException("Unknown instance: " + payload.getInstanceId()));
+		Optional<JobInstance> instanceOpt = myJobPersistence.fetchInstanceAndMarkInProgress(workNotification.getInstanceId());
+		JobInstance instance = instanceOpt.orElseThrow(() -> new InternalErrorException("Unknown instance: " + workNotification.getInstanceId()));
 		String instanceId = instance.getInstanceId();
 
 		if (instance.isCancelled()) {
@@ -95,38 +72,43 @@ class WorkChannelMessageHandler implements MessageHandler {
 			return;
 		}
 
-		executeStep(chunk, jobDefinitionId, jobDefinitionVersion, definition, targetStep, nextStep, targetStepId, firstStep, instance);
+		executeStep(chunk, jobDefinitionId, jobDefinitionVersion, definition, cursor, instance);
 	}
 
 
 	@SuppressWarnings("unchecked")
-	private <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> void executeStep(WorkChunk theWorkChunk, String theJobDefinitionId, int theJobDefinitionVersion, JobDefinition<PT> theDefinition, JobDefinitionStep<PT, IT, OT> theStep, JobDefinitionStep<PT, OT, ?> theSubsequentStep, String theTargetStepId, boolean theFirstStep, JobInstance theInstance) {
+	private <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> void executeStep(WorkChunk theWorkChunk, String theJobDefinitionId, int theJobDefinitionVersion, JobDefinition<PT> theDefinition, JobWorkCursor theJobWorkCursor, JobInstance theInstance) {
+		String targetStepId = theJobWorkCursor.getTargetStepId();
+		boolean isFirstStep = theJobWorkCursor.isFirstStep;
+		JobDefinitionStep<PT, IT, OT> step = theJobWorkCursor.targetStep;
+		JobDefinitionStep<PT, OT, ?> subsequentStep = theJobWorkCursor.nextStep;
+
 		String instanceId = theInstance.getInstanceId();
 		PT parameters = theInstance.getParameters(theDefinition.getParametersType());
-		IJobStepWorker<PT, IT, OT> worker = theStep.getJobStepWorker();
+		IJobStepWorker<PT, IT, OT> worker = step.getJobStepWorker();
 
 		BaseDataSink<OT> dataSink;
-		boolean finalStep = theSubsequentStep == null;
+		boolean finalStep = subsequentStep == null;
 		if (!finalStep) {
-			dataSink = new JobDataSink<>(myBatchJobSender, myJobPersistence, theJobDefinitionId, theJobDefinitionVersion, theSubsequentStep, instanceId, theStep.getStepId(), theDefinition.isGatedExecution());
+			dataSink = new JobDataSink<>(myBatchJobSender, myJobPersistence, theJobDefinitionId, theJobDefinitionVersion, subsequentStep, instanceId, step.getStepId(), theDefinition.isGatedExecution());
 		} else {
-			dataSink = (BaseDataSink<OT>) new FinalStepDataSink(theJobDefinitionId, instanceId, theStep.getStepId());
+			dataSink = (BaseDataSink<OT>) new FinalStepDataSink(theJobDefinitionId, instanceId, step.getStepId());
 		}
 
-		Class<IT> inputType = theStep.getInputType();
-		boolean success = executeStep(theWorkChunk, theJobDefinitionId, theTargetStepId, inputType, parameters, worker, dataSink);
+		Class<IT> inputType = step.getInputType();
+		boolean success = executeStep(theWorkChunk, theJobDefinitionId, targetStepId, inputType, parameters, worker, dataSink);
 		if (!success) {
 			return;
 		}
 
 		int workChunkCount = dataSink.getWorkChunkCount();
-		if (theFirstStep && workChunkCount == 0) {
+		if (isFirstStep && workChunkCount == 0) {
 			ourLog.info("First step of job theInstance {} produced no work chunks, marking as completed", instanceId);
 			myJobPersistence.markInstanceAsCompleted(instanceId);
 		}
 
-		if (theDefinition.isGatedExecution() && theFirstStep) {
-			theInstance.setCurrentGatedStepId(theTargetStepId);
+		if (theDefinition.isGatedExecution() && isFirstStep) {
+			theInstance.setCurrentGatedStepId(targetStepId);
 			myJobPersistence.updateInstance(theInstance);
 		}
 
