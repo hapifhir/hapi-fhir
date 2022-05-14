@@ -21,7 +21,6 @@ package ca.uhn.fhir.batch2.impl;
  */
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
-import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -30,7 +29,6 @@ import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
-import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.apache.commons.lang3.Validate;
@@ -39,16 +37,8 @@ import org.springframework.messaging.MessageHandler;
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class JobCoordinatorImpl implements IJobCoordinator {
@@ -58,8 +48,8 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 	private final IChannelReceiver myWorkChannelReceiver;
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final MessageHandler myReceiverHandler;
-	private final ValidatorFactory myValidatorFactory = Validation.buildDefaultValidatorFactory();
 	private final JobQuerySvc myJobQuerySvc;
+	private final JobParameterJsonValidator myJobParameterJsonValidator;
 
 	/**
 	 * Constructor
@@ -74,6 +64,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 
 		myReceiverHandler = new WorkChannelMessageHandler(theJobPersistence, theJobDefinitionRegistry, theBatchJobSender);
 		myJobQuerySvc = new JobQuerySvc(theJobPersistence, theJobDefinitionRegistry);
+		myJobParameterJsonValidator = new JobParameterJsonValidator();
 	}
 
 	@Override
@@ -84,7 +75,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 			throw new InvalidRequestException(Msg.code(2065) + "No parameters supplied");
 		}
 
-		validateJobParameters(theStartRequest, jobDefinition);
+		myJobParameterJsonValidator.validateJobParameters(theStartRequest, jobDefinition);
 
 		JobInstance instance = JobInstance.fromJobDefinition(jobDefinition);
 		instance.setParameters(theStartRequest.getParameters());
@@ -99,29 +90,6 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 		myBatchJobSender.sendWorkChannelMessage(workNotification);
 
 		return instanceId;
-	}
-
-	private <PT extends IModelJson> void validateJobParameters(JobInstanceStartRequest theStartRequest, JobDefinition<PT> theJobDefinition) {
-
-		// JSR 380
-		Validator validator = myValidatorFactory.getValidator();
-		PT parameters = theStartRequest.getParameters(theJobDefinition.getParametersType());
-		Set<ConstraintViolation<IModelJson>> constraintErrors = validator.validate(parameters);
-		List<String> errorStrings = constraintErrors.stream().map(t -> t.getPropertyPath() + " - " + t.getMessage()).sorted().collect(Collectors.toList());
-
-		// Programmatic Validator
-		IJobParametersValidator<PT> parametersValidator = theJobDefinition.getParametersValidator();
-		if (parametersValidator != null) {
-			List<String> outcome = parametersValidator.validate(parameters);
-			outcome = defaultIfNull(outcome, Collections.emptyList());
-			errorStrings.addAll(outcome);
-		}
-
-		if (!errorStrings.isEmpty()) {
-			String message = "Failed to validate parameters for job of type " + theJobDefinition.getJobDefinitionId() + ": " + errorStrings.stream().map(t -> "\n * " + t).collect(Collectors.joining());
-
-			throw new InvalidRequestException(Msg.code(2039) + message);
-		}
 	}
 
 	@Override
