@@ -31,13 +31,8 @@ import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.model.api.IModelJson;
-import ca.uhn.fhir.model.api.annotation.PasswordField;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.util.JsonUtil;
-import ca.uhn.fhir.util.UrlUtil;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.Validate;
 import org.springframework.messaging.MessageHandler;
 
@@ -48,7 +43,6 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
-import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -65,6 +59,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final MessageHandler myReceiverHandler;
 	private final ValidatorFactory myValidatorFactory = Validation.buildDefaultValidatorFactory();
+	private final JobQuerySvc myJobQuerySvc;
 
 	/**
 	 * Constructor
@@ -78,6 +73,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 
 		myReceiverHandler = new WorkChannelMessageHandler(theJobPersistence, theJobDefinitionRegistry, theBatchJobSender);
+		myJobQuerySvc = new JobQuerySvc(theJobPersistence, theJobDefinitionRegistry);
 	}
 
 	@Override
@@ -130,31 +126,17 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 
 	@Override
 	public JobInstance getInstance(String theInstanceId) {
-		return myJobPersistence.fetchInstance(theInstanceId).map(t -> massageInstanceForUserAccess(t)).orElseThrow(() -> new ResourceNotFoundException(Msg.code(2040) + "Unknown instance ID: " + UrlUtil.escapeUrlParam(theInstanceId)));
+		return myJobQuerySvc.fetchInstance(theInstanceId);
 	}
 
 	@Override
 	public List<JobInstance> getInstances(int thePageSize, int thePageIndex) {
-		return myJobPersistence.fetchInstances(thePageSize, thePageIndex).stream().map(t -> massageInstanceForUserAccess(t)).collect(Collectors.toList());
+		return myJobQuerySvc.fetchInstances(thePageSize, thePageIndex);
 	}
 
 	@Override
 	public void cancelInstance(String theInstanceId) throws ResourceNotFoundException {
 		myJobPersistence.cancelInstance(theInstanceId);
-	}
-
-	private JobInstance massageInstanceForUserAccess(JobInstance theInstance) {
-		JobInstance retVal = new JobInstance(theInstance);
-
-		JobDefinition definition = myJobDefinitionRegistry.getDefinitionOrThrowException(theInstance.getJobDefinitionId(), theInstance.getJobDefinitionVersion());
-
-		// Serializing the parameters strips any write-only params
-		IModelJson parameters = retVal.getParameters(definition.getParametersType());
-		stripPasswordFields(parameters);
-		String parametersString = JsonUtil.serializeOrInvalidRequest(parameters);
-		retVal.setParameters(parametersString);
-
-		return retVal;
 	}
 
 	@PostConstruct
@@ -165,33 +147,5 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 	@PreDestroy
 	public void stop() {
 		myWorkChannelReceiver.unsubscribe(myReceiverHandler);
-	}
-
-
-	/**
-	 * Scans a model object for fields marked as {@link PasswordField}
-	 * and nulls them
-	 */
-	private static void stripPasswordFields(@Nonnull Object theParameters) {
-		Field[] declaredFields = theParameters.getClass().getDeclaredFields();
-		for (Field nextField : declaredFields) {
-
-			JsonProperty propertyAnnotation = nextField.getAnnotation(JsonProperty.class);
-			if (propertyAnnotation == null) {
-				continue;
-			}
-
-			nextField.setAccessible(true);
-			try {
-				Object nextValue = nextField.get(theParameters);
-				if (nextField.getAnnotation(PasswordField.class) != null) {
-					nextField.set(theParameters, null);
-				} else if (nextValue != null) {
-					stripPasswordFields(nextValue);
-				}
-			} catch (IllegalAccessException e) {
-				throw new InternalErrorException(Msg.code(2044) + e.getMessage(), e);
-			}
-		}
 	}
 }
