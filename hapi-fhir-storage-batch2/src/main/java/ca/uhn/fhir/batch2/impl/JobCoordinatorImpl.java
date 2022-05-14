@@ -103,26 +103,16 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 
 		validateJobParameters(theStartRequest, jobDefinition);
 
-		String firstStepId = jobDefinition.getSteps().get(0).getStepId();
-		String jobDefinitionId = jobDefinition.getJobDefinitionId();
-		int jobDefinitionVersion = jobDefinition.getJobDefinitionVersion();
-
-		JobInstance instance = new JobInstance();
-		instance.setJobDefinitionId(jobDefinitionId);
-		instance.setJobDefinitionVersion(jobDefinitionVersion);
-		instance.setStatus(StatusEnum.QUEUED);
+		JobInstance instance = JobInstance.fromJobDefinition(jobDefinition);
 		instance.setParameters(theStartRequest.getParameters());
-
-		if (jobDefinition.isGatedExecution()) {
-			instance.setCurrentGatedStepId(firstStepId);
-		}
+		instance.setStatus(StatusEnum.QUEUED);
 
 		String instanceId = myJobPersistence.storeNewInstance(instance);
 
-		BatchWorkChunk batchWorkChunk = new BatchWorkChunk(jobDefinitionId, jobDefinitionVersion, firstStepId, instanceId, 0, null);
+		BatchWorkChunk batchWorkChunk = BatchWorkChunk.firstChunk(jobDefinition, instanceId);
 		String chunkId = myJobPersistence.storeWorkChunk(batchWorkChunk);
 
-		JobWorkNotification workNotification = new JobWorkNotification(jobDefinitionId, jobDefinitionVersion, instanceId, firstStepId, chunkId);
+		JobWorkNotification workNotification = JobWorkNotification.firstNotification(jobDefinition, instanceId, chunkId);
 		myBatchJobSender.sendWorkChannelMessage(workNotification);
 
 		return instanceId;

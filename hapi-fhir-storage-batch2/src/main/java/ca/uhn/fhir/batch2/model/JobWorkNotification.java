@@ -53,6 +53,13 @@ public class JobWorkNotification implements IModelJson {
 		setTargetStepId(theTargetStepId);
 	}
 
+	public static JobWorkNotification firstNotification(JobDefinition<?> theJobDefinition, String theInstanceId, String theChunkId) {
+		String firstStepId = theJobDefinition.getSteps().get(0).getStepId();
+		String jobDefinitionId = theJobDefinition.getJobDefinitionId();
+		int jobDefinitionVersion = theJobDefinition.getJobDefinitionVersion();
+		return new JobWorkNotification(jobDefinitionId, jobDefinitionVersion, theInstanceId, firstStepId, theChunkId);
+	}
+
 	public String getJobDefinitionId() {
 		return myJobDefinitionId;
 	}
