@@ -1,11 +1,15 @@
 package ca.uhn.fhir.batch2.model;
 
-public class JobWorkCursor {
-	public final boolean isFirstStep;
-	public final JobDefinitionStep targetStep;
-	public final JobDefinitionStep nextStep;
+import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.model.api.IModelJson;
+import org.apache.commons.lang3.Validate;
 
-	public JobWorkCursor(boolean theIsFirstStep, JobDefinitionStep theTargetStep, JobDefinitionStep theNextStep) {
+public class JobWorkCursor<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> {
+	public final boolean isFirstStep;
+	public final JobDefinitionStep<PT, IT, OT> targetStep;
+	public final JobDefinitionStep<PT, OT, ?> nextStep;
+
+	public JobWorkCursor(boolean theIsFirstStep, JobDefinitionStep<PT, IT, OT> theTargetStep, JobDefinitionStep<PT, OT, ?> theNextStep) {
 		isFirstStep = theIsFirstStep;
 		targetStep = theTargetStep;
 		nextStep = theNextStep;
@@ -13,5 +17,14 @@ public class JobWorkCursor {
 
 	public String getTargetStepId() {
 		return targetStep.getStepId();
+	}
+
+	public boolean isFinalStep() {
+		return nextStep == null;
+	}
+
+	public JobWorkCursor<PT,IT, VoidModel> asFinalCursor() {
+		Validate.isTrue(isFinalStep());
+		return (JobWorkCursor<PT,IT, VoidModel>)this;
 	}
 }

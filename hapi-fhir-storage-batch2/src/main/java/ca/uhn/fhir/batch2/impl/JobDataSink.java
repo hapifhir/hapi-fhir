@@ -21,7 +21,9 @@ package ca.uhn.fhir.batch2.impl;
  */
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
+import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.WorkChunkData;
 import ca.uhn.fhir.model.api.IModelJson;
@@ -29,40 +31,38 @@ import ca.uhn.fhir.util.JsonUtil;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-class JobDataSink<OT extends IModelJson> extends BaseDataSink<OT> {
+class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> extends BaseDataSink<PT,IT,OT> {
 	private final BatchJobSender myBatchJobSender;
 	private final IJobPersistence myJobPersistence;
 	private final String myJobDefinitionId;
 	private final int myJobDefinitionVersion;
-	private final JobDefinitionStep<?, ?, ?> myTargetStep;
+	private final JobDefinitionStep<PT, OT, ?> myTargetStep;
 	private final AtomicInteger myChunkCounter = new AtomicInteger(0);
 	private final boolean myGatedExecution;
 
-	JobDataSink(BatchJobSender theBatchJobSender, IJobPersistence theJobPersistence, String theJobDefinitionId, int theJobDefinitionVersion, JobDefinitionStep<?, ?, ?> theTargetStep, String theInstanceId, String theCurrentStepId, boolean theGatedExecution) {
-		super(theInstanceId, theCurrentStepId);
+	JobDataSink(BatchJobSender theBatchJobSender, IJobPersistence theJobPersistence, JobDefinition<?> theDefinition, String theInstanceId, JobWorkCursor<PT, IT, OT> theJobWorkCursor) {
+		super(theInstanceId, theJobWorkCursor);
 		myBatchJobSender = theBatchJobSender;
 		myJobPersistence = theJobPersistence;
-		myJobDefinitionId = theJobDefinitionId;
-		myJobDefinitionVersion = theJobDefinitionVersion;
-		myTargetStep = theTargetStep;
-		myGatedExecution = theGatedExecution;
+		myJobDefinitionId = theDefinition.getJobDefinitionId();
+		myJobDefinitionVersion = theDefinition.getJobDefinitionVersion();
+		myTargetStep = theJobWorkCursor.nextStep;
+		myGatedExecution = theDefinition.isGatedExecution();
 	}
 
 	@Override
 	public void accept(WorkChunkData<OT> theData) {
-		String jobDefinitionId = myJobDefinitionId;
-		int jobDefinitionVersion = myJobDefinitionVersion;
 		String instanceId = getInstanceId();
 		String targetStepId = myTargetStep.getStepId();
 		int sequence = myChunkCounter.getAndIncrement();
 		OT dataValue = theData.getData();
 		String dataValueString = JsonUtil.serialize(dataValue, false);
 
-		BatchWorkChunk batchWorkChunk = new BatchWorkChunk(jobDefinitionId, jobDefinitionVersion, targetStepId, instanceId, sequence, dataValueString);
+		BatchWorkChunk batchWorkChunk = new BatchWorkChunk(myJobDefinitionId, myJobDefinitionVersion, targetStepId, instanceId, sequence, dataValueString);
 		String chunkId = myJobPersistence.storeWorkChunk(batchWorkChunk);
 
 		if (!myGatedExecution) {
-			JobWorkNotification workNotification = new JobWorkNotification(jobDefinitionId, jobDefinitionVersion, instanceId, targetStepId, chunkId);
+			JobWorkNotification workNotification = new JobWorkNotification(myJobDefinitionId, myJobDefinitionVersion, instanceId, targetStepId, chunkId);
 			myBatchJobSender.sendWorkChannelMessage(workNotification);
 		}
 	}
