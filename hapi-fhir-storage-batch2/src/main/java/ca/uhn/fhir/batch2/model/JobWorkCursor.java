@@ -45,20 +45,6 @@ public class JobWorkCursor<PT extends IModelJson, IT extends IModelJson, OT exte
 		}
 	}
 
-	public String getTargetStepId() {
-		return currentStep.getStepId();
-	}
-
-	public boolean isFinalStep() {
-		return nextStep == null;
-	}
-
-	@SuppressWarnings("unchecked")
-	public JobWorkCursor<PT,IT, VoidModel> asFinalCursor() {
-		Validate.isTrue(isFinalStep());
-		return (JobWorkCursor<PT,IT, VoidModel>)this;
-	}
-
 	public static <PT extends IModelJson> JobWorkCursor<PT,?,?> fromJobDefinitionAndWorkNotification(JobDefinition<PT> theJobDefinition, JobWorkNotification theWorkNotification) {
 		String requestedStepId = theWorkNotification.getTargetStepId();
 		boolean isFirstStep = false;
@@ -88,4 +74,19 @@ public class JobWorkCursor<PT extends IModelJson, IT extends IModelJson, OT exte
 
 		return new JobWorkCursor(theJobDefinition, isFirstStep, currentStep, nextStep);
 	}
+
+	public String getTargetStepId() {
+		return currentStep.getStepId();
+	}
+
+	public boolean isFinalStep() {
+		return nextStep == null;
+	}
+
+	@SuppressWarnings("unchecked")
+	public JobWorkCursor<PT,IT, VoidModel> asFinalCursor() {
+		Validate.isTrue(isFinalStep());
+		return (JobWorkCursor<PT,IT, VoidModel>)this;
+	}
+
 }
