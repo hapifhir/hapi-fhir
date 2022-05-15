@@ -30,10 +30,10 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 	private final WorkChunk myWorkChunk;
 	private final JobWorkCursor<PT, IT, OT> myCursor;
 
-	JobStepExecutor(@Nonnull IJobPersistence theJobPersistence, @Nonnull BatchJobSender theBatchJobSender, JobDefinition<PT> theDefinition, JobInstance theInstance, WorkChunk theWorkChunk, JobWorkCursor<PT, IT, OT> theCursor) {
+	JobStepExecutor(@Nonnull IJobPersistence theJobPersistence, @Nonnull BatchJobSender theBatchJobSender, JobInstance theInstance, WorkChunk theWorkChunk, JobWorkCursor<PT, IT, OT> theCursor) {
 		myJobPersistence = theJobPersistence;
 		myBatchJobSender = theBatchJobSender;
-		myDefinition = theDefinition;
+		myDefinition = theCursor.jobDefinition;
 		myInstance = theInstance;
 		myWorkChunk = theWorkChunk;
 		myCursor = theCursor;

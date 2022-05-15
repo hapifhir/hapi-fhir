@@ -79,9 +79,9 @@ public class JobDefinitionRegistry {
 		return Optional.of(versionMap.get(theJobDefinitionVersion));
 	}
 
-	public JobDefinition getJobDefinitionOrThrowException(String theJobDefinitionId, int theJobDefinitionVersion) {
+	public JobDefinition<?> getJobDefinitionOrThrowException(String theJobDefinitionId, int theJobDefinitionVersion) {
 		Optional<JobDefinition<?>> opt = getJobDefinition(theJobDefinitionId, theJobDefinitionVersion);
-		if (!opt.isPresent()) {
+		if (opt.isEmpty()) {
 			String msg = "Unknown job definition ID[" + theJobDefinitionId + "] version[" + theJobDefinitionVersion + "]";
 			ourLog.warn(msg);
 			throw new InternalErrorException(Msg.code(2043) + msg);

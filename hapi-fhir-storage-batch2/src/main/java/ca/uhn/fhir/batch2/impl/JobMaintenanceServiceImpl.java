@@ -236,17 +236,15 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 			double percentComplete = (double) (completeChunkCount) / (double) (incompleteChunkCount + completeChunkCount + failedChunkCount + erroredChunkCount);
 			theInstance.setProgress(percentComplete);
 
-			changedStatus = false;
 			if (incompleteChunkCount == 0 && erroredChunkCount == 0 && failedChunkCount == 0) {
 				boolean completed = updateInstanceStatus(theInstance, StatusEnum.COMPLETED);
 				if (completed) {
 					JobDefinition<?> definition = myJobDefinitionRegistry.getJobDefinition(theInstance.getJobDefinitionId(), theInstance.getJobDefinitionVersion()).orElseThrow(() -> new IllegalStateException("Unknown job " + theInstance.getJobDefinitionId() + "/" + theInstance.getJobDefinitionVersion()));
 					invokeJobCompletionHandler(theInstance, definition);
 				}
-				changedStatus |= completed;
-			}
-			if (erroredChunkCount > 0) {
-				changedStatus |= updateInstanceStatus(theInstance, StatusEnum.ERRORED);
+				changedStatus = completed;
+			} else if (erroredChunkCount > 0) {
+				changedStatus = updateInstanceStatus(theInstance, StatusEnum.ERRORED);
 			}
 
 			if (earliestStartTime != null && latestEndTime != null) {

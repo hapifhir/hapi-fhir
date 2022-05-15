@@ -17,6 +17,9 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Job Query services intended for end-users querying the status of jobs
+ */
 class JobQuerySvc {
 	private final IJobPersistence myJobPersistence;
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
@@ -38,7 +41,7 @@ class JobQuerySvc {
 	private JobInstance massageInstanceForUserAccess(JobInstance theInstance) {
 		JobInstance retVal = new JobInstance(theInstance);
 
-		JobDefinition definition = myJobDefinitionRegistry.getJobDefinitionOrThrowException(theInstance.getJobDefinitionId(), theInstance.getJobDefinitionVersion());
+		JobDefinition<?> definition = myJobDefinitionRegistry.getJobDefinitionOrThrowException(theInstance.getJobDefinitionId(), theInstance.getJobDefinitionVersion());
 
 		// Serializing the parameters strips any write-only params
 		IModelJson parameters = retVal.getParameters(definition.getParametersType());

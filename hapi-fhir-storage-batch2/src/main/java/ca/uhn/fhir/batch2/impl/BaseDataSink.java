@@ -60,6 +60,6 @@ abstract class BaseDataSink<PT extends IModelJson, IT extends IModelJson, OT ext
 	}
 
 	public JobDefinitionStep<PT,IT,OT> getTargetStep() {
-		return myJobWorkCursor.targetStep;
+		return myJobWorkCursor.currentStep;
 	}
 }

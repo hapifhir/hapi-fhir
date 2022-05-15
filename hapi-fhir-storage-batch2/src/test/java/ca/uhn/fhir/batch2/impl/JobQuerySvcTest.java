@@ -14,7 +14,9 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 class JobQuerySvcTest extends BaseBatch2Test {
@@ -39,7 +41,7 @@ class JobQuerySvcTest extends BaseBatch2Test {
 		JobDefinition<?> definition = createJobDefinition();
 		JobInstance instance = createInstance();
 
-		when(myJobDefinitionRegistry.getJobDefinitionOrThrowException(eq(JOB_DEFINITION_ID), eq(1))).thenReturn(definition);
+		doReturn(definition).when(myJobDefinitionRegistry).getJobDefinitionOrThrowException(eq(JOB_DEFINITION_ID), eq(1));
 		when(myJobPersistence.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(instance));
 
 		// Execute
@@ -49,7 +51,7 @@ class JobQuerySvcTest extends BaseBatch2Test {
 		ourLog.info("Parameters: {}", outcome.getParameters());
 		assertEquals(PARAM_1_VALUE, outcome.getParameters(TestJobParameters.class).getParam1());
 		assertEquals(PARAM_2_VALUE, outcome.getParameters(TestJobParameters.class).getParam2());
-		assertEquals(null, outcome.getParameters(TestJobParameters.class).getPassword());
+		assertNull(outcome.getParameters(TestJobParameters.class).getPassword());
 
 	}
 
@@ -58,7 +60,7 @@ class JobQuerySvcTest extends BaseBatch2Test {
 
 		// Setup
 
-		when(myJobDefinitionRegistry.getJobDefinitionOrThrowException(eq(JOB_DEFINITION_ID), eq(1))).thenReturn(createJobDefinition());
+		doReturn(createJobDefinition()).when(myJobDefinitionRegistry).getJobDefinitionOrThrowException(eq(JOB_DEFINITION_ID), eq(1));
 		when(myJobPersistence.fetchInstances(eq(100), eq(0))).thenReturn(Lists.newArrayList(createInstance()));
 
 		// Execute

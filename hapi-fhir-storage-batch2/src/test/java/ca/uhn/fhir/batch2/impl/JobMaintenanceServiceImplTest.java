@@ -3,6 +3,7 @@ package ca.uhn.fhir.batch2.impl;
 import ca.uhn.fhir.batch2.api.IJobCompletionHandler;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobCompletionDetails;
+import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
@@ -141,7 +142,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 	@Test
 	public void testInProgress_GatedExecution_FirstStepComplete() {
 		// Setup
-		myJobDefinitionRegistry.addJobDefinition(createJobDefinition(t -> t.gatedExecution()));
+		myJobDefinitionRegistry.addJobDefinition(createJobDefinition(JobDefinition.Builder::gatedExecution));
 		when(myJobPersistence.fetchWorkChunksWithoutData(eq(INSTANCE_ID), eq(100), eq(0))).thenReturn(Lists.newArrayList(
 			createWorkChunkStep2().setStatus(StatusEnum.QUEUED).setId(CHUNK_ID),
 			createWorkChunkStep2().setStatus(StatusEnum.QUEUED).setId(CHUNK_ID_2)

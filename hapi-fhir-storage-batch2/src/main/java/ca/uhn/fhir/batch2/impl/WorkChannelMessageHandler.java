@@ -19,6 +19,9 @@ import org.springframework.messaging.MessagingException;
 import javax.annotation.Nonnull;
 import java.util.Optional;
 
+/**
+ * This handler receives batch work request messages and performs the batch work requested by the message
+ */
 class WorkChannelMessageHandler implements MessageHandler {
 	private static final Logger ourLog = LoggerFactory.getLogger(WorkChannelMessageHandler.class);
 	private final IJobPersistence myJobPersistence;
@@ -48,10 +51,7 @@ class WorkChannelMessageHandler implements MessageHandler {
 		}
 		WorkChunk workChunk = chunkOpt.get();
 
-		String jobDefinitionId = workNotification.getJobDefinitionId();
-		int jobDefinitionVersion = workNotification.getJobDefinitionVersion();
-		JobDefinition<?> definition = myJobDefinitionRegistry.getJobDefinitionOrThrowException(jobDefinitionId, jobDefinitionVersion);
-		JobWorkCursor<?,?,?> cursor = definition.cursorFromWorkNotification(workNotification);
+		JobWorkCursor<?, ?, ?> cursor = buildCursorFromNotification(workNotification);
 
 		Validate.isTrue(workChunk.getTargetStepId().equals(cursor.getTargetStepId()), "Chunk %s has target step %s but expected %s", chunkId, workChunk.getTargetStepId(), cursor.getTargetStepId());
 
@@ -65,7 +65,16 @@ class WorkChannelMessageHandler implements MessageHandler {
 			return;
 		}
 
-		JobStepExecutor<?,?,?> stepExecutor = myJobStepExecutorFactory.newJobStepExecutor(definition, instance, workChunk, cursor);
+		JobStepExecutor<?,?,?> stepExecutor = myJobStepExecutorFactory.newJobStepExecutor(instance, workChunk, cursor);
 		stepExecutor.executeStep();
+	}
+
+	private JobWorkCursor<?, ?, ?> buildCursorFromNotification(JobWorkNotification workNotification) {
+		String jobDefinitionId = workNotification.getJobDefinitionId();
+		int jobDefinitionVersion = workNotification.getJobDefinitionVersion();
+
+		JobDefinition<?> definition = myJobDefinitionRegistry.getJobDefinitionOrThrowException(jobDefinitionId, jobDefinitionVersion);
+
+		return JobWorkCursor.fromJobDefinitionAndWorkNotification(definition, workNotification);
 	}
 }

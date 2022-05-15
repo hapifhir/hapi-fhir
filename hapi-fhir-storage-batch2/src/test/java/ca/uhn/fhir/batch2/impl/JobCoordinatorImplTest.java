@@ -28,8 +28,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.mockito.stubbing.Answer;
 import org.springframework.messaging.MessageDeliveryException;
 
 import javax.annotation.Nonnull;
@@ -41,6 +40,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -49,8 +49,6 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public class JobCoordinatorImplTest extends BaseBatch2Test {
-
-	private static final Logger ourLog = LoggerFactory.getLogger(JobCoordinatorImplTest.class);
 	private final IChannelReceiver myWorkChannelReceiver = LinkedBlockingChannel.newSynchronous("receiver");
 	private JobCoordinatorImpl mySvc;
 	@Mock
@@ -121,10 +119,10 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		verify(myBatchJobSender, times(2)).sendWorkChannelMessage(any());
 	}
 
-	private void setupMocks(JobDefinition<TestJobParameters> JobDefinition, WorkChunk WorkChunkStep1) {
-		when(myJobDefinitionRegistry.getJobDefinitionOrThrowException(eq(JOB_DEFINITION_ID), eq(1))).thenReturn(JobDefinition);
+	private void setupMocks(JobDefinition<TestJobParameters> theJobDefinition, WorkChunk theWorkChunk) {
+		doReturn(theJobDefinition).when(myJobDefinitionRegistry).getJobDefinitionOrThrowException(eq(JOB_DEFINITION_ID), eq(1));
 		when(myJobInstancePersister.fetchInstanceAndMarkInProgress(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
-		when(myJobInstancePersister.fetchWorkChunkSetStartTimeAndMarkInProgress(eq(CHUNK_ID))).thenReturn(Optional.of(WorkChunkStep1));
+		when(myJobInstancePersister.fetchWorkChunkSetStartTimeAndMarkInProgress(eq(CHUNK_ID))).thenReturn(Optional.of(theWorkChunk));
 	}
 
 	/**
@@ -162,12 +160,13 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 		JobDefinition<TestJobParameters> jobDefinition = createJobDefinition(JobDefinition.Builder::gatedExecution);
 		setupMocks(jobDefinition, createWorkChunkStep1());
-		when(myStep1Worker.run(any(), any())).thenAnswer(t -> {
-			IJobDataSink<TestJobStep2InputType> sink = t.getArgument(1, IJobDataSink.class);
+		Answer<RunOutcome> answer = t -> {
+			IJobDataSink<TestJobStep2InputType> sink = t.getArgument(1);
 			sink.accept(new TestJobStep2InputType("data value 1a", "data value 2a"));
 			sink.accept(new TestJobStep2InputType("data value 1b", "data value 2b"));
 			return new RunOutcome(50);
-		});
+		};
+		when(myStep1Worker.run(any(), any())).thenAnswer(answer);
 		mySvc.start();
 
 		// Execute
@@ -192,7 +191,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		// Setup
 
 		when(myJobInstancePersister.fetchWorkChunkSetStartTimeAndMarkInProgress(eq(CHUNK_ID))).thenReturn(Optional.of(createWorkChunk(STEP_2, new TestJobStep2InputType(DATA_1_VALUE, DATA_2_VALUE))));
-		when(myJobDefinitionRegistry.getJobDefinitionOrThrowException(eq(JOB_DEFINITION_ID), eq(1))).thenReturn(createJobDefinition());
+		doReturn(createJobDefinition()).when(myJobDefinitionRegistry).getJobDefinitionOrThrowException(eq(JOB_DEFINITION_ID), eq(1));
 		when(myJobInstancePersister.fetchInstanceAndMarkInProgress(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
 		when(myStep2Worker.run(any(), any())).thenReturn(new RunOutcome(50));
 		mySvc.start();
@@ -217,7 +216,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 		// Setup
 
-		when(myJobDefinitionRegistry.getJobDefinitionOrThrowException(eq(JOB_DEFINITION_ID), eq(1))).thenReturn(createJobDefinition());
+		doReturn(createJobDefinition()).when(myJobDefinitionRegistry).getJobDefinitionOrThrowException(eq(JOB_DEFINITION_ID), eq(1));
 		when(myJobInstancePersister.fetchWorkChunkSetStartTimeAndMarkInProgress(eq(CHUNK_ID))).thenReturn(Optional.of(createWorkChunk(STEP_2, new TestJobStep2InputType(DATA_1_VALUE, DATA_2_VALUE))));
 		when(myJobInstancePersister.fetchInstanceAndMarkInProgress(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
 		when(myStep2Worker.run(any(), any())).thenThrow(new NullPointerException("This is an error message"));
@@ -250,7 +249,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		// Setup
 
 		when(myJobInstancePersister.fetchWorkChunkSetStartTimeAndMarkInProgress(eq(CHUNK_ID))).thenReturn(Optional.of(createWorkChunk(STEP_2, new TestJobStep2InputType(DATA_1_VALUE, DATA_2_VALUE))));
-		when(myJobDefinitionRegistry.getJobDefinitionOrThrowException(eq(JOB_DEFINITION_ID), eq(1))).thenReturn(createJobDefinition());
+		doReturn(createJobDefinition()).when(myJobDefinitionRegistry).getJobDefinitionOrThrowException(eq(JOB_DEFINITION_ID), eq(1));
 		when(myJobInstancePersister.fetchInstanceAndMarkInProgress(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
 		when(myStep2Worker.run(any(), any())).thenAnswer(t -> {
 			IJobDataSink<?> sink = t.getArgument(1, IJobDataSink.class);
@@ -283,7 +282,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		// Setup
 
 		when(myJobInstancePersister.fetchWorkChunkSetStartTimeAndMarkInProgress(eq(CHUNK_ID))).thenReturn(Optional.of(createWorkChunkStep3()));
-		when(myJobDefinitionRegistry.getJobDefinitionOrThrowException(eq(JOB_DEFINITION_ID), eq(1))).thenReturn(createJobDefinition());
+		doReturn(createJobDefinition()).when(myJobDefinitionRegistry).getJobDefinitionOrThrowException(eq(JOB_DEFINITION_ID), eq(1));
 		when(myJobInstancePersister.fetchInstanceAndMarkInProgress(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
 		when(myStep3Worker.run(any(), any())).thenReturn(new RunOutcome(50));
 		mySvc.start();
@@ -310,7 +309,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		// Setup
 
 		when(myJobInstancePersister.fetchWorkChunkSetStartTimeAndMarkInProgress(eq(CHUNK_ID))).thenReturn(Optional.of(createWorkChunk(STEP_3, new TestJobStep3InputType().setData3(DATA_3_VALUE).setData4(DATA_4_VALUE))));
-		when(myJobDefinitionRegistry.getJobDefinitionOrThrowException(eq(JOB_DEFINITION_ID), eq(1))).thenReturn(createJobDefinition());
+		doReturn(createJobDefinition()).when(myJobDefinitionRegistry).getJobDefinitionOrThrowException(eq(JOB_DEFINITION_ID), eq(1));
 		when(myJobInstancePersister.fetchInstanceAndMarkInProgress(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
 		when(myStep3Worker.run(any(), any())).thenAnswer(t -> {
 			IJobDataSink<VoidModel> sink = t.getArgument(1, IJobDataSink.class);

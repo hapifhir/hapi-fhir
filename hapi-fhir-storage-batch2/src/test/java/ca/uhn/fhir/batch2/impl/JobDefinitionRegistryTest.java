@@ -4,6 +4,7 @@ import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,13 +51,13 @@ class JobDefinitionRegistryTest {
 
 	@Test
 	void testGetLatestJobDefinition() {
-		assertEquals(2, mySvc.getLatestJobDefinition("A").orElseThrow(() -> new IllegalArgumentException()).getJobDefinitionVersion());
+		assertEquals(2, mySvc.getLatestJobDefinition("A").orElseThrow(IllegalArgumentException::new).getJobDefinitionVersion());
 	}
 
 	@Test
 	void testGetJobDefinition() {
-		assertEquals(1, mySvc.getJobDefinition("A", 1).orElseThrow(() -> new IllegalArgumentException()).getJobDefinitionVersion());
-		assertEquals(2, mySvc.getJobDefinition("A", 2).orElseThrow(() -> new IllegalArgumentException()).getJobDefinitionVersion());
+		assertEquals(1, mySvc.getJobDefinition("A", 1).orElseThrow(IllegalArgumentException::new).getJobDefinitionVersion());
+		assertEquals(2, mySvc.getJobDefinition("A", 2).orElseThrow(IllegalArgumentException::new).getJobDefinitionVersion());
 	}
 
 	@Test
@@ -108,6 +109,15 @@ class JobDefinitionRegistryTest {
 
 	}
 
+	@Test
+	public void getJobDefinitionOrThrowException() {
+		try {
+			mySvc.getJobDefinitionOrThrowException("Ranch Dressing Expert", 1);
+			fail();
+		} catch (InternalErrorException e) {
+			assertEquals("HAPI-2043: Unknown job definition ID[Ranch Dressing Expert] version[1]", e.getMessage());
+		}
+	}
 
 
 }
