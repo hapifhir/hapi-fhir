@@ -111,11 +111,13 @@ class JobDefinitionRegistryTest {
 
 	@Test
 	public void getJobDefinitionOrThrowException() {
+		String jobDefinitionId = "Ranch Dressing Expert";
+		int jobDefinitionVersion = 12;
 		try {
-			mySvc.getJobDefinitionOrThrowException("Ranch Dressing Expert", 1);
+			mySvc.getJobDefinitionOrThrowException(jobDefinitionId, jobDefinitionVersion);
 			fail();
 		} catch (InternalErrorException e) {
-			assertEquals("HAPI-2043: Unknown job definition ID[Ranch Dressing Expert] version[1]", e.getMessage());
+			assertEquals("HAPI-2043: Unknown job definition ID[" + jobDefinitionId + "] version[" + jobDefinitionVersion + "]", e.getMessage());
 		}
 	}
 
