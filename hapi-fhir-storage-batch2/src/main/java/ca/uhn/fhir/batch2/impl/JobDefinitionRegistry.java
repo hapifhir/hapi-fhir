@@ -43,7 +43,7 @@ public class JobDefinitionRegistry {
 
 	private final Map<String, TreeMap<Integer, JobDefinition<?>>> myJobs = new HashMap<>();
 
-	public <PT extends IModelJson> void addJobDefinition(JobDefinition<PT> theDefinition) {
+	public <PT extends IModelJson> void addJobDefinition(@Nonnull JobDefinition<PT> theDefinition) {
 		Validate.notNull(theDefinition);
 		Validate.notBlank(theDefinition.getJobDefinitionId());
 		Validate.isTrue(theDefinition.getJobDefinitionVersion() >= 1);

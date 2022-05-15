@@ -17,7 +17,7 @@ public class JobStepExecutorFactory {
 		myBatchJobSender = theBatchJobSender;
 	}
 
-	public <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> JobStepExecutor<PT,IT,OT> newJobStepExecutor(JobInstance theInstance, WorkChunk theWorkChunk, JobWorkCursor<PT, IT, OT> theCursor) {
+	public <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> JobStepExecutor<PT,IT,OT> newJobStepExecutor(@Nonnull JobInstance theInstance, @Nonnull WorkChunk theWorkChunk, @Nonnull JobWorkCursor<PT, IT, OT> theCursor) {
 		return new JobStepExecutor<>(myJobPersistence, myBatchJobSender, theInstance, theWorkChunk, theCursor);
 	}
 }

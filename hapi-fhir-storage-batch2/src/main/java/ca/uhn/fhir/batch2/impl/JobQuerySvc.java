@@ -24,7 +24,7 @@ class JobQuerySvc {
 	private final IJobPersistence myJobPersistence;
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 
-	JobQuerySvc(IJobPersistence theJobPersistence, JobDefinitionRegistry theJobDefinitionRegistry) {
+	JobQuerySvc(@Nonnull IJobPersistence theJobPersistence, @Nonnull JobDefinitionRegistry theJobDefinitionRegistry) {
 		myJobPersistence = theJobPersistence;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 	}

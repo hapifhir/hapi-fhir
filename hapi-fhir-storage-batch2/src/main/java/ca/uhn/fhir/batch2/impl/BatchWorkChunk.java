@@ -24,6 +24,9 @@ import ca.uhn.fhir.batch2.model.JobDefinition;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 public class BatchWorkChunk {
 
 	public final String jobDefinitionId;
@@ -43,7 +46,7 @@ public class BatchWorkChunk {
 	 * @param theSerializedData       The data. This will be in the form of a map where the values may be strings, lists, and other maps (i.e. JSON)
 	 */
 
-	public BatchWorkChunk(String theJobDefinitionId, int theJobDefinitionVersion, String theTargetStepId, String theInstanceId, int theSequence, String theSerializedData) {
+	public BatchWorkChunk(@Nonnull String theJobDefinitionId, int theJobDefinitionVersion, @Nonnull String theTargetStepId, @Nonnull String theInstanceId, int theSequence, @Nullable String theSerializedData) {
 		jobDefinitionId = theJobDefinitionId;
 		jobDefinitionVersion = theJobDefinitionVersion;
 		targetStepId = theTargetStepId;

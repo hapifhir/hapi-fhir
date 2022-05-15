@@ -29,6 +29,7 @@ import ca.uhn.fhir.batch2.model.WorkChunkData;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
 
+import javax.annotation.Nonnull;
 import java.util.concurrent.atomic.AtomicInteger;
 
 class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> extends BaseDataSink<PT,IT,OT> {
@@ -40,7 +41,7 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 	private final AtomicInteger myChunkCounter = new AtomicInteger(0);
 	private final boolean myGatedExecution;
 
-	JobDataSink(BatchJobSender theBatchJobSender, IJobPersistence theJobPersistence, JobDefinition<?> theDefinition, String theInstanceId, JobWorkCursor<PT, IT, OT> theJobWorkCursor) {
+	JobDataSink(@Nonnull BatchJobSender theBatchJobSender, @Nonnull IJobPersistence theJobPersistence, @Nonnull JobDefinition<?> theDefinition, @Nonnull String theInstanceId, @Nonnull JobWorkCursor<PT, IT, OT> theJobWorkCursor) {
 		super(theInstanceId, theJobWorkCursor);
 		myBatchJobSender = theBatchJobSender;
 		myJobPersistence = theJobPersistence;

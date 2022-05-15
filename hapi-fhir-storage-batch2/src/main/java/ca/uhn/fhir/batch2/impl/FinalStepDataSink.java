@@ -29,6 +29,8 @@ import ca.uhn.fhir.model.api.IModelJson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
+
 class FinalStepDataSink<PT extends IModelJson, IT extends IModelJson> extends BaseDataSink<PT,IT,VoidModel> {
 	private static final Logger ourLog = LoggerFactory.getLogger(FinalStepDataSink.class);
 
@@ -37,7 +39,7 @@ class FinalStepDataSink<PT extends IModelJson, IT extends IModelJson> extends Ba
 	/**
 	 * Constructor
 	 */
-	FinalStepDataSink(String theJobDefinitionId, String theInstanceId, JobWorkCursor<PT,IT,VoidModel> theJobWorkCursor) {
+	FinalStepDataSink(@Nonnull String theJobDefinitionId, @Nonnull String theInstanceId, @Nonnull JobWorkCursor<PT,IT,VoidModel> theJobWorkCursor) {
 		super(theInstanceId, theJobWorkCursor);
 		myJobDefinitionId = theJobDefinitionId;
 	}

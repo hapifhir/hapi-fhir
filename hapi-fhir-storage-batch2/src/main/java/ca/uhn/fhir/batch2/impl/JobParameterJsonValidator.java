@@ -7,6 +7,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
+import javax.annotation.Nonnull;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -21,7 +22,7 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 class JobParameterJsonValidator {
 	private final ValidatorFactory myValidatorFactory = Validation.buildDefaultValidatorFactory();
 
-	<PT extends IModelJson> void validateJobParameters(JobInstanceStartRequest theStartRequest, JobDefinition<PT> theJobDefinition) {
+	<PT extends IModelJson> void validateJobParameters(@Nonnull JobInstanceStartRequest theStartRequest, @Nonnull JobDefinition<PT> theJobDefinition) {
 
 		// JSR 380
 		Validator validator = myValidatorFactory.getValidator();
