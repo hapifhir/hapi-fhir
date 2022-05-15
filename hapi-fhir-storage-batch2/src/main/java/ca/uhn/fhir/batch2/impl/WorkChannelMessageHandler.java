@@ -46,14 +46,14 @@ class WorkChannelMessageHandler implements MessageHandler {
 			ourLog.error("Unable to find chunk with ID {} - Aborting", chunkId);
 			return;
 		}
-		WorkChunk chunk = chunkOpt.get();
+		WorkChunk workChunk = chunkOpt.get();
 
 		String jobDefinitionId = workNotification.getJobDefinitionId();
 		int jobDefinitionVersion = workNotification.getJobDefinitionVersion();
-		JobDefinition definition = myJobDefinitionRegistry.getJobDefinitionOrThrowException(jobDefinitionId, jobDefinitionVersion);
-		JobWorkCursor cursor = definition.cursorFromWorkNotification(workNotification);
+		JobDefinition<?> definition = myJobDefinitionRegistry.getJobDefinitionOrThrowException(jobDefinitionId, jobDefinitionVersion);
+		JobWorkCursor<?,?,?> cursor = definition.cursorFromWorkNotification(workNotification);
 
-		Validate.isTrue(chunk.getTargetStepId().equals(cursor.getTargetStepId()), "Chunk %s has target step %s but expected %s", chunkId, chunk.getTargetStepId(), cursor.getTargetStepId());
+		Validate.isTrue(workChunk.getTargetStepId().equals(cursor.getTargetStepId()), "Chunk %s has target step %s but expected %s", chunkId, workChunk.getTargetStepId(), cursor.getTargetStepId());
 
 		Optional<JobInstance> instanceOpt = myJobPersistence.fetchInstanceAndMarkInProgress(workNotification.getInstanceId());
 		JobInstance instance = instanceOpt.orElseThrow(() -> new InternalErrorException("Unknown instance: " + workNotification.getInstanceId()));
@@ -65,7 +65,7 @@ class WorkChannelMessageHandler implements MessageHandler {
 			return;
 		}
 
-		JobStepExecutor stepExecutor = myJobStepExecutorFactory.newJobStepExecutor(definition, instance, chunk, cursor);
+		JobStepExecutor<?,?,?> stepExecutor = myJobStepExecutorFactory.newJobStepExecutor(definition, instance, workChunk, cursor);
 		stepExecutor.executeStep();
 	}
 }
