@@ -2,11 +2,13 @@ package ca.uhn.fhir.batch2.model;
 
 import ca.uhn.fhir.batch2.impl.BaseBatch2Test;
 import ca.uhn.fhir.batch2.impl.TestJobParameters;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class JobWorkCursorTest extends BaseBatch2Test {
 
@@ -54,6 +56,24 @@ class JobWorkCursorTest extends BaseBatch2Test {
 
 		// verify
 		assertCursor(cursor, false, true, STEP_3, null);
+	}
+
+	@Test
+	public void unknownStep() {
+		// setup
+		JobWorkNotification workNotification = new JobWorkNotification();
+		String targetStepId = "Made a searching and fearless moral inventory of ourselves";
+		workNotification.setTargetStepId(targetStepId);
+
+		// execute
+		try {
+			JobWorkCursor.fromJobDefinitionAndWorkNotification(myDefinition, workNotification);
+
+			// verify
+			fail();
+		} catch (InternalErrorException e) {
+			assertEquals("HAPI-2042: Unknown step[" + targetStepId + "] for job definition ID[JOB_DEFINITION_ID] version[1]", e.getMessage());
+		}
 	}
 
 	private void assertCursor(JobWorkCursor<TestJobParameters,?,?> theCursor, boolean theExpectedIsFirstStep, boolean theExpectedIsFinalStep, String theExpectedCurrentStep, String theExpectedNextStep) {
