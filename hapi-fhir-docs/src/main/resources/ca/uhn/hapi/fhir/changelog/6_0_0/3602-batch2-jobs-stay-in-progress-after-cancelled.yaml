@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3602
+title: "New batch job implementation (batch2) were staying on IN_PROGRESS status after being cancelled.
+   That is now fixed. After cancellation status is changed to CANCELLED."

@@ -42,6 +42,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -80,6 +81,7 @@ public class GoldenResourceHelper {
 	 * @param theIncomingResource      The resource that will be used as the starting point for the MDM linking.
 	 * @param theMdmTransactionContext
 	 */
+	@Nonnull
 	public <T extends IAnyResource> T createGoldenResourceFromMdmSourceResource(T theIncomingResource, MdmTransactionContext theMdmTransactionContext) {
 		validateContextSupported();
 

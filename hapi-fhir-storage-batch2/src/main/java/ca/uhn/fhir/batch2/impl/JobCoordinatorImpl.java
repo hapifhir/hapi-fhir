@@ -162,9 +162,9 @@ public class JobCoordinatorImpl extends BaseJobService implements IJobCoordinato
 	}
 
 	@Override
-	public List<JobInstance> getRecentInstances(int thePageSize, int thePageIndex) {
-		return myJobPersistence.fetchRecentInstances(thePageSize, thePageIndex).stream()
-			.map(this::massageInstanceForUserAccess).collect(Collectors.toList());
+	public List<JobInstance> getRecentInstances(int theCount, int theStart) {
+		return myJobPersistence.fetchRecentInstances(theCount, theStart)
+			.stream().map(this::massageInstanceForUserAccess).collect(Collectors.toList());
 	}
 
 	@Override

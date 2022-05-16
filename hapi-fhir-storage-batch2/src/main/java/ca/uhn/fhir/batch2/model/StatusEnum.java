@@ -51,7 +51,12 @@ public enum StatusEnum {
 	 * Task has failed and is known to be unrecoverable. There is no reason to believe that retrying will
 	 * result in a different outcome.
 	 */
-	FAILED(true);
+	FAILED(true),
+
+	/**
+	 * Task has been cancelled.
+	 */
+	CANCELLED(true);
 
 	private final boolean myIncomplete;
 	private static Set<StatusEnum> ourIncompleteStatuses;

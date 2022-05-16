@@ -24,7 +24,6 @@ import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -65,7 +64,7 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	}
 
 	@Override
-	public Collection<JobInstance> fetchRecentInstances(int thePageSize, int thePageIndex) {
+	public List<JobInstance> fetchRecentInstances(int thePageSize, int thePageIndex) {
 		return myWrap.fetchRecentInstances(thePageSize, thePageIndex);
 	}
 

@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3608
+title: "Documentation on offset paging with _offset doesn't mention possible duplicate entries across different pages.
+ The documentation has been updated, and a warning log is added to notify this behaviour as well."
