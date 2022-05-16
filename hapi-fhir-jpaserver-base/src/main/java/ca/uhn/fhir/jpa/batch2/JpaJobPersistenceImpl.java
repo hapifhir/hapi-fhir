@@ -31,11 +31,12 @@ import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import org.apache.commons.lang3.Validate;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 import javax.annotation.Nonnull;
 import javax.transaction.Transactional;
+import java.util.Collection;
 import java.util.Date;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -113,7 +114,15 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	public List<JobInstance> fetchInstances(int thePageSize, int thePageIndex) {
-		return myJobInstanceRepository.fetchAll(PageRequest.of(thePageIndex, thePageSize)).stream().map(t -> toInstance(t)).collect(Collectors.toList());
+		// default sort is myCreateTime Asc
+		PageRequest pageRequest = PageRequest.of(thePageIndex, thePageSize, Sort.Direction.ASC, "myCreateTime");
+		return myJobInstanceRepository.findAll(pageRequest).stream().map(t -> toInstance(t)).collect(Collectors.toList());
+	}
+
+	@Override
+	public Collection<JobInstance> fetchRecentInstances(int thePageSize, int thePageIndex) {
+		PageRequest pageRequest = PageRequest.of(thePageIndex, thePageSize, Sort.Direction.DESC, "myCreateTime");
+		return myJobInstanceRepository.findAll(pageRequest).stream().map(this::toInstance).collect(Collectors.toList());
 	}
 
 	private WorkChunk toChunk(Batch2WorkChunkEntity theEntity, boolean theIncludeData) {
