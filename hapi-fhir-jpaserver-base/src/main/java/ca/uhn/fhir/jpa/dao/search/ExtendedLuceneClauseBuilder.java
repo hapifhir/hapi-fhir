@@ -252,7 +252,7 @@ public class ExtendedLuceneClauseBuilder {
 			ourLog.debug("addStringContainsSearch {} {}", theSearchParamName, terms);
 			List<? extends PredicateFinalStep> orTerms = terms.stream()
 				// wildcard is a term-level query, so queries aren't analyzed.  Do our own normalization first.
-				.map(s-> StringUtil.normalizeStringForSearchIndexing(s).toLowerCase(Locale.ROOT))
+				.map(s-> normalize(s))
 				.map(s -> myPredicateFactory
 					.wildcard().field(fieldPath)
 					.matching("*" + s + "*"))
@@ -260,6 +260,18 @@ public class ExtendedLuceneClauseBuilder {
 
 			myRootClause.must(orPredicateOrSingle(orTerms));
 		}
+	}
+
+	/**
+	 * Normalize the string to match our standardAnalyzer.
+	 * @see ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer#STANDARD_ANALYZER
+	 *
+	 * @param theString the raw string
+	 * @return a case and accent normalized version of the input
+	 */
+	@Nonnull
+	private String normalize(String theString) {
+		return StringUtil.normalizeStringForSearchIndexing(theString).toLowerCase(Locale.ROOT);
 	}
 
 	public void addStringUnmodifiedSearch(String theSearchParamName, List<List<IQueryParameterType>> theStringAndOrTerms) {
@@ -272,7 +284,7 @@ public class ExtendedLuceneClauseBuilder {
 					myPredicateFactory.wildcard()
 						.field(fieldPath)
 						// wildcard is a term-level query, so it isn't analyzed.  Do our own case-folding to match the normStringAnalyzer
-						.matching(s.toLowerCase(Locale.ROOT) + "*"))
+						.matching(normalize(s) + "*"))
 				.collect(Collectors.toList());
 
 			myRootClause.must(orPredicateOrSingle(orTerms));
