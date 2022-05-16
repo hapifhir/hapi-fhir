@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 3586
+jira: SMILE-3441
+title: "While converting the reindexing job to the new batch framework, a regression of [#3441](https://github.com/hapifhir/hapi-fhir/issues/3441) was introduced. Reindexing jobs were not respecting the passed in `_lastUpdated` parameter.
+  We now take date these date ranges into account when running re-indexing jobs."

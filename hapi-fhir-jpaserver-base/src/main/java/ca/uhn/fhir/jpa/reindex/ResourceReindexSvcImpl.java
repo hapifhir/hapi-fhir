@@ -35,6 +35,7 @@ import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.util.DateRangeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -85,7 +86,8 @@ public class ResourceReindexSvcImpl implements IResourceReindexSvc {
 
 		SearchParameterMap searchParamMap = myMatchUrlService.translateMatchUrl(theUrl, def);
 		searchParamMap.setSort(new SortSpec(Constants.PARAM_LASTUPDATED, SortOrderEnum.ASC));
-		searchParamMap.setLastUpdated(new DateRangeParam(theStart, theEnd));
+		DateRangeParam chunkDateRange = DateRangeUtil.narrowDateRange(searchParamMap.getLastUpdated(), theStart, theEnd);
+		searchParamMap.setLastUpdated(chunkDateRange);
 		searchParamMap.setCount(thePageSize);
 
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);

@@ -69,6 +69,11 @@ public interface IJobPersistence {
 	List<JobInstance> fetchInstances(int thePageSize, int thePageIndex);
 
 	/**
+	 * Fetch instances ordered by myCreateTime DESC
+	 */
+	List<JobInstance> fetchRecentInstances(int thePageSize, int thePageIndex);
+
+	/**
 	 * Fetch a given instance and update the stored status
 	 * * to {@link ca.uhn.fhir.batch2.model.StatusEnum#IN_PROGRESS}
 	 *
