@@ -27,44 +27,43 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 	private final BatchJobSender myBatchJobSender;
 
 	private final JobDefinition<PT> myDefinition;
-	private final JobInstance myInstance;
+	private final String myInstanceId;
 	private final WorkChunk myWorkChunk;
 	private final JobWorkCursor<PT, IT, OT> myCursor;
+	private final PT myParameters;
 
 	JobStepExecutor(@Nonnull IJobPersistence theJobPersistence, @Nonnull BatchJobSender theBatchJobSender, @Nonnull JobInstance theInstance, @Nonnull WorkChunk theWorkChunk, @Nonnull JobWorkCursor<PT, IT, OT> theCursor) {
 		myJobPersistence = theJobPersistence;
 		myBatchJobSender = theBatchJobSender;
 		myDefinition = theCursor.jobDefinition;
-		myInstance = theInstance;
+		myInstanceId = theInstance.getInstanceId();
+		myParameters = theInstance.getParameters(myDefinition.getParametersType());
 		myWorkChunk = theWorkChunk;
 		myCursor = theCursor;
 	}
 
 	@SuppressWarnings("unchecked")
 	void executeStep() {
-		String instanceId = myInstance.getInstanceId();
-
 		BaseDataSink<PT,IT,OT> dataSink;
 		if (myCursor.isFinalStep()) {
-			dataSink = (BaseDataSink<PT, IT, OT>) new FinalStepDataSink<>(myDefinition.getJobDefinitionId(), instanceId, myCursor.asFinalCursor());
+			dataSink = (BaseDataSink<PT, IT, OT>) new FinalStepDataSink<>(myDefinition.getJobDefinitionId(), myInstanceId, myCursor.asFinalCursor());
 		} else {
-			dataSink = new JobDataSink<>(myBatchJobSender, myJobPersistence, myDefinition, instanceId, myCursor);
+			dataSink = new JobDataSink<>(myBatchJobSender, myJobPersistence, myDefinition, myInstanceId, myCursor);
 		}
 
-		boolean success = executeStep(myDefinition.getJobDefinitionId(), myWorkChunk, myInstance.getParameters(myDefinition.getParametersType()), dataSink);
+		boolean success = executeStep(myDefinition.getJobDefinitionId(), myWorkChunk, myParameters, dataSink);
 
 		if (!success) {
 			return;
 		}
 
 		if (dataSink.firstStepProducedNothing()) {
-			ourLog.info("First step of job myInstance {} produced no work chunks, marking as completed", instanceId);
-			myJobPersistence.markInstanceAsCompleted(instanceId);
+			ourLog.info("First step of job myInstance {} produced no work chunks, marking as completed", myInstanceId);
+			myJobPersistence.markInstanceAsCompleted(myInstanceId);
 		}
 
 		if (myDefinition.isGatedExecution() && myCursor.isFirstStep) {
-			myInstance.setCurrentGatedStepId(myCursor.getTargetStepId());
-			myJobPersistence.updateInstance(myInstance);
+			myJobPersistence.setInstanceCurrentGatedStepId(myInstanceId, myCursor.getTargetStepId());
 		}
 
 	}

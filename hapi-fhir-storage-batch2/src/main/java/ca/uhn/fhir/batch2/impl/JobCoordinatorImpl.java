@@ -104,8 +104,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 
 	@Override
 	public List<JobInstance> getRecentInstances(int theCount, int theStart) {
-		return myJobPersistence.fetchRecentInstances(theCount, theStart)
-			.stream().map(this::massageInstanceForUserAccess).collect(Collectors.toList());
+		return myJobQuerySvc.fetchRecentInstances(theCount, theStart);
 	}
 
 	@Override

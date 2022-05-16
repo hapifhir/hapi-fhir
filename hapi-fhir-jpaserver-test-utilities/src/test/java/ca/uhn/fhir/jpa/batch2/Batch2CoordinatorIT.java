@@ -18,6 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 public class Batch2CoordinatorIT  extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(Batch2CoordinatorIT.class);
 
@@ -35,17 +37,17 @@ public class Batch2CoordinatorIT  extends BaseJpaR4Test {
 	private final PointcutLatch firstStepLatch = new PointcutLatch("First Step");
 	private final PointcutLatch lastStepLatch = new PointcutLatch("Last Step");
 
-	final IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> myFirstStep = (step,sink) -> callLatch(firstStepLatch, step);
-	final IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> myLastStep = (step,sink) -> callLatch(lastStepLatch, step);
-
 	private RunOutcome callLatch(PointcutLatch theLatch, StepExecutionDetails<?, ?> theStep) {
 		theLatch.call(theStep);
-		return new RunOutcome(1);
+		return RunOutcome.SUCCESS;
 	}
 
 	@Test
-	public void testHappyPass() throws InterruptedException {
-		JobDefinition<? extends IModelJson> definition = buildJobDefinition();
+	public void testFirstStepNoSink() throws InterruptedException {
+		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> firstStep = (step,sink) -> callLatch(firstStepLatch, step);
+		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step,sink) -> fail();
+
+		JobDefinition<? extends IModelJson> definition = buildJobDefinition(firstStep, lastStep);
 
 		myJobDefinitionRegistry.addJobDefinition(definition);
 
@@ -58,17 +60,12 @@ public class Batch2CoordinatorIT  extends BaseJpaR4Test {
 		String instanceId = myJobCoordinator.startInstance(request);
 		firstStepLatch.awaitExpected();
 
-		// FIXME KHS should the second step be called in this case?
-		lastStepLatch.setExpectedCount(1);
-		myJobMaintenanceService.runMaintenancePass();
-		lastStepLatch.awaitExpected();
-
 		myBatch2JobHelper.awaitJobCompletion(instanceId);
 	}
 
 	// FIXME KHS add a test to recover from poisoned head by cancelling job instance
 
-	private JobDefinition<? extends IModelJson> buildJobDefinition() {
+	private JobDefinition<? extends IModelJson> buildJobDefinition(IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> theFirstStep, IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> theLastStep) {
 		return JobDefinition.newBuilder()
 			.setJobDefinitionId(TEST_JOB_ID)
 			.setJobDescription("test job")
@@ -79,12 +76,12 @@ public class Batch2CoordinatorIT  extends BaseJpaR4Test {
 				"first-step",
 				"Test first step",
 				FirstStepOutput.class,
-				myFirstStep
+				theFirstStep
 			)
 			.addLastStep(
 				"last-step",
 				"Test last step",
-				myLastStep
+				theLastStep
 			)
 			.build();
 	}

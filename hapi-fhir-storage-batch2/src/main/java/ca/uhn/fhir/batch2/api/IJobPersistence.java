@@ -155,4 +155,5 @@ public interface IJobPersistence {
 	 */
 	void cancelInstance(String theInstanceId);
 
+	void setInstanceCurrentGatedStepId(String theInstanceId, String theCurrentStepId);
 }

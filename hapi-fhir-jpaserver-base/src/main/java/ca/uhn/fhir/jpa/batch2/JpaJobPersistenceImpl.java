@@ -238,4 +238,9 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	public void cancelInstance(String theInstanceId) {
 		myJobInstanceRepository.updateInstanceCancelled(theInstanceId, true);
 	}
+
+	@Override
+	public void setInstanceCurrentGatedStepId(String theInstanceId, String theCurrentStepId) {
+		myJobInstanceRepository.updateInstanceCurrentGatedStepId(theInstanceId, theCurrentStepId);
+	}
 }

@@ -30,13 +30,22 @@ class JobQuerySvc {
 	}
 
 	JobInstance fetchInstance(String theInstanceId) {
-		return myJobPersistence.fetchInstance(theInstanceId).map(this::massageInstanceForUserAccess).orElseThrow(() -> new ResourceNotFoundException(Msg.code(2040) + "Unknown instance ID: " + UrlUtil.escapeUrlParam(theInstanceId)));
+		return myJobPersistence.fetchInstance(theInstanceId)
+			.map(this::massageInstanceForUserAccess)
+			.orElseThrow(() -> new ResourceNotFoundException(Msg.code(2040) + "Unknown instance ID: " + UrlUtil.escapeUrlParam(theInstanceId)));
 	}
 
 	List<JobInstance> fetchInstances(int thePageSize, int thePageIndex) {
-		return myJobPersistence.fetchInstances(thePageSize, thePageIndex).stream().map(this::massageInstanceForUserAccess).collect(Collectors.toList());
+		return myJobPersistence.fetchInstances(thePageSize, thePageIndex).stream()
+			.map(this::massageInstanceForUserAccess)
+			.collect(Collectors.toList());
 	}
 
+	public List<JobInstance> fetchRecentInstances(int theCount, int theStart) {
+		return myJobPersistence.fetchRecentInstances(theCount, theStart)
+			.stream().map(this::massageInstanceForUserAccess)
+			.collect(Collectors.toList());
+	}
 
 	private JobInstance massageInstanceForUserAccess(JobInstance theInstance) {
 		JobInstance retVal = new JobInstance(theInstance);
