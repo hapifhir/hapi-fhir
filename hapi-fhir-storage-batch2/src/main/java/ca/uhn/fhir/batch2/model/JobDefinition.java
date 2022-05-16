@@ -113,6 +113,16 @@ public class JobDefinition<PT extends IModelJson> {
 		return mySteps;
 	}
 
+	/**
+	 *
+	 * @return Returns the stepId of the first step
+	 * @throws IndexOutOfBoundsException if there is no first step
+	 */
+	public String getFirstStepId() {
+		JobDefinitionStep<PT, ?, ?> firstStep = mySteps.get(0);
+		return firstStep.getStepId();
+	}
+
 	public boolean isGatedExecution() {
 		return myGatedExecution;
 	}

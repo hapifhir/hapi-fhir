@@ -56,7 +56,7 @@ public class BatchWorkChunk {
 	}
 
 	public static BatchWorkChunk firstChunk(JobDefinition<?> theJobDefinition, String theInstanceId) {
-		String firstStepId = theJobDefinition.getSteps().get(0).getStepId();
+		String firstStepId = theJobDefinition.getFirstStepId();
 		String jobDefinitionId = theJobDefinition.getJobDefinitionId();
 		int jobDefinitionVersion = theJobDefinition.getJobDefinitionVersion();
 		return new BatchWorkChunk(jobDefinitionId, jobDefinitionVersion, firstStepId, theInstanceId,  0, null);

@@ -86,7 +86,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 		BatchWorkChunk batchWorkChunk = BatchWorkChunk.firstChunk(jobDefinition, instanceId);
 		String chunkId = myJobPersistence.storeWorkChunk(batchWorkChunk);
 
-		JobWorkNotification workNotification = JobWorkNotification.firstNotification(jobDefinition, instanceId, chunkId);
+		JobWorkNotification workNotification = JobWorkNotification.firstStepNotification(jobDefinition, instanceId, chunkId);
 		myBatchJobSender.sendWorkChannelMessage(workNotification);
 
 		return instanceId;
