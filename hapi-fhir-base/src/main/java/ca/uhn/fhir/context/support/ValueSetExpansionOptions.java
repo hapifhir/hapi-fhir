@@ -35,7 +35,7 @@ public class ValueSetExpansionOptions {
 	private boolean myIncludeHierarchy;
 	private String myFilter;
 
-	private String theDisplayLanguage;
+	private String myDisplayLanguage;
 
 	public String getFilter() {
 		return myFilter;
@@ -122,10 +122,11 @@ public class ValueSetExpansionOptions {
 	}
 
 	public String getTheDisplayLanguage() {
-		return theDisplayLanguage;
+		return myDisplayLanguage;
 	}
 
-	public void setTheDisplayLanguage(String theDisplayLanguage) {
-		this.theDisplayLanguage = theDisplayLanguage;
+	public ValueSetExpansionOptions setTheDisplayLanguage(String theDisplayLanguage) {
+		myDisplayLanguage = theDisplayLanguage;
+		return this;
 	}
 }

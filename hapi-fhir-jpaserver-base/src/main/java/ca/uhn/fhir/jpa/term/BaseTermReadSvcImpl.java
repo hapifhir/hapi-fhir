@@ -140,7 +140,6 @@ import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
 import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -615,7 +614,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			if (conceptView.getDesignationPid() != null) {
 				TermConceptDesignation designation = new TermConceptDesignation();
 
-				if(isDisplayLanguageMatch(theExpansionOptions.getTheDisplayLanguage(),conceptView.getDesignationLang() )) {
+				if(isValueSetDisplayLanguageMatch(theExpansionOptions, conceptView.getDesignationLang() )) {
 					designation.setUseSystem(conceptView.getDesignationUseSystem());
 					designation.setUseCode(conceptView.getDesignationUseCode());
 					designation.setUseDisplay(conceptView.getDesignationUseDisplay());
@@ -671,6 +670,19 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		logDesignationsExpanded("Finished expanding designations. ", theTermValueSet, designationsExpanded);
 		logConceptsExpanded("Finished expanding concepts. ", theTermValueSet, conceptsExpanded);
+	}
+
+	static boolean isValueSetDisplayLanguageMatch(ValueSetExpansionOptions theExpansionOptions, String theStoredLang){
+		if( theExpansionOptions == null) {
+			return true;
+		}
+
+		if(theExpansionOptions.getTheDisplayLanguage() == null || theStoredLang == null) {
+			return true;
+		}
+
+		return theExpansionOptions.getTheDisplayLanguage().equalsIgnoreCase(theStoredLang);
+
 	}
 
 	private void logConceptsExpanded(String theLogDescriptionPrefix, TermValueSet theTermValueSet, int theConceptsExpanded) {
