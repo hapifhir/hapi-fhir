@@ -3,6 +3,7 @@ package ca.uhn.fhir.batch2.impl;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
+import ca.uhn.fhir.batch2.api.JobStepFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
@@ -94,7 +95,8 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 		} catch (Exception e) {
 			ourLog.error("Failure executing job {} step {}", theJobDefinitionId, targetStepId, e);
 			myJobPersistence.markWorkChunkAsErroredAndIncrementErrorCount(chunkId, e.toString());
-			throw new JobExecutionFailedException(Msg.code(2041) + e.getMessage(), e);
+			throw new JobStepFailedException(Msg.code(2041) + e.getMessage(), e);
+			// FIXME KHS integration test to confirm that cancelling the job will kill a poisoned head
 		} catch (Throwable t) {
 			ourLog.error("Unexpected failure executing job {} step {}", theJobDefinitionId, targetStepId, t);
 			myJobPersistence.markWorkChunkAsFailed(chunkId, t.toString());
