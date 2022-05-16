@@ -2,7 +2,9 @@ package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.interceptor.ForceOffsetSearchModeInterceptor;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
@@ -37,6 +39,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -77,6 +80,9 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 	private ISubscriptionTriggeringSvc mySubscriptionTriggeringSvc;
 	@Autowired
 	private ISchedulerService mySchedulerService;
+
+	@Autowired
+	private IInterceptorService myInterceptorService;
 
 	@AfterEach
 	public void afterUnregisterRestHookListener() {
@@ -339,6 +345,46 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 
 		waitForSize(0, ourCreatedPatients);
 		waitForSize(3, ourUpdatedPatients);
+
+	}
+
+	@Test
+	public void testTriggerSubscriptionWithSynchronousQueryMode() throws Exception {
+		myDaoConfig.setSearchPreFetchThresholds(Lists.newArrayList(13, 22, 100));
+
+		String payload = "application/fhir+json";
+		IdType sub2id = createSubscription("Patient?", payload, ourListenerServerBase).getIdElement();
+
+		// Create lots
+		for (int i = 0; i < 3; i++) {
+			Patient p = new Patient();
+			p.setId("P" + i);
+			p.addName().setFamily("P" + i);
+			ourClient.update().resource(p).execute();
+		}
+		waitForSize(3, ourUpdatedPatients);
+
+
+		ForceOffsetSearchModeInterceptor forceOffsetSearchModeInterceptor = new ForceOffsetSearchModeInterceptor();
+		myInterceptorService.registerInterceptor(forceOffsetSearchModeInterceptor);
+
+		// Use a single
+		beforeReset();
+		Parameters response = ourClient
+			.operation()
+			.onInstance(sub2id)
+			.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
+			.withParameter(Parameters.class, ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, new StringType("Patient?"))
+			.execute();
+		String responseValue = response.getParameter().get(0).getValue().primitiveValue();
+		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
+
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+
+		waitForSize(0, ourCreatedPatients);
+		waitForSize(3, ourUpdatedPatients);
+
+		myInterceptorService.unregisterInterceptor(forceOffsetSearchModeInterceptor);
 
 	}
 
