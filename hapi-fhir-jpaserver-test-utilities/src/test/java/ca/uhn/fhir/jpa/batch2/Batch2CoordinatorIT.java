@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.batch2;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
-import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
@@ -10,24 +9,18 @@ import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.impl.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
-import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.test.concurrency.PointcutLatch;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class Batch2CoordinatorIT extends BaseJpaR4Test {
-	private static final Logger ourLog = LoggerFactory.getLogger(Batch2CoordinatorIT.class);
-
 	public static final int TEST_JOB_VERSION = 1;
 	@Autowired
 	JobDefinitionRegistry myJobDefinitionRegistry;
@@ -35,8 +28,6 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	IJobCoordinator myJobCoordinator;
 	@Autowired
 	Batch2JobHelper myBatch2JobHelper;
-	@Autowired
-	IJobMaintenanceService myJobMaintenanceService;
 
 	private final PointcutLatch myFirstStepLatch = new PointcutLatch("First Step");
 	private final PointcutLatch myLastStepLatch = new PointcutLatch("Last Step");
@@ -87,10 +78,8 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		myFirstStepLatch.awaitExpected();
 
 		myLastStepLatch.setExpectedCount(1);
-		myJobMaintenanceService.runMaintenancePass();
-		myLastStepLatch.awaitExpected();
-
 		myBatch2JobHelper.awaitJobCompletion(instanceId);
+		myLastStepLatch.awaitExpected();
 	}
 
 
@@ -137,10 +126,8 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		String instanceId = myJobCoordinator.startInstance(request);
 		myFirstStepLatch.awaitExpected();
 
-		myJobMaintenanceService.runMaintenancePass();
-
 		// validate
-		assertEquals(StatusEnum.IN_PROGRESS, myJobCoordinator.getInstance(instanceId).getStatus());
+		myBatch2JobHelper.awaitJobInProgress(instanceId);
 
 		// execute
 		myJobCoordinator.cancelInstance(instanceId);

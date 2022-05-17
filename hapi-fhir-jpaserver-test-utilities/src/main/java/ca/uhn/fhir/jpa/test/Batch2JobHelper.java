@@ -59,4 +59,11 @@ public class Batch2JobHelper {
 			return myJobCoordinator.getInstance(theId).getStatus();
 		}, equalTo(StatusEnum.CANCELLED));
 	}
+
+	public void awaitJobInProgress(String theId) {
+		await().until(() -> {
+			myJobMaintenanceService.runMaintenancePass();
+			return myJobCoordinator.getInstance(theId).getStatus();
+		}, equalTo(StatusEnum.IN_PROGRESS));
+	}
 }
