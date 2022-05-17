@@ -22,9 +22,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- * Learning test.  Feel free to delete if it's failing or confusing.
- */
 class LinkedBlockingChannelFactoryTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(LinkedBlockingChannelFactoryTest.class);
 
