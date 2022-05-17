@@ -1144,7 +1144,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	private String[] splitOutOfParensOrs(String thePaths) {
 		List<String> topLevelOrExpressions = splitOutOfParensToken(thePaths, " or ");
 		List<String> retVal = topLevelOrExpressions.stream()
-			.flatMap(s -> splitOutOfParensToken(s, "|").stream())
+			.flatMap(s -> splitOutOfParensToken(s, " |").stream())
 			.collect(Collectors.toList());
 		return retVal.toArray(new String[retVal.size()]);
 	}
