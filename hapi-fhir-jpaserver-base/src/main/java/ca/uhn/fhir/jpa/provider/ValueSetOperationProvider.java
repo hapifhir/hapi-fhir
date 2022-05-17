@@ -299,7 +299,7 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 			options.setFilter(theFilter.getValue());
 		}
 
-		if( !theDisplayLanguage.isEmpty() ) {
+		if( theDisplayLanguage != null ) {
 			options.setTheDisplayLanguage(theDisplayLanguage.getValue());
 		}
 
