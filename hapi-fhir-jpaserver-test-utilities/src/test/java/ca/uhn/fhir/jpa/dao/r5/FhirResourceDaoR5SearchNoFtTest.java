@@ -55,13 +55,6 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 
 	@Test
 	public void testAppointmentR5Stores() {
-		Appointment appointment = new Appointment();
-		appointment.setStatus(Appointment.AppointmentStatus.ARRIVED);
-		Appointment.AppointmentParticipantComponent participant = new Appointment.AppointmentParticipantComponent();
-		participant.setStatus(Enumerations.ParticipationStatus.ACCEPTED);
-		appointment.setParticipant(Collections.singletonList(participant));
-
-		myAppointmentDao.create(appointment);
 	}
 
 
