@@ -1,4 +1,4 @@
-package ca.uhn.fhir.batch2.impl;
+package ca.uhn.fhir.batch2.api;
 
 /*-
  * #%L
@@ -20,21 +20,18 @@ package ca.uhn.fhir.batch2.impl;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.api.IJobPersistence;
-import org.apache.commons.lang3.Validate;
-
-import javax.annotation.Nonnull;
-
-public abstract class BaseJobService {
-	protected final IJobPersistence myJobPersistence;
+/**
+ * When a step throws an Exception that is not a {@link JobExecutionFailedException},
+ * the Smile Batch 2 framework will rethrow the exception as a {@link JobStepFailedException}.
+ * This will cause the job notification message to remain on the channel and the system will try executing the send
+ * operation repeatedly until it succeeds.
+ */
+public class JobStepFailedException extends RuntimeException {
 
 	/**
 	 * Constructor
-	 *
-	 * @param theJobPersistence The persistence service
 	 */
-	public BaseJobService(@Nonnull IJobPersistence theJobPersistence) {
-		Validate.notNull(theJobPersistence);
-		myJobPersistence = theJobPersistence;
+	public JobStepFailedException(String theMessage, Throwable theCause) {
+		super(theMessage, theCause);
 	}
 }

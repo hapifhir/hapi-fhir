@@ -144,7 +144,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 	@Test
 	public void testInProgress_GatedExecution_FirstStepComplete() {
 		// Setup
-		myJobDefinitionRegistry.addJobDefinition(createJobDefinition(t -> t.gatedExecution()));
+		myJobDefinitionRegistry.addJobDefinition(createJobDefinition(JobDefinition.Builder::gatedExecution));
 		when(myJobPersistence.fetchWorkChunksWithoutData(eq(INSTANCE_ID), eq(100), eq(0))).thenReturn(Lists.newArrayList(
 			createWorkChunkStep2().setStatus(StatusEnum.QUEUED).setId(CHUNK_ID),
 			createWorkChunkStep2().setStatus(StatusEnum.QUEUED).setId(CHUNK_ID_2)
