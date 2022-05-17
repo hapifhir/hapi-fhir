@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import java.util.Optional;
 
 public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(JobStepExecutor.class);
@@ -63,9 +64,19 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 		}
 
 		if (myDefinition.isGatedExecution() && myCursor.isFirstStep) {
-			myJobPersistence.setInstanceCurrentGatedStepId(myInstanceId, myCursor.getTargetStepId());
+			initializeGatedExecution();
 		}
 
+	}
+
+	private void initializeGatedExecution() {
+		Optional<JobInstance> oInstance = myJobPersistence.fetchInstance(myInstanceId);
+
+		if (oInstance.isPresent()) {
+			JobInstance instance = oInstance.get();
+			instance.setCurrentGatedStepId(myCursor.getCurrentStepId());
+			myJobPersistence.updateInstance(instance);
+		}
 	}
 
 	private boolean executeStep(String theJobDefinitionId, @Nonnull WorkChunk theWorkChunk, PT theParameters, BaseDataSink<PT,IT,OT> theDataSink) {

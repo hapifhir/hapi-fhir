@@ -122,9 +122,4 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	public void cancelInstance(String theInstanceId) {
 		myWrap.cancelInstance(theInstanceId);
 	}
-
-	@Override
-	public void setInstanceCurrentGatedStepId(String theInstanceId, String theCurrentStepId) {
-		myWrap.setInstanceCurrentGatedStepId(theInstanceId, theCurrentStepId);
-	}
 }

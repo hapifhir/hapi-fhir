@@ -75,7 +75,7 @@ public class JobWorkCursor<PT extends IModelJson, IT extends IModelJson, OT exte
 		return new JobWorkCursor(theJobDefinition, isFirstStep, currentStep, nextStep);
 	}
 
-	public String getTargetStepId() {
+	public String getCurrentStepId() {
 		return currentStep.getStepId();
 	}
 

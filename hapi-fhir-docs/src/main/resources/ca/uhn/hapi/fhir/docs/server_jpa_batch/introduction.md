@@ -45,9 +45,9 @@ Middle Steps in the job definition are executed in the same way, except instead 
 
 The final step operates the same way as the middle steps, except it does not produce any new work chunks.
 
-### Gated steps
+### Gated Execution
 
-If a step is marked as Gated, then all work chunks for one step must be COMPLETED before any work chunks for the next step may begin.
+If a Job Definition is set to having Gated Execution, then all work chunks for one step must be COMPLETED before any work chunks for the next step may begin.
 
 ### Job Instance Completion
 

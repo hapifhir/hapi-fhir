@@ -45,7 +45,7 @@ abstract class BaseDataSink<PT extends IModelJson, IT extends IModelJson, OT ext
 
 	@Override
 	public void recoveredError(String theMessage) {
-		ourLog.error("Error during job[{}] step[{}]: {}", myInstanceId, myJobWorkCursor.getTargetStepId(), theMessage);
+		ourLog.error("Error during job[{}] step[{}]: {}", myInstanceId, myJobWorkCursor.getCurrentStepId(), theMessage);
 		myRecoveredErrorCount++;
 	}
 
