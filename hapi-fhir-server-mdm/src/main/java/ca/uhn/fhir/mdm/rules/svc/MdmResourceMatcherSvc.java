@@ -92,10 +92,9 @@ public class MdmResourceMatcherSvc {
 		MdmMatchResultEnum matchResultEnum = myMdmRulesJson.getMatchResult(matchResult.vector);
 		matchResult.setMatchResultEnum(matchResultEnum);
 		if (ourLog.isDebugEnabled()) {
-			if (matchResult.isMatch() || matchResult.isPossibleMatch()) {
-				ourLog.debug("{} {} with field matchers {}", matchResult, theRightResource.getIdElement().toUnqualifiedVersionless(), myMdmRulesJson.getFieldMatchNamesForVector(matchResult.vector));
-			} else if (ourLog.isTraceEnabled()) {
-				ourLog.trace("{} {}.  Field matcher results: {}", matchResult, theRightResource.getIdElement().toUnqualifiedVersionless(), myMdmRulesJson.getDetailedFieldMatchResultForUnmatchedVector(matchResult.vector));
+				ourLog.debug("{} {}: {}", matchResult.getMatchResultEnum(), theRightResource.getIdElement().toUnqualifiedVersionless(), matchResult);
+			 if (ourLog.isTraceEnabled()) {
+				ourLog.trace("Field matcher results:\n{}", myMdmRulesJson.getDetailedFieldMatchResultWithSuccessInformation(matchResult.vector));
 			}
 		}
 		return matchResult;
@@ -135,6 +134,9 @@ public class MdmResourceMatcherSvc {
 			MdmMatchEvaluation matchEvaluation = fieldComparator.match(theLeftResource, theRightResource);
 			if (matchEvaluation.match) {
 				vector |= (1 << i);
+				ourLog.trace("Match: Successfully matched matcher {} with score {}.", fieldComparator.getName(), matchEvaluation.score);
+			} else {
+				ourLog.trace("No match: Matcher {} did not match (score: {}).", fieldComparator.getName(), matchEvaluation.score);
 			}
 			score += matchEvaluation.score;
 			appliedRuleCount += 1;

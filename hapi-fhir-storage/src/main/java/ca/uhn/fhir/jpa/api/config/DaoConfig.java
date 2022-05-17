@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.api.model.WarmCacheEntry;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.validation.FhirValidator;
@@ -307,6 +308,11 @@ public class DaoConfig {
 	 * Since 6.0.0
 	 */
 	private long myAutoInflateBinariesMaximumBytes = 10 * FileUtils.ONE_MB;
+
+	/**
+	 * Since 6.0.0
+	 */
+	private int myBulkExportFileRetentionPeriodHours = 2;
 
 	/**
 	 * Constructor
@@ -2858,7 +2864,28 @@ public class DaoConfig {
 		return myAutoInflateBinariesMaximumBytes;
 	}
 
-	public enum StoreMetaSourceInformationEnum {
+
+	/**
+	 * This setting controls how long Bulk Export collection entities will be retained after job start.
+	 * Default is 2 hours. Setting this value to 0 or less will cause Bulk Export collection entities to never be expired.
+	 *
+	 * @since 6.0.0
+	 */
+    public int getBulkExportFileRetentionPeriodHours() {
+        return myBulkExportFileRetentionPeriodHours;
+    }
+
+	/**
+	 * This setting controls how long Bulk Export collection entities will be retained after job start.
+	 * Default is 2 hours. Setting this value to 0 or less will cause Bulk Export collection entities to never be expired.
+	 *
+	 * @since 6.0.0
+	 */
+    public void setBulkExportFileRetentionPeriodHours(int theBulkExportFileRetentionPeriodHours) {
+        myBulkExportFileRetentionPeriodHours = theBulkExportFileRetentionPeriodHours;
+    }
+
+    public enum StoreMetaSourceInformationEnum {
 		NONE(false, false),
 		SOURCE_URI(true, false),
 		REQUEST_ID(false, true),
@@ -2948,7 +2975,7 @@ public class DaoConfig {
 		NON_VERSIONED,
 
 		/**
-		 * Tags are stored directly in the resource body (in the {@link ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable}
+		 * Tags are stored directly in the resource body (in the {@link ResourceHistoryTable}
 		 * entry for the resource, meaning that they are not indexed separately, and are versioned with the rest
 		 * of the resource.
 		 */

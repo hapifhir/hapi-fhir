@@ -74,6 +74,7 @@ public class HibernateSearchIndexWriter {
 	public void writeStringIndex(String theSearchParam, String theValue) {
 		DocumentElement stringIndexNode = getSearchParamIndexNode(theSearchParam, "string");
 
+		// we are assuming that our analyzer matches  StringUtil.normalizeStringForSearchIndexing(theValue).toLowerCase(Locale.ROOT))
 		stringIndexNode.addValue(IDX_STRING_NORMALIZED, theValue);// for default search
 		stringIndexNode.addValue(IDX_STRING_EXACT, theValue);
 		stringIndexNode.addValue(IDX_STRING_TEXT, theValue);
@@ -131,12 +132,12 @@ public class HibernateSearchIndexWriter {
 			nestedQtyNode.addValue(QTY_SYSTEM, theValue.getSystem());
 			nestedQtyNode.addValue(QTY_VALUE, theValue.getValue());
 
-			if ( ! myModelConfig.getNormalizedQuantitySearchLevel().storageOrSearchSupported()) { return; }
+			if ( ! myModelConfig.getNormalizedQuantitySearchLevel().storageOrSearchSupported()) { continue; }
 
 			//-- convert the value/unit to the canonical form if any
 			Pair canonicalForm = UcumServiceUtil.getCanonicalForm(theValue.getSystem(),
 				BigDecimal.valueOf(theValue.getValue()), theValue.getCode());
-			if (canonicalForm == null) { return; }
+			if (canonicalForm == null) { continue; }
 
 			double canonicalValue = Double.parseDouble(canonicalForm.getValue().asDecimal());
 			String canonicalUnits = canonicalForm.getCode();

@@ -41,7 +41,7 @@ public interface ISearchBuilder {
 
 	IResultIterator createQuery(SearchParameterMap theParams, SearchRuntimeDetails theSearchRuntime, RequestDetails theRequest, @Nonnull RequestPartitionId theRequestPartitionId);
 
-	Iterator<Long> createCountQuery(SearchParameterMap theParams, String theSearchUuid, RequestDetails theRequest, RequestPartitionId theRequestPartitionId);
+	Long createCountQuery(SearchParameterMap theParams, String theSearchUuid, RequestDetails theRequest, RequestPartitionId theRequestPartitionId);
 
 	void setMaxResultsToFetch(Integer theMaxResultsToFetch);
 

@@ -1,15 +1,28 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.batch.config.BatchConstants;
+import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
+import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
+import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
+import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
+import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
+import ca.uhn.fhir.util.JsonUtil;
+import com.google.common.collect.Sets;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -18,23 +31,34 @@ import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @SuppressWarnings("Duplicates")
 public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Test implements ITestDataBuilder {
+
+	@Autowired
+	private IBulkDataExportSvc myBulkDataExportSvc;
+	@Autowired
+	private IBulkDataExportJobSchedulingHelper myBulkDataExportJobSchedulingHelper;
 
 	@Override
 	@AfterEach
@@ -248,6 +272,20 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 	}
 
 	@Test
+	public void testPartitionInRequestDetails_UpdateWithWrongTenantId() {
+		IIdType idA = createPatient(withTenant(TENANT_A), withActiveTrue()).toVersionless();
+		IBaseResource patientA = buildPatient(withId(idA), withActiveTrue());
+		RequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setTenantId(TENANT_B);
+		try {
+			myPatientDao.update((Patient) patientA, requestDetails);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals(Msg.code(2079) + "Resource " + ((Patient) patientA).getResourceType() + "/" + ((Patient) patientA).getIdElement().getIdPart() + " is not known", e.getMessage());
+		}
+	}
+
+	@Test
 	public void testDirectDaoAccess_PartitionInRequestDetails_Update() {
 
 		IIdType idA = createPatient(withTenant(JpaConstants.DEFAULT_PARTITION_NAME), withActiveFalse()).toVersionless();
@@ -368,6 +406,56 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		createConditionWithAllowedUnqualified(idA);
 		Bundle response = myClient.search().byUrl(myClient.getServerBase() + "/" + TENANT_A + "/Condition?subject=Patient/" + idA.getIdPart() + "&_include=Condition:subject").returnBundle(Bundle.class).execute();
 		assertThat(response.getEntry(), hasSize(2));
+	}
+
+	@Test
+	public void testBulkExportForDifferentPartitions() throws IOException {
+		setBulkDataExportProvider();
+		testBulkExport(TENANT_A);
+		testBulkExport(TENANT_B);
+		testBulkExport(JpaConstants.DEFAULT_PARTITION_NAME);
+	}
+
+	private void testBulkExport(String createInPartition) throws IOException {
+		// Create a patient
+		IBaseResource patientA = buildPatient(withActiveTrue());
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setTenantId(createInPartition);
+		myPatientDao.create((Patient) patientA, requestDetails);
+
+		// Create a bulk job
+		BulkDataExportOptions options = new BulkDataExportOptions();
+		options.setResourceTypes(Sets.newHashSet("Patient"));
+		options.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
+
+		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(options, false, requestDetails);
+		assertNotNull(jobDetails.getJobId());
+
+		// Run a scheduled pass to build the export and wait for completion
+		myBulkDataExportJobSchedulingHelper.startSubmittedJobs();
+		myBatchJobHelper.awaitAllBulkJobCompletions(
+			BatchConstants.BULK_EXPORT_JOB_NAME
+		);
+
+		//perform export-poll-status
+		HttpGet get = new HttpGet(buildExportUrl(createInPartition, jobDetails.getJobId()));
+		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
+			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			BulkExportResponseJson responseJson = JsonUtil.deserialize(responseString, BulkExportResponseJson.class);
+			assertThat(responseJson.getOutput().get(0).getUrl(), containsString(JpaConstants.DEFAULT_PARTITION_NAME + "/Binary/"));
+		}
+	}
+
+	private void setBulkDataExportProvider() {
+		BulkDataExportProvider provider = new BulkDataExportProvider();
+		provider.setBulkDataExportSvcForUnitTests(myBulkDataExportSvc);
+		provider.setFhirContextForUnitTest(myFhirContext);
+		ourRestServer.registerProvider(provider);
+	}
+
+	private String buildExportUrl(String createInPartition, String jobId) {
+		return myClient.getServerBase() + "/" + createInPartition + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?"
+			+ JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + jobId;
 	}
 
 	private void createConditionWithAllowedUnqualified(IIdType idA) {

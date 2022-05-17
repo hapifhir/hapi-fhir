@@ -71,6 +71,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  *    <li>For instances that are COMPLETE, purges chunk data</li>
  *    <li>For instances that are IN_PROGRESS where at least one chunk is FAILED, marks instance as FAILED and propagates the error message to the instance, and purges chunk data</li>
  *    <li>For instances that are IN_PROGRESS with an error message set where no chunks are ERRORED or FAILED, clears the error message in the instance (meaning presumably there was an error but it cleared)</li>
+ *    <li>For instances that are IN_PROGRESS and isCancelled flag is set marks them as ERRORED and indicating the current running step if any</li>
  *    <li>For instances that are COMPLETE or FAILED and are old, delete them entirely</li>
  * </ul>
  * 	</p>
@@ -125,6 +126,7 @@ public class JobMaintenanceServiceImpl extends BaseJobService implements IJobMai
 
 			for (JobInstance instance : instances) {
 				if (processedInstanceIds.add(instance.getInstanceId())) {
+					handleCancellation(instance);
 					cleanupInstance(instance, progressAccumulator);
 					triggerGatedExecutions(instance, progressAccumulator);
 				}
@@ -134,6 +136,21 @@ public class JobMaintenanceServiceImpl extends BaseJobService implements IJobMai
 				break;
 			}
 		}
+	}
+
+	private void handleCancellation(JobInstance theInstance) {
+		if (! theInstance.isCancelled()) { return; }
+
+		if (theInstance.getStatus() == StatusEnum.QUEUED || theInstance.getStatus() == StatusEnum.IN_PROGRESS) {
+			String msg = "Job instance cancelled";
+			if (theInstance.getCurrentGatedStepId() != null) {
+				msg += " while running step " + theInstance.getCurrentGatedStepId();
+			}
+			theInstance.setErrorMessage(msg);
+			theInstance.setStatus(StatusEnum.CANCELLED);
+			myJobPersistence.updateInstance(theInstance);
+		}
+
 	}
 
 	private void cleanupInstance(JobInstance theInstance, JobChunkProgressAccumulator theProgressAccumulator) {
@@ -146,6 +163,7 @@ public class JobMaintenanceServiceImpl extends BaseJobService implements IJobMai
 				break;
 			case COMPLETED:
 			case FAILED:
+			case CANCELLED:
 				if (theInstance.getEndTime() != null) {
 					long cutoff = System.currentTimeMillis() - PURGE_THRESHOLD;
 					if (theInstance.getEndTime().getTime() < cutoff) {
@@ -157,7 +175,8 @@ public class JobMaintenanceServiceImpl extends BaseJobService implements IJobMai
 				break;
 		}
 
-		if ((theInstance.getStatus() == StatusEnum.COMPLETED || theInstance.getStatus() == StatusEnum.FAILED) && !theInstance.isWorkChunksPurged()) {
+		if ((theInstance.getStatus() == StatusEnum.COMPLETED || theInstance.getStatus() == StatusEnum.FAILED
+				|| theInstance.getStatus() == StatusEnum.CANCELLED) && !theInstance.isWorkChunksPurged()) {
 			theInstance.setWorkChunksPurged(true);
 			myJobPersistence.deleteChunks(theInstance.getInstanceId());
 			myJobPersistence.updateInstance(theInstance);
@@ -213,6 +232,8 @@ public class JobMaintenanceServiceImpl extends BaseJobService implements IJobMai
 					case FAILED:
 						failedChunkCount++;
 						errorMessage = chunk.getErrorMessage();
+						break;
+					case CANCELLED:
 						break;
 				}
 			}

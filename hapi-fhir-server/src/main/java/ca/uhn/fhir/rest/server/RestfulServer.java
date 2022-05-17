@@ -20,12 +20,12 @@ package ca.uhn.fhir.rest.server;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
 import ca.uhn.fhir.context.api.BundleInclusionRule;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -437,14 +437,14 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		Class<?> clazz = theProvider.getClass();
 		Class<?> supertype = clazz.getSuperclass();
 		while (!Object.class.equals(supertype)) {
-			count += findResourceMethods(theProvider, supertype);
 			count += findResourceMethodsOnInterfaces(theProvider, supertype.getInterfaces());
+			count += findResourceMethods(theProvider, supertype);
 			supertype = supertype.getSuperclass();
 		}
 
 		try {
-			count += findResourceMethods(theProvider, clazz);
 			count += findResourceMethodsOnInterfaces(theProvider, clazz.getInterfaces());
+			count += findResourceMethods(theProvider, clazz);
 		} catch (ConfigurationException e) {
 			throw new ConfigurationException(Msg.code(288) + "Failure scanning class " + clazz.getSimpleName() + ": " + e.getMessage(), e);
 		}
@@ -456,8 +456,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	private int findResourceMethodsOnInterfaces(Object theProvider, Class<?>[] interfaces) {
 		int count = 0;
 		for (Class<?> anInterface : interfaces) {
-			count += findResourceMethods(theProvider, anInterface);
 			count += findResourceMethodsOnInterfaces(theProvider, anInterface.getInterfaces());
+			count += findResourceMethods(theProvider, anInterface);
 		}
 		return count;
 	}

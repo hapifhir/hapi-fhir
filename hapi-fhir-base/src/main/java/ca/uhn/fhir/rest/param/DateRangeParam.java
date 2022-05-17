@@ -8,6 +8,7 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.DateUtils;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.ArrayList;
@@ -55,6 +56,17 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	 */
 	public DateRangeParam() {
 		super();
+	}
+
+	/**
+	 * Copy constructor.
+	 */
+	@SuppressWarnings("CopyConstructorMissesField")
+	public DateRangeParam(DateRangeParam theDateRangeParam) {
+		super();
+		Validate.notNull(theDateRangeParam);
+		setLowerBound(theDateRangeParam.getLowerBound());
+		setUpperBound(theDateRangeParam.getUpperBound());
 	}
 
 	/**
@@ -235,7 +247,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	 * are the same value. As such, even though the prefixes for the lower and
 	 * upper bounds default to <code>ge</code> and <code>le</code> respectively,
 	 * the resulting prefix is effectively <code>eq</code> where only a single
-	 * date is provided - as required by the FHIR specificiation (i.e. "If no
+	 * date is provided - as required by the FHIR specification (i.e. "If no
 	 * prefix is present, the prefix <code>eq</code> is assumed").
 	 * </p>
 	 */
@@ -296,12 +308,12 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 					break;
 				case EQUAL:
 				case GREATERTHAN_OR_EQUALS:
+				case NOT_EQUAL:
 					break;
 				case LESSTHAN:
 				case APPROXIMATE:
 				case LESSTHAN_OR_EQUALS:
 				case ENDS_BEFORE:
-				case NOT_EQUAL:
 					throw new IllegalStateException(Msg.code(1926) + "Invalid lower bound comparator: " + myLowerBound.getPrefix());
 			}
 		}
@@ -326,11 +338,11 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 					break;
 				case EQUAL:
 				case LESSTHAN_OR_EQUALS:
+				case NOT_EQUAL:
 					break;
 				case GREATERTHAN_OR_EQUALS:
 				case GREATERTHAN:
 				case APPROXIMATE:
-				case NOT_EQUAL:
 				case STARTS_AFTER:
 					throw new IllegalStateException(Msg.code(1927) + "Invalid upper bound comparator: " + myUpperBound.getPrefix());
 			}
@@ -355,13 +367,13 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 					retVal = myLowerBound.getPrecision().add(retVal, 1);
 					break;
 				case EQUAL:
+				case NOT_EQUAL:
 				case GREATERTHAN_OR_EQUALS:
 					break;
 				case LESSTHAN:
 				case APPROXIMATE:
 				case LESSTHAN_OR_EQUALS:
 				case ENDS_BEFORE:
-				case NOT_EQUAL:
 					throw new IllegalStateException(Msg.code(1928) + "Invalid lower bound comparator: " + myLowerBound.getPrefix());
 			}
 		}
@@ -417,6 +429,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 					retVal = new Date(retVal.getTime() - 1L);
 					break;
 				case EQUAL:
+				case NOT_EQUAL:
 				case LESSTHAN_OR_EQUALS:
 					retVal = myUpperBound.getPrecision().add(retVal, 1);
 					retVal = new Date(retVal.getTime() - 1L);
@@ -424,7 +437,6 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 				case GREATERTHAN_OR_EQUALS:
 				case GREATERTHAN:
 				case APPROXIMATE:
-				case NOT_EQUAL:
 				case STARTS_AFTER:
 					throw new IllegalStateException(Msg.code(1929) + "Invalid upper bound comparator: " + myUpperBound.getPrefix());
 			}

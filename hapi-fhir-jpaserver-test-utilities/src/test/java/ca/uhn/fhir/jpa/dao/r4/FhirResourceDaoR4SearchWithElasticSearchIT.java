@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -37,6 +38,7 @@ import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.storage.test.BaseDateSearchDaoTests;
 import ca.uhn.fhir.storage.test.DaoTestDataBuilder;
@@ -66,11 +68,15 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.annotation.DirtiesContext;
@@ -84,20 +90,26 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.persistence.EntityManager;
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.model.util.UcumServiceUtil.UCUM_CODESYSTEM_URL;
+import static ca.uhn.fhir.rest.api.Constants.CHARSET_UTF8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -578,7 +590,50 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		}
 	}
 
+	/**
+	 * Verify unmodified, :contains, and :text searches are case-insensitive and normalized;
+	 * :exact is still sensitive
+	 * https://github.com/hapifhir/hapi-fhir/issues/3584
+	 */
+	@Test
+	void testStringCaseFolding() {
+		IIdType kelly = myTestDataBuilder.createPatient(myTestDataBuilder.withGiven("Kelly"));
+		IIdType keely = myTestDataBuilder.createPatient(myTestDataBuilder.withGiven("Kélly"));
 
+		// un-modified, :contains, and :text are all ascii normalized, and case-folded
+		myTestDaoSearch.assertSearchFinds("lowercase matches capitalized", "/Patient?name=kelly", kelly, keely);
+		myTestDaoSearch.assertSearchFinds("uppercase matches capitalized", "/Patient?name=KELLY", kelly, keely);
+		myTestDaoSearch.assertSearchFinds("unmodified is accent insensitive", "/Patient?name=" + urlencode("Kélly"), kelly, keely);
+
+		myTestDaoSearch.assertSearchFinds("contains case-insensitive", "/Patient?name:contains=elly", kelly, keely);
+		myTestDaoSearch.assertSearchFinds("contains case-insensitive", "/Patient?name:contains=ELLY", kelly, keely);
+		myTestDaoSearch.assertSearchFinds("contains accent-insensitive", "/Patient?name:contains=ELLY", kelly, keely);
+		myTestDaoSearch.assertSearchFinds("contains accent-insensitive", "/Patient?name:contains=" + urlencode("éLLY"), kelly, keely);
+
+		myTestDaoSearch.assertSearchFinds("text also accent and case-insensitive", "/Patient?name:text=kelly", kelly, keely);
+		myTestDaoSearch.assertSearchFinds("text also accent and case-insensitive", "/Patient?name:text=KELLY", kelly, keely);
+		myTestDaoSearch.assertSearchFinds("text also accent and case-insensitive", "/Patient?name:text=" + urlencode("KÉLLY"), kelly, keely);
+
+		myTestDaoSearch.assertSearchFinds("exact case and accent sensitive", "/Patient?name:exact=Kelly", kelly);
+		// ugh.  Our url parser won't handle raw utf8 urls.  It requires everything to be single-byte encoded.
+		myTestDaoSearch.assertSearchFinds("exact case and accent sensitive", "/Patient?name:exact=" + urlencode("Kélly"), keely);
+		myTestDaoSearch.assertSearchNotFound("exact case and accent sensitive", "/Patient?name:exact=KELLY,kelly", kelly);
+		myTestDaoSearch.assertSearchNotFound("exact case and accent sensitive",
+			"/Patient?name:exact=" + urlencode("KÉLLY,kélly"),
+			keely);
+
+		myTestDaoSearch.assertSearchFinds("exact accent sensitive", "/Patient?name:exact=Kelly", kelly);
+		myTestDaoSearch.assertSearchFinds("exact accent sensitive", "/Patient?name:exact=" + urlencode("Kélly"), keely);
+		myTestDaoSearch.assertSearchNotFound("exact accent sensitive", "/Patient?name:exact=Kelly", keely);
+		myTestDaoSearch.assertSearchNotFound("exact accent sensitive", "/Patient?name:exact=" +
+			urlencode("kélly"), kelly);
+
+	}
+
+	/** Our url parser requires all chars to be single-byte, and in utf8, that means ascii. */
+	private String urlencode(String theParam) {
+		return URLEncoder.encode(theParam, CHARSET_UTF8);
+	}
 
 	private void assertObservationSearchMatchesNothing(String message, SearchParameterMap map) {
 		assertObservationSearchMatches(message, map);
@@ -627,13 +682,12 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 					"}";
 			Observation o = myFhirCtx.newJsonParser().parseResource(Observation.class, json);
 
-			myObservationDao.create(o, mySrd).getId().toUnqualifiedVersionless();
+			IIdType id = myObservationDao.create(o, mySrd).getId().toUnqualifiedVersionless();
 
 			// no error.
+			assertThat(id, notNullValue());
 		}
 	}
-
-
 
 	@Test
 	public void testExpandWithIsAInExternalValueSet() {
@@ -1184,6 +1238,78 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 				}
 
+				@Test
+				void testMultipleComponentsHandlesAndOr() {
+					Observation obs1 = getObservation();
+					addComponentWithCodeAndQuantity(obs1, "8480-6", 107);
+					addComponentWithCodeAndQuantity(obs1, "8462-4", 60);
+
+					IIdType obs1Id = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
+
+					Observation obs2 = getObservation();
+					addComponentWithCodeAndQuantity(obs2, "8480-6",307);
+					addComponentWithCodeAndQuantity(obs2, "8462-4",260);
+
+					myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
+
+					// andClauses
+					{
+						String theUrl = "/Observation?component-value-quantity=107&component-value-quantity=60";
+						List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
+						assertThat("when same component with qtys 107 and 60", resourceIds, hasItem(equalTo(obs1Id.getIdPart())));
+					}
+					{
+						String theUrl = "/Observation?component-value-quantity=107&component-value-quantity=260";
+						List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
+						assertThat("when same component with qtys 107 and 260", resourceIds, empty());
+					}
+
+					//andAndOrClauses
+					{
+						String theUrl = "/Observation?component-value-quantity=107&component-value-quantity=gt50,lt70";
+						List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
+						assertThat("when same component with qtys 107 and lt70,gt80", resourceIds, hasItem(equalTo(obs1Id.getIdPart())));
+					}
+					{
+						String theUrl = "/Observation?component-value-quantity=50,70&component-value-quantity=260";
+						List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
+						assertThat("when same component with qtys 50,70 and 260", resourceIds, empty());
+					}
+
+					// multipleAndsWithMultipleOrsEach
+					{
+						String theUrl = "/Observation?component-value-quantity=50,60&component-value-quantity=105,107";
+						List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
+						assertThat("when same component with qtys 50,60 and 105,107", resourceIds, hasItem(equalTo(obs1Id.getIdPart())));
+					}
+					{
+						String theUrl = "/Observation?component-value-quantity=50,60&component-value-quantity=250,260";
+						List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
+						assertThat("when same component with qtys 50,60 and 250,260", resourceIds, empty());
+					}
+				}
+
+
+				private Observation getObservation() {
+					Observation obs = new Observation();
+					obs.getCode().addCoding().setCode("85354-9").setSystem("http://loinc.org");
+					obs.setStatus(Observation.ObservationStatus.FINAL);
+					return obs;
+				}
+
+				private Quantity getQuantity(double theValue) {
+					return new Quantity().setValue(theValue).setUnit("mmHg").setSystem("http://unitsofmeasure.org").setCode("mm[Hg]");
+				}
+
+				private Observation.ObservationComponentComponent addComponentWithCodeAndQuantity(Observation theObservation, String theConceptCode, double theQuantityValue) {
+					Observation.ObservationComponentComponent comp = theObservation.addComponent();
+					CodeableConcept cc1_1 = new CodeableConcept();
+					cc1_1.addCoding().setCode(theConceptCode).setSystem("http://loinc.org");
+					comp.setCode(cc1_1);
+					comp.setValue(getQuantity(theQuantityValue));
+					return comp;
+				}
+
 
 			}
 
@@ -1399,9 +1525,9 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		}
 
 		private IIdType withObservationWithQuantity(double theValue, String theSystem, String theCode) {
-			myResourceId = myTestDataBuilder.createObservation(
+			myResourceId = myTestDataBuilder.createObservation(asArray(
 				myTestDataBuilder.withQuantityAtPath("valueQuantity", theValue, theSystem, theCode)
-			);
+			));
 			return myResourceId;
 		}
 
@@ -1472,6 +1598,109 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 
 	}
+
+
+
+	@Nested
+	public class TotalParameter {
+
+		@ParameterizedTest
+		@EnumSource(SearchTotalModeEnum.class)
+		public void totalParamSkipsSql(SearchTotalModeEnum theTotalModeEnum) {
+			myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "theCode")));
+
+			myCaptureQueriesListener.clear();
+			myTestDaoSearch.searchForIds("Observation?code=theCode&_total=" + theTotalModeEnum);
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+			assertEquals(1, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "bundle was built with no sql");
+		}
+
+
+		@Test
+		public void totalIsCorrect() {
+			myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-1")));
+			myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-2")));
+			myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-3")));
+
+			IBundleProvider resultBundle = myTestDaoSearch.searchForBundleProvider("Observation?_total=" + SearchTotalModeEnum.ACCURATE);
+			assertEquals(3, resultBundle.size());
+		}
+
+	}
+
+
+	@Nested
+	public class OffsetParameter {
+
+		@BeforeEach
+		public void enableResourceStorage() {
+			myDaoConfig.setStoreResourceInLuceneIndex(true);
+		}
+
+
+		@Test
+		public void offsetNoCount() {
+			myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-1")));
+			IIdType idCode2 = myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-2")));
+			IIdType idCode3 = myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-3")));
+
+			myCaptureQueriesListener.clear();
+			List<String> resultIds = myTestDaoSearch.searchForIds("Observation?code=code-1,code-2,code-3&_offset=1");
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+			assertThat(resultIds, containsInAnyOrder(idCode2.getIdPart(), idCode3.getIdPart()));
+			// make also sure no extra SQL queries were executed
+			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "bundle was built with no sql");
+		}
+
+
+		@Test
+		public void offsetAndCount() {
+			myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-1")));
+			IIdType idCode2 = myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-2")));
+			myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-3")));
+
+			myCaptureQueriesListener.clear();
+			List<String> resultIds = myTestDaoSearch.searchForIds("Observation?code=code-1,code-2,code-3&_offset=1&_count=1");
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+			assertThat(resultIds, containsInAnyOrder(idCode2.getIdPart()));
+			// also validate no extra SQL queries were executed
+			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "bundle was built with no sql");
+		}
+	}
+
+
+	@Disabled("keeping to debug search scrolling")
+	@Test
+	public void withoutCount() {
+		createObservations(600);
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.add("code", new TokenParam().setSystem("http://example.com"));
+		List<ResourcePersistentId> bp = myObservationDao.searchForIds(map, new ServletRequestDetails());
+		assertNotNull(bp);
+		assertEquals(600, bp.size());
+
+	}
+
+
+	private void createObservations(int theCount) {
+		for (int i = 0; i < theCount; i++) {
+			myTestDataBuilder.createObservation(asArray(
+				myTestDataBuilder.withObservationCode("http://example.com", "code-" + i)));
+		}
+	}
+
+
+	private Consumer<IBaseResource>[] asArray(Consumer<IBaseResource> theIBaseResourceConsumer) {
+		@SuppressWarnings("unchecked")
+		Consumer<IBaseResource>[] array = (Consumer<IBaseResource>[]) new Consumer[]{theIBaseResourceConsumer};
+		return array;
+	}
+
+
+
 
 
 	/**

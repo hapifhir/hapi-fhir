@@ -10,7 +10,10 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.method.SortParameter;
+import org.hamcrest.Matcher;
+import org.hamcrest.MatcherAssert;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,11 +22,18 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.hamcrest.Matchers.everyItem;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.in;
+import static org.hamcrest.Matchers.not;
 
 /**
  * Simplistic implementation of FHIR queries.
  */
 public class TestDaoSearch {
+
 	@Configuration
 	public static class Config {
 		@Bean
@@ -46,16 +56,67 @@ public class TestDaoSearch {
 		myFhirCtx = theFhirCtx;
 	}
 
+	/**
+	 * Assert that the FHIR search has theIds in the search results.
+	 * @param theReason junit reason message
+	 * @param theQueryUrl FHIR query - e.g. /Patient?name=kelly
+	 * @param theIds the resource ids to expect.
+	 */
+	public void assertSearchFinds(String theReason, String theQueryUrl,  String ...theIds) {
+		assertSearchResultIds(theQueryUrl, theReason, hasItems(theIds));
+	}
+
+	/**
+	 * Assert that the FHIR search has theIds in the search results.
+	 * @param theReason junit reason message
+	 * @param theQueryUrl FHIR query - e.g. /Patient?name=kelly
+	 * @param theIds the id-part of the resource ids to expect.
+	 */
+	public void assertSearchFinds(String theReason, String theQueryUrl, IIdType...theIds) {
+		String[] bareIds = idTypeToIdParts(theIds);
+
+		assertSearchResultIds(theQueryUrl, theReason, hasItems(bareIds));
+	}
+
+	public void assertSearchResultIds(String theQueryUrl, String theReason, Matcher<Iterable<String>> matcher) {
+		List<String> ids = searchForIds(theQueryUrl);
+
+		MatcherAssert.assertThat(theReason, ids, matcher);
+	}
+
+	/**
+	 * Assert that the FHIR search does not have theIds in the search results.
+	 * @param theReason junit reason message
+	 * @param theQueryUrl FHIR query - e.g. /Patient?name=kelly
+	 * @param theIds the id-part of the resource ids to not-expect.
+	 */
+	public void assertSearchNotFound(String theReason, String theQueryUrl, IIdType ...theIds) {
+		List<String> ids = searchForIds(theQueryUrl);
+
+		MatcherAssert.assertThat(theReason, ids, everyItem(not(in(idTypeToIdParts(theIds)))));
+	}
+
+	@Nonnull
+	private String[] idTypeToIdParts(IIdType[] theIds) {
+		String[] bareIds = new String[theIds.length];
+		for (int i = 0; i < theIds.length; i++) {
+			bareIds[i] = theIds[i].getIdPart();
+		}
+		return bareIds;
+	}
+
 	public List<IBaseResource> searchForResources(String theQueryUrl) {
 		IBundleProvider result = searchForBundleProvider(theQueryUrl);
 		return result.getAllResources();
 	}
 
-	public List<String> searchForIds(String theQueryUrl) {
+	public List<String>  searchForIds(String theQueryUrl) {
 		// fake out the server url parsing
 		IBundleProvider result = searchForBundleProvider(theQueryUrl);
 
-		List<String> resourceIds = result.getAllResourceIds();
+		// getAllResources is not safe as size is not always set
+		List<String> resourceIds = result.getResources(0, Integer.MAX_VALUE)
+					.stream().map(resource -> resource.getIdElement().getIdPart()).collect(Collectors.toList());
 		return resourceIds;
 	}
 

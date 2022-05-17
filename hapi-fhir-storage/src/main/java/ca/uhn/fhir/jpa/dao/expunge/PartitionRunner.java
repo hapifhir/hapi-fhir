@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.dao.expunge;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR Storage api
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.dao.expunge;
  */
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.collect.Lists;
@@ -57,7 +58,7 @@ public class PartitionRunner {
 		myThreadCount = theThreadCount;
 	}
 
-	public void runInPartitionedThreads(List<Long> theResourceIds, Consumer<List<Long>> partitionConsumer) {
+	public void runInPartitionedThreads(List<ResourcePersistentId> theResourceIds, Consumer<List<ResourcePersistentId>> partitionConsumer) {
 
 		List<Callable<Void>> callableTasks = buildCallableTasks(theResourceIds, partitionConsumer);
 		if (callableTasks.size() == 0) {
@@ -92,7 +93,7 @@ public class PartitionRunner {
 		}
 	}
 
-	private List<Callable<Void>> buildCallableTasks(List<Long> theResourceIds, Consumer<List<Long>> partitionConsumer) {
+	private List<Callable<Void>> buildCallableTasks(List<ResourcePersistentId> theResourceIds, Consumer<List<ResourcePersistentId>> partitionConsumer) {
 		List<Callable<Void>> retval = new ArrayList<>();
 
 		if (myBatchSize > theResourceIds.size()) {
@@ -100,9 +101,9 @@ public class PartitionRunner {
 		} else {
 			ourLog.info("Creating batch job of {} entries", theResourceIds.size());
 		}
-		List<List<Long>> partitions = Lists.partition(theResourceIds, myBatchSize);
+		List<List<ResourcePersistentId>> partitions = Lists.partition(theResourceIds, myBatchSize);
 
-		for (List<Long> nextPartition : partitions) {
+		for (List<ResourcePersistentId> nextPartition : partitions) {
 			if (nextPartition.size() > 0) {
 				Callable<Void> callableTask = () -> {
 					ourLog.info(myProcessName + " {} resources", nextPartition.size());

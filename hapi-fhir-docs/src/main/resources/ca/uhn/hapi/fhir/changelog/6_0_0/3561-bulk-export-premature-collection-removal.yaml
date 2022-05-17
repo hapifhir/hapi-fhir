@@ -1,0 +1,5 @@
+type: fix
+issue: 3561
+jira: SMILE-3728
+title: "Previously, Bulk export jobs automatically cleared the collection after a hardcoded 2 hour time period from start of the job. This is now configurable via a new DaoConfig property,
+`setBulkExportFileRetentionPeriodHours()`. If this is set to a value of 0 or below, then the collections will never be expired."

@@ -1,0 +1,57 @@
+<configuration>
+
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d{yyyy-MM-dd} %d{HH:mm:ss.SS} [%thread] %-5level %logger{20} %msg%n
+			</pattern>
+		</encoder>
+	</appender>
+
+	<logger name="ca.uhn.fhir.cli" additivity="false" level="info">
+		<appender-ref ref="STDOUT" />
+	</logger>
+	<logger name="ca.cdr.cli" additivity="false" level="info">
+		<appender-ref ref="STDOUT" />
+	</logger>
+
+	<!-- These two are used by the websocket client -->
+	<logger name="websocket.RECV" additivity="false" level="info">
+		<appender-ref ref="STDOUT" />
+	</logger>
+	<logger name="websocket.SEND" additivity="false" level="info">
+		<appender-ref ref="STDOUT" />
+	</logger>
+
+	<!-- These two are used by SynchronizeFhirServersCommand -->
+	<logger name="sync.SOURCE" additivity="false" level="info">
+		<appender-ref ref="STDOUT" />
+	</logger>
+	<logger name="sync.TARGET" additivity="false" level="info">
+		<appender-ref ref="STDOUT" />
+	</logger>
+
+	<!--
+	It's useful to have this log when uploading big terminologies
+	-->
+	<logger name="ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl" additivity="false" level="info">
+		<appender-ref ref="STDOUT" />
+	</logger>
+	<logger name="ca.uhn.fhir.jpa.term.TermCodeSystemStorageSvcImpl" additivity="false" level="info">
+		<appender-ref ref="STDOUT" />
+	</logger>
+	<logger name="ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl" additivity="false" level="info">
+		<appender-ref ref="STDOUT" />
+	</logger>
+
+	<!--
+	Always log the migrator
+	-->
+	<logger name="ca.uhn.fhir.jpa.migrate" additivity="false" level="info">
+		<appender-ref ref="STDOUT" />
+	</logger>
+
+	<root level="warn">
+		<appender-ref ref="STDOUT" />
+	</root>
+
+</configuration>
