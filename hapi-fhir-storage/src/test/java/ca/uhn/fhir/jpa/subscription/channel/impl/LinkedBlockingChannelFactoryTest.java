@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.test.concurrency.PointcutLatch;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -35,6 +36,7 @@ class LinkedBlockingChannelFactoryTest {
 		new PointcutLatch("first delivery"),
 		new PointcutLatch("second delivery")
 	};
+	private int myFailureCount = 0;
 
 	@BeforeEach
 	public void before() {
@@ -45,10 +47,10 @@ class LinkedBlockingChannelFactoryTest {
 	void testDeliverOneAtATime() {
 		// setup
 		AtomicInteger index = new AtomicInteger();
-		LinkedBlockingChannel producer = (LinkedBlockingChannel) buildChannels(() -> awaitNotification(index.getAndIncrement()));
+		LinkedBlockingChannel producer = (LinkedBlockingChannel) buildChannels(() -> startProcessingMessage(index.getAndIncrement()));
 
 		// execute
-		myHandlerCanProceedLatch[0].setExpectedCount(1);
+		prepareToHandleMessage(0);
 		producer.send(new TestMessage(TEST_PAYLOAD));
 		producer.send(new TestMessage(TEST_PAYLOAD));
 		producer.send(new TestMessage(TEST_PAYLOAD));
@@ -58,58 +60,71 @@ class LinkedBlockingChannelFactoryTest {
 
 	private void validateThreeMessagesDelivered(LinkedBlockingChannel producer) {
 
-		// The first send was dequeued but our handler doesn't deliver it until it is unblocked
+		// The first send was dequeued but our handler won't deliver it until we unblock it
 		await().until(() -> producer.getQueueSizeForUnitTest() == 2);
+		// no messages received yet
 		assertThat(myReceivedPayloads, hasSize(0));
 
-		// Unblock the handler so it is allowed to proceed
-		unblockHandler(0);
+		// Unblock the first latch so message handling is allowed to proceed
+		finishProcessingMessage(0);
 
+		// our queue size should decrement
 		await().until(() -> producer.getQueueSizeForUnitTest() == 1);
+
+		// and we should now have received 1 message
 		assertThat(myReceivedPayloads, hasSize(1));
 		assertEquals(TEST_PAYLOAD, myReceivedPayloads.get(0));
 
-		// Unblock the handler so it is allowed to proceed
-		unblockHandler(1);
+		// Unblock the second latch so message handling is allowed to proceed
+		finishProcessingMessage(1);
+
+		// our queue size decrements again
 		await().until(() -> producer.getQueueSizeForUnitTest() == 0);
+
+		// and we should now have received 2 messages
 		assertThat(myReceivedPayloads, hasSize(2));
 		assertEquals(TEST_PAYLOAD, myReceivedPayloads.get(1));
 	}
 
 	@Test
-	void testFirstHandlerFailsSecondAwaitsUnblocking() {
+	void testDeliveryResumesAfterFailedMessages() {
 		// setup
-		AtomicInteger counter = new AtomicInteger();
-		LinkedBlockingChannel producer = (LinkedBlockingChannel) buildChannels(() ->
-		{
-			counter.incrementAndGet();
-			if (counter.get() < 2) {
-				// This exception will be thrown the first two times this is called
-				throw new RuntimeException("Expected Exception");
-			} else {
-				awaitNotification(counter.get() - 3);
-			}
-		});
+		LinkedBlockingChannel producer = (LinkedBlockingChannel) buildChannels(failTwiceThenProceed());
 
 		// execute
-		myHandlerCanProceedLatch[0].setExpectedCount(1);
+		prepareToHandleMessage(0);
 		producer.send(new TestMessage(TEST_PAYLOAD)); // fail
 		producer.send(new TestMessage(TEST_PAYLOAD)); // fail
 		producer.send(new TestMessage(TEST_PAYLOAD)); // succeed
-		producer.send(new TestMessage(TEST_PAYLOAD));
-		producer.send(new TestMessage(TEST_PAYLOAD));
+		producer.send(new TestMessage(TEST_PAYLOAD)); // succeed
+		producer.send(new TestMessage(TEST_PAYLOAD)); // succeed
 
 		validateThreeMessagesDelivered(producer);
+		assertEquals(2, myFailureCount);
 	}
 
-	private void unblockHandler(int theIndex) {
-		if (theIndex + 1 < myHandlerCanProceedLatch.length) {
-			myHandlerCanProceedLatch[theIndex + 1].setExpectedCount(1);
-		}
-		myHandlerCanProceedLatch[theIndex].call("");
+	@NotNull
+	private Runnable failTwiceThenProceed() {
+		AtomicInteger counter = new AtomicInteger();
+
+		return () -> {
+			int value = counter.getAndIncrement();
+
+			if (value < 2) {
+				++myFailureCount;
+				// This exception will be thrown the first two times this method is run
+				throw new RuntimeException("Expected Exception " + value);
+			} else {
+				startProcessingMessage(value - 2);
+			}
+		};
 	}
 
-	private void awaitNotification(int theIndex) {
+	private void prepareToHandleMessage(int theIndex) {
+		myHandlerCanProceedLatch[theIndex].setExpectedCount(1);
+	}
+
+	private void startProcessingMessage(int theIndex) {
 		try {
 			myHandlerCanProceedLatch[theIndex].awaitExpected();
 		} catch (InterruptedException e) {
@@ -117,6 +132,12 @@ class LinkedBlockingChannelFactoryTest {
 		}
 	}
 
+	private void finishProcessingMessage(int theIndex) {
+		if (theIndex + 1 < myHandlerCanProceedLatch.length) {
+			prepareToHandleMessage(theIndex + 1);
+		}
+		myHandlerCanProceedLatch[theIndex].call("");
+	}
 
 	private IChannelProducer buildChannels(Runnable theCallback) {
 		ChannelProducerSettings channelSettings = new ChannelProducerSettings();
