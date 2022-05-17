@@ -95,7 +95,6 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 			ourLog.error("Failure executing job {} step {}", theJobDefinitionId, targetStepId, e);
 			myJobPersistence.markWorkChunkAsErroredAndIncrementErrorCount(chunkId, e.toString());
 			throw new JobStepFailedException(Msg.code(2041) + e.getMessage(), e);
-			// FIXME KHS integration test to confirm that cancelling the job will kill a poisoned head
 		} catch (Throwable t) {
 			ourLog.error("Unexpected failure executing job {} step {}", theJobDefinitionId, targetStepId, t);
 			myJobPersistence.markWorkChunkAsFailed(chunkId, t.toString());
