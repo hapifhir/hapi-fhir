@@ -52,13 +52,6 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 		IBundleProvider outcome = myPractitionerDao.search(params);
 		assertEquals(1, outcome.getResources(0, 1).size());
 	}
-
-	@Test
-	public void testAppointmentR5Stores() {
-	}
-
-
-
 	@Test
 	public void testHasWithTargetReferenceQualified() {
 		Organization org = new Organization();
