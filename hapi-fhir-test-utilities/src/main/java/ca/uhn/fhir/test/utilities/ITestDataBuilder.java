@@ -138,6 +138,14 @@ public interface ITestDataBuilder {
 		return t -> t.getMeta().addTag().setSystem(theSystem).setCode(theCode).setDisplay(theCode);
 	}
 
+	default Consumer<IBaseResource> withSecurity(String theSystem, String theCode) {
+		return t -> t.getMeta().addSecurity().setSystem(theSystem).setCode(theCode).setDisplay(theCode);
+	}
+
+	default Consumer<IBaseResource> withProfile(String theProfile) {
+		return t -> t.getMeta().addProfile(theProfile);
+	}
+
 	default IIdType createObservation(Consumer<IBaseResource>... theModifiers) {
 		return createResource("Observation", theModifiers);
 	}

@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
+import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import com.google.common.base.Strings;
@@ -90,6 +91,15 @@ public class ExtendedLuceneIndexExtractor {
 
 		theNewParams.myQuantityParams.forEach(nextParam ->
 			retVal.addQuantityIndexData(nextParam.getParamName(), nextParam.getUnits(), nextParam.getSystem(), nextParam.getValue().doubleValue()));
+
+		theResource.getMeta().getTag().forEach(tag ->
+			retVal.addTokenIndexData("_tag", new CodingDt(tag.getSystem(), tag.getCode()).setDisplay(tag.getDisplay())));
+
+		theResource.getMeta().getSecurity().forEach(sec ->
+			retVal.addTokenIndexData("_security", new CodingDt(sec.getSystem(), sec.getCode()).setDisplay(sec.getDisplay())));
+
+		theResource.getMeta().getProfile().forEach(prof ->
+			retVal.addUriIndexData("_profile", prof.getValue()));
 
 
 		if (!theNewParams.myLinks.isEmpty()) {

@@ -33,8 +33,6 @@ import org.slf4j.LoggerFactory;
 import java.math.BigDecimal;
 import java.util.Collection;
 
-import static org.hl7.fhir.r4.model.Observation.SP_VALUE_QUANTITY;
-
 public class HibernateSearchIndexWriter {
 	private static final Logger ourLog = LoggerFactory.getLogger(HibernateSearchIndexWriter.class);
 	public static final String IDX_STRING_NORMALIZED = "norm";
@@ -49,6 +47,8 @@ public class HibernateSearchIndexWriter {
 	public static final String QTY_VALUE = "value";
 	public static final String QTY_CODE_NORM = "code-norm";
 	public static final String QTY_VALUE_NORM = "value-norm";
+
+	public static final String URI_VALUE = "uri-value";
 
 
 
@@ -150,5 +150,14 @@ public class HibernateSearchIndexWriter {
 	}
 
 
+	public void writeUriIndex(String theParamName, Collection<String> theUriValueCollection) {
+		DocumentElement root = myNodeCache.getObjectElement(SEARCH_PARAM_ROOT);
 
+		for (String uriSearchIndexValue : theUriValueCollection) {
+			DocumentElement uriNode = root.addObject(theParamName);
+
+			ourLog.trace("Adding Search Param Uri: {} -- {}", theParamName, uriSearchIndexValue);
+			uriNode.addValue(URI_VALUE, uriSearchIndexValue);
+		}
+	}
 }

@@ -1416,6 +1416,63 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 	}
 
+	@Nested
+	public class TagTypesSearch {
+
+		@BeforeEach
+		public void enableResourceStorage() {
+			myDaoConfig.setStoreResourceInLuceneIndex(true);
+		}
+
+		@AfterEach
+		public void resetResourceStorage() {
+			myDaoConfig.setStoreResourceInLuceneIndex(new DaoConfig().isStoreResourceInLuceneIndex());
+		}
+
+		@Test
+		public void tagSearch() {
+			String id = myTestDataBuilder.createObservation(
+				myTestDataBuilder.withObservationCode("http://example.com/", "theCode"),
+				myTestDataBuilder.withTag("http://example.com", "aTag")).getIdPart();
+
+			myCaptureQueriesListener.clear();
+			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_tag=http://example.com|aTag");
+
+			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			assertThat(allIds, contains(id));
+		}
+
+
+		@Test
+		public void securitySearch() {
+			String id = myTestDataBuilder.createObservation(
+				myTestDataBuilder.withObservationCode("http://example.com/", "theCode"),
+				myTestDataBuilder.withSecurity("http://example.com", "security-label")).getIdPart();
+
+			myCaptureQueriesListener.clear();
+			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_security=http://example.com|security-label");
+
+			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			assertThat(allIds, contains(id));
+		}
+
+
+		@Test
+		public void profileSearch() {
+			String id = myTestDataBuilder.createObservation(
+				myTestDataBuilder.withObservationCode("http://example.com/", "theCode"),
+				myTestDataBuilder.withProfile("http://example.com|theProfile")).getIdPart();
+
+			myCaptureQueriesListener.clear();
+			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_profile=http://example.com|theProfile");
+
+			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			assertThat(allIds, contains(id));
+		}
+
+
+	}
+
 
 	/**
 	 * Disallow context dirtying for nested classes

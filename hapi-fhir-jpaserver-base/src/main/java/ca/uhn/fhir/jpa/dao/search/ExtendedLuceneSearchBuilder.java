@@ -29,6 +29,7 @@ import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -48,7 +49,7 @@ public class ExtendedLuceneSearchBuilder {
 	/**
 	 * These params have complicated semantics, or are best resolved at the JPA layer for now.
 	 */
-	public static final Set<String> ourUnsafeSearchParmeters = Sets.newHashSet("_id", "_tag", "_meta");
+	public static final Set<String> ourUnsafeSearchParmeters = Sets.newHashSet("_id", "_meta");
 
 	/**
 	 * Are any of the queries supported by our indexing?
@@ -110,6 +111,11 @@ public class ExtendedLuceneSearchBuilder {
 				return true;
 			}
 			return false;
+		} else if (param instanceof UriParam) {
+			if (EMPTY_MODIFIER.equals(modifier)) {
+				return true;
+			}
+			return false;
 		} else {
 			return false;
 		}
@@ -136,8 +142,8 @@ public class ExtendedLuceneSearchBuilder {
 
 					List<List<IQueryParameterType>> tokenUnmodifiedAndOrTerms = theParams.removeByNameUnmodified(nextParam);
 					builder.addTokenUnmodifiedSearch(nextParam, tokenUnmodifiedAndOrTerms);
-
 					break;
+
 				case STRING:
 					List<List<IQueryParameterType>> stringTextAndOrTerms = theParams.removeByNameAndModifier(nextParam, Constants.PARAMQUALIFIER_TOKEN_TEXT);
 					builder.addStringTextSearch(nextParam, stringTextAndOrTerms);
@@ -166,6 +172,10 @@ public class ExtendedLuceneSearchBuilder {
 					List<List<IQueryParameterType>> dateAndOrTerms = theParams.removeByNameUnmodified(nextParam);
 					builder.addDateUnmodifiedSearch(nextParam, dateAndOrTerms);
 					break;
+
+				case URI:
+					List<List<IQueryParameterType>> uriUnmodifiedAndOrTerms = theParams.removeByNameUnmodified(nextParam);
+					builder.addUriUnmodifiedSearch(nextParam, uriUnmodifiedAndOrTerms);
 
 				default:
 					// ignore unsupported param types/modifiers.  They will be processed up in SearchBuilder.
