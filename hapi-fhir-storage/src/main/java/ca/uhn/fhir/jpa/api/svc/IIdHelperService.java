@@ -124,7 +124,7 @@ public interface IIdHelperService {
 	@Nonnull
 	ResourcePersistentId getPidOrThrowException(@Nonnull IAnyResource theResource);
 
-	IIdType resourceIdFromPidOrThrowException(ResourcePersistentId theResourcePersistentId);
+	IIdType resourceIdFromPidOrThrowException(String thePid, String resourceType);
 
 	/**
 	 * Given a set of PIDs, return a set of public FHIR Resource IDs.
