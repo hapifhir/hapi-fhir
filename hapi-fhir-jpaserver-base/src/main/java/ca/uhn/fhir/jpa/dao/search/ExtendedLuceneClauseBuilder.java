@@ -51,6 +51,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -627,16 +628,16 @@ public class ExtendedLuceneClauseBuilder {
 
 	public void addUriUnmodifiedSearch(String theParamName, List<List<IQueryParameterType>> theUriUnmodifiedAndOrTerms) {
 		for (List<IQueryParameterType> nextAnd : theUriUnmodifiedAndOrTerms) {
-			BooleanPredicateClausesStep<?> terms = myPredicateFactory.bool();
-			terms.minimumShouldMatchNumber(1);
+
+			List<PredicateFinalStep> predicates = new ArrayList<>();
 
 			for (IQueryParameterType paramType : nextAnd) {
-				terms.should(myPredicateFactory.match()
+				predicates.add(myPredicateFactory.match()
 					.field(String.join(".", SEARCH_PARAM_ROOT, theParamName, URI_VALUE))
 					.matching( ((UriParam) paramType).getValue() ));
 			}
 
-			myRootClause.must(terms);
+			myRootClause.must(orPredicateOrSingle(predicates));
 		}
 	}
 }
