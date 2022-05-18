@@ -23,6 +23,8 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.equalTo;
 
 public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 
@@ -180,6 +182,30 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 			List<ResourcePersistentId> found = mySearchDao.search(null, map);
 			assertThat(ResourcePersistentId.toLongList(found), containsInAnyOrder(id1, id2, id3));
 		}
+
+	}
+
+	@Test
+	public void testSearchBySourceDoesntCrossResourceBoundary() {
+		Patient p = new Patient();
+		Organization o = new Organization();
+		p.getMeta().setSource("foo");
+		o.getMeta().setSource("foo");
+		myPatientDao.create(p);
+		myOrganizationDao.create(o);
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add("_source", new StringParam("foo"));
+
+
+		myCaptureQueriesListener.clear();
+		IBundleProvider patSearch = myPatientDao.search(map);
+		assertThat(patSearch.size(), is(equalTo(1)));
+		myCaptureQueriesListener.logSelectQueries();
+
+		IBundleProvider orgSearch = myOrganizationDao.search(map);
+		assertThat(orgSearch.size(), is(equalTo(1)));
 
 	}
 
