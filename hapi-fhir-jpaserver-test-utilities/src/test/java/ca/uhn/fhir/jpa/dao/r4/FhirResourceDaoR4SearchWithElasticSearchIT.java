@@ -68,7 +68,6 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
@@ -92,6 +91,7 @@ import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -915,7 +915,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		@Test
 		public void simpleTokenSkipsSql() {
 
-			IIdType id = myTestDataBuilder.createObservation(myTestDataBuilder.withObservationCode("http://example.com/", "theCode"));
+			IIdType id = myTestDataBuilder.createObservation(List.of(myTestDataBuilder.withObservationCode("http://example.com/", "theCode")));
 			myCaptureQueriesListener.clear();
 
 			List<String> ids = myTestDaoSearch.searchForIds("Observation?code=theCode");
@@ -929,7 +929,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		@Test
 		public void sortStillRequiresSql() {
 
-			IIdType id = myTestDataBuilder.createObservation(myTestDataBuilder.withObservationCode("http://example.com/", "theCode"));
+			IIdType id = myTestDataBuilder.createObservation(List.of(myTestDataBuilder.withObservationCode("http://example.com/", "theCode")));
 			myCaptureQueriesListener.clear();
 
 			List<String> ids = myTestDaoSearch.searchForIds("Observation?code=theCode&_sort=code");
@@ -944,7 +944,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		@Test
 		public void deletedResourceNotFound() {
 
-			IIdType id = myTestDataBuilder.createObservation(myTestDataBuilder.withObservationCode("http://example.com/", "theCode"));
+			IIdType id = myTestDataBuilder.createObservation(List.of(myTestDataBuilder.withObservationCode("http://example.com/", "theCode")));
 			myObservationDao.delete(id);
 			myCaptureQueriesListener.clear();
 
@@ -958,9 +958,9 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 		@Test
 		public void forcedIdSurvivesWithNoSql() {
-			IIdType id = myTestDataBuilder.createObservation(
+			IIdType id = myTestDataBuilder.createObservation(List.of(
 				myTestDataBuilder.withObservationCode("http://example.com/", "theCode"),
-				myTestDataBuilder.withId("forcedid"));
+				myTestDataBuilder.withId("forcedid")));
 			assertThat(id.getIdPart(), equalTo("forcedid"));
 			myCaptureQueriesListener.clear();
 
@@ -981,9 +981,9 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		 */
 		@Test
 		public void tagsSurvive() {
-			IIdType id = myTestDataBuilder.createObservation(
+			IIdType id = myTestDataBuilder.createObservation(List.of(
 				myTestDataBuilder.withObservationCode("http://example.com/", "theCode"),
-				myTestDataBuilder.withTag("http://example.com", "aTag"));
+				myTestDataBuilder.withTag("http://example.com", "aTag")));
 
 			myCaptureQueriesListener.clear();
 			List<IBaseResource> observations = myTestDaoSearch.searchForResources("Observation?code=theCode");
@@ -1476,10 +1476,10 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 					//	myLogbackLevelOverrideExtension.setLogLevel(DaoTestDataBuilder.class, Level.DEBUG);
 
 					// this configuration must generate a combo-value-quantity entry with both quantity objects
-					myResourceId = myTestDataBuilder.createObservation(
+					myResourceId = myTestDataBuilder.createObservation(List.of(
 						myTestDataBuilder.withQuantityAtPath("valueQuantity", 0.02, UCUM_CODESYSTEM_URL, "10*6/L"),
 						myTestDataBuilder.withQuantityAtPath("component.valueQuantity", 0.06, UCUM_CODESYSTEM_URL, "10*6/L")
-					);
+					));
 
 					//	myLogbackLevelOverrideExtension.resetLevel(DaoTestDataBuilder.class);
 
@@ -1532,11 +1532,11 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		}
 
 		private IIdType withObservationWithValueQuantity(double theValue) {
-			myResourceId = myTestDataBuilder.createObservation(myTestDataBuilder.withElementAt("valueQuantity",
+			myResourceId = myTestDataBuilder.createObservation(List.of(myTestDataBuilder.withElementAt("valueQuantity",
 				myTestDataBuilder.withPrimitiveAttribute("value", theValue),
 				myTestDataBuilder.withPrimitiveAttribute("system", UCUM_CODESYSTEM_URL),
 				myTestDataBuilder.withPrimitiveAttribute("code", "mm[Hg]")
-			));
+			)));
 			return myResourceId;
 		}
 
@@ -1555,50 +1555,140 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			myDaoConfig.setStoreResourceInLuceneIndex(new DaoConfig().isStoreResourceInLuceneIndex());
 		}
 
-		@Test
-		public void tagSearch() {
-			String id = myTestDataBuilder.createObservation(
-				myTestDataBuilder.withObservationCode("http://example.com/", "theCode"),
-				myTestDataBuilder.withTag("http://example.com", "aTag")).getIdPart();
+		@Nested
+		public class TagTagTests {
 
-			myCaptureQueriesListener.clear();
-			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_tag=http://example.com|aTag");
+			@Test
+			public void simpleSearch() {
+				String id = myTestDataBuilder.createObservation(List.of(
+					myTestDataBuilder.withObservationCode("http://example.com/", "theCode"),
+					myTestDataBuilder.withTag("http://example.com", "aTag"))).getIdPart();
 
-			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
-			assertThat(allIds, contains(id));
+				myCaptureQueriesListener.clear();
+				List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_tag=http://example.com|aTag");
+
+				assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+				assertThat(allIds, contains(id));
+			}
+
+			@Test
+			public void andOrCombinedSearch() {
+				String id = myTestDataBuilder.createObservation(List.of(
+					myTestDataBuilder.withObservationCode("http://example.com/", "theCode"),
+					myTestDataBuilder.withTag("http://example.com", "aTag"),
+					myTestDataBuilder.withTag("http://example.com", "anotherTag"))).getIdPart();
+
+				myCaptureQueriesListener.clear();
+				List<String> allIds = myTestDaoSearch.searchForIds("/Observation" +
+					"?_tag=http://example.com|not-existing-tag,http://example.com|aTag" +
+					"&_tag=http://example.com|other-not-existing-tag,http://example.com|anotherTag");
+
+				assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+				assertThat(allIds, contains(id));
+			}
+
+			@Test
+			public void AndOrCombinedSearch_failing_and_with_multiple_or() {
+				myTestDataBuilder.createObservation(List.of(
+					myTestDataBuilder.withObservationCode("http://example.com/", "theCode"),
+					myTestDataBuilder.withTag("http://example.com", "aTag"),
+					myTestDataBuilder.withTag("http://example.com", "anotherTag"))).getIdPart();
+
+				myCaptureQueriesListener.clear();
+				List<String> allIds = myTestDaoSearch.searchForIds("/Observation" +
+					"?_tag=http://example.com|not-existing-tag,http://example.com|one-more-not-existing-tag" +
+					"&_tag=http://example.com|other-not-existing-tag,http://example.com|anotherTag");
+
+				assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+				assertThat(allIds, empty());
+			}
+
+			@Test
+			public void AndOrCombinedSearch_failing_and_with_single_or() {
+				myTestDataBuilder.createObservation(List.of(
+					myTestDataBuilder.withObservationCode("http://example.com/", "theCode"),
+					myTestDataBuilder.withTag("http://example.com", "aTag"),
+					myTestDataBuilder.withTag("http://example.com", "anotherTag"))).getIdPart();
+
+				myCaptureQueriesListener.clear();
+				List<String> allIds = myTestDaoSearch.searchForIds("/Observation" +
+					"?_tag=http://example.com|not-existing-tag" +
+					"&_tag=http://example.com|other-not-existing-tag,http://example.com|anotherTag");
+
+				assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+				assertThat(allIds, empty());
+			}
+
+		}
+
+		@Nested
+		public class TagSecurityTests {
+
+			@Test
+			public void simpleSearch() {
+				String id = myTestDataBuilder.createObservation(List.of(
+					myTestDataBuilder.withObservationCode("http://example.com/", "theCode"),
+					myTestDataBuilder.withSecurity("http://example.com", "security-label"))).getIdPart();
+
+				myCaptureQueriesListener.clear();
+				List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_security=http://example.com|security-label");
+
+				assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+				assertThat(allIds, contains(id));
+			}
+
+			@Test
+			public void andOrCombinedSearch() {
+				String id = myTestDataBuilder.createObservation(List.of(
+					myTestDataBuilder.withObservationCode("http://example.com/", "theCode"),
+					myTestDataBuilder.withSecurity("http://example.com", "security-label"),
+					myTestDataBuilder.withSecurity("http://example.com", "other-security-label"))).getIdPart();
+
+				myCaptureQueriesListener.clear();
+				List<String> allIds = myTestDaoSearch.searchForIds("/Observation" +
+					"?_security=http://example.com|non-existing-security-label,http://example.com|security-label" +
+					"&_security=http://example.com|other-non-existing-security-label,http://example.com|other-security-label");
+
+				assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+				assertThat(allIds, contains(id));
+			}
 		}
 
 
-		@Test
-		public void securitySearch() {
-			String id = myTestDataBuilder.createObservation(
-				myTestDataBuilder.withObservationCode("http://example.com/", "theCode"),
-				myTestDataBuilder.withSecurity("http://example.com", "security-label")).getIdPart();
+		@Nested
+		public class TagProfileTests {
 
-			myCaptureQueriesListener.clear();
-			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_security=http://example.com|security-label");
+			@Test
+			public void simpleSearch() {
+				String id = myTestDataBuilder.createObservation(List.of(
+					myTestDataBuilder.withObservationCode("http://example.com/", "theCode"),
+					myTestDataBuilder.withProfile("http://example.com|theProfile"))).getIdPart();
 
-			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
-			assertThat(allIds, contains(id));
+				myCaptureQueriesListener.clear();
+				List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_profile=http://example.com|theProfile");
+
+				assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+				assertThat(allIds, contains(id));
+			}
+
+			@Test
+			public void andOrCombinedSearch() {
+				String id = myTestDataBuilder.createObservation(List.of(
+					myTestDataBuilder.withObservationCode("http://example.com/", "theCode"),
+					myTestDataBuilder.withProfile("http://example.com|theProfile"),
+					myTestDataBuilder.withProfile("http://example.com|anotherProfile"))).getIdPart();
+
+				myCaptureQueriesListener.clear();
+				List<String> allIds = myTestDaoSearch.searchForIds("/Observation" +
+					"?_profile=http://example.com|non-existing-profile\",http://example.com|theProfile" +
+					"&_profile=http://example.com|other-non-existing-profile\",http://example.com|anotherProfile");
+
+				assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+				assertThat(allIds, contains(id));
+			}
 		}
-
-
-		@Test
-		public void profileSearch() {
-			String id = myTestDataBuilder.createObservation(
-				myTestDataBuilder.withObservationCode("http://example.com/", "theCode"),
-				myTestDataBuilder.withProfile("http://example.com|theProfile")).getIdPart();
-
-			myCaptureQueriesListener.clear();
-			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_profile=http://example.com|theProfile");
-
-			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
-			assertThat(allIds, contains(id));
-		}
-
 
 	}
-
 
 
 	@Nested

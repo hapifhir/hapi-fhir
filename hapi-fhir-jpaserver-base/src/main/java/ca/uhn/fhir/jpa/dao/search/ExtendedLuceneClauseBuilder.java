@@ -628,10 +628,12 @@ public class ExtendedLuceneClauseBuilder {
 	public void addUriUnmodifiedSearch(String theParamName, List<List<IQueryParameterType>> theUriUnmodifiedAndOrTerms) {
 		for (List<IQueryParameterType> nextAnd : theUriUnmodifiedAndOrTerms) {
 			BooleanPredicateClausesStep<?> terms = myPredicateFactory.bool();
+			terms.minimumShouldMatchNumber(1);
 
 			for (IQueryParameterType paramType : nextAnd) {
-				terms.must(myPredicateFactory.match()
-					.field(String.join(".", SEARCH_PARAM_ROOT, theParamName, URI_VALUE)).matching( ((UriParam) paramType).getValue()));
+				terms.should(myPredicateFactory.match()
+					.field(String.join(".", SEARCH_PARAM_ROOT, theParamName, URI_VALUE))
+					.matching( ((UriParam) paramType).getValue() ));
 			}
 
 			myRootClause.must(terms);

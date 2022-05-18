@@ -152,11 +152,8 @@ public class HibernateSearchIndexWriter {
 
 
 	public void writeUriIndex(String theParamName, Collection<String> theUriValueCollection) {
-		DocumentElement root = myNodeCache.getObjectElement(SEARCH_PARAM_ROOT);
-
+		DocumentElement uriNode = myNodeCache.getObjectElement(SEARCH_PARAM_ROOT).addObject(theParamName);
 		for (String uriSearchIndexValue : theUriValueCollection) {
-			DocumentElement uriNode = root.addObject(theParamName);
-
 			ourLog.trace("Adding Search Param Uri: {} -- {}", theParamName, uriSearchIndexValue);
 			uriNode.addValue(URI_VALUE, uriSearchIndexValue);
 		}

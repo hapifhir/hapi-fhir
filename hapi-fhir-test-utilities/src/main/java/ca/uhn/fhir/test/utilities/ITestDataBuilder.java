@@ -34,6 +34,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.function.Consumer;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -155,6 +156,10 @@ public interface ITestDataBuilder {
 
 	default IIdType createObservation(Consumer<IBaseResource>... theModifiers) {
 		return createResource("Observation", theModifiers);
+	}
+
+	default IIdType createObservation(Collection<Consumer<IBaseResource>> theModifiers) {
+		return createResource("Observation", theModifiers.toArray(new Consumer[0]));
 	}
 
 	default IBaseResource buildPatient(Consumer<IBaseResource>... theModifiers) {
