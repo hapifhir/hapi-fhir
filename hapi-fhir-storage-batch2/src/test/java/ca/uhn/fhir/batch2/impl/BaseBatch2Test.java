@@ -53,7 +53,7 @@ public abstract class BaseBatch2Test {
 	}
 
 	@SafeVarargs
-	final JobDefinition<TestJobParameters> createJobDefinition(Consumer<JobDefinition.Builder<TestJobParameters, ?>>... theModifiers) {
+	protected final JobDefinition<TestJobParameters> createJobDefinition(Consumer<JobDefinition.Builder<TestJobParameters, ?>>... theModifiers) {
 		JobDefinition.Builder<TestJobParameters, VoidModel> builder = JobDefinition
 			.newBuilder()
 			.setJobDefinitionId(JOB_DEFINITION_ID)

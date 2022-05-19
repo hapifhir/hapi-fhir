@@ -113,6 +113,17 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		setCurrentGatedStepId(theJobInstance.getCurrentGatedStepId());
 	}
 
+	public static JobInstance fromJobDefinition(JobDefinition<?> theJobDefinition) {
+		JobInstance instance = new JobInstance();
+
+		instance.setJobDefinitionId(theJobDefinition.getJobDefinitionId());
+		instance.setJobDefinitionVersion(theJobDefinition.getJobDefinitionVersion());
+		if (theJobDefinition.isGatedExecution()) {
+			instance.setCurrentGatedStepId(theJobDefinition.getFirstStepId());
+		}
+		return instance;
+	}
+
 	public String getCurrentGatedStepId() {
 		return myCurrentGatedStepId;
 	}

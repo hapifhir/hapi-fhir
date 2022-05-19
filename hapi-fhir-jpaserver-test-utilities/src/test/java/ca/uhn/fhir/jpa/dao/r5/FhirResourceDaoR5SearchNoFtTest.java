@@ -7,6 +7,8 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.HasAndListParam;
 import ca.uhn.fhir.rest.param.HasOrListParam;
 import ca.uhn.fhir.rest.param.HasParam;
+import org.hl7.fhir.r5.model.Appointment;
+import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.Organization;
 import org.hl7.fhir.r5.model.Patient;
 import org.hl7.fhir.r5.model.Practitioner;
@@ -14,6 +16,7 @@ import org.hl7.fhir.r5.model.PractitionerRole;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.stream.Collectors;
 
@@ -49,7 +52,6 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 		IBundleProvider outcome = myPractitionerDao.search(params);
 		assertEquals(1, outcome.getResources(0, 1).size());
 	}
-
 	@Test
 	public void testHasWithTargetReferenceQualified() {
 		Organization org = new Organization();
