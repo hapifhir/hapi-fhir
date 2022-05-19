@@ -42,7 +42,7 @@ import ca.uhn.fhir.jpa.mdm.svc.MdmMatchLinkSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmModelConverterSvcImpl;
 import ca.uhn.fhir.jpa.mdm.svc.MdmResourceDaoSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmResourceFilteringSvc;
-import ca.uhn.fhir.jpa.mdm.svc.MdmSearchParamSvc;
+import ca.uhn.fhir.mdm.svc.MdmSearchParamSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmSurvivorshipSvcImpl;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.CandidateSearcher;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.FindCandidateByEidSvc;

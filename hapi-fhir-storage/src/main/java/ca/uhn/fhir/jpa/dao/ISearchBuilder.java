@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.dao;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR Storage api
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Set;
 
 public interface ISearchBuilder {
+	String SEARCH_BUILDER_BEAN_NAME = "SearchBuilder";
 
 	IResultIterator createQuery(SearchParameterMap theParams, SearchRuntimeDetails theSearchRuntime, RequestDetails theRequest, @Nonnull RequestPartitionId theRequestPartitionId);
 
