@@ -108,6 +108,7 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask {
 				sql = "alter table " + getTableName() + " modify column `" + getColumnName() + "` " + type + notNull;
 				break;
 			case POSTGRES_9_4:
+			case COCKROACHDB_21_1:
 				if (!alreadyOfCorrectType) {
 					sql = "alter table " + getTableName() + " alter column " + getColumnName() + " type " + type;
 				}

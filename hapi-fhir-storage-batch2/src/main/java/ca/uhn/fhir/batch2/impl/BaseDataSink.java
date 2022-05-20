@@ -21,20 +21,22 @@ package ca.uhn.fhir.batch2.impl;
  */
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.model.JobDefinitionStep;
+import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.model.api.IModelJson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-abstract class BaseDataSink<OT extends IModelJson> implements IJobDataSink<OT> {
+abstract class BaseDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> implements IJobDataSink<OT> {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseDataSink.class);
 
 	private final String myInstanceId;
-	private final String myCurrentStepId;
+	private final JobWorkCursor<PT,IT,OT> myJobWorkCursor;
 	private int myRecoveredErrorCount;
 
-	protected BaseDataSink(String theInstanceId, String theCurrentStepId) {
+	protected BaseDataSink(String theInstanceId, JobWorkCursor<PT,IT,OT> theJobWorkCursor) {
 		myInstanceId = theInstanceId;
-		myCurrentStepId = theCurrentStepId;
+		myJobWorkCursor = theJobWorkCursor;
 	}
 
 	public String getInstanceId() {
@@ -43,7 +45,7 @@ abstract class BaseDataSink<OT extends IModelJson> implements IJobDataSink<OT> {
 
 	@Override
 	public void recoveredError(String theMessage) {
-		ourLog.error("Error during job[{}] step[{}]: {}", myInstanceId, myCurrentStepId, theMessage);
+		ourLog.error("Error during job[{}] step[{}]: {}", myInstanceId, myJobWorkCursor.getCurrentStepId(), theMessage);
 		myRecoveredErrorCount++;
 	}
 
@@ -52,4 +54,12 @@ abstract class BaseDataSink<OT extends IModelJson> implements IJobDataSink<OT> {
 	}
 
 	public abstract int getWorkChunkCount();
+
+	public boolean firstStepProducedNothing() {
+		return myJobWorkCursor.isFirstStep && getWorkChunkCount() == 0;
+	}
+
+	public JobDefinitionStep<PT,IT,OT> getTargetStep() {
+		return myJobWorkCursor.currentStep;
+	}
 }
