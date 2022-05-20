@@ -24,7 +24,7 @@ kent,ken,kenny,kendrick
 		NicknameMap map = new NicknameMap();
 		map.load(new StringReader(testData));
 		assertEquals(7, map.size());
-		assertThat(map.getNicknamesFromFormalNameOrNull("kenneth"), containsInAnyOrder("ken", "kenny", "kendrick"));
-		assertThat(map.getFormalNamesFromNicknameOrNull("ken"), containsInAnyOrder("kendall", "kendrick", "kendrik", "kenneth", "kenny", "kent"));
+		assertThat(map.getNicknamesFromFormalName("kenneth"), containsInAnyOrder("ken", "kenny", "kendrick"));
+		assertThat(map.getFormalNamesFromNickname("ken"), containsInAnyOrder("kendall", "kendrick", "kendrik", "kenneth", "kenny", "kent"));
 	}
 }

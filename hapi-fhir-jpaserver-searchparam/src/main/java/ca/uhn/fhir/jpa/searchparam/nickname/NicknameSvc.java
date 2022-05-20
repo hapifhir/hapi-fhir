@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.searchparam.nickname;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -47,27 +48,26 @@ public class NicknameSvc {
 	}
 
 	public List<String> getEquivalentNames(String theName) {
-		List<String> retval = new ArrayList<>();
-		retval.add(theName);
+		List<String> retval = new ArrayList<>(getNicknamesFromFormalName(theName));
 
-		List<String> expansions;
-		expansions = getNicknamesFromFormalNameOrNull(theName);
-		if (expansions != null) {
-			retval.addAll(expansions);
-		} else {
-			expansions = getFormalNamesFromNicknameOrNull(theName);
-			if (expansions != null) {
-				retval.addAll(expansions);
+		if (retval.isEmpty()) {
+			List<String> formalNames = getFormalNamesFromNickname(theName);
+			retval.addAll(formalNames);
+			for (String formalName : formalNames) {
+				retval.addAll(getNicknamesFromFormalName(formalName));
 			}
 		}
+		retval.add(theName);
 		return retval;
 	}
 
-	List<String> getNicknamesFromFormalNameOrNull(String theName) {
-		return myNicknameMap.getNicknamesFromFormalNameOrNull(theName);
+	@Nonnull
+	List<String> getNicknamesFromFormalName(String theName) {
+		return myNicknameMap.getNicknamesFromFormalName(theName);
 	}
 
-	List<String> getFormalNamesFromNicknameOrNull(String theNickname) {
-		return myNicknameMap.getFormalNamesFromNicknameOrNull(theNickname);
+	@Nonnull
+	List<String> getFormalNamesFromNickname(String theNickname) {
+		return myNicknameMap.getFormalNamesFromNickname(theNickname);
 	}
 }

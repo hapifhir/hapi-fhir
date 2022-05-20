@@ -45,6 +45,11 @@ public class NicknameMatcher implements IMdmStringMatcher {
 		String rightString = theRightString.toLowerCase(Locale.ROOT);
 
 		List<String> leftNames = myNicknameSvc.getEquivalentNames(leftString);
-		return leftNames.contains(rightString);
+		if (leftNames.contains(rightString)) {
+			return true;
+		}
+
+		List<String> rightNames = myNicknameSvc.getEquivalentNames(rightString);
+		return rightNames.contains(leftString);
 	}
 }
