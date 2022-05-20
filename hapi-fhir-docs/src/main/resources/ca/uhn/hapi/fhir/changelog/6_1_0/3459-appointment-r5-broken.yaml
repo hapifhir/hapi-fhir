@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 3459
+title: "Previously, R5 Appointment resources would fail to save in JPA servers due to a path splitting problem during Search Parameter extraction. This has been corrected."

@@ -99,7 +99,7 @@ public class MdmLinkDaoSvc {
 			mdmLink.setPartitionId(new PartitionablePartitionId(partitionId.getFirstPartitionIdOrNull(), partitionId.getPartitionDate()));
 		}
 
-		String message = String.format("Creating MdmLink from %s to %s -> %s", theGoldenResource.getIdElement().toUnqualifiedVersionless(), theSourceResource.getIdElement().toUnqualifiedVersionless(), theMatchOutcome);
+		String message = String.format("Creating MdmLink from %s to %s.", theGoldenResource.getIdElement().toUnqualifiedVersionless(), theSourceResource.getIdElement().toUnqualifiedVersionless());
 		theMdmTransactionContext.addTransactionLogMessage(message);
 		ourLog.debug(message);
 		save(mdmLink);
@@ -301,11 +301,11 @@ public class MdmLinkDaoSvc {
 	 * Given a list of criteria, return all links from the database which fits the criteria provided
 	 *
 	 * @param theGoldenResourceId The resource ID of the golden resource being searched.
-	 * @param theSourceId The resource ID of the source resource being searched.
-	 * @param theMatchResult the {@link MdmMatchResultEnum} being searched.
-	 * @param theLinkSource the {@link MdmLinkSourceEnum} being searched.
-	 * @param thePageRequest the {@link MdmPageRequest} paging information
-	 * @param thePartitionId List of partitions ID being searched, where the link's partition must be in the list.
+	 * @param theSourceId         The resource ID of the source resource being searched.
+	 * @param theMatchResult      the {@link MdmMatchResultEnum} being searched.
+	 * @param theLinkSource       the {@link MdmLinkSourceEnum} being searched.
+	 * @param thePageRequest      the {@link MdmPageRequest} paging information
+	 * @param thePartitionId      List of partitions ID being searched, where the link's partition must be in the list.
 	 * @return a list of {@link MdmLink} entities which match the example.
 	 */
 	public PageImpl<MdmLink> executeTypedQuery(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmPageRequest thePageRequest, List<Integer> thePartitionId) {
@@ -406,5 +406,14 @@ public class MdmLinkDaoSvc {
 			retval = getPossibleMatchedLinkForSource(theResource);
 		}
 		return retval;
+	}
+
+	public Optional<? extends IMdmLink> getLinkByGoldenResourceAndSourceResource(@Nullable IAnyResource theGoldenResource, @Nullable IAnyResource theSourceResource) {
+		if (theGoldenResource == null || theSourceResource == null) {
+			return Optional.empty();
+		}
+		return getLinkByGoldenResourcePidAndSourceResourcePid(
+			myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theGoldenResource).getIdAsLong(),
+			myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theSourceResource).getIdAsLong());
 	}
 }

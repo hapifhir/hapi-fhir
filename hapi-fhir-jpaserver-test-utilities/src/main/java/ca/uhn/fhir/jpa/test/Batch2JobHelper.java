@@ -20,8 +20,8 @@ package ca.uhn.fhir.jpa.test;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import org.hamcrest.Matchers;
@@ -33,24 +33,37 @@ import static org.hamcrest.Matchers.equalTo;
 public class Batch2JobHelper {
 
 	@Autowired
-	private IJobMaintenanceService myJobCleanerService;
+	private IJobMaintenanceService myJobMaintenanceService;
 
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
 
 	public void awaitJobCompletion(String theId) {
 		await().until(() -> {
-			myJobCleanerService.runMaintenancePass();
+			myJobMaintenanceService.runMaintenancePass();
 			return myJobCoordinator.getInstance(theId).getStatus();
 		}, equalTo(StatusEnum.COMPLETED));
 	}
 
 	public JobInstance awaitJobFailure(String theId) {
 		await().until(() -> {
-			myJobCleanerService.runMaintenancePass();
+			myJobMaintenanceService.runMaintenancePass();
 			return myJobCoordinator.getInstance(theId).getStatus();
-		}, Matchers.anyOf(equalTo(StatusEnum.ERRORED),equalTo(StatusEnum.FAILED)));
+		}, Matchers.anyOf(equalTo(StatusEnum.ERRORED), equalTo(StatusEnum.FAILED)));
 		return myJobCoordinator.getInstance(theId);
 	}
 
+	public void awaitJobCancelled(String theId) {
+		await().until(() -> {
+			myJobMaintenanceService.runMaintenancePass();
+			return myJobCoordinator.getInstance(theId).getStatus();
+		}, equalTo(StatusEnum.CANCELLED));
+	}
+
+	public void awaitJobInProgress(String theId) {
+		await().until(() -> {
+			myJobMaintenanceService.runMaintenancePass();
+			return myJobCoordinator.getInstance(theId).getStatus();
+		}, equalTo(StatusEnum.IN_PROGRESS));
+	}
 }

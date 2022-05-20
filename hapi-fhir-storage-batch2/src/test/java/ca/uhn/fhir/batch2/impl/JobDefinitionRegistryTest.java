@@ -4,6 +4,7 @@ import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,7 +13,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 class JobDefinitionRegistryTest {
@@ -51,13 +51,13 @@ class JobDefinitionRegistryTest {
 
 	@Test
 	void testGetLatestJobDefinition() {
-		assertEquals(2, mySvc.getLatestJobDefinition("A").orElseThrow(() -> new IllegalArgumentException()).getJobDefinitionVersion());
+		assertEquals(2, mySvc.getLatestJobDefinition("A").orElseThrow(IllegalArgumentException::new).getJobDefinitionVersion());
 	}
 
 	@Test
 	void testGetJobDefinition() {
-		assertEquals(1, mySvc.getJobDefinition("A", 1).orElseThrow(() -> new IllegalArgumentException()).getJobDefinitionVersion());
-		assertEquals(2, mySvc.getJobDefinition("A", 2).orElseThrow(() -> new IllegalArgumentException()).getJobDefinitionVersion());
+		assertEquals(1, mySvc.getJobDefinition("A", 1).orElseThrow(IllegalArgumentException::new).getJobDefinitionVersion());
+		assertEquals(2, mySvc.getJobDefinition("A", 2).orElseThrow(IllegalArgumentException::new).getJobDefinitionVersion());
 	}
 
 	@Test
@@ -108,5 +108,18 @@ class JobDefinitionRegistryTest {
 		}
 
 	}
+
+	@Test
+	public void getJobDefinitionOrThrowException() {
+		String jobDefinitionId = "Ranch Dressing Expert";
+		int jobDefinitionVersion = 12;
+		try {
+			mySvc.getJobDefinitionOrThrowException(jobDefinitionId, jobDefinitionVersion);
+			fail();
+		} catch (InternalErrorException e) {
+			assertEquals("HAPI-2043: Unknown job definition ID[" + jobDefinitionId + "] version[" + jobDefinitionVersion + "]", e.getMessage());
+		}
+	}
+
 
 }
