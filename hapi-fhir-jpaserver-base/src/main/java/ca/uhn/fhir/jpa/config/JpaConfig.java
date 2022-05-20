@@ -135,7 +135,7 @@ import ca.uhn.fhir.jpa.sp.SearchParamPresenceSvcImpl;
 import ca.uhn.fhir.jpa.term.TermConceptMappingSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
-import ca.uhn.fhir.jpa.validation.JpaResourceLoader;
+import ca.uhn.fhir.jpa.validation.ResourceLoaderImpl;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.mdm.api.IMdmClearJobSubmitter;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -815,8 +815,8 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public JpaResourceLoader jpaResourceLoader() {
-		return new JpaResourceLoader();
+	public ResourceLoaderImpl jpaResourceLoader() {
+		return new ResourceLoaderImpl();
 	}
 
 	@Bean

@@ -38,6 +38,7 @@ public class MdmLinkFactory {
 	 * @return the new {@link MdmLink}
 	 */
 	public MdmLink newMdmLink() {
+		// FIXME check if mongo or jpa, return MDMLinkDocument or MDMLink accordingly
 		return new MdmLink(myMdmSettings.getRuleVersion());
 	}
 }
