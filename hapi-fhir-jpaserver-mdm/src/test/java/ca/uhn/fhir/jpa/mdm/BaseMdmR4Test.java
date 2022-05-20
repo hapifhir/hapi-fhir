@@ -140,6 +140,11 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		myRequestDetails = new ServletRequestDetails(myInterceptorBroadcaster);
 	}
 
+	@Override
+	public void beforeUnregisterAllSubscriptions() {
+		//no-op
+	}
+
 	@AfterEach
 	public void after() throws IOException {
 		myMdmLinkDao.deleteAll();
@@ -196,6 +201,11 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		Patient patient = (Patient) outcome.getResource();
 		patient.setId(outcome.getId());
 		return patient;
+	}
+
+	@Override
+	public void afterResetInterceptors() {
+		//no-op
 	}
 
 	@Nonnull

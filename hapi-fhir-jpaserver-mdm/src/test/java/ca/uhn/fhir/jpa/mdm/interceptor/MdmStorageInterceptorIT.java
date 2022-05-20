@@ -62,13 +62,8 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 	@Autowired
 	private IJpaIdHelperService myIdHelperService;
 
-	@Override
-	public void afterResetInterceptors() {
-		// noop
-	}
 
 	@Override
-	@BeforeEach
 	public void beforeUnregisterAllSubscriptions() {
 		// noop
 	}
