@@ -540,7 +540,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 	@AfterEach
 	public void afterResetInterceptors() {
-//		myInterceptorRegistry.unregisterAllInterceptors();
+		myInterceptorRegistry.unregisterAllInterceptors();
 	}
 
 	@AfterEach
@@ -563,7 +563,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 	@BeforeEach
 	public void beforeUnregisterAllSubscriptions() {
-//		mySubscriptionRegistry.unregisterAllSubscriptions();
+		mySubscriptionRegistry.unregisterAllSubscriptions();
 	}
 
 	@BeforeEach

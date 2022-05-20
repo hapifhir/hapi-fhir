@@ -61,6 +61,16 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 	@Autowired
 	private IJpaIdHelperService myIdHelperService;
 
+	@Override
+	public void afterResetInterceptors() {
+		// noop
+	}
+
+	@Override
+	public void beforeUnregisterAllSubscriptions() {
+		// noop
+	}
+
 	@Test
 	public void testCreatePractitioner() throws InterruptedException {
 		myMdmHelper.createWithLatch(buildPractitionerWithNameAndId("somename", "some_id"));
