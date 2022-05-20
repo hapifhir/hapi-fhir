@@ -92,7 +92,7 @@ public class MdmSubscriptionLoader {
 		}
 		//After loading all the subscriptions, sync the subscriptions to the registry.
 		if (subscriptions != null && subscriptions.size() > 0) {
-			mySubscriptionLoader.syncSubscriptions();
+//			mySubscriptionLoader.syncSubscriptions();
 		}
 	}
 

@@ -88,7 +88,7 @@ public abstract class BaseMdmHelper implements BeforeEachCallback, AfterEachCall
 		// We need to call this because subscriptions will get deleted in @After cleanup
 		waitForActivatedSubscriptionCount(0);
 		myMdmSubscriptionLoader.daoUpdateMdmSubscriptions();
-//		mySubscriptionLoader.syncSubscriptions();
+		mySubscriptionLoader.syncSubscriptions();
 		waitForActivatedSubscriptionCount(2);
 	}
 
