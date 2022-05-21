@@ -66,4 +66,8 @@ public class Batch2JobHelper {
 			return myJobCoordinator.getInstance(theId).getStatus();
 		}, equalTo(StatusEnum.IN_PROGRESS));
 	}
+
+	public void awaitJobCompletionNoMaintenance(String theId) {
+		await().until(() -> myJobCoordinator.getInstance(theId).getStatus() == StatusEnum.COMPLETED);
+	}
 }

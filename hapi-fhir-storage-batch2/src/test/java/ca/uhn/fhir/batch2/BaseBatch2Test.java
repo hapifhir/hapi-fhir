@@ -1,7 +1,10 @@
-package ca.uhn.fhir.batch2.impl;
+package ca.uhn.fhir.batch2;
 
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.batch2.coordinator.TestJobParameters;
+import ca.uhn.fhir.batch2.coordinator.TestJobStep2InputType;
+import ca.uhn.fhir.batch2.coordinator.TestJobStep3InputType;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
@@ -38,7 +41,7 @@ public abstract class BaseBatch2Test {
 	protected IJobStepWorker<TestJobParameters, TestJobStep3InputType, VoidModel> myStep3Worker;
 
 	@Nonnull
-	static JobInstance createInstance() {
+	public static JobInstance createInstance() {
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId(INSTANCE_ID);
 		instance.setStatus(StatusEnum.IN_PROGRESS);

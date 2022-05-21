@@ -1,11 +1,13 @@
-package ca.uhn.fhir.batch2.impl;
+package ca.uhn.fhir.batch2.coordinator;
 
+import ca.uhn.fhir.batch2.BaseBatch2Test;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
@@ -492,7 +494,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 	}
 
 	@Nonnull
-	static WorkChunk createWorkChunk(String theTargetStepId, IModelJson theData) {
+	public static WorkChunk createWorkChunk(String theTargetStepId, IModelJson theData) {
 		return new WorkChunk()
 			.setId(CHUNK_ID)
 			.setJobDefinitionId(JOB_DEFINITION_ID)
@@ -504,17 +506,17 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 	}
 
 	@Nonnull
-	static WorkChunk createWorkChunkStep1() {
+	public static WorkChunk createWorkChunkStep1() {
 		return createWorkChunk(STEP_1, null);
 	}
 
 	@Nonnull
-	static WorkChunk createWorkChunkStep2() {
+	public static WorkChunk createWorkChunkStep2() {
 		return createWorkChunk(STEP_2, new TestJobStep2InputType(DATA_1_VALUE, DATA_2_VALUE));
 	}
 
 	@Nonnull
-	static WorkChunk createWorkChunkStep3() {
+	public static WorkChunk createWorkChunkStep3() {
 		return createWorkChunk(STEP_3, new TestJobStep3InputType().setData3(DATA_3_VALUE).setData4(DATA_4_VALUE));
 	}
 

@@ -20,7 +20,7 @@ package ca.uhn.fhir.batch2.config;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.impl.JobDefinitionRegistry;
+import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
