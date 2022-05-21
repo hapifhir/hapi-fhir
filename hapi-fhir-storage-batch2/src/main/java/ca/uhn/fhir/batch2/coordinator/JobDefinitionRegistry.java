@@ -1,4 +1,4 @@
-package ca.uhn.fhir.batch2.impl;
+package ca.uhn.fhir.batch2.coordinator;
 
 /*-
  * #%L

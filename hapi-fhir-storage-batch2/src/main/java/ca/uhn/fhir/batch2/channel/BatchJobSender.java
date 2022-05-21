@@ -1,4 +1,4 @@
-package ca.uhn.fhir.batch2.impl;
+package ca.uhn.fhir.batch2.channel;
 
 /*-
  * #%L
@@ -36,7 +36,7 @@ public class BatchJobSender {
 		myWorkChannelProducer = theWorkChannelProducer;
 	}
 
-	void sendWorkChannelMessage(JobWorkNotification theJobWorkNotification) {
+	public void sendWorkChannelMessage(JobWorkNotification theJobWorkNotification) {
 		JobWorkNotificationJsonMessage message = new JobWorkNotificationJsonMessage();
 		message.setPayload(theJobWorkNotification);
 

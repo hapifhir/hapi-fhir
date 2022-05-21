@@ -1,7 +1,8 @@
-package ca.uhn.fhir.batch2.impl;
+package ca.uhn.fhir.batch2.coordinator;
 
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
