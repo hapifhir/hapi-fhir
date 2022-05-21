@@ -62,14 +62,12 @@ import javax.annotation.PostConstruct;
  * </p>
  */
 public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
-
 	private static final Logger ourLog = LoggerFactory.getLogger(JobMaintenanceServiceImpl.class);
+
 	private final IJobPersistence myJobPersistence;
 	private final ISchedulerService mySchedulerService;
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final BatchJobSender myBatchJobSender;
-	private final JobMaintenanceRunFactory myJobMaintenanceRunFactory;
-
 
 	/**
 	 * Constructor
@@ -84,7 +82,6 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 		mySchedulerService = theSchedulerService;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 		myBatchJobSender = theBatchJobSender;
-		myJobMaintenanceRunFactory = new JobMaintenanceRunFactory(theJobPersistence, theJobDefinitionRegistry, theBatchJobSender);
 	}
 
 	@PostConstruct
@@ -97,7 +94,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 
 	@Override
 	public void runMaintenancePass() {
-		JobMaintenanceRun jobMaintenanceRun = myJobMaintenanceRunFactory.newInstance();
+		JobMaintenanceRun jobMaintenanceRun = new JobMaintenanceRun(myJobPersistence, myJobDefinitionRegistry, myBatchJobSender);
 		jobMaintenanceRun.updateInstances();
 	}
 

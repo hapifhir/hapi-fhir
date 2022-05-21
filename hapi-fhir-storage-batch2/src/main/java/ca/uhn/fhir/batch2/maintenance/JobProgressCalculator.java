@@ -39,6 +39,7 @@ public class JobProgressCalculator {
 		Long earliestStartTime = null;
 		Long latestEndTime = null;
 		String errorMessage = null;
+
 		for (int page = 0; ; page++) {
 			List<WorkChunk> chunks = myJobPersistence.fetchWorkChunksWithoutData(theInstance.getInstanceId(), INSTANCES_PER_PASS, page);
 

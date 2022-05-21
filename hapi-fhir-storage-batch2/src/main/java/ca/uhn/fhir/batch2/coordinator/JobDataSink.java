@@ -32,6 +32,7 @@ import ca.uhn.fhir.util.JsonUtil;
 
 import javax.annotation.Nonnull;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> extends BaseDataSink<PT,IT,OT> {
 	private final BatchJobSender myBatchJobSender;
@@ -40,6 +41,7 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 	private final int myJobDefinitionVersion;
 	private final JobDefinitionStep<PT, OT, ?> myTargetStep;
 	private final AtomicInteger myChunkCounter = new AtomicInteger(0);
+	private final AtomicReference<String> myLastChunkId = new AtomicReference<>();
 	private final boolean myGatedExecution;
 
 	JobDataSink(@Nonnull BatchJobSender theBatchJobSender, @Nonnull IJobPersistence theJobPersistence, @Nonnull JobDefinition<?> theDefinition, @Nonnull String theInstanceId, @Nonnull JobWorkCursor<PT, IT, OT> theJobWorkCursor) {
@@ -54,24 +56,37 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 
 	@Override
 	public void accept(WorkChunkData<OT> theData) {
-		String instanceId = getInstanceId();
-		String targetStepId = myTargetStep.getStepId();
 		int sequence = myChunkCounter.getAndIncrement();
 		OT dataValue = theData.getData();
 		String dataValueString = JsonUtil.serialize(dataValue, false);
 
-		BatchWorkChunk batchWorkChunk = new BatchWorkChunk(myJobDefinitionId, myJobDefinitionVersion, targetStepId, instanceId, sequence, dataValueString);
+		BatchWorkChunk batchWorkChunk = new BatchWorkChunk(myJobDefinitionId, myJobDefinitionVersion, myTargetStep.getStepId(), getInstanceId(), sequence, dataValueString);
 		String chunkId = myJobPersistence.storeWorkChunk(batchWorkChunk);
+		myLastChunkId.set(chunkId);
 
 		if (!myGatedExecution) {
-			JobWorkNotification workNotification = new JobWorkNotification(myJobDefinitionId, myJobDefinitionVersion, instanceId, targetStepId, chunkId);
-			myBatchJobSender.sendWorkChannelMessage(workNotification);
+			sendWorkNotificationForNextStep(chunkId);
 		}
+	}
+
+	@Override
+	public void sendWorkNotificationForNextStep(String chunkId) {
+		JobWorkNotification workNotification = new JobWorkNotification(myJobDefinitionId, myJobDefinitionVersion, getInstanceId(), myTargetStep.getStepId(), chunkId);
+		myBatchJobSender.sendWorkChannelMessage(workNotification);
 	}
 
 	@Override
 	public int getWorkChunkCount() {
 		return myChunkCounter.get();
+	}
+
+	@Override
+	public String getOnlyChunkId() {
+		int chunkCount = myChunkCounter.get();
+		if (chunkCount != 1) {
+			throw new IllegalStateException("Requesting only chunk submitted to this data sink but " + chunkCount + " were submitted.");
+		}
+		return myLastChunkId.get();
 	}
 
 }

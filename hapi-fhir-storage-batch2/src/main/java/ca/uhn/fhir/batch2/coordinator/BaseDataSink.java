@@ -53,6 +53,8 @@ abstract class BaseDataSink<PT extends IModelJson, IT extends IModelJson, OT ext
 		return myRecoveredErrorCount;
 	}
 
+	public abstract void sendWorkNotificationForNextStep(String chunkId);
+
 	public abstract int getWorkChunkCount();
 
 	public boolean firstStepProducedNothing() {
@@ -62,4 +64,6 @@ abstract class BaseDataSink<PT extends IModelJson, IT extends IModelJson, OT ext
 	public JobDefinitionStep<PT,IT,OT> getTargetStep() {
 		return myJobWorkCursor.currentStep;
 	}
+
+	public abstract String getOnlyChunkId();
 }

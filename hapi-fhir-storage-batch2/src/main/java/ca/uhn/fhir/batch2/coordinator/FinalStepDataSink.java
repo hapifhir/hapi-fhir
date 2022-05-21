@@ -52,7 +52,17 @@ class FinalStepDataSink<PT extends IModelJson, IT extends IModelJson> extends Ba
 	}
 
 	@Override
+	public void sendWorkNotificationForNextStep(String chunkId) {
+		throw new UnsupportedOperationException("There is no next step");
+	}
+
+	@Override
 	public int getWorkChunkCount() {
-		return 0;
+		throw new UnsupportedOperationException("Final Step does not produce work chunks.");
+	}
+
+	@Override
+	public String getOnlyChunkId() {
+		return null;
 	}
 }

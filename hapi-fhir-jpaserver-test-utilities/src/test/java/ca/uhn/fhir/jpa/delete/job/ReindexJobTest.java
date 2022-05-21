@@ -62,6 +62,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
 		startRequest.setParameters(parameters);
 		String id = myJobCoordinator.startInstance(startRequest);
+		// FIXME KHS
 		myBatch2JobHelper.awaitJobCompletionNoMaintenance(id);
 
 		// validate

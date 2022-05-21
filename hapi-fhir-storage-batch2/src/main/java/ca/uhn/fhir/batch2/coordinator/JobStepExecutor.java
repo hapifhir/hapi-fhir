@@ -22,6 +22,8 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.util.Optional;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(JobStepExecutor.class);
 
@@ -31,26 +33,26 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 	private final JobDefinition<PT> myDefinition;
 	private final String myInstanceId;
 	private final WorkChunk myWorkChunk;
-	private final JobWorkCursor<PT, IT, OT> myCursor;
+	private final JobWorkCursor<PT, IT, OT> myJobWorkCursor;
 	private final PT myParameters;
 
-	JobStepExecutor(@Nonnull IJobPersistence theJobPersistence, @Nonnull BatchJobSender theBatchJobSender, @Nonnull JobInstance theInstance, @Nonnull WorkChunk theWorkChunk, @Nonnull JobWorkCursor<PT, IT, OT> theCursor) {
+	JobStepExecutor(@Nonnull IJobPersistence theJobPersistence, @Nonnull BatchJobSender theBatchJobSender, @Nonnull JobInstance theInstance, @Nonnull WorkChunk theWorkChunk, @Nonnull JobWorkCursor<PT, IT, OT> theJobWorkCursor) {
 		myJobPersistence = theJobPersistence;
 		myBatchJobSender = theBatchJobSender;
-		myDefinition = theCursor.jobDefinition;
+		myDefinition = theJobWorkCursor.jobDefinition;
 		myInstanceId = theInstance.getInstanceId();
 		myParameters = theInstance.getParameters(myDefinition.getParametersType());
 		myWorkChunk = theWorkChunk;
-		myCursor = theCursor;
+		myJobWorkCursor = theJobWorkCursor;
 	}
 
 	@SuppressWarnings("unchecked")
 	void executeStep() {
-		BaseDataSink<PT,IT,OT> dataSink;
-		if (myCursor.isFinalStep()) {
-			dataSink = (BaseDataSink<PT, IT, OT>) new FinalStepDataSink<>(myDefinition.getJobDefinitionId(), myInstanceId, myCursor.asFinalCursor());
+		BaseDataSink<PT, IT, OT> dataSink;
+		if (myJobWorkCursor.isFinalStep()) {
+			dataSink = (BaseDataSink<PT, IT, OT>) new FinalStepDataSink<>(myDefinition.getJobDefinitionId(), myInstanceId, myJobWorkCursor.asFinalCursor());
 		} else {
-			dataSink = new JobDataSink<>(myBatchJobSender, myJobPersistence, myDefinition, myInstanceId, myCursor);
+			dataSink = new JobDataSink<>(myBatchJobSender, myJobPersistence, myDefinition, myInstanceId, myJobWorkCursor);
 		}
 
 		boolean success = executeStep(myDefinition.getJobDefinitionId(), myWorkChunk, myParameters, dataSink);
@@ -62,25 +64,36 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 		if (dataSink.firstStepProducedNothing()) {
 			ourLog.info("First step of job myInstance {} produced no work chunks, marking as completed", myInstanceId);
 			myJobPersistence.markInstanceAsCompleted(myInstanceId);
+		} else if (myDefinition.isGatedExecution()) {
+			fastTrackOrSetGatedStep(dataSink);
 		}
-
-		if (myDefinition.isGatedExecution() && myCursor.isFirstStep) {
-			initializeGatedExecution();
-		}
-
 	}
 
-	private void initializeGatedExecution() {
+	private void fastTrackOrSetGatedStep(BaseDataSink<PT, IT, OT> dataSink) {
+		assert myDefinition.isGatedExecution();
+
 		Optional<JobInstance> oInstance = myJobPersistence.fetchInstance(myInstanceId);
 
-		if (oInstance.isPresent()) {
-			JobInstance instance = oInstance.get();
-			instance.setCurrentGatedStepId(myCursor.getCurrentStepId());
+		if (oInstance.isEmpty()) {
+			throw new IllegalStateException("Unable to find job instance " + myInstanceId);
+		}
+		JobInstance instance = oInstance.get();
+
+		if (!isBlank(instance.getCurrentGatedStepId())) {
+			// A gated step id is set.  This job will be advanced using the JobMaintenanceService
+			return;
+		}
+
+		if (!myJobWorkCursor.isFinalStep() && dataSink.getWorkChunkCount() == 1) {
+			// Only one chunk was produced.  Instead of waiting for the next maintenance run, push the notification immediately
+			dataSink.sendWorkNotificationForNextStep(dataSink.getOnlyChunkId());
+		} else {
+			instance.setCurrentGatedStepId(myJobWorkCursor.getCurrentStepId());
 			myJobPersistence.updateInstance(instance);
 		}
 	}
 
-	private boolean executeStep(String theJobDefinitionId, @Nonnull WorkChunk theWorkChunk, PT theParameters, BaseDataSink<PT,IT,OT> theDataSink) {
+	private boolean executeStep(String theJobDefinitionId, @Nonnull WorkChunk theWorkChunk, PT theParameters, BaseDataSink<PT, IT, OT> theDataSink) {
 		JobDefinitionStep<PT, IT, OT> theTargetStep = theDataSink.getTargetStep();
 		String targetStepId = theTargetStep.getStepId();
 		Class<IT> inputType = theTargetStep.getInputType();
