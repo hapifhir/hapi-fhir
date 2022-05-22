@@ -12,6 +12,8 @@ import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
+import ca.uhn.fhir.batch2.model.JobWorkNotification;
+import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
@@ -21,6 +23,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
+
+import static ca.uhn.fhir.batch2.maintenance.JobInstanceProcessor.updateInstanceStatus;
 
 public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(JobStepExecutor.class);
@@ -65,30 +69,45 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 		}
 
 		if (myDefinition.isGatedExecution()) {
-			initializeGatedExecutionIfRequired(dataSink);
+			JobInstance jobInstance = initializeGatedExecutionIfRequired(dataSink);
+			if (jobInstance != null &&
+				!jobInstance.hasGatedStep() &&
+				dataSink.getWorkChunkCount() <= 1) {
+				ourLog.info("Gated job {} step {} produced at most one chunk:  Fast tracking execution.", myDefinition.getJobDefinitionId(), myCursor.currentStep.getStepId());
+				// This job is defined to be gated, but so far every step has produced at most 1 work chunk, so it is
+				// eligible for fast tracking.
+				if (myCursor.isFinalStep()) {
+					if (updateInstanceStatus(jobInstance, StatusEnum.COMPLETED)) {
+						myJobPersistence.updateInstance(jobInstance);
+					}
+				} else {
+					JobWorkNotification workNotification = new JobWorkNotification(jobInstance, myCursor.nextStep.getStepId(), ((JobDataSink) dataSink).getOnlyChunkId());
+					myBatchJobSender.sendWorkChannelMessage(workNotification);
+				}
+			}
 		}
-
 	}
 
-	private void initializeGatedExecutionIfRequired(BaseDataSink<PT, IT, OT> theDataSink) {
+	private JobInstance initializeGatedExecutionIfRequired(BaseDataSink<PT, IT, OT> theDataSink) {
 		Optional<JobInstance> oJobInstance = myJobPersistence.fetchInstance(myInstanceId);
 		if (oJobInstance.isEmpty()) {
-			return;
+			return null;
 		}
 
 		JobInstance jobInstance = oJobInstance.get();
 		if (jobInstance.hasGatedStep()) {
 			// Gated execution is already initialized
-			return;
+			return jobInstance;
 		}
 
 		if (theDataSink.getWorkChunkCount() <= 1) {
-			// Disable gated execution for steps that produced only one chunk
-			return;
+			// Do not initialize gated execution for steps that produced only one chunk
+			return jobInstance;
 		}
 
 		jobInstance.setCurrentGatedStepId(myCursor.getCurrentStepId());
 		myJobPersistence.updateInstance(jobInstance);
+		return jobInstance;
 	}
 
 	private boolean executeStep(String theJobDefinitionId, @Nonnull WorkChunk theWorkChunk, PT theParameters, BaseDataSink<PT,IT,OT> theDataSink) {

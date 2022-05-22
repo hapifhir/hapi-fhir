@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import java.util.EnumSet;
 import java.util.List;
 
-class JobInstanceProcessor {
+public class JobInstanceProcessor {
 	private static final Logger ourLog = LoggerFactory.getLogger(JobInstanceProcessor.class);
 	public static final long PURGE_THRESHOLD = 7L * DateUtils.MILLIS_PER_DAY;
 
@@ -123,7 +123,7 @@ class JobInstanceProcessor {
 
 	}
 
-	static boolean updateInstanceStatus(JobInstance myInstance, StatusEnum newStatus) {
+	public static boolean updateInstanceStatus(JobInstance myInstance, StatusEnum newStatus) {
 		if (myInstance.getStatus() != newStatus) {
 			ourLog.info("Marking job instance {} of type {} as {}", myInstance.getInstanceId(), myInstance.getJobDefinitionId(), newStatus);
 			myInstance.setStatus(newStatus);
