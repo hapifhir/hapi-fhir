@@ -23,6 +23,8 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.fhir.rest.api.Constants;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.annotations.OptimisticLock;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -35,6 +37,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.MapsId;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+
+import static ca.uhn.fhir.jpa.model.entity.ResourceTable.RESTYPE_LEN;
 
 @Table(name = "HFJ_RES_VER_PROV", indexes = {
 	@Index(name = "IDX_RESVERPROV_SOURCEURI", columnList = "SOURCE_URI"),
@@ -60,6 +64,10 @@ public class ResourceHistoryProvenanceEntity extends BasePartitionable {
 	private String mySourceUri;
 	@Column(name = "REQUEST_ID", length = Constants.REQUEST_ID_LENGTH, nullable = true)
 	private String myRequestId;
+
+	@Column(name = "RES_TYPE", length = RESTYPE_LEN, nullable = false)
+	@OptimisticLock(excluded = true)
+	private String myResourceType;
 
 	/**
 	 * Constructor
@@ -105,5 +113,11 @@ public class ResourceHistoryProvenanceEntity extends BasePartitionable {
 		return myId;
 	}
 
+	public String getResourceType() {
+		return myResourceType;
+	}
 
+	public void setResourceType(String theResourceType) {
+		myResourceType = theResourceType;
+	}
 }

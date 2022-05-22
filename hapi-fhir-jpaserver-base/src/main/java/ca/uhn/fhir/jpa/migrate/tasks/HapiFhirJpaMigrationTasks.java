@@ -83,7 +83,17 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init550(); // 20210520 -
 		init560(); // 20211027 -
 		init570(); // 20211102 -
-		init600(); // 20211102 -
+		init600(); // 20211102 - 20220521
+		init610(); // 20220522 -
+	}
+	private void init610() {
+		Builder version = forVersion(VersionEnum.V6_1_0);
+		addResourceTypeToProvenance(version);
+	}
+
+	private void addResourceTypeToProvenance(Builder version) {
+		Builder.BuilderWithTableName hfjResVerProv = version.onTable("HFJ_RES_VER_PROV");
+		hfjResVerProv.addColumn("20220522.1", "RES_TYPE").nonNullable().type(ColumnTypeEnum.STRING, 40);
 	}
 
 	private void init600() {

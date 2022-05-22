@@ -1533,6 +1533,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			ResourceHistoryProvenanceEntity provenance = new ResourceHistoryProvenanceEntity();
 			provenance.setResourceHistoryTable(historyEntry);
 			provenance.setResourceTable(theEntity);
+			provenance.setResourceType(myFhirContext.getResourceType(theResource));
 			provenance.setPartitionId(theEntity.getPartitionId());
 			if (haveRequestId) {
 				provenance.setRequestId(left(requestId, Constants.REQUEST_ID_LENGTH));
