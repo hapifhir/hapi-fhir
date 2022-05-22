@@ -16,13 +16,11 @@ class JobInstanceProgressCalculator {
 	private static final Logger ourLog = LoggerFactory.getLogger(JobInstanceProgressCalculator.class);
 
 	private final IJobPersistence myJobPersistence;
-	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final JobInstance myInstance;
 	private final JobChunkProgressAccumulator myProgressAccumulator;
 
-	JobInstanceProgressCalculator(IJobPersistence theJobPersistence, JobDefinitionRegistry theJobDefinitionRegistry, JobInstance theInstance, JobChunkProgressAccumulator theProgressAccumulator) {
+	JobInstanceProgressCalculator(IJobPersistence theJobPersistence, JobInstance theInstance, JobChunkProgressAccumulator theProgressAccumulator) {
 		myJobPersistence = theJobPersistence;
-		myJobDefinitionRegistry = theJobDefinitionRegistry;
 		myInstance = theInstance;
 		myProgressAccumulator = theProgressAccumulator;
 	}
@@ -43,7 +41,7 @@ class JobInstanceProgressCalculator {
 			}
 		}
 
-		instanceProgress.updateInstance(myJobDefinitionRegistry, myInstance);
+		instanceProgress.updateInstance(myInstance);
 
 		if (instanceProgress.failed()) {
 			updateInstanceStatus(myInstance, StatusEnum.FAILED);

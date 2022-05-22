@@ -170,6 +170,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 
 	@Test
 	public void testFailed_PurgeOldInstance() {
+		myJobDefinitionRegistry.addJobDefinition(createJobDefinition());
 		JobInstance instance = createInstance();
 		instance.setStatus(StatusEnum.FAILED);
 		instance.setEndTime(parseTime("2001-01-01T12:12:12Z"));
@@ -222,6 +223,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 
 	@Test
 	public void testInProgress_CalculateProgress_OneStepFailed() {
+		myJobDefinitionRegistry.addJobDefinition(createJobDefinition());
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(createInstance()));
 		when(myJobPersistence.fetchWorkChunksWithoutData(eq(INSTANCE_ID), anyInt(), eq(0))).thenReturn(Lists.newArrayList(
 			createWorkChunkStep1().setStatus(StatusEnum.COMPLETED).setStartTime(parseTime("2022-02-12T14:00:00-04:00")).setEndTime(parseTime("2022-02-12T14:01:00-04:00")).setRecordsProcessed(25),

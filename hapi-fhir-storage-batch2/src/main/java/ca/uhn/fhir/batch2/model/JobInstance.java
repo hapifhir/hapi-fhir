@@ -20,9 +20,11 @@ package ca.uhn.fhir.batch2.model;
  * #L%
  */
 
+import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.jpa.util.JsonDateDeserializer;
 import ca.uhn.fhir.jpa.util.JsonDateSerializer;
 import ca.uhn.fhir.model.api.IModelJson;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -83,6 +85,9 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 	@JsonProperty(value = "estimatedCompletion", access = JsonProperty.Access.READ_ONLY)
 	private String myEstimatedTimeRemaining;
 
+	@JsonIgnore
+	private JobDefinition<?> myJobDefinition;
+
 	/**
 	 * Constructor
 	 */
@@ -111,13 +116,13 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		setTotalElapsedMillis(theJobInstance.getTotalElapsedMillis());
 		setWorkChunksPurged(theJobInstance.isWorkChunksPurged());
 		setCurrentGatedStepId(theJobInstance.getCurrentGatedStepId());
+		myJobDefinition = theJobInstance.getJobDefinition();
 	}
 
 	public static JobInstance fromJobDefinition(JobDefinition<?> theJobDefinition) {
 		JobInstance instance = new JobInstance();
+		instance.setJobDefinition(theJobDefinition);
 
-		instance.setJobDefinitionId(theJobDefinition.getJobDefinitionId());
-		instance.setJobDefinitionVersion(theJobDefinition.getJobDefinitionVersion());
 		if (theJobDefinition.isGatedExecution()) {
 			instance.setCurrentGatedStepId(theJobDefinition.getFirstStepId());
 		}
@@ -250,6 +255,17 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		return this;
 	}
 
+
+	public void setJobDefinition(JobDefinition<?> theJobDefinition) {
+		myJobDefinition = theJobDefinition;
+		setJobDefinitionId(theJobDefinition.getJobDefinitionId());
+		setJobDefinitionVersion(theJobDefinition.getJobDefinitionVersion());
+	}
+
+	public JobDefinition<?> getJobDefinition() {
+		return myJobDefinition;
+	}
+
 	public boolean isCancelled() {
 		return myCancelled;
 	}
@@ -283,5 +299,11 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 	 */
 	public boolean isRunning() {
 		return getStatus() == StatusEnum.IN_PROGRESS && !isCancelled();
+	}
+
+	public boolean isFinished() {
+		return myStatus == StatusEnum.COMPLETED ||
+			myStatus == StatusEnum.FAILED ||
+			myStatus == StatusEnum.CANCELLED;
 	}
 }

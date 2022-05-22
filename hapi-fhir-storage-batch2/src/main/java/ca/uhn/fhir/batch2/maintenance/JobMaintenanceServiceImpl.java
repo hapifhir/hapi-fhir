@@ -20,24 +20,14 @@ package ca.uhn.fhir.batch2.maintenance;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.api.IJobCompletionHandler;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
-import ca.uhn.fhir.batch2.api.JobCompletionDetails;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
-import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
-import ca.uhn.fhir.batch2.model.JobWorkNotification;
-import ca.uhn.fhir.batch2.model.StatusEnum;
-import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
-import ca.uhn.fhir.model.api.IModelJson;
-import ca.uhn.fhir.util.StopWatch;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.quartz.JobExecutionContext;
@@ -47,18 +37,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
-import java.util.Collection;
-import java.util.Date;
-import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
-import static java.util.Collections.emptyList;
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
-import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * This class performs regular polls of the stored jobs in order to
@@ -129,7 +110,8 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 
 			for (JobInstance instance : instances) {
 				if (processedInstanceIds.add(instance.getInstanceId())) {
-					JobInstanceProcessor jobInstanceProcessor = new JobInstanceProcessor(myJobPersistence, myJobDefinitionRegistry, myBatchJobSender, instance, progressAccumulator);
+					myJobDefinitionRegistry.setJobDefinition(instance);
+					JobInstanceProcessor jobInstanceProcessor = new JobInstanceProcessor(myJobPersistence, myBatchJobSender, instance, progressAccumulator);
 					jobInstanceProcessor.process();
 				}
 			}

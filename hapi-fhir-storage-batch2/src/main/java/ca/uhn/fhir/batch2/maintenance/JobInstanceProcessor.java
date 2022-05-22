@@ -2,7 +2,6 @@ package ca.uhn.fhir.batch2.maintenance;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
-import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
@@ -21,20 +20,18 @@ class JobInstanceProcessor {
 	public static final long PURGE_THRESHOLD = 7L * DateUtils.MILLIS_PER_DAY;
 
 	private final IJobPersistence myJobPersistence;
-	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final BatchJobSender myBatchJobSender;
 
 	private final JobInstance myInstance;
 	private final JobChunkProgressAccumulator myProgressAccumulator;
 	private final JobInstanceProgressCalculator myJobInstanceProgressCalculator;
 
-	JobInstanceProcessor(IJobPersistence theJobPersistence, JobDefinitionRegistry theJobDefinitionRegistry, BatchJobSender theBatchJobSender, JobInstance theInstance, JobChunkProgressAccumulator theProgressAccumulator) {
+	JobInstanceProcessor(IJobPersistence theJobPersistence, BatchJobSender theBatchJobSender, JobInstance theInstance, JobChunkProgressAccumulator theProgressAccumulator) {
 		myJobPersistence = theJobPersistence;
-		myJobDefinitionRegistry = theJobDefinitionRegistry;
 		myBatchJobSender = theBatchJobSender;
 		myInstance = theInstance;
 		myProgressAccumulator = theProgressAccumulator;
-		myJobInstanceProgressCalculator = new JobInstanceProgressCalculator(theJobPersistence, theJobDefinitionRegistry, theInstance, theProgressAccumulator);
+		myJobInstanceProgressCalculator = new JobInstanceProgressCalculator(theJobPersistence, theInstance, theProgressAccumulator);
 	}
 
 	public void process() {
@@ -55,7 +52,6 @@ class JobInstanceProcessor {
 			myInstance.setStatus(StatusEnum.CANCELLED);
 			myJobPersistence.updateInstance(myInstance);
 		}
-
 	}
 
 	private void cleanupInstance() {
@@ -69,24 +65,29 @@ class JobInstanceProcessor {
 			case COMPLETED:
 			case FAILED:
 			case CANCELLED:
-				if (myInstance.getEndTime() != null) {
-					long cutoff = System.currentTimeMillis() - PURGE_THRESHOLD;
-					if (myInstance.getEndTime().getTime() < cutoff) {
-						ourLog.info("Deleting old job instance {}", myInstance.getInstanceId());
-						myJobPersistence.deleteInstanceAndChunks(myInstance.getInstanceId());
-						return;
-					}
+				if (purgeExpiredInstance()) {
+					return;
 				}
 				break;
 		}
 
-		if ((myInstance.getStatus() == StatusEnum.COMPLETED || myInstance.getStatus() == StatusEnum.FAILED
-			|| myInstance.getStatus() == StatusEnum.CANCELLED) && !myInstance.isWorkChunksPurged()) {
+		if (myInstance.isFinished() && !myInstance.isWorkChunksPurged()) {
 			myInstance.setWorkChunksPurged(true);
 			myJobPersistence.deleteChunks(myInstance.getInstanceId());
 			myJobPersistence.updateInstance(myInstance);
 		}
+	}
 
+	private boolean purgeExpiredInstance() {
+		if (myInstance.getEndTime() != null) {
+			long cutoff = System.currentTimeMillis() - PURGE_THRESHOLD;
+			if (myInstance.getEndTime().getTime() < cutoff) {
+				ourLog.info("Deleting old job instance {}", myInstance.getInstanceId());
+				myJobPersistence.deleteInstanceAndChunks(myInstance.getInstanceId());
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private void triggerGatedExecutions() {
@@ -97,8 +98,8 @@ class JobInstanceProcessor {
 		String jobDefinitionId = myInstance.getJobDefinitionId();
 		int jobDefinitionVersion = myInstance.getJobDefinitionVersion();
 		String instanceId = myInstance.getInstanceId();
+		JobDefinition<?> definition = myInstance.getJobDefinition();
 
-		JobDefinition<?> definition = myJobDefinitionRegistry.getJobDefinition(jobDefinitionId, jobDefinitionVersion).orElseThrow(() -> new IllegalStateException("Unknown job definition: " + jobDefinitionId + " " + jobDefinitionVersion));
 		if (!definition.isGatedExecution()) {
 			return;
 		}

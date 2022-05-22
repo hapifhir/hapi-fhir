@@ -69,7 +69,7 @@ class InstanceProgress {
 		}
 	}
 
-	public void updateInstance(JobDefinitionRegistry myJobDefinitionRegistry, JobInstance theInstance) {
+	public void updateInstance(JobInstance theInstance) {
 		if (myEarliestStartTime != null) {
 			theInstance.setStartTime(new Date(myEarliestStartTime));
 		}
@@ -85,8 +85,7 @@ class InstanceProgress {
 			if (jobSuccessfullyCompleted()) {
 				boolean completed = updateInstanceStatus(theInstance, StatusEnum.COMPLETED);
 				if (completed) {
-					JobDefinition<?> definition = myJobDefinitionRegistry.getJobDefinition(theInstance.getJobDefinitionId(), theInstance.getJobDefinitionVersion()).orElseThrow(() -> new IllegalStateException("Unknown job " + theInstance.getJobDefinitionId() + "/" + theInstance.getJobDefinitionVersion()));
-					invokeJobCompletionHandler(theInstance, definition);
+					invokeJobCompletionHandler(theInstance);
 				}
 				changedStatus = completed;
 			} else if (myErroredChunkCount > 0) {
@@ -124,7 +123,8 @@ class InstanceProgress {
 		return myIncompleteChunkCount == 0 && myErroredChunkCount == 0 && myFailedChunkCount == 0;
 	}
 
-	private <PT extends IModelJson> void invokeJobCompletionHandler(JobInstance myInstance, JobDefinition<PT> definition) {
+	private <PT extends IModelJson> void invokeJobCompletionHandler(JobInstance myInstance) {
+		JobDefinition<PT> definition = (JobDefinition<PT>) myInstance.getJobDefinition();
 		IJobCompletionHandler<PT> completionHandler = definition.getCompletionHandler();
 		if (completionHandler != null) {
 			String instanceId = myInstance.getInstanceId();
