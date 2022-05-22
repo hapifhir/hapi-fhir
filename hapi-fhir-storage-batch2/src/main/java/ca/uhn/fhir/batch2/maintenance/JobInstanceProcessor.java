@@ -130,4 +130,14 @@ class JobInstanceProcessor {
 		}
 
 	}
+
+	static boolean updateInstanceStatus(JobInstance myInstance, StatusEnum newStatus) {
+		if (myInstance.getStatus() != newStatus) {
+			ourLog.info("Marking job instance {} of type {} as {}", myInstance.getInstanceId(), myInstance.getJobDefinitionId(), newStatus);
+			myInstance.setStatus(newStatus);
+			return true;
+		}
+		return false;
+	}
+
 }

@@ -2,6 +2,7 @@ package ca.uhn.fhir.batch2.maintenance;
 
 
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.batch2.model.WorkChunk;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 
@@ -26,14 +27,6 @@ class JobChunkProgressAccumulator {
 	private final Set<String> myConsumedInstanceAndChunkIds = new HashSet<>();
 	private final Multimap<String, ChunkStatusCountKey> myInstanceIdToChunkStatuses = ArrayListMultimap.create();
 
-	void addChunk(String theInstanceId, String theChunkId, String theStepId, StatusEnum theStatus) {
-		// Note: If chunks are being written while we're executing, we may see the same chunk twice. This
-		// check avoids adding it twice.
-		if (myConsumedInstanceAndChunkIds.add(theInstanceId + " " + theChunkId)) {
-			myInstanceIdToChunkStatuses.put(theInstanceId, new ChunkStatusCountKey(theChunkId, theStepId, theStatus));
-		}
-	}
-
 	int countChunksWithStatus(String theInstanceId, String theStepId, Set<StatusEnum> theStatuses) {
 		return getChunkIdsWithStatus(theInstanceId, theStepId, theStatuses).size();
 	}
@@ -47,6 +40,16 @@ class JobChunkProgressAccumulator {
 		Collection<ChunkStatusCountKey> chunkStatuses = myInstanceIdToChunkStatuses.get(theInstanceId);
 		chunkStatuses = defaultIfNull(chunkStatuses, emptyList());
 		return chunkStatuses;
+	}
+
+	public void addChunk(WorkChunk theChunk) {
+		String instanceId = theChunk.getInstanceId();
+		String chunkId = theChunk.getId();
+		// Note: If chunks are being written while we're executing, we may see the same chunk twice. This
+		// check avoids adding it twice.
+		if (myConsumedInstanceAndChunkIds.add(instanceId + " " + chunkId)) {
+			myInstanceIdToChunkStatuses.put(instanceId, new ChunkStatusCountKey(chunkId, theChunk.getTargetStepId(), theChunk.getStatus()));
+		}
 	}
 
 	private static class ChunkStatusCountKey {
