@@ -20,7 +20,6 @@ package ca.uhn.fhir.batch2.model;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.jpa.util.JsonDateDeserializer;
 import ca.uhn.fhir.jpa.util.JsonDateSerializer;
 import ca.uhn.fhir.model.api.IModelJson;
@@ -32,6 +31,8 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.Date;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 
@@ -305,5 +306,19 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		return myStatus == StatusEnum.COMPLETED ||
 			myStatus == StatusEnum.FAILED ||
 			myStatus == StatusEnum.CANCELLED;
+	}
+
+	public boolean hasGatedStep() {
+		return !isBlank(myCurrentGatedStepId);
+	}
+
+	/**
+	 * If a job is normally gated but does not have a gated step set, then so far it has produced fewer than 1 chunk
+	 * at every step and so we will treat the job instance as a non-gated job.
+	 */
+	public boolean isFastTracking() {
+		return myJobDefinition != null &&
+			myJobDefinition.isGatedExecution() &&
+			!hasGatedStep();
 	}
 }

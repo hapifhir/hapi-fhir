@@ -64,20 +64,31 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 			myJobPersistence.markInstanceAsCompleted(myInstanceId);
 		}
 
-		if (myDefinition.isGatedExecution() && myCursor.isFirstStep) {
-			initializeGatedExecution();
+		if (myDefinition.isGatedExecution()) {
+			initializeGatedExecutionIfRequired(dataSink);
 		}
 
 	}
 
-	private void initializeGatedExecution() {
-		Optional<JobInstance> oInstance = myJobPersistence.fetchInstance(myInstanceId);
-
-		if (oInstance.isPresent()) {
-			JobInstance instance = oInstance.get();
-			instance.setCurrentGatedStepId(myCursor.getCurrentStepId());
-			myJobPersistence.updateInstance(instance);
+	private void initializeGatedExecutionIfRequired(BaseDataSink<PT, IT, OT> theDataSink) {
+		Optional<JobInstance> oJobInstance = myJobPersistence.fetchInstance(myInstanceId);
+		if (oJobInstance.isEmpty()) {
+			return;
 		}
+
+		JobInstance jobInstance = oJobInstance.get();
+		if (jobInstance.hasGatedStep()) {
+			// Gated execution is already initialized
+			return;
+		}
+
+		if (theDataSink.getWorkChunkCount() <= 1) {
+			// Disable gated execution for steps that produced only one chunk
+			return;
+		}
+
+		jobInstance.setCurrentGatedStepId(myCursor.getCurrentStepId());
+		myJobPersistence.updateInstance(jobInstance);
 	}
 
 	private boolean executeStep(String theJobDefinitionId, @Nonnull WorkChunk theWorkChunk, PT theParameters, BaseDataSink<PT,IT,OT> theDataSink) {

@@ -2,8 +2,8 @@ package ca.uhn.fhir.batch2.maintenance;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
-import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import org.apache.commons.lang3.time.DateUtils;
@@ -12,8 +12,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.EnumSet;
 import java.util.List;
-
-import static org.apache.commons.lang3.StringUtils.isBlank;
 
 class JobInstanceProcessor {
 	private static final Logger ourLog = LoggerFactory.getLogger(JobInstanceProcessor.class);
@@ -45,7 +43,7 @@ class JobInstanceProcessor {
 
 		if (myInstance.getStatus() == StatusEnum.QUEUED || myInstance.getStatus() == StatusEnum.IN_PROGRESS) {
 			String msg = "Job instance cancelled";
-			if (myInstance.getCurrentGatedStepId() != null) {
+			if (myInstance.hasGatedStep()) {
 				msg += " while running step " + myInstance.getCurrentGatedStepId();
 			}
 			myInstance.setErrorMessage(msg);
@@ -95,34 +93,27 @@ class JobInstanceProcessor {
 			return;
 		}
 
-		String jobDefinitionId = myInstance.getJobDefinitionId();
-		int jobDefinitionVersion = myInstance.getJobDefinitionVersion();
+		if (!myInstance.hasGatedStep()) {
+			return;
+		}
+
+		JobWorkCursor<?,?,?> jobWorkCursor = JobWorkCursor.fromJobDefinitionAndRequestedStepId(myInstance.getJobDefinition(), myInstance.getCurrentGatedStepId());
+
+		if (jobWorkCursor.isFinalStep()) {
+			return;
+		}
+
 		String instanceId = myInstance.getInstanceId();
-		JobDefinition<?> definition = myInstance.getJobDefinition();
-
-		if (!definition.isGatedExecution()) {
-			return;
-		}
-
-		String currentStepId = myInstance.getCurrentGatedStepId();
-		if (isBlank(currentStepId)) {
-			return;
-		}
-
-		if (definition.isLastStep(currentStepId)) {
-			return;
-		}
-
+		String currentStepId = jobWorkCursor.getCurrentStepId();
 		int incompleteChunks = myProgressAccumulator.countChunksWithStatus(instanceId, currentStepId, StatusEnum.getIncompleteStatuses());
 		if (incompleteChunks == 0) {
 
-			int currentStepIndex = definition.getStepIndex(currentStepId);
-			String nextStepId = definition.getSteps().get(currentStepIndex + 1).getStepId();
+			String nextStepId = jobWorkCursor.nextStep.getStepId();
 
 			ourLog.info("All processing is complete for gated execution of instance {} step {}. Proceeding to step {}", instanceId, currentStepId, nextStepId);
 			List<String> chunksForNextStep = myProgressAccumulator.getChunkIdsWithStatus(instanceId, nextStepId, EnumSet.of(StatusEnum.QUEUED));
 			for (String nextChunkId : chunksForNextStep) {
-				JobWorkNotification workNotification = new JobWorkNotification(jobDefinitionId, jobDefinitionVersion, instanceId, nextStepId, nextChunkId);
+				JobWorkNotification workNotification = new JobWorkNotification(myInstance, nextStepId, nextChunkId);
 				myBatchJobSender.sendWorkChannelMessage(workNotification);
 			}
 

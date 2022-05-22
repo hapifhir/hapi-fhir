@@ -21,12 +21,8 @@ class JobWorkCursorTest extends BaseBatch2Test {
 
 	@Test
 	public void createCursorStep1() {
-		// setup
-		JobWorkNotification workNotification = new JobWorkNotification();
-		workNotification.setTargetStepId(STEP_1);
-
 		// execute
-		JobWorkCursor<TestJobParameters, ?, ?> cursor = JobWorkCursor.fromJobDefinitionAndWorkNotification(myDefinition, workNotification);
+		JobWorkCursor<TestJobParameters, ?, ?> cursor = JobWorkCursor.fromJobDefinitionAndRequestedStepId(myDefinition, STEP_1);
 
 		// verify
 		assertCursor(cursor, true, false, STEP_1, STEP_2);
@@ -34,12 +30,8 @@ class JobWorkCursorTest extends BaseBatch2Test {
 
 	@Test
 	public void createCursorStep2() {
-		// setup
-		JobWorkNotification workNotification = new JobWorkNotification();
-		workNotification.setTargetStepId(STEP_2);
-
 		// execute
-		JobWorkCursor<TestJobParameters, ?, ?> cursor = JobWorkCursor.fromJobDefinitionAndWorkNotification(myDefinition, workNotification);
+		JobWorkCursor<TestJobParameters, ?, ?> cursor = JobWorkCursor.fromJobDefinitionAndRequestedStepId(myDefinition, STEP_2);
 
 		// verify
 		assertCursor(cursor, false, false, STEP_2, STEP_3);
@@ -47,12 +39,8 @@ class JobWorkCursorTest extends BaseBatch2Test {
 
 	@Test
 	public void createCursorStep3() {
-		// setup
-		JobWorkNotification workNotification = new JobWorkNotification();
-		workNotification.setTargetStepId(STEP_3);
-
 		// execute
-		JobWorkCursor<TestJobParameters, ?, ?> cursor = JobWorkCursor.fromJobDefinitionAndWorkNotification(myDefinition, workNotification);
+		JobWorkCursor<TestJobParameters, ?, ?> cursor = JobWorkCursor.fromJobDefinitionAndRequestedStepId(myDefinition, STEP_3);
 
 		// verify
 		assertCursor(cursor, false, true, STEP_3, null);
@@ -61,13 +49,11 @@ class JobWorkCursorTest extends BaseBatch2Test {
 	@Test
 	public void unknownStep() {
 		// setup
-		JobWorkNotification workNotification = new JobWorkNotification();
 		String targetStepId = "Made a searching and fearless moral inventory of ourselves";
-		workNotification.setTargetStepId(targetStepId);
 
 		// execute
 		try {
-			JobWorkCursor.fromJobDefinitionAndWorkNotification(myDefinition, workNotification);
+			JobWorkCursor.fromJobDefinitionAndRequestedStepId(myDefinition, targetStepId);
 
 			// verify
 			fail();

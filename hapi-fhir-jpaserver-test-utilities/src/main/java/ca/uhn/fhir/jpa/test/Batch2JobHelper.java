@@ -45,6 +45,10 @@ public class Batch2JobHelper {
 		}, equalTo(StatusEnum.COMPLETED));
 	}
 
+	public void awaitJobCompletionNoMaintenance(String theId) {
+		await().until(() -> myJobCoordinator.getInstance(theId).getStatus() == StatusEnum.COMPLETED);
+	}
+
 	public JobInstance awaitJobFailure(String theId) {
 		await().until(() -> {
 			myJobMaintenanceService.runMaintenancePass();

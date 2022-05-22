@@ -76,6 +76,6 @@ class WorkChannelMessageHandler implements MessageHandler {
 
 		JobDefinition<?> definition = myJobDefinitionRegistry.getJobDefinitionOrThrowException(jobDefinitionId, jobDefinitionVersion);
 
-		return JobWorkCursor.fromJobDefinitionAndWorkNotification(definition, workNotification);
+		return JobWorkCursor.fromJobDefinitionAndRequestedStepId(definition, workNotification.getTargetStepId());
 	}
 }

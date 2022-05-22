@@ -43,7 +43,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> fail();
 
 		String jobId = "test-job-1";
-		JobDefinition<? extends IModelJson> definition = buildJobDefinition(jobId, firstStep, lastStep);
+		JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(jobId, firstStep, lastStep);
 
 		myJobDefinitionRegistry.addJobDefinition(definition);
 
@@ -58,7 +58,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 
 	@Test
-	public void testFirstStepToSecondStep() throws InterruptedException {
+	public void testFirstStepToSecondStep_singleChunkFasttracks() throws InterruptedException {
 		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> firstStep = (step, sink) -> {
 			sink.accept(new FirstStepOutput());
 			callLatch(myFirstStepLatch, step);
@@ -67,7 +67,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> callLatch(myLastStepLatch, step);
 
 		String jobId = "test-job-2";
-		JobDefinition<? extends IModelJson> definition = buildJobDefinition(jobId, firstStep, lastStep);
+		JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(jobId, firstStep, lastStep);
 
 		myJobDefinitionRegistry.addJobDefinition(definition);
 
@@ -78,8 +78,9 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		myFirstStepLatch.awaitExpected();
 
 		myLastStepLatch.setExpectedCount(1);
-		myBatch2JobHelper.awaitJobCompletion(instanceId);
+		// Since there was only one chunk, the job should proceed without requiring a maintenance pass
 		myLastStepLatch.awaitExpected();
+		myBatch2JobHelper.awaitJobCompletionNoMaintenance(instanceId);
 	}
 
 
@@ -92,7 +93,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> fail();
 
 		String jobId = "test-job-3";
-		JobDefinition<? extends IModelJson> definition = buildJobDefinition(jobId, firstStep, lastStep);
+		JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(jobId, firstStep, lastStep);
 
 		myJobDefinitionRegistry.addJobDefinition(definition);
 
@@ -115,7 +116,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> fail();
 
 		String jobId = "test-job-4";
-		JobDefinition<? extends IModelJson> definition = buildJobDefinition(jobId, firstStep, lastStep);
+		JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(jobId, firstStep, lastStep);
 
 		myJobDefinitionRegistry.addJobDefinition(definition);
 
@@ -146,7 +147,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	}
 
 	@Nonnull
-	private JobDefinition<? extends IModelJson> buildJobDefinition(String theJobId, IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> theFirstStep, IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> theLastStep) {
+	private JobDefinition<? extends IModelJson> buildGatedJobDefinition(String theJobId, IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> theFirstStep, IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> theLastStep) {
 		return JobDefinition.newBuilder()
 			.setJobDefinitionId(theJobId)
 			.setJobDescription("test job")
