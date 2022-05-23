@@ -171,9 +171,9 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		}
 
 		List<WorkChunk> chunks = mySvc.fetchWorkChunksWithoutData(instanceId, 3, 0);
-		assertEquals(null, chunks.get(0).getData());
-		assertEquals(null, chunks.get(1).getData());
-		assertEquals(null, chunks.get(2).getData());
+		assertNull(chunks.get(0).getData());
+		assertNull(chunks.get(1).getData());
+		assertNull(chunks.get(2).getData());
 		assertThat(chunks.stream().map(t -> t.getId()).collect(Collectors.toList()),
 			contains(ids.get(0), ids.get(1), ids.get(2)));
 
@@ -207,7 +207,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		String id = storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, 0, null);
 
 		WorkChunk chunk = mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(id).orElseThrow(() -> new IllegalArgumentException());
-		assertEquals(null, chunk.getData());
+		assertNull(chunk.getData());
 	}
 
 	@Test

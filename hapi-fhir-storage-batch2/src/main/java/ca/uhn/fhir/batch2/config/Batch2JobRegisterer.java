@@ -45,8 +45,9 @@ public class Batch2JobRegisterer {
 		JobDefinitionRegistry jobRegistry = myApplicationContext.getBean(JobDefinitionRegistry.class);
 
 		for (Map.Entry<String, JobDefinition> next : batchJobs.entrySet()) {
-			ourLog.info("Registering Batch2 Job Definition: {} / {}", next.getValue().getJobDefinitionId(), next.getValue().getJobDefinitionVersion());
-			jobRegistry.addJobDefinition(next.getValue());
+			JobDefinition<?> jobDefinition = next.getValue();
+			ourLog.info("Registering Batch2 Job Definition: {} / {}", jobDefinition.getJobDefinitionId(), jobDefinition.getJobDefinitionVersion());
+			jobRegistry.addJobDefinition(jobDefinition);
 		}
 	}
 

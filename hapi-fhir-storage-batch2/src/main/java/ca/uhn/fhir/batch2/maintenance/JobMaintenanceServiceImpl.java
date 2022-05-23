@@ -31,8 +31,6 @@ import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.quartz.JobExecutionContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
@@ -68,7 +66,7 @@ import java.util.Set;
 public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 
 	public static final int INSTANCES_PER_PASS = 100;
-	private static final Logger ourLog = LoggerFactory.getLogger(JobMaintenanceServiceImpl.class);
+
 	private final IJobPersistence myJobPersistence;
 	private final ISchedulerService mySchedulerService;
 	private final JobDefinitionRegistry myJobDefinitionRegistry;

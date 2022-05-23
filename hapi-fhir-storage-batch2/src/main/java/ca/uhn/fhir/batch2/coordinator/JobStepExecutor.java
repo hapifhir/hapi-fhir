@@ -81,7 +81,7 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 						myJobPersistence.updateInstance(jobInstance);
 					}
 				} else {
-					JobWorkNotification workNotification = new JobWorkNotification(jobInstance, myCursor.nextStep.getStepId(), ((JobDataSink) dataSink).getOnlyChunkId());
+					JobWorkNotification workNotification = new JobWorkNotification(jobInstance, myCursor.nextStep.getStepId(), ((JobDataSink<PT,IT,OT>) dataSink).getOnlyChunkId());
 					myBatchJobSender.sendWorkChannelMessage(workNotification);
 				}
 			}

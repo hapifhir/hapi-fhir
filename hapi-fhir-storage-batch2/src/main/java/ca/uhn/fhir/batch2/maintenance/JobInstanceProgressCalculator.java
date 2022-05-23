@@ -1,20 +1,15 @@
 package ca.uhn.fhir.batch2.maintenance;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
-import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 import static ca.uhn.fhir.batch2.maintenance.JobInstanceProcessor.updateInstanceStatus;
 
 class JobInstanceProgressCalculator {
-	private static final Logger ourLog = LoggerFactory.getLogger(JobInstanceProgressCalculator.class);
-
 	private final IJobPersistence myJobPersistence;
 	private final JobInstance myInstance;
 	private final JobChunkProgressAccumulator myProgressAccumulator;

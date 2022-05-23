@@ -307,14 +307,4 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 	public boolean hasGatedStep() {
 		return !isBlank(myCurrentGatedStepId);
 	}
-
-	/**
-	 * If a job is normally gated but does not have a gated step set, then so far it has produced fewer than 1 chunk
-	 * at every step and so we will treat the job instance as a non-gated job.
-	 */
-	public boolean isFastTracking() {
-		return myJobDefinition != null &&
-			myJobDefinition.isGatedExecution() &&
-			!hasGatedStep();
-	}
 }
