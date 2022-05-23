@@ -80,7 +80,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		myLastStepLatch.setExpectedCount(1);
 		// Since there was only one chunk, the job should proceed without requiring a maintenance pass
 		myLastStepLatch.awaitExpected();
-		myBatch2JobHelper.awaitJobCompletionNoMaintenance(instanceId);
+		myBatch2JobHelper.awaitJobCompletion(instanceId);
 	}
 
 

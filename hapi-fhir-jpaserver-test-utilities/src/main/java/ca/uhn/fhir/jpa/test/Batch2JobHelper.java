@@ -38,14 +38,14 @@ public class Batch2JobHelper {
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
 
-	public void awaitJobCompletion(String theId) {
+	public void awaitJobCompletionWithMaintenance(String theId) {
 		await().until(() -> {
 			myJobMaintenanceService.runMaintenancePass();
 			return myJobCoordinator.getInstance(theId).getStatus();
 		}, equalTo(StatusEnum.COMPLETED));
 	}
 
-	public void awaitJobCompletionNoMaintenance(String theId) {
+	public void awaitJobCompletion(String theId) {
 		await().until(() -> myJobCoordinator.getInstance(theId).getStatus() == StatusEnum.COMPLETED);
 	}
 
