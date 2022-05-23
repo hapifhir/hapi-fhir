@@ -1,5 +1,5 @@
 ---
 type: add
 issue: 3631
-title: "If a Batch 2 step and all prior steps produced only a single chunk of work, notify the next step immediately
+title: "If a gated Batch 2 job step and all prior steps produced only a single chunk of work, notify the next step immediately
 instead of waiting for the scheduled job maintenance to advance it."
