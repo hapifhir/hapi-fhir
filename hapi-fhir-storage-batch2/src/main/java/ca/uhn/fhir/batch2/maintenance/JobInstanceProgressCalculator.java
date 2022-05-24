@@ -20,7 +20,7 @@ class JobInstanceProgressCalculator {
 		myProgressAccumulator = theProgressAccumulator;
 	}
 
-	void calculateInstanceProgress() {
+	void calculateAndStoreInstanceProgress() {
 		InstanceProgress instanceProgress = new InstanceProgress();
 
 		for (int page = 0; ; page++) {

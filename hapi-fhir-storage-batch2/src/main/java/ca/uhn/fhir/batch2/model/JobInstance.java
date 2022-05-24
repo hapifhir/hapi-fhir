@@ -307,4 +307,8 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 	public boolean hasGatedStep() {
 		return !isBlank(myCurrentGatedStepId);
 	}
+
+	public boolean isPendingCancellation() {
+		return myCancelled && (myStatus == StatusEnum.QUEUED || myStatus == StatusEnum.IN_PROGRESS);
+	}
 }
