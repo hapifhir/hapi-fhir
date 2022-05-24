@@ -577,6 +577,11 @@ public class SearchCoordinatorSvcImpl extends AbstractSearchSvc implements ISear
 		myRequestPartitionHelperService = theRequestPartitionHelperService;
 	}
 
+	@VisibleForTesting
+	public void setSynchronousSearchSvc(ISynchronousSearchSvc theSynchronousSearchSvc) {
+		mySynchronousSearchSvc = theSynchronousSearchSvc;
+	}
+
 	public static void populateSearchEntity(SearchParameterMap theParams, String theResourceType, String theSearchUuid, String theQueryString, Search theSearch, RequestPartitionId theRequestPartitionId) {
 		theSearch.setDeleted(false);
 		theSearch.setUuid(theSearchUuid);

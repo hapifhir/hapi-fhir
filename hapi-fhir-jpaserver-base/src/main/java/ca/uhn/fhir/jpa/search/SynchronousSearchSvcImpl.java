@@ -42,7 +42,7 @@ import java.util.UUID;
 public class SynchronousSearchSvcImpl extends AbstractSearchSvc implements ISynchronousSearchSvc {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SynchronousSearchSvcImpl.class);
-	@Autowired
+
 	private FhirContext myContext;
 
 	@Autowired
@@ -170,17 +170,14 @@ public class SynchronousSearchSvcImpl extends AbstractSearchSvc implements ISync
 				bundleProvider.setCurrentPageSize(theParams.getCount());
 			}
 
+			int bundleSize = resources.size();
+
 			if (wantCount) {
-				bundleProvider.setSize(count.intValue());
-			} else {
-				Integer queryCount = getQueryCount(theLoadSynchronousUpTo, theParams);
-				if (queryCount == null || queryCount > resources.size()) {
-					// No limit, last page or everything was fetched within the limit
-					bundleProvider.setSize(getTotalCount(queryCount, theParams.getOffset(), resources.size()));
-				} else {
-					bundleProvider.setSize(null);
-				}
+				bundleSize = count.intValue();
 			}
+
+			bundleProvider.setSize(bundleSize);
+
 			bundleProvider.setPreferredPageSize(theParams.getCount());
 			return bundleProvider;
 		});
@@ -195,12 +192,17 @@ public class SynchronousSearchSvcImpl extends AbstractSearchSvc implements ISync
 		Class<? extends IBaseResource> resourceTypeClass = myContext.getResourceDefinition(theResourceType).getImplementingClass();
 		final ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(callingDao, theResourceType, resourceTypeClass);
 		sb.setFetchSize(mySyncSize);
-		return executeQuery(theSearchParameterMap, null, searchUuid, sb, null, theRequestPartitionId);
+		return executeQuery(theSearchParameterMap, null, searchUuid, sb, theSearchParameterMap.getLoadSynchronousUpTo(), theRequestPartitionId);
 	}
 
 	@Override
 	DaoConfig getDaoConfig() {
 		return myDaoConfig;
+	}
+
+	@Autowired
+	public void setContext(FhirContext theContext) {
+		myContext = theContext;
 	}
 
 	private int getTotalCount(Integer queryCount, Integer offset, int queryResultCount) {
