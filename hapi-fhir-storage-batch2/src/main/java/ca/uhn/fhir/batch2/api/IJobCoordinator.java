@@ -52,7 +52,10 @@ public interface IJobCoordinator {
 	 */
 	List<JobInstance> getInstances(int thePageSize, int thePageIndex);
 
-	List<JobInstance> getRecentInstances(int thePageSize, int thePageIndex);
+	/**
+	 * Fetch job instances
+	 */
+	List<JobInstance> getRecentInstances(int theCount, int theStart);
 
 	void cancelInstance(String theInstanceId) throws ResourceNotFoundException;
 

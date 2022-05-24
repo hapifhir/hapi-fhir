@@ -204,7 +204,7 @@ public class MdmRulesJson implements IModelJson {
 		return myVectorMatchResultMap.getFieldMatchNames(theVector);
 	}
 
-	public String getDetailedFieldMatchResultForUnmatchedVector(long theVector) {
+	public String getDetailedFieldMatchResultWithSuccessInformation(long theVector) {
 		List<String> fieldMatchResult = new ArrayList<>();
 		for (int i = 0; i < myMatchFieldJsonList.size(); ++i) {
 			if ((theVector & (1 << i)) == 0) {

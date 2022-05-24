@@ -26,11 +26,13 @@ import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
+
 public class BatchJobSender {
 	private static final Logger ourLog = LoggerFactory.getLogger(BatchJobSender.class);
 	private final IChannelProducer myWorkChannelProducer;
 
-	public BatchJobSender(IChannelProducer theWorkChannelProducer) {
+	public BatchJobSender(@Nonnull IChannelProducer theWorkChannelProducer) {
 		myWorkChannelProducer = theWorkChannelProducer;
 	}
 

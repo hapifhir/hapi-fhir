@@ -6,7 +6,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>6.1.0-PRE1-SNAPSHOT</version>
+	<version>6.1.0-PRE2-SNAPSHOT</version>
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
 	<url>https://hapifhir.io</url>
@@ -736,12 +736,16 @@
 			<organization>Google</organization>
 		</developer>
 		<developer>
-
 			<id>theGOTOguy</id>
 			<name>Ben Li-Sauerwine</name>
 		</developer>
 		<developer>
 			<id>tarekmamdouh</id>
+		</developer>
+		<developer>
+			<id>JoeShook</id>
+			<name>Joe Shook</name>
+			<organization>Surescripts LLC</organization>
 		</developer>
 	</developers>
 
@@ -822,10 +826,10 @@
         <swagger_version>2.1.12</swagger_version>
         <slf4j_version>1.7.33</slf4j_version>
         <log4j_to_slf4j_version>2.17.1</log4j_to_slf4j_version>
-        <spring_version>5.3.19</spring_version>
+        <spring_version>5.3.20</spring_version>
         <spring_data_version>2.6.1</spring_data_version>
         <spring_batch_version>4.3.3</spring_batch_version>
-        <spring_boot_version>2.6.2</spring_boot_version>
+        <spring_boot_version>2.6.7</spring_boot_version>
         <spring_retry_version>1.2.2.RELEASE</spring_retry_version>
 
         <stax2_api_version>3.1.4</stax2_api_version>
@@ -2002,7 +2006,7 @@
                             <groupId>ca.uhn.hapi.fhir</groupId>
                             <artifactId>hapi-fhir-checkstyle</artifactId>
 									<!-- Remember to bump this when you upgrade the version -->
-                            <version>6.1.0-PRE1-SNAPSHOT</version>
+                            <version>6.1.0-PRE2-SNAPSHOT</version>
                         </dependency>
 					</dependencies>
 				</plugin>

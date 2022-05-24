@@ -22,12 +22,16 @@ package ca.uhn.fhir.batch2.impl;
 
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.WorkChunkData;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.IModelJson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class FinalStepDataSink extends BaseDataSink<VoidModel> {
+import javax.annotation.Nonnull;
+
+class FinalStepDataSink<PT extends IModelJson, IT extends IModelJson> extends BaseDataSink<PT,IT,VoidModel> {
 	private static final Logger ourLog = LoggerFactory.getLogger(FinalStepDataSink.class);
 
 	private final String myJobDefinitionId;
@@ -35,8 +39,8 @@ class FinalStepDataSink extends BaseDataSink<VoidModel> {
 	/**
 	 * Constructor
 	 */
-	FinalStepDataSink(String theJobDefinitionId, String theInstanceId, String theCurrentStepId) {
-		super(theInstanceId, theCurrentStepId);
+	FinalStepDataSink(@Nonnull String theJobDefinitionId, @Nonnull String theInstanceId, @Nonnull JobWorkCursor<PT,IT,VoidModel> theJobWorkCursor) {
+		super(theInstanceId, theJobWorkCursor);
 		myJobDefinitionId = theJobDefinitionId;
 	}
 

@@ -24,7 +24,6 @@ import ca.uhn.fhir.batch2.impl.BatchWorkChunk;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -70,9 +69,9 @@ public interface IJobPersistence {
 	List<JobInstance> fetchInstances(int thePageSize, int thePageIndex);
 
 	/**
-	 * Fetch instance in 'myCreateTime' descending order
+	 * Fetch instances ordered by myCreateTime DESC
 	 */
-	Collection<JobInstance> fetchRecentInstances(int thePageSize, int thePageIndex);
+	List<JobInstance> fetchRecentInstances(int thePageSize, int thePageIndex);
 
 	/**
 	 * Fetch a given instance and update the stored status

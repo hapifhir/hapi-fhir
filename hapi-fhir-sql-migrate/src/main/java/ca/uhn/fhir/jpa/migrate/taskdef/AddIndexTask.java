@@ -105,6 +105,7 @@ public class AddIndexTask extends BaseTableTask {
 			switch (getDriverType()) {
 				case POSTGRES_9_4:
 				case MSSQL_2012:
+				case COCKROACHDB_21_1:
 					includeClause = " INCLUDE (" + String.join(", ", myIncludeColumns) + ")";
 					break;
 				case H2_EMBEDDED:
@@ -133,6 +134,7 @@ public class AddIndexTask extends BaseTableTask {
 		if (myOnline) {
 			switch (getDriverType()) {
 				case POSTGRES_9_4:
+				case COCKROACHDB_21_1:
 					postgresOnline = "CONCURRENTLY ";
 					// This runs without a lock, and can't be done transactionally.
 					setTransactional(false);

@@ -14,6 +14,7 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
@@ -268,6 +269,20 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		response = myPatientDao.read(idB, requestDetails);
 		assertFalse(response.getActive());
 
+	}
+
+	@Test
+	public void testPartitionInRequestDetails_UpdateWithWrongTenantId() {
+		IIdType idA = createPatient(withTenant(TENANT_A), withActiveTrue()).toVersionless();
+		IBaseResource patientA = buildPatient(withId(idA), withActiveTrue());
+		RequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setTenantId(TENANT_B);
+		try {
+			myPatientDao.update((Patient) patientA, requestDetails);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals(Msg.code(2079) + "Resource " + ((Patient) patientA).getResourceType() + "/" + ((Patient) patientA).getIdElement().getIdPart() + " is not known", e.getMessage());
+		}
 	}
 
 	@Test

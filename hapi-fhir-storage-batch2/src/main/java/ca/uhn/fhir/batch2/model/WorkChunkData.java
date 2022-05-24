@@ -24,7 +24,7 @@ import ca.uhn.fhir.model.api.IModelJson;
 
 public class WorkChunkData<OT extends IModelJson> {
 
-	private OT myData;
+	private final OT myData;
 
 	/**
 	 * Constructor

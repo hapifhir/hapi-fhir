@@ -71,6 +71,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  *    <li>For instances that are COMPLETE, purges chunk data</li>
  *    <li>For instances that are IN_PROGRESS where at least one chunk is FAILED, marks instance as FAILED and propagates the error message to the instance, and purges chunk data</li>
  *    <li>For instances that are IN_PROGRESS with an error message set where no chunks are ERRORED or FAILED, clears the error message in the instance (meaning presumably there was an error but it cleared)</li>
+ *    <li>For instances that are IN_PROGRESS and isCancelled flag is set marks them as ERRORED and indicating the current running step if any</li>
  *    <li>For instances that are COMPLETE or FAILED and are old, delete them entirely</li>
  * </ul>
  * 	</p>
@@ -81,11 +82,12 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * is complete (all chunks are in COMPLETE status) and trigger the next step.
  * </p>
  */
-public class JobMaintenanceServiceImpl extends BaseJobService implements IJobMaintenanceService {
+public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 
 	public static final int INSTANCES_PER_PASS = 100;
 	public static final long PURGE_THRESHOLD = 7L * DateUtils.MILLIS_PER_DAY;
 	private static final Logger ourLog = LoggerFactory.getLogger(JobMaintenanceServiceImpl.class);
+	private final IJobPersistence myJobPersistence;
 	private final ISchedulerService mySchedulerService;
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final BatchJobSender myBatchJobSender;
@@ -94,12 +96,13 @@ public class JobMaintenanceServiceImpl extends BaseJobService implements IJobMai
 	/**
 	 * Constructor
 	 */
-	public JobMaintenanceServiceImpl(ISchedulerService theSchedulerService, IJobPersistence theJobPersistence, JobDefinitionRegistry theJobDefinitionRegistry, BatchJobSender theBatchJobSender) {
-		super(theJobPersistence);
+	public JobMaintenanceServiceImpl(@Nonnull ISchedulerService theSchedulerService, @Nonnull IJobPersistence theJobPersistence, @Nonnull JobDefinitionRegistry theJobDefinitionRegistry, @Nonnull BatchJobSender theBatchJobSender) {
 		Validate.notNull(theSchedulerService);
+		Validate.notNull(theJobPersistence);
 		Validate.notNull(theJobDefinitionRegistry);
 		Validate.notNull(theBatchJobSender);
 
+		myJobPersistence = theJobPersistence;
 		mySchedulerService = theSchedulerService;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 		myBatchJobSender = theBatchJobSender;
@@ -125,6 +128,7 @@ public class JobMaintenanceServiceImpl extends BaseJobService implements IJobMai
 
 			for (JobInstance instance : instances) {
 				if (processedInstanceIds.add(instance.getInstanceId())) {
+					handleCancellation(instance);
 					cleanupInstance(instance, progressAccumulator);
 					triggerGatedExecutions(instance, progressAccumulator);
 				}
@@ -134,6 +138,21 @@ public class JobMaintenanceServiceImpl extends BaseJobService implements IJobMai
 				break;
 			}
 		}
+	}
+
+	private void handleCancellation(JobInstance theInstance) {
+		if (! theInstance.isCancelled()) { return; }
+
+		if (theInstance.getStatus() == StatusEnum.QUEUED || theInstance.getStatus() == StatusEnum.IN_PROGRESS) {
+			String msg = "Job instance cancelled";
+			if (theInstance.getCurrentGatedStepId() != null) {
+				msg += " while running step " + theInstance.getCurrentGatedStepId();
+			}
+			theInstance.setErrorMessage(msg);
+			theInstance.setStatus(StatusEnum.CANCELLED);
+			myJobPersistence.updateInstance(theInstance);
+		}
+
 	}
 
 	private void cleanupInstance(JobInstance theInstance, JobChunkProgressAccumulator theProgressAccumulator) {
@@ -146,6 +165,7 @@ public class JobMaintenanceServiceImpl extends BaseJobService implements IJobMai
 				break;
 			case COMPLETED:
 			case FAILED:
+			case CANCELLED:
 				if (theInstance.getEndTime() != null) {
 					long cutoff = System.currentTimeMillis() - PURGE_THRESHOLD;
 					if (theInstance.getEndTime().getTime() < cutoff) {
@@ -157,7 +177,8 @@ public class JobMaintenanceServiceImpl extends BaseJobService implements IJobMai
 				break;
 		}
 
-		if ((theInstance.getStatus() == StatusEnum.COMPLETED || theInstance.getStatus() == StatusEnum.FAILED) && !theInstance.isWorkChunksPurged()) {
+		if ((theInstance.getStatus() == StatusEnum.COMPLETED || theInstance.getStatus() == StatusEnum.FAILED
+				|| theInstance.getStatus() == StatusEnum.CANCELLED) && !theInstance.isWorkChunksPurged()) {
 			theInstance.setWorkChunksPurged(true);
 			myJobPersistence.deleteChunks(theInstance.getInstanceId());
 			myJobPersistence.updateInstance(theInstance);
@@ -214,6 +235,8 @@ public class JobMaintenanceServiceImpl extends BaseJobService implements IJobMai
 						failedChunkCount++;
 						errorMessage = chunk.getErrorMessage();
 						break;
+					case CANCELLED:
+						break;
 				}
 			}
 
@@ -234,17 +257,15 @@ public class JobMaintenanceServiceImpl extends BaseJobService implements IJobMai
 			double percentComplete = (double) (completeChunkCount) / (double) (incompleteChunkCount + completeChunkCount + failedChunkCount + erroredChunkCount);
 			theInstance.setProgress(percentComplete);
 
-			changedStatus = false;
 			if (incompleteChunkCount == 0 && erroredChunkCount == 0 && failedChunkCount == 0) {
 				boolean completed = updateInstanceStatus(theInstance, StatusEnum.COMPLETED);
 				if (completed) {
 					JobDefinition<?> definition = myJobDefinitionRegistry.getJobDefinition(theInstance.getJobDefinitionId(), theInstance.getJobDefinitionVersion()).orElseThrow(() -> new IllegalStateException("Unknown job " + theInstance.getJobDefinitionId() + "/" + theInstance.getJobDefinitionVersion()));
 					invokeJobCompletionHandler(theInstance, definition);
 				}
-				changedStatus |= completed;
-			}
-			if (erroredChunkCount > 0) {
-				changedStatus |= updateInstanceStatus(theInstance, StatusEnum.ERRORED);
+				changedStatus = completed;
+			} else if (erroredChunkCount > 0) {
+				changedStatus = updateInstanceStatus(theInstance, StatusEnum.ERRORED);
 			}
 
 			if (earliestStartTime != null && latestEndTime != null) {

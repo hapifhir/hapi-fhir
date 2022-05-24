@@ -82,6 +82,7 @@ public class AddForeignKeyTask extends BaseTableColumnTask {
 				// Quote the column names as "SYSTEM" is a reserved word in MySQL
 				sql = "alter table " + getTableName() + " add constraint " + myConstraintName + " foreign key (`" + getColumnName() + "`) references " + myForeignTableName + " (`" + myForeignColumnName + "`)";
 				break;
+			case COCKROACHDB_21_1:
 			case POSTGRES_9_4:
 			case DERBY_EMBEDDED:
 			case H2_EMBEDDED:
