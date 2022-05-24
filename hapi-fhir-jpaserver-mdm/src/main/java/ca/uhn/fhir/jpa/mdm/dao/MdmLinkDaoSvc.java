@@ -256,7 +256,7 @@ public class MdmLinkDaoSvc {
 			myMdmLinkDao.delete((MdmLink) theMdmLink);
 		}
 
-		throw new UnprocessableEntityException(Msg.code(2080) + "Unprocessable MdmLink Implementation");
+		throw new UnprocessableEntityException(Msg.code(2082) + "Unprocessable MdmLink Implementation");
 	}
 
 	/**
@@ -296,7 +296,7 @@ public class MdmLinkDaoSvc {
 		if (theMdmLink instanceof MdmLink){
 			return  (MdmLink) theMdmLink;
 		}
-		throw new UnprocessableEntityException(Msg.code(2081) + "Unprocessable MdmLink implementation");
+		throw new UnprocessableEntityException(Msg.code(2083) + "Unprocessable MdmLink implementation");
 	}
 
 
