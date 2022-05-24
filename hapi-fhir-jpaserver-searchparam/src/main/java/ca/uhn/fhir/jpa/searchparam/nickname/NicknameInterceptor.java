@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -70,7 +71,7 @@ public class NicknameInterceptor {
 					toRemove.add(stringParam);
 					//First, attempt to expand as a formal name
 					String name = stringParam.getValue().toLowerCase(Locale.ROOT);
-					List<String> expansions = myNicknameSvc.getEquivalentNames(name);
+					Collection<String> expansions = myNicknameSvc.getEquivalentNames(name);
 					if (expansions == null) {
 						continue;
 					}
