@@ -32,7 +32,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
-public interface ISearchCoordinatorSvc{
+public interface ISearchCoordinatorSvc {
 
 	void cancelAllActiveSearches();
 

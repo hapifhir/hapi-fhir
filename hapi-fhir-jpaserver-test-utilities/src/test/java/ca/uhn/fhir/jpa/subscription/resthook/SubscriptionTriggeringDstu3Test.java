@@ -73,14 +73,12 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 	private static final List<Patient> ourUpdatedPatients = Collections.synchronizedList(Lists.newArrayList());
 	private static final List<String> ourContentTypes = Collections.synchronizedList(Lists.newArrayList());
 	private final List<IIdType> mySubscriptionIds = Collections.synchronizedList(Lists.newArrayList());
-
 	@Autowired
 	private SubscriptionTestUtil mySubscriptionTestUtil;
 	@Autowired
 	private ISubscriptionTriggeringSvc mySubscriptionTriggeringSvc;
 	@Autowired
 	private ISchedulerService mySchedulerService;
-
 	@Autowired
 	private IInterceptorService myInterceptorService;
 
@@ -337,7 +335,6 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 
 	@Test
 	public void testTriggerSubscriptionWithSynchronousQueryMode() throws Exception {
-//		myDaoConfig.setSearchPreFetchThresholds(Lists.newArrayList(13, 22, 50));
 		((SubscriptionTriggeringSvcImpl)mySubscriptionTriggeringSvc).setMaxSubmitPerPass(10);
 
 		String payload = "application/fhir+json";

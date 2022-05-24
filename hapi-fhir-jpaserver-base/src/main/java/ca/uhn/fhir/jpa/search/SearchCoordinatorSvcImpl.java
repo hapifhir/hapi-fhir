@@ -96,7 +96,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
-import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -127,8 +126,7 @@ public class SearchCoordinatorSvcImpl extends AbstractSearchSvc implements ISear
 	private FhirContext myContext;
 	@Autowired
 	private DaoConfig myDaoConfig;
-	@Autowired
-	private EntityManager myEntityManager;
+
 	private Integer myLoadingThrottleForUnitTests = null;
 	private long myMaxMillisToWaitForRemoteResults = DateUtils.MILLIS_PER_MINUTE;
 	private boolean myNeverUseLocalSearchForUnitTests;
@@ -532,11 +530,6 @@ public class SearchCoordinatorSvcImpl extends AbstractSearchSvc implements ISear
 	@VisibleForTesting
 	void setDaoConfigForUnitTest(DaoConfig theDaoConfig) {
 		myDaoConfig = theDaoConfig;
-	}
-
-	@VisibleForTesting
-	void setEntityManagerForUnitTest(EntityManager theEntityManager) {
-		myEntityManager = theEntityManager;
 	}
 
 	@VisibleForTesting

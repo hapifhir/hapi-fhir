@@ -68,7 +68,6 @@ import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -504,17 +503,12 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		private List<String> myRemainingResourceIds;
 		private List<String> myRemainingSearchUrls;
 		private String myCurrentSearchUuid;
-
 		private String myCurrentSearchUrl;
-
 		private Integer myCurrentSearchCount;
 		private String myCurrentSearchResourceType;
 		private int myCurrentSearchLastUploadedIndex;
-
 		private int myCurrentSearchTotalCount;
-
 		private int myCurrentOffset;
-
 		private String myCurrentResourceType;
 
 		Integer getCurrentSearchCount() {
