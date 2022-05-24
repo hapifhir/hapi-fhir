@@ -28,8 +28,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class NicknameSvc {
 	private final NicknameMap myNicknameMap = new NicknameMap();
@@ -47,8 +49,8 @@ public class NicknameSvc {
 		return myNicknameMap.size();
 	}
 
-	public List<String> getEquivalentNames(String theName) {
-		List<String> retval = new ArrayList<>(getNicknamesFromFormalName(theName));
+	public Collection<String> getEquivalentNames(String theName) {
+		Set<String> retval = new HashSet<>(getNicknamesFromFormalName(theName));
 
 		if (retval.isEmpty()) {
 			List<String> formalNames = getFormalNamesFromNickname(theName);

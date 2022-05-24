@@ -25,6 +25,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.searchparam.nickname.NicknameSvc;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
@@ -44,12 +45,12 @@ public class NicknameMatcher implements IMdmStringMatcher {
 		String leftString = theLeftString.toLowerCase(Locale.ROOT);
 		String rightString = theRightString.toLowerCase(Locale.ROOT);
 
-		List<String> leftNames = myNicknameSvc.getEquivalentNames(leftString);
+		Collection<String> leftNames = myNicknameSvc.getEquivalentNames(leftString);
 		if (leftNames.contains(rightString)) {
 			return true;
 		}
 
-		List<String> rightNames = myNicknameSvc.getEquivalentNames(rightString);
+		Collection<String> rightNames = myNicknameSvc.getEquivalentNames(rightString);
 		return rightNames.contains(leftString);
 	}
 }
