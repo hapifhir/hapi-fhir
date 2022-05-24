@@ -145,7 +145,7 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 			myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions());
 			fail();
 		} catch (TooManyCandidatesException e) {
-			assertEquals("More than 3 candidate matches found for Patient?identifier=http%3A%2F%2Fa.tv%2F%7CID.JANE.123&active=true.  Aborting mdm matching.", e.getMessage());
+			assertEquals("HAPI-0762: More than 3 candidate matches found for Patient?identifier=http%3A%2F%2Fa.tv%2F%7CID.JANE.123&active=true.  Aborting mdm matching.", e.getMessage());
 		}
 	}
 

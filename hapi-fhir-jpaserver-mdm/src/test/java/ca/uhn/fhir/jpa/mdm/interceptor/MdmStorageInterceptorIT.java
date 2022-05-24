@@ -24,6 +24,7 @@ import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.SearchParameter;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
@@ -52,7 +53,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.slf4j.LoggerFactory.getLogger;
 
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @ContextConfiguration(classes = {MdmHelperConfig.class})
 public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 
@@ -63,6 +63,12 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 	public MdmHelperR4 myMdmHelper;
 	@Autowired
 	private IIdHelperService myIdHelperService;
+
+
+	@Override
+	public void beforeUnregisterAllSubscriptions() {
+		// noop
+	}
 
 	@Test
 	public void testCreatePractitioner() throws InterruptedException {
@@ -100,7 +106,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 			myMdmHelper.doCreateResource(patient, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertThat(e.getMessage(), startsWith("Cannot create or modify Resources that are managed by MDM."));
+			assertThat(e.getMessage(), startsWith("HAPI-0765: Cannot create or modify Resources that are managed by MDM."));
 		}
 	}
 
@@ -112,7 +118,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 			myMdmHelper.doCreateResource(patient, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertThat(e.getMessage(), startsWith("Cannot create or modify Resources that are managed by MDM."));
+			assertThat(e.getMessage(), startsWith("HAPI-0765: Cannot create or modify Resources that are managed by MDM."));
 		}
 	}
 
@@ -124,7 +130,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 			myMdmHelper.doCreateResource(medication, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertThat(e.getMessage(), startsWith("Cannot create or modify Resources that are managed by MDM."));
+			assertThat(e.getMessage(), startsWith("HAPI-0765: Cannot create or modify Resources that are managed by MDM."));
 		}
 	}
 
@@ -152,7 +158,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 			myMdmHelper.doCreateResource(organization, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertThat(e.getMessage(), startsWith("Cannot create or modify Resources that are managed by MDM."));
+			assertThat(e.getMessage(), startsWith("HAPI-0765: Cannot create or modify Resources that are managed by MDM."));
 		}
 	}
 
@@ -166,7 +172,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 			myMdmHelper.doUpdateResource(organization, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertEquals("The HAPI-MDM tag on a resource may not be changed once created.", e.getMessage());
+			assertEquals("HAPI-0764: The HAPI-MDM tag on a resource may not be changed once created.", e.getMessage());
 		}
 	}
 
@@ -197,7 +203,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 			myMdmHelper.doUpdateResource(patient, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertEquals("The HAPI-MDM tag on a resource may not be changed once created.", e.getMessage());
+			assertEquals("HAPI-0764: The HAPI-MDM tag on a resource may not be changed once created.", e.getMessage());
 		}
 	}
 
@@ -218,7 +224,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 			myMdmHelper.doUpdateResource(goldenResourcePatient, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertThat(e.getMessage(), startsWith("Cannot create or modify Resources that are managed by MDM."));
+			assertThat(e.getMessage(), startsWith("HAPI-0765: Cannot create or modify Resources that are managed by MDM."));
 		}
 	}
 
@@ -266,7 +272,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 			myMdmHelper.doUpdateResource(jane, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertThat(e.getMessage(), is(equalTo("While running with EID updates disabled, EIDs may not be updated on source resources")));
+			assertThat(e.getMessage(), is(equalTo("HAPI-0763: While running with EID updates disabled, EIDs may not be updated on source resources")));
 		}
 		setPreventEidUpdates(false);
 	}
@@ -281,7 +287,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 			myMdmHelper.doCreateResource(patient, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertThat(e.getMessage(), is(equalTo("While running with multiple EIDs disabled, source resources may have at most one EID.")));
+			assertThat(e.getMessage(), is(equalTo("HAPI-0766: While running with multiple EIDs disabled, source resources may have at most one EID.")));
 		}
 
 		setPreventMultipleEids(false);
