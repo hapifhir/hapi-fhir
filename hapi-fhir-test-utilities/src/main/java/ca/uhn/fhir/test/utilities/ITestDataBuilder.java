@@ -36,6 +36,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.Date;
 import java.util.function.Consumer;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -157,6 +158,10 @@ public interface ITestDataBuilder {
 
 	default Consumer<IBaseResource> withSource(FhirContext theContext, String theSource) {
 		return t -> MetaUtil.setSource(theContext, t.getMeta(), theSource);
+	}
+
+	default Consumer<IBaseResource> withLastUpdated(Date theLastUpdated) {
+		return t -> t.getMeta().setLastUpdated(theLastUpdated);
 	}
 
 	default IIdType createObservation(Consumer<IBaseResource>... theModifiers) {

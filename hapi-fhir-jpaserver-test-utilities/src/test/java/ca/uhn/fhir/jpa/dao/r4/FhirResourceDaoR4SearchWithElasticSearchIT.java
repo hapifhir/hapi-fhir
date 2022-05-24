@@ -48,6 +48,7 @@ import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 import org.hamcrest.Matchers;
+import org.hl7.fhir.dstu3.model.InstantType;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -91,7 +92,7 @@ import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -1674,6 +1675,97 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	}
 
 
+
+
+	@Nested
+	public class LastUpdatedTests {
+
+		private String myOldObsId, myNewObsId;
+		private String myOldLastUpdatedDateTime = "2017-03-24T03:21:47";
+
+		@BeforeEach
+		public void enableResourceStorage() {
+			myDaoConfig.setStoreResourceInLuceneIndex(true);
+
+			myOldObsId = myTestDataBuilder.createObservation(List.of(
+				myTestDataBuilder.withObservationCode("http://example.com/", "theCodeOld"),
+				myTestDataBuilder.withLastUpdated(new InstantType(myOldLastUpdatedDateTime).getValue()) )).getIdPart();
+
+			myNewObsId = myTestDataBuilder.createObservation(List.of(
+				myTestDataBuilder.withObservationCode("http://example.com/", "theCodeNew"),
+				myTestDataBuilder.withLastUpdated(new Date()) )).getIdPart();
+		}
+
+		@AfterEach
+		public void resetResourceStorage() {
+			myDaoConfig.setStoreResourceInLuceneIndex(new DaoConfig().isStoreResourceInLuceneIndex());
+		}
+
+		@Test
+		public void eq() {
+			myCaptureQueriesListener.clear();
+			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_lastUpdated=eq" + myOldLastUpdatedDateTime);
+
+			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			assertThat(allIds, contains(myOldObsId));
+		}
+
+		@Test
+		public void eqLessPrecisionRequest() {
+			myCaptureQueriesListener.clear();
+			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_lastUpdated=eq2017-03-24");
+
+			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			assertThat(allIds, contains(myOldObsId));
+		}
+
+		@Test
+		public void ne() {
+			myCaptureQueriesListener.clear();
+			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_lastUpdated=ne" + myOldLastUpdatedDateTime);
+
+			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			assertThat(allIds, contains(myNewObsId));
+		}
+
+		@Test
+		void gt() {
+			myCaptureQueriesListener.clear();
+			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_lastUpdated=gt2018-01-01");
+
+			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			assertThat(allIds, contains(myNewObsId));
+		}
+
+		@Test
+		public void ge() {
+			myCaptureQueriesListener.clear();
+			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_lastUpdated=ge" + myOldLastUpdatedDateTime);
+
+			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			assertThat(allIds, contains(myOldObsId, myNewObsId));
+		}
+
+		@Test
+		void lt() {
+			myCaptureQueriesListener.clear();
+			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_lastUpdated=lt2018-01-01");
+
+			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			assertThat(allIds, contains(myOldObsId));
+		}
+
+		@Test
+		public void le() {
+			myCaptureQueriesListener.clear();
+			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_lastUpdated=le" + myOldLastUpdatedDateTime);
+
+			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			assertThat(allIds, contains(myOldObsId));
+		}
+
+
+	}
 
 
 	@Nested
