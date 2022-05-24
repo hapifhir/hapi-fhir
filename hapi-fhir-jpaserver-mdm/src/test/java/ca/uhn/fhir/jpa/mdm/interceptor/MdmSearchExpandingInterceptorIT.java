@@ -41,7 +41,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.slf4j.LoggerFactory.getLogger;
 
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @ContextConfiguration(classes = {MdmHelperConfig.class})
 public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 
@@ -177,18 +176,21 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		// test
 		myDaoConfig.setAllowMdmExpansion(true);
 		IFhirResourceDaoPatient<Patient> dao = (IFhirResourceDaoPatient<Patient>) myPatientDao;
-		IBundleProvider outcome = dao.patientInstanceEverything(
-			req,
-			new IdDt(id),
-			null,
-			null,
-			null,
-			null,
-			null,
-			null,
-			null,
-			theDetails
-		);
+		IBundleProvider outcome = runInTransaction(() -> {
+			IBundleProvider res =  dao.patientInstanceEverything(
+				req,
+				new IdDt(id),
+				null,
+				null,
+				null,
+				null,
+				null,
+				null,
+				null,
+				theDetails
+			);
+			return res;
+		});
 
 		// verify return results
 		// we expect all the linked ids to be returned too

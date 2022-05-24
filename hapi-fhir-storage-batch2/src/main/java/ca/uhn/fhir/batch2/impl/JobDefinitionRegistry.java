@@ -25,7 +25,10 @@ import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.lang3.Validate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
@@ -36,17 +39,18 @@ import java.util.Set;
 import java.util.TreeMap;
 
 public class JobDefinitionRegistry {
+	private static final Logger ourLog = LoggerFactory.getLogger(JobDefinitionRegistry.class);
 
 	private final Map<String, TreeMap<Integer, JobDefinition<?>>> myJobs = new HashMap<>();
 
-	public <PT extends IModelJson> void addJobDefinition(JobDefinition<PT> theDefinition) {
+	public <PT extends IModelJson> void addJobDefinition(@Nonnull JobDefinition<PT> theDefinition) {
 		Validate.notNull(theDefinition);
 		Validate.notBlank(theDefinition.getJobDefinitionId());
 		Validate.isTrue(theDefinition.getJobDefinitionVersion() >= 1);
 		Validate.isTrue(theDefinition.getSteps().size() > 1);
 
 		Set<String> stepIds = new HashSet<>();
-		for (JobDefinitionStep<?,?,?> next : theDefinition.getSteps()) {
+		for (JobDefinitionStep<?, ?, ?> next : theDefinition.getSteps()) {
 			if (!stepIds.add(next.getStepId())) {
 				throw new ConfigurationException(Msg.code(2046) + "Duplicate step[" + next.getStepId() + "] in definition[" + theDefinition.getJobDefinitionId() + "] version: " + theDefinition.getJobDefinitionVersion());
 			}
@@ -73,5 +77,15 @@ public class JobDefinitionRegistry {
 			return Optional.empty();
 		}
 		return Optional.of(versionMap.get(theJobDefinitionVersion));
+	}
+
+	public JobDefinition<?> getJobDefinitionOrThrowException(String theJobDefinitionId, int theJobDefinitionVersion) {
+		Optional<JobDefinition<?>> opt = getJobDefinition(theJobDefinitionId, theJobDefinitionVersion);
+		if (opt.isEmpty()) {
+			String msg = "Unknown job definition ID[" + theJobDefinitionId + "] version[" + theJobDefinitionVersion + "]";
+			ourLog.warn(msg);
+			throw new InternalErrorException(Msg.code(2043) + msg);
+		}
+		return opt.get();
 	}
 }

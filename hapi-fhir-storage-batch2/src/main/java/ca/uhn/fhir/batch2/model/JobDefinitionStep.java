@@ -34,6 +34,7 @@ public class JobDefinitionStep<PT extends IModelJson, IT extends IModelJson, OT 
 	private final String myStepDescription;
 	private final IJobStepWorker<PT, IT, OT> myJobStepWorker;
 	private final Class<IT> myInputType;
+
 	private final Class<OT> myOutputType;
 
 	public JobDefinitionStep(@Nonnull String theStepId, @Nonnull String theStepDescription, @Nonnull IJobStepWorker<PT, IT, OT> theJobStepWorker, @Nonnull Class<IT> theInputType, @Nonnull Class<OT> theOutputType) {
@@ -62,5 +63,9 @@ public class JobDefinitionStep<PT extends IModelJson, IT extends IModelJson, OT 
 
 	public Class<IT> getInputType() {
 		return myInputType;
+	}
+
+	public Class<OT> getOutputType() {
+		return myOutputType;
 	}
 }
