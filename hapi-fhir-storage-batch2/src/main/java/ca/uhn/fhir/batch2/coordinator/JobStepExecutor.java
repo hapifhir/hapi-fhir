@@ -69,23 +69,32 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 		}
 
 		if (myDefinition.isGatedExecution()) {
-			JobInstance jobInstance = initializeGatedExecutionIfRequired(dataSink);
-			if (jobInstance != null &&
-				!jobInstance.hasGatedStep() &&
-				dataSink.getWorkChunkCount() <= 1) {
-				ourLog.info("Gated job {} step {} produced at most one chunk:  Fast tracking execution.", myDefinition.getJobDefinitionId(), myCursor.currentStep.getStepId());
-				// This job is defined to be gated, but so far every step has produced at most 1 work chunk, so it is
-				// eligible for fast tracking.
-				if (myCursor.isFinalStep()) {
-					if (updateInstanceStatus(jobInstance, StatusEnum.COMPLETED)) {
-						myJobPersistence.updateInstance(jobInstance);
-					}
-				} else {
-					JobWorkNotification workNotification = new JobWorkNotification(jobInstance, myCursor.nextStep.getStepId(), ((JobDataSink<PT,IT,OT>) dataSink).getOnlyChunkId());
-					myBatchJobSender.sendWorkChannelMessage(workNotification);
+			handleGatedExecution(dataSink);
+		}
+	}
+
+	private void handleGatedExecution(BaseDataSink<PT, IT, OT> theDataSink) {
+		JobInstance jobInstance = initializeGatedExecutionIfRequired(theDataSink);
+
+		if (eligibleForFastTracking(theDataSink, jobInstance)) {
+			ourLog.info("Gated job {} step {} produced at most one chunk:  Fast tracking execution.", myDefinition.getJobDefinitionId(), myCursor.currentStep.getStepId());
+			// This job is defined to be gated, but so far every step has produced at most 1 work chunk, so it is
+			// eligible for fast tracking.
+			if (myCursor.isFinalStep()) {
+				if (updateInstanceStatus(jobInstance, StatusEnum.COMPLETED)) {
+					myJobPersistence.updateInstance(jobInstance);
 				}
+			} else {
+				JobWorkNotification workNotification = new JobWorkNotification(jobInstance, myCursor.nextStep.getStepId(), ((JobDataSink<PT,IT,OT>) theDataSink).getOnlyChunkId());
+				myBatchJobSender.sendWorkChannelMessage(workNotification);
 			}
 		}
+	}
+
+	private boolean eligibleForFastTracking(BaseDataSink<PT, IT, OT> theDataSink, JobInstance theJobInstance) {
+		return theJobInstance != null &&
+			!theJobInstance.hasGatedStep() &&
+			theDataSink.getWorkChunkCount() <= 1;
 	}
 
 	private JobInstance initializeGatedExecutionIfRequired(BaseDataSink<PT, IT, OT> theDataSink) {
