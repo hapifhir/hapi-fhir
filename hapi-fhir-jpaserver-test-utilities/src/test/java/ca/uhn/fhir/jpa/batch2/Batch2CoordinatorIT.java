@@ -109,7 +109,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		String instanceId = myJobCoordinator.startInstance(request);
 		myFirstStepLatch.awaitExpected();
 
-		myBatch2JobHelper.assertGatedStep(FIRST_STEP_ID, instanceId);
+		myBatch2JobHelper.awaitGatedStepId(FIRST_STEP_ID, instanceId);
 
 		myLastStepLatch.setExpectedCount(2);
 		myBatch2JobHelper.awaitMultipleChunkJobCompletion(instanceId);

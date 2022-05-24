@@ -29,7 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class Batch2JobHelper {
@@ -77,8 +76,7 @@ public class Batch2JobHelper {
 		assertNull(myJobCoordinator.getInstance(theInstanceId).getCurrentGatedStepId());
 	}
 
-	public void assertGatedStep(String theExpectedGatedStepId, String theInstanceId) {
-		String actualGatedStepId = myJobCoordinator.getInstance(theInstanceId).getCurrentGatedStepId();
-		assertEquals(theExpectedGatedStepId, actualGatedStepId);
+	public void awaitGatedStepId(String theExpectedGatedStepId, String theInstanceId) {
+		await().until(() -> theExpectedGatedStepId.equals(myJobCoordinator.getInstance(theInstanceId).getCurrentGatedStepId()));
 	}
 }
