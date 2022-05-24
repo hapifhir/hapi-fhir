@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.searchparam.nickname;
  * #L%
  */
 
+import javax.annotation.Nonnull;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
@@ -57,11 +58,15 @@ class NicknameMap {
 		return myFormalToNick.size();
 	}
 
-	List<String> getNicknamesFromFormalNameOrNull(String theName) {
-		return myFormalToNick.get(theName);
+	@Nonnull
+	List<String> getNicknamesFromFormalName(String theName) {
+		List<String> result = myFormalToNick.get(theName);
+		return result == null ? new ArrayList<>() : result;
 	}
 
-	List<String> getFormalNamesFromNicknameOrNull(String theNickname) {
-		return myNicknameToFormal.get(theNickname);
+	@Nonnull
+	List<String> getFormalNamesFromNickname(String theNickname) {
+		List<String> result = myNicknameToFormal.get(theNickname);
+		return result == null ? new ArrayList<>() : result;
 	}
 }
