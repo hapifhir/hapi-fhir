@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.mdm.interceptor;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.dao.expunge.IExpungeEverythingService;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.mdm.api.MdmConstants;
@@ -215,7 +216,7 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	@Hook(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_EVERYTHING)
 	public void expungeAllMdmLinks(AtomicInteger theCounter) {
 		ourLog.debug("Expunging all MdmLink records");
-		theCounter.addAndGet(myExpungeEverythingService.expungeEverythingByType(MdmLink.class));
+		theCounter.addAndGet(((ExpungeEverythingService)myExpungeEverythingService).expungeEverythingByType(MdmLink.class));
 	}
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_RESOURCE)

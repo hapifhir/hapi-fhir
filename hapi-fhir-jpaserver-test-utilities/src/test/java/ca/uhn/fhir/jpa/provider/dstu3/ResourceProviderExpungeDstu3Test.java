@@ -38,6 +38,7 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 	@AfterEach
 	public void afterDisableExpunge() {
 		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
+		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 	}
 
 	private void assertExpunged(IIdType theId) {
@@ -115,6 +116,7 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 	@BeforeEach
 	public void beforeEnableExpunge() {
 		myDaoConfig.setExpungeEnabled(true);
+		myDaoConfig.setAllowMultipleDelete(true);
 	}
 
 	private IFhirResourceDao<?> getDao(IIdType theId) {
