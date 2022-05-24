@@ -1,0 +1,4 @@
+---
+type: add
+issue: 3640
+title: "Freetext search parameters _tag, _profile and _security were implemented."
