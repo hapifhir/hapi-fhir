@@ -126,7 +126,7 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 			startRequest(theServletRequest);
 			try {
 				if (myFulltextSearch == null || myFulltextSearch.isDisabled()) {
-					throw new InvalidRequestException("Autocomplete is not supported on this server, as the fulltext search service is not configured.");
+					throw new InvalidRequestException(Msg.code(2080) +  " Autocomplete is not supported on this server, as the fulltext search service is not configured.");
 				} else {
 					return myFulltextSearch.tokenAutocompleteValueSetSearch(options);
 				}
