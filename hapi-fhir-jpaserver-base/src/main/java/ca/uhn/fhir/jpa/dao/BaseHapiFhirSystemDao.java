@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
@@ -13,6 +14,7 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
@@ -83,7 +85,18 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 	@Override
 	@Transactional(propagation = Propagation.NEVER)
 	public ExpungeOutcome expunge(ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails) {
+		validateExpungeEnabled(theExpungeOptions);
 		return myExpungeService.expunge(null, null, theExpungeOptions, theRequestDetails);
+	}
+
+	private void validateExpungeEnabled(ExpungeOptions theExpungeOptions) {
+		if (!getConfig().isExpungeEnabled()) {
+			throw new MethodNotAllowedException(Msg.code(2080) + "$expunge is not enabled on this server");
+		}
+
+		if (theExpungeOptions.isExpungeEverything() && !getConfig().isAllowMultipleDelete()) {
+			throw new MethodNotAllowedException(Msg.code(2081) + "Multiple delete is not enabled on this server");
+		}
 	}
 
 	@Transactional(propagation = Propagation.REQUIRED)

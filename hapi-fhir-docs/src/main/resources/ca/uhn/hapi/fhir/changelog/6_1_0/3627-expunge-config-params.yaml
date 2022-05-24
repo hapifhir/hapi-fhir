@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 3627
+title: "Previously, the `$expunge` operation at the system level was always available, regardless of 
+configuration parameter settings. Now, the system-level `$expunge` operation requires that the `Expunge Enabled`
+parameter is enabled. Additionally, the `expungeEverything` option of the operation requires that the 
+`Allow Multiple Delete Enabled` parameter is enabled."
