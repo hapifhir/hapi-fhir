@@ -121,13 +121,18 @@ public class MdmLinkDaoSvc {
 		}
 	}
 
+
 	public Optional<? extends IMdmLink> getLinkByGoldenResourcePidAndSourceResourcePid(Long theGoldenResourcePid, Long theSourceResourcePid) {
+		return getLinkByGoldenResourcePidAndSourceResourcePid(new ResourcePersistentId(theGoldenResourcePid), new ResourcePersistentId(theSourceResourcePid));
+	}
+
+	public Optional<? extends IMdmLink> getLinkByGoldenResourcePidAndSourceResourcePid(ResourcePersistentId theGoldenResourcePid, ResourcePersistentId theSourceResourcePid) {
 		if (theSourceResourcePid == null || theGoldenResourcePid == null) {
 			return Optional.empty();
 		}
 		MdmLink link = myMdmLinkFactory.newMdmLink();
-		link.setSourcePid(theSourceResourcePid);
-		link.setGoldenResourcePid(theGoldenResourcePid);
+		link.setSourcePid(theSourceResourcePid.getIdAsLong());
+		link.setGoldenResourcePid(theGoldenResourcePid.getIdAsLong());
 		Example<MdmLink> example = Example.of(link);
 		return myMdmLinkDao.findOne(example);
 	}
@@ -139,9 +144,9 @@ public class MdmLinkDaoSvc {
 	 * @param theMatchResult the Match Result of the relationship
 	 * @return a list of {@link MdmLink} entities matching these criteria.
 	 */
-	public List<? extends IMdmLink> getMdmLinksBySourcePidAndMatchResult(Long theSourcePid, MdmMatchResultEnum theMatchResult) {
+	public List<? extends IMdmLink> getMdmLinksBySourcePidAndMatchResult(ResourcePersistentId theSourcePid, MdmMatchResultEnum theMatchResult) {
 		MdmLink exampleLink = myMdmLinkFactory.newMdmLink();
-		exampleLink.setSourcePid(theSourcePid);
+		exampleLink.setSourcePid(theSourcePid.getIdAsLong());
 		exampleLink.setMatchResult(theMatchResult);
 		Example<MdmLink> example = Example.of(exampleLink);
 		return myMdmLinkDao.findAll(example);
@@ -251,8 +256,7 @@ public class MdmLinkDaoSvc {
 			myMdmLinkDao.delete((MdmLink) theMdmLink);
 		}
 
-		// FIXME LM
-		// Throw an exception here with a code
+		throw new UnprocessableEntityException(Msg.code(2080) + "Unprocessable MdmLink Implementation");
 	}
 
 	/**
@@ -292,8 +296,7 @@ public class MdmLinkDaoSvc {
 		if (theMdmLink instanceof MdmLink){
 			return  (MdmLink) theMdmLink;
 		}
-		// FIXME LM update the code here to whatever the latest and add coherent error message
-		throw new UnprocessableEntityException(Msg.code(1766));
+		throw new UnprocessableEntityException(Msg.code(2081) + "Unprocessable MdmLink implementation");
 	}
 
 
