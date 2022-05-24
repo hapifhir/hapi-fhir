@@ -41,17 +41,19 @@ class JobInstanceProcessor {
 	}
 
 	private void handleCancellation() {
-		if (! myInstance.isCancelled()) { return; }
-
-		if (myInstance.getStatus() == StatusEnum.QUEUED || myInstance.getStatus() == StatusEnum.IN_PROGRESS) {
-			String msg = "Job instance cancelled";
-			if (myInstance.getCurrentGatedStepId() != null) {
-				msg += " while running step " + myInstance.getCurrentGatedStepId();
-			}
-			myInstance.setErrorMessage(msg);
+		if (myInstance.isPendingCancellation()) {
+			myInstance.setErrorMessage(buildCancelledMessage());
 			myInstance.setStatus(StatusEnum.CANCELLED);
 			myJobPersistence.updateInstance(myInstance);
 		}
+	}
+
+	private String buildCancelledMessage() {
+		String msg = "Job instance cancelled";
+		if (myInstance.getCurrentGatedStepId() != null) {
+			msg += " while running step " + myInstance.getCurrentGatedStepId();
+		}
+		return msg;
 	}
 
 	private void cleanupInstance() {
@@ -60,7 +62,7 @@ class JobInstanceProcessor {
 				break;
 			case IN_PROGRESS:
 			case ERRORED:
-				myJobInstanceProgressCalculator.calculateInstanceProgress();
+				myJobInstanceProgressCalculator.calculateAndStoreInstanceProgress();
 				break;
 			case COMPLETED:
 			case FAILED:

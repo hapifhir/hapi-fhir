@@ -2,7 +2,6 @@ package ca.uhn.fhir.batch2.maintenance;
 
 import ca.uhn.fhir.batch2.api.IJobCompletionHandler;
 import ca.uhn.fhir.batch2.api.JobCompletionDetails;
-import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
@@ -20,7 +19,7 @@ import static ca.uhn.fhir.batch2.maintenance.JobInstanceProcessor.updateInstance
 class InstanceProgress {
 	private static final Logger ourLog = LoggerFactory.getLogger(InstanceProgress.class);
 
-	private int myResourcesProcessed = 0;
+	private int myRecordsProcessed = 0;
 	private int myIncompleteChunkCount = 0;
 	private int myCompleteChunkCount = 0;
 	private int myErroredChunkCount = 0;
@@ -30,23 +29,17 @@ class InstanceProgress {
 	private Long myLatestEndTime = null;
 	private String myErrormessage = null;
 
-	public void addChunk(WorkChunk chunk) {
-		myErrorCountForAllStatuses += chunk.getErrorCount();
+	public void addChunk(WorkChunk theChunk) {
+		myErrorCountForAllStatuses += theChunk.getErrorCount();
 
-		if (chunk.getRecordsProcessed() != null) {
-			myResourcesProcessed += chunk.getRecordsProcessed();
-		}
-		if (chunk.getStartTime() != null) {
-			if (myEarliestStartTime == null || myEarliestStartTime > chunk.getStartTime().getTime()) {
-				myEarliestStartTime = chunk.getStartTime().getTime();
-			}
-		}
-		if (chunk.getEndTime() != null) {
-			if (myLatestEndTime == null || myLatestEndTime < chunk.getEndTime().getTime()) {
-				myLatestEndTime = chunk.getEndTime().getTime();
-			}
-		}
-		switch (chunk.getStatus()) {
+		updateRecordsProcessed(theChunk);
+		updateEarliestTime(theChunk);
+		updateLatestEndTime(theChunk);
+		updateCompletionStatus(theChunk);
+	}
+
+	private void updateCompletionStatus(WorkChunk theChunk) {
+		switch (theChunk.getStatus()) {
 			case QUEUED:
 			case IN_PROGRESS:
 				myIncompleteChunkCount++;
@@ -57,15 +50,37 @@ class InstanceProgress {
 			case ERRORED:
 				myErroredChunkCount++;
 				if (myErrormessage == null) {
-					myErrormessage = chunk.getErrorMessage();
+					myErrormessage = theChunk.getErrorMessage();
 				}
 				break;
 			case FAILED:
 				myFailedChunkCount++;
-				myErrormessage = chunk.getErrorMessage();
+				myErrormessage = theChunk.getErrorMessage();
 				break;
 			case CANCELLED:
 				break;
+		}
+	}
+
+	private void updateLatestEndTime(WorkChunk theChunk) {
+		if (theChunk.getEndTime() != null) {
+			if (myLatestEndTime == null || myLatestEndTime < theChunk.getEndTime().getTime()) {
+				myLatestEndTime = theChunk.getEndTime().getTime();
+			}
+		}
+	}
+
+	private void updateEarliestTime(WorkChunk theChunk) {
+		if (theChunk.getStartTime() != null) {
+			if (myEarliestStartTime == null || myEarliestStartTime > theChunk.getStartTime().getTime()) {
+				myEarliestStartTime = theChunk.getStartTime().getTime();
+			}
+		}
+	}
+
+	private void updateRecordsProcessed(WorkChunk theChunk) {
+		if (theChunk.getRecordsProcessed() != null) {
+			myRecordsProcessed += theChunk.getRecordsProcessed();
 		}
 	}
 
@@ -74,8 +89,30 @@ class InstanceProgress {
 			theInstance.setStartTime(new Date(myEarliestStartTime));
 		}
 		theInstance.setErrorCount(myErrorCountForAllStatuses);
-		theInstance.setCombinedRecordsProcessed(myResourcesProcessed);
+		theInstance.setCombinedRecordsProcessed(myRecordsProcessed);
 
+		boolean changedStatus = updateStatus(theInstance);
+
+		setEndTime(theInstance);
+
+		theInstance.setErrorMessage(myErrormessage);
+
+		if (changedStatus || theInstance.getStatus() == StatusEnum.IN_PROGRESS) {
+			ourLog.info("Job {} of type {} has status {} - {} records processed ({}/sec) - ETA: {}", theInstance.getInstanceId(), theInstance.getJobDefinitionId(), theInstance.getStatus(), theInstance.getCombinedRecordsProcessed(), theInstance.getCombinedRecordsProcessedPerSecond(), theInstance.getEstimatedTimeRemaining());
+		}
+	}
+
+	private void setEndTime(JobInstance theInstance) {
+		if (myLatestEndTime != null) {
+			if (myFailedChunkCount > 0) {
+				theInstance.setEndTime(new Date(myLatestEndTime));
+			} else if (myCompleteChunkCount > 0 && myIncompleteChunkCount == 0 && myErroredChunkCount == 0) {
+				theInstance.setEndTime(new Date(myLatestEndTime));
+			}
+		}
+	}
+
+	private boolean updateStatus(JobInstance theInstance) {
 		boolean changedStatus = false;
 		if (myCompleteChunkCount > 1 || myErroredChunkCount > 1) {
 
@@ -95,7 +132,7 @@ class InstanceProgress {
 			if (myEarliestStartTime != null && myLatestEndTime != null) {
 				long elapsedTime = myLatestEndTime - myEarliestStartTime;
 				if (elapsedTime > 0) {
-					double throughput = StopWatch.getThroughput(myResourcesProcessed, elapsedTime, TimeUnit.SECONDS);
+					double throughput = StopWatch.getThroughput(myRecordsProcessed, elapsedTime, TimeUnit.SECONDS);
 					theInstance.setCombinedRecordsProcessedPerSecond(throughput);
 
 					String estimatedTimeRemaining = StopWatch.formatEstimatedTimeRemaining(myCompleteChunkCount, (myCompleteChunkCount + myIncompleteChunkCount), elapsedTime);
@@ -103,20 +140,7 @@ class InstanceProgress {
 				}
 			}
 		}
-
-		if (myLatestEndTime != null) {
-			if (myFailedChunkCount > 0) {
-				theInstance.setEndTime(new Date(myLatestEndTime));
-			} else if (myCompleteChunkCount > 0 && myIncompleteChunkCount == 0 && myErroredChunkCount == 0) {
-				theInstance.setEndTime(new Date(myLatestEndTime));
-			}
-		}
-
-		theInstance.setErrorMessage(myErrormessage);
-
-		if (changedStatus || theInstance.getStatus() == StatusEnum.IN_PROGRESS) {
-			ourLog.info("Job {} of type {} has status {} - {} records processed ({}/sec) - ETA: {}", theInstance.getInstanceId(), theInstance.getJobDefinitionId(), theInstance.getStatus(), theInstance.getCombinedRecordsProcessed(), theInstance.getCombinedRecordsProcessedPerSecond(), theInstance.getEstimatedTimeRemaining());
-		}
+		return changedStatus;
 	}
 
 	private boolean jobSuccessfullyCompleted() {

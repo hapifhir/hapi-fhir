@@ -306,4 +306,8 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 			myStatus == StatusEnum.FAILED ||
 			myStatus == StatusEnum.CANCELLED;
 	}
+
+	public boolean isPendingCancellation() {
+		return myCancelled && (myStatus == StatusEnum.QUEUED || myStatus == StatusEnum.IN_PROGRESS);
+	}
 }
