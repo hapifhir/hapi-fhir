@@ -23,6 +23,7 @@ package ca.uhn.fhir.batch2.coordinator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.model.*;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
 
@@ -76,7 +77,7 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 	public String getOnlyChunkId() {
 		if (getWorkChunkCount() != 1) {
 			String msg = String.format("Expected this sink to have exactly one work chunk but there are %d.  Job %s v%s step %s", getWorkChunkCount(), myJobDefinitionId, myJobDefinitionVersion, myTargetStep);
-			throw new IllegalStateException(msg);
+			throw new IllegalStateException(Msg.code(2082) + msg);
 		}
 		return myLastChunkId.get();
 	}
