@@ -47,6 +47,7 @@ import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.util.SearchParameterMapCalculator;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
@@ -112,12 +113,17 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.util.SearchParameterMapCalculator.isWantCount;
+import static ca.uhn.fhir.jpa.util.SearchParameterMapCalculator.isWantOnlyCount;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Component("mySearchCoordinatorSvc")
-public class SearchCoordinatorSvcImpl extends AbstractSearchSvc implements ISearchCoordinatorSvc {
+//public class SearchCoordinatorSvcImpl extends AbstractSearchSvc implements ISearchCoordinatorSvc {
+public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
+	public static final int DEFAULT_SYNC_SIZE = 250;
 	public static final String UNIT_TEST_CAPTURE_STACK = "unit_test_capture_stack";
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchCoordinatorSvcImpl.class);
@@ -329,7 +335,7 @@ public class SearchCoordinatorSvcImpl extends AbstractSearchSvc implements ISear
 
 		Class<? extends IBaseResource> resourceTypeClass = myContext.getResourceDefinition(theResourceType).getImplementingClass();
 		final ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(theCallingDao, theResourceType, resourceTypeClass);
-		sb.setFetchSize(mySyncSize);
+		sb.setFetchSize(DEFAULT_SYNC_SIZE);
 
 		final Integer loadSynchronousUpTo = getLoadSynchronousUpToOrNull(theCacheControlDirective);
 		boolean isOffsetQuery = theParams.isOffsetQuery();
@@ -666,12 +672,7 @@ public class SearchCoordinatorSvcImpl extends AbstractSearchSvc implements ISear
 		}
 	}
 
-	@Override
-	DaoConfig getDaoConfig() {
-		return myDaoConfig;
-	}
-
-	/**
+		/**
 	 * A search task is a Callable task that runs in
 	 * a thread pool to handle an individual search. One instance
 	 * is created for any requested search and runs from the
@@ -1063,9 +1064,10 @@ public class SearchCoordinatorSvcImpl extends AbstractSearchSvc implements ISear
 			 *
 			 * before doing anything else.
 			 */
-			boolean wantOnlyCount = isWantOnlyCount(myParams);
-			boolean wantCount = isWantCount(myParams, wantOnlyCount);
-			if (wantCount) {
+			boolean myParamWantOnlyCount = isWantOnlyCount(myParams);
+			boolean myParamOrDefaultWantCount = nonNull(myParams.getSearchTotalMode()) ? isWantCount(myParams) : isWantCount(myDaoConfig.getDefaultTotalMode());
+
+			if (myParamWantOnlyCount || myParamOrDefaultWantCount) {
 				ourLog.trace("Performing count");
 				ISearchBuilder sb = newSearchBuilder();
 
@@ -1087,13 +1089,13 @@ public class SearchCoordinatorSvcImpl extends AbstractSearchSvc implements ISear
 					@Override
 					protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theArg0) {
 						mySearch.setTotalCount(count.intValue());
-						if (wantOnlyCount) {
+						if (myParamWantOnlyCount) {
 							mySearch.setStatus(SearchStatusEnum.FINISHED);
 						}
 						doSaveSearch();
 					}
 				});
-				if (wantOnlyCount) {
+				if (myParamWantOnlyCount) {
 					return;
 				}
 			}

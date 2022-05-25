@@ -15,6 +15,7 @@ import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.util.SearchParameterMapCalculator;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -39,7 +40,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-public class SynchronousSearchSvcImpl extends AbstractSearchSvc implements ISynchronousSearchSvc {
+import static ca.uhn.fhir.jpa.util.SearchParameterMapCalculator.isWantCount;
+import static ca.uhn.fhir.jpa.util.SearchParameterMapCalculator.isWantOnlyCount;
+import static java.util.Objects.nonNull;
+
+public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SynchronousSearchSvcImpl.class);
 
@@ -63,14 +68,15 @@ public class SynchronousSearchSvcImpl extends AbstractSearchSvc implements ISync
 	@Autowired
 	private EntityManager myEntityManager;
 
-	private int mySyncSize = DEFAULT_SYNC_SIZE;
+	private int mySyncSize = 250;
 
 	public IBundleProvider executeQuery(SearchParameterMap theParams, RequestDetails theRequestDetails, String theSearchUuid, ISearchBuilder theSb, Integer theLoadSynchronousUpTo, RequestPartitionId theRequestPartitionId) {
 		SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(theRequestDetails, theSearchUuid);
 		searchRuntimeDetails.setLoadSynchronous(true);
 
-		boolean wantOnlyCount = isWantOnlyCount(theParams);
-		boolean wantCount = isWantCount(theParams, wantOnlyCount);
+		boolean theParamWantOnlyCount = isWantOnlyCount(theParams);
+		boolean theParamOrConfigWantCount = nonNull(theParams.getSearchTotalMode()) ? isWantCount(theParams) : isWantCount(myDaoConfig.getDefaultTotalMode());
+		boolean wantCount = theParamWantOnlyCount || theParamOrConfigWantCount;
 
 		// Execute the query and make sure we return distinct results
 		TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
@@ -83,6 +89,7 @@ public class SynchronousSearchSvcImpl extends AbstractSearchSvc implements ISync
 
 			Long count = 0L;
 			if (wantCount) {
+
 				ourLog.trace("Performing count");
 				// TODO FulltextSearchSvcImpl will remove necessary parameters from the "theParams", this will cause actual query after count to
 				//  return wrong response. This is some dirty fix to avoid that issue. Params should not be mutated?
@@ -98,7 +105,7 @@ public class SynchronousSearchSvcImpl extends AbstractSearchSvc implements ISync
 				ourLog.trace("Got count {}", count);
 			}
 
-			if (wantOnlyCount) {
+			if (theParamWantOnlyCount) {
 				SimpleBundleProvider bundleProvider = new SimpleBundleProvider();
 				bundleProvider.setSize(count.intValue());
 				return bundleProvider;
@@ -193,11 +200,6 @@ public class SynchronousSearchSvcImpl extends AbstractSearchSvc implements ISync
 		final ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(callingDao, theResourceType, resourceTypeClass);
 		sb.setFetchSize(mySyncSize);
 		return executeQuery(theSearchParameterMap, null, searchUuid, sb, theSearchParameterMap.getLoadSynchronousUpTo(), theRequestPartitionId);
-	}
-
-	@Override
-	DaoConfig getDaoConfig() {
-		return myDaoConfig;
 	}
 
 	@Autowired
