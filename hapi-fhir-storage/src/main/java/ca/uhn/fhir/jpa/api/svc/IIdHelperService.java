@@ -25,6 +25,8 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.annotation.Nonnull;
@@ -103,11 +105,38 @@ public interface IIdHelperService {
 
 	Optional<String> translatePidIdToForcedIdWithCache(ResourcePersistentId theResourcePersistentId);
 
-	Map<Long, Optional<String>> translatePidsToForcedIds(Set<Long> thePids);
+	Map<ResourcePersistentId, Optional<String>> translatePidsToForcedIds(Set<ResourcePersistentId> theResourceIds);
 
 	/**
 	 * Pre-cache a PID-to-Resource-ID mapping for later retrieval by {@link #translatePidsToForcedIds(Set)} and related methods
 	 */
 	void addResolvedPidToForcedId(ResourcePersistentId theResourcePersistentId, @Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, @Nullable String theForcedId, @Nullable Date theDeletedAt);
+
+	@Nonnull
+	List<ResourcePersistentId> getPidsOrThrowException(RequestPartitionId theRequestPartitionId, List<IIdType> theIds);
+
+	@Nullable
+	ResourcePersistentId getPidOrNull(RequestPartitionId theRequestPartitionId, IBaseResource theResource);
+
+	@Nonnull
+	ResourcePersistentId getPidOrThrowException(RequestPartitionId theRequestPartitionId, IIdType theId);
+
+	@Nonnull
+	ResourcePersistentId getPidOrThrowException(@Nonnull IAnyResource theResource);
+
+	IIdType resourceIdFromPidOrThrowException(String thePid, String resourceType);
+
+	/**
+	 * Given a set of PIDs, return a set of public FHIR Resource IDs.
+	 * This function will resolve a forced ID if it resolves, and if it fails to resolve to a forced it, will just return the pid
+	 * Example:
+	 * Let's say we have Patient/1(pid == 1), Patient/pat1 (pid == 2), Patient/3 (pid == 3), their pids would resolve as follows:
+	 * <p>
+	 * [1,2,3] -> ["1","pat1","3"]
+	 *
+	 * @param thePids The Set of pids you would like to resolve to external FHIR Resource IDs.
+	 * @return A Set of strings representing the FHIR IDs of the pids.
+	 */
+	Set<String> translatePidsToFhirResourceIds(Set<ResourcePersistentId> thePids);
 
 }

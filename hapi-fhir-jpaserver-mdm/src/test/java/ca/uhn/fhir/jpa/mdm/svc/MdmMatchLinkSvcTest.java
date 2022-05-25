@@ -1,8 +1,10 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
 import ca.uhn.fhir.mdm.api.MdmConstants;
@@ -14,6 +16,7 @@ import ca.uhn.fhir.mdm.util.EIDHelper;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.HumanName;
@@ -154,7 +157,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		Patient janePatient = addExternalEID(buildJanePatient(), sampleEID);
 		janePatient = createPatientAndUpdateLinks(janePatient);
 
-		Optional<MdmLink> mdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(janePatient.getIdElement().getIdPartAsLong());
+		Optional<? extends IMdmLink> mdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(janePatient.getIdElement().getIdPartAsLong());
 		assertThat(mdmLink.isPresent(), is(true));
 
 		Patient patient = getTargetResourceFromMdmLink(mdmLink.get(), "Patient");
@@ -167,7 +170,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 	@Test
 	public void testWhenPatientIsCreatedWithoutAnEIDTheGoldenResourceGetsAutomaticallyAssignedOne() {
 		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
-		MdmLink mdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(patient.getIdElement().getIdPartAsLong()).get();
+		IMdmLink mdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(patient.getIdElement().getIdPartAsLong()).get();
 
 		Patient targetPatient = getTargetResourceFromMdmLink(mdmLink, "Patient");
 		Identifier identifierFirstRep = targetPatient.getIdentifierFirstRep();
@@ -179,7 +182,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 	public void testPatientAttributesAreCopiedOverWhenGoldenResourceIsCreatedFromPatient() {
 		Patient patient = createPatientAndUpdateLinks(buildPatientWithNameIdAndBirthday("Gary", "GARY_ID", new Date()));
 
-		Optional<MdmLink> mdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(patient.getIdElement().getIdPartAsLong());
+		Optional<? extends IMdmLink> mdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(patient.getIdElement().getIdPartAsLong());
 		Patient read = getTargetResourceFromMdmLink(mdmLink.get(), "Patient");
 
 		assertThat(read.getNameFirstRep().getFamily(), is(equalTo(patient.getNameFirstRep().getFamily())));
@@ -273,15 +276,14 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 
 		Patient finalPatient1 = patient1;
 		Patient finalPatient2 = patient2;
-		List<Long> duplicatePids = runInTransaction(()->Stream.of(finalPatient1, finalPatient2)
-			.map(this::getGoldenResourceFromTargetResource)
-			.map(myIdHelperService::getPidOrNull)
+		List<ResourcePersistentId> duplicatePids = runInTransaction(()->Stream.of(finalPatient1, finalPatient2)
+			.map(t -> myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), getGoldenResourceFromTargetResource(t)))
 			.collect(Collectors.toList()));
 
 		//The two GoldenResources related to the patients should both show up in the only existing POSSIBLE_DUPLICATE MdmLink.
 		MdmLink mdmLink = possibleDuplicates.get(0);
-		assertThat(mdmLink.getGoldenResourcePid(), is(in(duplicatePids)));
-		assertThat(mdmLink.getSourcePid(), is(in(duplicatePids)));
+		assertThat(mdmLink.getGoldenResourcePersistenceId(), is(in(duplicatePids)));
+		assertThat(mdmLink.getSourcePersistenceId(), is(in(duplicatePids)));
 	}
 
 	@Test
@@ -366,7 +368,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		assertThat(incomingJanePatient, is(possibleMatchWith(janePatient, janePatient2)));
 
 		//Ensure there is no successful MATCH links for incomingJanePatient
-		Optional<MdmLink> matchedLinkForTargetPid = runInTransaction(()->myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(incomingJanePatient)));
+		Optional<? extends IMdmLink> matchedLinkForTargetPid = runInTransaction(()->myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), incomingJanePatient).getIdAsLong()));
 		assertThat(matchedLinkForTargetPid.isPresent(), is(false));
 
 		logAllLinks();

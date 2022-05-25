@@ -20,11 +20,13 @@ package ca.uhn.fhir.jpa.dao.mdm;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
-import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -34,7 +36,10 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Nonnull;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class MdmLinkExpandSvc {
@@ -43,7 +48,7 @@ public class MdmLinkExpandSvc {
 	@Autowired
 	private IMdmLinkDao myMdmLinkDao;
 	@Autowired
-	private IJpaIdHelperService myIdHelperService;
+	private IIdHelperService myIdHelperService;
 
 	public MdmLinkExpandSvc() {
 	}
@@ -69,7 +74,7 @@ public class MdmLinkExpandSvc {
 	 */
 	public Set<String> expandMdmBySourceResourceId(IIdType theId) {
 		ourLog.debug("About to expand source resource with resource id {}", theId);
-		Long pidOrThrowException = myIdHelperService.getPidOrThrowException(theId);
+		Long pidOrThrowException = myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theId).getIdAsLong();
 		return expandMdmBySourceResourcePid(pidOrThrowException);
 	}
 
@@ -115,7 +120,7 @@ public class MdmLinkExpandSvc {
 
 	public Set<String> expandMdmByGoldenResourceId(IdDt theId) {
 		ourLog.debug("About to expand golden resource with golden resource id {}", theId);
-		Long pidOrThrowException = myIdHelperService.getPidOrThrowException(theId);
+		Long pidOrThrowException = myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theId).getIdAsLong();
 		return expandMdmByGoldenResourcePid(pidOrThrowException);
 	}
 
@@ -126,7 +131,8 @@ public class MdmLinkExpandSvc {
 			flattenedPids.add(tuple.getSourcePid());
 			flattenedPids.add(tuple.getGoldenPid());
 		});
-		Set<String> resourceIds = myIdHelperService.translatePidsToFhirResourceIds(flattenedPids);
+		Set<ResourcePersistentId> pids  = flattenedPids.stream().map(t-> new ResourcePersistentId(t)).collect(Collectors.toSet());
+		Set<String> resourceIds = myIdHelperService.translatePidsToFhirResourceIds(pids);
 		ourLog.debug("Pid {} has been expanded to [{}]", initialPid, String.join(",", resourceIds));
 		return resourceIds;
 	}

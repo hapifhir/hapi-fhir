@@ -24,6 +24,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmResourceDaoSvc;
+import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
@@ -65,8 +66,8 @@ public class FindCandidateByEidSvc extends BaseCandidateFinder {
 					if (isNoMatch(foundGoldenResource, theBaseResource)) {
 						continue;
 					}
-					Long pidOrNull = myIdHelperService.getPidOrNull(foundGoldenResource);
-					MatchedGoldenResourceCandidate mpc = new MatchedGoldenResourceCandidate(new ResourcePersistentId(pidOrNull), MdmMatchOutcome.EID_MATCH);
+					ResourcePersistentId pidOrNull = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), foundGoldenResource);
+					MatchedGoldenResourceCandidate mpc = new MatchedGoldenResourceCandidate(pidOrNull, MdmMatchOutcome.EID_MATCH);
 					ourLog.debug("Matched {} by EID {}", foundGoldenResource.getIdElement(), eid);
 					retval.add(mpc);
 				}
@@ -76,11 +77,11 @@ public class FindCandidateByEidSvc extends BaseCandidateFinder {
 	}
 
 	private boolean isNoMatch(IAnyResource theGoldenResource, IAnyResource theSourceResource) {
-		Optional<MdmLink> oLink = myMdmLinkDaoSvc.getLinkByGoldenResourceAndSourceResource(theGoldenResource, theSourceResource);
+		Optional<? extends IMdmLink> oLink = myMdmLinkDaoSvc.getLinkByGoldenResourceAndSourceResource(theGoldenResource, theSourceResource);
 		if (oLink.isEmpty()) {
 			return false;
 		}
-		MdmLink link = oLink.get();
+		MdmLink link = (MdmLink) oLink.get();
 		return link.isNoMatch();
 	}
 

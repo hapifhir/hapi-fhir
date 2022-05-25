@@ -22,11 +22,11 @@ package ca.uhn.fhir.jpa.delete.job;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.expunge.PartitionRunner;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceForeignKey;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;
-import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -56,7 +56,7 @@ public class DeleteExpungeProcessor implements ItemProcessor<List<Long>, List<St
 	@Autowired
 	DaoConfig myDaoConfig;
 	@Autowired
-	IJpaIdHelperService myIdHelper;
+	IIdHelperService myIdHelper;
 	@Autowired
 	IResourceLinkDao myResourceLinkDao;
 
@@ -100,8 +100,9 @@ public class DeleteExpungeProcessor implements ItemProcessor<List<Long>, List<St
 		//NB-GGG: We previously instantiated these ID values from firstConflict.getSourceResource().getIdDt(), but in a situation where we
 		//actually had to run delete conflict checks in multiple partitions, the executor service starts its own sessions on a per thread basis, and by the time
 		//we arrive here, those sessions are closed. So instead, we resolve them from PIDs, which are eagerly loaded.
-		String sourceResourceId = myIdHelper.resourceIdFromPidOrThrowException(firstConflict.getSourceResourcePid()).toVersionless().getValue();
-		String targetResourceId = myIdHelper.resourceIdFromPidOrThrowException(firstConflict.getTargetResourcePid()).toVersionless().getValue();
+
+		String sourceResourceId = myIdHelper.resourceIdFromPidOrThrowException(firstConflict.getSourceResourcePid().toString(), firstConflict.getSourceResourceType()).toVersionless().getValue();
+		String targetResourceId = myIdHelper.resourceIdFromPidOrThrowException(firstConflict.getTargetResourcePid().toString(), firstConflict.getTargetResourceType()).toVersionless().getValue();
 
 		throw new InvalidRequestException(Msg.code(822) + "DELETE with _expunge=true failed.  Unable to delete " +
 			targetResourceId + " because " + sourceResourceId + " refers to it via the path " + firstConflict.getSourcePath());

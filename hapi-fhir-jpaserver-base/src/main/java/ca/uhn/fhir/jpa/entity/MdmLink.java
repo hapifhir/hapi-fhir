@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.persistence.Column;
@@ -134,12 +135,38 @@ public class MdmLink extends BasePartitionable implements IMdmLink {
 	@Column(name = "TARGET_TYPE", nullable = true, length = SOURCE_TYPE_LENGTH)
 	private String myMdmSourceType;
 
+	@Override
 	public Long getId() {
 		return myId;
 	}
 
+	@Override
 	public MdmLink setId(Long theId) {
 		myId = theId;
+		return this;
+	}
+
+	@Override
+	public ResourcePersistentId getGoldenResourcePersistenceId() {
+		return new ResourcePersistentId(myGoldenResourcePid);
+	}
+
+	@Override
+	public IMdmLink setGoldenResourcePersistenceId(ResourcePersistentId theGoldenResourcePid) {
+		setPersonPid(theGoldenResourcePid.getIdAsLong());
+
+		myGoldenResourcePid = theGoldenResourcePid.getIdAsLong();
+		return this;
+	}
+
+	@Override
+	public ResourcePersistentId getSourcePersistenceId() {
+		return new ResourcePersistentId(mySourcePid);
+	}
+
+	@Override
+	public IMdmLink setSourcePersistenceId(ResourcePersistentId theSourcePid) {
+		mySourcePid = theSourcePid.getIdAsLong();
 		return this;
 	}
 
@@ -157,6 +184,7 @@ public class MdmLink extends BasePartitionable implements IMdmLink {
 		return this;
 	}
 
+	@Deprecated
 	public Long getGoldenResourcePid() {
 		return myGoldenResourcePid;
 	}
@@ -170,6 +198,10 @@ public class MdmLink extends BasePartitionable implements IMdmLink {
 		return this;
 	}
 
+	/**
+	 * @deprecated  Use {@link #setGoldenResourcePersistenceId(ResourcePersistentId)} instead
+	 */
+	@Deprecated
 	public MdmLink setGoldenResourcePid(Long theGoldenResourcePid) {
 		setPersonPid(theGoldenResourcePid);
 
@@ -187,101 +219,92 @@ public class MdmLink extends BasePartitionable implements IMdmLink {
 		return this;
 	}
 
+	@Deprecated
 	public Long getSourcePid() {
 		return mySourcePid;
 	}
 
+	/**
+	 * @deprecated  Use {@link #setSourcePersistenceId(ResourcePersistentId)} instead
+	 */
+	@Deprecated
 	public MdmLink setSourcePid(Long theSourcePid) {
 		mySourcePid = theSourcePid;
 		return this;
 	}
 
+	@Override
 	public MdmMatchResultEnum getMatchResult() {
 		return myMatchResult;
 	}
 
+	@Override
 	public MdmLink setMatchResult(MdmMatchResultEnum theMatchResult) {
 		myMatchResult = theMatchResult;
 		return this;
 	}
 
-	public boolean isNoMatch() {
-		return myMatchResult == MdmMatchResultEnum.NO_MATCH;
-	}
-
-	public boolean isMatch() {
-		return myMatchResult == MdmMatchResultEnum.MATCH;
-	}
-
-	public boolean isPossibleMatch() {
-		return myMatchResult == MdmMatchResultEnum.POSSIBLE_MATCH;
-	}
-
-	public boolean isRedirect() {
-		return myMatchResult == MdmMatchResultEnum.REDIRECT;
-	}
-
-	public boolean isPossibleDuplicate() {
-		return myMatchResult == MdmMatchResultEnum.POSSIBLE_DUPLICATE;
-	}
-
+	@Override
 	public MdmLinkSourceEnum getLinkSource() {
 		return myLinkSource;
 	}
 
+	@Override
 	public MdmLink setLinkSource(MdmLinkSourceEnum theLinkSource) {
 		myLinkSource = theLinkSource;
 		return this;
 	}
 
-	public boolean isAuto() {
-		return myLinkSource == MdmLinkSourceEnum.AUTO;
-	}
-
-	public boolean isManual() {
-		return myLinkSource == MdmLinkSourceEnum.MANUAL;
-	}
-
+	@Override
 	public Date getCreated() {
 		return myCreated;
 	}
 
+	@Override
 	public MdmLink setCreated(Date theCreated) {
 		myCreated = theCreated;
 		return this;
 	}
 
+	@Override
 	public Date getUpdated() {
 		return myUpdated;
 	}
 
+	@Override
 	public MdmLink setUpdated(Date theUpdated) {
 		myUpdated = theUpdated;
 		return this;
 	}
 
+	@Override
 	public String getVersion() {
 		return myVersion;
 	}
 
+	@Override
 	public MdmLink setVersion(String theVersion) {
 		myVersion = theVersion;
 		return this;
 	}
 
+	@Override
 	public Long getVector() {
 		return myVector;
 	}
 
+	@Override
 	public MdmLink setVector(Long theVector) {
 		myVector = theVector;
 		return this;
 	}
 
+	@Override
 	public Double getScore() {
 		return myScore;
 	}
 
+	@Override
 	public MdmLink setScore(Double theScore) {
 		myScore = theScore;
 		return this;
@@ -296,19 +319,23 @@ public class MdmLink extends BasePartitionable implements IMdmLink {
 	 * <code>isEidMatch</code> because Hibernate Search complains about having
 	 * 2 accessors for this property
 	 */
-	public boolean isEidMatchPresent() {
+	@Override
+	public Boolean isEidMatchPresent() {
 		return myEidMatch != null && myEidMatch;
 	}
 
+	@Override
 	public MdmLink setEidMatch(Boolean theEidMatch) {
 		myEidMatch = theEidMatch;
 		return this;
 	}
 
-	public boolean getHadToCreateNewGoldenResource() {
+	@Override
+	public Boolean getHadToCreateNewGoldenResource() {
 		return myHadToCreateNewGoldenResource != null && myHadToCreateNewGoldenResource;
 	}
 
+	@Override
 	public MdmLink setHadToCreateNewGoldenResource(Boolean theHadToCreateNewResource) {
 		myHadToCreateNewGoldenResource = theHadToCreateNewResource;
 		return this;
@@ -344,8 +371,9 @@ public class MdmLink extends BasePartitionable implements IMdmLink {
 		return myRuleCount;
 	}
 
-	public void setRuleCount(Long theRuleCount) {
+	public MdmLink setRuleCount(Long theRuleCount) {
 		myRuleCount = theRuleCount;
+		return this;
 	}
 
 }

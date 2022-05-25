@@ -30,7 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class JpaResourceLoader implements IResourceLoader {
+public class ResourceLoaderImpl implements IResourceLoader {
 	@Autowired
 	DaoRegistry myDaoRegistry;
 

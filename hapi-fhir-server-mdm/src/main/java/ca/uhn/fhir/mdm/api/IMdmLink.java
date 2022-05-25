@@ -20,5 +20,99 @@ package ca.uhn.fhir.mdm.api;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+
+import java.util.Date;
+
 public interface IMdmLink {
+	Long getId();
+
+	IMdmLink setId(Long theId);
+
+	ResourcePersistentId getGoldenResourcePersistenceId();
+
+	IMdmLink setGoldenResourcePersistenceId(ResourcePersistentId theGoldenResourcePid);
+
+	ResourcePersistentId getSourcePersistenceId();
+
+	IMdmLink setSourcePersistenceId(ResourcePersistentId theSourcePid);
+
+	MdmMatchResultEnum getMatchResult();
+
+	IMdmLink setMatchResult(MdmMatchResultEnum theMatchResult);
+
+	default boolean isNoMatch() {
+		return getMatchResult() == MdmMatchResultEnum.NO_MATCH;
+	}
+
+	default boolean isMatch() {
+		return getMatchResult() == MdmMatchResultEnum.MATCH;
+	}
+
+	default boolean isPossibleMatch() {
+		return getMatchResult() == MdmMatchResultEnum.POSSIBLE_MATCH;
+	}
+
+	default boolean isRedirect() {
+		return getMatchResult() == MdmMatchResultEnum.REDIRECT;
+	}
+
+	default boolean isPossibleDuplicate() {
+		return getMatchResult() == MdmMatchResultEnum.POSSIBLE_DUPLICATE;
+	}
+
+	MdmLinkSourceEnum getLinkSource();
+
+	IMdmLink setLinkSource(MdmLinkSourceEnum theLinkSource);
+
+    default boolean isAuto() {
+        return getLinkSource() == MdmLinkSourceEnum.AUTO;
+    }
+
+    default boolean isManual() {
+        return getLinkSource() == MdmLinkSourceEnum.MANUAL;
+    }
+
+    Date getCreated();
+
+	IMdmLink setCreated(Date theCreated);
+
+	Date getUpdated();
+
+	IMdmLink setUpdated(Date theUpdated);
+
+	String getVersion();
+
+	IMdmLink setVersion(String theVersion);
+
+	Boolean getEidMatch();
+
+	Boolean isEidMatchPresent();
+
+	IMdmLink setEidMatch(Boolean theEidMatch);
+
+	Boolean getHadToCreateNewGoldenResource();
+
+	IMdmLink setHadToCreateNewGoldenResource(Boolean theHadToCreateNewGoldenResource);
+
+	Long getVector();
+
+	IMdmLink setVector(Long theVector);
+
+	Double getScore();
+
+	IMdmLink setScore(Double theScore);
+
+	Long getRuleCount();
+
+	IMdmLink setRuleCount(Long theRuleCount);
+
+	String getMdmSourceType();
+
+	IMdmLink setMdmSourceType(String theMdmSourceType);
+
+	void setPartitionId(PartitionablePartitionId thePartitionablePartitionId);
+
+	PartitionablePartitionId getPartitionId();
 }

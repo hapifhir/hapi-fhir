@@ -1,16 +1,17 @@
 package ca.uhn.fhir.jpa.mdm.dao;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
+import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
+import ca.uhn.fhir.jpa.util.TestUtil;
+import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
-import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
-import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
-import ca.uhn.fhir.jpa.entity.MdmLink;
-import ca.uhn.fhir.jpa.util.TestUtil;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -22,7 +23,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.isIn;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -44,11 +44,11 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 
 	@Test
 	public void testUpdate() {
-		MdmLink createdLink = myMdmLinkDaoSvc.save(createResourcesAndBuildTestMDMLink());
+		IMdmLink createdLink = myMdmLinkDaoSvc.save(createResourcesAndBuildTestMDMLink());
 		assertThat(createdLink.getLinkSource(), is(MdmLinkSourceEnum.MANUAL));
 		TestUtil.sleepOneClick();
 		createdLink.setLinkSource(MdmLinkSourceEnum.AUTO);
-		MdmLink updatedLink = myMdmLinkDaoSvc.save(createdLink);
+		IMdmLink updatedLink = myMdmLinkDaoSvc.save(createdLink);
 		assertNotEquals(updatedLink.getCreated(), updatedLink.getUpdated());
 	}
 
@@ -98,8 +98,8 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 		mdmLink.setMatchResult(theMdmMatchResultEnum);
 		mdmLink.setCreated(new Date());
 		mdmLink.setUpdated(new Date());
-		mdmLink.setGoldenResourcePid(thePatientPid);
-		mdmLink.setSourcePid(runInTransaction(()->myIdHelperService.getPidOrNull(patient)));
+		mdmLink.setGoldenResourcePersistenceId(new ResourcePersistentId(thePatientPid));
+		mdmLink.setSourcePersistenceId(runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), patient)));
 		MdmLink saved= myMdmLinkDao.save(mdmLink);
 		return saved;
 	}
