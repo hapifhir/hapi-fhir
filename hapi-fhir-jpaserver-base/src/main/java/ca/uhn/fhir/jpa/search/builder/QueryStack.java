@@ -1163,15 +1163,19 @@ public class QueryStack {
 			if (isNotBlank(sourceUri) && isNotBlank(requestId)) {
 				orPredicates.add(toAndPredicate(
 					join.createPredicateSourceUri(sourceUri),
-					join.createPredicateRequestId(requestId)
+					join.createPredicateRequestId(requestId),
+					join.createPredicateResourceType(mySqlBuilder.getResourceType())
 				));
 			} else if (isNotBlank(sourceUri)) {
 				orPredicates.add(toAndPredicate(
 					join.createPredicateSourceUri(sourceUri),
-					join.createPredicateSourceUri()
+					join.createPredicateResourceType(mySqlBuilder.getResourceType())
 				));
 			} else if (isNotBlank(requestId)) {
-				orPredicates.add(join.createPredicateRequestId(requestId));
+				orPredicates.add(toAndPredicate(
+					join.createPredicateRequestId(requestId),
+					join.createPredicateResourceType(mySqlBuilder.getResourceType())
+				));
 			}
 		}
 
