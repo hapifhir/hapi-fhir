@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 3540
+title: "Previously, if you searched with only the `_source` search parameter, resources that had the right source value, but wrong resource type were being returned. e.g. `Patient?_source=foo` could potentially return non-Patient resources. This has been corrected."
