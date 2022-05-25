@@ -48,6 +48,7 @@ import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_CODE_N
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_SYSTEM;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_VALUE;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_VALUE_NORM;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.URI_VALUE;
 
 /**
  * Allows hibernate search to index
@@ -174,6 +175,9 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 
 			// reference
 			spfield.fieldTemplate("reference-value", keywordFieldType).matchingPathGlob("*.reference.value").multiValued();
+
+			// uri
+			spfield.fieldTemplate("uriValueTemplate", keywordFieldType).matchingPathGlob("*." + URI_VALUE).multiValued();
 
 			//quantity
 			String quantityPathGlob = "*.quantity";

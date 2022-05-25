@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.MetaUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -34,6 +35,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.function.Consumer;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -145,8 +147,24 @@ public interface ITestDataBuilder {
 		return t -> t.getMeta().addTag().setSystem(theSystem).setCode(theCode).setDisplay(theCode);
 	}
 
+	default Consumer<IBaseResource> withSecurity(String theSystem, String theCode) {
+		return t -> t.getMeta().addSecurity().setSystem(theSystem).setCode(theCode).setDisplay(theCode);
+	}
+
+	default Consumer<IBaseResource> withProfile(String theProfile) {
+		return t -> t.getMeta().addProfile(theProfile);
+	}
+
+	default Consumer<IBaseResource> withSource(FhirContext theContext, String theSource) {
+		return t -> MetaUtil.setSource(theContext, t.getMeta(), theSource);
+	}
+
 	default IIdType createObservation(Consumer<IBaseResource>... theModifiers) {
 		return createResource("Observation", theModifiers);
+	}
+
+	default IIdType createObservation(Collection<Consumer<IBaseResource>> theModifiers) {
+		return createResource("Observation", theModifiers.toArray(new Consumer[0]));
 	}
 
 	default IBaseResource buildPatient(Consumer<IBaseResource>... theModifiers) {

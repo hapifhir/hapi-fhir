@@ -140,7 +140,7 @@ public class MatchUrlService {
 				type.setValuesAsQueryTokens(myFhirContext, nextParamName, (paramList));
 				paramMap.add(nextParamName, type);
 			} else if (Constants.PARAM_SOURCE.equals(nextParamName)) {
-				IQueryParameterAnd<?> param = JpaParamUtil.parseQueryParams(myFhirContext, RestSearchParameterTypeEnum.TOKEN, nextParamName, paramList);
+				IQueryParameterAnd<?> param = JpaParamUtil.parseQueryParams(myFhirContext, RestSearchParameterTypeEnum.URI, nextParamName, paramList);
 				paramMap.add(nextParamName, param);
 			} else if (JpaConstants.PARAM_DELETE_EXPUNGE.equals(nextParamName)) {
 				paramMap.setDeleteExpunge(true);
