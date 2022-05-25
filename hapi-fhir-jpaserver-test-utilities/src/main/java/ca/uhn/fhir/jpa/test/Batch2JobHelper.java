@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class Batch2JobHelper {
 
@@ -38,11 +39,15 @@ public class Batch2JobHelper {
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
 
-	public void awaitJobCompletion(String theId) {
+	public void awaitMultipleChunkJobCompletion(String theId) {
 		await().until(() -> {
 			myJobMaintenanceService.runMaintenancePass();
 			return myJobCoordinator.getInstance(theId).getStatus();
 		}, equalTo(StatusEnum.COMPLETED));
+	}
+
+	public void awaitSingleChunkJobCompletion(String theId) {
+		await().until(() -> myJobCoordinator.getInstance(theId).getStatus() == StatusEnum.COMPLETED);
 	}
 
 	public JobInstance awaitJobFailure(String theId) {
@@ -65,5 +70,13 @@ public class Batch2JobHelper {
 			myJobMaintenanceService.runMaintenancePass();
 			return myJobCoordinator.getInstance(theId).getStatus();
 		}, equalTo(StatusEnum.IN_PROGRESS));
+	}
+
+	public void assertNoGatedStep(String theInstanceId) {
+		assertNull(myJobCoordinator.getInstance(theInstanceId).getCurrentGatedStepId());
+	}
+
+	public void awaitGatedStepId(String theExpectedGatedStepId, String theInstanceId) {
+		await().until(() -> theExpectedGatedStepId.equals(myJobCoordinator.getInstance(theInstanceId).getCurrentGatedStepId()));
 	}
 }

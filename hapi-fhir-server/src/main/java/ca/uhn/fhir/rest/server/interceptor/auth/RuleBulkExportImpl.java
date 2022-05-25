@@ -80,11 +80,8 @@ public class RuleBulkExportImpl extends BaseRule {
 			String actualGroupId = options.getGroupId().toUnqualifiedVersionless().getValue();
 			if (Objects.equals(expectedGroupId, actualGroupId)) {
 				return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
-			} else {
-				return new AuthorizationInterceptor.Verdict(PolicyEnum.DENY,this);
 			}
 		}
-
 		return null;
 	}
 
