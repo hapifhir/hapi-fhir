@@ -1,6 +1,8 @@
-package ca.uhn.fhir.batch2.maintenance;
+package ca.uhn.fhir.batch2.progress;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.maintenance.JobChunkProgressAccumulator;
+import ca.uhn.fhir.batch2.maintenance.JobMaintenanceServiceImpl;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
@@ -9,18 +11,18 @@ import java.util.List;
 
 import static ca.uhn.fhir.batch2.maintenance.JobInstanceProcessor.updateInstanceStatus;
 
-class JobInstanceProgressCalculator {
+public class JobInstanceProgressCalculator {
 	private final IJobPersistence myJobPersistence;
 	private final JobInstance myInstance;
 	private final JobChunkProgressAccumulator myProgressAccumulator;
 
-	JobInstanceProgressCalculator(IJobPersistence theJobPersistence, JobInstance theInstance, JobChunkProgressAccumulator theProgressAccumulator) {
+	public JobInstanceProgressCalculator(IJobPersistence theJobPersistence, JobInstance theInstance, JobChunkProgressAccumulator theProgressAccumulator) {
 		myJobPersistence = theJobPersistence;
 		myInstance = theInstance;
 		myProgressAccumulator = theProgressAccumulator;
 	}
 
-	void calculateAndStoreInstanceProgress() {
+	public void calculateAndStoreInstanceProgress() {
 		InstanceProgress instanceProgress = new InstanceProgress();
 
 		for (int page = 0; ; page++) {
