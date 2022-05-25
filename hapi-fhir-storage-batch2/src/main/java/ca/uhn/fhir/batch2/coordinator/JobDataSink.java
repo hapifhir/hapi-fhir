@@ -1,4 +1,4 @@
-package ca.uhn.fhir.batch2.impl;
+package ca.uhn.fhir.batch2.coordinator;
 
 /*-
  * #%L
@@ -21,16 +21,15 @@ package ca.uhn.fhir.batch2.impl;
  */
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
-import ca.uhn.fhir.batch2.model.JobDefinition;
-import ca.uhn.fhir.batch2.model.JobDefinitionStep;
-import ca.uhn.fhir.batch2.model.JobWorkCursor;
-import ca.uhn.fhir.batch2.model.JobWorkNotification;
-import ca.uhn.fhir.batch2.model.WorkChunkData;
+import ca.uhn.fhir.batch2.channel.BatchJobSender;
+import ca.uhn.fhir.batch2.model.*;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
 
 import javax.annotation.Nonnull;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> extends BaseDataSink<PT,IT,OT> {
 	private final BatchJobSender myBatchJobSender;
@@ -39,6 +38,7 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 	private final int myJobDefinitionVersion;
 	private final JobDefinitionStep<PT, OT, ?> myTargetStep;
 	private final AtomicInteger myChunkCounter = new AtomicInteger(0);
+	private final AtomicReference<String> myLastChunkId = new AtomicReference<>();
 	private final boolean myGatedExecution;
 
 	JobDataSink(@Nonnull BatchJobSender theBatchJobSender, @Nonnull IJobPersistence theJobPersistence, @Nonnull JobDefinition<?> theDefinition, @Nonnull String theInstanceId, @Nonnull JobWorkCursor<PT, IT, OT> theJobWorkCursor) {
@@ -61,6 +61,7 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 
 		BatchWorkChunk batchWorkChunk = new BatchWorkChunk(myJobDefinitionId, myJobDefinitionVersion, targetStepId, instanceId, sequence, dataValueString);
 		String chunkId = myJobPersistence.storeWorkChunk(batchWorkChunk);
+		myLastChunkId.set(chunkId);
 
 		if (!myGatedExecution) {
 			JobWorkNotification workNotification = new JobWorkNotification(myJobDefinitionId, myJobDefinitionVersion, instanceId, targetStepId, chunkId);
@@ -73,4 +74,11 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 		return myChunkCounter.get();
 	}
 
+	public String getOnlyChunkId() {
+		if (getWorkChunkCount() != 1) {
+			String msg = String.format("Expected this sink to have exactly one work chunk but there are %d.  Job %s v%s step %s", getWorkChunkCount(), myJobDefinitionId, myJobDefinitionVersion, myTargetStep);
+			throw new IllegalStateException(Msg.code(2082) + msg);
+		}
+		return myLastChunkId.get();
+	}
 }

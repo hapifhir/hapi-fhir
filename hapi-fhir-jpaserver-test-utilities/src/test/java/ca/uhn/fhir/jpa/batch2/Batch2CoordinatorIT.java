@@ -6,7 +6,7 @@ import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
-import ca.uhn.fhir.batch2.impl.JobDefinitionRegistry;
+import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -22,6 +22,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	public static final int TEST_JOB_VERSION = 1;
+	public static final String FIRST_STEP_ID = "first-step";
+	public static final String LAST_STEP_ID = "last-step";
 	@Autowired
 	JobDefinitionRegistry myJobDefinitionRegistry;
 	@Autowired
@@ -43,7 +45,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> fail();
 
 		String jobId = "test-job-1";
-		JobDefinition<? extends IModelJson> definition = buildJobDefinition(jobId, firstStep, lastStep);
+		JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(jobId, firstStep, lastStep);
 
 		myJobDefinitionRegistry.addJobDefinition(definition);
 
@@ -53,12 +55,12 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		String instanceId = myJobCoordinator.startInstance(request);
 		myFirstStepLatch.awaitExpected();
 
-		myBatch2JobHelper.awaitJobCompletion(instanceId);
+		myBatch2JobHelper.awaitSingleChunkJobCompletion(instanceId);
 	}
 
 
 	@Test
-	public void testFirstStepToSecondStep() throws InterruptedException {
+	public void testFirstStepToSecondStep_singleChunkFasttracks() throws InterruptedException {
 		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> firstStep = (step, sink) -> {
 			sink.accept(new FirstStepOutput());
 			callLatch(myFirstStepLatch, step);
@@ -67,7 +69,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> callLatch(myLastStepLatch, step);
 
 		String jobId = "test-job-2";
-		JobDefinition<? extends IModelJson> definition = buildJobDefinition(jobId, firstStep, lastStep);
+		JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(jobId, firstStep, lastStep);
 
 		myJobDefinitionRegistry.addJobDefinition(definition);
 
@@ -77,8 +79,40 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		String instanceId = myJobCoordinator.startInstance(request);
 		myFirstStepLatch.awaitExpected();
 
+		myBatch2JobHelper.assertNoGatedStep(instanceId);
+
 		myLastStepLatch.setExpectedCount(1);
-		myBatch2JobHelper.awaitJobCompletion(instanceId);
+		// Since there was only one chunk, the job should proceed without requiring a maintenance pass
+		myLastStepLatch.awaitExpected();
+		myBatch2JobHelper.awaitSingleChunkJobCompletion(instanceId);
+	}
+
+
+	@Test
+	public void testFirstStepToSecondStep_doubleChunk_doesNotFastTrack() throws InterruptedException {
+		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> firstStep = (step, sink) -> {
+			sink.accept(new FirstStepOutput());
+			sink.accept(new FirstStepOutput());
+			callLatch(myFirstStepLatch, step);
+			return RunOutcome.SUCCESS;
+		};
+		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> callLatch(myLastStepLatch, step);
+
+		String jobId = "test-job-5";
+		JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(jobId, firstStep, lastStep);
+
+		myJobDefinitionRegistry.addJobDefinition(definition);
+
+		JobInstanceStartRequest request = buildRequest(jobId);
+
+		myFirstStepLatch.setExpectedCount(1);
+		String instanceId = myJobCoordinator.startInstance(request);
+		myFirstStepLatch.awaitExpected();
+
+		myBatch2JobHelper.awaitGatedStepId(FIRST_STEP_ID, instanceId);
+
+		myLastStepLatch.setExpectedCount(2);
+		myBatch2JobHelper.awaitMultipleChunkJobCompletion(instanceId);
 		myLastStepLatch.awaitExpected();
 	}
 
@@ -92,7 +126,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> fail();
 
 		String jobId = "test-job-3";
-		JobDefinition<? extends IModelJson> definition = buildJobDefinition(jobId, firstStep, lastStep);
+		JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(jobId, firstStep, lastStep);
 
 		myJobDefinitionRegistry.addJobDefinition(definition);
 
@@ -115,7 +149,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> fail();
 
 		String jobId = "test-job-4";
-		JobDefinition<? extends IModelJson> definition = buildJobDefinition(jobId, firstStep, lastStep);
+		JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(jobId, firstStep, lastStep);
 
 		myJobDefinitionRegistry.addJobDefinition(definition);
 
@@ -146,7 +180,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	}
 
 	@Nonnull
-	private JobDefinition<? extends IModelJson> buildJobDefinition(String theJobId, IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> theFirstStep, IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> theLastStep) {
+	private JobDefinition<? extends IModelJson> buildGatedJobDefinition(String theJobId, IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> theFirstStep, IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> theLastStep) {
 		return JobDefinition.newBuilder()
 			.setJobDefinitionId(theJobId)
 			.setJobDescription("test job")
@@ -154,13 +188,13 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 			.setParametersType(TestJobParameters.class)
 			.gatedExecution()
 			.addFirstStep(
-				"first-step",
+				FIRST_STEP_ID,
 				"Test first step",
 				FirstStepOutput.class,
 				theFirstStep
 			)
 			.addLastStep(
-				"last-step",
+				LAST_STEP_ID,
 				"Test last step",
 				theLastStep
 			)

@@ -40,7 +40,6 @@ import java.util.List;
  */
 public class JobWorkCursor<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(JobWorkCursor.class);
-
 	public final JobDefinition<PT> jobDefinition;
 	public final boolean isFirstStep;
 	public final JobDefinitionStep<PT, IT, OT> currentStep;
@@ -65,8 +64,7 @@ public class JobWorkCursor<PT extends IModelJson, IT extends IModelJson, OT exte
 		}
 	}
 
-	public static <PT extends IModelJson> JobWorkCursor<PT,?,?> fromJobDefinitionAndWorkNotification(JobDefinition<PT> theJobDefinition, JobWorkNotification theWorkNotification) {
-		String requestedStepId = theWorkNotification.getTargetStepId();
+	public static <PT extends IModelJson> JobWorkCursor<PT,?,?> fromJobDefinitionAndRequestedStepId(JobDefinition<PT> theJobDefinition, String theRequestedStepId) {
 		boolean isFirstStep = false;
 		JobDefinitionStep<PT,?,?> currentStep = null;
 		JobDefinitionStep<PT,?,?> nextStep = null;
@@ -74,7 +72,7 @@ public class JobWorkCursor<PT extends IModelJson, IT extends IModelJson, OT exte
 		List<JobDefinitionStep<PT, ?, ?>> steps = theJobDefinition.getSteps();
 		for (int i = 0; i < steps.size(); i++) {
 			JobDefinitionStep<PT, ?, ?> step = steps.get(i);
-			if (step.getStepId().equals(requestedStepId)) {
+			if (step.getStepId().equals(theRequestedStepId)) {
 				currentStep = step;
 				if (i == 0) {
 					isFirstStep = true;
@@ -87,7 +85,7 @@ public class JobWorkCursor<PT extends IModelJson, IT extends IModelJson, OT exte
 		}
 
 		if (currentStep == null) {
-			String msg = "Unknown step[" + requestedStepId + "] for job definition ID[" + theJobDefinition.getJobDefinitionId() + "] version[" + theJobDefinition.getJobDefinitionVersion() + "]";
+			String msg = "Unknown step[" + theRequestedStepId + "] for job definition ID[" + theJobDefinition.getJobDefinitionId() + "] version[" + theJobDefinition.getJobDefinitionVersion() + "]";
 			ourLog.warn(msg);
 			throw new InternalErrorException(Msg.code(2042) + msg);
 		}
