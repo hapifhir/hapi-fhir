@@ -26,7 +26,6 @@ import ca.uhn.fhir.jpa.searchparam.nickname.NicknameSvc;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
 import java.util.Locale;
 
 public class NicknameMatcher implements IMdmStringMatcher {

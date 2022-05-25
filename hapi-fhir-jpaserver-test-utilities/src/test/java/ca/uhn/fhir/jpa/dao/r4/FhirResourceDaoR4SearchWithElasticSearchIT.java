@@ -1633,13 +1633,13 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		public void uriAndOrCombinedSearch() {
 			String id = myTestDataBuilder.createObservation(List.of(
 				myTestDataBuilder.withObservationCode("http://example.com/", "theCode"),
-				myTestDataBuilder.withProfile("http://example.com|theProfile"),
-				myTestDataBuilder.withProfile("http://example.com|anotherProfile"))).getIdPart();
+				myTestDataBuilder.withProfile("http://example.com/theProfile"),
+				myTestDataBuilder.withProfile("http://example.com/anotherProfile"))).getIdPart();
 
 			myCaptureQueriesListener.clear();
 			List<String> allIds = myTestDaoSearch.searchForIds("/Observation" +
-				"?_profile=http://example.com|non-existing-profile\",http://example.com|theProfile" +
-				"&_profile=http://example.com|other-non-existing-profile\",http://example.com|anotherProfile");
+				"?_profile=http://example.com/non-existing-profile,http://example.com/theProfile" +
+				"&_profile=http://example.com/other-non-existing-profile,http://example.com/anotherProfile");
 
 			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
 			assertThat(allIds, contains(id));
@@ -1649,10 +1649,10 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		public void tagProfileSearch() {
 			String id = myTestDataBuilder.createObservation(List.of(
 				myTestDataBuilder.withObservationCode("http://example.com/", "theCode"),
-				myTestDataBuilder.withProfile("http://example.com|theProfile"))).getIdPart();
+				myTestDataBuilder.withProfile("http://example.com/theProfile"))).getIdPart();
 
 			myCaptureQueriesListener.clear();
-			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_profile=http://example.com|theProfile");
+			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_profile=http://example.com/theProfile");
 
 			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
 			assertThat(allIds, contains(id));
@@ -1662,10 +1662,10 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		public void tagSourceSearch() {
 			String id = myTestDataBuilder.createObservation(List.of(
 				myTestDataBuilder.withObservationCode("http://example.com/", "theCode"),
-				myTestDataBuilder.withSource(myFhirContext, "http://example.com|theSource"))).getIdPart();
+				myTestDataBuilder.withSource(myFhirContext, "http://example.com/theSource"))).getIdPart();
 
 			myCaptureQueriesListener.clear();
-			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_source=http://example.com|theSource");
+			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_source=http://example.com/theSource");
 
 			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
 			assertThat(allIds, contains(id));
