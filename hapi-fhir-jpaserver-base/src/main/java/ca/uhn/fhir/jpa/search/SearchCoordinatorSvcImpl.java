@@ -121,7 +121,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Component("mySearchCoordinatorSvc")
-//public class SearchCoordinatorSvcImpl extends AbstractSearchSvc implements ISearchCoordinatorSvc {
 public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	public static final int DEFAULT_SYNC_SIZE = 250;
 	public static final String UNIT_TEST_CAPTURE_STACK = "unit_test_capture_stack";
