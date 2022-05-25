@@ -48,7 +48,6 @@ import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 import org.hamcrest.Matchers;
-import org.hl7.fhir.dstu3.model.InstantType;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -1689,7 +1688,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 			myOldObsId = myTestDataBuilder.createObservation(List.of(
 				myTestDataBuilder.withObservationCode("http://example.com/", "theCodeOld"),
-				myTestDataBuilder.withLastUpdated(new InstantType(myOldLastUpdatedDateTime).getValue()) )).getIdPart();
+				myTestDataBuilder.withLastUpdated(myOldLastUpdatedDateTime) )).getIdPart();
 
 			myNewObsId = myTestDataBuilder.createObservation(List.of(
 				myTestDataBuilder.withObservationCode("http://example.com/", "theCodeNew"),
