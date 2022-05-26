@@ -28,6 +28,8 @@ import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
+import ca.uhn.fhir.batch2.maintenance.JobChunkProgressAccumulator;
+import ca.uhn.fhir.batch2.progress.JobInstanceProgressCalculator;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -101,9 +103,10 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 			// This job is defined to be gated, but so far every step has produced at most 1 work chunk, so it is
 			// eligible for fast tracking.
 			if (myCursor.isFinalStep()) {
-				if (updateInstanceStatus(jobInstance, StatusEnum.COMPLETED)) {
-					myJobPersistence.updateInstance(jobInstance);
-				}
+				// TODO KHS instance factory should set definition instead of setting it explicitly here and there
+				jobInstance.setJobDefinition(myDefinition);
+				JobInstanceProgressCalculator calculator = new JobInstanceProgressCalculator(myJobPersistence, jobInstance, new JobChunkProgressAccumulator());
+				calculator.calculateAndStoreInstanceProgress();
 			} else {
 				JobWorkNotification workNotification = new JobWorkNotification(jobInstance, myCursor.nextStep.getStepId(), ((JobDataSink<PT,IT,OT>) theDataSink).getOnlyChunkId());
 				myBatchJobSender.sendWorkChannelMessage(workNotification);
