@@ -42,6 +42,13 @@
 				<artifactId>maven-jar-plugin</artifactId>
 				<executions>
 					<execution>
+						<id>default-jar</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+					<execution>
 						<id>javadoc-jar</id>
 						<phase>package</phase>
 						<goals>
@@ -49,6 +56,16 @@
 						</goals>
 						<configuration>
 							<classifier>javadoc</classifier>
+						</configuration>
+					</execution>
+					<execution>
+						<id>sources-jar</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<classifier>sources</classifier>
 						</configuration>
 					</execution>
 				</executions>
