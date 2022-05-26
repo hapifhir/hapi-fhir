@@ -1,4 +1,4 @@
 ---
 type: add
 issue: 3640
-title: "Freetext search parameters _tag, _profile and _security were implemented."
+title: "Extended Lucene/Elasticsearch indexing of search parameters now supports _tag, _profile and _security."

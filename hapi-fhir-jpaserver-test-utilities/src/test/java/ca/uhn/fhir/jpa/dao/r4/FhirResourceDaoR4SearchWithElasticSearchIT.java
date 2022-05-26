@@ -1662,10 +1662,10 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			public void simpleSearch() {
 				String id = myTestDataBuilder.createObservation(List.of(
 					myTestDataBuilder.withObservationCode("http://example.com/", "theCode"),
-					myTestDataBuilder.withProfile("http://example.com|theProfile"))).getIdPart();
+					myTestDataBuilder.withProfile("http://example.com/someProfile/v1"))).getIdPart();
 
 				myCaptureQueriesListener.clear();
-				List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_profile=http://example.com|theProfile");
+				List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_profile=http://example.com/someProfile/v1");
 
 				assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
 				assertThat(allIds, contains(id));
@@ -1675,13 +1675,13 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			public void andOrCombinedSearch() {
 				String id = myTestDataBuilder.createObservation(List.of(
 					myTestDataBuilder.withObservationCode("http://example.com/", "theCode"),
-					myTestDataBuilder.withProfile("http://example.com|theProfile"),
-					myTestDataBuilder.withProfile("http://example.com|anotherProfile"))).getIdPart();
+					myTestDataBuilder.withProfile("http://example.com/someProfile/v1"),
+					myTestDataBuilder.withProfile("http://example.com/anotherProfile/v1"))).getIdPart();
 
 				myCaptureQueriesListener.clear();
 				List<String> allIds = myTestDaoSearch.searchForIds("/Observation" +
-					"?_profile=http://example.com|non-existing-profile\",http://example.com|theProfile" +
-					"&_profile=http://example.com|other-non-existing-profile\",http://example.com|anotherProfile");
+					"?_profile=http://example.com/non-existing-profile,http://example.com/someProfile/v1" +
+					"&_profile=http://example.com/other-non-existing-profile,http://example.com/anotherProfile/v1");
 
 				assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
 				assertThat(allIds, contains(id));

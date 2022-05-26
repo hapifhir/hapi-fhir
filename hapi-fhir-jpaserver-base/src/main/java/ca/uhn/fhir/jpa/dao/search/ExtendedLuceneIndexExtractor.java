@@ -93,10 +93,10 @@ public class ExtendedLuceneIndexExtractor {
 			retVal.addQuantityIndexData(nextParam.getParamName(), nextParam.getUnits(), nextParam.getSystem(), nextParam.getValue().doubleValue()));
 
 		theResource.getMeta().getTag().forEach(tag ->
-			retVal.addTokenIndexData("_tag", new CodingDt(tag.getSystem(), tag.getCode()).setDisplay(tag.getDisplay())));
+			retVal.addTokenIndexData("_tag", tag));
 
 		theResource.getMeta().getSecurity().forEach(sec ->
-			retVal.addTokenIndexData("_security", new CodingDt(sec.getSystem(), sec.getCode()).setDisplay(sec.getDisplay())));
+			retVal.addTokenIndexData("_security", sec));
 
 		theResource.getMeta().getProfile().forEach(prof ->
 			retVal.addUriIndexData("_profile", prof.getValue()));
