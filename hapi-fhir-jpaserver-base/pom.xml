@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.1.0-PRE1-SNAPSHOT</version>
+		<version>6.1.0-PRE2-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -404,6 +404,7 @@
 					</dialects>
 					<customDialects>
 						<customDialect>ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect</customDialect>
+						<customDialect>org.hibernate.dialect.CockroachDB201Dialect</customDialect>
 					</customDialects>
 					<outputDirectory>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database</outputDirectory>
 					<packages>

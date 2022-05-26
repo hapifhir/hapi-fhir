@@ -73,6 +73,7 @@ public class AddIdGeneratorTask extends BaseTask {
 			case H2_EMBEDDED:
 				sql = "create sequence " + myGeneratorName + " start with 1 increment by 50";
 				break;
+			case COCKROACHDB_21_1:
 			case POSTGRES_9_4:
 				sql = "create sequence " + myGeneratorName + " start 1 increment 50";
 				break;

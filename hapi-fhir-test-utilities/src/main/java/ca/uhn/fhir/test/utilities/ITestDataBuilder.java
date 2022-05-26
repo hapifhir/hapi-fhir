@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.MetaUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -152,6 +153,10 @@ public interface ITestDataBuilder {
 
 	default Consumer<IBaseResource> withProfile(String theProfile) {
 		return t -> t.getMeta().addProfile(theProfile);
+	}
+
+	default Consumer<IBaseResource> withSource(FhirContext theContext, String theSource) {
+		return t -> MetaUtil.setSource(theContext, t.getMeta(), theSource);
 	}
 
 	default IIdType createObservation(Consumer<IBaseResource>... theModifiers) {

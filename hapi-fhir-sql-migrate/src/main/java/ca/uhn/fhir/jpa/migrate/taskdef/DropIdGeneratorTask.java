@@ -76,6 +76,7 @@ public class DropIdGeneratorTask extends BaseTask {
 				sql = "drop sequence " + myGeneratorName;
 				break;
 			case POSTGRES_9_4:
+			case COCKROACHDB_21_1:
 				sql = "drop sequence " + myGeneratorName;
 				break;
 			case ORACLE_12C:
