@@ -23,7 +23,7 @@ import ca.uhn.fhir.util.CoverageIgnore;
  */
 
 
-public class HasAndListParam  extends BaseAndListParam<HasOrListParam> {
+public class HasAndListParam extends BaseAndListParam<HasOrListParam> {
 
 	@Override
 	HasOrListParam newInstance() {

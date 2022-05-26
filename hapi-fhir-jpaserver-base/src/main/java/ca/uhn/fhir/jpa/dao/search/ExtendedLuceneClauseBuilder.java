@@ -28,7 +28,6 @@ import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
@@ -36,8 +35,10 @@ import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.DateUtils;
+import ca.uhn.fhir.util.StringUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -49,34 +50,28 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import java.security.InvalidParameterException;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.COMP_CODE_SYSTEM;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.COMP_CODE_VALUE;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.COMP_CODE_VALUE_QTY_PARAM_NAME;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.COMP_QTY_CODE;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.COMP_QTY_SYSTEM;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.COMP_QTY_VALUE;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_EXACT;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_NORMALIZED;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_TEXT;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.NESTED_SEARCH_PARAM_ROOT;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.CODE;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_CODE;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_CODE_NORM;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_PARAM_NAME;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.SYSTEM;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.VALUE;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_SYSTEM;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_VALUE;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_VALUE_NORM;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.SEARCH_PARAM_ROOT;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.URI_VALUE;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ExtendedLuceneClauseBuilder {
@@ -223,7 +218,7 @@ public class ExtendedLuceneClauseBuilder {
 		for (List<? extends IQueryParameterType> nextAnd : stringAndOrTerms) {
 			Set<String> terms = extractOrStringParams(nextAnd);
 			ourLog.debug("addStringTextSearch {}, {}", theSearchParamName, terms);
-			if (terms.size() >= 1) {
+			if (!terms.isEmpty()) {
 				String query = terms.stream()
 					.map(s -> "( " + s + " )")
 					.collect(Collectors.joining(" | "));
@@ -258,12 +253,27 @@ public class ExtendedLuceneClauseBuilder {
 			Set<String> terms = extractOrStringParams(nextAnd);
 			ourLog.debug("addStringContainsSearch {} {}", theSearchParamName, terms);
 			List<? extends PredicateFinalStep> orTerms = terms.stream()
-				.map(s ->
-					myPredicateFactory.wildcard().field(fieldPath).matching("*" + s + "*"))
+				// wildcard is a term-level query, so queries aren't analyzed.  Do our own normalization first.
+				.map(s-> normalize(s))
+				.map(s -> myPredicateFactory
+					.wildcard().field(fieldPath)
+					.matching("*" + s + "*"))
 				.collect(Collectors.toList());
 
 			myRootClause.must(orPredicateOrSingle(orTerms));
 		}
+	}
+
+	/**
+	 * Normalize the string to match our standardAnalyzer.
+	 * @see ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer#STANDARD_ANALYZER
+	 *
+	 * @param theString the raw string
+	 * @return a case and accent normalized version of the input
+	 */
+	@Nonnull
+	private String normalize(String theString) {
+		return StringUtil.normalizeStringForSearchIndexing(theString).toLowerCase(Locale.ROOT);
 	}
 
 	public void addStringUnmodifiedSearch(String theSearchParamName, List<List<IQueryParameterType>> theStringAndOrTerms) {
@@ -273,7 +283,10 @@ public class ExtendedLuceneClauseBuilder {
 			ourLog.debug("addStringUnmodifiedSearch {} {}", theSearchParamName, terms);
 			List<? extends PredicateFinalStep> orTerms = terms.stream()
 				.map(s ->
-					myPredicateFactory.wildcard().field(fieldPath).matching(s + "*"))
+					myPredicateFactory.wildcard()
+						.field(fieldPath)
+						// wildcard is a term-level query, so it isn't analyzed.  Do our own case-folding to match the normStringAnalyzer
+						.matching(normalize(s) + "*"))
 				.collect(Collectors.toList());
 
 			myRootClause.must(orPredicateOrSingle(orTerms));
@@ -364,8 +377,8 @@ public class ExtendedLuceneClauseBuilder {
 	 * }
 	 * </pre>
 	 *
-	 * @param theSearchParamName
-	 * @param theDateAndOrTerms
+	 * @param theSearchParamName e.g code
+	 * @param theDateAndOrTerms The and/or list of DateParam values
 	 */
 	public void addDateUnmodifiedSearch(String theSearchParamName, List<List<IQueryParameterType>> theDateAndOrTerms) {
 		for (List<? extends IQueryParameterType> nextAnd : theDateAndOrTerms) {
@@ -485,38 +498,30 @@ public class ExtendedLuceneClauseBuilder {
 	 * Differences with DB search:
 	 *  _ is not all-normalized-or-all-not. Each parameter is applied on quantity or normalized quantity depending on UCUM fitness
 	 *  _ respects ranges for equal and approximate qualifiers
+	 *
+	 * Strategy: For each parameter, if it can be canonicalized, it is, and used against 'normalized-value-quantity' index
+	 * 	otherwise it is applied as-is to 'value-quantity'
 	 */
 	public void addQuantityUnmodifiedSearch(String theSearchParamName, List<List<IQueryParameterType>> theQuantityAndOrTerms) {
-		addAndOrSearchClauses(theSearchParamName, theQuantityAndOrTerms, this::addQuantityOrClauses);
-	}
 
-
-	public void addCompositeUnmodifiedSearch(String theSearchParamName, List<List<IQueryParameterType>> theCompositeAndOrTerms) {
-		addAndOrSearchClauses(theSearchParamName, theCompositeAndOrTerms, this::addCompositeOrClauses);
-	}
-
-	/**
-	 * Handles "and" clauses (outer loop)  and "or" (inner loop) generically using the received param-type specific function
-	 */
-	private void addAndOrSearchClauses(String theSearchParamName, List<List<IQueryParameterType>> theAndOrTerms,
-			BiFunction<String, IQueryParameterType, BooleanPredicateClausesStep<?>> theAddClausesFunction) {
-
-		for (List<IQueryParameterType> nextAnd : theAndOrTerms) {
-			BooleanPredicateClausesStep<?> terms = myPredicateFactory.bool();
-			terms.minimumShouldMatchNumber(1);
+		for (List<IQueryParameterType> nextAnd : theQuantityAndOrTerms) {
+			BooleanPredicateClausesStep<?> quantityTerms = myPredicateFactory.bool();
+			quantityTerms.minimumShouldMatchNumber(1);
 
 			for (IQueryParameterType paramType : nextAnd) {
-				BooleanPredicateClausesStep<?> orTerms = theAddClausesFunction.apply(theSearchParamName, paramType);
-				terms.should(orTerms);
+		BooleanPredicateClausesStep<?> orQuantityTerms = myPredicateFactory.bool();
+				addQuantityOrClauses(theSearchParamName, paramType, orQuantityTerms);
+				quantityTerms.should(orQuantityTerms);
 			}
 
-			myRootClause.must(terms);
+			myRootClause.must(quantityTerms);
 		}
 	}
 
 
-	private BooleanPredicateClausesStep<?> addQuantityOrClauses(String theSearchParamName, IQueryParameterType theParamType) {
-		BooleanPredicateClausesStep<?> orQuantityTerms = myPredicateFactory.bool();
+	private void addQuantityOrClauses(String theSearchParamName,
+			IQueryParameterType theParamType, BooleanPredicateClausesStep<?> theQuantityTerms) {
+
 		QuantityParam qtyParam = QuantityParam.toQuantityParam(theParamType);
 		ParamPrefixEnum activePrefix = qtyParam.getPrefix() == null ? ParamPrefixEnum.EQUAL : qtyParam.getPrefix();
 		String fieldPath = NESTED_SEARCH_PARAM_ROOT + "." + theSearchParamName + "." + QTY_PARAM_NAME;
@@ -525,31 +530,29 @@ public class ExtendedLuceneClauseBuilder {
 			QuantityParam canonicalQty = UcumServiceUtil.toCanonicalQuantityOrNull(qtyParam);
 			if (canonicalQty != null) {
 				String valueFieldPath = fieldPath + "." + QTY_VALUE_NORM;
-				setPrefixedQuantityPredicate(orQuantityTerms, activePrefix, canonicalQty, valueFieldPath);
-				orQuantityTerms.must(myPredicateFactory.match()
+				setPrefixedQuantityPredicate(theQuantityTerms, activePrefix, canonicalQty, valueFieldPath);
+				theQuantityTerms.must(myPredicateFactory.match()
 					.field(fieldPath + "." + QTY_CODE_NORM)
 					.matching(canonicalQty.getUnits()));
-				return orQuantityTerms;
+				return;
 			}
 		}
 
 		// not NORMALIZED_QUANTITY_SEARCH_SUPPORTED or non-canonicalizable parameter
-		String valueFieldPath = fieldPath + "." + VALUE;
-		setPrefixedQuantityPredicate(orQuantityTerms, activePrefix, qtyParam, valueFieldPath);
+		String valueFieldPath = fieldPath + "." + QTY_VALUE;
+		setPrefixedQuantityPredicate(theQuantityTerms, activePrefix, qtyParam, valueFieldPath);
 
 		if ( isNotBlank(qtyParam.getSystem()) ) {
-			orQuantityTerms.must(
+			theQuantityTerms.must(
 				myPredicateFactory.match()
-					.field(fieldPath + "." + SYSTEM).matching(qtyParam.getSystem()) );
+					.field(fieldPath + "." + QTY_SYSTEM).matching(qtyParam.getSystem()) );
 		}
 
 		if ( isNotBlank(qtyParam.getUnits()) ) {
-			orQuantityTerms.must(
+			theQuantityTerms.must(
 				myPredicateFactory.match()
-					.field(fieldPath + "." + CODE).matching(qtyParam.getUnits()) );
+					.field(fieldPath + "." + QTY_CODE).matching(qtyParam.getUnits()) );
 		}
-
-		return orQuantityTerms;
 	}
 
 
@@ -621,66 +624,16 @@ public class ExtendedLuceneClauseBuilder {
 		}
 	}
 
-	private BooleanPredicateClausesStep<?> addCompositeOrClauses(String theParamName, IQueryParameterType theParamType) {
-		BooleanPredicateClausesStep<?> orTerms = myPredicateFactory.bool();
 
-		if (! (theParamType instanceof CompositeParam<?, ?>)) {
-			throw new InvalidParameterException(Msg.code(0) + "'theParamType' must be a CompositeParam");
-		}
+	public void addUriUnmodifiedSearch(String theParamName, List<List<IQueryParameterType>> theUriUnmodifiedAndOrTerms) {
+		for (List<IQueryParameterType> nextAnd : theUriUnmodifiedAndOrTerms) {
 
-		CompositeParam<?, ?> compsitParam = (CompositeParam<?, ?>) theParamType;
+			List<String> orTerms = nextAnd.stream().map(p -> ((UriParam) p).getValue()).collect(Collectors.toList());
+			PredicateFinalStep orTermPredicate = myPredicateFactory.terms()
+				.field(String.join(".", SEARCH_PARAM_ROOT, theParamName, URI_VALUE))
+				.matchingAny(orTerms);
 
-		if (! (compsitParam.getLeftValue() instanceof TokenParam) || ! (compsitParam.getRightValue() instanceof QuantityParam)) {
-			ourLog.warn("Can't handle composite parameter of sub types left: {} and right: {}",
-				compsitParam.getLeftValue().getClass().getSimpleName(), compsitParam.getRightValue().getClass().getSimpleName());
-			return orTerms;
-		}
-
-		TokenParam tokenParam = (TokenParam) compsitParam.getLeftValue();
-		QuantityParam qtyParam = (QuantityParam) compsitParam.getRightValue();
-
-		String fieldPath = NESTED_SEARCH_PARAM_ROOT + "." + theParamName + "." + COMP_CODE_VALUE_QTY_PARAM_NAME;
-
-		// token param
-		addTokenOrTerms(orTerms, tokenParam, fieldPath);
-
-		// Qty param
-		ParamPrefixEnum activePrefix = qtyParam.getPrefix() == null ? ParamPrefixEnum.EQUAL : qtyParam.getPrefix();
-		String valueFieldPath = fieldPath + "." + COMP_QTY_VALUE;
-		setPrefixedQuantityPredicate(orTerms, activePrefix, qtyParam, valueFieldPath);
-		addQuantityOrTerms(orTerms, qtyParam, fieldPath);
-
-		return orTerms;
-	}
-
-
-	private void addQuantityOrTerms(BooleanPredicateClausesStep<?> theOrTerms, QuantityParam theQtyParam, String thePath) {
-		if ( isNotBlank(theQtyParam.getSystem()) ) {
-			theOrTerms.must(
-				myPredicateFactory.match()
-					.field(thePath + "." + COMP_QTY_SYSTEM).matching(theQtyParam.getSystem()) );
-		}
-
-		if ( isNotBlank(theQtyParam.getUnits()) ) {
-			theOrTerms.must(
-				myPredicateFactory.match()
-					.field(thePath + "." + COMP_QTY_CODE).matching(theQtyParam.getUnits()) );
+			myRootClause.must(orTermPredicate);
 		}
 	}
-
-
-	private void addTokenOrTerms(BooleanPredicateClausesStep<?> theOrTerms, TokenParam theTokenParam, String thePath) {
-		if ( isNotBlank(theTokenParam.getSystem()) ) {
-			theOrTerms.must(
-				myPredicateFactory.match()
-					.field(thePath + "." + COMP_CODE_SYSTEM).matching(theTokenParam.getSystem()) );
-		}
-
-		if ( isNotBlank(theTokenParam.getValue()) ) {
-			theOrTerms.must(
-				myPredicateFactory.match()
-					.field(thePath + "." + COMP_CODE_VALUE).matching(theTokenParam.getValue()) );
-		}
-	}
-
 }

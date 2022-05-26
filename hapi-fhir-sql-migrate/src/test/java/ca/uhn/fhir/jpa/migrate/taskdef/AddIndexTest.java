@@ -174,6 +174,7 @@ public class AddIndexTest extends BaseTest {
 				mySql = myTask.generateSql();
 				switch (theDriver) {
 					case POSTGRES_9_4:
+					case COCKROACHDB_21_1:
 						assertEquals("create index CONCURRENTLY IDX_ANINDEX on SOMETABLE(PID, TEXTCOL)", mySql);
 						break;
 					case ORACLE_12C:

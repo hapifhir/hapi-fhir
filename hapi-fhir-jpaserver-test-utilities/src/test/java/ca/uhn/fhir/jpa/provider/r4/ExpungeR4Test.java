@@ -18,6 +18,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -29,6 +30,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -48,6 +50,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 
 import static org.awaitility.Awaitility.await;
@@ -77,6 +81,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	@AfterEach
 	public void afterDisableExpunge() {
 		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
+		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 
 		ourRestServer.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof CascadingDeleteInterceptor);
@@ -85,6 +90,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	@BeforeEach
 	public void beforeEnableExpunge() {
 		myDaoConfig.setExpungeEnabled(true);
+		myDaoConfig.setAllowMultipleDelete(true);
 	}
 
 	private void assertExpunged(IIdType theId) {
@@ -680,4 +686,55 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	}
 
 
+	@Test
+	public void testExpungeOperationRespectsConfiguration() {
+		// set up
+		myDaoConfig.setExpungeEnabled(false);
+		myDaoConfig.setAllowMultipleDelete(false);
+
+		createStandardPatients();
+
+		// execute
+		try {
+			myPatientDao.expunge(myOneVersionPatientId,
+				new ExpungeOptions().setExpungeOldVersions(true), null);
+			fail();
+		} catch (MethodNotAllowedException e) {
+			assertEquals("HAPI-0968: $expunge is not enabled on this server", e.getMessage());
+		}
+
+		try {
+			myPatientDao.expunge(myOneVersionPatientId.toVersionless(),
+				new ExpungeOptions().setExpungeOldVersions(true), null);
+			fail();
+		} catch (MethodNotAllowedException e) {
+			assertEquals("HAPI-0968: $expunge is not enabled on this server", e.getMessage());
+		}
+
+		try {
+			myPatientDao.expunge(null,
+				new ExpungeOptions().setExpungeOldVersions(true), null);
+			fail();
+		} catch (MethodNotAllowedException e) {
+			assertEquals("HAPI-0968: $expunge is not enabled on this server", e.getMessage());
+		}
+
+		try {
+			mySystemDao.expunge(new ExpungeOptions().setExpungeEverything(true), null);
+			fail();
+		} catch (MethodNotAllowedException e) {
+			assertEquals("HAPI-2080: $expunge is not enabled on this server", e.getMessage());
+		}
+
+		myDaoConfig.setExpungeEnabled(true);
+		try {
+			mySystemDao.expunge(new ExpungeOptions().setExpungeEverything(true), null);
+			fail();
+		} catch (MethodNotAllowedException e) {
+			assertEquals("HAPI-2081: Multiple delete is not enabled on this server", e.getMessage());
+		}
+
+		// re-enable multi-delete for clean-up
+		myDaoConfig.setAllowMultipleDelete(true);
+	}
 }

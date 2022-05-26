@@ -63,6 +63,9 @@ public class DropForeignKeyTask extends BaseTableTask {
 			case MSSQL_2012:
 				sqls.add("alter table " + theTableName + " drop constraint " + theConstraintName);
 				break;
+			case COCKROACHDB_21_1:
+				sqls.add("drop index if exists " + theTableName + "@" + theConstraintName + " cascade");
+				break;
 			default:
 				throw new IllegalStateException(Msg.code(59));
 		}

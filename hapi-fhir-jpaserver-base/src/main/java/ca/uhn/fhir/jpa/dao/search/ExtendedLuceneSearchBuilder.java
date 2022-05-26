@@ -24,12 +24,12 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -49,7 +49,7 @@ public class ExtendedLuceneSearchBuilder {
 	/**
 	 * These params have complicated semantics, or are best resolved at the JPA layer for now.
 	 */
-	public static final Set<String> ourUnsafeSearchParmeters = Sets.newHashSet("_id", "_tag", "_meta");
+	public static final Set<String> ourUnsafeSearchParmeters = Sets.newHashSet("_id", "_meta");
 
 	/**
 	 * Are any of the queries supported by our indexing?
@@ -94,9 +94,6 @@ public class ExtendedLuceneSearchBuilder {
 		} else if (param instanceof QuantityParam) {
 			return modifier.equals(EMPTY_MODIFIER);
 
-		} else if (param instanceof CompositeParam) {
-			return true;
-
 		} else if (param instanceof ReferenceParam) {
 			//We cannot search by chain.
 			if (((ReferenceParam) param).getChain() != null) {
@@ -106,10 +103,16 @@ public class ExtendedLuceneSearchBuilder {
 				case EMPTY_MODIFIER:
 					return true;
 				case Constants.PARAMQUALIFIER_MDM:
+				case Constants.PARAMQUALIFIER_NICKNAME:
 				default:
 					return false;
 			}
 		} else if (param instanceof DateParam) {
+			if (EMPTY_MODIFIER.equals(modifier)) {
+				return true;
+			}
+			return false;
+		} else if (param instanceof UriParam) {
 			if (EMPTY_MODIFIER.equals(modifier)) {
 				return true;
 			}
@@ -140,8 +143,8 @@ public class ExtendedLuceneSearchBuilder {
 
 					List<List<IQueryParameterType>> tokenUnmodifiedAndOrTerms = theParams.removeByNameUnmodified(nextParam);
 					builder.addTokenUnmodifiedSearch(nextParam, tokenUnmodifiedAndOrTerms);
-
 					break;
+
 				case STRING:
 					List<List<IQueryParameterType>> stringTextAndOrTerms = theParams.removeByNameAndModifier(nextParam, Constants.PARAMQUALIFIER_TOKEN_TEXT);
 					builder.addStringTextSearch(nextParam, stringTextAndOrTerms);
@@ -171,10 +174,9 @@ public class ExtendedLuceneSearchBuilder {
 					builder.addDateUnmodifiedSearch(nextParam, dateAndOrTerms);
 					break;
 
-				case COMPOSITE:
-					List<List<IQueryParameterType>> compositeAndOrTerms = theParams.removeByNameUnmodified(nextParam);
-					builder.addCompositeUnmodifiedSearch(nextParam, compositeAndOrTerms);
-					break;
+				case URI:
+					List<List<IQueryParameterType>> uriUnmodifiedAndOrTerms = theParams.removeByNameUnmodified(nextParam);
+					builder.addUriUnmodifiedSearch(nextParam, uriUnmodifiedAndOrTerms);
 
 				default:
 					// ignore unsupported param types/modifiers.  They will be processed up in SearchBuilder.

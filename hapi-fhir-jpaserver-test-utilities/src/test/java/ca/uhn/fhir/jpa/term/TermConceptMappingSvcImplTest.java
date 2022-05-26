@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.term;
 
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.TranslateConceptResult;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.i18n.Msg;
@@ -8,14 +9,19 @@ import ca.uhn.fhir.jpa.entity.TermConceptMap;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroup;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElement;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElementTarget;
+import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.codesystems.HttpVerb;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
@@ -25,6 +31,7 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -32,6 +39,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(TermConceptMappingSvcImplTest.class);
@@ -1547,6 +1559,100 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 		});
 	}
 
+	@Test
+	public void testTranslateCodeRequestToTranslationRequestMapping() {
+		CodeableConcept codeableConcept = new CodeableConcept();
+		Coding coding = new Coding("theSourceSystemUrl", "theSourceCode", null);
+		codeableConcept.addCoding(coding);
+
+		IValidationSupport.TranslateCodeRequest theRequest = new IValidationSupport.TranslateCodeRequest(
+			Collections.unmodifiableList(codeableConcept.getCoding()),
+			"theTargetSystemUrl",
+			"theConceptMapUrl",
+			"theConceptMapVersion",
+			"theSourceValueSetUrl",
+			"theTargetValueSetUrl",
+			0L,
+			false
+		);
+
+		CodeableConcept sourceCodeableConcept = new CodeableConcept();
+		sourceCodeableConcept
+			.addCoding()
+			.setSystem(coding.getSystem())
+			.setCode(coding.getCode());
+
+		TranslationRequest expected = new TranslationRequest();
+		expected.setCodeableConcept(sourceCodeableConcept);
+		expected.setConceptMapVersion(new StringType(theRequest.getConceptMapVersion()));
+		expected.setUrl(new UriType(theRequest.getConceptMapUrl()));
+		expected.setSource(new UriType(theRequest.getSourceValueSetUrl()));
+		expected.setTarget(new UriType(theRequest.getTargetValueSetUrl()));
+		expected.setTargetSystem(new UriType(theRequest.getTargetSystemUrl()));
+		expected.setResourceId(theRequest.getResourcePid());
+		expected.setReverse(theRequest.isReverse());
+
+		ITermConceptMappingSvc mock = mock(TermConceptMappingSvcImpl.class);
+		ArgumentCaptor<TranslationRequest> argument = ArgumentCaptor.forClass(TranslationRequest.class);
+		when(mock.translate(expected)).thenReturn(new TranslateConceptResults());
+		when(mock.translateConcept(theRequest)).thenCallRealMethod();
+		mock.translateConcept(theRequest);
+		verify(mock).translate(argument.capture());
+		assertSameTranslationRequest(expected, argument.getValue());
+	}
+
+	@Test
+	public void testTranslateCodeRequestWithReverseToTranslationRequestMapping() {
+		CodeableConcept codeableConcept = new CodeableConcept();
+		Coding coding = new Coding("theSourceSystemUrl", "theSourceCode", null);
+		codeableConcept.addCoding(coding);
+
+		IValidationSupport.TranslateCodeRequest theRequest = new IValidationSupport.TranslateCodeRequest(
+			Collections.unmodifiableList(codeableConcept.getCoding()),
+			"theTargetSystemUrl",
+			"theConceptMapUrl",
+			"theConceptMapVersion",
+			"theSourceValueSetUrl",
+			"theTargetValueSetUrl",
+			0L,
+			true
+		);
+
+		CodeableConcept sourceCodeableConcept = new CodeableConcept();
+		sourceCodeableConcept
+			.addCoding()
+			.setSystem(coding.getSystem())
+			.setCode(coding.getCode());
+
+		TranslationRequest expected = new TranslationRequest();
+		expected.setCodeableConcept(sourceCodeableConcept);
+		expected.setConceptMapVersion(new StringType(theRequest.getConceptMapVersion()));
+		expected.setUrl(new UriType(theRequest.getConceptMapUrl()));
+		expected.setSource(new UriType(theRequest.getSourceValueSetUrl()));
+		expected.setTarget(new UriType(theRequest.getTargetValueSetUrl()));
+		expected.setTargetSystem(new UriType(theRequest.getTargetSystemUrl()));
+		expected.setResourceId(theRequest.getResourcePid());
+		expected.setReverse(theRequest.isReverse());
+
+		ITermConceptMappingSvc mock = mock(TermConceptMappingSvcImpl.class);
+		ArgumentCaptor<TranslationRequest> argument = ArgumentCaptor.forClass(TranslationRequest.class);
+		when(mock.translate(expected)).thenReturn(new TranslateConceptResults());
+		when(mock.translateConcept(theRequest)).thenCallRealMethod();
+		mock.translateConcept(theRequest);
+		verify(mock).translateWithReverse(argument.capture());
+		assertSameTranslationRequest(expected, argument.getValue());
+	}
+
+	private static void assertSameTranslationRequest(TranslationRequest expected, TranslationRequest actual) {
+		assertTrue(expected.getCodeableConcept().equalsDeep(actual.getCodeableConcept()));
+		assertEquals(expected.getConceptMapVersion().asStringValue(), actual.getConceptMapVersion().asStringValue());
+		assertEquals(expected.getUrl().asStringValue(), actual.getUrl().asStringValue());
+		assertEquals(expected.getSource().asStringValue(), actual.getSource().asStringValue());
+		assertEquals(expected.getTarget().asStringValue(), actual.getTarget().asStringValue());
+		assertEquals(expected.getTargetSystem().asStringValue(), actual.getTargetSystem().asStringValue());
+		assertEquals(expected.getResourceId(), actual.getResourceId());
+		assertEquals(expected.getReverseAsBoolean(), actual.getReverseAsBoolean());
+	}
 
 	private void createAndPersistConceptMap() {
 		ConceptMap conceptMap = createConceptMap();

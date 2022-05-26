@@ -36,6 +36,7 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.IntStream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
@@ -43,6 +44,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
@@ -148,12 +150,55 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 			.useHttpGet()
 			.execute();
 
-		assertEquals( 1, respParam.getParameter().size(), "Expected only 1 observation for blood count code");
+		assertEquals(1, respParam.getParameter().size(), "Expected only 1 observation for blood count code");
 		Bundle bundle = (Bundle) respParam.getParameter().get(0).getResource();
 		Observation observation = (Observation) bundle.getEntryFirstRep().getResource();
 
 		assertEquals("Patient/p-123", observation.getSubject().getReference());
 		assertTrue(observation.getCode().getCodingFirstRep().getDisplay().contains("Erythrocytes"));
+
+	}
+
+	@Test
+	public void testCountReturnsExpectedSizeOfResources() throws IOException {
+		IntStream.range(0, 10).forEach(index -> {
+			Coding blood_count = new Coding("http://loinc.org", "789-8", "Erythrocytes in Blood by Automated count for code: " + (index + 1));
+			createObservationWithCode(blood_count);
+		});
+		HttpGet countQuery = new HttpGet(ourServerBase + "/Observation?code=789-8&_count=5");
+		myCaptureQueriesListener.clear();
+		try (CloseableHttpResponse response = ourHttpClient.execute(countQuery)) {
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+			// then
+			assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatusLine().getStatusCode());
+			String text = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, text);
+			assertEquals(10, bundle.getTotal(), "Expected total 10 observations matching query");
+			assertEquals(5, bundle.getEntry().size(), "Expected 5 observation entries to match page size");
+			assertTrue(bundle.getLink("next").hasRelation());
+			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+		}
+	}
+
+	@Test
+	public void testCountZeroReturnsNoResourceEntries() throws IOException {
+		IntStream.range(0, 10).forEach(index -> {
+			Coding blood_count = new Coding("http://loinc.org", "789-8", "Erythrocytes in Blood by Automated count for code: " + (index + 1));
+			createObservationWithCode(blood_count);
+		});
+		HttpGet countQuery = new HttpGet(ourServerBase + "/Observation?code=789-8&_count=0");
+		myCaptureQueriesListener.clear();
+		try (CloseableHttpResponse response = ourHttpClient.execute(countQuery)) {
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+			assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatusLine().getStatusCode());
+			String text = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, text);
+			assertEquals(10, bundle.getTotal(), "Expected total 10 observations matching query");
+			assertEquals(0, bundle.getEntry().size(), "Expected no entries in bundle");
+			assertNull(bundle.getLink("next"), "Expected no 'next' link");
+			assertNull(bundle.getLink("prev"), "Expected no 'prev' link");
+			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+		}
 
 	}
 

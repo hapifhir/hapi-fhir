@@ -1108,17 +1108,25 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	@Override
 	public String[] split(String thePaths) {
-		if (getContext().getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
-			if (!thePaths.contains("|")) {
-				return new String[]{thePaths};
-			}
-			return splitPathsR4(thePaths);
-		} else {
-			if (!thePaths.contains("|") && !thePaths.contains(" or ")) {
-				return new String[]{thePaths};
-			}
+		if (shouldAttemptToSplitPath(thePaths)) {
 			return splitOutOfParensOrs(thePaths);
+		} else {
+			return new String[]{thePaths};
 		}
+	}
+
+	public boolean shouldAttemptToSplitPath(String thePath) {
+		if (getContext().getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
+			if (thePath.contains("|")) {
+				return true;
+			}
+		} else {
+			//DSTU 3 and below used "or" as well as "|"
+			if (thePath.contains("|") || thePath.contains(" or ")) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -1136,7 +1144,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	private String[] splitOutOfParensOrs(String thePaths) {
 		List<String> topLevelOrExpressions = splitOutOfParensToken(thePaths, " or ");
 		List<String> retVal = topLevelOrExpressions.stream()
-			.flatMap(s -> splitOutOfParensToken(s, "|").stream())
+			.flatMap(s -> splitOutOfParensToken(s, " |").stream())
 			.collect(Collectors.toList());
 		return retVal.toArray(new String[retVal.size()]);
 	}

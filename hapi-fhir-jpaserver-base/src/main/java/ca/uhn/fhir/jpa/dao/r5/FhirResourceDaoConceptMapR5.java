@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.r5;
  * #L%
  */
 
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
 import ca.uhn.fhir.jpa.api.model.TranslationRequest;
@@ -35,19 +36,19 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.ConceptMap;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Collections;
 import java.util.Date;
 
 public class FhirResourceDaoConceptMapR5 extends BaseHapiFhirResourceDao<ConceptMap> implements IFhirResourceDaoConceptMap<ConceptMap> {
 	@Autowired
 	private ITermConceptMappingSvc myTermConceptMappingSvc;
+	@Autowired
+	private IValidationSupport myValidationSupport;
 
 	@Override
 	public TranslateConceptResults translate(TranslationRequest theTranslationRequest, RequestDetails theRequestDetails) {
-		if (theTranslationRequest.hasReverse() && theTranslationRequest.getReverseAsBoolean()) {
-			return myTermConceptMappingSvc.translateWithReverse(theTranslationRequest);
-		}
-
-		return myTermConceptMappingSvc.translate(theTranslationRequest);
+		IValidationSupport.TranslateCodeRequest translateCodeRequest = theTranslationRequest.asTranslateCodeRequest();
+		return myValidationSupport.translateConcept(translateCodeRequest);
 	}
 
 	@Override

@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.batch2;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.config.BaseBatch2Config;
-import ca.uhn.fhir.batch2.impl.SynchronizedJobPersistenceWrapper;
+import ca.uhn.fhir.batch2.coordinator.SynchronizedJobPersistenceWrapper;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import org.springframework.context.annotation.Bean;

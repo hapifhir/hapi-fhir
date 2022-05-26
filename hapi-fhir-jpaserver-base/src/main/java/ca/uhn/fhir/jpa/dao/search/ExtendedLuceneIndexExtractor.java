@@ -22,14 +22,15 @@ package ca.uhn.fhir.jpa.dao.search;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
+import ca.uhn.fhir.util.MetaUtil;
 import com.google.common.base.Strings;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -42,7 +43,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * Extract search params for advanced lucene indexing.
@@ -91,7 +93,20 @@ public class ExtendedLuceneIndexExtractor {
 		theNewParams.myQuantityParams.forEach(nextParam ->
 			retVal.addQuantityIndexData(nextParam.getParamName(), nextParam.getUnits(), nextParam.getSystem(), nextParam.getValue().doubleValue()));
 
-//		fixme jm: add CopositeIndexData
+		theResource.getMeta().getTag().forEach(tag ->
+			retVal.addTokenIndexData("_tag", tag));
+
+		theResource.getMeta().getSecurity().forEach(sec ->
+			retVal.addTokenIndexData("_security", sec));
+
+		theResource.getMeta().getProfile().forEach(prof ->
+			retVal.addUriIndexData("_profile", prof.getValue()));
+
+		String source = MetaUtil.getSource(myContext, theResource.getMeta());
+		if (isNotBlank(source)) {
+			retVal.addUriIndexData("_source", source);
+		}
+
 
 		if (!theNewParams.myLinks.isEmpty()) {
 

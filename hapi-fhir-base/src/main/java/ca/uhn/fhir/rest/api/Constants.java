@@ -22,12 +22,7 @@ package ca.uhn.fhir.rest.api;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
@@ -217,6 +212,7 @@ public class Constants {
 	public static final String PARAMQUALIFIER_STRING_EXACT = ":exact";
 	public static final String PARAMQUALIFIER_TOKEN_TEXT = ":text";
 	public static final String PARAMQUALIFIER_MDM = ":mdm";
+	public static final String PARAMQUALIFIER_NICKNAME = ":nickname";
 	public static final String PARAMQUALIFIER_TOKEN_OF_TYPE = ":of-type";
 	public static final String PARAMQUALIFIER_TOKEN_NOT = ":not";
 	public static final int STATUS_HTTP_200_OK = 200;

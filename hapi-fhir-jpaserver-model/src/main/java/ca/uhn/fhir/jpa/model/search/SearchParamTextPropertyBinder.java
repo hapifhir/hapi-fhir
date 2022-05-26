@@ -40,21 +40,15 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.COMP_CODE_SYSTEM;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.COMP_CODE_VALUE;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.COMP_CODE_VALUE_QTY_PARAM_NAME;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.COMP_QTY_CODE;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.COMP_QTY_SYSTEM;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.COMP_QTY_VALUE;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_EXACT;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_NORMALIZED;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_TEXT;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.CODE;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_CODE;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_CODE_NORM;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_PARAM_NAME;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.SYSTEM;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.VALUE;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_SYSTEM;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_VALUE;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_VALUE_NORM;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.URI_VALUE;
 
 /**
  * Allows hibernate search to index
@@ -74,8 +68,7 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 		// N.B. GGG I would hazard that it is not, we could potentially use Version of the resource.
 		thePropertyBindingContext.dependencies()
 			.use("mySearchParamStrings")
-			.use("mySearchParamQuantities")
-			.use("mySearchParamCompositeTokenQuantity");
+			.use("mySearchParamQuantities");
 
 		defineIndexingTemplate(thePropertyBindingContext);
 
@@ -183,12 +176,15 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 			// reference
 			spfield.fieldTemplate("reference-value", keywordFieldType).matchingPathGlob("*.reference.value").multiValued();
 
-			// quantity
-			String quantityPathGlob = "*." + QTY_PARAM_NAME;
+			// uri
+			spfield.fieldTemplate("uriValueTemplate", keywordFieldType).matchingPathGlob("*." + URI_VALUE).multiValued();
+
+			//quantity
+			String quantityPathGlob = "*.quantity";
 			nestedSpField.objectFieldTemplate("quantityTemplate", ObjectStructure.FLATTENED).matchingPathGlob(quantityPathGlob);
-			nestedSpField.fieldTemplate(SYSTEM, keywordFieldType).matchingPathGlob(quantityPathGlob + "." + SYSTEM);
-			nestedSpField.fieldTemplate(CODE, keywordFieldType).matchingPathGlob(quantityPathGlob + "." + CODE);
-			nestedSpField.fieldTemplate(VALUE, bigDecimalFieldType).matchingPathGlob(quantityPathGlob + "." + VALUE);
+			nestedSpField.fieldTemplate(QTY_SYSTEM, keywordFieldType).matchingPathGlob(quantityPathGlob + "." + QTY_SYSTEM);
+			nestedSpField.fieldTemplate(QTY_CODE, keywordFieldType).matchingPathGlob(quantityPathGlob + "." + QTY_CODE);
+			nestedSpField.fieldTemplate(QTY_VALUE, bigDecimalFieldType).matchingPathGlob(quantityPathGlob + "." + QTY_VALUE);
 			nestedSpField.fieldTemplate(QTY_CODE_NORM, keywordFieldType).matchingPathGlob(quantityPathGlob + "." + QTY_CODE_NORM);
 			nestedSpField.fieldTemplate(QTY_VALUE_NORM, bigDecimalFieldType).matchingPathGlob(quantityPathGlob + "." + QTY_VALUE_NORM);
 
@@ -199,15 +195,6 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 			spfield.fieldTemplate("datetime-lower-value", dateTimeFieldType).matchingPathGlob(dateTimePathGlob + ".lower");
 			spfield.fieldTemplate("datetime-upper-ordinal", dateTimeOrdinalFieldType).matchingPathGlob(dateTimePathGlob + ".upper-ord");
 			spfield.fieldTemplate("datetime-upper-value", dateTimeFieldType).matchingPathGlob(dateTimePathGlob + ".upper");
-
-			// component-code-value-quantity
-			String compositeTokenQtyPathGlob = "*." + COMP_CODE_VALUE_QTY_PARAM_NAME;
-			nestedSpField.objectFieldTemplate("compositeCdeValueQtyTemplate", ObjectStructure.FLATTENED).matchingPathGlob(compositeTokenQtyPathGlob);
-			nestedSpField.fieldTemplate(COMP_CODE_SYSTEM, 	keywordFieldType)		.matchingPathGlob(compositeTokenQtyPathGlob + "." + COMP_CODE_SYSTEM);
-			nestedSpField.fieldTemplate(COMP_CODE_VALUE, 	keywordFieldType)		.matchingPathGlob(compositeTokenQtyPathGlob + "." + COMP_CODE_VALUE);
-			nestedSpField.fieldTemplate(COMP_QTY_SYSTEM,		keywordFieldType)		.matchingPathGlob(compositeTokenQtyPathGlob + "." + COMP_QTY_SYSTEM);
-			nestedSpField.fieldTemplate(COMP_QTY_CODE, 		keywordFieldType)		.matchingPathGlob(compositeTokenQtyPathGlob + "." + COMP_QTY_CODE);
-			nestedSpField.fieldTemplate(COMP_QTY_VALUE, 		bigDecimalFieldType)	.matchingPathGlob(compositeTokenQtyPathGlob + "." + COMP_QTY_VALUE);
 
 			// last, since the globs are matched in declaration order, and * matches even nested nodes.
 			spfield.objectFieldTemplate("spObject", ObjectStructure.FLATTENED).matchingPathGlob("*");

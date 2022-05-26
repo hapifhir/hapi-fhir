@@ -22,9 +22,6 @@ package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.VersionUtil;
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.joran.JoranConfigurator;
-import ch.qos.logback.core.joran.spi.JoranException;
 import com.helger.commons.io.file.FileHelper;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
@@ -60,7 +57,7 @@ public abstract class BaseApp {
 
 	static {
 		System.setProperty(STACKFILTER_PATTERN_PROP, STACKFILTER_PATTERN);
-		loggingConfigOff();
+		LogbackUtil.loggingConfigOff();
 
 		// We don't use qualified names for loggers in CLI
 		ourLog = LoggerFactory.getLogger(App.class);
@@ -198,7 +195,7 @@ public abstract class BaseApp {
 
 	@SuppressWarnings("ResultOfMethodCallIgnored")
 	public void run(String[] theArgs) {
-		loggingConfigOff();
+		LogbackUtil.loggingConfigOff();
 		validateJavaVersion();
 
 		if (System.getProperty("unit_test") != null) {
@@ -225,7 +222,7 @@ public abstract class BaseApp {
 		}
 
 		Optional<BaseCommand> commandOpt = parseCommand(theArgs);
-		if (! commandOpt.isPresent())  return;
+		if (commandOpt.isEmpty())  return;
 
 		BaseCommand command = commandOpt.get();
 
@@ -238,7 +235,14 @@ public abstract class BaseApp {
 
 		logAppHeader();
 		validateJavaVersion();
-		loggingConfigOn();
+
+		if (System.console() == null) {
+			// Probably redirecting stdout to a file
+			LogbackUtil.loggingConfigOnWithoutColour();
+		} else {
+			// Use colours if we're logging to a console
+			LogbackUtil.loggingConfigOnWithColour();
+		}
 
 		try {
 			String[] args = Arrays.copyOfRange(theArgs, 1, theArgs.length);
@@ -248,7 +252,7 @@ public abstract class BaseApp {
 			}
 
 			if (parsedOptions.hasOption("debug")) {
-				loggingConfigOnDebug();
+				LogbackUtil.loggingConfigOnDebug();
 				ourDebugMode = true;
 			}
 
@@ -264,7 +268,7 @@ public abstract class BaseApp {
 
 		} catch (ParseException e) {
 			if (!"true".equals(System.getProperty("test"))) {
-				loggingConfigOff();
+				LogbackUtil.loggingConfigOff();
 			}
 			System.err.println("Invalid command options for command: " + command.getCommandName());
 			System.err.println("  " + ansi().fg(Ansi.Color.RED).bold() + e.getMessage());
@@ -287,7 +291,7 @@ public abstract class BaseApp {
 	private Optional<BaseCommand> parseCommand(String[] theArgs) {
 		Optional<BaseCommand> commandOpt = getNextCommand(theArgs, 0);
 
-		if (! commandOpt.isPresent()) {
+		if (commandOpt.isEmpty()) {
 			String message = "Unrecognized command: " + ansi().bold().fg(Ansi.Color.RED) + theArgs[0] + ansi().boldOff().fg(Ansi.Color.WHITE);
 			printMessageToStdout(message);
 			printMessageToStdout("");
@@ -307,7 +311,7 @@ public abstract class BaseApp {
 			return;
 		}
 		Optional<BaseCommand> commandOpt = getNextCommand(theArgs, 1);
-		if (! commandOpt.isPresent()) {
+		if (commandOpt.isEmpty()) {
 			String message = "Unknown command: " + theArgs[1];
 			System.err.println(message);
 			exitDueToProblem(message);
@@ -339,7 +343,7 @@ public abstract class BaseApp {
 	private void runCleanupHookAndUnregister() {
 		if (myShutdownHookHasNotRun) {
 			Runtime.getRuntime().removeShutdownHook(myShutdownHook);
-			myShutdownHook.run();
+			myShutdownHook.start();
 			myShutdownHookHasNotRun = false;
 		}
 	}
@@ -370,41 +374,5 @@ public abstract class BaseApp {
 
 	public static boolean isDebugMode() {
 		return ourDebugMode;
-	}
-
-	private static void loggingConfigOff() {
-		try {
-			JoranConfigurator configurator = new JoranConfigurator();
-			configurator.setContext((LoggerContext) LoggerFactory.getILoggerFactory());
-			configurator.doConfigure(App.class.getResourceAsStream("/logback-cli-off.xml"));
-		} catch (JoranException e) {
-			e.printStackTrace();
-		}
-	}
-
-	private static void loggingConfigOn() {
-		try {
-			JoranConfigurator configurator = new JoranConfigurator();
-			configurator.setContext((LoggerContext) LoggerFactory.getILoggerFactory());
-			((LoggerContext) LoggerFactory.getILoggerFactory()).reset();
-			configurator.doConfigure(App.class.getResourceAsStream("/logback-cli-on.xml"));
-			ourLog.info("Logging configuration set from file logback-cli-on.xml");
-		} catch (JoranException e) {
-			e.printStackTrace();
-		}
-	}
-
-	private static void loggingConfigOnDebug() {
-		try {
-			JoranConfigurator configurator = new JoranConfigurator();
-			configurator.setContext((LoggerContext) LoggerFactory.getILoggerFactory());
-			((LoggerContext) LoggerFactory.getILoggerFactory()).reset();
-			configurator.doConfigure(App.class.getResourceAsStream("/logback-cli-on-debug.xml"));
-			ourLog.info("Logging configuration set from file logback-cli-on-debug.xml");
-		} catch (JoranException e) {
-			e.printStackTrace();
-		}
-
-		ourLog.info("Debug logging is enabled");
 	}
 }
