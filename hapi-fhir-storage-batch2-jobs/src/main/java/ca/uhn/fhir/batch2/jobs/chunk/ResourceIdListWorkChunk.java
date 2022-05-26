@@ -1,4 +1,4 @@
-package ca.uhn.fhir.batch2.jobs.reindex;
+package ca.uhn.fhir.batch2.jobs.chunk;
 
 /*-
  * #%L
@@ -26,11 +26,12 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hl7.fhir.r4.model.IdType;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ReindexChunkIds implements IModelJson {
+public class ResourceIdListWorkChunk implements IModelJson {
 
 	@JsonProperty("ids")
 	private List<Id> myIds;
@@ -49,6 +50,9 @@ public class ReindexChunkIds implements IModelJson {
 			.toString();
 	}
 
+	public void addResourceId(IdType theId) {
+		getIds().add(Id.fromIdType(theId));
+	}
 
 	public static class Id implements IModelJson {
 
@@ -56,6 +60,10 @@ public class ReindexChunkIds implements IModelJson {
 		private String myResourceType;
 		@JsonProperty("id")
 		private String myId;
+
+		public static Id fromIdType(IdType theId) {
+			return new Id().setResourceType(theId.getResourceType()).setId(theId.getId());
+		}
 
 		@Override
 		public String toString() {

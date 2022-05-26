@@ -2,7 +2,9 @@ package ca.uhn.fhir.batch2.jobs.reindex;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunk;
 import ca.uhn.fhir.jpa.api.svc.IResourceReindexSvc;
+import ca.uhn.fhir.jpa.api.svc.IdChunk;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.r4.model.InstantType;
 import org.junit.jupiter.api.Test;
@@ -38,20 +40,19 @@ public class LoadIdsStepTest {
 	private IResourceReindexSvc myResourceReindexSvc;
 
 	@Mock
-	private IJobDataSink<ReindexChunkIds> mySink;
+	private IJobDataSink<ResourceIdListWorkChunk> mySink;
 
 	@InjectMocks
 	private LoadIdsStep mySvc;
 
 	@Captor
-	private ArgumentCaptor<ReindexChunkIds> myChunkIdsCaptor;
+	private ArgumentCaptor<ResourceIdListWorkChunk> myChunkIdsCaptor;
 
 	@Test
 	public void testGenerateSteps() {
 		ReindexJobParameters parameters = new ReindexJobParameters();
-		ReindexChunkRange range = new ReindexChunkRange()
-			.setStart(DATE_1)
-			.setEnd(DATE_END);
+		ReindexChunkRange range = new ReindexChunkRange();
+		range.setStart(DATE_1).setEnd(DATE_END);
 		String instanceId = "instance-id";
 		String chunkId = "chunk-id";
 		StepExecutionDetails<ReindexJobParameters, ReindexChunkRange> details = new StepExecutionDetails<>(parameters, range, instanceId, chunkId);
@@ -75,23 +76,23 @@ public class LoadIdsStepTest {
 	}
 
 	@Nonnull
-	private ReindexChunkIds createIdChunk(int theLow, int theHigh) {
-		ReindexChunkIds retVal = new ReindexChunkIds();
+	private ResourceIdListWorkChunk createIdChunk(int theLow, int theHigh) {
+		ResourceIdListWorkChunk retVal = new ResourceIdListWorkChunk();
 		for (int i = theLow; i < theHigh; i++) {
-			retVal.getIds().add(new ReindexChunkIds.Id().setResourceType("Patient").setId(Integer.toString(i)));
+			retVal.getIds().add(new ResourceIdListWorkChunk.Id().setResourceType("Patient").setId(Integer.toString(i)));
 		}
 		return retVal;
 	}
 
 	@Nonnull
-	private IResourceReindexSvc.IdChunk createIdChunk(long idLow, long idHigh, Date lastDate) {
+	private IdChunk createIdChunk(long idLow, long idHigh, Date lastDate) {
 		List<ResourcePersistentId> ids = new ArrayList<>();
 		List<String> resourceTypes = new ArrayList<>();
 		for (long i = idLow; i < idHigh; i++) {
 			ids.add(new ResourcePersistentId(i));
 			resourceTypes.add("Patient");
 		}
-		IResourceReindexSvc.IdChunk chunk = new IResourceReindexSvc.IdChunk(ids, resourceTypes, lastDate);
+		IdChunk chunk = new IdChunk(ids, resourceTypes, lastDate);
 		return chunk;
 	}
 

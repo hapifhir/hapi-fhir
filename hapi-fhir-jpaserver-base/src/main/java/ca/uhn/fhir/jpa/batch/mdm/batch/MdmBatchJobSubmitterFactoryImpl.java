@@ -1,8 +1,8 @@
-package ca.uhn.fhir.batch2.jobs.reindex;
+package ca.uhn.fhir.jpa.batch.mdm.batch;
 
 /*-
  * #%L
- * hapi-fhir-storage-batch2-jobs
+ * HAPI FHIR JPA Server
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
@@ -20,22 +20,16 @@ package ca.uhn.fhir.batch2.jobs.reindex;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.jobs.chunk.ChunkRange;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import ca.uhn.fhir.mdm.api.IMdmBatchJobSubmitterFactory;
+import ca.uhn.fhir.mdm.api.IMdmClearJobSubmitter;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nullable;
+public class MdmBatchJobSubmitterFactoryImpl implements IMdmBatchJobSubmitterFactory {
+	@Autowired
+	IMdmClearJobSubmitter myMdmClearJobSubmitter;
 
-public class ReindexChunkRange extends ChunkRange {
-	@Nullable
-	@JsonProperty("url")
-	private String myUrl;
-
-	@Nullable
-	public String getUrl() {
-		return myUrl;
-	}
-
-	public void setUrl(@Nullable String theUrl) {
-		myUrl = theUrl;
+	@Override
+	public IMdmClearJobSubmitter getClearJobSubmitter() {
+		return myMdmClearJobSubmitter;
 	}
 }

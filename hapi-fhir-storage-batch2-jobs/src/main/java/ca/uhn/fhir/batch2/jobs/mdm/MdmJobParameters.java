@@ -1,4 +1,4 @@
-package ca.uhn.fhir.batch2.jobs.reindex;
+package ca.uhn.fhir.batch2.jobs.mdm;
 
 /*-
  * #%L
@@ -32,22 +32,21 @@ import javax.validation.constraints.Pattern;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ReindexJobParameters extends PartitionedJobParameters {
+public class MdmJobParameters extends PartitionedJobParameters {
+	@JsonProperty("resourceType")
+	@Nonnull
+	private List<@Pattern(regexp = "^[A-Z][A-Za-z]+$", message = "If populated, must be a valid resource type'") String> myResourceType;
 
-	@JsonProperty("url")
-	@Nullable
-	private List<@Pattern(regexp = "^[A-Z][A-Za-z0-9]+\\?.*", message = "If populated, URL must be a search URL in the form '{resourceType}?[params]'") String> myUrl;
-
-	public List<String> getUrl() {
-		if (myUrl == null) {
-			myUrl = new ArrayList<>();
+	public List<String> getResourceType() {
+		if (myResourceType == null) {
+			myResourceType = new ArrayList<>();
 		}
-		return myUrl;
+		return myResourceType;
 	}
 
-	public ReindexJobParameters addUrl(@Nonnull String theUrl) {
-		Validate.notNull(theUrl);
-		getUrl().add(theUrl);
+	public MdmJobParameters addResourceType(@Nonnull String theResourceType) {
+		Validate.notNull(theResourceType);
+		getResourceType().add(theResourceType);
 		return this;
 	}
 

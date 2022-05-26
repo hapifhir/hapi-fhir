@@ -14,7 +14,7 @@ import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.batch.job.PartitionedUrlValidator;
-import ca.uhn.fhir.jpa.batch.mdm.MdmClearJobSubmitterImpl;
+import ca.uhn.fhir.jpa.batch.mdm.batch.MdmClearJobSubmitterImpl;
 import ca.uhn.fhir.jpa.batch.reader.BatchResourceSearcher;
 import ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;

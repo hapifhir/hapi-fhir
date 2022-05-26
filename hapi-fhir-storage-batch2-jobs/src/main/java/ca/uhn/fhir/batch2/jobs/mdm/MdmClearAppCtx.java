@@ -1,4 +1,4 @@
-package ca.uhn.fhir.batch2.jobs.reindex;
+package ca.uhn.fhir.batch2.jobs.mdm;
 
 /*-
  * #%L
@@ -29,60 +29,60 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class ReindexAppCtx {
+public class MdmClearAppCtx {
 
-	public static final String JOB_REINDEX = "REINDEX";
+	public static final String JOB_Mdm = "Mdm";
 
 	@Bean
-	public JobDefinition<ReindexJobParameters> reindexJobDefinition() {
+	public JobDefinition<MdmJobParameters> mdmJobDefinition() {
 		return JobDefinition
 			.newBuilder()
-			.setJobDefinitionId(JOB_REINDEX)
-			.setJobDescription("Reindex resources")
+			.setJobDefinitionId(JOB_Mdm)
+			.setJobDescription("Clear mdm links and golden resrouces")
 			.setJobDefinitionVersion(1)
-			.setParametersType(ReindexJobParameters.class)
-			.setParametersValidator(reindexJobParametersValidator())
+			.setParametersType(MdmJobParameters.class)
+			.setParametersValidator(MdmJobParametersValidator())
 			.gatedExecution()
 			.addFirstStep(
 				"generate-ranges",
-				"Generate data ranges to reindex",
-				ReindexChunkRange.class,
-				reindexGenerateRangeChunksStep())
+				"Generate date ranges to Mdm Clear",
+				MdmChunkRange.class,
+				mdmGenerateRangeChunksStep())
 			.addIntermediateStep(
-				"load-ids",
-				"Load IDs of resources to reindex",
+				"find-golden-resource-ids",
+				"Load ids of golden resources to be cleared",
 				ResourceIdListWorkChunk.class,
-				loadIdsStep())
-			.addLastStep("reindex",
-				"Perform the resource reindex",
-				reindexStep()
+				loadGoldenIdsStep())
+			.addLastStep("Mdm",
+				"Remove golden resources and mdm links",
+				mdmClearStep()
 			)
 			.build();
 	}
 
 	@Bean
-	public ReindexJobParametersValidator reindexJobParametersValidator() {
-		return new ReindexJobParametersValidator();
+	public MdmJobParametersValidator MdmJobParametersValidator() {
+		return new MdmJobParametersValidator();
 	}
 
 	@Bean
-	public ReindexStep reindexStep() {
-		return new ReindexStep();
+	public MdmClearStep mdmClearStep() {
+		return new MdmClearStep();
 	}
 
 	@Bean
-	public GenerateRangeChunksStep reindexGenerateRangeChunksStep() {
-		return new GenerateRangeChunksStep();
+	public MdmGenerateRangeChunksStep mdmGenerateRangeChunksStep() {
+		return new MdmGenerateRangeChunksStep();
 	}
 
 	@Bean
-	public LoadIdsStep loadIdsStep() {
-		return new LoadIdsStep();
+	public LoadGoldenIdsStep loadGoldenIdsStep() {
+		return new LoadGoldenIdsStep();
 	}
 
 	@Bean
-	public ReindexProvider reindexProvider(FhirContext theFhirContext, IJobCoordinator theJobCoordinator, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
-		return new ReindexProvider(theFhirContext, theJobCoordinator, theRequestPartitionHelperSvc);
+	public MdmClearProvider MdmProvider(FhirContext theFhirContext, IJobCoordinator theJobCoordinator, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+		return new MdmClearProvider(theFhirContext, theJobCoordinator, theRequestPartitionHelperSvc);
 	}
 
 }

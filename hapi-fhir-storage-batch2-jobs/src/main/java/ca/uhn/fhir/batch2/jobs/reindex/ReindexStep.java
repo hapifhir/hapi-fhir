@@ -26,6 +26,7 @@ import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunk;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
@@ -49,7 +50,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-public class ReindexStep implements IJobStepWorker<ReindexJobParameters, ReindexChunkIds, VoidModel> {
+public class ReindexStep implements IJobStepWorker<ReindexJobParameters, ResourceIdListWorkChunk, VoidModel> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ReindexStep.class);
 	@Autowired
@@ -63,15 +64,15 @@ public class ReindexStep implements IJobStepWorker<ReindexJobParameters, Reindex
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<ReindexJobParameters, ReindexChunkIds> theStepExecutionDetails, @Nonnull IJobDataSink<VoidModel> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(@Nonnull StepExecutionDetails<ReindexJobParameters, ResourceIdListWorkChunk> theStepExecutionDetails, @Nonnull IJobDataSink<VoidModel> theDataSink) throws JobExecutionFailedException {
 
-		ReindexChunkIds data = theStepExecutionDetails.getData();
+		ResourceIdListWorkChunk data = theStepExecutionDetails.getData();
 
 		return doReindex(data, theDataSink, theStepExecutionDetails.getInstanceId(), theStepExecutionDetails.getChunkId());
 	}
 
 	@Nonnull
-	public RunOutcome doReindex(ReindexChunkIds data, IJobDataSink<VoidModel> theDataSink, String theInstanceId, String theChunkId) {
+	public RunOutcome doReindex(ResourceIdListWorkChunk data, IJobDataSink<VoidModel> theDataSink, String theInstanceId, String theChunkId) {
 		RequestDetails requestDetails = new SystemRequestDetails();
 		TransactionDetails transactionDetails = new TransactionDetails();
 		myHapiTransactionService.execute(requestDetails, transactionDetails, new ReindexJob(data, requestDetails, transactionDetails, theDataSink, theInstanceId, theChunkId));
@@ -80,14 +81,14 @@ public class ReindexStep implements IJobStepWorker<ReindexJobParameters, Reindex
 	}
 
 	private class ReindexJob implements TransactionCallback<Void> {
-		private final ReindexChunkIds myData;
+		private final ResourceIdListWorkChunk myData;
 		private final RequestDetails myRequestDetails;
 		private final TransactionDetails myTransactionDetails;
 		private final IJobDataSink<VoidModel> myDataSink;
 		private final String myChunkId;
 		private final String myInstanceId;
 
-		public ReindexJob(ReindexChunkIds theData, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, IJobDataSink<VoidModel> theDataSink, String theInstanceId, String theChunkId) {
+		public ReindexJob(ResourceIdListWorkChunk theData, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, IJobDataSink<VoidModel> theDataSink, String theInstanceId, String theChunkId) {
 			myData = theData;
 			myRequestDetails = theRequestDetails;
 			myTransactionDetails = theTransactionDetails;

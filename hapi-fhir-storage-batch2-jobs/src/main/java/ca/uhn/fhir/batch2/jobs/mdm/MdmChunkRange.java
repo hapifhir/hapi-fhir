@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.batch.mdm;
+package ca.uhn.fhir.batch2.jobs.mdm;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * hapi-fhir-storage-batch2-jobs
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
@@ -20,16 +20,23 @@ package ca.uhn.fhir.jpa.batch.mdm;
  * #L%
  */
 
-import ca.uhn.fhir.mdm.api.IMdmBatchJobSubmitterFactory;
-import ca.uhn.fhir.mdm.api.IMdmClearJobSubmitter;
-import org.springframework.beans.factory.annotation.Autowired;
+import ca.uhn.fhir.batch2.jobs.chunk.ChunkRange;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class MdmBatchJobSubmitterFactoryImpl implements IMdmBatchJobSubmitterFactory {
-	@Autowired
-	IMdmClearJobSubmitter myMdmClearJobSubmitter;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
-	@Override
-	public IMdmClearJobSubmitter getClearJobSubmitter() {
-		return myMdmClearJobSubmitter;
+public class MdmChunkRange extends ChunkRange {
+	@Nonnull
+	@JsonProperty("resourceType")
+	private String myResourceType;
+
+	@Nonnull
+	public String getResourceType() {
+		return myResourceType;
+	}
+
+	public void setResourceType(@Nullable String theResourceType) {
+		myResourceType = theResourceType;
 	}
 }

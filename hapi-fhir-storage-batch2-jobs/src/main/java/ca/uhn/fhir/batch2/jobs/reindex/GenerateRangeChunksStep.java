@@ -26,27 +26,23 @@ import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
-import ca.uhn.fhir.jpa.api.svc.IResourceReindexSvc;
-import org.hl7.fhir.r4.model.InstantType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
 import java.util.Date;
 
+import static ca.uhn.fhir.batch2.jobs.Batch2Constants.BATCH_START_DATE;
+
 public class GenerateRangeChunksStep implements IFirstJobStepWorker<ReindexJobParameters, ReindexChunkRange> {
 	private static final Logger ourLog = LoggerFactory.getLogger(GenerateRangeChunksStep.class);
-
-	@Autowired
-	private IResourceReindexSvc myResourceReindexSvc;
 
 	@Nonnull
 	@Override
 	public RunOutcome run(@Nonnull StepExecutionDetails<ReindexJobParameters, VoidModel> theStepExecutionDetails, @Nonnull IJobDataSink<ReindexChunkRange> theDataSink) throws JobExecutionFailedException {
 		ReindexJobParameters params = theStepExecutionDetails.getParameters();
 
-		Date start = new InstantType("2000-01-01T00:00:00Z").getValue();
+		Date start = BATCH_START_DATE;
 		Date end = new Date();
 
 		if (params.getUrl().isEmpty()) {
