@@ -1,5 +1,6 @@
 package ca.uhn.fhir.batch2.maintenance;
 
+import ca.uhn.fhir.batch2.progress.JobInstanceProgressCalculator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.model.JobInstance;

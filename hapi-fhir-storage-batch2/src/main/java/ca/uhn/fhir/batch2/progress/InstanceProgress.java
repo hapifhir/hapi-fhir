@@ -1,4 +1,4 @@
-package ca.uhn.fhir.batch2.maintenance;
+package ca.uhn.fhir.batch2.progress;
 
 import ca.uhn.fhir.batch2.api.IJobCompletionHandler;
 import ca.uhn.fhir.batch2.api.JobCompletionDetails;
