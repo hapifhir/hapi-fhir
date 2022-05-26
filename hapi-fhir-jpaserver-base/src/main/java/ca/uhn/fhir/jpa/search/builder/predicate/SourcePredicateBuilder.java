@@ -22,10 +22,13 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
+import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static com.healthmarketscience.sqlbuilder.SqlObject.NULL_VALUE;
 
 public class SourcePredicateBuilder extends BaseJoiningPredicateBuilder {
 
@@ -60,7 +63,10 @@ public class SourcePredicateBuilder extends BaseJoiningPredicateBuilder {
 		return BinaryCondition.equalTo(myRequestIdColumn, generatePlaceholder(theRequestId));
 	}
 	public Condition createPredicateResourceType(String theResourceType) {
-		return BinaryCondition.equalTo(myResourceTypeColumn, generatePlaceholder(theResourceType));
+		return ComboCondition.or(
+			BinaryCondition.equalTo(myResourceTypeColumn, generatePlaceholder(theResourceType)),
+			BinaryCondition.equalTo(myResourceTypeColumn, NULL_VALUE)
+		);
 	}
 
 }

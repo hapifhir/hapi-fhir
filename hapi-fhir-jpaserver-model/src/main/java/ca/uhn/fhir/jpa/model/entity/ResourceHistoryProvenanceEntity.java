@@ -65,7 +65,7 @@ public class ResourceHistoryProvenanceEntity extends BasePartitionable {
 	@Column(name = "REQUEST_ID", length = Constants.REQUEST_ID_LENGTH, nullable = true)
 	private String myRequestId;
 
-	@Column(name = "RES_TYPE", length = RESTYPE_LEN, nullable = false)
+	@Column(name = "RES_TYPE", length = RESTYPE_LEN, nullable = true)
 	@OptimisticLock(excluded = true)
 	private String myResourceType;
 

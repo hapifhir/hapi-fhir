@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+import ca.uhn.fhir.jpa.dao.data.IResourceProvenanceDao;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.Constants;
@@ -30,6 +32,9 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 
 	@Autowired
 	private IFulltextSearchSvc mySearchDao;
+
+	@Autowired
+	private IResourceProvenanceDao myResourceProvenanceDao;
 
 	@Test
 	public void testDaoCallRequiresTransaction() {
@@ -198,15 +203,25 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 		map.setLoadSynchronous(true);
 		map.add("_source", new StringParam("foo"));
 
+		{ //Check new behaviour on properly indexed data.
+			IBundleProvider patSearch = myPatientDao.search(map);
+			assertThat(patSearch.size(), is(equalTo(1)));
 
-		myCaptureQueriesListener.clear();
-		IBundleProvider patSearch = myPatientDao.search(map);
-		assertThat(patSearch.size(), is(equalTo(1)));
-		myCaptureQueriesListener.logSelectQueries();
+			IBundleProvider orgSearch = myOrganizationDao.search(map);
+			assertThat(orgSearch.size(), is(equalTo(1)));
+		}
 
-		IBundleProvider orgSearch = myOrganizationDao.search(map);
-		assertThat(orgSearch.size(), is(equalTo(1)));
+		{ //Check old behaviour still works on data that has not been reindexed.
+			List<ResourceHistoryProvenanceEntity> all = myResourceProvenanceDao.findAll();
+			all.forEach(prov -> prov.setResourceType(null));
+			myResourceProvenanceDao.saveAllAndFlush(all);
 
+			IBundleProvider patSearch = myPatientDao.search(map);
+			assertThat(patSearch.size(), is(equalTo(2)));
+
+			IBundleProvider orgSearch = myOrganizationDao.search(map);
+			assertThat(orgSearch.size(), is(equalTo(2)));
+		}
 	}
 
 	@Test
