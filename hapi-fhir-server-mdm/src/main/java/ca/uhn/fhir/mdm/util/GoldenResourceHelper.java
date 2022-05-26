@@ -180,7 +180,7 @@ public class GoldenResourceHelper {
 
 		if (goldenResourceOfficialEid.isEmpty() || !myMdmSettings.isPreventMultipleEids()) {
 			log(theMdmTransactionContext, "Incoming resource:" + theSourceResource.getIdElement().toUnqualifiedVersionless() + " + with EID " + incomingSourceEid.stream().map(CanonicalEID::toString).collect(Collectors.joining(","))
-				+ " is applying this EIDs to its related Golden Resource, as this Golden Resource does not yet have an external EID");
+				+ " is applying this EID to its related Golden Resource, as this Golden Resource does not yet have an external EID");
 			addCanonicalEidsToGoldenResourceIfAbsent(theGoldenResource, incomingSourceEid);
 		} else if (!goldenResourceOfficialEid.isEmpty() && myEIDHelper.eidMatchExists(goldenResourceOfficialEid, incomingSourceEid)) {
 			log(theMdmTransactionContext, "incoming resource:" + theSourceResource.getIdElement().toVersionless() + " with EIDs " + incomingSourceEid.stream().map(CanonicalEID::toString).collect(Collectors.joining(",")) + " does not need to overwrite the EID in the Golden Resource, as this EID is already present in the Golden Resource");
