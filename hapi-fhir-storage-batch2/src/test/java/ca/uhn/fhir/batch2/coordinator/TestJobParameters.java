@@ -1,4 +1,4 @@
-package ca.uhn.fhir.batch2.impl;
+package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.model.api.annotation.PasswordField;
 import ca.uhn.fhir.model.api.IModelJson;

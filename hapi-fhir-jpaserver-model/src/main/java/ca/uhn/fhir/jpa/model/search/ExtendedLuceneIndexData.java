@@ -48,6 +48,7 @@ public class ExtendedLuceneIndexData {
 	final SetMultimap<String, String> mySearchParamStrings = HashMultimap.create();
 	final SetMultimap<String, IBaseCoding> mySearchParamTokens = HashMultimap.create();
 	final SetMultimap<String, String> mySearchParamLinks = HashMultimap.create();
+	final SetMultimap<String, String> mySearchParamUri = HashMultimap.create();
 	final SetMultimap<String, DateSearchIndexData> mySearchParamDates = HashMultimap.create();
 	final SetMultimap<String, QuantitySearchIndexData> mySearchParamQuantities = HashMultimap.create();
 	private String myForcedId;
@@ -94,6 +95,7 @@ public class ExtendedLuceneIndexData {
 		Multimaps.asMap(mySearchParamQuantities).forEach(ifNotContained(indexWriter::writeQuantityIndex));
 		// TODO MB Use RestSearchParameterTypeEnum to define templates.
 		mySearchParamDates.forEach(ifNotContained(indexWriter::writeDateIndex));
+		Multimaps.asMap(mySearchParamUri).forEach(ifNotContained(indexWriter::writeUriIndex));
 	}
 
 	public void addStringIndexData(String theSpName, String theText) {
@@ -113,6 +115,10 @@ public class ExtendedLuceneIndexData {
 
 	public void addTokenIndexData(String theSpName, IBaseCoding theNextValue) {
 		mySearchParamTokens.put(theSpName, theNextValue);
+	}
+
+	public void addUriIndexData(String theSpName, String theValue) {
+		mySearchParamUri.put(theSpName, theValue);
 	}
 
 	public void addResourceLinkIndexData(String theSpName, String theTargetResourceId) {

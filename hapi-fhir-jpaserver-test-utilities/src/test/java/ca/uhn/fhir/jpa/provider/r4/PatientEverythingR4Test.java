@@ -65,6 +65,7 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 		myDaoConfig.setEverythingIncludesFetchPageSize(new DaoConfig().getEverythingIncludesFetchPageSize());
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
 		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
+		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 	}
 
 	@Override

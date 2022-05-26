@@ -35,6 +35,7 @@ import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.DateUtils;
 import ca.uhn.fhir.util.StringUtil;
@@ -50,6 +51,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -70,6 +72,7 @@ import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_SYSTEM
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_VALUE;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_VALUE_NORM;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.SEARCH_PARAM_ROOT;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.URI_VALUE;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ExtendedLuceneClauseBuilder {
@@ -623,4 +626,18 @@ public class ExtendedLuceneClauseBuilder {
 	}
 
 
+	public void addUriUnmodifiedSearch(String theParamName, List<List<IQueryParameterType>> theUriUnmodifiedAndOrTerms) {
+		for (List<IQueryParameterType> nextAnd : theUriUnmodifiedAndOrTerms) {
+
+			List<PredicateFinalStep> predicates = new ArrayList<>();
+
+			for (IQueryParameterType paramType : nextAnd) {
+				predicates.add(myPredicateFactory.match()
+					.field(String.join(".", SEARCH_PARAM_ROOT, theParamName, URI_VALUE))
+					.matching( ((UriParam) paramType).getValue() ));
+			}
+
+			myRootClause.must(orPredicateOrSingle(predicates));
+		}
+	}
 }
