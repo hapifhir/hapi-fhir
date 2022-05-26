@@ -94,7 +94,7 @@ public class GoldenResourceHelper {
 		// hapi has 2 metamodels: for children and types
 		BaseRuntimeChildDefinition goldenResourceIdentifier = resourceDefinition.getChildByName(FIELD_NAME_IDENTIFIER);
 
-		cloneAllExternalEidsIntoNewGoldenResource(goldenResourceIdentifier, theIncomingResource, newGoldenResource);
+		cloneMDMEidsIntoNewGoldenResource(goldenResourceIdentifier, theIncomingResource, newGoldenResource);
 
 		addHapiEidIfNoExternalEidIsPresent(newGoldenResource, goldenResourceIdentifier, theIncomingResource);
 
@@ -126,8 +126,14 @@ public class GoldenResourceHelper {
 		cloneEidIntoResource(myFhirContext, theSourceResource, hapiEid);
 	}
 
-	private void cloneAllExternalEidsIntoNewGoldenResource(BaseRuntimeChildDefinition theGoldenResourceIdentifier,
-																			 IAnyResource theIncomingResource, IBase theNewGoldenResource) {
+	private void cloneMDMEidsIntoNewGoldenResource(BaseRuntimeChildDefinition theGoldenResourceIdentifier,
+																  IAnyResource theIncomingResource, IBase theNewGoldenResource) {
+		String incomingResourceType = myFhirContext.getResourceType(theIncomingResource);
+		String mdmEIDSystem = myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType(incomingResourceType);
+		if (mdmEIDSystem == null) {
+			return;
+		}
+
 		// FHIR choice types - fields within fhir where we have a choice of ids
 		IFhirPath fhirPath = myFhirContext.newFhirPath();
 		List<IBase> incomingResourceIdentifiers = theGoldenResourceIdentifier.getAccessor().getValues(theIncomingResource);
@@ -135,8 +141,6 @@ public class GoldenResourceHelper {
 		for (IBase incomingResourceIdentifier : incomingResourceIdentifiers) {
 			Optional<IPrimitiveType> incomingIdentifierSystem = fhirPath.evaluateFirst(incomingResourceIdentifier, "system", IPrimitiveType.class);
 			if (incomingIdentifierSystem.isPresent()) {
-				String incomingResourceType = myFhirContext.getResourceType(theIncomingResource);
-				String mdmEIDSystem = myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType(incomingResourceType);
 				String incomingIdentifierSystemString = incomingIdentifierSystem.get().getValueAsString();
 				if (Objects.equals(incomingIdentifierSystemString, mdmEIDSystem)) {
 					ourLog.debug("Incoming resource EID System {} matches EID system in the MDM rules.  Copying to Golden Resource.", incomingIdentifierSystemString);
