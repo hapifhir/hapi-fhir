@@ -43,6 +43,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.mdm.svc.candidate.CandidateSearcher.idOrType;
 import static ca.uhn.fhir.mdm.api.MdmConstants.ALL_RESOURCE_SEARCH_PARAM_TYPE;
 
 @Service
@@ -103,13 +104,6 @@ public class MdmCandidateSearchSvc {
 
 		ourLog.info("Found {} matching resources for {}", matchedPidsToResources.size(), idOrType(theResource, theResourceType));
 		return matchedPidsToResources.values();
-	}
-
-	private String idOrType(IAnyResource theResource, String theResourceType) {
-		if (theResource.getIdElement() != null) {
-			return theResource.getIdElement().toUnqualifiedVersionless().toString();
-		}
-		return theResourceType;
 	}
 
 	private boolean isSearchParamForResource(String theResourceType, MdmResourceSearchParamJson resourceSearchParam) {
