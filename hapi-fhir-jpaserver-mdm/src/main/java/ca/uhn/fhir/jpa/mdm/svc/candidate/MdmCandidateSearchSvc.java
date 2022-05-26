@@ -98,11 +98,11 @@ public class MdmCandidateSearchSvc {
 		// so it may not have an ID yet, precluding the need to remove it.
 		if (theResource.getIdElement().getIdPart() != null) {
 			if (matchedPidsToResources.remove(myJpaIdHelperService.getPidOrNull(theResource)) != null) {
-				ourLog.debug("Incoming resource {} was removed from the list of candidates.", theResource.getIdElement().toUnqualifiedVersionless());
+				ourLog.debug("Removing incoming resource {} from list of candidates.", theResource.getIdElement().toUnqualifiedVersionless());
 			}
 		}
 
-		ourLog.info("Found {} matching resources for {}", matchedPidsToResources.size(), idOrType(theResource, theResourceType));
+		ourLog.info("Candidate search found {} matching resources for {}", matchedPidsToResources.size(), idOrType(theResource, theResourceType));
 		return matchedPidsToResources.values();
 	}
 

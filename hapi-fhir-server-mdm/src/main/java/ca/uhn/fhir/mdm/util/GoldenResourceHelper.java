@@ -127,25 +127,25 @@ public class GoldenResourceHelper {
 	}
 
 	private void cloneAllExternalEidsIntoNewGoldenResource(BaseRuntimeChildDefinition theGoldenResourceIdentifier,
-																			 IAnyResource theGoldenResource, IBase theNewGoldenResource) {
+																			 IAnyResource theIncomingResource, IBase theNewGoldenResource) {
 		// FHIR choice types - fields within fhir where we have a choice of ids
 		IFhirPath fhirPath = myFhirContext.newFhirPath();
-		List<IBase> goldenResourceIdentifiers = theGoldenResourceIdentifier.getAccessor().getValues(theGoldenResource);
+		List<IBase> incomingResourceIdentifiers = theGoldenResourceIdentifier.getAccessor().getValues(theIncomingResource);
 
-		for (IBase base : goldenResourceIdentifiers) {
-			Optional<IPrimitiveType> system = fhirPath.evaluateFirst(base, "system", IPrimitiveType.class);
-			if (system.isPresent()) {
-				String resourceType = myFhirContext.getResourceType(theGoldenResource);
-				String mdmSystem = myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType(resourceType);
-				String baseSystem = system.get().getValueAsString();
-				if (Objects.equals(baseSystem, mdmSystem)) {
-					ca.uhn.fhir.util.TerserUtil.cloneEidIntoResource(myFhirContext, theGoldenResourceIdentifier, base, theNewGoldenResource);
-					ourLog.debug("EID System {} matches system in the MDM rules", baseSystem);
+		for (IBase incomingResourceIdentifier : incomingResourceIdentifiers) {
+			Optional<IPrimitiveType> incomingIdentifierSystem = fhirPath.evaluateFirst(incomingResourceIdentifier, "system", IPrimitiveType.class);
+			if (incomingIdentifierSystem.isPresent()) {
+				String incomingResourceType = myFhirContext.getResourceType(theIncomingResource);
+				String mdmEIDSystem = myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType(incomingResourceType);
+				String incomingIdentifierSystemString = incomingIdentifierSystem.get().getValueAsString();
+				if (Objects.equals(incomingIdentifierSystemString, mdmEIDSystem)) {
+					ourLog.debug("Incoming resource EID System {} matches EID system in the MDM rules.  Copying to Golden Resource.", incomingIdentifierSystemString);
+					ca.uhn.fhir.util.TerserUtil.cloneEidIntoResource(myFhirContext, theGoldenResourceIdentifier, incomingResourceIdentifier, theNewGoldenResource);
 				} else {
-					ourLog.debug("EID System {} differs from system in the MDM rules {}", baseSystem, mdmSystem);
+					ourLog.debug("Incoming resource EID System {} differs from EID system in the MDM rules {}.  Not copying to Golden Resource.", incomingIdentifierSystemString, mdmEIDSystem);
 				}
 			} else {
-				ourLog.debug("EID System is missing, skipping");
+				ourLog.debug("No EID System in incoming resource.");
 			}
 		}
 	}
@@ -179,11 +179,12 @@ public class GoldenResourceHelper {
 		}
 
 		if (goldenResourceOfficialEid.isEmpty() || !myMdmSettings.isPreventMultipleEids()) {
-			log(theMdmTransactionContext, "Incoming resource:" + theSourceResource.getIdElement().toUnqualifiedVersionless() + " + with EID " + incomingSourceEid.stream().map(CanonicalEID::toString).collect(Collectors.joining(","))
-				+ " is applying this EID to its related Golden Resource, as this Golden Resource does not yet have an external EID");
-			addCanonicalEidsToGoldenResourceIfAbsent(theGoldenResource, incomingSourceEid);
+			if (addCanonicalEidsToGoldenResourceIfAbsent(theGoldenResource, incomingSourceEid)) {
+				log(theMdmTransactionContext, "Incoming resource:" + theSourceResource.getIdElement().toUnqualifiedVersionless() + " + with EID " + incomingSourceEid.stream().map(CanonicalEID::toString).collect(Collectors.joining(","))
+					+ " is applying this EID to its related Golden Resource, as this Golden Resource does not yet have an external EID");
+			}
 		} else if (!goldenResourceOfficialEid.isEmpty() && myEIDHelper.eidMatchExists(goldenResourceOfficialEid, incomingSourceEid)) {
-			log(theMdmTransactionContext, "incoming resource:" + theSourceResource.getIdElement().toVersionless() + " with EIDs " + incomingSourceEid.stream().map(CanonicalEID::toString).collect(Collectors.joining(",")) + " does not need to overwrite the EID in the Golden Resource, as this EID is already present in the Golden Resource");
+			log(theMdmTransactionContext, "Incoming resource:" + theSourceResource.getIdElement().toVersionless() + " with EIDs " + incomingSourceEid.stream().map(CanonicalEID::toString).collect(Collectors.joining(",")) + " does not need to overwrite the EID in the Golden Resource, as this EID is already present in the Golden Resource");
 		} else {
 			throw new IllegalArgumentException(Msg.code(1490) + String.format("Incoming resource EID %s would create a duplicate Golden Resource, as Golden Resource EID %s already exists!",
 					incomingSourceEid.toString(), goldenResourceOfficialEid.toString()));
@@ -239,16 +240,19 @@ public class GoldenResourceHelper {
 
 	/**
 	 * Given a list of incoming External EIDs, and a Golden Resource, apply all the EIDs to this resource, which did not already exist on it.
+	 * @return true if an EID was added
 	 */
-	private void addCanonicalEidsToGoldenResourceIfAbsent(IBaseResource theGoldenResource, List<CanonicalEID> theIncomingSourceExternalEids) {
+	private boolean addCanonicalEidsToGoldenResourceIfAbsent(IBaseResource theGoldenResource, List<CanonicalEID> theIncomingSourceExternalEids) {
 		List<CanonicalEID> goldenResourceExternalEids = myEIDHelper.getExternalEid(theGoldenResource);
-
+		boolean addedEid = false;
 		for (CanonicalEID incomingExternalEid : theIncomingSourceExternalEids) {
 			if (goldenResourceExternalEids.contains(incomingExternalEid)) {
 				continue;
 			}
 			cloneEidIntoResource(myFhirContext, theGoldenResource, incomingExternalEid);
+			addedEid = true;
 		}
+		return addedEid;
 	}
 
 	public boolean hasIdentifier(IBaseResource theResource) {
