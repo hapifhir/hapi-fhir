@@ -1,0 +1,4 @@
+---
+type: change
+issue: 3506
+title: "Changing the MDM logging to contain scores for each applied matcher field. Deleting summary score when creating MDM link."

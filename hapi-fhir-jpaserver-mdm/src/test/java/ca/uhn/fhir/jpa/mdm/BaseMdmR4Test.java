@@ -88,11 +88,17 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 	protected static final String PAUL_ID = "ID.PAUL.456";
 	protected static final String FRANK_ID = "ID.FRANK.789";
 	protected static final String DUMMY_ORG_ID = "Organization/mfr";
+	protected static final String EID_1 = "123";
+	protected static final String EID_2 = "456";
+
 	private static final Logger ourLog = getLogger(BaseMdmR4Test.class);
 	private static final ContactPoint TEST_TELECOM = new ContactPoint()
 		.setSystem(ContactPoint.ContactPointSystem.PHONE)
 		.setValue("555-555-5555");
 	private static final String NAME_GIVEN_FRANK = "Frank";
+
+
+
 	@Autowired
 	protected IFhirResourceDao<Patient> myPatientDao;
 	@Autowired
@@ -132,6 +138,11 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 	@BeforeEach
 	public void beforeSetRequestDetails() {
 		myRequestDetails = new ServletRequestDetails(myInterceptorBroadcaster);
+	}
+
+	@Override
+	public void beforeUnregisterAllSubscriptions() {
+		//no-op
 	}
 
 	@AfterEach
@@ -190,6 +201,11 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		Patient patient = (Patient) outcome.getResource();
 		patient.setId(outcome.getId());
 		return patient;
+	}
+
+	@Override
+	public void afterResetInterceptors() {
+		//no-op
 	}
 
 	@Nonnull
@@ -603,5 +619,13 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		Organization org = new Organization();
 		org.setId(DUMMY_ORG_ID);
 		return myOrganizationDao.update(org);
+	}
+
+	@Nonnull
+	protected MdmTransactionContext buildUpdateLinkMdmTransactionContext() {
+		MdmTransactionContext retval = new MdmTransactionContext();
+		retval.setResourceType("Patient");
+		retval.setRestOperation(MdmTransactionContext.OperationType.UPDATE_LINK);
+		return retval;
 	}
 }

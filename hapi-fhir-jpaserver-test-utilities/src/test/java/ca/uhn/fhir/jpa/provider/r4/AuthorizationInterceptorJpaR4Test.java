@@ -105,6 +105,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
 					.allow().bulkExport().groupExportOnGroup(new IdType("Group/123")).andThen()
+					.allow().bulkExport().groupExportOnGroup(new IdType("Group/789")).andThen()
 					.build();
 			}
 		};
@@ -115,12 +116,26 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		 */
 		{
 			BulkDataExportOptions bulkDataExportOptions = new BulkDataExportOptions();
-			bulkDataExportOptions.setGroupId(new IdType("Group/123"));
+			bulkDataExportOptions.setGroupId(new IdType("Group/789"));
 			bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
 
 			ServletRequestDetails requestDetails = new ServletRequestDetails().setServletRequest(new MockHttpServletRequest());
 			IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(bulkDataExportOptions, true, requestDetails);
 			assertEquals(BulkExportJobStatusEnum.SUBMITTED, jobDetails.getStatus());
+		}
+
+		/*
+		 * Second matching group ID
+		 */
+		{
+		 BulkDataExportOptions bulkDataExportOptions = new BulkDataExportOptions();
+		 bulkDataExportOptions.setGroupId(new IdType("Group/789"));
+		 bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
+
+		 ServletRequestDetails requestDetails = new ServletRequestDetails().setServletRequest(new MockHttpServletRequest());
+		 IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(bulkDataExportOptions, true, requestDetails);
+		 assertEquals(BulkExportJobStatusEnum.SUBMITTED, jobDetails.getStatus());
+
 		}
 
 		/*

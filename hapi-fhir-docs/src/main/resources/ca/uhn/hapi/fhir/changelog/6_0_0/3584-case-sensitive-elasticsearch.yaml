@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3584
+title: "Unmodified string searches and string `:contains` search were incorrectly case-sensitive 
+  when configured with recent versions of Lucene/Elasticsearch.  This has been corrected."

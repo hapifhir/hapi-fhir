@@ -26,6 +26,8 @@ import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.model.api.IModelJson;
 import org.apache.commons.lang3.Validate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -35,7 +37,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class JobDefinition<PT extends IModelJson> {
-
+	private static final Logger ourLog = LoggerFactory.getLogger(JobDefinition.class);
 	public static final int ID_MAX_LENGTH = 100;
 
 	private final String myJobDefinitionId;
@@ -61,7 +63,7 @@ public class JobDefinition<PT extends IModelJson> {
 		myJobDefinitionVersion = theJobDefinitionVersion;
 		myJobDescription = theJobDescription;
 		mySteps = theSteps;
-		myStepIds = mySteps.stream().map(t -> t.getStepId()).collect(Collectors.toList());
+		myStepIds = mySteps.stream().map(JobDefinitionStep::getStepId).collect(Collectors.toList());
 		myParametersType = theParametersType;
 		myParametersValidator = theParametersValidator;
 		myGatedExecution = theGatedExecution;
@@ -78,6 +80,7 @@ public class JobDefinition<PT extends IModelJson> {
 		return myParametersValidator;
 	}
 
+	@SuppressWarnings("unused")
 	public String getJobDescription() {
 		return myJobDescription;
 	}
@@ -108,6 +111,16 @@ public class JobDefinition<PT extends IModelJson> {
 	 */
 	public List<JobDefinitionStep<PT, ?, ?>> getSteps() {
 		return mySteps;
+	}
+
+	/**
+	 *
+	 * @return Returns the stepId of the first step
+	 * @throws IndexOutOfBoundsException if there is no first step
+	 */
+	public String getFirstStepId() {
+		JobDefinitionStep<PT, ?, ?> firstStep = mySteps.get(0);
+		return firstStep.getStepId();
 	}
 
 	public boolean isGatedExecution() {
@@ -141,7 +154,7 @@ public class JobDefinition<PT extends IModelJson> {
 			mySteps = new ArrayList<>();
 		}
 
-		Builder(List<JobDefinitionStep<PT, ?, ?>> theSteps, String theJobDefinitionId, int theJobDefinitionVersion, String theJobDescription, Class<PT> theJobParametersType, Class<NIT> theNextInputType, IJobParametersValidator<PT> theParametersValidator, boolean theGatedExecution, IJobCompletionHandler<PT> theCompletionHandler) {
+		Builder(List<JobDefinitionStep<PT, ?, ?>> theSteps, String theJobDefinitionId, int theJobDefinitionVersion, String theJobDescription, Class<PT> theJobParametersType, Class<NIT> theNextInputType, @Nullable IJobParametersValidator<PT> theParametersValidator, boolean theGatedExecution, IJobCompletionHandler<PT> theCompletionHandler) {
 			mySteps = theSteps;
 			myJobDefinitionId = theJobDefinitionId;
 			myJobDefinitionVersion = theJobDefinitionVersion;
@@ -259,7 +272,6 @@ public class JobDefinition<PT extends IModelJson> {
 		 *
 		 * @param theParametersValidator The validator (must not be null. Do not call this method at all if you do not want a parameters validator).
 		 */
-		@SuppressWarnings("unchecked")
 		public Builder<PT, NIT> setParametersValidator(@Nonnull IJobParametersValidator<PT> theParametersValidator) {
 			Validate.notNull(theParametersValidator, "theParametersValidator must not be null");
 			Validate.isTrue(myParametersValidator == null, "Can not supply multiple parameters validators. Already have: %s", myParametersValidator);

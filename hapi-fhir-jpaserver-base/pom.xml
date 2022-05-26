@@ -404,6 +404,7 @@
 					</dialects>
 					<customDialects>
 						<customDialect>ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect</customDialect>
+						<customDialect>org.hibernate.dialect.CockroachDB201Dialect</customDialect>
 					</customDialects>
 					<outputDirectory>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database</outputDirectory>
 					<packages>

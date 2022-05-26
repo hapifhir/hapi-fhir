@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3628
+title: "Nickname matching only matched formal names to a nickname.  This has been broadened to match nicknames to other
+nicknames for the same formal name."

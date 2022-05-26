@@ -1,0 +1,5 @@
+---
+type: add
+issue: 3577
+title: "Experimental support for CockroachDB has been added to the JPA server. Thanks to Joe Shook
+  for the contribution!"

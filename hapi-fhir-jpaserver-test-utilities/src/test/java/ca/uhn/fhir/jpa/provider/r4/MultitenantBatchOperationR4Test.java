@@ -16,9 +16,7 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.hapi.rest.server.helper.BatchHelperR4;
-import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
@@ -156,7 +154,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		StringType jobId = (StringType) response.getParameter(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
 
-		myBatch2JobHelper.awaitJobCompletion(jobId.getValue());
+		myBatch2JobHelper.awaitSingleChunkJobCompletion(jobId.getValue());
 
 		// validate
 		List<String> alleleObservationIds = reindexTestHelper.getAlleleObservationIds(myClient);
@@ -180,7 +178,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		jobId = (StringType) response.getParameter(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
 
-		myBatch2JobHelper.awaitJobCompletion(jobId.getValue());
+		myBatch2JobHelper.awaitSingleChunkJobCompletion(jobId.getValue());
 
 
 		myTenantClientInterceptor.setTenantId(DEFAULT_PARTITION_NAME);
@@ -223,7 +221,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		StringType jobId = (StringType) response.getParameter(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
 
-		myBatch2JobHelper.awaitJobCompletion(jobId.getValue());
+		myBatch2JobHelper.awaitSingleChunkJobCompletion(jobId.getValue());
 
 		// validate
 		List<String> alleleObservationIds = reindexTestHelper.getAlleleObservationIds(myClient);

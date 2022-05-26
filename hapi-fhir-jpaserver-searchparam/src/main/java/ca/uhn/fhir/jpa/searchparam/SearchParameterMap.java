@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.*;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -515,9 +516,14 @@ public class SearchParameterMap implements Serializable {
 
 		if (getLastUpdated() != null) {
 			DateParam lb = getLastUpdated().getLowerBound();
-			addLastUpdateParam(b, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, lb);
 			DateParam ub = getLastUpdated().getUpperBound();
-			addLastUpdateParam(b, ParamPrefixEnum.LESSTHAN_OR_EQUALS, ub);
+
+			if (isNotEqualsComparator(lb, ub)) {
+				addLastUpdateParam(b, NOT_EQUAL, getLastUpdated().getLowerBound());
+			} else {
+				addLastUpdateParam(b, GREATERTHAN_OR_EQUALS, lb);
+				addLastUpdateParam(b, LESSTHAN_OR_EQUALS, ub);
+			}
 		}
 
 		if (getCount() != null) {
@@ -566,6 +572,10 @@ public class SearchParameterMap implements Serializable {
 		return b.toString();
 	}
 
+	private boolean isNotEqualsComparator(DateParam theLowerBound, DateParam theUpperBound) {
+		return theLowerBound != null && theUpperBound != null && theLowerBound.getPrefix().equals(NOT_EQUAL) && theUpperBound.getPrefix().equals(NOT_EQUAL);
+	}
+
 	/**
 	 * @since 5.5.0
 	 */
@@ -576,10 +586,10 @@ public class SearchParameterMap implements Serializable {
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-		if (isEmpty() == false) {
+		if (!isEmpty()) {
 			b.append("params", mySearchParameterMap);
 		}
-		if (getIncludes().isEmpty() == false) {
+		if (!getIncludes().isEmpty()) {
 			b.append("includes", getIncludes());
 		}
 		return b.toString();
@@ -668,7 +678,7 @@ public class SearchParameterMap implements Serializable {
 	/**
 	 * Variant of removeByNameAndModifier for unmodified params.
 	 *
-	 * @param theName
+	 * @param theName the query parameter key
 	 * @return an And/Or List of Query Parameters matching the name with no modifier.
 	 */
 	public List<List<IQueryParameterType>> removeByNameUnmodified(String theName) {
