@@ -101,8 +101,15 @@ public class MdmCandidateSearchSvc {
 			}
 		}
 
-		ourLog.info("Found {} matching resources for {}", matchedPidsToResources.size(), theResourceType);
+		ourLog.info("Found {} matching resources for {}", matchedPidsToResources.size(), idOrType(theResource, theResourceType));
 		return matchedPidsToResources.values();
+	}
+
+	private String idOrType(IAnyResource theResource, String theResourceType) {
+		if (theResource.getIdElement() != null) {
+			return theResource.getIdElement().toUnqualifiedVersionless().toString();
+		}
+		return theResourceType;
 	}
 
 	private boolean isSearchParamForResource(String theResourceType, MdmResourceSearchParamJson resourceSearchParam) {
