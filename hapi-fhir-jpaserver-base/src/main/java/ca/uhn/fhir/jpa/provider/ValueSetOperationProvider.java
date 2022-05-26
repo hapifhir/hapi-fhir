@@ -73,7 +73,7 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 	private ValidationSupportChain myValidationSupportChain;
 	@Autowired
 	private IValidationSupport myValidationSupport;
-	@Autowired
+	@Autowired(required = false)
 	private IFulltextSearchSvc myFulltextSearch;
 
 	public void setValidationSupport(IValidationSupport theValidationSupport) {
@@ -125,8 +125,11 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 			ValueSetAutocompleteOptions options = ValueSetAutocompleteOptions.validateAndParseOptions(myDaoConfig, theContext, theFilter, theCount, theId, theUrl, theValueSet);
 			startRequest(theServletRequest);
 			try {
-
-				return myFulltextSearch.tokenAutocompleteValueSetSearch(options);
+				if (myFulltextSearch == null || myFulltextSearch.isDisabled()) {
+					throw new InvalidRequestException(Msg.code(2083) +  " Autocomplete is not supported on this server, as the fulltext search service is not configured.");
+				} else {
+					return myFulltextSearch.tokenAutocompleteValueSetSearch(options);
+				}
 			} finally {
 				endRequest(theServletRequest);
 			}
