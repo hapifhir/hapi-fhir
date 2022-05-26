@@ -146,11 +146,11 @@ public interface ITestDataBuilder {
 	}
 
 	default Consumer<IBaseResource> withTag(String theSystem, String theCode) {
-		return t -> t.getMeta().addTag().setSystem(theSystem).setCode(theCode).setDisplay(theCode);
+		return t -> t.getMeta().addTag().setSystem(theSystem).setCode(theCode);
 	}
 
 	default Consumer<IBaseResource> withSecurity(String theSystem, String theCode) {
-		return t -> t.getMeta().addSecurity().setSystem(theSystem).setCode(theCode).setDisplay(theCode);
+		return t -> t.getMeta().addSecurity().setSystem(theSystem).setCode(theCode);
 	}
 
 	default Consumer<IBaseResource> withProfile(String theProfile) {

@@ -22,7 +22,7 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
  * are found, so that they can be reused for maintenance jobs without
  * needing to hit the database a second time.
  */
-class JobChunkProgressAccumulator {
+public class JobChunkProgressAccumulator {
 
 	private final Set<String> myConsumedInstanceAndChunkIds = new HashSet<>();
 	private final Multimap<String, ChunkStatusCountKey> myInstanceIdToChunkStatuses = ArrayListMultimap.create();
