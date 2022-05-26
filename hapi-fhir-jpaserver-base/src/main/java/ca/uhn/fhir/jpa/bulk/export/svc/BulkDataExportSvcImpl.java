@@ -69,7 +69,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataExportSvcImpl.class);
-	private final int myReuseBulkExportForMillis = (int) (60 * DateUtils.MILLIS_PER_MINUTE);
+	private static final int myReuseBulkExportForMillis = (int) (60 * DateUtils.MILLIS_PER_MINUTE);
 
 	@Autowired
 	private IBulkExportJobDao myBulkExportJobDao;
@@ -83,7 +83,6 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	private DaoConfig myDaoConfig;
 
 	private Set<String> myCompartmentResources;
-
 
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -173,7 +172,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 				.collect(Collectors.toSet());
 
 		BulkExportJobEntity jobEntity = new BulkExportJobEntity();
-		jobEntity.setJobId(UUID.randomUUID().toString());
+		// no jobid yet
 		jobEntity.setStatus(BulkExportJobStatusEnum.SUBMITTED);
 		jobEntity.setSince(since);
 		jobEntity.setCreated(new Date());
@@ -198,6 +197,13 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 		// TODO - wire in new steps (kick off batch job)
 		return toSubmittedJobInfo(jobEntity);
+	}
+
+	@Override
+	public void saveJobIdToJob(String theId, String theJobId) {
+		BulkExportJobEntity entity = myBulkExportJobDao.getById(Long.parseLong(theId));
+		entity.setJobId(theJobId);
+		myBulkExportJobDao.save(entity);
 	}
 
 	public void validateTypes(Set<String> theResourceTypes) {
@@ -225,7 +231,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 	private JobInfo toSubmittedJobInfo(BulkExportJobEntity theJob) {
 		return new JobInfo()
-			.setJobId(theJob.getJobId())
+			.setJobId(Long.toString(theJob.getId()))
 			.setStatus(theJob.getStatus());
 	}
 

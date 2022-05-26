@@ -89,11 +89,24 @@ public class BulkDataExportProvider {
 		validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_EXPORT);
 		BulkDataExportOptions bulkDataExportOptions = buildSystemBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter);
 		Boolean useCache = shouldUseCache(theRequestDetails);
+
+		//TODO - this must be copied down to other exports
+		// maybe make it external and simplified
+		/**
+		 * the 2 jobids are different
+		 * JobInfo.jobId <- id of db record storing metadata about the job
+		 * jobId from start job <- id of the actual batch2 job
+		 *
+		 * We need to resave the batch2 jobid to jobinfo metadata
+		 */
 		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(bulkDataExportOptions, useCache, theRequestDetails);
 
-		writePollingLocationToResponseHeaders(theRequestDetails, outcome);
+		String batch2JobId = myJobRunner.startJob(BulkExportUtils.getBulkExportJobParametersFromExportOptions(bulkDataExportOptions));
 
-		myJobRunner.startJob(BulkExportUtils.getBulkExportJobParametersFromExportOptions(bulkDataExportOptions, outcome.getJobId()));
+		myBulkDataExportSvc.saveJobIdToJob(outcome.getJobId(), batch2JobId);
+
+		outcome.setJobId(batch2JobId); // we set it to the job id from the runner
+		writePollingLocationToResponseHeaders(theRequestDetails, outcome);
 	}
 
 	private boolean shouldUseCache(ServletRequestDetails theRequestDetails) {
@@ -133,16 +146,16 @@ public class BulkDataExportProvider {
 		ourLog.debug("_typeFilter={}", theTypeFilter);
 		ourLog.debug("_mdm=", theMdm);
 
-
 		validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_EXPORT);
 
 		// TODO - if type is null, does that mean all types?
 		BulkDataExportOptions bulkDataExportOptions = buildGroupBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter, theIdParam, theMdm);
 		validateResourceTypesAllContainPatientSearchParams(bulkDataExportOptions.getResourceTypes());
+
+		String jobId = myJobRunner.startJob(BulkExportUtils.getBulkExportJobParametersFromExportOptions(bulkDataExportOptions));
+
 		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(bulkDataExportOptions, shouldUseCache(theRequestDetails), theRequestDetails);
 		writePollingLocationToResponseHeaders(theRequestDetails, outcome);
-
-		myJobRunner.startJob(BulkExportUtils.getBulkExportJobParametersFromExportOptions(bulkDataExportOptions, outcome.getJobId()));
 	}
 
 	private void validateResourceTypesAllContainPatientSearchParams(Set<String> theResourceTypes) {
@@ -172,10 +185,15 @@ public class BulkDataExportProvider {
 		validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_EXPORT);
 		BulkDataExportOptions bulkDataExportOptions = buildPatientBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter);
 		validateResourceTypesAllContainPatientSearchParams(bulkDataExportOptions.getResourceTypes());
-		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(bulkDataExportOptions, shouldUseCache(theRequestDetails), theRequestDetails);
-		writePollingLocationToResponseHeaders(theRequestDetails, outcome);
 
-		myJobRunner.startJob(BulkExportUtils.getBulkExportJobParametersFromExportOptions(bulkDataExportOptions, outcome.getJobId()));
+		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(bulkDataExportOptions, shouldUseCache(theRequestDetails), theRequestDetails);
+
+		String jobId = myJobRunner.startJob(BulkExportUtils.getBulkExportJobParametersFromExportOptions(bulkDataExportOptions));
+
+		// outcome and jobId are different
+		// we want the outcomeid for finding the job
+		// we wont hte jobId for finding the binary records...
+		writePollingLocationToResponseHeaders(theRequestDetails, outcome);
 	}
 
 	/**
@@ -190,6 +208,9 @@ public class BulkDataExportProvider {
 		HttpServletResponse response = theRequestDetails.getServletResponse();
 		theRequestDetails.getServer().addHeadersToResponse(response);
 
+		// we have the job instance id -> need to transfer to the actual id of the record
+		// (should we maybe index it?)
+		// alternatively - we can use the same id when we save it
 		IBulkDataExportSvc.JobInfo status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(theJobId.getValueAsString());
 
 		switch (status.getStatus()) {

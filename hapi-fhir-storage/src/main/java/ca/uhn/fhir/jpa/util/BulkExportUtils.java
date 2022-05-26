@@ -12,9 +12,9 @@ public class BulkExportUtils {
 	/**
 	 * Converts the BulkDataExportOptions -> BulkExportParameters
 	 */
-	public static BulkExportParameters getBulkExportJobParametersFromExportOptions(BulkDataExportOptions theOptions, String theJobId) {
+	public static BulkExportParameters getBulkExportJobParametersFromExportOptions(BulkDataExportOptions theOptions) {
 		BulkExportParameters parameters = new BulkExportParameters(Batch2JobDefinitionConstants.BULK_EXPORT);
-		parameters.setJobId(theJobId);
+
 		parameters.setStartDate(theOptions.getSince());
 		parameters.setOutputFormat(theOptions.getOutputFormat());
 		parameters.setExportStyle(theOptions.getExportStyle());

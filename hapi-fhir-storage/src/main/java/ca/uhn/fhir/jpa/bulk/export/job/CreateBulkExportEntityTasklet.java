@@ -54,47 +54,48 @@ public class CreateBulkExportEntityTasklet implements Tasklet {
 
 	@Override
 	public RepeatStatus execute(StepContribution theStepContribution, ChunkContext theChunkContext) throws Exception {
-		Map<String, Object> jobParameters = theChunkContext.getStepContext().getJobParameters();
-
-		//We can leave early if they provided us with an existing job.
-		if (jobParameters.containsKey(BatchConstants.JOB_UUID_PARAMETER)) {
-			addUUIDToJobContext(theChunkContext, (String) jobParameters.get(BatchConstants.JOB_UUID_PARAMETER));
-			return RepeatStatus.FINISHED;
-		} else {
-			String resourceTypes = (String) jobParameters.get("resourceTypes");
-			Date since = (Date) jobParameters.get("since");
-			String filters = (String) jobParameters.get("filters");
-			Set<String> filterSet;
-			if (StringUtils.isBlank(filters)) {
-				filterSet = null;
-			} else {
-				filterSet = Arrays.stream(filters.split(",")).collect(Collectors.toSet());
-			}
-			Set<String> resourceTypeSet = Arrays.stream(resourceTypes.split(",")).collect(Collectors.toSet());
-
-			String outputFormat = (String) jobParameters.get("outputFormat");
-			if (StringUtils.isBlank(outputFormat)) {
-				outputFormat = Constants.CT_FHIR_NDJSON;
-			}
-
-			BulkDataExportOptions bulkDataExportOptions = new BulkDataExportOptions();
-			bulkDataExportOptions.setOutputFormat(outputFormat);
-			bulkDataExportOptions.setResourceTypes(resourceTypeSet);
-			bulkDataExportOptions.setSince(since);
-			bulkDataExportOptions.setFilters(filterSet);
-
-			//Set export style
-			String exportStyle = (String)jobParameters.get("exportStyle");
-			bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.valueOf(exportStyle));
-
-			//Set group id if present
-			String groupId = (String)jobParameters.get("groupId");
-			bulkDataExportOptions.setGroupId(new IdDt(groupId));
-
-			IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.submitJob(bulkDataExportOptions, true, null);
-
-			addUUIDToJobContext(theChunkContext, jobInfo.getJobId());
-			return RepeatStatus.FINISHED;
-		}
+//		Map<String, Object> jobParameters = theChunkContext.getStepContext().getJobParameters();
+//
+//		//We can leave early if they provided us with an existing job.
+//		if (jobParameters.containsKey(BatchConstants.JOB_UUID_PARAMETER)) {
+//			addUUIDToJobContext(theChunkContext, (String) jobParameters.get(BatchConstants.JOB_UUID_PARAMETER));
+//			return RepeatStatus.FINISHED;
+//		} else {
+//			String resourceTypes = (String) jobParameters.get("resourceTypes");
+//			Date since = (Date) jobParameters.get("since");
+//			String filters = (String) jobParameters.get("filters");
+//			Set<String> filterSet;
+//			if (StringUtils.isBlank(filters)) {
+//				filterSet = null;
+//			} else {
+//				filterSet = Arrays.stream(filters.split(",")).collect(Collectors.toSet());
+//			}
+//			Set<String> resourceTypeSet = Arrays.stream(resourceTypes.split(",")).collect(Collectors.toSet());
+//
+//			String outputFormat = (String) jobParameters.get("outputFormat");
+//			if (StringUtils.isBlank(outputFormat)) {
+//				outputFormat = Constants.CT_FHIR_NDJSON;
+//			}
+//
+//			BulkDataExportOptions bulkDataExportOptions = new BulkDataExportOptions();
+//			bulkDataExportOptions.setOutputFormat(outputFormat);
+//			bulkDataExportOptions.setResourceTypes(resourceTypeSet);
+//			bulkDataExportOptions.setSince(since);
+//			bulkDataExportOptions.setFilters(filterSet);
+//
+//			//Set export style
+//			String exportStyle = (String)jobParameters.get("exportStyle");
+//			bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.valueOf(exportStyle));
+//
+//			//Set group id if present
+//			String groupId = (String)jobParameters.get("groupId");
+//			bulkDataExportOptions.setGroupId(new IdDt(groupId));
+//
+//			IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.submitJob(bulkDataExportOptions, true, null);
+//
+//			addUUIDToJobContext(theChunkContext, jobInfo.getJobId());
+//			return RepeatStatus.FINISHED;
+//		}
+		return RepeatStatus.FINISHED;
 	}
 }

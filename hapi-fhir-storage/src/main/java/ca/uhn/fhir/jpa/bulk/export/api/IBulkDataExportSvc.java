@@ -32,7 +32,11 @@ import java.util.Set;
 
 public interface IBulkDataExportSvc {
 
-	JobInfo submitJob(BulkDataExportOptions theBulkDataExportOptions, Boolean useCache, RequestDetails theRequestDetails);
+	JobInfo submitJob(BulkDataExportOptions theBulkDataExportOptions,
+							Boolean useCache,
+							RequestDetails theRequestDetails);
+
+	void saveJobIdToJob(String theId, String theJobId);
 
 	JobInfo getJobInfoOrThrowResourceNotFound(String theJobId);
 
@@ -42,6 +46,10 @@ public interface IBulkDataExportSvc {
 	Set<String> getPatientCompartmentResources();
 
 	class JobInfo {
+		/**
+		 * Legacy - but this jobId is not the job id
+		 * but the actual id of the record storing metadata of the job
+		 */
 		private String myJobId;
 		private BulkExportJobStatusEnum myStatus;
 		private List<FileEntry> myFiles;
@@ -131,7 +139,5 @@ public interface IBulkDataExportSvc {
 			return this;
 		}
 	}
-
-
 
 }

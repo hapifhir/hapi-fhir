@@ -35,6 +35,7 @@ public class BulkDataExportOptions {
 		GROUP,
 		SYSTEM
 	}
+
 	private String myOutputFormat;
 	private Set<String> myResourceTypes;
 	private Date mySince;
