@@ -20,13 +20,13 @@ package ca.uhn.fhir.mdm.util;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.fhirpath.IFhirPath;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
 import ca.uhn.fhir.mdm.log.Logs;
@@ -140,10 +140,12 @@ public class GoldenResourceHelper {
 				String baseSystem = system.get().getValueAsString();
 				if (Objects.equals(baseSystem, mdmSystem)) {
 					ca.uhn.fhir.util.TerserUtil.cloneEidIntoResource(myFhirContext, theGoldenResourceIdentifier, base, theNewGoldenResource);
-					ourLog.debug("System {} differs from system in the MDM rules {}", baseSystem, mdmSystem);
+					ourLog.debug("EID System {} matches system in the MDM rules", baseSystem);
+				} else {
+					ourLog.debug("EID System {} differs from system in the MDM rules {}", baseSystem, mdmSystem);
 				}
 			} else {
-				ourLog.debug("System is missing, skipping");
+				ourLog.debug("EID System is missing, skipping");
 			}
 		}
 	}
@@ -178,12 +180,12 @@ public class GoldenResourceHelper {
 
 		if (goldenResourceOfficialEid.isEmpty() || !myMdmSettings.isPreventMultipleEids()) {
 			log(theMdmTransactionContext, "Incoming resource:" + theSourceResource.getIdElement().toUnqualifiedVersionless() + " + with EID " + incomingSourceEid.stream().map(CanonicalEID::toString).collect(Collectors.joining(","))
-				+ " is applying this EIDs to its related Source Resource, as this Source Resource does not yet have an external EID");
+				+ " is applying this EIDs to its related Golden Resource, as this Golden Resource does not yet have an external EID");
 			addCanonicalEidsToGoldenResourceIfAbsent(theGoldenResource, incomingSourceEid);
 		} else if (!goldenResourceOfficialEid.isEmpty() && myEIDHelper.eidMatchExists(goldenResourceOfficialEid, incomingSourceEid)) {
-			log(theMdmTransactionContext, "incoming resource:" + theSourceResource.getIdElement().toVersionless() + " with EIDs " + incomingSourceEid.stream().map(CanonicalEID::toString).collect(Collectors.joining(",")) + " does not need to overwrite Golden Resource, as this EID is already present");
+			log(theMdmTransactionContext, "incoming resource:" + theSourceResource.getIdElement().toVersionless() + " with EIDs " + incomingSourceEid.stream().map(CanonicalEID::toString).collect(Collectors.joining(",")) + " does not need to overwrite the EID in the Golden Resource, as this EID is already present in the Golden Resource");
 		} else {
-			throw new IllegalArgumentException(Msg.code(1490) + String.format("Source EIDs %s would create a duplicate golden resource, as EIDs %s already exist!",
+			throw new IllegalArgumentException(Msg.code(1490) + String.format("Incoming resource EID %s would create a duplicate Golden Resource, as Golden Resource EID %s already exists!",
 					incomingSourceEid.toString(), goldenResourceOfficialEid.toString()));
 		}
 		return theGoldenResource;
@@ -208,7 +210,7 @@ public class GoldenResourceHelper {
 				String mdmSystem = myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType(resourceType);
 				String baseSystem = system.get().getValueAsString();
 				if (Objects.equals(baseSystem, mdmSystem)) {
-					ourLog.debug("Found EID confirming to MDM rules {}. It should not be copied, skipping", baseSystem);
+					ourLog.debug("Found EID confirming to MDM rules {}. It does not need to be copied, skipping", baseSystem);
 					continue;
 				}
 			}
