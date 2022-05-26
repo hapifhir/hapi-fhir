@@ -327,6 +327,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
 
 		mySubscriptionTriggeringSvc.runDeliveryPass();
+		mySubscriptionTriggeringSvc.runDeliveryPass();
 
 		waitForSize(0, ourCreatedPatients);
 		waitForSize(3, ourUpdatedPatients);
