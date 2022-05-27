@@ -17,7 +17,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class AddIndexTest extends BaseTest {
+public class AddIndexTaskTest extends BaseTest {
 
 
 	@ParameterizedTest(name = "{index}: {0}")
