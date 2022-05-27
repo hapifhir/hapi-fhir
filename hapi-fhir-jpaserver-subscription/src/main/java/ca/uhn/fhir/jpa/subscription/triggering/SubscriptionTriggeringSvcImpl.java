@@ -40,7 +40,6 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
-import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -50,6 +49,7 @@ import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.ValidateUtil;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.apache.commons.lang3.time.DateUtils;
@@ -79,7 +79,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_RESOURCE_ID;
-import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
@@ -238,9 +237,6 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			String resourceType = resourceDef.getName();
 			IFhirResourceDao<?> callingDao = myDaoRegistry.getResourceDao(resourceType);
 
-			// add the param _total=accurate to we get a count of all the resources matching the query
-			params.setSearchTotalMode(SearchTotalModeEnum.ACCURATE);
-
 			ourLog.info("Triggering job[{}] is starting a search for {}", theJobDetails.getJobId(), nextSearchUrl);
 
 			search = mySearchCoordinatorSvc.registerSearch(callingDao, params, resourceType, new CacheControlDirective(), null, RequestPartitionId.allPartitions());
@@ -251,62 +247,79 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 
 			} else {
 				// we don't have a search uuid i.e. we're setting up for synchronous processing
-				theJobDetails.setCurrentSearchTotalCount(search.size());
-				theJobDetails.setCurrentOffset(defaultIfNull(params.getOffset(), 0));
-				theJobDetails.setCurrentResourceType(resourceType);
 				theJobDetails.setCurrentSearchUrl(nextSearchUrl);
 			}
 
 			theJobDetails.setCurrentSearchResourceType(resourceType);
 			theJobDetails.setCurrentSearchCount(params.getCount());
+			theJobDetails.setCurrentOffset(params.getOffset());
 			theJobDetails.setCurrentSearchLastUploadedIndex(-1);
 		}
 
 		// processing step for synchronous processing mode
 		if (isNotBlank(theJobDetails.getCurrentSearchUrl()) && totalSubmitted < myMaxSubmitPerPass) {
-			int currentSearchTotalCount = theJobDetails.getCurrentSearchTotalCount();
-			int currentOffset = theJobDetails.getCurrentOffset();
-			String resourceType = theJobDetails.getCurrentResourceType();
+			List<IBaseResource> allCurrentResources;
+
+			int fromIndex = theJobDetails.getCurrentSearchLastUploadedIndex() + 1;
+
 			String searchUrl = theJobDetails.getCurrentSearchUrl();
-			int submissionRoom = myMaxSubmitPerPass - totalSubmitted;
 
-			ourLog.info("Starting synchronous processing at offset {}", currentOffset);
+			ourLog.info("Triggered job [{}] - Starting synchronous processing at offset {} + index {}", theJobDetails.getJobId(), theJobDetails.getCurrentOffset(), fromIndex );
 
-			if (isNull(search)) {
+			int submittableCount = myMaxSubmitPerPass - totalSubmitted;
+			int toIndex = fromIndex + submittableCount;
+
+			if (nonNull(search)) {
+				// we already have data from the initial step therefor adjust what we can submit (search.size())
+				// according to what we have room to submit (submittableCount)
+				toIndex = Math.min(toIndex, search.size());
+
+				ourLog.info("Triggered job[{}] sublisting to index {}", theJobDetails.getJobId(), toIndex - 1);
+				allCurrentResources = search.getAllResources().subList(0, toIndex);
+
+			} else {
+				if (theJobDetails.getCurrentSearchCount() != null) {
+					toIndex = Math.min(toIndex, theJobDetails.getCurrentSearchCount());
+				}
 
 				RuntimeResourceDefinition resourceDef = UrlUtil.parseUrlResourceType(myFhirContext, searchUrl);
 				String queryPart = searchUrl.substring(searchUrl.indexOf('?'));
 				SearchParameterMap params = myMatchUrlService.translateMatchUrl(queryPart, resourceDef);
-				params.setOffset(currentOffset);
+				int offset = theJobDetails.getCurrentOffset() + fromIndex;
+				params.setOffset(offset);
+				params.setCount(toIndex);
 
-				search = mySearchService.executeQuery(resourceType, params, RequestPartitionId.allPartitions());
+				ourLog.info("Triggered job[{}] requesting {} resources from offset {}", theJobDetails.getJobId(), toIndex, offset);
 
+				search = mySearchService.executeQuery(resourceDef.getName(), params, RequestPartitionId.allPartitions());
+				allCurrentResources = search.getAllResources();
 			}
 
-			List<IBaseResource> allCurrentResources = search.getAllResources();
+			ourLog.info("Triggered job[{}] delivering {} resources", theJobDetails.getJobId(), allCurrentResources.size());
+			int highestIndexSubmitted = theJobDetails.getCurrentSearchLastUploadedIndex();
 
-			int toSubmitCount = Math.min(submissionRoom, allCurrentResources.size());
 
-			ourLog.info("Submitting resources up to offset {}", currentOffset+toSubmitCount-1);
-
-			for (int i = 0; i < toSubmitCount; i++) {
-				IBaseResource nextResource = allCurrentResources.get(i);
+			for (IBaseResource nextResource : allCurrentResources) {
 				Future<Void> future = submitResource(theJobDetails.getSubscriptionId(), nextResource);
 				futures.add(Pair.of(nextResource.getIdElement().getIdPart(), future));
 				totalSubmitted++;
+				highestIndexSubmitted++;
 			}
 
 			if (validateFuturesAndReturnTrueIfWeShouldAbort(futures)) {
 				return;
 			}
 
-			currentOffset += toSubmitCount;
-			theJobDetails.setCurrentOffset(currentOffset);
-			ourLog.info("Next currentOffset is {}", currentOffset);
+			theJobDetails.setCurrentSearchLastUploadedIndex(highestIndexSubmitted);
 
-			if (currentOffset >= currentSearchTotalCount) {
-				// set the exit strategy
+			ourLog.info("Triggered job[{}] lastUploadedIndex is {}", theJobDetails.getJobId(), theJobDetails.getCurrentSearchLastUploadedIndex());
+
+			if (allCurrentResources.isEmpty() || nonNull(theJobDetails.getCurrentSearchCount()) && toIndex >= theJobDetails.getCurrentSearchCount()) {
+				ourLog.info("Triggered job[{}] for search URL {} has completed ", theJobDetails.getJobId(), theJobDetails.getCurrentSearchUrl());
+				theJobDetails.setCurrentSearchResourceType(null);
 				theJobDetails.clearCurrentSearchUrl();
+				theJobDetails.setCurrentSearchLastUploadedIndex(-1);
+				theJobDetails.setCurrentSearchCount(null);
 			}
 
 		}
@@ -507,9 +520,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		private Integer myCurrentSearchCount;
 		private String myCurrentSearchResourceType;
 		private int myCurrentSearchLastUploadedIndex;
-		private int myCurrentSearchTotalCount;
 		private int myCurrentOffset;
-		private String myCurrentResourceType;
 
 		Integer getCurrentSearchCount() {
 			return myCurrentSearchCount;
@@ -583,32 +594,16 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			myCurrentSearchLastUploadedIndex = theCurrentSearchLastUploadedIndex;
 		}
 
-		public void setCurrentSearchTotalCount(int theTotalCount) {
-			myCurrentSearchTotalCount = theTotalCount;
+		public void clearCurrentSearchUrl(){
+			myCurrentSearchUrl = null;
 		}
 
-		public int getCurrentSearchTotalCount() {
-			return myCurrentSearchTotalCount;
-		}
-
-		public int getCurrentOffset() {
+		public int getCurrentOffset(){
 			return myCurrentOffset;
 		}
 
-		public void setCurrentOffset(int theCurrentOffset) {
-			this.myCurrentOffset = theCurrentOffset;
-		}
-
-		public void setCurrentResourceType(String theResourceType) {
-			myCurrentResourceType = theResourceType;
-		}
-
-		public String getCurrentResourceType() {
-			return myCurrentResourceType;
-		}
-
-		public void clearCurrentSearchUrl(){
-			myCurrentSearchUrl = null;
+		public void setCurrentOffset(Integer theCurrentOffset) {
+			myCurrentOffset = ObjectUtils.defaultIfNull(theCurrentOffset, 0);
 		}
 	}
 
