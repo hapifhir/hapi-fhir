@@ -79,6 +79,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_RESOURCE_ID;
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
@@ -241,18 +242,18 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 
 			search = mySearchCoordinatorSvc.registerSearch(callingDao, params, resourceType, new CacheControlDirective(), null, RequestPartitionId.allPartitions());
 
-			if (nonNull(search.getUuid())) {
-				// populate properties for asynchronous path
-				theJobDetails.setCurrentSearchUuid(search.getUuid());
-
-			} else {
+			if (isNull(search.getUuid())) {
 				// we don't have a search uuid i.e. we're setting up for synchronous processing
 				theJobDetails.setCurrentSearchUrl(nextSearchUrl);
+				theJobDetails.setCurrentOffset(params.getOffset());
+
+			} else {
+				// populate properties for asynchronous path
+				theJobDetails.setCurrentSearchUuid(search.getUuid());
 			}
 
 			theJobDetails.setCurrentSearchResourceType(resourceType);
 			theJobDetails.setCurrentSearchCount(params.getCount());
-			theJobDetails.setCurrentOffset(params.getOffset());
 			theJobDetails.setCurrentSearchLastUploadedIndex(-1);
 		}
 

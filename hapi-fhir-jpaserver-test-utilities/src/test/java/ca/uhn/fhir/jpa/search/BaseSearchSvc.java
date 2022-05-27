@@ -46,10 +46,8 @@ public class BaseSearchSvc {
 	protected static final FhirContext ourCtx = FhirContext.forDstu3Cached();
 
 	public void after() {
-
 		verify(mySearchBuilderFactory, atMost(myExpectedNumberOfSearchBuildersCreated)).newSearchBuilder(any(), any(), any());
 	}
-
 
 	protected List<ResourcePersistentId> createPidSequence(int to) {
 		List<ResourcePersistentId> pids = new ArrayList<>();

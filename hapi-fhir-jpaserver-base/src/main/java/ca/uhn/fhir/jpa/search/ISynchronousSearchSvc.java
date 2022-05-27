@@ -9,6 +9,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 public interface ISynchronousSearchSvc extends ISearchSvc {
 
-	public IBundleProvider executeQuery(SearchParameterMap theParams, RequestDetails theRequestDetails, String theSearchUuid, ISearchBuilder theSb, Integer theLoadSynchronousUpTo, RequestPartitionId theRequestPartitionId);
+	IBundleProvider executeQuery(SearchParameterMap theParams, RequestDetails theRequestDetails, String theSearchUuid, ISearchBuilder theSb, Integer theLoadSynchronousUpTo, RequestPartitionId theRequestPartitionId);
 
 }
