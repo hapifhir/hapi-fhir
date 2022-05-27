@@ -46,6 +46,8 @@ public class AddIndexTask extends BaseTableTask {
 	private List<String> myIncludeColumns = Collections.emptyList();
 	private boolean myOnline;
 
+	private MetadataSource myMetadataSource = new MetadataSource();
+
 	public AddIndexTask(String theProductVersion, String theSchemaVersion) {
 		super(theProductVersion, theSchemaVersion);
 	}
@@ -143,7 +145,9 @@ public class AddIndexTask extends BaseTableTask {
 					oracleOnlineDeferred = " ONLINE DEFERRED INVALIDATION";
 					break;
 				case MSSQL_2012:
-					oracleOnlineDeferred = " WITH (ONLINE = ON)";
+					if (myMetadataSource.isOnlineIndexSupported(getConnectionProperties())) {
+						oracleOnlineDeferred = " WITH (ONLINE = ON)";
+					}
 					break;
 				default:
 			}
@@ -197,4 +201,7 @@ public class AddIndexTask extends BaseTableTask {
 		theBuilder.append(myOnline);
 	}
 
+	public void setMetadataSource(MetadataSource theMetadataSource) {
+		myMetadataSource = theMetadataSource;
+	}
 }

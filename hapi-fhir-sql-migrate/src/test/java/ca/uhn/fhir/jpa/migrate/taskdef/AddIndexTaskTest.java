@@ -6,8 +6,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.sql.SQLException;
 import java.util.function.Supplier;
@@ -17,8 +23,8 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class AddIndexTaskTest extends BaseTest {
-
 
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
@@ -149,6 +155,9 @@ public class AddIndexTaskTest extends BaseTest {
 		@Nested
 		public class OnlineNoLocks {
 
+			@Mock
+			private MetadataSource mockMetadataSource;
+
 			@BeforeEach
 			public void beforeEach() {
 				myTask = new AddIndexTask("1", "1");
@@ -156,6 +165,7 @@ public class AddIndexTaskTest extends BaseTest {
 				myTask.setTableName("SOMETABLE");
 				myTask.setColumns("PID", "TEXTCOL");
 				myTask.setUnique(false);
+				myTask.setMetadataSource(mockMetadataSource);
 			}
 
 			@ParameterizedTest(name = "{index}: {0}")
@@ -171,6 +181,8 @@ public class AddIndexTaskTest extends BaseTest {
 			public void platformSyntaxWhenOn(DriverTypeEnum theDriver) {
 				myTask.setDriverType(theDriver);
 				myTask.setOnline(true);
+				DriverTypeEnum.ConnectionProperties props;
+				Mockito.when(mockMetadataSource.isOnlineIndexSupported(Mockito.any())).thenReturn(true);
 				mySql = myTask.generateSql();
 				switch (theDriver) {
 					case POSTGRES_9_4:
@@ -187,6 +199,22 @@ public class AddIndexTaskTest extends BaseTest {
 						// unsupported is ok.  But it means we lock the table for a bit.
 						assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL)", mySql);
 						break;
+				}
+			}
+
+			@ParameterizedTest(name = "{index}: {0}")
+			@ValueSource(booleans = { true, false } )
+			public void offForUnsupportedVersionsOfSqlServer(boolean theSupportedFlag) {
+				myTask.setDriverType(DriverTypeEnum.MSSQL_2012);
+				myTask.setOnline(true);
+				myTask.setMetadataSource(mockMetadataSource);
+				Mockito.when(mockMetadataSource.isOnlineIndexSupported(Mockito.any())).thenReturn(theSupportedFlag);
+
+				mySql = myTask.generateSql();
+				if (theSupportedFlag) {
+					assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL) WITH (ONLINE = ON)", mySql);
+				} else {
+					assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL)", mySql);
 				}
 			}
 		}
